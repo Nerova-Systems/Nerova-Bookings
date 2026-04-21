@@ -869,12 +869,14 @@ The developer-cli `start_worker_agent` / `complete_work` / `claude-agent` infras
 |-----------|-------|----------|
 | .NET backend feature | `backend-engineer` | `backend-reviewer` |
 | React/TS frontend feature | `frontend-engineer` | `frontend-reviewer` |
+| Java/Spring/Apache Camel iPaaS | `integrations-engineer` | `integrations-reviewer` |
 | Playwright E2E tests | `qa-engineer` | `qa-reviewer` |
 
 ### Delegation Rules (both modes)
 - One SCS per agent call — never split `main` backend + `integrations` Java in one task
 - Always pass the relevant PLAN.md section as context in the task prompt
 - Engineer → Reviewer pipeline is mandatory before marking a task done
+- Java (integrations SCS): use `mvn verify -q` directly — developer-cli MCP does not yet cover Java builds
 - Reviewer returns `✅ APPROVED` or `❌ CHANGES REQUIRED` with specific file:line references
 
 ### Build/Test Commands (via MCP, both modes — never raw `dotnet`/`npm`)
