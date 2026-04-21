@@ -1,259 +1,1116 @@
-# Design System Inspired by Cal.com
+# BookSlot — Master Product & Technical Plan
 
-## 1. Visual Theme & Atmosphere
+> Transfer this file to the root of the new codebase. It is the authoritative reference for what we are building, why, and how.
 
-Cal.com's website is a masterclass in monochromatic restraint — a grayscale world where boldness comes not from color but from the sheer confidence of black text on white space. Inspired by Uber's minimal aesthetic, the palette is deliberately stripped of hue: near-black headings (`#242424`), mid-gray secondary text (`#898989`), and pure white surfaces. Color is treated as a foreign substance — when it appears (a rare blue link, a green trust badge), it feels like a controlled accent in an otherwise black-and-white photograph.
+---
 
-Cal Sans, the brand's custom geometric display typeface designed by Mark Davis, is the visual centerpiece. Letters are intentionally spaced extremely close at large sizes, creating dense, architectural headlines that feel like they're carved into the page. At 64px and 48px, Cal Sans headings sit at weight 600 with a tight 1.10 line-height — confident, compressed, and immediately recognizable. For body text, the system switches to Inter, providing "rock-solid" readability that complements Cal Sans's display personality. The typography pairing creates a clear division: Cal Sans speaks, Inter explains.
+## 1. Product Vision
 
-The elevation system is notably sophisticated for a minimal site — 11 shadow definitions create a nuanced depth hierarchy using multi-layered shadows that combine ring borders (`0px 0px 0px 1px`), soft diffused shadows, and inset highlights. This shadow-first approach to depth (rather than border-first) gives surfaces a subtle three-dimensionality that feels modern and polished. Built on Framer with a border-radius scale from 2px to 9999px (pill), Cal.com balances geometric precision with soft, rounded interactive elements.
+**BookSlot** is a SaaS appointment-booking platform built for non-technical professional business owners in South Africa (primary), UK, US, and Australia.
 
-**Key Characteristics:**
-- Purely grayscale brand palette — no brand colors, boldness through monochrome
-- Cal Sans custom geometric display font with extremely tight default letter-spacing
-- Multi-layered shadow system (11 definitions) with ring borders + diffused shadows + inset highlights
-- Cal Sans for headings, Inter for body — clean typographic division
-- Wide border-radius scale from 2px to 9999px (pill) — versatile rounding
-- White canvas with near-black (#242424) text — maximum contrast, zero decoration
-- Product screenshots as primary visual content — the scheduling UI sells itself
-- Built on Framer platform
+### Core Philosophy: "Buy and Use"
 
-## 2. Color Palette & Roles
+> *"The entire idea of the app is providing a ready-built system for non-technical professional business owners. No one wants to invest time to configure a random flow. It's buy, and use. That is it."*
 
-### Primary
-- **Charcoal** (`#242424`): Primary heading and button text — Cal.com's signature near-black, warmer than pure black
-- **Midnight** (`#111111`): Deepest text/overlay color — used at 50% opacity for subtle overlays
-- **White** (`#ffffff`): Primary background and surface — the dominant canvas
+This means:
+- **Zero manual configuration** for any feature. Everything is pre-built and activated via simple toggles.
+- **No flow builders**, no drag-and-drop tools, no custom template editors.
+- Every integration (WhatsApp, calendar, payments) must work out-of-the-box the moment a tenant enables it.
+- The UI is designed for confidence, not complexity.
 
-### Secondary & Accent
-- **Link Blue** (`#0099ff`): In-text links with underline decoration — the only blue in the system, reserved strictly for hyperlinks
-- **Focus Ring** (`#3b82f6` at 50% opacity): Keyboard focus indicator — accessibility-only, invisible in normal interaction
-- **Default Link** (`#0000ee`): Browser-default link color on some elements — unmodified, signaling openness
+### Target Markets
+- **Primary:** South Africa (ZA) — POPIA compliance required
+- **Secondary:** UK, US, Australia
 
-### Surface & Background
-- **Pure White** (`#ffffff`): Primary page background and card surfaces
-- **Light Gray** (approx `#f5f5f5`): Subtle section differentiation — barely visible tint
-- **Mid Gray** (`#898989`): Secondary text, descriptions, and muted labels
+### Compliance Notes
+- **POPIA (ZA):** Opt-in for WhatsApp must capture purpose + timestamp + consent source
+- **GDPR (UK/EU):** Same requirements where applicable
+- **No live tenants yet** — dev/staging only. Migrations can be drop-and-rebuild without backfill.
 
-### Neutrals & Text
-- **Charcoal** (`#242424`): Headlines, buttons, primary UI text
-- **Midnight** (`#111111`): Deep black for high-contrast links and nav text
-- **Mid Gray** (`#898989`): Descriptions, secondary labels, muted content
-- **Pure Black** (`#000000`): Certain link text elements
-- **Border Gray** (approx `rgba(34, 42, 53, 0.08–0.10)`): Shadow-based borders using ring shadows instead of CSS borders
+---
 
-### Semantic & Accent
-- Cal.com is deliberately colorless for brand elements — "a grayscale brand to emphasise on boldness and professionalism"
-- Product UI screenshots show color (blues, greens in the scheduling interface), but the marketing site itself stays monochrome
-- The philosophy mirrors Uber's approach: let the content carry color, the frame stays neutral
+## 2. Repository Base
 
-### Gradient System
-- No gradients on the marketing site — the design is fully flat and monochrome
-- Depth is achieved entirely through shadows, not color transitions
+Clone [PlatformPlatform](https://github.com/platformplatform/PlatformPlatform) and rename throughout.
 
-## 3. Typography Rules
+**What the boilerplate provides (do not rebuild):**
+- Multi-tenant account SCS (`application/account/`) — tenant creation, user management, login/signup
+- Back-office SCS (`application/back-office/`) — support admin, tenant impersonation
+- Shared kernel (`application/shared-kernel/`) — domain primitives, EF Core infrastructure, pipeline behaviors
+- Shared webapp (`application/shared-webapp/`) — React UI components, API client, auth hooks
+- AppHost (`application/AppHost/`) — .NET Aspire orchestration for all SCSs + Docker containers
+- AppGateway (`application/AppGateway/`) — YARP reverse proxy routing all SCSs under one host
+- Azure Bicep IaC (`cloud-infrastructure/`)
+- Developer CLI (`developer-cli/`) — build, test, format, lint commands
+- GitHub Actions CI/CD (`.github/`)
+- Agent rules (`.claude/`)
 
-### Font Family
-- **Display**: `Cal Sans` — custom geometric sans-serif by Mark Davis. Open-source, available on Google Fonts and GitHub. Extremely tight default letter-spacing designed for large headlines. Has 6 character variants (Cc, j, t, u, 0, 1)
-- **Body**: `Inter` — "rock-solid" standard body font. Fallback: `Inter Placeholder`
-- **UI Light**: `Cal Sans UI Variable Light` — light-weight variant (300) for softer UI text with -0.2px letter-spacing
-- **UI Medium**: `Cal Sans UI Medium` — medium-weight variant (500) for emphasized captions
-- **Mono**: `Roboto Mono` — for code blocks and technical content
-- **Tertiary**: `Matter Regular` / `Matter SemiBold` / `Matter Medium` — additional body fonts for specific contexts
+**Rename checklist (PlatformPlatform → BookSlot):**
+- Solution file names (`.slnx`, `.slnf`)
+- Root namespaces in all `Directory.Build.props`
+- `AppHost` project name registrations
+- `AppGateway` YARP route prefixes
+- Azure Bicep resource names
+- GitHub Actions workflow names
 
-### Hierarchy
+---
 
-| Role | Font | Size | Weight | Line Height | Letter Spacing | Notes |
-|------|------|------|--------|-------------|----------------|-------|
-| Display Hero | Cal Sans | 64px | 600 | 1.10 | 0px | Maximum impact, tight default spacing |
-| Section Heading | Cal Sans | 48px | 600 | 1.10 | 0px | Large section titles |
-| Feature Heading | Cal Sans | 24px | 600 | 1.30 | 0px | Feature block headlines |
-| Sub-heading | Cal Sans | 20px | 600 | 1.20 | +0.2px | Positive spacing for readability at smaller size |
-| Sub-heading Alt | Cal Sans | 20px | 600 | 1.50 | 0px | Relaxed line-height variant |
-| Card Title | Cal Sans | 16px | 600 | 1.10 | 0px | Smallest Cal Sans usage |
-| Caption Label | Cal Sans | 12px | 600 | 1.50 | 0px | Small labels in Cal Sans |
-| Body Light | Cal Sans UI Light | 18px | 300 | 1.30 | -0.2px | Light-weight body intro text |
-| Body Light Standard | Cal Sans UI Light | 16px | 300 | 1.50 | -0.2px | Light-weight body text |
-| Caption Light | Cal Sans UI Light | 14px | 300 | 1.40–1.50 | -0.2 to -0.28px | Light captions and descriptions |
-| UI Label | Inter | 16px | 600 | 1.00 | 0px | UI buttons and nav labels |
-| Caption Inter | Inter | 14px | 500 | 1.14 | 0px | Small UI text |
-| Micro | Inter | 12px | 500 | 1.00 | 0px | Smallest Inter text |
-| Code | Roboto Mono | 14px | 600 | 1.00 | 0px | Code snippets, technical text |
-| Body Matter | Matter Regular | 14px | 400 | 1.14 | 0px | Alternate body text (product UI) |
+## 3. Repository Structure
 
-### Principles
-- **Cal Sans at large, Inter at small**: Cal Sans is exclusively for headings and display — never for body text. The system enforces this division strictly
-- **Tight by default, space when small**: Cal Sans letters are "intentionally spaced to be extremely close" at large sizes. At 20px and below, positive letter-spacing (+0.2px) must be applied to prevent cramming
-- **Weight 300 body variant**: Cal Sans UI Variable Light at 300 weight creates an elegant, airy body text that contrasts with the dense 600-weight headlines
-- **Weight 600 dominance**: Nearly all Cal Sans usage is at weight 600 (semi-bold) — the font was designed to perform at this weight
-- **Negative tracking on light text**: Cal Sans UI Light uses -0.2px to -0.28px letter-spacing, subtly tightening the already-compact letterforms
+```
+booking-saas/
+├── application/
+│   ├── account/           # Boilerplate — tenant + user management (extend only)
+│   ├── back-office/       # Boilerplate — support/admin tools (extend only)
+│   ├── integrations/      # NEW: Apache Camel iPaaS SCS (Java 21 + Spring Boot 3)
+│   ├── main/              # BookSlot core SCS (.NET 10 + React)
+│   ├── shared-kernel/     # Boilerplate — extend only
+│   ├── shared-webapp/     # Boilerplate — extend only
+│   ├── AppHost/           # Aspire orchestration
+│   └── AppGateway/        # YARP reverse proxy
+├── cloud-infrastructure/  # Azure Bicep IaC
+├── developer-cli/         # .NET CLI tool
+├── AGENTS.md
+├── DESIGN.md              # Cal.com-inspired design system (see Section 5)
+└── PLAN.md                # This file
+```
 
-## 4. Component Stylings
+---
 
-### Buttons
-- **Dark Primary**: `#242424` (or `#1e1f23`) background, white text, 6–8px radius. Hover: opacity reduction to 0.7. The signature CTA — maximally dark on white
-- **White/Ghost**: White background with shadow-ring border, dark text. Uses the multi-layered shadow system for subtle elevation
-- **Pill**: 9999px radius for rounded pill-shaped actions and badges
-- **Compact**: 4px padding, small text — utility actions within product UI
-- **Inset highlight**: Some buttons feature `rgba(255, 255, 255, 0.15) 0px 2px 0px inset` — a subtle inner-top highlight creating a 3D pressed effect
+## 4. Tech Stack
 
-### Cards & Containers
-- **Shadow Card**: White background, multi-layered shadow — `rgba(19, 19, 22, 0.7) 0px 1px 5px -4px, rgba(34, 42, 53, 0.08) 0px 0px 0px 1px, rgba(34, 42, 53, 0.05) 0px 4px 8px 0px`. The ring shadow (0px 0px 0px 1px) acts as a shadow-border
-- **Product UI Cards**: Screenshots of the scheduling interface displayed in card containers with shadow elevation
-- **Radius**: 8px for standard cards, 12px for larger containers, 16px for prominent sections
-- **Hover**: Likely subtle shadow deepening or scale transform
+| Layer | Technology |
+|-------|-----------|
+| Backend SCS | .NET 10 minimal API, C# 13 |
+| Architecture | Vertical Sliced Architecture (VSA) — features own their full stack |
+| ORM | EF Core 10, PostgreSQL, JSONB for value collections |
+| Messaging | MediatR pipeline (command/query handlers) |
+| Validation | FluentValidation |
+| Auth | JWT, PlatformPlatform's built-in auth pipeline |
+| iPaaS SCS | Java 21, Spring Boot 3, Apache Camel 4 |
+| Frontend | React 19, TypeScript 5, TanStack Router (file-based) |
+| API Client | openapi-fetch (`api.useQuery`, `api.useMutation`) |
+| Forms | React Aria Components + `mutationSubmitter` pattern |
+| Styles | Tailwind CSS v4 |
+| Build | Rsbuild (frontend), Turbo (monorepo) |
+| Orchestration | .NET Aspire (AppHost) |
+| Proxy | YARP (AppGateway) |
+| Infra | Azure Container Apps, Azure PostgreSQL Flexible Server, Azure Key Vault, Azure Blob Storage |
+| CI/CD | GitHub Actions |
+| i18n | LinguiJS |
 
-### Inputs & Forms
-- **Select dropdown**: White background, `#000000` text, 1px solid `rgb(118, 118, 118)` border
-- **Focus**: Uses Framer's focus outline system (`--framer-focus-outline`)
-- **Text input**: 8px radius, standard border treatment
-- **Minimal form presence**: The marketing site prioritizes CTA buttons over complex forms
+---
 
-### Navigation
-- **Top nav**: White/transparent background, Cal Sans links at near-black
-- **Nav text**: `#111111` (Midnight) for primary links, `#000000` for emphasis
-- **CTA button**: Dark Primary in the nav — high contrast call-to-action
-- **Mobile**: Collapses to hamburger with simplified navigation
-- **Sticky**: Fixed on scroll
+## 5. Design System (Cal.com-Inspired)
 
-### Image Treatment
-- **Product screenshots**: Large scheduling UI screenshots — the product is the primary visual
-- **Trust logos**: Grayscale company logos in a horizontal trust bar
-- **Aspect ratios**: Wide landscape for product UI screenshots
-- **No decorative imagery**: No illustrations, photos, or abstract graphics — pure product + typography
+> Full details in `DESIGN.md`. Summary below for agent reference.
 
-## 5. Layout Principles
+### Color Palette
+| Role | Value |
+|------|-------|
+| Primary text | `#242424` (Charcoal) |
+| Deep text | `#111111` (Midnight) |
+| Secondary text | `#898989` (Mid Gray) |
+| Background | `#ffffff` (Pure White) |
+| Link | `#0099ff` |
+| CTA button | `#242424` bg + white text |
+| Shadow border | `rgba(34, 42, 53, 0.08)` ring |
 
-### Spacing System
-- **Base unit**: 8px
-- **Scale**: 1px, 2px, 3px, 4px, 6px, 8px, 12px, 16px, 20px, 24px, 28px, 80px, 96px
-- **Section padding**: 80px–96px vertical between major sections (generous)
-- **Card padding**: 12px–24px internal
-- **Component gaps**: 4px–8px between related elements
-- **Notable jump**: From 28px to 80px — a deliberate gap emphasizing the section-level spacing tier
+### Typography
+- **Headings (24px+):** Cal Sans, weight 600, line-height 1.10, tight tracking
+- **Body:** Inter, weight 300–500
+- Never use Cal Sans for body text. Never mix weights on Cal Sans except 600.
 
-### Grid & Container
-- **Max width**: ~1200px content container, centered
-- **Column patterns**: Full-width hero, centered text blocks, 2-3 column feature grids
-- **Feature showcase**: Product screenshots flanked by description text
-- **Breakpoints**: 98px, 640px, 768px, 810px, 1024px, 1199px — Framer-generated
+### Cards & Elevation
+Multi-layered shadow: `rgba(19,19,22,0.7) 0px 1px 5px -4px, rgba(34,42,53,0.08) 0px 0px 0px 1px, rgba(34,42,53,0.05) 0px 4px 8px`
 
-### Whitespace Philosophy
-- **Lavish section spacing**: 80px–96px between sections creates a breathable, premium feel
-- **Product-first content**: Screenshots dominate the visual space — minimal surrounding decoration
-- **Centered headlines**: Cal Sans headings centered with generous margins above and below
+Use ring shadows instead of CSS `border`. No CSS gradients. No decorative illustrations.
 
-### Border Radius Scale
-- **2px**: Subtle rounding on inline elements
-- **4px**: Small UI components
-- **6px–7px**: Buttons, small cards, images
-- **8px**: Standard interactive elements — buttons, inputs, images
-- **12px**: Medium containers — links, larger cards, images
-- **16px**: Large section containers
-- **29px**: Special rounded elements
-- **100px**: Large rounding — nearly circular on small elements
-- **1000px**: Very large rounding
-- **9999px**: Full pill shape — badges, links
+### Spacing
+Base unit 8px. Section padding 80–96px vertical. Cards 12–24px internal.
 
-## 6. Depth & Elevation
+---
 
-| Level | Treatment | Use |
-|-------|-----------|-----|
-| Level 0 (Flat) | No shadow | Page canvas, basic text containers |
-| Level 1 (Inset) | `rgba(0,0,0,0.16) 0px 1px 1.9px 0px inset` | Pressed/recessed elements, input wells |
-| Level 2 (Ring + Soft) | `rgba(19,19,22,0.7) 0px 1px 5px -4px, rgba(34,42,53,0.08) 0px 0px 0px 1px, rgba(34,42,53,0.05) 0px 4px 8px` | Cards, containers — the workhorse shadow |
-| Level 3 (Ring + Soft Alt) | `rgba(36,36,36,0.7) 0px 1px 5px -4px, rgba(36,36,36,0.05) 0px 4px 8px` | Alt card elevation without ring border |
-| Level 4 (Inset Highlight) | `rgba(255,255,255,0.15) 0px 2px 0px inset` or `rgb(255,255,255) 0px 2px 0px inset` | Button inner highlight — 3D pressed effect |
-| Level 5 (Soft Only) | `rgba(34,42,53,0.05) 0px 4px 8px` | Subtle ambient shadow |
+## 6. Architecture: iPaaS SCS (`application/integrations/`)
 
-### Shadow Philosophy
-Cal.com's shadow system is the most sophisticated element of the design — 11 shadow definitions using a multi-layered compositing technique:
-- **Ring borders**: `0px 0px 0px 1px` shadows act as borders, avoiding CSS `border` entirely. This creates hairline containment without affecting layout
-- **Diffused soft shadows**: `0px 4px 8px` at 5% opacity add gentle ambient depth
-- **Sharp contact shadows**: `0px 1px 5px -4px` at 70% opacity create tight bottom-edge shadows for grounding
-- **Inset highlights**: White inset shadows at the top of buttons create a subtle 3D bevel
-- Shadows are composed in comma-separated stacks — each surface gets 2-3 layered shadow definitions working together
+### Purpose
+All third-party integrations route through the iPaaS. No SCS calls Twilio, PayFast, Google, or Microsoft directly — they publish internal events or call the integration layer's REST API.
 
-### Decorative Depth
-- No gradients or glow effects
-- All depth comes from the sophisticated shadow compositing system
-- The overall effect is subtle but precise — surfaces feel like physical cards sitting on a table
+### Technology
+- Java 21, Spring Boot 3, Apache Camel 4
+- Spring Security for internal auth (service-to-service JWT or shared secret)
+- Azure Key Vault client for credential storage (Spring Cloud Azure)
+- Spring Boot Actuator for health endpoints
 
-## 7. Do's and Don'ts
+### Structure
+```
+application/integrations/
+├── src/main/java/com/bookslot/integrations/
+│   ├── IntegrationsApplication.java
+│   ├── config/
+│   │   ├── CamelConfig.java
+│   │   └── SecurityConfig.java
+│   ├── connectors/
+│   │   ├── ConnectorRegistry.java
+│   │   ├── google/
+│   │   │   └── GoogleCalendarRoute.java
+│   │   ├── microsoft/
+│   │   │   └── OutlookCalendarRoute.java
+│   │   ├── twilio/
+│   │   │   └── TwilioWhatsAppRoute.java
+│   │   └── payfast/
+│   │       └── PayFastWebhookRoute.java
+│   ├── credentials/
+│   │   ├── CredentialVault.java         # Azure Key Vault abstraction
+│   │   └── LocalDevCredentialVault.java # AES-256 fallback for dev
+│   └── api/
+│       └── ConnectorController.java     # REST API for dashboard
+├── src/main/resources/
+│   └── application.yml
+└── pom.xml (or build.gradle)
+```
 
-### Do
-- Use Cal Sans exclusively for headings (24px+) and never for body text — it's a display font with tight default spacing
-- Apply positive letter-spacing (+0.2px) when using Cal Sans below 24px — the font cramps at small sizes without it
-- Maintain the grayscale palette — boldness comes from contrast, not color
-- Use the multi-layered shadow system for card elevation — ring shadow + diffused shadow + contact shadow
-- Keep backgrounds pure white — the monochrome philosophy requires a clean canvas
-- Use Inter for all body text at weight 300–600 — it's the reliable counterpart to Cal Sans's display personality
-- Let product screenshots be the visual content — no illustrations, no decorative graphics
-- Apply generous section spacing (80px–96px) — the breathing room is essential to the premium feel
+### REST API exposed by integrations SCS
+```
+GET    /api/integrations/connectors              → list all connectors + status
+POST   /api/integrations/connectors/{id}/enable  → start Camel route
+POST   /api/integrations/connectors/{id}/disable → stop Camel route
+PUT    /api/integrations/connectors/{id}/config  → update config
+POST   /api/integrations/connectors/{id}/rotate  → rotate credentials
+GET    /api/integrations/connectors/{id}/health  → route health + last error
+```
 
-### Don't
-- Use Cal Sans for body text or text below 16px — it wasn't designed for extended reading
-- Add brand colors — Cal.com is intentionally grayscale, color is reserved for links and UI states only
-- Use CSS borders when shadows can achieve the same containment — the ring-shadow technique is the system's approach
-- Apply negative letter-spacing to Cal Sans at small sizes — it needs positive spacing (+0.2px) below 24px
-- Create heavy, dark shadows — Cal.com's shadows are subtle (5% opacity diffused) with sharp contact edges
-- Use illustrations, abstract graphics, or decorative elements — the visual language is typography + product UI only
-- Mix Cal Sans weights — the font is designed for weight 600, other weights break the intended character
-- Reduce section spacing below 48px — the generous whitespace is core to the premium monochrome aesthetic
+### Credentials Strategy
+- Prod: Azure Key Vault (one secret per connector per tenant, named `{tenantId}-{connectorId}-{credentialKey}`)
+- Local dev: `application-local.yml` with AES-256 encrypted values, key from env var
+- Never store raw credentials in database or config files
 
-## 8. Responsive Behavior
+### Aspire Integration
+Add Java Spring Boot app to AppHost:
+```csharp
+var integrations = builder.AddSpringApp("integrations",
+    workingDirectory: "../integrations",
+    springApplicationName: "integrations",
+    httpPort: 5003);
+```
 
-### Breakpoints
-| Name | Width | Key Changes |
-|------|-------|-------------|
-| Mobile | <640px | Single column, hero text ~36px, stacked features, hamburger nav |
-| Tablet Small | 640px–768px | 2-column begins for some elements |
-| Tablet | 768px–810px | Layout adjustments, fuller grid |
-| Tablet Large | 810px–1024px | Multi-column feature grids |
-| Desktop | 1024px–1199px | Full layout, expanded navigation |
-| Large Desktop | >1199px | Max-width container, centered content |
+### Dashboard Frontend
+Located at `application/integrations/WebApp/`. Same React + TanStack Router stack.
+Routes:
+- `/dashboard/integrations` — connector list, status badges, last-run stats
+- `/dashboard/integrations/{id}` — config drawer, credential rotation, enable/disable
 
-### Touch Targets
-- Buttons: 8px radius with comfortable padding (10px+ vertical)
-- Nav links: Dark text with adequate spacing
-- Mobile CTAs: Full-width dark buttons for easy thumb access
-- Pill badges: 9999px radius creates large, tappable targets
+---
 
-### Collapsing Strategy
-- **Navigation**: Full horizontal nav → hamburger on mobile
-- **Hero**: 64px Cal Sans display → ~36px on mobile
-- **Feature grids**: Multi-column → 2-column → single stacked column
-- **Product screenshots**: Scale within containers, maintaining aspect ratios
-- **Section spacing**: Reduces from 80px–96px to ~48px on mobile
+## 7. Domain Model Reference
 
-### Image Behavior
-- Product screenshots scale responsively
-- Trust logos reflow to multi-row grid on mobile
-- No art direction changes — same compositions at all sizes
-- Images use 7px–12px border-radius for consistent rounded corners
+All domain entities follow these rules (from `shared-kernel`):
 
-## 9. Agent Prompt Guide
+### Backend Conventions
+```csharp
+// Aggregate pattern
+public sealed class MyEntity : AggregateRoot<MyEntityId>, ITenantScopedEntity
+{
+    private MyEntity() : base(MyEntityId.NewId()) { }
 
-### Quick Color Reference
-- Primary Text: Charcoal (`#242424`)
-- Deep Text: Midnight (`#111111`)
-- Secondary Text: Mid Gray (`#898989`)
-- Background: Pure White (`#ffffff`)
-- Link: Link Blue (`#0099ff`)
-- CTA Button: Charcoal (`#242424`) bg, white text
-- Shadow Border: `rgba(34, 42, 53, 0.08)` ring
+    public TenantId TenantId { get; private set; } = null!;
 
-### Example Component Prompts
-- "Create a hero section with white background, 64px Cal Sans heading at weight 600, line-height 1.10, #242424 text, centered layout with a dark CTA button (#242424, 8px radius, white text)"
-- "Design a scheduling card with white background, multi-layered shadow (0px 1px 5px -4px rgba(19,19,22,0.7), 0px 0px 0px 1px rgba(34,42,53,0.08), 0px 4px 8px rgba(34,42,53,0.05)), 12px radius"
-- "Build a navigation bar with white background, Inter links at 14px weight 500 in #111111, a dark CTA button (#242424), sticky positioning"
-- "Create a trust bar with grayscale company logos, horizontally centered, 16px gap between logos, on white background"
-- "Design a feature section with 48px Cal Sans heading (weight 600, #242424), 16px Inter body text (weight 300, #898989, line-height 1.50), and a product screenshot with 12px radius and the card shadow"
+    // ... properties with private setters
 
-### Iteration Guide
-When refining existing screens generated with this design system:
-1. Verify headings use Cal Sans at weight 600, body uses Inter — never mix them
-2. Check that the palette is purely grayscale — if you see brand colors, remove them
-3. Ensure card elevation uses the multi-layered shadow stack, not CSS borders
-4. Confirm section spacing is generous (80px+) — if sections feel cramped, add more space
-5. The overall tone should feel like a clean, professional scheduling tool — monochrome confidence without any decorative flourishes
+    public static MyEntity Create(...) => new MyEntity { ... };
+
+    // Behaviour methods (not setters)
+    public void DoSomething(...) { ... }
+}
+
+// Strongly typed ID
+[PublicAPI]
+[IdPrefix("myent")]
+[JsonConverter(typeof(StronglyTypedIdJsonConverter<string, MyEntityId>))]
+public sealed record MyEntityId(string Value) : StronglyTypedUlid<MyEntityId>(Value)
+{
+    public override string ToString() => Value;
+}
+
+// Repository — interface + implementation in same file under Domain/
+public interface IMyEntityRepository : ICrudRepository<MyEntity, MyEntityId>
+{
+    Task<MyEntity?> GetByTenantAsync(TenantId tenantId, CancellationToken cancellationToken);
+}
+
+internal sealed class MyEntityRepository(MainDbContext mainDbContext)
+    : RepositoryBase<MyEntity, MyEntityId>(mainDbContext), IMyEntityRepository
+{
+    public async Task<MyEntity?> GetByTenantAsync(TenantId tenantId, CancellationToken ct)
+        => await DbSet.FirstOrDefaultAsync(x => x.TenantId == tenantId, ct);
+}
+
+// EF config in same file
+public sealed class MyEntityConfiguration : IEntityTypeConfiguration<MyEntity> { ... }
+```
+
+### Key Infrastructure Rules
+- **EF query filters:** Named filters `'Tenant'` and `'SoftDelete'`. Bypass tenant filter with `.IgnoreQueryFilters([QueryFilterNames.Tenant])` for cross-tenant queries.
+- **`IExecutionContext.TenantId` being null blocks ALL tenant-filtered results.** Public (unauthenticated) APIs must use `IgnoreQueryFilters([QueryFilterNames.Tenant])`.
+- **`ICrudRepository`** only exposes `GetByIdAsync`, `AddAsync`, `Update`, `Remove`. No `RemoveRange` on the interface — use individual `Remove()` calls.
+- **Unit of work:** `UnitOfWorkPipelineBehavior` commits once at end of handler. Do not call `SaveChanges()` manually.
+- **JSONB columns:** Use `ImmutableArray<T>` for value-object collections stored as JSONB.
+- **Migrations:** One migration per feature/phase. Never combine unrelated changes.
+
+### Existing Domain Models (reuse these designs)
+
+#### `Appointment`
+Key fields: `TenantId`, `ReferenceNumber` (`#` + 8-char ULID), `ClientName`, `ClientPhone` (normalised), `ClientEmail`, `ServiceName`, `DurationMinutes`, `Price`, `Currency`, `StartAt`, `EndAt`, `Status`, `Source`, `LocationId`, `Notes`, `InternalNotes`, `ExternalCalendarEventId`, `PaymentStatus`, `PaymentMethod`, `PaidAt`, `PaymentReference`, `ReminderSentAt`, `AssignedTeamMemberId`, `RecurringGroupId`, `Recurrence`, `VideoMeetingUrl`.
+
+Status lifecycle (state machine):
+```
+New → Pending | PendingPayment | Confirmed | Cancelled
+Pending → PendingPayment | Confirmed | Cancelled
+PendingPayment → Confirmed | Cancelled
+Confirmed → Arrived | Started | Cancelled | NoShow
+Arrived → Started | Cancelled | NoShow
+Started → Completed | Cancelled | NoShow
+Completed → (terminal)
+Cancelled → (terminal)
+NoShow → (terminal)
+```
+
+Sources: `Manual`, `WhatsApp`, `CalendarSync`, `BookingPage`
+Payment statuses: `Unpaid`, `PendingOnline`, `Paid`, `Refunded`
+Payment methods: `Cash`, `Card`, `Online`
+Reference number: `"#" + Guid.NewGuid().ToString("N").ToUpperInvariant()[..8]`
+ID prefix: `appt`
+
+#### `ServiceType`
+Key fields: `TenantId`, `CategoryId`, `Name`, `Description`, `DurationMinutes`, `BufferMinutes`, `ExtraTimeBefore`, `ExtraTimeAfter`, `Price`, `Currency` (default `"ZAR"`), `PaymentTiming`, `PaymentChannel`, `DisplayOrder`, `IsActive`, `IsArchived`, `LocationIds`, `Variants`, `TimeSegments`, `Images`, `AssignedTeamMemberIds`, `TimePricingRules`, `SchedulingType`, `MinimumBookingNoticeMinutes`, `MaxAdvanceBookingDays` (default 365), `MaxActiveBookingsPerClient`, `PeriodType`, `RollingWindowDays`, `BookingPeriodStart`, `BookingPeriodEnd`, `RequiresConfirmation`, `MaxParticipantsPerSlot`, `CustomBookingFields`.
+
+All array properties (`LocationIds`, `Variants`, `TimeSegments`, `Images`, etc.) stored as JSONB `ImmutableArray<T>`.
+ID prefix: `svct`
+
+Value object enums: `PaymentTiming` (None/Before/After), `PaymentChannel` (WhatsAppLink/CardMachine/Manual), `SchedulingType` (Manual/RoundRobin/LeastRecent), `PeriodType` (Unlimited/Rolling/DateRange), `TimeSegmentType` (Active/Processing), `BookingFieldType` (Text/Textarea/Select/Checkbox/Phone/Email)
+
+#### `Client`
+Key fields: `TenantId`, `FirstName`, `LastName`, `Phone` (normalised via `PhoneNormalizer.Normalize()`), `Email`, `AvatarUrl`, `DateOfBirth`, `Pronouns`, `Source`, `ReferredByClientId`, `IsBlocked`, `BlockedReason`, `IsDeleted`, `Notes`, `StaffAlerts`, `Allergies`, `TagIds`.
+ID prefix: `clnt`
+
+#### `Location`
+Key fields: `TenantId`, `Name`, `Address`, `Phone`, `Email`, `BusinessHours`, `IsActive`.
+`BusinessHours` = value object with `DayHours(Open, Close)` per day of week, stored as JSONB.
+ID prefix: `loc`
+
+#### `BusinessSchedule`
+Single aggregate per tenant. Key field: `Schedule` — `ImmutableArray<DaySchedule>` (Day, IsOpen, OpenTime, CloseTime).
+Default: Mon–Fri 08:00–17:00 open, Sat–Sun closed.
+Table: `business_hours`
+ID prefix: `bschl`
+
+#### `BusinessProfile`
+Key fields: `TenantId`, `BusinessName`, `Description`, `Phone`, `Email`, `Website`, `AddressLine1/2`, `City`, `Province`, `PostalCode`, `Country`, `WhatsAppBusinessIdentity` (JSONB), `WhatsAppNumberInventory` (JSONB array), `WhatsAppSenderProfileHistory` (JSONB array), `WhatsAppFlowDefinitions` (JSONB array).
+Table: `business_profiles`
+ID prefix: `bprof`
+Custom repo method: `GetByTenantAsync(TenantId)`
+
+---
+
+## 8. Phase Roadmap
+
+### Phase 0 — Fresh Foundation
+
+**Goal:** Working boilerplate, renamed, all tooling green.
+
+Tasks:
+1. Clone PlatformPlatform at latest HEAD
+2. Global rename: `PlatformPlatform` → `BookSlot`, `platformplatform` → `bookslot`
+3. Update Azure Bicep infra scripts — add `integrations` container app resource
+4. Add `integrations/` SCS placeholder to solution and AppHost
+5. Verify `developer-cli build` and `developer-cli test` pass clean
+6. Wire CI/CD — verify GitHub Actions pipeline green
+
+---
+
+### Phase 1 — iPaaS Foundation
+
+**Goal:** Apache Camel SCS running in Aspire with a management dashboard.
+
+**Backend (Java):**
+- Spring Boot 3 app bootstrapped with Spring Initializr (Camel, Web, Actuator, Spring Cloud Azure)
+- `ConnectorRegistry` — maps connector IDs to Camel route builders; supports start/stop per tenant
+- `CredentialVault` interface with Azure Key Vault impl + local AES-256 dev impl
+- `ConnectorController` — all REST endpoints listed in Section 6
+- Health endpoint: `GET /actuator/health` + per-route custom health indicator
+- Dockerfile + `aspire-manifest.json` registration
+
+**Frontend (React):**
+- `/dashboard/integrations` — table of connectors with status pill (Active / Error / Disabled)
+- Connector drawer: enable toggle, config fields per connector type, credential rotation button
+- Environment badge (dev / staging / prod)
+
+**Docs:** `application/integrations/README.md` — what the SCS does, route list, credential setup
+
+---
+
+### Phase 2 — Core Booking Engine
+
+Build each sub-feature as a complete vertical (backend + API + frontend + unit tests). Order matters — later ones depend on earlier.
+
+#### 2.1 Service Types
+
+**Backend:**
+- `ServiceType` aggregate (fields listed in Section 7)
+- `CreateServiceType`, `UpdateServiceType`, `DeleteServiceType`, `ReorderServiceTypes`, `ToggleServiceType` commands
+- `GetServiceType`, `ListServiceTypes` queries
+- `ServiceTypeRepository` (`IServiceTypeRepository : ICrudRepository<ServiceType, ServiceTypeId>`)
+- `ServiceCategoryRepository` (category as separate aggregate: `ServiceCategory` with `TenantId`, `Name`, `DisplayOrder`)
+
+**API endpoints:**
+```
+GET    /api/main/service-types
+POST   /api/main/service-types
+GET    /api/main/service-types/{id}
+PUT    /api/main/service-types/{id}
+DELETE /api/main/service-types/{id}
+PATCH  /api/main/service-types/{id}/reorder
+PATCH  /api/main/service-types/{id}/toggle
+GET    /api/main/service-categories
+POST   /api/main/service-categories
+PUT    /api/main/service-categories/{id}
+DELETE /api/main/service-categories/{id}
+```
+
+**Frontend:**
+- `routes/dashboard/services.tsx` (layout, redirect to index)
+- `routes/dashboard/services.index.tsx` (list with drag-to-reorder, active/archived tabs)
+- `routes/dashboard/services.$id.tsx` (edit form — general, pricing, scheduling config, images)
+- `routes/dashboard/services.new.tsx` (create form)
+
+---
+
+#### 2.2 Locations
+
+**Backend:**
+- `Location` aggregate (fields in Section 7)
+- `CreateLocation`, `UpdateLocation`, `DeleteLocation`, `ToggleLocation` commands
+- `GetLocation`, `ListLocations` queries
+- `LocationRepository`
+
+**API endpoints:**
+```
+GET    /api/main/locations
+POST   /api/main/locations
+GET    /api/main/locations/{id}
+PUT    /api/main/locations/{id}
+DELETE /api/main/locations/{id}
+PATCH  /api/main/locations/{id}/toggle
+```
+
+**Frontend:**
+- `routes/dashboard/locations.tsx` (layout)
+- `routes/dashboard/locations.index.tsx` (list)
+- `routes/dashboard/locations.$id.tsx` (edit — name, address, business hours override)
+
+---
+
+#### 2.3 Business Schedule
+
+**Backend:**
+- `BusinessSchedule` aggregate (single per tenant — see Section 7)
+- `UpdateBusinessSchedule` command
+- `GetBusinessSchedule` query (creates with defaults if not found)
+- `BusinessScheduleRepository`
+- `BlockedTime` aggregate — manual blocks: `TenantId`, `LocationId?`, `StartsAt`, `EndsAt`, `Reason?`, `IsRecurring`, `RecurrenceRule?`
+
+**API endpoints:**
+```
+GET  /api/main/business-schedule
+PUT  /api/main/business-schedule
+GET  /api/main/blocked-times
+POST /api/main/blocked-times
+DELETE /api/main/blocked-times/{id}
+```
+
+**Frontend:**
+- `routes/dashboard/schedule.tsx` (weekly hours editor, exception dates)
+- Block times section inline on schedule page
+
+---
+
+#### 2.4 Public Booking Page
+
+**Backend:**
+- Unauthenticated API — uses `publicApi` client, `IgnoreQueryFilters([QueryFilterNames.Tenant])`
+- `GetVendorProfile` query — returns business name, logo, active services, locations, timezone
+- `GetAvailableSlots` query — computes free slots from schedule, blocked times, existing appointments (respects buffer, `MinimumBookingNoticeMinutes`, `MaxAdvanceBookingDays`)
+- `CreateBooking` command — creates `Appointment` with `Source = BookingPage`; triggers confirmation notification via iPaaS
+
+**Slot algorithm:**
+1. Load `BusinessSchedule` for the requested date
+2. Load all `Appointment`s that day (status != Cancelled) for the location/service
+3. Load all `BlockedTime`s for the day
+4. Generate slots every `DurationMinutes + BufferMinutes` within open hours
+5. Remove conflicting slots
+6. Apply `MinimumBookingNoticeMinutes` from now
+7. Return available `DateTimeOffset` slots
+
+**API endpoints (public, no auth):**
+```
+GET  /api/main/public/vendors/{tenantId}/profile
+GET  /api/main/public/vendors/{tenantId}/services/{serviceId}/slots?date={date}
+POST /api/main/public/vendors/{tenantId}/book
+GET  /api/main/public/appointments/{appointmentId}         (view own appointment)
+PUT  /api/main/public/appointments/{appointmentId}/cancel  (client self-cancel)
+PUT  /api/main/public/appointments/{appointmentId}/reschedule
+```
+
+**Frontend:**
+- `routes/book.tsx` (layout, unauthenticated)
+- `routes/book.$tenantId.tsx` (vendor landing, service list)
+- `routes/book.$tenantId.$serviceId.tsx` (slot picker, booking form, opt-in capture)
+- `routes/book.confirmation.$appointmentId.tsx` (success page)
+- `routes/book.manage.$appointmentId.tsx` (cancel / reschedule)
+
+---
+
+#### 2.5 Appointments
+
+**Backend:**
+- `CreateAppointment` (manual), `UpdateAppointment`, `CancelAppointment`, `RescheduleAppointment` commands
+- `ConfirmAppointment`, `MarkArrived`, `StartAppointment`, `CompleteAppointment`, `MarkNoShow` commands
+- `GetAppointment`, `ListAppointments` (with filters: status, date range, service, location, client), `GetCalendarEvents` queries
+- `AppointmentRepository`
+
+**API endpoints:**
+```
+GET    /api/main/appointments
+POST   /api/main/appointments
+GET    /api/main/appointments/{id}
+PUT    /api/main/appointments/{id}
+DELETE /api/main/appointments/{id}
+PATCH  /api/main/appointments/{id}/status   (confirm/arrive/start/complete/no-show/cancel)
+PATCH  /api/main/appointments/{id}/reschedule
+GET    /api/main/appointments/calendar      (date range, for calendar view)
+```
+
+**Frontend:**
+- `routes/dashboard/appointments.tsx` (layout)
+- `routes/dashboard/appointments.index.tsx` (calendar view + list view toggle)
+- `routes/dashboard/appointments.$id.tsx` (detail/edit panel)
+- `routes/dashboard/appointments.new.tsx` (manual booking form)
+
+---
+
+#### 2.6 Clients
+
+**Backend:**
+- `Client` aggregate (fields in Section 7)
+- `CreateClient`, `UpdateClient`, `DeleteClient`, `BlockClient`, `UnblockClient` commands
+- `AddClientNote`, `RemoveClientNote`, `AddClientAlert` commands
+- `GetClient`, `ListClients`, `SearchClients` queries
+- `ClientRepository`
+- `ClientTag` aggregate (separate, `TenantId`, `Name`, `Color`)
+
+**API endpoints:**
+```
+GET    /api/main/clients
+POST   /api/main/clients
+GET    /api/main/clients/{id}
+PUT    /api/main/clients/{id}
+DELETE /api/main/clients/{id}
+PATCH  /api/main/clients/{id}/block
+PATCH  /api/main/clients/{id}/unblock
+POST   /api/main/clients/{id}/notes
+DELETE /api/main/clients/{id}/notes/{noteId}
+GET    /api/main/client-tags
+POST   /api/main/client-tags
+```
+
+**Frontend:**
+- `routes/dashboard/clients.tsx` (layout)
+- `routes/dashboard/clients.index.tsx` (list, search, filter by tags)
+- `routes/dashboard/clients.$id.tsx` (profile: details, appointment history, notes, alerts)
+- `routes/dashboard/clients.new.tsx`
+
+---
+
+### Phase 3 — Business Profile & Onboarding
+
+**Backend:**
+- `BusinessProfile` aggregate (fields in Section 7 — **without WhatsApp fields initially**)
+- `CreateBusinessProfile`, `UpdateBusinessProfile` commands
+- `GetBusinessProfile` query (upsert on first access)
+- `BusinessProfileRepository` with `GetByTenantAsync`
+
+**API:**
+```
+GET  /api/main/business-profile
+PUT  /api/main/business-profile
+POST /api/main/business-profile/logo    (blob upload)
+```
+
+**Onboarding flow (frontend):**
+- `routes/onboarding.tsx` (layout)
+- `routes/onboarding.profile.tsx` → `routes/onboarding.service.tsx` → `routes/onboarding.location.tsx` → `routes/onboarding.schedule.tsx` → `routes/onboarding.complete.tsx`
+- Onboarding step tracked on tenant record (extend account SCS or use main SCS preference)
+
+**Settings frontend:**
+- `routes/dashboard/settings.tsx` (layout, redirects to `.profile`)
+- `routes/dashboard/settings.profile.tsx`
+- `routes/dashboard/settings.booking.tsx` (booking page customisation — cancellation policy, branding colour, welcome message)
+- `routes/dashboard/settings.notifications.tsx` (notification preferences — which events trigger messages)
+
+---
+
+### Phase 4 — Calendar Integration (via iPaaS)
+
+**Camel Routes (integrations SCS):**
+
+`GoogleCalendarRoute`:
+- OAuth2 PKCE flow — redirect URI points back to `main` API, code exchange happens server-side
+- Token refresh via Camel timer + Azure Key Vault token storage
+- Polls for new/changed events every 5 minutes (or push via Google webhook if available)
+- Translates Google Event → `CalendarEvent` internal DTO, pushes to `POST /api/main/calendar/events/inbound`
+- Writes BookSlot appointment to Google on `CalendarEventOutbound` message from `main`
+
+`OutlookCalendarRoute`:
+- Same pattern via MS Graph API
+- Subscription-based push (MS Graph change notifications) preferred over polling
+
+**main SCS additions:**
+
+`CalendarSettings` aggregate:
+- `TenantId`, `Provider` (Google/Outlook), `ConnectedCalendarId`, `AccessTokenRef` (Key Vault reference), `RefreshTokenRef`, `TokenExpiresAt`, `SyncEnabled`, `SyncDirection` (TwoWay/ImportOnly/ExportOnly), `ConnectedAt`, `LastSyncAt`, `LastSyncError`
+- ID prefix: `calset`
+
+`CalendarSync` feature:
+- `HandleInboundCalendarEvent` command — receives event from iPaaS, creates/updates `BlockedTime` or matches to existing appointment
+- `SyncAppointmentToCalendar` command — called from appointment lifecycle events, sends to iPaaS outbound queue
+- `GetCalendarSyncStatus` query
+
+API:
+```
+GET    /api/main/calendar-settings
+POST   /api/main/calendar-settings/google/connect    (initiates OAuth flow)
+GET    /api/main/calendar-settings/google/callback   (OAuth callback)
+POST   /api/main/calendar-settings/outlook/connect
+GET    /api/main/calendar-settings/outlook/callback
+DELETE /api/main/calendar-settings/{provider}        (disconnect)
+POST   /api/main/calendar/events/inbound             (iPaaS → main, internal)
+```
+
+Frontend:
+- `routes/dashboard/settings.calendar.tsx` — connect/disconnect Google + Outlook, sync status, last error
+
+---
+
+### Phase 5 — PayFast Payments
+
+**Camel Route (integrations SCS):**
+
+`PayFastWebhookRoute`:
+- Listens on `POST /api/integrations/payfast/itn`
+- Verifies signature: MD5 hash of sorted `key=value` pairs + passphrase (from credential vault)
+- Checks `payment_status` field: `COMPLETE` → forward to `POST /api/main/payments/payfast/itn`
+- Idempotency: hash the `m_payment_id` — skip if already processed
+- Dead-letter queue for failed verifications
+
+**main SCS:**
+
+`Payment` aggregate:
+- `TenantId`, `AppointmentId`, `Amount`, `Currency`, `PayFastPaymentId` (their `pf_payment_id`), `MerchantPaymentId` (our generated ID), `Status` (Pending/Captured/Failed/Refunded), `CapturedAt`, `RefundedAt`, `RefundReason`, `PayFastRawResponse` (JSONB)
+- ID prefix: `pay`
+
+`HandlePayFastItn` command — updates `Payment` and transitions `Appointment` to `Confirmed` (or `Cancelled` on failure)
+
+`InitiatePayment` command — generates `MerchantPaymentId`, builds PayFast payment URL, returns redirect URL
+
+`RefundPayment` command — calls PayFast refund API (via iPaaS HTTP route)
+
+**PayFast integration specifics:**
+- Sandbox URL: `https://sandbox.payfast.co.za/eng/process`
+- Live URL: `https://www.payfast.co.za/eng/process`
+- Merchant ID + Merchant Key + Passphrase stored in iPaaS credential vault
+- ITN webhook endpoint: `POST /api/main/payments/payfast/itn` (no auth, signature-verified)
+- Payment required if `ServiceType.Price > 0` and `ServiceType.PaymentTiming = Before`
+- Booking flow: slot selection → booking form → redirect to PayFast → ITN → confirmation
+
+**API endpoints:**
+```
+POST /api/main/payments/initiate             (creates payment intent, returns redirect URL)
+POST /api/main/payments/payfast/itn          (PayFast webhook — no auth)
+POST /api/main/payments/{id}/refund
+GET  /api/main/payments                      (list for dashboard)
+GET  /api/main/payments/{id}
+```
+
+**Frontend:**
+- `routes/book.payment-callback.tsx` (return URL from PayFast — show loading, poll for payment status)
+- `routes/dashboard/payments.tsx` (transaction list, filters, refund actions)
+- Payment step injected into `book.$tenantId.$serviceId.tsx` when `Price > 0`
+
+---
+
+### Phase 6 — WhatsApp Notifications (via iPaaS)
+
+**Non-negotiable rules:**
+1. **Never send free-text** to a client outside a 24-hour inbound session window. Always use `ContentSid`.
+2. **Opt-in required.** No opt-in record → log + return (no throw, no silent drop).
+3. **Single aggregate** — no dual source-of-truth. `WhatsAppOnboarding` on `BusinessProfile` (not a separate `WhatsAppSettings` table).
+4. **Platform-owned templates v1** — 4 templates submitted once on BookSlot's WABA, SIDs hard-coded per environment.
+
+**Camel Route (integrations SCS):**
+
+`TwilioWhatsAppRoute`:
+- `SendWhatsAppMessage` message processor:
+  1. Load opt-in from `POST /api/main/whatsapp/opt-in/check`
+  2. If opted-in AND `now - LastInboundAt < 24h` → send free-text body
+  3. Otherwise → send with `ContentSid` + `ContentVariables`
+  4. Idempotency key: `tenant-{id}-appt-{id}-{eventType}`
+- `HandleInboundMessage` — receives Twilio webhook, updates `LastInboundAt`, creates `WhatsAppMessageLog`
+- Webhook endpoint: `POST /api/integrations/twilio/whatsapp/inbound` (Twilio signature verified)
+- Polly retry: 3 attempts, exponential backoff, Twilio 429 → circuit breaker
+
+**main SCS:**
+
+`WhatsAppOptIn` aggregate:
+- `TenantId`, `ClientPhone` (normalised), `ConsentedAt`, `ConsentSource` (BookingPage/Manual/Import), `ConsentPurpose`, `RevokedAt?`, `LastInboundAt?`
+- ID prefix: `woptin`
+- Repository method: `GetByPhoneAsync(TenantId, string phone)`
+
+`WhatsAppOnboarding` — **on `BusinessProfile`** (not separate aggregate):
+- Fields: `TwilioSubaccountSid`, `TwilioSubaccountAuthToken` (encrypted via `ITokenEncryptor`), `PhoneNumber`, `TwilioPhoneNumberSid`, `WabaId`, `SenderSid`, `OnboardingStatus` (NotStarted/NumberReserved/EmbeddedSignupCompleted/Active/Failed), `NumberLifecycleStatus` (Reserved/Active/Released), `DisplayName`
+
+`WhatsAppMessageLog` aggregate:
+- `TenantId`, `AppointmentId?`, `ClientPhone`, `MessageType` (Confirmation/Cancellation/Reschedule/Reminder/Custom), `Status` (Sent/Failed/Blocked), `BlockReason?` (NoOptIn/SessionExpired), `ContentSid?`, `TwilioMessageSid?`, `SentAt?`, `ErrorCode?`
+- ID prefix: `wamsg`
+
+**4 Platform Templates (v1 — hard-coded ContentSIDs):**
+| Template | Variables |
+|----------|-----------|
+| `bookslot_confirmation` | `{{business_name}}`, `{{service_name}}`, `{{date_time}}`, `{{reference}}` |
+| `bookslot_cancellation` | `{{business_name}}`, `{{service_name}}`, `{{date_time}}`, `{{reference}}` |
+| `bookslot_reschedule` | `{{business_name}}`, `{{service_name}}`, `{{old_date_time}}`, `{{new_date_time}}`, `{{reference}}` |
+| `bookslot_reminder` | `{{business_name}}`, `{{service_name}}`, `{{date_time}}`, `{{reference}}`, `{{hours_until}}` |
+
+**API endpoints:**
+```
+GET    /api/main/whatsapp/onboarding          (get current onboarding state)
+POST   /api/main/whatsapp/senders/search      (list available Twilio numbers by country)
+POST   /api/main/whatsapp/senders/reserve     (purchase Twilio number + create subaccount)
+POST   /api/main/whatsapp/senders/complete    (post embedded-signup callback → register sender)
+POST   /api/main/whatsapp/senders/check       (poll sender registration status)
+DELETE /api/main/whatsapp/senders             (disconnect + release Twilio number)
+POST   /api/main/whatsapp/opt-in/check        (internal — called by iPaaS)
+POST   /api/main/whatsapp/opt-in/record       (record opt-in from booking page)
+DELETE /api/main/whatsapp/opt-in/{phone}      (revoke opt-in)
+POST   /api/main/whatsapp/test-send           (send test template to authenticated user's phone)
+```
+
+**Frontend:**
+- `routes/dashboard/connectors.tsx` (layout)
+- `routes/dashboard/connectors.whatsapp.tsx` — onboarding wizard + sender status + opt-in stats
+- Opt-in checkbox in `book.$tenantId.$serviceId.tsx` — captures consent before booking
+
+---
+
+### Phase 7 — Advanced Features
+
+Build in priority order:
+
+#### 7.1 Waitlist
+`Waitlist` aggregate: `TenantId`, `ServiceTypeId`, `LocationId?`, `PreferredDate`, `ClientName`, `ClientPhone`, `ClientEmail?`, `Status` (Waiting/Notified/Booked/Expired), `NotifiedAt?`, `ExpiresAt`.
+- Triggered when slot fills: add to waitlist
+- On cancellation: notify first in queue via WhatsApp if enabled
+- ID prefix: `wait`
+
+#### 7.2 Insights
+Read-only queries only — no aggregate. Backed by EF Core `InMemoryDatabase` for unit tests (not SQLite, due to named filter translation issues with StronglyTypedId types).
+- `GetBookingInsights` — total bookings, cancellation rate, completion rate by period
+- `GetRevenueInsights` — revenue by service, by location, by period
+- `GetClientInsights` — new clients, retention rate, top clients by booking count
+- Frontend: `routes/dashboard/insights.tsx` — charts, date range picker
+
+#### 7.3 API Keys
+`ApiKey` aggregate: `TenantId`, `Name`, `KeyHash` (SHA-256 of raw key), `Prefix` (first 8 chars for display), `Scopes`, `ExpiresAt?`, `LastUsedAt?`, `IsRevoked`.
+- Key only returned once on creation
+- ID prefix: `apikey`
+
+#### 7.4 Webhooks
+`WebhookSubscription` aggregate: `TenantId`, `Url`, `Secret` (for HMAC-SHA256 signature header), `Events` (array of event names), `IsActive`, `FailureCount`.
+`WebhookDelivery` aggregate: `SubscriptionId`, `Event`, `Payload` (JSONB), `Status` (Pending/Delivered/Failed), `AttemptCount`, `NextAttemptAt`, `LastAttemptAt`, `ResponseStatus`.
+- Delivery via background worker with exponential backoff (max 5 attempts)
+- Events: `appointment.created`, `appointment.confirmed`, `appointment.cancelled`, `appointment.completed`, `payment.captured`, `payment.refunded`
+
+---
+
+### Phase 8 — Back-office & Platform Operations
+
+Extend the boilerplate back-office SCS:
+
+- **Tenant management** — list tenants, view details, suspend/unsuspend, impersonate
+- **Integration health** — read `GET /api/integrations/connectors/{id}/health` from back-office
+- **Platform metrics** — aggregate booking counts, payment volumes, active tenants
+- **Audit log viewer** — search domain event log by tenant, event type, date range
+- **WhatsApp template status** — view approval states of platform templates across Twilio
+
+---
+
+## 9. Frontend Conventions
+
+### Routing
+TanStack Router file-based routing. Layout file (`settings.tsx`) + child files (`settings.profile.tsx`). Parent uses `useLocation()` to redirect to first child when at exact parent path.
+
+### API Calls
+```tsx
+// Authenticated
+import { api } from "@/shared/lib/api/client";
+const { data } = api.useQuery("get", "/api/main/service-types");
+const mutation = api.useMutation("post", "/api/main/service-types");
+
+// Unauthenticated (public booking page)
+import { publicApi } from "@/shared/lib/api/publicClient";
+const { data } = publicApi.useQuery("get", "/api/main/public/vendors/{tenantId}/profile", {
+  params: { path: { tenantId } }
+});
+
+// Invalidate after mutation
+queryClient.invalidateQueries({ queryKey: ["get", "/api/main/service-types"] });
+```
+
+### Forms
+```tsx
+<Form onSubmit={mutationSubmitter(mutation, params)}>
+  <TextField name="name" label="Service name" isRequired />
+  <Button type="submit">Save</Button>
+</Form>
+```
+Mutation variables must be typed as `MutationParams` from `@repo/ui/forms/mutationSubmitter`.
+
+### Settings Pattern
+Parent layout file redirects to first child:
+```tsx
+// settings.tsx
+const { pathname } = useLocation();
+if (pathname === "/dashboard/settings") return <Navigate to="/dashboard/settings/profile" />;
+```
+
+---
+
+## 10. Backend Handler Conventions
+
+```csharp
+// Command handler
+public sealed record CreateServiceTypeCommand(...) : ICommand<ServiceTypeId>;
+
+public sealed class CreateServiceTypeHandler(
+    IServiceTypeRepository repository,
+    IExecutionContext executionContext
+) : ICommandHandler<CreateServiceTypeCommand, ServiceTypeId>
+{
+    public async Task<Result<ServiceTypeId>> Handle(
+        CreateServiceTypeCommand command,
+        CancellationToken cancellationToken)
+    {
+        var serviceType = ServiceType.Create(
+            executionContext.TenantId!,
+            ...
+        );
+        await repository.AddAsync(serviceType, cancellationToken);
+        return serviceType.Id;
+    }
+}
+
+// Validator
+public sealed class CreateServiceTypeValidator : AbstractValidator<CreateServiceTypeCommand>
+{
+    public CreateServiceTypeValidator()
+    {
+        RuleFor(x => x.Name).NotEmpty().MaximumLength(100);
+        RuleFor(x => x.DurationMinutes).GreaterThan(0);
+    }
+}
+```
+
+### Testing (unit tests, `application/main/Tests/`)
+- Use `SqliteInMemoryDbContextFactory<MainDbContext>` for handlers that use `DbContext`
+- Use `EF Core InMemoryDatabase` for Insights/query handlers (SQLite cannot handle `DateTimeOffset` range comparisons or named filter translation with StronglyTypedId types)
+- Always test: happy path, validation failure, not-found, permission denied (wrong tenant)
+
+---
+
+## 11. Agent Workflow (Mandatory)
+
+The project supports two parallel agentic modes. Both use the same `.claude/agents/*.md` files and `developer-cli` MCP tools. **Never implement code as coordinator in either mode.**
+
+### Mode A: GitHub Copilot CLI (Primary — no setup required)
+
+GitHub Copilot CLI acts as coordinator. Dispatch sub-agents via the built-in `task` tool:
+
+```
+User → Copilot CLI (coordinator)
+  → task(agent_type="backend-engineer", prompt="...")  → implements directly, full toolset
+  → task(agent_type="backend-reviewer", prompt="...")  → reviews diff, returns approval/feedback
+```
+
+No terminal setup. No worker-host processes. Agents are stateless per dispatch — embed full context (relevant PLAN.md section + task description) in each prompt.
+
+### Mode B: Claude Code Worker-Host (Optional — persistent session memory)
+
+For developers using Claude Code who want persistent agent memory across multi-task features:
+
+```bash
+pp claude-agent coordinator      # terminal 1
+pp claude-agent backend-engineer # terminal 2 (keeps memory between tasks)
+```
+
+The developer-cli `start_worker_agent` / `complete_work` / `claude-agent` infrastructure remains available for this mode. Worker-host agents read `.claude/commands/process/implement-task.md` and maintain session context via `.claude-session-id`.
+
+### Delegation Table (both modes)
+
+| Work type | Agent | Reviewer |
+|-----------|-------|----------|
+| .NET backend feature | `backend-engineer` | `backend-reviewer` |
+| React/TS frontend feature | `frontend-engineer` | `frontend-reviewer` |
+| Playwright E2E tests | `qa-engineer` | `qa-reviewer` |
+
+### Delegation Rules (both modes)
+- One SCS per agent call — never split `main` backend + `integrations` Java in one task
+- Always pass the relevant PLAN.md section as context in the task prompt
+- Engineer → Reviewer pipeline is mandatory before marking a task done
+- Reviewer returns `✅ APPROVED` or `❌ CHANGES REQUIRED` with specific file:line references
+
+### Build/Test Commands (via MCP, both modes — never raw `dotnet`/`npm`)
+```
+execute_command(command='build', backend=true, frontend=true)
+execute_command(command='test', backend=true, noBuild=true)
+execute_command(command='format', backend=true, noBuild=true)
+execute_command(command='lint', frontend=true, noBuild=true)
+```
+
+Slow operations (Aspire restart, backend format/lint, E2E) → dispatch as parallel `task` agents.
+
+---
+
+## 12. What Was Wrong in the Previous Codebase (Do Not Repeat)
+
+| Problem | Fix in new codebase |
+|---------|---------------------|
+| `WhatsAppSettings` aggregate duplicated fields from `BusinessProfile` | Single `WhatsAppOnboarding` embedded in `BusinessProfile` |
+| Three separate WhatsApp status enums with non-1:1 mappings | Single `OnboardingStatus` + `LifecycleStatus` per inventory entry |
+| Twilio sends free-text `Body` to all appointments — rejected outside 24h window | Always use `ContentSid` for business-initiated messages |
+| Zero opt-in / consent tracking | `WhatsAppOptIn` aggregate, POPIA-compliant |
+| Nango inline in `main` Core/Integrations | All third-party calls go through iPaaS Camel routes |
+| Paystack wired directly in `main` Core | PayFast via iPaaS Camel route + ITN webhook verification |
+| No idempotency on Twilio or payment calls | Idempotency keys on all external calls |
+| `DisconnectWhatsApp` didn't call Twilio — tenant kept paying | Disconnect releases Twilio number via iPaaS route |
+| WhatsApp "flows" UI accepted config but backend never read it at send time | No flow UI until backend is fully implemented |
+| Code generated without agent discipline — inconsistent patterns | All work via `backend-engineer` → `backend-reviewer` pipeline |
+
+---
+
+## 13. ID Prefix Registry
+
+| Entity | Prefix |
+|--------|--------|
+| `Appointment` | `appt` |
+| `ServiceType` | `svct` |
+| `ServiceVariant` | `svcv` |
+| `ServiceTimeSegment` | `svts` |
+| `ServiceImage` | `svci` |
+| `TimePricingRule` | `svpr` |
+| `ServiceCategory` | `svccat` |
+| `Client` | `clnt` |
+| `Location` | `loc` |
+| `BusinessProfile` | `bprof` |
+| `BusinessSchedule` | `bschl` |
+| `BlockedTime` | `blkt` |
+| `CalendarSettings` | `calset` |
+| `Payment` | `pay` |
+| `WhatsAppOptIn` | `woptin` |
+| `WhatsAppMessageLog` | `wamsg` |
+| `Waitlist` | `wait` |
+| `ApiKey` | `apikey` |
+| `WebhookSubscription` | `whksub` |
+| `WebhookDelivery` | `whkdlv` |
+| `ClientTag` | `ctag` |
+
+---
+
+## 14. Open Decisions (Resolve Before Building Each Phase)
+
+1. **Phase 1:** Which Azure region for prod? (affects Aspire env vars and Key Vault name)
+2. **Phase 4:** Google Calendar push notifications require a publicly reachable endpoint. In dev, use `ngrok` or Aspire tunnel. Document setup in `integrations/README.md`.
+3. **Phase 5:** PayFast does not support direct refund API in all scenarios — confirm refund flow with PayFast sandbox before building the command.
+4. **Phase 6:** Platform WhatsApp templates must be submitted to Meta for approval before they can be used. Allow minimum 2 weeks for approval. Build the send path with template SIDs as config values, not hard-coded strings, so they can be swapped after approval.
+5. **Phase 7 (Webhooks):** Worker for delivery retries — extend existing `Workers` project in `main` SCS using the boilerplate's job runner pattern.
+
+---
+
+## 15. Agent File Setup (Critical — Do Before Phase 0)
+
+The PlatformPlatform boilerplate ships `.claude/agents/*.md` as **Claude Code worker-host passthrough proxies** (`tools: mcp__developer-cli__start_worker_agent` only). These must be replaced with **real implementation agents** so both Copilot CLI and Claude Code can dispatch them directly.
+
+### Why the Change
+
+| Current (boilerplate) | Target (new codebase) |
+|----------------------|----------------------|
+| `tools: mcp__developer-cli__start_worker_agent` only | No `tools:` restriction — inherits all available tools |
+| Pure passthrough — zero thinking | Real implementation — reads rules, writes code, builds, tests |
+| Requires Claude Code worker-host running in terminal | Works via `task` tool in Copilot CLI with no setup |
+| Claude Code only | Both Copilot CLI and Claude Code |
+
+### Frontmatter Template (all agents)
+
+```yaml
+---
+name: backend-engineer
+description: Called by coordinator for backend development tasks.
+model: claude-sonnet-4-5
+color: green
+---
+```
+
+**No `tools:` line.** Removing it gives the agent all tools available in the dispatching system.
+
+### backend-engineer.md
+
+```markdown
+You are a **backend engineer** in the BookSlot project implementing vertical-slice features in .NET 10.
+
+## Role
+- Implement commands, queries, domain models, repositories, API endpoints, and xUnit tests
+- One task = one commit. All subtasks land together — code must compile, run, and pass tests
+- Build and test incrementally after each meaningful change, not only at the end
+- When complete, delegate to `backend-reviewer`
+
+## Before Any Implementation
+Read these rule files:
+- `.claude/rules/backend/backend.md`
+- `.claude/rules/backend/domain-modeling.md`
+- `.claude/rules/backend/commands.md`
+- `.claude/rules/backend/queries.md`
+- `.claude/rules/backend/api-endpoints.md`
+- `.claude/rules/backend/api-tests.md`
+- `.claude/rules/backend/database-migrations.md`
+
+## Mandatory Validation (before calling reviewer)
+Run in order — all must pass with zero failures/warnings:
+1. `execute_command(command='build', backend=true)`
+2. `execute_command(command='test', backend=true, noBuild=true)`
+3. `execute_command(command='format', backend=true, noBuild=true)`
+
+## Completion
+Commit with message in imperative form. Then call reviewer:
+`task(agent_type="backend-reviewer", prompt="Review: [what was implemented] on branch [branch]")`
+```
+
+### frontend-engineer.md
+
+```markdown
+You are a **frontend engineer** in the BookSlot project implementing React/TypeScript features.
+
+## Role
+- Implement TanStack Router routes, React components, API integration, and translations
+- One task = one commit. All subtasks land together
+- Test in browser via Playwright MCP — zero tolerance for visual regressions
+- When complete, delegate to `frontend-reviewer`
+
+## Before Any Implementation
+Read these rule files:
+- `.claude/rules/frontend/frontend.md`
+- `.claude/rules/frontend/tanstack-query-api-integration.md`
+- `.claude/rules/frontend/form-with-validation.md`
+- `.claude/rules/frontend/translations.md`
+
+## Mandatory Validation (before calling reviewer)
+1. `execute_command(command='build', frontend=true)`
+2. `execute_command(command='lint', frontend=true, noBuild=true)`
+3. Visual browser check via Playwright MCP — no layout breaks, no console errors
+
+## Completion
+Commit. Then call reviewer:
+`task(agent_type="frontend-reviewer", prompt="Review: [what was implemented] on branch [branch]")`
+```
+
+### backend-reviewer.md
+
+```markdown
+You are a **backend reviewer** in the BookSlot project. Review .NET backend code for correctness and convention compliance. Never implement — return feedback only.
+
+## Review Checklist
+- [ ] Aggregate: `AggregateRoot<T>`, private ctor, static `Create` factory, `IEntityTypeConfiguration` in same file
+- [ ] ID: `StronglyTypedUlid` with correct `[IdPrefix("xxx")]` — check PLAN.md Section 13
+- [ ] Repository: `ICrudRepository<T>` interface + `RepositoryBase` implementation in same file under `Domain/`
+- [ ] Handler: never calls `SaveChanges()` directly (UnitOfWork pipeline handles it)
+- [ ] Validator: covers all required fields with sensible max lengths
+- [ ] API endpoint: correct HTTP method, registered in correct endpoint group, auth applied
+- [ ] Tests: happy path + validation failure + not-found + wrong-tenant minimum
+- [ ] No direct external API calls — all third-party traffic via iPaaS Camel routes
+- [ ] No `WhatsApp`, `PayFast`, or `Calendar` logic in `main` Core directly
+
+## Output
+Return exactly one of:
+- `✅ APPROVED — [brief summary of what was implemented]`
+- `❌ CHANGES REQUIRED — [specific issues with file:line references]`
+```
+
+### frontend-reviewer.md
+
+```markdown
+You are a **frontend reviewer** in the BookSlot project. Review React/TypeScript code. Never implement — return feedback only.
+
+## Review Checklist
+- [ ] TanStack Router routing: correct file name convention (`settings.profile.tsx` not `settings/profile.tsx`)
+- [ ] API calls: uses `api.useQuery`/`api.useMutation` from `@/shared/lib/api/client` (authenticated) or `publicApi` from `publicClient` (public)
+- [ ] Forms: uses `<Form onSubmit={mutationSubmitter(...)}>` pattern with `MutationParams` typing
+- [ ] No raw `fetch` or `axios` calls
+- [ ] Translations: all user-visible strings use `t()` — no hard-coded English strings in JSX
+- [ ] No console errors in browser
+- [ ] Responsive — works at 375px (mobile) and 1280px (desktop)
+
+## Output
+- `✅ APPROVED — [brief summary]`
+- `❌ CHANGES REQUIRED — [specific issues]`
+```
+
+### qa-engineer.md
+
+```markdown
+You are a **QA engineer** in the BookSlot project writing Playwright E2E tests.
+
+## Role
+- Write Playwright tests in `application/main/WebApp/tests/e2e/` (or the relevant SCS)
+- Tests must pass against a running Aspire instance (`developer-cli run`)
+- Follow `.claude/rules/end-to-end-tests/end-to-end-tests.md`
+- When complete, delegate to `qa-reviewer`
+
+## Mandatory Validation
+1. `end_to_end(searchTerms=["your-test-file"])` — all new tests must pass
+2. `end_to_end()` — full suite must not regress
+
+## Completion
+`task(agent_type="qa-reviewer", prompt="Review E2E tests: [what was tested] on branch [branch]")`
+```
+
+### qa-reviewer.md
+
+```markdown
+You are a **QA reviewer** in the BookSlot project. Review Playwright E2E tests for coverage and reliability. Never implement — return feedback only.
+
+## Review Checklist
+- [ ] Tests cover the happy path end-to-end (fill form → submit → see result)
+- [ ] Tests cover at least one error/validation path
+- [ ] No `page.waitForTimeout()` — use `waitForSelector` or `waitForResponse`
+- [ ] Test IDs use `data-testid` attributes, not CSS class selectors
+- [ ] Tests are isolated — no shared state between tests
+
+## Output
+- `✅ APPROVED — [brief summary]`
+- `❌ CHANGES REQUIRED — [specific issues]`
+```
+
+### pair-programmer.md
+
+```markdown
+You are a **pair programmer** collaborating directly with the developer. You have full tool access.
+
+Work interactively — ask for clarification, propose approaches before implementing, explain your reasoning. You are not bound by the engineer/reviewer pipeline. Commit only when the developer asks.
+```
