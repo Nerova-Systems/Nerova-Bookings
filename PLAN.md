@@ -1,4 +1,4 @@
-# BookSlot — Master Product & Technical Plan
+# Nerova Bookings — Master Product & Technical Plan
 
 > Transfer this file to the root of the new codebase. It is the authoritative reference for what we are building, why, and how.
 
@@ -6,7 +6,7 @@
 
 ## 1. Product Vision
 
-**BookSlot** is a SaaS appointment-booking platform built for non-technical professional business owners in South Africa (primary), UK, US, and Australia.
+**Nerova Bookings** is a SaaS appointment-booking platform built for non-technical professional business owners in South Africa (primary), UK, US, and Australia.
 
 ### Core Philosophy: "Buy and Use"
 
@@ -45,7 +45,7 @@ Clone [PlatformPlatform](https://github.com/platformplatform/PlatformPlatform) a
 - GitHub Actions CI/CD (`.github/`)
 - Agent rules (`.claude/`)
 
-**Rename checklist (PlatformPlatform → BookSlot):**
+**Rename checklist (PlatformPlatform → Nerova Bookings):**
 - Solution file names (`.slnx`, `.slnf`)
 - Root namespaces in all `Directory.Build.props`
 - `AppHost` project name registrations
@@ -63,7 +63,7 @@ booking-saas/
 │   ├── account/           # Boilerplate — tenant + user management (extend only)
 │   ├── back-office/       # Boilerplate — support/admin tools (extend only)
 │   ├── integrations/      # NEW: Apache Camel iPaaS SCS (Java 21 + Spring Boot 3)
-│   ├── main/              # BookSlot core SCS (.NET 10 + React)
+│   ├── main/              # Nerova Bookings core SCS (.NET 10 + React)
 │   ├── shared-kernel/     # Boilerplate — extend only
 │   ├── shared-webapp/     # Boilerplate — extend only
 │   ├── AppHost/           # Aspire orchestration
@@ -145,7 +145,7 @@ All third-party integrations route through the iPaaS. No SCS calls Twilio, PayFa
 ### Structure
 ```
 application/integrations/
-├── src/main/java/com/bookslot/integrations/
+├── src/main/java/com/nerovabookings/integrations/
 │   ├── IntegrationsApplication.java
 │   ├── config/
 │   │   ├── CamelConfig.java
@@ -320,7 +320,7 @@ Custom repo method: `GetByTenantAsync(TenantId)`
 
 Tasks:
 1. Clone PlatformPlatform at latest HEAD
-2. Global rename: `PlatformPlatform` → `BookSlot`, `platformplatform` → `bookslot`
+2. Global rename: `PlatformPlatform` → `Nerova Bookings`, `platformplatform` → `nerovabookings`
 3. Update Azure Bicep infra scripts — add `integrations` container app resource
 4. Add `integrations/` SCS placeholder to solution and AppHost
 5. Verify `developer-cli build` and `developer-cli test` pass clean
@@ -568,7 +568,7 @@ POST /api/main/business-profile/logo    (blob upload)
 - Token refresh via Camel timer + Azure Key Vault token storage
 - Polls for new/changed events every 5 minutes (or push via Google webhook if available)
 - Translates Google Event → `CalendarEvent` internal DTO, pushes to `POST /api/main/calendar/events/inbound`
-- Writes BookSlot appointment to Google on `CalendarEventOutbound` message from `main`
+- Writes Nerova Bookings appointment to Google on `CalendarEventOutbound` message from `main`
 
 `OutlookCalendarRoute`:
 - Same pattern via MS Graph API
@@ -654,7 +654,7 @@ GET  /api/main/payments/{id}
 1. **Never send free-text** to a client outside a 24-hour inbound session window. Always use `ContentSid`.
 2. **Opt-in required.** No opt-in record → log + return (no throw, no silent drop).
 3. **Single aggregate** — no dual source-of-truth. `WhatsAppOnboarding` on `BusinessProfile` (not a separate `WhatsAppSettings` table).
-4. **Platform-owned templates v1** — 4 templates submitted once on BookSlot's WABA, SIDs hard-coded per environment.
+4. **Platform-owned templates v1** — 4 templates submitted once on Nerova Bookings' WABA, SIDs hard-coded per environment.
 
 **Camel Route (integrations SCS):**
 
@@ -685,10 +685,10 @@ GET  /api/main/payments/{id}
 **4 Platform Templates (v1 — hard-coded ContentSIDs):**
 | Template | Variables |
 |----------|-----------|
-| `bookslot_confirmation` | `{{business_name}}`, `{{service_name}}`, `{{date_time}}`, `{{reference}}` |
-| `bookslot_cancellation` | `{{business_name}}`, `{{service_name}}`, `{{date_time}}`, `{{reference}}` |
-| `bookslot_reschedule` | `{{business_name}}`, `{{service_name}}`, `{{old_date_time}}`, `{{new_date_time}}`, `{{reference}}` |
-| `bookslot_reminder` | `{{business_name}}`, `{{service_name}}`, `{{date_time}}`, `{{reference}}`, `{{hours_until}}` |
+| `nerovabookings_confirmation` | `{{business_name}}`, `{{service_name}}`, `{{date_time}}`, `{{reference}}` |
+| `nerovabookings_cancellation` | `{{business_name}}`, `{{service_name}}`, `{{date_time}}`, `{{reference}}` |
+| `nerovabookings_reschedule` | `{{business_name}}`, `{{service_name}}`, `{{old_date_time}}`, `{{new_date_time}}`, `{{reference}}` |
+| `nerovabookings_reminder` | `{{business_name}}`, `{{service_name}}`, `{{date_time}}`, `{{reference}}`, `{{hours_until}}` |
 
 **API endpoints:**
 ```
@@ -973,7 +973,7 @@ color: green
 ### backend-engineer.md
 
 ```markdown
-You are a **backend engineer** in the BookSlot project implementing vertical-slice features in .NET 10.
+You are a **backend engineer** in the Nerova Bookings project implementing vertical-slice features in .NET 10.
 
 ## Role
 - Implement commands, queries, domain models, repositories, API endpoints, and xUnit tests
@@ -1005,7 +1005,7 @@ Commit with message in imperative form. Then call reviewer:
 ### frontend-engineer.md
 
 ```markdown
-You are a **frontend engineer** in the BookSlot project implementing React/TypeScript features.
+You are a **frontend engineer** in the Nerova Bookings project implementing React/TypeScript features.
 
 ## Role
 - Implement TanStack Router routes, React components, API integration, and translations
@@ -1033,7 +1033,7 @@ Commit. Then call reviewer:
 ### backend-reviewer.md
 
 ```markdown
-You are a **backend reviewer** in the BookSlot project. Review .NET backend code for correctness and convention compliance. Never implement — return feedback only.
+You are a **backend reviewer** in the Nerova Bookings project. Review .NET backend code for correctness and convention compliance. Never implement — return feedback only.
 
 ## Review Checklist
 - [ ] Aggregate: `AggregateRoot<T>`, private ctor, static `Create` factory, `IEntityTypeConfiguration` in same file
@@ -1055,7 +1055,7 @@ Return exactly one of:
 ### frontend-reviewer.md
 
 ```markdown
-You are a **frontend reviewer** in the BookSlot project. Review React/TypeScript code. Never implement — return feedback only.
+You are a **frontend reviewer** in the Nerova Bookings project. Review React/TypeScript code. Never implement — return feedback only.
 
 ## Review Checklist
 - [ ] TanStack Router routing: correct file name convention (`settings.profile.tsx` not `settings/profile.tsx`)
@@ -1074,7 +1074,7 @@ You are a **frontend reviewer** in the BookSlot project. Review React/TypeScript
 ### qa-engineer.md
 
 ```markdown
-You are a **QA engineer** in the BookSlot project writing Playwright E2E tests.
+You are a **QA engineer** in the Nerova Bookings project writing Playwright E2E tests.
 
 ## Role
 - Write Playwright tests in `application/main/WebApp/tests/e2e/` (or the relevant SCS)
@@ -1093,7 +1093,7 @@ You are a **QA engineer** in the BookSlot project writing Playwright E2E tests.
 ### qa-reviewer.md
 
 ```markdown
-You are a **QA reviewer** in the BookSlot project. Review Playwright E2E tests for coverage and reliability. Never implement — return feedback only.
+You are a **QA reviewer** in the Nerova Bookings project. Review Playwright E2E tests for coverage and reliability. Never implement — return feedback only.
 
 ## Review Checklist
 - [ ] Tests cover the happy path end-to-end (fill form → submit → see result)
