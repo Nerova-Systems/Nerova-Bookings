@@ -29,30 +29,36 @@ public sealed record PaymentTransactionId(string Value) : StronglyTypedUlid<Paym
 
 public sealed class Subscription : AggregateRoot<SubscriptionId>, ITenantScopedEntity
 {
-    private Subscription(TenantId tenantId) : base(SubscriptionId.NewId())
+    private Subscription(TenantId tenantId, DateTimeOffset trialEndsAt) : base(SubscriptionId.NewId())
     {
         TenantId = tenantId;
-        Plan = SubscriptionPlan.Basis;
+        Status = SubscriptionStatus.Trial;
+        Plan = SubscriptionPlan.Trial;
+        TrialEndsAt = trialEndsAt;
         PaymentTransactions = ImmutableArray<PaymentTransaction>.Empty;
     }
+
+    public SubscriptionStatus Status { get; private set; }
 
     public SubscriptionPlan Plan { get; private set; }
 
     public SubscriptionPlan? ScheduledPlan { get; private set; }
 
-    public StripeCustomerId? StripeCustomerId { get; private set; }
+    public string? PayFastToken { get; private set; }
 
-    public StripeSubscriptionId? StripeSubscriptionId { get; private set; }
+    public string? PayFastPaymentId { get; private set; }
 
-    public decimal? CurrentPriceAmount { get; private set; }
+    public DateTimeOffset TrialEndsAt { get; private set; }
 
-    public string? CurrentPriceCurrency { get; private set; }
+    public DateTimeOffset? NextBillingDate { get; private set; }
+
+    public DateTimeOffset? CurrentPeriodStart { get; private set; }
 
     public DateTimeOffset? CurrentPeriodEnd { get; private set; }
 
-    public bool CancelAtPeriodEnd { get; private set; }
-
     public DateTimeOffset? FirstPaymentFailedAt { get; private set; }
+
+    public DateTimeOffset? CancelledAt { get; private set; }
 
     public CancellationReason? CancellationReason { get; private set; }
 
@@ -60,42 +66,11 @@ public sealed class Subscription : AggregateRoot<SubscriptionId>, ITenantScopedE
 
     public ImmutableArray<PaymentTransaction> PaymentTransactions { get; private set; }
 
-    public PaymentMethod? PaymentMethod { get; private set; }
-
-    public BillingInfo? BillingInfo { get; private set; }
-
     public TenantId TenantId { get; }
 
-    public static Subscription Create(TenantId tenantId)
+    public static Subscription Create(TenantId tenantId, DateTimeOffset now)
     {
-        return new Subscription(tenantId);
-    }
-
-    public void SetStripeCustomerId(StripeCustomerId stripeCustomerId)
-    {
-        StripeCustomerId = stripeCustomerId;
-    }
-
-    public void SetBillingInfo(BillingInfo? billingInfo)
-    {
-        BillingInfo = billingInfo;
-    }
-
-    public void SetStripeSubscription(StripeSubscriptionId? stripeSubscriptionId, SubscriptionPlan plan, decimal? currentPriceAmount, string? currentPriceCurrency, DateTimeOffset? currentPeriodEnd, PaymentMethod? paymentMethod)
-    {
-        StripeSubscriptionId = stripeSubscriptionId;
-        Plan = plan;
-        CurrentPriceAmount = currentPriceAmount;
-        CurrentPriceCurrency = currentPriceCurrency;
-        CurrentPeriodEnd = currentPeriodEnd;
-        PaymentMethod = paymentMethod;
-    }
-
-    public void SetCancellation(bool cancelAtPeriodEnd, CancellationReason? cancellationReason, string? cancellationFeedback)
-    {
-        CancelAtPeriodEnd = cancelAtPeriodEnd;
-        CancellationReason = cancellationReason;
-        CancellationFeedback = cancellationFeedback;
+        return new Subscription(tenantId, now.AddDays(30));
     }
 
     public void SetScheduledPlan(SubscriptionPlan? scheduledPlan)
@@ -108,11 +83,6 @@ public sealed class Subscription : AggregateRoot<SubscriptionId>, ITenantScopedE
         PaymentTransactions = paymentTransactions;
     }
 
-    public void SetPaymentMethod(PaymentMethod? paymentMethod)
-    {
-        PaymentMethod = paymentMethod;
-    }
-
     public void SetPaymentFailed(DateTimeOffset failedAt)
     {
         FirstPaymentFailedAt = failedAt;
@@ -123,41 +93,38 @@ public sealed class Subscription : AggregateRoot<SubscriptionId>, ITenantScopedE
         FirstPaymentFailedAt = null;
     }
 
-    public void ResetToFreePlan()
+    public void Activate(string? payFastToken, string payFastPaymentId, DateTimeOffset now)
     {
-        Plan = SubscriptionPlan.Basis;
-        ScheduledPlan = null;
-        StripeSubscriptionId = null;
-        CurrentPriceAmount = null;
-        CurrentPriceCurrency = null;
-        CurrentPeriodEnd = null;
-        CancelAtPeriodEnd = false;
+        Status = SubscriptionStatus.Active;
+        if (payFastToken is not null) PayFastToken = payFastToken;
+        PayFastPaymentId = payFastPaymentId;
+        NextBillingDate = now.AddDays(30);
+        CurrentPeriodStart = now;
+        CurrentPeriodEnd = now.AddDays(30);
         FirstPaymentFailedAt = null;
-        CancellationReason = null;
-        CancellationFeedback = null;
     }
 
-    public bool HasActiveStripeSubscription()
+    public void SetPastDue(DateTimeOffset failedAt)
     {
-        return StripeSubscriptionId is not null && Plan != SubscriptionPlan.Basis && !CancelAtPeriodEnd;
+        Status = SubscriptionStatus.PastDue;
+        FirstPaymentFailedAt = failedAt;
+    }
+
+    public void Cancel(CancellationReason? reason, string? feedback, DateTimeOffset now)
+    {
+        Status = SubscriptionStatus.Cancelled;
+        CancellationReason = reason;
+        CancellationFeedback = feedback;
+        CancelledAt = now;
+    }
+
+    public void Expire()
+    {
+        Status = SubscriptionStatus.Expired;
+        PayFastToken = null;
+        PayFastPaymentId = null;
     }
 }
-
-[PublicAPI]
-public sealed record BillingAddress(
-    string? Line1,
-    string? Line2,
-    string? PostalCode,
-    string? City,
-    string? State,
-    string? Country
-);
-
-[PublicAPI]
-public sealed record BillingInfo(string? Name, BillingAddress? Address, string? Email, string? TaxId);
-
-[PublicAPI]
-public sealed record PaymentMethod(string Brand, string Last4, int ExpMonth, int ExpYear);
 
 [PublicAPI]
 public sealed record PaymentTransaction(

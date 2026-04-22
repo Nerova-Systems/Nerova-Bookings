@@ -12,42 +12,29 @@ public sealed record SubscriptionResponse(
     SubscriptionId Id,
     SubscriptionPlan Plan,
     SubscriptionPlan? ScheduledPlan,
-    bool HasStripeCustomer,
-    bool HasStripeSubscription,
-    decimal? CurrentPriceAmount,
-    string? CurrentPriceCurrency,
+    SubscriptionStatus Status,
+    DateTimeOffset TrialEndsAt,
     DateTimeOffset? CurrentPeriodEnd,
-    bool CancelAtPeriodEnd,
-    bool IsPaymentFailed,
-    PaymentMethod? PaymentMethod,
-    BillingInfo? BillingInfo,
-    bool HasPendingStripeEvents
+    DateTimeOffset? NextBillingDate,
+    DateTimeOffset? CancelledAt
 );
 
-public sealed class GetCurrentSubscriptionHandler(ISubscriptionRepository subscriptionRepository, IStripeEventRepository stripeEventRepository)
+public sealed class GetCurrentSubscriptionHandler(ISubscriptionRepository subscriptionRepository)
     : IRequestHandler<GetCurrentSubscriptionQuery, Result<SubscriptionResponse>>
 {
     public async Task<Result<SubscriptionResponse>> Handle(GetCurrentSubscriptionQuery query, CancellationToken cancellationToken)
     {
         var subscription = await subscriptionRepository.GetCurrentAsync(cancellationToken);
 
-        var hasPendingStripeEvents = subscription.StripeCustomerId is not null
-                                     && await stripeEventRepository.HasPendingByStripeCustomerIdAsync(subscription.StripeCustomerId, cancellationToken);
-
         return new SubscriptionResponse(
             subscription.Id,
             subscription.Plan,
             subscription.ScheduledPlan,
-            subscription.StripeCustomerId is not null,
-            subscription.StripeSubscriptionId is not null,
-            subscription.CurrentPriceAmount,
-            subscription.CurrentPriceCurrency,
+            subscription.Status,
+            subscription.TrialEndsAt,
             subscription.CurrentPeriodEnd,
-            subscription.CancelAtPeriodEnd,
-            subscription.FirstPaymentFailedAt is not null,
-            subscription.PaymentMethod,
-            subscription.BillingInfo,
-            hasPendingStripeEvents
+            subscription.NextBillingDate,
+            subscription.CancelledAt
         );
     }
 }

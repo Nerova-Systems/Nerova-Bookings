@@ -21,10 +21,6 @@ public sealed class SubscriptionEndpoints : IEndpoints
             => await mediator.Send(query)
         ).Produces<SubscriptionResponse>();
 
-        group.MapGet("/checkout-preview", async Task<ApiResult<CheckoutPreviewResponse>> ([AsParameters] GetCheckoutPreviewQuery query, IMediator mediator)
-            => await mediator.Send(query)
-        ).Produces<CheckoutPreviewResponse>();
-
         group.MapGet("/subscribe-preview", async Task<ApiResult<SubscribePreviewResponse>> ([AsParameters] GetSubscribePreviewQuery query, IMediator mediator)
             => await mediator.Send(query)
         ).Produces<SubscribePreviewResponse>();
@@ -33,19 +29,15 @@ public sealed class SubscriptionEndpoints : IEndpoints
             => await mediator.Send(query)
         ).Produces<UpgradePreviewResponse>();
 
-        group.MapPost("/start-checkout", async Task<ApiResult<StartSubscriptionCheckoutResponse>> (StartSubscriptionCheckoutCommand command, IMediator mediator)
+        group.MapPost("/upgrade", async Task<ApiResult> (UpgradeSubscriptionCommand command, IMediator mediator)
             => await mediator.Send(command)
-        ).Produces<StartSubscriptionCheckoutResponse>();
-
-        group.MapPost("/upgrade", async Task<ApiResult<UpgradeSubscriptionResponse>> (UpgradeSubscriptionCommand command, IMediator mediator)
-            => await mediator.Send(command)
-        ).Produces<UpgradeSubscriptionResponse>();
+        );
 
         group.MapPost("/schedule-downgrade", async Task<ApiResult> (ScheduleDowngradeCommand command, IMediator mediator)
             => await mediator.Send(command)
         );
 
-        group.MapPost("/cancel-downgrade", async Task<ApiResult> (IMediator mediator)
+        group.MapPost("/cancel-scheduled-downgrade", async Task<ApiResult> (IMediator mediator)
             => await mediator.Send(new CancelScheduledDowngradeCommand())
         );
 
@@ -56,9 +48,5 @@ public sealed class SubscriptionEndpoints : IEndpoints
         group.MapPost("/reactivate", async Task<ApiResult<ReactivateSubscriptionResponse>> (IMediator mediator)
             => await mediator.Send(new ReactivateSubscriptionCommand())
         ).Produces<ReactivateSubscriptionResponse>();
-
-        group.MapPost("/process-pending-events", async Task<ApiResult> (IMediator mediator)
-            => await mediator.Send(new ProcessPendingEventsCommand())
-        );
     }
 }

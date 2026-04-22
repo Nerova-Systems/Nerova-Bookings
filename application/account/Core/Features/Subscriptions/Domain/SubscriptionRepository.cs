@@ -11,13 +11,6 @@ public interface ISubscriptionRepository : ICrudRepository<Subscription, Subscri
     Task<Subscription> GetCurrentAsync(CancellationToken cancellationToken);
 
     /// <summary>
-    ///     Retrieves a subscription by Stripe customer ID with pessimistic locking (FOR UPDATE).
-    ///     This method should only be used in webhook processing to serialize with user-action commands.
-    ///     This method bypasses tenant query filters since webhooks have no tenant context.
-    /// </summary>
-    Task<Subscription?> GetByStripeCustomerIdWithLockUnfilteredAsync(StripeCustomerId stripeCustomerId, CancellationToken cancellationToken);
-
-    /// <summary>
     ///     Retrieves a subscription by tenant ID without applying tenant query filters.
     ///     This method is used when tenant context is not available (e.g., during signup token creation).
     /// </summary>
@@ -31,24 +24,6 @@ internal sealed class SubscriptionRepository(AccountDbContext accountDbContext, 
     {
         ArgumentNullException.ThrowIfNull(executionContext.TenantId);
         return await DbSet.SingleAsync(s => s.TenantId == executionContext.TenantId, cancellationToken);
-    }
-
-    /// <summary>
-    ///     Retrieves a subscription by Stripe customer ID with pessimistic locking (FOR UPDATE).
-    ///     This method should only be used in webhook processing to serialize with user-action commands.
-    ///     This method bypasses tenant query filters since webhooks have no tenant context.
-    /// </summary>
-    public async Task<Subscription?> GetByStripeCustomerIdWithLockUnfilteredAsync(StripeCustomerId stripeCustomerId, CancellationToken cancellationToken)
-    {
-        if (accountDbContext.Database.ProviderName is "Microsoft.EntityFrameworkCore.Sqlite")
-        {
-            return await DbSet.IgnoreQueryFilters().SingleOrDefaultAsync(s => s.StripeCustomerId == stripeCustomerId, cancellationToken);
-        }
-
-        return await DbSet
-            .FromSqlInterpolated($"SELECT * FROM subscriptions WHERE stripe_customer_id = {stripeCustomerId.Value} FOR UPDATE")
-            .IgnoreQueryFilters()
-            .SingleOrDefaultAsync(cancellationToken);
     }
 
     public async Task<Subscription?> GetByTenantIdUnfilteredAsync(TenantId tenantId, CancellationToken cancellationToken)

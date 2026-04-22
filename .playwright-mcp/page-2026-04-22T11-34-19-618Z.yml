@@ -1,0 +1,1843 @@
+- generic [ref=e3]:
+  - banner [ref=e4]:
+    - generic [ref=e7]:
+      - generic [ref=e8]:
+        - button [ref=e10] [cursor=pointer]:
+          - generic [ref=e12]: 󰍜
+        - link "Payfast by Network" [ref=e14] [cursor=pointer]:
+          - /url: https://payfast.io
+          - img "Payfast by Network" [ref=e15]
+        - generic [ref=e19]: Docs
+      - generic [ref=e21]:
+        - text: 󰍉 󰍝
+        - generic [ref=e22]:
+          - link "Docs" [ref=e23] [cursor=pointer]:
+            - /url: /api
+            - generic [ref=e25]: API Ref
+          - link "Support" [ref=e26] [cursor=pointer]:
+            - /url: https://support.payfast.co.za/
+            - generic [ref=e28]: Support
+          - link "Register" [ref=e29] [cursor=pointer]:
+            - /url: https://registration.payfast.io
+            - generic [ref=e30]: Sign Up
+  - main [ref=e31]:
+    - generic [ref=e33]:
+      - generic [ref=e35]:
+        - alert [ref=e36]:
+          - generic [ref=e37]:
+            - generic [ref=e38]: 󰋼
+            - generic [ref=e40]:
+              - text: "Gateway Developer Documentation: If you are looking for Dev Docs related to Paygate please see"
+              - link "here" [ref=e41] [cursor=pointer]:
+                - /url: https://docs.paygate.co.za/
+              - text: .
+        - generic [ref=e42]:
+          - heading "Documentation" [level=1] [ref=e43]
+          - text: Quickly integrate Payfast into your platform.
+        - generic [ref=e44]:
+          - generic [ref=e45]:
+            - generic [ref=e47]:
+              - link [ref=e49] [cursor=pointer]:
+                - /url: "#quickstart"
+                - img [ref=e51]
+              - heading "Custom Integration" [level=3] [ref=e54]:
+                - link "Custom Integration" [ref=e55] [cursor=pointer]:
+                  - /url: "#quickstart"
+            - generic [ref=e57]:
+              - paragraph [ref=e58]:
+                - text: Build a checkout form and receive payments
+                - text: securely from our payment platform.
+              - link "Simple integration" [ref=e59] [cursor=pointer]:
+                - /url: "#quickstart"
+              - link "Create security signature" [ref=e60] [cursor=pointer]:
+                - /url: "#step_2_signature"
+              - link "Pay with Payfast" [ref=e61] [cursor=pointer]:
+                - /url: "#step_3_pay_on_payfast"
+              - link "Confirm payment" [ref=e62] [cursor=pointer]:
+                - /url: "#step_4_confirm_payment"
+          - generic [ref=e63]:
+            - generic [ref=e65]:
+              - link [ref=e67] [cursor=pointer]:
+                - /url: api#introduction
+                - img [ref=e69]
+              - heading "APIs" [level=3] [ref=e72]:
+                - link "APIs" [ref=e73] [cursor=pointer]:
+                  - /url: api#introduction
+            - generic [ref=e75]:
+              - paragraph [ref=e76]: Server-to-server integration.
+              - link "Authentication" [ref=e77] [cursor=pointer]:
+                - /url: api#authentication
+              - link "Error handling" [ref=e78] [cursor=pointer]:
+                - /url: api#errors
+              - link "Recurring Billing" [ref=e79] [cursor=pointer]:
+                - /url: api#recurring-billing
+              - link "View all" [ref=e80] [cursor=pointer]:
+                - /url: api#introduction
+          - generic [ref=e81]:
+            - generic [ref=e83]:
+              - link [ref=e85] [cursor=pointer]:
+                - /url: "#onsite_payments"
+                - img [ref=e87]
+              - heading "Onsite Payments" [level=3] [ref=e90]:
+                - link "Onsite Payments" [ref=e91] [cursor=pointer]:
+                  - /url: "#onsite_payments"
+            - generic [ref=e93]:
+              - text: Receive payments without redirecting customers
+              - text: away from your website.
+          - generic [ref=e94]:
+            - generic [ref=e96]:
+              - link [ref=e98] [cursor=pointer]:
+                - /url: "#recurring_billing"
+                - img [ref=e100]
+              - heading "Recurring Billing" [level=3] [ref=e103]:
+                - link "Recurring Billing" [ref=e104] [cursor=pointer]:
+                  - /url: "#recurring_billing"
+            - generic [ref=e106]:
+              - paragraph [ref=e107]: Enable subscription and tokenization payments.
+              - link "Subscriptions" [ref=e108] [cursor=pointer]:
+                - /url: "#subscriptions"
+              - link "Tokenization" [ref=e109] [cursor=pointer]:
+                - /url: "#tokenization"
+              - link "Additional methods of integrating" [ref=e110] [cursor=pointer]:
+                - /url: "#recurring_functionality"
+          - generic [ref=e111]:
+            - generic [ref=e113]:
+              - link [ref=e115] [cursor=pointer]:
+                - /url: https://payfast.io/integration/pay-now-buttons
+                - img [ref=e117]
+              - heading "Pay Now Button" [level=3] [ref=e121]:
+                - link "Pay Now Button" [ref=e122] [cursor=pointer]:
+                  - /url: https://payfast.io/integration/pay-now-buttons
+            - generic [ref=e123]: Generate Pay Now HTML button code.
+          - generic [ref=e124]:
+            - generic [ref=e126]:
+              - link [ref=e128] [cursor=pointer]:
+                - /url: https://payfast.io/integration/shopping-carts
+                - img [ref=e130]
+              - heading "Shopping Carts" [level=3] [ref=e133]:
+                - link "Shopping Carts" [ref=e134] [cursor=pointer]:
+                  - /url: https://payfast.io/integration/shopping-carts
+            - generic [ref=e135]: Choose from one of our many plugins.
+      - generic [ref=e136]:
+        - generic [ref=e137]:
+          - generic [ref=e138]:
+            - img [ref=e141]
+            - heading "Custom Payment Integration" [level=1] [ref=e144]
+          - paragraph [ref=e145]:
+            - text: Build a checkout form and receive payments securely from our payment platform.
+            - text: This process can be used for both one-time and recurring payments.
+        - generic [ref=e146]:
+          - paragraph [ref=e148]:
+            - text: "Live: https://www.payfast.co.za/eng/process"
+            - text: "Sandbox: https://sandbox.payfast.co.za/eng/process"
+          - alert [ref=e149]:
+            - generic [ref=e150]:
+              - generic [ref=e151]: 󰋼
+              - generic [ref=e153]:
+                - text: "Quick start: It is recommended that you create your own"
+                - link "Sandbox" [ref=e154] [cursor=pointer]:
+                  - /url: "#sandbox"
+                - text: account to test your integration.
+          - iframe [ref=e157]:
+            - generic [active] [ref=f1e1]:
+              - generic "YouTube Video Player" [ref=f1e3]
+              - generic [ref=f1e5]:
+                - generic:
+                  - generic:
+                    - button "Play video" [ref=f1e10] [cursor=pointer]
+                    - button "Hide player controls" [ref=f1e12] [cursor=pointer]
+                    - generic [ref=f1e14]:
+                      - generic [ref=f1e19]:
+                        - generic [ref=f1e20]:
+                          - link "PayFast Custom Integration" [ref=f1e21] [cursor=pointer]:
+                            - /url: https://www.youtube.com/watch?v=aEb_v5OjQX4
+                          - link "Payfast by Network" [ref=f1e22] [cursor=pointer]:
+                            - /url: /channel/UCtzv3KZ2uWomwuM_pqyEW8A
+                            - generic [ref=f1e23]: Payfast by Network
+                        - generic [ref=f1e24]:
+                          - button [ref=f1e25] [cursor=pointer]
+                          - generic [ref=f1e27]:
+                            - generic: Payfast by Network
+                            - generic: 1.13K subscribers
+                      - generic [ref=f1e28]:
+                        - button "Share" [ref=f1e31] [cursor=pointer]:
+                          - generic [ref=f1e35]:
+                            - img
+                        - link "Watch on YouTube" [ref=f1e42] [cursor=pointer]:
+                          - /url: https://www.youtube.com/watch?v=aEb_v5OjQX4
+                          - generic [ref=f1e45]:
+                            - text: Watch on
+                            - img [ref=f1e47]:
+                              - generic [ref=f1e49]:
+                                - img
+        - generic [ref=e161]:
+          - generic [ref=e162]:
+            - heading "Simple Form Integration" [level=5] [ref=e164]
+            - button "󱀲" [ref=e165] [cursor=pointer]
+          - code [ref=e168]:
+            - generic [ref=e169]:
+              - generic [ref=e170]: <form
+              - text: action
+              - generic [ref=e171]: ="https://www.payfast.co.za/eng/process"
+              - text: method
+              - generic [ref=e172]: ="post"
+              - text: ">"
+            - generic [ref=e173]:
+              - generic [ref=e174]: <input
+              - text: type
+              - generic [ref=e175]: ="hidden"
+              - text: name
+              - generic [ref=e176]: ="merchant_id"
+              - text: value
+              - generic [ref=e177]: ="10000100"
+              - text: ">"
+            - generic [ref=e178]:
+              - generic [ref=e179]: <input
+              - text: type
+              - generic [ref=e180]: ="hidden"
+              - text: name
+              - generic [ref=e181]: ="merchant_key"
+              - text: value
+              - generic [ref=e182]: ="46f0cd694581a"
+              - text: ">"
+            - generic [ref=e183]:
+              - generic [ref=e184]: <input
+              - text: type
+              - generic [ref=e185]: ="hidden"
+              - text: name
+              - generic [ref=e186]: ="amount"
+              - text: value
+              - generic [ref=e187]: ="100.00"
+              - text: ">"
+            - generic [ref=e188]:
+              - generic [ref=e189]: <input
+              - text: type
+              - generic [ref=e190]: ="hidden"
+              - text: name
+              - generic [ref=e191]: ="item_name"
+              - text: value
+              - generic [ref=e192]: ="Test Product"
+              - text: ">"
+            - generic [ref=e193]:
+              - generic [ref=e194]: <input
+              - text: type
+              - generic [ref=e195]: ="submit"
+              - text: ">"
+            - generic [ref=e196]:
+              - generic [ref=e197]: </form
+              - text: ">"
+        - generic [ref=e198]:
+          - separator [ref=e199]
+          - generic [ref=e200]:
+            - generic [ref=e201]:
+              - 'heading "Step 1: Create your checkout form" [level=2] [ref=e202]'
+              - generic [ref=e203]: Create a checkout page with an HTML form, usually hidden, with a number of fields containing all the necessary information needed for Payfast to process the payment. Most shopping cart platforms will have the customer click on a ‘Confirm Order’ or ‘Pay Now’ button to submit the form and be redirected to the Payfast Payment page.
+              - generic [ref=e204]:
+                - heading "Merchant details" [level=3] [ref=e205]
+                - generic [ref=e207]:
+                  - generic [ref=e208]:
+                    - generic [ref=e210]: merchant_id
+                    - text: integer, 8 charREQUIRED
+                  - generic [ref=e211]: The Merchant ID as given by the Payfast system. Used to uniquely identify the receiving account. This can be found on the merchant’s settings page.
+                - generic [ref=e213]:
+                  - generic [ref=e214]:
+                    - generic [ref=e216]: merchant_key
+                    - text: stringREQUIRED
+                  - generic [ref=e217]: The Merchant Key as given by the Payfast system. Used to uniquely identify the receiving account. This provides an extra level of certainty concerning the correct account as both the ID and the Key must be correct in order for the transaction to proceed. This can be found on the merchant’s settings page.
+                - generic [ref=e219]:
+                  - generic [ref=e220]:
+                    - generic [ref=e222]: return_url
+                    - text: string, no char limitOPTIONAL
+                  - generic [ref=e223]: The URL where the user is returned to after payment has been successfully taken.
+                - generic [ref=e225]:
+                  - generic [ref=e226]:
+                    - generic [ref=e228]: cancel_url
+                    - text: string, no char limitOPTIONAL
+                  - generic [ref=e229]: The URL where the user should be redirected should they choose to cancel their payment while on the Payfast system.
+                - generic [ref=e231]:
+                  - generic [ref=e232]:
+                    - generic [ref=e234]: notify_url
+                    - text: string, no char limitOPTIONAL
+                  - generic [ref=e235]:
+                    - text: The URL which is used by Payfast to post the
+                    - link "Instant Transaction Notifications" [ref=e236] [cursor=pointer]:
+                      - /url: /docs#step_4_confirm_payment
+                    - text: (ITNs) for this transaction.
+                - generic [ref=e238]:
+                  - generic [ref=e239]:
+                    - generic [ref=e241]: fica_idnumber
+                    - text: integer, 13 charOPTIONAL
+                  - generic [ref=e242]: The Fica ID Number provided of the buyer must be a valid South African ID Number.
+              - alert [ref=e243]:
+                - generic [ref=e244]:
+                  - generic [ref=e245]: 󰋼
+                  - generic [ref=e246]: For the notify_url mentioned, a variable can be specified globally on the Merchant’s Payfast account or overridden on a per transaction basis. The value provided during a transaction overrides the global setting.
+            - generic [ref=e250]:
+              - generic [ref=e251]:
+                - heading "Merchant Details" [level=5] [ref=e253]
+                - button "󱀲" [ref=e254] [cursor=pointer]
+              - code [ref=e257]:
+                - generic [ref=e258]:
+                  - generic [ref=e259]: <input
+                  - text: type
+                  - generic [ref=e260]: ="hidden"
+                  - text: name
+                  - generic [ref=e261]: ="merchant_id"
+                  - text: value
+                  - generic [ref=e262]: ="10000100"
+                  - text: ">"
+                - generic [ref=e263]:
+                  - generic [ref=e264]: <input
+                  - text: type
+                  - generic [ref=e265]: ="hidden"
+                  - text: name
+                  - generic [ref=e266]: ="merchant_key"
+                  - text: value
+                  - generic [ref=e267]: ="46f0cd694581a"
+                  - text: ">"
+                - generic [ref=e268]:
+                  - generic [ref=e269]: <input
+                  - text: type
+                  - generic [ref=e270]: ="hidden"
+                  - text: name
+                  - generic [ref=e271]: ="return_url"
+                  - text: value
+                  - generic [ref=e272]: ="https://www.example.com/success"
+                  - text: ">"
+                - generic [ref=e273]:
+                  - generic [ref=e274]: <input
+                  - text: type
+                  - generic [ref=e275]: ="hidden"
+                  - text: name
+                  - generic [ref=e276]: ="cancel_url"
+                  - text: value
+                  - generic [ref=e277]: ="https://www.example.com/cancel"
+                  - text: ">"
+                - generic [ref=e278]:
+                  - generic [ref=e279]: <input
+                  - text: type
+                  - generic [ref=e280]: ="hidden"
+                  - text: name
+                  - generic [ref=e281]: ="notify_url"
+                  - text: value
+                  - generic [ref=e282]: ="https://www.example.com/notify"
+                  - text: ">"
+            - generic [ref=e284]:
+              - heading "Customer details" [level=3] [ref=e285]
+              - generic [ref=e287]:
+                - generic [ref=e288]:
+                  - generic [ref=e290]: name_first
+                  - text: string, 100 char OPTIONAL
+                - generic [ref=e291]: The customer’s first name.
+              - generic [ref=e293]:
+                - generic [ref=e294]:
+                  - generic [ref=e296]: name_last
+                  - text: string, 100 char OPTIONAL
+                - generic [ref=e297]: The customer’s last name.
+              - generic [ref=e299]:
+                - generic [ref=e300]:
+                  - generic [ref=e302]: email_address
+                  - text: string, 100 char OPTIONAL
+                - generic [ref=e303]: The customer’s email address.
+              - generic [ref=e305]:
+                - generic [ref=e306]:
+                  - generic [ref=e308]: cell_number
+                  - text: string, 100 char OPTIONAL
+                - generic [ref=e309]: The customer’s valid cell number. If the email_address field is empty, and cell_number provided, the system will use the cell_number as the username and auto login the user, if they do not have a registered account
+            - generic [ref=e313]:
+              - generic [ref=e314]:
+                - heading "Customer Details" [level=5] [ref=e316]
+                - button "󱀲" [ref=e317] [cursor=pointer]
+              - code [ref=e320]:
+                - generic [ref=e321]:
+                  - generic [ref=e322]: <input
+                  - text: type
+                  - generic [ref=e323]: ="hidden"
+                  - text: name
+                  - generic [ref=e324]: ="name_first"
+                  - text: value
+                  - generic [ref=e325]: ="John"
+                  - text: ">"
+                - generic [ref=e326]:
+                  - generic [ref=e327]: <input
+                  - text: type
+                  - generic [ref=e328]: ="hidden"
+                  - text: name
+                  - generic [ref=e329]: ="name_last"
+                  - text: value
+                  - generic [ref=e330]: ="Doe"
+                  - text: ">"
+                - generic [ref=e331]:
+                  - generic [ref=e332]: <input
+                  - text: type
+                  - generic [ref=e333]: ="hidden"
+                  - text: name
+                  - generic [ref=e334]: ="email_address"
+                  - text: value
+                  - generic [ref=e335]: ="john@doe.com"
+                  - text: ">"
+                - generic [ref=e336]:
+                  - generic [ref=e337]: <input
+                  - text: type
+                  - generic [ref=e338]: ="hidden"
+                  - text: name
+                  - generic [ref=e339]: ="cell_number"
+                  - text: value
+                  - generic [ref=e340]: ="0823456789"
+                  - text: ">"
+            - generic [ref=e342]:
+              - heading "Transaction details" [level=3] [ref=e343]
+              - generic [ref=e345]:
+                - generic [ref=e346]:
+                  - generic [ref=e348]: m_payment_id
+                  - text: string, 100 char OPTIONAL
+                - generic [ref=e349]: Unique payment ID on the merchant’s system.
+              - generic [ref=e351]:
+                - generic [ref=e352]:
+                  - generic [ref=e354]: amount
+                  - text: decimalREQUIRED
+                - generic [ref=e355]: The amount which the payer must pay in ZAR.
+              - generic [ref=e357]:
+                - generic [ref=e358]:
+                  - generic [ref=e360]: item_name
+                  - text: string, 100 char REQUIRED
+                - generic [ref=e361]: The name of the item being charged for, or in the case of multiple items the order number.
+              - generic [ref=e363]:
+                - generic [ref=e364]:
+                  - generic [ref=e366]: item_description
+                  - text: string, 255 char OPTIONAL
+                - generic [ref=e367]: The description of the item being charged for, or in the case of multiple items the order description.
+              - generic [ref=e369]:
+                - generic [ref=e370]:
+                  - generic [ref=e372]: custom_int<1..5>
+                  - text: integer, 255 charOPTIONAL
+                - generic [ref=e373]:
+                  - text: A series of 5 custom integer variables
+                  - emphasis [ref=e374]: (custom_int1, custom_int2…)
+                  - text: which can be used by the merchant as pass-through variables. They will be posted back to the merchant at the completion of the transaction.
+              - generic [ref=e376]:
+                - generic [ref=e377]:
+                  - generic [ref=e379]: custom_str<1..5>
+                  - text: string, 255 char OPTIONAL
+                - generic [ref=e380]:
+                  - text: A series of 5 custom string variables
+                  - emphasis [ref=e381]: (custom_str1, custom_str2…)
+                  - text: which can be used by the merchant as pass-through variables. They will be posted back to the merchant at the completion of the transaction.
+            - generic [ref=e385]:
+              - generic [ref=e386]:
+                - heading "Transaction Details" [level=5] [ref=e388]
+                - button "󱀲" [ref=e389] [cursor=pointer]
+              - code [ref=e392]:
+                - generic [ref=e393]:
+                  - generic [ref=e394]: <input
+                  - text: type
+                  - generic [ref=e395]: ="hidden"
+                  - text: name
+                  - generic [ref=e396]: ="m_payment_id"
+                  - text: value
+                  - generic [ref=e397]: ="01AB"
+                  - text: ">"
+                - generic [ref=e398]:
+                  - generic [ref=e399]: <input
+                  - text: type
+                  - generic [ref=e400]: ="hidden"
+                  - text: name
+                  - generic [ref=e401]: ="amount"
+                  - text: value
+                  - generic [ref=e402]: ="100.00"
+                  - text: ">"
+                - generic [ref=e403]:
+                  - generic [ref=e404]: <input
+                  - text: type
+                  - generic [ref=e405]: ="hidden"
+                  - text: name
+                  - generic [ref=e406]: ="item_name"
+                  - text: value
+                  - generic [ref=e407]: ="Test Item"
+                  - text: ">"
+                - generic [ref=e408]:
+                  - generic [ref=e409]: <input
+                  - text: type
+                  - generic [ref=e410]: ="hidden"
+                  - text: name
+                  - generic [ref=e411]: ="item_description"
+                  - text: value
+                  - generic [ref=e412]: ="A test product"
+                  - text: ">"
+                - generic [ref=e413]:
+                  - generic [ref=e414]: <input
+                  - text: type
+                  - generic [ref=e415]: ="hidden"
+                  - text: name
+                  - generic [ref=e416]: ="custom_int1"
+                  - text: value
+                  - generic [ref=e417]: ="2"
+                  - text: ">"
+                - generic [ref=e418]:
+                  - generic [ref=e419]: <input
+                  - text: type
+                  - generic [ref=e420]: ="hidden"
+                  - text: name
+                  - generic [ref=e421]: ="custom_str1"
+                  - text: value
+                  - generic [ref=e422]: ="Extra order information"
+                  - text: ">"
+            - generic [ref=e424]:
+              - heading "Transaction options" [level=3] [ref=e425]
+              - generic [ref=e427]:
+                - generic [ref=e428]:
+                  - generic [ref=e430]: email_confirmation
+                  - text: boolean, 1 charOPTIONAL
+                - generic [ref=e431]: Whether to send an email confirmation to the merchant of the transaction. The email confirmation is automatically sent to the payer. 1 = on, 0 = off
+              - generic [ref=e433]:
+                - generic [ref=e434]:
+                  - generic [ref=e436]: confirmation_address
+                  - text: string, 100 charOPTIONAL
+                - generic [ref=e437]: The email address to send the confirmation email to. This value can be set globally on your account. Using this field will override the value set in your account for this transaction.
+            - generic [ref=e441]:
+              - generic [ref=e442]:
+                - heading "Transaction Options" [level=5] [ref=e444]
+                - button "󱀲" [ref=e445] [cursor=pointer]
+              - code [ref=e448]:
+                - generic [ref=e449]:
+                  - generic [ref=e450]: <input
+                  - text: type
+                  - generic [ref=e451]: ="hidden"
+                  - text: name
+                  - generic [ref=e452]: ="email_confirmation"
+                  - text: value
+                  - generic [ref=e453]: ="1"
+                  - text: ">"
+                - generic [ref=e454]:
+                  - generic [ref=e455]: <input
+                  - text: type
+                  - generic [ref=e456]: ="hidden"
+                  - text: name
+                  - generic [ref=e457]: ="confirmation_address"
+                  - text: value
+                  - generic [ref=e458]: ="john@doe.com"
+                  - text: ">"
+            - generic [ref=e460]:
+              - heading "Payment methods" [level=3] [ref=e461]
+              - generic [ref=e463]:
+                - generic [ref=e464]:
+                  - generic [ref=e466]: payment_method
+                  - text: string, 3 char OPTIONAL
+                - generic [ref=e467]:
+                  - text: When this field is set, only the SINGLE payment method specified can be used when the customer reaches Payfast. If this field is blank, or not included, then all available payment methods will be shown.
+                  - text: "The values are as follows:"
+                  - list [ref=e468]:
+                    - listitem [ref=e469]: ‘ef’ – EFT
+                    - listitem [ref=e470]: ‘cc’ – Credit card
+                    - listitem [ref=e471]: ‘dc’ – Debit card
+                    - listitem [ref=e472]: ’mp’ – Masterpass Scan to Pay
+                    - listitem [ref=e473]: ‘mc’ – Mobicred
+                    - listitem [ref=e474]: ‘sc’ – SCode
+                    - listitem [ref=e475]: ‘ss’ – SnapScan
+                    - listitem [ref=e476]: ‘zp’ – Zapper
+                    - listitem [ref=e477]: ‘mt’ – MoreTyme
+                    - listitem [ref=e478]: ‘rc’ – Store card
+                    - listitem [ref=e479]: ‘mu’ – Mukuru
+                    - listitem [ref=e480]: ‘ap’ – Apple Pay
+                    - listitem [ref=e481]: ‘sp’ – Samsung Pay
+                    - listitem [ref=e482]: ‘cp’ – Capitec Pay
+                    - listitem [ref=e483]: ‘ab’ – Absa Pay
+                    - listitem [ref=e484]: ‘gp’ – Google Pay
+                    - listitem [ref=e485]: ‘nd’ – Nedbank Direct EFT
+                    - listitem [ref=e486]: ‘pf’ – Payflex. Buy Now, Pay Later
+            - generic [ref=e490]:
+              - generic [ref=e491]:
+                - heading "Payment Methods" [level=5] [ref=e493]
+                - button "󱀲" [ref=e494] [cursor=pointer]
+              - code [ref=e497]:
+                - generic [ref=e498]:
+                  - generic [ref=e499]: <input
+                  - text: type
+                  - generic [ref=e500]: ="hidden"
+                  - text: name
+                  - generic [ref=e501]: ="payment_method"
+                  - text: value
+                  - generic [ref=e502]: ="cc"
+                  - text: ">"
+            - generic [ref=e504]:
+              - heading "Recurring Billing and Split Payment form options" [level=3] [ref=e505]
+              - paragraph [ref=e506]:
+                - link "(See Recurring Billing subscriptions and Split Payments for additional fields)" [ref=e507] [cursor=pointer]:
+                  - /url: /docs#subscriptions
+          - generic [ref=e508]:
+            - generic [ref=e509]:
+              - 'heading "Step 2: Create security signature" [level=2] [ref=e510]'
+              - generic [ref=e511]: A generated MD5 signature must be passed as an additional hidden input and this hash is then used to ensure the integrity of the data transfer.
+            - generic [ref=e515]:
+              - generic [ref=e516]:
+                - heading "Security Signature" [level=5] [ref=e518]
+                - button "󱀲" [ref=e519] [cursor=pointer]
+              - code [ref=e522]:
+                - generic [ref=e523]:
+                  - generic [ref=e524]: <input
+                  - text: type
+                  - generic [ref=e525]: ="hidden"
+                  - text: name
+                  - generic [ref=e526]: ="signature"
+                  - text: value
+                  - generic [ref=e527]: ="f103e22c0418655fb03991538c51bfd5"
+                  - text: ">"
+            - generic [ref=e528]:
+              - generic [ref=e529]:
+                - heading "To generate the signature:" [level=3] [ref=e530]
+                - paragraph [ref=e531]:
+                  - text: "1."
+                  - strong [ref=e532]: Concatenation of the name value pairs of all the non-blank variables with ‘&’ used as a separator
+              - alert [ref=e533]:
+                - generic [ref=e537]:
+                  - text: "Variable order: The pairs must be listed in the order in which they appear in the attributes description. eg. name_first=John&name_last=Doe&email_address=…"
+                  - emphasis [ref=e538]: "* Do not use the API signature format, which uses alphabetical ordering!"
+              - generic [ref=e539]:
+                - paragraph [ref=e540]:
+                  - text: "2."
+                  - strong [ref=e541]: Add your passphrase
+                  - text: The passphrase is an extra security feature, used as a ‘salt’, and is set by the Merchant in the Settings section of their Payfast Dashboard.
+                  - text: Add the passphrase to the end of the below string.
+                  - emphasis [ref=e542]: E.g. name_first=John&name_last=Doe&email_address=…&passphrase=...
+                  - text: The resultant URL encoding must be in upper case (eg. http%3A%2F%2F), and spaces encoded as ‘+’.
+                - paragraph [ref=e543]:
+                  - text: "3."
+                  - strong [ref=e544]: MD5 the parameter string and pass it as a hidden input named “signature”
+              - alert [ref=e545]:
+                - generic [ref=e549]:
+                  - text: "Troubleshooting: For troubleshooting signature mismatch issues check out our knowledge base"
+                  - link "Common causes of a failed integration / signature mismatch" [ref=e550] [cursor=pointer]:
+                    - /url: https://support.payfast.co.za/portal/en/kb/articles/common-causes-of-a-failed-integration-signature-mismatch
+            - generic [ref=e554]:
+              - generic [ref=e555]:
+                - heading "Signature generation" [level=5] [ref=e557]
+                - button "Select library 󰕏" [ref=e560] [cursor=pointer]:
+                  - generic [ref=e561]:
+                    - generic: Select library
+                    - textbox "Select library" [ref=e563]
+                    - generic [ref=e565]: 󰕏
+                - button "󱀲" [ref=e568] [cursor=pointer]
+              - code [ref=e571]:
+                - generic [ref=e572]: "<?php /** * @param array $data * @param null $passPhrase * @return string */ function generateSignature($data, $passPhrase = null) { // Create parameter string $pfOutput = ''; foreach( $data as $key => $val ) { if($val !== '') { $pfOutput .= $key .'='. urlencode( trim( $val ) ) .'&'; } } // Remove last ampersand $getString = substr( $pfOutput, 0, -1 ); if( $passPhrase !== null ) { $getString .= '&passphrase='. urlencode( trim( $passPhrase ) ); } return md5( $getString ); }"
+          - generic [ref=e573]:
+            - generic [ref=e574]:
+              - 'heading "Step 3: Send the customer to Payfast for payment" [level=2] [ref=e575]'
+              - generic [ref=e576]:
+                - text: On submission of your form, your customers will be redirected to the secure Payfast payments page.
+                - text: Your form should be setup to post to either Payfast's live URL or the Sandbox for testing.
+            - generic [ref=e580]:
+              - generic [ref=e581]:
+                - heading "Full form implementation" [level=5] [ref=e583]
+                - button "Select library 󰕏" [ref=e586] [cursor=pointer]:
+                  - generic [ref=e587]:
+                    - generic: Select library
+                    - textbox "Select library" [ref=e589]
+                    - generic [ref=e591]: 󰕏
+                - button "󱀲" [ref=e594] [cursor=pointer]
+              - code [ref=e597]:
+                - generic [ref=e598]: "<?php // Construct variables $cartTotal = 10.00; // This amount needs to be sourced from your application $passphrase = 'jt7NOE43FZPn'; $data = array( // Merchant details 'merchant_id' => '10000100', 'merchant_key' => '46f0cd694581a', 'return_url' => 'http://www.yourdomain.co.za/return.php', 'cancel_url' => 'http://www.yourdomain.co.za/cancel.php', 'notify_url' => 'http://www.yourdomain.co.za/notify.php', // Buyer details 'name_first' => 'First Name', 'name_last' => 'Last Name', 'email_address'=> 'test@test.com', // Transaction details 'm_payment_id' => '1234', //Unique payment ID to pass through to notify_url 'amount' => number_format( sprintf( '%.2f', $cartTotal ), 2, '.', '' ), 'item_name' => 'Order#123' ); $signature = generateSignature($data, $passphrase); $data['signature'] = $signature; // If in testing mode make use of either sandbox.payfast.co.za or www.payfast.co.za $testingMode = true; $pfHost = $testingMode ? 'sandbox.payfast.co.za' : 'www.payfast.co.za'; $htmlForm = '<form action=\"https://'.$pfHost.'/eng/process\" method=\"post\">'; foreach($data as $name=> $value) { $htmlForm .= '<input name=\"'.$name.'\" type=\"hidden\" value=\\''.$value.'\\' />'; } $htmlForm .= '<input type=\"submit\" value=\"Pay Now\" /></form>'; echo $htmlForm;"
+          - generic [ref=e599]:
+            - generic [ref=e600]:
+              - 'heading "Step 4: Confirm payment is successful" [level=2] [ref=e601]'
+              - generic [ref=e602]: Before the customer is returned to the URL you specified in the “return_url” parameter, Payfast will send a notification to your “notify_url” page.
+            - generic [ref=e603]:
+              - generic [ref=e604]:
+                - heading "4.1. Setting up your notification page:" [level=3] [ref=e605]
+                - paragraph [ref=e606]:
+                  - text: On receiving the payment notification from Payfast, return a header 200 to prevent further retries.
+                  - text: If no 200 response is returned the notification will be re-sent immediately, then after 10 minutes and then at exponentially longer intervals until eventually stopping.
+              - alert [ref=e607]:
+                - generic [ref=e608]:
+                  - generic [ref=e609]: 󰋼
+                  - generic [ref=e611]:
+                    - text: If you are testing locally you will need to have a publicly accessible URL (notify_url) in order to receive the notifications, consider using tools such as
+                    - link "NGROK" [ref=e612] [cursor=pointer]:
+                      - /url: https://ngrok.com/
+                    - text: or
+                    - link "Expose" [ref=e613] [cursor=pointer]:
+                      - /url: https://beyondco.de/docs/expose/introduction
+                    - text: to expose your local development server to the Internet.
+              - generic [ref=e614]:
+                - heading "4.2. Receive the notification parameters" [level=3] [ref=e615]
+                - paragraph [ref=e616]: "As part of the notification you can expect to receive the following parameters:"
+              - generic [ref=e617]:
+                - heading "Transaction details" [level=3] [ref=e618]
+                - generic [ref=e620]:
+                  - generic [ref=e621]:
+                    - generic [ref=e623]: m_payment_id
+                    - text: string, 100 charOPTIONAL
+                  - generic [ref=e624]: Unique payment ID on the merchant’s system.
+                - generic [ref=e626]:
+                  - generic [ref=e627]:
+                    - generic [ref=e629]: pf_payment_id
+                    - text: integerREQUIRED
+                  - generic [ref=e630]: Unique transaction ID on Payfast.
+                - generic [ref=e632]:
+                  - generic [ref=e633]:
+                    - generic [ref=e635]: payment_status
+                    - text: string (CANCELLED / COMPLETE)REQUIRED
+                  - generic [ref=e636]: After a successful payment the status sent will be COMPLETE. When a subscription is cancelled the status will be CANCELLED.
+                - generic [ref=e638]:
+                  - generic [ref=e639]:
+                    - generic [ref=e641]: item_name
+                    - text: string, 100 charREQUIRED
+                  - generic [ref=e642]: The name of the item being charged for, or in the case of multiple items the order number.
+                - generic [ref=e644]:
+                  - generic [ref=e645]:
+                    - generic [ref=e647]: item_description
+                    - text: string, 255 charOPTIONAL
+                  - generic [ref=e648]: The description of the item being charged for, or in the case of multiple items the order description.
+                - generic [ref=e650]:
+                  - generic [ref=e651]:
+                    - generic [ref=e653]: amount_gross
+                    - text: decimalOPTIONAL
+                  - generic [ref=e654]: The total amount the customer paid in ZAR.
+                - generic [ref=e656]:
+                  - generic [ref=e657]:
+                    - generic [ref=e659]: amount_fee
+                    - text: decimalOPTIONAL
+                  - generic [ref=e660]: The total in fees which was deducted from the amount in ZAR.
+                - generic [ref=e662]:
+                  - generic [ref=e663]:
+                    - generic [ref=e665]: amount_net
+                    - text: decimalOPTIONAL
+                  - generic [ref=e666]: The net amount credited to the merchant’s account in ZAR.
+                - generic [ref=e668]:
+                  - generic [ref=e669]:
+                    - generic [ref=e671]: custom_int<1..5>
+                    - text: integer, 255 charOPTIONAL
+                  - generic [ref=e672]: The series of 5 custom integer variables (custom_int1, custom_int2…) originally passed by the receiver during the payment request.
+                - generic [ref=e674]:
+                  - generic [ref=e675]:
+                    - generic [ref=e677]: custom_str<1..5>
+                    - text: string, 255 charOPTIONAL
+                  - generic [ref=e678]: The series of 5 custom string variables (custom_str1, custom_str2…) originally passed by the receiver during the payment request.
+              - generic [ref=e679]:
+                - heading "Customer details" [level=3] [ref=e680]
+                - generic [ref=e682]:
+                  - generic [ref=e683]:
+                    - generic [ref=e685]: name_first
+                    - text: string, 100 charOPTIONAL
+                  - generic [ref=e686]: The customer’s first name.
+                - generic [ref=e688]:
+                  - generic [ref=e689]:
+                    - generic [ref=e691]: name_last
+                    - text: string, 100 charOPTIONAL
+                  - generic [ref=e692]: The customer’s last name.
+                - generic [ref=e694]:
+                  - generic [ref=e695]:
+                    - generic [ref=e697]: email_address
+                    - text: string, 100 charOPTIONAL
+                  - generic [ref=e698]: The customer’s email address.
+              - generic [ref=e699]:
+                - heading "Merchant details" [level=3] [ref=e700]
+                - generic [ref=e702]:
+                  - generic [ref=e703]:
+                    - generic [ref=e705]: merchant_id
+                    - text: integer, 8 charREQUIRED
+                  - generic [ref=e706]: The Merchant ID as given by the Payfast system. Used to uniquely identify the receiver’s account.
+              - generic [ref=e707]:
+                - heading "Recurring Billing details" [level=3] [ref=e708]
+                - generic [ref=e710]:
+                  - generic [ref=e711]:
+                    - generic [ref=e713]: token
+                    - text: string, 36 charREQUIRED
+                  - generic [ref=e714]: Unique ID on Payfast that represents the subscription.
+                - generic [ref=e716]:
+                  - generic [ref=e717]:
+                    - generic [ref=e719]: billing_date
+                    - text: date, YYYY-MM-DDOPTIONAL
+                  - generic [ref=e720]: The date from which future subscription payments will be made. Eg. 2020-01-01. Defaults to current date if not set.
+              - generic [ref=e721]:
+                - heading "Security information" [level=3] [ref=e722]
+                - generic [ref=e724]:
+                  - generic [ref=e725]:
+                    - generic [ref=e727]: signature
+                    - text: MD5 hash in lower caseOPTIONAL
+                  - generic [ref=e728]: A security signature of the transmitted data taking the form of an MD5 hash of all the url encoded submitted variables.
+            - generic [ref=e732]:
+              - generic [ref=e733]:
+                - heading "Example of a Transaction Webhook Payload" [level=5] [ref=e735]
+                - button "Select library 󰕏" [ref=e738] [cursor=pointer]:
+                  - generic [ref=e739]:
+                    - generic: Select library
+                    - textbox "Select library" [ref=e741]
+                    - generic [ref=e743]: 󰕏
+                - button "󱀲" [ref=e746] [cursor=pointer]
+              - code [ref=e749]: $ITN_Payload = [ 'm_payment_id' => 'SuperUnique1', 'pf_payment_id' => '1089250', 'payment_status' => 'COMPLETE', 'item_name' => 'test+product', 'item_description' => , 'amount_gross' => 200.00, 'amount_fee' => -4.60, 'amount_net' => 195.40, 'custom_str1' => , 'custom_str2' => , 'custom_str3' => , 'custom_str4' => , 'custom_str5' => , 'custom_int1' => , 'custom_int2' => , 'custom_int3' => , 'custom_int4' => , 'custom_int5' => , 'name_first' => , 'name_last' => , 'email_address' => , 'merchant_id' => '10012577', 'signature' => 'ad8e7685c9522c24365d7ccea8cb3db7' ];
+            - generic [ref=e751]:
+              - heading "4.3. Conduct security checks" [level=3] [ref=e752]
+              - paragraph [ref=e753]: Conduct four security checks to ensure that the data you are receiving is correct, from the correct source and hasn’t been altered; you should not continue the process if a test fails!
+            - generic [ref=e757]:
+              - generic [ref=e758]:
+                - heading "Notification page" [level=5] [ref=e760]
+                - button "Select library 󰕏" [ref=e763] [cursor=pointer]:
+                  - generic [ref=e764]:
+                    - generic: Select library
+                    - textbox "Select library" [ref=e766]
+                    - generic [ref=e768]: 󰕏
+                - button "󱀲" [ref=e771] [cursor=pointer]
+              - code [ref=e774]:
+                - generic [ref=e775]: "<?php // Tell Payfast that this page is reachable by triggering a header 200 header( 'HTTP/1.0 200 OK' ); flush(); define( 'SANDBOX_MODE', true ); $pfHost = SANDBOX_MODE ? 'sandbox.payfast.co.za' : 'www.payfast.co.za'; // Posted variables from ITN $pfData = $_POST; // Strip any slashes in data foreach( $pfData as $key => $val ) { $pfData[$key] = stripslashes( $val ); } // Convert posted variables to a string foreach( $pfData as $key => $val ) { if( $key !== 'signature' ) { $pfParamString .= $key .'='. urlencode( $val ) .'&'; } else { break; } } $pfParamString = substr( $pfParamString, 0, -1 );"
+            - generic [ref=e777]:
+              - paragraph
+              - list [ref=e778]:
+                - listitem [ref=e779]:
+                  - heading "Verify the signature" [level=3] [ref=e780]
+                  - paragraph [ref=e781]: Verify the security signature in the notification; this is done in a similar way that the signature that you generated for stage one of the user payment flow.
+                  - paragraph [ref=e782]: The string that gets created needs to include all fields posted from Payfast.
+              - paragraph
+            - generic [ref=e786]:
+              - generic [ref=e787]:
+                - heading "Verify Signature" [level=5] [ref=e789]
+                - button "Select library 󰕏" [ref=e792] [cursor=pointer]:
+                  - generic [ref=e793]:
+                    - generic: Select library
+                    - textbox "Select library" [ref=e795]
+                    - generic [ref=e797]: 󰕏
+                - button "󱀲" [ref=e800] [cursor=pointer]
+              - code [ref=e803]:
+                - generic [ref=e804]: "<?php function pfValidSignature( $pfData, $pfParamString, $pfPassphrase = null ) { // Calculate security signature if($pfPassphrase === null) { $tempParamString = $pfParamString; } else { $tempParamString = $pfParamString.'&passphrase='.urlencode( $pfPassphrase ); } $signature = md5( $tempParamString ); return ( $pfData['signature'] === $signature ); }"
+            - generic [ref=e806]:
+              - paragraph
+              - list [ref=e807]:
+                - listitem [ref=e808]:
+                  - heading "Check that the notification has come from a valid Payfast domain" [level=3] [ref=e809]
+                  - paragraph [ref=e810]:
+                    - text: "The following is a list of valid domains:"
+                    - text: "- www.payfast.co.za"
+                    - text: "- w1w.payfast.co.za"
+                    - text: "- w2w.payfast.co.za"
+                    - text: "- sandbox.payfast.co.za"
+              - paragraph
+            - generic [ref=e814]:
+              - generic [ref=e815]:
+                - heading "Check valid Payfast domain" [level=5] [ref=e817]
+                - button "Select library 󰕏" [ref=e820] [cursor=pointer]:
+                  - generic [ref=e821]:
+                    - generic: Select library
+                    - textbox "Select library" [ref=e823]
+                    - generic [ref=e825]: 󰕏
+                - button "󱀲" [ref=e828] [cursor=pointer]
+              - code [ref=e831]:
+                - generic [ref=e832]: "<?php function pfValidIP() { // Variable initialization $validHosts = array( 'www.payfast.co.za', 'sandbox.payfast.co.za', 'w1w.payfast.co.za', 'w2w.payfast.co.za', ); $validIps = []; foreach( $validHosts as $pfHostname ) { $ips = gethostbynamel( $pfHostname ); if( $ips !== false ) $validIps = array_merge( $validIps, $ips ); } // Remove duplicates $validIps = array_unique( $validIps ); $referrerIp = gethostbyname(parse_url($_SERVER['HTTP_REFERER'])['host']); if( in_array( $referrerIp, $validIps, true ) ) { return true; } return false; }"
+            - generic [ref=e834]:
+              - paragraph
+              - list [ref=e835]:
+                - listitem [ref=e836]:
+                  - heading "Compare payment data" [level=3] [ref=e837]
+                  - paragraph [ref=e838]: The amount you expected the customer to pay should match the “amount_gross” value sent in the notification.
+              - paragraph
+            - generic [ref=e842]:
+              - generic [ref=e843]:
+                - heading "Compare payment data" [level=5] [ref=e845]
+                - button "Select library 󰕏" [ref=e848] [cursor=pointer]:
+                  - generic [ref=e849]:
+                    - generic: Select library
+                    - textbox "Select library" [ref=e851]
+                    - generic [ref=e853]: 󰕏
+                - button "󱀲" [ref=e856] [cursor=pointer]
+              - code [ref=e859]:
+                - generic [ref=e860]: "<?php function pfValidPaymentData( $cartTotal, $pfData ) { return !(abs((float)$cartTotal - (float)$pfData['amount_gross']) > 0.01); }"
+            - generic [ref=e861]:
+              - generic [ref=e862]:
+                - paragraph
+                - list [ref=e863]:
+                  - listitem [ref=e864]:
+                    - heading "Perform a server request to confirm the details" [level=3] [ref=e865]
+                    - paragraph [ref=e866]: Validate the data that you have received from Payfast by contacting our server and confirming the order details.
+                    - paragraph [ref=e867]:
+                      - text: "Live: https://www.payfast.co.za/eng/query/validate"
+                      - text: "Sandbox: https://sandbox.payfast.co.za/eng/query/validate"
+                - paragraph [ref=e868]
+              - generic [ref=e869]:
+                - heading "Curl Options" [level=5] [ref=e872]
+                - table [ref=e876]:
+                  - rowgroup [ref=e877]:
+                    - row "CURLOPT_RETURNTRANSFER Set to TRUE to return the transfer as a string of the return value of curl_exec() instead of outputting it out directly." [ref=e878]:
+                      - cell "CURLOPT_RETURNTRANSFER" [ref=e879]
+                      - cell "Set to TRUE to return the transfer as a string of the return value of curl_exec() instead of outputting it out directly." [ref=e880]
+                    - row "CURLOPT_HEADER Set to FALSE to exclude the header in the output." [ref=e881]:
+                      - cell "CURLOPT_HEADER" [ref=e882]
+                      - cell "Set to FALSE to exclude the header in the output." [ref=e883]
+                    - row "CURLOPT_SSL_VERIFYHOST Set to 2 to check the existence of a common name in the SSL peer certificate, and to also verify that it matches the hostname provided." [ref=e884]:
+                      - cell "CURLOPT_SSL_VERIFYHOST" [ref=e885]
+                      - cell "Set to 2 to check the existence of a common name in the SSL peer certificate, and to also verify that it matches the hostname provided." [ref=e886]
+                    - row "CURLOPT_SSL_VERIFYPEER This option determines whether curl verifies the authenticity of the peer’s certificate. The default value is 1." [ref=e887]:
+                      - cell "CURLOPT_SSL_VERIFYPEER" [ref=e888]
+                      - cell "This option determines whether curl verifies the authenticity of the peer’s certificate. The default value is 1." [ref=e889]
+                    - row "CURLOPT_URL Set to the Payfast query validation URL, eg. https://www.payfast.co.za/eng/query/validate. This can also be set when initializing a session with curl_init()." [ref=e890]:
+                      - cell "CURLOPT_URL" [ref=e891]
+                      - cell "Set to the Payfast query validation URL, eg. https://www.payfast.co.za/eng/query/validate. This can also be set when initializing a session with curl_init()." [ref=e892]
+                    - row "CURLOPT_POST Set to TRUE to do a regular HTTP POST. This POST is the normal application/x-www-form-urlencoded kind, most commonly used by HTML forms." [ref=e893]:
+                      - cell "CURLOPT_POST" [ref=e894]
+                      - cell "Set to TRUE to do a regular HTTP POST. This POST is the normal application/x-www-form-urlencoded kind, most commonly used by HTML forms." [ref=e895]
+                    - 'row "CURLOPT_POSTFIELDS The full data to post via HTTP to Payfast. This parameter is passed as a urlencoded string, such as: m_payment_id=01&pf_payment_id=01234.." [ref=e896]':
+                      - cell "CURLOPT_POSTFIELDS" [ref=e897]
+                      - 'cell "The full data to post via HTTP to Payfast. This parameter is passed as a urlencoded string, such as: m_payment_id=01&pf_payment_id=01234.." [ref=e898]'
+            - generic [ref=e899]:
+              - generic [ref=e902]:
+                - generic [ref=e903]:
+                  - heading "Server request to confirm details" [level=5] [ref=e905]
+                  - button "Select library 󰕏" [ref=e908] [cursor=pointer]:
+                    - generic [ref=e909]:
+                      - generic: Select library
+                      - textbox "Select library" [ref=e911]
+                      - generic [ref=e913]: 󰕏
+                  - button "󱀲" [ref=e916] [cursor=pointer]
+                - code [ref=e919]:
+                  - generic [ref=e920]: "<?php function pfValidServerConfirmation( $pfParamString, $pfHost = 'sandbox.payfast.co.za', $pfProxy = null ) { // Use cURL (if available) if( in_array( 'curl', get_loaded_extensions(), true ) ) { // Variable initialization $url = 'https://'. $pfHost .'/eng/query/validate'; // Create default cURL object $ch = curl_init(); // Set cURL options - Use curl_setopt for greater PHP compatibility // Base settings curl_setopt( $ch, CURLOPT_USERAGENT, NULL ); // Set user agent curl_setopt( $ch, CURLOPT_RETURNTRANSFER, true ); // Return output as string rather than outputting it curl_setopt( $ch, CURLOPT_HEADER, false ); // Don't include header in output curl_setopt( $ch, CURLOPT_SSL_VERIFYHOST, 2 ); curl_setopt( $ch, CURLOPT_SSL_VERIFYPEER, true ); // Standard settings curl_setopt( $ch, CURLOPT_URL, $url ); curl_setopt( $ch, CURLOPT_POST, true ); curl_setopt( $ch, CURLOPT_POSTFIELDS, $pfParamString ); if( !empty( $pfProxy ) ) curl_setopt( $ch, CURLOPT_PROXY, $pfProxy ); // Execute cURL $response = curl_exec( $ch ); curl_close( $ch ); if ($response === 'VALID') { return true; } } return false; }"
+              - generic [ref=e923]:
+                - generic [ref=e924]:
+                  - heading "Bringing the checks together" [level=5] [ref=e926]
+                  - button "Select library 󰕏" [ref=e929] [cursor=pointer]:
+                    - generic [ref=e930]:
+                      - generic: Select library
+                      - textbox "Select library" [ref=e932]
+                      - generic [ref=e934]: 󰕏
+                  - button "󱀲" [ref=e937] [cursor=pointer]
+                - code [ref=e940]:
+                  - generic [ref=e941]: "<?php $check1 = pfValidSignature($pfData, $pfParamString); $check2 = pfValidIP(); $check3 = pfValidPaymentData($cartTotal, $pfData); $check4 = pfValidServerConfirmation($pfParamString, $pfHost); if($check1 && $check2 && $check3 && $check4) { // All checks have passed, the payment is successful } else { // Some checks have failed, check payment manually and log for investigation }"
+      - generic [ref=e942]:
+        - generic [ref=e943]:
+          - generic [ref=e944]:
+            - img [ref=e947]
+            - heading "Onsite Payments (Beta)" [level=1] [ref=e950]
+          - paragraph [ref=e951]: Integrate Payfast’s secure payment engine directly into the checkout page.
+        - generic [ref=e952]:
+          - heading "Integration" [level=2] [ref=e953]
+          - paragraph [ref=e955]: "Integration is a simple two step process:"
+          - alert [ref=e956]:
+            - generic [ref=e960]: "Important: Please note that for security reasons Onsite Payments requires that your application be served over HTTPS."
+        - iframe [ref=e964]:
+          - generic [active] [ref=f2e1]:
+            - generic "YouTube Video Player" [ref=f2e3]
+            - generic [ref=f2e5]:
+              - generic:
+                - generic:
+                  - button "Play video" [ref=f2e10] [cursor=pointer]
+                  - button "Hide player controls" [ref=f2e12] [cursor=pointer]
+                  - generic [ref=f2e14]:
+                    - generic [ref=f2e19]:
+                      - generic [ref=f2e20]:
+                        - link "PayFast DevDocs Onsite Payments Integration" [ref=f2e21] [cursor=pointer]:
+                          - /url: https://www.youtube.com/watch?v=3dBxdvCmkOU
+                        - link "Payfast by Network" [ref=f2e22] [cursor=pointer]:
+                          - /url: /channel/UCtzv3KZ2uWomwuM_pqyEW8A
+                          - generic [ref=f2e23]: Payfast by Network
+                      - generic [ref=f2e24]:
+                        - button [ref=f2e25] [cursor=pointer]
+                        - generic [ref=f2e27]:
+                          - generic: Payfast by Network
+                          - generic: 1.13K subscribers
+                    - generic [ref=f2e28]:
+                      - button "Share" [ref=f2e31] [cursor=pointer]:
+                        - generic [ref=f2e35]:
+                          - img
+                      - link "Watch on YouTube" [ref=f2e42] [cursor=pointer]:
+                        - /url: https://www.youtube.com/watch?v=3dBxdvCmkOU
+                        - generic [ref=f2e45]:
+                          - text: Watch on
+                          - img [ref=f2e47]:
+                            - generic [ref=f2e49]:
+                              - img
+        - generic [ref=e965]:
+          - generic [ref=e966]:
+            - 'heading "Step 1: Post payment details and get a unique payment identifier" [level=3] [ref=e967]'
+            - paragraph [ref=e968]: The transaction and customer details need to be sent to Payfast before any customer interaction.
+            - paragraph [ref=e969]:
+              - text: "Live: https://www.payfast.co.za/onsite/process"
+              - text: "Sandbox: https://sandbox.payfast.co.za/onsite/process"
+          - generic [ref=e970]:
+            - text: "POST Data:"
+            - text: The POST data that is required can be found in the
+            - link "Quickstart guide" [ref=e971] [cursor=pointer]:
+              - /url: /docs#step_1_form_fields
+            - text: .
+          - generic [ref=e972]:
+            - heading "The following are additional requirements for Onsite" [level=3] [ref=e973]
+            - generic [ref=e975]:
+              - generic [ref=e976]:
+                - generic [ref=e978]: signature
+                - text: stringREQUIRED
+              - generic [ref=e979]: The signature is a hash of the posted data used to ensure the integrity of the data transfer
+            - generic [ref=e981]:
+              - generic [ref=e982]:
+                - generic [ref=e984]: email_address
+                - text: string, 100 char REQUIRED UNLESS MOBILE REGISTRATION ALLOWED
+              - generic [ref=e985]: The customer’s email address. This is required unless the merchant has specifically allowed mobile registration from their account.
+            - generic [ref=e987]:
+              - generic [ref=e988]:
+                - generic [ref=e990]: cell_number
+                - text: string, 100 char REQUIRED IF EMAIL NOT SET
+              - generic [ref=e991]: The customer’s valid cell number. If the email_address field is empty, and cell_number provided, the system will use the cell_number as the username and auto login the user, if they do not have a registered account
+          - alert [ref=e992]:
+            - generic [ref=e993]:
+              - generic [ref=e994]: 󰋼
+              - generic [ref=e995]: If no return_url is submitted, the modal will just close on payment completion and customers will not be redirected to a success page.
+        - generic [ref=e996]:
+          - generic [ref=e999]:
+            - generic [ref=e1000]:
+              - heading "POST /onsite/process" [level=5] [ref=e1002]
+              - button "󱀲" [ref=e1003] [cursor=pointer]
+            - code [ref=e1006]: https://www.payfast.co.za/onsite/process
+          - generic [ref=e1007]:
+            - heading "RESPONSE" [level=5] [ref=e1010]
+            - generic [ref=e1015]:
+              - generic [ref=e1017]: "{"
+              - generic [ref=e1018]:
+                - generic [ref=e1021]: "\"uuid\":"
+                - generic [ref=e1022]: "\"123-abc\""
+              - generic [ref=e1024]: "}"
+          - generic [ref=e1027]:
+            - generic [ref=e1028]:
+              - heading "Payment identifier generation" [level=5] [ref=e1030]
+              - button "Select library 󰕏" [ref=e1033] [cursor=pointer]:
+                - generic [ref=e1034]:
+                  - generic: Select library
+                  - textbox "Select library" [ref=e1036]
+                  - generic [ref=e1038]: 󰕏
+              - button "󱀲" [ref=e1041] [cursor=pointer]
+            - code [ref=e1044]: "<?php $passPhrase = 'jt7NOE43FZPn'; $data = [ 'merchant_id' => '10000100', 'merchant_key' => '46f0cd694581a', ... ]; function dataToString($dataArray) { // Create parameter string $pfOutput = ''; foreach( $dataArray as $key => $val ) { if($val !== '') { $pfOutput .= $key .'='. urlencode( trim( $val ) ) .'&'; } } // Remove last ampersand return substr( $pfOutput, 0, -1 ); } function generatePaymentIdentifier($pfParamString, $pfProxy = null) { // Use cURL (if available) if( in_array( 'curl', get_loaded_extensions(), true ) ) { // Variable initialization $url = 'https://www.payfast.co.za/onsite/process'; // Create default cURL object $ch = curl_init(); // Set cURL options - Use curl_setopt for greater PHP compatibility // Base settings curl_setopt( $ch, CURLOPT_USERAGENT, NULL ); // Set user agent curl_setopt( $ch, CURLOPT_RETURNTRANSFER, true ); // Return output as string rather than outputting it curl_setopt( $ch, CURLOPT_HEADER, false ); // Don't include header in output curl_setopt( $ch, CURLOPT_SSL_VERIFYHOST, 2 ); curl_setopt( $ch, CURLOPT_SSL_VERIFYPEER, true ); // Standard settings curl_setopt( $ch, CURLOPT_URL, $url ); curl_setopt( $ch, CURLOPT_POST, true ); curl_setopt( $ch, CURLOPT_POSTFIELDS, $pfParamString ); if( !empty( $pfProxy ) ) curl_setopt( $ch, CURLOPT_PROXY, $pfProxy ); // Execute cURL $response = curl_exec( $ch ); curl_close( $ch ); echo $response; $rsp = json_decode($response, true); if ($rsp['uuid']) { return $rsp['uuid']; } } return null; } // Generate signature (see Custom Integration -> Step 2) $data[\"signature\"] = generateSignature($data, $passPhrase); // Convert the data array to a string $pfParamString = dataToString($data); // Generate payment identifier $identifier = generatePaymentIdentifier($pfParamString);"
+        - generic [ref=e1045]:
+          - generic [ref=e1046]:
+            - 'heading "Step 2: Trigger the modal popup" [level=3] [ref=e1047]'
+            - paragraph [ref=e1048]:
+              - text: Once you have successfully retrieved the above UUID for the payment you can pass that into the Javascript for the payment page initialisation.
+              - text: Place the following script inside of your document
+              - text: to initialise the payment modal on your website.
+          - generic [ref=e1049]: There are 2 initialisation options for the modal that can be used depending on how you would like payment completion to be handled.
+        - generic [ref=e1053]:
+          - generic [ref=e1054]:
+            - heading "Onsite activation script" [level=5] [ref=e1056]
+            - button "󱀲" [ref=e1057] [cursor=pointer]
+          - code [ref=e1060]:
+            - generic [ref=e1061]:
+              - generic [ref=e1062]: <script
+              - text: src
+              - generic [ref=e1063]: ="https://www.payfast.co.za/onsite/engine.js"
+              - text: ">"
+            - generic [ref=e1064]:
+              - generic [ref=e1065]: </script
+              - text: ">"
+        - generic [ref=e1067]:
+          - text: "Method 1: Simple"
+          - paragraph [ref=e1068]:
+            - text: This is the simplest method of triggering the payment modal.
+            - text: All that is needed is to specify the uuid you received in the first step.
+            - text: On payment success the buyer is redirected to your return url.
+          - paragraph [ref=e1069]: Additionally, if you did not specify the return and cancel urls while getting the unique identifier in step 1, you can add these to the call in this step.
+        - generic [ref=e1070]:
+          - generic [ref=e1073]:
+            - generic [ref=e1074]:
+              - heading "Method 1 - Simple" [level=5] [ref=e1076]
+              - button "󱀲" [ref=e1077] [cursor=pointer]
+            - code [ref=e1080]: "window.payfast_do_onsite_payment({\"uuid\":\"123-abc\"});"
+          - generic [ref=e1083]:
+            - generic [ref=e1084]:
+              - heading "Method 1 - With URLs" [level=5] [ref=e1086]
+              - button "󱀲" [ref=e1087] [cursor=pointer]
+            - code [ref=e1090]: "window.payfast_do_onsite_payment({ \"uuid\":\"123-abc\", \"return_url\":\"http://example.com\", \"cancel_url\":\"http://example.com\" });"
+        - generic [ref=e1091]:
+          - generic [ref=e1092]:
+            - text: "Method 2: Callback"
+            - paragraph [ref=e1093]:
+              - text: This method is triggered in the same way as the simple method, the difference is that with this method you can define a callback method.
+              - text: On a final action (either a success or the user closing the popup) a call to the callback defined will be fired.
+          - alert [ref=e1094]:
+            - generic [ref=e1098]: "Important: When using the callback method, only the callback will be triggered and any return or cancel urls specified will be ignored!"
+        - generic [ref=e1102]:
+          - generic [ref=e1103]:
+            - heading "Method 2 - Callback" [level=5] [ref=e1105]
+            - button "󱀲" [ref=e1106] [cursor=pointer]
+          - code [ref=e1109]: "window.payfast_do_onsite_payment({\"uuid\":\"123-abc\"}, function (result) { if (result === true) { // Payment Completed } else { // Payment Window Closed } });"
+        - generic [ref=e1111]:
+          - heading "Payment Confirmation" [level=2] [ref=e1112]
+          - paragraph [ref=e1113]:
+            - text: A payment confirmation notification will be sent to the "notify_url" you specified.
+            - text: The full implementation details can be found
+            - link "here" [ref=e1114] [cursor=pointer]:
+              - /url: "#step_4_confirm_payment"
+            - text: .
+      - generic [ref=e1115]:
+        - generic [ref=e1116]:
+          - generic [ref=e1117]:
+            - img [ref=e1120]
+            - heading "Recurring Billing" [level=1] [ref=e1123]
+          - paragraph [ref=e1124]:
+            - paragraph [ref=e1125]:
+              - text: "Create two methods of recurring payments: Subscriptions and Tokenization."
+              - text: For Recurring Billing only the credit card option can be used.
+        - generic [ref=e1127]:
+          - text: On successful payment completion and all subsequent recurring payments you will be sent a notification (see
+          - link "Confirm payment is successful" [ref=e1128] [cursor=pointer]:
+            - /url: "#step_4_confirm_payment"
+          - text: ).
+          - text: A “token” parameter will be sent as part of the notification and is to be used for all further
+          - link "API calls" [ref=e1129] [cursor=pointer]:
+            - /url: /api
+          - text: related to the subscription.
+          - text: On failed payments, Payfast will try a number of times to reprocess a payment where the customer does not have funds on their credit card. On failure, the customer will be notified, allowing some time for the problem to be resolved. On a complete failure (after X amount of times), the subscription will be ‘locked’ and will need some action from the merchant to reactivate on the Payfast account or via the API pause endpoint.
+          - heading "Custom integration" [level=3] [ref=e1130]
+          - text: Recurring Billing is set up in exactly the same manner as standard payments (see the above
+          - link "Quickstart" [ref=e1131] [cursor=pointer]:
+            - /url: "#quickstart"
+          - text: guide), with the addition of the following fields.
+        - generic [ref=e1132]:
+          - separator [ref=e1133]
+          - generic [ref=e1134]:
+            - generic [ref=e1135]:
+              - heading "Subscriptions" [level=2] [ref=e1136]
+              - generic [ref=e1137]:
+                - text: A recurring charge on a given date.
+                - text: Payfast will charge the credit card according to the frequency, billing date and number of payments (cycles) specified in the payment request.
+              - alert [ref=e1138]:
+                - generic [ref=e1142]:
+                  - text: "Passphrase: Please note that for Subscriptions a passphrase is REQUIRED in your"
+                  - link "signature" [ref=e1143] [cursor=pointer]:
+                    - /url: "#step_2_signature"
+                  - text: .
+                  - text: To get a passphrase while testing in the sandbox, visit
+                  - link "https://sandbox.payfast.co.za" [ref=e1144] [cursor=pointer]:
+                    - /url: https://sandbox.payfast.co.za
+                  - text: ", under SETTINGS edit the \"Salt Passphrase\". You can now use the new passphrase and merchant credentials for your sandbox testing."
+              - generic [ref=e1145]:
+                - heading "Additional subscription form fields" [level=3] [ref=e1146]
+                - generic [ref=e1148]:
+                  - generic [ref=e1149]:
+                    - generic [ref=e1151]: subscription_type
+                    - text: integer, 1 charREQUIRED FOR SUBSCRIPTIONS
+                  - generic [ref=e1152]: 1 – sets type to a subscription
+                - generic [ref=e1154]:
+                  - generic [ref=e1155]:
+                    - generic [ref=e1157]: billing_date
+                    - text: date (YYYY-MM-DD)OPTIONAL
+                  - generic [ref=e1158]: The date from which future subscription payments will be made. Eg. 2020-01-01. Defaults to current date if not set.
+                - generic [ref=e1160]:
+                  - generic [ref=e1161]:
+                    - generic [ref=e1163]: recurring_amount
+                    - text: decimalOPTIONAL
+                  - generic [ref=e1164]:
+                    - text: Future recurring amount for the subscription in ZAR. Defaults to the ‘amount’ value if not set. There is a minimum value of 5.00.
+                    - text: It is possible to set up a subscription or tokenization payment with an initial amount of R0.00. This would be used with subscriptions if the first cycle/period is free, or, in the case of tokenization payments it is used to set up the customers account on the merchants site, allowing for future payments. If the initial amount is R0.00 the customer will be redirected to Payfast, where they will input their credit card details and go through 3D Secure, but no money will be deducted.
+                - generic [ref=e1166]:
+                  - generic [ref=e1167]:
+                    - generic [ref=e1169]: frequency
+                    - text: integer, 1 charREQUIRED FOR SUBSCRIPTIONS
+                  - generic [ref=e1170]:
+                    - text: The cycle period.
+                    - text: 1 - Daily
+                    - text: 2 - Weekly
+                    - text: 3 - Monthly
+                    - text: 4 - Quarterly
+                    - text: 5 - Biannually
+                    - text: 6 - Annual
+                - generic [ref=e1172]:
+                  - generic [ref=e1173]:
+                    - generic [ref=e1175]: cycles
+                    - text: integer, 1 charREQUIRED FOR SUBSCRIPTIONS
+                  - generic [ref=e1176]: The number of payments/cycles that will occur for this subscription. Set to 0 for indefinite subscription.
+                - generic [ref=e1178]:
+                  - generic [ref=e1179]:
+                    - generic [ref=e1181]: subscription_notify_email
+                    - text: booleanOPTIONAL
+                  - generic [ref=e1182]:
+                    - text: Send the merchant an email notification 7 days before a subscription trial ends, or before a subscription amount increases.
+                    - text: "This setting is enabled by default and can be changed via the merchant dashboard: Settings -> Recurring Billing."
+                - generic [ref=e1184]:
+                  - generic [ref=e1185]:
+                    - generic [ref=e1187]: subscription_notify_webhook
+                    - text: booleanOPTIONAL
+                  - generic [ref=e1188]:
+                    - text: Send the merchant a webhook notification 7 days before a subscription trial ends, or before a subscription amount increases.
+                    - text: "The webhook notification URL can be set via the merchant dashboard: Settings -> Recurring Billing."
+                - generic [ref=e1190]:
+                  - generic [ref=e1191]:
+                    - generic [ref=e1193]: subscription_notify_buyer
+                    - text: booleanOPTIONAL
+                  - generic [ref=e1194]:
+                    - text: Send the buyer an email notification 7 days before a subscription trial ends, or before a subscription amount increases.
+                    - text: "This setting is enabled by default and can be changed via the merchant dashboard: Settings -> Recurring Billing."
+            - generic [ref=e1195]:
+              - generic [ref=e1198]:
+                - generic [ref=e1199]:
+                  - heading "Subscription Variables" [level=5] [ref=e1201]
+                  - button "󱀲" [ref=e1202] [cursor=pointer]
+                - code [ref=e1205]:
+                  - generic [ref=e1206]:
+                    - generic [ref=e1207]: <input
+                    - text: type
+                    - generic [ref=e1208]: ="hidden"
+                    - text: name
+                    - generic [ref=e1209]: ="subscription_type"
+                    - text: value
+                    - generic [ref=e1210]: ="1"
+                    - text: ">"
+                  - generic [ref=e1211]:
+                    - generic [ref=e1212]: <input
+                    - text: type
+                    - generic [ref=e1213]: ="hidden"
+                    - text: name
+                    - generic [ref=e1214]: ="billing_date"
+                    - text: value
+                    - generic [ref=e1215]: ="2020-01-01"
+                    - text: ">"
+                  - generic [ref=e1216]:
+                    - generic [ref=e1217]: <input
+                    - text: type
+                    - generic [ref=e1218]: ="hidden"
+                    - text: name
+                    - generic [ref=e1219]: ="recurring_amount"
+                    - text: value
+                    - generic [ref=e1220]: ="123.45"
+                    - text: ">"
+                  - generic [ref=e1221]:
+                    - generic [ref=e1222]: <input
+                    - text: type
+                    - generic [ref=e1223]: ="hidden"
+                    - text: name
+                    - generic [ref=e1224]: ="frequency"
+                    - text: value
+                    - generic [ref=e1225]: ="3"
+                    - text: ">"
+                  - generic [ref=e1226]:
+                    - generic [ref=e1227]: <input
+                    - text: type
+                    - generic [ref=e1228]: ="hidden"
+                    - text: name
+                    - generic [ref=e1229]: ="cycles"
+                    - text: value
+                    - generic [ref=e1230]: ="12"
+                    - text: ">"
+                  - generic [ref=e1231]:
+                    - generic [ref=e1232]: <input
+                    - text: type
+                    - generic [ref=e1233]: ="hidden"
+                    - text: name
+                    - generic [ref=e1234]: ="subscription_notify_email"
+                    - text: value
+                    - generic [ref=e1235]: ="true"
+                    - text: ">"
+                  - generic [ref=e1236]:
+                    - generic [ref=e1237]: <input
+                    - text: type
+                    - generic [ref=e1238]: ="hidden"
+                    - text: name
+                    - generic [ref=e1239]: ="subscription_notify_webhook"
+                    - text: value
+                    - generic [ref=e1240]: ="true"
+                    - text: ">"
+                  - generic [ref=e1241]:
+                    - generic [ref=e1242]: <input
+                    - text: type
+                    - generic [ref=e1243]: ="hidden"
+                    - text: name
+                    - generic [ref=e1244]: ="subscription_notify_buyer"
+                    - text: value
+                    - generic [ref=e1245]: ="true"
+                    - text: ">"
+              - generic [ref=e1246]:
+                - heading "Subscription trial webhook sample" [level=5] [ref=e1249]
+                - generic [ref=e1254]:
+                  - generic [ref=e1256]: "{"
+                  - generic [ref=e1257]:
+                    - generic [ref=e1260]: "\"type\":"
+                    - generic [ref=e1261]: "\"subscription.free-trial\","
+                  - generic [ref=e1262]:
+                    - generic [ref=e1265]: "\"token\":"
+                    - generic [ref=e1266]: "\"dc0521d3-55fe-269b-fa00-b647310d760f\","
+                  - generic [ref=e1267]:
+                    - generic [ref=e1270]: "\"initial_amount\":"
+                    - generic [ref=e1271]: 0,
+                  - generic [ref=e1272]:
+                    - generic [ref=e1275]: "\"amount\":"
+                    - generic [ref=e1276]: 10000,
+                  - generic [ref=e1277]:
+                    - generic [ref=e1280]: "\"next_run\":"
+                    - generic [ref=e1281]: "\"2021-03-30\","
+                  - generic [ref=e1282]:
+                    - generic [ref=e1285]: "\"frequency\":"
+                    - generic [ref=e1286]: "\"3\","
+                  - generic [ref=e1287]:
+                    - generic [ref=e1290]: "\"item_name\":"
+                    - generic [ref=e1291]: "\"Test Item\","
+                  - generic [ref=e1292]:
+                    - generic [ref=e1295]: "\"item_description\":"
+                    - generic [ref=e1296]: "\"A test product\","
+                  - generic [ref=e1297]:
+                    - generic [ref=e1300]: "\"name_first\":"
+                    - generic [ref=e1301]: "\"John\","
+                  - generic [ref=e1302]:
+                    - generic [ref=e1305]: "\"name_last\":"
+                    - generic [ref=e1306]: "\"Doe\","
+                  - generic [ref=e1307]:
+                    - generic [ref=e1310]: "\"email_address\":"
+                    - generic [ref=e1311]: "\"john@example.com\""
+                  - generic [ref=e1313]: "}"
+              - generic [ref=e1314]:
+                - heading "Webhook attributes" [level=3] [ref=e1315]
+                - generic [ref=e1317]:
+                  - generic [ref=e1318]:
+                    - generic [ref=e1320]: type
+                    - text: stringREQUIRED
+                  - generic [ref=e1321]: The type of webhook being sent, can be one of 'subscription.free-trial', 'subscription.promo' or 'subscription.update'.
+                - generic [ref=e1323]:
+                  - generic [ref=e1324]:
+                    - generic [ref=e1326]: token
+                    - text: stringREQUIRED
+                  - generic [ref=e1327]: The Unique ID on Payfast that represents the subscription.
+                - generic [ref=e1329]:
+                  - generic [ref=e1330]:
+                    - generic [ref=e1332]: initial_amount
+                    - text: integerREQUIRED
+                  - generic [ref=e1333]: The initial amount payable during the free trial or promotion period, in cents (ZAR).
+                - generic [ref=e1335]:
+                  - generic [ref=e1336]:
+                    - generic [ref=e1338]: amount
+                    - text: integerREQUIRED
+                  - generic [ref=e1339]: The subscription amount, in cents (ZAR).
+                - generic [ref=e1341]:
+                  - generic [ref=e1342]:
+                    - generic [ref=e1344]: next_run
+                    - text: YYYY-MM-DDOPTIONAL
+                  - generic [ref=e1345]: The next run date for the subscription.
+                - generic [ref=e1347]:
+                  - generic [ref=e1348]:
+                    - generic [ref=e1350]: frequency
+                    - text: integer, 1 charOPTIONAL
+                  - generic [ref=e1351]:
+                    - text: The cycle period.
+                    - text: 1 - Daily
+                    - text: 2 - Weekly
+                    - text: 3 - Monthly
+                    - text: 4 - Quarterly
+                    - text: 5 - Biannually
+                    - text: 6 - Annual
+                - generic [ref=e1353]:
+                  - generic [ref=e1354]:
+                    - generic [ref=e1356]: item_name
+                    - text: string, 100 char OPTIONAL
+                  - generic [ref=e1357]: The name of the item being charged for, or in the case of multiple items the order number.
+                - generic [ref=e1359]:
+                  - generic [ref=e1360]:
+                    - generic [ref=e1362]: item_description
+                    - text: string, 255 char OPTIONAL
+                  - generic [ref=e1363]: The description of the item being charged for, or in the case of multiple items the order description.
+                - generic [ref=e1365]:
+                  - generic [ref=e1366]:
+                    - generic [ref=e1368]: name_first
+                    - text: string, 100 char OPTIONAL
+                  - generic [ref=e1369]: The customer’s first name.
+                - generic [ref=e1371]:
+                  - generic [ref=e1372]:
+                    - generic [ref=e1374]: name_last
+                    - text: string, 100 char OPTIONAL
+                  - generic [ref=e1375]: The customer’s last name.
+                - generic [ref=e1377]:
+                  - generic [ref=e1378]:
+                    - generic [ref=e1380]: email_address
+                    - text: string, 100 char OPTIONAL
+                  - generic [ref=e1381]: The customer’s email address.
+          - generic [ref=e1382]:
+            - generic [ref=e1383]:
+              - heading "Tokenization" [level=2] [ref=e1384]
+              - generic [ref=e1385]:
+                - text: A recurring charge where the future dates and amounts of payments may be unknown.
+                - text: Payfast will only charge the customer's card when instructed to do so via the API.
+                - text: Tokenization payment agreements can be
+                - link "setup without charging the customer." [ref=e1386] [cursor=pointer]:
+                  - /url: https://support.payfast.co.za/portal/en/kb/articles/can-i-set-up-a-tokenization-payment-agreement-without-charging-the-customer
+              - generic [ref=e1387]:
+                - heading "Additional tokenization form fields" [level=3] [ref=e1388]
+                - generic [ref=e1390]:
+                  - generic [ref=e1391]:
+                    - generic [ref=e1393]: subscription_type
+                    - text: integer, 1 charREQUIRED FOR SUBSCRIPTIONS
+                  - generic [ref=e1394]: 2 – sets type to a tokenization payment
+            - generic [ref=e1398]:
+              - generic [ref=e1399]:
+                - heading "Tokenization Variable" [level=5] [ref=e1401]
+                - button "󱀲" [ref=e1402] [cursor=pointer]
+              - code [ref=e1405]:
+                - generic [ref=e1406]:
+                  - generic [ref=e1407]: <input
+                  - text: type
+                  - generic [ref=e1408]: ="hidden"
+                  - text: name
+                  - generic [ref=e1409]: ="subscription_type"
+                  - text: value
+                  - generic [ref=e1410]: ="2"
+                  - text: ">"
+          - generic [ref=e1411]:
+            - generic [ref=e1412]:
+              - heading "Update card details" [level=2] [ref=e1413]
+              - generic [ref=e1414]: Provide buyers with a link to update their card details on a Recurring Billing subscription or Tokenization charges. This link will redirect them to Payfast in order to perform the update securely.
+              - generic [ref=e1415]:
+                - heading "Additional tokenization form fields" [level=3] [ref=e1416]
+                - generic [ref=e1418]:
+                  - generic [ref=e1419]:
+                    - generic [ref=e1421]: token
+                    - text: stringREQUIRED
+                  - generic [ref=e1422]: The buyers recurring billing subscription or recurring adhoc token
+                - generic [ref=e1424]:
+                  - generic [ref=e1425]:
+                    - generic [ref=e1427]: return
+                    - text: string, no char limitOPTIONAL
+                  - generic [ref=e1428]: The URL where the buyer is returned to after updating their card details (or cancelling the update). If no return url is supplied there will be no redirect.
+            - generic [ref=e1429]:
+              - generic [ref=e1432]:
+                - generic [ref=e1433]:
+                  - heading "GET /eng/recurring/update" [level=5] [ref=e1435]
+                  - button "󱀲" [ref=e1436] [cursor=pointer]
+                - code [ref=e1439]: "https://www.payfast.co.za/eng/recurring/update/{token}?return={return}"
+              - generic [ref=e1442]:
+                - generic [ref=e1443]:
+                  - heading "Example Usage" [level=5] [ref=e1445]
+                  - button "󱀲" [ref=e1446] [cursor=pointer]
+                - code [ref=e1449]:
+                  - generic [ref=e1450]:
+                    - generic [ref=e1451]: <a
+                    - text: href
+                    - generic [ref=e1452]: ="https://www.payfast.co.za/eng/recurring/update/00000000-0000-0000-0000-000000000000?return=http://store.example.com"
+                    - text: ">"
+                  - text: Update the card for your subscription
+                  - generic [ref=e1453]:
+                    - generic [ref=e1454]: </a
+                    - text: ">"
+          - generic [ref=e1456]:
+            - heading "Additional methods of integrating Recurring Billing" [level=2] [ref=e1457]
+            - generic [ref=e1458]:
+              - text: For more information on other ways of setting up Subscriptions, such as through a Pay Now button, Payment Request or ecommerce platform plugins,
+              - link "click here" [ref=e1459] [cursor=pointer]:
+                - /url: https://support.payfast.co.za/portal/en/kb/articles/how-do-i-enable-recurring-payments-on-my-website
+            - generic [ref=e1460]:
+              - heading "Recurring Billing maintenance" [level=3] [ref=e1461]
+              - paragraph [ref=e1462]: Subscriptions can be edited, paused and cancelled either via the Payfast dashboard or the API.
+              - list [ref=e1463]:
+                - listitem [ref=e1464]:
+                  - text: "Update:"
+                  - link "Payfast dashboard guide" [ref=e1465] [cursor=pointer]:
+                    - /url: https://support.payfast.co.za/portal/en/kb/articles/managing-subscriptions-on-your-payfast-dashboard
+                  - text: "|"
+                  - link "API guide" [ref=e1466] [cursor=pointer]:
+                    - /url: /api#update-a-subscription
+                - listitem [ref=e1467]:
+                  - text: "Pause:"
+                  - link "Payfast dashboard guide" [ref=e1468] [cursor=pointer]:
+                    - /url: https://support.payfast.co.za/portal/en/kb/articles/managing-subscriptions-on-your-payfast-dashboard
+                  - text: "|"
+                  - link "API guide" [ref=e1469] [cursor=pointer]:
+                    - /url: /api#pause-a-subscription
+                - listitem [ref=e1470]:
+                  - text: "Cancel:"
+                  - link "Payfast dashboard guide" [ref=e1471] [cursor=pointer]:
+                    - /url: https://support.payfast.co.za/portal/en/kb/articles/managing-subscriptions-on-your-payfast-dashboard
+                  - text: "|"
+                  - link "API guide" [ref=e1472] [cursor=pointer]:
+                    - /url: /api#cancel-a-subscription
+      - generic [ref=e1473]:
+        - generic [ref=e1474]:
+          - generic [ref=e1475]:
+            - img [ref=e1478]
+            - heading "Split Payments" [level=1] [ref=e1481]
+          - paragraph [ref=e1482]:
+            - paragraph [ref=e1483]:
+              - text: Instantly split a portion of an online payment with a third party.
+              - link "Read more" [ref=e1484] [cursor=pointer]:
+                - /url: https://payfast.io/features/split-payments
+        - generic [ref=e1485]:
+          - heading "Initial setup" [level=2] [ref=e1486]
+          - list [ref=e1488]:
+            - listitem [ref=e1489]:
+              - text: You will need to enable Split Payments on your account. Setup details can be found
+              - link "here" [ref=e1490] [cursor=pointer]:
+                - /url: https://support.payfast.co.za/portal/en/kb/articles/how-do-i-enable-split-payments
+              - text: .
+            - listitem [ref=e1491]: Only one receiving merchant can be allocated a Split Payment, per split transaction. Therefore the Merchant ID of this receiving merchant is mandatory.
+            - listitem [ref=e1492]: All amounts used for the split must be in cents.
+            - listitem [ref=e1493]:
+              - paragraph [ref=e1494]: "There are two methods of splitting a payment:"
+              - list [ref=e1495]:
+                - listitem [ref=e1496]:
+                  - text: "Global setup: By contacting"
+                  - link "Payfast support" [ref=e1497] [cursor=pointer]:
+                    - /url: https://payfast.io/contact
+                  - text: you can have a split setup on your account that will take affect on every transaction.
+                - listitem [ref=e1498]:
+                  - text: "Direct request: Send the split data"
+                  - emphasis [ref=e1499]: (see additional form fields below)
+                  - text: embedded in the payment request. This gives you the flexibility to determine which payments a split should take affect on.
+                  - text: The data sent in this request will take precedence over anything setup on your account.
+                  - text: Where the request involved Recurring Billing, the split data will continue to be used on all subsequent recurring payments.
+          - generic [ref=e1500]:
+            - heading "Additional Split Payment form fields" [level=3] [ref=e1501]
+            - generic [ref=e1503]:
+              - generic [ref=e1504]:
+                - generic [ref=e1506]: setup
+                - text: string, JSON encodedREQUIRED FOR SPLIT PAYMENTS
+              - generic [ref=e1507]:
+                - text: "NB: Not included in the signature."
+                - text: The value for setup needs to contain the JSON encoded payload for split_payment as shown in the example.
+              - generic [ref=e1509]:
+                - generic [ref=e1511]:
+                  - generic [ref=e1512]:
+                    - generic [ref=e1514]: merchant_id
+                    - text: integer, 8 charREQUIRED
+                  - generic [ref=e1515]: The third party merchant that the payment is being split with.
+                - generic [ref=e1517]:
+                  - generic [ref=e1518]:
+                    - generic [ref=e1520]: amount
+                    - text: integerREQUIRED IF NOT USING PERCENTAGE
+                  - generic [ref=e1521]: The amount in cents (ZAR), that will go to the third party merchant.
+                - generic [ref=e1523]:
+                  - generic [ref=e1524]:
+                    - generic [ref=e1526]: percentage
+                    - text: integer, 2 charREQUIRED IF NOT USING AMOUNT
+                  - generic [ref=e1527]: The percentage allocated to the third party merchant.
+                - generic [ref=e1529]:
+                  - generic [ref=e1530]:
+                    - generic [ref=e1532]: min
+                    - text: integerOPTIONAL
+                  - generic [ref=e1533]: The minimum amount that will be split, in cents (ZAR)
+                - generic [ref=e1535]:
+                  - generic [ref=e1536]:
+                    - generic [ref=e1538]: max
+                    - text: integerOPTIONAL
+                  - generic [ref=e1539]: The maximum amount that will be split, in cents (ZAR)
+        - generic [ref=e1543]:
+          - generic [ref=e1544]:
+            - heading "Split Payment input" [level=5] [ref=e1546]
+            - button "󱀲" [ref=e1547] [cursor=pointer]
+          - code [ref=e1550]:
+            - generic [ref=e1551]:
+              - generic [ref=e1552]: <input
+              - text: type
+              - generic [ref=e1553]: ="hidden"
+              - text: name
+              - generic [ref=e1554]: ="setup"
+              - text: value
+              - generic [ref=e1555]: "='{ \"split_payment\" : { \"merchant_id\":10000105, \"percentage\":10, \"min\":100, \"max\":100000 } }'"
+              - text: ">"
+        - generic [ref=e1557]:
+          - heading "Split Payment calculation" [level=2] [ref=e1558]
+          - paragraph [ref=e1559]:
+            - text: 1. If both percentage and amount are specified, then the percentage will be deducted first, and then the amount will be deducted from the rest.
+            - text: "Split amount: (40,000 – (40,000/10)) – 500) = 35,500 cents"
+        - generic [ref=e1561]:
+          - heading "For example on an amount of R400 (40000 cents)" [level=5] [ref=e1564]
+          - generic [ref=e1569]:
+            - generic [ref=e1571]: "{"
+            - generic [ref=e1572]:
+              - generic [ref=e1575]: "\"split_payment\":"
+              - generic [ref=e1576]: "{"
+            - generic [ref=e1577]:
+              - generic [ref=e1581]: "\"merchant_id\":"
+              - generic [ref=e1582]: 10000105,
+            - generic [ref=e1583]:
+              - generic [ref=e1587]: "\"percentage\":"
+              - generic [ref=e1588]: 10,
+            - generic [ref=e1589]:
+              - generic [ref=e1593]: "\"amount\":"
+              - generic [ref=e1594]: 500,
+            - generic [ref=e1595]:
+              - generic [ref=e1599]: "\"min\":"
+              - generic [ref=e1600]: 100,
+            - generic [ref=e1601]:
+              - generic [ref=e1605]: "\"max\":"
+              - generic [ref=e1606]: "100000"
+            - generic [ref=e1610]: "}"
+            - generic [ref=e1612]: "}"
+        - generic [ref=e1614]:
+          - text: 2. If the split amount is smaller than the min, then the min will be used instead of the split amount.
+          - text: "Split amount: (6,000 – 5500) = 500 cents (< min) = 1000 cents"
+        - generic [ref=e1616]:
+          - heading "For example on an amount of R60 (6000 cents)" [level=5] [ref=e1619]
+          - generic [ref=e1624]:
+            - generic [ref=e1626]: "{"
+            - generic [ref=e1627]:
+              - generic [ref=e1630]: "\"split_payment\":"
+              - generic [ref=e1631]: "{"
+            - generic [ref=e1632]:
+              - generic [ref=e1636]: "\"merchant_id\":"
+              - generic [ref=e1637]: 10000105,
+            - generic [ref=e1638]:
+              - generic [ref=e1642]: "\"amount\":"
+              - generic [ref=e1643]: 5500,
+            - generic [ref=e1644]:
+              - generic [ref=e1648]: "\"min\":"
+              - generic [ref=e1649]: 1000,
+            - generic [ref=e1650]:
+              - generic [ref=e1654]: "\"max\":"
+              - generic [ref=e1655]: "100000"
+            - generic [ref=e1659]: "}"
+            - generic [ref=e1661]: "}"
+        - generic [ref=e1663]:
+          - text: 3. If the split amount is bigger than the max, then the max will be used instead of the split amount.
+          - text: "Split amount: 40,000 – (40,000/10) = 36,000 cents (> max) = 20 000 cents"
+        - generic [ref=e1665]:
+          - heading "For example on an amount of R400 (40000 cents)" [level=5] [ref=e1668]
+          - generic [ref=e1673]:
+            - generic [ref=e1675]: "{"
+            - generic [ref=e1676]:
+              - generic [ref=e1679]: "\"split_payment\":"
+              - generic [ref=e1680]: "{"
+            - generic [ref=e1681]:
+              - generic [ref=e1685]: "\"merchant_id\":"
+              - generic [ref=e1686]: 10000105,
+            - generic [ref=e1687]:
+              - generic [ref=e1691]: "\"percentage\":"
+              - generic [ref=e1692]: 10,
+            - generic [ref=e1693]:
+              - generic [ref=e1697]: "\"min\":"
+              - generic [ref=e1698]: 100,
+            - generic [ref=e1699]:
+              - generic [ref=e1703]: "\"max\":"
+              - generic [ref=e1704]: "20000"
+            - generic [ref=e1708]: "}"
+            - generic [ref=e1710]: "}"
+      - generic [ref=e1711]:
+        - generic [ref=e1712]:
+          - generic [ref=e1713]:
+            - img [ref=e1716]
+            - heading "PCI compliance" [level=1] [ref=e1722]
+          - paragraph [ref=e1723]:
+            - paragraph [ref=e1724]: Payfast is PCI DSS level 1 compliant. PCI DSS stands for Payment Card Industry Data Security Standard and is a PASA (Payment Association of South Africa) regulation in South Africa, this means any company accepting credit card payments on their website needs to comply in some way.
+        - generic [ref=e1726]:
+          - text: Outsourcing your card payments to Payfast means you do not have to be concerned about the laborious process of being PCI compliant, and can rest assured in the knowledge that card information is handled securely.
+          - text: For more information on PCI compliance you can refer our
+          - link "blog post" [ref=e1727] [cursor=pointer]:
+            - /url: https://payfast.io/blog/pci-compliance/
+          - text: ", or to the"
+          - link "PCI security standards best practices" [ref=e1728] [cursor=pointer]:
+            - /url: https://www.pcisecuritystandards.org/pdfs/best_practices_securing_ecommerce.pdf
+          - text: . You can, if need be, take the
+          - link "PCI self assessment questionaire" [ref=e1729] [cursor=pointer]:
+            - /url: https://www.pcisecuritystandards.org/documents/SAQ_A_v3.pdf
+          - text: .
+      - generic [ref=e1730]:
+        - generic [ref=e1731]:
+          - generic [ref=e1732]:
+            - img [ref=e1735]
+            - heading "Testing and tools" [level=1] [ref=e1738]
+          - paragraph [ref=e1739]:
+            - paragraph [ref=e1740]: Use our Sandbox to test your integration before going live.
+        - generic [ref=e1741]:
+          - generic [ref=e1743]:
+            - heading "SDKs & Libraries" [level=2] [ref=e1744]
+            - generic [ref=e1745]: SDKs and libraries take the complexity out of integrations by providing language-specific APIs for Payfast services.
+            - generic [ref=e1747]:
+              - generic [ref=e1749]:
+                - link [ref=e1751] [cursor=pointer]:
+                  - /url: https://github.com/PayFast/payfast-php-sdk
+                  - img [ref=e1753]
+                - heading "PHP SDK" [level=3] [ref=e1755]:
+                  - link "PHP SDK" [ref=e1756] [cursor=pointer]:
+                    - /url: https://github.com/PayFast/payfast-php-sdk
+              - generic [ref=e1758]:
+                - paragraph [ref=e1759]: The Payfast PHP SDK includes Custom Integration, Onsite Integration and all APIs.
+                - link "Github" [ref=e1760] [cursor=pointer]:
+                  - /url: https://github.com/Payfast/payfast-php-sdk
+          - generic [ref=e1761]:
+            - generic [ref=e1762]:
+              - heading "The Sandbox" [level=2] [ref=e1763]
+              - generic [ref=e1764]:
+                - text: The
+                - link "Payfast Sandbox" [ref=e1765] [cursor=pointer]:
+                  - /url: https://sandbox.payfast.co.za
+                - text: is an exact code duplicate of the production site, available for running test transactions with.
+              - generic [ref=e1766]: Any transactions made or actions performed on this system are isolated from the main production environment, while providing a realistic experience of your integration with Payfast, before going live.
+              - generic [ref=e1767]: Using our Sandbox, you will be able to test your integration, once off payments and recurring payments, as well as receive ITNs, without any money changing hands.
+            - generic [ref=e1771]:
+              - generic [ref=e1772]:
+                - heading "Sandbox URL" [level=5] [ref=e1774]
+                - button "󱀲" [ref=e1775] [cursor=pointer]
+              - code [ref=e1778]: https://sandbox.payfast.co.za
+            - generic [ref=e1779]:
+              - generic [ref=e1780]:
+                - heading "Getting started:" [level=3] [ref=e1781]
+                - text: To get started proceed to the above URL and enter your email address. The Sandbox dashboard has everything you need to test your integration. We recommend spending some time and familiarising yourself with the dashboard. There are helpful hints and tips to guide you on each page.
+              - generic [ref=e1782]:
+                - heading "Payment methods:" [level=3] [ref=e1783]
+                - text: The Sandbox allows you to test your integration without any money changing hands. The Sandbox makes use of a single payment method – a wallet with a substantially large dummy balance. While it is not possible to utilise the other payment methods in Sandbox, this will not affect your integration.
+              - generic [ref=e1784]: Sandbox is simply a tool to test your integration, the actual payment screen can not be simulated while performing test transactions. The Sandbox does not make any connections to external systems (allowing all payments to be successful).
+              - generic [ref=e1785]:
+                - heading "Payment notifications:" [level=3] [ref=e1786]
+                - text: The Sandbox will only send payment notifications once. You can view all sent notifications by navigating to ITN (Instant transaction notification) in the Sandbox.
+              - generic [ref=e1787]:
+                - heading "Setting a passphrase:" [level=3] [ref=e1788]
+                - text: This is required for all subscription and tokenization payments. It is the ‘salt’ added to your parameter string before generating the signature. To add or change your passphrase, simply visit the Account Information Tab on the left hand side and enter or edit your passphrase in the ’Salt Passphrase’ input field.
+              - generic [ref=e1789]:
+                - heading "Integration tools:" [level=3] [ref=e1790]
+                - text: This section has been built to help you detect issues with your signature and assist where possible. The signature tool tests and evaluates a given parameter string and gives a result based on your input.
+              - generic [ref=e1791]:
+                - heading "Test your integration:" [level=3] [ref=e1792]
+                - text: This section was created to see what your signature should be with all your given variables. Fill out the form and click generate signature to allow Payfast to generate the correct signature for you and then submit to Payfast Sandbox. You will have the option to send through incorrect variables to see how we respond to certain variables.
+              - generic [ref=e1793]:
+                - heading "Sandbox limitations:" [level=3] [ref=e1794]
+                - text: The Sandbox does not make any connections to external systems (allowing all payments to be successful). Because the Sandbox makes use of Payfast's own personal buyer behind the scenes, all fields containing the party table will yield Test Buyer. This will not be the case when going live.
+              - generic [ref=e1795]:
+                - heading "Recurring Billing tools:" [level=3] [ref=e1796]
+                - text: Recurring Billing transactions require a passphrase to be set.
+                - text: Subscriptions and tokenization payments completed in Sandbox can be viewed on your Sandbox account. Just like on the Payfast merchant account, you will be able to cancel, charge, pause and edit subscriptions. For tokenization payments, you will be able to charge and cancel them.
+                - text: When editing a subscription you can change the amount, the number of cycles (payments), the next payment date and the frequency.
+                - text: The subscription token does not display in the Sandbox, so be sure to capture this from the ITN!
+          - generic [ref=e1797]:
+            - generic [ref=e1798]:
+              - heading "Test transaction setup" [level=2] [ref=e1799]
+              - heading "Merchant Details:" [level=3] [ref=e1801]
+              - generic [ref=e1802]:
+                - text: To get started you can use the credentials provided in your
+                - link "Sandbox" [ref=e1803] [cursor=pointer]:
+                  - /url: https://sandbox.payfast.co.za
+                - text: ", or you can use the following test credentials:"
+              - generic [ref=e1806]:
+                - generic [ref=e1807]:
+                  - heading "Merchant Credentials" [level=5] [ref=e1809]
+                  - button "󱀲" [ref=e1810] [cursor=pointer]
+                - code [ref=e1813]: "Merchant ID: 10000100 Merchant Key: 46f0cd694581a Merchant Passphrase: jt7NOE43FZPn"
+              - generic [ref=e1814]:
+                - text: These credentials can be found on your live or Sandbox dashboard after you have logged in.
+                - text: They are unique to your account but the Sandbox merchant_id and merchant_key has no correlation to your live account.
+            - generic [ref=e1816]:
+              - heading "Sandbox URLs:" [level=5] [ref=e1819]
+              - table [ref=e1823]:
+                - rowgroup [ref=e1824]:
+                  - row "Post payment URL https://sandbox.payfast.co.za/eng/process" [ref=e1825]:
+                    - cell "Post payment URL" [ref=e1826]
+                    - cell "https://sandbox.payfast.co.za/eng/process" [ref=e1827]
+                  - row "Transaction notification URL https://sandbox.payfast.co.za/eng/query/validate" [ref=e1828]:
+                    - cell "Transaction notification URL" [ref=e1829]
+                    - cell "https://sandbox.payfast.co.za/eng/query/validate" [ref=e1830]
+            - generic [ref=e1831]:
+              - heading "Make payment:" [level=2] [ref=e1833]
+              - generic [ref=e1834]:
+                - heading "Buyer credentials:" [level=3] [ref=e1835]
+                - text: "Username: sbtu01@payfast.io"
+                - text: "Password: clientpass"
+              - generic [ref=e1836]:
+                - heading "Payfast wallet:" [level=3] [ref=e1837]
+                - text: For a once off payment, you will see the amount given for the transaction, and a Payfast wallet (which is reset to R99,999,999.99 every night). Complete the test transaction by clicking ‘Pay Now Using Your Wallet’.
+              - generic [ref=e1838]:
+                - heading "Recurring payment:" [level=3] [ref=e1839]
+                - text: For a recurring payment, you will see a message about the recurring payment, as well as a test credit card and cvv number. In order to make the test payment, select the credit card and enter the cvv number provided and click ‘Pay’.
+              - alert [ref=e1840]:
+                - generic [ref=e1843]: Subscriptions require a Sandbox account with passphrase setup.
+              - heading "Payment success:" [level=2] [ref=e1845]
+              - generic [ref=e1846]:
+                - heading "Transaction notifications:" [level=3] [ref=e1847]
+                - text: View the success transaction notification by navigating to ITN (Instant transaction notification) in the Sandbox.
+          - generic [ref=e1848]:
+            - generic [ref=e1849]:
+              - heading "Going Live" [level=2] [ref=e1850]
+              - generic [ref=e1851]:
+                - text: If you have ensured that your inputs to Payfast are correct in test transactions with the Sandbox, and have ensured that you can handle the appropriate responses, there should be no reason why the live system should perform any differently
+                - text: To make your payments live, simply switch to your live credentials and the live URLs.
+            - generic [ref=e1853]:
+              - heading "Live URLs:" [level=5] [ref=e1856]
+              - table [ref=e1860]:
+                - rowgroup [ref=e1861]:
+                  - row "Post payment URL https://www.payfast.co.za/eng/process" [ref=e1862]:
+                    - cell "Post payment URL" [ref=e1863]
+                    - cell "https://www.payfast.co.za/eng/process" [ref=e1864]
+                  - row "Transaction notification URL https://www.payfast.co.za/eng/query/validate" [ref=e1865]:
+                    - cell "Transaction notification URL" [ref=e1866]
+                    - cell "https://www.payfast.co.za/eng/query/validate" [ref=e1867]
+            - generic [ref=e1868]:
+              - generic [ref=e1869]:
+                - heading "Merchant credentials:" [level=3] [ref=e1870]
+                - text: Make sure that you have switched to your live Merchant ID and Merchant Key.
+              - generic [ref=e1871]:
+                - heading "Test transactions:" [level=3] [ref=e1872]
+                - text: Any payments transferred while testing live will appear in your Payfast wallet. It can then simply be paid out, once you are finished with the testing.
+                - text: As per our requirements, you will not be able to process payments with an amount less than ZAR 5.00
+                - text: Please note that any “test” transactions processed this way will be subject to the agreed transaction fees which can unfortunately not be refunded.
+      - generic [ref=e1873]:
+        - generic [ref=e1874]:
+          - generic [ref=e1875]:
+            - img [ref=e1878]
+            - heading "Widgets" [level=1] [ref=e1881]
+          - paragraph [ref=e1882]:
+            - paragraph [ref=e1883]: Add one of our Payfast widgets onto your website product page to display useful payment information.
+        - generic [ref=e1884]:
+          - heading "MoreTyme" [level=2] [ref=e1885]
+          - generic [ref=e1887]:
+            - generic [ref=e1888]:
+              - text: MoreTyme Add-ons for Your Website
+              - generic [ref=e1889]:
+                - text: Create a personalised widget for your product web pages and increase sales on your site.
+                - text: The widget informs your customers how much they need to pay upfront and for the next two payments with MoreTyme.
+            - generic [ref=e1890]:
+              - paragraph [ref=e1891]:
+                - text: "Preview:"
+                - link "Edit Widget" [ref=e1893] [cursor=pointer]:
+                  - /url: "#"
+              - generic [ref=e1897]:
+                - generic [ref=e1898]: Pay R 333.34 now with
+                - img "PayFast & MoreTyme" [ref=e1900] [cursor=pointer]
+                - generic [ref=e1901]:
+                  - generic [ref=e1902]: and the rest in 2 interest-free payments.
+                  - link "Learn More" [ref=e1903] [cursor=pointer]:
+                    - /url: https://www.tymebank.co.za/personal-banking/accounts/moretyme/
+            - generic [ref=e1904]:
+              - generic [ref=e1905]:
+                - paragraph [ref=e1906]: "Code Snippet:"
+                - generic [ref=e1907]: Copy the code snippet into your website linked to the relevant product display, and simply change the amount to the price of the product displayed.
+                - list [ref=e1908]:
+                  - listitem [ref=e1909] [cursor=pointer]:
+                    - generic [ref=e1910]: Custom
+                  - listitem [ref=e1911] [cursor=pointer]:
+                    - generic [ref=e1912]: Shopify
+                  - listitem [ref=e1913] [cursor=pointer]:
+                    - generic [ref=e1914]: WooCommerce
+                - generic [ref=e1915]:
+                  - text: "<script async src=\"https://content.payfast.io/widgets/moretyme/widget.min.js?amount={product_price}\" type=\"text/javascript\"></script>"
+                  - button "Copy code" [ref=e1916] [cursor=pointer]:
+                    - generic [ref=e1918]: Copy code
+              - separator [ref=e1919]
+              - generic [ref=e1920]:
+                - text: MoreTyme Marketing Banner
+                - generic [ref=e1921]: Download MoreTyme marketing material to promote this buy now, pay later payment method on your website.
+                - link "Download" [ref=e1923] [cursor=pointer]:
+                  - /url: https://content.payfast.io/widgets/moretyme/assets/MoreTyme_Marketing_Banner_Pack.zip
+                  - generic [ref=e1925]:
+                    - img [ref=e1926]
+                    - text: Download
+      - generic [ref=e1928]:
+        - generic [ref=e1929]:
+          - generic [ref=e1930]:
+            - img [ref=e1933]
+            - heading "Ports and IP addresses" [level=1] [ref=e1938]
+          - paragraph [ref=e1939]:
+            - paragraph [ref=e1940]: The following information can be used by system administrators if any changes need to be made to your servers when integrating with Payfast.
+        - generic [ref=e1941]:
+          - heading "Ports" [level=2] [ref=e1942]
+          - generic [ref=e1943]:
+            - text: When communicating with the notify url via the ITN, Payfast makes use of ports
+            - strong [ref=e1944]: 80, 8080, 8081
+            - text: and
+            - strong [ref=e1945]: "443"
+            - text: only.
+        - generic [ref=e1946]:
+          - heading "IP addresses Updated" [level=2] [ref=e1947]:
+            - text: IP addresses
+            - generic [ref=e1949]: Updated
+          - generic [ref=e1950]: These are the Payfast server IPs. Our information can come from any of these IPs and we recommend white-listing all of these IPs.
+        - generic [ref=e1954]:
+          - generic [ref=e1955]:
+            - heading "IP Addresses" [level=5] [ref=e1957]
+            - button "󱀲" [ref=e1958] [cursor=pointer]
+          - code [ref=e1961]: 197.97.145.144/28 (197.97.145.144 - 197.97.145.159) 41.74.179.192/27 (41.74.179.192 – 41.74.179.223) 102.216.36.0/28 (102.216.36.0 - 102.216.36.15) 102.216.36.128/28 (102.216.36.128 - 102.216.36.143) 144.126.193.139
+      - generic [ref=e1963]:
+        - generic [ref=e1964]:
+          - img [ref=e1967]
+          - heading "FAQs" [level=1] [ref=e1971]
+        - paragraph [ref=e1972]:
+          - paragraph [ref=e1973]:
+            - text: If your questions are not answered here, please see our
+            - link "Knowledge Base" [ref=e1974] [cursor=pointer]:
+              - /url: https://support.payfast.co.za/portal/en/kb
+            - text: .
+      - generic [ref=e1975]:
+        - generic [ref=e1976]: 2026 — Payfast | All right reserved.
+        - generic [ref=e1977]: PCI-DSS Level 1 Service Provider Compliant
+        - generic [ref=e1978]: v0.1.24

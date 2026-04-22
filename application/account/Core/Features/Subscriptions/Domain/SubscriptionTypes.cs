@@ -1,37 +1,26 @@
 using JetBrains.Annotations;
-using SharedKernel.StronglyTypedIds;
 
 namespace Account.Features.Subscriptions.Domain;
-
-[PublicAPI]
-[IdPrefix("cus")]
-[JsonConverter(typeof(StronglyTypedIdJsonConverter<string, StripeCustomerId>))]
-public sealed record StripeCustomerId(string Value) : StronglyTypedString<StripeCustomerId>(Value)
-{
-    public override string ToString()
-    {
-        return Value;
-    }
-}
-
-[PublicAPI]
-[IdPrefix("sub")]
-[JsonConverter(typeof(StronglyTypedIdJsonConverter<string, StripeSubscriptionId>))]
-public sealed record StripeSubscriptionId(string Value) : StronglyTypedString<StripeSubscriptionId>(Value)
-{
-    public override string ToString()
-    {
-        return Value;
-    }
-}
 
 [PublicAPI]
 [JsonConverter(typeof(JsonStringEnumConverter))]
 public enum SubscriptionPlan
 {
-    Basis = 0,
-    Standard = 1,
-    Premium = 2
+    Trial = 0,
+    Starter = 1,
+    Standard = 2,
+    Premium = 3
+}
+
+[PublicAPI]
+[JsonConverter(typeof(JsonStringEnumConverter))]
+public enum SubscriptionStatus
+{
+    Trial = 0,
+    Active = 1,
+    PastDue = 2,
+    Cancelled = 3,
+    Expired = 4
 }
 
 [PublicAPI]
@@ -53,14 +42,4 @@ public enum PaymentTransactionStatus
     Failed,
     Pending,
     Refunded
-}
-
-[PublicAPI]
-[JsonConverter(typeof(JsonStringEnumConverter))]
-public enum StripeEventStatus
-{
-    Pending,
-    Processed,
-    Ignored,
-    Failed
 }

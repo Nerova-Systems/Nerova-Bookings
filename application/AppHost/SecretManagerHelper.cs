@@ -47,7 +47,10 @@ public static class SecretManagerHelper
             {
                 var passwordGenerator = new GenerateParameterDefault
                 {
-                    MinLower = 5, MinUpper = 5, MinNumeric = 3, MinSpecial = 3
+                    MinLower = 5,
+                    MinUpper = 5,
+                    MinNumeric = 3,
+                    MinSpecial = 3
                 };
                 password = passwordGenerator.GetDefaultValue();
                 SaveSecrectToDotNetUserSecrets(secretName, password);

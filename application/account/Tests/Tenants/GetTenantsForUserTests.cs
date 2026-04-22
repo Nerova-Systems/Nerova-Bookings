@@ -31,7 +31,7 @@ public sealed class GetTenantsForUserTests : EndpointBaseTest<AccountDbContext>
                 ("name", tenant2Name),
                 ("state", nameof(TenantState.Active)),
                 ("logo", """{"Url":null,"Version":0}"""),
-                ("plan", nameof(SubscriptionPlan.Basis))
+                ("plan", nameof(SubscriptionPlan.Trial))
             ]
         );
 
@@ -106,7 +106,7 @@ public sealed class GetTenantsForUserTests : EndpointBaseTest<AccountDbContext>
                 ("name", "Other Tenant"),
                 ("state", nameof(TenantState.Active)),
                 ("logo", """{"Url":null,"Version":0}"""),
-                ("plan", nameof(SubscriptionPlan.Basis))
+                ("plan", nameof(SubscriptionPlan.Trial))
             ]
         );
 
@@ -152,7 +152,7 @@ public sealed class GetTenantsForUserTests : EndpointBaseTest<AccountDbContext>
                 ("name", "Other User Tenant"),
                 ("state", nameof(TenantState.Active)),
                 ("logo", """{"Url":null,"Version":0}"""),
-                ("plan", nameof(SubscriptionPlan.Basis))
+                ("plan", nameof(SubscriptionPlan.Trial))
             ]
         );
 
@@ -199,7 +199,7 @@ public sealed class GetTenantsForUserTests : EndpointBaseTest<AccountDbContext>
                 ("name", tenant2Name),
                 ("state", nameof(TenantState.Active)),
                 ("logo", """{"Url":null,"Version":0}"""),
-                ("plan", nameof(SubscriptionPlan.Basis))
+                ("plan", nameof(SubscriptionPlan.Trial))
             ]
         );
 

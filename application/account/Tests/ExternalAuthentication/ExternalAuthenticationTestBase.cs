@@ -94,9 +94,9 @@ public abstract class ExternalAuthenticationTestBase : IDisposable
                 builder.ConfigureAppConfiguration((_, config) =>
                     {
                         config.AddInMemoryCollection(new Dictionary<string, string?>
-                            {
-                                ["OAuth:AllowMockProvider"] = "true"
-                            }
+                        {
+                            ["OAuth:AllowMockProvider"] = "true"
+                        }
                         );
                     }
                 );

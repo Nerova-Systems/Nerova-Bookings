@@ -18,12 +18,12 @@ public sealed class ExternalAvatarClientTests
     {
         // Arrange
         var handler = new MockHttpMessageHandler(new HttpResponseMessage(HttpStatusCode.OK)
+        {
+            Content = new ByteArrayContent([0x89, 0x50, 0x4E, 0x47])
             {
-                Content = new ByteArrayContent([0x89, 0x50, 0x4E, 0x47])
-                {
-                    Headers = { ContentType = new MediaTypeHeaderValue("image/png") }
-                }
+                Headers = { ContentType = new MediaTypeHeaderValue("image/png") }
             }
+        }
         );
         var httpClient = new HttpClient(handler);
         var logger = Substitute.For<ILogger<ExternalAvatarClient>>();

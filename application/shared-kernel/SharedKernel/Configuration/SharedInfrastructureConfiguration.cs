@@ -70,10 +70,10 @@ public static class SharedInfrastructureConfiguration
                 var secretClient = new SecretClient(keyVaultUri, DefaultAzureCredential);
 
                 builder.Configuration.AddAzureKeyVault(secretClient, new AzureKeyVaultConfigurationOptions
-                    {
-                        Manager = new KeyVaultSecretManager(),
-                        ReloadInterval = TimeSpan.FromMinutes(1)
-                    }
+                {
+                    Manager = new KeyVaultSecretManager(),
+                    ReloadInterval = TimeSpan.FromMinutes(1)
+                }
                 );
             }
 

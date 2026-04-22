@@ -18,10 +18,6 @@ public sealed class SubscriptionConfiguration : IEntityTypeConfiguration<Subscri
         builder.MapStronglyTypedUuid<Subscription, SubscriptionId>(s => s.Id);
         builder.MapStronglyTypedLongId<Subscription, TenantId>(s => s.TenantId);
         builder.HasOne<Tenant>().WithMany().HasForeignKey(s => s.TenantId);
-        builder.MapStronglyTypedNullableId<Subscription, StripeCustomerId, string>(s => s.StripeCustomerId);
-        builder.MapStronglyTypedNullableId<Subscription, StripeSubscriptionId, string>(s => s.StripeSubscriptionId);
-
-        builder.Property(s => s.CurrentPriceAmount).HasPrecision(18, 2);
 
         builder.Property(s => s.PaymentTransactions)
             .HasColumnType("jsonb")
@@ -34,15 +30,6 @@ public sealed class SubscriptionConfiguration : IEntityTypeConfiguration<Subscri
                     c => c.Aggregate(0, (a, v) => HashCode.Combine(a, v.GetHashCode())),
                     c => c
                 )
-            );
-
-        builder.OwnsOne(s => s.PaymentMethod, b => b.ToJson());
-
-        builder.Property(s => s.BillingInfo)
-            .HasColumnType("jsonb")
-            .HasConversion(
-                v => v == null ? null : JsonSerializer.Serialize(v, JsonSerializerOptions),
-                v => v == null ? null : JsonSerializer.Deserialize<BillingInfo>(v, JsonSerializerOptions)
             );
     }
 }

@@ -136,7 +136,7 @@ public sealed class GetUserSessionsTests : EndpointBaseTest<AccountDbContext>
                 ("name", name),
                 ("state", "Active"),
                 ("logo", """{"Url":null,"Version":0}"""),
-                ("plan", nameof(SubscriptionPlan.Basis))
+                ("plan", nameof(SubscriptionPlan.Trial))
             ]
         );
 

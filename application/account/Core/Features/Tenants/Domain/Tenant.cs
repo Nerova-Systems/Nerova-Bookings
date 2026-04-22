@@ -8,7 +8,7 @@ public sealed class Tenant : SoftDeletableAggregateRoot<TenantId>
     private Tenant() : base(TenantId.NewId())
     {
         State = TenantState.Active;
-        Plan = SubscriptionPlan.Basis;
+        Plan = SubscriptionPlan.Trial;
         Logo = new Logo();
     }
 

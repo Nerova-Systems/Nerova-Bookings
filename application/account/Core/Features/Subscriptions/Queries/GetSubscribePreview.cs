@@ -1,6 +1,5 @@
 using Account.Features.Subscriptions.Domain;
 using Account.Features.Users.Domain;
-using Account.Integrations.Stripe;
 using FluentValidation;
 using JetBrains.Annotations;
 using SharedKernel.Cqrs;
@@ -18,11 +17,11 @@ public sealed class GetSubscribePreviewValidator : AbstractValidator<GetSubscrib
 {
     public GetSubscribePreviewValidator()
     {
-        RuleFor(x => x.Plan).NotEqual(SubscriptionPlan.Basis).WithMessage("Cannot preview subscription for the Basis plan.");
+        RuleFor(x => x.Plan).NotEqual(SubscriptionPlan.Trial).WithMessage("Cannot preview subscription for the Trial plan.");
     }
 }
 
-public sealed class GetSubscribePreviewHandler(ISubscriptionRepository subscriptionRepository, StripeClientFactory stripeClientFactory, IExecutionContext executionContext)
+public sealed class GetSubscribePreviewHandler(ISubscriptionRepository subscriptionRepository, IExecutionContext executionContext)
     : IRequestHandler<GetSubscribePreviewQuery, Result<SubscribePreviewResponse>>
 {
     public async Task<Result<SubscribePreviewResponse>> Handle(GetSubscribePreviewQuery query, CancellationToken cancellationToken)
@@ -32,20 +31,9 @@ public sealed class GetSubscribePreviewHandler(ISubscriptionRepository subscript
             return Result<SubscribePreviewResponse>.Forbidden("Only owners can manage subscriptions.");
         }
 
-        var subscription = await subscriptionRepository.GetCurrentAsync(cancellationToken);
+        _ = await subscriptionRepository.GetCurrentAsync(cancellationToken);
 
-        if (subscription.StripeCustomerId is null)
-        {
-            return Result<SubscribePreviewResponse>.BadRequest("Billing information must be saved before previewing subscription.");
-        }
-
-        var stripeClient = stripeClientFactory.GetClient();
-        var preview = await stripeClient.GetCheckoutPreviewAsync(subscription.StripeCustomerId, query.Plan, cancellationToken);
-        if (preview is null)
-        {
-            return Result<SubscribePreviewResponse>.BadRequest("Failed to get subscription preview from Stripe.");
-        }
-
-        return new SubscribePreviewResponse(preview.TotalAmount, preview.Currency, preview.TaxAmount);
+        // TODO: Implement PayFast subscribe preview in pf-03
+        return Result<SubscribePreviewResponse>.BadRequest("Subscribe preview not yet available.");
     }
 }

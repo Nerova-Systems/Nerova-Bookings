@@ -2,13 +2,12 @@ using Account.Database;
 using Account.Features.EmailAuthentication.Shared;
 using Account.Features.ExternalAuthentication;
 using Account.Features.ExternalAuthentication.Shared;
-using Account.Features.Subscriptions.Shared;
 using Account.Features.Users.Shared;
 using Account.Integrations.Gravatar;
 using Account.Integrations.OAuth;
 using Account.Integrations.OAuth.Google;
 using Account.Integrations.OAuth.Mock;
-using Account.Integrations.Stripe;
+using Account.Integrations.PayFast;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using SharedKernel.Configuration;
@@ -24,6 +23,8 @@ public static class Configuration
     {
         public IHostApplicationBuilder AddAccountInfrastructure()
         {
+            builder.Services.Configure<PayFastSettings>(builder.Configuration.GetSection("PayFast"));
+
             // Infrastructure is configured separately from other Infrastructure services to allow mocking in tests
             return builder
                 .AddSharedInfrastructure<AccountDbContext>("account-database")
@@ -52,11 +53,7 @@ public static class Configuration
             services.AddKeyedScoped<IOAuthProvider, MockOAuthProvider>("mock-google");
             services.AddScoped<OAuthProviderFactory>();
 
-            services.AddMemoryCache();
-            services.AddKeyedScoped<IStripeClient, StripeClient>("stripe");
-            services.AddKeyedScoped<IStripeClient, MockStripeClient>("mock-stripe");
-            services.AddKeyedScoped<IStripeClient, UnconfiguredStripeClient>("unconfigured-stripe");
-            services.AddScoped<StripeClientFactory>();
+            services.AddHttpClient<PayFastClient>(client => { client.Timeout = TimeSpan.FromSeconds(30); });
 
             return services
                 .AddSharedServices<AccountDbContext>([Assembly])
@@ -64,7 +61,6 @@ public static class Configuration
                 .AddScoped<CompleteEmailConfirmation>()
                 .AddScoped<AvatarUpdater>()
                 .AddScoped<UserInfoFactory>()
-                .AddScoped<ProcessPendingStripeEvents>()
                 .AddScoped<ExternalAuthenticationService>()
                 .AddScoped<ExternalAuthenticationHelper>();
         }
