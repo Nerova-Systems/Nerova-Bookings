@@ -1,7 +1,7 @@
 ---
 name: backend-engineer
 description: Called by coordinator for backend development tasks.
-model: claude-sonnet-4-6
+model: inherit
 color: green
 ---
 

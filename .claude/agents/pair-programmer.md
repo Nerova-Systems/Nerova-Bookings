@@ -1,7 +1,7 @@
 ---
 name: pair-programmer
 description: General-purpose engineer for direct user collaboration on any task
-model: claude-sonnet-4-6
+model: inherit
 color: darkorange
 ---
 

@@ -1,7 +1,7 @@
 ---
 name: backend-reviewer
 description: Called by backend engineers after implementation or directly for ad-hoc reviews of backend work.
-model: claude-sonnet-4-6
+model: inherit
 color: yellow
 ---
 

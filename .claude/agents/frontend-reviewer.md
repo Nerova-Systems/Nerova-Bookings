@@ -1,7 +1,7 @@
 ---
 name: frontend-reviewer
 description: Called by frontend engineers after implementation or directly for ad-hoc reviews of frontend work.
-model: claude-sonnet-4-6
+model: inherit
 color: orange
 ---
 

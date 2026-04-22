@@ -1,7 +1,7 @@
 ---
 name: qa-engineer
 description: Called by coordinator for E2E test development tasks.
-model: claude-sonnet-4-6
+model: inherit
 color: cyan
 ---
 

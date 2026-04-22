@@ -1,7 +1,7 @@
 ---
 name: integrations-reviewer
 description: Called by integrations engineers after implementation or directly for ad-hoc reviews of iPaaS work.
-model: claude-sonnet-4-6
+model: inherit
 color: teal
 ---
 

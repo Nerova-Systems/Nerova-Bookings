@@ -1,7 +1,7 @@
 ---
 name: integrations-engineer
 description: Called by coordinator for iPaaS integration development tasks. Implements Java/Spring Boot/Apache Camel routes.
-model: claude-sonnet-4-6
+model: inherit
 color: teal
 ---
 

@@ -1,7 +1,7 @@
 ---
 name: frontend-engineer
 description: Called by coordinator for frontend development tasks.
-model: claude-sonnet-4-6
+model: inherit
 color: blue
 ---
 

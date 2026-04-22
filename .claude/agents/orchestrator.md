@@ -1,7 +1,7 @@
 ---
 name: orchestrator
 description: End-to-end delivery coordinator. Never implements code. Controls workflow as a state machine, delegates to specialized agents, and enforces quality gates.
-model: claude-sonnet-4-6
+model: inherit
 color: purple
 ---
 
