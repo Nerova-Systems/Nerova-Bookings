@@ -58,8 +58,8 @@ Use developer-cli MCP tools — never raw `dotnet`/`npm`:
 
 ## Zero-Tolerance Rules
 
-1. No raw external API calls from `main` or `account` SCS — all third-party traffic via iPaaS Camel routes.
-2. No WhatsApp, PayFast, Google Calendar, or Twilio logic in `main` Core directly.
+1. No raw external API calls from `main` or `account` SCS for WhatsApp, Google Calendar, or Twilio — these route via iPaaS Camel. **Exception: PayFast is called directly from both `account` Core (subscription billing) and `main` Core (appointment payments) — it is not an iPaaS route.**
+2. No WhatsApp, Google Calendar, or Twilio logic in `main` Core directly — use iPaaS.
 3. No `SaveChanges()` calls in .NET handlers — `UnitOfWorkPipelineBehavior` handles commits.
 4. No hard-coded English strings in JSX — all user-visible text via `t()`.
 5. No `page.waitForTimeout()` in Playwright tests.

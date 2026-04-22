@@ -134,7 +134,7 @@ Base unit 8px. Section padding 80–96px vertical. Cards 12–24px internal.
 ## 6. Architecture: iPaaS SCS (`application/integrations/`)
 
 ### Purpose
-All third-party integrations route through the iPaaS. No SCS calls Twilio, PayFast, Google, or Microsoft directly — they publish internal events or call the integration layer's REST API.
+All third-party integrations route through the iPaaS. No SCS calls Twilio, Google, or Microsoft directly — they publish internal events or call the integration layer's REST API.
 
 ### Technology
 - Java 21, Spring Boot 3, Apache Camel 4
@@ -158,8 +158,7 @@ application/integrations/
 │   │   │   └── OutlookCalendarRoute.java
 │   │   ├── twilio/
 │   │   │   └── TwilioWhatsAppRoute.java
-│   │   └── payfast/
-│   │       └── PayFastWebhookRoute.java
+│   │   └── (payfast connector deferred — not an iPaaS route)
 │   ├── credentials/
 │   │   ├── CredentialVault.java         # Azure Key Vault abstraction
 │   │   └── LocalDevCredentialVault.java # AES-256 fallback for dev
@@ -603,14 +602,8 @@ Frontend:
 
 ### Phase 5 — PayFast Payments
 
-**Camel Route (integrations SCS):**
-
-`PayFastWebhookRoute`:
-- Listens on `POST /api/integrations/payfast/itn`
-- Verifies signature: MD5 hash of sorted `key=value` pairs + passphrase (from credential vault)
-- Checks `payment_status` field: `COMPLETE` → forward to `POST /api/main/payments/payfast/itn`
-- Idempotency: hash the `m_payment_id` — skip if already processed
-- Dead-letter queue for failed verifications
+> **Note:** PayFast is called directly from the `main` SCS — it is not routed through iPaaS Camel.
+> PayFast is exclusive to this platform; no multi-tenant connector management is needed.
 
 **main SCS:**
 
@@ -618,24 +611,24 @@ Frontend:
 - `TenantId`, `AppointmentId`, `Amount`, `Currency`, `PayFastPaymentId` (their `pf_payment_id`), `MerchantPaymentId` (our generated ID), `Status` (Pending/Captured/Failed/Refunded), `CapturedAt`, `RefundedAt`, `RefundReason`, `PayFastRawResponse` (JSONB)
 - ID prefix: `pay`
 
-`HandlePayFastItn` command — updates `Payment` and transitions `Appointment` to `Confirmed` (or `Cancelled` on failure)
+`HandlePayFastItn` command — receives ITN from PayFast directly, verifies signature, updates `Payment` and transitions `Appointment` to `Confirmed` (or `Cancelled` on failure)
 
 `InitiatePayment` command — generates `MerchantPaymentId`, builds PayFast payment URL, returns redirect URL
 
-`RefundPayment` command — calls PayFast refund API (via iPaaS HTTP route)
+`RefundPayment` command — calls PayFast refund API directly from `main` Core
 
 **PayFast integration specifics:**
 - Sandbox URL: `https://sandbox.payfast.co.za/eng/process`
 - Live URL: `https://www.payfast.co.za/eng/process`
-- Merchant ID + Merchant Key + Passphrase stored in iPaaS credential vault
-- ITN webhook endpoint: `POST /api/main/payments/payfast/itn` (no auth, signature-verified)
+- Merchant ID + Merchant Key + Passphrase stored in AppHost secrets (same pattern as `account` SCS)
+- ITN webhook: `POST /api/main/payments/payfast/itn` (no auth, signature-verified using MD5 + passphrase)
 - Payment required if `ServiceType.Price > 0` and `ServiceType.PaymentTiming = Before`
 - Booking flow: slot selection → booking form → redirect to PayFast → ITN → confirmation
 
 **API endpoints:**
 ```
 POST /api/main/payments/initiate             (creates payment intent, returns redirect URL)
-POST /api/main/payments/payfast/itn          (PayFast webhook — no auth)
+POST /api/main/payments/payfast/itn          (PayFast ITN webhook — no auth, signature-verified)
 POST /api/main/payments/{id}/refund
 GET  /api/main/payments                      (list for dashboard)
 GET  /api/main/payments/{id}
@@ -900,7 +893,7 @@ Slow operations (Aspire restart, backend format/lint, E2E) → dispatch as paral
 | Twilio sends free-text `Body` to all appointments — rejected outside 24h window | Always use `ContentSid` for business-initiated messages |
 | Zero opt-in / consent tracking | `WhatsAppOptIn` aggregate, POPIA-compliant |
 | Nango inline in `main` Core/Integrations | All third-party calls go through iPaaS Camel routes |
-| Paystack wired directly in `main` Core | PayFast via iPaaS Camel route + ITN webhook verification |
+| Paystack wired directly in `main` Core | PayFast called directly from `main` Core with ITN signature verification |
 | No idempotency on Twilio or payment calls | Idempotency keys on all external calls |
 | `DisconnectWhatsApp` didn't call Twilio — tenant kept paying | Disconnect releases Twilio number via iPaaS route |
 | WhatsApp "flows" UI accepted config but backend never read it at send time | No flow UI until backend is fully implemented |
@@ -1045,8 +1038,8 @@ You are a **backend reviewer** in the Nerova Bookings project. Review .NET backe
 - [ ] Validator: covers all required fields with sensible max lengths
 - [ ] API endpoint: correct HTTP method, registered in correct endpoint group, auth applied
 - [ ] Tests: happy path + validation failure + not-found + wrong-tenant minimum
-- [ ] No direct external API calls — all third-party traffic via iPaaS Camel routes
-- [ ] No `WhatsApp`, `PayFast`, or `Calendar` logic in `main` Core directly
+- [ ] No direct external API calls for WhatsApp, Calendar, or Twilio — those route via iPaaS (PayFast is exempt — called directly from `account` and `main` Core)
+- [ ] No `WhatsApp` or `Calendar` logic in `main` Core directly (PayFast is allowed)
 
 ## Output
 Return exactly one of:
