@@ -73,7 +73,7 @@ export function DowngradeBanner({
   );
 }
 
-export function StripeNotConfiguredBanner() {
+export function BillingNotConfiguredBanner() {
   return (
     <div className="mb-6 flex items-center gap-3 rounded-lg border border-border bg-muted/50 p-4 text-sm text-muted-foreground">
       <AlertTriangleIcon className="size-4 shrink-0" />

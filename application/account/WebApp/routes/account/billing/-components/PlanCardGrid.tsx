@@ -43,7 +43,7 @@ export function PlanCardGrid({
 }: Readonly<PlanCardGridProps>) {
   return (
     <div className="grid gap-4 lg:grid-cols-3">
-      {[Plans.Basis, Plans.Standard, Plans.Premium].map((plan) => {
+      {[Plans.Starter, Plans.Standard, Plans.Premium].map((plan) => {
         const planItem = plans?.find((p) => p.plan === plan);
         const taxExclusive = planItem != null && !planItem.taxInclusive;
         return (

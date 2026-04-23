@@ -1,6 +1,6 @@
 # Nerova Bookings — Master Product & Technical Plan
 
-> Transfer this file to the root of the new codebase. It is the authoritative reference for what we are building, why, and how.
+> This file is the authoritative reference for what we are building, why, and how in the current Nerova Bookings repository.
 
 ---
 
@@ -18,6 +18,10 @@ This means:
 - Every integration (WhatsApp, calendar, payments) must work out-of-the-box the moment a tenant enables it.
 - The UI is designed for confidence, not complexity.
 
+**Interpretation:** "Zero manual configuration" does not mean the owner never enters business data. It means the app avoids arbitrary workflow builders and expert-only setup. Services, hours, staff, payment preferences, WhatsApp sender setup, and calendar connections are configured through guided defaults and short setup screens.
+
+**Primary booking surface:** bookings happen inside each tenant's WhatsApp chatbot using professional, prebuilt WhatsApp Flows. Nerova Bookings does not rely on a platform-hosted public booking page as the primary customer experience. The dashboard is for business owners and staff; WhatsApp is for clients.
+
 ### Target Markets
 - **Primary:** African Countries, especially South Africa (POPIA compliance, WhatsApp ubiquity, PayFast dominance)
 - **Secondary:** UK, US, Australia (GDPR compliance, Twilio/Paystack support)
@@ -27,11 +31,50 @@ This means:
 - **GDPR (UK/EU):** Same requirements where applicable
 - **No live tenants yet** — dev/staging only. Migrations can be drop-and-rebuild without backfill.
 
+### MVP Scope Guardrails
+
+The first usable release must prove the core booking loop before platform-level integration infrastructure is built.
+
+**MVP focus:**
+- Business onboarding with sensible defaults
+- Services
+- Business hours and blocked times
+- Per-tenant WhatsApp chatbot setup
+- Professional WhatsApp Flow-based booking journey
+- WhatsApp inbound message and Flow submission handling
+- Appointments dashboard
+- Clients created from bookings
+- PayFast upfront payment support for paid services
+- WhatsApp booking confirmation, cancellation, reminder, and management messages
+- Nango-powered calendar connection for busy-time import only
+
+**Explicitly deferred until after MVP:**
+- Platform-hosted public web booking page
+- Self-built Apache Camel iPaaS
+- Full integrations dashboard
+- Full two-way Google/Outlook calendar sync
+- External calendar event writes and conflict-resolution UI
+- Waitlist
+- Insights
+- API keys
+- Webhooks
+- Advanced connector health operations
+
+**MVP review questions to answer before implementation:**
+1. Should MVP support solo businesses only, or must it include staff/team scheduling from day one?
+2. Are locations required in MVP, or can MVP launch with one default location plus business address?
+3. Is PayFast required for every paid booking at launch, or can MVP support unpaid bookings first and paid bookings shortly after?
+4. Should calendar integration only block unavailable time in MVP, with outbound event creation deferred?
+5. Should each tenant use a tenant-owned WhatsApp sender from day one, or can MVP use a platform-owned sender while onboarding is proven?
+6. What parts of the WhatsApp Flow are customizable in MVP: branding/tone only, service-specific questions, cancellation policy, or custom fields?
+7. Should appointment management happen entirely in WhatsApp, or should WhatsApp send a secure fallback management link for complex changes?
+8. What countries are truly launch markets for MVP: South Africa only, or South Africa plus one secondary market?
+
 ---
 
 ## 2. Repository Base
 
-Clone [PlatformPlatform](https://github.com/platformplatform/PlatformPlatform) and rename throughout.
+This repository is based on [PlatformPlatform](https://github.com/platformplatform/PlatformPlatform). Do not restart by cloning a new codebase unless explicitly decided later. Stabilise and extend the current repository.
 
 **What the boilerplate provides (do not rebuild):**
 - Multi-tenant account SCS (`application/account/`) — tenant creation, user management, login/signup
@@ -62,7 +105,7 @@ booking-saas/
 ├── application/
 │   ├── account/           # Boilerplate — tenant + user management (extend only)
 │   ├── back-office/       # Boilerplate — support/admin tools (extend only)
-│   ├── integrations/      # NEW: Apache Camel iPaaS SCS (Java 21 + Spring Boot 3)
+│   ├── integrations/      # POST-MVP: Apache Camel iPaaS SCS (Java 21 + Spring Boot 3)
 │   ├── main/              # Nerova Bookings core SCS (.NET 10 + React)
 │   ├── shared-kernel/     # Boilerplate — extend only
 │   ├── shared-webapp/     # Boilerplate — extend only
@@ -87,7 +130,8 @@ booking-saas/
 | Messaging | MediatR pipeline (command/query handlers) |
 | Validation | FluentValidation |
 | Auth | JWT, PlatformPlatform's built-in auth pipeline |
-| iPaaS SCS | Java 21, Spring Boot 3, Apache Camel 4 |
+| MVP integrations | Nango for Google/Outlook calendar OAuth, proxying, and busy-time sync |
+| Post-MVP iPaaS SCS | Java 21, Spring Boot 3, Apache Camel 4 |
 | Frontend | React 19, TypeScript 5, TanStack Router (file-based) |
 | API Client | openapi-fetch (`api.useQuery`, `api.useMutation`) |
 | Forms | React Aria Components + `mutationSubmitter` pattern |
@@ -131,10 +175,40 @@ Base unit 8px. Section padding 80–96px vertical. Cards 12–24px internal.
 
 ---
 
-## 6. Architecture: iPaaS SCS (`application/integrations/`)
+## 6. Architecture: Integrations
 
 ### Purpose
-All third-party integrations route through the iPaaS. No SCS calls Twilio, Google, or Microsoft directly — they publish internal events or call the integration layer's REST API.
+Integrations must be isolated behind an internal boundary so the booking domain does not become coupled to third-party SDKs or provider-specific API details.
+
+For MVP, calendar integrations use **Nango** for OAuth, token refresh, provider proxying, and sync/webhook lifecycle. The self-built Apache Camel iPaaS remains the post-MVP target if integration complexity, scale, or cost justifies owning that infrastructure.
+
+No domain handler should call Google or Microsoft directly. Handlers call an internal calendar integration abstraction, which is implemented with Nango for MVP and can later be backed by a self-built iPaaS.
+
+WhatsApp is the primary customer booking channel. MVP uses an internal WhatsApp booking boundary for inbound messages, Flow delivery, Flow submissions, opt-in, booking creation, payment handoff, and appointment management. If multi-provider messaging or tenant-owned sender operations become complex enough, move this boundary behind the same post-MVP iPaaS.
+
+PayFast remains a direct platform payment integration because it is core to the South African product and not a tenant-managed connector.
+
+### MVP: Nango Calendar Boundary
+
+MVP calendar scope is **busy-time import only**:
+- User connects Google Calendar or Outlook via Nango.
+- `main` stores the Nango connection ID, provider, selected calendar, status, last sync timestamp, and last error.
+- Nango sync/webhook events notify `main`.
+- `main` imports external busy periods into internal calendar-block records.
+- Slot availability checks internal appointments, blocked times, and imported busy periods.
+- MVP does not write Nerova appointments back to external calendars unless explicitly approved later.
+
+### MVP: WhatsApp Booking Boundary
+
+MVP WhatsApp scope:
+- Each tenant has a WhatsApp chatbot entry point.
+- The chatbot sends professional, prebuilt WhatsApp Flows for service selection, slot selection, client details, opt-in, and confirmation.
+- Flow structure is generated from Nerova service, location, schedule, payment, and business-profile data. Tenants do not build arbitrary flows.
+- Flow customization is limited to safe business settings such as display name, logo/profile data, service-specific booking questions, cancellation policy, and tone. The core flow logic remains platform-owned.
+- Flow submissions call `main`, which validates availability, creates appointments, creates clients, records opt-in, and starts payment where required.
+- Appointment management happens through WhatsApp conversation steps and/or secure management tokens when a fallback link is unavoidable.
+
+### Post-MVP: Self-Built iPaaS SCS (`application/integrations/`)
 
 ### Technology
 - Java 21, Spring Boot 3, Apache Camel 4
@@ -274,7 +348,7 @@ Cancelled → (terminal)
 NoShow → (terminal)
 ```
 
-Sources: `Manual`, `WhatsApp`, `CalendarSync`, `BookingPage`
+Sources: `Manual`, `WhatsApp`, `WhatsAppFlow`, `CalendarSync`, `WebFallback` (post-MVP only)
 Payment statuses: `Unpaid`, `PendingOnline`, `Paid`, `Refunded`
 Payment methods: `Cash`, `Card`, `Online`
 Reference number: `"#" + Guid.NewGuid().ToString("N").ToUpperInvariant()[..8]`
@@ -297,6 +371,15 @@ Key fields: `TenantId`, `Name`, `Address`, `Phone`, `Email`, `BusinessHours`, `I
 `BusinessHours` = value object with `DayHours(Open, Close)` per day of week, stored as JSONB.
 ID prefix: `loc`
 
+#### `TeamMember` (Decision Required)
+The plan references `AssignedTeamMemberId`, `AssignedTeamMemberIds`, `RoundRobin`, and `LeastRecent` scheduling. These require an explicit team/staff model before advanced availability can be correct.
+
+MVP options:
+- **Solo-only MVP:** remove team-member fields from MVP availability and add staff scheduling later.
+- **Basic staff MVP:** add `TeamMember` with `TenantId`, `Name`, `Email`, `Phone`, `IsActive`, assigned services, assigned locations, and working hours override.
+
+Decision question: should MVP support only owner-operated businesses, or must it support multiple staff members from launch?
+
 #### `BusinessSchedule`
 Single aggregate per tenant. Key field: `Schedule` — `ImmutableArray<DaySchedule>` (Day, IsOpen, OpenTime, CloseTime).
 Default: Mon–Fri 08:00–17:00 open, Sat–Sun closed.
@@ -313,38 +396,46 @@ Custom repo method: `GetByTenantAsync(TenantId)`
 
 ## 8. Phase Roadmap
 
-### Phase 0 — Fresh Foundation
+### Phase 0 — Current Foundation Stabilisation
 
-**Goal:** Working boilerplate, renamed, all tooling green.
+**Goal:** Current repository is renamed, stable, and all tooling is green.
 
 Tasks:
-1. Clone PlatformPlatform at latest HEAD
-2. Global rename: `PlatformPlatform` → `Nerova Bookings`, `platformplatform` → `nerovabookings`
-3. Update Azure Bicep infra scripts — add `integrations` container app resource
-4. Add `integrations/` SCS placeholder to solution and AppHost
-5. Verify `developer-cli build` and `developer-cli test` pass clean
-6. Wire CI/CD — verify GitHub Actions pipeline green
+1. Verify the existing `application/account`, `application/main`, `application/back-office`, `shared-kernel`, and `shared-webapp` structure against this plan.
+2. Complete any remaining global rename work: `PlatformPlatform` → `Nerova Bookings`, `platformplatform` → `nerovabookings`.
+3. Remove or defer any planned `integrations/` SCS work from MVP setup.
+4. Verify `developer-cli build` and `developer-cli test` pass clean.
+5. Wire CI/CD — verify GitHub Actions pipeline green.
 
 ---
 
-### Phase 1 — iPaaS Foundation
+### Phase 1 — MVP Integration Boundary
 
-**Goal:** Apache Camel SCS running in Aspire with a management dashboard.
+**Goal:** Calendar and notification integrations are isolated behind internal interfaces without building the self-owned iPaaS yet.
 
-**Backend (Java):**
-- Spring Boot 3 app bootstrapped with Spring Initializr (Camel, Web, Actuator, Spring Cloud Azure)
-- `ConnectorRegistry` — maps connector IDs to Camel route builders; supports start/stop per tenant
-- `CredentialVault` interface with Azure Key Vault impl + local AES-256 dev impl
-- `ConnectorController` — all REST endpoints listed in Section 6
-- Health endpoint: `GET /actuator/health` + per-route custom health indicator
-- Dockerfile + `aspire-manifest.json` registration
+**Calendar (Nango-first):**
+- Add `CalendarConnection` aggregate in `main`.
+- Store provider, Nango connection ID, selected calendar ID, status, last sync timestamp, and last error.
+- Add Nango auth-complete webhook handling.
+- Add Nango sync webhook handling.
+- Import external calendar events as busy-time blocks only.
+- Availability queries consume imported busy blocks.
+- No outbound writes to Google/Outlook in MVP unless explicitly approved.
 
-**Frontend (React):**
-- `/dashboard/integrations` — table of connectors with status pill (Active / Error / Disabled)
-- Connector drawer: enable toggle, config fields per connector type, credential rotation button
-- Environment badge (dev / staging / prod)
+**WhatsApp booking:**
+- Keep WhatsApp behind an internal booking/messaging abstraction.
+- Use environment-configured Content SIDs and Flow IDs.
+- Handle inbound WhatsApp messages and Flow submissions in `main`.
+- Do not build a connector dashboard for MVP.
 
-**Docs:** `application/integrations/README.md` — what the SCS does, route list, credential setup
+**Deferred:**
+- Apache Camel iPaaS.
+- Java/Spring service.
+- Connector registry.
+- Credential rotation dashboard.
+- Route health dashboard.
+- External calendar event writes.
+- Platform-hosted public web booking page.
 
 ---
 
@@ -433,39 +524,45 @@ DELETE /api/main/blocked-times/{id}
 
 ---
 
-#### 2.4 Public Booking Page
+#### 2.4 WhatsApp Booking Flow
 
 **Backend:**
-- Unauthenticated API — uses `publicApi` client, `IgnoreQueryFilters([QueryFilterNames.Tenant])`
-- `GetVendorProfile` query — returns business name, logo, active services, locations, timezone
+- WhatsApp webhook and Flow API endpoints — unauthenticated from the client perspective, but signature-verified and provider-authenticated.
+- `GetVendorProfile` query — returns business name, active services, locations, timezone, and WhatsApp Flow metadata.
 - `GetAvailableSlots` query — computes free slots from schedule, blocked times, existing appointments (respects buffer, `MinimumBookingNoticeMinutes`, `MaxAdvanceBookingDays`)
-- `CreateBooking` command — creates `Appointment` with `Source = BookingPage`; triggers confirmation notification via iPaaS
+- `StartWhatsAppBookingConversation` command — starts or resumes the chatbot booking state for a client phone number.
+- `HandleWhatsAppFlowSubmission` command — validates Flow payloads, creates/updates client records, checks slot availability, records opt-in, creates appointments, and starts payment where required.
+- `CreateBooking` command — creates `Appointment` with `Source = WhatsAppFlow`; triggers confirmation in the same WhatsApp conversation.
+
+**MVP dependency:** if PayFast is not implemented yet, paid-upfront services (`Price > 0` and `PaymentTiming = Before`) must not be offered inside the WhatsApp booking flow. The MVP release should include PayFast before enabling paid-upfront services for clients.
 
 **Slot algorithm:**
-1. Load `BusinessSchedule` for the requested date
-2. Load all `Appointment`s that day (status != Cancelled) for the location/service
-3. Load all `BlockedTime`s for the day
-4. Generate slots every `DurationMinutes + BufferMinutes` within open hours
-5. Remove conflicting slots
-6. Apply `MinimumBookingNoticeMinutes` from now
-7. Return available `DateTimeOffset` slots
+1. Resolve tenant timezone and compute the requested local day with DST-safe boundaries.
+2. Load `BusinessSchedule` and any location/staff overrides that apply.
+3. Load all `Appointment`s that day (status != Cancelled) for the location/service/staff scope.
+4. Load all `BlockedTime`s and imported external calendar busy blocks for the day.
+5. Generate candidate start times using a configurable start interval. Do not assume interval = `DurationMinutes + BufferMinutes`.
+6. For each candidate, compute occupied time using duration, buffer, extra time before, and extra time after.
+7. Remove candidates that conflict with appointments, blocks, imported busy time, capacity limits, or booking-period rules.
+8. Apply `MinimumBookingNoticeMinutes` from now.
+9. Protect booking creation with a database-level conflict check or transactional uniqueness strategy so two clients cannot book the same slot concurrently.
+10. Return available `DateTimeOffset` slots.
 
-**API endpoints (public, no auth):**
+**Provider webhook/API endpoints:**
 ```
-GET  /api/main/public/vendors/{tenantId}/profile
-GET  /api/main/public/vendors/{tenantId}/services/{serviceId}/slots?date={date}
-POST /api/main/public/vendors/{tenantId}/book
-GET  /api/main/public/appointments/{appointmentId}         (view own appointment)
-PUT  /api/main/public/appointments/{appointmentId}/cancel  (client self-cancel)
-PUT  /api/main/public/appointments/{appointmentId}/reschedule
+POST /api/main/whatsapp/inbound                  (Twilio/WhatsApp inbound webhook)
+POST /api/main/whatsapp/flows/data               (WhatsApp Flow data exchange / dynamic options)
+POST /api/main/whatsapp/flows/submit             (Flow submission handler)
+POST /api/main/whatsapp/appointments/{managementToken}/cancel
+POST /api/main/whatsapp/appointments/{managementToken}/reschedule
 ```
+
+Appointment management must never authorize by `AppointmentId` alone. Use WhatsApp conversation identity plus a separate opaque management token, signed link, or OTP verification flow.
 
 **Frontend:**
-- `routes/book.tsx` (layout, unauthenticated)
-- `routes/book.$tenantId.tsx` (vendor landing, service list)
-- `routes/book.$tenantId.$serviceId.tsx` (slot picker, booking form, opt-in capture)
-- `routes/book.confirmation.$appointmentId.tsx` (success page)
-- `routes/book.manage.$appointmentId.tsx` (cancel / reschedule)
+- No customer-facing web booking routes in MVP.
+- Dashboard screens configure WhatsApp onboarding, allowed customization, service questions, and sender status.
+- Any web management link is a fallback, not the primary booking surface.
 
 ---
 
@@ -533,7 +630,7 @@ POST   /api/main/client-tags
 ### Phase 3 — Business Profile & Onboarding
 
 **Backend:**
-- `BusinessProfile` aggregate (fields in Section 7 — **without WhatsApp fields initially**)
+- `BusinessProfile` aggregate (fields in Section 7, including WhatsApp identity and Flow configuration needed for MVP)
 - `CreateBusinessProfile`, `UpdateBusinessProfile` commands
 - `GetBusinessProfile` query (upsert on first access)
 - `BusinessProfileRepository` with `GetByTenantAsync`
@@ -553,50 +650,53 @@ POST /api/main/business-profile/logo    (blob upload)
 **Settings frontend:**
 - `routes/dashboard/settings.tsx` (layout, redirects to `.profile`)
 - `routes/dashboard/settings.profile.tsx`
-- `routes/dashboard/settings.booking.tsx` (booking page customisation — cancellation policy, branding colour, welcome message)
+- `routes/dashboard/settings.booking.tsx` (WhatsApp booking customization — cancellation policy, branding colour, welcome message, service-specific questions)
 - `routes/dashboard/settings.notifications.tsx` (notification preferences — which events trigger messages)
 
 ---
 
-### Phase 4 — Calendar Integration (via iPaaS)
+### Phase 4 — Calendar Integration (Nango MVP)
 
-**Camel Routes (integrations SCS):**
+**MVP goal:** use Nango to let a tenant connect Google Calendar or Outlook and import busy time so WhatsApp booking avoids obvious conflicts. Do not build the self-owned iPaaS in MVP.
 
-`GoogleCalendarRoute`:
-- OAuth2 PKCE flow — redirect URI points back to `main` API, code exchange happens server-side
-- Token refresh via Camel timer + Azure Key Vault token storage
-- Polls for new/changed events every 5 minutes (or push via Google webhook if available)
-- Translates Google Event → `CalendarEvent` internal DTO, pushes to `POST /api/main/calendar/events/inbound`
-- Writes Nerova Bookings appointment to Google on `CalendarEventOutbound` message from `main`
-
-`OutlookCalendarRoute`:
-- Same pattern via MS Graph API
-- Subscription-based push (MS Graph change notifications) preferred over polling
+**Nango responsibilities:**
+- OAuth connection flow for Google Calendar and Outlook.
+- Token refresh.
+- Provider proxying.
+- Sync/webhook lifecycle events.
 
 **main SCS additions:**
 
-`CalendarSettings` aggregate:
-- `TenantId`, `Provider` (Google/Outlook), `ConnectedCalendarId`, `AccessTokenRef` (Key Vault reference), `RefreshTokenRef`, `TokenExpiresAt`, `SyncEnabled`, `SyncDirection` (TwoWay/ImportOnly/ExportOnly), `ConnectedAt`, `LastSyncAt`, `LastSyncError`
+`CalendarConnection` aggregate:
+- `TenantId`, `Provider` (Google/Outlook), `NangoConnectionId`, `ConnectedCalendarId`, `SyncEnabled`, `SyncDirection` (ImportOnly for MVP), `ConnectedAt`, `LastSyncAt`, `LastSyncError`, `Status`
 - ID prefix: `calset`
 
+`ExternalCalendarBusyBlock` aggregate:
+- `TenantId`, `CalendarConnectionId`, `ExternalEventId`, `StartsAt`, `EndsAt`, `TitleHash?`, `IsDeleted`, `LastSeenAt`
+- Stores only what is needed for availability. Avoid storing unnecessary external event details in MVP.
+
 `CalendarSync` feature:
-- `HandleInboundCalendarEvent` command — receives event from iPaaS, creates/updates `BlockedTime` or matches to existing appointment
-- `SyncAppointmentToCalendar` command — called from appointment lifecycle events, sends to iPaaS outbound queue
+- `HandleNangoAuthWebhook` command — reconciles Nango connection IDs to tenant connections
+- `HandleNangoSyncWebhook` command — imports changed busy blocks from Nango
 - `GetCalendarSyncStatus` query
+- `DisconnectCalendar` command — disables sync and removes/revokes the Nango connection where supported
 
 API:
 ```
-GET    /api/main/calendar-settings
-POST   /api/main/calendar-settings/google/connect    (initiates OAuth flow)
-GET    /api/main/calendar-settings/google/callback   (OAuth callback)
-POST   /api/main/calendar-settings/outlook/connect
-GET    /api/main/calendar-settings/outlook/callback
-DELETE /api/main/calendar-settings/{provider}        (disconnect)
-POST   /api/main/calendar/events/inbound             (iPaaS → main, internal)
+GET    /api/main/calendar-connections
+POST   /api/main/calendar-connections/{provider}/connect    (initiates Nango OAuth flow)
+POST   /api/main/calendar-connections/nango/webhook         (Nango → main, signature-verified)
+DELETE /api/main/calendar-connections/{provider}            (disconnect)
 ```
 
 Frontend:
 - `routes/dashboard/settings.calendar.tsx` — connect/disconnect Google + Outlook, sync status, last error
+
+Post-MVP:
+- Outbound writes of Nerova appointments to external calendars.
+- True two-way sync.
+- Conflict-resolution UI.
+- Provider-specific webhook subscriptions outside Nango.
 
 ---
 
@@ -623,7 +723,7 @@ Frontend:
 - Merchant ID + Merchant Key + Passphrase stored in AppHost secrets (same pattern as `account` SCS)
 - ITN webhook: `POST /api/main/payments/payfast/itn` (no auth, signature-verified using MD5 + passphrase)
 - Payment required if `ServiceType.Price > 0` and `ServiceType.PaymentTiming = Before`
-- Booking flow: slot selection → booking form → redirect to PayFast → ITN → confirmation
+- Booking flow: WhatsApp Flow service/slot/client details → PayFast payment link or redirect handoff → ITN → WhatsApp confirmation
 
 **API endpoints:**
 ```
@@ -635,36 +735,45 @@ GET  /api/main/payments/{id}
 ```
 
 **Frontend:**
-- `routes/book.payment-callback.tsx` (return URL from PayFast — show loading, poll for payment status)
+- Optional fallback `routes/payment-callback.tsx` (return URL from PayFast — show loading, poll for payment status, instruct client to return to WhatsApp)
 - `routes/dashboard/payments.tsx` (transaction list, filters, refund actions)
-- Payment step injected into `book.$tenantId.$serviceId.tsx` when `Price > 0`
+- Payment step injected into WhatsApp booking flow when `Price > 0`
 
 ---
 
-### Phase 6 — WhatsApp Notifications (via iPaaS)
+### MVP-Critical — WhatsApp Chatbot, Flows, and Notifications
+
+This is not a late-stage notification feature. It is the primary booking surface and must be built with the core booking engine before MVP launch.
 
 **Non-negotiable rules:**
 1. **Never send free-text** to a client outside a 24-hour inbound session window. Always use `ContentSid`.
 2. **Opt-in required.** No opt-in record → log + return (no throw, no silent drop).
 3. **Single aggregate** — no dual source-of-truth. `WhatsAppOnboarding` on `BusinessProfile` (not a separate `WhatsAppSettings` table).
-4. **Platform-owned templates v1** — 4 templates submitted once on Nerova Bookings' WABA, SIDs hard-coded per environment.
+4. **Platform-owned templates v1** — 4 templates submitted once on Nerova Bookings' WABA, SIDs configured per environment.
 
-**Camel Route (integrations SCS):**
+**MVP Twilio WhatsApp booking service:**
 
-`TwilioWhatsAppRoute`:
+`TwilioWhatsAppBookingService`:
+- `SendWhatsAppFlow` message processor:
+  1. Select the correct tenant Flow ID and Content SID.
+  2. Populate Flow variables from business profile, service catalog, and appointment context.
+  3. Send via the WhatsApp provider.
 - `SendWhatsAppMessage` message processor:
   1. Load opt-in from `POST /api/main/whatsapp/opt-in/check`
   2. If opted-in AND `now - LastInboundAt < 24h` → send free-text body
   3. Otherwise → send with `ContentSid` + `ContentVariables`
   4. Idempotency key: `tenant-{id}-appt-{id}-{eventType}`
-- `HandleInboundMessage` — receives Twilio webhook, updates `LastInboundAt`, creates `WhatsAppMessageLog`
-- Webhook endpoint: `POST /api/integrations/twilio/whatsapp/inbound` (Twilio signature verified)
+- `HandleInboundMessage` — receives Twilio webhook, updates `LastInboundAt`, creates `WhatsAppMessageLog`, and starts/resumes booking conversations.
+- `HandleFlowSubmission` — receives WhatsApp Flow payloads and dispatches `HandleWhatsAppFlowSubmission`.
+- Webhook endpoint: `POST /api/main/whatsapp/inbound` (Twilio signature verified)
 - Polly retry: 3 attempts, exponential backoff, Twilio 429 → circuit breaker
+
+Post-MVP, this booking service can move behind the self-built iPaaS if WhatsApp operations become more complex.
 
 **main SCS:**
 
 `WhatsAppOptIn` aggregate:
-- `TenantId`, `ClientPhone` (normalised), `ConsentedAt`, `ConsentSource` (BookingPage/Manual/Import), `ConsentPurpose`, `RevokedAt?`, `LastInboundAt?`
+- `TenantId`, `ClientPhone` (normalised), `ConsentedAt`, `ConsentSource` (WhatsAppFlow/Manual/Import), `ConsentPurpose`, `RevokedAt?`, `LastInboundAt?`
 - ID prefix: `woptin`
 - Repository method: `GetByPhoneAsync(TenantId, string phone)`
 
@@ -675,7 +784,15 @@ GET  /api/main/payments/{id}
 - `TenantId`, `AppointmentId?`, `ClientPhone`, `MessageType` (Confirmation/Cancellation/Reschedule/Reminder/Custom), `Status` (Sent/Failed/Blocked), `BlockReason?` (NoOptIn/SessionExpired), `ContentSid?`, `TwilioMessageSid?`, `SentAt?`, `ErrorCode?`
 - ID prefix: `wamsg`
 
-**4 Platform Templates (v1 — hard-coded ContentSIDs):**
+`WhatsAppBookingSession` aggregate:
+- `TenantId`, `ClientPhone`, `CurrentStep`, `SelectedServiceTypeId?`, `SelectedLocationId?`, `SelectedStartAt?`, `AppointmentId?`, `PaymentId?`, `Status` (Active/Completed/Expired/Abandoned), `StartedAt`, `LastInteractionAt`, `ExpiresAt`
+- ID prefix: `wabks`
+
+`WhatsAppFlowSubmission` aggregate:
+- `TenantId`, `ClientPhone`, `FlowId`, `FlowToken`, `PayloadHash`, `Status` (Received/Processed/Rejected), `AppointmentId?`, `ReceivedAt`, `ProcessedAt?`, `Error?`
+- ID prefix: `wafsub`
+
+**4 Platform Templates (v1 — ContentSIDs configured per environment):**
 | Template | Variables |
 |----------|-----------|
 | `nerovabookings_confirmation` | `{{business_name}}`, `{{service_name}}`, `{{date_time}}`, `{{reference}}` |
@@ -691,16 +808,18 @@ POST   /api/main/whatsapp/senders/reserve     (purchase Twilio number + create s
 POST   /api/main/whatsapp/senders/complete    (post embedded-signup callback → register sender)
 POST   /api/main/whatsapp/senders/check       (poll sender registration status)
 DELETE /api/main/whatsapp/senders             (disconnect + release Twilio number)
-POST   /api/main/whatsapp/opt-in/check        (internal — called by iPaaS)
-POST   /api/main/whatsapp/opt-in/record       (record opt-in from booking page)
+POST   /api/main/whatsapp/opt-in/check        (internal — called by WhatsApp booking/messaging boundary)
+POST   /api/main/whatsapp/opt-in/record       (record opt-in from WhatsApp Flow)
 DELETE /api/main/whatsapp/opt-in/{phone}      (revoke opt-in)
+POST   /api/main/whatsapp/flows/data          (dynamic Flow data endpoint)
+POST   /api/main/whatsapp/flows/submit        (Flow submission endpoint)
 POST   /api/main/whatsapp/test-send           (send test template to authenticated user's phone)
 ```
 
 **Frontend:**
 - `routes/dashboard/connectors.tsx` (layout)
-- `routes/dashboard/connectors.whatsapp.tsx` — onboarding wizard + sender status + opt-in stats
-- Opt-in checkbox in `book.$tenantId.$serviceId.tsx` — captures consent before booking
+- `routes/dashboard/connectors.whatsapp.tsx` — onboarding wizard + sender status + opt-in stats + Flow status
+- `routes/dashboard/settings.booking.tsx` — WhatsApp Flow settings, approved customization, service-specific questions
 
 ---
 
@@ -739,7 +858,7 @@ Read-only queries only — no aggregate. Backed by EF Core `InMemoryDatabase` fo
 Extend the boilerplate back-office SCS:
 
 - **Tenant management** — list tenants, view details, suspend/unsuspend, impersonate
-- **Integration health** — read `GET /api/integrations/connectors/{id}/health` from back-office
+- **Integration health** — MVP reads Nango/notification status from `main`; post-MVP can read `GET /api/integrations/connectors/{id}/health`
 - **Platform metrics** — aggregate booking counts, payment volumes, active tenants
 - **Audit log viewer** — search domain event log by tenant, event type, date range
 - **WhatsApp template status** — view approval states of platform templates across Twilio
@@ -758,10 +877,10 @@ import { api } from "@/shared/lib/api/client";
 const { data } = api.useQuery("get", "/api/main/service-types");
 const mutation = api.useMutation("post", "/api/main/service-types");
 
-// Unauthenticated (public booking page)
+// Fallback web surfaces only; WhatsApp booking is handled by provider webhooks/Flow endpoints.
 import { publicApi } from "@/shared/lib/api/publicClient";
-const { data } = publicApi.useQuery("get", "/api/main/public/vendors/{tenantId}/profile", {
-  params: { path: { tenantId } }
+const { data } = publicApi.useQuery("get", "/api/main/public/appointments/{managementToken}", {
+  params: { path: { managementToken } }
 });
 
 // Invalidate after mutation
@@ -862,14 +981,14 @@ The developer-cli `start_worker_agent` / `complete_work` / `claude-agent` infras
 |-----------|-------|----------|
 | .NET backend feature | `backend-engineer` | `backend-reviewer` |
 | React/TS frontend feature | `frontend-engineer` | `frontend-reviewer` |
-| Java/Spring/Apache Camel iPaaS | `integrations-engineer` | `integrations-reviewer` |
+| Java/Spring/Apache Camel iPaaS (post-MVP only) | `integrations-engineer` | `integrations-reviewer` |
 | Playwright E2E tests | `qa-engineer` | `qa-reviewer` |
 
 ### Delegation Rules (both modes)
 - One SCS per agent call — never split `main` backend + `integrations` Java in one task
 - Always pass the relevant PLAN.md section as context in the task prompt
 - Engineer → Reviewer pipeline is mandatory before marking a task done
-- Java (integrations SCS): use `mvn verify -q` directly — developer-cli MCP does not yet cover Java builds
+- Java (post-MVP integrations SCS only): use `mvn verify -q` directly — developer-cli MCP does not yet cover Java builds
 - Reviewer returns `✅ APPROVED` or `❌ CHANGES REQUIRED` with specific file:line references
 
 ### Build/Test Commands (via MCP, both modes — never raw `dotnet`/`npm`)
@@ -886,17 +1005,17 @@ Slow operations (Aspire restart, backend format/lint, E2E) → dispatch as paral
 
 ## 12. What Was Wrong in the Previous Codebase (Do Not Repeat)
 
-| Problem | Fix in new codebase |
+| Problem | Fix in current plan |
 |---------|---------------------|
 | `WhatsAppSettings` aggregate duplicated fields from `BusinessProfile` | Single `WhatsAppOnboarding` embedded in `BusinessProfile` |
 | Three separate WhatsApp status enums with non-1:1 mappings | Single `OnboardingStatus` + `LifecycleStatus` per inventory entry |
 | Twilio sends free-text `Body` to all appointments — rejected outside 24h window | Always use `ContentSid` for business-initiated messages |
 | Zero opt-in / consent tracking | `WhatsAppOptIn` aggregate, POPIA-compliant |
-| Nango inline in `main` Core/Integrations | All third-party calls go through iPaaS Camel routes |
+| Third-party SDK details leaking into domain handlers | Use internal integration abstractions; MVP calendar implementation uses Nango behind that boundary |
 | Paystack wired directly in `main` Core | PayFast called directly from `main` Core with ITN signature verification |
 | No idempotency on Twilio or payment calls | Idempotency keys on all external calls |
-| `DisconnectWhatsApp` didn't call Twilio — tenant kept paying | Disconnect releases Twilio number via iPaaS route |
-| WhatsApp "flows" UI accepted config but backend never read it at send time | No flow UI until backend is fully implemented |
+| `DisconnectWhatsApp` didn't call Twilio — tenant kept paying | Disconnect releases Twilio number through the notification/integration boundary |
+| WhatsApp "flows" UI accepted config but backend never read it at send time | WhatsApp Flows are core booking infrastructure; only expose customization that the backend uses at send and submission time |
 | Code generated without agent discipline — inconsistent patterns | All work via `backend-engineer` → `backend-reviewer` pipeline |
 
 ---
@@ -917,10 +1036,14 @@ Slow operations (Aspire restart, backend format/lint, E2E) → dispatch as paral
 | `BusinessProfile` | `bprof` |
 | `BusinessSchedule` | `bschl` |
 | `BlockedTime` | `blkt` |
-| `CalendarSettings` | `calset` |
+| `TeamMember` | `tmem` |
+| `CalendarConnection` | `calset` |
+| `ExternalCalendarBusyBlock` | `ecblk` |
 | `Payment` | `pay` |
 | `WhatsAppOptIn` | `woptin` |
 | `WhatsAppMessageLog` | `wamsg` |
+| `WhatsAppBookingSession` | `wabks` |
+| `WhatsAppFlowSubmission` | `wafsub` |
 | `Waitlist` | `wait` |
 | `ApiKey` | `apikey` |
 | `WebhookSubscription` | `whksub` |
@@ -931,11 +1054,20 @@ Slow operations (Aspire restart, backend format/lint, E2E) → dispatch as paral
 
 ## 14. Open Decisions (Resolve Before Building Each Phase)
 
-1. **Phase 1:** Which Azure region for prod? (affects Aspire env vars and Key Vault name)
-2. **Phase 4:** Google Calendar push notifications require a publicly reachable endpoint. In dev, use `ngrok` or Aspire tunnel. Document setup in `integrations/README.md`.
-3. **Phase 5:** PayFast does not support direct refund API in all scenarios — confirm refund flow with PayFast sandbox before building the command.
-4. **Phase 6:** Platform WhatsApp templates must be submitted to Meta for approval before they can be used. Allow minimum 2 weeks for approval. Build the send path with template SIDs as config values, not hard-coded strings, so they can be swapped after approval.
-5. **Phase 7 (Webhooks):** Worker for delivery retries — extend existing `Workers` project in `main` SCS using the boilerplate's job runner pattern.
+1. **MVP scope:** Solo-only MVP, or staff/team scheduling from launch?
+2. **MVP scope:** One default location, or full multi-location support from launch?
+3. **MVP payments:** PayFast in the first public release, or unpaid bookings first with paid bookings disabled until PayFast is complete?
+4. **MVP calendar:** Busy-time import only via Nango, or also create/update external calendar events from Nerova appointments?
+5. **MVP WhatsApp sender:** Tenant-owned WhatsApp sender from day one, or platform-owned sender while onboarding is proven?
+6. **MVP WhatsApp customization:** Which parts of the Flow are configurable: branding/tone only, service-specific questions, cancellation policy, custom fields, or all of these?
+7. **MVP appointment management:** Entirely inside WhatsApp, or WhatsApp plus secure fallback management links for complex changes?
+8. **MVP WhatsApp provider:** Twilio WhatsApp Flows for MVP, Meta Cloud API directly, or another BSP?
+9. **MVP market:** South Africa only, or South Africa plus one secondary market?
+10. **Phase 0:** Which Azure region for prod? (affects Aspire env vars and Key Vault name)
+11. **Phase 4:** Nango webhook handling requires a publicly reachable endpoint in non-local environments. In local dev, decide whether to use `ngrok`, an Aspire tunnel, or manual sync testing.
+12. **Phase 5:** PayFast does not support direct refund API in all scenarios — confirm refund flow with PayFast sandbox before building the command.
+13. **MVP WhatsApp:** Platform WhatsApp templates and Flows must be approved before they can be used for production business-initiated journeys. Allow time for approval. Build the send path with template SIDs and Flow IDs as config values, not hard-coded strings, so they can be swapped after approval.
+14. **Phase 7 (Webhooks):** Worker for delivery retries — extend existing `Workers` project in `main` SCS using the boilerplate's job runner pattern.
 
 ---
 
@@ -945,7 +1077,7 @@ The PlatformPlatform boilerplate ships `.claude/agents/*.md` as **Claude Code wo
 
 ### Why the Change
 
-| Current (boilerplate) | Target (new codebase) |
+| Current (boilerplate) | Target (Nerova Bookings repository) |
 |----------------------|----------------------|
 | `tools: mcp__developer-cli__start_worker_agent` only | No `tools:` restriction — inherits all available tools |
 | Pure passthrough — zero thinking | Real implementation — reads rules, writes code, builds, tests |
@@ -972,9 +1104,10 @@ You are a **backend engineer** in the Nerova Bookings project implementing verti
 
 ## Role
 - Implement commands, queries, domain models, repositories, API endpoints, and xUnit tests
-- One task = one commit. All subtasks land together — code must compile, run, and pass tests
+- One task should produce one coherent changeset. Code must compile, run, and pass tests.
 - Build and test incrementally after each meaningful change, not only at the end
 - When complete, delegate to `backend-reviewer`
+- Never commit, amend, or revert unless the developer explicitly asks for that git action in the current conversation.
 
 ## Before Any Implementation
 Read these rule files:
@@ -993,8 +1126,10 @@ Run in order — all must pass with zero failures/warnings:
 3. `execute_command(command='format', backend=true, noBuild=true)`
 
 ## Completion
-Commit with message in imperative form. Then call reviewer:
+Call reviewer:
 `task(agent_type="backend-reviewer", prompt="Review: [what was implemented] on branch [branch]")`
+
+Only commit after explicit developer instruction. Commit messages must be one descriptive line in imperative form with no description body.
 ```
 
 ### frontend-engineer.md
@@ -1004,9 +1139,10 @@ You are a **frontend engineer** in the Nerova Bookings project implementing Reac
 
 ## Role
 - Implement TanStack Router routes, React components, API integration, and translations
-- One task = one commit. All subtasks land together
+- One task should produce one coherent changeset
 - Test in browser via Playwright MCP — zero tolerance for visual regressions
 - When complete, delegate to `frontend-reviewer`
+- Never commit, amend, or revert unless the developer explicitly asks for that git action in the current conversation.
 
 ## Before Any Implementation
 Read these rule files:
@@ -1021,8 +1157,10 @@ Read these rule files:
 3. Visual browser check via Playwright MCP — no layout breaks, no console errors
 
 ## Completion
-Commit. Then call reviewer:
+Call reviewer:
 `task(agent_type="frontend-reviewer", prompt="Review: [what was implemented] on branch [branch]")`
+
+Only commit after explicit developer instruction. Commit messages must be one descriptive line in imperative form with no description body.
 ```
 
 ### backend-reviewer.md
@@ -1038,8 +1176,8 @@ You are a **backend reviewer** in the Nerova Bookings project. Review .NET backe
 - [ ] Validator: covers all required fields with sensible max lengths
 - [ ] API endpoint: correct HTTP method, registered in correct endpoint group, auth applied
 - [ ] Tests: happy path + validation failure + not-found + wrong-tenant minimum
-- [ ] No direct external API calls for WhatsApp, Calendar, or Twilio — those route via iPaaS (PayFast is exempt — called directly from `account` and `main` Core)
-- [ ] No `WhatsApp` or `Calendar` logic in `main` Core directly (PayFast is allowed)
+- [ ] No provider SDK details leak into domain handlers. Calendar uses the Nango-backed integration boundary in MVP; WhatsApp uses the booking/messaging boundary. PayFast is exempt and is called directly from `account` and `main` Core.
+- [ ] No Google, Microsoft, or Twilio-specific logic inside appointment/service/client domain handlers.
 
 ## Output
 Return exactly one of:

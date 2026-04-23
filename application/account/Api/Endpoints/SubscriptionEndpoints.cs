@@ -29,6 +29,14 @@ public sealed class SubscriptionEndpoints : IEndpoints
             => await mediator.Send(query)
         ).Produces<UpgradePreviewResponse>();
 
+        group.MapGet("/update-card-url", async Task<ApiResult<UpdateCardUrlResponse>> ([AsParameters] GetUpdateCardUrlQuery query, IMediator mediator)
+            => await mediator.Send(query)
+        ).Produces<UpdateCardUrlResponse>();
+
+        group.MapPost("/initiate", async Task<ApiResult<InitiateSubscriptionResponse>> (InitiateSubscriptionCommand command, IMediator mediator)
+            => await mediator.Send(command)
+        ).Produces<InitiateSubscriptionResponse>();
+
         group.MapPost("/upgrade", async Task<ApiResult> (UpgradeSubscriptionCommand command, IMediator mediator)
             => await mediator.Send(command)
         );
@@ -48,5 +56,14 @@ public sealed class SubscriptionEndpoints : IEndpoints
         group.MapPost("/reactivate", async Task<ApiResult<ReactivateSubscriptionResponse>> (IMediator mediator)
             => await mediator.Send(new ReactivateSubscriptionCommand())
         ).Produces<ReactivateSubscriptionResponse>();
+
+        group.MapPost("/retry-charge", async Task<ApiResult> (IMediator mediator)
+            => await mediator.Send(new RetryFailedChargeCommand())
+        );
+
+        // PayFast ITN webhook — no auth, receives form-encoded POST from PayFast servers
+        group.MapPost("/payfast/itn", async Task<ApiResult> (IFormCollection form, IMediator mediator)
+            => await mediator.Send(new HandlePayFastItnCommand(form.ToDictionary(k => k.Key, v => v.Value.ToString())))
+        ).AllowAnonymous();
     }
 }

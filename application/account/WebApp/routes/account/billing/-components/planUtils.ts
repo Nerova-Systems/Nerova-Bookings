@@ -18,7 +18,7 @@ export function getFormattedPrice(plan: SubscriptionPlan, pricingPlans: PlanPric
     const price = formatCurrency(item.unitAmount, item.currency);
     return t`${price}/month`;
   }
-  if (plan === SubscriptionPlan.Basis) {
+  if (plan === SubscriptionPlan.Trial) {
     return t`Free`;
   }
   return "";
@@ -30,10 +30,15 @@ export function getCatalogUnitAmount(plan: SubscriptionPlan, pricingPlans: PlanP
 
 export function getPlanDetails(plan: SubscriptionPlan): PlanDetails {
   switch (plan) {
-    case SubscriptionPlan.Basis:
+    case SubscriptionPlan.Trial:
       return {
-        name: t`Basis`,
+        name: t`Trial`,
         features: [t`5 users`, t`10 GB storage`, t`Basic support`]
+      };
+    case SubscriptionPlan.Starter:
+      return {
+        name: t`Starter`,
+        features: [t`5 users`, t`10 GB storage`, t`Email support`]
       };
     case SubscriptionPlan.Standard:
       return {
@@ -50,11 +55,13 @@ export function getPlanDetails(plan: SubscriptionPlan): PlanDetails {
 
 export function getPlanOrder(plan: SubscriptionPlan): number {
   switch (plan) {
-    case SubscriptionPlan.Basis:
+    case SubscriptionPlan.Trial:
       return 0;
-    case SubscriptionPlan.Standard:
+    case SubscriptionPlan.Starter:
       return 1;
-    case SubscriptionPlan.Premium:
+    case SubscriptionPlan.Standard:
       return 2;
+    case SubscriptionPlan.Premium:
+      return 3;
   }
 }

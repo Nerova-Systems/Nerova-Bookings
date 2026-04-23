@@ -197,12 +197,6 @@ msgstr "Achieved in Microsoft Defender for Cloud following Azure best practices"
 msgid "Action"
 msgstr "Action"
 
-msgid "Activating subscription"
-msgstr "Activating subscription"
-
-msgid "Activating your subscription..."
-msgstr "Activating your subscription..."
-
 msgid "Active"
 msgstr "Active"
 
@@ -214,9 +208,6 @@ msgstr "Active users in the past 30 days"
 
 msgid "Add an extra layer of security to your account."
 msgstr "Add an extra layer of security to your account."
-
-msgid "Add billing information"
-msgstr "Add billing information"
 
 msgid "Add more in the Users menu"
 msgstr "Add more in the Users menu"
@@ -247,9 +238,6 @@ msgstr "Add your first recipe to start building your personal cookbook."
 
 msgid "Added"
 msgstr "Added"
-
-msgid "Address"
-msgstr "Address"
 
 msgid "Address (fixed 2 lines)"
 msgstr "Address (fixed 2 lines)"
@@ -298,12 +286,6 @@ msgstr "An account with this email already exists. Please log in instead."
 
 msgid "An email with login instructions will be sent to the user."
 msgstr "An email with login instructions will be sent to the user."
-
-msgid "An error occurred while processing your payment."
-msgstr "An error occurred while processing your payment."
-
-msgid "An error occurred while updating your payment method."
-msgstr "An error occurred while updating your payment method."
 
 msgid "An unexpected error occurred while processing your request."
 msgstr "An unexpected error occurred while processing your request."
@@ -427,38 +409,20 @@ msgstr "Basic skills, under 30 minutes"
 msgid "Basic support"
 msgstr "Basic support"
 
-msgid "Basis"
-msgstr "Basis"
-
-msgid "Bill to"
-msgstr "Bill to"
-
 msgid "Billed monthly: {targetFormattedPrice}"
 msgstr "Billed monthly: {targetFormattedPrice}"
 
 msgid "Billing"
 msgstr "Billing"
 
-msgid "Billing email"
-msgstr "Billing email"
-
 msgid "Billing history"
 msgstr "Billing history"
-
-msgid "Billing information"
-msgstr "Billing information"
-
-msgid "Billing information updated"
-msgstr "Billing information updated"
 
 msgid "Billing is not configured. Please contact support to enable payment processing."
 msgstr "Billing is not configured. Please contact support to enable payment processing."
 
 msgid "Billing tabs"
 msgstr "Billing tabs"
-
-msgid "billing@company.com"
-msgstr "billing@company.com"
 
 msgid "Boeuf bourguignon"
 msgstr "Boeuf bourguignon"
@@ -525,9 +489,6 @@ msgstr "By continuing, you accept our policies"
 
 msgid "By default only one item is open at a time. Pass openMultiple to allow several panels to stay open together."
 msgstr "By default only one item is open at a time. Pass openMultiple to allow several panels to stay open together."
-
-msgid "By subscribing, you agree to our <0>terms of service</0> and <1>privacy policy</1>."
-msgstr "By subscribing, you agree to our <0>terms of service</0> and <1>privacy policy</1>."
 
 msgid "Calendar"
 msgstr "Calendar"
@@ -661,9 +622,6 @@ msgstr "Choose which notifications you receive and how."
 msgid "Chrome"
 msgstr "Chrome"
 
-msgid "City"
-msgstr "City"
-
 msgid "Clear"
 msgstr "Clear"
 
@@ -735,9 +693,6 @@ msgstr "Command"
 
 msgid "Command palette"
 msgstr "Command palette"
-
-msgid "Complete your payment to activate your subscription."
-msgstr "Complete your payment to activate your subscription."
 
 msgid "Compliance"
 msgstr "Compliance"
@@ -1067,12 +1022,6 @@ msgstr "Easy"
 msgid "Edge"
 msgstr "Edge"
 
-msgid "Edit"
-msgstr "Edit"
-
-msgid "Edit billing information"
-msgstr "Edit billing information"
-
 msgid "Edit profile"
 msgstr "Edit profile"
 
@@ -1109,14 +1058,8 @@ msgstr "Enabled"
 msgid "Enchiladas verdes"
 msgstr "Enchiladas verdes"
 
-msgid "Enter the billing details for your subscription."
-msgstr "Enter the billing details for your subscription."
-
 msgid "Enter your email below to log in"
 msgstr "Enter your email below to log in"
-
-msgid "Enter your new payment details below."
-msgstr "Enter your new payment details below."
 
 msgid "Enter your verification code"
 msgstr "Enter your verification code"
@@ -1151,9 +1094,6 @@ msgstr "Expand Components"
 msgid "Expand Examples"
 msgstr "Expand Examples"
 
-msgid "expires"
-msgstr "expires"
-
 msgid "Export"
 msgstr "Export"
 
@@ -1177,9 +1117,6 @@ msgstr "Extra small"
 
 msgid "Failed"
 msgstr "Failed"
-
-msgid "Failed to load payment processor."
-msgstr "Failed to load payment processor."
 
 msgid "Features"
 msgstr "Features"
@@ -1586,8 +1523,8 @@ msgstr "Manage subscription"
 msgid "Manage your account here."
 msgstr "Manage your account here."
 
-msgid "Manage your payment methods and billing information."
-msgstr "Manage your payment methods and billing information."
+msgid "Manage your subscription and billing history."
+msgstr "Manage your subscription and billing history."
 
 msgid "Manage your subscription plan."
 msgstr "Manage your subscription plan."
@@ -1697,9 +1634,6 @@ msgstr "Muted"
 msgid "Name"
 msgstr "Name"
 
-msgid "Name as it appears on invoices"
-msgstr "Name as it appears on invoices"
-
 msgid "Narrow bottom drawer"
 msgstr "Narrow bottom drawer"
 
@@ -1745,17 +1679,11 @@ msgstr "No account found for this email address. Please sign up to create an acc
 msgid "No active sessions found."
 msgstr "No active sessions found."
 
-msgid "No billing information on file"
-msgstr "No billing information on file"
-
 msgid "No longer needed"
 msgstr "No longer needed"
 
 msgid "No payment history available."
 msgstr "No payment history available."
-
-msgid "No payment method on file"
-msgstr "No payment method on file"
 
 msgid "No recipes yet"
 msgstr "No recipes yet"
@@ -1886,20 +1814,8 @@ msgstr "Passkeys"
 msgid "Passwordless deployments"
 msgstr "Passwordless deployments"
 
-msgid "Pay"
-msgstr "Pay"
-
-msgid "Pay and subscribe"
-msgstr "Pay and subscribe"
-
 msgid "Pay and upgrade"
 msgstr "Pay and upgrade"
-
-msgid "Payment authentication failed."
-msgstr "Payment authentication failed."
-
-msgid "Payment could not be processed. Please try again later."
-msgstr "Payment could not be processed. Please try again later."
 
 msgid "Payment failed"
 msgstr "Payment failed"
@@ -1907,20 +1823,14 @@ msgstr "Payment failed"
 msgid "Payment failed. Your subscription will be suspended soon."
 msgstr "Payment failed. Your subscription will be suspended soon."
 
-msgid "Payment method"
-msgstr "Payment method"
-
-msgid "Payment method updated"
-msgstr "Payment method updated"
+msgid "Payment processor unavailable. Please refresh and try again."
+msgstr "Payment processor unavailable. Please refresh and try again."
 
 msgid "Pedro Duarte"
 msgstr "Pedro Duarte"
 
 msgid "Pending"
 msgstr "Pending"
-
-msgid "Pending payment completed"
-msgstr "Pending payment completed"
 
 msgid "People"
 msgstr "People"
@@ -1977,9 +1887,6 @@ msgstr "Please check your email for a verification code sent to <0>{email}</0>"
 msgid "Please enter a valid email address"
 msgstr "Please enter a valid email address"
 
-msgid "Please include your country code"
-msgstr "Please include your country code"
-
 msgid "Please log in again to continue."
 msgstr "Please log in again to continue."
 
@@ -1991,12 +1898,6 @@ msgstr "Please select a JPEG, PNG, GIF, WebP, or SVG image."
 
 msgid "Please try again or return to the home page."
 msgstr "Please try again or return to the home page."
-
-msgid "Please wait while we confirm your payment. This may take a few moments."
-msgstr "Please wait while we confirm your payment. This may take a few moments."
-
-msgid "Postal code"
-msgstr "Postal code"
 
 msgid "Powered by"
 msgstr "Powered by"
@@ -2039,9 +1940,6 @@ msgstr "Privacy policies"
 
 msgid "Privacy Policy"
 msgstr "Privacy Policy"
-
-msgid "Processing payment..."
-msgstr "Processing payment..."
 
 msgid "Processing..."
 msgstr "Processing..."
@@ -2216,8 +2114,8 @@ msgstr "Restore user"
 msgid "Restoring..."
 msgstr "Restoring..."
 
-msgid "Retry pending payment"
-msgstr "Retry pending payment"
+msgid "Retry payment"
+msgstr "Retry payment"
 
 msgid "Revoke"
 msgstr "Revoke"
@@ -2549,11 +2447,8 @@ msgstr "Standard"
 msgid "Standard user access"
 msgstr "Standard user access"
 
-msgid "State / Province"
-msgstr "State / Province"
-
-msgid "State or region"
-msgstr "State or region"
+msgid "Starter"
+msgstr "Starter"
 
 msgid "Static preview of the Sidebar component. The fully interactive version — with drag-to-resize, hover-reveal toggle, and icon collapse — renders as the real sidemenu in each self-contained system."
 msgstr "Static preview of the Sidebar component. The fully interactive version — with drag-to-resize, hover-reveal toggle, and icon collapse — renders as the real sidemenu in each self-contained system."
@@ -2569,9 +2464,6 @@ msgstr "Street address"
 
 msgid "Strict separation prevents production data from leaking to other environments"
 msgstr "Strict separation prevents production data from leaking to other environments"
-
-msgid "Stripe Link"
-msgstr "Stripe Link"
 
 msgid "Subscribe"
 msgstr "Subscribe"
@@ -2621,9 +2513,6 @@ msgstr "Tacos al pastor"
 
 msgid "Tax"
 msgstr "Tax"
-
-msgid "Tax ID (VAT number)"
-msgstr "Tax ID (VAT number)"
 
 msgid "Tell us a bit about yourself to get started."
 msgstr "Tell us a bit about yourself to get started."
@@ -2796,6 +2685,9 @@ msgstr "Transparency, security, and privacy are at the core of how we operate. R
 msgid "Trending up by 5.2% this month"
 msgstr "Trending up by 5.2% this month"
 
+msgid "Trial"
+msgstr "Trial"
+
 msgid "Trust Center"
 msgstr "Trust Center"
 
@@ -2847,23 +2739,11 @@ msgstr "Unnamed account"
 msgid "Unsaved changes"
 msgstr "Unsaved changes"
 
-msgid "Update"
-msgstr "Update"
-
-msgid "Update payment method"
-msgstr "Update payment method"
-
-msgid "Update the billing details associated with your subscription."
-msgstr "Update the billing details associated with your subscription."
-
 msgid "Update your personal information and profile photo."
 msgstr "Update your personal information and profile photo."
 
 msgid "Update your profile picture and personal details here."
 msgstr "Update your profile picture and personal details here."
-
-msgid "Updating..."
-msgstr "Updating..."
 
 msgid "Upgrade"
 msgstr "Upgrade"
@@ -2961,9 +2841,6 @@ msgstr "Users who haven't confirmed their email"
 
 msgid "Values"
 msgstr "Values"
-
-msgid "VAT number"
-msgstr "VAT number"
 
 msgid "Vegetable tempura"
 msgstr "Vegetable tempura"
@@ -3100,12 +2977,6 @@ msgstr "Your downgrade has been scheduled."
 msgid "Your email address cannot be changed. An owner must delete your account and reinvite you with the new email address."
 msgstr "Your email address cannot be changed. An owner must delete your account and reinvite you with the new email address."
 
-msgid "Your payment card is expired or expiring soon. Please update your payment method to avoid service interruption."
-msgstr "Your payment card is expired or expiring soon. Please update your payment method to avoid service interruption."
-
-msgid "Your payment card is expiring soon. Update your payment method to avoid interruption."
-msgstr "Your payment card is expiring soon. Update your payment method to avoid interruption."
-
 msgid "Your personal cookbook library."
 msgstr "Your personal cookbook library."
 
@@ -3129,9 +3000,6 @@ msgstr "Your session has expired."
 
 msgid "Your session was ended from another device."
 msgstr "Your session was ended from another device."
-
-msgid "Your subscription has been activated."
-msgstr "Your subscription has been activated."
 
 msgid "Your subscription has been cancelled and will end at the end of the current billing period."
 msgstr "Your subscription has been cancelled and will end at the end of the current billing period."

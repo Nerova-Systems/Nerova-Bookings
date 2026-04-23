@@ -8,15 +8,14 @@ import { useFormatLongDate } from "@repo/ui/hooks/useSmartDate";
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 
-import { api, SubscriptionPlan } from "@/shared/lib/api/client";
+import { api, SubscriptionPlan, SubscriptionStatus } from "@/shared/lib/api/client";
 
 import { BillingHistoryTable } from "./-components/BillingHistoryTable";
-import { BillingInfoSection } from "./-components/BillingInfoSection";
-import { BillingPageDialogs } from "./-components/BillingPageDialogs";
 import { BillingTabNavigation } from "./-components/BillingTabNavigation";
+import { CancelDowngradeDialog } from "./-components/CancelDowngradeDialog";
 import { CurrentPlanSection } from "./-components/CurrentPlanSection";
 import { InitialPlanSelection } from "./-components/InitialPlanSelection";
-import { PaymentMethodSection } from "./-components/PaymentMethodSection";
+import { ReactivateConfirmationDialog } from "./-components/ReactivateConfirmationDialog";
 import { CancellationBanner, DowngradeBanner } from "./-components/SubscriptionBanner";
 import { useBillingPageMutations } from "./-components/useBillingPageMutations";
 import { useSubscriptionPolling } from "./-components/useSubscriptionPolling";
@@ -35,44 +34,21 @@ function BillingPage() {
   const { isPolling, isLoading, startPolling, subscription } = useSubscriptionPolling();
   const [isCancelDowngradeDialogOpen, setIsCancelDowngradeDialogOpen] = useState(false);
   const [isReactivateDialogOpen, setIsReactivateDialogOpen] = useState(false);
-  const [isEditBillingInfoOpen, setIsEditBillingInfoOpen] = useState(false);
-  const [isUpdatePaymentMethodOpen, setIsUpdatePaymentMethodOpen] = useState(false);
-  const [isRetryPaymentOpen, setIsRetryPaymentOpen] = useState(false);
-  const [retryInvoice, setRetryInvoice] = useState({ amount: 0, currency: "" });
-  const [isCheckoutDialogOpen, setIsCheckoutDialogOpen] = useState(false);
-  const [checkoutPlan, setCheckoutPlan] = useState<SubscriptionPlan>(SubscriptionPlan.Basis);
-  const [pendingCheckoutPlan, setPendingCheckoutPlan] = useState<SubscriptionPlan | null>(null);
-  const [reactivateClientSecret, setReactivateClientSecret] = useState<string | undefined>();
-  const [reactivatePublishableKey, setReactivatePublishableKey] = useState<string | undefined>();
 
-  const { data: tenant } = api.useQuery("get", "/api/account/tenants/current");
   const { data: pricingCatalog } = api.useQuery("get", "/api/account/subscriptions/pricing-catalog");
-  const currentPlan = subscription?.plan ?? SubscriptionPlan.Basis;
+  const currentPlan = subscription?.plan ?? SubscriptionPlan.Trial;
 
   const { reactivateMutation, cancelDowngradeMutation } = useBillingPageMutations({
     startPolling,
-    currentPlan,
     setIsReactivateDialogOpen,
-    setReactivateClientSecret,
-    setReactivatePublishableKey,
-    setPendingCheckoutPlan,
-    setIsEditBillingInfoOpen,
     setIsCancelDowngradeDialogOpen
   });
 
-  const isStripeConfigured = (pricingCatalog?.plans?.length ?? 0) > 0;
-  const cancelAtPeriodEnd = subscription?.cancelAtPeriodEnd ?? false;
+  const isCancelled = subscription?.status === SubscriptionStatus.Cancelled;
+  const isSubscribed = subscription?.status !== SubscriptionStatus.Trial;
   const scheduledPlan = subscription?.scheduledPlan ?? null;
   const currentPeriodEnd = subscription?.currentPeriodEnd ?? null;
-  const hasStripeCustomer = subscription?.hasStripeCustomer ?? false;
   const formattedPeriodEndLong = formatLongDate(currentPeriodEnd);
-
-  const handleBillingInfoSuccess = () => {
-    if (pendingCheckoutPlan == null) return;
-    setCheckoutPlan(pendingCheckoutPlan);
-    setPendingCheckoutPlan(null);
-    setIsCheckoutDialogOpen(true);
-  };
 
   if (isLoading) {
     return (
@@ -84,22 +60,22 @@ function BillingPage() {
 
   return (
     <>
-      {hasStripeCustomer ? (
+      {isSubscribed ? (
         <AppLayout
           variant="center"
           maxWidth="64rem"
           title={t`Billing`}
-          subtitle={t`Manage your payment methods and billing information.`}
+          subtitle={t`Manage your subscription and billing history.`}
         >
           <BillingTabNavigation activeTab="billing" />
-          {cancelAtPeriodEnd && (
+          {isCancelled && (
             <CancellationBanner
               currentPlan={currentPlan}
               formattedPeriodEnd={formattedPeriodEndLong}
               onReactivate={() => setIsReactivateDialogOpen(true)}
             />
           )}
-          {scheduledPlan && !cancelAtPeriodEnd && (
+          {scheduledPlan && !isCancelled && (
             <DowngradeBanner
               scheduledPlan={scheduledPlan}
               formattedPeriodEnd={formattedPeriodEndLong}
@@ -108,22 +84,12 @@ function BillingPage() {
           )}
           <CurrentPlanSection
             currentPlan={currentPlan}
-            cancelAtPeriodEnd={cancelAtPeriodEnd}
+            cancelAtPeriodEnd={isCancelled}
             scheduledPlan={scheduledPlan}
             formattedPeriodEndLong={formattedPeriodEndLong}
-            currentPriceAmount={subscription?.currentPriceAmount}
-            currentPriceCurrency={subscription?.currentPriceCurrency}
+            currentPriceAmount={undefined}
+            currentPriceCurrency={undefined}
             plans={pricingCatalog?.plans}
-          />
-          <PaymentMethodSection
-            paymentMethod={subscription?.paymentMethod}
-            isStripeConfigured={isStripeConfigured}
-            onUpdateClick={() => setIsUpdatePaymentMethodOpen(true)}
-          />
-          <BillingInfoSection
-            billingInfo={subscription?.billingInfo}
-            isStripeConfigured={isStripeConfigured}
-            onEditClick={() => setIsEditBillingInfoOpen(true)}
           />
           <div className="mt-8 flex flex-col gap-4">
             <h3>
@@ -137,50 +103,30 @@ function BillingPage() {
         <InitialPlanSelection
           plans={pricingCatalog?.plans}
           currentPlan={currentPlan}
-          isStripeConfigured={isStripeConfigured}
-          onSubscribe={(plan) => {
-            setPendingCheckoutPlan(plan);
-            setIsEditBillingInfoOpen(true);
-          }}
+          isStripeConfigured={true}
+          onSubscribe={() => {}}
         />
       )}
-      <BillingPageDialogs
-        scheduledPlan={scheduledPlan}
-        isCancelDowngradeDialogOpen={isCancelDowngradeDialogOpen}
-        setIsCancelDowngradeDialogOpen={setIsCancelDowngradeDialogOpen}
-        onCancelDowngradeConfirm={() => cancelDowngradeMutation.mutate({})}
-        isCancelDowngradePending={cancelDowngradeMutation.isPending || isPolling}
+
+      <ReactivateConfirmationDialog
+        isOpen={isReactivateDialogOpen}
+        onOpenChange={setIsReactivateDialogOpen}
+        onConfirm={() => reactivateMutation.mutate({})}
+        isPending={reactivateMutation.isPending || isPolling}
         currentPlan={currentPlan}
-        currentPeriodEnd={currentPeriodEnd}
-        isReactivateDialogOpen={isReactivateDialogOpen}
-        setIsReactivateDialogOpen={setIsReactivateDialogOpen}
-        onReactivateConfirm={() => reactivateMutation.mutate({})}
-        isReactivatePending={reactivateMutation.isPending || isPolling}
-        isEditBillingInfoOpen={isEditBillingInfoOpen}
-        setIsEditBillingInfoOpen={setIsEditBillingInfoOpen}
-        billingInfo={subscription?.billingInfo}
-        tenantName={tenant?.name ?? ""}
-        onBillingInfoSuccess={handleBillingInfoSuccess}
-        pendingCheckoutPlan={pendingCheckoutPlan}
-        isUpdatePaymentMethodOpen={isUpdatePaymentMethodOpen}
-        setIsUpdatePaymentMethodOpen={setIsUpdatePaymentMethodOpen}
-        onHasOpenInvoice={(invoice) => {
-          setRetryInvoice(invoice);
-          setIsRetryPaymentOpen(true);
-        }}
-        isRetryPaymentOpen={isRetryPaymentOpen}
-        setIsRetryPaymentOpen={setIsRetryPaymentOpen}
-        paymentMethod={subscription?.paymentMethod}
-        retryInvoiceAmount={retryInvoice.amount}
-        retryInvoiceCurrency={retryInvoice.currency}
-        isCheckoutDialogOpen={isCheckoutDialogOpen}
-        setIsCheckoutDialogOpen={setIsCheckoutDialogOpen}
-        checkoutPlan={checkoutPlan}
-        reactivateClientSecret={reactivateClientSecret}
-        reactivatePublishableKey={reactivatePublishableKey}
-        setReactivateClientSecret={setReactivateClientSecret}
-        setReactivatePublishableKey={setReactivatePublishableKey}
       />
+
+      {scheduledPlan && (
+        <CancelDowngradeDialog
+          isOpen={isCancelDowngradeDialogOpen}
+          onOpenChange={setIsCancelDowngradeDialogOpen}
+          onConfirm={() => cancelDowngradeMutation.mutate({})}
+          isPending={cancelDowngradeMutation.isPending || isPolling}
+          currentPlan={currentPlan}
+          scheduledPlan={scheduledPlan}
+          currentPeriodEnd={currentPeriodEnd}
+        />
+      )}
     </>
   );
 }

@@ -1,4 +1,19 @@
 {
+  "env": {
+    "ENABLE_TOOL_SEARCH": "true",
+    "CLAUDE_CODE_DISABLE_GIT_INSTRUCTIONS": "1"
+  },
+  "permissions": {
+    "allow": [
+      "PowerShell(pp build --backend --quiet 2>&1)",
+      "PowerShell(pp build --frontend --quiet 2>&1)",
+      "PowerShell(\\(Get-Item \"C:\\\\Users\\\\colin\\\\dev\\\\booking-SaaS\"\\).Target)",
+      "Read(//c/Users/colin/dev/booking-SaaS/**)",
+      "PowerShell($item = Get-Item \"C:\\\\Users\\\\colin\\\\dev\\\\booking-SaaS\" -ErrorAction SilentlyContinue; if \\($null -ne $item\\) { \"$\\($item.FullName\\) | LinkType: $\\($item.LinkType\\) | Target: $\\($item.Target\\)\" } else { \"Does not exist\" })",
+      "Read(//c/Users/colin/dev//**)",
+      "Bash(npx tsc *)"
+    ]
+  },
   "enabledMcpjsonServers": [
     "developer-cli"
   ],
@@ -55,9 +70,5 @@
   "enabledPlugins": {
     "typescript-lsp@claude-plugins-official": true,
     "csharp-lsp@claude-plugins-official": true
-  },
-  "env": {
-    "ENABLE_TOOL_SEARCH": "true",
-    "CLAUDE_CODE_DISABLE_GIT_INSTRUCTIONS": "1"
   }
 }

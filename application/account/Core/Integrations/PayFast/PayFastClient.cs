@@ -3,7 +3,7 @@ using Microsoft.Extensions.Options;
 
 namespace Account.Integrations.PayFast;
 
-public sealed class PayFastClient(HttpClient httpClient, IOptions<PayFastSettings> options, ILogger<PayFastClient> logger)
+public sealed class PayFastClient(HttpClient httpClient, IOptions<PayFastSettings> options, ILogger<PayFastClient> logger) : IPayFastClient
 {
     private PayFastSettings Settings => options.Value;
 
@@ -36,24 +36,26 @@ public sealed class PayFastClient(HttpClient httpClient, IOptions<PayFastSetting
         }
     }
 
-    public async Task<bool> ChargeSubscriptionAsync(string token, decimal amount, string itemName, CancellationToken cancellationToken)
+    public async Task<bool> ChargeTokenAsync(string token, decimal amountRand, string itemName, CancellationToken cancellationToken)
     {
         try
         {
             var timestamp = DateTimeOffset.UtcNow.ToString("o");
             var signature = PayFastSignature.GenerateApiSignature(Settings.MerchantId, Settings.Passphrase, timestamp);
 
-            var request = new HttpRequestMessage(HttpMethod.Post, $"{ApiBaseUrl}/subscriptions/{token}/charge");
+            var amountInCents = (int)(amountRand * 100);
+
+            var request = new HttpRequestMessage(HttpMethod.Post, $"{ApiBaseUrl}/subscriptions/{token}/adhoc");
             request.Headers.Add("merchant-id", Settings.MerchantId);
             request.Headers.Add("version", "v1");
             request.Headers.Add("timestamp", timestamp);
             request.Headers.Add("signature", signature);
-            request.Content = JsonContent.Create(new { amount, item_name = itemName });
+            request.Content = JsonContent.Create(new { amount = amountInCents, item_name = itemName });
 
             var response = await httpClient.SendAsync(request, cancellationToken);
             if (!response.IsSuccessStatusCode)
             {
-                logger.LogError("PayFast charge subscription failed for token {Token} with status {StatusCode}", token, response.StatusCode);
+                logger.LogError("PayFast adhoc charge failed for token {Token} with status {StatusCode}", token, response.StatusCode);
                 return false;
             }
 
@@ -61,7 +63,7 @@ public sealed class PayFastClient(HttpClient httpClient, IOptions<PayFastSetting
         }
         catch (TaskCanceledException ex)
         {
-            logger.LogError(ex, "Timeout calling PayFast charge for token {Token}", token);
+            logger.LogError(ex, "Timeout calling PayFast adhoc charge for token {Token}", token);
             return false;
         }
     }
@@ -93,6 +95,11 @@ public sealed class PayFastClient(HttpClient httpClient, IOptions<PayFastSetting
             logger.LogError(ex, "Timeout calling PayFast cancel for token {Token}", token);
             return false;
         }
+    }
+
+    public string GetUpdateCardUrl(string token)
+    {
+        return $"{BaseUrl}/eng/recurring/update/{token}";
     }
 
     private sealed record OnsiteProcessResponse(string Uuid);

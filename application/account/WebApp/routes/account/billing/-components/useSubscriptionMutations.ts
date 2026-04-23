@@ -1,6 +1,7 @@
 import { t } from "@lingui/core/macro";
+import { toast } from "sonner";
 
-import { api, type SubscriptionPlan } from "@/shared/lib/api/client";
+import { api, type SubscriptionPlan, SubscriptionStatus } from "@/shared/lib/api/client";
 
 import type { useSubscriptionPolling } from "./useSubscriptionPolling";
 
@@ -12,24 +13,15 @@ interface UseSubscriptionMutationsOptions {
   setIsCancelDialogOpen: (open: boolean) => void;
   setIsCancelDowngradeDialogOpen: (open: boolean) => void;
   setIsReactivateDialogOpen: (open: boolean) => void;
-  setIsEditBillingInfoOpen: (open: boolean) => void;
-  setReactivateClientSecret: (value: string | undefined) => void;
-  setReactivatePublishableKey: (value: string | undefined) => void;
-  setPendingCheckoutPlan: (plan: SubscriptionPlan | null) => void;
 }
 
 export function useSubscriptionLifecycleMutations({
   startPolling,
-  currentPlan,
   downgradeTarget,
   setIsDowngradeDialogOpen,
   setIsCancelDialogOpen,
   setIsCancelDowngradeDialogOpen,
-  setIsReactivateDialogOpen,
-  setIsEditBillingInfoOpen,
-  setReactivateClientSecret,
-  setReactivatePublishableKey,
-  setPendingCheckoutPlan
+  setIsReactivateDialogOpen
 }: UseSubscriptionMutationsOptions) {
   const downgradeMutation = api.useMutation("post", "/api/account/subscriptions/schedule-downgrade", {
     onSuccess: () => {
@@ -44,14 +36,14 @@ export function useSubscriptionLifecycleMutations({
   const cancelMutation = api.useMutation("post", "/api/account/subscriptions/cancel", {
     onSuccess: () => {
       startPolling({
-        check: (subscription) => subscription.cancelAtPeriodEnd === true,
+        check: (subscription) => subscription.status === SubscriptionStatus.Cancelled,
         successMessage: t`Your subscription has been cancelled.`,
         onComplete: () => setIsCancelDialogOpen(false)
       });
     }
   });
 
-  const cancelDowngradeMutation = api.useMutation("post", "/api/account/subscriptions/cancel-downgrade", {
+  const cancelDowngradeMutation = api.useMutation("post", "/api/account/subscriptions/cancel-scheduled-downgrade", {
     onSuccess: () => {
       startPolling({
         check: (subscription) => subscription.scheduledPlan == null,
@@ -63,15 +55,16 @@ export function useSubscriptionLifecycleMutations({
 
   const reactivateMutation = api.useMutation("post", "/api/account/subscriptions/reactivate", {
     onSuccess: (data) => {
-      if (data.clientSecret && data.publishableKey) {
+      if (data.uuid) {
         setIsReactivateDialogOpen(false);
-        setReactivateClientSecret(data.clientSecret);
-        setReactivatePublishableKey(data.publishableKey);
-        setPendingCheckoutPlan(currentPlan);
-        setIsEditBillingInfoOpen(true);
+        if (typeof window.payfast_do_onsite_payment === "function") {
+          window.payfast_do_onsite_payment({ uuid: data.uuid });
+        } else {
+          toast.error(t`Payment processor unavailable. Please refresh and try again.`);
+        }
       } else {
         startPolling({
-          check: (subscription) => subscription.cancelAtPeriodEnd === false,
+          check: (subscription) => subscription.status === SubscriptionStatus.Active,
           successMessage: t`Your subscription has been reactivated.`,
           onComplete: () => setIsReactivateDialogOpen(false)
         });

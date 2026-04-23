@@ -1,4 +1,5 @@
 using Account.Features.Subscriptions.Domain;
+using Account.Features.Subscriptions.Shared;
 using JetBrains.Annotations;
 using SharedKernel.Cqrs;
 
@@ -22,9 +23,22 @@ public sealed record PlanPriceItem(
 
 public sealed class GetPricingCatalogHandler : IRequestHandler<GetPricingCatalogQuery, Result<PricingCatalogResponse>>
 {
-    // TODO: Replace with PayFast plan catalog in pf-03
     public Task<Result<PricingCatalogResponse>> Handle(GetPricingCatalogQuery query, CancellationToken cancellationToken)
     {
-        return Task.FromResult(Result<PricingCatalogResponse>.Success(new PricingCatalogResponse([])));
+        var plans = new[]
+        {
+            SubscriptionPlan.Starter,
+            SubscriptionPlan.Standard,
+            SubscriptionPlan.Premium
+        }.Select(plan => new PlanPriceItem(
+            plan,
+            SubscriptionPlanPricing.GetMonthlyPrice(plan),
+            SubscriptionPlanPricing.Currency,
+            "month",
+            1,
+            true
+        )).ToArray();
+
+        return Task.FromResult(Result<PricingCatalogResponse>.Success(new PricingCatalogResponse(plans)));
     }
 }

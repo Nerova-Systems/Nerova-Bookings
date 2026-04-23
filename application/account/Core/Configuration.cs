@@ -53,7 +53,7 @@ public static class Configuration
             services.AddKeyedScoped<IOAuthProvider, MockOAuthProvider>("mock-google");
             services.AddScoped<OAuthProviderFactory>();
 
-            services.AddHttpClient<PayFastClient>(client => { client.Timeout = TimeSpan.FromSeconds(30); });
+            services.AddHttpClient<IPayFastClient, PayFastClient>(client => { client.Timeout = TimeSpan.FromSeconds(30); });
 
             return services
                 .AddSharedServices<AccountDbContext>([Assembly])

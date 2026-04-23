@@ -195,12 +195,6 @@ msgstr "Opnået i Microsoft Defender for Cloud ved at følge Azures bedste praks
 msgid "Action"
 msgstr ""
 
-msgid "Activating subscription"
-msgstr "Aktiverer abonnement"
-
-msgid "Activating your subscription..."
-msgstr "Aktiverer dit abonnement..."
-
 msgid "Active"
 msgstr "Aktiv"
 
@@ -212,9 +206,6 @@ msgstr "Aktive brugere i de sidste 30 dage"
 
 msgid "Add an extra layer of security to your account."
 msgstr ""
-
-msgid "Add billing information"
-msgstr "Tilføj faktureringsoplysninger"
 
 msgid "Add more in the Users menu"
 msgstr "Tilføj flere i Brugere menuen"
@@ -245,9 +236,6 @@ msgstr "Tilføj din første opskrift for at begynde at opbygge din personlige ko
 
 msgid "Added"
 msgstr "Tilføjet"
-
-msgid "Address"
-msgstr "Adresse"
 
 msgid "Address (fixed 2 lines)"
 msgstr "Adresse (fast 2 linjer)"
@@ -296,12 +284,6 @@ msgstr "Der findes allerede en konto med denne e-mailadresse. Log ind i stedet."
 
 msgid "An email with login instructions will be sent to the user."
 msgstr "En e-mail med login-instruktioner vil blive sendt til brugeren."
-
-msgid "An error occurred while processing your payment."
-msgstr "Der opstod en fejl under behandling af din betaling."
-
-msgid "An error occurred while updating your payment method."
-msgstr "Der opstod en fejl under opdatering af din betalingsmetode."
 
 msgid "An unexpected error occurred while processing your request."
 msgstr "Der opstod en uventet fejl ved behandlingen."
@@ -425,38 +407,20 @@ msgstr "Grundlæggende færdigheder, under 30 minutter"
 msgid "Basic support"
 msgstr "Basal support"
 
-msgid "Basis"
-msgstr "Basis"
-
-msgid "Bill to"
-msgstr "Faktureres til"
-
 msgid "Billed monthly: {targetFormattedPrice}"
 msgstr "Faktureres månedligt: {targetFormattedPrice}"
 
 msgid "Billing"
 msgstr "Fakturering"
 
-msgid "Billing email"
-msgstr "Faktureringsmail"
-
 msgid "Billing history"
 msgstr "Betalingshistorik"
-
-msgid "Billing information"
-msgstr "Faktureringsoplysninger"
-
-msgid "Billing information updated"
-msgstr "Faktureringsoplysninger opdateret"
 
 msgid "Billing is not configured. Please contact support to enable payment processing."
 msgstr "Betaling er ikke konfigureret. Kontakt support for at aktivere betalingsbehandling."
 
 msgid "Billing tabs"
 msgstr "Faktureringsfaner"
-
-msgid "billing@company.com"
-msgstr "fakturering@firma.dk"
 
 msgid "Boeuf bourguignon"
 msgstr "Boeuf bourguignon"
@@ -523,9 +487,6 @@ msgstr "Ved at fortsætte accepterer du vores vilkår"
 
 msgid "By default only one item is open at a time. Pass openMultiple to allow several panels to stay open together."
 msgstr "Som standard kan kun én sektion være åben ad gangen. Brug openMultiple for at lade flere paneler stå åbne samtidigt."
-
-msgid "By subscribing, you agree to our <0>terms of service</0> and <1>privacy policy</1>."
-msgstr "Ved at abonnere accepterer du vores <0>servicevilkår</0> og <1>privatlivspolitik</1>."
 
 msgid "Calendar"
 msgstr "Kalender"
@@ -659,9 +620,6 @@ msgstr "Vælg hvilke notifikationer du modtager og hvordan."
 msgid "Chrome"
 msgstr "Chrome"
 
-msgid "City"
-msgstr "By"
-
 msgid "Clear"
 msgstr "Ryd"
 
@@ -733,9 +691,6 @@ msgstr "Command"
 
 msgid "Command palette"
 msgstr "Kommandopalette"
-
-msgid "Complete your payment to activate your subscription."
-msgstr "Gennemfør din betaling for at aktivere dit abonnement."
 
 msgid "Compliance"
 msgstr "Overholdelse"
@@ -1065,12 +1020,6 @@ msgstr "Let"
 msgid "Edge"
 msgstr "Edge"
 
-msgid "Edit"
-msgstr "Rediger"
-
-msgid "Edit billing information"
-msgstr "Rediger faktureringsoplysninger"
-
 msgid "Edit profile"
 msgstr "Rediger profil"
 
@@ -1107,14 +1056,8 @@ msgstr "Aktiveret"
 msgid "Enchiladas verdes"
 msgstr "Enchiladas verdes"
 
-msgid "Enter the billing details for your subscription."
-msgstr "Indtast faktureringsoplysningerne for dit abonnement."
-
 msgid "Enter your email below to log in"
 msgstr "Indtast din e-mail nedenfor for at logge ind"
-
-msgid "Enter your new payment details below."
-msgstr "Indtast dine nye betalingsoplysninger nedenfor."
 
 msgid "Enter your verification code"
 msgstr "Indtast din bekræftelseskode"
@@ -1149,9 +1092,6 @@ msgstr "Fold Komponenter ud"
 msgid "Expand Examples"
 msgstr "Fold Eksempler ud"
 
-msgid "expires"
-msgstr "udløber"
-
 msgid "Export"
 msgstr "Eksporter"
 
@@ -1175,9 +1115,6 @@ msgstr "Ekstra lille"
 
 msgid "Failed"
 msgstr "Mislykket"
-
-msgid "Failed to load payment processor."
-msgstr "Kunne ikke indlæse betalingsprocessor."
 
 msgid "Features"
 msgstr "Funktioner"
@@ -1584,8 +1521,8 @@ msgstr "Administrer abonnement"
 msgid "Manage your account here."
 msgstr "Administrer din konto her."
 
-msgid "Manage your payment methods and billing information."
-msgstr "Administrer dine betalingsmetoder og faktureringsoplysninger."
+msgid "Manage your subscription and billing history."
+msgstr ""
 
 msgid "Manage your subscription plan."
 msgstr "Administrer dit abonnement."
@@ -1695,9 +1632,6 @@ msgstr ""
 msgid "Name"
 msgstr "Navn"
 
-msgid "Name as it appears on invoices"
-msgstr "Navn som det fremgår på fakturaer"
-
 msgid "Narrow bottom drawer"
 msgstr "Smal bunddrawer"
 
@@ -1743,17 +1677,11 @@ msgstr "Ingen konto fundet for denne e-mailadresse. Tilmeld dig venligst for at 
 msgid "No active sessions found."
 msgstr "Ingen aktive sessioner"
 
-msgid "No billing information on file"
-msgstr "Ingen faktureringsoplysninger registreret"
-
 msgid "No longer needed"
 msgstr "Ikke længere nødvendigt"
 
 msgid "No payment history available."
 msgstr "Ingen betalingshistorik tilgængelig."
-
-msgid "No payment method on file"
-msgstr "Ingen betalingsmetode registreret"
 
 msgid "No recipes yet"
 msgstr "Ingen opskrifter endnu"
@@ -1884,20 +1812,8 @@ msgstr ""
 msgid "Passwordless deployments"
 msgstr "Adgangskodeløse implementeringer"
 
-msgid "Pay"
-msgstr "Betal"
-
-msgid "Pay and subscribe"
-msgstr "Betal og abonner"
-
 msgid "Pay and upgrade"
 msgstr "Betal og opgrader"
-
-msgid "Payment authentication failed."
-msgstr "Betalingsgodkendelse mislykkedes."
-
-msgid "Payment could not be processed. Please try again later."
-msgstr "Betalingen kunne ikke gennemføres. Prøv igen senere."
 
 msgid "Payment failed"
 msgstr "Betaling mislykkedes"
@@ -1905,20 +1821,14 @@ msgstr "Betaling mislykkedes"
 msgid "Payment failed. Your subscription will be suspended soon."
 msgstr "Betaling mislykkedes. Dit abonnement vil blive suspenderet snart."
 
-msgid "Payment method"
-msgstr "Betalingsmetode"
-
-msgid "Payment method updated"
-msgstr "Betalingsmetode opdateret"
+msgid "Payment processor unavailable. Please refresh and try again."
+msgstr ""
 
 msgid "Pedro Duarte"
 msgstr "Pedro Duarte"
 
 msgid "Pending"
 msgstr "Afventer"
-
-msgid "Pending payment completed"
-msgstr "Afventende betaling gennemført"
 
 msgid "People"
 msgstr "Mennesker"
@@ -1975,9 +1885,6 @@ msgstr "Tjek din e-mail for en bekræftelseskode sendt til <0>{email}</0>"
 msgid "Please enter a valid email address"
 msgstr "Indtast en gyldig e-mailadresse"
 
-msgid "Please include your country code"
-msgstr "Inkluder venligst din landekode"
-
 msgid "Please log in again to continue."
 msgstr "Log venligst ind igen for at fortsætte."
 
@@ -1989,12 +1896,6 @@ msgstr "Vælg et JPEG-, PNG-, GIF-, WebP- eller SVG-billede."
 
 msgid "Please try again or return to the home page."
 msgstr "Prøv venligst igen eller vend tilbage til forsiden."
-
-msgid "Please wait while we confirm your payment. This may take a few moments."
-msgstr "Vent venligst mens vi bekræfter din betaling. Det kan tage et øjeblik."
-
-msgid "Postal code"
-msgstr "Postnummer"
 
 msgid "Powered by"
 msgstr "Powered by"
@@ -2037,9 +1938,6 @@ msgstr "Fortrolighedspolitikker"
 
 msgid "Privacy Policy"
 msgstr "Privatlivspolitik"
-
-msgid "Processing payment..."
-msgstr "Behandler betaling..."
 
 msgid "Processing..."
 msgstr "Behandler..."
@@ -2214,8 +2112,8 @@ msgstr "Gendan bruger"
 msgid "Restoring..."
 msgstr "Gendanner..."
 
-msgid "Retry pending payment"
-msgstr "Prøv afventende betaling igen"
+msgid "Retry payment"
+msgstr ""
 
 msgid "Revoke"
 msgstr "Tilbagekald"
@@ -2547,11 +2445,8 @@ msgstr "Standard"
 msgid "Standard user access"
 msgstr "Standard brugeradgang"
 
-msgid "State / Province"
-msgstr "Stat / Region"
-
-msgid "State or region"
-msgstr "Stat eller region"
+msgid "Starter"
+msgstr ""
 
 msgid "Static preview of the Sidebar component. The fully interactive version — with drag-to-resize, hover-reveal toggle, and icon collapse — renders as the real sidemenu in each self-contained system."
 msgstr "Statisk forhåndsvisning af Sidebar-komponenten. Den fuldt interaktive version — med træk-for-at-ændre-størrelse, skifteknap der vises ved hover og ikon-sammenklapning — vises som den rigtige sidemenu i hvert self-contained system."
@@ -2567,9 +2462,6 @@ msgstr "Vejnavn"
 
 msgid "Strict separation prevents production data from leaking to other environments"
 msgstr "Streng adskillelse forhindrer produktionsdata i at lække til andre miljøer"
-
-msgid "Stripe Link"
-msgstr "Stripe Link"
 
 msgid "Subscribe"
 msgstr "Abonner"
@@ -2619,9 +2511,6 @@ msgstr "Tacos al pastor"
 
 msgid "Tax"
 msgstr "Moms"
-
-msgid "Tax ID (VAT number)"
-msgstr "CVR-nummer"
 
 msgid "Tell us a bit about yourself to get started."
 msgstr "Fortæl os lidt om dig selv for at komme i gang."
@@ -2794,6 +2683,9 @@ msgstr "Gennemsigtighed, sikkerhed og privatliv er kernen i hvordan vi opererer.
 msgid "Trending up by 5.2% this month"
 msgstr "Stiger med 5,2% denne måned"
 
+msgid "Trial"
+msgstr ""
+
 msgid "Trust Center"
 msgstr "Tillidscenter"
 
@@ -2845,23 +2737,11 @@ msgstr "Unavngivet konto"
 msgid "Unsaved changes"
 msgstr "Ugemte ændringer"
 
-msgid "Update"
-msgstr "Opdater"
-
-msgid "Update payment method"
-msgstr "Opdater betalingsmetode"
-
-msgid "Update the billing details associated with your subscription."
-msgstr "Opdater faktureringsoplysningerne tilknyttet dit abonnement."
-
 msgid "Update your personal information and profile photo."
 msgstr "Opdater dine personlige oplysninger og profilbillede."
 
 msgid "Update your profile picture and personal details here."
 msgstr "Opdater dit profilbillede og personlige oplysninger her."
-
-msgid "Updating..."
-msgstr "Opdaterer..."
 
 msgid "Upgrade"
 msgstr "Opgrader"
@@ -2959,9 +2839,6 @@ msgstr "Brugere, der ikke har bekræftet deres e-mail"
 
 msgid "Values"
 msgstr "Værdier"
-
-msgid "VAT number"
-msgstr "CVR-nummer"
 
 msgid "Vegetable tempura"
 msgstr "Grøntsagstempura"
@@ -3098,12 +2975,6 @@ msgstr "Din nedgradering er blevet planlagt."
 msgid "Your email address cannot be changed. An owner must delete your account and reinvite you with the new email address."
 msgstr "Din e-mailadresse kan ikke ændres. En ejer skal slette din konto og invitere dig igen med den nye e-mailadresse."
 
-msgid "Your payment card is expired or expiring soon. Please update your payment method to avoid service interruption."
-msgstr "Dit betalingskort er udløbet eller udløber snart. Opdater venligst din betalingsmetode for at undgå afbrydelse af tjenesten."
-
-msgid "Your payment card is expiring soon. Update your payment method to avoid interruption."
-msgstr "Dit betalingskort udløber snart. Opdater din betalingsmetode for at undgå afbrydelse."
-
 msgid "Your personal cookbook library."
 msgstr "Dit personlige kogebogsbibliotek."
 
@@ -3127,9 +2998,6 @@ msgstr "Din session er udløbet."
 
 msgid "Your session was ended from another device."
 msgstr "Din session blev afsluttet fra en anden enhed."
-
-msgid "Your subscription has been activated."
-msgstr "Dit abonnement er blevet aktiveret."
 
 msgid "Your subscription has been cancelled and will end at the end of the current billing period."
 msgstr "Dit abonnement er blevet opsagt og udløber ved udgangen af den nuværende faktureringsperiode."

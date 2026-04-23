@@ -1,0 +1,96 @@
+using Account.Features.Subscriptions.Domain;
+using Account.Features.Subscriptions.Shared;
+using Account.Features.Users.Domain;
+using Account.Integrations.PayFast;
+using FluentValidation;
+using JetBrains.Annotations;
+using Microsoft.Extensions.Options;
+using SharedKernel.Cqrs;
+using SharedKernel.ExecutionContext;
+using SharedKernel.Telemetry;
+
+namespace Account.Features.Subscriptions.Commands;
+
+[PublicAPI]
+public sealed record InitiateSubscriptionCommand(SubscriptionPlan Plan) : ICommand, IRequest<Result<InitiateSubscriptionResponse>>;
+
+[PublicAPI]
+public sealed record InitiateSubscriptionResponse(string Uuid);
+
+public sealed class InitiateSubscriptionValidator : AbstractValidator<InitiateSubscriptionCommand>
+{
+    public InitiateSubscriptionValidator()
+    {
+        RuleFor(x => x.Plan).NotEqual(SubscriptionPlan.Trial).WithMessage("Cannot initiate checkout for the Trial plan.");
+    }
+}
+
+public sealed class InitiateSubscriptionHandler(
+    ISubscriptionRepository subscriptionRepository,
+    IExecutionContext executionContext,
+    IPayFastClient payFastClient,
+    IOptions<PayFastSettings> payFastOptions,
+    ITelemetryEventsCollector events,
+    TimeProvider timeProvider
+) : IRequestHandler<InitiateSubscriptionCommand, Result<InitiateSubscriptionResponse>>
+{
+    public async Task<Result<InitiateSubscriptionResponse>> Handle(InitiateSubscriptionCommand command, CancellationToken cancellationToken)
+    {
+        if (executionContext.UserInfo.Role != nameof(UserRole.Owner))
+        {
+            return Result<InitiateSubscriptionResponse>.Forbidden("Only owners can manage subscriptions.");
+        }
+
+        var subscription = await subscriptionRepository.GetCurrentAsync(cancellationToken);
+
+        if (subscription.Status == SubscriptionStatus.Active)
+        {
+            return Result<InitiateSubscriptionResponse>.BadRequest("Subscription is already active. Use upgrade or downgrade instead.");
+        }
+
+        if (subscription.Status == SubscriptionStatus.Expired)
+        {
+            return Result<InitiateSubscriptionResponse>.BadRequest("Subscription has expired. Please contact support.");
+        }
+
+        var settings = payFastOptions.Value;
+        var now = timeProvider.GetUtcNow();
+        var amount = SubscriptionPlanPricing.GetMonthlyPrice(command.Plan);
+        var billingDay = now.Day <= 28 ? now.Day : 1;
+
+        var parameters = new SortedDictionary<string, string>
+        {
+            { "merchant_id", settings.MerchantId },
+            { "merchant_key", settings.MerchantKey },
+            { "return_url", settings.ReturnUrl },
+            { "cancel_url", settings.CancelUrl },
+            { "notify_url", settings.NotifyUrl },
+            { "name_first", executionContext.UserInfo.FirstName ?? "Customer" },
+            { "email_address", executionContext.UserInfo.Email },
+            { "m_payment_id", Guid.NewGuid().ToString("N") },
+            { "amount", amount.ToString("F2") },
+            { "item_name", $"Nerova Bookings {command.Plan} Plan" },
+            { "subscription_type", "1" },
+            { "billing_date", now.ToString("yyyy-MM-") + billingDay.ToString("D2") },
+            { "recurring_amount", amount.ToString("F2") },
+            { "frequency", "3" },
+            { "cycles", "0" },
+            { "custom_str1", subscription.Id.ToString() },
+            { "custom_str2", executionContext.TenantId!.ToString()! },
+            { "custom_str3", command.Plan.ToString() }
+        };
+
+        parameters["signature"] = PayFastSignature.Generate(parameters, settings.Passphrase);
+
+        var uuid = await payFastClient.ProcessOnsitePaymentAsync(parameters, cancellationToken);
+
+        if (uuid is null)
+        {
+            return Result<InitiateSubscriptionResponse>.BadRequest("Failed to initiate payment. Please try again.");
+        }
+
+        events.CollectEvent(new SubscriptionCheckoutStarted(subscription.Id, command.Plan, false));
+
+        return new InitiateSubscriptionResponse(uuid);
+    }
+}

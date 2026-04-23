@@ -1,4 +1,5 @@
 using Account.Features.Subscriptions.Domain;
+using Account.Features.Subscriptions.Shared;
 using Account.Features.Users.Domain;
 using FluentValidation;
 using JetBrains.Annotations;
@@ -33,7 +34,8 @@ public sealed class GetSubscribePreviewHandler(ISubscriptionRepository subscript
 
         _ = await subscriptionRepository.GetCurrentAsync(cancellationToken);
 
-        // TODO: Implement PayFast subscribe preview in pf-03
-        return Result<SubscribePreviewResponse>.BadRequest("Subscribe preview not yet available.");
+        var totalAmount = SubscriptionPlanPricing.GetMonthlyPrice(query.Plan);
+
+        return new SubscribePreviewResponse(totalAmount, SubscriptionPlanPricing.Currency, 0);
     }
 }

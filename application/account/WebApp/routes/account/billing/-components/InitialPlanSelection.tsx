@@ -7,7 +7,7 @@ import type { SubscriptionPlan } from "@/shared/lib/api/client";
 import { SubscriptionPlan as Plans } from "@/shared/lib/api/client";
 
 import { getFormattedPrice, PlanCard } from "./PlanCard";
-import { StripeNotConfiguredBanner } from "./SubscriptionBanner";
+import { BillingNotConfiguredBanner } from "./SubscriptionBanner";
 
 type PlanPriceItem = components["schemas"]["PlanPriceItem"];
 
@@ -26,9 +26,9 @@ export function InitialPlanSelection({
 }: Readonly<InitialPlanSelectionProps>) {
   return (
     <AppLayout variant="center" maxWidth="64rem" title={t`Billing`} subtitle={t`Choose a plan to get started.`}>
-      {!isStripeConfigured && <StripeNotConfiguredBanner />}
+      {!isStripeConfigured && <BillingNotConfiguredBanner />}
       <div className="grid gap-4 lg:grid-cols-3">
-        {[Plans.Basis, Plans.Standard, Plans.Premium].map((plan) => (
+        {[Plans.Starter, Plans.Standard, Plans.Premium].map((plan) => (
           <PlanCard
             key={plan}
             plan={plan}

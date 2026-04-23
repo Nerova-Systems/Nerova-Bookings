@@ -93,15 +93,39 @@ public sealed class Subscription : AggregateRoot<SubscriptionId>, ITenantScopedE
         FirstPaymentFailedAt = null;
     }
 
-    public void Activate(string? payFastToken, string payFastPaymentId, DateTimeOffset now)
+    public void Activate(SubscriptionPlan plan, string? payFastToken, string payFastPaymentId, DateTimeOffset now)
     {
         Status = SubscriptionStatus.Active;
+        Plan = plan;
+        ScheduledPlan = null;
         if (payFastToken is not null) PayFastToken = payFastToken;
         PayFastPaymentId = payFastPaymentId;
         NextBillingDate = now.AddDays(30);
         CurrentPeriodStart = now;
         CurrentPeriodEnd = now.AddDays(30);
         FirstPaymentFailedAt = null;
+        CancelledAt = null;
+        CancellationReason = null;
+        CancellationFeedback = null;
+    }
+
+    public void SetPlan(SubscriptionPlan plan)
+    {
+        Plan = plan;
+    }
+
+    public void RenewBillingPeriod(DateTimeOffset now)
+    {
+        CurrentPeriodStart = now;
+        CurrentPeriodEnd = now.AddDays(30);
+        NextBillingDate = now.AddDays(30);
+        FirstPaymentFailedAt = null;
+
+        if (ScheduledPlan is not null)
+        {
+            Plan = ScheduledPlan.Value;
+            ScheduledPlan = null;
+        }
     }
 
     public void SetPastDue(DateTimeOffset failedAt)

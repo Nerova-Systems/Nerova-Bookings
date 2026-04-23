@@ -4,8 +4,10 @@ import { SubscriptionPlan } from "@/shared/lib/api/client";
 
 export function getPlanLabel(plan: SubscriptionPlan): string {
   switch (plan) {
-    case SubscriptionPlan.Basis:
-      return t`Basis`;
+    case SubscriptionPlan.Trial:
+      return t`Trial`;
+    case SubscriptionPlan.Starter:
+      return t`Starter`;
     case SubscriptionPlan.Standard:
       return t`Standard`;
     case SubscriptionPlan.Premium:

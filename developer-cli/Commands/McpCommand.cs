@@ -534,7 +534,7 @@ public static partial class DeveloperCliMcpTools
         try
         {
             var developerCliPath = Path.Combine(Configuration.SourceCodeFolder, "developer-cli");
-            var args = new List<string> { "run", "--project", developerCliPath, cliCommand };
+            var args = new List<string> { "run", "--no-build", "--project", developerCliPath, cliCommand };
 
             var processStartInfo = new ProcessStartInfo
             {
@@ -691,7 +691,7 @@ public static partial class DeveloperCliMcpTools
             var stopwatch = Stopwatch.StartNew();
 
             var developerCliPath = Path.Combine(Configuration.SourceCodeFolder, "developer-cli");
-            var allArgs = new List<string> { "run", "--project", developerCliPath, "--" };
+            var allArgs = new List<string> { "run", "--no-build", "--project", developerCliPath, "--" };
             allArgs.AddRange(args);
 
             var command = $"dotnet {string.Join(" ", allArgs.Select(arg => arg.Contains(' ') ? $"\"{arg}\"" : arg))}";

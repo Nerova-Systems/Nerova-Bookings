@@ -15,25 +15,17 @@ export function usePlansPageState() {
   const [isCancelDialogOpen, setIsCancelDialogOpen] = useState(false);
   const [isCancelDowngradeDialogOpen, setIsCancelDowngradeDialogOpen] = useState(false);
   const [isReactivateDialogOpen, setIsReactivateDialogOpen] = useState(false);
-  const [isCheckoutDialogOpen, setIsCheckoutDialogOpen] = useState(false);
-  const [isEditBillingInfoOpen, setIsEditBillingInfoOpen] = useState(false);
-  const [checkoutPlan, setCheckoutPlan] = useState<SubscriptionPlan>(SubscriptionPlan.Standard);
-  const [pendingCheckoutPlan, setPendingCheckoutPlan] = useState<SubscriptionPlan | null>(null);
-  const [reactivateClientSecret, setReactivateClientSecret] = useState<string | undefined>();
-  const [reactivatePublishableKey, setReactivatePublishableKey] = useState<string | undefined>();
-  const [isConfirmingPayment, setIsConfirmingPayment] = useState(false);
   const [isSubscribeDialogOpen, setIsSubscribeDialogOpen] = useState(false);
-  const [subscribeTarget, setSubscribeTarget] = useState<SubscriptionPlan>(SubscriptionPlan.Standard);
+  const [subscribeTarget, setSubscribeTarget] = useState<SubscriptionPlan>(SubscriptionPlan.Starter);
 
   const { data: tenant } = api.useQuery("get", "/api/account/tenants/current");
   const { data: pricingCatalog } = api.useQuery("get", "/api/account/subscriptions/pricing-catalog");
-  const currentPlan = subscription?.plan ?? SubscriptionPlan.Basis;
+  const currentPlan = subscription?.plan ?? SubscriptionPlan.Trial;
 
   const { upgradeMutation, subscribeMutation } = useUpgradeSubscribeMutations({
     startPolling,
     setIsUpgradeDialogOpen,
-    setIsSubscribeDialogOpen,
-    setIsConfirmingPayment
+    setIsSubscribeDialogOpen
   });
 
   const { downgradeMutation, cancelMutation, cancelDowngradeMutation, reactivateMutation } =
@@ -44,11 +36,7 @@ export function usePlansPageState() {
       setIsDowngradeDialogOpen,
       setIsCancelDialogOpen,
       setIsCancelDowngradeDialogOpen,
-      setIsReactivateDialogOpen,
-      setIsEditBillingInfoOpen,
-      setReactivateClientSecret,
-      setReactivatePublishableKey,
-      setPendingCheckoutPlan
+      setIsReactivateDialogOpen
     });
 
   const isPending =
@@ -65,22 +53,14 @@ export function usePlansPageState() {
     : downgradeMutation.isPending
       ? downgradeTarget
       : cancelMutation.isPending
-        ? SubscriptionPlan.Basis
+        ? SubscriptionPlan.Trial
         : reactivateMutation.isPending
           ? currentPlan
           : null;
 
-  const handleBillingInfoSuccess = () => {
-    if (pendingCheckoutPlan == null) return;
-    setCheckoutPlan(pendingCheckoutPlan);
-    setPendingCheckoutPlan(null);
-    setIsCheckoutDialogOpen(true);
-  };
-
   return {
     subscription,
     isPolling,
-    isConfirmingPayment,
     tenant,
     pricingCatalog,
     currentPlan,
@@ -100,17 +80,6 @@ export function usePlansPageState() {
     setIsCancelDowngradeDialogOpen,
     isReactivateDialogOpen,
     setIsReactivateDialogOpen,
-    isCheckoutDialogOpen,
-    setIsCheckoutDialogOpen,
-    isEditBillingInfoOpen,
-    setIsEditBillingInfoOpen,
-    checkoutPlan,
-    pendingCheckoutPlan,
-    setPendingCheckoutPlan,
-    reactivateClientSecret,
-    reactivatePublishableKey,
-    setReactivateClientSecret,
-    setReactivatePublishableKey,
     isSubscribeDialogOpen,
     setIsSubscribeDialogOpen,
     subscribeTarget,
@@ -120,7 +89,6 @@ export function usePlansPageState() {
     downgradeMutation,
     cancelMutation,
     cancelDowngradeMutation,
-    reactivateMutation,
-    handleBillingInfoSuccess
+    reactivateMutation
   };
 }

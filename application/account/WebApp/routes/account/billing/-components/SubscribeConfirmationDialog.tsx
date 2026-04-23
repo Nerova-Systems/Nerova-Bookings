@@ -14,16 +14,9 @@ import { Separator } from "@repo/ui/components/Separator";
 import { Skeleton } from "@repo/ui/components/Skeleton";
 import { formatCurrency } from "@repo/utils/currency/formatCurrency";
 
-import type { components } from "@/shared/lib/api/api.generated";
-
 import { api, type SubscriptionPlan } from "@/shared/lib/api/client";
 
-import { BillingInfoDisplay } from "./BillingInfoDisplay";
-import { PaymentMethodDisplay } from "./PaymentMethodDisplay";
 import { getFormattedPrice, getPlanDetails } from "./PlanCard";
-
-type BillingInfo = components["schemas"]["BillingInfo"];
-type PaymentMethod = components["schemas"]["PaymentMethod"];
 
 type SubscribeConfirmationDialogProps = {
   isOpen: boolean;
@@ -31,8 +24,6 @@ type SubscribeConfirmationDialogProps = {
   onConfirm: () => void;
   isPending: boolean;
   targetPlan: SubscriptionPlan;
-  billingInfo: BillingInfo | null | undefined;
-  paymentMethod: PaymentMethod | null | undefined;
 };
 
 export function SubscribeConfirmationDialog({
@@ -40,9 +31,7 @@ export function SubscribeConfirmationDialog({
   onOpenChange,
   onConfirm,
   isPending,
-  targetPlan,
-  billingInfo,
-  paymentMethod
+  targetPlan
 }: Readonly<SubscribeConfirmationDialogProps>) {
   const { data: preview, isLoading: isPreviewLoading } = api.useQuery(
     "get",
@@ -65,38 +54,20 @@ export function SubscribeConfirmationDialog({
         <DialogBody>
           <div className="flex flex-col gap-4">
             <div className="flex flex-col gap-2">
-              <span className="text-sm font-medium">
-                <Trans>Bill to</Trans>
-              </span>
-              <BillingInfoDisplay billingInfo={billingInfo} />
-            </div>
-
-            <Separator />
-
-            <div className="flex flex-col gap-2">
-              <span className="text-sm font-medium">
-                <Trans>Payment method</Trans>
-              </span>
-              <PaymentMethodDisplay paymentMethod={paymentMethod} />
-            </div>
-
-            <Separator />
-
-            <div className="flex flex-col gap-2">
               {isPreviewLoading || preview == null ? (
                 <div className="flex flex-col gap-2">
                   <div className="flex items-center justify-between">
-                    <Skeleton className="h-4 w-[10rem]" />
-                    <Skeleton className="h-4 w-[4rem]" />
+                    <Skeleton className="h-4 w-40" />
+                    <Skeleton className="h-4 w-16" />
                   </div>
                   <div className="flex items-center justify-between">
-                    <Skeleton className="h-4 w-[12rem]" />
-                    <Skeleton className="h-4 w-[4rem]" />
+                    <Skeleton className="h-4 w-48" />
+                    <Skeleton className="h-4 w-16" />
                   </div>
                   <Separator />
                   <div className="flex items-center justify-between">
-                    <Skeleton className="h-5 w-[6rem]" />
-                    <Skeleton className="h-5 w-[5rem]" />
+                    <Skeleton className="h-5 w-24" />
+                    <Skeleton className="h-5 w-20" />
                   </div>
                 </div>
               ) : (
@@ -139,7 +110,7 @@ export function SubscribeConfirmationDialog({
             <Trans>Cancel</Trans>
           </DialogClose>
           <Button onClick={onConfirm} disabled={isPending || isPreviewLoading}>
-            {isPending ? <Trans>Processing...</Trans> : <Trans>Pay and subscribe</Trans>}
+            {isPending ? <Trans>Processing...</Trans> : <Trans>Subscribe</Trans>}
           </Button>
         </DialogFooter>
       </DialogContent>

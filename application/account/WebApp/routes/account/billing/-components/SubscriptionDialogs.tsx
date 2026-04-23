@@ -1,19 +1,13 @@
 import { t } from "@lingui/core/macro";
 
-import type { components } from "@/shared/lib/api/api.generated";
 import type { CancellationReason, SubscriptionPlan } from "@/shared/lib/api/client";
 
 import { CancelDowngradeDialog } from "./CancelDowngradeDialog";
 import { CancelSubscriptionDialog } from "./CancelSubscriptionDialog";
-import { CheckoutDialog } from "./CheckoutDialog";
 import { DowngradeConfirmationDialog } from "./DowngradeConfirmationDialog";
-import { EditBillingInfoDialog } from "./EditBillingInfoDialog";
 import { ReactivateConfirmationDialog } from "./ReactivateConfirmationDialog";
 import { SubscribeConfirmationDialog } from "./SubscribeConfirmationDialog";
 import { UpgradeConfirmationDialog } from "./UpgradeConfirmationDialog";
-
-type BillingInfo = components["schemas"]["BillingInfo"];
-type PaymentMethod = components["schemas"]["PaymentMethod"];
 
 interface SubscriptionDialogsProps {
   isCancelDialogOpen: boolean;
@@ -51,21 +45,6 @@ interface SubscriptionDialogsProps {
   setIsReactivateDialogOpen: (open: boolean) => void;
   onReactivateConfirm: () => void;
   isReactivatePending: boolean;
-
-  isEditBillingInfoOpen: boolean;
-  setIsEditBillingInfoOpen: (open: boolean) => void;
-  billingInfo: BillingInfo | null | undefined;
-  paymentMethod: PaymentMethod | null | undefined;
-  tenantName: string;
-  onBillingInfoSuccess: () => void;
-
-  isCheckoutDialogOpen: boolean;
-  setIsCheckoutDialogOpen: (open: boolean) => void;
-  checkoutPlan: SubscriptionPlan;
-  reactivateClientSecret: string | undefined;
-  reactivatePublishableKey: string | undefined;
-  setReactivateClientSecret: (value: string | undefined) => void;
-  setReactivatePublishableKey: (value: string | undefined) => void;
 }
 
 export function SubscriptionDialogs({
@@ -98,20 +77,7 @@ export function SubscriptionDialogs({
   isReactivateDialogOpen,
   setIsReactivateDialogOpen,
   onReactivateConfirm,
-  isReactivatePending,
-  isEditBillingInfoOpen,
-  setIsEditBillingInfoOpen,
-  billingInfo,
-  paymentMethod,
-  tenantName,
-  onBillingInfoSuccess,
-  isCheckoutDialogOpen,
-  setIsCheckoutDialogOpen,
-  checkoutPlan,
-  reactivateClientSecret,
-  reactivatePublishableKey,
-  setReactivateClientSecret,
-  setReactivatePublishableKey
+  isReactivatePending
 }: Readonly<SubscriptionDialogsProps>) {
   return (
     <>
@@ -129,8 +95,6 @@ export function SubscriptionDialogs({
         onConfirm={onUpgradeConfirm}
         isPending={isUpgradePending}
         targetPlan={upgradeTarget}
-        billingInfo={billingInfo}
-        paymentMethod={paymentMethod}
       />
 
       <SubscribeConfirmationDialog
@@ -139,8 +103,6 @@ export function SubscriptionDialogs({
         onConfirm={onSubscribeConfirm}
         isPending={isSubscribePending}
         targetPlan={subscribeTarget}
-        billingInfo={billingInfo}
-        paymentMethod={paymentMethod}
       />
 
       <DowngradeConfirmationDialog
@@ -170,30 +132,6 @@ export function SubscriptionDialogs({
         onConfirm={onReactivateConfirm}
         isPending={isReactivatePending}
         currentPlan={currentPlan}
-      />
-
-      <EditBillingInfoDialog
-        isOpen={isEditBillingInfoOpen}
-        onOpenChange={setIsEditBillingInfoOpen}
-        billingInfo={billingInfo}
-        tenantName={tenantName}
-        onSuccess={onBillingInfoSuccess}
-        submitLabel={t`Next`}
-        pendingLabel={t`Saving...`}
-      />
-
-      <CheckoutDialog
-        isOpen={isCheckoutDialogOpen}
-        onOpenChange={(open) => {
-          setIsCheckoutDialogOpen(open);
-          if (!open) {
-            setReactivateClientSecret(undefined);
-            setReactivatePublishableKey(undefined);
-          }
-        }}
-        plan={checkoutPlan}
-        prefetchedClientSecret={reactivateClientSecret}
-        prefetchedPublishableKey={reactivatePublishableKey}
       />
     </>
   );

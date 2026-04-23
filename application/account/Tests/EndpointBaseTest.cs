@@ -1,6 +1,7 @@
 using System.Net.Http.Headers;
 using Account.Features.Users.Domain;
 using Account.Integrations.OAuth;
+using Account.Integrations.PayFast;
 using Bogus;
 using JetBrains.Annotations;
 using Microsoft.ApplicationInsights;
@@ -28,6 +29,7 @@ public abstract class EndpointBaseTest<TContext> : IDisposable where TContext : 
 {
     protected readonly AccessTokenGenerator AccessTokenGenerator;
     protected readonly IEmailClient EmailClient;
+    protected readonly IPayFastClient PayFastClient;
     protected readonly Faker Faker = new();
     protected readonly ServiceCollection Services;
     protected readonly TimeProvider TimeProvider;
@@ -82,6 +84,12 @@ public abstract class EndpointBaseTest<TContext> : IDisposable where TContext : 
         EmailClient = Substitute.For<IEmailClient>();
         Services.AddScoped<IEmailClient>(_ => EmailClient);
 
+        PayFastClient = Substitute.For<IPayFastClient>();
+        PayFastClient.ProcessOnsitePaymentAsync(Arg.Any<SortedDictionary<string, string>>(), Arg.Any<CancellationToken>()).Returns("test-uuid");
+        PayFastClient.ChargeTokenAsync(Arg.Any<string>(), Arg.Any<decimal>(), Arg.Any<string>(), Arg.Any<CancellationToken>()).Returns(true);
+        PayFastClient.CancelSubscriptionAsync(Arg.Any<string>(), Arg.Any<CancellationToken>()).Returns(true);
+        PayFastClient.GetUpdateCardUrl(Arg.Any<string>()).Returns("https://sandbox.payfast.co.za/eng/recurring/update/test-token");
+
         var telemetryChannel = Substitute.For<ITelemetryChannel>();
         Services.AddSingleton(new TelemetryClient(new TelemetryConfiguration { TelemetryChannel = telemetryChannel }));
 
@@ -113,6 +121,9 @@ public abstract class EndpointBaseTest<TContext> : IDisposable where TContext : 
 
                         services.Remove(services.Single(d => d.ServiceType == typeof(IEmailClient)));
                         services.AddTransient<IEmailClient>(_ => EmailClient);
+
+                        services.Remove(services.Single(d => d.ServiceType == typeof(IPayFastClient)));
+                        services.AddTransient<IPayFastClient>(_ => PayFastClient);
 
                         RegisterMockLoggers(services);
 

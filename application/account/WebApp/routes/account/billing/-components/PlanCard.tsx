@@ -62,7 +62,7 @@ export function PlanCard({
   const planOrder = getPlanOrder(plan);
   const isUpgrade = planOrder > currentOrder;
   const isDowngrade = planOrder < currentOrder;
-  const isBasis = currentPlan === SubscriptionPlan.Basis;
+  const isBasis = currentPlan === SubscriptionPlan.Trial;
 
   function renderAction() {
     if (cancelAtPeriodEnd) {
@@ -84,7 +84,7 @@ export function PlanCard({
       );
     }
 
-    if (isBasis && plan !== SubscriptionPlan.Basis) {
+    if (isBasis && plan !== SubscriptionPlan.Trial) {
       return (
         <Button
           variant="default"
@@ -164,7 +164,7 @@ export function PlanCard({
             formattedPrice
           )}
         </div>
-        {taxExclusive && plan !== SubscriptionPlan.Basis && (
+        {taxExclusive && plan !== SubscriptionPlan.Trial && (
           <span className="text-sm font-normal text-muted-foreground">
             <Trans>Excl. tax</Trans>
           </span>
