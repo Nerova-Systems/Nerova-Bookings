@@ -1,8 +1,6 @@
-import { useContext } from "react";
-
+import { useFieldError } from "../hooks/useFieldError";
 import { cn } from "../utils";
 import { Field, FieldDescription, FieldError, FieldLabel } from "./Field";
-import { FormValidationContext } from "./Form";
 import { LabelWithTooltip } from "./LabelWithTooltip";
 import { Textarea } from "./Textarea";
 
@@ -10,13 +8,12 @@ export interface TextAreaFieldProps extends Omit<React.ComponentProps<"textarea"
   label?: string;
   description?: string;
   errorMessage?: string;
-  tooltip?: string;
+  tooltip?: React.ReactNode;
   className?: string;
   textareaClassName?: string;
   onChange?: (value: string) => void;
-  isRequired?: boolean;
-  isDisabled?: boolean;
-  isReadOnly?: boolean;
+  lines?: number;
+  resizable?: boolean;
 }
 
 export function TextAreaField({
@@ -30,26 +27,17 @@ export function TextAreaField({
   value,
   onChange,
   autoFocus,
-  isRequired,
-  isDisabled,
-  isReadOnly,
+  required,
+  disabled,
+  readOnly,
+  lines,
+  resizable,
   ...props
 }: Readonly<TextAreaFieldProps>) {
-  const formErrors = useContext(FormValidationContext);
-  const fieldValidationErrors = name && formErrors && name in formErrors ? formErrors[name] : undefined;
-  const fieldErrorMessages = fieldValidationErrors
-    ? Array.isArray(fieldValidationErrors)
-      ? fieldValidationErrors
-      : [fieldValidationErrors]
-    : [];
-  const errors = errorMessage
-    ? [{ message: errorMessage }]
-    : fieldErrorMessages.length > 0
-      ? fieldErrorMessages.map((err) => ({ message: err }))
-      : undefined;
-  const isInvalid = errors && errors.length > 0;
+  const { errors, isInvalid, markChanged, clearOnBlur } = useFieldError({ name, errorMessage });
 
   const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    markChanged();
     onChange?.(e.target.value);
   };
 
@@ -65,11 +53,14 @@ export function TextAreaField({
         name={name}
         value={value}
         onChange={handleChange}
+        onBlur={clearOnBlur}
         autoFocus={autoFocus}
-        required={isRequired}
-        disabled={isDisabled}
-        readOnly={isReadOnly}
+        required={required}
+        disabled={disabled}
+        readOnly={readOnly}
         aria-invalid={isInvalid || undefined}
+        lines={lines}
+        resizable={resizable}
         className={textareaClassName}
         {...props}
       />

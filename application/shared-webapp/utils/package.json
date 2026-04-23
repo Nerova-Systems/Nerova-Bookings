@@ -14,7 +14,7 @@
     "dev": "tsc -p . -w",
     "dev:setup": "tsc -p .",
     "format": "oxfmt && (oxlint --fix || true)",
-    "lint": "oxlint"
+    "lint": "oxlint --deny-warnings"
   },
   "devDependencies": {
     "@repo/config": "*"

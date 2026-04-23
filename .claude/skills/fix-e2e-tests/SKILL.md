@@ -1,7 +1,7 @@
 ---
 name: fix-e2e-tests
 description: Systematically fix all failing E2E tests using a phased diagnostic approach. Classifies tests as passing, flaky, or permanently failing, then fixes them one by one with progressive scope expansion.
-allowed-tools: Read, Write, Edit, Bash, Glob, Grep, mcp__developer-cli__end_to_end, mcp__developer-cli__execute_command, mcp__developer-cli__run
+allowed-tools: Read, Write, Edit, Bash, Glob, Grep, mcp__developer-cli__end_to_end, mcp__developer-cli__build, mcp__developer-cli__run
 ---
 
 # Fix E2E Tests

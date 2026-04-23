@@ -5,166 +5,83 @@ description: Rules for forms with validation using ShadCN 2.0 components
 
 # Form With Validation
 
-Guidelines for implementing forms with validation in the frontend, covering UI components, mutation handling, and validation error display.
+## Form wiring
 
-## Implementation
+- `api.useMutation` (or TanStack `useMutation` for multi-call flows) + `mutationSubmitter` on `<Form>`.
+- Server validation via `<Form validationErrors={mutation.error?.errors} validationBehavior="aria">`. Fields read their own errors from `FormValidationContext` by `name`.
+- Submit button: `disabled={mutation.isPending}` only. No client-side `isValid` gate — server validates.
+- If the backend can't return field-level errors (e.g. non-nullable `DateOnly` fails JSON deserialization on `""`), fix the backend: make it nullable + `NotNull` FluentValidation rule.
 
-1. Use ShadCN components from `@repo/ui/components` for form elements
-2. Use `api.useMutation` or TanStack's `useMutation` for form submissions
-3. Use the custom `mutationSubmitter` to handle form submission and data mapping
-4. Handle validation errors using the `validationErrors` prop from the mutation error
-5. Show loading state in submit buttons using `disabled={mutation.isPending}`
-6. For complex scenarios with multiple API calls, create a custom mutation with a `mutationFn`
+## Dialog wrapper/body split
+
+Every form dialog has two components in the same file:
+
+- **Wrapper** (`XxxDialog`): receives `isOpen` / `onOpenChange`. Contains only `DirtyDialog` + `DialogContent` + `DialogHeader`. No state, no mutation, no dirty tracking.
+- **Body** (`XxxDialogBody`): child of `<DialogContent>`. Owns all state, mutation, `Form`, `DialogBody`, `DialogFooter`. Signals dirtiness via `useDialogSetDirty()` in field `onChange` handlers.
+
+**Why this split:** `DialogContent` unmounts its children on close, so the body is recreated on every open. Form state, mutation errors, dirty flag — all reset automatically because the components holding them no longer exist. No `handleCloseComplete`, no `mutation.reset()`, no `setIsFormDirty(false)` anywhere.
+
+## DirtyDialog API
+
+- Props: `open`, `onOpenChange`, `trackingTitle`, optional label overrides. That's it.
+- Body calls `useDialogSetDirty()(true)` on any field change. The wrapper tracks the flag internally and clears it when `open` flips false.
+- Cancel button: `<DialogClose render={<Button type="reset" ... />}>` — `type="reset"` bypasses the unsaved warning.
+- Close on success: call `onClose` passed from the wrapper. Do not reset anything manually.
 
 ## Anti-patterns
 
-- **Do NOT use `<FormErrorMessage>`** - This component is deprecated. Instead:
-  - Use `validationErrors` prop on the `<Form>` to show field-level validation errors
-  - Use toast notifications to display server errors (non-validation errors)
+- State (`useState`, `useMutation`, refs) in the wrapper — persists across close/reopen. Always in the body.
+- `isValid`-gated submit button — hides server errors from the user.
+- `handleCloseComplete` / `mutation.reset()` / `setIsFormDirty(false)` — symptoms of state in the wrong place.
+- `<FormErrorMessage>` — deprecated. Use `validationErrors`.
 
-Note: All .NET API endpoints are available as strongly typed API contracts in the frontend—when compiling the .NET backend, an OpenApi.json file is generated and the frontend build uses `openapi-typescript` to generate the API contracts.
+Note: .NET endpoints generate an `*.Api.json` on backend build; `openapi-typescript` turns it into `api.generated.d.ts`. Backend contract changes need both builds.
 
-## Examples
+## Example
 
-### Example 1 - Basic Form With Validation
-
-```typescript
-// ✅ DO: Use mutationSubmitter and proper error handling
-import { api } from "@/shared/lib/api/client";
-import { mutationSubmitter } from "@repo/ui/forms/mutationSubmitter";
-import { Form, TextField, Button } from "@repo/ui/components";
-import { Trans } from "@lingui/react/macro";
-
-export function UserProfileForm({ user }) {
-  const updateUserMutation = api.useMutation("put", "/api/account/users/me");
-  
+```tsx
+export function InviteUserDialog({ isOpen, onOpenChange }: Readonly<Props>) {
+  const handleClose = () => onOpenChange(false);
   return (
-    <Form
-      onSubmit={mutationSubmitter(updateUserMutation)}
-      validationBehavior="aria"
-      validationErrors={updateUserMutation.error?.errors}
-    >
-      <TextField
-        autoFocus={true}
-        isRequired={true}
-        name="firstName"
-        label={t`First name`}
-        defaultValue={user?.firstName}
-        placeholder={t`E.g., Alex`}
-      />
-      <TextField
-        isRequired={true}
-        name="lastName"
-        label={t`Last name`}
-        defaultValue={user?.lastName}
-        placeholder={t`E.g., Taylor`}
-      />
-      
-      <TextField
-        name="title"
-        label={t`Title`}
-        defaultValue={user?.title}
-      />
-
-      <Button type="submit" disabled={updateUserMutation.isPending}>
-        {updateUserMutation.isPending ? <Trans>Saving...</Trans> : <Trans>Save changes</Trans>}
-      </Button>
-    </Form>
+    <DirtyDialog open={isOpen} onOpenChange={onOpenChange} trackingTitle="Invite user">
+      <DialogContent className="sm:w-dialog-md">
+        <DialogHeader>
+          <DialogTitle><Trans>Invite user</Trans></DialogTitle>
+        </DialogHeader>
+        <InviteUserDialogBody onClose={handleClose} />
+      </DialogContent>
+    </DirtyDialog>
   );
 }
 
-// ❌ DON'T: Use direct form submission without mutationSubmitter
-function BadUserProfileForm({ user }) {
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState(null);
-  
-  const handleSubmit = async (event) => {
-    event.preventDefault();
-    setIsLoading(true);
-    
-    try {
-      const formData = new FormData(event.target);
-      const data = Object.fromEntries(formData.entries());
-      
-      await fetch("/api/account/users/me", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data)
-      });
-    } catch (err) {
-      setError(err);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-  
-  return (
-    <Form onSubmit={handleSubmit}>
-      {/* Missing proper validation and error handling */}
-      <TextField name="firstName" defaultValue={user?.firstName} isRequired />
-      <TextField name="lastName" defaultValue={user?.lastName} isRequired />
-      <TextField name="title" defaultValue={user?.title} />
-      
-      <Button type="submit" disabled={isLoading}>
-        {isLoading ? <Trans>Saving...</Trans> : <Trans>Save changes</Trans>}
-      </Button>
-    </Form>
-  );
-}
-```
-
-### Example 2 - Complex Form With Multiple APIs Calls
-
-```typescript
-// ✅ DO: Use custom mutation for complex scenarios
-export function UserProfileWithAvatarForm({ user, onSuccess, onClose }) {
-  const [selectedAvatarFile, setSelectedAvatarFile] = useState(null);
-  const [removeAvatar, setRemoveAvatar] = useState(false);
-  
-  const updateUserMutation = api.useMutation("put", "/api/account/users/me");
-  const updateAvatarMutation = api.useMutation("post", "/api/account/users/me/avatar");
-  const removeAvatarMutation = api.useMutation("delete", "/api/account/users/me/avatar");
-  
-  const queryClient = useQueryClient();
-  
-  // Complex mutation with multiple API calls
-  const saveMutation = useMutation({
-    mutationFn: async (data) => {
-      // First API call - upload avatar if selected
-      if (selectedAvatarFile) {
-        const formData = new FormData();
-        formData.append("file", selectedAvatarFile);
-        await updateAvatarMutation.mutateAsync({ body: formData });
-      } 
-      
-      // Second API call - remove avatar if requested
-      else if (removeAvatar) {
-        await removeAvatarMutation.mutateAsync({});
-      }
-
-      // Third API call - update user data
-      return await updateUserMutation.mutateAsync(data);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries();
-      onSuccess?.();
-      onClose?.();
-    }
+function InviteUserDialogBody({ onClose }: { onClose: () => void }) {
+  const setDirty = useDialogSetDirty();
+  const inviteMutation = api.useMutation("post", "/api/account/users/invite", {
+    onSuccess: () => { toast.success(t`User invited`); onClose(); }
   });
-  
+
   return (
     <Form
-      onSubmit={mutationSubmitter(saveMutation)}
+      onSubmit={mutationSubmitter(inviteMutation)}
+      validationErrors={inviteMutation.error?.errors}
       validationBehavior="aria"
-      validationErrors={saveMutation.error?.errors || updateUserMutation.error?.errors}
     >
-      {/* Form fields */}
-
-      <Button type="submit" disabled={saveMutation.isPending}>
-        {saveMutation.isPending ? <Trans>Saving...</Trans> : <Trans>Save changes</Trans>}
-      </Button>
+      <DialogBody>
+        <TextField autoFocus name="email" label={t`Email`} onChange={() => setDirty(true)} />
+      </DialogBody>
+      <DialogFooter>
+        <DialogClose render={<Button type="reset" variant="secondary" disabled={inviteMutation.isPending} />}>
+          <Trans>Cancel</Trans>
+        </DialogClose>
+        <Button type="submit" disabled={inviteMutation.isPending}>
+          {inviteMutation.isPending ? <Trans>Sending...</Trans> : <Trans>Send invite</Trans>}
+        </Button>
+      </DialogFooter>
     </Form>
   );
 }
 ```
 
+Multi-step dialogs: wizard state (`step`, intermediate values) also lives in the body — unmount resets the wizard to step 0 on reopen.
+
+Multi-call submits: compose `api.useMutation` calls inside a TanStack `useMutation({ mutationFn: async (d) => { ... } })`, pass its `error?.errors` into `<Form validationErrors>`.

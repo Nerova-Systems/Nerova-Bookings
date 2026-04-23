@@ -6,7 +6,7 @@ import { useUserInfo } from "@repo/infrastructure/auth/hooks";
 import { createLoginUrlWithReturnPath } from "@repo/infrastructure/auth/util";
 import { Avatar, AvatarFallback, AvatarImage } from "@repo/ui/components/Avatar";
 import { Button } from "@repo/ui/components/Button";
-import { overlayContext } from "@repo/ui/components/SideMenu";
+import { overlayContext } from "@repo/ui/components/Sidebar";
 import { useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { ChevronDownIcon, LogOutIcon, MonitorSmartphoneIcon, SlidersHorizontalIcon, UserIcon } from "lucide-react";
@@ -51,8 +51,7 @@ export function MobileMenuContent({
         userId: userInfo?.id || ""
       });
 
-      // Use window.location.href for logout to ensure a full page reload,
-      // clearing all React state and preventing stale queries
+      // Full page reload clears all React state and prevents stale queries.
       window.location.href = createLoginUrlWithReturnPath(loginPath);
     } catch {
       window.location.href = createLoginUrlWithReturnPath(loginPath);

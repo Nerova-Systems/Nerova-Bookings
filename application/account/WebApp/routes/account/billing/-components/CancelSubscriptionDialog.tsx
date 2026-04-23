@@ -126,7 +126,7 @@ export function CancelSubscriptionDialog({
             placeholder={t`Tell us more...`}
             value={feedback}
             onChange={setFeedback}
-            isDisabled={isPending}
+            disabled={isPending}
             maxLength={500}
             rows={5}
           />

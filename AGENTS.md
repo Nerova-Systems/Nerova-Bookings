@@ -1,63 +1,22 @@
-# Main Entry Point
+## Build, Test, and Format
 
-Always follow these rule files very carefully, as they have been crafted to ensure consistency and high-quality code.
+Always use MCP tools (`build`, `test`, `format`, `lint`, `run`, `restart`, `stop`, `end_to_end`) instead of running dotnet/npm/npx commands directly. Run `build` first, then remaining tools with `noBuild=true`.
 
-## Git Commit Policy
+On MCP failures fall back to the CLI (`[CLI_ALIAS] build --quiet`, `[CLI_ALIAS] test --quiet`, etc.).
 
-Wait for the user to request git operations (commit, amend, revert). Each request grants permission for that operation only.
+**Slow:** Aspire restart, backend format, backend lint, end-to-end tests. **Fast:** frontend format/lint, backend test. If any slow operation is needed, run everything in parallel Task agents. End-to-end tests use `waitForAspire=true`.
 
-- ✅ Always wait for user to request a commit
-- ❌ Be proactive about commits—user will always initiate
-- ❌ After completing work, ask if user wants to commit
-- ❌ Commit after finishing a task without being asked
-- ❌ Run revert or amend to fix a mistake—let user decide
-- ❌ Treat one commit request as permission for later commits
+**Aspire**: The `run`, `restart`, and `stop` MCP tools manage the AppHost at [APP_URL]. Use `restart` when backend changes or hot reload breaks. In the agentic workflow, only the Guardian agent calls these. All other agents must notify the Guardian if they need Aspire restarted.
 
-## Development Approach
+Never commit, amend, or revert without explicit user instruction each time. Commit messages: one descriptive line in imperative form, no description body.
 
-When working on tasks, follow any specific workflow instructions provided for your role. If no specific workflow is provided:
+## Application URL
 
-1. Understand the problem and requirements clearly.
-2. Consult the relevant rule files before implementation.
-3. Develop a clear implementation plan.
-4. Follow established patterns and conventions.
-5. Use MCP tools for building, testing, and formatting.
+Whenever you see `[APP_URL]`, replace it with the configured value.
 
-   Always use MCP tools instead of running `dotnet build`, `dotnet test`, `dotnet format`, or equivalent `npm`  and `npx playwright` commands directly.
-
-   **Execution Order** (mandatory):
-   1. Run **build** first: `execute_command(command='build', backend=true, frontend=true)`
-   2. Run remaining tools with `noBuild=true`
-
-   **Slow Operations:**
-   - Aspire restart
-   - Backend format
-   - Backend lint
-   - End-to-end tests
-
-   **Fast Operations:**
-   - Frontend format, lint
-   - Backend test
-
-   **Parallelization rule:**
-   - If running only fast operations → run sequentially
-   - If running any slow operation → run EVERYTHING in parallel Task agents
-
-   **Example: running all tools after build (do NOT use run_in_background):**
-   ```
-   Task(subagent_type: "general-purpose", prompt: "Restart Aspire: mcp__developer-cli__run()", run_in_background: false)
-   Task(subagent_type: "general-purpose", prompt: "Test backend: mcp__developer-cli__execute_command(command='test', backend=true, noBuild=true)", run_in_background: false)
-   Task(subagent_type: "general-purpose", prompt: "Format backend: mcp__developer-cli__execute_command(command='format', backend=true, noBuild=true)", run_in_background: false)
-   Task(subagent_type: "general-purpose", prompt: "Lint backend: mcp__developer-cli__execute_command(command='lint', backend=true, noBuild=true)", run_in_background: false)
-   Task(subagent_type: "general-purpose", prompt: "Run e2e: mcp__developer-cli__end_to_end(browser='chromium', waitForAspire=true)", run_in_background: false)
-   ```
-   Format, lint, and test run while Aspire starts. End-to-end tests use `waitForAspire=true` to wait until Aspire is ready.
-
-   **About Aspire**: The **run** MCP tool starts the Aspire AppHost at https://localhost:9000. Restart it when the backend has changed, when frontend hot reload stops working, or when it is not running.
-
-   **MCP Server Setup**: See [.mcp.json](/.mcp.json) for MCP server configuration. For Claude Code, run `claude config set enableAllProjectMcpServers true` once to enable project-scoped MCP servers.
-
-**Critical**: If you do NOT see the mentioned developer-cli MCP tool, tell the user. Do NOT just ignore that you cannot find them, and fall back to other tools.
+```
+APP_URL="https://localhost:9000"
+```
 
 ## CLI Alias Configuration
 
@@ -75,45 +34,20 @@ Whenever you see `[PRODUCT_MANAGEMENT_TOOL]`, replace it with the configured val
 PRODUCT_MANAGEMENT_TOOL="Linear"
 ```
 
-## Rules for implementing changes
+When working with [features] or [tasks], read `.claude/reference/product-management/[PRODUCT_MANAGEMENT_TOOL].md` to learn how to look them up, how to update status, and how generic statuses like [Active], [Review], [Completed] map to the tool. Read the [feature] for full context and the [task] for specific requirements.
 
-Always consult the relevant rule files before each code change.
+## Auto Memory
 
-Please note that I often correct or even revert code you generated. If you notice that, take special care not to revert my changes.
+Never write to or edit any auto memory files (MEMORY.md or any file in a memory directory). These files are managed by the user only.
 
-Commit messages should be in imperative form, start with a capital letter, avoid ending punctuation, be a single line, and concisely describe changes and motivation.
+## Source of Truth
 
-Be very careful with comments, and add them only very sparingly. Never add comments about changes made (these belong in pull requests).
-
-## Edit Discipline
-
-When using the Edit tool:
-- The `new_string` must be a minimal transformation of `old_string`
-- Never remove, modify, or add comments unless that is the explicit task
-- Never reformat code, fix whitespace, or "clean up" adjacent lines
-- If you need to include surrounding context for uniqueness, copy it exactly
+Always verify paths, names, and API routes against the actual codebase. Never rely on memory, cached context, or prior session knowledge for these. Always look them up. Only read files within the git repository unless explicitly asked to look elsewhere.
 
 ## Project Structure
 
 This is a mono repository with multiple self-contained systems (SCS), each being a small monolith. All SCSs follow the same structure.
 
-- [.github](/.github): GitHub workflows and other GitHub artifacts.
-- [application](/application): Contains application code:
-  - [account](/application/account): An SCS for tenant and user management:
-    - [WebApp](/application/account/WebApp): A React, TypeScript SPA.
-    - [Api](/application/account/Api): .NET 10 minimal API.
-    - [Core](/application/account/Core): .NET 10 Vertical Sliced Architecture.
-    - [Workers](/application/account/Workers): A .NET Console job.
-    - [Tests](/application/account/Tests): xUnit tests for backend.
-  - [back-office](/application/back-office): An empty SCS that will be used to create tools for Support and System Admins:
-    - [WebApp](/application/back-office/WebApp): A React, TypeScript SPA.
-    - [Api](/application/back-office/Api): .NET 10 minimal API.
-    - [Core](/application/back-office/Core): .NET 10 Vertical Sliced Architecture.
-    - [Workers](/application/back-office/Workers): A .NET Console job.
-    - [Tests](/application/back-office/Tests): xUnit tests for backend.
-  - [AppHost](/application/AppHost): Aspire project for orchestrating SCSs and Docker containers. Never run directly—typically running in watch mode.
-  - [AppGateway](/application/AppGateway): Main entry point using YARP as reverse proxy for all SCSs.
-  - [shared-kernel](/application/shared-kernel): Reusable .NET backend shared by all SCSs.
-  - [shared-webapp](/application/shared-webapp): Reusable frontend shared by all SCSs.
+- [application](/application): Contains application code, one folder per SCS, plus shared-kernel and shared-webapp.
 - [cloud-infrastructure](/cloud-infrastructure): Bash and Azure Bicep scripts (IaC).
 - [developer-cli](/developer-cli): A .NET CLI tool for automating common developer tasks.

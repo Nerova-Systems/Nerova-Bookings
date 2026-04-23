@@ -19,8 +19,8 @@ This means:
 - The UI is designed for confidence, not complexity.
 
 ### Target Markets
-- **Primary:** South Africa (ZA) — POPIA compliance required
-- **Secondary:** UK, US, Australia
+- **Primary:** African Countries, especially South Africa (POPIA compliance, WhatsApp ubiquity, PayFast dominance)
+- **Secondary:** UK, US, Australia (GDPR compliance, Twilio/Paystack support)
 
 ### Compliance Notes
 - **POPIA (ZA):** Opt-in for WhatsApp must capture purpose + timestamp + consent source

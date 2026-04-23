@@ -6,11 +6,21 @@ import os from "node:os";
 import path from "node:path";
 
 /**
- * Build ignore pattern for the dist folder
+ * File watcher ignore patterns.
+ *
+ * - Dist folders: ignore the WebApp's own dist AND every shared-webapp dist.
+ *   Without the shared-webapp pattern, tsc -w writing to shared-webapp dist
+ *   triggers rspack rebuilds that conflict with the source-change rebuild,
+ *   creating an infinite rebuild loop where no stable output is produced.
+ * - Tests and Playwright reports: never part of the dev bundle, so watching
+ *   them wastes work and can cause spurious rebuilds when reports are generated.
  */
 const applicationRoot = path.resolve(process.cwd(), "..", "..");
 const distFolder = path.join(process.cwd(), "dist");
 const ignoreDistPattern = `**/${path.relative(applicationRoot, distFolder)}/**`;
+const ignoreSharedWebappDistPattern = "**/shared-webapp/*/dist/**";
+const ignoreTestsPattern = "**/tests/**";
+const ignorePlaywrightReportPattern = "**/playwright-report/**";
 
 /**
  * Files to write to disk for the development server to serve
@@ -22,6 +32,12 @@ export type DevelopmentServerPluginOptions = {
    * The port to start the development server on
    */
   port: number;
+  /**
+   * Whether to reload the page when HMR fails to apply an update.
+   * Disable for module federation remotes to prevent the remote's failed HMR
+   * update from reloading the host page while the remote is still rebuilding.
+   */
+  liveReload?: boolean;
 };
 
 /**
@@ -55,9 +71,24 @@ export function DevelopmentServerPlugin(options: DevelopmentServerPluginOptions)
         logger.info(`Using ignore pattern: ${ignoreDistPattern}`);
 
         const extraConfig: RsbuildConfig = {
+          output: {
+            // Force non-hashed filenames in dev mode. Without this, writeToDisk
+            // writes content-hashed filenames (e.g. index.abc123.js) to dist/,
+            // but the dev server serves non-hashed filenames (index.js) from
+            // memory. The .NET backend reads index.html from disk, so the
+            // hashed reference causes 404s and white screens.
+            filename: {
+              js: "[name].js",
+              css: "[name].css"
+            }
+          },
           server: {
             // If the port is in use, the server will exit with an error
             strictPort: true,
+            // Disable HTML fallback - the .NET backend handles SPA routing via MapFallback.
+            // Without this, missing JS files (e.g. during failed rebuilds) return HTML instead
+            // of 404, causing "Unexpected token '<'" errors and white screens.
+            htmlFallback: false,
             // Allow CORS for the platformplatform server
             headers: {
               "Access-Control-Allow-Origin": "*"
@@ -73,6 +104,7 @@ export function DevelopmentServerPlugin(options: DevelopmentServerPluginOptions)
             client: {
               port: options.port
             },
+            liveReload: options.liveReload ?? true,
             // Set publicPath to auto to enable the server to serve the files
             assetPrefix: "auto",
             // Write files to "dist" folder enabling the Api to serve them
@@ -83,8 +115,12 @@ export function DevelopmentServerPlugin(options: DevelopmentServerPluginOptions)
           tools: {
             rspack: {
               watchOptions: {
-                // Ignore the dist folder to prevent infinite loop as we are writing files to dist
-                ignored: ignoreDistPattern
+                ignored: [
+                  ignoreDistPattern,
+                  ignoreSharedWebappDistPattern,
+                  ignoreTestsPattern,
+                  ignorePlaywrightReportPattern
+                ]
               }
             }
           },

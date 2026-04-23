@@ -125,18 +125,19 @@ type TranslationProviderProps = {
 };
 
 function TranslationProvider({ children, translation }: Readonly<TranslationProviderProps>) {
-  const [currentLocale, setCurrentLocale] = useState(i18n.locale);
+  const [currentLocale, setCurrentLocale] = useState(i18n.locale as Locale);
 
   const value: TranslationContext = useMemo(
     () => ({
+      currentLocale,
       setLocale: async (locale: string) => {
         await translation.dynamicActivate(locale);
-        setCurrentLocale(locale); // Update state to force re-render
+        setCurrentLocale(locale as Locale); // Update state to force re-render
       },
       locales: translation.locales,
       getLocaleInfo: translation.getLocaleInfo
     }),
-    [translation]
+    [translation, currentLocale]
   );
 
   useEffect(() => {

@@ -1,11 +1,10 @@
 import { t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
 import { AppLayout } from "@repo/ui/components/AppLayout";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@repo/ui/components/Select";
+import { ToggleGroup, ToggleGroupItem } from "@repo/ui/components/ToggleGroup";
 import { createFileRoute } from "@tanstack/react-router";
 import { MoonIcon, SunIcon } from "lucide-react";
 
-import { OptionCard } from "./-components/OptionCard";
 import { ThemeMode, locales, usePreferences } from "./-components/usePreferences";
 
 export const Route = createFileRoute("/user/preferences/")({
@@ -41,26 +40,30 @@ function PreferencesPage() {
           <p className="mb-4 text-sm text-muted-foreground">
             <Trans>Choose how the application looks to you on this device.</Trans>
           </p>
-          <div className="grid gap-3 sm:grid-cols-3">
-            <OptionCard
-              icon={getSystemThemeIcon()}
-              label={t`System`}
-              isSelected={theme === ThemeMode.System}
-              onClick={() => handleThemeChange(ThemeMode.System)}
-            />
-            <OptionCard
-              icon={<SunIcon className="size-5" />}
-              label={t`Light`}
-              isSelected={theme === ThemeMode.Light}
-              onClick={() => handleThemeChange(ThemeMode.Light)}
-            />
-            <OptionCard
-              icon={<MoonIcon className="size-5" />}
-              label={t`Dark`}
-              isSelected={theme === ThemeMode.Dark}
-              onClick={() => handleThemeChange(ThemeMode.Dark)}
-            />
-          </div>
+          <ToggleGroup
+            variant="outline"
+            size="lg"
+            className="flex w-full"
+            value={[theme ?? ThemeMode.System]}
+            onValueChange={(values) => {
+              if (values.length > 0) {
+                handleThemeChange(values[0]);
+              }
+            }}
+          >
+            <ToggleGroupItem className="flex-1" value={ThemeMode.System}>
+              {getSystemThemeIcon()}
+              <Trans>System</Trans>
+            </ToggleGroupItem>
+            <ToggleGroupItem className="flex-1" value={ThemeMode.Light}>
+              <SunIcon className="size-5" />
+              <Trans>Light</Trans>
+            </ToggleGroupItem>
+            <ToggleGroupItem className="flex-1" value={ThemeMode.Dark}>
+              <MoonIcon className="size-5" />
+              <Trans>Dark</Trans>
+            </ToggleGroupItem>
+          </ToggleGroup>
         </section>
 
         <section>
@@ -70,17 +73,24 @@ function PreferencesPage() {
           <p className="mb-4 text-sm text-muted-foreground">
             <Trans>Select your preferred language. Saved to your profile.</Trans>
           </p>
-          <div className="grid gap-3 sm:grid-cols-2">
+          <ToggleGroup
+            variant="outline"
+            size="lg"
+            className="flex w-full"
+            value={[currentLocale]}
+            onValueChange={(values) => {
+              if (values.length > 0) {
+                handleLocaleChange(values[0] as (typeof locales)[number]["id"]);
+              }
+            }}
+          >
             {locales.map((locale) => (
-              <OptionCard
-                key={locale.id}
-                icon={<span className="text-lg leading-none">{locale.flag}</span>}
-                label={locale.label}
-                isSelected={locale.id === currentLocale}
-                onClick={() => handleLocaleChange(locale.id)}
-              />
+              <ToggleGroupItem key={locale.id} className="flex-1" value={locale.id}>
+                <span className="text-lg leading-none">{locale.flag}</span>
+                {locale.label}
+              </ToggleGroupItem>
             ))}
-          </div>
+          </ToggleGroup>
         </section>
 
         <section>
@@ -90,21 +100,24 @@ function PreferencesPage() {
           <p className="mb-4 text-sm text-muted-foreground">
             <Trans>Adjust the interface size on this device to your preference.</Trans>
           </p>
-          <Select value={currentZoomLevel} onValueChange={handleZoomLevelChange}>
-            <SelectTrigger className="w-full" aria-label={t`Zoom level`}>
-              <SelectValue>{() => zoomLevelOptions.find((z) => z.value === currentZoomLevel)?.label}</SelectValue>
-            </SelectTrigger>
-            <SelectContent>
-              {zoomLevelOptions.map((zoom) => (
-                <SelectItem key={zoom.value} value={zoom.value}>
-                  <span className="flex items-center gap-2">
-                    <span style={{ fontSize: zoom.fontSize, lineHeight: 1 }}>Aa</span>
-                    {zoom.label}
-                  </span>
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <ToggleGroup
+            variant="outline"
+            size="lg"
+            className="flex w-full"
+            value={[currentZoomLevel]}
+            onValueChange={(values) => {
+              if (values.length > 0) {
+                handleZoomLevelChange(values[0]);
+              }
+            }}
+          >
+            {zoomLevelOptions.map((zoom) => (
+              <ToggleGroupItem key={zoom.value} className="flex-1" value={zoom.value}>
+                <span style={{ fontSize: zoom.fontSize, lineHeight: 1 }}>Aa</span>
+                {zoom.label}
+              </ToggleGroupItem>
+            ))}
+          </ToggleGroup>
         </section>
       </div>
     </AppLayout>

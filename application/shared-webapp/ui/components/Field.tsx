@@ -47,7 +47,7 @@ function FieldGroup({ className, ...props }: React.ComponentProps<"div">) {
   );
 }
 
-const fieldVariants = cva("group/field flex w-full gap-3 data-[invalid=true]:text-destructive", {
+const fieldVariants = cva("group/field relative flex w-full gap-3 data-[invalid=true]:text-destructive", {
   variants: {
     orientation: {
       vertical: ["flex-col [&>*]:w-full [&>.sr-only]:w-auto"],
@@ -71,14 +71,15 @@ const fieldVariants = cva("group/field flex w-full gap-3 data-[invalid=true]:tex
 function Field({
   className,
   orientation = "vertical",
+  inline,
   ...props
-}: React.ComponentProps<"div"> & VariantProps<typeof fieldVariants>) {
+}: React.ComponentProps<"div"> & VariantProps<typeof fieldVariants> & { inline?: boolean }) {
   return (
     <div
       role="group"
       data-slot="field"
       data-orientation={orientation}
-      className={cn(fieldVariants({ orientation }), className)}
+      className={cn(fieldVariants({ orientation }), inline && "inline-flex w-auto [&>*]:w-auto", className)}
       {...props}
     />
   );
@@ -94,8 +95,6 @@ function FieldContent({ className, ...props }: React.ComponentProps<"div">) {
   );
 }
 
-// NOTE: This diverges from stock ShadCN to use data-checked (BaseUI) instead of data-state=checked,
-// thicker border (border-2) when checked, and bg-card background for better visibility in Choice Card pattern.
 function FieldLabel({ className, ...props }: React.ComponentProps<typeof Label>) {
   return (
     <Label

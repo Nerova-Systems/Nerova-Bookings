@@ -8,24 +8,53 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger
 } from "@repo/ui/components/DropdownMenu";
+import { type Accept, type FileRejection, useDropzone } from "@repo/ui/components/Dropzone";
 import { CameraIcon, PencilIcon, Trash2Icon } from "lucide-react";
 import { useRef, useState } from "react";
 
 const MAX_FILE_SIZE = 1024 * 1024; // 1MB in bytes
 const ALLOWED_FILE_TYPES = ["image/jpeg", "image/png", "image/gif", "image/webp"];
+const ACCEPTED_FILES: Accept = {
+  "image/jpeg": [".jpg", ".jpeg"],
+  "image/png": [".png"],
+  "image/gif": [".gif"],
+  "image/webp": [".webp"]
+};
 
 interface UserAvatarPickerProps {
   avatarUrl: string | null | undefined;
   isPending: boolean;
+  size?: "base" | "lg";
   onFileSelect: (file: File | null) => void;
   onRemove?: () => void;
 }
 
-export function UserAvatarPicker({ avatarUrl, isPending, onFileSelect, onRemove }: Readonly<UserAvatarPickerProps>) {
+export function UserAvatarPicker({
+  avatarUrl,
+  isPending,
+  size = "base",
+  onFileSelect,
+  onRemove
+}: Readonly<UserAvatarPickerProps>) {
   const [avatarPreviewUrl, setAvatarPreviewUrl] = useState<string | null>(null);
   const [isAvatarRemoved, setIsAvatarRemoved] = useState(false);
   const [avatarMenuOpen, setAvatarMenuOpen] = useState(false);
   const avatarFileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleAcceptedFile = (file: File) => {
+    setAvatarPreviewUrl(URL.createObjectURL(file));
+    setIsAvatarRemoved(false);
+    onFileSelect(file);
+  };
+
+  const handleRejection = (rejection: FileRejection) => {
+    const code = rejection.errors[0]?.code;
+    if (code === "file-too-large") {
+      alert(t`Image must be smaller than 1 MB.`);
+    } else if (code === "file-invalid-type") {
+      alert(t`Please select a JPEG, PNG, GIF, or WebP image.`);
+    }
+  };
 
   const handleFileSelect = (files: FileList | null) => {
     if (files?.[0]) {
@@ -41,11 +70,27 @@ export function UserAvatarPicker({ avatarUrl, isPending, onFileSelect, onRemove 
         return;
       }
 
-      setAvatarPreviewUrl(URL.createObjectURL(file));
-      setIsAvatarRemoved(false);
-      onFileSelect(file);
+      handleAcceptedFile(file);
     }
   };
+
+  const { getRootProps, isDragActive } = useDropzone({
+    onDrop: (acceptedFiles, fileRejections) => {
+      if (fileRejections[0]) {
+        handleRejection(fileRejections[0]);
+        return;
+      }
+      if (acceptedFiles[0]) {
+        handleAcceptedFile(acceptedFiles[0]);
+      }
+    },
+    accept: ACCEPTED_FILES,
+    maxSize: MAX_FILE_SIZE,
+    multiple: false,
+    noClick: true,
+    noKeyboard: true,
+    disabled: isPending
+  });
 
   const handleRemove = () => {
     setAvatarMenuOpen(false);
@@ -69,7 +114,20 @@ export function UserAvatarPicker({ avatarUrl, isPending, onFileSelect, onRemove 
       />
 
       <DropdownMenu open={avatarMenuOpen} onOpenChange={setAvatarMenuOpen} trackingTitle="Profile picture menu">
-        <div className="group relative">
+        <div
+          {...getRootProps({
+            className: [
+              "group relative",
+              size === "lg"
+                ? "flex h-34 w-full flex-col items-center justify-center rounded-xl bg-card md:size-34"
+                : "w-fit",
+              isDragActive && (size === "lg" ? "rounded-xl" : "rounded-full"),
+              isDragActive && "outline outline-2 outline-dashed outline-ring"
+            ]
+              .filter(Boolean)
+              .join(" ")
+          })}
+        >
           <DropdownMenuTrigger
             render={
               <Button

@@ -13,41 +13,111 @@ msgstr ""
 "Plural-Forms: \n"
 "X-Generator: @lingui/cli\n"
 
+#. placeholder {0}: -diffDays
+msgid "{0, plural, one {# day ago} other {# days ago}}"
+msgstr "{0, plural, one {for # dag siden} other {for # dage siden}}"
+
+msgid "{diffDays, plural, one {In # day} other {In # days}}"
+msgstr "{diffDays, plural, one {Om # dag} other {Om # dage}}"
+
 msgid "Access denied"
 msgstr "Adgang nægtet"
 
 msgid "An unexpected error occurred while processing your request."
 msgstr "Der opstod en uventet fejl ved behandlingen."
 
+msgid "Breadcrumb"
+msgstr "Brødkrumme"
+
+msgid "Clear date"
+msgstr "Ryd dato"
+
+msgid "Clear dates"
+msgstr "Ryd datoer"
+
+msgid "Close"
+msgstr ""
+
+msgid "Close menu"
+msgstr "Luk menu"
+
+msgid "Close sidebar"
+msgstr "Luk sidemenu"
+
 msgid "Contact your administrator if you believe this is a mistake."
 msgstr "Kontakt din administrator, hvis du mener, dette er en fejl."
+
+msgid "Create <0>{search}</0>"
+msgstr "Opret <0>{search}</0>"
 
 msgid "Dashboard"
 msgstr "Dashboard"
 
+msgid "Decrease"
+msgstr "Formindsk"
+
+msgid "Drop files here, or click to browse"
+msgstr ""
+
 msgid "Go to home"
 msgstr "Gå til forsiden"
+
+msgid "Go to next page"
+msgstr "Gå til næste side"
+
+msgid "Go to previous page"
+msgstr "Gå til forrige side"
 
 msgid "Hide details"
 msgstr "Skjul detaljer"
 
+msgid "Increase"
+msgstr "Forøg"
+
+msgid "Leave"
+msgstr "Forlad"
+
+msgid "Loading"
+msgstr ""
+
 msgid "Log out"
 msgstr "Log ud"
+
+msgid "Main content"
+msgstr "Hovedindhold"
+
+msgid "Main navigation"
+msgstr "Hovednavigation"
 
 msgid "Manage tenants, view system data, see exceptions, and perform various tasks for operational and support teams."
 msgstr "Administrer lejere, se systemdata, se undtagelser og udfør forskellige opgaver for drifts- og supportteams."
 
-msgid "More information"
-msgstr "Mere information"
+msgid "Mobile navigation menu"
+msgstr "Mobilnavigationsmenu"
+
+msgid "More pages"
+msgstr "Flere sider"
 
 msgid "Navigation"
 msgstr "Navigation"
+
+msgid "Next"
+msgstr "Næste"
+
+msgid "No results found"
+msgstr "Ingen resultater fundet"
+
+msgid "Open calendar"
+msgstr ""
 
 msgid "Open navigation menu"
 msgstr "Åbn navigationsmenu"
 
 msgid "Page not found"
 msgstr "Siden blev ikke fundet"
+
+msgid "Pagination"
+msgstr "Paginering"
 
 msgid "PlatformPlatform logo"
 msgstr "PlatformPlatform logo"
@@ -58,23 +128,59 @@ msgstr "Tjek venligst URL'en eller vend tilbage til forsiden."
 msgid "Please try again or return to the home page."
 msgstr "Prøv venligst igen eller vend tilbage til forsiden."
 
+msgid "Previous"
+msgstr "Forrige"
+
+msgid "Resize sidebar"
+msgstr "Ændr bredde på sidepanel"
+
+msgid "Select dates"
+msgstr "Vælg datoer"
+
+msgid "Select time zone"
+msgstr "Vælg tidszone"
+
 msgid "Show details"
 msgstr "Vis detaljer"
+
+msgid "Show more"
+msgstr "Vis flere"
+
+msgid "Skip to main content"
+msgstr "Spring til hovedindhold"
 
 msgid "Something went wrong"
 msgstr "Noget gik galt"
 
+msgid "Stay"
+msgstr "Bliv"
+
 msgid "The page you are looking for does not exist or was moved."
 msgstr "Siden du leder efter findes ikke eller er blevet flyttet."
+
+msgid "Today"
+msgstr "I dag"
 
 msgid "Toggle sidebar"
 msgstr "Vis/skjul sidepanel"
 
+msgid "Tomorrow"
+msgstr "I morgen"
+
 msgid "Try again"
 msgstr "Prøv igen"
+
+msgid "Unsaved changes"
+msgstr "Ugemte ændringer"
 
 msgid "Welcome to the Back Office"
 msgstr "Velkommen til Back Office"
 
+msgid "Yesterday"
+msgstr "I går"
+
 msgid "You do not have permission to access this page."
 msgstr "Du har ikke tilladelse til at tilgaa denne side."
+
+msgid "You have unsaved changes. If you leave now, your changes will be lost."
+msgstr "Du har ugemte ændringer. Hvis du forlader nu, går dine ændringer tabt."

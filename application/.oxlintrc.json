@@ -12,7 +12,10 @@
     "jsx-a11y",
     "promise"
   ],
-  "jsPlugins": ["./shared-webapp/config/jsPlugins/no-misplaced-tanstack-query-options.js"],
+  "jsPlugins": [
+    "./shared-webapp/config/jsPlugins/no-misplaced-tanstack-query-options.js",
+    "./shared-webapp/config/jsPlugins/no-ambiguous-date-formatting.js"
+  ],
   "categories": {},
   "rules": {
     // BASIC CODE QUALITY
@@ -20,6 +23,9 @@
 
     // TANSTACK QUERY
     "tanstack-query/no-misplaced-options": "error",
+
+    // DATE FORMATTING
+    "date-formatting/no-ambiguous-date-formatting": "error",
 
     // NO BARREL FILES - set threshold=1 for zero tolerance
     "oxc/no-barrel-file": ["error", { "threshold": 1 }],
@@ -143,6 +149,12 @@
       "rules": {
         "max-lines": "off",
         "max-lines-per-function": "off"
+      }
+    },
+    {
+      "files": ["**/shared-webapp/ui/components/Calendar.tsx", "**/shared-webapp/ui/hooks/useSmartDate.ts"],
+      "rules": {
+        "date-formatting/no-ambiguous-date-formatting": "off"
       }
     },
     {

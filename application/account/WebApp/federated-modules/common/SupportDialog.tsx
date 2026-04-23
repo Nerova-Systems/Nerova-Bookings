@@ -31,7 +31,7 @@ export function SupportDialog({ isOpen, onOpenChange }: Readonly<SupportDialogPr
             name="email"
             label={t`Email`}
             value="support@platformplatform.net"
-            isReadOnly={true}
+            readOnly={true}
             startIcon={<MailIcon className="size-4" />}
           />
           <p className="text-sm text-muted-foreground">{t`Feel free to reach out with any questions or issues you may have.`}</p>

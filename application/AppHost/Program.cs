@@ -257,15 +257,13 @@ void CreateBlobContainer(string containerName)
 
 void CheckPortAvailability()
 {
-    Thread.Sleep(500); // Allow time for previous process to fully release ports
-
     var ports = new[] { (9098, "Resource Service"), (9097, "Dashboard"), (9001, "Aspire") };
     var blocked = ports.Where(p => !IsPortAvailable(p.Item1)).ToList();
 
-    if (blocked.Any())
+    if (blocked.Count > 0)
     {
         Console.WriteLine($"⚠️  Port conflicts: {string.Join(", ", blocked.Select(b => $"{b.Item1} ({b.Item2})"))}");
-        Console.WriteLine("   Services already running. Stop them first using 'watch --stop' command or the watch MCP tool with stop flag.");
+        Console.WriteLine("   Services already running. Stop them first using 'run --stop'.");
         Environment.Exit(1);
     }
 

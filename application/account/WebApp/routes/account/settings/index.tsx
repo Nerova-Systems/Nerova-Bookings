@@ -39,7 +39,7 @@ function DangerZone({ setIsDeleteModalOpen }: { setIsDeleteModalOpen: (open: boo
           <Trans>Delete your account and all data. This action is irreversible—proceed with caution.</Trans>
         </p>
 
-        <Button variant="destructive" onClick={() => setIsDeleteModalOpen(true)} className="w-fit max-sm:w-full">
+        <Button variant="destructive" onClick={() => setIsDeleteModalOpen(true)}>
           <Trash2 />
           <Trans>Delete account</Trans>
         </Button>
@@ -130,7 +130,7 @@ export function AccountSettings() {
             isPending={saveMutation.isPending}
             onLogoFileSelect={handleLogoFileSelect}
             onLogoRemove={handleLogoRemove}
-            isReadOnly={!isOwner}
+            readOnly={!isOwner}
             tooltip={isOwner ? t`The name of your account, shown to users and in email notifications` : undefined}
             description={!isOwner ? t`Only account owners can modify the account name` : undefined}
             onChange={() => setIsFormDirty(true)}
@@ -141,7 +141,7 @@ export function AccountSettings() {
             <div className="mt-4 md:grid md:grid-cols-[8.5rem_1fr] md:gap-8">
               <div />
               <div className="flex sm:justify-end">
-                <Button type="submit" className="w-full sm:w-auto" disabled={saveMutation.isPending}>
+                <Button type="submit" disabled={saveMutation.isPending}>
                   {saveMutation.isPending ? <Trans>Saving...</Trans> : <Trans>Save changes</Trans>}
                 </Button>
               </div>

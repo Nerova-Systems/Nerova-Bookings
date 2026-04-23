@@ -6,7 +6,7 @@ import { useUserInfo } from "@repo/infrastructure/auth/hooks";
 import { hasPermission } from "@repo/infrastructure/auth/routeGuards";
 import { createLoginUrlWithReturnPath } from "@repo/infrastructure/auth/util";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from "@repo/ui/components/DropdownMenu";
-import { collapsedContext, overlayContext } from "@repo/ui/components/SideMenu";
+import { collapsedContext, overlayContext } from "@repo/ui/components/Sidebar";
 import { TenantLogo } from "@repo/ui/components/TenantLogo";
 import { getRootFontSize, SIDE_MENU_DEFAULT_WIDTH_REM } from "@repo/ui/utils/responsive";
 import { useQueryClient } from "@tanstack/react-query";
@@ -118,8 +118,8 @@ export default function UserMenu({ isCollapsed: isCollapsedProp }: Readonly<User
     }
   };
 
-  const triggerClassName = `relative flex h-11 cursor-pointer items-center gap-0 overflow-visible rounded-md border-0 py-2 font-normal text-sm outline-ring hover:bg-hover-background focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 ${
-    isCollapsed ? "ml-[0.375rem] w-11 justify-center" : "w-full pr-2 pl-3"
+  const triggerClassName = `relative flex h-[var(--control-height)] cursor-pointer items-center gap-0 overflow-visible rounded-md border-0 py-2 font-normal text-sm outline-ring hover:bg-hover-background focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 ${
+    isCollapsed ? "ml-[0.5625rem] w-[var(--control-height)] justify-center" : "w-full pr-2 pl-3"
   } ${isMenuOpen ? "bg-hover-background" : ""}`;
 
   return (

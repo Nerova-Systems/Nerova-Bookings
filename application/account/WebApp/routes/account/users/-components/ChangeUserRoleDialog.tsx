@@ -12,12 +12,14 @@ import {
   DialogTitle
 } from "@repo/ui/components/Dialog";
 import { DirtyDialog } from "@repo/ui/components/DirtyDialog";
+import { useDialogSetDirty } from "@repo/ui/components/DirtyDialogContext";
 import { Field, FieldContent, FieldDescription, FieldLabel, FieldTitle } from "@repo/ui/components/Field";
-import { Form } from "@repo/ui/components/Form";
+import { Form, type FormProps } from "@repo/ui/components/Form";
+import { Item, ItemContent, ItemDescription, ItemMedia, ItemTitle } from "@repo/ui/components/Item";
 import { RadioGroup, RadioGroupItem } from "@repo/ui/components/RadioGroup";
 import { getInitials } from "@repo/utils/string/getInitials";
 import { useQueryClient } from "@tanstack/react-query";
-import { useCallback, useState } from "react";
+import { useState } from "react";
 import { toast } from "sonner";
 
 import { api, type components, UserRole } from "@/shared/lib/api/client";
@@ -31,148 +33,134 @@ interface ChangeUserRoleDialogProps {
 }
 
 export function ChangeUserRoleDialog({ user, isOpen, onOpenChange }: Readonly<ChangeUserRoleDialogProps>) {
-  const queryClient = useQueryClient();
-  const [selectedRole, setSelectedRole] = useState<UserRole | null>(null);
-
-  const changeUserRoleMutation = api.useMutation("put", "/api/account/users/{id}/change-user-role", {
-    onSuccess: () => {
-      if (!user) {
-        return;
-      }
-
-      setSelectedRole(null);
-      const userDisplayName = `${user.firstName ?? ""} ${user.lastName ?? ""}`.trim() || user.email;
-      toast.success(t`User role updated successfully for ${userDisplayName}`);
-      queryClient.invalidateQueries({
-        queryKey: ["get", "/api/account/users"]
-      });
-      onOpenChange(false);
-    }
-  });
-
-  const handleCloseComplete = useCallback(() => {
-    setSelectedRole(null);
-  }, []);
-
   if (!user) {
     return null;
   }
 
-  const displayName = [user.firstName, user.lastName].filter(Boolean).join(" ") || user.email;
-  const currentRole = selectedRole ?? user.role;
-
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    changeUserRoleMutation.mutate({
-      params: {
-        path: { id: user.id }
-      },
-      body: { userRole: currentRole }
-    });
-  };
+  const handleClose = () => onOpenChange(false);
 
   return (
-    <DirtyDialog
-      open={isOpen}
-      onOpenChange={onOpenChange}
-      hasUnsavedChanges={selectedRole !== null}
-      unsavedChangesTitle={t`Unsaved changes`}
-      unsavedChangesMessage={<Trans>You have unsaved changes. If you leave now, your changes will be lost.</Trans>}
-      leaveLabel={t`Leave`}
-      stayLabel={t`Stay`}
-      onCloseComplete={handleCloseComplete}
-      trackingTitle="Change user role"
-    >
+    <DirtyDialog open={isOpen} onOpenChange={onOpenChange} trackingTitle="Change user role">
       <DialogContent className="sm:w-dialog-lg">
         <DialogHeader>
           <DialogTitle>
             <Trans>Change user role</Trans>
           </DialogTitle>
         </DialogHeader>
-
-        <Form
-          onSubmit={handleSubmit}
-          validationErrors={changeUserRoleMutation.error?.errors}
-          validationBehavior="aria"
-          className="flex flex-col max-sm:h-full"
-        >
-          <DialogBody>
-            <div className="flex items-center gap-3">
-              <Avatar className="size-16">
-                <AvatarImage src={user.avatarUrl ?? undefined} />
-                <AvatarFallback>
-                  {getInitials(user.firstName ?? undefined, user.lastName ?? undefined, user.email)}
-                </AvatarFallback>
-              </Avatar>
-              <div className="min-w-0 flex-1">
-                <p className="truncate font-medium">{displayName}</p>
-                {user.title && <p className="truncate text-sm text-muted-foreground">{user.title}</p>}
-                <p className="truncate text-sm text-muted-foreground">{user.email}</p>
-              </div>
-            </div>
-
-            <RadioGroup
-              aria-label={t`Role`}
-              value={currentRole}
-              onValueChange={(value) => {
-                trackInteraction("Change user role", "interaction", "Select role");
-                setSelectedRole(value as UserRole);
-              }}
-              className="mt-3"
-            >
-              <FieldLabel>
-                <Field orientation="horizontal">
-                  <RadioGroupItem value={UserRole.Owner} id="role-owner" aria-label={t`Owner`} autoFocus={true} />
-                  <FieldContent>
-                    <FieldTitle>
-                      <Trans>Owner</Trans>
-                    </FieldTitle>
-                    <FieldDescription>
-                      <Trans>Full access including user roles and account settings</Trans>
-                    </FieldDescription>
-                  </FieldContent>
-                </Field>
-              </FieldLabel>
-              <FieldLabel>
-                <Field orientation="horizontal">
-                  <RadioGroupItem value={UserRole.Admin} id="role-admin" aria-label={t`Admin`} />
-                  <FieldContent>
-                    <FieldTitle>
-                      <Trans>Admin</Trans>
-                    </FieldTitle>
-                    <FieldDescription>
-                      <Trans>Full access except changing user roles and account settings</Trans>
-                    </FieldDescription>
-                  </FieldContent>
-                </Field>
-              </FieldLabel>
-              <FieldLabel>
-                <Field orientation="horizontal">
-                  <RadioGroupItem value={UserRole.Member} id="role-member" aria-label={t`Member`} />
-                  <FieldContent>
-                    <FieldTitle>
-                      <Trans>Member</Trans>
-                    </FieldTitle>
-                    <FieldDescription>
-                      <Trans>Standard user access</Trans>
-                    </FieldDescription>
-                  </FieldContent>
-                </Field>
-              </FieldLabel>
-            </RadioGroup>
-          </DialogBody>
-          <DialogFooter>
-            <DialogClose
-              render={<Button type="reset" variant="secondary" disabled={changeUserRoleMutation.isPending} />}
-            >
-              <Trans>Cancel</Trans>
-            </DialogClose>
-            <Button type="submit" disabled={changeUserRoleMutation.isPending}>
-              {changeUserRoleMutation.isPending ? <Trans>Saving...</Trans> : <Trans>Save changes</Trans>}
-            </Button>
-          </DialogFooter>
-        </Form>
+        <ChangeUserRoleDialogBody user={user} onClose={handleClose} />
       </DialogContent>
     </DirtyDialog>
+  );
+}
+
+function ChangeUserRoleDialogBody({ user, onClose }: { user: UserDetails; onClose: () => void }) {
+  const queryClient = useQueryClient();
+  const setDirty = useDialogSetDirty();
+  const [selectedRole, setSelectedRole] = useState<UserRole | null>(null);
+
+  const changeUserRoleMutation = api.useMutation("put", "/api/account/users/{id}/change-user-role", {
+    onSuccess: () => {
+      const userDisplayName = `${user.firstName ?? ""} ${user.lastName ?? ""}`.trim() || user.email;
+      toast.success(t`User role updated successfully for ${userDisplayName}`);
+      queryClient.invalidateQueries({ queryKey: ["get", "/api/account/users"] });
+      onClose();
+    }
+  });
+
+  const displayName = [user.firstName, user.lastName].filter(Boolean).join(" ") || user.email;
+  const currentRole = selectedRole ?? user.role;
+
+  const handleSubmit: NonNullable<FormProps["onSubmit"]> = (event) => {
+    event.preventDefault();
+    changeUserRoleMutation.mutate({
+      params: { path: { id: user.id } },
+      body: { userRole: currentRole }
+    });
+  };
+
+  return (
+    <Form
+      onSubmit={handleSubmit}
+      validationErrors={changeUserRoleMutation.error?.errors}
+      validationBehavior="aria"
+      className="flex flex-col max-sm:h-full"
+    >
+      <DialogBody>
+        <Item className="p-0">
+          <ItemMedia variant="image" className="size-16">
+            <Avatar className="size-16">
+              <AvatarImage src={user.avatarUrl ?? undefined} />
+              <AvatarFallback>
+                {getInitials(user.firstName ?? undefined, user.lastName ?? undefined, user.email)}
+              </AvatarFallback>
+            </Avatar>
+          </ItemMedia>
+          <ItemContent>
+            <ItemTitle className="truncate font-medium">{displayName}</ItemTitle>
+            {user.title && <ItemDescription className="truncate">{user.title}</ItemDescription>}
+            <ItemDescription className="truncate">{user.email}</ItemDescription>
+          </ItemContent>
+        </Item>
+
+        <RadioGroup
+          aria-label={t`Role`}
+          value={currentRole}
+          onValueChange={(value) => {
+            trackInteraction("Change user role", "interaction", "Select role");
+            setSelectedRole(value as UserRole);
+            setDirty(true);
+          }}
+          className="mt-3"
+        >
+          <FieldLabel>
+            <Field orientation="horizontal">
+              <RadioGroupItem value={UserRole.Owner} id="role-owner" aria-label={t`Owner`} autoFocus={true} />
+              <FieldContent>
+                <FieldTitle>
+                  <Trans>Owner</Trans>
+                </FieldTitle>
+                <FieldDescription>
+                  <Trans>Full access including user roles and account settings</Trans>
+                </FieldDescription>
+              </FieldContent>
+            </Field>
+          </FieldLabel>
+          <FieldLabel>
+            <Field orientation="horizontal">
+              <RadioGroupItem value={UserRole.Admin} id="role-admin" aria-label={t`Admin`} />
+              <FieldContent>
+                <FieldTitle>
+                  <Trans>Admin</Trans>
+                </FieldTitle>
+                <FieldDescription>
+                  <Trans>Full access except changing user roles and account settings</Trans>
+                </FieldDescription>
+              </FieldContent>
+            </Field>
+          </FieldLabel>
+          <FieldLabel>
+            <Field orientation="horizontal">
+              <RadioGroupItem value={UserRole.Member} id="role-member" aria-label={t`Member`} />
+              <FieldContent>
+                <FieldTitle>
+                  <Trans>Member</Trans>
+                </FieldTitle>
+                <FieldDescription>
+                  <Trans>Standard user access</Trans>
+                </FieldDescription>
+              </FieldContent>
+            </Field>
+          </FieldLabel>
+        </RadioGroup>
+      </DialogBody>
+      <DialogFooter>
+        <DialogClose render={<Button type="reset" variant="secondary" disabled={changeUserRoleMutation.isPending} />}>
+          <Trans>Cancel</Trans>
+        </DialogClose>
+        <Button type="submit" disabled={changeUserRoleMutation.isPending}>
+          {changeUserRoleMutation.isPending ? <Trans>Saving...</Trans> : <Trans>Save changes</Trans>}
+        </Button>
+      </DialogFooter>
+    </Form>
   );
 }

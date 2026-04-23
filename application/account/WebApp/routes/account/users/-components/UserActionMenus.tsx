@@ -27,7 +27,7 @@ interface UserActionMenuProps {
   currentUserRole: string | undefined;
   currentUserId: string | undefined;
   onSelectedUsersChange: (users: UserDetails[]) => void;
-  onViewProfile: (user: UserDetails, isKeyboardOpen?: boolean) => void;
+  onViewProfile: (user: UserDetails) => void;
   onDeleteUser: (user: UserDetails) => void;
   onChangeRole: (user: UserDetails) => void;
 }
@@ -57,7 +57,7 @@ export function MobileUserActionMenu({
     >
       <ContextMenuTrigger className="block w-full">{children}</ContextMenuTrigger>
       <ContextMenuContent className="w-auto">
-        <ContextMenuItem onClick={() => onViewProfile(user, false)}>
+        <ContextMenuItem onClick={() => onViewProfile(user)}>
           <UserIcon className="size-4" />
           <Trans>View profile</Trans>
         </ContextMenuItem>
@@ -109,7 +109,7 @@ export function DesktopUserActionMenu({
         }
       />
       <DropdownMenuContent className="w-auto">
-        <DropdownMenuItem onClick={() => onViewProfile(user, false)}>
+        <DropdownMenuItem onClick={() => onViewProfile(user)}>
           <UserIcon className="size-4" />
           <Trans>View profile</Trans>
         </DropdownMenuItem>

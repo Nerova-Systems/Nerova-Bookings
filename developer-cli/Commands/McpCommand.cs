@@ -1,13 +1,14 @@
 using System.CommandLine;
 using System.ComponentModel;
 using System.Diagnostics;
-using System.Text.Json;
+using System.Runtime.InteropServices;
+using System.Text;
 using System.Text.RegularExpressions;
 using DeveloperCli.Installation;
-using DeveloperCli.Utilities;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using ModelContextProtocol;
 using ModelContextProtocol.Server;
 
 namespace DeveloperCli.Commands;
@@ -21,48 +22,381 @@ public class McpCommand : Command
 
     private static async Task ExecuteAsync()
     {
-        // MCP server mode - all output to stderr to keep stdout clean
-        await Console.Error.WriteLineAsync("[MCP] Starting MCP server...");
-        await Console.Error.WriteLineAsync("[MCP] Listening on stdio for MCP communication");
+        McpDebugLog.Initialize();
+        McpDebugLog.Log("MCP server process starting");
+        McpDebugLog.Log($"Process ID: {Environment.ProcessId}");
+        McpDebugLog.Log($"Working directory: {Environment.CurrentDirectory}");
+        McpDebugLog.Log($"CLI source: {Configuration.SourceCodeFolder}");
+        McpDebugLog.Log($"Runtime: {RuntimeInformation.FrameworkDescription}, OS: {RuntimeInformation.OSDescription}");
+        McpDebugLog.Log($"Args: {string.Join(" ", Environment.GetCommandLineArgs())}");
+        McpDebugLog.LogGitContext();
+        McpDebugLog.DetectPreviousCrash();
+        McpDebugLog.WriteSessionPid();
 
-        var builder = Host.CreateApplicationBuilder();
-        builder.Logging.AddConsole(consoleLogOptions => { consoleLogOptions.LogToStandardErrorThreshold = LogLevel.Trace; });
-        builder.Services
-            .AddMcpServer()
-            .WithStdioServerTransport()
-            .WithToolsFromAssembly();
+        AppDomain.CurrentDomain.UnhandledException += (_, args) => { McpDebugLog.Log($"UNHANDLED EXCEPTION (terminating={args.IsTerminating}): {args.ExceptionObject}"); };
 
-        await builder.Build().RunAsync();
+        TaskScheduler.UnobservedTaskException += (_, args) =>
+        {
+            McpDebugLog.Log($"UNOBSERVED TASK EXCEPTION: {args.Exception}");
+            args.SetObserved();
+        };
+
+        AppDomain.CurrentDomain.ProcessExit += (_, _) =>
+        {
+            McpDebugLog.Log("ProcessExit event fired -- MCP server shutting down");
+            McpDebugLog.ClearSessionPid();
+        };
+
+        Console.CancelKeyPress += (_, args) =>
+        {
+            McpDebugLog.Log($"CancelKeyPress received (SpecialKey={args.SpecialKey})");
+            args.Cancel = true; // Let the host shut down gracefully
+        };
+
+        RegisterPosixSignalHandlers();
+
+        try
+        {
+            try
+            {
+                await Console.Error.WriteLineAsync("[MCP] Starting MCP server...");
+                await Console.Error.WriteLineAsync("[MCP] Listening on stdio for MCP communication");
+            }
+            catch (IOException)
+            {
+                McpDebugLog.Log("WARNING: Failed to write startup message to stderr (stream closed)");
+            }
+
+            var builder = Host.CreateApplicationBuilder();
+            builder.Logging.AddConsole(consoleLogOptions => { consoleLogOptions.LogToStandardErrorThreshold = LogLevel.Trace; });
+
+            // Allow 5 minutes for in-flight tools (like EndToEnd) to complete during shutdown.
+            builder.Services.Configure<HostOptions>(options => options.ShutdownTimeout = TimeSpan.FromMinutes(5));
+
+            builder.Services
+                .AddMcpServer()
+                .WithStdioServerTransport()
+                .WithToolsFromAssembly();
+
+            // Replace the SDK's SingleSessionMcpServerHostedService (which calls StopApplication on stdin EOF)
+            // with our own resilient version that keeps the process alive.
+            ReplaceSingleSessionHostedService(builder.Services);
+
+            var host = builder.Build();
+            McpDebugLog.Log("MCP host built successfully, starting RunAsync");
+
+            await host.RunAsync();
+
+            McpDebugLog.Log("MCP host RunAsync completed normally");
+        }
+        catch (OperationCanceledException)
+        {
+            McpDebugLog.Log("MCP server stopped via cancellation (normal shutdown)");
+        }
+        catch (Exception exception)
+        {
+            McpDebugLog.Log($"FATAL EXCEPTION in MCP server: {exception}");
+            throw;
+        }
+        finally
+        {
+            McpDebugLog.Log("MCP server ExecuteAsync exiting");
+        }
+    }
+
+    private static void RegisterPosixSignalHandlers()
+    {
+        // SIGTERM and SIGHUP are not available on Windows
+        PosixSignalRegistration.Create(PosixSignal.SIGTERM, context =>
+            {
+                McpDebugLog.Log("SIGTERM received -- process is being terminated");
+                context.Cancel = true;
+            }
+        );
+
+        PosixSignalRegistration.Create(PosixSignal.SIGINT, context =>
+            {
+                McpDebugLog.Log("SIGINT received -- process interrupted");
+                context.Cancel = true;
+            }
+        );
+
+        if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+        {
+            PosixSignalRegistration.Create(PosixSignal.SIGHUP, context =>
+                {
+                    McpDebugLog.Log("SIGHUP received -- terminal disconnected");
+                    context.Cancel = true;
+                }
+            );
+        }
+    }
+
+    private static void ReplaceSingleSessionHostedService(IServiceCollection services)
+    {
+        // Remove the SDK's SingleSessionMcpServerHostedService that calls StopApplication() on stdin EOF.
+        var singleSessionDescriptor = services.FirstOrDefault(descriptor =>
+            descriptor.ServiceType == typeof(IHostedService) && descriptor.ImplementationType?.Name == "SingleSessionMcpServerHostedService"
+        );
+
+        if (singleSessionDescriptor is not null)
+        {
+            services.Remove(singleSessionDescriptor);
+            McpDebugLog.Log("Removed SDK's SingleSessionMcpServerHostedService");
+        }
+        else
+        {
+            McpDebugLog.Log("WARNING: Could not find SingleSessionMcpServerHostedService to remove");
+        }
+
+        services.AddHostedService<ResilientMcpServerHostedService>();
+    }
+}
+
+/// <summary>
+///     Replaces the SDK's SingleSessionMcpServerHostedService. When the MCP session ends (stdin EOF),
+///     this service waits for in-flight tool executions to complete instead of immediately calling
+///     StopApplication(). This prevents the process from being killed mid-tool-execution when the
+///     client disconnects.
+/// </summary>
+public sealed class ResilientMcpServerHostedService(McpServer session, IHostApplicationLifetime lifetime) : BackgroundService
+{
+    private static readonly TimeSpan GracePeriod = TimeSpan.FromMinutes(5);
+
+    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+    {
+        try
+        {
+            McpDebugLog.Log("ResilientMcpServerHostedService: session starting");
+            await session.RunAsync(stoppingToken);
+            McpDebugLog.Log("ResilientMcpServerHostedService: session ended (stdin closed)");
+        }
+        catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
+        {
+            McpDebugLog.Log("ResilientMcpServerHostedService: session cancelled by host shutdown");
+            return;
+        }
+        catch (Exception exception)
+        {
+            McpDebugLog.Log($"ResilientMcpServerHostedService: session failed -- {exception}");
+        }
+
+        // Session ended (stdin EOF). Wait for any in-flight tool executions to finish
+        // before shutting down the process. Tools acquire ToolExecutionSemaphore, so we
+        // try to acquire it here -- if we get it, no tools are running.
+        McpDebugLog.Log($"ResilientMcpServerHostedService: waiting up to {GracePeriod.TotalSeconds}s for in-flight tools");
+        var acquired = await DeveloperCliMcpTools.ToolExecutionSemaphore.WaitAsync(GracePeriod, CancellationToken.None);
+        if (acquired)
+        {
+            DeveloperCliMcpTools.ToolExecutionSemaphore.Release();
+            McpDebugLog.Log("ResilientMcpServerHostedService: no in-flight tools, shutting down");
+        }
+        else
+        {
+            McpDebugLog.Log("ResilientMcpServerHostedService: grace period expired, shutting down with tools still running");
+        }
+
+        lifetime.StopApplication();
+    }
+}
+
+public static class McpDebugLog
+{
+    private const long MaxLogFileSize = 512 * 1024; // 500 KB
+    private static string? _logFilePath;
+    private static string? _sessionPidFilePath;
+    private static readonly Lock Lock = new();
+
+    public static void Initialize()
+    {
+        var logsDirectory = Path.Combine(Configuration.WorkspaceFolder, "developer-cli", "mcp");
+
+        if (!Directory.Exists(logsDirectory))
+        {
+            Directory.CreateDirectory(logsDirectory);
+        }
+
+        _logFilePath = Path.Combine(logsDirectory, "mcp-debug.log");
+        _sessionPidFilePath = Path.Combine(logsDirectory, "mcp-session.pid");
+
+        RotateLogIfNeeded();
+
+        Log("=== MCP Debug Log Initialized ===");
+    }
+
+    public static void Log(string message)
+    {
+        var logFilePath = _logFilePath;
+        if (logFilePath is null) return;
+
+        var timestamp = DateTimeOffset.UtcNow.ToString("yyyy-MM-dd HH:mm:ss.fff");
+        var threadId = Environment.CurrentManagedThreadId;
+        var entry = $"[{timestamp}] [T{threadId}] [PID:{Environment.ProcessId}] {message}\n";
+
+        try
+        {
+            lock (Lock)
+            {
+                File.AppendAllText(logFilePath, entry);
+            }
+        }
+        catch
+        {
+            // Cannot fail -- this is the last resort logger
+        }
+    }
+
+    public static void LogGitContext()
+    {
+        try
+        {
+            var branch = RunGitCommand("branch --show-current");
+            var commit = RunGitCommand("rev-parse --short HEAD");
+            Log($"Git: branch={branch}, commit={commit}");
+        }
+        catch (Exception exception)
+        {
+            Log($"Git context unavailable: {exception.Message}");
+        }
+    }
+
+    public static void DetectPreviousCrash()
+    {
+        if (_sessionPidFilePath is null || !File.Exists(_sessionPidFilePath)) return;
+
+        try
+        {
+            var previousPidText = File.ReadAllText(_sessionPidFilePath).Trim();
+            if (!int.TryParse(previousPidText, out var previousPid)) return;
+
+            var isStillRunning = false;
+            try
+            {
+                using var process = Process.GetProcessById(previousPid);
+                isStillRunning = !process.HasExited;
+            }
+            catch (ArgumentException)
+            {
+                // Process does not exist -- it crashed or was killed
+            }
+            catch (InvalidOperationException)
+            {
+                // Process has exited between GetProcessById and HasExited check
+            }
+
+            if (!isStillRunning)
+            {
+                Log($"CRASH DETECTED: previous session PID {previousPid} is no longer running (no clean shutdown logged)");
+            }
+        }
+        catch (Exception exception)
+        {
+            Log($"WARNING: Failed to check previous session: {exception.Message}");
+        }
+    }
+
+    public static void WriteSessionPid()
+    {
+        if (_sessionPidFilePath is null) return;
+
+        try
+        {
+            File.WriteAllText(_sessionPidFilePath, Environment.ProcessId.ToString());
+        }
+        catch (Exception exception)
+        {
+            Log($"WARNING: Failed to write session PID file: {exception.Message}");
+        }
+    }
+
+    public static void ClearSessionPid()
+    {
+        if (_sessionPidFilePath is null) return;
+
+        try
+        {
+            if (File.Exists(_sessionPidFilePath))
+            {
+                File.Delete(_sessionPidFilePath);
+            }
+        }
+        catch
+        {
+            // Best effort -- process is exiting
+        }
+    }
+
+    private static void RotateLogIfNeeded()
+    {
+        var logFilePath = _logFilePath;
+        if (logFilePath is null) return;
+
+        try
+        {
+            if (!File.Exists(logFilePath)) return;
+
+            var fileInfo = new FileInfo(logFilePath);
+            if (fileInfo.Length <= MaxLogFileSize) return;
+
+            var previousLogFilePath = logFilePath + ".prev";
+            if (File.Exists(previousLogFilePath))
+            {
+                File.Delete(previousLogFilePath);
+            }
+
+            File.Move(logFilePath, previousLogFilePath);
+        }
+        catch
+        {
+            // Best effort -- don't block startup over log rotation
+        }
+    }
+
+    private static string RunGitCommand(string arguments)
+    {
+        using var process = new Process();
+        process.StartInfo = new ProcessStartInfo
+        {
+            FileName = "git",
+            Arguments = arguments,
+            WorkingDirectory = Configuration.SourceCodeFolder,
+            RedirectStandardOutput = true,
+            RedirectStandardError = true,
+            UseShellExecute = false,
+            CreateNoWindow = true
+        };
+        process.Start();
+        var output = process.StandardOutput.ReadToEnd().Trim();
+        process.WaitForExit(TimeSpan.FromSeconds(5));
+        return output;
     }
 }
 
 [McpServerToolType]
-public static class DeveloperCliMcpTools
+public static partial class DeveloperCliMcpTools
 {
+    private static readonly TimeSpan ProgressInterval = TimeSpan.FromSeconds(5);
+
+    // Serialize tool execution to prevent concurrent tool calls from crashing the stdio transport.
+    // When Claude Code sends multiple tool calls simultaneously and the first completes, the client
+    // closes stdin before the second finishes, killing the MCP server process.
+    // Internal so ResilientMcpServerHostedService can check for in-flight tools before shutdown.
+    internal static readonly SemaphoreSlim ToolExecutionSemaphore = new(1, 1);
+
     [McpServerTool]
-    [Description("Execute developer CLI commands: build, test, format, or lint code")]
-    public static async Task<string> ExecuteCommand(
-        [Description("Command to execute: 'build', 'test', 'format', or 'lint'")]
-        string command,
-        [Description("Backend")] bool backend = false,
-        [Description("Frontend")] bool frontend = false,
+    [Description("Build the solution including backend (.NET), frontend (React/TypeScript), and developer CLI projects")]
+    public static async Task<string> Build(
+        IProgress<ProgressNotificationValue> progress,
+        CancellationToken cancellationToken,
+        [Description("Backend (.NET)")] bool backend = false,
+        [Description("Frontend (React/TypeScript)")]
+        bool frontend = false,
+        [Description("Developer CLI")] bool cli = false,
         [Description("Self-contained system, e.g., 'account' (optional)")]
-        string? selfContainedSystem = null,
-        [Description("Skip build (for test, format, lint only)")]
-        bool noBuild = false,
-        [Description("Filter tests by name (test command only)")]
-        string? filter = null,
-        [Description("Developer CLI")] bool cli = false)
+        string? selfContainedSystem = null)
     {
-        var validCommands = new[] { "build", "test", "format", "lint" };
-        if (!validCommands.Contains(command))
-        {
-            return $"Invalid command: '{command}'. Valid commands: {string.Join(", ", validCommands)}";
-        }
+        var args = new List<string> { "build", "--quiet" };
 
-        var args = new List<string> { command, "--quiet" };
-
-        // Add target flags - if none specified, command will run all targets
         if (backend) args.Add("--backend");
         if (frontend) args.Add("--frontend");
         if (cli) args.Add("--cli");
@@ -73,71 +407,205 @@ public static class DeveloperCliMcpTools
             args.Add(selfContainedSystem);
         }
 
-        if (noBuild && command != "build")
+        return await ExecuteCliCommandAsync(progress, "Build", args.ToArray(), cancellationToken);
+    }
+
+    [McpServerTool]
+    [Description("Run backend (.NET) xUnit tests with optional name filtering")]
+    public static async Task<string> Test(
+        IProgress<ProgressNotificationValue> progress,
+        CancellationToken cancellationToken,
+        [Description("Backend (.NET)")] bool backend = false,
+        [Description("Skip build before running tests")]
+        bool noBuild = false,
+        [Description("Filter tests by name")] string? filter = null,
+        [Description("Self-contained system, e.g., 'account' (optional)")]
+        string? selfContainedSystem = null)
+    {
+        var args = new List<string> { "test", "--quiet" };
+
+        if (backend) args.Add("--backend");
+
+        if (selfContainedSystem is not null)
         {
-            args.Add("--no-build");
+            args.Add("--self-contained-system");
+            args.Add(selfContainedSystem);
         }
 
-        if (filter is not null && command == "test")
+        if (noBuild) args.Add("--no-build");
+
+        if (filter is not null)
         {
             args.Add("--filter");
             args.Add(filter);
         }
 
-        return await ExecuteCliCommandAsync(args.ToArray());
+        return await ExecuteCliCommandAsync(progress, "Test", args.ToArray(), cancellationToken);
     }
 
     [McpServerTool]
-    [Description("Start .NET Aspire AppHost and run database migrations at https://localhost:9000. Runs in the background so you can continue working while it starts.")]
-    public static string Run()
+    [Description("Format and auto-fix code style for backend (.NET), frontend (React/TypeScript), and developer CLI projects")]
+    public static async Task<string> Format(
+        IProgress<ProgressNotificationValue> progress,
+        CancellationToken cancellationToken,
+        [Description("Backend (.NET)")] bool backend = false,
+        [Description("Frontend (React/TypeScript)")]
+        bool frontend = false,
+        [Description("Developer CLI")] bool cli = false,
+        [Description("Skip build before formatting")]
+        bool noBuild = false,
+        [Description("Self-contained system, e.g., 'account' (optional)")]
+        string? selfContainedSystem = null)
     {
-        // Call run command in detached mode - don't wait for process exit
-        var developerCliPath = Path.Combine(Configuration.SourceCodeFolder, "developer-cli");
-        var args = new List<string> { "run", "--project", developerCliPath, "run", "--detach", "--force" };
+        var args = new List<string> { "format", "--quiet" };
 
-        var processStartInfo = new ProcessStartInfo
+        if (backend) args.Add("--backend");
+        if (frontend) args.Add("--frontend");
+        if (cli) args.Add("--cli");
+
+        if (selfContainedSystem is not null)
         {
-            FileName = "dotnet",
-            Arguments = string.Join(" ", args),
-            WorkingDirectory = Configuration.SourceCodeFolder,
-            UseShellExecute = false,
-            RedirectStandardOutput = true,
-            RedirectStandardError = true,
-            CreateNoWindow = true
-        };
-
-        using var process = new Process();
-        process.StartInfo = processStartInfo;
-        var output = new List<string>();
-        var errors = new List<string>();
-
-        process.OutputDataReceived += (_, e) =>
-        {
-            if (e.Data is not null) output.Add(e.Data);
-        };
-        process.ErrorDataReceived += (_, e) =>
-        {
-            if (e.Data is not null) errors.Add(e.Data);
-        };
-
-        process.Start();
-        process.BeginOutputReadLine();
-        process.BeginErrorReadLine();
-
-        // Wait briefly to capture startup messages, then return (don't wait for full exit)
-        Thread.Sleep(TimeSpan.FromSeconds(3));
-
-        if (process.HasExited && process.ExitCode != 0)
-        {
-            return $"Failed to start Aspire.\n\n{string.Join("\n", output)}\n{string.Join("\n", errors)}";
+            args.Add("--self-contained-system");
+            args.Add(selfContainedSystem);
         }
 
-        return "Aspire started successfully in detached mode at https://localhost:9000";
+        if (noBuild) args.Add("--no-build");
+
+        return await ExecuteCliCommandAsync(progress, "Format", args.ToArray(), cancellationToken);
+    }
+
+    [McpServerTool]
+    [Description("Lint code for backend (.NET), frontend (React/TypeScript), and developer CLI projects to find issues")]
+    public static async Task<string> Lint(
+        IProgress<ProgressNotificationValue> progress,
+        CancellationToken cancellationToken,
+        [Description("Backend (.NET)")] bool backend = false,
+        [Description("Frontend (React/TypeScript)")]
+        bool frontend = false,
+        [Description("Developer CLI")] bool cli = false,
+        [Description("Skip build before linting")]
+        bool noBuild = false,
+        [Description("Self-contained system, e.g., 'account' (optional)")]
+        string? selfContainedSystem = null)
+    {
+        var args = new List<string> { "lint", "--quiet" };
+
+        if (backend) args.Add("--backend");
+        if (frontend) args.Add("--frontend");
+        if (cli) args.Add("--cli");
+
+        if (selfContainedSystem is not null)
+        {
+            args.Add("--self-contained-system");
+            args.Add(selfContainedSystem);
+        }
+
+        if (noBuild) args.Add("--no-build");
+
+        return await ExecuteCliCommandAsync(progress, "Lint", args.ToArray(), cancellationToken);
+    }
+
+    [McpServerTool]
+    [Description("Start .NET Aspire AppHost at https://localhost:9000. Fails if already running -- use Restart to replace a running instance, or Stop to stop it.")]
+    public static Task<string> Run()
+    {
+        return ExecuteAspireLifecycleCommand("run", "Run", "Aspire started successfully in detached mode at https://localhost:9000");
+    }
+
+    [McpServerTool]
+    [Description("Stop any running Aspire AppHost and start a fresh instance. Use after backend changes or when hot reload breaks.")]
+    public static Task<string> Restart()
+    {
+        return ExecuteAspireLifecycleCommand("restart", "Restart", "Aspire restarted successfully in detached mode at https://localhost:9000");
+    }
+
+    [McpServerTool]
+    [Description("Stop the running Aspire AppHost.")]
+    public static Task<string> Stop()
+    {
+        return ExecuteAspireLifecycleCommand("stop", "Stop", "Aspire stopped successfully");
+    }
+
+    private static async Task<string> ExecuteAspireLifecycleCommand(string cliCommand, string toolName, string successMessage)
+    {
+        McpDebugLog.Log($"TOOL INVOKED: {toolName} (no parameters)");
+        var stopwatch = Stopwatch.StartNew();
+
+        try
+        {
+            var developerCliPath = Path.Combine(Configuration.SourceCodeFolder, "developer-cli");
+            var args = new List<string> { "run", "--project", developerCliPath, cliCommand };
+
+            var processStartInfo = new ProcessStartInfo
+            {
+                FileName = "dotnet",
+                Arguments = string.Join(" ", args),
+                WorkingDirectory = Configuration.SourceCodeFolder,
+                UseShellExecute = false,
+                RedirectStandardInput = true,
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                CreateNoWindow = true
+            };
+
+            using var process = new Process();
+            process.StartInfo = processStartInfo;
+            var output = new List<string>();
+            var errors = new List<string>();
+
+            process.OutputDataReceived += (_, e) =>
+            {
+                try
+                {
+                    if (e.Data is not null) output.Add(e.Data);
+                }
+                catch (Exception exception)
+                {
+                    McpDebugLog.Log($"{toolName}: error in OutputDataReceived -- {exception.Message}");
+                }
+            };
+            process.ErrorDataReceived += (_, e) =>
+            {
+                try
+                {
+                    if (e.Data is not null) errors.Add(e.Data);
+                }
+                catch (Exception exception)
+                {
+                    McpDebugLog.Log($"{toolName}: error in ErrorDataReceived -- {exception.Message}");
+                }
+            };
+
+            process.Start();
+            McpDebugLog.Log($"{toolName}: spawned process PID={process.Id}");
+            process.BeginOutputReadLine();
+            process.BeginErrorReadLine();
+
+            // Wait briefly to capture startup messages, then return (don't wait for full exit)
+            await Task.Delay(TimeSpan.FromSeconds(3));
+
+            if (process.HasExited && process.ExitCode != 0)
+            {
+                var result = $"Failed: {toolName}.\n\n{string.Join("\n", output)}\n{string.Join("\n", errors)}";
+                McpDebugLog.Log($"TOOL FAILED: {toolName} after {stopwatch.ElapsedMilliseconds}ms -- {result}");
+                return result;
+            }
+
+            McpDebugLog.Log($"TOOL COMPLETED: {toolName} after {stopwatch.ElapsedMilliseconds}ms -- {successMessage}");
+            return successMessage;
+        }
+        catch (Exception exception)
+        {
+            McpDebugLog.Log($"TOOL EXCEPTION: {toolName} after {stopwatch.ElapsedMilliseconds}ms -- {exception}");
+            return $"Error during {toolName}: {exception.Message}";
+        }
     }
 
     [McpServerTool]
     [Description("Run end-to-end tests")]
     public static async Task<string> EndToEnd(
+        IProgress<ProgressNotificationValue> progress,
+        CancellationToken cancellationToken,
         [Description("Search terms")] string[]? searchTerms = null,
         [Description("Browser (chromium, firefox, webkit, safari, all). Defaults to chromium")]
         string browser = "chromium",
@@ -168,398 +636,219 @@ public static class DeveloperCliMcpTools
         if (lastFailed) args.Add("--last-failed");
         if (workers.HasValue) args.Add($"--workers={workers.Value}");
 
-        return await ExecuteCliCommandAsync(args.ToArray());
+        return await ExecuteCliCommandAsync(progress, "EndToEnd", args.ToArray(), cancellationToken);
     }
 
     [McpServerTool]
-    [Description("Sync AI rules from .claude to .windsurf, .cursor, .github/instructions, and .agent. CRITICAL: Always make AI rule changes in .claude folder first, then sync")]
-    public static async Task<string> SyncAiRules()
+    [Description("Send an interrupt signal to a team agent. The signal is picked up by the agent's PostToolUse hook on their next tool call. Returns an interrupt ID to use in the follow-up SendMessage. For idle/sleeping agents, also send a SendMessage to wake them.")]
+    public static string SendInterruptSignal(
+        [Description("Team name (e.g., 'feature-team')")]
+        string teamName,
+        [Description("Target agent name (e.g., 'backend', 'frontend')")]
+        string agentName)
     {
-        return await ExecuteCliCommandAsync(["sync-ai-rules"]);
-    }
-
-    [McpServerTool]
-    [Description("""
-                 ⚠️ MANDATORY: Report bugs in the AGENTIC SYSTEM (workflows, MCP tools, message protocols, agent communication).
-
-                 YOU ARE PART OF AN AGENTIC SYSTEM:
-                 - Multiple agents communicate via MCP tools and message files
-                 - This tool is for fixing bugs in: MCP tool contracts, /commands workflows, system prompts, message file protocols, agent communication patterns
-
-                 MUST REPORT system/workflow bugs:
-                 ✓ Workflow says read file at path X but file doesn't exist there
-                 ✓ MCP tool returns errors or has wrong parameter descriptions
-                 ✓ Instructions reference non-existent tools or commands
-                 ✓ Message file missing expected JSON fields
-                 ✓ Agent called with parameters that don't match interface
-                 ✓ Conflicting instructions in different workflow files
-
-                 DO NOT REPORT:
-                 ✗ Feature implementation issues (wrong business logic, missing validation)
-                 ✗ Code quality problems (bad patterns, missing tests)
-                 ✗ User's PRD or requirements unclear
-                 ✗ Your own implementation bugs
-
-                 IF YOU RECOVER - REPORT PROBLEM + SOLUTION:
-                 1. Report the system bug (severity: error/warning)
-                 2. Find workaround and continue
-                 3. Report what actually worked (severity: info, include solution)
-
-                 Example: Workflow says read current-task.json from workspace root, but actual path is .workspace/agent-workspaces/branch/agent/current-task.json - report BOTH.
-
-                 Reports: .workspace/agent-workspaces/{branch}/feedback-reports/problems/HH-MM-SS-severity-title.md
-                 """
-    )]
-    public static string ReportProblem(
-        [Description("Your agent type (e.g., backend-engineer, coordinator, backend-reviewer)")]
-        string reporter,
-        [Description("Severity: 'error' (blocking issue), 'warning' (should fix), 'info' (suggestion)")]
-        string severity,
-        [Description("Short title describing the problem")]
-        string title,
-        [Description("Detailed explanation of what went wrong and what you were trying to do")]
-        string description,
-        [Description("Where the issue occurred (file path:line or context)")]
-        string location,
-        [Description("Optional: Your suggestion for how to fix this issue")]
-        string? suggestedFix = null)
-    {
-        // Validate severity
-        var validSeverities = new[] { "error", "warning", "info" };
-
-        if (!validSeverities.Contains(severity))
-        {
-            return $"Invalid severity: '{severity}'. Valid severities: {string.Join(", ", validSeverities)}";
-        }
+        McpDebugLog.Log($"TOOL INVOKED: SendInterruptSignal teamName={teamName}, agentName={agentName}");
 
         try
         {
-            // Get current branch
-            var branch = GitHelper.GetCurrentBranch();
+            var homeDirectory = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+            var signalsDirectory = Path.Combine(homeDirectory, ".claude", "teams", teamName, "signals");
 
-            // Sanitize title for filename (same as ClaudeAgentCommand.cs)
-            var sanitizedTitle = string.Join("-", title.Split(' ', StringSplitOptions.RemoveEmptyEntries))
-                .ToLowerInvariant();
-            // Remove all special characters, keep only alphanumeric and hyphens
-            sanitizedTitle = Regex.Replace(sanitizedTitle, "[^a-z0-9-]", "");
-            // Fallback to "untitled" if sanitization results in empty string
-            if (string.IsNullOrEmpty(sanitizedTitle)) sanitizedTitle = "untitled";
+            if (!Directory.Exists(signalsDirectory))
+            {
+                Directory.CreateDirectory(signalsDirectory);
+            }
 
-            // Generate timestamp and report ID (use local time)
-            var now = DateTime.Now;
-            var timeStamp = now.ToString("HH-mm-ss");
-            var reportId = $"{now:yyyy-MM-dd}-{timeStamp}-{reporter}-{severity}-{sanitizedTitle}";
-            var fileName = $"{timeStamp}-{severity}-{sanitizedTitle}.md";
+            var interruptId = DateTimeOffset.UtcNow.ToString("yyyy-MM-dd:HH:mm.ss");
+            var signalFilePath = Path.Combine(signalsDirectory, $"{agentName}.signal");
+            File.WriteAllText(signalFilePath, $"Stop working until you see message #{interruptId}");
 
-            // Create directory structure
-            var reportsDirectory = reporter is "pair-programmer" or "tech-lead"
-                ? Path.Combine(Configuration.SourceCodeFolder, ".workspace", "agent-workspaces", reporter, "feedback-reports", "problems")
-                : Path.Combine(Configuration.SourceCodeFolder, ".workspace", "agent-workspaces", branch, "feedback-reports", "problems");
-            Directory.CreateDirectory(reportsDirectory);
-
-            // Build report content
-            var reportContent = $$"""
-                                  ---
-                                  report-id: {{reportId}}
-                                  timestamp: {{now:yyyy-MM-ddTHH:mm:ss}}
-                                  reporter: {{reporter}}
-                                  severity: {{severity}}
-                                  location: {{location}}
-                                  status: open
-                                  ---
-
-                                  # {{title}}
-
-                                  ## Description
-                                  {{description}}
-
-                                  ## Context
-                                  {{location}}
-                                  {{(suggestedFix is not null ? $"\n## Suggested Fix\n{suggestedFix}" : "")}}
-                                  """;
-
-            // Write report file
-            var reportPath = Path.Combine(reportsDirectory, fileName);
-            File.WriteAllText(reportPath, reportContent);
-
-            return $$"""
-                     ✓ Problem reported successfully
-                     Report ID: {{reportId}}
-                     Location: .workspace/agent-workspaces/{{branch}}/feedback-reports/problems/{{fileName}}
-
-                     You can continue working. This issue will be reviewed.
-                     """;
+            McpDebugLog.Log("TOOL COMPLETED: SendInterruptSignal");
+            return $"Interrupt signal sent to {agentName}. Send your message now using SendMessage with prefix #{interruptId}";
         }
-        catch (Exception ex)
+        catch (Exception exception)
         {
-            return $"Failed to write problem report: {ex.Message}";
+            McpDebugLog.Log($"TOOL EXCEPTION: SendInterruptSignal -- {exception}");
+            return $"Error sending interrupt signal: {exception.Message}";
         }
     }
 
     [McpServerTool]
-    [Description("Delegate a development task to a specialized agent. Use this when you need backend development, frontend work, E2E testing, or code review. The agent will work autonomously and return results.")]
-    public static async Task<string> StartWorkerAgent(
-        [Description("Your agent type (who is sending this delegation)")]
-        string senderAgentType,
-        [Description("Target agent type (backend-engineer, backend-reviewer, frontend-engineer, frontend-reviewer, qa-engineer, qa-reviewer)")]
-        string targetAgentType,
-        [Description("Short title for the task")]
-        string taskTitle,
-        [Description("Task content in markdown format")]
-        string markdownContent,
-        [Description("Branch name to ensure all agents work on same branch")]
-        string branch,
-        [Description("Identifier for [feature] in [PRODUCT_MANAGEMENT_TOOL] (optional - use for regular tasks, omit for ad-hoc work)")]
-        string? featureId,
-        [Description("Identifier for [task] in [PRODUCT_MANAGEMENT_TOOL] (required)")]
-        string taskId,
-        [Description("Set resetMemory to true only on your first delegation to a downstream agent when working on a new task. Set to false for all re-delegations and for peer-to-peer messages to other engineers.")]
-        bool resetMemory,
-        [Description("Engineer's request file path (optional, for review tasks)")]
-        string? requestFilePath = null,
-        [Description("Engineer's response file path (optional, for review tasks)")]
-        string? responseFilePath = null)
+    [Description("Sync AI rules from .claude to .windsurf and .cursor. CRITICAL: Always make AI rule changes in .claude folder first, then sync")]
+    public static async Task<string> SyncAiRules(IProgress<ProgressNotificationValue> progress, CancellationToken cancellationToken)
     {
-        // Validate required parameters
-        if (string.IsNullOrWhiteSpace(taskId))
-        {
-            return "Error: Parameter `taskId` is required and must not be empty. `taskId` must match the actual [task] identifier from [PRODUCT_MANAGEMENT_TOOL].";
-        }
-
-        // Prevent self-delegation: Engineers cannot delegate to themselves
-        if (senderAgentType == targetAgentType)
-        {
-            return $"Error: Cannot delegate to yourself. You ARE {targetAgentType}.";
-        }
-
-        // Check if target engineer is already working on a task
-        var targetWorkspace = new Workspace(targetAgentType, branch);
-        if (File.Exists(targetWorkspace.CurrentTaskFile))
-        {
-            try
-            {
-                var taskJson = await File.ReadAllTextAsync(targetWorkspace.CurrentTaskFile);
-                var taskInfo = JsonSerializer.Deserialize<CurrentTaskInfo>(taskJson, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
-
-                if (taskInfo is not null)
-                {
-                    var startedAt = DateTime.Parse(taskInfo.StartedAt);
-                    var elapsed = DateTime.Now - startedAt;
-                    var elapsedFormatted = elapsed.TotalMinutes >= 1
-                        ? $"{(int)elapsed.TotalMinutes}m{elapsed.Seconds}s"
-                        : $"{elapsed.Seconds}s";
-
-                    // If same taskId, this is recovery - allow delegation (will monitor existing request)
-                    if (taskInfo.TaskId == taskId)
-                    {
-                        await Console.Error.WriteLineAsync($"[MCP] Task {taskId} already active (request #{taskInfo.TaskNumber}). Will monitor existing request...");
-                        // Continue with delegation - ClaudeAgentCommand will detect duplicate and monitor existing
-                    }
-                    else if (taskId.StartsWith("ad-hoc-"))
-                    {
-                        // For ad-hoc work, reject if engineer is busy with different task
-                        return $"""
-                                Error: Cannot delegate ad-hoc work to {targetAgentType} - engineer is currently busy.
-
-                                The {targetAgentType} has been working on task "{taskInfo.TaskTitle}" for {elapsedFormatted}.
-
-                                Please try again in a few minutes (e.g., use a sleep function). You can call it again when it's done.
-                                """;
-                    }
-                    else
-                    {
-                        // For regular tasks, warn but allow (worker-host will queue the request)
-                        await Console.Error.WriteLineAsync($"[MCP] Warning: {targetAgentType} is currently busy with task {taskInfo.TaskId} ({elapsedFormatted}). New request will be queued.");
-                        // Continue with delegation - request will be queued
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                // Fallback if we can't read/parse the file - continue with delegation
-                await Console.Error.WriteLineAsync($"[MCP] Warning: Could not read current-task.json: {ex.Message}");
-            }
-        }
-
-        // Thin wrapper - calls the claude-agent CLI command in MCP mode
-        var args = new List<string> { "claude-agent", targetAgentType, "--mcp", "--task-title", taskTitle, "--markdown-content", markdownContent, "--branch", branch };
-
-        if (!string.IsNullOrEmpty(featureId))
-        {
-            args.Add("--feature-id");
-            args.Add(featureId);
-        }
-
-        args.Add("--task-id");
-        args.Add(taskId);
-
-        args.Add("--reset-memory");
-        args.Add(resetMemory.ToString().ToLower());
-
-        args.Add("--sender-agent-type");
-        args.Add(senderAgentType);
-
-        if (requestFilePath is not null)
-        {
-            args.Add("--request-file-path");
-            args.Add(requestFilePath);
-        }
-
-        if (responseFilePath is not null)
-        {
-            args.Add("--response-file-path");
-            args.Add(responseFilePath);
-        }
-
-        return await ExecuteCliCommandAsync(args.ToArray());
+        return await ExecuteCliCommandAsync(progress, "SyncAiRules", ["sync-ai-rules"], cancellationToken);
     }
 
-    [McpServerTool]
-    [Description("Signal completion from worker agent (task or review). Returns success confirmation that will be saved in your conversation history, then terminates session after 5 seconds. This gives you time to see the confirmation before session ends.")]
-    public static async Task<string> CompleteWork(
-        [Description("Completion mode: 'task' or 'review'")]
-        string mode,
-        [Description("Agent type (e.g., backend-engineer, frontend-reviewer, qa-engineer)")]
-        string agentType,
-        [Description("Full response content in markdown")]
-        string responseContent,
-        [Description("Branch name to validate workspace consistency")]
-        string branch,
-        [Description("Mandatory feedback using category prefixes. Use [system] for workflow/MCP tools/agent coordination issues. Use [requirements] for requirements/acceptance criteria clarity. Use [code] for code patterns/rules/architecture guidance. Examples: '[system] CompleteWork returned errors until title was less than 100 characters - consider adding format description' or '[requirements] Task mentioned Admin but unclear if TenantAdmin or WorkspaceAdmin'. Can provide multiple categorized items.")]
-        string feedback,
-        [Description("Brief task summary in sentence case (for task mode only, e.g., 'Api endpoints implemented')")]
-        string? taskSummary = null,
-        [Description("Commit hash containing approved changes (for review mode - approved only)")]
-        string? commitHash = null,
-        [Description("Rejection reason (for review mode - rejected only)")]
-        string? rejectReason = null)
+    private static async Task<string> ExecuteCliCommandAsync(IProgress<ProgressNotificationValue> progress, string toolName, string[] args, CancellationToken cancellationToken)
     {
-        if (string.IsNullOrWhiteSpace(feedback))
+        McpDebugLog.Log($"TOOL QUEUED: {toolName} -- args: [{string.Join(" ", args)}]");
+
+        await ToolExecutionSemaphore.WaitAsync(cancellationToken);
+        try
         {
-            return "Error: feedback is required. Use category prefixes: [system] for workflow/MCP tools, [requirements] for requirements clarity, [code] for code guidance. Example: '[system] StartWorkerAgent unclear error when busy'";
+            McpDebugLog.Log($"TOOL STARTED: {toolName} -- semaphore acquired");
+            var stopwatch = Stopwatch.StartNew();
+
+            var developerCliPath = Path.Combine(Configuration.SourceCodeFolder, "developer-cli");
+            var allArgs = new List<string> { "run", "--project", developerCliPath, "--" };
+            allArgs.AddRange(args);
+
+            var command = $"dotnet {string.Join(" ", allArgs.Select(arg => arg.Contains(' ') ? $"\"{arg}\"" : arg))}";
+            McpDebugLog.Log($"TOOL EXECUTING: {toolName} -- command: {command}");
+
+            var processStartInfo = new ProcessStartInfo
+            {
+                FileName = "dotnet",
+                Arguments = string.Join(" ", allArgs.Select(arg => arg.Contains(' ') ? $"\"{arg}\"" : arg)),
+                WorkingDirectory = Configuration.SourceCodeFolder,
+                RedirectStandardInput = true,
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                UseShellExecute = false,
+                CreateNoWindow = true
+            };
+
+            using var process = Process.Start(processStartInfo)!;
+
+            // Do NOT register cancellationToken to kill the child process. The SDK's CancellationToken
+            // fires when the client sends notifications/cancelled OR when stdin closes. In both cases,
+            // we want the child process to finish its work rather than being killed mid-execution.
+            // The ResilientMcpServerHostedService waits for in-flight tools before stopping the process.
+            if (cancellationToken.IsCancellationRequested)
+            {
+                McpDebugLog.Log($"TOOL CANCELLED BEFORE START: {toolName} -- cancellation already requested");
+            }
+
+            var stdout = new StringBuilder();
+            var stderr = new StringBuilder();
+            var progressCounter = 0;
+
+            var stdoutTask = ReadStreamWithProgressAsync(process.StandardOutput, stdout, progress, toolName, stopwatch, () => progressCounter++);
+            var stderrTask = ReadStreamAsync(process.StandardError, stderr);
+
+            await Task.WhenAll(stdoutTask, stderrTask);
+            // Pass CancellationToken.None -- let the process finish even if the MCP client cancelled
+            await process.WaitForExitAsync(CancellationToken.None);
+
+            var combinedOutput = $"{stdout}\n{stderr}";
+            var outputLength = combinedOutput.Length;
+            var truncatedOutput = outputLength > 500 ? combinedOutput[..500] + "..." : combinedOutput;
+            McpDebugLog.Log($"TOOL COMPLETED: {toolName} after {stopwatch.ElapsedMilliseconds}ms -- exitCode={process.ExitCode}, outputLength={outputLength}, output: {truncatedOutput}");
+
+            const int maxOutputLength = 50_000;
+            if (combinedOutput.Length > maxOutputLength)
+            {
+                var half = maxOutputLength / 2;
+                combinedOutput = $"{combinedOutput[..half]}\n\n... [truncated {combinedOutput.Length - maxOutputLength} characters] ...\n\n{combinedOutput[^half..]}";
+            }
+
+            return combinedOutput;
         }
+        catch (OperationCanceledException)
+        {
+            McpDebugLog.Log($"TOOL CANCELLED: {toolName} -- cancelled while waiting for semaphore");
+            return $"Tool {toolName} was cancelled while queued.";
+        }
+        catch (Exception exception)
+        {
+            McpDebugLog.Log($"TOOL EXCEPTION: {toolName} -- {exception}");
+            return $"Error executing command: {exception.Message}";
+        }
+        finally
+        {
+            ToolExecutionSemaphore.Release();
+            McpDebugLog.Log($"TOOL RELEASED: {toolName} -- semaphore released");
+        }
+    }
+
+    private static async Task ReadStreamWithProgressAsync(StreamReader reader, StringBuilder output, IProgress<ProgressNotificationValue> progress, string toolName, Stopwatch stopwatch, Func<int> nextCounter)
+    {
+        var lastProgressTime = stopwatch.Elapsed;
+        var totalTests = 0;
+        var completedTests = 0;
 
         try
         {
-            var workspace = new Workspace(agentType, branch);
-
-            if (!File.Exists(workspace.CurrentTaskFile))
+            while (await reader.ReadLineAsync() is { } line)
             {
-                // Recovery mode: current-task.json missing, skip feedback and proceed to completion
-                if (mode is "task")
+                output.AppendLine(line);
+
+                // Strip ANSI escape codes for pattern matching
+                var cleanLine = AnsiEscapeRegex().Replace(line, "");
+
+                // Parse "Running N tests using M workers" to get total
+                if (totalTests == 0 && cleanLine.StartsWith("Running ") && cleanLine.Contains(" tests using "))
                 {
-                    return await ClaudeAgentLifecycle.CompleteAndExitTask(agentType, taskSummary ?? "Task recovered", responseContent, branch);
+                    var parts = cleanLine.Split(' ');
+                    if (parts.Length >= 2 && int.TryParse(parts[1], out var parsed))
+                    {
+                        totalTests = parsed;
+                        McpDebugLog.Log($"PROGRESS parsed total tests: {totalTests} for {toolName}");
+                    }
                 }
 
-                return await ClaudeAgentLifecycle.CompleteAndExitReview(agentType, commitHash, rejectReason, responseContent, branch);
+                // Count completed tests (lines starting with check mark or cross)
+                var trimmed = cleanLine.TrimStart();
+                if (totalTests > 0 && trimmed.Length > 0 && (trimmed[0] == '✓' || trimmed[0] == '✘' || trimmed.StartsWith("- ✓") || trimmed.StartsWith("- ✘")))
+                {
+                    completedTests++;
+                }
+
+                var now = stopwatch.Elapsed;
+                if (now - lastProgressTime >= ProgressInterval)
+                {
+                    lastProgressTime = now;
+                    var counter = nextCounter();
+                    try
+                    {
+                        if (totalTests > 0)
+                        {
+                            progress.Report(new ProgressNotificationValue { Progress = completedTests, Total = totalTests });
+                            McpDebugLog.Log($"PROGRESS sent for {toolName} at {now.Minutes}m {now.Seconds}s ({completedTests}/{totalTests} tests)");
+                        }
+                        else
+                        {
+                            progress.Report(new ProgressNotificationValue { Progress = counter, Total = counter + 10 });
+                            McpDebugLog.Log($"PROGRESS sent for {toolName} at {now.Minutes}m {now.Seconds}s (counter={counter}, no total yet)");
+                        }
+                    }
+                    catch (Exception exception)
+                    {
+                        McpDebugLog.Log($"PROGRESS failed for {toolName}: {exception.Message}");
+                    }
+                }
             }
-
-            var taskJson = await File.ReadAllTextAsync(workspace.CurrentTaskFile);
-            var taskInfo = JsonSerializer.Deserialize<CurrentTaskInfo>(taskJson, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
-
-            if (taskInfo is null)
-            {
-                return "Error: Failed to parse current-task.json for feedback.";
-            }
-
-            var feedbackDirectory = agentType is "pair-programmer" or "tech-lead"
-                ? Path.Combine(Configuration.SourceCodeFolder, ".workspace", "agent-workspaces", agentType, "feedback-reports", "evaluations")
-                : Path.Combine(Configuration.SourceCodeFolder, ".workspace", "agent-workspaces", branch, "feedback-reports", "evaluations");
-            Directory.CreateDirectory(feedbackDirectory);
-
-            // Sanitize task summary for filename (same logic as ReportProblem)
-            var sanitizedSummary = mode is "task" && !string.IsNullOrEmpty(taskSummary)
-                ? string.Join("-", taskSummary.Split(' ', StringSplitOptions.RemoveEmptyEntries))
-                : mode is "review"
-                    ? string.IsNullOrEmpty(rejectReason) ? "approved" : "rejected"
-                    : "feedback";
-            sanitizedSummary = Regex.Replace(sanitizedSummary, "[^a-z0-9-]", "");
-            // Fallback to "feedback" if sanitization results in empty string
-            if (string.IsNullOrEmpty(sanitizedSummary)) sanitizedSummary = "feedback";
-
-            var feedbackContent = $"""
-                                   ---
-                                   task-number: {taskInfo.TaskNumber}
-                                   task-id: {taskInfo.TaskId}
-                                   timestamp: {DateTime.Now:yyyy-MM-ddTHH:mm:sszzz}
-                                   agent-type: {agentType}
-                                   mode: {mode}
-                                   ---
-
-                                   # Task Feedback
-
-                                   {feedback}
-                                   """;
-
-            var feedbackFileName = $"{taskInfo.TaskNumber}.{agentType}.feedback.{sanitizedSummary}.md";
-            var feedbackFilePath = Path.Combine(feedbackDirectory, feedbackFileName);
-            await File.WriteAllTextAsync(feedbackFilePath, feedbackContent);
         }
-        catch (Exception ex)
+        catch (IOException exception)
         {
-            return $"Error: Failed to save feedback: {ex.Message}";
+            McpDebugLog.Log($"STREAM ERROR reading stdout for {toolName}: {exception.Message}");
         }
-
-        if (mode is "task")
+        catch (ObjectDisposedException exception)
         {
-            if (string.IsNullOrEmpty(taskSummary))
-            {
-                return "Error: taskSummary is required for task mode";
-            }
-
-            try
-            {
-                return await ClaudeAgentLifecycle.CompleteAndExitTask(agentType, taskSummary, responseContent, branch);
-            }
-            catch (Exception ex)
-            {
-                return $"""
-                        Error: Failed to complete task.
-
-                        Mode: {mode}
-                        Agent: {agentType}
-                        Summary: {taskSummary}
-                        Branch: {branch}
-
-                        Details: {ex.Message}
-                        """;
-            }
+            McpDebugLog.Log($"STREAM DISPOSED reading stdout for {toolName}: {exception.Message}");
         }
-
-        if (mode is "review")
-        {
-            try
-            {
-                return await ClaudeAgentLifecycle.CompleteAndExitReview(agentType, commitHash, rejectReason, responseContent, branch);
-            }
-            catch (Exception ex)
-            {
-                return $"""
-                        Error: Failed to complete review.
-
-                        Mode: {mode}
-                        Agent: {agentType}
-                        Commit: {commitHash ?? "(none)"}
-                        Reject Reason: {rejectReason ?? "(none)"}
-                        Branch: {branch}
-
-                        Details: {ex.Message}
-                        """;
-            }
-        }
-
-        return $"Invalid mode: '{mode}'. Valid modes: task, review";
     }
 
-    private static async Task<string> ExecuteCliCommandAsync(string[] args)
+    [GeneratedRegex(@"\x1B\[[0-9;]*m")]
+    private static partial Regex AnsiEscapeRegex();
+
+    private static async Task ReadStreamAsync(StreamReader reader, StringBuilder output)
     {
-        var developerCliPath = Path.Combine(Configuration.SourceCodeFolder, "developer-cli");
-        var allArgs = new List<string> { "run", "--project", developerCliPath, "--" };
-        allArgs.AddRange(args);
-
-        var command = $"dotnet {string.Join(" ", allArgs.Select(arg => arg.Contains(" ") ? $"\"{arg}\"" : arg))}";
-        var result = await ProcessHelper.ExecuteQuietlyAsync(command, Configuration.SourceCodeFolder);
-
-        return result.CombinedOutput;
+        try
+        {
+            while (await reader.ReadLineAsync() is { } line)
+            {
+                output.AppendLine(line);
+            }
+        }
+        catch (IOException)
+        {
+            // Stream closed unexpectedly -- child process may have been killed
+        }
+        catch (ObjectDisposedException)
+        {
+            // Stream disposed -- process already exited
+        }
     }
 }

@@ -28,6 +28,7 @@ export function UserProfileFields({
     <UserAvatarPicker
       avatarUrl={user?.avatarUrl}
       isPending={isPending}
+      size={layout === "horizontal" ? "lg" : "base"}
       onFileSelect={onAvatarFileSelect}
       onRemove={onAvatarRemove}
     />
@@ -38,7 +39,7 @@ export function UserProfileFields({
       <div className="flex flex-col gap-4 sm:flex-row">
         <TextField
           autoFocus={autoFocus}
-          isRequired={true}
+          required={true}
           name="firstName"
           label={t`First name`}
           defaultValue={user?.firstName}
@@ -46,7 +47,7 @@ export function UserProfileFields({
           className="sm:flex-1"
         />
         <TextField
-          isRequired={true}
+          required={true}
           name="lastName"
           label={t`Last name`}
           defaultValue={user?.lastName}
@@ -58,18 +59,13 @@ export function UserProfileFields({
       <TextField
         name="email"
         label={t`Email`}
+        tooltip={t`Your email address cannot be changed. An owner must delete your account and reinvite you with the new email address.`}
         value={user?.email}
-        isDisabled={true}
+        readOnly={true}
         startIcon={<MailIcon className="size-4" />}
       />
 
-      <TextField
-        name="title"
-        label={t`Title`}
-        tooltip={t`Your professional title or role`}
-        defaultValue={user?.title}
-        placeholder={t`E.g. Software engineer`}
-      />
+      <TextField name="title" label={t`Title`} defaultValue={user?.title} placeholder={t`E.g. Software engineer`} />
     </>
   );
 
@@ -80,9 +76,7 @@ export function UserProfileFields({
           <span className="pb-2.75 text-sm font-medium">
             <Trans>Profile photo</Trans>
           </span>
-          <div className="flex h-[8.5rem] w-full flex-col items-center justify-center rounded-xl bg-card md:size-[8.5rem]">
-            {avatarSection}
-          </div>
+          {avatarSection}
         </div>
         <div className="flex flex-col gap-4">{fieldsSection}</div>
       </div>

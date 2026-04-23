@@ -17,7 +17,7 @@
     "dev": "tsc -b . environment -w",
     "dev:setup": "tsc -b . environment",
     "format": "oxfmt && (oxlint --fix || true)",
-    "lint": "oxlint"
+    "lint": "oxlint --deny-warnings"
   },
   "devDependencies": {
     "@repo/config": "*"

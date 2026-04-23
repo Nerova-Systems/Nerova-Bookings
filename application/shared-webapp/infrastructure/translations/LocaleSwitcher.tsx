@@ -6,6 +6,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger
 } from "@repo/ui/components/DropdownMenu";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@repo/ui/components/Tooltip";
 import { CheckIcon, GlobeIcon } from "lucide-react";
 import { use, useMemo } from "react";
 
@@ -37,13 +38,20 @@ export function LocaleSwitcher({ "aria-label": ariaLabel }: Readonly<{ "aria-lab
 
   return (
     <DropdownMenu trackingTitle="Language menu">
-      <DropdownMenuTrigger
-        render={
-          <Button variant="ghost" size="icon-lg" aria-label={ariaLabel}>
-            <GlobeIcon className="size-5" />
-          </Button>
-        }
-      />
+      <Tooltip>
+        <TooltipTrigger
+          render={
+            <DropdownMenuTrigger
+              render={
+                <Button variant="ghost" size="icon-lg" aria-label={ariaLabel}>
+                  <GlobeIcon className="size-5" />
+                </Button>
+              }
+            />
+          }
+        />
+        <TooltipContent>{ariaLabel}</TooltipContent>
+      </Tooltip>
       <DropdownMenuContent>
         {items.map((item) => (
           <DropdownMenuItem key={item.id} trackingLabel={item.label} onClick={() => handleLocaleChange(item.id)}>

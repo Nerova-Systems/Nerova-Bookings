@@ -4,7 +4,17 @@ import { lazy, Suspense } from "react";
 const AccountApp = lazy(() => import("account/AccountApp"));
 const NotFoundPage = lazy(() => import("account/NotFoundPage"));
 
-const ACCOUNT_PREFIXES = ["/login", "/signup", "/account", "/user", "/profile", "/legal", "/error", "/welcome"];
+const ACCOUNT_PREFIXES = [
+  "/account",
+  "/components",
+  "/error",
+  "/legal",
+  "/login",
+  "/profile",
+  "/signup",
+  "/user",
+  "/welcome"
+];
 
 export const Route = createFileRoute("/$")({
   component: CatchAll

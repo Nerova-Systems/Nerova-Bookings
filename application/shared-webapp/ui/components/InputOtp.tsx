@@ -4,21 +4,34 @@ import * as React from "react";
 
 import { cn } from "../utils";
 
+// Tracks editability so InputOtpSlot can hide the fake caret and active-slot ring when read-only. The library keeps
+// slots focusable in read-only mode for accessibility, but rendering the blinking caret there misleads users into
+// thinking they can type.
+const InputOtpReadOnlyContext = React.createContext<boolean>(false);
+
 function InputOtp({
   className,
   containerClassName,
+  readOnly,
   ...props
 }: React.ComponentProps<typeof OTPInput> & {
   containerClassName?: string;
 }) {
   return (
-    <OTPInput
-      data-slot="input-otp"
-      containerClassName={cn("cn-input-otp flex items-center has-disabled:opacity-50", containerClassName)}
-      spellCheck={false}
-      className={cn("disabled:cursor-not-allowed", className)}
-      {...props}
-    />
+    <InputOtpReadOnlyContext.Provider value={!!readOnly}>
+      <OTPInput
+        data-slot="input-otp"
+        data-readonly={readOnly || undefined}
+        readOnly={readOnly}
+        containerClassName={cn(
+          "cn-input-otp flex items-center has-disabled:opacity-50 has-[[data-readonly]]:cursor-default",
+          containerClassName
+        )}
+        spellCheck={false}
+        className={cn("read-only:cursor-default disabled:cursor-not-allowed", className)}
+        {...props}
+      />
+    </InputOtpReadOnlyContext.Provider>
   );
 }
 
@@ -43,21 +56,22 @@ function InputOtpSlot({
   index: number;
 }) {
   const inputOtpContext = React.useContext(OTPInputContext);
+  const readOnly = React.useContext(InputOtpReadOnlyContext);
   const { char, hasFakeCaret, isActive } = inputOtpContext?.slots[index] ?? {};
+  const showActive = isActive && !readOnly;
 
   return (
     <div
       data-slot="input-otp-slot"
-      data-active={isActive}
-      // NOTE: This diverges from stock ShadCN to --control-height CSS variable for Apple HIG compliance and use a before pseudo-element for the focus ring (outline-offset gap is transparent and box-shadow gets clipped by adjacent slots; the pseudo-element as a child of the z-10 context renders above adjacent z-0 slots). Transparent left border ensures consistent spacing on all sides.
+      data-active={showActive}
       className={cn(
-        "relative z-0 flex size-[var(--control-height)] items-center justify-center border border-input border-l-transparent text-sm shadow-xs transition-all first:rounded-l-md first:border-l-input last:rounded-r-md aria-invalid:border-destructive data-[active=true]:z-10 data-[active=true]:before:pointer-events-none data-[active=true]:before:absolute data-[active=true]:before:-inset-[5px] data-[active=true]:before:z-[-1] data-[active=true]:before:rounded-[inherit] data-[active=true]:before:border-2 data-[active=true]:before:border-ring data-[active=true]:before:bg-background data-[active=true]:aria-invalid:border-destructive dark:bg-input/30",
+        "relative z-0 flex size-(--control-height) items-center justify-center border border-input border-l-transparent text-sm shadow-xs transition-all first:rounded-l-md first:border-l-input last:rounded-r-md aria-invalid:border-destructive data-[active=true]:z-10 data-[active=true]:before:pointer-events-none data-[active=true]:before:absolute data-[active=true]:before:-inset-1.25 data-[active=true]:before:z-[-1] data-[active=true]:before:rounded-[inherit] data-[active=true]:before:border-2 data-[active=true]:before:border-ring data-[active=true]:before:bg-background data-[active=true]:aria-invalid:border-destructive dark:bg-input/30",
         className
       )}
       {...props}
     >
       {char}
-      {hasFakeCaret && (
+      {hasFakeCaret && !readOnly && (
         <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
           <div className="animate-caret-blink h-4 w-px bg-foreground duration-1000" />
         </div>

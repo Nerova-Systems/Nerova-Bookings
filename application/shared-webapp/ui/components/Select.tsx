@@ -2,10 +2,24 @@ import type * as React from "react";
 
 import { Select as SelectPrimitive } from "@base-ui/react/select";
 import { CheckIcon, ChevronDownIcon, ChevronUpIcon } from "lucide-react";
+import { createContext, useContext } from "react";
 
 import { cn } from "../utils";
+import { FormValidationContext } from "./Form";
 
-const Select = SelectPrimitive.Root;
+const SelectNameContext = createContext<string | undefined>(undefined);
+const SelectReadOnlyContext = createContext<boolean>(false);
+
+function Select<Value, Multiple extends boolean | undefined = false>({
+  name,
+  ...props
+}: SelectPrimitive.Root.Props<Value, Multiple>) {
+  return (
+    <SelectNameContext.Provider value={name}>
+      <SelectPrimitive.Root name={name} {...props} />
+    </SelectNameContext.Provider>
+  );
+}
 
 function SelectGroup({ className, ...props }: SelectPrimitive.Group.Props) {
   return <SelectPrimitive.Group data-slot="select-group" className={cn("scroll-my-1 p-1", className)} {...props} />;
@@ -13,7 +27,11 @@ function SelectGroup({ className, ...props }: SelectPrimitive.Group.Props) {
 
 function SelectValue({ className, ...props }: SelectPrimitive.Value.Props) {
   return (
-    <SelectPrimitive.Value data-slot="select-value" className={cn("flex flex-1 text-left", className)} {...props} />
+    <SelectPrimitive.Value
+      data-slot="select-value"
+      className={cn("line-clamp-1 flex flex-1 items-center gap-1.5 text-left", className)}
+      {...props}
+    />
   );
 }
 
@@ -25,14 +43,20 @@ function SelectTrigger({
 }: SelectPrimitive.Trigger.Props & {
   size?: "sm" | "default";
 }) {
+  const name = useContext(SelectNameContext);
+  const readOnly = useContext(SelectReadOnlyContext);
+  const formErrors = useContext(FormValidationContext);
+  const isInvalid = !!(name && formErrors && name in formErrors && formErrors[name]);
+
   return (
     <SelectPrimitive.Trigger
+      id={name}
       data-slot="select-trigger"
       data-size={size}
-      // NOTE: This diverges from stock ShadCN to use outline-based focus ring, bg-white instead of bg-transparent,
-      // --control-height CSS variables for Apple HIG compliance, and active:bg-accent for press feedback.
+      aria-invalid={isInvalid || undefined}
       className={cn(
-        "flex w-fit cursor-pointer items-center justify-between gap-1.5 rounded-md border border-input bg-white py-2 pr-2 pl-2.5 text-sm whitespace-nowrap shadow-xs outline-ring transition-[color,box-shadow] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 active:bg-accent disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-[0.1875rem] aria-invalid:ring-destructive/20 data-[placeholder]:text-muted-foreground data-[size=default]:h-[var(--control-height)] data-[size=sm]:h-[var(--control-height-sm)] dark:bg-input/30 dark:hover:bg-input/50 dark:active:bg-input/60 dark:aria-invalid:border-destructive/50 dark:aria-invalid:ring-destructive/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 [&>*]:data-[slot=select-value]:line-clamp-1 [&>*]:data-[slot=select-value]:flex [&>*]:data-[slot=select-value]:items-center [&>*]:data-[slot=select-value]:gap-1.5",
+        "flex w-fit cursor-pointer items-center justify-between gap-1.5 rounded-md border border-input bg-white py-2 pr-2 pl-2.5 text-sm whitespace-nowrap shadow-xs outline-ring transition-[color,box-shadow] focus-visible:outline-2 focus-visible:outline-offset-2 active:bg-accent disabled:pointer-events-none disabled:opacity-50 aria-invalid:outline-2 aria-invalid:outline-offset-2 aria-invalid:outline-destructive aria-invalid:focus-visible:shadow-error-halo data-placeholder:text-muted-foreground data-[size=default]:h-(--control-height) data-[size=sm]:h-(--control-height-sm) dark:bg-input/30 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+        readOnly && "focus:outline-2 focus:outline-offset-2 aria-invalid:focus:shadow-error-halo",
         className
       )}
       {...props}
@@ -50,7 +74,6 @@ function SelectContent({
   sideOffset = 4,
   align = "center",
   alignOffset = 0,
-  // NOTE: This diverges from stock ShadCN to show dropdown below trigger instead of aligned with selected item.
   alignItemWithTrigger = false,
   container,
   ...props
@@ -99,14 +122,12 @@ function SelectLabel({ className, ...props }: SelectPrimitive.GroupLabel.Props) 
   );
 }
 
-// NOTE: This diverges from stock ShadCN to use py-3 for 44px touch targets (Apple HIG compliance)
-// and active:bg-accent for press feedback.
 function SelectItem({ className, children, ...props }: SelectPrimitive.Item.Props) {
   return (
     <SelectPrimitive.Item
       data-slot="select-item"
       className={cn(
-        "relative flex w-full cursor-pointer items-center gap-2 rounded-sm py-3 pr-8 pl-2 text-sm outline-hidden select-none focus:bg-accent focus:text-accent-foreground active:bg-accent data-[disabled]:pointer-events-none data-[disabled]:opacity-50 not-data-[variant=destructive]:focus:[&_*]:text-accent-foreground [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 [&>span:last-child]:flex [&>span:last-child]:items-center [&>span:last-child]:gap-2",
+        "relative flex w-full cursor-pointer items-center gap-2 rounded-sm py-3 pr-8 pl-2 text-sm outline-hidden select-none focus:bg-accent focus:text-accent-foreground active:bg-accent data-disabled:pointer-events-none data-disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 [&>span:last-child]:flex [&>span:last-child]:items-center [&>span:last-child]:gap-2",
         className
       )}
       {...props}
@@ -169,6 +190,7 @@ export {
   SelectGroup,
   SelectItem,
   SelectLabel,
+  SelectReadOnlyContext,
   SelectScrollDownButton,
   SelectScrollUpButton,
   SelectSeparator,

@@ -1,3 +1,4 @@
+import { plural, t } from "@lingui/core/macro";
 import { useLingui } from "@lingui/react";
 import { useCallback, useEffect, useState } from "react";
 
@@ -12,7 +13,9 @@ export interface SmartDateResult {
 function formatDate(input: string, locale: string, includeTime = false, longMonth = false): string {
   const date = new Date(input);
   const options: Intl.DateTimeFormatOptions = {
-    year: "numeric",
+    // Short format uses a 2-digit year for compactness ("Apr 19, 26"); long format keeps the
+    // 4-digit year for prose readability ("April 19, 2026").
+    year: longMonth ? "numeric" : "2-digit",
     month: longMonth ? "long" : "short",
     day: "numeric",
     ...(includeTime && {
@@ -115,6 +118,41 @@ export function useFormatLongDate() {
     (input: string | undefined | null): string => {
       if (!input) {
         return "";
+      }
+      return formatDate(input, locale, false, true);
+    },
+    [locale]
+  );
+}
+
+/**
+ * Returns a locale-aware calendar-day-relative date formatting function. Suitable for date-only
+ * values (no time component) where you want "Today", "Yesterday", "In 5 days", "5 days ago".
+ * Falls back to the long date format ("April 19, 2026") outside ±5 days.
+ */
+export function useFormatRelativeDate() {
+  const { i18n } = useLingui();
+  const locale = i18n.locale;
+
+  return useCallback(
+    (input: string | undefined | null): string => {
+      if (!input) {
+        return "";
+      }
+      const date = new Date(input);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const target = new Date(date);
+      target.setHours(0, 0, 0, 0);
+      const diffDays = Math.round((target.getTime() - today.getTime()) / 86400000);
+      if (diffDays === 0) return t`Today`;
+      if (diffDays === -1) return t`Yesterday`;
+      if (diffDays === 1) return t`Tomorrow`;
+      if (diffDays >= 2 && diffDays <= 5) {
+        return plural(diffDays, { one: "In # day", other: "In # days" });
+      }
+      if (diffDays <= -2 && diffDays >= -5) {
+        return plural(-diffDays, { one: "# day ago", other: "# days ago" });
       }
       return formatDate(input, locale, false, true);
     },

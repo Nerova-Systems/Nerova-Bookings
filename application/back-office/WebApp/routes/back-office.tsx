@@ -1,4 +1,5 @@
 import { hasPermission, requireAuthentication } from "@repo/infrastructure/auth/routeGuards";
+import { SidebarInset, SidebarProvider } from "@repo/ui/components/Sidebar";
 import { createFileRoute, Outlet } from "@tanstack/react-router";
 
 import { BackOfficeSideMenu } from "@/shared/components/BackOfficeSideMenu";
@@ -14,9 +15,11 @@ function BackOfficeLayout() {
     return <AccessDeniedPage />;
   }
   return (
-    <>
+    <SidebarProvider>
       <BackOfficeSideMenu />
-      <Outlet />
-    </>
+      <SidebarInset>
+        <Outlet />
+      </SidebarInset>
+    </SidebarProvider>
   );
 }

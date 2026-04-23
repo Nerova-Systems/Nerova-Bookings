@@ -9,7 +9,7 @@ interface UserTableSkeletonProps {
 export function UserTableSkeleton({ isMobile }: Readonly<UserTableSkeletonProps>) {
   return (
     <div className="min-h-48 flex-1 overflow-auto rounded-md">
-      <Table aria-label={t`Users loading`}>
+      <Table rowSize="spacious" aria-label={t`Users loading`}>
         <TableBody>
           <TableRow className="h-10">
             <TableCell>

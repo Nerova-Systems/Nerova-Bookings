@@ -99,9 +99,6 @@ function DialogPortal({ ...props }: DialogPrimitive.Portal.Props) {
   return <DialogPrimitive.Portal data-slot="dialog-portal" {...props} />;
 }
 
-// NOTE: This diverges from stock ShadCN to integrate with DirtyDialog.
-// When inside a DirtyDialog and the rendered element has type="reset",
-// the cancel button bypasses the unsaved changes warning.
 function DialogClose({ render, children, ...props }: DialogPrimitive.Close.Props) {
   const dirtyDialogContext = useContext(DirtyDialogContext);
   const trackingContext = useContext(DialogTrackingContext);
@@ -138,8 +135,6 @@ function DialogOverlay({ className, ...props }: DialogPrimitive.Backdrop.Props) 
   );
 }
 
-// NOTE: This diverges from stock ShadCN for mobile full-screen dialogs with scrollable content.
-// Mobile: full-screen (top-0, h-dvh), Desktop: centered modal (sm:top-1/2, sm:-translate-y-1/2).
 function DialogContent({
   className,
   children,
@@ -180,8 +175,6 @@ function DialogHeader({ className, ...props }: React.ComponentProps<"div">) {
   return <div data-slot="dialog-header" className={cn("flex flex-col gap-2", className)} {...props} />;
 }
 
-// NOTE: This diverges from stock ShadCN to add padding for focus ring visibility.
-// The overflow-y-auto clips focus rings, so p-1 -m-1 provides space for the 3px ring.
 function DialogBody({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
@@ -215,8 +208,6 @@ function DialogFooter({
   );
 }
 
-// NOTE: This diverges from stock ShadCN to add top margin.
-// Removed mt-6 from global h2 styles, so DialogTitle (which is an h2) needs explicit top margin.
 function DialogTitle({ className, ...props }: DialogPrimitive.Title.Props) {
   return (
     <DialogPrimitive.Title

@@ -13,6 +13,7 @@ import {
   DialogTitle
 } from "@repo/ui/components/Dialog";
 import { DirtyDialog } from "@repo/ui/components/DirtyDialog";
+import { useDialogSetDirty } from "@repo/ui/components/DirtyDialogContext";
 import { Form } from "@repo/ui/components/Form";
 import { mutationSubmitter } from "@repo/ui/forms/mutationSubmitter";
 import { useQueryClient } from "@tanstack/react-query";
@@ -47,43 +48,11 @@ export function EditBillingInfoDialog({
   submitLabel,
   pendingLabel
 }: Readonly<EditBillingInfoDialogProps>) {
-  const [isFormDirty, setIsFormDirty] = useState(false);
-  const [selectedCountry, setSelectedCountry] = useState(billingInfo?.address?.country ?? undefined);
-  const userInfo = useUserInfo();
-  const queryClient = useQueryClient();
-  const { i18n } = useLingui();
-  const countries = useCountryOptions(i18n.locale);
-
-  const mutation = api.useMutation("put", "/api/account/billing/billing-info", {
-    onSuccess: async () => {
-      setIsFormDirty(false);
-      await queryClient.invalidateQueries({ queryKey: ["get", "/api/account/subscriptions/current"] });
-      toast.success(t`Billing information updated`);
-      onOpenChange(false);
-      onSuccess?.();
-    }
-  });
-
-  const handleCloseComplete = () => {
-    setIsFormDirty(false);
-    setSelectedCountry(billingInfo?.address?.country ?? undefined);
-  };
-
-  const markDirty = () => setIsFormDirty(true);
   const isNewBillingInfo = !billingInfo?.address;
+  const handleClose = () => onOpenChange(false);
 
   return (
-    <DirtyDialog
-      open={isOpen}
-      onOpenChange={onOpenChange}
-      hasUnsavedChanges={isFormDirty}
-      unsavedChangesTitle={t`Unsaved changes`}
-      unsavedChangesMessage={<Trans>You have unsaved changes. If you leave now, your changes will be lost.</Trans>}
-      leaveLabel={t`Leave`}
-      stayLabel={t`Stay`}
-      onCloseComplete={handleCloseComplete}
-      trackingTitle="Edit billing info"
-    >
+    <DirtyDialog open={isOpen} onOpenChange={onOpenChange} trackingTitle="Edit billing info">
       <DialogContent className="sm:w-dialog-lg">
         <DialogHeader>
           <DialogTitle>
@@ -97,35 +66,80 @@ export function EditBillingInfoDialog({
             )}
           </DialogDescription>
         </DialogHeader>
-        <Form
-          onSubmit={mutationSubmitter(mutation)}
-          validationErrors={mutation.error?.errors}
-          className="flex min-h-0 flex-1 flex-col"
-        >
-          <DialogBody>
-            <BillingInfoFormFields
-              billingInfo={billingInfo}
-              tenantName={tenantName}
-              defaultEmail={billingInfo?.email ?? userInfo?.email ?? ""}
-              countries={countries}
-              selectedCountry={selectedCountry}
-              onCountryChange={(value) => {
-                setSelectedCountry(value ?? undefined);
-                markDirty();
-              }}
-              onFieldChange={markDirty}
-            />
-          </DialogBody>
-          <DialogFooter>
-            <DialogClose render={<Button type="reset" variant="secondary" disabled={mutation.isPending} />}>
-              <Trans>Cancel</Trans>
-            </DialogClose>
-            <Button type="submit" disabled={mutation.isPending}>
-              {mutation.isPending ? (pendingLabel ?? t`Saving...`) : (submitLabel ?? t`Save`)}
-            </Button>
-          </DialogFooter>
-        </Form>
+        <EditBillingInfoDialogBody
+          billingInfo={billingInfo}
+          tenantName={tenantName}
+          onClose={handleClose}
+          onSuccess={onSuccess}
+          submitLabel={submitLabel}
+          pendingLabel={pendingLabel}
+        />
       </DialogContent>
     </DirtyDialog>
+  );
+}
+
+function EditBillingInfoDialogBody({
+  billingInfo,
+  tenantName,
+  onClose,
+  onSuccess,
+  submitLabel,
+  pendingLabel
+}: {
+  billingInfo: BillingInfo | null | undefined;
+  tenantName: string;
+  onClose: () => void;
+  onSuccess?: () => void;
+  submitLabel?: string;
+  pendingLabel?: string;
+}) {
+  const setDirty = useDialogSetDirty();
+  const [selectedCountry, setSelectedCountry] = useState(billingInfo?.address?.country ?? undefined);
+  const userInfo = useUserInfo();
+  const queryClient = useQueryClient();
+  const { i18n } = useLingui();
+  const countries = useCountryOptions(i18n.locale);
+
+  const mutation = api.useMutation("put", "/api/account/billing/billing-info", {
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["get", "/api/account/subscriptions/current"] });
+      toast.success(t`Billing information updated`);
+      onClose();
+      onSuccess?.();
+    }
+  });
+
+  const markDirty = () => setDirty(true);
+
+  return (
+    <Form
+      onSubmit={mutationSubmitter(mutation)}
+      validationErrors={mutation.error?.errors}
+      className="flex min-h-0 flex-1 flex-col"
+    >
+      <DialogBody>
+        <BillingInfoFormFields
+          billingInfo={billingInfo}
+          tenantName={tenantName}
+          defaultEmail={billingInfo?.email ?? userInfo?.email ?? ""}
+          countries={countries}
+          selectedCountry={selectedCountry}
+          onCountryChange={(value) => {
+            setSelectedCountry(value ?? undefined);
+            markDirty();
+          }}
+          onFieldChange={markDirty}
+        />
+      </DialogBody>
+      <DialogFooter>
+        <DialogClose render={<Button type="reset" variant="secondary" disabled={mutation.isPending} />}>
+          <Trans>Cancel</Trans>
+        </DialogClose>
+        <Button type="submit" disabled={mutation.isPending}>
+          {mutation.isPending ? (pendingLabel ?? t`Saving...`) : (submitLabel ?? t`Save`)}
+        </Button>
+      </DialogFooter>
+    </Form>
   );
 }

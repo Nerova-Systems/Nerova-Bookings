@@ -113,7 +113,7 @@ function AccountSetupForm({ onComplete }: AccountSetupFormProps) {
             <Skeleton className="size-16 rounded-md" />
             <Skeleton className="h-16 flex-1" />
           </div>
-          <Skeleton className="mt-4 h-11 w-full" />
+          <Skeleton className="mt-4 h-[var(--control-height)] w-full" />
         </div>
       ) : (
         <>
@@ -208,7 +208,7 @@ function ProfileSetupForm() {
           </div>
           <Skeleton className="h-16 w-full" />
           <Skeleton className="h-16 w-full" />
-          <Skeleton className="mt-4 h-11 w-full" />
+          <Skeleton className="mt-4 h-[var(--control-height)] w-full" />
         </div>
       ) : (
         <>

@@ -2,6 +2,7 @@ import { t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
 import { Badge } from "@repo/ui/components/Badge";
 import { Button } from "@repo/ui/components/Button";
+import { Item, ItemActions, ItemContent, ItemDescription, ItemTitle } from "@repo/ui/components/Item";
 import { Separator } from "@repo/ui/components/Separator";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@repo/ui/components/Tooltip";
 import { formatCurrency } from "@repo/utils/currency/formatCurrency";
@@ -44,9 +45,9 @@ export function CurrentPlanSection({
         <Trans>Current plan</Trans>
       </h3>
       <Separator />
-      <div className="flex items-center justify-between gap-4">
-        <div className="flex flex-col gap-2">
-          <div className="flex flex-wrap items-center gap-3">
+      <Item className="p-0">
+        <ItemContent>
+          <ItemTitle className="flex flex-wrap items-center gap-3">
             <span className="font-medium">
               {getPlanLabel(currentPlan)}{" "}
               {currentPriceAmount != null && currentPriceCurrency != null
@@ -62,47 +63,49 @@ export function CurrentPlanSection({
                 <Trans>Active</Trans>
               </Badge>
             )}
-          </div>
+          </ItemTitle>
           {formattedPeriodEndLong && (
-            <p className="text-sm text-muted-foreground">
+            <ItemDescription>
               {cancelAtPeriodEnd ? (
                 <Trans>Access until {formattedPeriodEndLong}</Trans>
               ) : (
                 <Trans>Next billing date: {formattedPeriodEndLong}</Trans>
               )}
-            </p>
+            </ItemDescription>
           )}
           {scheduledPlan && !cancelAtPeriodEnd && (
-            <p className="text-sm text-muted-foreground">
+            <ItemDescription>
               <Trans>
                 Changing to {getPlanLabel(scheduledPlan)} {getFormattedPrice(scheduledPlan, plans)} on{" "}
                 {formattedPeriodEndLong}
               </Trans>
-            </p>
+            </ItemDescription>
           )}
-        </div>
-        <Tooltip>
-          <TooltipTrigger
-            render={
-              <Button
-                variant="outline"
-                size="sm"
-                className="shrink-0 gap-1.5"
-                aria-label={t`Change plan`}
-                onClick={() => navigate({ to: "/account/billing/subscription" })}
-              >
-                <PencilIcon className="size-4" />
-                <span className="hidden sm:inline" aria-hidden="true">
-                  <Trans>Change</Trans>
-                </span>
-              </Button>
-            }
-          />
-          <TooltipContent className="sm:hidden">
-            <Trans>Change plan</Trans>
-          </TooltipContent>
-        </Tooltip>
-      </div>
+        </ItemContent>
+        <ItemActions>
+          <Tooltip>
+            <TooltipTrigger
+              render={
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="shrink-0 gap-1.5"
+                  aria-label={t`Change plan`}
+                  onClick={() => navigate({ to: "/account/billing/subscription" })}
+                >
+                  <PencilIcon className="size-4" />
+                  <span className="hidden sm:inline" aria-hidden="true">
+                    <Trans>Change</Trans>
+                  </span>
+                </Button>
+              }
+            />
+            <TooltipContent className="sm:hidden">
+              <Trans>Change plan</Trans>
+            </TooltipContent>
+          </Tooltip>
+        </ItemActions>
+      </Item>
     </div>
   );
 }

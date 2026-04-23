@@ -13,41 +13,111 @@ msgstr ""
 "Language-Team: \n"
 "Plural-Forms: \n"
 
+#. placeholder {0}: -diffDays
+msgid "{0, plural, one {# day ago} other {# days ago}}"
+msgstr "{0, plural, one {# day ago} other {# days ago}}"
+
+msgid "{diffDays, plural, one {In # day} other {In # days}}"
+msgstr "{diffDays, plural, one {In # day} other {In # days}}"
+
 msgid "Access denied"
 msgstr "Access denied"
 
 msgid "An unexpected error occurred while processing your request."
 msgstr "An unexpected error occurred while processing your request."
 
+msgid "Breadcrumb"
+msgstr "Breadcrumb"
+
+msgid "Clear date"
+msgstr "Clear date"
+
+msgid "Clear dates"
+msgstr "Clear dates"
+
+msgid "Close"
+msgstr "Close"
+
+msgid "Close menu"
+msgstr "Close menu"
+
+msgid "Close sidebar"
+msgstr "Close sidebar"
+
 msgid "Contact your administrator if you believe this is a mistake."
 msgstr "Contact your administrator if you believe this is a mistake."
+
+msgid "Create <0>{search}</0>"
+msgstr "Create <0>{search}</0>"
 
 msgid "Dashboard"
 msgstr "Dashboard"
 
+msgid "Decrease"
+msgstr "Decrease"
+
+msgid "Drop files here, or click to browse"
+msgstr "Drop files here, or click to browse"
+
 msgid "Go to home"
 msgstr "Go to home"
+
+msgid "Go to next page"
+msgstr "Go to next page"
+
+msgid "Go to previous page"
+msgstr "Go to previous page"
 
 msgid "Hide details"
 msgstr "Hide details"
 
+msgid "Increase"
+msgstr "Increase"
+
+msgid "Leave"
+msgstr "Leave"
+
+msgid "Loading"
+msgstr "Loading"
+
 msgid "Log out"
 msgstr "Log out"
+
+msgid "Main content"
+msgstr "Main content"
+
+msgid "Main navigation"
+msgstr "Main navigation"
 
 msgid "Manage tenants, view system data, see exceptions, and perform various tasks for operational and support teams."
 msgstr "Manage tenants, view system data, see exceptions, and perform various tasks for operational and support teams."
 
-msgid "More information"
-msgstr "More information"
+msgid "Mobile navigation menu"
+msgstr "Mobile navigation menu"
+
+msgid "More pages"
+msgstr "More pages"
 
 msgid "Navigation"
 msgstr "Navigation"
+
+msgid "Next"
+msgstr "Next"
+
+msgid "No results found"
+msgstr "No results found"
+
+msgid "Open calendar"
+msgstr "Open calendar"
 
 msgid "Open navigation menu"
 msgstr "Open navigation menu"
 
 msgid "Page not found"
 msgstr "Page not found"
+
+msgid "Pagination"
+msgstr "Pagination"
 
 msgid "PlatformPlatform logo"
 msgstr "PlatformPlatform logo"
@@ -58,23 +128,59 @@ msgstr "Please check the URL or return to the home page."
 msgid "Please try again or return to the home page."
 msgstr "Please try again or return to the home page."
 
+msgid "Previous"
+msgstr "Previous"
+
+msgid "Resize sidebar"
+msgstr "Resize sidebar"
+
+msgid "Select dates"
+msgstr "Select dates"
+
+msgid "Select time zone"
+msgstr "Select time zone"
+
 msgid "Show details"
 msgstr "Show details"
+
+msgid "Show more"
+msgstr "Show more"
+
+msgid "Skip to main content"
+msgstr "Skip to main content"
 
 msgid "Something went wrong"
 msgstr "Something went wrong"
 
+msgid "Stay"
+msgstr "Stay"
+
 msgid "The page you are looking for does not exist or was moved."
 msgstr "The page you are looking for does not exist or was moved."
+
+msgid "Today"
+msgstr "Today"
 
 msgid "Toggle sidebar"
 msgstr "Toggle sidebar"
 
+msgid "Tomorrow"
+msgstr "Tomorrow"
+
 msgid "Try again"
 msgstr "Try again"
+
+msgid "Unsaved changes"
+msgstr "Unsaved changes"
 
 msgid "Welcome to the Back Office"
 msgstr "Welcome to the Back Office"
 
+msgid "Yesterday"
+msgstr "Yesterday"
+
 msgid "You do not have permission to access this page."
 msgstr "You do not have permission to access this page."
+
+msgid "You have unsaved changes. If you leave now, your changes will be lost."
+msgstr "You have unsaved changes. If you leave now, your changes will be lost."

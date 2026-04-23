@@ -126,13 +126,13 @@ export function StartSignupForm() {
         type="email"
         label={t`Email`}
         autoFocus={true}
-        isRequired={true}
+        required={true}
         value={email}
         onChange={setEmail}
         autoComplete="email webauthn"
         placeholder={t`yourname@example.com`}
         className="flex w-full flex-col"
-        isDisabled={isPending}
+        disabled={isPending}
       />
       <Button type="submit" disabled={isPending} className="mt-4 w-full text-center">
         {startSignupMutation.isPending ? (

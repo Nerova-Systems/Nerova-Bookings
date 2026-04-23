@@ -59,7 +59,7 @@ export function BillingHistoryTable() {
   }
 
   return (
-    <Table>
+    <Table rowSize="compact">
       <TableHeader>
         <TableRow>
           <TableHead className="w-1/3">
