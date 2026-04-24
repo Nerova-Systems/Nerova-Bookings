@@ -23,7 +23,11 @@
       "PowerShell($pids = \\(Get-Process | Where-Object { $_.Name -match \"dcpctrl|dotnet\" }\\).Id; Stop-Process -Id $pids -Force -ErrorAction SilentlyContinue; Write-Host \"Killed $\\($pids.Count\\) processes\")",
       "PowerShell($procs = Get-Process | Where-Object { $_.Name -match \"dcpctrl|dotnet\" }; Write-Host \"Process count: $\\($procs.Count\\)\")",
       "PowerShell(Stop-Process -Id 40344, 46100 -Force -ErrorAction SilentlyContinue)",
-      "Bash(pp test *)"
+      "Bash(pp test *)",
+      "mcp__plugin_playwright_playwright__browser_navigate",
+      "mcp__plugin_playwright_playwright__browser_snapshot",
+      "mcp__plugin_playwright_playwright__browser_fill_form",
+      "mcp__plugin_playwright_playwright__browser_click"
     ],
     "additionalDirectories": [
       "C:\\Users\\colin\\AppData\\Roaming\\Microsoft\\UserSecrets\\platformplatform-f817f2a1-ac57-4756-aef2-a57ca864bbd3"

@@ -7,7 +7,9 @@
       "Bash(pp --version)",
       "Bash(npm run *)",
       "Bash(pp lint *)",
-      "mcp__plugin_playwright_playwright__browser_console_messages"
+      "mcp__plugin_playwright_playwright__browser_console_messages",
+      "Read(//c/Users/colin/AppData/Local/Temp/platformplatform-mcp/**)",
+      "PowerShell(pp lint --backend --quiet 2>&1)"
     ]
   }
 }

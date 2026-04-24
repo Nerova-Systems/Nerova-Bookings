@@ -13,9 +13,12 @@ function activeSubscription(overrides: Record<string, unknown> = {}) {
     currentPeriodEnd: "2026-03-24T00:00:00Z",
     nextBillingDate: "2026-03-24T00:00:00Z",
     cancelledAt: null,
-    paymentTransactions: [],
     ...overrides
   };
+}
+
+function billingHistory(transactions: unknown[] = []) {
+  return { totalCount: transactions.length, transactions };
 }
 
 test.describe("@smoke", () => {
@@ -95,19 +98,17 @@ test.describe("@smoke", () => {
         await route.fulfill({
           status: 200,
           contentType: "application/json",
-          json: activeSubscription({
-            paymentTransactions: [
-              {
-                id: "txn_mock_1",
-                amount: 299.0,
-                currency: "ZAR",
-                status: "Succeeded",
-                date: "2026-02-24T00:00:00Z",
-                invoiceUrl: null,
-                creditNoteUrl: null
-              }
-            ]
-          })
+          json: activeSubscription()
+        });
+      });
+
+      await ownerPage.route("**/api/account/billing/payment-history**", async (route) => {
+        await route.fulfill({
+          status: 200,
+          contentType: "application/json",
+          json: billingHistory([
+            { id: "txn_mock_1", amount: 299.0, currency: "ZAR", status: "Succeeded", date: "2026-02-24T00:00:00Z", invoiceUrl: null, creditNoteUrl: null }
+          ])
         });
       });
 
@@ -123,6 +124,7 @@ test.describe("@smoke", () => {
       await expect(ownerPage.getByRole("columnheader", { name: "Status" })).toBeVisible();
       await expect(ownerPage.getByText("Succeeded")).toBeVisible();
 
+      await ownerPage.unroute("**/api/account/billing/payment-history**");
       await ownerPage.unroute("**/api/account/subscriptions/current");
     })();
 
@@ -255,6 +257,10 @@ test.describe("@smoke", () => {
         });
       });
 
+      await ownerPage.route("**/api/account/billing/payment-history**", async (route) => {
+        await route.fulfill({ status: 200, contentType: "application/json", json: billingHistory() });
+      });
+
       await ownerPage.goto("/account/billing");
       await expect(ownerPage.getByText("cancelled and will end on")).toBeVisible();
       await expect(ownerPage.getByRole("button", { name: "Reactivate" })).toBeVisible();
@@ -275,6 +281,7 @@ test.describe("@smoke", () => {
 
       await expectToastMessage(context, "Your subscription has been reactivated.");
       await ownerPage.unroute("**/api/account/subscriptions/reactivate");
+      await ownerPage.unroute("**/api/account/billing/payment-history**");
       await ownerPage.unroute("**/api/account/subscriptions/current");
     })();
 
@@ -288,10 +295,15 @@ test.describe("@smoke", () => {
         });
       });
 
+      await ownerPage.route("**/api/account/billing/payment-history**", async (route) => {
+        await route.fulfill({ status: 200, contentType: "application/json", json: billingHistory() });
+      });
+
       await ownerPage.goto("/account/billing");
       await expect(ownerPage.getByText("Payment failed. Your subscription will be suspended soon.")).toBeVisible();
       await expect(ownerPage.getByRole("button", { name: "Retry payment" }).first()).toBeVisible();
 
+      await ownerPage.unroute("**/api/account/billing/payment-history**");
       await ownerPage.unroute("**/api/account/subscriptions/current");
     })();
 
@@ -407,8 +419,12 @@ test.describe("@comprehensive", () => {
           await route.fulfill({
             status: 200,
             contentType: "application/json",
-            json: activeSubscription({ paymentTransactions: [] })
+            json: activeSubscription()
           });
+        });
+
+        await ownerPage.route("**/api/account/billing/payment-history**", async (route) => {
+          await route.fulfill({ status: 200, contentType: "application/json", json: billingHistory() });
         });
 
         await ownerPage.goto("/account/billing");
@@ -432,6 +448,7 @@ test.describe("@comprehensive", () => {
       await expect(ownerPage.getByRole("heading", { name: "Billing history" })).toBeVisible();
       await expect(ownerPage.getByText("No payment history available.")).toBeVisible();
 
+      await ownerPage.unroute("**/api/account/billing/payment-history**");
       await ownerPage.unroute("**/api/account/subscriptions/current");
     })();
 
@@ -441,12 +458,18 @@ test.describe("@comprehensive", () => {
         await route.fulfill({
           status: 200,
           contentType: "application/json",
-          json: activeSubscription({
-            paymentTransactions: [
-              { id: "txn_1", amount: 299.0, currency: "ZAR", status: "Succeeded", date: "2026-02-24T00:00:00Z", invoiceUrl: null, creditNoteUrl: null },
-              { id: "txn_2", amount: 299.0, currency: "ZAR", status: "Refunded", date: "2026-01-24T00:00:00Z", invoiceUrl: null, creditNoteUrl: null }
-            ]
-          })
+          json: activeSubscription()
+        });
+      });
+
+      await ownerPage.route("**/api/account/billing/payment-history**", async (route) => {
+        await route.fulfill({
+          status: 200,
+          contentType: "application/json",
+          json: billingHistory([
+            { id: "txn_1", amount: 299.0, currency: "ZAR", status: "Succeeded", date: "2026-02-24T00:00:00Z", invoiceUrl: null, creditNoteUrl: null },
+            { id: "txn_2", amount: 299.0, currency: "ZAR", status: "Refunded", date: "2026-01-24T00:00:00Z", invoiceUrl: null, creditNoteUrl: null }
+          ])
         });
       });
 
@@ -455,6 +478,7 @@ test.describe("@comprehensive", () => {
       await expect(ownerPage.getByText("Succeeded")).toBeVisible();
       await expect(ownerPage.getByText("Refunded")).toBeVisible();
 
+      await ownerPage.unroute("**/api/account/billing/payment-history**");
       await ownerPage.unroute("**/api/account/subscriptions/current");
     })();
 
@@ -465,8 +489,12 @@ test.describe("@comprehensive", () => {
         await route.fulfill({
           status: 200,
           contentType: "application/json",
-          json: activeSubscription({ plan: "Premium", scheduledPlan, paymentTransactions: [] })
+          json: activeSubscription({ plan: "Premium", scheduledPlan })
         });
+      });
+
+      await ownerPage.route("**/api/account/billing/payment-history**", async (route) => {
+        await route.fulfill({ status: 200, contentType: "application/json", json: billingHistory() });
       });
 
       await ownerPage.route("**/api/account/subscriptions/cancel-scheduled-downgrade", async (route) => {
@@ -489,6 +517,7 @@ test.describe("@comprehensive", () => {
 
       await expectToastMessage(context, "Your scheduled downgrade has been cancelled.");
       await ownerPage.unroute("**/api/account/subscriptions/cancel-scheduled-downgrade");
+      await ownerPage.unroute("**/api/account/billing/payment-history**");
       await ownerPage.unroute("**/api/account/subscriptions/current");
     })();
   });

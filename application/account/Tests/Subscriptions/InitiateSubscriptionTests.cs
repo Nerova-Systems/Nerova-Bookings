@@ -24,7 +24,7 @@ public sealed class InitiateSubscriptionTests : EndpointBaseTest<AccountDbContex
         var response = await AuthenticatedOwnerHttpClient.PostAsJsonAsync("/api/account/subscriptions/initiate", command);
 
         // Assert
-        await response.ShouldBeSuccessfulPostRequest(hasLocation: false);
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
         var result = await response.Content.ReadFromJsonAsync<InitiateSubscriptionResponse>();
         result!.Uuid.Should().Be("test-uuid");
         await PayFastClient.Received(1).ProcessOnsitePaymentAsync(Arg.Any<SortedDictionary<string, string>>(), Arg.Any<CancellationToken>());
@@ -47,7 +47,7 @@ public sealed class InitiateSubscriptionTests : EndpointBaseTest<AccountDbContex
         var response = await AuthenticatedOwnerHttpClient.PostAsJsonAsync("/api/account/subscriptions/initiate", command);
 
         // Assert
-        await response.ShouldBeSuccessfulPostRequest(hasLocation: false);
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
         var result = await response.Content.ReadFromJsonAsync<InitiateSubscriptionResponse>();
         result!.Uuid.Should().Be("test-uuid");
     }

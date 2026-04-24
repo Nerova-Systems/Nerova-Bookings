@@ -1,0 +1,37 @@
+- generic [ref=e2]:
+  - main [ref=e4]:
+    - generic [ref=e7]:
+      - generic [ref=e8]:
+        - link "Logo" [ref=e9] [cursor=pointer]:
+          - /url: /
+          - img "Logo" [ref=e10]
+        - heading "Hi! Welcome back" [level=2] [ref=e11]
+        - generic [ref=e12]: Enter your email below to log in
+        - group [ref=e13]:
+          - generic [ref=e14]: Email
+          - textbox "Email" [disabled]:
+            - /placeholder: yourname@example.com
+            - text: colinswart0@gmail.com
+        - button "Sending verification code..." [disabled]
+        - generic [ref=e19]: or
+        - button "Log in with Google" [disabled]:
+          - img
+          - text: Log in with Google
+        - paragraph [ref=e23]:
+          - text: Don't have an account?
+          - link "Create new account" [ref=e24] [cursor=pointer]:
+            - /url: /signup
+            - text: Create one
+        - generic [ref=e25]:
+          - generic [ref=e26]: Built with
+          - link "PlatformPlatform" [ref=e27] [cursor=pointer]:
+            - /url: https://github.com/platformplatform/PlatformPlatform
+            - img "PlatformPlatform" [ref=e28]
+      - generic [ref=e29]:
+        - button "Change theme" [ref=e30] [cursor=pointer]:
+          - img
+        - button "Contact support" [ref=e31] [cursor=pointer]:
+          - img
+        - button "Change language" [ref=e32] [cursor=pointer]:
+          - img
+  - region "Notifications alt+T"

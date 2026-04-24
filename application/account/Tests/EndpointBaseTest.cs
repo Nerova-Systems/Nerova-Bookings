@@ -13,6 +13,7 @@ using Microsoft.AspNetCore.TestHost;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using NSubstitute;
 using SharedKernel.Authentication;
@@ -107,6 +108,21 @@ public abstract class EndpointBaseTest<TContext> : IDisposable where TContext : 
                 builder.ConfigureLogging(logging =>
                     {
                         logging.AddFilter(_ => false); // Suppress all logs during tests
+                    }
+                );
+
+                builder.ConfigureAppConfiguration((_, config) =>
+                    {
+                        config.AddInMemoryCollection(new Dictionary<string, string?>
+                        {
+                            ["PayFast:MerchantId"] = "10043122",
+                            ["PayFast:MerchantKey"] = "6g0gkxnzbtx1t",
+                            ["PayFast:Passphrase"] = "nerovabookings",
+                            ["PayFast:Sandbox"] = "true",
+                            ["PayFast:NotifyUrl"] = "https://localhost:9000/api/account/subscriptions/payfast/itn",
+                            ["PayFast:ReturnUrl"] = "https://localhost:9000/account/billing",
+                            ["PayFast:CancelUrl"] = "https://localhost:9000/account/billing"
+                        });
                     }
                 );
 

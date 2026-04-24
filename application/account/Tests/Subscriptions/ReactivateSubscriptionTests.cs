@@ -1,11 +1,10 @@
 using System.Net;
 using System.Net.Http.Json;
 using Account.Database;
+using Account.Features.Subscriptions.Commands;
 using Account.Features.Subscriptions.Domain;
-using Account.Features.Subscriptions.Queries;
 using FluentAssertions;
 using SharedKernel.Tests;
-using SharedKernel.Tests.Persistence;
 using SharedKernel.Tests.Persistence;
 using Xunit;
 
@@ -27,7 +26,9 @@ public sealed class ReactivateSubscriptionTests : EndpointBaseTest<AccountDbCont
         var response = await AuthenticatedOwnerHttpClient.PostAsync("/api/account/subscriptions/reactivate", null);
 
         // Assert
-        await response.ShouldBeSuccessfulPostRequest(hasLocation: false);
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        var result = await response.Content.ReadFromJsonAsync<ReactivateSubscriptionResponse>();
+        result!.Uuid.Should().Be("test-uuid");
     }
 
     [Fact]

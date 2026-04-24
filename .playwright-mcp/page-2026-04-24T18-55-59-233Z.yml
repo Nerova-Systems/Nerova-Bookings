@@ -1,0 +1,103 @@
+- generic [ref=e2]:
+  - generic [ref=e4]:
+    - link "Skip to main content" [ref=e253] [cursor=pointer]:
+      - /url: "#main-content"
+    - generic [ref=e8]:
+      - navigation "Main navigation" [ref=e254]:
+        - button "User menu" [ref=e255] [cursor=pointer]:
+          - img [ref=e16]
+          - generic [ref=e20]: parker life coach
+          - img [ref=e21]
+        - generic [ref=e24]:
+          - generic [ref=e25]:
+            - generic [ref=e26]: User
+            - list [ref=e28]:
+              - listitem [ref=e29]:
+                - link "User profile" [ref=e256] [cursor=pointer]:
+                  - /url: /user/profile
+                  - img [ref=e31]
+                  - generic [ref=e34]: Profile
+              - listitem [ref=e35]:
+                - link "User preferences" [ref=e257] [cursor=pointer]:
+                  - /url: /user/preferences
+                  - img [ref=e37]
+                  - generic [ref=e38]: Preferences
+              - listitem [ref=e39]:
+                - link "User sessions" [ref=e258] [cursor=pointer]:
+                  - /url: /user/sessions
+                  - img [ref=e41]
+                  - generic [ref=e44]: Sessions
+          - generic [ref=e45]:
+            - generic [ref=e46]: Account
+            - list [ref=e48]:
+              - listitem [ref=e49]:
+                - link "Overview" [ref=e259] [cursor=pointer]:
+                  - /url: /account
+                  - img [ref=e51]
+                  - generic [ref=e54]: Overview
+              - listitem [ref=e55]:
+                - link "Settings" [ref=e260] [cursor=pointer]:
+                  - /url: /account/settings
+                  - img [ref=e57]
+                  - generic [ref=e61]: Settings
+              - listitem [ref=e62]:
+                - link "Users" [ref=e261] [cursor=pointer]:
+                  - /url: /account/users
+                  - img [ref=e64]
+                  - generic [ref=e69]: Users
+              - listitem [ref=e70]:
+                - link "Billing" [ref=e262] [cursor=pointer]:
+                  - /url: /account/billing
+                  - img [ref=e72]
+                  - generic [ref=e74]: Billing
+      - button "Resize sidebar" [ref=e263]
+      - button "Toggle sidebar" [ref=e264] [cursor=pointer]:
+        - img [ref=e77]
+    - main [ref=e80]:
+      - main "Main content" [ref=e279]:
+        - generic [ref=e281]:
+          - generic [ref=e282]:
+            - heading "Billing" [level=1] [ref=e283]
+            - paragraph [ref=e284]: Manage your subscription and billing history.
+          - tablist "Billing tabs" [ref=e287]:
+            - tab "Billing" [selected] [ref=e288] [cursor=pointer]
+            - tab "Subscription" [ref=e289] [cursor=pointer]
+          - generic [ref=e290]:
+            - heading "Current plan" [level=3] [ref=e291]
+            - separator [ref=e292]
+            - generic [ref=e293]:
+              - generic [ref=e294]:
+                - generic [ref=e295]:
+                  - generic [ref=e296]: Starter ZAR 149.00/month
+                  - generic [ref=e297]: Active
+                - paragraph [ref=e298]: "Next billing date: May 24, 2026"
+              - button "Change plan" [ref=e300] [cursor=pointer]:
+                - img
+                - generic [ref=e301]: Change
+          - generic [ref=e302]:
+            - heading "Billing history" [level=3] [ref=e303]
+            - separator [ref=e304]
+            - table [ref=e306]:
+              - rowgroup [ref=e307]:
+                - row "Date Amount Status" [ref=e308]:
+                  - columnheader "Date" [ref=e309]:
+                    - generic [ref=e310]: Date
+                  - columnheader "Amount" [ref=e311]:
+                    - generic [ref=e312]: Amount
+                  - columnheader "Status" [ref=e313]:
+                    - generic [ref=e314]: Status
+                  - columnheader [ref=e315]
+              - rowgroup [ref=e316]:
+                - row "Apr 24, 26 ZAR 149.00 Succeeded" [ref=e317]:
+                  - cell "Apr 24, 26" [ref=e318]
+                  - cell "ZAR 149.00" [ref=e319]
+                  - cell "Succeeded" [ref=e320]:
+                    - generic [ref=e321]: Succeeded
+                  - cell [ref=e322]
+                - row "Apr 24, 26 ZAR 149.00 Succeeded" [ref=e323]:
+                  - cell "Apr 24, 26" [ref=e324]
+                  - cell "ZAR 149.00" [ref=e325]
+                  - cell "Succeeded" [ref=e326]:
+                    - generic [ref=e327]: Succeeded
+                  - cell [ref=e328]
+  - region "Notifications alt+T"
