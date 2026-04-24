@@ -1,0 +1,30 @@
+- generic [ref=e2]:
+  - main [ref=e4]:
+    - generic [ref=e7]:
+      - generic [ref=e8]:
+        - link "Logo" [ref=e9] [cursor=pointer]:
+          - /url: /
+          - img "Logo" [ref=e10]
+        - heading "Let's set up your account" [level=2] [ref=e11]
+        - generic [ref=e12]: Add your account name and logo.
+        - generic [ref=e13]:
+          - button "Change logo" [ref=e14] [cursor=pointer]:
+            - generic [ref=e16]:
+              - img
+          - generic:
+            - img
+        - group [ref=e17]:
+          - generic [ref=e18]: Account name
+          - textbox "Account name" [active] [ref=e19]:
+            - /placeholder: E.g. Acme Corp
+        - button "Continue" [ref=e20] [cursor=pointer]
+      - generic [ref=e21]:
+        - button "Log out" [ref=e22] [cursor=pointer]:
+          - img
+        - button "Change theme" [ref=e23] [cursor=pointer]:
+          - img
+        - button "Contact support" [ref=e24] [cursor=pointer]:
+          - img
+        - button "Change language" [ref=e25] [cursor=pointer]:
+          - img
+  - region "Notifications alt+T"

@@ -11,7 +11,22 @@
       "Read(//c/Users/colin/dev/booking-SaaS/**)",
       "PowerShell($item = Get-Item \"C:\\\\Users\\\\colin\\\\dev\\\\booking-SaaS\" -ErrorAction SilentlyContinue; if \\($null -ne $item\\) { \"$\\($item.FullName\\) | LinkType: $\\($item.LinkType\\) | Target: $\\($item.Target\\)\" } else { \"Does not exist\" })",
       "Read(//c/Users/colin/dev//**)",
-      "Bash(npx tsc *)"
+      "Bash(npx tsc *)",
+      "PowerShell(Stop-Process -Id 34456 -Force)",
+      "PowerShell(Get-NetTCPConnection -LocalPort 9001 -State Listen -ErrorAction SilentlyContinue | ForEach-Object { Get-Process -Id $_.OwningProcess -ErrorAction SilentlyContinue } | Select-Object Id, ProcessName)",
+      "PowerShell(Get-Process | Where-Object { $_.Name -match \"dcpctrl|dotnet\" } | Select-Object Id, Name, StartTime | Format-Table -AutoSize)",
+      "mcp__plugin_playwright_playwright__browser_evaluate",
+      "PowerShell(Stop-Process -Id 2916 -Force -ErrorAction SilentlyContinue; Get-Process | Where-Object { $_.Name -eq \"dotnet\" } | Stop-Process -Force -ErrorAction SilentlyContinue; Write-Host \"Processes killed\")",
+      "PowerShell(Get-Process | Where-Object { $_.Name -match \"dcpctrl|dotnet\" } | Measure-Object | Select-Object Count)",
+      "PowerShell($procs = Get-Process | Where-Object { $_.Name -match \"dcpctrl|dotnet\" }; Write-Host \"Count: $\\($procs.Count\\)\")",
+      "PowerShell($procs = Get-Process | Where-Object { $_.Name -match \"dcpctrl|dotnet\" }; Write-Host \"Count: $\\($procs.Count\\)\"; $procs | Select-Object Id, Name, StartTime | Format-Table -AutoSize)",
+      "PowerShell($pids = \\(Get-Process | Where-Object { $_.Name -match \"dcpctrl|dotnet\" }\\).Id; Stop-Process -Id $pids -Force -ErrorAction SilentlyContinue; Write-Host \"Killed $\\($pids.Count\\) processes\")",
+      "PowerShell($procs = Get-Process | Where-Object { $_.Name -match \"dcpctrl|dotnet\" }; Write-Host \"Process count: $\\($procs.Count\\)\")",
+      "PowerShell(Stop-Process -Id 40344, 46100 -Force -ErrorAction SilentlyContinue)",
+      "Bash(pp test *)"
+    ],
+    "additionalDirectories": [
+      "C:\\Users\\colin\\AppData\\Roaming\\Microsoft\\UserSecrets\\platformplatform-f817f2a1-ac57-4756-aef2-a57ca864bbd3"
     ]
   },
   "enabledMcpjsonServers": [

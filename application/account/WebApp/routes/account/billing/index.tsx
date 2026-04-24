@@ -5,7 +5,7 @@ import { AppLayout } from "@repo/ui/components/AppLayout";
 import { Separator } from "@repo/ui/components/Separator";
 import { Skeleton } from "@repo/ui/components/Skeleton";
 import { useFormatLongDate } from "@repo/ui/hooks/useSmartDate";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 
 import { api, SubscriptionPlan, SubscriptionStatus } from "@/shared/lib/api/client";
@@ -30,6 +30,7 @@ export const Route = createFileRoute("/account/billing/")({
 });
 
 function BillingPage() {
+  const navigate = useNavigate();
   const formatLongDate = useFormatLongDate();
   const { isPolling, isLoading, startPolling, subscription } = useSubscriptionPolling();
   const [isCancelDowngradeDialogOpen, setIsCancelDowngradeDialogOpen] = useState(false);
@@ -104,7 +105,7 @@ function BillingPage() {
           plans={pricingCatalog?.plans}
           currentPlan={currentPlan}
           isStripeConfigured={true}
-          onSubscribe={() => {}}
+          onSubscribe={() => navigate({ to: "/account/billing/subscription" })}
         />
       )}
 

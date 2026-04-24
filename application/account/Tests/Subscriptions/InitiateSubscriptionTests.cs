@@ -7,6 +7,7 @@ using Account.Integrations.PayFast;
 using FluentAssertions;
 using NSubstitute;
 using SharedKernel.Tests;
+using SharedKernel.Tests.Persistence;
 using Xunit;
 
 namespace Account.Tests.Subscriptions;

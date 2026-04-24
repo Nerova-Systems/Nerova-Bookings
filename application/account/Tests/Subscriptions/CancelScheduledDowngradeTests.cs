@@ -5,6 +5,7 @@ using Account.Features.Subscriptions.Commands;
 using Account.Features.Subscriptions.Domain;
 using FluentAssertions;
 using SharedKernel.Tests;
+using SharedKernel.Tests.Persistence;
 using Xunit;
 
 namespace Account.Tests.Subscriptions;
@@ -29,7 +30,7 @@ public sealed class CancelScheduledDowngradeTests : EndpointBaseTest<AccountDbCo
 
         // Assert
         await response.ShouldBeSuccessfulPostRequest(hasLocation: false);
-        var scheduledPlan = Connection.ExecuteScalar<string?>("SELECT scheduled_plan FROM subscriptions WHERE tenant_id = @id", new { id = DatabaseSeeder.Tenant1.Id.Value });
+        var scheduledPlan = Connection.ExecuteScalar<string?>("SELECT scheduled_plan FROM subscriptions WHERE tenant_id = @id", [new { id = DatabaseSeeder.Tenant1.Id.Value }]);
         scheduledPlan.Should().BeNull();
         TelemetryEventsCollectorSpy.CollectedEvents.Count.Should().Be(1);
         TelemetryEventsCollectorSpy.CollectedEvents[0].GetType().Name.Should().Be("SubscriptionDowngradeCancelled");

@@ -1,0 +1,48 @@
+- generic [ref=e2]:
+  - main [ref=e4]:
+    - generic [ref=e7]:
+      - generic [ref=e26]:
+        - link "Logo" [ref=e27] [cursor=pointer]:
+          - /url: /
+          - img "Logo" [ref=e28]
+        - heading "Let's set up your profile" [level=2] [ref=e29]
+        - generic [ref=e30]: Tell us a bit about yourself to get started.
+        - generic [ref=e31]:
+          - generic [ref=e32]:
+            - button "Change profile picture" [ref=e33] [cursor=pointer]:
+              - img "Add profile picture"
+            - generic:
+              - img
+          - generic [ref=e34]:
+            - group [ref=e35]:
+              - generic [ref=e36]: First name
+              - textbox "First name" [active] [ref=e37]:
+                - /placeholder: E.g. Alex
+            - group [ref=e38]:
+              - generic [ref=e39]: Last name
+              - textbox "Last name" [ref=e40]:
+                - /placeholder: E.g. Taylor
+          - group [ref=e41]:
+            - generic [ref=e42]:
+              - text: Email
+              - button [ref=e43]:
+                - img [ref=e44]
+            - group [ref=e46]:
+              - group [ref=e47]:
+                - img [ref=e48]
+              - textbox "Email" [ref=e51]: colinswart0@gmail.com
+          - group [ref=e52]:
+            - generic [ref=e53]: Title
+            - textbox "Title" [ref=e54]:
+              - /placeholder: E.g. Software engineer
+        - button "Continue" [ref=e55] [cursor=pointer]
+      - generic [ref=e21]:
+        - button "Log out" [ref=e22] [cursor=pointer]:
+          - img
+        - button "Change theme" [ref=e23] [cursor=pointer]:
+          - img
+        - button "Contact support" [ref=e24] [cursor=pointer]:
+          - img
+        - button "Change language" [ref=e25] [cursor=pointer]:
+          - img
+  - region "Notifications alt+T"

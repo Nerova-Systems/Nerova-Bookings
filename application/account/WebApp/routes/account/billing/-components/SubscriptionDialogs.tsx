@@ -1,5 +1,3 @@
-import { t } from "@lingui/core/macro";
-
 import type { CancellationReason, SubscriptionPlan } from "@/shared/lib/api/client";
 
 import { CancelDowngradeDialog } from "./CancelDowngradeDialog";

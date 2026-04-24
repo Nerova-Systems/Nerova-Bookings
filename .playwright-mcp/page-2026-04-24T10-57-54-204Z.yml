@@ -1,0 +1,666 @@
+- generic [ref=e2]:
+  - generic "Aspire" [ref=e4]:
+    - link "Aspire" [ref=e5] [cursor=pointer]:
+      - /url: /
+      - generic:
+        - generic:
+          - generic:
+            - img
+  - banner [ref=e6]:
+    - generic [ref=e7]:
+      - link "AppHost" [ref=e9] [cursor=pointer]:
+        - /url: /
+        - generic:
+          - generic: AppHost
+      - generic "Aspire repo" [ref=e10]:
+        - link "Aspire repo" [ref=e11] [cursor=pointer]:
+          - /url: https://aka.ms/dotnet/aspire/repo
+          - generic:
+            - generic:
+              - img
+      - generic "Help" [ref=e12] [cursor=pointer]:
+        - button "Help" [ref=e13]:
+          - generic:
+            - generic:
+              - img
+      - generic "MCP Server" [ref=e14] [cursor=pointer]:
+        - button "MCP Server" [ref=e15]:
+          - generic:
+            - generic:
+              - img
+      - generic "Settings" [ref=e16] [cursor=pointer]:
+        - button "Settings" [ref=e17]:
+          - generic:
+            - generic:
+              - img
+  - navigation [ref=e18]:
+    - generic "Resources" [ref=e19]:
+      - link "Resources" [ref=e21] [cursor=pointer]:
+        - /url: /
+        - generic [ref=e22]:
+          - img [ref=e23]
+          - generic [ref=e25]: Resources
+    - generic "Console" [ref=e26]:
+      - link "Console" [ref=e28] [cursor=pointer]:
+        - /url: /consolelogs
+        - generic [ref=e29]:
+          - img [ref=e30]
+          - generic [ref=e32]: Console
+    - generic "Structured" [ref=e33]:
+      - link "Structured" [ref=e35] [cursor=pointer]:
+        - /url: /structuredlogs
+        - generic [ref=e36]:
+          - img [ref=e37]
+          - generic [ref=e39]: Structured
+    - generic "Traces" [ref=e40]:
+      - link "Traces" [ref=e42] [cursor=pointer]:
+        - /url: /traces
+        - generic [ref=e43]:
+          - img [ref=e44]
+          - generic [ref=e46]: Traces
+    - generic "Metrics" [ref=e47]:
+      - link "Metrics" [ref=e49] [cursor=pointer]:
+        - /url: /metrics
+        - generic [ref=e50]:
+          - img [ref=e51]
+          - generic [ref=e53]: Metrics
+  - generic [ref=e55]:
+    - generic [ref=e56]:
+      - img [ref=e58]
+      - generic [ref=e60]:
+        - generic [ref=e61]: Unresolved parameters
+        - text: There are unresolved parameters that need to be set. Please provide values for them.
+      - generic [ref=e62]:
+        - generic "Alert action" [ref=e63] [cursor=pointer]:
+          - button "Alert action" [ref=e64]:
+            - generic:
+              - generic: Enter values
+        - img [ref=e65] [cursor=pointer]
+    - generic [ref=e67]:
+      - img [ref=e69]
+      - generic [ref=e71]:
+        - generic [ref=e72]: Update now
+        - text: Aspire 13.2.3 is available.
+        - generic "Link" [ref=e73]:
+          - link "Upgrade instructions" [ref=e74] [cursor=pointer]:
+            - /url: https://aka.ms/dotnet/aspire/update-latest
+            - generic:
+              - generic: Upgrade instructions
+      - generic [ref=e75]:
+        - generic "Alert action" [ref=e76] [cursor=pointer]:
+          - button "Alert action" [ref=e77]:
+            - generic:
+              - generic: Ignore
+        - img [ref=e78] [cursor=pointer]
+  - generic [ref=e83]:
+    - banner "Page toolbar" [ref=e84]:
+      - toolbar [ref=e85]:
+        - generic [ref=e86]:
+          - heading "Resources" [level=1] [ref=e87]
+          - generic [ref=e88]:
+            - generic:
+              - generic [ref=e90]:
+                - img [ref=e93]
+                - generic [ref=e95]:
+                  - searchbox [ref=e96]
+                  - button [ref=e98]:
+                    - img [ref=e100]
+              - generic "No filters" [ref=e102] [cursor=pointer]:
+                - button "No filters" [ref=e103]:
+                  - generic:
+                    - generic:
+                      - img
+              - generic "View options" [ref=e104] [cursor=pointer]:
+                - button "View options" [ref=e105]:
+                  - generic:
+                    - generic:
+                      - img
+    - main [ref=e106]:
+      - generic [ref=e112]:
+        - generic [ref=e113]:
+          - tablist [ref=e114]:
+            - generic:
+              - tab "Resources" [ref=e115] [cursor=pointer]:
+                - generic:
+                  - img [ref=e116]
+                  - text: Resources
+              - tab "Parameters" [active] [selected] [ref=e118] [cursor=pointer]:
+                - generic:
+                  - img [ref=e119]
+                  - text: Parameters
+              - tab "Graph. For an accessible view please navigate to the Resources tab" [ref=e121] [cursor=pointer]:
+                - generic:
+                  - img [ref=e122]
+                  - text: Graph
+          - generic:
+            - generic:
+              - tabpanel "Parameters"
+        - table [ref=e126]:
+          - rowgroup [ref=e127]:
+            - row "Name State Source Value Actions" [ref=e611]:
+              - columnheader "Name" [ref=e129]:
+                - generic "Name" [ref=e131] [cursor=pointer]:
+                  - button "Name" [ref=e132]:
+                    - generic:
+                      - generic:
+                        - generic "Name"
+              - columnheader "State" [ref=e135]:
+                - generic "State" [ref=e137] [cursor=pointer]:
+                  - button "State" [ref=e138]:
+                    - generic:
+                      - generic:
+                        - generic "State"
+              - columnheader "Source" [ref=e147]:
+                - generic "Source" [ref=e149] [cursor=pointer]:
+                  - button "Source" [ref=e150]:
+                    - generic:
+                      - generic:
+                        - generic "Source"
+              - columnheader "Value" [ref=e615]:
+                - generic "Value" [ref=e617] [cursor=pointer]:
+                  - button "Value" [ref=e618]:
+                    - generic:
+                      - generic:
+                        - generic "Value"
+              - columnheader "Actions" [ref=e159]:
+                - generic "Actions" [ref=e161] [cursor=pointer]:
+                  - button "Actions" [ref=e162]:
+                    - generic:
+                      - generic:
+                        - generic "Actions"
+          - rowgroup [ref=e165]:
+            - 'row "Parameter: google-oauth-client-id Running Parameters:google-oauth-client-id ●●●●●●●● Open in text visualizer Show value Console logs Actions" [ref=e622]':
+              - 'gridcell "Parameter: google-oauth-client-id" [ref=e623]':
+                - generic [ref=e625]:
+                  - img [ref=e626]
+                  - generic [ref=e628]: google-oauth-client-id
+              - gridcell "Running" [ref=e629]:
+                - generic [ref=e630]:
+                  - img [ref=e631]
+                  - text: Running
+              - gridcell "Parameters:google-oauth-client-id" [ref=e633]:
+                - generic [ref=e634]:
+                  - generic "Parameters:google-oauth-client-id" [ref=e635]
+                  - generic "Open in text visualizer" [ref=e636] [cursor=pointer]:
+                    - button "Open in text visualizer" [ref=e637]:
+                      - generic:
+                        - generic:
+                          - img
+              - gridcell "●●●●●●●● Open in text visualizer Show value" [ref=e638]:
+                - generic [ref=e639]:
+                  - generic [ref=e640]: ●●●●●●●●
+                  - generic [ref=e641]:
+                    - generic "Open in text visualizer" [ref=e642] [cursor=pointer]:
+                      - button "Open in text visualizer" [ref=e643]:
+                        - generic:
+                          - generic:
+                            - img
+                    - generic "Show value" [ref=e644] [cursor=pointer]:
+                      - button "Show value" [ref=e645]:
+                        - generic:
+                          - generic:
+                            - img
+              - gridcell "Console logs Actions" [ref=e646]:
+                - generic [ref=e647]:
+                  - generic "Console logs" [ref=e648] [cursor=pointer]:
+                    - button "Console logs" [ref=e649]:
+                      - generic:
+                        - generic:
+                          - img
+                  - generic "Actions" [ref=e650] [cursor=pointer]:
+                    - button "Actions" [ref=e651]:
+                      - generic:
+                        - generic:
+                          - img
+            - 'row "Parameter: google-oauth-client-secret Running Parameters:google-oauth-client-secret ●●●●●●●● Open in text visualizer Show value Console logs Actions" [ref=e652]':
+              - 'gridcell "Parameter: google-oauth-client-secret" [ref=e653]':
+                - generic [ref=e655]:
+                  - img [ref=e656]
+                  - generic [ref=e658]: google-oauth-client-secret
+              - gridcell "Running" [ref=e659]:
+                - generic [ref=e660]:
+                  - img [ref=e661]
+                  - text: Running
+              - gridcell "Parameters:google-oauth-client-secret" [ref=e663]:
+                - generic [ref=e664]:
+                  - generic "Parameters:google-oauth-client-secret" [ref=e665]
+                  - generic "Open in text visualizer" [ref=e666] [cursor=pointer]:
+                    - button "Open in text visualizer" [ref=e667]:
+                      - generic:
+                        - generic:
+                          - img
+              - gridcell "●●●●●●●● Open in text visualizer Show value" [ref=e668]:
+                - generic [ref=e669]:
+                  - generic [ref=e670]: ●●●●●●●●
+                  - generic [ref=e671]:
+                    - generic "Open in text visualizer" [ref=e672] [cursor=pointer]:
+                      - button "Open in text visualizer" [ref=e673]:
+                        - generic:
+                          - generic:
+                            - img
+                    - generic "Show value" [ref=e674] [cursor=pointer]:
+                      - button "Show value" [ref=e675]:
+                        - generic:
+                          - generic:
+                            - img
+              - gridcell "Console logs Actions" [ref=e676]:
+                - generic [ref=e677]:
+                  - generic "Console logs" [ref=e678] [cursor=pointer]:
+                    - button "Console logs" [ref=e679]:
+                      - generic:
+                        - generic:
+                          - img
+                  - generic "Actions" [ref=e680] [cursor=pointer]:
+                    - button "Actions" [ref=e681]:
+                      - generic:
+                        - generic:
+                          - img
+            - 'row "Parameter: google-oauth-enabled Running Parameters:google-oauth-enabled true Console logs Actions" [ref=e682]':
+              - 'gridcell "Parameter: google-oauth-enabled" [ref=e683]':
+                - generic [ref=e685]:
+                  - img [ref=e686]
+                  - generic [ref=e688]: google-oauth-enabled
+              - gridcell "Running" [ref=e689]:
+                - generic [ref=e690]:
+                  - img [ref=e691]
+                  - text: Running
+              - gridcell "Parameters:google-oauth-enabled" [ref=e693]:
+                - generic [ref=e694]:
+                  - generic "Parameters:google-oauth-enabled" [ref=e695]
+                  - generic "Open in text visualizer" [ref=e696] [cursor=pointer]:
+                    - button "Open in text visualizer" [ref=e697]:
+                      - generic:
+                        - generic:
+                          - img
+              - gridcell "true" [ref=e698]:
+                - generic [ref=e699]:
+                  - generic "true" [ref=e700]
+                  - generic "Open in text visualizer" [ref=e701] [cursor=pointer]:
+                    - button "Open in text visualizer" [ref=e702]:
+                      - generic:
+                        - generic:
+                          - img
+              - gridcell "Console logs Actions" [ref=e703]:
+                - generic [ref=e704]:
+                  - generic "Console logs" [ref=e705] [cursor=pointer]:
+                    - button "Console logs" [ref=e706]:
+                      - generic:
+                        - generic:
+                          - img
+                  - generic "Actions" [ref=e707] [cursor=pointer]:
+                    - button "Actions" [ref=e708]:
+                      - generic:
+                        - generic:
+                          - img
+            - 'row "Parameter: payfast-allowed-ips Value missing Parameters:payfast-allowed-ips Value not set Console logs Actions" [ref=e709]':
+              - 'gridcell "Parameter: payfast-allowed-ips" [ref=e710]':
+                - generic [ref=e712]:
+                  - img [ref=e713]
+                  - generic [ref=e715]: payfast-allowed-ips
+              - gridcell "Value missing" [ref=e716]:
+                - generic [ref=e717]:
+                  - img [ref=e718]
+                  - text: Value missing
+              - gridcell "Parameters:payfast-allowed-ips" [ref=e720]:
+                - generic [ref=e721]:
+                  - generic "Parameters:payfast-allowed-ips" [ref=e722]
+                  - generic "Open in text visualizer" [ref=e723] [cursor=pointer]:
+                    - button "Open in text visualizer" [ref=e724]:
+                      - generic:
+                        - generic:
+                          - img
+              - gridcell "Value not set" [ref=e725]
+              - gridcell "Console logs Actions" [ref=e726]:
+                - generic [ref=e727]:
+                  - generic "Console logs" [ref=e728] [cursor=pointer]:
+                    - button "Console logs" [ref=e729]:
+                      - generic:
+                        - generic:
+                          - img
+                  - generic "Actions" [ref=e730] [cursor=pointer]:
+                    - button "Actions" [ref=e731]:
+                      - generic:
+                        - generic:
+                          - img
+            - 'row "Parameter: payfast-cancel-url Running Parameters:payfast-cancel-url ●●●●●●●● Open in text visualizer Show value Console logs Actions" [ref=e732]':
+              - 'gridcell "Parameter: payfast-cancel-url" [ref=e733]':
+                - generic [ref=e735]:
+                  - img [ref=e736]
+                  - generic [ref=e738]: payfast-cancel-url
+              - gridcell "Running" [ref=e739]:
+                - generic [ref=e740]:
+                  - img [ref=e741]
+                  - text: Running
+              - gridcell "Parameters:payfast-cancel-url" [ref=e743]:
+                - generic [ref=e744]:
+                  - generic "Parameters:payfast-cancel-url" [ref=e745]
+                  - generic "Open in text visualizer" [ref=e746] [cursor=pointer]:
+                    - button "Open in text visualizer" [ref=e747]:
+                      - generic:
+                        - generic:
+                          - img
+              - gridcell "●●●●●●●● Open in text visualizer Show value" [ref=e748]:
+                - generic [ref=e749]:
+                  - generic [ref=e750]: ●●●●●●●●
+                  - generic [ref=e751]:
+                    - generic "Open in text visualizer" [ref=e752] [cursor=pointer]:
+                      - button "Open in text visualizer" [ref=e753]:
+                        - generic:
+                          - generic:
+                            - img
+                    - generic "Show value" [ref=e754] [cursor=pointer]:
+                      - button "Show value" [ref=e755]:
+                        - generic:
+                          - generic:
+                            - img
+              - gridcell "Console logs Actions" [ref=e756]:
+                - generic [ref=e757]:
+                  - generic "Console logs" [ref=e758] [cursor=pointer]:
+                    - button "Console logs" [ref=e759]:
+                      - generic:
+                        - generic:
+                          - img
+                  - generic "Actions" [ref=e760] [cursor=pointer]:
+                    - button "Actions" [ref=e761]:
+                      - generic:
+                        - generic:
+                          - img
+            - 'row "Parameter: payfast-enabled Running Parameters:payfast-enabled true Console logs Actions" [ref=e762]':
+              - 'gridcell "Parameter: payfast-enabled" [ref=e763]':
+                - generic [ref=e765]:
+                  - img [ref=e766]
+                  - generic [ref=e768]: payfast-enabled
+              - gridcell "Running" [ref=e769]:
+                - generic [ref=e770]:
+                  - img [ref=e771]
+                  - text: Running
+              - gridcell "Parameters:payfast-enabled" [ref=e773]:
+                - generic [ref=e774]:
+                  - generic "Parameters:payfast-enabled" [ref=e775]
+                  - generic "Open in text visualizer" [ref=e776] [cursor=pointer]:
+                    - button "Open in text visualizer" [ref=e777]:
+                      - generic:
+                        - generic:
+                          - img
+              - gridcell "true" [ref=e778]:
+                - generic [ref=e779]:
+                  - generic "true" [ref=e780]
+                  - generic "Open in text visualizer" [ref=e781] [cursor=pointer]:
+                    - button "Open in text visualizer" [ref=e782]:
+                      - generic:
+                        - generic:
+                          - img
+              - gridcell "Console logs Actions" [ref=e783]:
+                - generic [ref=e784]:
+                  - generic "Console logs" [ref=e785] [cursor=pointer]:
+                    - button "Console logs" [ref=e786]:
+                      - generic:
+                        - generic:
+                          - img
+                  - generic "Actions" [ref=e787] [cursor=pointer]:
+                    - button "Actions" [ref=e788]:
+                      - generic:
+                        - generic:
+                          - img
+            - 'row "Parameter: payfast-merchant-id Running Parameters:payfast-merchant-id ●●●●●●●● Open in text visualizer Show value Console logs Actions" [ref=e789]':
+              - 'gridcell "Parameter: payfast-merchant-id" [ref=e790]':
+                - generic [ref=e792]:
+                  - img [ref=e793]
+                  - generic [ref=e795]: payfast-merchant-id
+              - gridcell "Running" [ref=e796]:
+                - generic [ref=e797]:
+                  - img [ref=e798]
+                  - text: Running
+              - gridcell "Parameters:payfast-merchant-id" [ref=e800]:
+                - generic [ref=e801]:
+                  - generic "Parameters:payfast-merchant-id" [ref=e802]
+                  - generic "Open in text visualizer" [ref=e803] [cursor=pointer]:
+                    - button "Open in text visualizer" [ref=e804]:
+                      - generic:
+                        - generic:
+                          - img
+              - gridcell "●●●●●●●● Open in text visualizer Show value" [ref=e805]:
+                - generic [ref=e806]:
+                  - generic [ref=e807]: ●●●●●●●●
+                  - generic [ref=e808]:
+                    - generic "Open in text visualizer" [ref=e809] [cursor=pointer]:
+                      - button "Open in text visualizer" [ref=e810]:
+                        - generic:
+                          - generic:
+                            - img
+                    - generic "Show value" [ref=e811] [cursor=pointer]:
+                      - button "Show value" [ref=e812]:
+                        - generic:
+                          - generic:
+                            - img
+              - gridcell "Console logs Actions" [ref=e813]:
+                - generic [ref=e814]:
+                  - generic "Console logs" [ref=e815] [cursor=pointer]:
+                    - button "Console logs" [ref=e816]:
+                      - generic:
+                        - generic:
+                          - img
+                  - generic "Actions" [ref=e817] [cursor=pointer]:
+                    - button "Actions" [ref=e818]:
+                      - generic:
+                        - generic:
+                          - img
+            - 'row "Parameter: payfast-merchant-key Running Parameters:payfast-merchant-key ●●●●●●●● Open in text visualizer Show value Console logs Actions" [ref=e819]':
+              - 'gridcell "Parameter: payfast-merchant-key" [ref=e820]':
+                - generic [ref=e822]:
+                  - img [ref=e823]
+                  - generic [ref=e825]: payfast-merchant-key
+              - gridcell "Running" [ref=e826]:
+                - generic [ref=e827]:
+                  - img [ref=e828]
+                  - text: Running
+              - gridcell "Parameters:payfast-merchant-key" [ref=e830]:
+                - generic [ref=e831]:
+                  - generic "Parameters:payfast-merchant-key" [ref=e832]
+                  - generic "Open in text visualizer" [ref=e833] [cursor=pointer]:
+                    - button "Open in text visualizer" [ref=e834]:
+                      - generic:
+                        - generic:
+                          - img
+              - gridcell "●●●●●●●● Open in text visualizer Show value" [ref=e835]:
+                - generic [ref=e836]:
+                  - generic [ref=e837]: ●●●●●●●●
+                  - generic [ref=e838]:
+                    - generic "Open in text visualizer" [ref=e839] [cursor=pointer]:
+                      - button "Open in text visualizer" [ref=e840]:
+                        - generic:
+                          - generic:
+                            - img
+                    - generic "Show value" [ref=e841] [cursor=pointer]:
+                      - button "Show value" [ref=e842]:
+                        - generic:
+                          - generic:
+                            - img
+              - gridcell "Console logs Actions" [ref=e843]:
+                - generic [ref=e844]:
+                  - generic "Console logs" [ref=e845] [cursor=pointer]:
+                    - button "Console logs" [ref=e846]:
+                      - generic:
+                        - generic:
+                          - img
+                  - generic "Actions" [ref=e847] [cursor=pointer]:
+                    - button "Actions" [ref=e848]:
+                      - generic:
+                        - generic:
+                          - img
+            - 'row "Parameter: payfast-notify-url Running Parameters:payfast-notify-url ●●●●●●●● Open in text visualizer Show value Console logs Actions" [ref=e849]':
+              - 'gridcell "Parameter: payfast-notify-url" [ref=e850]':
+                - generic [ref=e852]:
+                  - img [ref=e853]
+                  - generic [ref=e855]: payfast-notify-url
+              - gridcell "Running" [ref=e856]:
+                - generic [ref=e857]:
+                  - img [ref=e858]
+                  - text: Running
+              - gridcell "Parameters:payfast-notify-url" [ref=e860]:
+                - generic [ref=e861]:
+                  - generic "Parameters:payfast-notify-url" [ref=e862]
+                  - generic "Open in text visualizer" [ref=e863] [cursor=pointer]:
+                    - button "Open in text visualizer" [ref=e864]:
+                      - generic:
+                        - generic:
+                          - img
+              - gridcell "●●●●●●●● Open in text visualizer Show value" [ref=e865]:
+                - generic [ref=e866]:
+                  - generic [ref=e867]: ●●●●●●●●
+                  - generic [ref=e868]:
+                    - generic "Open in text visualizer" [ref=e869] [cursor=pointer]:
+                      - button "Open in text visualizer" [ref=e870]:
+                        - generic:
+                          - generic:
+                            - img
+                    - generic "Show value" [ref=e871] [cursor=pointer]:
+                      - button "Show value" [ref=e872]:
+                        - generic:
+                          - generic:
+                            - img
+              - gridcell "Console logs Actions" [ref=e873]:
+                - generic [ref=e874]:
+                  - generic "Console logs" [ref=e875] [cursor=pointer]:
+                    - button "Console logs" [ref=e876]:
+                      - generic:
+                        - generic:
+                          - img
+                  - generic "Actions" [ref=e877] [cursor=pointer]:
+                    - button "Actions" [ref=e878]:
+                      - generic:
+                        - generic:
+                          - img
+            - 'row "Parameter: payfast-passphrase Running Parameters:payfast-passphrase ●●●●●●●● Open in text visualizer Show value Console logs Actions" [ref=e879]':
+              - 'gridcell "Parameter: payfast-passphrase" [ref=e880]':
+                - generic [ref=e882]:
+                  - img [ref=e883]
+                  - generic [ref=e885]: payfast-passphrase
+              - gridcell "Running" [ref=e886]:
+                - generic [ref=e887]:
+                  - img [ref=e888]
+                  - text: Running
+              - gridcell "Parameters:payfast-passphrase" [ref=e890]:
+                - generic [ref=e891]:
+                  - generic "Parameters:payfast-passphrase" [ref=e892]
+                  - generic "Open in text visualizer" [ref=e893] [cursor=pointer]:
+                    - button "Open in text visualizer" [ref=e894]:
+                      - generic:
+                        - generic:
+                          - img
+              - gridcell "●●●●●●●● Open in text visualizer Show value" [ref=e895]:
+                - generic [ref=e896]:
+                  - generic [ref=e897]: ●●●●●●●●
+                  - generic [ref=e898]:
+                    - generic "Open in text visualizer" [ref=e899] [cursor=pointer]:
+                      - button "Open in text visualizer" [ref=e900]:
+                        - generic:
+                          - generic:
+                            - img
+                    - generic "Show value" [ref=e901] [cursor=pointer]:
+                      - button "Show value" [ref=e902]:
+                        - generic:
+                          - generic:
+                            - img
+              - gridcell "Console logs Actions" [ref=e903]:
+                - generic [ref=e904]:
+                  - generic "Console logs" [ref=e905] [cursor=pointer]:
+                    - button "Console logs" [ref=e906]:
+                      - generic:
+                        - generic:
+                          - img
+                  - generic "Actions" [ref=e907] [cursor=pointer]:
+                    - button "Actions" [ref=e908]:
+                      - generic:
+                        - generic:
+                          - img
+            - 'row "Parameter: payfast-return-url Running Parameters:payfast-return-url ●●●●●●●● Open in text visualizer Show value Console logs Actions" [ref=e909]':
+              - 'gridcell "Parameter: payfast-return-url" [ref=e910]':
+                - generic [ref=e912]:
+                  - img [ref=e913]
+                  - generic [ref=e915]: payfast-return-url
+              - gridcell "Running" [ref=e916]:
+                - generic [ref=e917]:
+                  - img [ref=e918]
+                  - text: Running
+              - gridcell "Parameters:payfast-return-url" [ref=e920]:
+                - generic [ref=e921]:
+                  - generic "Parameters:payfast-return-url" [ref=e922]
+                  - generic "Open in text visualizer" [ref=e923] [cursor=pointer]:
+                    - button "Open in text visualizer" [ref=e924]:
+                      - generic:
+                        - generic:
+                          - img
+              - gridcell "●●●●●●●● Open in text visualizer Show value" [ref=e925]:
+                - generic [ref=e926]:
+                  - generic [ref=e927]: ●●●●●●●●
+                  - generic [ref=e928]:
+                    - generic "Open in text visualizer" [ref=e929] [cursor=pointer]:
+                      - button "Open in text visualizer" [ref=e930]:
+                        - generic:
+                          - generic:
+                            - img
+                    - generic "Show value" [ref=e931] [cursor=pointer]:
+                      - button "Show value" [ref=e932]:
+                        - generic:
+                          - generic:
+                            - img
+              - gridcell "Console logs Actions" [ref=e933]:
+                - generic [ref=e934]:
+                  - generic "Console logs" [ref=e935] [cursor=pointer]:
+                    - button "Console logs" [ref=e936]:
+                      - generic:
+                        - generic:
+                          - img
+                  - generic "Actions" [ref=e937] [cursor=pointer]:
+                    - button "Actions" [ref=e938]:
+                      - generic:
+                        - generic:
+                          - img
+            - 'row "Parameter: payfast-sandbox Running Parameters:payfast-sandbox ●●●●●●●● Open in text visualizer Show value Console logs Actions" [ref=e939]':
+              - 'gridcell "Parameter: payfast-sandbox" [ref=e940]':
+                - generic [ref=e942]:
+                  - img [ref=e943]
+                  - generic [ref=e945]: payfast-sandbox
+              - gridcell "Running" [ref=e946]:
+                - generic [ref=e947]:
+                  - img [ref=e948]
+                  - text: Running
+              - gridcell "Parameters:payfast-sandbox" [ref=e950]:
+                - generic [ref=e951]:
+                  - generic "Parameters:payfast-sandbox" [ref=e952]
+                  - generic "Open in text visualizer" [ref=e953] [cursor=pointer]:
+                    - button "Open in text visualizer" [ref=e954]:
+                      - generic:
+                        - generic:
+                          - img
+              - gridcell "●●●●●●●● Open in text visualizer Show value" [ref=e955]:
+                - generic [ref=e956]:
+                  - generic [ref=e957]: ●●●●●●●●
+                  - generic [ref=e958]:
+                    - generic "Open in text visualizer" [ref=e959] [cursor=pointer]:
+                      - button "Open in text visualizer" [ref=e960]:
+                        - generic:
+                          - generic:
+                            - img
+                    - generic "Show value" [ref=e961] [cursor=pointer]:
+                      - button "Show value" [ref=e962]:
+                        - generic:
+                          - generic:
+                            - img
+              - gridcell "Console logs Actions" [ref=e963]:
+                - generic [ref=e964]:
+                  - generic "Console logs" [ref=e965] [cursor=pointer]:
+                    - button "Console logs" [ref=e966]:
+                      - generic:
+                        - generic:
+                          - img
+                  - generic "Actions" [ref=e967] [cursor=pointer]:
+                    - button "Actions" [ref=e968]:
+                      - generic:
+                        - generic:
+                          - img
+    - contentinfo [ref=e606]:
+      - generic [ref=e609]:
+        - text: Showing
+        - strong [ref=e969]: 12 resources

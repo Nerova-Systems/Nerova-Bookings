@@ -116,6 +116,7 @@ public sealed class Subscription : AggregateRoot<SubscriptionId>, ITenantScopedE
 
     public void RenewBillingPeriod(DateTimeOffset now)
     {
+        Status = SubscriptionStatus.Active;
         CurrentPeriodStart = now;
         CurrentPeriodEnd = now.AddDays(30);
         NextBillingDate = now.AddDays(30);

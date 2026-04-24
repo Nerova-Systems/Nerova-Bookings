@@ -1,0 +1,32 @@
+- generic [ref=e2]:
+  - generic [ref=e3]:
+    - link "Skip to main content" [ref=e4] [cursor=pointer]:
+      - /url: "#main-content"
+    - generic [ref=e5]:
+      - button "Close sidebar"
+      - generic [ref=e7]:
+        - navigation "Main navigation" [ref=e8]:
+          - button "User menu" [ref=e11] [cursor=pointer]:
+            - img [ref=e15]
+          - generic [ref=e20]:
+            - generic [ref=e21]: Navigation
+            - list [ref=e23]:
+              - listitem [ref=e24]:
+                - link [ref=e26] [cursor=pointer]:
+                  - /url: /dashboard
+                  - img [ref=e27]
+        - button "Resize sidebar" [ref=e32] [cursor=pointer]
+        - button "Toggle sidebar" [ref=e33] [cursor=pointer]:
+          - img [ref=e34]
+    - main [ref=e37]:
+      - main "Main content" [ref=e40]:
+        - generic [ref=e42]:
+          - generic [ref=e43]:
+            - heading "Good afternoon, Colin" [level=1] [ref=e44]
+            - paragraph [ref=e45]: Here's your overview of what's happening.
+          - generic [ref=e46]:
+            - img [ref=e48]
+            - generic [ref=e53]:
+              - heading "Your dashboard is empty" [level=2] [ref=e54]
+              - paragraph [ref=e55]: This is where your personalized dashboard content will appear. Stay tuned for updates.
+  - region "Notifications alt+T"

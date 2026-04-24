@@ -6,6 +6,7 @@ using Account.Features.Subscriptions.Queries;
 using FluentAssertions;
 using SharedKernel.Tests;
 using SharedKernel.Tests.Persistence;
+using SharedKernel.Tests.Persistence;
 using Xunit;
 
 namespace Account.Tests.Subscriptions;

@@ -19,10 +19,12 @@ public sealed class PayFastClient(HttpClient httpClient, IOptions<PayFastSetting
     {
         try
         {
-            var response = await httpClient.PostAsJsonAsync($"{BaseUrl}/onsite/process", parameters, cancellationToken);
+            var formContent = new FormUrlEncodedContent(parameters);
+            var response = await httpClient.PostAsync($"{BaseUrl}/onsite/process", formContent, cancellationToken);
             if (!response.IsSuccessStatusCode)
             {
-                logger.LogError("PayFast onsite/process failed with status {StatusCode}", response.StatusCode);
+                var body = await response.Content.ReadAsStringAsync(cancellationToken);
+                logger.LogError("PayFast onsite/process failed with status {StatusCode}: {Body}", response.StatusCode, body);
                 return null;
             }
 

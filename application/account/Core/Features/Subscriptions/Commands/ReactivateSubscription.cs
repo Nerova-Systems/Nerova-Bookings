@@ -86,7 +86,7 @@ public sealed class ReactivateSubscriptionHandler(
             { "cancel_url", settings.CancelUrl },
             { "notify_url", settings.NotifyUrl },
             { "name_first", executionContext.UserInfo.FirstName ?? "Customer" },
-            { "email_address", executionContext.UserInfo.Email },
+            { "email_address", executionContext.UserInfo.Email ?? "" },
             { "m_payment_id", Guid.NewGuid().ToString("N") },
             { "amount", reactivateAmount.ToString("F2") },
             { "item_name", $"Nerova Bookings {reactivatePlan} Plan" },

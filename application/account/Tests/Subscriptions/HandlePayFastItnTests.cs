@@ -4,6 +4,7 @@ using Account.Features.Subscriptions.Domain;
 using Account.Integrations.PayFast;
 using FluentAssertions;
 using SharedKernel.Tests;
+using SharedKernel.Tests.Persistence;
 using Xunit;
 
 namespace Account.Tests.Subscriptions;
@@ -25,11 +26,11 @@ public sealed class HandlePayFastItnTests : EndpointBaseTest<AccountDbContext>
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var status = Connection.ExecuteScalar<string>("SELECT status FROM subscriptions WHERE tenant_id = @id", new { id = DatabaseSeeder.Tenant1.Id.Value });
+        var status = Connection.ExecuteScalar<string>("SELECT status FROM subscriptions WHERE tenant_id = @id", [new { id = DatabaseSeeder.Tenant1.Id.Value }]);
         status.Should().Be(nameof(SubscriptionStatus.Active));
-        var plan = Connection.ExecuteScalar<string>("SELECT plan FROM subscriptions WHERE tenant_id = @id", new { id = DatabaseSeeder.Tenant1.Id.Value });
+        var plan = Connection.ExecuteScalar<string>("SELECT plan FROM subscriptions WHERE tenant_id = @id", [new { id = DatabaseSeeder.Tenant1.Id.Value }]);
         plan.Should().Be(nameof(SubscriptionPlan.Starter));
-        var token = Connection.ExecuteScalar<string?>("SELECT pay_fast_token FROM subscriptions WHERE tenant_id = @id", new { id = DatabaseSeeder.Tenant1.Id.Value });
+        var token = Connection.ExecuteScalar<string?>("SELECT pay_fast_token FROM subscriptions WHERE tenant_id = @id", [new { id = DatabaseSeeder.Tenant1.Id.Value }]);
         token.Should().Be(TestToken);
         TelemetryEventsCollectorSpy.CollectedEvents.Count.Should().Be(1);
         TelemetryEventsCollectorSpy.CollectedEvents[0].GetType().Name.Should().Be("SubscriptionCreated");
@@ -53,7 +54,7 @@ public sealed class HandlePayFastItnTests : EndpointBaseTest<AccountDbContext>
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var status = Connection.ExecuteScalar<string>("SELECT status FROM subscriptions WHERE tenant_id = @id", new { id = DatabaseSeeder.Tenant1.Id.Value });
+        var status = Connection.ExecuteScalar<string>("SELECT status FROM subscriptions WHERE tenant_id = @id", [new { id = DatabaseSeeder.Tenant1.Id.Value }]);
         status.Should().Be(nameof(SubscriptionStatus.Active));
         TelemetryEventsCollectorSpy.CollectedEvents.Count.Should().Be(1);
         TelemetryEventsCollectorSpy.CollectedEvents[0].GetType().Name.Should().Be("SubscriptionReactivated");
@@ -102,7 +103,7 @@ public sealed class HandlePayFastItnTests : EndpointBaseTest<AccountDbContext>
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var status = Connection.ExecuteScalar<string>("SELECT status FROM subscriptions WHERE tenant_id = @id", new { id = DatabaseSeeder.Tenant1.Id.Value });
+        var status = Connection.ExecuteScalar<string>("SELECT status FROM subscriptions WHERE tenant_id = @id", [new { id = DatabaseSeeder.Tenant1.Id.Value }]);
         status.Should().Be(nameof(SubscriptionStatus.PastDue));
         TelemetryEventsCollectorSpy.CollectedEvents.Count.Should().Be(1);
         TelemetryEventsCollectorSpy.CollectedEvents[0].GetType().Name.Should().Be("PaymentFailed");
@@ -164,7 +165,7 @@ public sealed class HandlePayFastItnTests : EndpointBaseTest<AccountDbContext>
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
     }
 
-    private static FormUrlEncodedContent BuildItnPayload(string status, SubscriptionPlan plan, string? token, long? tenantId = null)
+    private FormUrlEncodedContent BuildItnPayload(string status, SubscriptionPlan plan, string? token, long? tenantId = null)
     {
         var fields = new SortedDictionary<string, string>
         {

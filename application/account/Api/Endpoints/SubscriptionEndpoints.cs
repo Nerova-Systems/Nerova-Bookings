@@ -64,6 +64,6 @@ public sealed class SubscriptionEndpoints : IEndpoints
         // PayFast ITN webhook — no auth, receives form-encoded POST from PayFast servers
         group.MapPost("/payfast/itn", async Task<ApiResult> (IFormCollection form, IMediator mediator)
             => await mediator.Send(new HandlePayFastItnCommand(form.ToDictionary(k => k.Key, v => v.Value.ToString())))
-        ).AllowAnonymous();
+        ).AllowAnonymous().DisableAntiforgery();
     }
 }

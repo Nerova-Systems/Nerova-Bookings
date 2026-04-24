@@ -3,7 +3,11 @@
     "allow": [
       "WebFetch(domain:github.com)",
       "WebFetch(domain:raw.githubusercontent.com)",
-      "Bash(xargs grep *)"
+      "Bash(xargs grep *)",
+      "Bash(pp --version)",
+      "Bash(npm run *)",
+      "Bash(pp lint *)",
+      "mcp__plugin_playwright_playwright__browser_console_messages"
     ]
   }
 }

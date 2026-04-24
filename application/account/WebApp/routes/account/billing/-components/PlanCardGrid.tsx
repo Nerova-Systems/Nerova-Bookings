@@ -42,8 +42,8 @@ export function PlanCardGrid({
   currentPriceCurrency
 }: Readonly<PlanCardGridProps>) {
   return (
-    <div className="grid gap-4 lg:grid-cols-3">
-      {[Plans.Starter, Plans.Standard, Plans.Premium].map((plan) => {
+    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      {[Plans.Trial, Plans.Starter, Plans.Standard, Plans.Premium].map((plan) => {
         const planItem = plans?.find((p) => p.plan === plan);
         const taxExclusive = planItem != null && !planItem.taxInclusive;
         return (

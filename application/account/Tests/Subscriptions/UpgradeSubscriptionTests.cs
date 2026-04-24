@@ -6,6 +6,7 @@ using Account.Features.Subscriptions.Domain;
 using FluentAssertions;
 using NSubstitute;
 using SharedKernel.Tests;
+using SharedKernel.Tests.Persistence;
 using Xunit;
 
 namespace Account.Tests.Subscriptions;
@@ -33,7 +34,7 @@ public sealed class UpgradeSubscriptionTests : EndpointBaseTest<AccountDbContext
 
         // Assert
         await response.ShouldBeSuccessfulPostRequest(hasLocation: false);
-        var plan = Connection.ExecuteScalar<string>("SELECT plan FROM subscriptions WHERE tenant_id = @id", new { id = DatabaseSeeder.Tenant1.Id.Value });
+        var plan = Connection.ExecuteScalar<string>("SELECT plan FROM subscriptions WHERE tenant_id = @id", [new { id = DatabaseSeeder.Tenant1.Id.Value }]);
         plan.Should().Be(nameof(SubscriptionPlan.Standard));
         await PayFastClient.Received(1).ChargeTokenAsync(TestToken, Arg.Any<decimal>(), Arg.Any<string>(), Arg.Any<CancellationToken>());
         TelemetryEventsCollectorSpy.CollectedEvents.Count.Should().Be(1);
@@ -59,7 +60,7 @@ public sealed class UpgradeSubscriptionTests : EndpointBaseTest<AccountDbContext
 
         // Assert
         await response.ShouldBeSuccessfulPostRequest(hasLocation: false);
-        var plan = Connection.ExecuteScalar<string>("SELECT plan FROM subscriptions WHERE tenant_id = @id", new { id = DatabaseSeeder.Tenant1.Id.Value });
+        var plan = Connection.ExecuteScalar<string>("SELECT plan FROM subscriptions WHERE tenant_id = @id", [new { id = DatabaseSeeder.Tenant1.Id.Value }]);
         plan.Should().Be(nameof(SubscriptionPlan.Premium));
     }
 

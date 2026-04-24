@@ -6,6 +6,7 @@ using Account.Features.Subscriptions.Domain;
 using FluentAssertions;
 using NSubstitute;
 using SharedKernel.Tests;
+using SharedKernel.Tests.Persistence;
 using Xunit;
 
 namespace Account.Tests.Subscriptions;
@@ -31,7 +32,7 @@ public sealed class RetryFailedChargeTests : EndpointBaseTest<AccountDbContext>
 
         // Assert
         await response.ShouldBeSuccessfulPostRequest(hasLocation: false);
-        var status = Connection.ExecuteScalar<string>("SELECT status FROM subscriptions WHERE tenant_id = @id", new { id = DatabaseSeeder.Tenant1.Id.Value });
+        var status = Connection.ExecuteScalar<string>("SELECT status FROM subscriptions WHERE tenant_id = @id", [new { id = DatabaseSeeder.Tenant1.Id.Value }]);
         status.Should().Be(nameof(SubscriptionStatus.Active));
         await PayFastClient.Received(1).ChargeTokenAsync(TestToken, Arg.Any<decimal>(), Arg.Any<string>(), Arg.Any<CancellationToken>());
         TelemetryEventsCollectorSpy.CollectedEvents.Count.Should().Be(1);

@@ -1,0 +1,30 @@
+- generic [ref=e2]:
+  - main [ref=e49]:
+    - generic [ref=e52]:
+      - generic [ref=e53]:
+        - generic [ref=e55]:
+          - link "Logo" [ref=e57] [cursor=pointer]:
+            - /url: /
+            - img "Logo" [ref=e58]
+          - heading "Enter your verification code" [level=2] [ref=e59]
+          - generic [ref=e60]: Please check your email for a verification code sent to colinswart0@gmail.com
+          - textbox "Signup verification code" [active] [ref=e61]
+          - paragraph [ref=e63]: Your verification code is valid for 4:59
+          - button "Verify" [disabled]
+        - generic [ref=e64]:
+          - generic [ref=e65]: Can't find your code? Check your spam folder.
+          - link "Back to signup" [ref=e66] [cursor=pointer]:
+            - /url: /signup
+          - generic [ref=e67]:
+            - generic [ref=e68]: Powered by
+            - link "PlatformPlatform" [ref=e69] [cursor=pointer]:
+              - /url: https://github.com/platformplatform/PlatformPlatform
+              - img "PlatformPlatform" [ref=e70]
+      - generic [ref=e71]:
+        - button "Change theme" [ref=e72] [cursor=pointer]:
+          - img
+        - button "Contact support" [ref=e73] [cursor=pointer]:
+          - img
+        - button "Change language" [ref=e74] [cursor=pointer]:
+          - img
+  - region "Notifications alt+T"
