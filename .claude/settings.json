@@ -27,7 +27,27 @@
       "mcp__plugin_playwright_playwright__browser_navigate",
       "mcp__plugin_playwright_playwright__browser_snapshot",
       "mcp__plugin_playwright_playwright__browser_fill_form",
-      "mcp__plugin_playwright_playwright__browser_click"
+      "mcp__plugin_playwright_playwright__browser_click",
+      "PowerShell(pp restart 2>&1)",
+      "PowerShell(pp restart --public-url \"https://215e-169-1-35-95.ngrok-free.app\" 2>&1)",
+      "Bash(dotnet run *)",
+      "PowerShell(Stop-Process -Force)",
+      "mcp__plugin_playwright_playwright__browser_network_requests",
+      "Bash(python -c ' *)",
+      "PowerShell($logPath = \"C:\\\\Users\\\\colin\\\\dev\\\\NerovaBookings\\\\.workspace\\\\developer-cli\\\\aspire-apphost.log\"; $proc = \\(& \"C:\\\\Sysinternals\\\\handle64.exe\" -nobanner -accepteula $logPath 2>$null\\); $proc)",
+      "PowerShell(Get-NetTCPConnection -LocalPort 9000,9001,9098 -State Listen -ErrorAction SilentlyContinue)",
+      "PowerShell(docker exec -e PGPASSWORD='5EkB.7T5yfkN}y~D' postgres-78db10bb psql -U postgres -d account -c \"UPDATE subscriptions SET status='Trial', plan='Trial', pay_fast_token=NULL, cancelled_at=NULL, scheduled_plan=NULL, current_period_end=NULL, next_billing_date=NULL WHERE id='sub_01KPZGXR9B3GKSWYM6EPSKNVCW'; DELETE FROM payment_transactions WHERE tenant_id=1497184145489530880;\")",
+      "Bash(tasklist //FI \"imagename eq cmd.exe\" //FO csv)",
+      "Bash(tasklist //FI \"imagename eq AppHost.exe\" //FO csv)",
+      "PowerShell(Get-NetTCPConnection -LocalPort 9000,9001 -State Listen -ErrorAction SilentlyContinue)",
+      "PowerShell(Stop-Process -Id 7128 -Force -ErrorAction SilentlyContinue)",
+      "Bash(awk '{print $6, $7, $8}')",
+      "Read(//c/Users/colin/dev/NerovaBookings/**)",
+      "Read(//c/Users/colin/**)",
+      "Read(//c//**)",
+      "Read(//c/Users/**)",
+      "Bash(dotnet script *)",
+      "PowerShell($logToken = Select-String -Path \"C:\\\\Users\\\\colin\\\\dev\\\\NerovaBookings\\\\.workspace\\\\developer-cli\\\\aspire-apphost.log\" -Pattern \"login\\\\?t=\\([a-f0-9]+\\)\" | Select-Object -Last 1; if \\($logToken\\) { $matches = [regex]::Match\\($logToken.Line, 'login\\\\?t=\\([a-f0-9]+\\)'\\); Write-Host \"Latest token: $\\($matches.Groups[1].Value\\)\" })"
     ],
     "additionalDirectories": [
       "C:\\Users\\colin\\AppData\\Roaming\\Microsoft\\UserSecrets\\platformplatform-f817f2a1-ac57-4756-aef2-a57ca864bbd3"

@@ -1,0 +1,805 @@
+- generic [ref=e2]:
+  - generic "Aspire" [ref=e4]:
+    - link "Aspire" [ref=e5] [cursor=pointer]:
+      - /url: /
+      - generic:
+        - generic:
+          - generic:
+            - img
+  - banner [ref=e6]:
+    - generic [ref=e7]:
+      - link "AppHost" [ref=e9] [cursor=pointer]:
+        - /url: /
+        - generic:
+          - generic: AppHost
+      - generic "Aspire repo" [ref=e10]:
+        - link "Aspire repo" [ref=e11] [cursor=pointer]:
+          - /url: https://aka.ms/dotnet/aspire/repo
+          - generic:
+            - generic:
+              - img
+      - generic "Help" [ref=e12] [cursor=pointer]:
+        - button "Help" [ref=e13]:
+          - generic:
+            - generic:
+              - img
+      - generic "MCP Server" [ref=e14] [cursor=pointer]:
+        - button "MCP Server" [ref=e15]:
+          - generic:
+            - generic:
+              - img
+      - generic "Settings" [ref=e16] [cursor=pointer]:
+        - button "Settings" [ref=e17]:
+          - generic:
+            - generic:
+              - img
+  - navigation [ref=e18]:
+    - generic "Resources" [ref=e19]:
+      - link "Resources" [ref=e21] [cursor=pointer]:
+        - /url: /
+        - generic [ref=e22]:
+          - img [ref=e23]
+          - generic [ref=e25]: Resources
+    - generic "Console" [ref=e26]:
+      - link "Console" [ref=e28] [cursor=pointer]:
+        - /url: /consolelogs
+        - generic [ref=e29]:
+          - img [ref=e30]
+          - generic [ref=e32]: Console
+    - generic "Structured" [ref=e33]:
+      - link "Structured" [ref=e35] [cursor=pointer]:
+        - /url: /structuredlogs
+        - generic [ref=e36]:
+          - img [ref=e37]
+          - generic [ref=e39]: Structured
+    - generic "Traces" [ref=e40]:
+      - link "Traces" [ref=e42] [cursor=pointer]:
+        - /url: /traces
+        - generic [ref=e43]:
+          - img [ref=e44]
+          - generic [ref=e46]: Traces
+    - generic "Metrics" [ref=e47]:
+      - link "Metrics" [ref=e49] [cursor=pointer]:
+        - /url: /metrics
+        - generic [ref=e50]:
+          - img [ref=e51]
+          - generic [ref=e53]: Metrics
+  - generic [ref=e56]:
+    - img [ref=e58]
+    - generic [ref=e60]:
+      - generic [ref=e61]: Update now
+      - text: Aspire 13.2.3 is available.
+      - generic "Link" [ref=e62]:
+        - link "Upgrade instructions" [ref=e63] [cursor=pointer]:
+          - /url: https://aka.ms/dotnet/aspire/update-latest
+          - generic:
+            - generic: Upgrade instructions
+    - generic [ref=e64]:
+      - generic "Alert action" [ref=e65] [cursor=pointer]:
+        - button "Alert action" [ref=e66]:
+          - generic:
+            - generic: Ignore
+      - img [ref=e67] [cursor=pointer]
+  - generic [ref=e72]:
+    - banner "Page toolbar" [ref=e73]:
+      - heading "Structured logs" [level=1] [ref=e74]
+      - toolbar [ref=e75]:
+        - generic [ref=e76]:
+          - generic:
+            - generic [ref=e77]: Resource
+            - combobox "Resource" [ref=e78]:
+              - generic [ref=e80] [cursor=pointer]:
+                - generic [ref=e81]: (All)
+                - img [ref=e84]
+            - generic "Pause incoming data" [ref=e86] [cursor=pointer]:
+              - button "Pause incoming data" [ref=e87]:
+                - generic:
+                  - generic:
+                    - img
+            - generic "Remove data" [ref=e88] [cursor=pointer]:
+              - button "Remove data" [ref=e89]:
+                - generic:
+                  - generic:
+                    - img
+                - generic:
+                  - generic:
+                    - img
+          - generic [ref=e90]:
+            - generic:
+              - generic "Message filter" [ref=e91]:
+                - generic [ref=e92]:
+                  - img [ref=e95]
+                  - generic [ref=e97]:
+                    - searchbox [ref=e98]
+                    - button [ref=e100]:
+                      - img [ref=e102]
+              - generic [ref=e104] [cursor=pointer]: Level
+              - combobox "Select a minimum log level" [ref=e105]:
+                - generic [ref=e107] [cursor=pointer]:
+                  - generic [ref=e108]: Error
+                  - img [ref=e111]
+                - generic: (All)
+                - generic: Trace
+                - generic: Debug
+                - generic: Information
+                - generic: Warning
+                - generic: Error
+                - generic: Critical
+              - generic [ref=e113]: No filters
+              - generic "Add filter" [ref=e114] [cursor=pointer]:
+                - button "Add filter" [ref=e115]:
+                  - generic:
+                    - generic:
+                      - img
+    - main [ref=e116]:
+      - generic [ref=e118]:
+        - table [ref=e123]:
+          - rowgroup [ref=e124]:
+            - row "Resource Level Timestamp Message Trace Actions" [ref=e125]:
+              - columnheader "Resource" [ref=e126]:
+                - generic "Resource" [ref=e128] [cursor=pointer]:
+                  - button "Resource" [ref=e129]:
+                    - generic:
+                      - generic:
+                        - generic "Resource"
+              - columnheader "Level" [ref=e132]:
+                - generic "Level" [ref=e134] [cursor=pointer]:
+                  - button "Level" [ref=e135]:
+                    - generic:
+                      - generic:
+                        - generic "Level"
+              - columnheader "Timestamp" [ref=e138]:
+                - generic "Timestamp" [ref=e140] [cursor=pointer]:
+                  - button "Timestamp" [ref=e141]:
+                    - generic:
+                      - generic:
+                        - generic "Timestamp"
+              - columnheader "Message" [ref=e144]:
+                - generic "Message" [ref=e146] [cursor=pointer]:
+                  - button "Message" [ref=e147]:
+                    - generic:
+                      - generic:
+                        - generic "Message"
+              - columnheader "Trace" [ref=e150]:
+                - generic "Trace" [ref=e152] [cursor=pointer]:
+                  - button "Trace" [ref=e153]:
+                    - generic:
+                      - generic:
+                        - generic "Trace"
+              - columnheader "Actions" [ref=e156]:
+                - generic "Actions" [ref=e158] [cursor=pointer]:
+                  - button "Actions" [ref=e159]:
+                    - generic:
+                      - generic:
+                        - generic "Actions"
+          - rowgroup [ref=e162]:
+            - 'row "account-api Error 4/25/2026 9:36:57.3928181 PM PayFast onsite/process failed with status BadRequest: <!doctype html> <html> <head> <meta charset=\"utf-8\"> <meta http-equiv=\"X-UA-Compatible\" content=\"IE=edge\"> <meta name=\"viewport\" content=\"width=device-width, initial-s… Open in text visualizer 6fc448e Actions" [ref=e163]':
+              - gridcell "account-api" [ref=e164]
+              - gridcell "Error" [ref=e165]:
+                - img [ref=e166]
+                - text: Error
+              - gridcell "4/25/2026 9:36:57.3928181 PM" [ref=e168]: 9:36:57.392 PM
+              - 'gridcell "PayFast onsite/process failed with status BadRequest: <!doctype html> <html> <head> <meta charset=\"utf-8\"> <meta http-equiv=\"X-UA-Compatible\" content=\"IE=edge\"> <meta name=\"viewport\" content=\"width=device-width, initial-s… Open in text visualizer" [ref=e169]':
+                - generic [ref=e170]:
+                  - generic [ref=e171]: "PayFast onsite/process failed with status BadRequest: <!doctype html> <html> <head> <meta charset=\"utf-8\"> <meta http-equiv=\"X-UA-Compatible\" content=\"IE=edge\"> <meta name=\"viewport\" content=\"width=device-width, initial-s…"
+                  - generic "Open in text visualizer" [ref=e172] [cursor=pointer]:
+                    - button "Open in text visualizer" [ref=e173]:
+                      - generic:
+                        - generic:
+                          - img
+              - gridcell "6fc448e" [ref=e174]:
+                - link "6fc448e" [ref=e175] [cursor=pointer]:
+                  - /url: /traces/detail/6fc448e4293b13985ae9c703f5af58ce?spanId=4db4a852032480f0
+              - gridcell "Actions" [ref=e176]:
+                - generic "Actions" [ref=e178] [cursor=pointer]:
+                  - button "Actions" [ref=e179]:
+                    - generic:
+                      - generic:
+                        - img
+            - 'row "account-api Error 4/25/2026 9:44:50.2914599 PM PayFast onsite/process failed with status BadRequest: <!doctype html> <html> <head> <meta charset=\"utf-8\"> <meta http-equiv=\"X-UA-Compatible\" content=\"IE=edge\"> <meta name=\"viewport\" content=\"width=device-width, initial-s… Open in text visualizer f025fbd Actions" [ref=e180]':
+              - gridcell "account-api" [ref=e181]
+              - gridcell "Error" [ref=e182]:
+                - img [ref=e183]
+                - text: Error
+              - gridcell "4/25/2026 9:44:50.2914599 PM" [ref=e185]: 9:44:50.291 PM
+              - 'gridcell "PayFast onsite/process failed with status BadRequest: <!doctype html> <html> <head> <meta charset=\"utf-8\"> <meta http-equiv=\"X-UA-Compatible\" content=\"IE=edge\"> <meta name=\"viewport\" content=\"width=device-width, initial-s… Open in text visualizer" [ref=e186]':
+                - generic [ref=e187]:
+                  - generic [ref=e188]: "PayFast onsite/process failed with status BadRequest: <!doctype html> <html> <head> <meta charset=\"utf-8\"> <meta http-equiv=\"X-UA-Compatible\" content=\"IE=edge\"> <meta name=\"viewport\" content=\"width=device-width, initial-s…"
+                  - generic "Open in text visualizer" [ref=e189] [cursor=pointer]:
+                    - button "Open in text visualizer" [ref=e190]:
+                      - generic:
+                        - generic:
+                          - img
+              - gridcell "f025fbd" [ref=e191]:
+                - link "f025fbd" [ref=e192] [cursor=pointer]:
+                  - /url: /traces/detail/f025fbd20ebc0f7992cd2637c1c469d8?spanId=af7df6aa8b34b8eb
+              - gridcell "Actions" [ref=e193]:
+                - generic "Actions" [ref=e195] [cursor=pointer]:
+                  - button "Actions" [ref=e196]:
+                    - generic:
+                      - generic:
+                        - img
+            - 'row "account-api Error 4/25/2026 9:45:15.4155552 PM PayFast onsite/process failed with status BadRequest: <!doctype html> <html> <head> <meta charset=\"utf-8\"> <meta http-equiv=\"X-UA-Compatible\" content=\"IE=edge\"> <meta name=\"viewport\" content=\"width=device-width, initial-s… Open in text visualizer cb3764e Actions" [ref=e197]':
+              - gridcell "account-api" [ref=e198]
+              - gridcell "Error" [ref=e199]:
+                - img [ref=e200]
+                - text: Error
+              - gridcell "4/25/2026 9:45:15.4155552 PM" [ref=e202]: 9:45:15.415 PM
+              - 'gridcell "PayFast onsite/process failed with status BadRequest: <!doctype html> <html> <head> <meta charset=\"utf-8\"> <meta http-equiv=\"X-UA-Compatible\" content=\"IE=edge\"> <meta name=\"viewport\" content=\"width=device-width, initial-s… Open in text visualizer" [ref=e203]':
+                - generic [ref=e204]:
+                  - generic [ref=e205]: "PayFast onsite/process failed with status BadRequest: <!doctype html> <html> <head> <meta charset=\"utf-8\"> <meta http-equiv=\"X-UA-Compatible\" content=\"IE=edge\"> <meta name=\"viewport\" content=\"width=device-width, initial-s…"
+                  - generic "Open in text visualizer" [ref=e206] [cursor=pointer]:
+                    - button "Open in text visualizer" [ref=e207]:
+                      - generic:
+                        - generic:
+                          - img
+              - gridcell "cb3764e" [ref=e208]:
+                - link "cb3764e" [ref=e209] [cursor=pointer]:
+                  - /url: /traces/detail/cb3764ee420b1256eebaa869435d5899?spanId=afce9429fe33dcf9
+              - gridcell "Actions" [ref=e210]:
+                - generic "Actions" [ref=e212] [cursor=pointer]:
+                  - button "Actions" [ref=e213]:
+                    - generic:
+                      - generic:
+                        - img
+        - generic [ref=e226]:
+          - generic [ref=e227]:
+            - heading "Log entry details Account.Integrations.PayFast.PayFastClient" [level=2] [ref=e228]:
+              - generic "Log entry details (Account.Integrations.PayFast.PayFastClient)" [ref=e229]: Log entry details Account.Integrations.PayFast.PayFastClient
+            - generic [ref=e230]:
+              - generic "Split horizontal" [ref=e231] [cursor=pointer]:
+                - button "Split horizontal" [ref=e232]:
+                  - generic:
+                    - generic:
+                      - img
+              - generic "Close" [ref=e233] [cursor=pointer]:
+                - button "Close" [ref=e234]:
+                  - generic:
+                    - generic:
+                      - img
+          - generic [ref=e235]:
+            - toolbar [ref=e236]:
+              - generic [ref=e237]:
+                - generic:
+                  - generic [ref=e238]:
+                    - text: Resource
+                    - strong [ref=e239]: account-api
+                  - generic "9:45:15.4155552 PM" [ref=e240]:
+                    - text: Timestamp
+                    - strong [ref=e241]: 9:45:15.415 PM
+                - generic [ref=e244]:
+                  - img [ref=e247]
+                  - generic [ref=e249]:
+                    - searchbox [ref=e250]
+                    - button [ref=e252]:
+                      - img [ref=e254]
+            - generic [ref=e257]:
+              - generic:
+                - generic [ref=e258]:
+                  - heading "Log entry 7" [level=2] [ref=e259]:
+                    - button "Log entry" [expanded] [ref=e260] [cursor=pointer]:
+                      - generic [ref=e261]:
+                        - generic: Log entry
+                    - generic [ref=e266]: "7"
+                    - generic:
+                      - generic:
+                        - img
+                  - region "Log entry" [ref=e267]:
+                    - table [ref=e269]:
+                      - rowgroup [ref=e270]:
+                        - row "Name Value" [ref=e271]:
+                          - columnheader "Name" [ref=e272]:
+                            - generic "Name" [ref=e274] [cursor=pointer]:
+                              - button "Name" [ref=e275]:
+                                - generic:
+                                  - generic:
+                                    - generic "Name"
+                          - columnheader "Value" [ref=e278]:
+                            - generic "Value" [ref=e280] [cursor=pointer]:
+                              - button "Value" [ref=e281]:
+                                - generic:
+                                  - generic:
+                                    - generic "Value"
+                      - rowgroup [ref=e284]:
+                        - row "Level Open in text visualizer Error Open in text visualizer" [ref=e285]:
+                          - gridcell "Level Open in text visualizer" [ref=e286]:
+                            - generic [ref=e287]:
+                              - generic "Level" [ref=e288]
+                              - generic "Open in text visualizer" [ref=e289] [cursor=pointer]:
+                                - button "Open in text visualizer" [ref=e290]:
+                                  - generic:
+                                    - generic:
+                                      - img
+                          - gridcell "Error Open in text visualizer" [ref=e291]:
+                            - generic [ref=e292]:
+                              - generic "Error" [ref=e293]:
+                                - img [ref=e294]
+                                - text: Error
+                              - generic "Open in text visualizer" [ref=e296] [cursor=pointer]:
+                                - button "Open in text visualizer" [ref=e297]:
+                                  - generic:
+                                    - generic:
+                                      - img
+                        - row [ref=e298]:
+                          - gridcell "Message Open in text visualizer" [ref=e299]:
+                            - generic [ref=e300]:
+                              - generic "Message" [ref=e301]
+                              - generic "Open in text visualizer" [ref=e302] [cursor=pointer]:
+                                - button "Open in text visualizer" [ref=e303]:
+                                  - generic:
+                                    - generic:
+                                      - img
+                          - gridcell [ref=e304]:
+                            - generic [ref=e305]:
+                              - generic [ref=e306]
+                              - generic "Open in text visualizer" [ref=e307] [cursor=pointer]:
+                                - button "Open in text visualizer" [ref=e308]:
+                                  - generic:
+                                    - generic:
+                                      - img
+                        - row "StatusCode Open in text visualizer BadRequest Open in text visualizer" [ref=e309]:
+                          - gridcell "StatusCode Open in text visualizer" [ref=e310]:
+                            - generic [ref=e311]:
+                              - generic "StatusCode" [ref=e312]
+                              - generic "Open in text visualizer" [ref=e313] [cursor=pointer]:
+                                - button "Open in text visualizer" [ref=e314]:
+                                  - generic:
+                                    - generic:
+                                      - img
+                          - gridcell "BadRequest Open in text visualizer" [ref=e315]:
+                            - generic [ref=e316]:
+                              - generic "BadRequest" [ref=e317]
+                              - generic "Open in text visualizer" [ref=e318] [cursor=pointer]:
+                                - button "Open in text visualizer" [ref=e319]:
+                                  - generic:
+                                    - generic:
+                                      - img
+                        - row [ref=e320]:
+                          - gridcell "Body Open in text visualizer" [ref=e321]:
+                            - generic [ref=e322]:
+                              - generic "Body" [ref=e323]
+                              - generic "Open in text visualizer" [ref=e324] [cursor=pointer]:
+                                - button "Open in text visualizer" [ref=e325]:
+                                  - generic:
+                                    - generic:
+                                      - img
+                          - gridcell [ref=e326]:
+                            - generic [ref=e327]:
+                              - generic [ref=e328]
+                              - generic "Open in text visualizer" [ref=e329] [cursor=pointer]:
+                                - button "Open in text visualizer" [ref=e330]:
+                                  - generic:
+                                    - generic:
+                                      - img
+                        - row "ConnectionId Open in text visualizer 0HNL303I3GBQD Open in text visualizer" [ref=e331]:
+                          - gridcell "ConnectionId Open in text visualizer" [ref=e332]:
+                            - generic [ref=e333]:
+                              - generic "ConnectionId" [ref=e334]
+                              - generic "Open in text visualizer" [ref=e335] [cursor=pointer]:
+                                - button "Open in text visualizer" [ref=e336]:
+                                  - generic:
+                                    - generic:
+                                      - img
+                          - gridcell "0HNL303I3GBQD Open in text visualizer" [ref=e337]:
+                            - generic [ref=e338]:
+                              - generic "0HNL303I3GBQD" [ref=e339]
+                              - generic "Open in text visualizer" [ref=e340] [cursor=pointer]:
+                                - button "Open in text visualizer" [ref=e341]:
+                                  - generic:
+                                    - generic:
+                                      - img
+                        - row "RequestId Open in text visualizer 0HNL303I3GBQD:00000025 Open in text visualizer" [ref=e342]:
+                          - gridcell "RequestId Open in text visualizer" [ref=e343]:
+                            - generic [ref=e344]:
+                              - generic "RequestId" [ref=e345]
+                              - generic "Open in text visualizer" [ref=e346] [cursor=pointer]:
+                                - button "Open in text visualizer" [ref=e347]:
+                                  - generic:
+                                    - generic:
+                                      - img
+                          - gridcell "0HNL303I3GBQD:00000025 Open in text visualizer" [ref=e348]:
+                            - generic [ref=e349]:
+                              - generic "0HNL303I3GBQD:00000025" [ref=e350]
+                              - generic "Open in text visualizer" [ref=e351] [cursor=pointer]:
+                                - button "Open in text visualizer" [ref=e352]:
+                                  - generic:
+                                    - generic:
+                                      - img
+                        - row "RequestPath Open in text visualizer /api/account/subscriptions/initiate Open in text visualizer" [ref=e353]:
+                          - gridcell "RequestPath Open in text visualizer" [ref=e354]:
+                            - generic [ref=e355]:
+                              - generic "RequestPath" [ref=e356]
+                              - generic "Open in text visualizer" [ref=e357] [cursor=pointer]:
+                                - button "Open in text visualizer" [ref=e358]:
+                                  - generic:
+                                    - generic:
+                                      - img
+                          - gridcell "/api/account/subscriptions/initiate Open in text visualizer" [ref=e359]:
+                            - generic [ref=e360]:
+                              - generic "/api/account/subscriptions/initiate" [ref=e361]
+                              - generic "Open in text visualizer" [ref=e362] [cursor=pointer]:
+                                - button "Open in text visualizer" [ref=e363]:
+                                  - generic:
+                                    - generic:
+                                      - img
+                - generic [ref=e364]:
+                  - heading "Context 3" [level=2] [ref=e365]:
+                    - button "Context" [expanded] [ref=e366] [cursor=pointer]:
+                      - generic [ref=e367]:
+                        - generic: Context
+                    - generic [ref=e372]: "3"
+                    - generic:
+                      - generic:
+                        - img
+                  - region "Context" [ref=e373]:
+                    - table [ref=e375]:
+                      - rowgroup [ref=e376]:
+                        - row "Name Value" [ref=e377]:
+                          - columnheader "Name" [ref=e378]:
+                            - generic "Name" [ref=e380] [cursor=pointer]:
+                              - button "Name" [ref=e381]:
+                                - generic:
+                                  - generic:
+                                    - generic "Name"
+                          - columnheader "Value" [ref=e384]:
+                            - generic "Value" [ref=e386] [cursor=pointer]:
+                              - button "Value" [ref=e387]:
+                                - generic:
+                                  - generic:
+                                    - generic "Value"
+                      - rowgroup [ref=e390]:
+                        - row "Category Open in text visualizer Account.Integrations.PayFast.PayFastClient Open in text visualizer" [ref=e391]:
+                          - gridcell "Category Open in text visualizer" [ref=e392]:
+                            - generic [ref=e393]:
+                              - generic "Category" [ref=e394]
+                              - generic "Open in text visualizer" [ref=e395] [cursor=pointer]:
+                                - button "Open in text visualizer" [ref=e396]:
+                                  - generic:
+                                    - generic:
+                                      - img
+                          - gridcell "Account.Integrations.PayFast.PayFastClient Open in text visualizer" [ref=e397]:
+                            - generic [ref=e398]:
+                              - generic "Account.Integrations.PayFast.PayFastClient" [ref=e399]
+                              - generic "Open in text visualizer" [ref=e400] [cursor=pointer]:
+                                - button "Open in text visualizer" [ref=e401]:
+                                  - generic:
+                                    - generic:
+                                      - img
+                        - row "TraceId Open in text visualizer cb3764ee420b1256eebaa869435d5899 Open in text visualizer" [ref=e402]:
+                          - gridcell "TraceId Open in text visualizer" [ref=e403]:
+                            - generic [ref=e404]:
+                              - generic "TraceId" [ref=e405]
+                              - generic "Open in text visualizer" [ref=e406] [cursor=pointer]:
+                                - button "Open in text visualizer" [ref=e407]:
+                                  - generic:
+                                    - generic:
+                                      - img
+                          - gridcell "cb3764ee420b1256eebaa869435d5899 Open in text visualizer" [ref=e408]:
+                            - generic [ref=e409]:
+                              - generic "cb3764ee420b1256eebaa869435d5899" [ref=e410]:
+                                - button "cb3764ee420b1256eebaa869435d5899" [ref=e412] [cursor=pointer]:
+                                  - generic:
+                                    - generic:
+                                      - img
+                                  - generic:
+                                    - generic: cb3764ee420b1256eebaa869435d5899
+                              - generic "Open in text visualizer" [ref=e413] [cursor=pointer]:
+                                - button "Open in text visualizer" [ref=e414]:
+                                  - generic:
+                                    - generic:
+                                      - img
+                        - row "SpanId Open in text visualizer afce9429fe33dcf9 Open in text visualizer" [ref=e415]:
+                          - gridcell "SpanId Open in text visualizer" [ref=e416]:
+                            - generic [ref=e417]:
+                              - generic "SpanId" [ref=e418]
+                              - generic "Open in text visualizer" [ref=e419] [cursor=pointer]:
+                                - button "Open in text visualizer" [ref=e420]:
+                                  - generic:
+                                    - generic:
+                                      - img
+                          - gridcell "afce9429fe33dcf9 Open in text visualizer" [ref=e421]:
+                            - generic [ref=e422]:
+                              - generic "afce9429fe33dcf9" [ref=e423]:
+                                - button "afce9429fe33dcf9" [ref=e425] [cursor=pointer]:
+                                  - generic:
+                                    - generic:
+                                      - img
+                                  - generic:
+                                    - generic: afce9429fe33dcf9
+                              - generic "Open in text visualizer" [ref=e426] [cursor=pointer]:
+                                - button "Open in text visualizer" [ref=e427]:
+                                  - generic:
+                                    - generic:
+                                      - img
+                - generic [ref=e428]:
+                  - heading "Resource 6" [level=2] [ref=e429]:
+                    - button "Resource" [expanded] [ref=e430] [cursor=pointer]:
+                      - generic [ref=e431]:
+                        - generic: Resource
+                    - generic [ref=e436]: "6"
+                    - generic:
+                      - generic:
+                        - img
+                  - region "Resource" [ref=e437]:
+                    - table [ref=e439]:
+                      - rowgroup [ref=e440]:
+                        - row "Name Value" [ref=e441]:
+                          - columnheader "Name" [ref=e442]:
+                            - generic "Name" [ref=e444] [cursor=pointer]:
+                              - button "Name" [ref=e445]:
+                                - generic:
+                                  - generic:
+                                    - generic "Name"
+                          - columnheader "Value" [ref=e448]:
+                            - generic "Value" [ref=e450] [cursor=pointer]:
+                              - button "Value" [ref=e451]:
+                                - generic:
+                                  - generic:
+                                    - generic "Value"
+                      - rowgroup [ref=e454]:
+                        - row "service.name Open in text visualizer account-api Open in text visualizer" [ref=e455]:
+                          - gridcell "service.name Open in text visualizer" [ref=e456]:
+                            - generic [ref=e457]:
+                              - generic "service.name" [ref=e458]
+                              - generic "Open in text visualizer" [ref=e459] [cursor=pointer]:
+                                - button "Open in text visualizer" [ref=e460]:
+                                  - generic:
+                                    - generic:
+                                      - img
+                          - gridcell "account-api Open in text visualizer" [ref=e461]:
+                            - generic [ref=e462]:
+                              - generic "account-api" [ref=e463]:
+                                - button "account-api" [ref=e465] [cursor=pointer]:
+                                  - generic:
+                                    - generic:
+                                      - img
+                                  - generic:
+                                    - generic: account-api
+                              - generic "Open in text visualizer" [ref=e466] [cursor=pointer]:
+                                - button "Open in text visualizer" [ref=e467]:
+                                  - generic:
+                                    - generic:
+                                      - img
+                        - row "service.instance.id Open in text visualizer tdgeuybh Open in text visualizer" [ref=e468]:
+                          - gridcell "service.instance.id Open in text visualizer" [ref=e469]:
+                            - generic [ref=e470]:
+                              - generic "service.instance.id" [ref=e471]
+                              - generic "Open in text visualizer" [ref=e472] [cursor=pointer]:
+                                - button "Open in text visualizer" [ref=e473]:
+                                  - generic:
+                                    - generic:
+                                      - img
+                          - gridcell "tdgeuybh Open in text visualizer" [ref=e474]:
+                            - generic [ref=e475]:
+                              - generic "tdgeuybh" [ref=e476]
+                              - generic "Open in text visualizer" [ref=e477] [cursor=pointer]:
+                                - button "Open in text visualizer" [ref=e478]:
+                                  - generic:
+                                    - generic:
+                                      - img
+                        - row "telemetry.distro.name Open in text visualizer Azure.Monitor.OpenTelemetry.AspNetCore Open in text visualizer" [ref=e479]:
+                          - gridcell "telemetry.distro.name Open in text visualizer" [ref=e480]:
+                            - generic [ref=e481]:
+                              - generic "telemetry.distro.name" [ref=e482]
+                              - generic "Open in text visualizer" [ref=e483] [cursor=pointer]:
+                                - button "Open in text visualizer" [ref=e484]:
+                                  - generic:
+                                    - generic:
+                                      - img
+                          - gridcell "Azure.Monitor.OpenTelemetry.AspNetCore Open in text visualizer" [ref=e485]:
+                            - generic [ref=e486]:
+                              - generic "Azure.Monitor.OpenTelemetry.AspNetCore" [ref=e487]
+                              - generic "Open in text visualizer" [ref=e488] [cursor=pointer]:
+                                - button "Open in text visualizer" [ref=e489]:
+                                  - generic:
+                                    - generic:
+                                      - img
+                        - row "telemetry.sdk.language Open in text visualizer dotnet Open in text visualizer" [ref=e490]:
+                          - gridcell "telemetry.sdk.language Open in text visualizer" [ref=e491]:
+                            - generic [ref=e492]:
+                              - generic "telemetry.sdk.language" [ref=e493]
+                              - generic "Open in text visualizer" [ref=e494] [cursor=pointer]:
+                                - button "Open in text visualizer" [ref=e495]:
+                                  - generic:
+                                    - generic:
+                                      - img
+                          - gridcell "dotnet Open in text visualizer" [ref=e496]:
+                            - generic [ref=e497]:
+                              - generic "dotnet" [ref=e498]
+                              - generic "Open in text visualizer" [ref=e499] [cursor=pointer]:
+                                - button "Open in text visualizer" [ref=e500]:
+                                  - generic:
+                                    - generic:
+                                      - img
+                        - row "telemetry.sdk.name Open in text visualizer opentelemetry Open in text visualizer" [ref=e501]:
+                          - gridcell "telemetry.sdk.name Open in text visualizer" [ref=e502]:
+                            - generic [ref=e503]:
+                              - generic "telemetry.sdk.name" [ref=e504]
+                              - generic "Open in text visualizer" [ref=e505] [cursor=pointer]:
+                                - button "Open in text visualizer" [ref=e506]:
+                                  - generic:
+                                    - generic:
+                                      - img
+                          - gridcell "opentelemetry Open in text visualizer" [ref=e507]:
+                            - generic [ref=e508]:
+                              - generic "opentelemetry" [ref=e509]
+                              - generic "Open in text visualizer" [ref=e510] [cursor=pointer]:
+                                - button "Open in text visualizer" [ref=e511]:
+                                  - generic:
+                                    - generic:
+                                      - img
+                        - row "telemetry.sdk.version Open in text visualizer 1.15.0 Open in text visualizer" [ref=e512]:
+                          - gridcell "telemetry.sdk.version Open in text visualizer" [ref=e513]:
+                            - generic [ref=e514]:
+                              - generic "telemetry.sdk.version" [ref=e515]
+                              - generic "Open in text visualizer" [ref=e516] [cursor=pointer]:
+                                - button "Open in text visualizer" [ref=e517]:
+                                  - generic:
+                                    - generic:
+                                      - img
+                          - gridcell "1.15.0 Open in text visualizer" [ref=e518]:
+                            - generic [ref=e519]:
+                              - generic "1.15.0" [ref=e520]
+                              - generic "Open in text visualizer" [ref=e521] [cursor=pointer]:
+                                - button "Open in text visualizer" [ref=e522]:
+                                  - generic:
+                                    - generic:
+                                      - img
+  - dialog [ref=e524]:
+    - generic:
+      - generic [ref=e525]:
+        - generic [ref=e527]:
+          - img [ref=e528]
+          - heading "Body" [level=4] [ref=e530]
+          - generic "Select format" [ref=e532]:
+            - button "Select format" [ref=e534] [cursor=pointer]:
+              - generic:
+                - generic: Select format
+              - generic:
+                - generic:
+                  - img
+        - generic "Close" [ref=e535] [cursor=pointer]:
+          - button "Close" [ref=e536]:
+            - generic:
+              - generic:
+                - img
+        - tooltip "Tooltip"
+      - generic [ref=e538]:
+        - generic [ref=e540]:
+          - generic [ref=e544]:
+            - generic [ref=e545]: "1"
+            - generic [ref=e546]: <!doctype html>
+          - generic [ref=e550]:
+            - generic [ref=e551]: "2"
+            - generic [ref=e552]: <html>
+          - generic [ref=e556]:
+            - generic [ref=e557]: "3"
+            - generic [ref=e558]: <head>
+          - generic [ref=e562]:
+            - generic [ref=e563]: "4"
+            - generic [ref=e564]: <meta charset="utf-8">
+          - generic [ref=e568]:
+            - generic [ref=e569]: "5"
+            - generic [ref=e570]: <meta http-equiv="X-UA-Compatible" content="IE=edge">
+          - generic [ref=e574]:
+            - generic [ref=e575]: "6"
+            - generic [ref=e576]: <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+          - generic [ref=e580]:
+            - generic [ref=e581]: "7"
+            - generic [ref=e582]: <meta name="keywords" content="payfast, payments processing">
+          - generic [ref=e586]:
+            - generic [ref=e587]: "8"
+            - generic [ref=e588]: <title>PayFast - Engine</title>
+          - generic [ref=e592]:
+            - generic [ref=e593]: "9"
+            - generic [ref=e594]: <link rel="stylesheet" href="/eng/default/css/error.css?id=0bb7f9bd3316768c6391" type="text/css">
+          - generic [ref=e598]:
+            - generic [ref=e599]: "10"
+            - generic [ref=e600]: </head>
+          - generic [ref=e604]:
+            - generic [ref=e605]: "11"
+            - generic [ref=e606]: <body>
+          - generic [ref=e610]:
+            - generic [ref=e611]: "12"
+            - generic [ref=e612]: <div id="error-header-wrapper">
+          - generic [ref=e616]:
+            - generic [ref=e617]: "13"
+            - generic [ref=e618]: <img id="error-header-logo" src="/eng/images/PayFast_Logo_150.png" alt="Secure payments by PayFast" title="Secure payments by PayFast" />
+          - generic [ref=e622]:
+            - generic [ref=e623]: "14"
+            - generic [ref=e624]: </div>
+          - generic [ref=e628]:
+            - generic [ref=e629]: "15"
+            - generic [ref=e630]: <div class="wrapper">
+          - generic [ref=e634]:
+            - generic [ref=e635]: "16"
+            - generic [ref=e636]: <div class="error-wrapper">
+          - generic [ref=e640]:
+            - generic [ref=e641]: "17"
+            - generic [ref=e642]: <div class="error-row-1">
+          - generic [ref=e646]:
+            - generic [ref=e647]: "18"
+            - generic [ref=e648]: "<h2>Error: 400 Bad Request</h2>"
+          - generic [ref=e652]:
+            - generic [ref=e653]: "19"
+            - generic [ref=e654]: <p class="center-content">Unfortunately we could not process your transaction.</p>
+          - generic [ref=e658]:
+            - generic [ref=e659]: "20"
+            - generic [ref=e660]: </div>
+          - generic [ref=e664]:
+            - generic [ref=e665]: "21"
+            - generic [ref=e666]: <div class="error-row-2">
+          - generic [ref=e670]:
+            - generic [ref=e671]: "22"
+            - generic [ref=e672]: <img src="/eng/images/400.png" title="An error has occurred" alt="An error has occurred">
+          - generic [ref=e676]:
+            - generic [ref=e677]: "23"
+            - generic [ref=e678]: </div>
+          - generic [ref=e682]:
+            - generic [ref=e683]: "24"
+            - generic [ref=e684]: <div class="error-row-3">
+          - generic [ref=e688]:
+            - generic [ref=e689]: "25"
+            - generic [ref=e690]: <p>The following information provided by the seller is invalid:</p>
+          - generic [ref=e694]:
+            - generic [ref=e695]: "26"
+            - generic [ref=e696]: <div class="notice-error-container">
+          - generic [ref=e700]:
+            - generic [ref=e701]: "27"
+            - generic [ref=e702]: <div class="error-container__text">
+          - generic [ref=e706]:
+            - generic [ref=e707]: "28"
+            - generic [ref=e708]: <i class="fas fa-minus-circle"></i>
+          - generic [ref=e712]:
+            - generic [ref=e713]: "29"
+            - generic [ref=e714]: <span class="err-msg"><strong>recurring_amount:</strong> The subscription recurring amount is outside the limits set by the merchant or PayFast. </span>
+          - generic [ref=e718]:
+            - generic [ref=e719]: "30"
+            - generic [ref=e720]: </div>
+          - generic [ref=e724]:
+            - generic [ref=e725]: "31"
+            - generic [ref=e726]: <div class="error-container__text">
+          - generic [ref=e730]:
+            - generic [ref=e731]: "32"
+            - generic [ref=e732]: <i class="fas fa-minus-circle"></i>
+          - generic [ref=e736]:
+            - generic [ref=e737]: "33"
+            - generic [ref=e738]: <span class="err-msg"><strong>recurring_amount:</strong> The subscription amount is outside the limits set by the merchant or PayFast. </span>
+          - generic [ref=e742]:
+            - generic [ref=e743]: "34"
+            - generic [ref=e744]: </div>
+          - generic [ref=e748]:
+            - generic [ref=e749]: "35"
+            - generic [ref=e750]: </div>
+          - generic [ref=e754]:
+            - generic [ref=e755]: "36"
+            - generic [ref=e756]: </div>
+          - generic [ref=e760]:
+            - generic [ref=e761]: "37"
+            - generic [ref=e762]: <div class="error-row-4 center-content">
+          - generic [ref=e766]:
+            - generic [ref=e767]: "38"
+            - generic [ref=e768]: <button id="error-btn-back" class="btn btn-secondary pf-button" onclick="window.history.back()">Go Back</button>
+          - generic [ref=e772]:
+            - generic [ref=e773]: "39"
+            - generic [ref=e774]: </div>
+          - generic [ref=e778]:
+            - generic [ref=e779]: "40"
+            - generic [ref=e780]: </div>
+          - generic [ref=e784]:
+            - generic [ref=e785]: "41"
+            - generic [ref=e786]: </div>
+          - generic [ref=e790]:
+            - generic [ref=e791]: "42"
+            - generic [ref=e792]: </body>
+          - generic [ref=e796]:
+            - generic [ref=e797]: "43"
+            - generic [ref=e798]: </html>
+          - generic [ref=e803]: "44"
+        - button "Copy to clipboard" [ref=e805] [cursor=pointer]:
+          - generic:
+            - generic:
+              - generic:
+                - img
+          - generic:
+            - generic: Copy to clipboard

@@ -174,7 +174,7 @@ public class RunCommand : Command
                     var pid = parts[^1];
                     if (!processedPids.Add(pid)) continue;
 
-                    var processName = ProcessHelper.StartProcess($"""wmic process where ProcessId={pid} get Name /format:list""", redirectOutput: true, exitOnError: false);
+                    var processName = ProcessHelper.StartProcess($"""powershell -NoProfile -Command "(Get-Process -Id {pid} -ErrorAction SilentlyContinue).Name" """, redirectOutput: true, exitOnError: false);
 
                     if (processName.Contains("dotnet", StringComparison.OrdinalIgnoreCase) ||
                         processName.Contains("rsbuild-node", StringComparison.OrdinalIgnoreCase))

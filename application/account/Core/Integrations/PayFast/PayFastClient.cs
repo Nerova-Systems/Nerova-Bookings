@@ -15,7 +15,7 @@ public sealed class PayFastClient(HttpClient httpClient, IOptions<PayFastSetting
         ? "https://sandbox.payfast.co.za"
         : "https://api.payfast.co.za";
 
-    public async Task<string?> ProcessOnsitePaymentAsync(SortedDictionary<string, string> parameters, CancellationToken cancellationToken)
+    public async Task<string?> ProcessOnsitePaymentAsync(IDictionary<string, string> parameters, CancellationToken cancellationToken)
     {
         try
         {
