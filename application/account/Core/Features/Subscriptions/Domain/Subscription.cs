@@ -143,6 +143,19 @@ public sealed class Subscription : AggregateRoot<SubscriptionId>, ITenantScopedE
         CancelledAt = now;
     }
 
+    /// <summary>
+    ///     Reactivates a cancelled subscription within its still-paid billing period. The user already
+    ///     paid for the current period, so no new charge is taken — we just clear the cancellation
+    ///     flags and restore Active status. The existing CurrentPeriodEnd / NextBillingDate are kept.
+    /// </summary>
+    public void ResumeWithinPaidPeriod()
+    {
+        Status = SubscriptionStatus.Active;
+        CancelledAt = null;
+        CancellationReason = null;
+        CancellationFeedback = null;
+    }
+
     public void Expire()
     {
         Status = SubscriptionStatus.Expired;
