@@ -39,9 +39,10 @@ public static class PayFastSignature
     }
 
     /// <summary>
-    ///     Verifies an inbound ITN signature. PayFast computes the ITN signature over the form fields
-    ///     in the order they appear in the request body (not alphabetical, not the onsite canonical
-    ///     order). The signature field itself is excluded. PHP empty/trim semantics apply.
+    ///     Verifies an inbound ITN signature. PayFast computes the ITN signature over EVERY form field
+    ///     it sent (including empty ones like custom_str4=, custom_int1=, etc.) in the order they
+    ///     appear in the request body. The signature field itself is excluded. This differs from the
+    ///     onsite/process signature which skips empty values and uses a canonical field order.
     /// </summary>
     public static string GenerateForItn(IEnumerable<KeyValuePair<string, string>> orderedFields, string passphrase)
     {
@@ -49,10 +50,9 @@ public static class PayFastSignature
         foreach (var (key, value) in orderedFields)
         {
             if (key == "signature") continue;
-            if (string.IsNullOrWhiteSpace(value)) continue;
-            parts.Add($"{key}={WebUtility.UrlEncode(value.Trim())}");
+            parts.Add($"{key}={WebUtility.UrlEncode(value)}");
         }
-        parts.Add($"passphrase={WebUtility.UrlEncode(passphrase.Trim())}");
+        parts.Add($"passphrase={WebUtility.UrlEncode(passphrase)}");
 
         var queryString = string.Join("&", parts);
         var hash = MD5.HashData(Encoding.UTF8.GetBytes(queryString));

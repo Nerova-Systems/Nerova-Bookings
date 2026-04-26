@@ -58,7 +58,8 @@
       "PowerShell(Get-Process -Name ngrok -ErrorAction SilentlyContinue | Select-Object Id, StartTime; Write-Host \"---\"; try { $r = Invoke-WebRequest \"http://127.0.0.1:4040/inspect/http\" -UseBasicParsing -ErrorAction Stop; Write-Host \"Inspect: $\\($r.StatusCode\\)\" } catch { Write-Host \"Not on 4040\" })",
       "PowerShell($r = Invoke-WebRequest \"http://127.0.0.1:4040/api/requests/http?limit=50\" -UseBasicParsing; $data = $r.Content | ConvertFrom-Json; Write-Host \"Count: $\\($data.requests.Count\\)\"; $data.requests | ForEach-Object { \"$\\($_.request.method\\) $\\($_.request.uri\\) -> $\\($_.response.status_code\\) at $\\($_.start\\)\" } | Select-Object -First 20)",
       "PowerShell($r = Invoke-WebRequest \"http://127.0.0.1:4040/api/requests/http?limit=100\" -UseBasicParsing; $reqs = \\($r.Content | ConvertFrom-Json\\).requests; Write-Host \"Total: $\\($reqs.Count\\)\"; $reqs | ForEach-Object { $ua = ''; if \\($_.request.headers.'User-Agent'\\) { $ua = $_.request.headers.'User-Agent'[0].Substring\\(0, [Math]::Min\\(40, $_.request.headers.'User-Agent'[0].Length\\)\\) }; \"$\\($_.start\\) $\\($_.request.method\\) $\\($_.request.uri\\) -> $\\($_.response.status_code\\) UA=$ua\" })",
-      "PowerShell($conf = Invoke-WebRequest \"http://127.0.0.1:4040/api/tunnels\" -UseBasicParsing; \\($conf.Content | ConvertFrom-Json\\) | ConvertTo-Json -Depth 6 | Select-String -Pattern \"addr|verify|inspect|public_url\" | Select-Object -First 10)"
+      "PowerShell($conf = Invoke-WebRequest \"http://127.0.0.1:4040/api/tunnels\" -UseBasicParsing; \\($conf.Content | ConvertFrom-Json\\) | ConvertTo-Json -Depth 6 | Select-String -Pattern \"addr|verify|inspect|public_url\" | Select-Object -First 10)",
+      "Bash(python)"
     ],
     "additionalDirectories": [
       "C:\\Users\\colin\\AppData\\Roaming\\Microsoft\\UserSecrets\\platformplatform-f817f2a1-ac57-4756-aef2-a57ca864bbd3"
