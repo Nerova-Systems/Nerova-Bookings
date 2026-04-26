@@ -65,7 +65,8 @@
       "PowerShell($tokenLine = Select-String -Path \"C:\\\\Users\\\\colin\\\\dev\\\\NerovaBookings\\\\.workspace\\\\developer-cli\\\\aspire-apphost.log\" -Pattern \"login\\\\?t=\" | Select-Object -Last 1; if \\($tokenLine\\) { Write-Host $tokenLine.Line })",
       "PowerShell(docker exec -e PGPASSWORD='5EkB.7T5yfkN}y~D' postgres-78db10bb psql -U postgres -d account -c \"SELECT s.id, t.name, jsonb_array_length\\(s.payment_transactions\\) as txn_count, s.payment_transactions FROM subscriptions s JOIN tenants t ON s.tenant_id = t.id WHERE t.name = 'Nerova Systems';\")",
       "PowerShell(docker exec -e PGPASSWORD='5EkB.7T5yfkN}y~D' postgres-78db10bb psql -U postgres -d account -c \"SELECT s.id, t.name, t.id as tenant_id, s.status, s.plan, s.scheduled_plan, s.pay_fast_token IS NOT NULL as has_token, s.current_period_end, jsonb_array_length\\(s.payment_transactions\\) as txn_count FROM subscriptions s JOIN tenants t ON s.tenant_id = t.id ORDER BY s.created_at DESC;\")",
-      "PowerShell(docker exec -e PGPASSWORD='5EkB.7T5yfkN}y~D' postgres-78db10bb psql -U postgres -d account -c \"SELECT id, jsonb_array_length\\(payment_transactions\\) as count, payment_transactions FROM subscriptions WHERE id = 'sub_01KQ4MAQNJEF1PAVS1DPBPN5RW';\")"
+      "PowerShell(docker exec -e PGPASSWORD='5EkB.7T5yfkN}y~D' postgres-78db10bb psql -U postgres -d account -c \"SELECT id, jsonb_array_length\\(payment_transactions\\) as count, payment_transactions FROM subscriptions WHERE id = 'sub_01KQ4MAQNJEF1PAVS1DPBPN5RW';\")",
+      "PowerShell($dashUrl = \\(Select-String -Path \"C:\\\\Users\\\\colin\\\\dev\\\\NerovaBookings\\\\.workspace\\\\developer-cli\\\\aspire-apphost.log\" -Pattern \"login\\\\?t=\" | Select-Object -Last 1\\).Line; Write-Host $dashUrl)"
     ],
     "additionalDirectories": [
       "C:\\Users\\colin\\AppData\\Roaming\\Microsoft\\UserSecrets\\platformplatform-f817f2a1-ac57-4756-aef2-a57ca864bbd3"
