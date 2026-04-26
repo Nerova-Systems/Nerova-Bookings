@@ -45,6 +45,34 @@
         <link href="/favicon.ico" rel="icon" type="image/x-icon" />
         <link href="/apple-touch-icon.png" rel="apple-touch-icon" sizes="180x180" />
         <link rel="manifest" href="/manifest.json" />
+        <script src="https://sandbox.payfast.co.za/onsite/engine.js" nonce="{{cspNonce}}"></script>
+        <style nonce="{{cspNonce}}">
+            /* PayFast lightbox: render the engine.js-injected container as a centered fullscreen modal.
+               The engine.js library appends #payfast_div_container to <body> with no positioning, so it
+               flows below the app. These rules give it the modal overlay behavior users expect. */
+            #payfast_div_container {
+                position: fixed !important;
+                inset: 0 !important;
+                z-index: 2147483647 !important;
+                background: rgba(0, 0, 0, 0.6) !important;
+                display: flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+                width: 100vw !important;
+                height: 100vh !important;
+                overflow: auto !important;
+            }
+            #payfast_div_container iframe {
+                width: min(420px, 100vw) !important;
+                height: min(640px, 100vh) !important;
+                max-width: 100vw !important;
+                max-height: 100vh !important;
+                border: 0 !important;
+                border-radius: 8px !important;
+                box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5) !important;
+                background: #fff !important;
+            }
+        </style>
     </head>
     <body id="main">
         <div id="root"></div>

@@ -38,6 +38,27 @@ public static class PayFastSignature
         return Convert.ToHexString(hash).ToLowerInvariant();
     }
 
+    /// <summary>
+    ///     Verifies an inbound ITN signature. PayFast computes the ITN signature over the form fields
+    ///     in the order they appear in the request body (not alphabetical, not the onsite canonical
+    ///     order). The signature field itself is excluded. PHP empty/trim semantics apply.
+    /// </summary>
+    public static string GenerateForItn(IEnumerable<KeyValuePair<string, string>> orderedFields, string passphrase)
+    {
+        var parts = new List<string>();
+        foreach (var (key, value) in orderedFields)
+        {
+            if (key == "signature") continue;
+            if (string.IsNullOrWhiteSpace(value)) continue;
+            parts.Add($"{key}={WebUtility.UrlEncode(value.Trim())}");
+        }
+        parts.Add($"passphrase={WebUtility.UrlEncode(passphrase.Trim())}");
+
+        var queryString = string.Join("&", parts);
+        var hash = MD5.HashData(Encoding.UTF8.GetBytes(queryString));
+        return Convert.ToHexString(hash).ToLowerInvariant();
+    }
+
     public static string GenerateApiSignature(string merchantId, string passphrase, string timestamp)
     {
         var parameters = new SortedDictionary<string, string>

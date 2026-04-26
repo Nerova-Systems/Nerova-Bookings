@@ -190,6 +190,15 @@ public class RunCommand : Command
             {
                 ProcessHelper.StartProcess($"taskkill /F /IM {processName}.exe", redirectOutput: true, exitOnError: false);
             }
+
+            // Kill any orphan cmd.exe that still holds the apphost log file open. When `dotnet run` is
+            // started via `cmd /c "... > apphost.log 2>&1"`, killing dotnet leaves the parent cmd alive
+            // with the log file still open, which causes the next `pp restart` to fail to delete the log.
+            ProcessHelper.StartProcess(
+                """powershell -NoProfile -Command "Get-CimInstance Win32_Process -Filter \"Name='cmd.exe'\" | Where-Object { $_.CommandLine -like '*aspire-apphost.log*' } | ForEach-Object { Stop-Process -Id $_.ProcessId -Force -ErrorAction SilentlyContinue }" """,
+                redirectOutput: true,
+                exitOnError: false
+            );
         }
         else
         {

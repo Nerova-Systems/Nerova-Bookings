@@ -130,11 +130,7 @@ public sealed class HandlePayFastItnHandler(
         var receivedSignature = fields.GetValueOrDefault("signature");
         if (receivedSignature is null) return false;
 
-        var parametersForSigning = new SortedDictionary<string, string>(
-            fields.Where(kvp => kvp.Key != "signature").ToDictionary(kvp => kvp.Key, kvp => kvp.Value)
-        );
-
-        var expectedSignature = PayFastSignature.Generate(parametersForSigning, passphrase);
+        var expectedSignature = PayFastSignature.GenerateForItn(fields, passphrase);
         return string.Equals(expectedSignature, receivedSignature, StringComparison.OrdinalIgnoreCase);
     }
 }

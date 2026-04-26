@@ -1,3 +1,4 @@
+using System.Globalization;
 using Account.Features.Subscriptions.Domain;
 using Account.Features.Subscriptions.Shared;
 using Account.Features.Users.Domain;
@@ -72,14 +73,14 @@ public sealed class InitiateSubscriptionHandler(
             // settings.Sandbox is false and the real user email is used.
             { "email_address", settings.Sandbox ? "buyer@nerova.test" : (executionContext.UserInfo.Email ?? "") },
             { "m_payment_id", Guid.NewGuid().ToString("N") },
-            { "amount", amount.ToString("F2") },
+            { "amount", amount.ToString("F2", CultureInfo.InvariantCulture) },
             { "item_name", $"Nerova Bookings {command.Plan} Plan" },
             { "custom_str1", subscription.Id.ToString() },
             { "custom_str2", executionContext.TenantId!.ToString()! },
             { "custom_str3", command.Plan.ToString() },
             { "subscription_type", "1" },
-            { "billing_date", now.ToString("yyyy-MM-") + billingDay.ToString("D2") },
-            { "recurring_amount", amount.ToString("F2") },
+            { "billing_date", now.ToString("yyyy-MM-", CultureInfo.InvariantCulture) + billingDay.ToString("D2", CultureInfo.InvariantCulture) },
+            { "recurring_amount", amount.ToString("F2", CultureInfo.InvariantCulture) },
             { "frequency", "3" },
             { "cycles", "0" }
         };
