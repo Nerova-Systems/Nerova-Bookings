@@ -59,15 +59,22 @@ public static class PayFastSignature
         return Convert.ToHexString(hash).ToLowerInvariant();
     }
 
-    public static string GenerateApiSignature(string merchantId, string passphrase, string timestamp)
+    /// <summary>
+    ///     Signature for PayFast Recurring Billing API (e.g. /subscriptions/{token}/adhoc, /cancel).
+    ///     PayFast expects all headers (merchant-id, version, timestamp) AND all body parameters
+    ///     (e.g. amount, item_name) sorted alphabetically by key, urlencoded, joined with '&', with
+    ///     '&passphrase=...' appended, then MD5-hashed. Empty values are skipped.
+    /// </summary>
+    public static string GenerateApiSignature(IDictionary<string, string> headersAndBody, string passphrase)
     {
-        var parameters = new SortedDictionary<string, string>
-        {
-            { "merchant-id", merchantId },
-            { "passphrase", passphrase },
-            { "timestamp", timestamp }
-        };
-        var queryString = string.Join("&", parameters.Select(p => $"{p.Key}={WebUtility.UrlEncode(p.Value)}"));
+        var parts = headersAndBody
+            .Where(kvp => !string.IsNullOrWhiteSpace(kvp.Value))
+            .OrderBy(kvp => kvp.Key, StringComparer.Ordinal)
+            .Select(kvp => $"{kvp.Key}={WebUtility.UrlEncode(kvp.Value.Trim())}")
+            .ToList();
+        parts.Add($"passphrase={WebUtility.UrlEncode(passphrase.Trim())}");
+
+        var queryString = string.Join("&", parts);
         var hash = MD5.HashData(Encoding.UTF8.GetBytes(queryString));
         return Convert.ToHexString(hash).ToLowerInvariant();
     }
