@@ -98,8 +98,9 @@ public sealed class ReactivateSubscriptionHandler(
             { "cancel_url", settings.CancelUrl },
             { "notify_url", settings.NotifyUrl },
             { "name_first", executionContext.UserInfo.FirstName ?? "Customer" },
-            // Sandbox PayFast rejects when buyer email == merchant email; use a test buyer in sandbox
-            { "email_address", settings.Sandbox ? "buyer@nerova.test" : (executionContext.UserInfo.Email ?? "") },
+            // Sandbox PayFast rejects when buyer email == merchant email; use a per-tenant test buyer
+            // in sandbox so each tenant shows up as a distinct party in the PayFast dashboard.
+            { "email_address", settings.Sandbox ? $"buyer-{executionContext.TenantId}@nerova.test" : (executionContext.UserInfo.Email ?? "") },
             { "m_payment_id", Guid.NewGuid().ToString("N") },
             { "amount", reactivateAmount.ToString("F2", CultureInfo.InvariantCulture) },
             { "item_name", $"Nerova Bookings {reactivatePlan} Plan" },

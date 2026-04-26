@@ -68,10 +68,11 @@ public sealed class InitiateSubscriptionHandler(
             { "notify_url", settings.NotifyUrl },
             { "name_first", executionContext.UserInfo.FirstName ?? "Customer" },
             // In PayFast sandbox, the buyer's email_address cannot equal the merchant account email
-            // (the sandbox account is registered with the developer's email). Use a neutral test buyer
-            // email so signature verification + payment flow can be exercised end-to-end. In production,
-            // settings.Sandbox is false and the real user email is used.
-            { "email_address", settings.Sandbox ? "buyer@nerova.test" : (executionContext.UserInfo.Email ?? "") },
+            // (the sandbox account is registered with the developer's email). Use a per-tenant test
+            // buyer email so each tenant shows up as a distinct party in the PayFast dashboard rather
+            // than being merged under one shared "Test Buyer". In production, settings.Sandbox is
+            // false and the real user email is used.
+            { "email_address", settings.Sandbox ? $"buyer-{executionContext.TenantId}@nerova.test" : (executionContext.UserInfo.Email ?? "") },
             { "m_payment_id", Guid.NewGuid().ToString("N") },
             { "amount", amount.ToString("F2", CultureInfo.InvariantCulture) },
             { "item_name", $"Nerova Bookings {command.Plan} Plan" },

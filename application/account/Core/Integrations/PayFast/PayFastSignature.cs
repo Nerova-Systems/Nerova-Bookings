@@ -61,18 +61,21 @@ public static class PayFastSignature
 
     /// <summary>
     ///     Signature for PayFast Recurring Billing API (e.g. /subscriptions/{token}/adhoc, /cancel).
-    ///     PayFast expects all headers (merchant-id, version, timestamp) AND all body parameters
-    ///     (e.g. amount, item_name) sorted alphabetically by key, urlencoded, joined with '&', with
-    ///     '&passphrase=...' appended, then MD5-hashed. Empty values are skipped.
+    ///     PayFast adds the passphrase as a regular field, sorts everything alphabetically (including
+    ///     passphrase, which lands between 'merchant-id' and 'timestamp'), then urlencodes and joins
+    ///     with '&'. This differs from the onsite signature where passphrase is always appended last.
     /// </summary>
     public static string GenerateApiSignature(IDictionary<string, string> headersAndBody, string passphrase)
     {
-        var parts = headersAndBody
+        var fields = new SortedDictionary<string, string>(headersAndBody, StringComparer.Ordinal);
+        if (!string.IsNullOrWhiteSpace(passphrase))
+        {
+            fields["passphrase"] = passphrase;
+        }
+
+        var parts = fields
             .Where(kvp => !string.IsNullOrWhiteSpace(kvp.Value))
-            .OrderBy(kvp => kvp.Key, StringComparer.Ordinal)
-            .Select(kvp => $"{kvp.Key}={WebUtility.UrlEncode(kvp.Value.Trim())}")
-            .ToList();
-        parts.Add($"passphrase={WebUtility.UrlEncode(passphrase.Trim())}");
+            .Select(kvp => $"{kvp.Key}={WebUtility.UrlEncode(kvp.Value.Trim())}");
 
         var queryString = string.Join("&", parts);
         var hash = MD5.HashData(Encoding.UTF8.GetBytes(queryString));
