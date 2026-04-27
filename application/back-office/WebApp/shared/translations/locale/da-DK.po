@@ -23,8 +23,17 @@ msgstr "{diffDays, plural, one {Om # dag} other {Om # dage}}"
 msgid "Access denied"
 msgstr "Adgang nægtet"
 
+msgid "Active"
+msgstr ""
+
+msgid "Adjust the search and try again."
+msgstr ""
+
 msgid "An unexpected error occurred while processing your request."
 msgstr "Der opstod en uventet fejl ved behandlingen."
+
+msgid "Back Office"
+msgstr ""
 
 msgid "Breadcrumb"
 msgstr "Brødkrumme"
@@ -50,11 +59,17 @@ msgstr "Kontakt din administrator, hvis du mener, dette er en fejl."
 msgid "Create <0>{search}</0>"
 msgstr "Opret <0>{search}</0>"
 
+msgid "Created"
+msgstr ""
+
 msgid "Dashboard"
 msgstr "Dashboard"
 
 msgid "Decrease"
 msgstr "Formindsk"
+
+msgid "Deleted"
+msgstr ""
 
 msgid "Drop files here, or click to browse"
 msgstr ""
@@ -74,6 +89,9 @@ msgstr "Skjul detaljer"
 msgid "Increase"
 msgstr "Forøg"
 
+msgid "Last seen"
+msgstr ""
+
 msgid "Leave"
 msgstr "Forlad"
 
@@ -83,17 +101,23 @@ msgstr ""
 msgid "Log out"
 msgstr "Log ud"
 
+msgid "Lookup users across tenants from the Back-office catalog."
+msgstr ""
+
+msgid "Lookup users by name, email, or tenant."
+msgstr ""
+
 msgid "Main content"
 msgstr "Hovedindhold"
 
 msgid "Main navigation"
 msgstr "Hovednavigation"
 
-msgid "Manage tenants, view system data, see exceptions, and perform various tasks for operational and support teams."
-msgstr "Administrer lejere, se systemdata, se undtagelser og udfør forskellige opgaver for drifts- og supportteams."
-
 msgid "Mobile navigation menu"
 msgstr "Mobilnavigationsmenu"
+
+msgid "Modified"
+msgstr ""
 
 msgid "More pages"
 msgstr "Flere sider"
@@ -104,8 +128,23 @@ msgstr "Navigation"
 msgid "Next"
 msgstr "Næste"
 
+msgid "No matching tenants"
+msgstr ""
+
+msgid "No matching users"
+msgstr ""
+
 msgid "No results found"
 msgstr "Ingen resultater fundet"
+
+msgid "No tenants yet"
+msgstr ""
+
+msgid "No users in catalog"
+msgstr ""
+
+msgid "No users yet"
+msgstr ""
 
 msgid "Open calendar"
 msgstr ""
@@ -113,11 +152,24 @@ msgstr ""
 msgid "Open navigation menu"
 msgstr "Åbn navigationsmenu"
 
+msgid "Operate tenants and users from the synchronized platform catalog."
+msgstr ""
+
+#. placeholder {0}: tenant.id
+msgid "Operational catalog details for tenant {0}."
+msgstr ""
+
 msgid "Page not found"
 msgstr "Siden blev ikke fundet"
 
 msgid "Pagination"
 msgstr "Paginering"
+
+msgid "Pending"
+msgstr ""
+
+msgid "Plan"
+msgstr ""
 
 msgid "PlatformPlatform logo"
 msgstr "PlatformPlatform logo"
@@ -133,6 +185,27 @@ msgstr "Forrige"
 
 msgid "Resize sidebar"
 msgstr "Ændr bredde på sidepanel"
+
+msgid "Restore tenant"
+msgstr ""
+
+msgid "Review catalog state and restore deleted tenants."
+msgstr ""
+
+msgid "Review the operational tenant catalog synchronized from Account."
+msgstr ""
+
+msgid "Role"
+msgstr ""
+
+msgid "Search"
+msgstr ""
+
+msgid "Search tenants"
+msgstr ""
+
+msgid "Search users"
+msgstr ""
 
 msgid "Select dates"
 msgstr "Vælg datoer"
@@ -152,11 +225,41 @@ msgstr "Spring til hovedindhold"
 msgid "Something went wrong"
 msgstr "Noget gik galt"
 
+msgid "State"
+msgstr ""
+
+msgid "Status"
+msgstr ""
+
 msgid "Stay"
 msgstr "Bliv"
 
+msgid "Tenant"
+msgstr ""
+
+msgid "Tenant details"
+msgstr ""
+
+msgid "Tenant not found"
+msgstr ""
+
+msgid "Tenant restore requested"
+msgstr ""
+
+msgid "Tenants"
+msgstr ""
+
+msgid "The catalog does not contain this tenant."
+msgstr ""
+
 msgid "The page you are looking for does not exist or was moved."
 msgstr "Siden du leder efter findes ikke eller er blevet flyttet."
+
+msgid "The tenant catalog will populate as Account publishes catalog events."
+msgstr ""
+
+msgid "The user catalog will populate as Account publishes catalog events."
+msgstr ""
 
 msgid "Today"
 msgstr "I dag"
@@ -173,8 +276,17 @@ msgstr "Prøv igen"
 msgid "Unsaved changes"
 msgstr "Ugemte ændringer"
 
-msgid "Welcome to the Back Office"
-msgstr "Velkommen til Back Office"
+msgid "User"
+msgstr ""
+
+msgid "User rows will appear after Account publishes user catalog events."
+msgstr ""
+
+msgid "Users"
+msgstr ""
+
+msgid "Users currently known for this tenant."
+msgstr ""
 
 msgid "Yesterday"
 msgstr "I går"

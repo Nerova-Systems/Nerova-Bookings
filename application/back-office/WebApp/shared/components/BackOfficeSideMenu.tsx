@@ -13,7 +13,7 @@ import {
   SidebarRail
 } from "@repo/ui/components/Sidebar";
 import { Link as RouterLink, useRouter } from "@tanstack/react-router";
-import { BoxIcon } from "lucide-react";
+import { BoxIcon, Building2Icon, UsersIcon } from "lucide-react";
 
 import logoMark from "@/shared/images/logo-mark.svg";
 
@@ -45,6 +45,34 @@ export function BackOfficeSideMenu() {
                       <BoxIcon />
                       <span>
                         <Trans>Dashboard</Trans>
+                      </span>
+                    </RouterLink>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <SidebarMenuButton
+                    asChild={true}
+                    isActive={currentPath.startsWith("/back-office/tenants")}
+                    tooltip={t`Tenants`}
+                  >
+                    <RouterLink to="/back-office/tenants">
+                      <Building2Icon />
+                      <span>
+                        <Trans>Tenants</Trans>
+                      </span>
+                    </RouterLink>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <SidebarMenuButton
+                    asChild={true}
+                    isActive={currentPath.startsWith("/back-office/users")}
+                    tooltip={t`Users`}
+                  >
+                    <RouterLink to="/back-office/users">
+                      <UsersIcon />
+                      <span>
+                        <Trans>Users</Trans>
                       </span>
                     </RouterLink>
                   </SidebarMenuButton>

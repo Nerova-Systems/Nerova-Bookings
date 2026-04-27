@@ -15,6 +15,7 @@ using SharedKernel.Authentication.TokenGeneration;
 using SharedKernel.Authentication.TokenSigning;
 using SharedKernel.DomainEvents;
 using SharedKernel.Integrations.Email;
+using SharedKernel.Outbox;
 using SharedKernel.Persistence;
 using SharedKernel.PipelineBehaviors;
 using SharedKernel.Platform;
@@ -75,6 +76,7 @@ public static class SharedDependencyConfiguration
                 .AddEmailClient()
                 .AddMediatRPipelineBehaviors()
                 .RegisterMediatRRequest(assemblies)
+                .RegisterOutboxMessageHandlers(assemblies)
                 .RegisterRepositories(assemblies);
         }
 
@@ -127,6 +129,7 @@ public static class SharedDependencyConfiguration
         {
             return services
                 .AddScoped<IUnitOfWork, UnitOfWork>(provider => new UnitOfWork(provider.GetRequiredService<T>()))
+                .AddScoped<IOutboxPublisher, OutboxPublisher>(provider => new OutboxPublisher(provider.GetRequiredService<T>(), provider.GetRequiredService<TimeProvider>()))
                 .AddScoped<IDomainEventCollector, DomainEventCollector>(provider =>
                     new DomainEventCollector(provider.GetRequiredService<T>())
                 );
@@ -191,6 +194,17 @@ public static class SharedDependencyConfiguration
                              type.BaseType.GetGenericTypeDefinition() == typeof(SoftDeletableRepositoryBase<,>))
                         ), false
                     )
+                    .AsImplementedInterfaces()
+                    .WithScopedLifetime()
+                );
+        }
+
+        public IServiceCollection RegisterOutboxMessageHandlers(Assembly[] assemblies)
+        {
+            return services
+                .Scan(scan => scan
+                    .FromAssemblies(assemblies)
+                    .AddClasses(classes => classes.AssignableTo<IOutboxMessageHandler>())
                     .AsImplementedInterfaces()
                     .WithScopedLifetime()
                 );

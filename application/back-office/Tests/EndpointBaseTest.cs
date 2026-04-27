@@ -132,6 +132,10 @@ public abstract class EndpointBaseTest<TContext> : IDisposable where TContext : 
         AuthenticatedMemberHttpClient = _webApplicationFactory.CreateClient();
         AuthenticatedMemberHttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", memberAccessToken);
 
+        var sysOpAccessToken = AccessTokenGenerator.Generate(DatabaseSeeder.SysOp);
+        AuthenticatedSysOpHttpClient = _webApplicationFactory.CreateClient();
+        AuthenticatedSysOpHttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", sysOpAccessToken);
+
         // Set the environment variable to bypass antiforgery validation on the server. ASP.NET uses a cryptographic
         // double-submit pattern that encrypts the user's ClaimUid in the token, which is complex to replicate in tests
         Environment.SetEnvironmentVariable("BypassAntiforgeryValidation", "true");
@@ -156,6 +160,8 @@ public abstract class EndpointBaseTest<TContext> : IDisposable where TContext : 
     protected HttpClient AuthenticatedOwnerHttpClient { get; }
 
     protected HttpClient AuthenticatedMemberHttpClient { get; }
+
+    protected HttpClient AuthenticatedSysOpHttpClient { get; }
 
     public void Dispose()
     {

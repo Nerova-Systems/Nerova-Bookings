@@ -97,7 +97,9 @@ public sealed class ReactivateSubscriptionHandler(
             { "return_url", settings.ReturnUrl },
             { "cancel_url", settings.CancelUrl },
             { "notify_url", settings.NotifyUrl },
+            // Buyer name: use tenant name as surname for dashboard distinction (see InitiateSubscription).
             { "name_first", executionContext.UserInfo.FirstName ?? "Customer" },
+            { "name_last", executionContext.UserInfo.TenantName ?? executionContext.UserInfo.LastName ?? "" },
             // Sandbox PayFast rejects when buyer email == merchant email; use a per-tenant test buyer
             // in sandbox so each tenant shows up as a distinct party in the PayFast dashboard.
             { "email_address", settings.Sandbox ? $"buyer-{executionContext.TenantId}@nerova.test" : (executionContext.UserInfo.Email ?? "") },

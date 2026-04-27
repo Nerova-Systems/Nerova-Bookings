@@ -69,7 +69,11 @@ public sealed class InitiateSubscriptionHandler(
             { "return_url", settings.ReturnUrl },
             { "cancel_url", settings.CancelUrl },
             { "notify_url", settings.NotifyUrl },
+            // Buyer name shown in PayFast dashboard. We use the tenant name as the surname so the
+            // dashboard makes the organisation immediately identifiable (e.g. "Colin / Nerova Test")
+            // instead of every test charge being lumped under a generic "Test Buyer".
             { "name_first", executionContext.UserInfo.FirstName ?? "Customer" },
+            { "name_last", executionContext.UserInfo.TenantName ?? executionContext.UserInfo.LastName ?? "" },
             // In PayFast sandbox, the buyer's email_address cannot equal the merchant account email
             // (the sandbox account is registered with the developer's email). Use a per-tenant test
             // buyer email so each tenant shows up as a distinct party in the PayFast dashboard rather

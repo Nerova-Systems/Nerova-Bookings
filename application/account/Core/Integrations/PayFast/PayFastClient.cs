@@ -85,15 +85,20 @@ public sealed class PayFastClient(HttpClient httpClient, IOptions<PayFastSetting
 
             // PayFast returns HTTP 200 even when the charge itself was declined or refused. The actual
             // outcome lives inside the JSON envelope: { "code": 200, "status": "success",
-            // "data": { "response": true|false, "message": "..." } }. Treat anything other than
-            // data.response === true as a hard failure so the caller does not apply plan/state changes.
+            // "data": { "response": true|"true"|false|"false", "message": "..." } }. Note PayFast
+            // serialises the response field as a STRING ("true"/"false") not a JSON boolean — accept
+            // both forms.
             try
             {
                 using var doc = JsonDocument.Parse(rawBody);
                 var data = doc.RootElement.TryGetProperty("data", out var d) ? d : default;
-                var charged = data.ValueKind == JsonValueKind.Object &&
-                              data.TryGetProperty("response", out var resp) &&
-                              resp.ValueKind == JsonValueKind.True;
+                var charged = false;
+                if (data.ValueKind == JsonValueKind.Object && data.TryGetProperty("response", out var resp))
+                {
+                    charged = resp.ValueKind == JsonValueKind.True ||
+                              (resp.ValueKind == JsonValueKind.String &&
+                               string.Equals(resp.GetString(), "true", StringComparison.OrdinalIgnoreCase));
+                }
 
                 if (!charged)
                 {

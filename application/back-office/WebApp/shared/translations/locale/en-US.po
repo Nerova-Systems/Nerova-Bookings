@@ -23,8 +23,17 @@ msgstr "{diffDays, plural, one {In # day} other {In # days}}"
 msgid "Access denied"
 msgstr "Access denied"
 
+msgid "Active"
+msgstr "Active"
+
+msgid "Adjust the search and try again."
+msgstr "Adjust the search and try again."
+
 msgid "An unexpected error occurred while processing your request."
 msgstr "An unexpected error occurred while processing your request."
+
+msgid "Back Office"
+msgstr "Back Office"
 
 msgid "Breadcrumb"
 msgstr "Breadcrumb"
@@ -50,11 +59,17 @@ msgstr "Contact your administrator if you believe this is a mistake."
 msgid "Create <0>{search}</0>"
 msgstr "Create <0>{search}</0>"
 
+msgid "Created"
+msgstr "Created"
+
 msgid "Dashboard"
 msgstr "Dashboard"
 
 msgid "Decrease"
 msgstr "Decrease"
+
+msgid "Deleted"
+msgstr "Deleted"
 
 msgid "Drop files here, or click to browse"
 msgstr "Drop files here, or click to browse"
@@ -74,6 +89,9 @@ msgstr "Hide details"
 msgid "Increase"
 msgstr "Increase"
 
+msgid "Last seen"
+msgstr "Last seen"
+
 msgid "Leave"
 msgstr "Leave"
 
@@ -83,17 +101,23 @@ msgstr "Loading"
 msgid "Log out"
 msgstr "Log out"
 
+msgid "Lookup users across tenants from the Back-office catalog."
+msgstr "Lookup users across tenants from the Back-office catalog."
+
+msgid "Lookup users by name, email, or tenant."
+msgstr "Lookup users by name, email, or tenant."
+
 msgid "Main content"
 msgstr "Main content"
 
 msgid "Main navigation"
 msgstr "Main navigation"
 
-msgid "Manage tenants, view system data, see exceptions, and perform various tasks for operational and support teams."
-msgstr "Manage tenants, view system data, see exceptions, and perform various tasks for operational and support teams."
-
 msgid "Mobile navigation menu"
 msgstr "Mobile navigation menu"
+
+msgid "Modified"
+msgstr "Modified"
 
 msgid "More pages"
 msgstr "More pages"
@@ -104,8 +128,23 @@ msgstr "Navigation"
 msgid "Next"
 msgstr "Next"
 
+msgid "No matching tenants"
+msgstr "No matching tenants"
+
+msgid "No matching users"
+msgstr "No matching users"
+
 msgid "No results found"
 msgstr "No results found"
+
+msgid "No tenants yet"
+msgstr "No tenants yet"
+
+msgid "No users in catalog"
+msgstr "No users in catalog"
+
+msgid "No users yet"
+msgstr "No users yet"
 
 msgid "Open calendar"
 msgstr "Open calendar"
@@ -113,11 +152,24 @@ msgstr "Open calendar"
 msgid "Open navigation menu"
 msgstr "Open navigation menu"
 
+msgid "Operate tenants and users from the synchronized platform catalog."
+msgstr "Operate tenants and users from the synchronized platform catalog."
+
+#. placeholder {0}: tenant.id
+msgid "Operational catalog details for tenant {0}."
+msgstr "Operational catalog details for tenant {0}."
+
 msgid "Page not found"
 msgstr "Page not found"
 
 msgid "Pagination"
 msgstr "Pagination"
+
+msgid "Pending"
+msgstr "Pending"
+
+msgid "Plan"
+msgstr "Plan"
 
 msgid "PlatformPlatform logo"
 msgstr "PlatformPlatform logo"
@@ -133,6 +185,27 @@ msgstr "Previous"
 
 msgid "Resize sidebar"
 msgstr "Resize sidebar"
+
+msgid "Restore tenant"
+msgstr "Restore tenant"
+
+msgid "Review catalog state and restore deleted tenants."
+msgstr "Review catalog state and restore deleted tenants."
+
+msgid "Review the operational tenant catalog synchronized from Account."
+msgstr "Review the operational tenant catalog synchronized from Account."
+
+msgid "Role"
+msgstr "Role"
+
+msgid "Search"
+msgstr "Search"
+
+msgid "Search tenants"
+msgstr "Search tenants"
+
+msgid "Search users"
+msgstr "Search users"
 
 msgid "Select dates"
 msgstr "Select dates"
@@ -152,11 +225,41 @@ msgstr "Skip to main content"
 msgid "Something went wrong"
 msgstr "Something went wrong"
 
+msgid "State"
+msgstr "State"
+
+msgid "Status"
+msgstr "Status"
+
 msgid "Stay"
 msgstr "Stay"
 
+msgid "Tenant"
+msgstr "Tenant"
+
+msgid "Tenant details"
+msgstr "Tenant details"
+
+msgid "Tenant not found"
+msgstr "Tenant not found"
+
+msgid "Tenant restore requested"
+msgstr "Tenant restore requested"
+
+msgid "Tenants"
+msgstr "Tenants"
+
+msgid "The catalog does not contain this tenant."
+msgstr "The catalog does not contain this tenant."
+
 msgid "The page you are looking for does not exist or was moved."
 msgstr "The page you are looking for does not exist or was moved."
+
+msgid "The tenant catalog will populate as Account publishes catalog events."
+msgstr "The tenant catalog will populate as Account publishes catalog events."
+
+msgid "The user catalog will populate as Account publishes catalog events."
+msgstr "The user catalog will populate as Account publishes catalog events."
 
 msgid "Today"
 msgstr "Today"
@@ -173,8 +276,17 @@ msgstr "Try again"
 msgid "Unsaved changes"
 msgstr "Unsaved changes"
 
-msgid "Welcome to the Back Office"
-msgstr "Welcome to the Back Office"
+msgid "User"
+msgstr "User"
+
+msgid "User rows will appear after Account publishes user catalog events."
+msgstr "User rows will appear after Account publishes user catalog events."
+
+msgid "Users"
+msgstr "Users"
+
+msgid "Users currently known for this tenant."
+msgstr "Users currently known for this tenant."
 
 msgid "Yesterday"
 msgstr "Yesterday"

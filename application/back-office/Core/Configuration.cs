@@ -22,6 +22,13 @@ public static class Configuration
     {
         public IServiceCollection AddBackOfficeServices()
         {
+            services.AddHttpClient("AccountInternal", client =>
+                {
+                    client.BaseAddress = new Uri(Environment.GetEnvironmentVariable("ACCOUNT_API_URL") ?? "https://localhost:9100");
+                    client.Timeout = TimeSpan.FromSeconds(30);
+                }
+            );
+
             return services.AddSharedServices<BackOfficeDbContext>([Assembly]);
         }
     }

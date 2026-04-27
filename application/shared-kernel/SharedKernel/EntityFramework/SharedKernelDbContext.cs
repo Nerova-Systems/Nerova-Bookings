@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using SharedKernel.Domain;
 using SharedKernel.ExecutionContext;
+using SharedKernel.Outbox;
 
 namespace SharedKernel.EntityFramework;
 
@@ -17,6 +18,8 @@ public abstract class SharedKernelDbContext<TContext>(DbContextOptions<TContext>
     private readonly HashSet<object> _entitiesMarkedForPurge = [];
 
     protected TenantId? TenantId => executionContext.TenantId;
+
+    public DbSet<OutboxMessage> OutboxMessages => Set<OutboxMessage>();
 
     void IPurgeTracker.MarkForPurge(object entity)
     {
@@ -42,6 +45,7 @@ public abstract class SharedKernelDbContext<TContext>(DbContextOptions<TContext>
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(TContext).Assembly);
+        ConfigureOutbox(modelBuilder);
 
         // Set pluralized table names for all aggregates
         foreach (var entityType in modelBuilder.Model.GetEntityTypes())
@@ -61,6 +65,18 @@ public abstract class SharedKernelDbContext<TContext>(DbContextOptions<TContext>
         ApplyNamedQueryFilters(modelBuilder);
 
         base.OnModelCreating(modelBuilder);
+    }
+
+    private static void ConfigureOutbox(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<OutboxMessage>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.Type).IsRequired();
+                entity.Property(e => e.Payload).IsRequired();
+                entity.HasIndex(e => new { e.ProcessedAt, e.NextAttemptAt, e.LockedUntilAt });
+            }
+        );
     }
 
     /// <summary>

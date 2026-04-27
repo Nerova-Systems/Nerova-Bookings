@@ -18,6 +18,8 @@ public sealed class SqliteInMemoryDbContextFactory<T> : IDisposable where T : Db
         _sqliteConnection.Open();
     }
 
+    public SqliteConnection Connection => _sqliteConnection;
+
     public void Dispose()
     {
         _sqliteConnection.Close();

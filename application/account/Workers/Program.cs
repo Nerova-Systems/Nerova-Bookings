@@ -3,6 +3,7 @@ using Account.Database;
 using Account.Features.Subscriptions.Jobs;
 using SharedKernel.Configuration;
 using SharedKernel.Database;
+using SharedKernel.Outbox;
 
 // Worker service is using WebApplication.CreateBuilder instead of Host.CreateDefaultBuilder to allow scaling to zero
 var builder = WebApplication.CreateBuilder(args);
@@ -16,6 +17,7 @@ builder
 builder.Services
     .AddWorkerServices()
     .AddAccountServices()
+    .AddHostedService<OutboxMessageProcessor<AccountDbContext>>()
     .AddHostedService<BillingJob>()
     .AddHostedService<TrialExpiryNotificationJob>();
 
