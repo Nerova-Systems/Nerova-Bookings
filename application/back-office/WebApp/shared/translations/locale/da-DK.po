@@ -13,6 +13,16 @@ msgstr ""
 "Plural-Forms: \n"
 "X-Generator: @lingui/cli\n"
 
+#. placeholder {0}: minutes % 60
+msgid "{hours}h {0}m"
+msgstr ""
+
+msgid "{minutes}m"
+msgstr ""
+
+msgid "{seconds}s"
+msgstr ""
+
 msgid "Access denied"
 msgstr "Adgang nægtet"
 
@@ -37,7 +47,16 @@ msgstr "Der opstod en uventet fejl ved behandlingen."
 msgid "Attempts"
 msgstr ""
 
+msgid "Available"
+msgstr ""
+
 msgid "Back Office"
+msgstr ""
+
+msgid "Broker status"
+msgstr ""
+
+msgid "Check outbox, inbox, and broker subscription health."
 msgstr ""
 
 msgid "Contact your administrator if you believe this is a mistake."
@@ -49,7 +68,19 @@ msgstr ""
 msgid "Dashboard"
 msgstr "Dashboard"
 
+msgid "Dead letters"
+msgstr ""
+
+msgid "Dead-lettered"
+msgstr ""
+
 msgid "Deleted"
+msgstr ""
+
+msgid "DLQ"
+msgstr ""
+
+msgid "Error"
 msgstr ""
 
 msgid "Go to home"
@@ -64,6 +95,15 @@ msgstr ""
 msgid "Last seen"
 msgstr ""
 
+msgid "Latest received"
+msgstr ""
+
+msgid "Legacy outbox"
+msgstr ""
+
+msgid "Locked"
+msgstr ""
+
 msgid "Log out"
 msgstr "Log ud"
 
@@ -76,10 +116,25 @@ msgstr ""
 msgid "Main navigation"
 msgstr "Hovednavigation"
 
+msgid "MassTransit inbox"
+msgstr ""
+
+msgid "MassTransit outbox"
+msgstr ""
+
 msgid "Message"
 msgstr ""
 
+msgid "Messaging"
+msgstr ""
+
+msgid "Messaging health"
+msgstr ""
+
 msgid "Modified"
+msgstr ""
+
+msgid "Monitor local outbox stores and Azure Service Bus catalog subscriptions."
 msgstr ""
 
 msgid "Monitor message delivery and retry failed work."
@@ -115,6 +170,12 @@ msgstr ""
 msgid "No users yet"
 msgstr ""
 
+msgid "None"
+msgstr ""
+
+msgid "Oldest pending"
+msgstr ""
+
 msgid "Operate tenants and users from the synchronized platform catalog."
 msgstr ""
 
@@ -131,10 +192,16 @@ msgstr ""
 msgid "Outbox messages will appear as platform events are enqueued."
 msgstr ""
 
+msgid "Overall status"
+msgstr ""
+
 msgid "Page not found"
 msgstr "Siden blev ikke fundet"
 
 msgid "Pending"
+msgstr ""
+
+msgid "Pending outbox"
 msgstr ""
 
 msgid "Plan"
@@ -149,6 +216,9 @@ msgstr "Tjek venligst URL'en eller vend tilbage til forsiden."
 msgid "Please try again or return to the home page."
 msgstr "Prøv venligst igen eller vend tilbage til forsiden."
 
+msgid "Processed"
+msgstr ""
+
 msgid "Restore tenant"
 msgstr ""
 
@@ -162,6 +232,12 @@ msgid "Review the operational tenant catalog synchronized from Account."
 msgstr ""
 
 msgid "Role"
+msgstr ""
+
+msgid "Rows"
+msgstr ""
+
+msgid "Scheduled"
 msgstr ""
 
 msgid "Search"
@@ -191,6 +267,9 @@ msgstr ""
 msgid "Status"
 msgstr ""
 
+msgid "Subscription"
+msgstr ""
+
 msgid "Tenant"
 msgstr ""
 
@@ -218,8 +297,17 @@ msgstr ""
 msgid "The user catalog will populate as Account publishes catalog events."
 msgstr ""
 
+msgid "Total"
+msgstr ""
+
+msgid "Transfer DLQ"
+msgstr ""
+
 msgid "Try again"
 msgstr "Prøv igen"
+
+msgid "Unavailable"
+msgstr ""
 
 msgid "User"
 msgstr ""
@@ -231,6 +319,9 @@ msgid "Users"
 msgstr ""
 
 msgid "Users currently known for this tenant."
+msgstr ""
+
+msgid "View outbox rows"
 msgstr ""
 
 msgid "You do not have permission to access this page."

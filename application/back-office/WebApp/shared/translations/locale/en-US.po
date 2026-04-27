@@ -13,6 +13,16 @@ msgstr ""
 "Language-Team: \n"
 "Plural-Forms: \n"
 
+#. placeholder {0}: minutes % 60
+msgid "{hours}h {0}m"
+msgstr "{hours}h {0}m"
+
+msgid "{minutes}m"
+msgstr "{minutes}m"
+
+msgid "{seconds}s"
+msgstr "{seconds}s"
+
 msgid "Access denied"
 msgstr "Access denied"
 
@@ -37,8 +47,17 @@ msgstr "An unexpected error occurred while processing your request."
 msgid "Attempts"
 msgstr "Attempts"
 
+msgid "Available"
+msgstr "Available"
+
 msgid "Back Office"
 msgstr "Back Office"
+
+msgid "Broker status"
+msgstr "Broker status"
+
+msgid "Check outbox, inbox, and broker subscription health."
+msgstr "Check outbox, inbox, and broker subscription health."
 
 msgid "Contact your administrator if you believe this is a mistake."
 msgstr "Contact your administrator if you believe this is a mistake."
@@ -49,8 +68,20 @@ msgstr "Created"
 msgid "Dashboard"
 msgstr "Dashboard"
 
+msgid "Dead letters"
+msgstr "Dead letters"
+
+msgid "Dead-lettered"
+msgstr "Dead-lettered"
+
 msgid "Deleted"
 msgstr "Deleted"
+
+msgid "DLQ"
+msgstr "DLQ"
+
+msgid "Error"
+msgstr "Error"
 
 msgid "Go to home"
 msgstr "Go to home"
@@ -64,6 +95,15 @@ msgstr "Last error"
 msgid "Last seen"
 msgstr "Last seen"
 
+msgid "Latest received"
+msgstr "Latest received"
+
+msgid "Legacy outbox"
+msgstr "Legacy outbox"
+
+msgid "Locked"
+msgstr "Locked"
+
 msgid "Log out"
 msgstr "Log out"
 
@@ -76,11 +116,26 @@ msgstr "Lookup users by name, email, or tenant."
 msgid "Main navigation"
 msgstr "Main navigation"
 
+msgid "MassTransit inbox"
+msgstr "MassTransit inbox"
+
+msgid "MassTransit outbox"
+msgstr "MassTransit outbox"
+
 msgid "Message"
 msgstr "Message"
 
+msgid "Messaging"
+msgstr "Messaging"
+
+msgid "Messaging health"
+msgstr "Messaging health"
+
 msgid "Modified"
 msgstr "Modified"
+
+msgid "Monitor local outbox stores and Azure Service Bus catalog subscriptions."
+msgstr "Monitor local outbox stores and Azure Service Bus catalog subscriptions."
 
 msgid "Monitor message delivery and retry failed work."
 msgstr "Monitor message delivery and retry failed work."
@@ -115,6 +170,12 @@ msgstr "No users in catalog"
 msgid "No users yet"
 msgstr "No users yet"
 
+msgid "None"
+msgstr "None"
+
+msgid "Oldest pending"
+msgstr "Oldest pending"
+
 msgid "Operate tenants and users from the synchronized platform catalog."
 msgstr "Operate tenants and users from the synchronized platform catalog."
 
@@ -131,11 +192,17 @@ msgstr "Outbox message scheduled for retry"
 msgid "Outbox messages will appear as platform events are enqueued."
 msgstr "Outbox messages will appear as platform events are enqueued."
 
+msgid "Overall status"
+msgstr "Overall status"
+
 msgid "Page not found"
 msgstr "Page not found"
 
 msgid "Pending"
 msgstr "Pending"
+
+msgid "Pending outbox"
+msgstr "Pending outbox"
 
 msgid "Plan"
 msgstr "Plan"
@@ -148,6 +215,9 @@ msgstr "Please check the URL or return to the home page."
 
 msgid "Please try again or return to the home page."
 msgstr "Please try again or return to the home page."
+
+msgid "Processed"
+msgstr "Processed"
 
 msgid "Restore tenant"
 msgstr "Restore tenant"
@@ -163,6 +233,12 @@ msgstr "Review the operational tenant catalog synchronized from Account."
 
 msgid "Role"
 msgstr "Role"
+
+msgid "Rows"
+msgstr "Rows"
+
+msgid "Scheduled"
+msgstr "Scheduled"
 
 msgid "Search"
 msgstr "Search"
@@ -191,6 +267,9 @@ msgstr "State"
 msgid "Status"
 msgstr "Status"
 
+msgid "Subscription"
+msgstr "Subscription"
+
 msgid "Tenant"
 msgstr "Tenant"
 
@@ -218,8 +297,17 @@ msgstr "The tenant catalog will populate as Account publishes catalog events."
 msgid "The user catalog will populate as Account publishes catalog events."
 msgstr "The user catalog will populate as Account publishes catalog events."
 
+msgid "Total"
+msgstr "Total"
+
+msgid "Transfer DLQ"
+msgstr "Transfer DLQ"
+
 msgid "Try again"
 msgstr "Try again"
+
+msgid "Unavailable"
+msgstr "Unavailable"
 
 msgid "User"
 msgstr "User"
@@ -232,6 +320,9 @@ msgstr "Users"
 
 msgid "Users currently known for this tenant."
 msgstr "Users currently known for this tenant."
+
+msgid "View outbox rows"
+msgstr "View outbox rows"
 
 msgid "You do not have permission to access this page."
 msgstr "You do not have permission to access this page."

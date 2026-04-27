@@ -29,7 +29,9 @@ public static class Configuration
                 }
             );
 
-            return services.AddSharedServices<BackOfficeDbContext>([Assembly]);
+            return services
+                .AddSingleton<Features.Messaging.Queries.IServiceBusHealthClient, Features.Messaging.Queries.ServiceBusHealthClient>()
+                .AddSharedServices<BackOfficeDbContext>([Assembly]);
         }
     }
 }

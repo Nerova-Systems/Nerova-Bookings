@@ -123,10 +123,10 @@ public static class SharedDependencyConfiguration
 
         private static void ConfigureCatalogEventTopics(IServiceBusBusFactoryConfigurator configurator)
         {
-            configurator.Message<TenantCatalogUpserted>(x => x.SetEntityName("tenant-catalog-upserted"));
-            configurator.Message<TenantCatalogDeleted>(x => x.SetEntityName("tenant-catalog-deleted"));
-            configurator.Message<UserCatalogUpserted>(x => x.SetEntityName("user-catalog-upserted"));
-            configurator.Message<UserCatalogDeleted>(x => x.SetEntityName("user-catalog-deleted"));
+            configurator.Message<TenantCatalogUpserted>(x => x.SetEntityName(CatalogMessagingTopology.TenantCatalogUpsertedTopic));
+            configurator.Message<TenantCatalogDeleted>(x => x.SetEntityName(CatalogMessagingTopology.TenantCatalogDeletedTopic));
+            configurator.Message<UserCatalogUpserted>(x => x.SetEntityName(CatalogMessagingTopology.UserCatalogUpsertedTopic));
+            configurator.Message<UserCatalogDeleted>(x => x.SetEntityName(CatalogMessagingTopology.UserCatalogDeletedTopic));
         }
 
         public IServiceCollection AddSharedServices<T>(Assembly[] assemblies)

@@ -4,6 +4,7 @@ using AppHost;
 using Azure.Storage.Blobs;
 using Microsoft.Extensions.Configuration;
 using Projects;
+using SharedKernel.Catalog;
 
 // Check for port conflicts before starting
 CheckPortAvailability();
@@ -46,10 +47,10 @@ var messaging = builder
     .AddAzureServiceBus("messaging")
     .RunAsEmulator();
 
-messaging.AddServiceBusTopic("tenant-catalog-upserted").AddServiceBusSubscription("back-office-tenant-catalog-upserted");
-messaging.AddServiceBusTopic("tenant-catalog-deleted").AddServiceBusSubscription("back-office-tenant-catalog-deleted");
-messaging.AddServiceBusTopic("user-catalog-upserted").AddServiceBusSubscription("back-office-user-catalog-upserted");
-messaging.AddServiceBusTopic("user-catalog-deleted").AddServiceBusSubscription("back-office-user-catalog-deleted");
+foreach (var subscription in CatalogMessagingTopology.BackOfficeCatalogSubscriptions)
+{
+    messaging.AddServiceBusTopic(subscription.TopicName).AddServiceBusSubscription(subscription.BackOfficeSubscriptionName);
+}
 
 builder
     .AddContainer("mail-server", "axllent/mailpit")
