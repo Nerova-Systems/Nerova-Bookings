@@ -1,5 +1,4 @@
 using Account.Database;
-using Account.Features.Catalog;
 using Account.Features.EmailAuthentication.Shared;
 using Account.Features.ExternalAuthentication;
 using Account.Features.ExternalAuthentication.Shared;
@@ -13,7 +12,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using SharedKernel.Configuration;
 using SharedKernel.OpenIdConnect;
-using SharedKernel.Outbox;
 
 namespace Account;
 
@@ -56,16 +54,6 @@ public static class Configuration
             services.AddScoped<OAuthProviderFactory>();
 
             services.AddHttpClient<IPayFastClient, PayFastClient>(client => { client.Timeout = TimeSpan.FromSeconds(30); });
-            services.AddHttpClient("BackOfficeInternal", client =>
-                {
-                    client.BaseAddress = new Uri(Environment.GetEnvironmentVariable("BACK_OFFICE_API_URL") ?? "https://localhost:9200");
-                    client.Timeout = TimeSpan.FromSeconds(30);
-                }
-            );
-            services.AddScoped<IOutboxMessageHandler>(provider => CatalogOutboxForwarder.CreateHandlers(provider.GetRequiredService<IHttpClientFactory>()).ElementAt(0));
-            services.AddScoped<IOutboxMessageHandler>(provider => CatalogOutboxForwarder.CreateHandlers(provider.GetRequiredService<IHttpClientFactory>()).ElementAt(1));
-            services.AddScoped<IOutboxMessageHandler>(provider => CatalogOutboxForwarder.CreateHandlers(provider.GetRequiredService<IHttpClientFactory>()).ElementAt(2));
-            services.AddScoped<IOutboxMessageHandler>(provider => CatalogOutboxForwarder.CreateHandlers(provider.GetRequiredService<IHttpClientFactory>()).ElementAt(3));
 
             return services
                 .AddSharedServices<AccountDbContext>([Assembly])

@@ -60,13 +60,16 @@ function OutboxRows({ messages }: { messages: OutboxMessageSummary[] }) {
   });
 
   return messages.map((message) => {
-    const canRetry = message.status !== "Processed";
+    const canRetry = message.source === "Legacy" && message.status !== "Processed";
 
     return (
       <TableRow key={message.id}>
         <TableCell>
           <div className="font-medium">{formatType(message.type)}</div>
           <div className="text-xs text-muted-foreground">{message.id}</div>
+        </TableCell>
+        <TableCell>
+          <Badge variant={message.source === "MassTransit" ? "default" : "secondary"}>{message.source}</Badge>
         </TableCell>
         <TableCell>
           <Badge variant={statusVariant(message.status)}>{message.status}</Badge>
@@ -146,6 +149,7 @@ export default function OutboxPage() {
               key={option}
               size="sm"
               variant={status === option ? "default" : "secondary"}
+              nativeButton={false}
               render={<RouterLink to="/back-office/outbox" search={{ search, status: option, pageOffset: 0 }} />}
             >
               {option === "All" ? <Trans>All</Trans> : option}
@@ -159,6 +163,9 @@ export default function OutboxPage() {
           <TableRow>
             <TableHead>
               <Trans>Message</Trans>
+            </TableHead>
+            <TableHead>
+              <Trans>Source</Trans>
             </TableHead>
             <TableHead>
               <Trans>Status</Trans>

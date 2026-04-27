@@ -119,7 +119,7 @@ export default function TenantDetailsPage() {
       title={tenant?.name ?? t`Tenant details`}
       subtitle={tenant ? t`Operational catalog details for tenant ${tenant.id}.` : undefined}
       beforeHeader={
-        <Button variant="ghost" size="sm" render={<RouterLink to="/back-office/tenants" />}>
+        <Button variant="ghost" size="sm" nativeButton={false} render={<RouterLink to="/back-office/tenants" />}>
           <ArrowLeftIcon />
           <Trans>Tenants</Trans>
         </Button>

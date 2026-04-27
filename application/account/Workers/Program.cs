@@ -15,9 +15,9 @@ builder
 
 // Configure dependency injection services like Repositories, MediatR, Pipelines, FluentValidation validators, etc.
 builder.Services
+    .AddSharedMassTransit<AccountDbContext>(builder.Configuration, builder.Environment, [], addConsumers: false, enableOutboxDelivery: true)
     .AddWorkerServices()
     .AddAccountServices()
-    .AddHostedService<OutboxMessageProcessor<AccountDbContext>>()
     .AddHostedService<BillingJob>()
     .AddHostedService<TrialExpiryNotificationJob>();
 

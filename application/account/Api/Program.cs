@@ -1,4 +1,5 @@
 using Account;
+using Account.Database;
 using SharedKernel.Configuration;
 using SharedKernel.SinglePageApp;
 
@@ -12,6 +13,7 @@ builder
 
 // Configure dependency injection services like Repositories, MediatR, Pipelines, FluentValidation validators, etc.
 builder.Services
+    .AddSharedMassTransit<AccountDbContext>(builder.Configuration, builder.Environment, [], addConsumers: false, enableOutboxDelivery: false)
     .AddApiServices([Assembly.GetExecutingAssembly(), Configuration.Assembly])
     .AddAccountServices();
 

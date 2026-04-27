@@ -1,6 +1,7 @@
 using System.Net.Http.Json;
 using System.Text.Json;
 using BackOffice.Database;
+using BackOffice.Features.Catalog.Commands;
 using BackOffice.Features.Catalog.Domain;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
@@ -28,13 +29,15 @@ public sealed class IngestCatalogEventTests : EndpointBaseTest<BackOfficeDbConte
             TimeProvider.GetUtcNow()
         );
 
-        var firstResponse = await AnonymousHttpClient.PostAsJsonAsync("/internal-api/back-office/catalog/events", envelope, SharedDependencyConfiguration.DefaultJsonSerializerOptions);
-        var secondResponse = await AnonymousHttpClient.PostAsJsonAsync("/internal-api/back-office/catalog/events", envelope, SharedDependencyConfiguration.DefaultJsonSerializerOptions);
-
-        firstResponse.ShouldHaveEmptyHeaderAndLocationOnSuccess();
-        secondResponse.ShouldHaveEmptyHeaderAndLocationOnSuccess();
-
         using var scope = Provider.CreateScope();
+        var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
+
+        var firstResponse = await mediator.Send(new IngestCatalogEventCommand(envelope.SourceEventId, envelope.Type, envelope.Payload, envelope.OccurredAt));
+        var secondResponse = await mediator.Send(new IngestCatalogEventCommand(envelope.SourceEventId, envelope.Type, envelope.Payload, envelope.OccurredAt));
+
+        firstResponse.IsSuccess.Should().BeTrue();
+        secondResponse.IsSuccess.Should().BeTrue();
+
         var dbContext = scope.ServiceProvider.GetRequiredService<BackOfficeDbContext>();
         (await dbContext.Set<CatalogTenant>().CountAsync(t => t.Id == tenantId)).Should().Be(1);
         (await dbContext.Set<ProcessedCatalogEvent>().CountAsync(e => e.Id == sourceEventId)).Should().Be(1);

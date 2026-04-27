@@ -36,10 +36,10 @@ public sealed class TenantEndpoints : IEndpoints
 
         routes.MapDelete("/internal-api/account/tenants/{id}", async Task<ApiResult> (TenantId id, IMediator mediator)
             => await mediator.Send(new DeleteTenantCommand(id))
-        );
+        ).DisableAntiforgery();
 
         routes.MapPost("/internal-api/account/tenants/{id}/restore", async Task<ApiResult> (TenantId id, IMediator mediator)
             => await mediator.Send(new RestoreTenantCommand(id))
-        );
+        ).DisableAntiforgery();
     }
 }

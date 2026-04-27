@@ -2,8 +2,8 @@ using Account.Features.Catalog;
 using Account.Features.Users.Domain;
 using FluentValidation;
 using JetBrains.Annotations;
+using MassTransit;
 using SharedKernel.Cqrs;
-using SharedKernel.Outbox;
 using SharedKernel.Telemetry;
 
 namespace Account.Features.Users.Commands;
@@ -29,7 +29,7 @@ public sealed class UpdateCurrentUserValidator : AbstractValidator<UpdateCurrent
     }
 }
 
-public sealed class UpdateCurrentUserHandler(IUserRepository userRepository, IOutboxPublisher outboxPublisher, ITelemetryEventsCollector events)
+public sealed class UpdateCurrentUserHandler(IUserRepository userRepository, IPublishEndpoint publishEndpoint, ITelemetryEventsCollector events)
     : IRequestHandler<UpdateCurrentUserCommand, Result>
 {
     public async Task<Result> Handle(UpdateCurrentUserCommand command, CancellationToken cancellationToken)
@@ -38,7 +38,7 @@ public sealed class UpdateCurrentUserHandler(IUserRepository userRepository, IOu
 
         user.Update(command.FirstName, command.LastName, command.Title);
         userRepository.Update(user);
-        await outboxPublisher.EnqueueAsync(CatalogEventFactory.UserUpserted(user), cancellationToken);
+        await publishEndpoint.Publish(CatalogEventFactory.UserUpserted(user), cancellationToken);
 
         events.CollectEvent(new UserUpdated());
 

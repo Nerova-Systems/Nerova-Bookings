@@ -1,8 +1,11 @@
 using BackOffice.Database;
 using JetBrains.Annotations;
+using MassTransit.EntityFrameworkCoreIntegration;
 using Microsoft.EntityFrameworkCore;
 using SharedKernel.Cqrs;
 using SharedKernel.Outbox;
+using LegacyOutboxMessage = SharedKernel.Outbox.OutboxMessage;
+using MassTransitOutboxMessage = MassTransit.EntityFrameworkCoreIntegration.OutboxMessage;
 
 namespace BackOffice.Features.Outbox.Queries;
 
@@ -16,6 +19,7 @@ public sealed record OutboxMessagesResponse(int TotalCount, int PageSize, int To
 [PublicAPI]
 public sealed record OutboxMessageSummary(
     Guid Id,
+    string Source,
     string Type,
     OutboxMessageStatus Status,
     int Attempts,
@@ -32,17 +36,20 @@ public sealed class GetOutboxMessagesHandler(BackOfficeDbContext dbContext, Time
 {
     public async Task<Result<OutboxMessagesResponse>> Handle(GetOutboxMessagesQuery query, CancellationToken cancellationToken)
     {
-        IQueryable<OutboxMessage> messages = dbContext.OutboxMessages;
+        IQueryable<LegacyOutboxMessage> legacyMessages = dbContext.OutboxMessages;
+        IQueryable<MassTransitOutboxMessage> massTransitMessages = dbContext.Set<MassTransitOutboxMessage>();
 
         if (!string.IsNullOrWhiteSpace(query.Search))
         {
-            messages = messages.Where(m => m.Type.Contains(query.Search) || (m.LastError != null && m.LastError.Contains(query.Search)));
+            legacyMessages = legacyMessages.Where(m => m.Type.Contains(query.Search) || (m.LastError != null && m.LastError.Contains(query.Search)));
+            massTransitMessages = massTransitMessages.Where(m => m.MessageType.Contains(query.Search));
         }
 
         var now = timeProvider.GetUtcNow();
-        var summaries = (await messages.ToArrayAsync(cancellationToken))
+        var legacySummaries = (await legacyMessages.ToArrayAsync(cancellationToken))
             .Select(m => new OutboxMessageSummary(
                     m.Id,
+                    "Legacy",
                     m.Type,
                     m.GetStatus(now),
                     m.Attempts,
@@ -55,6 +62,35 @@ public sealed class GetOutboxMessagesHandler(BackOfficeDbContext dbContext, Time
                 )
             )
             .ToArray();
+
+        var outboxStates = await dbContext.Set<OutboxState>().ToDictionaryAsync(s => s.OutboxId, cancellationToken);
+        var massTransitSummaries = (await massTransitMessages.ToArrayAsync(cancellationToken))
+            .Select(m =>
+                {
+                    outboxStates.TryGetValue(m.OutboxId ?? Guid.Empty, out var outboxState);
+                    var sentAt = ToUtcOffset(m.SentTime);
+                    var enqueueAt = m.EnqueueTime is null ? sentAt : ToUtcOffset(m.EnqueueTime.Value);
+                    DateTimeOffset? deliveredAt = outboxState?.Delivered is null ? null : ToUtcOffset(outboxState.Delivered.Value);
+                    var status = deliveredAt is not null ? OutboxMessageStatus.Processed : enqueueAt > now ? OutboxMessageStatus.Scheduled : OutboxMessageStatus.Pending;
+
+                    return new OutboxMessageSummary(
+                        m.MessageId,
+                        "MassTransit",
+                        m.MessageType,
+                        status,
+                        0,
+                        sentAt,
+                        deliveredAt,
+                        null,
+                        enqueueAt,
+                        null,
+                        null
+                    );
+                }
+            )
+            .ToArray();
+
+        var summaries = legacySummaries.Concat(massTransitSummaries).ToArray();
 
         if (query.Status is not null)
         {
@@ -75,5 +111,10 @@ public sealed class GetOutboxMessagesHandler(BackOfficeDbContext dbContext, Time
         var pagedMessages = summaries.Skip(pageOffset * pageSize).Take(pageSize).ToArray();
 
         return new OutboxMessagesResponse(totalCount, pageSize, totalPages, pageOffset, pagedMessages);
+    }
+
+    private static DateTimeOffset ToUtcOffset(DateTime value)
+    {
+        return new DateTimeOffset(DateTime.SpecifyKind(value, DateTimeKind.Utc));
     }
 }

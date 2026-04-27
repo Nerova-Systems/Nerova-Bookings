@@ -3,9 +3,9 @@ using Account.Features.Subscriptions.Domain;
 using Account.Features.Tenants.Domain;
 using Account.Features.Users.Commands;
 using Account.Features.Users.Domain;
+using MassTransit;
 using SharedKernel.Cqrs;
 using SharedKernel.Domain;
-using SharedKernel.Outbox;
 using SharedKernel.Telemetry;
 
 namespace Account.Features.Tenants.Commands;
@@ -15,14 +15,14 @@ internal sealed record CreateTenantCommand(string OwnerEmail, bool EmailConfirme
 
 internal sealed record CreateTenantResponse(TenantId TenantId, UserId UserId);
 
-internal sealed class CreateTenantHandler(ITenantRepository tenantRepository, ISubscriptionRepository subscriptionRepository, IMediator mediator, IOutboxPublisher outboxPublisher, ITelemetryEventsCollector events, TimeProvider timeProvider)
+internal sealed class CreateTenantHandler(ITenantRepository tenantRepository, ISubscriptionRepository subscriptionRepository, IMediator mediator, IPublishEndpoint publishEndpoint, ITelemetryEventsCollector events, TimeProvider timeProvider)
     : IRequestHandler<CreateTenantCommand, Result<CreateTenantResponse>>
 {
     public async Task<Result<CreateTenantResponse>> Handle(CreateTenantCommand command, CancellationToken cancellationToken)
     {
         var tenant = Tenant.Create(command.OwnerEmail);
         await tenantRepository.AddAsync(tenant, cancellationToken);
-        await outboxPublisher.EnqueueAsync(CatalogEventFactory.TenantUpserted(tenant), cancellationToken);
+        await publishEndpoint.Publish(CatalogEventFactory.TenantUpserted(tenant), cancellationToken);
 
         var subscription = Subscription.Create(tenant.Id, timeProvider.GetUtcNow());
         await subscriptionRepository.AddAsync(subscription, cancellationToken);

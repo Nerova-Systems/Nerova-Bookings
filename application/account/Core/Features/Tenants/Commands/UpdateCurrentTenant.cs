@@ -3,10 +3,10 @@ using Account.Features.Tenants.Domain;
 using Account.Features.Users.Domain;
 using FluentValidation;
 using JetBrains.Annotations;
+using MassTransit;
 using SharedKernel.Authentication;
 using SharedKernel.Cqrs;
 using SharedKernel.ExecutionContext;
-using SharedKernel.Outbox;
 using SharedKernel.Telemetry;
 
 namespace Account.Features.Tenants.Commands;
@@ -28,7 +28,7 @@ public sealed class UpdateCurrentTenantValidator : AbstractValidator<UpdateCurre
 public sealed class UpdateTenantHandler(
     ITenantRepository tenantRepository,
     IExecutionContext executionContext,
-    IOutboxPublisher outboxPublisher,
+    IPublishEndpoint publishEndpoint,
     ITelemetryEventsCollector events
 ) : IRequestHandler<UpdateCurrentTenantCommand, Result>
 {
@@ -51,7 +51,7 @@ public sealed class UpdateTenantHandler(
 
         tenant.Update(command.Name);
         tenantRepository.Update(tenant);
-        await outboxPublisher.EnqueueAsync(CatalogEventFactory.TenantUpserted(tenant), cancellationToken);
+        await publishEndpoint.Publish(CatalogEventFactory.TenantUpserted(tenant), cancellationToken);
 
         events.CollectEvent(new TenantUpdated());
 

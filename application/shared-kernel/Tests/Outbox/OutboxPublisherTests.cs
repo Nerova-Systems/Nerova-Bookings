@@ -43,5 +43,13 @@ public sealed class OutboxPublisherTests : IDisposable
         savedMessage.ProcessedAt.Should().BeNull();
     }
 
+    [Fact]
+    public void OutboxMessagePayload_WhenMapped_ShouldUseJsonbColumnType()
+    {
+        var property = _testDbContext.Model.FindEntityType(typeof(OutboxMessage))!.FindProperty(nameof(OutboxMessage.Payload))!;
+
+        property.GetColumnType().Should().Be("jsonb");
+    }
+
     private sealed record TestOutboxEvent(string AggregateId, string Name);
 }

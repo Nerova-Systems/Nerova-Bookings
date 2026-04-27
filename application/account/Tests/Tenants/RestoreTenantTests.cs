@@ -10,7 +10,7 @@ namespace Account.Tests.Tenants;
 public sealed class RestoreTenantTests : EndpointBaseTest<AccountDbContext>
 {
     [Fact]
-    public async Task RestoreTenant_WhenTenantWasDeleted_ShouldRestoreTenantAndEnqueueCatalogEvent()
+    public async Task RestoreTenant_WhenTenantWasDeleted_ShouldRestoreTenantAndPublishCatalogEvent()
     {
         var tenantId = DatabaseSeeder.Tenant1.Id;
         var deleteResponse = await AuthenticatedOwnerHttpClient.DeleteAsync($"/internal-api/account/tenants/{tenantId}");
@@ -21,7 +21,7 @@ public sealed class RestoreTenantTests : EndpointBaseTest<AccountDbContext>
         restoreResponse.ShouldHaveEmptyHeaderAndLocationOnSuccess();
         var deletedAt = Connection.ExecuteScalar<string>("SELECT deleted_at FROM tenants WHERE id = @id", [new { id = tenantId.ToString() }]);
         deletedAt.Should().BeNull();
-        var outboxCount = Connection.ExecuteScalar<long>("SELECT COUNT(*) FROM outbox_messages", []);
+        var outboxCount = Connection.ExecuteScalar<long>("SELECT COUNT(*) FROM masstransit_outbox_messages WHERE message_type LIKE '%TenantCatalog%'", []);
         outboxCount.Should().BeGreaterThanOrEqualTo(2);
         TelemetryEventsCollectorSpy.CollectedEvents.Should().Contain(e => e.GetType().Name == "TenantRestored");
     }

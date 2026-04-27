@@ -27,6 +27,9 @@
         <PackageReference Include="IdGen"/>
         <PackageReference Include="JetBrains.Annotations"/>
         <PackageReference Include="Mapster"/>
+        <PackageReference Include="MassTransit"/>
+        <PackageReference Include="MassTransit.Azure.ServiceBus.Core"/>
+        <PackageReference Include="MassTransit.EntityFrameworkCore"/>
         <PackageReference Include="MediatR"/>
         <PackageReference Include="MediatR.Contracts"/>
         <PackageReference Include="Microsoft.ApplicationInsights"/>

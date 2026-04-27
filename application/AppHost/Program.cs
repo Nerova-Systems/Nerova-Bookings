@@ -42,6 +42,15 @@ var azureStorage = builder
     )
     .AddBlobs("blobs");
 
+var messaging = builder
+    .AddAzureServiceBus("messaging")
+    .RunAsEmulator();
+
+messaging.AddServiceBusTopic("tenant-catalog-upserted").AddServiceBusSubscription("back-office-tenant-catalog-upserted");
+messaging.AddServiceBusTopic("tenant-catalog-deleted").AddServiceBusSubscription("back-office-tenant-catalog-deleted");
+messaging.AddServiceBusTopic("user-catalog-upserted").AddServiceBusSubscription("back-office-user-catalog-upserted");
+messaging.AddServiceBusTopic("user-catalog-deleted").AddServiceBusSubscription("back-office-user-catalog-deleted");
+
 builder
     .AddContainer("mail-server", "axllent/mailpit")
     .WithHttpEndpoint(9003, 8025)
@@ -63,6 +72,7 @@ var accountWorkers = builder
     .AddProject<Account_Workers>("account-workers")
     .WithReference(accountDatabase)
     .WithReference(azureStorage)
+    .WithReference(messaging)
     .WaitFor(accountDatabase);
 
 var accountApi = builder
@@ -70,6 +80,7 @@ var accountApi = builder
     .WithUrlConfiguration("/account")
     .WithReference(accountDatabase)
     .WithReference(azureStorage)
+    .WithReference(messaging)
     .WithEnvironment("OAuth__Google__ClientId", googleOAuthClientId)
     .WithEnvironment("OAuth__Google__ClientSecret", googleOAuthClientSecret)
     .WithEnvironment("OAuth__AllowMockProvider", "true")
@@ -90,6 +101,7 @@ var backOfficeWorkers = builder
     .AddProject<BackOffice_Workers>("back-office-workers")
     .WithReference(backOfficeDatabase)
     .WithReference(azureStorage)
+    .WithReference(messaging)
     .WaitFor(backOfficeDatabase);
 
 var backOfficeApi = builder
@@ -97,6 +109,7 @@ var backOfficeApi = builder
     .WithUrlConfiguration("/back-office")
     .WithReference(backOfficeDatabase)
     .WithReference(azureStorage)
+    .WithReference(messaging)
     .WaitFor(backOfficeWorkers);
 
 var mainDatabase = postgres

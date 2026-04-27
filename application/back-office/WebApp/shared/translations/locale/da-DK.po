@@ -182,6 +182,9 @@ msgstr "Vis detaljer"
 msgid "Something went wrong"
 msgstr "Noget gik galt"
 
+msgid "Source"
+msgstr ""
+
 msgid "State"
 msgstr ""
 
