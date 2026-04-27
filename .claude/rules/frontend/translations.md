@@ -14,13 +14,16 @@ Guidelines for implementing translations and internationalization in the fronten
 3. Always use plain English text in translation markers
 4. Don't hardcode text without proper translation wrappers
 5. Use "Sentence case" for everything (buttons, menus, headings, etc.)
-6. **Lingui macros work in `shared-webapp/ui` components**. The SWC plugin runs in source-build mode across all workspace packages, and each self-contained system's `createLinguiConfig()` includes `shared-webapp/ui/**/*.{ts,tsx}` in its extraction scope. This means every shared UI component auto-generates catalog entries in every self-contained system (main, account, back-office) independently. Prefer macros over threading translatable text through props -- only accept a text prop when a consumer genuinely needs to override the default (e.g., context-specific wording). Note: shared strings must be translated in every self-contained system's `*.po` files -- translation workflow must keep all three self-contained systems in sync
+6. **Catalogs are split between the shared component library and each self-contained system**:
+   - Markers in `application/shared-webapp/ui/**` extract to `application/shared-webapp/ui/translations/locale/{locale}.po` — one shared catalog used by every app
+   - Markers in `application/<system>/WebApp/**` extract to that system's `shared/translations/locale/{locale}.po`
+   - At runtime, `createFederatedTranslation` merges them: shared underneath, system on top, federated remote (e.g. account loaded into main) on top of that
+   - Translate each shared string **once** in the shared catalog, not in every system's catalog
+   - Prefer Lingui macros inside `shared-webapp/ui` components over threading translatable text through props -- only accept a text prop when a consumer genuinely needs to override the default (e.g., context-specific wording)
 7. Translation workflow:
-   - Translation files are in `shared/translations/locale/` (e.g., `da-DK.po`, `en-US.po`)
-   - After adding/changing `<Trans>` or t\`\` markers, the `*.po` files are auto-generated/updated by the build system
-   - Don't manually add or remove entries to `*.po` files
-   - After auto-generation, translate all new/updated entries in `*.po` files for all supported languages
-   - Only translate `msgstr` values—never change `msgid` values
+   - After adding/changing `<Trans>` or t\`\` markers, the `*.po` files are auto-regenerated on build
+   - Don't manually add or remove `msgid` entries -- only translate `msgstr` values
+   - After auto-generation, translate all new/updated entries for all supported languages
 8. **Use correct language-specific characters** in translations -- e.g., Danish requires æøå/ÆØÅ, not ae/oe/aa substitutes. Never approximate with ASCII equivalents
 9. Don't translate fully dynamic content such as variable values or dynamic text
 9. **Domain terminology consistency**:

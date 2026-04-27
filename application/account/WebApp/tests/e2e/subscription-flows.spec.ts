@@ -84,7 +84,7 @@ test.describe("@smoke", () => {
 
       await expect(ownerPage.getByRole("dialog", { name: "Subscribe to Starter" })).toBeVisible();
       await expect(ownerPage.getByText("Total")).toBeVisible();
-      await expect(ownerPage.getByRole("button", { name: "Subscribe" })).toBeVisible();
+      await expect(ownerPage.getByRole("button", { name: "Pay and subscribe" })).toBeVisible();
       await expect(ownerPage.getByRole("button", { name: "Cancel" })).toBeVisible();
 
       await ownerPage.getByRole("button", { name: "Cancel" }).click();

@@ -113,6 +113,9 @@ msgstr "Main content"
 msgid "Main navigation"
 msgstr "Main navigation"
 
+msgid "Manage tenants, view system data, see exceptions, and perform various tasks for operational and support teams."
+msgstr "Manage tenants, view system data, see exceptions, and perform various tasks for operational and support teams."
+
 msgid "Mobile navigation menu"
 msgstr "Mobile navigation menu"
 
@@ -287,6 +290,9 @@ msgstr "Users"
 
 msgid "Users currently known for this tenant."
 msgstr "Users currently known for this tenant."
+
+msgid "Welcome to the Back Office"
+msgstr "Welcome to the Back Office"
 
 msgid "Yesterday"
 msgstr "Yesterday"

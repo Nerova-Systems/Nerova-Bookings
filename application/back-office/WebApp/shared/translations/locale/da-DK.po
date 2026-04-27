@@ -113,6 +113,9 @@ msgstr "Hovedindhold"
 msgid "Main navigation"
 msgstr "Hovednavigation"
 
+msgid "Manage tenants, view system data, see exceptions, and perform various tasks for operational and support teams."
+msgstr "Administrer lejere, se systemdata, se undtagelser og udfør forskellige opgaver for drifts- og supportteams."
+
 msgid "Mobile navigation menu"
 msgstr "Mobilnavigationsmenu"
 
@@ -287,6 +290,9 @@ msgstr ""
 
 msgid "Users currently known for this tenant."
 msgstr ""
+
+msgid "Welcome to the Back Office"
+msgstr "Velkommen til Back Office"
 
 msgid "Yesterday"
 msgstr "I går"

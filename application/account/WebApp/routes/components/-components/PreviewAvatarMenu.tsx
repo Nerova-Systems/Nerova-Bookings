@@ -2,6 +2,7 @@ import { t } from "@lingui/core/macro";
 import { useLingui } from "@lingui/react";
 import { Trans } from "@lingui/react/macro";
 import { preferredLocaleKey } from "@repo/infrastructure/translations/constants";
+import localeMap from "@repo/infrastructure/translations/i18n.config.json";
 import { type Locale, translationContext } from "@repo/infrastructure/translations/TranslationContext";
 import { Avatar, AvatarFallback } from "@repo/ui/components/Avatar";
 import {
@@ -81,7 +82,9 @@ function FakeProfileCard() {
 export function PreviewAvatarMenu() {
   const isCollapsed = useContext(collapsedContext);
   const { theme, setTheme, resolvedTheme } = useTheme();
-  const { setLocale, getLocaleInfo, locales } = use(translationContext);
+  const { setLocale } = use(translationContext);
+  const locales = Object.keys(localeMap) as Locale[];
+  const getLocaleInfo = (locale: Locale) => localeMap[locale];
   const { i18n } = useLingui();
   const currentLocale = i18n.locale as Locale;
   const [currentZoomLevel, setCurrentZoomLevel] = useState("1");

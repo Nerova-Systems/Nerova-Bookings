@@ -244,7 +244,7 @@ public class ClaudeAgentCommand : Command
             .ToHashSet();
 
         // Only show primary agents (sub-agents like backend, frontend, qa are spawned by team-lead)
-        return PrimaryAgents.Where(a => allAgents.Contains(a)).ToArray();
+        return PrimaryAgents.Where(allAgents.Contains).ToArray();
     }
 
     private static ProcessStartInfo BuildProcessStartInfo(List<string> claudeArgs, string workingDirectory)

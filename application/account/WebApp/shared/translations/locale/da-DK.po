@@ -13,10 +13,6 @@ msgstr ""
 "Plural-Forms: \n"
 "X-Generator: @lingui/cli\n"
 
-#. placeholder {0}: -diffDays
-msgid "{0, plural, one {# day ago} other {# days ago}}"
-msgstr "{0, plural, one {for # dag siden} other {for # dage siden}}"
-
 #. placeholder {0}: result.value
 msgid "{0, plural, one {# hour ago} other {# hours ago}}"
 msgstr "{0, plural, one {# time siden} other {# timer siden}}"
@@ -63,9 +59,6 @@ msgstr "{0}/måned"
 
 msgid "{deletedCount} users permanently deleted"
 msgstr "{deletedCount} brugere slettet permanent"
-
-msgid "{diffDays, plural, one {In # day} other {In # days}}"
-msgstr "{diffDays, plural, one {Om # dag} other {Om # dage}}"
 
 msgid "{price}/month"
 msgstr "{price}/måned"
@@ -467,9 +460,6 @@ msgstr "Bunddrawer"
 msgid "Bottom sheet"
 msgstr "Bundsheet"
 
-msgid "Breadcrumb"
-msgstr "Brødkrumme"
-
 msgid "Breadcrumb — custom separator"
 msgstr "Brødkrumme — brugerdefineret skilletegn"
 
@@ -653,12 +643,6 @@ msgstr ""
 msgid "Clear"
 msgstr "Ryd"
 
-msgid "Clear date"
-msgstr "Ryd dato"
-
-msgid "Clear dates"
-msgstr "Ryd datoer"
-
 msgid "Clear filters"
 msgstr "Ryd filtre"
 
@@ -671,14 +655,8 @@ msgstr "Klik på en række for at åbne sidepanelet. Brug Shift eller Cmd/Ctrl s
 msgid "Close"
 msgstr "Luk"
 
-msgid "Close menu"
-msgstr "Luk menu"
-
 msgid "Close recipe details"
 msgstr "Luk opskriftsdetaljer"
-
-msgid "Close sidebar"
-msgstr "Luk sidemenu"
 
 msgid "Close user profile"
 msgstr "Luk brugerprofil"
@@ -779,9 +757,6 @@ msgstr "Land"
 msgid "Create"
 msgstr "Opret"
 
-msgid "Create <0>{search}</0>"
-msgstr "Opret <0>{search}</0>"
-
 msgid "Create new account"
 msgstr "Opret ny konto"
 
@@ -877,9 +852,6 @@ msgstr "Afslå"
 
 msgid "Declining..."
 msgstr "Afslår..."
-
-msgid "Decrease"
-msgstr "Formindsk"
 
 msgid "Default"
 msgstr "Standard"
@@ -1007,9 +979,6 @@ msgstr "Slip et billede i et vilkårligt kort — AspectRatio holder feltet fast
 
 msgid "Drop anywhere to add to the gallery"
 msgstr "Slip et vilkårligt sted for at tilføje til galleriet"
-
-msgid "Drop files here, or click to browse"
-msgstr "Slip filer her, eller klik for at vælge"
 
 msgid "Drop your filter controls here. The sheet handles scrolling and dismissal."
 msgstr "Placér dine filterkontroller her. Sheet håndterer scrolling og lukning."
@@ -1244,12 +1213,6 @@ msgstr "Gå til kontoindstillinger"
 msgid "Go to home"
 msgstr "Gå til forsiden"
 
-msgid "Go to next page"
-msgstr "Gå til næste side"
-
-msgid "Go to previous page"
-msgstr "Gå til forrige side"
-
 msgid "Google"
 msgstr "Google"
 
@@ -1300,9 +1263,6 @@ msgstr "I selve appen er sidemenuen fixed-positioneret, gemmer sin tilstand og b
 
 msgid "Include cooking notes"
 msgstr "Inkluder tilberedningsnoter"
-
-msgid "Increase"
-msgstr "Forøg"
 
 msgid "Indeterminate"
 msgstr "Ubestemt"
@@ -1502,9 +1462,6 @@ msgstr "Linkvarianter"
 msgid "LinkedIn"
 msgstr "LinkedIn"
 
-msgid "Loading"
-msgstr ""
-
 msgid "Loading..."
 msgstr "Indlæser..."
 
@@ -1628,9 +1585,6 @@ msgstr "Midte"
 msgid "Mobile"
 msgstr "Mobil"
 
-msgid "Mobile navigation menu"
-msgstr "Mobilnavigationsmenu"
-
 msgid "Mobile-first sheet with a drag handle and swipe-to-dismiss. Reach for it when content is short and the user should be able to flick it away. Left and right drawers are narrow by default; top and bottom span the full width unless you constrain DrawerContent with mx-auto and max-w-*."
 msgstr "Mobile-first panel med trækhåndtag og swipe-to-dismiss. Brug det når indholdet er kort og brugeren skal kunne flicke det væk. Venstre- og højre-drawers er smalle som standard; top og bund spænder fuld bredde med mindre du begrænser DrawerContent med mx-auto og max-w-*."
 
@@ -1648,9 +1602,6 @@ msgstr "Flere eksportmuligheder"
 
 msgid "More merge options"
 msgstr "Flere fletmuligheder"
-
-msgid "More pages"
-msgstr "Flere sider"
 
 msgid "More save options"
 msgstr "Flere gemgemuligheder"
@@ -1790,14 +1741,8 @@ msgstr "Kun ejere kan ændre brugerroller"
 msgid "Only trusted personnel access data through Azure AD authentication"
 msgstr "Kun betroet personale får adgang til data gennem Azure AD autentificering"
 
-msgid "Open calendar"
-msgstr ""
-
 msgid "Open command palette"
 msgstr "Åbn kommandopalette"
-
-msgid "Open navigation menu"
-msgstr "Åbn navigationsmenu"
 
 msgid "Open side pane"
 msgstr "Åbn sidepanel"
@@ -1855,9 +1800,6 @@ msgstr "Siden blev ikke fundet"
 
 msgid "Page Views"
 msgstr "Sidevisninger"
-
-msgid "Pagination"
-msgstr "Paginering"
 
 msgid "Palak paneer"
 msgstr "Palak paneer"
@@ -2164,9 +2106,6 @@ msgstr "Justerbar app-skal"
 msgid "Resizable panels"
 msgstr "Justerbare paneler"
 
-msgid "Resize sidebar"
-msgstr "Ændr bredde på sidepanel"
-
 msgid "Responsive layout"
 msgstr "Responsivt layout"
 
@@ -2318,9 +2257,6 @@ msgstr "Vælg land"
 msgid "Select dates"
 msgstr "Vælg datoer"
 
-msgid "Select time zone"
-msgstr "Vælg tidszone"
-
 msgid "Select with groups"
 msgstr "Vælg med grupper"
 
@@ -2399,9 +2335,6 @@ msgstr "Vis detaljer"
 msgid "Show dismissable banner"
 msgstr "Vis afliveligt banner"
 
-msgid "Show more"
-msgstr "Vis flere"
-
 msgid "Show search filters"
 msgstr "Vis søgefiltre"
 
@@ -2458,9 +2391,6 @@ msgstr "Enkelt-udfoldning vs multi-udfoldning"
 
 msgid "Skeleton"
 msgstr "Skelet"
-
-msgid "Skip to main content"
-msgstr "Spring til hovedindhold"
 
 msgid "SLA"
 msgstr "SLA"
@@ -2697,9 +2627,6 @@ msgstr "Titel"
 msgid "To delete your account, please contact our support team."
 msgstr "For at slette din konto bedes du kontakte vores supportteam."
 
-msgid "Today"
-msgstr "I dag"
-
 msgid "Toggle bold"
 msgstr "Skift fed"
 
@@ -2712,17 +2639,11 @@ msgstr "Skiftegruppe"
 msgid "Toggle italic"
 msgstr "Skift kursiv"
 
-msgid "Toggle sidebar"
-msgstr "Skift sidepanel"
-
 msgid "Toggle underline"
 msgstr "Skift understregning"
 
 msgid "Tom yum soup"
 msgstr "Tom yum-suppe"
-
-msgid "Tomorrow"
-msgstr "I morgen"
 
 msgid "Tonkotsu ramen"
 msgstr "Tonkotsu ramen"

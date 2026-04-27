@@ -1,0 +1,126 @@
+msgid ""
+msgstr ""
+"POT-Creation-Date: 2026-04-26 17:39+0200\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: @lingui/cli\n"
+"Language: da-DK\n"
+"Project-Id-Version: \n"
+"Report-Msgid-Bugs-To: \n"
+"PO-Revision-Date: \n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Plural-Forms: \n"
+
+#. placeholder {0}: -diffDays
+msgid "{0, plural, one {# day ago} other {# days ago}}"
+msgstr "{0, plural, one {for # dag siden} other {for # dage siden}}"
+
+msgid "{diffDays, plural, one {In # day} other {In # days}}"
+msgstr "{diffDays, plural, one {Om # dag} other {Om # dage}}"
+
+msgid "Breadcrumb"
+msgstr "Brødkrumme"
+
+msgid "Clear date"
+msgstr "Ryd dato"
+
+msgid "Clear dates"
+msgstr "Ryd datoer"
+
+msgid "Close"
+msgstr "Luk"
+
+msgid "Close menu"
+msgstr "Luk menu"
+
+msgid "Close sidebar"
+msgstr "Luk sidemenu"
+
+msgid "Create <0>{search}</0>"
+msgstr "Opret <0>{search}</0>"
+
+msgid "Decrease"
+msgstr "Formindsk"
+
+msgid "Drop files here, or click to browse"
+msgstr "Slip filer her, eller klik for at vælge"
+
+msgid "Go to next page"
+msgstr "Gå til næste side"
+
+msgid "Go to previous page"
+msgstr "Gå til forrige side"
+
+msgid "Increase"
+msgstr "Forøg"
+
+msgid "Leave"
+msgstr "Forlad"
+
+msgid "Loading"
+msgstr ""
+
+msgid "Main content"
+msgstr "Hovedindhold"
+
+msgid "Mobile navigation menu"
+msgstr "Mobilnavigationsmenu"
+
+msgid "More pages"
+msgstr "Flere sider"
+
+msgid "Next"
+msgstr "Næste"
+
+msgid "No results found"
+msgstr "Ingen resultater fundet"
+
+msgid "Open calendar"
+msgstr ""
+
+msgid "Open navigation menu"
+msgstr "Åbn navigationsmenu"
+
+msgid "Pagination"
+msgstr "Paginering"
+
+msgid "Previous"
+msgstr "Forrige"
+
+msgid "Resize sidebar"
+msgstr "Ændr bredde på sidepanel"
+
+msgid "Select dates"
+msgstr "Vælg datoer"
+
+msgid "Select time zone"
+msgstr "Vælg tidszone"
+
+msgid "Show more"
+msgstr "Vis flere"
+
+msgid "Skip to main content"
+msgstr "Spring til hovedindhold"
+
+msgid "Stay"
+msgstr "Bliv"
+
+msgid "Today"
+msgstr "I dag"
+
+msgid "Toggle sidebar"
+msgstr "Skift sidepanel"
+
+msgid "Tomorrow"
+msgstr "I morgen"
+
+msgid "Unsaved changes"
+msgstr "Ugemte ændringer"
+
+msgid "Yesterday"
+msgstr "I går"
+
+msgid "You have unsaved changes. If you leave now, your changes will be lost."
+msgstr "Du har ugemte ændringer. Hvis du forlader nu, vil dine ændringer gå tabt."

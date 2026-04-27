@@ -84,6 +84,10 @@ function isExternalLink(href: string): boolean {
   return href.startsWith("http://") || href.startsWith("https://") || href.startsWith("mailto:");
 }
 
+function isHashLink(href: string): boolean {
+  return href.startsWith("#");
+}
+
 export function Link({
   href,
   children,
@@ -134,6 +138,23 @@ export function Link({
         className={linkClassName}
         target={target ?? "_blank"}
         rel={rel ?? "noopener noreferrer"}
+        onClick={onClick as (event: MouseEvent<HTMLAnchorElement>) => void}
+        aria-current={ariaCurrent}
+        aria-label={ariaLabel}
+      >
+        {children}
+      </a>
+    );
+  }
+
+  // In-page hash anchors (skip links, scroll targets) need native browser navigation,
+  // not TanStack Router — routing #foo would treat it as a path segment.
+  if (isHashLink(href)) {
+    const { "aria-current": ariaCurrent, "aria-label": ariaLabel } = props as InternalLinkProps;
+    return (
+      <a
+        href={href}
+        className={linkClassName}
         onClick={onClick as (event: MouseEvent<HTMLAnchorElement>) => void}
         aria-current={ariaCurrent}
         aria-label={ariaLabel}

@@ -13,10 +13,6 @@ msgstr ""
 "Plural-Forms: \n"
 "X-Generator: @lingui/cli\n"
 
-#. placeholder {0}: -diffDays
-msgid "{0, plural, one {# day ago} other {# days ago}}"
-msgstr "{0, plural, one {# day ago} other {# days ago}}"
-
 #. placeholder {0}: result.value
 msgid "{0, plural, one {# hour ago} other {# hours ago}}"
 msgstr "{0, plural, one {# hour ago} other {# hours ago}}"
@@ -63,9 +59,6 @@ msgstr "{0}/month"
 
 msgid "{deletedCount} users permanently deleted"
 msgstr "{deletedCount} users permanently deleted"
-
-msgid "{diffDays, plural, one {In # day} other {In # days}}"
-msgstr "{diffDays, plural, one {In # day} other {In # days}}"
 
 msgid "{price}/month"
 msgstr "{price}/month"
@@ -469,9 +462,6 @@ msgstr "Bottom drawer"
 msgid "Bottom sheet"
 msgstr "Bottom sheet"
 
-msgid "Breadcrumb"
-msgstr "Breadcrumb"
-
 msgid "Breadcrumb — custom separator"
 msgstr "Breadcrumb — custom separator"
 
@@ -655,12 +645,6 @@ msgstr "City"
 msgid "Clear"
 msgstr "Clear"
 
-msgid "Clear date"
-msgstr "Clear date"
-
-msgid "Clear dates"
-msgstr "Clear dates"
-
 msgid "Clear filters"
 msgstr "Clear filters"
 
@@ -673,14 +657,8 @@ msgstr "Click a row to open the side pane. Use Shift or Cmd/Ctrl with click or a
 msgid "Close"
 msgstr "Close"
 
-msgid "Close menu"
-msgstr "Close menu"
-
 msgid "Close recipe details"
 msgstr "Close recipe details"
-
-msgid "Close sidebar"
-msgstr "Close sidebar"
 
 msgid "Close user profile"
 msgstr "Close user profile"
@@ -781,9 +759,6 @@ msgstr "Country"
 msgid "Create"
 msgstr "Create"
 
-msgid "Create <0>{search}</0>"
-msgstr "Create <0>{search}</0>"
-
 msgid "Create new account"
 msgstr "Create new account"
 
@@ -879,9 +854,6 @@ msgstr "Decline"
 
 msgid "Declining..."
 msgstr "Declining..."
-
-msgid "Decrease"
-msgstr "Decrease"
 
 msgid "Default"
 msgstr "Default"
@@ -1009,9 +981,6 @@ msgstr "Drop an image into any card — AspectRatio keeps the slot size fixed re
 
 msgid "Drop anywhere to add to the gallery"
 msgstr "Drop anywhere to add to the gallery"
-
-msgid "Drop files here, or click to browse"
-msgstr "Drop files here, or click to browse"
 
 msgid "Drop your filter controls here. The sheet handles scrolling and dismissal."
 msgstr "Drop your filter controls here. The sheet handles scrolling and dismissal."
@@ -1246,12 +1215,6 @@ msgstr "Go to account settings"
 msgid "Go to home"
 msgstr "Go to home"
 
-msgid "Go to next page"
-msgstr "Go to next page"
-
-msgid "Go to previous page"
-msgstr "Go to previous page"
-
 msgid "Google"
 msgstr "Google"
 
@@ -1302,9 +1265,6 @@ msgstr "In the real app the sidebar is fixed-positioned, persists its state and 
 
 msgid "Include cooking notes"
 msgstr "Include cooking notes"
-
-msgid "Increase"
-msgstr "Increase"
 
 msgid "Indeterminate"
 msgstr "Indeterminate"
@@ -1504,9 +1464,6 @@ msgstr "Link variants"
 msgid "LinkedIn"
 msgstr "LinkedIn"
 
-msgid "Loading"
-msgstr "Loading"
-
 msgid "Loading..."
 msgstr "Loading..."
 
@@ -1630,9 +1587,6 @@ msgstr "Middle"
 msgid "Mobile"
 msgstr "Mobile"
 
-msgid "Mobile navigation menu"
-msgstr "Mobile navigation menu"
-
 msgid "Mobile-first sheet with a drag handle and swipe-to-dismiss. Reach for it when content is short and the user should be able to flick it away. Left and right drawers are narrow by default; top and bottom span the full width unless you constrain DrawerContent with mx-auto and max-w-*."
 msgstr "Mobile-first sheet with a drag handle and swipe-to-dismiss. Reach for it when content is short and the user should be able to flick it away. Left and right drawers are narrow by default; top and bottom span the full width unless you constrain DrawerContent with mx-auto and max-w-*."
 
@@ -1650,9 +1604,6 @@ msgstr "More export options"
 
 msgid "More merge options"
 msgstr "More merge options"
-
-msgid "More pages"
-msgstr "More pages"
 
 msgid "More save options"
 msgstr "More save options"
@@ -1792,14 +1743,8 @@ msgstr "Only owners can change user roles"
 msgid "Only trusted personnel access data through Azure AD authentication"
 msgstr "Only trusted personnel access data through Azure AD authentication"
 
-msgid "Open calendar"
-msgstr "Open calendar"
-
 msgid "Open command palette"
 msgstr "Open command palette"
-
-msgid "Open navigation menu"
-msgstr "Open navigation menu"
 
 msgid "Open side pane"
 msgstr "Open side pane"
@@ -1857,9 +1802,6 @@ msgstr "Page not found"
 
 msgid "Page Views"
 msgstr "Page Views"
-
-msgid "Pagination"
-msgstr "Pagination"
 
 msgid "Palak paneer"
 msgstr "Palak paneer"
@@ -2166,9 +2108,6 @@ msgstr "Resizable app shell"
 msgid "Resizable panels"
 msgstr "Resizable panels"
 
-msgid "Resize sidebar"
-msgstr "Resize sidebar"
-
 msgid "Responsive layout"
 msgstr "Responsive layout"
 
@@ -2320,9 +2259,6 @@ msgstr "Select country"
 msgid "Select dates"
 msgstr "Select dates"
 
-msgid "Select time zone"
-msgstr "Select time zone"
-
 msgid "Select with groups"
 msgstr "Select with groups"
 
@@ -2401,9 +2337,6 @@ msgstr "Show details"
 msgid "Show dismissable banner"
 msgstr "Show dismissable banner"
 
-msgid "Show more"
-msgstr "Show more"
-
 msgid "Show search filters"
 msgstr "Show search filters"
 
@@ -2460,9 +2393,6 @@ msgstr "Single-expand vs multi-expand"
 
 msgid "Skeleton"
 msgstr "Skeleton"
-
-msgid "Skip to main content"
-msgstr "Skip to main content"
 
 msgid "SLA"
 msgstr "SLA"
@@ -2699,9 +2629,6 @@ msgstr "Title"
 msgid "To delete your account, please contact our support team."
 msgstr "To delete your account, please contact our support team."
 
-msgid "Today"
-msgstr "Today"
-
 msgid "Toggle bold"
 msgstr "Toggle bold"
 
@@ -2714,17 +2641,11 @@ msgstr "Toggle group"
 msgid "Toggle italic"
 msgstr "Toggle italic"
 
-msgid "Toggle sidebar"
-msgstr "Toggle sidebar"
-
 msgid "Toggle underline"
 msgstr "Toggle underline"
 
 msgid "Tom yum soup"
 msgstr "Tom yum soup"
-
-msgid "Tomorrow"
-msgstr "Tomorrow"
 
 msgid "Tonkotsu ramen"
 msgstr "Tonkotsu ramen"
@@ -3147,4 +3068,4 @@ msgid "YouTube"
 msgstr "YouTube"
 
 msgid "Zoom"
-msgstr "Zoom"
+msgstr "Zoomtest-modify"

@@ -132,10 +132,7 @@
   "overrides": [
     {
       "files": ["**/public/*.html"],
-      "rules": {
-        "jsx-a11y/use-valid-lang": "off",
-        "no-assign-in-expression": "off"
-      }
+      "rules": {}
     },
     {
       "files": ["**/*.test.ts", "**/*.test.tsx", "**/tests/**/*.ts", "**/tests/**/*.tsx"],

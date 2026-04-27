@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "build": "npm run update-translations && npm run swagger && rsbuild build",
+    "build": "npm run swagger && rsbuild build",
     "check": "oxfmt --check && oxlint",
     "dev": "rsbuild dev",
     "dev:setup": "npm run update-translations && npm run swagger",

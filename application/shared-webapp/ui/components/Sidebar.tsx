@@ -16,6 +16,7 @@ import {
 } from "../utils/responsive";
 import { Button } from "./Button";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "./HoverCard";
+import { Link } from "./Link";
 import { Separator } from "./Separator";
 import { Skeleton } from "./Skeleton";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "./Tooltip";
@@ -241,11 +242,13 @@ function SidebarProvider({
               {...props}
             >
               {/* Keyboard users can jump past the sidebar to #main-content (set by AppLayout). */}
-              <Button
-                render={<a href="#main-content">{t`Skip to main content`}</a>}
-                nativeButton={false}
+              <Link
+                href="#main-content"
+                variant="button-primary"
                 className="absolute top-4 left-4 z-[100] -translate-y-[200%] focus-visible:translate-y-0"
-              />
+              >
+                {t`Skip to main content`}
+              </Link>
 
               {children}
             </div>
