@@ -38,7 +38,7 @@ interface RetryPaymentDialogProps {
  * Retry a failed billing-period charge against the saved PayFast token. The backend (POST
  * /api/account/billing/retry-pending-invoice) calls PayFast's /subscriptions/{token}/adhoc API.
  * If the token has been revoked / expired, the response includes a UUID for the lightbox so the
- * user can register a new card. Replaces upstream's Stripe invoice.payment_action_required flow.
+ * user can register a new card.
  */
 export function RetryPaymentDialog({
   isOpen,

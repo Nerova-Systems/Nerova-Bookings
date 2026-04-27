@@ -221,7 +221,7 @@ public sealed record BillingAddress(
 /// <summary>
 ///     Payment method summary shown on the billing page. PayFast does not return card brand / last4 /
 ///     expiry from the recurring API, so we populate <c>Brand = "Card on file"</c> and leave the other
-///     fields null. The shape is preserved for UI compatibility with upstream's Stripe-derived layout.
+///     fields null. The shape is preserved for UI compatibility with the billing page layout.
 /// </summary>
 [PublicAPI]
 public sealed record PaymentMethod(

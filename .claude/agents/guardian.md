@@ -91,7 +91,7 @@ Only you manage Aspire via the `run` or `restart` MCP tool. Rules:
 
 ## Data Corruption
 
-Never reset or wipe the database. Data is synced with external services (e.g., Stripe sandbox) and wiping it causes cascading problems. If data is corrupted (e.g., from another branch), write a temporary data migration script to clean it up, run it, then delete the script. Escalate to the team lead if unsure.
+Never reset or wipe the database. Data is synced with external services (e.g., PayFast sandbox) and wiping it causes cascading problems. If data is corrupted (e.g., from another branch), write a temporary data migration script to clean it up, run it, then delete the script. Escalate to the team lead if unsure.
 
 ## [Task] Status
 

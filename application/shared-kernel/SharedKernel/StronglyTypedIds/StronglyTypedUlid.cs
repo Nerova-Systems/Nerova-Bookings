@@ -5,7 +5,7 @@ namespace SharedKernel.StronglyTypedIds;
 
 /// <summary>
 ///     This is the recommended ID type to use. It uses the <see cref="Ulid" /> to create unique chronological IDs.
-///     IDs are prefixed with the value of the <see cref="IdPrefixAttribute" /> inspired by Stripe's API.
+///     IDs are prefixed with the value of the <see cref="IdPrefixAttribute" />.
 /// </summary>
 public abstract record StronglyTypedUlid<T>(string Value) : StronglyTypedId<string, T>(Value)
     where T : StronglyTypedUlid<T>

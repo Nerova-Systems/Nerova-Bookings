@@ -24,11 +24,16 @@ param googleOAuthClientId string
 param googleOAuthClientSecret string
 
 @secure()
-param stripePublishableKey string
+param payFastMerchantId string
 @secure()
-param stripeApiKey string
+param payFastMerchantKey string
 @secure()
-param stripeWebhookSecret string
+param payFastPassphrase string
+param payFastSandbox string = 'false'
+param payFastNotifyUrl string = ''
+param payFastReturnUrl string = ''
+param payFastCancelUrl string = ''
+param payFastAllowedIps string = ''
 
 var storageAccountUniquePrefix = replace(clusterResourceGroupName, '-', '')
 var tags = { environment: environment, 'managed-by': 'bicep' }
@@ -120,15 +125,20 @@ module googleOAuthSecrets '../modules/key-vault-secrets.bicep' = if (!empty(goog
   }
 }
 
-module stripeSecrets '../modules/key-vault-secrets.bicep' = if (!empty(stripeApiKey) && !empty(stripeWebhookSecret) && !empty(stripePublishableKey)) {
+module payFastSecrets '../modules/key-vault-secrets.bicep' = if (!empty(payFastMerchantId) && !empty(payFastMerchantKey) && !empty(payFastPassphrase)) {
   scope: clusterResourceGroup
-  name: '${clusterResourceGroupName}-stripe-secrets'
+  name: '${clusterResourceGroupName}-payfast-secrets'
   params: {
     keyVaultName: keyVault.outputs.name
     secrets: {
-      'Stripe--ApiKey': stripeApiKey
-      'Stripe--WebhookSecret': stripeWebhookSecret
-      'Stripe--PublishableKey': stripePublishableKey
+      'PayFast--MerchantId': payFastMerchantId
+      'PayFast--MerchantKey': payFastMerchantKey
+      'PayFast--Passphrase': payFastPassphrase
+      'PayFast--Sandbox': payFastSandbox
+      'PayFast--NotifyUrl': empty(payFastNotifyUrl) ? '${publicUrl}/api/account/subscriptions/payfast/itn' : payFastNotifyUrl
+      'PayFast--ReturnUrl': empty(payFastReturnUrl) ? '${publicUrl}/account/billing' : payFastReturnUrl
+      'PayFast--CancelUrl': empty(payFastCancelUrl) ? '${publicUrl}/account/billing' : payFastCancelUrl
+      'PayFast--AllowedIps': payFastAllowedIps
     }
   }
 }
@@ -250,12 +260,8 @@ var accountEnvironmentVariables = [
     value: 'no-reply@${communicationService.outputs.fromSenderDomain}'
   }
   {
-    name: 'Stripe__SubscriptionEnabled'
-    value: !empty(stripeApiKey) && !empty(stripeWebhookSecret) && !empty(stripePublishableKey) ? 'true' : 'false'
-  }
-  {
-    name: 'Stripe__AllowMockProvider'
-    value: 'false'
+    name: 'PayFast__Sandbox'
+    value: payFastSandbox
   }
 ]
 
@@ -511,7 +517,7 @@ var mainEnvironmentVariables = [
   }
   {
     name: 'PUBLIC_SUBSCRIPTION_ENABLED'
-    value: !empty(stripeApiKey) && !empty(stripeWebhookSecret) && !empty(stripePublishableKey) ? 'true' : 'false'
+    value: !empty(payFastMerchantId) && !empty(payFastMerchantKey) && !empty(payFastPassphrase) ? 'true' : 'false'
   }
 ]
 

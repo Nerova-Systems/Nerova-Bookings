@@ -29,6 +29,7 @@ function PlansPage() {
   const scheduledPlan = state.subscription?.scheduledPlan ?? null;
   const currentPeriodEnd = state.subscription?.currentPeriodEnd ?? null;
   const formattedPeriodEnd = formatLongDate(currentPeriodEnd);
+  const isPaymentConfigured = state.pricingCatalog == null || state.pricingCatalog.plans.length > 0;
 
   const handleSubscribe = (plan: SubscriptionPlan) => {
     state.setSubscribeTarget(plan);
@@ -59,7 +60,7 @@ function PlansPage() {
           currentPlan={state.currentPlan}
           cancelAtPeriodEnd={isCancelled}
           scheduledPlan={scheduledPlan}
-          isStripeConfigured={true}
+          isPaymentConfigured={isPaymentConfigured}
           onSubscribe={handleSubscribe}
           onUpgrade={(plan) => {
             state.setUpgradeTarget(plan);

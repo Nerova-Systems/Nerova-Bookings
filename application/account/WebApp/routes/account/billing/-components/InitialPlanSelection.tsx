@@ -14,19 +14,19 @@ type PlanPriceItem = components["schemas"]["PlanPriceItem"];
 interface InitialPlanSelectionProps {
   plans: PlanPriceItem[] | undefined;
   currentPlan: SubscriptionPlan;
-  isStripeConfigured: boolean;
+  isPaymentConfigured: boolean;
   onSubscribe: (plan: SubscriptionPlan) => void;
 }
 
 export function InitialPlanSelection({
   plans,
   currentPlan,
-  isStripeConfigured,
+  isPaymentConfigured,
   onSubscribe
 }: Readonly<InitialPlanSelectionProps>) {
   return (
     <AppLayout variant="center" maxWidth="64rem" title={t`Billing`} subtitle={t`Choose a plan to get started.`}>
-      {!isStripeConfigured && <BillingNotConfiguredBanner />}
+      {!isPaymentConfigured && <BillingNotConfiguredBanner />}
       <div className="grid gap-4 lg:grid-cols-3">
         {[Plans.Starter, Plans.Standard, Plans.Premium].map((plan) => (
           <PlanCard
@@ -36,7 +36,7 @@ export function InitialPlanSelection({
             currentPlan={currentPlan}
             cancelAtPeriodEnd={false}
             scheduledPlan={null}
-            isStripeConfigured={isStripeConfigured}
+            isPaymentConfigured={isPaymentConfigured}
             onSubscribe={onSubscribe}
             onUpgrade={() => {}}
             onDowngrade={() => {}}

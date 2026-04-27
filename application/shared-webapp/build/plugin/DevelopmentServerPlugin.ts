@@ -23,9 +23,14 @@ const ignoreTestsPattern = "**/tests/**";
 const ignorePlaywrightReportPattern = "**/playwright-report/**";
 
 /**
- * Files to write to disk for the development server to serve
+ * Files to write to disk so the .NET APIs can serve SPA and federated-module assets.
  */
 const writeToDisk = ["index.html", "remoteEntry.js", "robots.txt", "favicon.ico"];
+
+function shouldWriteToDisk(filename: string) {
+  const normalizedFilename = filename.replace(/\\/g, "/");
+  return writeToDisk.some((file) => normalizedFilename.endsWith(file)) || normalizedFilename.includes("/static/");
+}
 
 export type DevelopmentServerPluginOptions = {
   /**
@@ -108,9 +113,7 @@ export function DevelopmentServerPlugin(options: DevelopmentServerPluginOptions)
             // Set publicPath to auto to enable the server to serve the files
             assetPrefix: "auto",
             // Write files to "dist" folder enabling the Api to serve them
-            writeToDisk: (filename: string) => {
-              return writeToDisk.some((file) => filename.endsWith(file));
-            }
+            writeToDisk: shouldWriteToDisk
           },
           tools: {
             rspack: {

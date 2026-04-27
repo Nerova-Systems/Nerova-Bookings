@@ -19,7 +19,7 @@ type PlanCardProps = {
   currentPlan: SubscriptionPlan;
   cancelAtPeriodEnd: boolean;
   scheduledPlan: SubscriptionPlan | null;
-  isStripeConfigured: boolean;
+  isPaymentConfigured: boolean;
   onSubscribe: (plan: SubscriptionPlan) => void;
   onUpgrade: (plan: SubscriptionPlan) => void;
   onDowngrade: (plan: SubscriptionPlan) => void;
@@ -40,7 +40,7 @@ export function PlanCard({
   currentPlan,
   cancelAtPeriodEnd,
   scheduledPlan,
-  isStripeConfigured,
+  isPaymentConfigured,
   onSubscribe,
   onUpgrade,
   onDowngrade,
@@ -105,7 +105,7 @@ export function PlanCard({
           currentPlan={currentPlan}
           cancelAtPeriodEnd={cancelAtPeriodEnd}
           scheduledPlan={scheduledPlan}
-          isStripeConfigured={isStripeConfigured}
+          isPaymentConfigured={isPaymentConfigured}
           onSubscribe={onSubscribe}
           onUpgrade={onUpgrade}
           onDowngrade={onDowngrade}

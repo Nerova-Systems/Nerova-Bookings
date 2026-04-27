@@ -22,7 +22,7 @@ Guidelines for creating database migrations using PostgreSQL conventions with sn
    - All other properties in the same order as they appear in the C# Aggregate class
 
 3. Use snake_case naming for everything:
-   - Table names: plural, lowercase (e.g., `users`, `email_logins`, `stripe_events`)
+   - Table names: plural, lowercase (e.g., `users`, `email_logins`, `payfast_itns`)
    - Column names: lowercase with underscores (e.g., `tenant_id`, `created_at`, `email_confirmed`)
    - C# anonymous type members must also be snake_case (e.g., `tenant_id = table.Column<long>(...)`)
    - Constraint names: `pk_table_name`, `fk_child_table_parent_table_column_name`, `ix_table_name_column_name`
@@ -119,7 +119,7 @@ public class AddUserPrefsMigration : Migration  // ❌ Not sealed, incorrect nam
 ```csharp
 // ✅ DO: Use PostgreSQL WHERE clause syntax for filtered indexes
 migrationBuilder.CreateIndex("ix_users_tenant_id_email", "users", ["tenant_id", "email"], unique: true, filter: "deleted_at IS NULL");
-migrationBuilder.CreateIndex("ix_subscriptions_stripe_customer_id", "subscriptions", "stripe_customer_id", unique: true, filter: "stripe_customer_id IS NOT NULL");
+migrationBuilder.CreateIndex("ix_subscriptions_payfast_token", "subscriptions", "payfast_token", unique: true, filter: "payfast_token IS NOT NULL");
 
 // ❌ DON'T: Use SQL Server bracket notation
 migrationBuilder.CreateIndex("IX_Users_TenantId_Email", "Users", ["TenantId", "Email"], unique: true, filter: "[DeletedAt] IS NULL");

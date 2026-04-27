@@ -38,6 +38,7 @@ function BillingPage() {
 
   const { data: pricingCatalog } = api.useQuery("get", "/api/account/subscriptions/pricing-catalog");
   const currentPlan = subscription?.plan ?? SubscriptionPlan.Trial;
+  const isPaymentConfigured = pricingCatalog == null || pricingCatalog.plans.length > 0;
 
   const { reactivateMutation, cancelDowngradeMutation } = useBillingPageMutations({
     startPolling,
@@ -104,7 +105,7 @@ function BillingPage() {
         <InitialPlanSelection
           plans={pricingCatalog?.plans}
           currentPlan={currentPlan}
-          isStripeConfigured={true}
+          isPaymentConfigured={isPaymentConfigured}
           onSubscribe={() => navigate({ to: "/account/billing/subscription" })}
         />
       )}

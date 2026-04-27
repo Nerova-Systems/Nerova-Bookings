@@ -110,7 +110,7 @@ We use the following data processors to operate our Service:
 
 - **Microsoft Azure**: Cloud infrastructure and services
 - **Azure Application Insights**: Analytics and performance monitoring
-- **Stripe**: Payment processing (where applicable)
+- **PayFast**: Payment processing (where applicable)
 
 These processors are contractually bound to protect data and process it only according to our instructions. Our data processing relationship is governed by a Data Processing Agreement (DPA) that complies with GDPR Article 28 requirements. Our DPA template is publicly available at [Data Processing Agreement](/legal/dpa).
 

@@ -26,7 +26,7 @@ interface UpdatePaymentMethodDialogProps {
  * supported flow is to redirect the customer to PayFast's hosted page at
  * `/eng/recurring/update/{token}` where they enter new card details. The same token continues to
  * work after the update — no webhook fires for the card change itself, so the user simply returns
- * to our app and continues. Compare to Stripe's SetupIntent flow which we replaced.
+ * to our app and continues.
  */
 export function UpdatePaymentMethodDialog({ isOpen, onOpenChange }: Readonly<UpdatePaymentMethodDialogProps>) {
   const queryClient = useQueryClient();
