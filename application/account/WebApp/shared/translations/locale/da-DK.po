@@ -207,6 +207,9 @@ msgstr "Aktive brugere i de sidste 30 dage"
 msgid "Add an extra layer of security to your account."
 msgstr ""
 
+msgid "Add billing information"
+msgstr ""
+
 msgid "Add more in the Users menu"
 msgstr "Tilføj flere i Brugere menuen"
 
@@ -240,6 +243,12 @@ msgstr "Tilføjet"
 msgid "Address (fixed 2 lines)"
 msgstr "Adresse (fast 2 linjer)"
 
+msgid "Address line 1"
+msgstr ""
+
+msgid "Address line 2 (optional)"
+msgstr ""
+
 msgid "Adjust the interface size on this device to your preference."
 msgstr "Juster grænsefladens størrelse på denne enhed efter dine præferencer."
 
@@ -254,6 +263,9 @@ msgstr "Avancerede indstillinger"
 
 msgid "Advanced techniques, over 60 minutes"
 msgstr "Avancerede teknikker, over 60 minutter"
+
+msgid "After updating your card, return to this tab — there's nothing else you need to do here."
+msgstr ""
 
 msgid "Alert dialogs"
 msgstr "Advarselsdialoger"
@@ -407,17 +419,29 @@ msgstr "Grundlæggende færdigheder, under 30 minutter"
 msgid "Basic support"
 msgstr "Basal support"
 
+msgid "Bill to"
+msgstr ""
+
 msgid "Billed monthly: {targetFormattedPrice}"
 msgstr "Faktureres månedligt: {targetFormattedPrice}"
 
 msgid "Billing"
 msgstr "Fakturering"
 
+msgid "Billing email"
+msgstr ""
+
 msgid "Billing history"
 msgstr "Betalingshistorik"
 
+msgid "Billing information updated"
+msgstr ""
+
 msgid "Billing is not configured. Please contact support to enable payment processing."
 msgstr "Betaling er ikke konfigureret. Kontakt support for at aktivere betalingsbehandling."
+
+msgid "Billing name"
+msgstr ""
 
 msgid "Billing tabs"
 msgstr "Faktureringsfaner"
@@ -533,6 +557,9 @@ msgstr "Annullerer"
 msgid "Cancelling..."
 msgstr "Annullerer..."
 
+msgid "Card on file"
+msgstr ""
+
 msgid "Card-style preview shown on hover or focus. Use it for user mentions, link previews, or any compact context that would otherwise need a click."
 msgstr "Kortvisning vist ved hover eller fokus. Brug det til brugeromtaler, link-previews eller kompakt kontekst der ellers ville kræve et klik."
 
@@ -619,6 +646,9 @@ msgstr "Vælg hvilke notifikationer du modtager og hvordan."
 
 msgid "Chrome"
 msgstr "Chrome"
+
+msgid "City"
+msgstr ""
 
 msgid "Clear"
 msgstr "Ryd"
@@ -1020,6 +1050,9 @@ msgstr "Let"
 msgid "Edge"
 msgstr "Edge"
 
+msgid "Edit billing information"
+msgstr ""
+
 msgid "Edit profile"
 msgstr "Rediger profil"
 
@@ -1056,6 +1089,9 @@ msgstr "Aktiveret"
 msgid "Enchiladas verdes"
 msgstr "Enchiladas verdes"
 
+msgid "Enter the billing details for your subscription."
+msgstr ""
+
 msgid "Enter your email below to log in"
 msgstr "Indtast din e-mail nedenfor for at logge ind"
 
@@ -1091,6 +1127,11 @@ msgstr "Fold Komponenter ud"
 
 msgid "Expand Examples"
 msgstr "Fold Eksempler ud"
+
+#. placeholder {0}: paymentMethod.expMonth
+#. placeholder {1}: paymentMethod.expYear
+msgid "Expires {0}/{1}"
+msgstr ""
 
 msgid "Export"
 msgstr "Eksporter"
@@ -1530,6 +1571,9 @@ msgstr "Administrer dit abonnement."
 msgid "Manage your users and permissions here."
 msgstr "Administrer dine brugere og tilladelser her."
 
+msgid "Managed by PayFast"
+msgstr ""
+
 msgid "Managed identities"
 msgstr "Administrerede identiteter"
 
@@ -1677,11 +1721,17 @@ msgstr "Ingen konto fundet for denne e-mailadresse. Tilmeld dig venligst for at 
 msgid "No active sessions found."
 msgstr "Ingen aktive sessioner"
 
+msgid "No billing information on file."
+msgstr ""
+
 msgid "No longer needed"
 msgstr "Ikke længere nødvendigt"
 
 msgid "No payment history available."
 msgstr "Ingen betalingshistorik tilgængelig."
+
+msgid "No payment method on file."
+msgstr ""
 
 msgid "No recipes yet"
 msgstr "Ingen opskrifter endnu"
@@ -1755,6 +1805,12 @@ msgstr "Åbn sidepanel"
 msgid "Opened documentation"
 msgstr "Åbnet dokumentation"
 
+msgid "Opening PayFast in a new tab to update your card."
+msgstr ""
+
+msgid "Opening..."
+msgstr ""
+
 msgid "Option A"
 msgstr "Mulighed A"
 
@@ -1812,14 +1868,26 @@ msgstr ""
 msgid "Passwordless deployments"
 msgstr "Adgangskodeløse implementeringer"
 
+msgid "Pay"
+msgstr ""
+
+msgid "Pay and subscribe"
+msgstr ""
+
 msgid "Pay and upgrade"
 msgstr "Betal og opgrader"
+
+msgid "Payment could not be processed. Please update your card and try again."
+msgstr ""
 
 msgid "Payment failed"
 msgstr "Betaling mislykkedes"
 
 msgid "Payment failed. Your subscription will be suspended soon."
 msgstr "Betaling mislykkedes. Dit abonnement vil blive suspenderet snart."
+
+msgid "Payment method"
+msgstr ""
 
 msgid "Payment processor unavailable. Please refresh and try again."
 msgstr ""
@@ -1829,6 +1897,9 @@ msgstr "Pedro Duarte"
 
 msgid "Pending"
 msgstr "Afventer"
+
+msgid "Pending payment completed"
+msgstr ""
 
 msgid "People"
 msgstr "Mennesker"
@@ -1896,6 +1967,9 @@ msgstr "Vælg et JPEG-, PNG-, GIF-, WebP- eller SVG-billede."
 
 msgid "Please try again or return to the home page."
 msgstr "Prøv venligst igen eller vend tilbage til forsiden."
+
+msgid "Postal code"
+msgstr ""
 
 msgid "Powered by"
 msgstr "Powered by"
@@ -2113,6 +2187,9 @@ msgid "Restoring..."
 msgstr "Gendanner..."
 
 msgid "Retry payment"
+msgstr ""
+
+msgid "Retry pending payment"
 msgstr ""
 
 msgid "Revoke"
@@ -2448,6 +2525,9 @@ msgstr "Standard brugeradgang"
 msgid "Starter"
 msgstr ""
 
+msgid "State / Province (optional)"
+msgstr ""
+
 msgid "Static preview of the Sidebar component. The fully interactive version — with drag-to-resize, hover-reveal toggle, and icon collapse — renders as the real sidemenu in each self-contained system."
 msgstr "Statisk forhåndsvisning af Sidebar-komponenten. Den fuldt interaktive version — med træk-for-at-ændre-størrelse, skifteknap der vises ved hover og ikon-sammenklapning — vises som den rigtige sidemenu i hvert self-contained system."
 
@@ -2511,6 +2591,12 @@ msgstr "Tacos al pastor"
 
 msgid "Tax"
 msgstr "Moms"
+
+msgid "Tax ID (optional)"
+msgstr ""
+
+msgid "Tax ID:"
+msgstr ""
 
 msgid "Tell us a bit about yourself to get started."
 msgstr "Fortæl os lidt om dig selv for at komme i gang."
@@ -2737,6 +2823,15 @@ msgstr "Unavngivet konto"
 msgid "Unsaved changes"
 msgstr "Ugemte ændringer"
 
+msgid "Update on PayFast"
+msgstr ""
+
+msgid "Update payment method"
+msgstr ""
+
+msgid "Update the billing details associated with your subscription."
+msgstr ""
+
 msgid "Update your personal information and profile photo."
 msgstr "Opdater dine personlige oplysninger og profilbillede."
 
@@ -2937,6 +3032,9 @@ msgstr "Du har ugemte ændringer. Hvis du forlader nu, vil dine ændringer gå t
 
 msgid "You were logged out from another browser tab."
 msgstr "Du blev logget ud fra en anden browsertab."
+
+msgid "You'll be redirected to PayFast in a new tab where you can securely update the card on your subscription. Your existing schedule and billing dates remain unchanged."
+msgstr ""
 
 #. placeholder {0}: getPlanLabel(currentPlan)
 msgid "Your {0} subscription has been cancelled and will end on {formattedPeriodEnd}."

@@ -8,13 +8,13 @@ import {
   DialogClose,
   DialogContent,
   DialogFooter,
+  DialogForm,
   DialogHeader,
   DialogTitle
 } from "@repo/ui/components/Dialog";
 import { DirtyDialog } from "@repo/ui/components/DirtyDialog";
 import { useDialogSetDirty } from "@repo/ui/components/DirtyDialogContext";
 import { Field, FieldContent, FieldDescription, FieldLabel, FieldTitle } from "@repo/ui/components/Field";
-import { Form, type FormProps } from "@repo/ui/components/Form";
 import { Item, ItemContent, ItemDescription, ItemMedia, ItemTitle } from "@repo/ui/components/Item";
 import { RadioGroup, RadioGroupItem } from "@repo/ui/components/RadioGroup";
 import { getInitials } from "@repo/utils/string/getInitials";
@@ -70,8 +70,7 @@ function ChangeUserRoleDialogBody({ user, onClose }: { user: UserDetails; onClos
   const displayName = [user.firstName, user.lastName].filter(Boolean).join(" ") || user.email;
   const currentRole = selectedRole ?? user.role;
 
-  const handleSubmit: NonNullable<FormProps["onSubmit"]> = (event) => {
-    event.preventDefault();
+  const handleSubmit = () => {
     changeUserRoleMutation.mutate({
       params: { path: { id: user.id } },
       body: { userRole: currentRole }
@@ -79,12 +78,7 @@ function ChangeUserRoleDialogBody({ user, onClose }: { user: UserDetails; onClos
   };
 
   return (
-    <Form
-      onSubmit={handleSubmit}
-      validationErrors={changeUserRoleMutation.error?.errors}
-      validationBehavior="aria"
-      className="flex flex-col max-sm:h-full"
-    >
+    <DialogForm onSubmit={handleSubmit} validationErrors={changeUserRoleMutation.error?.errors}>
       <DialogBody>
         <Item className="p-0">
           <ItemMedia variant="image" className="size-16">
@@ -157,10 +151,10 @@ function ChangeUserRoleDialogBody({ user, onClose }: { user: UserDetails; onClos
         <DialogClose render={<Button type="reset" variant="secondary" disabled={changeUserRoleMutation.isPending} />}>
           <Trans>Cancel</Trans>
         </DialogClose>
-        <Button type="submit" disabled={changeUserRoleMutation.isPending}>
+        <Button type="submit" isPending={changeUserRoleMutation.isPending}>
           {changeUserRoleMutation.isPending ? <Trans>Saving...</Trans> : <Trans>Save changes</Trans>}
         </Button>
       </DialogFooter>
-    </Form>
+    </DialogForm>
   );
 }

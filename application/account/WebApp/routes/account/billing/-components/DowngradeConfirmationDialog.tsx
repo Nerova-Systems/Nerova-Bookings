@@ -59,7 +59,7 @@ export function DowngradeConfirmationDialog({
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel disabled={isPending}>{t`Cancel`}</AlertDialogCancel>
-          <AlertDialogAction onClick={onConfirm} disabled={isPending}>
+          <AlertDialogAction onClick={onConfirm} isPending={isPending}>
             {isPending ? t`Processing...` : t`Confirm downgrade`}
           </AlertDialogAction>
         </AlertDialogFooter>

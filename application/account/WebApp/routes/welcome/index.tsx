@@ -124,7 +124,7 @@ function AccountSetupForm({ onComplete }: AccountSetupFormProps) {
             onLogoFileSelect={setSelectedLogoFile}
           />
 
-          <Button type="submit" disabled={isPending} className="mt-4 w-full">
+          <Button type="submit" isPending={isPending} className="mt-4 w-full">
             {isPending ? <Trans>Saving...</Trans> : <Trans>Continue</Trans>}
           </Button>
         </>
@@ -221,7 +221,7 @@ function ProfileSetupForm() {
             />
           </div>
 
-          <Button type="submit" disabled={isPending} className="mt-4 w-full">
+          <Button type="submit" isPending={isPending} className="mt-4 w-full">
             {isPending ? <Trans>Saving...</Trans> : <Trans>Continue</Trans>}
           </Button>
         </>

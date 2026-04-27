@@ -141,7 +141,8 @@ export function CancelSubscriptionDialog({
                 onConfirm(reason, feedback.trim() || null);
               }
             }}
-            disabled={isPending || reason === null}
+            isPending={isPending}
+            disabled={reason === null}
           >
             {isPending ? t`Cancelling...` : t`Cancel subscription`}
           </AlertDialogAction>

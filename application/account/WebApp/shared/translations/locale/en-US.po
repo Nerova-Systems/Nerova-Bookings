@@ -209,6 +209,9 @@ msgstr "Active users in the past 30 days"
 msgid "Add an extra layer of security to your account."
 msgstr "Add an extra layer of security to your account."
 
+msgid "Add billing information"
+msgstr "Add billing information"
+
 msgid "Add more in the Users menu"
 msgstr "Add more in the Users menu"
 
@@ -242,6 +245,12 @@ msgstr "Added"
 msgid "Address (fixed 2 lines)"
 msgstr "Address (fixed 2 lines)"
 
+msgid "Address line 1"
+msgstr "Address line 1"
+
+msgid "Address line 2 (optional)"
+msgstr "Address line 2 (optional)"
+
 msgid "Adjust the interface size on this device to your preference."
 msgstr "Adjust the interface size on this device to your preference."
 
@@ -256,6 +265,9 @@ msgstr "Advanced options"
 
 msgid "Advanced techniques, over 60 minutes"
 msgstr "Advanced techniques, over 60 minutes"
+
+msgid "After updating your card, return to this tab — there's nothing else you need to do here."
+msgstr "After updating your card, return to this tab — there's nothing else you need to do here."
 
 msgid "Alert dialogs"
 msgstr "Alert dialogs"
@@ -409,17 +421,29 @@ msgstr "Basic skills, under 30 minutes"
 msgid "Basic support"
 msgstr "Basic support"
 
+msgid "Bill to"
+msgstr "Bill to"
+
 msgid "Billed monthly: {targetFormattedPrice}"
 msgstr "Billed monthly: {targetFormattedPrice}"
 
 msgid "Billing"
 msgstr "Billing"
 
+msgid "Billing email"
+msgstr "Billing email"
+
 msgid "Billing history"
 msgstr "Billing history"
 
+msgid "Billing information updated"
+msgstr "Billing information updated"
+
 msgid "Billing is not configured. Please contact support to enable payment processing."
 msgstr "Billing is not configured. Please contact support to enable payment processing."
+
+msgid "Billing name"
+msgstr "Billing name"
 
 msgid "Billing tabs"
 msgstr "Billing tabs"
@@ -535,6 +559,9 @@ msgstr "Cancelling"
 msgid "Cancelling..."
 msgstr "Cancelling..."
 
+msgid "Card on file"
+msgstr "Card on file"
+
 msgid "Card-style preview shown on hover or focus. Use it for user mentions, link previews, or any compact context that would otherwise need a click."
 msgstr "Card-style preview shown on hover or focus. Use it for user mentions, link previews, or any compact context that would otherwise need a click."
 
@@ -621,6 +648,9 @@ msgstr "Choose which notifications you receive and how."
 
 msgid "Chrome"
 msgstr "Chrome"
+
+msgid "City"
+msgstr "City"
 
 msgid "Clear"
 msgstr "Clear"
@@ -1022,6 +1052,9 @@ msgstr "Easy"
 msgid "Edge"
 msgstr "Edge"
 
+msgid "Edit billing information"
+msgstr "Edit billing information"
+
 msgid "Edit profile"
 msgstr "Edit profile"
 
@@ -1058,6 +1091,9 @@ msgstr "Enabled"
 msgid "Enchiladas verdes"
 msgstr "Enchiladas verdes"
 
+msgid "Enter the billing details for your subscription."
+msgstr "Enter the billing details for your subscription."
+
 msgid "Enter your email below to log in"
 msgstr "Enter your email below to log in"
 
@@ -1093,6 +1129,11 @@ msgstr "Expand Components"
 
 msgid "Expand Examples"
 msgstr "Expand Examples"
+
+#. placeholder {0}: paymentMethod.expMonth
+#. placeholder {1}: paymentMethod.expYear
+msgid "Expires {0}/{1}"
+msgstr "Expires {0}/{1}"
 
 msgid "Export"
 msgstr "Export"
@@ -1532,6 +1573,9 @@ msgstr "Manage your subscription plan."
 msgid "Manage your users and permissions here."
 msgstr "Manage your users and permissions here."
 
+msgid "Managed by PayFast"
+msgstr "Managed by PayFast"
+
 msgid "Managed identities"
 msgstr "Managed identities"
 
@@ -1679,11 +1723,17 @@ msgstr "No account found for this email address. Please sign up to create an acc
 msgid "No active sessions found."
 msgstr "No active sessions found."
 
+msgid "No billing information on file."
+msgstr "No billing information on file."
+
 msgid "No longer needed"
 msgstr "No longer needed"
 
 msgid "No payment history available."
 msgstr "No payment history available."
+
+msgid "No payment method on file."
+msgstr "No payment method on file."
 
 msgid "No recipes yet"
 msgstr "No recipes yet"
@@ -1757,6 +1807,12 @@ msgstr "Open side pane"
 msgid "Opened documentation"
 msgstr "Opened documentation"
 
+msgid "Opening PayFast in a new tab to update your card."
+msgstr "Opening PayFast in a new tab to update your card."
+
+msgid "Opening..."
+msgstr "Opening..."
+
 msgid "Option A"
 msgstr "Option A"
 
@@ -1814,14 +1870,26 @@ msgstr "Passkeys"
 msgid "Passwordless deployments"
 msgstr "Passwordless deployments"
 
+msgid "Pay"
+msgstr "Pay"
+
+msgid "Pay and subscribe"
+msgstr "Pay and subscribe"
+
 msgid "Pay and upgrade"
 msgstr "Pay and upgrade"
+
+msgid "Payment could not be processed. Please update your card and try again."
+msgstr "Payment could not be processed. Please update your card and try again."
 
 msgid "Payment failed"
 msgstr "Payment failed"
 
 msgid "Payment failed. Your subscription will be suspended soon."
 msgstr "Payment failed. Your subscription will be suspended soon."
+
+msgid "Payment method"
+msgstr "Payment method"
 
 msgid "Payment processor unavailable. Please refresh and try again."
 msgstr "Payment processor unavailable. Please refresh and try again."
@@ -1831,6 +1899,9 @@ msgstr "Pedro Duarte"
 
 msgid "Pending"
 msgstr "Pending"
+
+msgid "Pending payment completed"
+msgstr "Pending payment completed"
 
 msgid "People"
 msgstr "People"
@@ -1898,6 +1969,9 @@ msgstr "Please select a JPEG, PNG, GIF, WebP, or SVG image."
 
 msgid "Please try again or return to the home page."
 msgstr "Please try again or return to the home page."
+
+msgid "Postal code"
+msgstr "Postal code"
 
 msgid "Powered by"
 msgstr "Powered by"
@@ -2116,6 +2190,9 @@ msgstr "Restoring..."
 
 msgid "Retry payment"
 msgstr "Retry payment"
+
+msgid "Retry pending payment"
+msgstr "Retry pending payment"
 
 msgid "Revoke"
 msgstr "Revoke"
@@ -2450,6 +2527,9 @@ msgstr "Standard user access"
 msgid "Starter"
 msgstr "Starter"
 
+msgid "State / Province (optional)"
+msgstr "State / Province (optional)"
+
 msgid "Static preview of the Sidebar component. The fully interactive version — with drag-to-resize, hover-reveal toggle, and icon collapse — renders as the real sidemenu in each self-contained system."
 msgstr "Static preview of the Sidebar component. The fully interactive version — with drag-to-resize, hover-reveal toggle, and icon collapse — renders as the real sidemenu in each self-contained system."
 
@@ -2513,6 +2593,12 @@ msgstr "Tacos al pastor"
 
 msgid "Tax"
 msgstr "Tax"
+
+msgid "Tax ID (optional)"
+msgstr "Tax ID (optional)"
+
+msgid "Tax ID:"
+msgstr "Tax ID:"
 
 msgid "Tell us a bit about yourself to get started."
 msgstr "Tell us a bit about yourself to get started."
@@ -2739,6 +2825,15 @@ msgstr "Unnamed account"
 msgid "Unsaved changes"
 msgstr "Unsaved changes"
 
+msgid "Update on PayFast"
+msgstr "Update on PayFast"
+
+msgid "Update payment method"
+msgstr "Update payment method"
+
+msgid "Update the billing details associated with your subscription."
+msgstr "Update the billing details associated with your subscription."
+
 msgid "Update your personal information and profile photo."
 msgstr "Update your personal information and profile photo."
 
@@ -2939,6 +3034,9 @@ msgstr "You have unsaved changes. If you leave now, your changes will be lost."
 
 msgid "You were logged out from another browser tab."
 msgstr "You were logged out from another browser tab."
+
+msgid "You'll be redirected to PayFast in a new tab where you can securely update the card on your subscription. Your existing schedule and billing dates remain unchanged."
+msgstr "You'll be redirected to PayFast in a new tab where you can securely update the card on your subscription. Your existing schedule and billing dates remain unchanged."
 
 #. placeholder {0}: getPlanLabel(currentPlan)
 msgid "Your {0} subscription has been cancelled and will end on {formattedPeriodEnd}."

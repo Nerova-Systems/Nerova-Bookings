@@ -7,12 +7,12 @@ import {
   DialogContent,
   DialogDescription,
   DialogFooter,
+  DialogForm,
   DialogHeader,
   DialogTitle
 } from "@repo/ui/components/Dialog";
 import { DirtyDialog } from "@repo/ui/components/DirtyDialog";
 import { useDialogSetDirty } from "@repo/ui/components/DirtyDialogContext";
-import { Form } from "@repo/ui/components/Form";
 import { TextField } from "@repo/ui/components/TextField";
 import { mutationSubmitter } from "@repo/ui/forms/mutationSubmitter";
 import { toast } from "sonner";
@@ -54,12 +54,7 @@ function InviteUserDialogBody({ onClose }: { onClose: () => void }) {
   });
 
   return (
-    <Form
-      onSubmit={mutationSubmitter(inviteUserMutation)}
-      validationErrors={inviteUserMutation.error?.errors}
-      validationBehavior="aria"
-      className="flex flex-col max-sm:h-full"
-    >
+    <DialogForm onSubmit={mutationSubmitter(inviteUserMutation)} validationErrors={inviteUserMutation.error?.errors}>
       <DialogBody>
         <TextField
           autoFocus={true}
@@ -67,7 +62,6 @@ function InviteUserDialogBody({ onClose }: { onClose: () => void }) {
           name="email"
           label={t`Email`}
           placeholder={t`user@email.com`}
-          className="flex-grow"
           onChange={() => setDirty(true)}
         />
       </DialogBody>
@@ -75,10 +69,10 @@ function InviteUserDialogBody({ onClose }: { onClose: () => void }) {
         <DialogClose render={<Button type="reset" variant="secondary" disabled={inviteUserMutation.isPending} />}>
           <Trans>Cancel</Trans>
         </DialogClose>
-        <Button type="submit" disabled={inviteUserMutation.isPending}>
+        <Button type="submit" isPending={inviteUserMutation.isPending}>
           {inviteUserMutation.isPending ? <Trans>Sending...</Trans> : <Trans>Send invite</Trans>}
         </Button>
       </DialogFooter>
-    </Form>
+    </DialogForm>
   );
 }

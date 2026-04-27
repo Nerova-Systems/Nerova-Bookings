@@ -141,7 +141,7 @@ export function AccountSettings() {
             <div className="mt-4 md:grid md:grid-cols-[8.5rem_1fr] md:gap-8">
               <div />
               <div className="flex sm:justify-end">
-                <Button type="submit" disabled={saveMutation.isPending}>
+                <Button type="submit" isPending={saveMutation.isPending}>
                   {saveMutation.isPending ? <Trans>Saving...</Trans> : <Trans>Save changes</Trans>}
                 </Button>
               </div>

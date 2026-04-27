@@ -2,9 +2,8 @@ import { t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
 import { Button } from "@repo/ui/components/Button";
 import { CheckboxField } from "@repo/ui/components/CheckboxField";
-import { DialogBody, DialogFooter } from "@repo/ui/components/Dialog";
+import { DialogBody, DialogFooter, DialogForm } from "@repo/ui/components/Dialog";
 import { Field, FieldContent, FieldDescription, FieldLabel, FieldTitle } from "@repo/ui/components/Field";
-import { Form } from "@repo/ui/components/Form";
 import { InlineFieldGroup } from "@repo/ui/components/InlineFieldGroup";
 import { RadioGroup, RadioGroupItem } from "@repo/ui/components/RadioGroup";
 import { mutationSubmitter } from "@repo/ui/forms/mutationSubmitter";
@@ -22,7 +21,7 @@ export function CategorizationStep({ mutation, onBack, onChange }: Readonly<Cate
   const [favoriteChecked, setFavoriteChecked] = useState(false);
 
   return (
-    <Form onSubmit={mutationSubmitter(mutation)} validationBehavior="aria" className="flex min-h-0 flex-1 flex-col">
+    <DialogForm onSubmit={mutationSubmitter(mutation)}>
       <DialogBody>
         <div className="flex flex-col gap-4">
           <RadioGroup defaultValue="medium" onValueChange={onChange}>
@@ -87,10 +86,10 @@ export function CategorizationStep({ mutation, onBack, onChange }: Readonly<Cate
           <ChevronLeftIcon />
           <Trans>Back</Trans>
         </Button>
-        <Button type="submit" disabled={mutation.isPending}>
+        <Button type="submit" isPending={mutation.isPending}>
           {mutation.isPending ? <Trans>Saving...</Trans> : <Trans>Save changes</Trans>}
         </Button>
       </DialogFooter>
-    </Form>
+    </DialogForm>
   );
 }

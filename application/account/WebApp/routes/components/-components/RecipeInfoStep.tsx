@@ -1,8 +1,7 @@
 import { t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
 import { Button } from "@repo/ui/components/Button";
-import { DialogBody, DialogClose, DialogFooter } from "@repo/ui/components/Dialog";
-import { Form } from "@repo/ui/components/Form";
+import { DialogBody, DialogClose, DialogFooter, DialogForm } from "@repo/ui/components/Dialog";
 import { TextField } from "@repo/ui/components/TextField";
 import { ChevronRightIcon } from "lucide-react";
 
@@ -17,7 +16,7 @@ interface RecipeInfoStepProps {
 
 export function RecipeInfoStep({ simulateErrors, onNext, onCancel, onChange }: Readonly<RecipeInfoStepProps>) {
   return (
-    <Form validationBehavior="aria" className="flex min-h-0 flex-1 flex-col">
+    <DialogForm>
       <DialogBody>
         <div className="grid grid-cols-2 gap-4">
           <div className="col-span-2">
@@ -67,6 +66,6 @@ export function RecipeInfoStep({ simulateErrors, onNext, onCancel, onChange }: R
           <ChevronRightIcon />
         </Button>
       </DialogFooter>
-    </Form>
+    </DialogForm>
   );
 }

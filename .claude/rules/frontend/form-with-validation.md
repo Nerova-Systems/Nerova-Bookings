@@ -7,35 +7,41 @@ description: Rules for forms with validation using ShadCN 2.0 components
 
 ## Form wiring
 
-- `api.useMutation` (or TanStack `useMutation` for multi-call flows) + `mutationSubmitter` on `<Form>`.
-- Server validation via `<Form validationErrors={mutation.error?.errors} validationBehavior="aria">`. Fields read their own errors from `FormValidationContext` by `name`.
-- Submit button: `disabled={mutation.isPending}` only. No client-side `isValid` gate — server validates.
-- If the backend can't return field-level errors (e.g. non-nullable `DateOnly` fails JSON deserialization on `""`), fix the backend: make it nullable + `NotNull` FluentValidation rule.
+- In dialogs use `<DialogForm>` (from `@repo/ui/components/Dialog`); outside dialogs use `<Form>`. A plain `<Form>` between `DialogContent` and `DialogBody` breaks the scroll chain — `DialogForm` pre-applies `flex min-h-0 flex-1 flex-col` so `DialogBody`'s `flex-1 min-h-0 overflow-y-auto` still works.
+- `api.useMutation` (or TanStack `useMutation` for multi-call flows) + `mutationSubmitter` on the form.
+- Server validation: `validationErrors={mutation.error?.errors}` on the form. Fields read their own errors from `FormValidationContext` by `name`. `DialogForm` defaults `validationBehavior` to `"aria"`; `Form` requires you to set it.
+- Mutation CTAs: `isPending={mutation.isPending}` on `<Button>` (auto-disables, prepends `<Spinner />`). Cancel/Close keep `disabled={...}` — they are not CTAs, no spinner.
+- No client-side `isValid` gate — the server validates, and gating client-side hides the real errors from the user.
+- If the backend can't return field-level errors (e.g. non-nullable `DateOnly` fails JSON deserialization on `""`), fix the backend: make it nullable + add a `NotNull` FluentValidation rule.
 
 ## Dialog wrapper/body split
 
 Every form dialog has two components in the same file:
 
 - **Wrapper** (`XxxDialog`): receives `isOpen` / `onOpenChange`. Contains only `DirtyDialog` + `DialogContent` + `DialogHeader`. No state, no mutation, no dirty tracking.
-- **Body** (`XxxDialogBody`): child of `<DialogContent>`. Owns all state, mutation, `Form`, `DialogBody`, `DialogFooter`. Signals dirtiness via `useDialogSetDirty()` in field `onChange` handlers.
+- **Body** (`XxxDialogBody`): child of `<DialogContent>`. Owns state, mutation, the form, `DialogBody`, and `DialogFooter`. Signals dirtiness via `useDialogSetDirty()` (from `@repo/ui/components/DirtyDialogContext`) in field `onChange` handlers.
 
-**Why this split:** `DialogContent` unmounts its children on close, so the body is recreated on every open. Form state, mutation errors, dirty flag — all reset automatically because the components holding them no longer exist. No `handleCloseComplete`, no `mutation.reset()`, no `setIsFormDirty(false)` anywhere.
+`DialogContent` unmounts children on close, so the body is recreated on every open. Form state, mutation errors, and the dirty flag reset automatically — never write `handleCloseComplete`, `mutation.reset()`, or `setIsFormDirty(false)`.
 
-## DirtyDialog API
+Wizard state (`step`, intermediate values) also lives in the body — unmount resets the wizard to step 0 on reopen.
 
-- Props: `open`, `onOpenChange`, `trackingTitle`, optional label overrides. That's it.
-- Body calls `useDialogSetDirty()(true)` on any field change. The wrapper tracks the flag internally and clears it when `open` flips false.
-- Cancel button: `<DialogClose render={<Button type="reset" ... />}>` — `type="reset"` bypasses the unsaved warning.
-- Close on success: call `onClose` passed from the wrapper. Do not reset anything manually.
+## DirtyDialog
+
+- Props: `open`, `onOpenChange`, `trackingTitle` (+ optional label overrides). All state lives in the body.
+- Cancel button: `<DialogClose render={<Button type="reset" ... />}>`. `type="reset"` bypasses the unsaved-changes warning.
+- Close on success: call `onClose` passed from the wrapper. Do not reset anything manually — unmount does it.
 
 ## Anti-patterns
 
+- `<Form>` inside a dialog — breaks the `DialogBody` scroll chain. Use `<DialogForm>`.
 - State (`useState`, `useMutation`, refs) in the wrapper — persists across close/reopen. Always in the body.
 - `isValid`-gated submit button — hides server errors from the user.
-- `handleCloseComplete` / `mutation.reset()` / `setIsFormDirty(false)` — symptoms of state in the wrong place.
+- `handleCloseComplete`, `mutation.reset()`, `setIsFormDirty(false)` — symptoms of state living in the wrong component.
 - `<FormErrorMessage>` — deprecated. Use `validationErrors`.
 
-Note: .NET endpoints generate an `*.Api.json` on backend build; `openapi-typescript` turns it into `api.generated.d.ts`. Backend contract changes need both builds.
+## Multi-call submits
+
+Compose `api.useMutation` calls inside a TanStack `useMutation({ mutationFn: async (d) => { ... } })`, then pass its `error?.errors` into `validationErrors`.
 
 ## Example
 
@@ -61,27 +67,21 @@ function InviteUserDialogBody({ onClose }: { onClose: () => void }) {
   });
 
   return (
-    <Form
-      onSubmit={mutationSubmitter(inviteMutation)}
-      validationErrors={inviteMutation.error?.errors}
-      validationBehavior="aria"
-    >
+    <DialogForm onSubmit={mutationSubmitter(inviteMutation)} validationErrors={inviteMutation.error?.errors}>
       <DialogBody>
-        <TextField autoFocus name="email" label={t`Email`} onChange={() => setDirty(true)} />
+        <TextField autoFocus required name="email" label={t`Email`} onChange={() => setDirty(true)} />
       </DialogBody>
       <DialogFooter>
         <DialogClose render={<Button type="reset" variant="secondary" disabled={inviteMutation.isPending} />}>
           <Trans>Cancel</Trans>
         </DialogClose>
-        <Button type="submit" disabled={inviteMutation.isPending}>
+        <Button type="submit" isPending={inviteMutation.isPending}>
           {inviteMutation.isPending ? <Trans>Sending...</Trans> : <Trans>Send invite</Trans>}
         </Button>
       </DialogFooter>
-    </Form>
+    </DialogForm>
   );
 }
 ```
 
-Multi-step dialogs: wizard state (`step`, intermediate values) also lives in the body — unmount resets the wizard to step 0 on reopen.
-
-Multi-call submits: compose `api.useMutation` calls inside a TanStack `useMutation({ mutationFn: async (d) => { ... } })`, pass its `error?.errors` into `<Form validationErrors>`.
+Note: .NET endpoints generate `*.Api.json` on backend build; `openapi-typescript` turns it into `api.generated.d.ts`. Backend contract changes need both builds.

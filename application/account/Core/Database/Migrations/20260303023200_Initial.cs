@@ -158,7 +158,9 @@ public sealed class Initial : Migration
                 cancelled_at = table.Column<DateTimeOffset>("timestamptz", nullable: true),
                 cancellation_reason = table.Column<string>("text", nullable: true),
                 cancellation_feedback = table.Column<string>("text", nullable: true),
-                payment_transactions = table.Column<string>("jsonb", nullable: false)
+                payment_transactions = table.Column<string>("jsonb", nullable: false),
+                billing_info = table.Column<string>("jsonb", nullable: true),
+                payment_method = table.Column<string>("jsonb", nullable: true)
             },
             constraints: table =>
             {

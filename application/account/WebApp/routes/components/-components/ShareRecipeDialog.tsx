@@ -8,13 +8,13 @@ import {
   DialogContent,
   DialogDescription,
   DialogFooter,
+  DialogForm,
   DialogHeader,
   DialogTitle
 } from "@repo/ui/components/Dialog";
 import { DirtyDialog } from "@repo/ui/components/DirtyDialog";
 import { useDialogSetDirty } from "@repo/ui/components/DirtyDialogContext";
 import { Field, FieldContent, FieldDescription, FieldLabel, FieldTitle } from "@repo/ui/components/Field";
-import { Form } from "@repo/ui/components/Form";
 import { InlineFieldGroup } from "@repo/ui/components/InlineFieldGroup";
 import { RadioGroup, RadioGroupItem } from "@repo/ui/components/RadioGroup";
 import { TextField } from "@repo/ui/components/TextField";
@@ -92,11 +92,9 @@ function ShareRecipeDialogBody({
   };
 
   return (
-    <Form
+    <DialogForm
       onSubmit={mutationSubmitter(mutation)}
       validationErrors={simulateErrors ? { email: [t`Please enter a valid email address`] } : undefined}
-      validationBehavior="aria"
-      className="flex min-h-0 flex-1 flex-col"
     >
       <DialogBody>
         <div className="flex flex-col gap-6">
@@ -171,10 +169,10 @@ function ShareRecipeDialogBody({
         <DialogClose render={<Button type="reset" variant="secondary" disabled={mutation.isPending} />}>
           <Trans>Cancel</Trans>
         </DialogClose>
-        <Button type="submit" disabled={mutation.isPending}>
+        <Button type="submit" isPending={mutation.isPending}>
           {mutation.isPending ? <Trans>Sharing...</Trans> : <Trans>Share recipe</Trans>}
         </Button>
       </DialogFooter>
-    </Form>
+    </DialogForm>
   );
 }

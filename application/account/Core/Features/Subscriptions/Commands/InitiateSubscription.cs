@@ -55,10 +55,13 @@ public sealed class InitiateSubscriptionHandler(
         }
 
         var settings = payFastOptions.Value;
-        var now = timeProvider.GetUtcNow();
         var amount = SubscriptionPlanPricing.GetMonthlyPrice(command.Plan);
-        var billingDay = now.Day <= 28 ? now.Day : 1;
 
+        // Use PayFast Tokenization (subscription_type=2) instead of Subscriptions (=1).
+        // With Tokenization, PayFast stores the card and we own all billing — adhoc charges via
+        // /subscriptions/{token}/adhoc, no PayFast-managed recurring schedule. This avoids the
+        // double-billing race we saw under subscription_type=1 where PayFast auto-bills on
+        // billing_date in addition to our BillingJob. Tokens appear on the Tokenization page.
         var parameters = new Dictionary<string, string>
         {
             { "merchant_id", settings.MerchantId },
@@ -79,11 +82,7 @@ public sealed class InitiateSubscriptionHandler(
             { "custom_str1", subscription.Id.ToString() },
             { "custom_str2", executionContext.TenantId!.ToString()! },
             { "custom_str3", command.Plan.ToString() },
-            { "subscription_type", "1" },
-            { "billing_date", now.ToString("yyyy-MM-", CultureInfo.InvariantCulture) + billingDay.ToString("D2", CultureInfo.InvariantCulture) },
-            { "recurring_amount", amount.ToString("F2", CultureInfo.InvariantCulture) },
-            { "frequency", "3" },
-            { "cycles", "0" }
+            { "subscription_type", "2" }
         };
 
         parameters["signature"] = PayFastSignature.Generate(parameters, settings.Passphrase);

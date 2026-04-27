@@ -66,6 +66,10 @@ public sealed class Subscription : AggregateRoot<SubscriptionId>, ITenantScopedE
 
     public ImmutableArray<PaymentTransaction> PaymentTransactions { get; private set; }
 
+    public BillingInfo? BillingInfo { get; private set; }
+
+    public PaymentMethod? PaymentMethod { get; private set; }
+
     public TenantId TenantId { get; }
 
     public static Subscription Create(TenantId tenantId, DateTimeOffset now)
@@ -161,6 +165,22 @@ public sealed class Subscription : AggregateRoot<SubscriptionId>, ITenantScopedE
         Status = SubscriptionStatus.Expired;
         PayFastToken = null;
         PayFastPaymentId = null;
+        PaymentMethod = null;
+    }
+
+    public void SetBillingInfo(BillingInfo billingInfo)
+    {
+        BillingInfo = billingInfo;
+    }
+
+    public void SetPaymentMethod(PaymentMethod paymentMethod)
+    {
+        PaymentMethod = paymentMethod;
+    }
+
+    public void ClearPaymentMethod()
+    {
+        PaymentMethod = null;
     }
 }
 
@@ -174,4 +194,39 @@ public sealed record PaymentTransaction(
     string? FailureReason,
     string? InvoiceUrl,
     string? CreditNoteUrl
+);
+
+/// <summary>
+///     Billing details displayed on invoices and the billing page. Stored locally as a JSONB column on
+///     the Subscription aggregate (PayFast does not store these — invoicing is our responsibility).
+/// </summary>
+[PublicAPI]
+public sealed record BillingInfo(
+    string Name,
+    BillingAddress Address,
+    string Email,
+    string? TaxId
+);
+
+[PublicAPI]
+public sealed record BillingAddress(
+    string Line1,
+    string? Line2,
+    string PostalCode,
+    string City,
+    string? State,
+    string Country
+);
+
+/// <summary>
+///     Payment method summary shown on the billing page. PayFast does not return card brand / last4 /
+///     expiry from the recurring API, so we populate <c>Brand = "Card on file"</c> and leave the other
+///     fields null. The shape is preserved for UI compatibility with upstream's Stripe-derived layout.
+/// </summary>
+[PublicAPI]
+public sealed record PaymentMethod(
+    string Brand,
+    string? Last4,
+    int? ExpMonth,
+    int? ExpYear
 );

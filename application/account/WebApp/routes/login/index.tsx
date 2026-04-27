@@ -123,7 +123,12 @@ export function LoginForm() {
         className="flex w-full flex-col"
         disabled={isPending}
       />
-      <Button type="submit" disabled={isPending} className="mt-4 w-full text-center">
+      <Button
+        type="submit"
+        isPending={startLoginMutation.isPending}
+        disabled={isPending}
+        className="mt-4 w-full text-center"
+      >
         {startLoginMutation.isPending ? <Trans>Sending verification code...</Trans> : <Trans>Log in with email</Trans>}
       </Button>
       {import.meta.runtime_env.PUBLIC_GOOGLE_OAUTH_ENABLED === "true" && (
@@ -140,10 +145,10 @@ export function LoginForm() {
             variant="outline"
             className="w-full"
             onClick={handleGoogleLogin}
+            isPending={isGoogleLoginPending}
             disabled={isPending}
-            aria-busy={isGoogleLoginPending}
           >
-            <img src={googleIconUrl} alt="" aria-hidden="true" className="size-5" />
+            {!isGoogleLoginPending && <img src={googleIconUrl} alt="" aria-hidden="true" className="size-5" />}
             {isGoogleLoginPending ? <Trans>Redirecting...</Trans> : <Trans>Log in with Google</Trans>}
           </Button>
         </>

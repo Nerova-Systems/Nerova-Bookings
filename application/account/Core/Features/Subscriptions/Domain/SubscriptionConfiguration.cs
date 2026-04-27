@@ -31,5 +31,14 @@ public sealed class SubscriptionConfiguration : IEntityTypeConfiguration<Subscri
                     c => c
                 )
             );
+
+        builder.OwnsOne(s => s.BillingInfo, b =>
+            {
+                b.ToJson();
+                b.OwnsOne(i => i.Address);
+            }
+        );
+
+        builder.OwnsOne(s => s.PaymentMethod, b => b.ToJson());
     }
 }

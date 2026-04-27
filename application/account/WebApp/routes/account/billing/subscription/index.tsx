@@ -91,6 +91,8 @@ function PlansPage() {
         onSubscribeConfirm={() => state.subscribeMutation.mutate({ body: { plan: state.subscribeTarget } })}
         isSubscribePending={state.subscribeMutation.isPending || state.isPolling}
         subscribeTarget={state.subscribeTarget}
+        billingInfo={state.subscription?.billingInfo}
+        paymentMethod={state.subscription?.paymentMethod}
         isDowngradeDialogOpen={state.isDowngradeDialogOpen}
         setIsDowngradeDialogOpen={state.setIsDowngradeDialogOpen}
         onDowngradeConfirm={() => state.downgradeMutation.mutate({ body: { newPlan: state.downgradeTarget } })}

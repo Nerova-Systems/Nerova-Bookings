@@ -1,3 +1,5 @@
+import type { components } from "@/shared/lib/api/api.generated";
+
 import type { CancellationReason, SubscriptionPlan } from "@/shared/lib/api/client";
 
 import { CancelDowngradeDialog } from "./CancelDowngradeDialog";
@@ -6,6 +8,9 @@ import { DowngradeConfirmationDialog } from "./DowngradeConfirmationDialog";
 import { ReactivateConfirmationDialog } from "./ReactivateConfirmationDialog";
 import { SubscribeConfirmationDialog } from "./SubscribeConfirmationDialog";
 import { UpgradeConfirmationDialog } from "./UpgradeConfirmationDialog";
+
+type BillingInfo = components["schemas"]["BillingInfo"];
+type PaymentMethod = components["schemas"]["PaymentMethod"];
 
 interface SubscriptionDialogsProps {
   isCancelDialogOpen: boolean;
@@ -25,6 +30,8 @@ interface SubscriptionDialogsProps {
   onSubscribeConfirm: () => void;
   isSubscribePending: boolean;
   subscribeTarget: SubscriptionPlan;
+  billingInfo: BillingInfo | null | undefined;
+  paymentMethod: PaymentMethod | null | undefined;
 
   isDowngradeDialogOpen: boolean;
   setIsDowngradeDialogOpen: (open: boolean) => void;
@@ -61,6 +68,8 @@ export function SubscriptionDialogs({
   onSubscribeConfirm,
   isSubscribePending,
   subscribeTarget,
+  billingInfo,
+  paymentMethod,
   isDowngradeDialogOpen,
   setIsDowngradeDialogOpen,
   onDowngradeConfirm,
@@ -101,6 +110,8 @@ export function SubscriptionDialogs({
         onConfirm={onSubscribeConfirm}
         isPending={isSubscribePending}
         targetPlan={subscribeTarget}
+        billingInfo={billingInfo}
+        paymentMethod={paymentMethod}
       />
 
       <DowngradeConfirmationDialog

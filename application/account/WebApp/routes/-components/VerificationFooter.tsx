@@ -42,7 +42,7 @@ export function VerificationFooter({
             validationErrors={resendMutation.error?.errors}
             className="inline"
           >
-            <Button type="submit" variant="link" disabled={resendMutation.isPending} className="h-auto p-0 text-sm">
+            <Button type="submit" variant="link" isPending={resendMutation.isPending} className="h-auto p-0 text-sm">
               <Trans>Request a new code</Trans>
             </Button>
           </Form>

@@ -85,10 +85,10 @@ public sealed class ReactivateSubscriptionHandler(
         }
 
         // Case 3: No token or charge failed — start a fresh checkout with the onsite lightbox.
+        // Uses Tokenization (subscription_type=2) — see InitiateSubscription for rationale.
         var settings = payFastOptions.Value;
         var reactivatePlan = plan == SubscriptionPlan.Trial ? SubscriptionPlan.Starter : plan;
         var reactivateAmount = SubscriptionPlanPricing.GetMonthlyPrice(reactivatePlan);
-        var billingDay = now.Day <= 28 ? now.Day : 1;
 
         var parameters = new Dictionary<string, string>
         {
@@ -104,11 +104,7 @@ public sealed class ReactivateSubscriptionHandler(
             { "m_payment_id", Guid.NewGuid().ToString("N") },
             { "amount", reactivateAmount.ToString("F2", CultureInfo.InvariantCulture) },
             { "item_name", $"Nerova Bookings {reactivatePlan} Plan" },
-            { "subscription_type", "1" },
-            { "billing_date", now.ToString("yyyy-MM-", CultureInfo.InvariantCulture) + billingDay.ToString("D2", CultureInfo.InvariantCulture) },
-            { "recurring_amount", reactivateAmount.ToString("F2", CultureInfo.InvariantCulture) },
-            { "frequency", "3" },
-            { "cycles", "0" },
+            { "subscription_type", "2" },
             { "custom_str1", subscription.Id.ToString() },
             { "custom_str2", executionContext.TenantId!.ToString()! },
             { "custom_str3", reactivatePlan.ToString() }

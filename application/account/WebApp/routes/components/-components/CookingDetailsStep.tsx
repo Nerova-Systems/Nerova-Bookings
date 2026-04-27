@@ -6,8 +6,7 @@ import { Trans } from "@lingui/react/macro";
 import { Button } from "@repo/ui/components/Button";
 import { DatePicker } from "@repo/ui/components/DatePicker";
 import { DateRangePicker } from "@repo/ui/components/DateRangePicker";
-import { DialogBody, DialogFooter } from "@repo/ui/components/Dialog";
-import { Form } from "@repo/ui/components/Form";
+import { DialogBody, DialogFooter, DialogForm } from "@repo/ui/components/Dialog";
 import { TextAreaField } from "@repo/ui/components/TextAreaField";
 import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
 
@@ -35,7 +34,7 @@ export function CookingDetailsStep({
   const { i18n } = useLingui();
 
   return (
-    <Form validationBehavior="aria" className="flex min-h-0 flex-1 flex-col">
+    <DialogForm>
       <DialogBody>
         <div className="grid grid-cols-2 gap-4">
           <DatePicker
@@ -80,6 +79,6 @@ export function CookingDetailsStep({
           <ChevronRightIcon />
         </Button>
       </DialogFooter>
-    </Form>
+    </DialogForm>
   );
 }

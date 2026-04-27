@@ -74,6 +74,14 @@ public sealed class HandlePayFastItnHandler(
             );
             subscription.SetPaymentTransactions(subscription.PaymentTransactions.Add(transaction));
 
+            // PayFast does not return card details from the recurring API, so we surface a generic
+            // "Card on file" badge once a token is on file. The Update button in the UI links to
+            // PayFast's hosted /eng/recurring/update/{token} page where users manage the actual card.
+            if (token is not null && subscription.PaymentMethod is null)
+            {
+                subscription.SetPaymentMethod(new PaymentMethod("Card on file", null, null, null));
+            }
+
             if (wasAlreadyActive)
             {
                 subscription.RenewBillingPeriod(now);

@@ -16,7 +16,9 @@ public sealed record SubscriptionResponse(
     DateTimeOffset TrialEndsAt,
     DateTimeOffset? CurrentPeriodEnd,
     DateTimeOffset? NextBillingDate,
-    DateTimeOffset? CancelledAt
+    DateTimeOffset? CancelledAt,
+    BillingInfo? BillingInfo,
+    PaymentMethod? PaymentMethod
 );
 
 public sealed class GetCurrentSubscriptionHandler(ISubscriptionRepository subscriptionRepository)
@@ -34,7 +36,9 @@ public sealed class GetCurrentSubscriptionHandler(ISubscriptionRepository subscr
             subscription.TrialEndsAt,
             subscription.CurrentPeriodEnd,
             subscription.NextBillingDate,
-            subscription.CancelledAt
+            subscription.CancelledAt,
+            subscription.BillingInfo,
+            subscription.PaymentMethod
         );
     }
 }
