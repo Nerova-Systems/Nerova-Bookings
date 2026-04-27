@@ -13,51 +13,35 @@ msgstr ""
 "Language-Team: \n"
 "Plural-Forms: \n"
 
-#. placeholder {0}: -diffDays
-msgid "{0, plural, one {# day ago} other {# days ago}}"
-msgstr "{0, plural, one {# day ago} other {# days ago}}"
-
-msgid "{diffDays, plural, one {In # day} other {In # days}}"
-msgstr "{diffDays, plural, one {In # day} other {In # days}}"
-
 msgid "Access denied"
 msgstr "Access denied"
+
+msgid "Actions"
+msgstr "Actions"
 
 msgid "Active"
 msgstr "Active"
 
+msgid "Adjust the filters and try again."
+msgstr "Adjust the filters and try again."
+
 msgid "Adjust the search and try again."
 msgstr "Adjust the search and try again."
+
+msgid "All"
+msgstr "All"
 
 msgid "An unexpected error occurred while processing your request."
 msgstr "An unexpected error occurred while processing your request."
 
+msgid "Attempts"
+msgstr "Attempts"
+
 msgid "Back Office"
 msgstr "Back Office"
 
-msgid "Breadcrumb"
-msgstr "Breadcrumb"
-
-msgid "Clear date"
-msgstr "Clear date"
-
-msgid "Clear dates"
-msgstr "Clear dates"
-
-msgid "Close"
-msgstr "Close"
-
-msgid "Close menu"
-msgstr "Close menu"
-
-msgid "Close sidebar"
-msgstr "Close sidebar"
-
 msgid "Contact your administrator if you believe this is a mistake."
 msgstr "Contact your administrator if you believe this is a mistake."
-
-msgid "Create <0>{search}</0>"
-msgstr "Create <0>{search}</0>"
 
 msgid "Created"
 msgstr "Created"
@@ -65,38 +49,20 @@ msgstr "Created"
 msgid "Dashboard"
 msgstr "Dashboard"
 
-msgid "Decrease"
-msgstr "Decrease"
-
 msgid "Deleted"
 msgstr "Deleted"
-
-msgid "Drop files here, or click to browse"
-msgstr "Drop files here, or click to browse"
 
 msgid "Go to home"
 msgstr "Go to home"
 
-msgid "Go to next page"
-msgstr "Go to next page"
-
-msgid "Go to previous page"
-msgstr "Go to previous page"
-
 msgid "Hide details"
 msgstr "Hide details"
 
-msgid "Increase"
-msgstr "Increase"
+msgid "Last error"
+msgstr "Last error"
 
 msgid "Last seen"
 msgstr "Last seen"
-
-msgid "Leave"
-msgstr "Leave"
-
-msgid "Loading"
-msgstr "Loading"
 
 msgid "Log out"
 msgstr "Log out"
@@ -107,29 +73,29 @@ msgstr "Lookup users across tenants from the Back-office catalog."
 msgid "Lookup users by name, email, or tenant."
 msgstr "Lookup users by name, email, or tenant."
 
-msgid "Main content"
-msgstr "Main content"
-
 msgid "Main navigation"
 msgstr "Main navigation"
 
-msgid "Manage tenants, view system data, see exceptions, and perform various tasks for operational and support teams."
-msgstr "Manage tenants, view system data, see exceptions, and perform various tasks for operational and support teams."
-
-msgid "Mobile navigation menu"
-msgstr "Mobile navigation menu"
+msgid "Message"
+msgstr "Message"
 
 msgid "Modified"
 msgstr "Modified"
 
-msgid "More pages"
-msgstr "More pages"
+msgid "Monitor message delivery and retry failed work."
+msgstr "Monitor message delivery and retry failed work."
+
+msgid "Monitor message delivery health and retry unprocessed messages."
+msgstr "Monitor message delivery health and retry unprocessed messages."
 
 msgid "Navigation"
 msgstr "Navigation"
 
-msgid "Next"
-msgstr "Next"
+msgid "Next attempt"
+msgstr "Next attempt"
+
+msgid "No matching messages"
+msgstr "No matching messages"
 
 msgid "No matching tenants"
 msgstr "No matching tenants"
@@ -137,8 +103,8 @@ msgstr "No matching tenants"
 msgid "No matching users"
 msgstr "No matching users"
 
-msgid "No results found"
-msgstr "No results found"
+msgid "No outbox messages"
+msgstr "No outbox messages"
 
 msgid "No tenants yet"
 msgstr "No tenants yet"
@@ -149,12 +115,6 @@ msgstr "No users in catalog"
 msgid "No users yet"
 msgstr "No users yet"
 
-msgid "Open calendar"
-msgstr "Open calendar"
-
-msgid "Open navigation menu"
-msgstr "Open navigation menu"
-
 msgid "Operate tenants and users from the synchronized platform catalog."
 msgstr "Operate tenants and users from the synchronized platform catalog."
 
@@ -162,11 +122,17 @@ msgstr "Operate tenants and users from the synchronized platform catalog."
 msgid "Operational catalog details for tenant {0}."
 msgstr "Operational catalog details for tenant {0}."
 
+msgid "Outbox"
+msgstr "Outbox"
+
+msgid "Outbox message scheduled for retry"
+msgstr "Outbox message scheduled for retry"
+
+msgid "Outbox messages will appear as platform events are enqueued."
+msgstr "Outbox messages will appear as platform events are enqueued."
+
 msgid "Page not found"
 msgstr "Page not found"
-
-msgid "Pagination"
-msgstr "Pagination"
 
 msgid "Pending"
 msgstr "Pending"
@@ -183,14 +149,11 @@ msgstr "Please check the URL or return to the home page."
 msgid "Please try again or return to the home page."
 msgstr "Please try again or return to the home page."
 
-msgid "Previous"
-msgstr "Previous"
-
-msgid "Resize sidebar"
-msgstr "Resize sidebar"
-
 msgid "Restore tenant"
 msgstr "Restore tenant"
+
+msgid "Retry"
+msgstr "Retry"
 
 msgid "Review catalog state and restore deleted tenants."
 msgstr "Review catalog state and restore deleted tenants."
@@ -204,26 +167,17 @@ msgstr "Role"
 msgid "Search"
 msgstr "Search"
 
+msgid "Search message type or error"
+msgstr "Search message type or error"
+
 msgid "Search tenants"
 msgstr "Search tenants"
 
 msgid "Search users"
 msgstr "Search users"
 
-msgid "Select dates"
-msgstr "Select dates"
-
-msgid "Select time zone"
-msgstr "Select time zone"
-
 msgid "Show details"
 msgstr "Show details"
-
-msgid "Show more"
-msgstr "Show more"
-
-msgid "Skip to main content"
-msgstr "Skip to main content"
 
 msgid "Something went wrong"
 msgstr "Something went wrong"
@@ -233,9 +187,6 @@ msgstr "State"
 
 msgid "Status"
 msgstr "Status"
-
-msgid "Stay"
-msgstr "Stay"
 
 msgid "Tenant"
 msgstr "Tenant"
@@ -264,20 +215,8 @@ msgstr "The tenant catalog will populate as Account publishes catalog events."
 msgid "The user catalog will populate as Account publishes catalog events."
 msgstr "The user catalog will populate as Account publishes catalog events."
 
-msgid "Today"
-msgstr "Today"
-
-msgid "Toggle sidebar"
-msgstr "Toggle sidebar"
-
-msgid "Tomorrow"
-msgstr "Tomorrow"
-
 msgid "Try again"
 msgstr "Try again"
-
-msgid "Unsaved changes"
-msgstr "Unsaved changes"
 
 msgid "User"
 msgstr "User"
@@ -291,14 +230,5 @@ msgstr "Users"
 msgid "Users currently known for this tenant."
 msgstr "Users currently known for this tenant."
 
-msgid "Welcome to the Back Office"
-msgstr "Welcome to the Back Office"
-
-msgid "Yesterday"
-msgstr "Yesterday"
-
 msgid "You do not have permission to access this page."
 msgstr "You do not have permission to access this page."
-
-msgid "You have unsaved changes. If you leave now, your changes will be lost."
-msgstr "You have unsaved changes. If you leave now, your changes will be lost."

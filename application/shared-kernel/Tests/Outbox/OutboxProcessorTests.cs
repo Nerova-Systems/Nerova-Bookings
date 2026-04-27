@@ -48,6 +48,34 @@ public sealed class OutboxProcessorTests : IDisposable
     }
 
     [Fact]
+    public async Task ProcessDueMessagesAsync_WhenMessageReachesMaximumAttempts_ShouldMarkMessageDeadLettered()
+    {
+        await using var dbContext = _sqliteInMemoryDbContextFactory.CreateContext();
+        var message = OutboxMessage.Create(typeof(TestOutboxEvent).FullName!, """{"name":"tenant"}""", _timeProvider.GetUtcNow());
+        for (var attempt = 0; attempt < OutboxMessage.MaximumAttempts - 1; attempt++)
+        {
+            message.MarkFailed("Transport unavailable", _timeProvider.GetUtcNow());
+        }
+
+        dbContext.OutboxMessages.Add(message);
+        await dbContext.SaveChangesAsync(CancellationToken.None);
+
+        var handler = Substitute.For<IOutboxMessageHandler>();
+        handler.MessageType.Returns(typeof(TestOutboxEvent).FullName);
+        handler.HandleAsync(Arg.Any<OutboxMessage>(), Arg.Any<CancellationToken>()).Returns(Task.FromException(new InvalidOperationException("Transport unavailable")));
+
+        var processor = CreateProcessor(handler);
+        await processor.ProcessDueMessagesAsync(CancellationToken.None);
+
+        var savedMessage = await dbContext.OutboxMessages.SingleAsync(CancellationToken.None);
+        savedMessage.ProcessedAt.Should().BeNull();
+        savedMessage.DeadLetteredAt.Should().NotBeNull();
+        savedMessage.NextAttemptAt.Should().BeOnOrBefore(_timeProvider.GetUtcNow());
+        savedMessage.Attempts.Should().Be(OutboxMessage.MaximumAttempts);
+        savedMessage.LastError.Should().Contain("Transport unavailable");
+    }
+
+    [Fact]
     public async Task ProcessDueMessagesAsync_WhenDuplicateMessageIsHandledSuccessfully_ShouldMarkBothMessagesProcessed()
     {
         await using var dbContext = _sqliteInMemoryDbContextFactory.CreateContext();

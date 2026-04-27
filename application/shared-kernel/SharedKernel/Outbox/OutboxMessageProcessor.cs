@@ -38,7 +38,7 @@ public sealed class OutboxMessageProcessor<TContext>(IServiceScopeFactory scopeF
 
         var messages = await dbContext.Set<OutboxMessage>()
             .AsTracking()
-            .Where(m => m.ProcessedAt == null)
+            .Where(m => m.ProcessedAt == null && m.DeadLetteredAt == null)
             .ToArrayAsync(cancellationToken);
 
         messages = messages
@@ -78,7 +78,14 @@ public sealed class OutboxMessageProcessor<TContext>(IServiceScopeFactory scopeF
         catch (Exception ex)
         {
             logger.LogWarning(ex, "Failed to process outbox message {OutboxMessageId} of type {OutboxMessageType}", message.Id, message.Type);
-            message.MarkFailed(ex.Message, now.AddSeconds(GetRetryDelaySeconds(message.Attempts)));
+            if (message.Attempts + 1 >= OutboxMessage.MaximumAttempts)
+            {
+                message.MarkDeadLettered(ex.Message, now);
+            }
+            else
+            {
+                message.MarkFailed(ex.Message, now.AddSeconds(GetRetryDelaySeconds(message.Attempts)));
+            }
         }
 
         await dbContext.SaveChangesAsync(cancellationToken);

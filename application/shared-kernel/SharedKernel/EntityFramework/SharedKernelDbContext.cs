@@ -75,6 +75,7 @@ public abstract class SharedKernelDbContext<TContext>(DbContextOptions<TContext>
                 entity.Property(e => e.Type).IsRequired();
                 entity.Property(e => e.Payload).IsRequired();
                 entity.HasIndex(e => new { e.ProcessedAt, e.NextAttemptAt, e.LockedUntilAt });
+                entity.HasIndex(e => e.DeadLetteredAt);
             }
         );
     }
