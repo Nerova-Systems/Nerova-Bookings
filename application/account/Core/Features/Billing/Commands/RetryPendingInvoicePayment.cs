@@ -1,5 +1,6 @@
 using Account.Features.Subscriptions.Domain;
 using Account.Features.Subscriptions.Shared;
+using Account.Features.Tenants.Domain;
 using Account.Features.Users.Domain;
 using Account.Integrations.PayFast;
 using JetBrains.Annotations;
@@ -17,6 +18,7 @@ public sealed record RetryPendingInvoicePaymentResponse(bool Paid, string? Uuid)
 
 public sealed class RetryPendingInvoicePaymentHandler(
     ISubscriptionRepository subscriptionRepository,
+    ITenantRepository tenantRepository,
     IExecutionContext executionContext,
     IPayFastClient payFastClient,
     ITelemetryEventsCollector events,
@@ -66,6 +68,13 @@ public sealed class RetryPendingInvoicePaymentHandler(
         subscription.SetPaymentTransactions(subscription.PaymentTransactions.Add(transaction));
         subscription.RenewBillingPeriod(now);
         subscription.ClearPaymentFailure();
+
+        var tenant = await tenantRepository.GetByIdUnfilteredAsync(subscription.TenantId, cancellationToken);
+        if (tenant is not null && tenant.State == TenantState.Suspended && tenant.SuspensionReason == SuspensionReason.PaymentFailed)
+        {
+            tenant.Activate();
+            tenantRepository.Update(tenant);
+        }
 
         events.CollectEvent(new PendingInvoicePaymentRetried(subscription.Id));
         events.CollectEvent(new PaymentRecovered(subscription.Id, plan, daysInPastDue, amount, SubscriptionPlanPricing.Currency));

@@ -1,3 +1,4 @@
+using Account.Database;
 using Account.Features.Subscriptions.Commands;
 using Account.Features.Subscriptions.Queries;
 using SharedKernel.ApiResults;
@@ -57,13 +58,29 @@ public sealed class SubscriptionEndpoints : IEndpoints
             => await mediator.Send(new ReactivateSubscriptionCommand())
         ).Produces<ReactivateSubscriptionResponse>();
 
-        group.MapPost("/retry-charge", async Task<ApiResult> (IMediator mediator)
-            => await mediator.Send(new RetryFailedChargeCommand())
+        group.MapPost("/retry-charge", async Task<ApiResult> (IMediator mediator, AccountDbContext dbContext, ILogger<SubscriptionEndpoints> logger)
+            => await BillingEndpointRetry.ExecuteAsync(
+                async () =>
+                {
+                    var result = await mediator.Send(new RetryFailedChargeCommand());
+                    return (ApiResult)result;
+                },
+                dbContext,
+                logger
+            )
         );
 
         // PayFast ITN webhook — no auth, receives form-encoded POST from PayFast servers
-        group.MapPost("/payfast/itn", async Task<ApiResult> (IFormCollection form, IMediator mediator)
-            => await mediator.Send(new HandlePayFastItnCommand(form.ToDictionary(k => k.Key, v => v.Value.ToString())))
+        group.MapPost("/payfast/itn", async Task<ApiResult> (IFormCollection form, IMediator mediator, AccountDbContext dbContext, ILogger<SubscriptionEndpoints> logger)
+            => await BillingEndpointRetry.ExecuteAsync(
+                async () =>
+                {
+                    var result = await mediator.Send(new HandlePayFastItnCommand(form.ToDictionary(k => k.Key, v => v.Value.ToString())));
+                    return (ApiResult)result;
+                },
+                dbContext,
+                logger
+            )
         ).AllowAnonymous().DisableAntiforgery();
     }
 }

@@ -1,4 +1,6 @@
 using Account.Features.Subscriptions.Domain;
+using Account.Features.Subscriptions.Jobs;
+using Account.Features.Tenants.Domain;
 using JetBrains.Annotations;
 using SharedKernel.Cqrs;
 
@@ -18,15 +20,21 @@ public sealed record SubscriptionResponse(
     DateTimeOffset? NextBillingDate,
     DateTimeOffset? CancelledAt,
     BillingInfo? BillingInfo,
-    PaymentMethod? PaymentMethod
+    PaymentMethod? PaymentMethod,
+    DateTimeOffset? GracePeriodEndsAt,
+    SuspensionReason? SuspensionReason
 );
 
-public sealed class GetCurrentSubscriptionHandler(ISubscriptionRepository subscriptionRepository)
+public sealed class GetCurrentSubscriptionHandler(ISubscriptionRepository subscriptionRepository, ITenantRepository tenantRepository)
     : IRequestHandler<GetCurrentSubscriptionQuery, Result<SubscriptionResponse>>
 {
     public async Task<Result<SubscriptionResponse>> Handle(GetCurrentSubscriptionQuery query, CancellationToken cancellationToken)
     {
         var subscription = await subscriptionRepository.GetCurrentAsync(cancellationToken);
+        var tenant = await tenantRepository.GetByIdUnfilteredAsync(subscription.TenantId, cancellationToken);
+        DateTimeOffset? gracePeriodEndsAt = subscription.Status == SubscriptionStatus.PastDue && subscription.FirstPaymentFailedAt is not null
+            ? subscription.FirstPaymentFailedAt.Value.Add(BillingDunningService.PaymentGracePeriod)
+            : null;
 
         return new SubscriptionResponse(
             subscription.Id,
@@ -38,7 +46,9 @@ public sealed class GetCurrentSubscriptionHandler(ISubscriptionRepository subscr
             subscription.NextBillingDate,
             subscription.CancelledAt,
             subscription.BillingInfo,
-            subscription.PaymentMethod
+            subscription.PaymentMethod,
+            gracePeriodEndsAt,
+            tenant?.SuspensionReason
         );
     }
 }

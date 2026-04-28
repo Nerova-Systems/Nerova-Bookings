@@ -16,7 +16,7 @@ import { CancelDowngradeDialog } from "./-components/CancelDowngradeDialog";
 import { CurrentPlanSection } from "./-components/CurrentPlanSection";
 import { InitialPlanSelection } from "./-components/InitialPlanSelection";
 import { ReactivateConfirmationDialog } from "./-components/ReactivateConfirmationDialog";
-import { CancellationBanner, DowngradeBanner } from "./-components/SubscriptionBanner";
+import { CancellationBanner, DowngradeBanner, PastDueBanner } from "./-components/SubscriptionBanner";
 import { useBillingPageMutations } from "./-components/useBillingPageMutations";
 import { useSubscriptionPolling } from "./-components/useSubscriptionPolling";
 
@@ -47,10 +47,12 @@ function BillingPage() {
   });
 
   const isCancelled = subscription?.status === SubscriptionStatus.Cancelled;
+  const isPastDue = subscription?.status === SubscriptionStatus.PastDue;
   const isSubscribed = subscription?.status !== SubscriptionStatus.Trial;
   const scheduledPlan = subscription?.scheduledPlan ?? null;
   const currentPeriodEnd = subscription?.currentPeriodEnd ?? null;
   const formattedPeriodEndLong = formatLongDate(currentPeriodEnd);
+  const formattedGracePeriodEnd = formatLongDate(subscription?.gracePeriodEndsAt ?? null);
 
   if (isLoading) {
     return (
@@ -77,6 +79,7 @@ function BillingPage() {
               onReactivate={() => setIsReactivateDialogOpen(true)}
             />
           )}
+          {isPastDue && <PastDueBanner formattedGracePeriodEnd={formattedGracePeriodEnd} />}
           {scheduledPlan && !isCancelled && (
             <DowngradeBanner
               scheduledPlan={scheduledPlan}

@@ -28,6 +28,30 @@ public sealed class GetCurrentSubscriptionTests : EndpointBaseTest<AccountDbCont
         result.CurrentPeriodEnd.Should().BeNull();
         result.NextBillingDate.Should().BeNull();
         result.CancelledAt.Should().BeNull();
+        result.GracePeriodEndsAt.Should().BeNull();
+        result.SuspensionReason.Should().BeNull();
+    }
+
+    [Fact]
+    public async Task GetCurrentSubscription_WhenPastDue_ShouldReturnGracePeriodDeadline()
+    {
+        // Arrange
+        var firstFailedAt = TimeProvider.System.GetUtcNow().AddDays(-2);
+        Connection.Update("subscriptions", "tenant_id", DatabaseSeeder.Tenant1.Id.Value, [
+                ("status", nameof(SubscriptionStatus.PastDue)),
+                ("plan", nameof(SubscriptionPlan.Standard)),
+                ("first_payment_failed_at", firstFailedAt)
+            ]
+        );
+
+        // Act
+        var response = await AuthenticatedOwnerHttpClient.GetAsync("/api/account/subscriptions/current");
+
+        // Assert
+        response.ShouldBeSuccessfulGetRequest();
+        var result = await response.Content.ReadFromJsonAsync<SubscriptionResponse>();
+        result!.Status.Should().Be(SubscriptionStatus.PastDue);
+        result.GracePeriodEndsAt.Should().BeCloseTo(firstFailedAt.AddDays(7), TimeSpan.FromSeconds(1));
     }
 
     [Fact]

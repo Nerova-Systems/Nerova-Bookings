@@ -160,14 +160,146 @@ public sealed class PayFastClient(HttpClient httpClient, IOptions<PayFastSetting
         }
     }
 
+    public async Task<PayFastSubscriptionDetails?> FetchSubscriptionAsync(string token, CancellationToken cancellationToken)
+    {
+        try
+        {
+            var request = CreateSignedApiRequest(HttpMethod.Get, $"{ApiBaseUrl}/subscriptions/{token}/fetch{TestingQuery}");
+            var response = await httpClient.SendAsync(request, cancellationToken);
+            var rawBody = await response.Content.ReadAsStringAsync(cancellationToken);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                logger.LogError("PayFast fetch subscription failed for token {Token} with status {StatusCode}: {Body}", token, response.StatusCode, rawBody);
+                return null;
+            }
+
+            using var document = JsonDocument.Parse(rawBody);
+            var data = document.RootElement.TryGetProperty("data", out var dataElement)
+                ? dataElement
+                : document.RootElement;
+
+            var status = TryGetString(data, "status") ?? TryGetString(data, "payment_status") ?? "unknown";
+            var latestPaymentId = TryGetString(data, "pf_payment_id") ?? TryGetString(data, "latest_payment_id");
+            var nextRunDate = TryGetDateTimeOffset(data, "run_date") ?? TryGetDateTimeOffset(data, "next_run_date");
+            var amount = TryGetDecimal(data, "amount");
+
+            return new PayFastSubscriptionDetails(token, status, nextRunDate, latestPaymentId, amount);
+        }
+        catch (Exception ex) when (ex is TaskCanceledException or JsonException)
+        {
+            logger.LogError(ex, "PayFast fetch subscription failed for token {Token}", token);
+            return null;
+        }
+    }
+
+    public async Task<bool> UpdateSubscriptionAsync(string token, decimal amountRand, DateTimeOffset nextRunDate, CancellationToken cancellationToken)
+    {
+        try
+        {
+            var body = new Dictionary<string, string>
+            {
+                { "amount", amountRand.ToString("F2", CultureInfo.InvariantCulture) },
+                { "run_date", nextRunDate.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture) }
+            };
+
+            var request = CreateSignedApiRequest(HttpMethod.Patch, $"{ApiBaseUrl}/subscriptions/{token}/update{TestingQuery}", body);
+            request.Content = new FormUrlEncodedContent(body);
+
+            var response = await httpClient.SendAsync(request, cancellationToken);
+            if (!response.IsSuccessStatusCode)
+            {
+                var rawBody = await response.Content.ReadAsStringAsync(cancellationToken);
+                logger.LogError("PayFast update subscription failed for token {Token} with status {StatusCode}: {Body}", token, response.StatusCode, rawBody);
+                return false;
+            }
+
+            return true;
+        }
+        catch (TaskCanceledException ex)
+        {
+            logger.LogError(ex, "Timeout calling PayFast update for token {Token}", token);
+            return false;
+        }
+    }
+
+    public Task<PayFastRefundResult> RefundPaymentAsync(string providerPaymentId, decimal amountRand, string reason, CancellationToken cancellationToken)
+    {
+        logger.LogWarning(
+            "PayFast refund API support is not enabled for this merchant setup. Recording refund manually for provider payment {ProviderPaymentId}.",
+            providerPaymentId
+        );
+
+        return Task.FromResult(new PayFastRefundResult(false, false, null, "PayFast refund API is not enabled; record the refund manually."));
+    }
+
     public string GetUpdateCardUrl(string token)
     {
         return $"{BaseUrl}/eng/recurring/update/{token}";
     }
 
+    private HttpRequestMessage CreateSignedApiRequest(HttpMethod method, string url, IReadOnlyDictionary<string, string>? bodyFields = null)
+    {
+        var timestamp = FormatPayFastTimestamp(DateTimeOffset.UtcNow);
+        var signedFields = new SortedDictionary<string, string>(StringComparer.Ordinal)
+        {
+            { "merchant-id", Settings.MerchantId },
+            { "timestamp", timestamp },
+            { "version", "v1" }
+        };
+
+        if (bodyFields is not null)
+        {
+            foreach (var (key, value) in bodyFields)
+            {
+                signedFields[key] = value;
+            }
+        }
+
+        var signature = PayFastSignature.GenerateApiSignature(signedFields, Settings.Passphrase);
+        var request = new HttpRequestMessage(method, url);
+        request.Headers.Add("merchant-id", Settings.MerchantId);
+        request.Headers.Add("version", "v1");
+        request.Headers.Add("timestamp", timestamp);
+        request.Headers.Add("signature", signature);
+        return request;
+    }
+
     // PayFast expects ISO 8601 with second precision and timezone offset (no fractional seconds).
     private static string FormatPayFastTimestamp(DateTimeOffset utcNow)
         => utcNow.ToString("yyyy-MM-ddTHH:mm:sszzz", CultureInfo.InvariantCulture);
+
+    private static string? TryGetString(JsonElement element, string propertyName)
+    {
+        return element.ValueKind == JsonValueKind.Object &&
+               element.TryGetProperty(propertyName, out var value) &&
+               value.ValueKind == JsonValueKind.String
+            ? value.GetString()
+            : null;
+    }
+
+    private static DateTimeOffset? TryGetDateTimeOffset(JsonElement element, string propertyName)
+    {
+        var value = TryGetString(element, propertyName);
+        return DateTimeOffset.TryParse(value, CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal, out var parsed)
+            ? parsed
+            : null;
+    }
+
+    private static decimal? TryGetDecimal(JsonElement element, string propertyName)
+    {
+        if (element.ValueKind != JsonValueKind.Object || !element.TryGetProperty(propertyName, out var value))
+        {
+            return null;
+        }
+
+        return value.ValueKind switch
+        {
+            JsonValueKind.Number when value.TryGetDecimal(out var decimalValue) => decimalValue,
+            JsonValueKind.String when decimal.TryParse(value.GetString(), NumberStyles.Number, CultureInfo.InvariantCulture, out var decimalValue) => decimalValue,
+            _ => null
+        };
+    }
 
     private sealed record OnsiteProcessResponse(string Uuid);
 }

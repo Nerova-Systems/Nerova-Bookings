@@ -3,6 +3,7 @@ using System.Net.Http.Json;
 using Account.Database;
 using Account.Features.Subscriptions.Commands;
 using Account.Features.Subscriptions.Domain;
+using Account.Features.Tenants.Domain;
 using FluentAssertions;
 using NSubstitute;
 using SharedKernel.Tests;
@@ -37,6 +38,33 @@ public sealed class RetryFailedChargeTests : EndpointBaseTest<AccountDbContext>
         await PayFastClient.Received(1).ChargeTokenAsync(TestToken, Arg.Any<decimal>(), Arg.Any<string>(), Arg.Any<CancellationToken>());
         TelemetryEventsCollectorSpy.CollectedEvents.Count.Should().Be(1);
         TelemetryEventsCollectorSpy.CollectedEvents[0].GetType().Name.Should().Be("PaymentRecovered");
+    }
+
+    [Fact]
+    public async Task RetryFailedCharge_WhenTenantIsSuspendedForBilling_ShouldReactivateTenant()
+    {
+        // Arrange
+        Connection.Update("tenants", "id", DatabaseSeeder.Tenant1.Id.Value, [
+                ("state", nameof(TenantState.Suspended)),
+                ("suspension_reason", nameof(SuspensionReason.PaymentFailed)),
+                ("suspended_at", TimeProvider.System.GetUtcNow().AddDays(-1))
+            ]
+        );
+        Connection.Update("subscriptions", "tenant_id", DatabaseSeeder.Tenant1.Id.Value, [
+                ("status", nameof(SubscriptionStatus.PastDue)),
+                ("plan", nameof(SubscriptionPlan.Standard)),
+                ("pay_fast_token", TestToken),
+                ("first_payment_failed_at", TimeProvider.System.GetUtcNow().AddDays(-3))
+            ]
+        );
+
+        // Act
+        var response = await AuthenticatedOwnerHttpClient.PostAsJsonAsync("/api/account/subscriptions/retry-charge", new RetryFailedChargeCommand());
+
+        // Assert
+        await response.ShouldBeSuccessfulPostRequest(hasLocation: false);
+        var tenantState = Connection.ExecuteScalar<string>("SELECT state FROM tenants WHERE id = @id", [new { id = DatabaseSeeder.Tenant1.Id.Value }]);
+        tenantState.Should().Be(nameof(TenantState.Active));
     }
 
     [Fact]

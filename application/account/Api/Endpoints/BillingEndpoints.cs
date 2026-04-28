@@ -1,3 +1,4 @@
+using Account.Database;
 using Account.Features.Billing.Commands;
 using Account.Features.Billing.Queries;
 using SharedKernel.ApiResults;
@@ -25,8 +26,16 @@ public sealed class BillingEndpoints : IEndpoints
             => await mediator.Send(new StartPaymentMethodSetupCommand())
         ).Produces<StartPaymentMethodSetupResponse>();
 
-        group.MapPost("/retry-pending-invoice", async Task<ApiResult<RetryPendingInvoicePaymentResponse>> (IMediator mediator)
-            => await mediator.Send(new RetryPendingInvoicePaymentCommand())
+        group.MapPost("/retry-pending-invoice", async Task<ApiResult<RetryPendingInvoicePaymentResponse>> (IMediator mediator, AccountDbContext dbContext, ILogger<BillingEndpoints> logger)
+            => await BillingEndpointRetry.ExecuteAsync<RetryPendingInvoicePaymentResponse>(
+                async () =>
+                {
+                    var result = await mediator.Send(new RetryPendingInvoicePaymentCommand());
+                    return (ApiResult<RetryPendingInvoicePaymentResponse>)result;
+                },
+                dbContext,
+                logger
+            )
         ).Produces<RetryPendingInvoicePaymentResponse>();
     }
 }

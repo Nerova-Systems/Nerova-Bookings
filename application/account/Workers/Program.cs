@@ -19,6 +19,8 @@ builder.Services
     .AddWorkerServices()
     .AddAccountServices()
     .AddHostedService<BillingJob>()
+    .AddHostedService<BillingReconciliationJob>()
+    .AddHostedService<BillingDunningJob>()
     .AddHostedService<TrialExpiryNotificationJob>();
 
 builder.Services.AddTransient<DatabaseMigrationService<AccountDbContext>>();

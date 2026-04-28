@@ -2,6 +2,7 @@ using Account.Database;
 using Account.Features.EmailAuthentication.Shared;
 using Account.Features.ExternalAuthentication;
 using Account.Features.ExternalAuthentication.Shared;
+using Account.Features.Subscriptions.Jobs;
 using Account.Features.Users.Shared;
 using Account.Integrations.Gravatar;
 using Account.Integrations.OAuth;
@@ -59,6 +60,7 @@ public static class Configuration
                 .AddSharedServices<AccountDbContext>([Assembly])
                 .AddScoped<StartEmailConfirmation>()
                 .AddScoped<CompleteEmailConfirmation>()
+                .AddScoped<BillingDunningService>()
                 .AddScoped<AvatarUpdater>()
                 .AddScoped<UserInfoFactory>()
                 .AddScoped<ExternalAuthenticationService>()

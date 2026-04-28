@@ -89,6 +89,11 @@ public abstract class EndpointBaseTest<TContext> : IDisposable where TContext : 
         PayFastClient.ProcessOnsitePaymentAsync(Arg.Any<SortedDictionary<string, string>>(), Arg.Any<CancellationToken>()).Returns("test-uuid");
         PayFastClient.ChargeTokenAsync(Arg.Any<string>(), Arg.Any<decimal>(), Arg.Any<string>(), Arg.Any<CancellationToken>()).Returns(true);
         PayFastClient.CancelSubscriptionAsync(Arg.Any<string>(), Arg.Any<CancellationToken>()).Returns(true);
+        PayFastClient.FetchSubscriptionAsync(Arg.Any<string>(), Arg.Any<CancellationToken>())
+            .Returns(callInfo => new PayFastSubscriptionDetails(callInfo.Arg<string>(), "active", null, null, null));
+        PayFastClient.UpdateSubscriptionAsync(Arg.Any<string>(), Arg.Any<decimal>(), Arg.Any<DateTimeOffset>(), Arg.Any<CancellationToken>()).Returns(true);
+        PayFastClient.RefundPaymentAsync(Arg.Any<string>(), Arg.Any<decimal>(), Arg.Any<string>(), Arg.Any<CancellationToken>())
+            .Returns(new PayFastRefundResult(false, false, null, "Manual refund"));
         PayFastClient.GetUpdateCardUrl(Arg.Any<string>()).Returns(callInfo => $"https://sandbox.payfast.co.za/eng/recurring/update/{callInfo.Arg<string>()}");
 
         var telemetryChannel = Substitute.For<ITelemetryChannel>();

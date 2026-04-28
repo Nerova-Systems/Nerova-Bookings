@@ -87,6 +87,44 @@ public sealed class Subscription : AggregateRoot<SubscriptionId>, ITenantScopedE
         PaymentTransactions = paymentTransactions;
     }
 
+    public bool TryRecordRefund(
+        PaymentTransactionId transactionId,
+        decimal amount,
+        string reason,
+        string? creditNoteUrl,
+        string? refundReference
+    )
+    {
+        var index = -1;
+        for (var i = 0; i < PaymentTransactions.Length; i++)
+        {
+            if (PaymentTransactions[i].Id == transactionId)
+            {
+                index = i;
+                break;
+            }
+        }
+        if (index < 0) return false;
+
+        var transaction = PaymentTransactions[index];
+        var refundedAmount = transaction.RefundedAmount + amount;
+        var status = refundedAmount >= transaction.Amount
+            ? PaymentTransactionStatus.Refunded
+            : transaction.Status;
+
+        var updatedTransaction = transaction with
+        {
+            Status = status,
+            CreditNoteUrl = creditNoteUrl ?? transaction.CreditNoteUrl,
+            RefundedAmount = refundedAmount,
+            RefundReason = reason,
+            RefundReference = refundReference
+        };
+
+        PaymentTransactions = PaymentTransactions.SetItem(index, updatedTransaction);
+        return true;
+    }
+
     public void SetPaymentFailed(DateTimeOffset failedAt)
     {
         FirstPaymentFailedAt = failedAt;
@@ -136,7 +174,7 @@ public sealed class Subscription : AggregateRoot<SubscriptionId>, ITenantScopedE
     public void SetPastDue(DateTimeOffset failedAt)
     {
         Status = SubscriptionStatus.PastDue;
-        FirstPaymentFailedAt = failedAt;
+        FirstPaymentFailedAt ??= failedAt;
     }
 
     public void Cancel(CancellationReason? reason, string? feedback, DateTimeOffset now)
@@ -193,7 +231,15 @@ public sealed record PaymentTransaction(
     DateTimeOffset Date,
     string? FailureReason,
     string? InvoiceUrl,
-    string? CreditNoteUrl
+    string? CreditNoteUrl,
+    string? Provider = null,
+    string? ProviderPaymentId = null,
+    string? ProviderEventId = null,
+    string? ProviderStatus = null,
+    string? RawPayloadJson = null,
+    decimal RefundedAmount = 0,
+    string? RefundReason = null,
+    string? RefundReference = null
 );
 
 /// <summary>

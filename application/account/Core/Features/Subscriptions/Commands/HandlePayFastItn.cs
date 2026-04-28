@@ -1,7 +1,11 @@
+using System.Text.Json;
+using Account.Database;
 using Account.Features.Subscriptions.Domain;
 using Account.Features.Subscriptions.Shared;
+using Account.Features.Tenants.Domain;
 using Account.Integrations.PayFast;
 using JetBrains.Annotations;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using SharedKernel.Cqrs;
 using SharedKernel.Domain;
@@ -14,6 +18,8 @@ public sealed record HandlePayFastItnCommand(IReadOnlyDictionary<string, string>
 
 public sealed class HandlePayFastItnHandler(
     ISubscriptionRepository subscriptionRepository,
+    ITenantRepository tenantRepository,
+    AccountDbContext dbContext,
     IOptions<PayFastSettings> payFastOptions,
     ITelemetryEventsCollector events,
     TimeProvider timeProvider,
@@ -44,6 +50,14 @@ public sealed class HandlePayFastItnHandler(
         }
 
         var tenantId = new TenantId(tenantIdValue);
+        var eventKey = PayFastItnEvent.CreateEventKey(tenantId, pfPaymentId, paymentStatus ?? "");
+        var eventAlreadyProcessed = await dbContext.Set<PayFastItnEvent>().AnyAsync(e => e.EventKey == eventKey, cancellationToken);
+        if (eventAlreadyProcessed)
+        {
+            logger.LogInformation("PayFast ITN replay ignored for event key {EventKey}", eventKey);
+            return Result.Success();
+        }
+
         var subscription = await subscriptionRepository.GetByTenantIdUnfilteredAsync(tenantId, cancellationToken);
 
         if (subscription is null)
@@ -53,6 +67,8 @@ public sealed class HandlePayFastItnHandler(
         }
 
         var now = timeProvider.GetUtcNow();
+        var rawPayloadJson = JsonSerializer.Serialize(fields.OrderBy(x => x.Key).ToDictionary(x => x.Key, x => x.Value));
+        dbContext.Set<PayFastItnEvent>().Add(PayFastItnEvent.Create(tenantId, pfPaymentId, paymentStatus ?? "", rawPayloadJson, now));
 
         if (paymentStatus == "COMPLETE")
         {
@@ -61,6 +77,13 @@ public sealed class HandlePayFastItnHandler(
             var wasAlreadyActive = subscription.Status == SubscriptionStatus.Active;
             var previousStatus = subscription.Status;
             var daysSinceCancelled = subscription.CancelledAt.HasValue ? (int)(now - subscription.CancelledAt.Value).TotalDays : 0;
+            var daysInPastDue = subscription.FirstPaymentFailedAt.HasValue ? (int)(now - subscription.FirstPaymentFailedAt.Value).TotalDays : 0;
+
+            if (HasProviderTransaction(subscription, pfPaymentId, PaymentTransactionStatus.Succeeded))
+            {
+                logger.LogInformation("PayFast COMPLETE ITN for payment {PfPaymentId} already has a succeeded transaction", pfPaymentId);
+                return Result.Success();
+            }
 
             var transaction = new PaymentTransaction(
                 PaymentTransactionId.NewId(),
@@ -70,7 +93,12 @@ public sealed class HandlePayFastItnHandler(
                 now,
                 null,
                 null,
-                null
+                null,
+                "PayFast",
+                pfPaymentId,
+                eventKey,
+                paymentStatus,
+                rawPayloadJson
             );
             subscription.SetPaymentTransactions(subscription.PaymentTransactions.Add(transaction));
 
@@ -95,10 +123,25 @@ public sealed class HandlePayFastItnHandler(
                 {
                     events.CollectEvent(new SubscriptionReactivated(subscription.Id, plan, null, daysSinceCancelled, price, price, SubscriptionPlanPricing.Currency));
                 }
+                else if (previousStatus == SubscriptionStatus.PastDue)
+                {
+                    events.CollectEvent(new PaymentRecovered(subscription.Id, plan, daysInPastDue, price, SubscriptionPlanPricing.Currency));
+                }
                 else
                 {
                     events.CollectEvent(new SubscriptionCreated(subscription.Id, plan, price, price, SubscriptionPlanPricing.Currency));
                 }
+            }
+
+            var tenant = await tenantRepository.GetByIdUnfilteredAsync(subscription.TenantId, cancellationToken);
+            if (tenant is not null)
+            {
+                tenant.UpdatePlan(plan);
+                if (tenant.State == TenantState.Suspended && tenant.SuspensionReason == SuspensionReason.PaymentFailed)
+                {
+                    tenant.Activate();
+                }
+                tenantRepository.Update(tenant);
             }
 
             subscriptionRepository.Update(subscription);
@@ -110,6 +153,12 @@ public sealed class HandlePayFastItnHandler(
             var plan = subscription.Plan;
             var price = plan != SubscriptionPlan.Trial ? SubscriptionPlanPricing.GetMonthlyPrice(plan) : 0;
 
+            if (HasProviderTransaction(subscription, pfPaymentId, PaymentTransactionStatus.Failed))
+            {
+                logger.LogInformation("PayFast FAILED ITN for payment {PfPaymentId} already has a failed transaction", pfPaymentId);
+                return Result.Success();
+            }
+
             var transaction = new PaymentTransaction(
                 PaymentTransactionId.NewId(),
                 price,
@@ -118,7 +167,12 @@ public sealed class HandlePayFastItnHandler(
                 now,
                 "Payment declined by PayFast.",
                 null,
-                null
+                null,
+                "PayFast",
+                pfPaymentId,
+                eventKey,
+                paymentStatus,
+                rawPayloadJson
             );
             subscription.SetPaymentTransactions(subscription.PaymentTransactions.Add(transaction));
             subscription.SetPastDue(now);
@@ -131,6 +185,15 @@ public sealed class HandlePayFastItnHandler(
 
         logger.LogInformation("PayFast ITN received with status {PaymentStatus} — no state change", paymentStatus);
         return Result.Success();
+    }
+
+    private static bool HasProviderTransaction(Subscription subscription, string providerPaymentId, PaymentTransactionStatus status)
+    {
+        return !string.IsNullOrWhiteSpace(providerPaymentId) &&
+               subscription.PaymentTransactions.Any(t =>
+                   t.Provider == "PayFast" &&
+                   t.ProviderPaymentId == providerPaymentId &&
+                   t.Status == status);
     }
 
     private static bool VerifySignature(IReadOnlyDictionary<string, string> fields, string passphrase)
