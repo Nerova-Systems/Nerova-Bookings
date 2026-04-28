@@ -1,0 +1,154 @@
+tasks:
+  - id: task-01
+    title: Strip Stripe backend
+    description: |
+      Delete all Stripe-specific backend files. Fix all compile errors.
+      Files to delete:
+        Core/Features/Subscriptions/Domain/StripeEvent.cs
+        Core/Features/Subscriptions/Domain/StripeEventConfiguration.cs
+        Core/Features/Subscriptions/Domain/StripeEventRepository.cs
+        Core/Features/Subscriptions/Shared/ProcessPendingStripeEvents.cs
+        Core/Features/Subscriptions/Commands/AcknowledgeStripeWebhook.cs
+        Core/Features/Subscriptions/Commands/StartSubscriptionCheckout.cs
+        Core/Features/Subscriptions/Commands/ProcessPendingEvents.cs
+        Core/Features/Billing/Commands/StartPaymentMethodSetup.cs
+        Core/Features/Billing/Commands/ConfirmPaymentMethodSetup.cs
+        Core/Features/Billing/Commands/RetryPendingInvoicePayment.cs
+        Core/Features/Billing/Commands/UpdateBillingInfo.cs
+        Core/Features/Subscriptions/Queries/GetCheckoutPreview.cs
+      Also remove: Stripe NuGet package references from account/Core and account/Api.
+      After deletion, build must pass (fix compile errors by stubbing or removing usages).
+    agent: backend-engineer
+    depends_on: []
+
+  - id: task-02
+    title: Rewrite Subscription domain + PayFast infrastructure
+    description: |
+      Rewrite the Subscription aggregate and SubscriptionTypes.
+      New enums: SubscriptionPlan (Trial/Starter/Standard/Premium), SubscriptionStatus (Trial/Active/PastDue/Cancelled/Expired).
+      New fields: PayFastToken, PayFastPaymentId, Status, ScheduledPlan, TrialEndsAt,
+        NextBillingDate, CurrentPeriodStart, CurrentPeriodEnd, FirstPaymentFailedAt, CancelledAt.
+      Create PayFastClient (HttpClient wrapper for PayFast charge and cancel APIs).
+      Create PayFastSignature (MD5 signature generation for both onsite and API calls).
+      Create PayFastSettings (IOptions binding: MerchantId, MerchantKey, Passphrase, Sandbox,
+        NotifyUrl, ReturnUrl, CancelUrl, AllowedIps).
+      Delete existing subscription migrations, recreate with new schema.
+      See design.md for full details.
+    agent: backend-engineer
+    depends_on: [task-01]
+
+  - id: task-03
+    title: Implement PayFast commands and queries
+    description: |
+      Implement all new/rewritten backend commands and queries. See design.md API Contract.
+      New commands:
+        - InitiateSubscription: build params, generate MD5 sig, POST to PayFast onsite/process, return {uuid}
+        - HandlePayFastItn: IP verification, MD5 signature check, idempotency, status transitions
+        - UpgradeSubscription: proration calc, call tokenization charge API
+        - ScheduleDowngrade: store ScheduledPlan
+        - CancelScheduledDowngrade: clear ScheduledPlan
+        - RetryFailedCharge: call tokenization charge API
+      Rewritten commands:
+        - CancelSubscription: call PayFast cancel API
+        - ReactivateSubscription: new tokenization checkout (returns uuid)
+      New queries:
+        - GetUpdateCardUrl: build /eng/recurring/update/{token}?return=... URL
+        - GetUpgradePreview: proration calculation (days remaining / days in cycle * price diff)
+      Rewritten queries:
+        - GetCurrentSubscription: return new fields
+        - GetPricingCatalog: hardcoded plan definitions (Trial/Starter/Standard/Premium)
+        - GetPaymentHistory: updated for new PaymentTransaction model
+      Wire up all new endpoints in account/Api.
+      Write unit tests in account/Tests for ITN handler (signature verify, idempotency,
+        each payment_status branch) and proration calculation.
+    agent: backend-engineer
+    depends_on: [task-02]
+
+  - id: task-04
+    title: Implement billing worker jobs
+    description: |
+      Implement 4 worker jobs in application/account/Workers:
+        BillingJob (daily 02:00 UTC):
+          - Find Status=Active where NextBillingDate <= UtcNow
+          - Apply ScheduledPlan if set (change plan, clear ScheduledPlan)
+          - Call PayFast tokenization charge API
+          - On API error: set Status=PastDue, FirstPaymentFailedAt=now
+        RetryJob (daily 03:00 UTC):
+          - Find Status=PastDue
+          - Retry at FirstPaymentFailedAt+3d and +7d
+        ExpireJob (daily 04:00 UTC):
+          - Find Status=PastDue where FirstPaymentFailedAt < UtcNow-14d
+          - Set Status=Expired, call PayFast cancel API
+        TrialExpiryNotificationJob (daily 08:00 UTC):
+          - Find Status=Trial where TrialEndsAt is 7, 3, or 1 day away
+          - Send email notification
+      Use PayFastClient for API calls. Register jobs with Quartz or hosted service.
+      Write tests for BillingJob subscription selection logic and ScheduledPlan application.
+    agent: backend-engineer
+    depends_on: [task-03]
+
+  - id: task-05
+    title: Update AppHost — remove Stripe, add PayFast config
+    description: |
+      In application/AppHost/Program.cs:
+        - Remove ConfigureStripeParameters() method and call
+        - Remove AddStripeCliContainer() and stripe-cli container
+        - Remove all Stripe env vars from accountApi configuration
+        - Add ConfigurePayFastParameters() method that reads PayFast__ secrets
+        - Pass PayFast__MerchantId, PayFast__MerchantKey, PayFast__Passphrase,
+          PayFast__Sandbox, PayFast__NotifyUrl, PayFast__ReturnUrl,
+          PayFast__CancelUrl, PayFast__AllowedIps to accountApi env vars
+      Build must pass after this change.
+    agent: backend-engineer
+    depends_on: [task-01]
+
+  - id: task-06
+    title: Rebuild billing frontend
+    description: |
+      In application/account/WebApp:
+      1. Delete: routes/account/billing/-components/ (all files),
+                 routes/account/billing/subscription/index.tsx
+      2. Remove Stripe npm packages from package.json.
+      3. Rewrite routes/account/billing/index.tsx with status-aware UI:
+           Trial: trial countdown banner + plan cards + "Start Subscription" button
+           Active: CurrentPlanSection + Upgrade/ScheduleDowngrade/UpdateCard/Cancel + BillingHistoryTable
+           PastDue: warning banner + RetryPayment + UpdateCard buttons
+           Expired: hard gate + plan cards
+           Cancelled: reactivation prompt + plan cards
+      4. New components (in -components/):
+           CheckoutDialog — loads payfast_do_onsite_payment(), spinner, polls on success
+           UpdatePaymentMethodDialog — redirect warning + opens update card URL
+           UpgradeConfirmationDialog — shows GetUpgradePreview proration, confirm
+           ScheduleDowngradeDialog — confirm schedule downgrade at period end
+           CancelDowngradeDialog — confirm cancel scheduled downgrade
+           RetryPaymentDialog — confirm retry
+           CancelSubscriptionDialog — reason + feedback + confirm
+           ReactivateDialog — new CheckoutDialog flow
+           BillingHistoryTable — paginated PaymentTransaction records
+           CurrentPlanSection — plan name, price, next billing date, period
+           SubscriptionBanner — status-aware banners
+           PlanCard + PlanCardGrid — plan display, "coming soon" for Premium
+           BillingTabNavigation — tab navigation
+      5. Load PayFast engine.js:
+           <script src="https://www.payfast.co.za/onsite/engine.js"> in index.html or loaded dynamically
+      6. No /account/billing/return route needed (JS callback used instead).
+    agent: frontend-engineer
+    depends_on: [task-03, task-05]
+
+  - id: task-07
+    title: E2E tests for billing flows
+    description: |
+      Write Playwright E2E tests covering:
+        1. Trial state: tenant sees trial countdown, plan cards, Premium shows "coming soon"
+        2. Subscribe flow: click Upgrade, PayFast lightbox appears (mock ITN), status becomes Active
+        3. Active state: current plan displayed, billing date shown, upgrade/cancel available
+        4. Upgrade flow: click Upgrade, proration dialog shows, confirm, charge via mock ITN
+        5. Schedule downgrade: click Schedule Downgrade, confirm, pending change shown
+        6. Cancel scheduled downgrade: click Cancel Scheduled Change
+        7. Cancel subscription: cancel dialog with reason, subscription cancelled
+        8. Reactivate: reactivation flow
+        9. Past due state: warning banner, retry button visible
+       10. Expired state: hard gate shown, plan cards offered
+      Use network request mocking for PayFast ITN callbacks.
+    agent: qa-engineer
+    depends_on: [task-06]
