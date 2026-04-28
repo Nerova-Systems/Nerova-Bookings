@@ -22,12 +22,6 @@ msgstr "Sidder du stadig oppe?"
 msgid "Dashboard"
 msgstr "Dashboard"
 
-msgid "Get started"
-msgstr "Kom i gang"
-
-msgid "Go to app"
-msgstr "Gå til app"
-
 msgid "Good afternoon"
 msgstr "God eftermiddag"
 
@@ -49,29 +43,14 @@ msgstr "God morgen, {firstName}"
 msgid "Here's your overview of what's happening."
 msgstr "Her er dit overblik over hvad der sker."
 
-msgid "Log in"
-msgstr "Log ind"
-
 msgid "Main navigation"
 msgstr "Hovednavigation"
 
 msgid "Navigation"
 msgstr "Navigation"
 
-msgid "Replace this sample page with your own product information and branding."
-msgstr "Erstat denne eksempelside med dine egne produktinformationer og branding."
-
 msgid "This is where your personalized dashboard content will appear. Stay tuned for updates."
 msgstr "Her vil dit personlige dashboard-indhold blive vist. Hold dig opdateret."
-
-msgid "Welcome to PlatformPlatform"
-msgstr "Velkommen til PlatformPlatform"
-
-msgid "You successfully deployed PlatformPlatform! 🎉"
-msgstr "Du har installeret PlatformPlatform med succes! 🎉"
-
-msgid "You successfully installed PlatformPlatform! 🎉"
-msgstr "Du har installeret PlatformPlatform med succes! 🎉"
 
 msgid "Your dashboard is empty"
 msgstr "Dit dashboard er tomt"

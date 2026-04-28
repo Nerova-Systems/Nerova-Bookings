@@ -63,8 +63,8 @@ msgstr "{deletedCount} users permanently deleted"
 msgid "{price}/month"
 msgstr "{price}/month"
 
-msgid "© {currentYear} PlatformPlatform. All rights reserved."
-msgstr "© {currentYear} PlatformPlatform. All rights reserved."
+msgid "© {currentYear} Nerova Systems. All rights reserved."
+msgstr "© {currentYear} Nerova Systems. All rights reserved."
 
 msgid "+39 06 555 0000"
 msgstr "+39 06 555 0000"
@@ -480,6 +480,9 @@ msgstr "Built on <0>PlatformPlatform<1/></0> - an open-source platform by indust
 msgid "Built with"
 msgstr "Built with"
 
+msgid "Business operations for appointment teams, starting with bookings, staff schedules, services, payments, and integrations."
+msgstr "Business operations for appointment teams, starting with bookings, staff schedules, services, payments, and integrations."
+
 msgid "Butter chicken"
 msgstr "Butter chicken"
 
@@ -696,14 +699,14 @@ msgstr "Combobox (free text)"
 msgid "Comfort in a bowl"
 msgstr "Comfort in a bowl"
 
+msgid "Coming soon"
+msgstr "Coming soon"
+
 msgid "Command"
 msgstr "Command"
 
 msgid "Command palette"
 msgstr "Command palette"
-
-msgid "Compliance"
-msgstr "Compliance"
 
 msgid "Components"
 msgstr "Components"
@@ -967,9 +970,6 @@ msgstr "Downgrade"
 msgid "Downgrade to {planName}"
 msgstr "Downgrade to {planName}"
 
-msgid "DPA"
-msgstr "DPA"
-
 msgid "Drag-and-drop or click to browse. Previews use AspectRatio to keep thumbnails aligned."
 msgstr "Drag-and-drop or click to browse. Previews use AspectRatio to keep thumbnails aligned."
 
@@ -1045,6 +1045,9 @@ msgstr "Email address"
 msgid "Email me when a new device signs in."
 msgstr "Email me when a new device signs in."
 
+msgid "Email Nerova"
+msgstr "Email Nerova"
+
 msgid "Email support"
 msgstr "Email support"
 
@@ -1068,6 +1071,9 @@ msgstr "Enter your email below to log in"
 
 msgid "Enter your verification code"
 msgstr "Enter your verification code"
+
+msgid "Enterprise workflows for specialized appointment teams. Coming soon, with no self-serve checkout path yet."
+msgstr "Enterprise workflows for specialized appointment teams. Coming soon, with no self-serve checkout path yet."
 
 msgid "Enterprise-grade Azure infrastructure"
 msgstr "Enterprise-grade Azure infrastructure"
@@ -1164,9 +1170,6 @@ msgstr "Found an alternative"
 msgid "Free"
 msgstr "Free"
 
-msgid "Free, open-source .NET and React starter kit for building modern SaaS applications."
-msgstr "Free, open-source .NET and React starter kit for building modern SaaS applications."
-
 msgid "French"
 msgstr "French"
 
@@ -1202,9 +1205,6 @@ msgstr "GDPR Compliant"
 
 msgid "Ghost"
 msgstr "Ghost"
-
-msgid "GitHub"
-msgstr "GitHub"
 
 msgid "GitHub deploys directly to Azure without passwords or API keys"
 msgstr "GitHub deploys directly to Azure without passwords or API keys"
@@ -1286,6 +1286,9 @@ msgstr "Inline keyboard hint. Use it to call out shortcuts in tooltips, menus, a
 
 msgid "Inline tip:"
 msgstr "Inline tip:"
+
+msgid "Integrations"
+msgstr "Integrations"
 
 msgid "Invalid request"
 msgstr "Invalid request"
@@ -1460,9 +1463,6 @@ msgstr "Link underline"
 
 msgid "Link variants"
 msgstr "Link variants"
-
-msgid "LinkedIn"
-msgstr "LinkedIn"
 
 msgid "Loading..."
 msgstr "Loading..."
@@ -1957,9 +1957,6 @@ msgstr "Primary"
 msgid "Priority support"
 msgstr "Priority support"
 
-msgid "Privacy"
-msgstr "Privacy"
-
 msgid "Privacy policies"
 msgstr "Privacy policies"
 
@@ -1968,6 +1965,9 @@ msgstr "Privacy Policy"
 
 msgid "Processing..."
 msgstr "Processing..."
+
+msgid "Product"
+msgstr "Product"
 
 msgid "Profile"
 msgstr "Profile"
@@ -1986,6 +1986,9 @@ msgstr "Profile updated successfully"
 
 msgid "Progress"
 msgstr "Progress"
+
+msgid "Public navigation"
+msgstr "Public navigation"
 
 msgid "Publish now"
 msgstr "Publish now"
@@ -2427,6 +2430,9 @@ msgstr "SOC and ISO Reports"
 msgid "SOC and ISO Reports (opens in new window)"
 msgstr "SOC and ISO Reports (opens in new window)"
 
+msgid "Solutions"
+msgstr "Solutions"
+
 msgid "Som tam salad"
 msgstr "Som tam salad"
 
@@ -2465,6 +2471,9 @@ msgstr "Standard"
 
 msgid "Standard user access"
 msgstr "Standard user access"
+
+msgid "Start free trial"
+msgstr "Start free trial"
 
 msgid "Starter"
 msgstr "Starter"
@@ -2547,9 +2556,6 @@ msgstr "Tell us a bit about yourself to get started."
 
 msgid "Tell us more..."
 msgstr "Tell us more..."
-
-msgid "Terms"
-msgstr "Terms"
 
 msgid "Terms of Service"
 msgstr "Terms of Service"
@@ -2930,6 +2936,9 @@ msgstr "When to use Accordion"
 msgid "When you accept this invitation, your profile information (name, title, and avatar) from your current account will be copied to the new account."
 msgstr "When you accept this invitation, your profile information (name, title, and avatar) from your current account will be copied to the new account."
 
+msgid "Why us"
+msgstr "Why us"
+
 msgid "With icons"
 msgstr "With icons"
 
@@ -3081,9 +3090,6 @@ msgstr "Your verification code is valid for {expiresInString}"
 
 msgid "yourname@example.com"
 msgstr "yourname@example.com"
-
-msgid "YouTube"
-msgstr "YouTube"
 
 msgid "Zoom"
 msgstr "Zoom"

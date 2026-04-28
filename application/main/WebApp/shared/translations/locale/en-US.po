@@ -22,12 +22,6 @@ msgstr "Burning the midnight oil?"
 msgid "Dashboard"
 msgstr "Dashboard"
 
-msgid "Get started"
-msgstr "Get started"
-
-msgid "Go to app"
-msgstr "Go to app"
-
 msgid "Good afternoon"
 msgstr "Good afternoon"
 
@@ -49,29 +43,14 @@ msgstr "Good morning, {firstName}"
 msgid "Here's your overview of what's happening."
 msgstr "Here's your overview of what's happening."
 
-msgid "Log in"
-msgstr "Log in"
-
 msgid "Main navigation"
 msgstr "Main navigation"
 
 msgid "Navigation"
 msgstr "Navigation"
 
-msgid "Replace this sample page with your own product information and branding."
-msgstr "Replace this sample page with your own product information and branding."
-
 msgid "This is where your personalized dashboard content will appear. Stay tuned for updates."
 msgstr "This is where your personalized dashboard content will appear. Stay tuned for updates."
-
-msgid "Welcome to PlatformPlatform"
-msgstr "Welcome to PlatformPlatform"
-
-msgid "You successfully deployed PlatformPlatform! 🎉"
-msgstr "You successfully deployed PlatformPlatform! 🎉"
-
-msgid "You successfully installed PlatformPlatform! 🎉"
-msgstr "You successfully installed PlatformPlatform! 🎉"
 
 msgid "Your dashboard is empty"
 msgstr "Your dashboard is empty"

@@ -63,8 +63,8 @@ msgstr "{deletedCount} brugere slettet permanent"
 msgid "{price}/month"
 msgstr "{price}/måned"
 
-msgid "© {currentYear} PlatformPlatform. All rights reserved."
-msgstr "© {currentYear} PlatformPlatform. Alle rettigheder forbeholdes."
+msgid "© {currentYear} Nerova Systems. All rights reserved."
+msgstr ""
 
 msgid "+39 06 555 0000"
 msgstr ""
@@ -478,6 +478,9 @@ msgstr "Bygget på <0>PlatformPlatform<1/></0> - en open-source platform af bran
 msgid "Built with"
 msgstr "Bygget med"
 
+msgid "Business operations for appointment teams, starting with bookings, staff schedules, services, payments, and integrations."
+msgstr ""
+
 msgid "Butter chicken"
 msgstr ""
 
@@ -694,14 +697,14 @@ msgstr ""
 msgid "Comfort in a bowl"
 msgstr ""
 
+msgid "Coming soon"
+msgstr ""
+
 msgid "Command"
 msgstr ""
 
 msgid "Command palette"
 msgstr ""
-
-msgid "Compliance"
-msgstr "Overholdelse"
 
 msgid "Components"
 msgstr ""
@@ -965,9 +968,6 @@ msgstr "Nedgrader"
 msgid "Downgrade to {planName}"
 msgstr "Nedgrader til {planName}"
 
-msgid "DPA"
-msgstr "DBA"
-
 msgid "Drag-and-drop or click to browse. Previews use AspectRatio to keep thumbnails aligned."
 msgstr ""
 
@@ -1043,6 +1043,9 @@ msgstr ""
 msgid "Email me when a new device signs in."
 msgstr ""
 
+msgid "Email Nerova"
+msgstr ""
+
 msgid "Email support"
 msgstr "E-mail-support"
 
@@ -1066,6 +1069,9 @@ msgstr "Indtast din e-mail nedenfor for at logge ind"
 
 msgid "Enter your verification code"
 msgstr "Indtast din bekræftelseskode"
+
+msgid "Enterprise workflows for specialized appointment teams. Coming soon, with no self-serve checkout path yet."
+msgstr ""
 
 msgid "Enterprise-grade Azure infrastructure"
 msgstr "Azure infrastruktur i virksomhedsklasse"
@@ -1162,9 +1168,6 @@ msgstr "Fandt et alternativ"
 msgid "Free"
 msgstr "Gratis"
 
-msgid "Free, open-source .NET and React starter kit for building modern SaaS applications."
-msgstr "Gratis, open-source .NET og React startpakke til at bygge moderne SaaS-applikationer."
-
 msgid "French"
 msgstr ""
 
@@ -1200,9 +1203,6 @@ msgstr "GDPR-kompatibel"
 
 msgid "Ghost"
 msgstr ""
-
-msgid "GitHub"
-msgstr "GitHub"
 
 msgid "GitHub deploys directly to Azure without passwords or API keys"
 msgstr "GitHub deployer direkte til Azure uden adgangskoder eller API-nøgler"
@@ -1283,6 +1283,9 @@ msgid "Inline keyboard hint. Use it to call out shortcuts in tooltips, menus, an
 msgstr ""
 
 msgid "Inline tip:"
+msgstr ""
+
+msgid "Integrations"
 msgstr ""
 
 msgid "Invalid request"
@@ -1458,9 +1461,6 @@ msgstr ""
 
 msgid "Link variants"
 msgstr ""
-
-msgid "LinkedIn"
-msgstr "LinkedIn"
 
 msgid "Loading..."
 msgstr "Indlæser..."
@@ -1955,9 +1955,6 @@ msgstr ""
 msgid "Priority support"
 msgstr "Prioriteret support"
 
-msgid "Privacy"
-msgstr "Privatliv"
-
 msgid "Privacy policies"
 msgstr "Fortrolighedspolitikker"
 
@@ -1966,6 +1963,9 @@ msgstr "Privatlivspolitik"
 
 msgid "Processing..."
 msgstr "Behandler..."
+
+msgid "Product"
+msgstr ""
 
 msgid "Profile"
 msgstr "Profil"
@@ -1983,6 +1983,9 @@ msgid "Profile updated successfully"
 msgstr "Profil opdateret succesfuldt"
 
 msgid "Progress"
+msgstr ""
+
+msgid "Public navigation"
 msgstr ""
 
 msgid "Publish now"
@@ -2425,6 +2428,9 @@ msgstr "SOC og ISO rapporter"
 msgid "SOC and ISO Reports (opens in new window)"
 msgstr "SOC og ISO rapporter (åbner i nyt vindue)"
 
+msgid "Solutions"
+msgstr ""
+
 msgid "Som tam salad"
 msgstr ""
 
@@ -2463,6 +2469,9 @@ msgstr "Standard"
 
 msgid "Standard user access"
 msgstr "Standard brugeradgang"
+
+msgid "Start free trial"
+msgstr ""
 
 msgid "Starter"
 msgstr ""
@@ -2545,9 +2554,6 @@ msgstr "Fortæl os lidt om dig selv for at komme i gang."
 
 msgid "Tell us more..."
 msgstr "Fortæl os mere..."
-
-msgid "Terms"
-msgstr "Vilkår"
 
 msgid "Terms of Service"
 msgstr "Servicevilkår"
@@ -2928,6 +2934,9 @@ msgstr ""
 msgid "When you accept this invitation, your profile information (name, title, and avatar) from your current account will be copied to the new account."
 msgstr "Når du accepterer denne invitation, vil dine profiloplysninger (navn, titel og avatar) fra din nuværende konto blive kopieret til den nye konto."
 
+msgid "Why us"
+msgstr ""
+
 msgid "With icons"
 msgstr ""
 
@@ -3079,9 +3088,6 @@ msgstr "Din bekræftelseskode er gyldig i {expiresInString}"
 
 msgid "yourname@example.com"
 msgstr "ditnavn@eksempel.com"
-
-msgid "YouTube"
-msgstr "YouTube"
 
 msgid "Zoom"
 msgstr "Zoom"
