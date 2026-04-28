@@ -148,6 +148,7 @@ public static class SharedDependencyConfiguration
                 .AddPersistenceHelpers<T>()
                 .AddDefaultHealthChecks()
                 .AddEmailClient()
+                .AddTransactionalEmail<T>()
                 .AddMediatRPipelineBehaviors()
                 .RegisterMediatRRequest(assemblies)
                 .RegisterOutboxMessageHandlers(assemblies)
@@ -231,6 +232,13 @@ public static class SharedDependencyConfiguration
             }
 
             return services;
+        }
+
+        private IServiceCollection AddTransactionalEmail<T>() where T : DbContext
+        {
+            return services
+                .AddScoped<ITransactionalEmailQueue, TransactionalEmailQueue<T>>()
+                .AddScoped<TransactionalEmailProcessor<T>>();
         }
 
         private IServiceCollection AddMediatRPipelineBehaviors()

@@ -29,7 +29,7 @@ public sealed class InviteUserValidator : AbstractValidator<InviteUserCommand>
 public sealed class InviteUserHandler(
     IUserRepository userRepository,
     ITenantRepository tenantRepository,
-    IEmailClient emailClient,
+    ITransactionalEmailQueue emailQueue,
     IExecutionContext executionContext,
     IMediator mediator,
     ITelemetryEventsCollector events
@@ -77,7 +77,7 @@ public sealed class InviteUserHandler(
         var loginPath = $"{Environment.GetEnvironmentVariable(SinglePageAppConfiguration.PublicUrlKey)}/login";
         var inviter = $"{executionContext.UserInfo.FirstName} {executionContext.UserInfo.LastName}".Trim();
         inviter = inviter.Length > 0 ? inviter : executionContext.UserInfo.Email;
-        await emailClient.SendAsync(command.Email.ToLower(), $"You have been invited to join {tenant.Name} on PlatformPlatform",
+        await emailQueue.EnqueueAsync(command.Email.ToLower(), $"You have been invited to join {tenant.Name} on PlatformPlatform",
             $"""
              <h1 style="text-align:center;font-family:sans-serif;font-size:20px">
                <b>{inviter}</b> invited you to join PlatformPlatform.
@@ -86,6 +86,8 @@ public sealed class InviteUserHandler(
                To gain access, <a href="{loginPath}" target="blank">go to this page in your open browser</a> and login using <b>{command.Email.ToLower()}</b>.
              </p>
              """,
+            TransactionalEmailTemplateKeys.UserInvite,
+            result.Value!.Value,
             cancellationToken
         );
 

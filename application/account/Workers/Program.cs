@@ -3,6 +3,7 @@ using Account.Database;
 using Account.Features.Subscriptions.Jobs;
 using SharedKernel.Configuration;
 using SharedKernel.Database;
+using SharedKernel.Integrations.Email;
 using SharedKernel.Outbox;
 
 // Worker service is using WebApplication.CreateBuilder instead of Host.CreateDefaultBuilder to allow scaling to zero
@@ -21,7 +22,8 @@ builder.Services
     .AddHostedService<BillingJob>()
     .AddHostedService<BillingReconciliationJob>()
     .AddHostedService<BillingDunningJob>()
-    .AddHostedService<TrialExpiryNotificationJob>();
+    .AddHostedService<TrialExpiryNotificationJob>()
+    .AddHostedService<TransactionalEmailWorker<AccountDbContext>>();
 
 builder.Services.AddTransient<DatabaseMigrationService<AccountDbContext>>();
 builder.Services.AddTransient<DataMigrationRunner<AccountDbContext>>();

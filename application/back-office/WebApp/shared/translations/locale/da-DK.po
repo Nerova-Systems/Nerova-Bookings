@@ -80,6 +80,15 @@ msgstr ""
 msgid "DLQ"
 msgstr ""
 
+msgid "Email"
+msgstr ""
+
+msgid "Email log"
+msgstr ""
+
+msgid "Email scheduled for retry"
+msgstr ""
+
 msgid "Error"
 msgstr ""
 
@@ -88,6 +97,9 @@ msgstr "Gå til forsiden"
 
 msgid "Hide details"
 msgstr "Skjul detaljer"
+
+msgid "Inspect transactional email delivery state and retry failed sends."
+msgstr ""
 
 msgid "Last error"
 msgstr ""
@@ -147,6 +159,9 @@ msgid "Navigation"
 msgstr "Navigation"
 
 msgid "Next attempt"
+msgstr ""
+
+msgid "No email messages"
 msgstr ""
 
 msgid "No matching messages"
@@ -219,6 +234,9 @@ msgstr "Prøv venligst igen eller vend tilbage til forsiden."
 msgid "Processed"
 msgstr ""
 
+msgid "Queued login, invite, and billing emails will appear here."
+msgstr ""
+
 msgid "Restore tenant"
 msgstr ""
 
@@ -252,6 +270,9 @@ msgstr ""
 msgid "Search users"
 msgstr ""
 
+msgid "Sent"
+msgstr ""
+
 msgid "Show details"
 msgstr "Vis detaljer"
 
@@ -268,6 +289,9 @@ msgid "Status"
 msgstr ""
 
 msgid "Subscription"
+msgstr ""
+
+msgid "Template"
 msgstr ""
 
 msgid "Tenant"

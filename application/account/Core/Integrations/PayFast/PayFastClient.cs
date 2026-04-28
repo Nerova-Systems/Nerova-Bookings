@@ -223,14 +223,67 @@ public sealed class PayFastClient(HttpClient httpClient, IOptions<PayFastSetting
         }
     }
 
-    public Task<PayFastRefundResult> RefundPaymentAsync(string providerPaymentId, decimal amountRand, string reason, CancellationToken cancellationToken)
+    public async Task<PayFastRefundResult> RefundPaymentAsync(string providerPaymentId, decimal amountRand, string reason, CancellationToken cancellationToken)
     {
-        logger.LogWarning(
-            "PayFast refund API support is not enabled for this merchant setup. Recording refund manually for provider payment {ProviderPaymentId}.",
-            providerPaymentId
-        );
+        try
+        {
+            var amountInCents = ToCents(amountRand);
+            var queryRequest = CreateSignedApiRequest(HttpMethod.Get, $"{ApiBaseUrl}/refunds/query/{providerPaymentId}{TestingQuery}");
+            var queryResponse = await httpClient.SendAsync(queryRequest, cancellationToken);
+            var queryBody = await queryResponse.Content.ReadAsStringAsync(cancellationToken);
+            if (!queryResponse.IsSuccessStatusCode)
+            {
+                logger.LogError("PayFast refund query failed for payment {ProviderPaymentId} with status {StatusCode}: {Body}", providerPaymentId, queryResponse.StatusCode, queryBody);
+                return new PayFastRefundResult(false, false, null, "PayFast refund availability could not be verified. Record the refund manually.");
+            }
 
-        return Task.FromResult(new PayFastRefundResult(false, false, null, "PayFast refund API is not enabled; record the refund manually."));
+            var availability = ParseRefundAvailability(queryBody);
+            if (availability.Status == "NOT_AVAILABLE")
+            {
+                return new PayFastRefundResult(false, false, null, availability.ErrorMessage ?? "PayFast reports this payment is not refundable.");
+            }
+
+            if (availability.AmountAvailableForRefund is not null && amountInCents > availability.AmountAvailableForRefund)
+            {
+                return new PayFastRefundResult(false, false, null, "PayFast reports that the requested refund amount exceeds the available refundable balance.");
+            }
+
+            if (!availability.SupportsPaymentSourceRefund)
+            {
+                return new PayFastRefundResult(false, false, null, "PayFast requires bank payout details for this refund. Record a manual bank payout refund instead.");
+            }
+
+            var body = new Dictionary<string, string>
+            {
+                { "amount", amountInCents.ToString(CultureInfo.InvariantCulture) },
+                { "notify_buyer", "1" },
+                { "notify_merchant", "0" },
+                { "reason", reason }
+            };
+            var refundRequest = CreateSignedApiRequest(HttpMethod.Post, $"{ApiBaseUrl}/refunds/{providerPaymentId}{TestingQuery}", body);
+            refundRequest.Content = new FormUrlEncodedContent(body);
+
+            var refundResponse = await httpClient.SendAsync(refundRequest, cancellationToken);
+            var refundBody = await refundResponse.Content.ReadAsStringAsync(cancellationToken);
+            if (!refundResponse.IsSuccessStatusCode)
+            {
+                logger.LogError("PayFast refund create failed for payment {ProviderPaymentId} with status {StatusCode}: {Body}", providerPaymentId, refundResponse.StatusCode, refundBody);
+                return new PayFastRefundResult(false, true, null, "PayFast refund failed. Record the refund manually after checking PayFast.");
+            }
+
+            if (!TryParsePayFastBooleanResponse(refundBody, out var message))
+            {
+                logger.LogError("PayFast refund create was declined for payment {ProviderPaymentId}. Message: {Message}. Body: {Body}", providerPaymentId, message, refundBody);
+                return new PayFastRefundResult(false, true, null, message ?? "PayFast refund was declined.");
+            }
+
+            return new PayFastRefundResult(true, true, providerPaymentId, null);
+        }
+        catch (Exception ex) when (ex is TaskCanceledException or JsonException)
+        {
+            logger.LogError(ex, "PayFast refund failed for payment {ProviderPaymentId}", providerPaymentId);
+            return new PayFastRefundResult(false, false, null, "PayFast refund failed. Record the refund manually after checking PayFast.");
+        }
     }
 
     public string GetUpdateCardUrl(string token)
@@ -301,5 +354,85 @@ public sealed class PayFastClient(HttpClient httpClient, IOptions<PayFastSetting
         };
     }
 
+    private static int ToCents(decimal amountRand)
+    {
+        return (int)Math.Round(amountRand * 100m, MidpointRounding.AwayFromZero);
+    }
+
+    private static RefundAvailability ParseRefundAvailability(string rawBody)
+    {
+        using var document = JsonDocument.Parse(rawBody);
+        var data = document.RootElement.TryGetProperty("data", out var dataElement)
+            ? dataElement
+            : document.RootElement;
+
+        var status = TryGetString(data, "status") ?? "UNKNOWN";
+        var amountAvailable = TryGetInt(data, "amount_available_for_refund");
+        var fullMethod = TryGetNestedString(data, "refund_full", "method");
+        var partialMethod = TryGetNestedString(data, "refund_partial", "method");
+        var supportsPaymentSourceRefund = string.Equals(fullMethod, "PAYMENT_SOURCE", StringComparison.OrdinalIgnoreCase) ||
+                                          string.Equals(partialMethod, "PAYMENT_SOURCE", StringComparison.OrdinalIgnoreCase);
+
+        string? errorMessage = null;
+        if (data.ValueKind == JsonValueKind.Object &&
+            data.TryGetProperty("errors", out var errors) &&
+            errors.ValueKind == JsonValueKind.Array)
+        {
+            var messages = errors.EnumerateArray()
+                .Where(e => e.ValueKind == JsonValueKind.String)
+                .Select(e => e.GetString())
+                .Where(e => !string.IsNullOrWhiteSpace(e));
+            errorMessage = string.Join(" ", messages);
+        }
+
+        return new RefundAvailability(status, amountAvailable, supportsPaymentSourceRefund, string.IsNullOrWhiteSpace(errorMessage) ? null : errorMessage);
+    }
+
+    private static bool TryParsePayFastBooleanResponse(string rawBody, out string? message)
+    {
+        using var doc = JsonDocument.Parse(rawBody);
+        var data = doc.RootElement.TryGetProperty("data", out var dataElement)
+            ? dataElement
+            : doc.RootElement;
+
+        message = data.ValueKind == JsonValueKind.Object && data.TryGetProperty("message", out var messageElement) && messageElement.ValueKind == JsonValueKind.String
+            ? messageElement.GetString()
+            : null;
+
+        if (data.ValueKind != JsonValueKind.Object || !data.TryGetProperty("response", out var response))
+        {
+            return false;
+        }
+
+        return response.ValueKind == JsonValueKind.True ||
+               (response.ValueKind == JsonValueKind.String && string.Equals(response.GetString(), "true", StringComparison.OrdinalIgnoreCase));
+    }
+
+    private static int? TryGetInt(JsonElement element, string propertyName)
+    {
+        if (element.ValueKind != JsonValueKind.Object || !element.TryGetProperty(propertyName, out var value))
+        {
+            return null;
+        }
+
+        return value.ValueKind switch
+        {
+            JsonValueKind.Number when value.TryGetInt32(out var intValue) => intValue,
+            JsonValueKind.String when int.TryParse(value.GetString(), NumberStyles.Integer, CultureInfo.InvariantCulture, out var intValue) => intValue,
+            _ => null
+        };
+    }
+
+    private static string? TryGetNestedString(JsonElement element, string objectName, string propertyName)
+    {
+        return element.ValueKind == JsonValueKind.Object &&
+               element.TryGetProperty(objectName, out var nested) &&
+               nested.ValueKind == JsonValueKind.Object
+            ? TryGetString(nested, propertyName)
+            : null;
+    }
+
     private sealed record OnsiteProcessResponse(string Uuid);
+
+    private sealed record RefundAvailability(string Status, int? AmountAvailableForRefund, bool SupportsPaymentSourceRefund, string? ErrorMessage);
 }

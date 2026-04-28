@@ -1806,6 +1806,9 @@ msgstr "Page Views"
 msgid "Palak paneer"
 msgstr "Palak paneer"
 
+msgid "Partially refunded"
+msgstr "Partially refunded"
+
 msgid "Passkeys"
 msgstr "Passkeys"
 
@@ -1826,6 +1829,12 @@ msgstr "Payment could not be processed. Please update your card and try again."
 
 msgid "Payment failed"
 msgstr "Payment failed"
+
+msgid "Payment failed. Update or retry payment before {formattedGracePeriodEnd} to avoid suspension."
+msgstr "Payment failed. Update or retry payment before {formattedGracePeriodEnd} to avoid suspension."
+
+msgid "Payment failed. Update or retry payment to keep access active."
+msgstr "Payment failed. Update or retry payment to keep access active."
 
 msgid "Payment failed. Your subscription will be suspended soon."
 msgstr "Payment failed. Your subscription will be suspended soon."
@@ -2061,6 +2070,9 @@ msgstr "Recycle bin is empty"
 
 msgid "Redirecting..."
 msgstr "Redirecting..."
+
+msgid "Reference"
+msgstr "Reference"
 
 msgid "Reference ID: {id}"
 msgstr "Reference ID: {id}"

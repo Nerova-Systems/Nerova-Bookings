@@ -80,6 +80,15 @@ msgstr "Deleted"
 msgid "DLQ"
 msgstr "DLQ"
 
+msgid "Email"
+msgstr "Email"
+
+msgid "Email log"
+msgstr "Email log"
+
+msgid "Email scheduled for retry"
+msgstr "Email scheduled for retry"
+
 msgid "Error"
 msgstr "Error"
 
@@ -88,6 +97,9 @@ msgstr "Go to home"
 
 msgid "Hide details"
 msgstr "Hide details"
+
+msgid "Inspect transactional email delivery state and retry failed sends."
+msgstr "Inspect transactional email delivery state and retry failed sends."
 
 msgid "Last error"
 msgstr "Last error"
@@ -148,6 +160,9 @@ msgstr "Navigation"
 
 msgid "Next attempt"
 msgstr "Next attempt"
+
+msgid "No email messages"
+msgstr "No email messages"
 
 msgid "No matching messages"
 msgstr "No matching messages"
@@ -219,6 +234,9 @@ msgstr "Please try again or return to the home page."
 msgid "Processed"
 msgstr "Processed"
 
+msgid "Queued login, invite, and billing emails will appear here."
+msgstr "Queued login, invite, and billing emails will appear here."
+
 msgid "Restore tenant"
 msgstr "Restore tenant"
 
@@ -252,6 +270,9 @@ msgstr "Search tenants"
 msgid "Search users"
 msgstr "Search users"
 
+msgid "Sent"
+msgstr "Sent"
+
 msgid "Show details"
 msgstr "Show details"
 
@@ -269,6 +290,9 @@ msgstr "Status"
 
 msgid "Subscription"
 msgstr "Subscription"
+
+msgid "Template"
+msgstr "Template"
 
 msgid "Tenant"
 msgstr "Tenant"

@@ -9,6 +9,7 @@ using FluentAssertions;
 using Microsoft.AspNetCore.Identity;
 using NSubstitute;
 using SharedKernel.Authentication;
+using SharedKernel.Integrations.Email;
 using SharedKernel.Domain;
 using SharedKernel.Tests;
 using SharedKernel.Tests.Persistence;
@@ -40,12 +41,10 @@ public sealed class StartEmailLoginTests : EndpointBaseTest<AccountDbContext>
         TelemetryEventsCollectorSpy.CollectedEvents[0].Properties["event.user_id"].Should().Be(DatabaseSeeder.Tenant1Owner.Id);
         TelemetryEventsCollectorSpy.AreAllEventsDispatched.Should().BeTrue();
 
-        await EmailClient.Received(1).SendAsync(
-            email.ToLower(),
-            "PlatformPlatform login verification code",
-            Arg.Is<string>(s => s.Contains("Your confirmation code is below")),
-            Arg.Any<CancellationToken>()
-        );
+        Connection.ExecuteScalar<long>(
+            "SELECT COUNT(*) FROM transactional_email_messages WHERE recipient = @email AND subject = @subject AND template_key = @templateKey",
+            [new { email = email.ToLower(), subject = "PlatformPlatform login verification code", templateKey = TransactionalEmailTemplateKeys.LoginOtp }]
+        ).Should().Be(1);
     }
 
     [Fact]
@@ -111,12 +110,10 @@ public sealed class StartEmailLoginTests : EndpointBaseTest<AccountDbContext>
 
         TelemetryEventsCollectorSpy.CollectedEvents.Should().BeEmpty();
 
-        await EmailClient.Received(1).SendAsync(
-            email.ToLower(),
-            "Unknown user tried to login to PlatformPlatform",
-            Arg.Is<string>(s => s.Contains("You or someone else tried to login to PlatformPlatform")),
-            Arg.Any<CancellationToken>()
-        );
+        Connection.ExecuteScalar<long>(
+            "SELECT COUNT(*) FROM transactional_email_messages WHERE recipient = @email AND subject = @subject AND template_key = @templateKey",
+            [new { email = email.ToLower(), subject = "Unknown user tried to login to PlatformPlatform", templateKey = TransactionalEmailTemplateKeys.UnknownLoginAttempt }]
+        ).Should().Be(1);
     }
 
     [Fact]
@@ -190,11 +187,9 @@ public sealed class StartEmailLoginTests : EndpointBaseTest<AccountDbContext>
 
         TelemetryEventsCollectorSpy.CollectedEvents.Should().BeEmpty();
 
-        await EmailClient.Received(1).SendAsync(
-            email.ToLower(),
-            "Unknown user tried to login to PlatformPlatform",
-            Arg.Is<string>(s => s.Contains("You or someone else tried to login to PlatformPlatform")),
-            Arg.Any<CancellationToken>()
-        );
+        Connection.ExecuteScalar<long>(
+            "SELECT COUNT(*) FROM transactional_email_messages WHERE recipient = @email AND subject = @subject AND template_key = @templateKey",
+            [new { email = email.ToLower(), subject = "Unknown user tried to login to PlatformPlatform", templateKey = TransactionalEmailTemplateKeys.UnknownLoginAttempt }]
+        ).Should().Be(1);
     }
 }

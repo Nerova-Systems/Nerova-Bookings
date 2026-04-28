@@ -1804,6 +1804,9 @@ msgstr "Sidevisninger"
 msgid "Palak paneer"
 msgstr "Palak paneer"
 
+msgid "Partially refunded"
+msgstr ""
+
 msgid "Passkeys"
 msgstr ""
 
@@ -1824,6 +1827,12 @@ msgstr ""
 
 msgid "Payment failed"
 msgstr "Betaling mislykkedes"
+
+msgid "Payment failed. Update or retry payment before {formattedGracePeriodEnd} to avoid suspension."
+msgstr ""
+
+msgid "Payment failed. Update or retry payment to keep access active."
+msgstr ""
 
 msgid "Payment failed. Your subscription will be suspended soon."
 msgstr "Betaling mislykkedes. Dit abonnement vil blive suspenderet snart."
@@ -2059,6 +2068,9 @@ msgstr "Papirkurven er tom"
 
 msgid "Redirecting..."
 msgstr "Omdirigerer..."
+
+msgid "Reference"
+msgstr ""
 
 msgid "Reference ID: {id}"
 msgstr "Reference-ID: {id}"

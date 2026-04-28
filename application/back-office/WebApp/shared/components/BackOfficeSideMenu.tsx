@@ -13,7 +13,7 @@ import {
   SidebarRail
 } from "@repo/ui/components/Sidebar";
 import { Link as RouterLink, useRouter } from "@tanstack/react-router";
-import { BoxIcon, Building2Icon, InboxIcon, RadioTowerIcon, UsersIcon } from "lucide-react";
+import { BoxIcon, Building2Icon, InboxIcon, MailIcon, RadioTowerIcon, UsersIcon } from "lucide-react";
 
 import logoMark from "@/shared/images/logo-mark.svg";
 
@@ -87,6 +87,16 @@ export function BackOfficeSideMenu() {
                       <InboxIcon />
                       <span>
                         <Trans>Outbox</Trans>
+                      </span>
+                    </RouterLink>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild={true} isActive={currentPath.startsWith("/back-office/email")} tooltip={t`Email`}>
+                    <RouterLink to="/back-office/email">
+                      <MailIcon />
+                      <span>
+                        <Trans>Email</Trans>
                       </span>
                     </RouterLink>
                   </SidebarMenuButton>

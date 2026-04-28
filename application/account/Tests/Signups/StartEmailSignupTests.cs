@@ -7,6 +7,7 @@ using FluentAssertions;
 using Microsoft.AspNetCore.Identity;
 using NSubstitute;
 using SharedKernel.Authentication;
+using SharedKernel.Integrations.Email;
 using SharedKernel.Tests;
 using SharedKernel.Tests.Persistence;
 using SharedKernel.Validation;
@@ -37,12 +38,10 @@ public sealed class StartEmailSignupTests : EndpointBaseTest<AccountDbContext>
         TelemetryEventsCollectorSpy.CollectedEvents[0].GetType().Name.Should().Be("SignupStarted");
         TelemetryEventsCollectorSpy.AreAllEventsDispatched.Should().BeTrue();
 
-        await EmailClient.Received(1).SendAsync(
-            email.ToLower(),
-            "Confirm your email address",
-            Arg.Is<string>(s => s.Contains("Your confirmation code is below")),
-            Arg.Any<CancellationToken>()
-        );
+        Connection.ExecuteScalar<long>(
+            "SELECT COUNT(*) FROM transactional_email_messages WHERE recipient = @email AND subject = @subject AND template_key = @templateKey",
+            [new { email = email.ToLower(), subject = "Confirm your email address", templateKey = TransactionalEmailTemplateKeys.SignupOtp }]
+        ).Should().Be(1);
     }
 
     [Fact]
