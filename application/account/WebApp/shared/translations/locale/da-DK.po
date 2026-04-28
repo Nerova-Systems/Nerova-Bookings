@@ -21,6 +21,22 @@ msgstr "{0, plural, one {# time siden} other {# timer siden}}"
 msgid "{0, plural, one {# minute ago} other {# minutes ago}}"
 msgstr "{0, plural, one {# minut siden} other {# minutter siden}}"
 
+#. placeholder {0}: dishes.length
+msgid "{0, plural, one {Delete # recipe} other {Delete # recipes}}"
+msgstr ""
+
+#. placeholder {0}: smartDate.value
+msgid "{0} hours ago"
+msgstr ""
+
+#. placeholder {0}: smartDate.value
+msgid "{0} minutes ago"
+msgstr ""
+
+#. placeholder {0}: dishes.length
+msgid "{0} of {totalCount} recipes selected"
+msgstr ""
+
 #. placeholder {0}: targetPlanDetails.name
 msgid "{0} plan"
 msgstr "{0}-abonnement"
@@ -50,6 +66,14 @@ msgstr "{price}/måned"
 msgid "© {currentYear} PlatformPlatform. All rights reserved."
 msgstr "© {currentYear} PlatformPlatform. Alle rettigheder forbeholdes."
 
+msgid "+39 06 555 0000"
+msgstr ""
+
+msgid ""
+"1 Infinite Loop\n"
+"Cupertino, CA 95014"
+msgstr ""
+
 msgid "1 TB storage"
 msgstr "1 TB lagerplads"
 
@@ -68,8 +92,26 @@ msgstr "100 GB lagerplads"
 msgid "100% Security Score"
 msgstr "100% sikkerhedsscore"
 
+msgid "14 h 30 min logged"
+msgstr ""
+
+msgid "2 hours ago"
+msgstr ""
+
+msgid "2X large"
+msgstr ""
+
+msgid "3 minutes ago"
+msgstr ""
+
+msgid "5 active co-cooks"
+msgstr ""
+
 msgid "5 users"
 msgstr "5 brugere"
+
+msgid "75% of quota used"
+msgstr ""
 
 msgid "A different user logged in from another browser tab."
 msgstr "En anden bruger loggede ind fra en anden browsertab."
@@ -79,6 +121,12 @@ msgstr "En ny bekræftelseskode er blevet sendt til din e-mail."
 
 msgid "A quick summary of your account activity."
 msgstr "Et hurtigt overblik over din kontoaktivitet."
+
+msgid "A small selection of chart variants built on recharts."
+msgstr ""
+
+msgid "About this feature"
+msgstr ""
 
 msgid "Accept invitation"
 msgstr "Accepter invitation"
@@ -91,6 +139,12 @@ msgstr "Adgang nægtet"
 
 msgid "Access until {formattedPeriodEndLong}"
 msgstr "Adgang indtil {formattedPeriodEndLong}"
+
+msgid "Accordion"
+msgstr ""
+
+msgid "Accordion vs Collapsible"
+msgstr ""
 
 msgid "Account"
 msgstr "Konto"
@@ -131,11 +185,8 @@ msgstr "Konto skiftet"
 msgid "Achieved in Microsoft Defender for Cloud following Azure best practices"
 msgstr "Opnået i Microsoft Defender for Cloud ved at følge Azures bedste praksis"
 
-msgid "Activating subscription"
-msgstr "Aktiverer abonnement"
-
-msgid "Activating your subscription..."
-msgstr "Aktiverer dit abonnement..."
+msgid "Action"
+msgstr ""
 
 msgid "Active"
 msgstr "Aktiv"
@@ -146,14 +197,29 @@ msgstr "Aktive brugere"
 msgid "Active users in the past 30 days"
 msgstr "Aktive brugere i de sidste 30 dage"
 
+msgid "Add an extra layer of security to your account."
+msgstr ""
+
 msgid "Add billing information"
 msgstr "Tilføj faktureringsoplysninger"
 
 msgid "Add more in the Users menu"
 msgstr "Tilføj flere i Brugere menuen"
 
+msgid "Add notes about this recipe"
+msgstr ""
+
+msgid "Add notes here"
+msgstr ""
+
 msgid "Add profile picture"
 msgstr "Tilføj profilbillede"
+
+msgid "Add recipe"
+msgstr ""
+
+msgid "Add to favorites"
+msgstr ""
 
 msgid "Add your account name"
 msgstr "Tilføj dit kontonavn"
@@ -161,8 +227,20 @@ msgstr "Tilføj dit kontonavn"
 msgid "Add your account name and logo."
 msgstr "Tilføj dit kontonavn og logo."
 
-msgid "Address"
-msgstr "Adresse"
+msgid "Add your first recipe to start building your personal cookbook."
+msgstr ""
+
+msgid "Added"
+msgstr ""
+
+msgid "Address (fixed 2 lines)"
+msgstr ""
+
+msgid "Address line 1"
+msgstr ""
+
+msgid "Address line 2 (optional)"
+msgstr ""
 
 msgid "Adjust the interface size on this device to your preference."
 msgstr "Juster grænsefladens størrelse på denne enhed efter dine præferencer."
@@ -173,8 +251,35 @@ msgstr "Admin"
 msgid "Advanced analytics"
 msgstr "Avanceret analyse"
 
+msgid "Advanced options"
+msgstr ""
+
+msgid "Advanced techniques, over 60 minutes"
+msgstr ""
+
+msgid "After updating your card, return to this tab — there's nothing else you need to do here."
+msgstr ""
+
+msgid "Alert dialogs"
+msgstr ""
+
+msgid "Alerts"
+msgstr ""
+
+msgid "Alerts, badges, and banners"
+msgstr ""
+
+msgid "Alex Taylor"
+msgstr ""
+
+msgid "All modifiers"
+msgstr ""
+
 msgid "All users"
 msgstr "Alle brugere"
+
+msgid "Always underlined"
+msgstr ""
 
 msgid "Amount"
 msgstr "Beløb"
@@ -184,12 +289,6 @@ msgstr "Der findes allerede en konto med denne e-mailadresse. Log ind i stedet."
 
 msgid "An email with login instructions will be sent to the user."
 msgstr "En e-mail med login-instruktioner vil blive sendt til brugeren."
-
-msgid "An error occurred while processing your payment."
-msgstr "Der opstod en fejl under behandling af din betaling."
-
-msgid "An error occurred while updating your payment method."
-msgstr "Der opstod en fejl under opdatering af din betalingsmetode."
 
 msgid "An unexpected error occurred while processing your request."
 msgstr "Der opstod en uventet fejl ved behandlingen."
@@ -209,6 +308,18 @@ msgstr "Enhver rolle"
 msgid "Any status"
 msgstr "Enhver status"
 
+msgid "Apply filters"
+msgstr ""
+
+msgid "Archive"
+msgstr ""
+
+msgid "Archive item"
+msgstr ""
+
+msgid "Archive this item?"
+msgstr ""
+
 #. placeholder {0}: users.length
 msgid "Are you sure you want to delete <0>{0} users</0>?"
 msgstr "Er du sikker på, at du vil slette <0>{0} brugere</0>?"
@@ -226,6 +337,15 @@ msgstr "Er du sikker på, at du vil slette <0>{userDisplayName}</0> permanent?"
 msgid "Are you sure you want to revoke this session? The device will be logged out and will need to log in again."
 msgstr "Er du sikker på, at du vil tilbagekalde denne session? Enheden vil blive logget ud og skal logge ind igen."
 
+msgid "Area chart"
+msgstr ""
+
+msgid "Area Chart - Interactive"
+msgstr ""
+
+msgid "Aspect ratio"
+msgstr ""
+
 msgid "Audit reports and assessments"
 msgstr "Revisions rapporter og vurderinger"
 
@@ -241,11 +361,23 @@ msgstr "Autentificering deles på tværs af alle faner. For at bruge flere konti
 msgid "Authentication was cancelled or denied. Please try again if you want to continue."
 msgstr "Godkendelse blev annulleret eller afvist. Prøv venligst igen, hvis du vil fortsætte."
 
+msgid "Avatar fallback and badge"
+msgstr ""
+
+msgid "Avatar group"
+msgstr ""
+
+msgid "Avatar sizes"
+msgstr ""
+
 msgid "Azure Compliance"
 msgstr "Azure Overholdelse"
 
 msgid "Azure Compliance (opens in new window)"
 msgstr "Azure Overholdelse (åbner i nyt vindue)"
+
+msgid "Back"
+msgstr ""
 
 msgid "Back to app"
 msgstr "Tilbage til appen"
@@ -256,11 +388,29 @@ msgstr "Tilbage til login"
 msgid "Back to signup"
 msgstr "Tilbage til tilmelding"
 
+msgid "Badges"
+msgstr ""
+
+msgid "Banners"
+msgstr ""
+
+msgid "Bar chart"
+msgstr ""
+
+msgid "Bar Chart - Interactive"
+msgstr ""
+
+msgid "Bar Chart - Stacked + Legend"
+msgstr ""
+
+msgid "Basic recipe information and cover photo."
+msgstr ""
+
+msgid "Basic skills, under 30 minutes"
+msgstr ""
+
 msgid "Basic support"
 msgstr "Basal support"
-
-msgid "Basis"
-msgstr "Basis"
 
 msgid "Bill to"
 msgstr "Faktureres til"
@@ -277,20 +427,50 @@ msgstr "Faktureringsmail"
 msgid "Billing history"
 msgstr "Betalingshistorik"
 
-msgid "Billing information"
-msgstr "Faktureringsoplysninger"
-
 msgid "Billing information updated"
 msgstr "Faktureringsoplysninger opdateret"
 
 msgid "Billing is not configured. Please contact support to enable payment processing."
 msgstr "Betaling er ikke konfigureret. Kontakt support for at aktivere betalingsbehandling."
 
+msgid "Billing name"
+msgstr ""
+
 msgid "Billing tabs"
 msgstr "Faktureringsfaner"
 
-msgid "billing@company.com"
-msgstr "fakturering@firma.dk"
+msgid "Boeuf bourguignon"
+msgstr ""
+
+msgid "Boeuf, ragù, biryani"
+msgstr ""
+
+msgid "Bold"
+msgstr ""
+
+msgid "Bordered row for stand-alone settings or list items."
+msgstr ""
+
+msgid "Bottom"
+msgstr ""
+
+msgid "Bottom drawer"
+msgstr ""
+
+msgid "Bottom sheet"
+msgstr ""
+
+msgid "Breadcrumb — custom separator"
+msgstr ""
+
+msgid "Breadcrumb — multi-level with auto-collapse"
+msgstr ""
+
+msgid "Breadcrumb — simple"
+msgstr ""
+
+msgid "Browse all recipes"
+msgstr ""
 
 msgid "Built on <0>PlatformPlatform<1/></0> - an open-source platform by industry experts showcasing how to build enterprise-grade B2B SaaS products"
 msgstr "Bygget på <0>PlatformPlatform<1/></0> - en open-source platform af brancheeksperter til professionel B2B SaaS udvikling"
@@ -298,11 +478,50 @@ msgstr "Bygget på <0>PlatformPlatform<1/></0> - en open-source platform af bran
 msgid "Built with"
 msgstr "Bygget med"
 
+msgid "Butter chicken"
+msgstr ""
+
+msgid "Button group"
+msgstr ""
+
+msgid "Button sizes"
+msgstr ""
+
+msgid "Button variants"
+msgstr ""
+
+msgid "Button-styled links"
+msgstr ""
+
+msgid "Buttons and links"
+msgstr ""
+
 msgid "By continuing, you accept our policies"
 msgstr "Ved at fortsætte accepterer du vores vilkår"
 
-msgid "By subscribing, you agree to our <0>terms of service</0> and <1>privacy policy</1>."
-msgstr "Ved at abonnere accepterer du vores <0>servicevilkår</0> og <1>privatlivspolitik</1>."
+msgid "By default only one item is open at a time. Pass openMultiple to allow several panels to stay open together."
+msgstr ""
+
+msgid "Calendar"
+msgstr ""
+
+msgid "Calendar (multiple)"
+msgstr ""
+
+msgid "Calendar (range)"
+msgstr ""
+
+msgid "Calendar (single)"
+msgstr ""
+
+msgid "Can change ingredients and instructions"
+msgstr ""
+
+msgid "Can edit"
+msgstr ""
+
+msgid "Can view"
+msgstr ""
 
 msgid "Can't find your code?"
 msgstr "Kan du ikke finde din kode?"
@@ -327,6 +546,24 @@ msgstr "Annullerer"
 
 msgid "Cancelling..."
 msgstr "Annullerer..."
+
+msgid "Card on file"
+msgstr ""
+
+msgid "Card-style preview shown on hover or focus. Use it for user mentions, link previews, or any compact context that would otherwise need a click."
+msgstr ""
+
+msgid "Cards"
+msgstr ""
+
+msgid "Casey Park"
+msgstr ""
+
+msgid "Categorization"
+msgstr ""
+
+msgid "Center"
+msgstr ""
 
 msgid "Change"
 msgstr "Skift"
@@ -359,19 +596,46 @@ msgstr "Skift brugerrolle"
 msgid "Change user role for {0}"
 msgstr "Skift brugerrolle for {0}"
 
+msgid "Change zoom level"
+msgstr ""
+
+msgid "Changes published"
+msgstr ""
+
 #. placeholder {0}: getPlanLabel(scheduledPlan)
 #. placeholder {1}: getFormattedPrice(scheduledPlan, plans)
 msgid "Changing to {0} {1} on {formattedPeriodEndLong}"
 msgstr "Skifter til {0} {1} den {formattedPeriodEndLong}"
 
+msgid "Charts"
+msgstr ""
+
 msgid "Check your spam folder."
 msgstr "Tjek din spammappe."
+
+msgid "Checkbox"
+msgstr ""
+
+msgid "Chef"
+msgstr ""
+
+msgid "Chicken katsu"
+msgstr ""
+
+msgid "Chiles rellenos"
+msgstr ""
 
 msgid "Choose a plan to get started."
 msgstr "Vælg en plan for at komme i gang."
 
 msgid "Choose how the application looks to you on this device."
 msgstr "Vælg hvordan applikationen ser ud for dig på denne enhed."
+
+msgid "Choose which notifications you receive and how."
+msgstr ""
+
+msgid "Chrome"
+msgstr ""
 
 msgid "City"
 msgstr "By"
@@ -385,17 +649,65 @@ msgstr "Ryd filtre"
 msgid "Clear search"
 msgstr "Ryd søgning"
 
+msgid "Click a row to open the side pane. Use Shift or Cmd/Ctrl with click or arrow keys to multi-select, Enter to open, and Space to toggle the selection."
+msgstr ""
+
 msgid "Close"
 msgstr "Luk"
+
+msgid "Close recipe details"
+msgstr ""
 
 msgid "Close user profile"
 msgstr "Luk brugerprofil"
 
-msgid "Complete your payment to activate your subscription."
-msgstr "Gennemfør din betaling for at aktivere dit abonnement."
+msgid "Co-author"
+msgstr ""
+
+msgid "Co-cooks"
+msgstr ""
+
+msgid "Collapse Components"
+msgstr ""
+
+msgid "Collapse Examples"
+msgstr ""
+
+msgid "Collapsible"
+msgstr ""
+
+msgid "Collapsible is the unstyled single-section primitive behind Accordion. Use it when you need one trigger and one panel."
+msgstr ""
+
+msgid "Colm Tuite"
+msgstr ""
+
+msgid "Combobox"
+msgstr ""
+
+msgid "Combobox (creatable)"
+msgstr ""
+
+msgid "Combobox (free text)"
+msgstr ""
+
+msgid "Comfort in a bowl"
+msgstr ""
+
+msgid "Command"
+msgstr ""
+
+msgid "Command palette"
+msgstr ""
 
 msgid "Compliance"
 msgstr "Overholdelse"
+
+msgid "Components"
+msgstr ""
+
+msgid "Confirm action"
+msgstr ""
 
 msgid "Confirm downgrade"
 msgstr "Bekræft nedgradering"
@@ -409,14 +721,47 @@ msgstr "Kontakt kontoejeren omgående, hvis du mener, dette er forkert."
 msgid "Contact your administrator if you believe this is a mistake."
 msgstr "Kontakt din administrator, hvis du mener, dette er en fejl."
 
+msgid "Context menu"
+msgstr ""
+
 msgid "Continue"
 msgstr "Fortsæt"
+
+msgid "Controls"
+msgstr ""
+
+msgid "Cook time"
+msgstr ""
+
+msgid "Cookbooks"
+msgstr ""
+
+msgid "Cooking details"
+msgstr ""
+
+msgid "Cooking notes"
+msgstr ""
+
+msgid "Cooking techniques"
+msgstr ""
+
+msgid "Cooking time"
+msgstr ""
+
+msgid "Coq au vin"
+msgstr ""
 
 msgid "Country"
 msgstr "Land"
 
+msgid "Create"
+msgstr ""
+
 msgid "Create new account"
 msgstr "Opret ny konto"
+
+msgid "Create shortcut..."
+msgstr ""
 
 msgid "Create your account"
 msgstr "Opret din konto"
@@ -427,8 +772,23 @@ msgstr "Oprettet"
 msgid "Credit note"
 msgstr "Kreditnota"
 
+msgid "Creme brulee"
+msgstr ""
+
+msgid "Cuisine"
+msgstr ""
+
+msgid "Cuisines of the world"
+msgstr ""
+
+msgid "Curated weekly"
+msgstr ""
+
 msgid "Current"
 msgstr "Nuværende"
+
+msgid "Current page"
+msgstr ""
 
 msgid "Current plan"
 msgstr "Nuværende plan"
@@ -448,6 +808,9 @@ msgstr "Mørk"
 msgid "Dashboard"
 msgstr "Dashboard"
 
+msgid "Data"
+msgstr ""
+
 msgid "Data Processing Agreement"
 msgstr "Databehandleraftale"
 
@@ -463,6 +826,27 @@ msgstr "Datalagringsplacering for privatliv og compliance. Dette kan ikke ændre
 msgid "Date"
 msgstr "Dato"
 
+msgid "Date and time"
+msgstr ""
+
+msgid "Date and time formatting"
+msgstr ""
+
+msgid "Date input"
+msgstr ""
+
+msgid "Date must be in the past"
+msgstr ""
+
+msgid "Date picker"
+msgstr ""
+
+msgid "Date range"
+msgstr ""
+
+msgid "Dates and personal notes about this recipe."
+msgstr ""
+
 msgid "Decline"
 msgstr "Afslå"
 
@@ -471,6 +855,9 @@ msgstr "Afslår..."
 
 msgid "Default"
 msgstr "Standard"
+
+msgid "Default alert"
+msgstr ""
 
 msgid "Delete"
 msgstr "Slet"
@@ -482,8 +869,20 @@ msgstr "Slet {0} brugere"
 msgid "Delete account"
 msgstr "Slet konto"
 
+msgid "Delete item"
+msgstr ""
+
 msgid "Delete permanently"
 msgstr "Slet permanent"
+
+msgid "Delete recipe"
+msgstr ""
+
+msgid "Delete selected recipes"
+msgstr ""
+
+msgid "Delete this item?"
+msgstr ""
 
 msgid "Delete user"
 msgstr "Slet bruger"
@@ -506,20 +905,59 @@ msgstr "Slettede brugere indlæses"
 msgid "Deleted users will appear here for recovery"
 msgstr "Slettede brugere vil blive vist her til gendannelse"
 
+msgid "Description"
+msgstr ""
+
 msgid "Desktop"
 msgstr "Stationær"
+
+msgid "Destructive"
+msgstr ""
+
+msgid "Destructive alert"
+msgstr ""
+
+msgid "Developer tools"
+msgstr ""
 
 msgid "Devices that have logged into your account. Revoke any sessions you do not recognize."
 msgstr "Enheder, der har logget ind på din konto. Tilbagekald alle sessioner, du ikke genkender."
 
+msgid "Dialogs"
+msgstr ""
+
 msgid "Different user logged in"
 msgstr "En anden bruger loggede ind"
+
+msgid "Difficulty"
+msgstr ""
+
+msgid "Dirty dialog"
+msgstr ""
+
+msgid "Disabled"
+msgstr ""
+
+msgid "Disabled buttons"
+msgstr ""
+
+msgid "Discover"
+msgstr ""
+
+msgid "Dish name"
+msgstr ""
+
+msgid "Dish name is required"
+msgstr ""
 
 msgid "Do you already have an account?"
 msgstr "Har du allerede en konto?"
 
 msgid "Don't have an account? <0>Create one</0>"
 msgstr "Har du ikke en konto? <0>Opret en</0>"
+
+msgid "Done"
+msgstr ""
 
 msgid "Downgrade"
 msgstr "Nedgrader"
@@ -530,11 +968,35 @@ msgstr "Nedgrader til {planName}"
 msgid "DPA"
 msgstr "DBA"
 
+msgid "Drag-and-drop or click to browse. Previews use AspectRatio to keep thumbnails aligned."
+msgstr ""
+
+msgid "Drawer"
+msgstr ""
+
+msgid "Drop an image into any card — AspectRatio keeps the slot size fixed regardless of content."
+msgstr ""
+
+msgid "Drop anywhere to add to the gallery"
+msgstr ""
+
+msgid "Drop your filter controls here. The sheet handles scrolling and dismissal."
+msgstr ""
+
+msgid "Dropzone"
+msgstr ""
+
+msgid "Duplicate"
+msgstr ""
+
 msgid "E.g. Acme Corp"
 msgstr "F.eks. Hansen & Co"
 
 msgid "E.g. Alex"
 msgstr "F.eks. Anders"
+
+msgid "E.g. doubled the garlic, used a cast iron pan..."
+msgstr ""
 
 msgid "E.g. Software engineer"
 msgstr "F.eks. Softwareingeniør"
@@ -542,8 +1004,20 @@ msgstr "F.eks. Softwareingeniør"
 msgid "E.g. Taylor"
 msgstr "F.eks. Jensen"
 
-msgid "Edit"
-msgstr "Rediger"
+msgid "E.g., Alex Taylor"
+msgstr ""
+
+msgid "E.g., Maria Rossi"
+msgstr ""
+
+msgid "E.g., Spaghetti Carbonara"
+msgstr ""
+
+msgid "Easy"
+msgstr ""
+
+msgid "Edge"
+msgstr ""
 
 msgid "Edit billing information"
 msgstr "Rediger faktureringsoplysninger"
@@ -551,26 +1025,44 @@ msgstr "Rediger faktureringsoplysninger"
 msgid "Edit profile"
 msgstr "Rediger profil"
 
+msgid "Edit recipe"
+msgstr ""
+
 msgid "Edit user profile"
 msgstr "Rediger brugerprofil"
+
+msgid "Editor's picks"
+msgstr ""
 
 msgid "Email"
 msgstr "E-mail"
 
+msgid "Email address"
+msgstr ""
+
+msgid "Email me when a new device signs in."
+msgstr ""
+
 msgid "Email support"
 msgstr "E-mail-support"
 
+msgid "Empty"
+msgstr ""
+
 msgid "Empty recycle bin"
 msgstr "Tøm papirkurv"
+
+msgid "Enabled"
+msgstr ""
+
+msgid "Enchiladas verdes"
+msgstr ""
 
 msgid "Enter the billing details for your subscription."
 msgstr "Indtast faktureringsoplysningerne for dit abonnement."
 
 msgid "Enter your email below to log in"
 msgstr "Indtast din e-mail nedenfor for at logge ind"
-
-msgid "Enter your new payment details below."
-msgstr "Indtast dine nye betalingsoplysninger nedenfor."
 
 msgid "Enter your verification code"
 msgstr "Indtast din bekræftelseskode"
@@ -581,23 +1073,61 @@ msgstr "Azure infrastruktur i virksomhedsklasse"
 msgid "Environment isolation"
 msgstr "Miljøisolering"
 
+msgid "Errors"
+msgstr ""
+
+msgid "Escape to close"
+msgstr ""
+
 msgid "Estimated next bill: {targetFormattedPrice}"
 msgstr "Forventet næste regning: {targetFormattedPrice}"
 
 msgid "Europe"
 msgstr "Europa"
 
+msgid "Examples"
+msgstr ""
+
 msgid "Excl. tax"
 msgstr "Ekskl. moms"
 
-msgid "expires"
-msgstr "udløber"
+msgid "Expand Components"
+msgstr ""
+
+msgid "Expand Examples"
+msgstr ""
+
+#. placeholder {0}: paymentMethod.expMonth
+#. placeholder {1}: paymentMethod.expYear
+msgid "Expires {0}/{1}"
+msgstr ""
+
+msgid "Export"
+msgstr ""
+
+msgid "Export as CSV"
+msgstr ""
+
+msgid "Export as JSON"
+msgstr ""
+
+msgid "Export as PDF"
+msgstr ""
+
+msgid "External"
+msgstr ""
+
+msgid "Extra large"
+msgstr ""
+
+msgid "Extra small"
+msgstr ""
 
 msgid "Failed"
 msgstr "Mislykket"
 
-msgid "Failed to load payment processor."
-msgstr "Kunne ikke indlæse betalingsprocessor."
+msgid "Features"
+msgstr ""
 
 msgid "Feel free to reach out with any questions or issues you may have."
 msgstr "Du er velkommen til at kontakte os med eventuelle spørgsmål eller problemer, du måtte have."
@@ -605,14 +1135,26 @@ msgstr "Du er velkommen til at kontakte os med eventuelle spørgsmål eller prob
 msgid "Filters"
 msgstr "Filtre"
 
+msgid "Firefox"
+msgstr ""
+
+msgid "First cooked"
+msgstr ""
+
 msgid "First name"
 msgstr "Fornavn"
+
+msgid "Fixed columns"
+msgstr ""
 
 msgid "For detailed compliance certifications and audit reports, visit Microsoft's official resources."
 msgstr "For detaljerede certificeringer og revisionsrapporter, besøg Microsofts officielle ressourcer."
 
 msgid "For your protection, you have been logged out. Please log in again to continue."
 msgstr "For din beskyttelse er du blevet logget ud. Log venligst ind igen for at fortsætte."
+
+msgid "Forward"
+msgstr ""
 
 msgid "Found an alternative"
 msgstr "Fandt et alternativ"
@@ -623,11 +1165,26 @@ msgstr "Gratis"
 msgid "Free, open-source .NET and React starter kit for building modern SaaS applications."
 msgstr "Gratis, open-source .NET og React startpakke til at bygge moderne SaaS-applikationer."
 
+msgid "French"
+msgstr ""
+
+msgid "friend@example.com"
+msgstr ""
+
 msgid "Full access except changing user roles and account settings"
 msgstr "Fuld adgang undtagen ændring af brugerroller og kontoindstillinger"
 
 msgid "Full access including user roles and account settings"
 msgstr "Fuld adgang inklusive brugerroller og kontoindstillinger"
+
+msgid "Full access, can edit and share with others"
+msgstr ""
+
+msgid "Full library"
+msgstr ""
+
+msgid "Fullscreen on mobile"
+msgstr ""
 
 msgid "Fully managed infrastructure"
 msgstr "Fuldt administreret infrastruktur"
@@ -640,6 +1197,9 @@ msgstr "GDPR-kompatibel"
 
 msgid "GDPR Compliant"
 msgstr "GDPR-kompatibel"
+
+msgid "Ghost"
+msgstr ""
 
 msgid "GitHub"
 msgstr "GitHub"
@@ -656,6 +1216,12 @@ msgstr "Gå til forsiden"
 msgid "Google"
 msgstr "Google"
 
+msgid "Green curry"
+msgstr ""
+
+msgid "Hard"
+msgstr ""
+
 msgid "Help your team recognize your invites"
 msgstr "Hjælp dit team med at genkende dine invitationer"
 
@@ -665,8 +1231,26 @@ msgstr "Hej! Velkommen tilbage"
 msgid "Hide details"
 msgstr "Skjul detaljer"
 
+msgid "Home"
+msgstr ""
+
+msgid "Horizontal"
+msgstr ""
+
+msgid "Horizontal nav bar with rich dropdown sections. Use it for marketing-style site headers or top-level discovery navigation."
+msgstr ""
+
+msgid "HoverCard"
+msgstr ""
+
 msgid "How we collect, use, and protect your personal data in compliance with GDPR."
 msgstr "Hvordan vi indsamler, bruger og beskytter dine personlige data i overensstemmelse med GDPR."
+
+msgid "Icon-only buttons"
+msgstr ""
+
+msgid "Icons"
+msgstr ""
 
 msgid "Identity mismatch"
 msgstr "Identitetsuoverensstemmelse"
@@ -674,11 +1258,41 @@ msgstr "Identitetsuoverensstemmelse"
 msgid "Image must be smaller than 1 MB."
 msgstr "Billedet skal være mindre end 1 MB."
 
+msgid "In the real app the sidebar is fixed-positioned, persists its state and width in localStorage (rem-based, not cookies), and exposes a floating chevron to toggle icon collapse plus drag-to-resize between 14rem and 25rem."
+msgstr ""
+
+msgid "Include cooking notes"
+msgstr ""
+
+msgid "Indeterminate"
+msgstr ""
+
+msgid "Indeterminate loading indicator. Use Progress when you can show how much work remains; reach for Spinner when you can't."
+msgstr ""
+
+msgid "Indian"
+msgstr ""
+
+msgid "Info alert"
+msgstr ""
+
+msgid "Inline calendar"
+msgstr ""
+
+msgid "Inline keyboard hint. Use it to call out shortcuts in tooltips, menus, and command palettes. Compose multi-key combinations with KbdGroup so each key keeps its own visual chip."
+msgstr ""
+
+msgid "Inline tip:"
+msgstr ""
+
 msgid "Invalid request"
 msgstr "Ugyldig anmodning"
 
 msgid "Invitation pending"
 msgstr "Invitation afventer"
+
+msgid "Invite"
+msgstr ""
 
 msgid "Invite user"
 msgstr "Inviter bruger"
@@ -698,14 +1312,74 @@ msgstr "Er der andet, du gerne vil fortælle os? (valgfrit)"
 msgid "It may take up to 5 minutes before the device is logged out."
 msgstr "Det kan tage op til 5 minutter, før enheden er logget ud."
 
+msgid "Italian"
+msgstr ""
+
+msgid "Italian, Thai, Mexican and more"
+msgstr ""
+
+msgid "Italic"
+msgstr ""
+
+msgid "Item — clickable row"
+msgstr ""
+
+msgid "Item — image media"
+msgstr ""
+
+msgid "Item — variants"
+msgstr ""
+
+msgid "Item archived"
+msgstr ""
+
+msgid "Item deleted"
+msgstr ""
+
+msgid "ItemGroup — settings list"
+msgstr ""
+
+msgid "January - June 2024"
+msgstr ""
+
+msgid "Japanese"
+msgstr ""
+
+msgid "Joined March 2024"
+msgstr ""
+
+msgid "Jordan Lee"
+msgstr ""
+
+msgid "Jot down a thought. It will be attached to the current recipe."
+msgstr ""
+
+msgid "JPEG, PNG or WebP. Max 1 MB."
+msgstr ""
+
 msgid "Just now"
 msgstr "Lige nu"
+
+msgid "Kbd"
+msgstr ""
 
 msgid "Keep downgrade"
 msgstr "Behold nedgradering"
 
 msgid "Keep subscription"
 msgstr "Behold abonnement"
+
+msgid "Keyboard accessible"
+msgstr ""
+
+msgid "Knife skills, sauces, fermentation"
+msgstr ""
+
+msgid "Labels"
+msgstr ""
+
+msgid "Lamb biryani"
+msgstr ""
 
 msgid "Language"
 msgstr "Sprog"
@@ -716,6 +1390,18 @@ msgstr "Stor"
 msgid "Larger"
 msgstr "Større"
 
+msgid "Lasagna bolognese"
+msgstr ""
+
+msgid "Last 3 months"
+msgstr ""
+
+msgid "Last 30 days"
+msgstr ""
+
+msgid "Last 7 days"
+msgstr ""
+
 msgid "Last active"
 msgstr "Sidst aktiv"
 
@@ -725,8 +1411,20 @@ msgstr "Efternavn"
 msgid "Last seen"
 msgstr "Sidst set"
 
+msgid "Learn more"
+msgstr ""
+
 msgid "Leave"
 msgstr "Forlad"
+
+msgid "Left"
+msgstr ""
+
+msgid "Left drawer"
+msgstr ""
+
+msgid "Left sheet"
+msgstr ""
 
 msgid "Legal and Compliance"
 msgstr "Juridisk og overholdelse"
@@ -737,14 +1435,38 @@ msgstr "Lad os opsætte din konto"
 msgid "Let's set up your profile"
 msgstr "Lad os opsætte din profil"
 
+msgid "Library"
+msgstr ""
+
 msgid "Light"
 msgstr "Lys"
+
+msgid "Line chart"
+msgstr ""
+
+msgid "Linear progress bar for determinate, foreground tasks like uploads or onboarding completion. Use Spinner for indeterminate or background loading."
+msgstr ""
+
+msgid "Link"
+msgstr ""
+
+msgid "Link sizes"
+msgstr ""
+
+msgid "Link underline"
+msgstr ""
+
+msgid "Link variants"
+msgstr ""
 
 msgid "LinkedIn"
 msgstr "LinkedIn"
 
 msgid "Loading..."
 msgstr "Indlæser..."
+
+msgid "Local seasonal"
+msgstr ""
 
 msgid "Log in"
 msgstr "Log ind"
@@ -761,6 +1483,9 @@ msgstr "Log ud"
 msgid "Logged out"
 msgstr "Logget ud"
 
+msgid "Login alerts"
+msgstr ""
+
 msgid "Login method"
 msgstr "Login-metode"
 
@@ -770,14 +1495,32 @@ msgstr "Login-bekræftelseskode"
 msgid "Logo"
 msgstr "Logo"
 
+msgid "Long date"
+msgstr ""
+
+msgid "macOS modifier glyphs: ⌃ Control, ⌥ Option, ⇧ Shift, ⌘ Command, fn Function. Use these everywhere shortcuts are surfaced so the chips read the same across menus, palettes, and tooltips."
+msgstr ""
+
+msgid "Main"
+msgstr ""
+
+msgid "Main content"
+msgstr ""
+
+msgid "Main navigation"
+msgstr ""
+
+msgid "Manage"
+msgstr ""
+
 msgid "Manage subscription"
 msgstr "Administrer abonnement"
 
 msgid "Manage your account here."
 msgstr "Administrer din konto her."
 
-msgid "Manage your payment methods and billing information."
-msgstr "Administrer dine betalingsmetoder og faktureringsoplysninger."
+msgid "Manage your subscription and billing history."
+msgstr ""
 
 msgid "Manage your subscription plan."
 msgstr "Administrer dit abonnement."
@@ -785,11 +1528,38 @@ msgstr "Administrer dit abonnement."
 msgid "Manage your users and permissions here."
 msgstr "Administrer dine brugere og tilladelser her."
 
+msgid "Managed by PayFast"
+msgstr ""
+
 msgid "Managed identities"
 msgstr "Administrerede identiteter"
 
+msgid "Masala dosa"
+msgstr ""
+
+msgid "Meal plan period"
+msgstr ""
+
+msgid "Media"
+msgstr ""
+
+msgid "Medium"
+msgstr ""
+
+msgid "Meeting notes from last week"
+msgstr ""
+
 msgid "Member"
 msgstr "Medlem"
+
+msgid "Merge"
+msgstr ""
+
+msgid "Merge commit"
+msgstr ""
+
+msgid "Mexican"
+msgstr ""
 
 msgid "Microsoft Azure"
 msgstr "Microsoft Azure"
@@ -809,26 +1579,83 @@ msgstr "Microsoft DBA (åbner i nyt vindue)"
 msgid "Microsoft patches and secures all PaaS infrastructure automatically"
 msgstr "Microsoft opdaterer og sikrer automatisk al PaaS infrastruktur"
 
+msgid "Middle"
+msgstr ""
+
 msgid "Mobile"
 msgstr "Mobil"
+
+msgid "Mobile-first sheet with a drag handle and swipe-to-dismiss. Reach for it when content is short and the user should be able to flick it away. Left and right drawers are narrow by default; top and bottom span the full width unless you constrain DrawerContent with mx-auto and max-w-*."
+msgstr ""
 
 msgid "Modified date"
 msgstr "Ændret dato"
 
-msgid "More information"
-msgstr "Mere information"
+msgid "Modifier combo"
+msgstr ""
+
+msgid "Mole poblano"
+msgstr ""
+
+msgid "More export options"
+msgstr ""
+
+msgid "More merge options"
+msgstr ""
+
+msgid "More save options"
+msgstr ""
+
+msgid "More tools"
+msgstr ""
+
+msgid "Morgan Riley"
+msgstr ""
+
+msgid "Multi select"
+msgstr ""
+
+msgid "Multi-select"
+msgstr ""
+
+msgid "Multi-select summary side pane"
+msgstr ""
+
+msgid "Muted"
+msgstr ""
 
 msgid "Name"
 msgstr "Navn"
 
-msgid "Name as it appears on invoices"
-msgstr "Navn som det fremgår på fakturaer"
+msgid "Narrow bottom drawer"
+msgstr ""
+
+msgid "Narrow bottom sheet"
+msgstr ""
+
+msgid "Native date"
+msgstr ""
+
+msgid "Native time"
+msgstr ""
 
 msgid "Navigation"
 msgstr "Navigation"
 
+msgid "Navigation and shortcuts"
+msgstr ""
+
+msgid "NavigationMenu"
+msgstr ""
+
 msgid "Need help? Our support team is here to assist you."
 msgstr "Har du brug for hjælp? Vores supportteam er klart til at hjælpe."
+
+msgid "Never underlined"
+msgstr ""
+
+msgid "New document"
+msgstr ""
 
 msgid "Next"
 msgstr "Næste"
@@ -836,14 +1663,17 @@ msgstr "Næste"
 msgid "Next billing date: {formattedPeriodEndLong}"
 msgstr "Næste faktureringsdato: {formattedPeriodEndLong}"
 
+msgid "Nigiri sushi"
+msgstr ""
+
 msgid "No account found for this email address. Please sign up to create an account."
 msgstr "Ingen konto fundet for denne e-mailadresse. Tilmeld dig venligst for at oprette en konto."
 
 msgid "No active sessions found."
 msgstr "Ingen aktive sessioner"
 
-msgid "No billing information on file"
-msgstr "Ingen faktureringsoplysninger registreret"
+msgid "No billing information on file."
+msgstr ""
 
 msgid "No longer needed"
 msgstr "Ikke længere nødvendigt"
@@ -851,14 +1681,53 @@ msgstr "Ikke længere nødvendigt"
 msgid "No payment history available."
 msgstr "Ingen betalingshistorik tilgængelig."
 
-msgid "No payment method on file"
-msgstr "Ingen betalingsmetode registreret"
+msgid "No payment method on file."
+msgstr ""
+
+msgid "No recipes yet"
+msgstr ""
+
+msgid "No results found"
+msgstr ""
+
+msgid "No results found."
+msgstr ""
 
 msgid "No users found"
 msgstr "Ingen brugere fundet"
 
+msgid "None"
+msgstr ""
+
+msgid "Not yet"
+msgstr ""
+
+msgid "Note"
+msgstr ""
+
+msgid "Notifications"
+msgstr ""
+
+msgid "Number (decimal)"
+msgstr ""
+
+msgid "Number (integer)"
+msgstr ""
+
+msgid "Off"
+msgstr ""
+
 msgid "OK"
 msgstr "OK"
+
+msgid "Okonomiyaki"
+msgstr ""
+
+msgid "On"
+msgstr ""
+
+msgid "One-time code"
+msgstr ""
 
 msgid "One-time password"
 msgstr "Engangskode"
@@ -872,11 +1741,38 @@ msgstr "Kun ejere kan ændre brugerroller"
 msgid "Only trusted personnel access data through Azure AD authentication"
 msgstr "Kun betroet personale får adgang til data gennem Azure AD autentificering"
 
-msgid "Open navigation menu"
-msgstr "Åbn navigationsmenu"
+msgid "Open command palette"
+msgstr ""
+
+msgid "Open side pane"
+msgstr ""
+
+msgid "Opened documentation"
+msgstr ""
+
+msgid "Opening PayFast in a new tab to update your card."
+msgstr ""
+
+msgid "Opening..."
+msgstr ""
+
+msgid "Option A"
+msgstr ""
+
+msgid "Option B"
+msgstr ""
 
 msgid "or"
 msgstr "eller"
+
+msgid "or press"
+msgstr ""
+
+msgid "Osso buco"
+msgstr ""
+
+msgid "Other"
+msgstr ""
 
 msgid "Other reason"
 msgstr "Anden grund"
@@ -884,14 +1780,35 @@ msgstr "Anden grund"
 msgid "Our support team will assist you with the account deletion process and ensure all your data is properly removed."
 msgstr "Vores supportteam hjælper dig med at slette din konto og sikrer, at alle dine data bliver fjernet."
 
+msgid "Outline"
+msgstr ""
+
+msgid "Overlays"
+msgstr ""
+
 msgid "Overview"
 msgstr "Overblik"
 
 msgid "Owner"
 msgstr "Ejer"
 
+msgid "Pad thai"
+msgstr ""
+
 msgid "Page not found"
 msgstr "Siden blev ikke fundet"
+
+msgid "Page Views"
+msgstr ""
+
+msgid "Palak paneer"
+msgstr ""
+
+msgid "Partially refunded"
+msgstr ""
+
+msgid "Passkeys"
+msgstr ""
 
 msgid "Passwordless deployments"
 msgstr "Adgangskodeløse implementeringer"
@@ -905,14 +1822,17 @@ msgstr "Betal og abonner"
 msgid "Pay and upgrade"
 msgstr "Betal og opgrader"
 
-msgid "Payment authentication failed."
-msgstr "Betalingsgodkendelse mislykkedes."
-
-msgid "Payment could not be processed. Please try again later."
-msgstr "Betalingen kunne ikke gennemføres. Prøv igen senere."
+msgid "Payment could not be processed. Please update your card and try again."
+msgstr ""
 
 msgid "Payment failed"
 msgstr "Betaling mislykkedes"
+
+msgid "Payment failed. Update or retry payment before {formattedGracePeriodEnd} to avoid suspension."
+msgstr ""
+
+msgid "Payment failed. Update or retry payment to keep access active."
+msgstr ""
 
 msgid "Payment failed. Your subscription will be suspended soon."
 msgstr "Betaling mislykkedes. Dit abonnement vil blive suspenderet snart."
@@ -920,14 +1840,20 @@ msgstr "Betaling mislykkedes. Dit abonnement vil blive suspenderet snart."
 msgid "Payment method"
 msgstr "Betalingsmetode"
 
-msgid "Payment method updated"
-msgstr "Betalingsmetode opdateret"
+msgid "Payment processor unavailable. Please refresh and try again."
+msgstr ""
+
+msgid "Pedro Duarte"
+msgstr ""
 
 msgid "Pending"
 msgstr "Afventer"
 
 msgid "Pending payment completed"
 msgstr "Afventende betaling gennemført"
+
+msgid "People"
+msgstr ""
 
 #. placeholder {0}: selectedUsers.length
 msgid "Permanently delete {0} users"
@@ -938,6 +1864,30 @@ msgstr "Slet bruger permanent"
 
 msgid "Permanently delete users"
 msgstr "Slet brugere permanent"
+
+msgid "Pick a chart"
+msgstr ""
+
+msgid "Pick a date"
+msgstr ""
+
+msgid "Pick a recipe"
+msgstr ""
+
+msgid "Pick a workday"
+msgstr ""
+
+msgid "Pie chart"
+msgstr ""
+
+msgid "Pie Chart - Donut with Text"
+msgstr ""
+
+msgid "Pizza margherita"
+msgstr ""
+
+msgid "Placeholders"
+msgstr ""
 
 msgid "PlatformPlatform"
 msgstr "PlatformPlatform"
@@ -954,8 +1904,8 @@ msgstr "Tjek venligst URL'en eller vend tilbage til forsiden."
 msgid "Please check your email for a verification code sent to <0>{email}</0>"
 msgstr "Tjek din e-mail for en bekræftelseskode sendt til <0>{email}</0>"
 
-msgid "Please include your country code"
-msgstr "Inkluder venligst din landekode"
+msgid "Please enter a valid email address"
+msgstr ""
 
 msgid "Please log in again to continue."
 msgstr "Log venligst ind igen for at fortsætte."
@@ -969,14 +1919,14 @@ msgstr "Vælg et JPEG-, PNG-, GIF-, WebP- eller SVG-billede."
 msgid "Please try again or return to the home page."
 msgstr "Prøv venligst igen eller vend tilbage til forsiden."
 
-msgid "Please wait while we confirm your payment. This may take a few moments."
-msgstr "Vent venligst mens vi bekræfter din betaling. Det kan tage et øjeblik."
-
 msgid "Postal code"
 msgstr "Postnummer"
 
 msgid "Powered by"
 msgstr "Powered by"
+
+msgid "Pozole rojo"
+msgstr ""
 
 msgid "Preferences"
 msgstr "Præferencer"
@@ -984,8 +1934,23 @@ msgstr "Præferencer"
 msgid "Premium"
 msgstr "Premium"
 
+msgid "press <0>?</0> to view all shortcuts."
+msgstr ""
+
+msgid "Preview app"
+msgstr ""
+
+msgid "Preview settings"
+msgstr ""
+
 msgid "Previous"
 msgstr "Forrige"
+
+msgid "Pricing"
+msgstr ""
+
+msgid "Primary"
+msgstr ""
 
 msgid "Priority support"
 msgstr "Prioriteret support"
@@ -999,9 +1964,6 @@ msgstr "Fortrolighedspolitikker"
 msgid "Privacy Policy"
 msgstr "Privatlivspolitik"
 
-msgid "Processing payment..."
-msgstr "Behandler betaling..."
-
 msgid "Processing..."
 msgstr "Behandler..."
 
@@ -1014,14 +1976,89 @@ msgstr "Profilavatar"
 msgid "Profile photo"
 msgstr "Profilbillede"
 
+msgid "Profile picture preview"
+msgstr ""
+
 msgid "Profile updated successfully"
 msgstr "Profil opdateret succesfuldt"
+
+msgid "Progress"
+msgstr ""
+
+msgid "Publish now"
+msgstr ""
+
+msgid "Quick note"
+msgstr ""
+
+msgid "Quick weeknight meals"
+msgstr ""
+
+msgid "Radar chart"
+msgstr ""
+
+msgid "Radial Chart - Shape"
+msgstr ""
+
+msgid "Radial Chart - Stacked"
+msgstr ""
+
+msgid "Radio group"
+msgstr ""
+
+msgid "Ratatouille"
+msgstr ""
+
+msgid "Reach for Collapsible when you only need one trigger and one panel. Use Accordion when several items share visual rhythm and behavior."
+msgstr ""
 
 msgid "Reactivate"
 msgstr "Fortryd opsigelse"
 
 msgid "Reactivate subscription"
 msgstr "Fortryd opsigelse"
+
+msgid "Read docs"
+msgstr ""
+
+msgid "Read only"
+msgstr ""
+
+msgid "Read only access to the recipe"
+msgstr ""
+
+msgid "Ready to publish?"
+msgstr ""
+
+msgid "Rebase and merge"
+msgstr ""
+
+msgid "Recipe"
+msgstr ""
+
+msgid "Recipe actions"
+msgstr ""
+
+msgid "Recipe details"
+msgstr ""
+
+msgid "Recipe ID"
+msgstr ""
+
+msgid "Recipe info"
+msgstr ""
+
+msgid "Recipe saved"
+msgstr ""
+
+msgid "Recipe shared"
+msgstr ""
+
+msgid "Recipes"
+msgstr ""
+
+msgid "recipes@example.com"
+msgstr ""
 
 msgid "Recycle bin"
 msgstr "Papirkurv"
@@ -1032,8 +2069,14 @@ msgstr "Papirkurven er tom"
 msgid "Redirecting..."
 msgstr "Omdirigerer..."
 
+msgid "Reference"
+msgstr ""
+
 msgid "Reference ID: {id}"
 msgstr "Reference-ID: {id}"
+
+msgid "Refine the recipe list. Changes apply when you close the sheet."
+msgstr ""
 
 msgid "Refunded"
 msgstr "Refunderet"
@@ -1044,8 +2087,21 @@ msgstr "Region"
 msgid "Regulatory standards and certifications"
 msgstr "Lovgivningsmæssige standarder og certificeringer"
 
+msgid "Relative"
+msgstr ""
+
 msgid "Reload"
 msgstr "Genindlæs"
+
+msgid "Remove"
+msgstr ""
+
+#. placeholder {0}: image.file.name
+msgid "Remove {0}"
+msgstr ""
+
+msgid "Remove image from {label}"
+msgstr ""
 
 msgid "Remove logo"
 msgstr "Fjern logo"
@@ -1055,6 +2111,18 @@ msgstr "Fjern profilbillede"
 
 msgid "Request a new code"
 msgstr "Anmod om en ny kode"
+
+msgid "Resizable app shell"
+msgstr ""
+
+msgid "Resizable panels"
+msgstr ""
+
+msgid "Responsive layout"
+msgstr ""
+
+msgid "Restaurant phone"
+msgstr ""
 
 msgid "Restore"
 msgstr "Gendan"
@@ -1069,6 +2137,9 @@ msgstr "Gendan bruger"
 msgid "Restoring..."
 msgstr "Gendanner..."
 
+msgid "Retry payment"
+msgstr ""
+
 msgid "Retry pending payment"
 msgstr "Prøv afventende betaling igen"
 
@@ -1081,17 +2152,59 @@ msgstr "Tilbagekald session"
 msgid "Revoking..."
 msgstr "Tilbagekalder..."
 
+msgid "Right"
+msgstr ""
+
+msgid "Right drawer"
+msgstr ""
+
+msgid "Right sheet"
+msgstr ""
+
+msgid "Right-click area"
+msgstr ""
+
+msgid "Right-click here"
+msgstr ""
+
+msgid "Risotto alla milanese"
+msgstr ""
+
+msgid "Rogan josh"
+msgstr ""
+
 msgid "Role"
 msgstr "Rolle"
+
+msgid "Safari"
+msgstr ""
 
 msgid "Save"
 msgstr "Gem"
 
+msgid "Save and close"
+msgstr ""
+
+msgid "Save as..."
+msgstr ""
+
 msgid "Save changes"
 msgstr "Gem ændringer"
 
+msgid "Save note"
+msgstr ""
+
+msgid "Save page as..."
+msgstr ""
+
+msgid "Saved recipes"
+msgstr ""
+
 msgid "Saving..."
 msgstr "Gemmer..."
+
+msgid "Scheduled maintenance on Sunday 2:00 AM — 4:00 AM UTC. Some features may be unavailable."
+msgstr ""
 
 msgid "Screenshots of the dashboard project with desktop and mobile versions"
 msgstr "Skærmbilleder af dashboard-projektet med desktop- og mobilversioner"
@@ -1099,22 +2212,56 @@ msgstr "Skærmbilleder af dashboard-projektet med desktop- og mobilversioner"
 msgid "Search"
 msgstr "Søg"
 
+msgid "Search and run commands"
+msgstr ""
+
+msgid "Search charts..."
+msgstr ""
+
+msgid "Search emoji"
+msgstr ""
+
+msgid "Search-driven menu with grouped items and inline shortcuts. Wrap it in CommandDialog to surface as a Cmd+K palette."
+msgstr ""
+
+msgid "Secondary"
+msgstr ""
+
 msgid "Security alert"
 msgstr "Sikkerhedsadvarsel"
 
 msgid "Security, privacy, and compliance information"
 msgstr "Sikkerheds-, privatlivs- og overholdelsesoplysninger"
 
+msgid "See more variations on ShadCN"
+msgstr ""
+
+msgid "Select"
+msgstr ""
+
+#. placeholder {0}: dish.name
+msgid "Select {0}"
+msgstr ""
+
 #. placeholder {0}: user.firstName
 #. placeholder {1}: user.lastName
 msgid "Select {0} {1}"
 msgstr "Vælg {0} {1}"
 
+msgid "Select a value"
+msgstr ""
+
 msgid "Select account"
 msgstr "Vælg konto"
 
+msgid "Select all rows on this page"
+msgstr ""
+
 msgid "Select all users"
 msgstr "Vælg alle brugere"
+
+msgid "Select charts"
+msgstr ""
 
 msgid "Select country"
 msgstr "Vælg land"
@@ -1122,8 +2269,14 @@ msgstr "Vælg land"
 msgid "Select dates"
 msgstr "Vælg datoer"
 
+msgid "Select with groups"
+msgstr ""
+
 msgid "Select your preferred language. Saved to your profile."
 msgstr "Vælg dit foretrukne sprog. Gemt på din profil."
+
+msgid "Selected recipes"
+msgstr ""
 
 msgid "Send invite"
 msgstr "Send invitation"
@@ -1133,6 +2286,9 @@ msgstr "Sender bekræftelseskode..."
 
 msgid "Sending..."
 msgstr "Sender..."
+
+msgid "Separator"
+msgstr ""
 
 msgid "Session ended"
 msgstr "Session afsluttet"
@@ -1146,14 +2302,80 @@ msgstr "Session tilbagekaldt succesfuldt"
 msgid "Sessions"
 msgstr "Sessioner"
 
+msgid "Set the recipe's difficulty and favorite status."
+msgstr ""
+
 msgid "Settings"
 msgstr "Indstillinger"
+
+msgid "Share permission"
+msgstr ""
+
+msgid "Share recipe"
+msgstr ""
+
+msgid "Share recipes with family and friends."
+msgstr ""
+
+msgid "Share this recipe with a friend or family member."
+msgstr ""
+
+msgid "Sharing..."
+msgstr ""
+
+msgid "Sheet"
+msgstr ""
+
+msgid "Short date"
+msgstr ""
+
+msgid "Show banner"
+msgstr ""
+
+msgid "Show banner with action"
+msgstr ""
+
+msgid "Show bookmarks"
+msgstr ""
+
+msgid "Show checkboxes"
+msgstr ""
 
 msgid "Show details"
 msgstr "Vis detaljer"
 
+msgid "Show dismissable banner"
+msgstr ""
+
 msgid "Show search filters"
 msgstr "Vis søgefiltre"
+
+msgid "Show status bar"
+msgstr ""
+
+msgid "Show toast"
+msgstr ""
+
+msgid "Showing total visitors for the last 3 months"
+msgstr ""
+
+msgid "Showing total visitors for the last 6 months"
+msgstr ""
+
+msgid "Side pane"
+msgstr ""
+
+msgid "Side-anchored panel built on the same Dialog primitive. Use it for desktop side surfaces like filter sidebars, secondary navigation, or detail editors. Left and right sheets are narrow by default; top and bottom span the full width unless you constrain SheetContent with mx-auto and max-w-*. Compare with SidePane (Custom) which is the docked-by-default app-shell variant."
+msgstr ""
+
+msgid "Sidebar"
+msgstr ""
+
+msgid "Sidebar footer"
+msgstr ""
+
+msgid "Sign in without a password using your device."
+msgstr ""
 
 msgid "Sign up"
 msgstr "Tilmeld dig"
@@ -1170,8 +2392,29 @@ msgstr "Tilmeld dig med Google"
 msgid "Signup verification code"
 msgstr "Tilmeldingsbekræftelseskode"
 
+msgid "Simulate errors"
+msgstr ""
+
+msgid "Single key"
+msgstr ""
+
+msgid "Single-expand vs multi-expand"
+msgstr ""
+
+msgid "Skeleton"
+msgstr ""
+
 msgid "SLA"
 msgstr "SLA"
+
+msgid "Slider (range)"
+msgstr ""
+
+msgid "Slider with steps"
+msgstr ""
+
+msgid "Slow-cooked classics"
+msgstr ""
 
 msgid "Small"
 msgstr "Lille"
@@ -1182,8 +2425,38 @@ msgstr "SOC og ISO rapporter"
 msgid "SOC and ISO Reports (opens in new window)"
 msgstr "SOC og ISO rapporter (åbner i nyt vindue)"
 
+msgid "Som tam salad"
+msgstr ""
+
+msgid "Some cooking experience, 30 to 60 minutes"
+msgstr ""
+
 msgid "Something went wrong"
 msgstr "Noget gik galt"
+
+msgid "Something went wrong. Please try again."
+msgstr ""
+
+msgid "Soups and stews"
+msgstr ""
+
+msgid "Source"
+msgstr ""
+
+msgid "Spacious rows"
+msgstr ""
+
+msgid "Spaghetti carbonara"
+msgstr ""
+
+msgid "Spinner"
+msgstr ""
+
+msgid "Split buttons"
+msgstr ""
+
+msgid "Squash and merge"
+msgstr ""
 
 msgid "Standard"
 msgstr "Standard"
@@ -1191,11 +2464,14 @@ msgstr "Standard"
 msgid "Standard user access"
 msgstr "Standard brugeradgang"
 
-msgid "State / Province"
-msgstr "Stat / Region"
+msgid "Starter"
+msgstr ""
 
-msgid "State or region"
-msgstr "Stat eller region"
+msgid "State / Province (optional)"
+msgstr ""
+
+msgid "Static preview of the Sidebar component. The fully interactive version — with drag-to-resize, hover-reveal toggle, and icon collapse — renders as the real sidemenu in each self-contained system."
+msgstr ""
 
 msgid "Status"
 msgstr "Status"
@@ -1204,13 +2480,10 @@ msgid "Stay"
 msgstr "Bliv"
 
 msgid "Street address"
-msgstr "Vejnavn"
+msgstr ""
 
 msgid "Strict separation prevents production data from leaking to other environments"
 msgstr "Streng adskillelse forhindrer produktionsdata i at lække til andre miljøer"
-
-msgid "Stripe Link"
-msgstr "Stripe Link"
 
 msgid "Subscribe"
 msgstr "Abonner"
@@ -1222,11 +2495,20 @@ msgstr "Abonner på {0}"
 msgid "Subscription"
 msgstr "Abonnement"
 
+msgid "Subtle background for grouped rows inside a panel."
+msgstr ""
+
 msgid "Succeeded"
 msgstr "Gennemført"
 
+msgid "Suggestions"
+msgstr ""
+
 msgid "Suspended"
 msgstr "Suspenderet"
+
+msgid "Switch"
+msgstr ""
 
 msgid "Switch account"
 msgstr "Skift konto"
@@ -1237,14 +2519,26 @@ msgstr "Skifter konto..."
 msgid "System"
 msgstr "System"
 
+msgid "Tables and side pane"
+msgstr ""
+
 msgid "Tablet"
 msgstr "Tablet"
+
+msgid "Tabs"
+msgstr ""
+
+msgid "Tacos al pastor"
+msgstr ""
 
 msgid "Tax"
 msgstr "Moms"
 
-msgid "Tax ID (VAT number)"
-msgstr "CVR-nummer"
+msgid "Tax ID (optional)"
+msgstr ""
+
+msgid "Tax ID:"
+msgstr ""
 
 msgid "Tell us a bit about yourself to get started."
 msgstr "Fortæl os lidt om dig selv for at komme i gang."
@@ -1261,11 +2555,23 @@ msgstr "Servicevilkår"
 msgid "Terms of use"
 msgstr "Brugsvilkår"
 
+msgid "Text area"
+msgstr ""
+
+msgid "Text field"
+msgstr ""
+
+msgid "Thai"
+msgstr ""
+
 msgid "The agreement governing your use of our Service, including acceptable use and liability."
 msgstr "Aftalen der styrer din brug af vores service, inklusive acceptabel brug og ansvar."
 
 msgid "The authentication request was invalid. Please try again."
 msgstr "Godkendelsesanmodningen var ugyldig. Prøv venligst igen."
+
+msgid "The item will be moved to the archive. You can restore it later from the archive."
+msgstr ""
 
 msgid "The name of your account, shown to users and in email notifications"
 msgstr "Navnet på din konto, vist til brugere og i e-mail-notifikationer"
@@ -1282,11 +2588,32 @@ msgstr "Denne konto er knyttet til en anden Google-identitet."
 msgid "This action cannot be undone."
 msgstr "Denne handling kan ikke fortrydes."
 
+msgid "This action cannot be undone. The item will be permanently removed."
+msgstr ""
+
+msgid "This action may have unintended consequences."
+msgstr ""
+
 msgid "This can happen when email ownership has changed. Contact your account administrator."
 msgstr "Dette kan ske, når e-mailejerskabet er ændret. Kontakt din kontoadministrator."
 
 msgid "This device"
 msgstr "Denne enhed"
+
+msgid "This feature helps you manage your workspace more efficiently. All changes are synced across your team in real time."
+msgstr ""
+
+msgid "This field is required"
+msgstr ""
+
+msgid "This is a default informational alert."
+msgstr ""
+
+msgid "This is a side pane component that slides in from the right. It can adapt to fullscreen mode on smaller screens."
+msgstr ""
+
+msgid "This is an informational message."
+msgstr ""
 
 msgid "This is the region where your data is stored"
 msgstr "Dette er den region, hvor dine data er lagret"
@@ -1297,26 +2624,86 @@ msgstr "Dette vil permanent slette <0>{totalDeletedUsersCount} brugere</0> i pap
 msgid "This will permanently delete <0>1 user</0> in the recycle bin."
 msgstr "Dette vil permanent slette <0>1 bruger</0> i papirkurven."
 
+msgid "Time zone"
+msgstr ""
+
+msgid "Tinkers with food on weekends. Recipe library curator since 2024."
+msgstr ""
+
+msgid "Tiramisu"
+msgstr ""
+
 msgid "Title"
 msgstr "Titel"
 
 msgid "To delete your account, please contact our support team."
 msgstr "For at slette din konto bedes du kontakte vores supportteam."
 
-msgid "Toggle sidebar"
-msgstr "Skift sidepanel"
+msgid "Toggle bold"
+msgstr ""
+
+msgid "Toggle buttons"
+msgstr ""
+
+msgid "Toggle group"
+msgstr ""
+
+msgid "Toggle italic"
+msgstr ""
+
+msgid "Toggle underline"
+msgstr ""
+
+msgid "Tom yum soup"
+msgstr ""
+
+msgid "Tonkotsu ramen"
+msgstr ""
 
 msgid "Too expensive"
 msgstr "For dyrt"
 
+msgid "Tooltips"
+msgstr ""
+
+msgid "Top"
+msgstr ""
+
+msgid "Top center"
+msgstr ""
+
+msgid "Top drawer"
+msgstr ""
+
+msgid "Top left"
+msgstr ""
+
+msgid "Top right"
+msgstr ""
+
+msgid "Top sheet"
+msgstr ""
+
 msgid "Total"
 msgstr "Total"
+
+msgid "Total cook time"
+msgstr ""
+
+msgid "Total time spent cooking this month."
+msgstr ""
 
 msgid "Total users"
 msgstr "Totalt antal brugere"
 
 msgid "Transparency, security, and privacy are at the core of how we operate. Review our policies and learn how we protect your data."
 msgstr "Gennemsigtighed, sikkerhed og privatliv er kernen i hvordan vi opererer. Gennemgå vores politikker og lær hvordan vi beskytter dine data."
+
+msgid "Trending up by 5.2% this month"
+msgstr ""
+
+msgid "Trial"
+msgstr ""
 
 msgid "Trust Center"
 msgstr "Tillidscenter"
@@ -1330,8 +2717,29 @@ msgstr "Prøv at justere din søgning eller filtre"
 msgid "Try again"
 msgstr "Prøv igen"
 
+msgid "Two-factor authentication"
+msgstr ""
+
+msgid "Type a command or search..."
+msgstr ""
+
+msgid "Type a date"
+msgstr ""
+
+msgid "Type or search..."
+msgstr ""
+
 msgid "Unable to load profile"
 msgstr "Kunne ikke indlæse profil"
+
+msgid "Under 30 minutes"
+msgstr ""
+
+msgid "Underline"
+msgstr ""
+
+msgid "Underline on hover"
+msgstr ""
 
 msgid "Unknown"
 msgstr "Ukendt"
@@ -1348,8 +2756,8 @@ msgstr "Unavngivet konto"
 msgid "Unsaved changes"
 msgstr "Ugemte ændringer"
 
-msgid "Update"
-msgstr "Opdater"
+msgid "Update on PayFast"
+msgstr ""
 
 msgid "Update payment method"
 msgstr "Opdater betalingsmetode"
@@ -1357,24 +2765,42 @@ msgstr "Opdater betalingsmetode"
 msgid "Update the billing details associated with your subscription."
 msgstr "Opdater faktureringsoplysningerne tilknyttet dit abonnement."
 
+msgid "Update your personal information and profile photo."
+msgstr ""
+
 msgid "Update your profile picture and personal details here."
 msgstr "Opdater dit profilbillede og personlige oplysninger her."
 
-msgid "Updating..."
-msgstr "Opdaterer..."
-
 msgid "Upgrade"
 msgstr "Opgrader"
+
+msgid "Upgrade now"
+msgstr ""
 
 #. placeholder {0}: targetPlanDetails.name
 msgid "Upgrade to {0}"
 msgstr "Opgrader til {0}"
 
+msgid "Upload image for {label}"
+msgstr ""
+
+msgid "Upload images"
+msgstr ""
+
 msgid "Upload logo"
 msgstr "Upload logo"
 
+msgid "Upload photo"
+msgstr ""
+
 msgid "Upload profile picture"
 msgstr "Upload profilbillede"
+
+msgid "Use a horizontal separator to group related sections in a column layout."
+msgstr ""
+
+msgid "Use Accordion to stack multiple related disclosable sections. Good for FAQs, settings groups, or any list where users scan items and expand a few."
+msgstr ""
 
 msgid "User"
 msgstr "Bruger"
@@ -1439,8 +2865,11 @@ msgstr "Brugere indlæses"
 msgid "Users who haven't confirmed their email"
 msgstr "Brugere, der ikke har bekræftet deres e-mail"
 
-msgid "VAT number"
-msgstr "CVR-nummer"
+msgid "Values"
+msgstr ""
+
+msgid "Vegetable tempura"
+msgstr ""
 
 msgid "Verification code sent"
 msgstr "Bekræftelseskode sendt"
@@ -1457,17 +2886,32 @@ msgstr "Bekræfter..."
 msgid "View active users"
 msgstr "Se aktive brugere"
 
+msgid "View all"
+msgstr ""
+
 msgid "View invitation"
 msgstr "Se invitation"
 
 msgid "View invited users"
 msgstr "Se inviterede brugere"
 
+msgid "View invoices and manage your payment method."
+msgstr ""
+
 msgid "View profile"
 msgstr "Se profil"
 
+msgid "View profile verification"
+msgstr ""
+
 msgid "View users"
 msgstr "Se brugere"
+
+msgid "Visitors"
+msgstr ""
+
+msgid "Warning alert"
+msgstr ""
 
 msgid "We detected a security issue with your login attempt. Please try again."
 msgstr "Vi opdagede et sikkerhedsproblem med dit loginforsøg. Prøv venligst igen."
@@ -1475,8 +2919,26 @@ msgstr "Vi opdagede et sikkerhedsproblem med dit loginforsøg. Prøv venligst ig
 msgid "We detected suspicious activity on your account. Someone may have attempted to take over your session."
 msgstr "Vi opdagede mistænkelig aktivitet på din konto. Nogen kan have forsøgt at overtage din session."
 
+msgid "What's at the market this week"
+msgstr ""
+
+msgid "When to use Accordion"
+msgstr ""
+
 msgid "When you accept this invitation, your profile information (name, title, and avatar) from your current account will be copied to the new account."
 msgstr "Når du accepterer denne invitation, vil dine profiloplysninger (navn, titel og avatar) fra din nuværende konto blive kopieret til den nye konto."
+
+msgid "With icons"
+msgstr ""
+
+msgid "Workday picker"
+msgstr ""
+
+msgid "Yakitori skewers"
+msgstr ""
+
+msgid "Yesterday"
+msgstr ""
 
 msgid "You cannot change your own role"
 msgstr "Du kan ikke ændre din egen rolle"
@@ -1490,6 +2952,9 @@ msgstr "Du har ikke tilladelse til at tilgå denne side."
 msgid "You have {invitationCount} pending invitations."
 msgstr "Du har {invitationCount} afventende invitationer."
 
+msgid "You have 12 saved recipes."
+msgstr ""
+
 #. placeholder {0}: firstInvitation.tenantName
 #. placeholder {0}: tenant.tenantName
 msgid "You have been invited to join <0>{0}</0>."
@@ -1500,6 +2965,9 @@ msgstr "Du har ugemte ændringer. Hvis du forlader nu, vil dine ændringer gå t
 
 msgid "You were logged out from another browser tab."
 msgstr "Du blev logget ud fra en anden browsertab."
+
+msgid "You'll be redirected to PayFast in a new tab where you can securely update the card on your subscription. Your existing schedule and billing dates remain unchanged."
+msgstr ""
 
 #. placeholder {0}: getPlanLabel(currentPlan)
 msgid "Your {0} subscription has been cancelled and will end on {formattedPeriodEnd}."
@@ -1526,17 +2994,26 @@ msgstr "Din opsigelse vil blive fortrudt, og dit {planName}-abonnement vil forbl
 msgid "Your changes may take a moment to appear."
 msgstr "Dine ændringer kan tage et øjeblik at blive vist."
 
+msgid "Your changes will be published and visible to all team members immediately."
+msgstr ""
+
 msgid "Your data stays in the Azure region you select at signup"
 msgstr "Dine data forbliver i den Azure region du vælger ved tilmelding"
 
 msgid "Your downgrade has been scheduled."
 msgstr "Din nedgradering er blevet planlagt."
 
+msgid "Your email address cannot be changed. An owner must delete your account and reinvite you with the new email address."
+msgstr ""
+
 msgid "Your payment card is expired or expiring soon. Please update your payment method to avoid service interruption."
 msgstr "Dit betalingskort er udløbet eller udløber snart. Opdater venligst din betalingsmetode for at undgå afbrydelse af tjenesten."
 
 msgid "Your payment card is expiring soon. Update your payment method to avoid interruption."
 msgstr "Dit betalingskort udløber snart. Opdater din betalingsmetode for at undgå afbrydelse."
+
+msgid "Your personal cookbook library."
+msgstr ""
 
 msgid "Your plan has been upgraded."
 msgstr "Dit abonnement er blevet opgraderet."
@@ -1547,8 +3024,8 @@ msgstr "Din plan vil blive nedgraderet til {planName} ved udgangen af din nuvær
 msgid "Your plan will be downgraded to {planName} at the end of your current billing period. You will keep your current plan features until then."
 msgstr "Din plan vil blive nedgraderet til {planName} ved udgangen af din nuværende faktureringsperiode. Du beholder dine nuværende planfunktioner indtil da."
 
-msgid "Your professional title or role"
-msgstr "Din professionelle titel eller rolle"
+msgid "Your profile has been verified"
+msgstr ""
 
 msgid "Your scheduled downgrade has been cancelled."
 msgstr "Din planlagte nedgradering er blevet afbrudt."
@@ -1558,9 +3035,6 @@ msgstr "Din session er udløbet."
 
 msgid "Your session was ended from another device."
 msgstr "Din session blev afsluttet fra en anden enhed."
-
-msgid "Your subscription has been activated."
-msgstr "Dit abonnement er blevet aktiveret."
 
 msgid "Your subscription has been cancelled and will end at the end of the current billing period."
 msgstr "Dit abonnement er blevet opsagt og udløber ved udgangen af den nuværende faktureringsperiode."
@@ -1594,6 +3068,9 @@ msgstr "Dit abonnement forbliver aktivt indtil {formattedDate}. Herefter skifter
 msgid "Your team needs to know who's inviting them. Add an account name to get started."
 msgstr "Dit team skal vide, hvem der inviterer dem. Tilføj et kontonavn for at komme i gang."
 
+msgid "Your trial expires in 3 days."
+msgstr ""
+
 msgid "Your verification code has expired"
 msgstr "Din bekræftelseskode er udløbet"
 
@@ -1608,6 +3085,3 @@ msgstr "YouTube"
 
 msgid "Zoom"
 msgstr "Zoom"
-
-msgid "Zoom level"
-msgstr "Zoomniveau"

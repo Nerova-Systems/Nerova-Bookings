@@ -70,13 +70,24 @@ test.describe("@smoke", () => {
     })();
 
     // === SUBSCRIBE FLOW (CONFIRMATION DIALOG) ===
-    await step("Click Subscribe on Starter plan & verify confirmation dialog & cancel it")(async () => {
+    await step("Click Subscribe on Starter plan & verify confirmation dialog and PayFast handoff")(async () => {
       await ownerPage.route("**/api/account/subscriptions/subscribe-preview**", async (route) => {
         await route.fulfill({
           status: 200,
           contentType: "application/json",
           json: { totalAmount: 149.0, taxAmount: 0, currency: "ZAR" }
         });
+      });
+      await ownerPage.route("**/api/account/subscriptions/initiate", async (route) => {
+        await route.fulfill({ status: 200, contentType: "application/json", json: { uuid: "payfast-test-uuid" } });
+      });
+      await ownerPage.evaluate(() => {
+        const windowWithPayFast = window as typeof window & {
+          __payfastCalls?: Array<{ uuid: string }>;
+          payfast_do_onsite_payment?: (data: { uuid: string }) => void;
+        };
+        windowWithPayFast.__payfastCalls = [];
+        windowWithPayFast.payfast_do_onsite_payment = (data) => windowWithPayFast.__payfastCalls?.push(data);
       });
 
       const starterCard = ownerPage.locator(".grid > div").filter({ hasText: "Starter" }).first();
@@ -85,11 +96,20 @@ test.describe("@smoke", () => {
       await expect(ownerPage.getByRole("dialog", { name: "Subscribe to Starter" })).toBeVisible();
       await expect(ownerPage.getByText("Total")).toBeVisible();
       await expect(ownerPage.getByRole("button", { name: "Pay and subscribe" })).toBeVisible();
-      await expect(ownerPage.getByRole("button", { name: "Cancel" })).toBeVisible();
+      await expect(ownerPage.getByText(/stripe/i)).toHaveCount(0);
 
-      await ownerPage.getByRole("button", { name: "Cancel" }).click();
+      await ownerPage.getByRole("button", { name: "Pay and subscribe" }).click();
+      await expect
+        .poll(() =>
+          ownerPage.evaluate(() => {
+            const windowWithPayFast = window as typeof window & { __payfastCalls?: Array<{ uuid: string }> };
+            return windowWithPayFast.__payfastCalls ?? [];
+          })
+        )
+        .toEqual([{ uuid: "payfast-test-uuid" }]);
       await expect(ownerPage.getByRole("dialog", { name: "Subscribe to Starter" })).not.toBeVisible();
 
+      await ownerPage.unroute("**/api/account/subscriptions/initiate");
       await ownerPage.unroute("**/api/account/subscriptions/subscribe-preview**");
     })();
 
@@ -230,7 +250,7 @@ test.describe("@smoke", () => {
         await trialCard.getByRole("button", { name: "Downgrade" }).click();
 
         await expect(ownerPage.getByRole("alertdialog")).toBeVisible();
-        await expect(ownerPage.getByText("Cancel subscription")).toBeVisible();
+        await expect(ownerPage.getByRole("heading", { name: "Cancel subscription" })).toBeVisible();
         await expect(ownerPage.getByText("switch to the free plan")).toBeVisible();
       }
     )();

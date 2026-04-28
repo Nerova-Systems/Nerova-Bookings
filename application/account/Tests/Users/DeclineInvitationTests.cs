@@ -30,7 +30,7 @@ public sealed class DeclineInvitationTests : EndpointBaseTest<AccountDbContext>
                 ("name", Faker.Company.CompanyName()),
                 ("state", nameof(TenantState.Active)),
                 ("logo", """{"Url":null,"Version":0}"""),
-                ("plan", nameof(SubscriptionPlan.Basis))
+                ("plan", nameof(SubscriptionPlan.Trial))
             ]
         );
 
@@ -103,7 +103,7 @@ public sealed class DeclineInvitationTests : EndpointBaseTest<AccountDbContext>
                 ("name", Faker.Company.CompanyName()),
                 ("state", nameof(TenantState.Active)),
                 ("logo", """{"Url":null,"Version":0}"""),
-                ("plan", nameof(SubscriptionPlan.Basis))
+                ("plan", nameof(SubscriptionPlan.Trial))
             ]
         );
 
@@ -114,7 +114,7 @@ public sealed class DeclineInvitationTests : EndpointBaseTest<AccountDbContext>
                 ("name", Faker.Company.CompanyName()),
                 ("state", nameof(TenantState.Active)),
                 ("logo", """{"Url":null,"Version":0}"""),
-                ("plan", nameof(SubscriptionPlan.Basis))
+                ("plan", nameof(SubscriptionPlan.Trial))
             ]
         );
 

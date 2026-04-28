@@ -18,14 +18,13 @@ export default function ExpiringCardBanner() {
 
   const paymentMethod = subscription?.paymentMethod;
   const currentPeriodEnd = subscription?.currentPeriodEnd;
-  const cancelAtPeriodEnd = subscription?.cancelAtPeriodEnd ?? false;
   const isOwner = userInfo?.role === "Owner";
 
   const isCardExpiringSoon =
     paymentMethod &&
-    paymentMethod.brand !== "link" &&
+    paymentMethod.expMonth !== null &&
+    paymentMethod.expYear !== null &&
     currentPeriodEnd &&
-    !cancelAtPeriodEnd &&
     new Date(currentPeriodEnd) >= new Date(paymentMethod.expYear, paymentMethod.expMonth, 1);
 
   if (!isCardExpiringSoon || !isOwner) {

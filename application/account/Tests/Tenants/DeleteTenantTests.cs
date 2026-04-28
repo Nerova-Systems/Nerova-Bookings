@@ -57,8 +57,8 @@ public sealed class DeleteTenantTests : EndpointBaseTest<AccountDbContext>
         // Arrange
         Connection.Update("subscriptions", "tenant_id", DatabaseSeeder.Tenant1.Id.Value, [
                 ("plan", nameof(SubscriptionPlan.Standard)),
-                ("stripe_customer_id", "cus_test_123"),
-                ("stripe_subscription_id", "sub_test_123"),
+                ("status", nameof(SubscriptionStatus.Active)),
+                ("pay_fast_token", "payfast-token-123"),
                 ("current_period_end", TimeProvider.GetUtcNow().AddDays(30))
             ]
         );

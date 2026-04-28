@@ -5,7 +5,7 @@ import { AppLayout } from "@repo/ui/components/AppLayout";
 import { Separator } from "@repo/ui/components/Separator";
 import { Skeleton } from "@repo/ui/components/Skeleton";
 import { useFormatLongDate } from "@repo/ui/hooks/useSmartDate";
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 
 import { api, SubscriptionPlan, SubscriptionStatus } from "@/shared/lib/api/client";
@@ -16,9 +16,12 @@ import { CancelDowngradeDialog } from "./-components/CancelDowngradeDialog";
 import { CurrentPlanSection } from "./-components/CurrentPlanSection";
 import { InitialPlanSelection } from "./-components/InitialPlanSelection";
 import { ReactivateConfirmationDialog } from "./-components/ReactivateConfirmationDialog";
+import { RetryPaymentDialog } from "./-components/RetryPaymentDialog";
+import { SubscribeConfirmationDialog } from "./-components/SubscribeConfirmationDialog";
 import { CancellationBanner, DowngradeBanner, PastDueBanner } from "./-components/SubscriptionBanner";
 import { useBillingPageMutations } from "./-components/useBillingPageMutations";
 import { useSubscriptionPolling } from "./-components/useSubscriptionPolling";
+import { useUpgradeSubscribeMutations } from "./-components/useUpgradeSubscribeMutations";
 
 export const Route = createFileRoute("/account/billing/")({
   staticData: { trackingTitle: "Billing" },
@@ -30,11 +33,13 @@ export const Route = createFileRoute("/account/billing/")({
 });
 
 function BillingPage() {
-  const navigate = useNavigate();
   const formatLongDate = useFormatLongDate();
   const { isPolling, isLoading, startPolling, subscription } = useSubscriptionPolling();
   const [isCancelDowngradeDialogOpen, setIsCancelDowngradeDialogOpen] = useState(false);
   const [isReactivateDialogOpen, setIsReactivateDialogOpen] = useState(false);
+  const [isSubscribeDialogOpen, setIsSubscribeDialogOpen] = useState(false);
+  const [isRetryPaymentDialogOpen, setIsRetryPaymentDialogOpen] = useState(false);
+  const [subscribeTarget, setSubscribeTarget] = useState<SubscriptionPlan>(SubscriptionPlan.Starter);
 
   const { data: pricingCatalog } = api.useQuery("get", "/api/account/subscriptions/pricing-catalog");
   const currentPlan = subscription?.plan ?? SubscriptionPlan.Trial;
@@ -45,6 +50,11 @@ function BillingPage() {
     setIsReactivateDialogOpen,
     setIsCancelDowngradeDialogOpen
   });
+  const { subscribeMutation } = useUpgradeSubscribeMutations({
+    startPolling,
+    setIsUpgradeDialogOpen: () => {},
+    setIsSubscribeDialogOpen
+  });
 
   const isCancelled = subscription?.status === SubscriptionStatus.Cancelled;
   const isPastDue = subscription?.status === SubscriptionStatus.PastDue;
@@ -53,6 +63,7 @@ function BillingPage() {
   const currentPeriodEnd = subscription?.currentPeriodEnd ?? null;
   const formattedPeriodEndLong = formatLongDate(currentPeriodEnd);
   const formattedGracePeriodEnd = formatLongDate(subscription?.gracePeriodEndsAt ?? null);
+  const currentPlanPrice = pricingCatalog?.plans.find((plan) => plan.plan === currentPlan);
 
   if (isLoading) {
     return (
@@ -79,7 +90,12 @@ function BillingPage() {
               onReactivate={() => setIsReactivateDialogOpen(true)}
             />
           )}
-          {isPastDue && <PastDueBanner formattedGracePeriodEnd={formattedGracePeriodEnd} />}
+          {isPastDue && (
+            <PastDueBanner
+              formattedGracePeriodEnd={formattedGracePeriodEnd}
+              onRetryPayment={() => setIsRetryPaymentDialogOpen(true)}
+            />
+          )}
           {scheduledPlan && !isCancelled && (
             <DowngradeBanner
               scheduledPlan={scheduledPlan}
@@ -109,7 +125,10 @@ function BillingPage() {
           plans={pricingCatalog?.plans}
           currentPlan={currentPlan}
           isPaymentConfigured={isPaymentConfigured}
-          onSubscribe={() => navigate({ to: "/account/billing/subscription" })}
+          onSubscribe={(plan) => {
+            setSubscribeTarget(plan);
+            setIsSubscribeDialogOpen(true);
+          }}
         />
       )}
 
@@ -132,6 +151,25 @@ function BillingPage() {
           currentPeriodEnd={currentPeriodEnd}
         />
       )}
+
+      <SubscribeConfirmationDialog
+        isOpen={isSubscribeDialogOpen}
+        onOpenChange={setIsSubscribeDialogOpen}
+        onConfirm={() => subscribeMutation.mutate({ body: { plan: subscribeTarget } })}
+        isPending={subscribeMutation.isPending || isPolling}
+        targetPlan={subscribeTarget}
+        billingInfo={subscription?.billingInfo}
+        paymentMethod={subscription?.paymentMethod}
+      />
+
+      <RetryPaymentDialog
+        isOpen={isRetryPaymentDialogOpen}
+        onOpenChange={setIsRetryPaymentDialogOpen}
+        billingInfo={subscription?.billingInfo}
+        paymentMethod={subscription?.paymentMethod}
+        amount={currentPlanPrice?.unitAmount ?? 0}
+        currency={currentPlanPrice?.currency ?? "ZAR"}
+      />
     </>
   );
 }

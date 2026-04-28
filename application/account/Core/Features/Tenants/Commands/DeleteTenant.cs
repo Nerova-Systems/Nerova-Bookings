@@ -19,7 +19,7 @@ public sealed class DeleteTenantHandler(ITenantRepository tenantRepository, ISub
         if (tenant is null) return Result.NotFound($"Tenant with id '{command.Id}' not found.");
 
         var subscription = await subscriptionRepository.GetByTenantIdUnfilteredAsync(command.Id, cancellationToken);
-        if (subscription?.HasActiveStripeSubscription() == true)
+        if (subscription?.Status is SubscriptionStatus.Active or SubscriptionStatus.PastDue)
         {
             return Result.BadRequest("Cannot delete a tenant with an active subscription.");
         }
