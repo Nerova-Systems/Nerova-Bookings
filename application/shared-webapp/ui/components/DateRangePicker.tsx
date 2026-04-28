@@ -1,57 +1,93 @@
-import type { DateRange } from "react-day-picker";
-
-import { useLingui } from "@lingui/react";
-import { format, type Locale } from "date-fns";
-import { da, enUS } from "date-fns/locale";
+import { t } from "@lingui/core/macro";
 import { CalendarIcon, XIcon } from "lucide-react";
-import { useState } from "react";
+import { type ReactNode, useRef, useState } from "react";
 
+import { type DateFieldDisplayFormat } from "../hooks/useDateField";
+import { type DateRangeValue, useDateRangeField } from "../hooks/useDateRangeField";
 import { cn } from "../utils";
 import { Button } from "./Button";
 import { Calendar } from "./Calendar";
-import { Field, FieldLabel } from "./Field";
-import { Popover, PopoverContent, PopoverTrigger } from "./Popover";
+import { Field, FieldDescription, FieldError } from "./Field";
+import { Input } from "./Input";
+import { Label } from "./Label";
+import { LabelWithTooltip } from "./LabelWithTooltip";
+import { Popover, PopoverContent } from "./Popover";
 
-/**
- * Maps app locale codes to date-fns locale objects.
- * Add new locales here when extending language support.
- */
-const dateFnsLocaleMap: Record<string, Locale> = {
-  "en-US": enUS,
-  "da-DK": da
-};
-
-export interface DateRangeValue {
-  start: Date;
-  end: Date;
-}
+export type { DateRangeValue };
 
 export interface DateRangePickerProps {
+  id?: string;
+  name?: string;
   label?: string;
+  description?: string;
+  errorMessage?: string;
+  tooltip?: React.ReactNode;
+  className?: string;
   value?: DateRangeValue | null;
   onChange?: (value: DateRangeValue | null) => void;
   placeholder?: string;
-  className?: string;
+  startIcon?: ReactNode;
+  required?: boolean;
   disabled?: boolean;
+  readOnly?: boolean;
+  locale?: string;
+  displayFormat?: DateFieldDisplayFormat;
 }
 
 export function DateRangePicker({
+  id,
+  name,
   label,
+  description,
+  errorMessage,
+  tooltip,
+  className,
   value,
   onChange,
-  placeholder = "Select dates",
-  className,
-  disabled
+  placeholder = t`Select dates`,
+  startIcon = <CalendarIcon className="size-4 shrink-0" />,
+  disabled,
+  readOnly,
+  locale,
+  displayFormat = "input"
 }: Readonly<DateRangePickerProps>) {
-  const { i18n } = useLingui();
-  const dateLocale = dateFnsLocaleMap[i18n.locale] ?? enUS;
   const [open, setOpen] = useState(false);
   const [selectionsCount, setSelectionsCount] = useState(0);
-  // Track the first clicked date separately since react-day-picker's onSelect
-  // doesn't reliably tell us which date was clicked
   const [firstClickDate, setFirstClickDate] = useState<Date | null>(null);
+  const {
+    inputRef,
+    rangeInputFormat,
+    isEditing,
+    hasValue,
+    inputValue,
+    selectedRange,
+    previewDate,
+    errors,
+    isInvalid,
+    handleInputChange,
+    handleInputMouseDown: baseHandleMouseDown,
+    handleInputFocus,
+    handleInputBlur: baseHandleBlur,
+    handleInputKeyDown: baseHandleKeyDown,
+    handleClear,
+    commitRange
+  } = useDateRangeField({
+    value,
+    onChange,
+    name,
+    errorMessage,
+    locale,
+    displayFormat,
+    externalEditingOverride: open
+  });
 
-  const dateRange: DateRange | undefined = value ? { from: value.start, to: value.end } : undefined;
+  const triggerId = id ?? name;
+  const showTrailingControls = !readOnly && !disabled;
+  const calendarMonth = previewDate ?? value?.start ?? value?.end;
+
+  const openedByKeyboardRef = useRef(false);
+  const wasFocusedBeforeClickRef = useRef(false);
+  const wasOpenAtMouseDownRef = useRef(false);
 
   const handleOpenChange = (isOpen: boolean) => {
     setOpen(isOpen);
@@ -61,113 +97,180 @@ export function DateRangePicker({
     }
   };
 
+  const handleInputMouseDown = (event: React.MouseEvent) => {
+    baseHandleMouseDown();
+    wasFocusedBeforeClickRef.current = inputRef.current === document.activeElement;
+    wasOpenAtMouseDownRef.current = open;
+    if (!disabled && !readOnly && !open && !wasFocusedBeforeClickRef.current) {
+      event.preventDefault();
+    }
+  };
+
+  const handleInputClick = () => {
+    if (readOnly || disabled) {
+      return;
+    }
+    if (wasOpenAtMouseDownRef.current) {
+      return;
+    }
+    if (wasFocusedBeforeClickRef.current) {
+      return;
+    }
+    openedByKeyboardRef.current = false;
+    handleOpenChange(true);
+    inputRef.current?.focus();
+  };
+
+  const handleInputBlur = () => {
+    baseHandleBlur();
+    wasFocusedBeforeClickRef.current = false;
+    wasOpenAtMouseDownRef.current = false;
+  };
+
+  const handleInputKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === "ArrowDown" && !open) {
+      event.preventDefault();
+      openedByKeyboardRef.current = true;
+      handleOpenChange(true);
+      return;
+    }
+    baseHandleKeyDown(event);
+  };
+
   const handleDayClick = (day: Date) => {
     const newCount = selectionsCount + 1;
     setSelectionsCount(newCount);
 
     if (newCount === 1) {
-      // First click: use existing start as pivot (matches react-day-picker behavior)
+      // First click pivots on the existing range: clicking before the start becomes the new start,
+      // clicking on or after the start becomes the new end. With no existing range the day becomes
+      // a single-day range that the next click expands.
       const existingStart = value?.start;
       const existingEnd = value?.end;
       setFirstClickDate(day);
 
       if (existingStart && existingEnd) {
         if (day.getTime() < existingStart.getTime()) {
-          // Clicked before existing start: clicked becomes start, keep end
-          onChange?.({ start: day, end: existingEnd });
+          commitRange({ start: day, end: existingEnd });
         } else {
-          // Clicked on or after existing start: keep start, clicked becomes end
-          onChange?.({ start: existingStart, end: day });
+          commitRange({ start: existingStart, end: day });
         }
       } else {
-        // No existing range: clicked becomes both start and end
-        onChange?.({ start: day, end: day });
+        commitRange({ start: day, end: day });
       }
-    } else {
-      // Second click: combine with the first click to form the range
-      const firstDate = firstClickDate ?? day;
-
-      // Earlier date becomes start, later becomes end
-      let newStart = firstDate;
-      let newEnd = day;
-      if (newStart.getTime() > newEnd.getTime()) {
-        [newStart, newEnd] = [newEnd, newStart];
-      }
-
-      onChange?.({ start: newStart, end: newEnd });
-
-      // Close if we have a valid range with different dates
-      if (newStart.getTime() !== newEnd.getTime()) {
-        setTimeout(() => setOpen(false), 100);
-      }
+      return;
+    }
+    // Second click: pair with the first click; swap so earlier becomes start.
+    const firstDate = firstClickDate ?? day;
+    let newStart = firstDate;
+    let newEnd = day;
+    if (newStart.getTime() > newEnd.getTime()) {
+      [newStart, newEnd] = [newEnd, newStart];
+    }
+    commitRange({ start: newStart, end: newEnd });
+    if (newStart.getTime() !== newEnd.getTime()) {
+      setOpen(false);
+      inputRef.current?.focus();
     }
   };
-
-  const handleClear = (event: React.MouseEvent) => {
-    event.preventDefault();
-    event.stopPropagation();
-    onChange?.(null);
-  };
-
-  const formatDateRange = () => {
-    if (!value?.start || !value?.end) {
-      return placeholder;
-    }
-    return `${format(value.start, "PP", { locale: dateLocale })} - ${format(value.end, "PP", { locale: dateLocale })}`;
-  };
-
-  const hasValue = value !== null && value !== undefined;
 
   return (
     <Field className={cn("flex flex-col", className)}>
-      {label && <FieldLabel>{label}</FieldLabel>}
-      <div className="relative">
-        <Popover open={open} onOpenChange={handleOpenChange}>
-          <PopoverTrigger
-            render={
-              <Button
-                variant="outline"
-                // NOTE: This diverges from stock ShadCN to prevent hover background change on the trigger button.
-                className={cn(
-                  "w-full min-w-40 justify-between border border-input font-normal hover:bg-white dark:hover:bg-input/30",
-                  hasValue && "pr-9"
-                )}
-                disabled={disabled}
-              >
-                <div className={cn("flex items-center gap-2", !hasValue && "text-muted-foreground")}>
-                  <CalendarIcon />
-                  <span className="flex-1 text-right">{formatDateRange()}</span>
-                </div>
-              </Button>
-            }
+      {label && (
+        <Label
+          htmlFor={disabled ? undefined : triggerId}
+          data-slot="field-label"
+          className="cursor-default leading-snug"
+        >
+          {tooltip ? <LabelWithTooltip tooltip={tooltip}>{label}</LabelWithTooltip> : label}
+        </Label>
+      )}
+      <div className="group relative">
+        <Popover open={readOnly ? false : open} onOpenChange={readOnly ? () => {} : handleOpenChange}>
+          <Input
+            ref={inputRef}
+            id={triggerId}
+            aria-invalid={isInvalid || undefined}
+            placeholder={isEditing ? rangeInputFormat.toLowerCase() : placeholder}
+            value={inputValue}
+            onChange={handleInputChange}
+            onMouseDown={handleInputMouseDown}
+            onFocus={handleInputFocus}
+            onBlur={handleInputBlur}
+            onKeyDown={handleInputKeyDown}
+            onClick={handleInputClick}
+            disabled={disabled}
+            readOnly={readOnly}
+            autoComplete="off"
+            inputMode={isEditing ? "numeric" : undefined}
+            className={cn(
+              startIcon != null && "pl-9",
+              showTrailingControls && hasValue && (isEditing ? "pr-9" : "group-hover:pr-9")
+            )}
           />
-          <PopoverContent className="w-auto overflow-hidden p-0" align="start">
+          {startIcon != null && (
+            <button
+              type="button"
+              tabIndex={-1}
+              disabled={readOnly || disabled}
+              aria-label={t`Open calendar`}
+              onMouseDown={(event) => event.preventDefault()}
+              onClick={() => {
+                if (readOnly || disabled) {
+                  return;
+                }
+                openedByKeyboardRef.current = false;
+                handleOpenChange(true);
+              }}
+              className={cn(
+                "absolute top-1/2 left-2.5 -translate-y-1/2 cursor-pointer rounded outline-ring focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2",
+                hasValue ? "text-foreground" : "text-muted-foreground",
+                (readOnly || disabled) && "pointer-events-none cursor-default"
+              )}
+            >
+              {startIcon}
+            </button>
+          )}
+          {showTrailingControls && hasValue && (
+            <Button
+              variant="ghost"
+              size="icon-xs"
+              tabIndex={-1}
+              className={cn(
+                "absolute top-1/2 right-1 -translate-y-1/2 transition-opacity",
+                isEditing ? "opacity-100" : "opacity-0 group-hover:opacity-100"
+              )}
+              onClick={handleClear}
+              aria-label={t`Clear dates`}
+            >
+              <XIcon className="size-5" />
+            </Button>
+          )}
+          <PopoverContent
+            className="w-auto overflow-hidden p-0"
+            align="start"
+            anchor={() => inputRef.current}
+            onKeyDown={(event: React.KeyboardEvent) => {
+              if (event.key === "Tab") {
+                event.preventDefault();
+                setOpen(false);
+                inputRef.current?.focus();
+              }
+            }}
+          >
             <Calendar
+              autoFocus={openedByKeyboardRef.current}
               mode="range"
-              selected={dateRange}
+              selected={selectedRange}
               onDayClick={handleDayClick}
+              defaultMonth={calendarMonth}
               numberOfMonths={1}
-              defaultMonth={value?.start}
             />
           </PopoverContent>
         </Popover>
-        {hasValue && (
-          <Button
-            variant="ghost"
-            size="icon-xs"
-            className="absolute top-1/2 right-1 -translate-y-1/2"
-            onClick={handleClear}
-            disabled={disabled}
-            aria-label="Clear dates"
-          >
-            <XIcon className="size-5" />
-          </Button>
-        )}
       </div>
+      {description && <FieldDescription>{description}</FieldDescription>}
+      <FieldError errors={errors} />
     </Field>
   );
-}
-
-export function parseDateString(dateString: string): Date {
-  return new Date(dateString);
 }

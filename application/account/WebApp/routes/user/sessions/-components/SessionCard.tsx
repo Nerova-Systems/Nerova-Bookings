@@ -1,5 +1,6 @@
 import { Trans } from "@lingui/react/macro";
 import { Button } from "@repo/ui/components/Button";
+import { Item, ItemActions, ItemContent, ItemDescription, ItemMedia, ItemTitle } from "@repo/ui/components/Item";
 import { useFormatDate } from "@repo/ui/hooks/useSmartDate";
 
 import { SmartDate } from "@/shared/components/SmartDate";
@@ -33,29 +34,28 @@ export function SessionCard({
   return (
     <div className="rounded-xl border border-border p-6">
       <div className="flex flex-col gap-5">
-        <div className="flex items-start justify-between gap-4">
-          <div className="flex gap-4">
-            <div className="flex size-12 shrink-0 items-center justify-center rounded-lg bg-muted">
-              <DeviceIcon className="size-6 text-muted-foreground" />
-            </div>
-            <div>
-              <h4 className="text-lg font-medium">{browser}</h4>
-              <p className="text-muted-foreground">
-                {os} · {deviceType}
-              </p>
-            </div>
-          </div>
-
-          {isCurrent ? (
-            <span className="shrink-0 rounded-full bg-success px-3 py-1 text-sm font-medium text-success-foreground">
-              <Trans>This device</Trans>
-            </span>
-          ) : (
-            <Button variant="secondary" onClick={() => onRevoke(session)} disabled={isRevoking} className="shrink-0">
-              {isRevoking ? <Trans>Revoking...</Trans> : <Trans>Revoke</Trans>}
-            </Button>
-          )}
-        </div>
+        <Item className="p-0">
+          <ItemMedia className="size-12 rounded-lg bg-muted">
+            <DeviceIcon className="size-6 text-muted-foreground" />
+          </ItemMedia>
+          <ItemContent>
+            <ItemTitle className="font-medium">{browser}</ItemTitle>
+            <ItemDescription>
+              {os} · {deviceType}
+            </ItemDescription>
+          </ItemContent>
+          <ItemActions>
+            {isCurrent ? (
+              <span className="shrink-0 rounded-full bg-success px-3 py-1 text-sm font-medium text-success-foreground">
+                <Trans>This device</Trans>
+              </span>
+            ) : (
+              <Button variant="secondary" onClick={() => onRevoke(session)} disabled={isRevoking} className="shrink-0">
+                {isRevoking ? <Trans>Revoking...</Trans> : <Trans>Revoke</Trans>}
+              </Button>
+            )}
+          </ItemActions>
+        </Item>
 
         <div className="grid grid-cols-1 gap-3 text-sm md:flex md:justify-between">
           {showAccountName && (

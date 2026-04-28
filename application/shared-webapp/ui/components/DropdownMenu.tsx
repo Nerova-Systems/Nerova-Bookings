@@ -50,7 +50,6 @@ function DropdownMenuTrigger({ ...props }: MenuPrimitive.Trigger.Props) {
   return <MenuPrimitive.Trigger data-slot="dropdown-menu-trigger" {...props} />;
 }
 
-// NOTE: This diverges from stock ShadCN to add w-auto for content-based width.
 function DropdownMenuContent({
   align = "start",
   alignOffset = 0,
@@ -102,7 +101,6 @@ function DropdownMenuLabel({
   );
 }
 
-// NOTE: This diverges from stock ShadCN to use py-3 for 44px touch targets and active:bg-accent for press feedback.
 function DropdownMenuItem({
   className,
   inset,
@@ -137,7 +135,7 @@ function DropdownMenuItem({
       data-inset={inset}
       data-variant={variant}
       className={cn(
-        "group/dropdown-menu-item relative flex cursor-pointer items-center gap-2 rounded-sm px-2 py-3 text-sm outline-hidden select-none focus:bg-accent focus:text-accent-foreground active:bg-accent data-disabled:pointer-events-none data-disabled:opacity-50 data-[inset]:pl-8 data-[variant=destructive]:text-destructive data-[variant=destructive]:focus:bg-destructive/10 data-[variant=destructive]:focus:text-destructive data-[variant=destructive]:active:bg-destructive/10 dark:data-[variant=destructive]:focus:bg-destructive/20 dark:data-[variant=destructive]:active:bg-destructive/20 not-data-[variant=destructive]:focus:[&_*]:text-accent-foreground [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 data-[variant=destructive]:[&>svg]:text-destructive",
+        "group/dropdown-menu-item relative flex min-h-[var(--control-height)] cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-hidden select-none focus:bg-accent focus:text-accent-foreground active:bg-accent data-disabled:pointer-events-none data-disabled:opacity-50 data-[inset]:pl-8 data-[variant=destructive]:text-destructive data-[variant=destructive]:focus:bg-destructive/10 data-[variant=destructive]:focus:text-destructive data-[variant=destructive]:active:bg-destructive/10 dark:data-[variant=destructive]:focus:bg-destructive/20 dark:data-[variant=destructive]:active:bg-destructive/20 not-data-[variant=destructive]:focus:[&_*]:text-accent-foreground [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 data-[variant=destructive]:[&>svg]:text-destructive",
         className
       )}
       onClick={menuTrackingTitle && trackingLabel ? handleClick : onClick}
@@ -150,7 +148,6 @@ function DropdownMenuSub({ ...props }: MenuPrimitive.SubmenuRoot.Props) {
   return <MenuPrimitive.SubmenuRoot data-slot="dropdown-menu-sub" {...props} />;
 }
 
-// NOTE: This diverges from stock ShadCN to use py-3 for 44px touch targets and active:bg-accent for press feedback.
 function DropdownMenuSubTrigger({
   className,
   inset,
@@ -164,7 +161,7 @@ function DropdownMenuSubTrigger({
       data-slot="dropdown-menu-sub-trigger"
       data-inset={inset}
       className={cn(
-        "flex cursor-pointer items-center gap-2 rounded-sm px-2 py-3 text-sm outline-hidden select-none focus:bg-accent focus:text-accent-foreground active:bg-accent data-open:bg-accent data-open:text-accent-foreground data-[inset]:pl-8 not-data-[variant=destructive]:focus:[&_*]:text-accent-foreground [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+        "flex min-h-[var(--control-height)] cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-hidden select-none focus:bg-accent focus:text-accent-foreground active:bg-accent data-open:bg-accent data-open:text-accent-foreground data-[inset]:pl-8 not-data-[variant=destructive]:focus:[&_*]:text-accent-foreground [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
         className
       )}
       {...props}
@@ -199,7 +196,6 @@ function DropdownMenuSubContent({
   );
 }
 
-// NOTE: This diverges from stock ShadCN to add active:bg-accent for press feedback.
 function DropdownMenuCheckboxItem({ className, children, checked, ...props }: MenuPrimitive.CheckboxItem.Props) {
   return (
     <MenuPrimitive.CheckboxItem
@@ -228,7 +224,6 @@ function DropdownMenuRadioGroup({ ...props }: MenuPrimitive.RadioGroup.Props) {
   return <MenuPrimitive.RadioGroup data-slot="dropdown-menu-radio-group" {...props} />;
 }
 
-// NOTE: This diverges from stock ShadCN to add active:bg-accent for press feedback.
 function DropdownMenuRadioItem({ className, children, ...props }: MenuPrimitive.RadioItem.Props) {
   return (
     <MenuPrimitive.RadioItem

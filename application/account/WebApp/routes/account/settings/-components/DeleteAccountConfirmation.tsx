@@ -31,7 +31,7 @@ export default function DeleteAccountConfirmation({ isOpen, onOpenChange }: Read
             name="email"
             label={t`Email`}
             value="support@platformplatform.net"
-            isReadOnly={true}
+            readOnly={true}
             startIcon={<MailIcon className="size-4" />}
           />
           <p className="text-sm text-muted-foreground">{t`Our support team will assist you with the account deletion process and ensure all your data is properly removed.`}</p>

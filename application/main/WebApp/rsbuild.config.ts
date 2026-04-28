@@ -19,20 +19,6 @@ export default defineConfig({
   security: {
     nonce: "{{cspNonce}}"
   },
-  tools: {
-    rspack: {
-      // Exclude tests/e2e directory from file watching to prevent hot reloading issues
-      watchOptions: {
-        ignored: ["**/tests/**", "**/playwright-report/**"],
-        // Watch workspace packages for changes
-        followSymlinks: true
-      },
-      snapshot: {
-        // Include workspace packages in module snapshots for change detection
-        managedPaths: []
-      }
-    }
-  },
   plugins: [
     TailwindPlugin("#main"),
     pluginReact(),

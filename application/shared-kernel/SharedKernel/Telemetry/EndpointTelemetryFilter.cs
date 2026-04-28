@@ -34,12 +34,12 @@ public class EndpointTelemetryFilter(ITelemetryProcessor telemetryProcessor)
     private static bool IsExcludedPath(RequestTelemetry requestTelemetry)
     {
         var path = requestTelemetry.Url.AbsolutePath;
-        return ExcludedPaths.Any(excludePath => path.StartsWith(excludePath));
+        return ExcludedPaths.Any(path.StartsWith);
     }
 
     private static bool IsExcludedFileExtension(RequestTelemetry requestTelemetry)
     {
         var path = requestTelemetry.Url.AbsolutePath;
-        return ExcludedFileExtensions.Any(excludeExtension => path.EndsWith(excludeExtension));
+        return ExcludedFileExtensions.Any(path.EndsWith);
     }
 }

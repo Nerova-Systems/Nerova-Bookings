@@ -43,7 +43,7 @@ export function BannerPortal({ children }: BannerPortalProps) {
 
   return (
     <>
-      <div ref={bannerRef} id="banner-root" className="fixed top-0 right-0 left-0 z-40" />
+      <div ref={bannerRef} id="banner-root" className="fixed top-0 right-0 left-0 z-40 [&_button]:w-fit" />
       <Suspense>{children}</Suspense>
     </>
   );

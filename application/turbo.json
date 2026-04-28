@@ -5,6 +5,10 @@
     "build": {
       "inputs": ["$TURBO_DEFAULT$", "shared/lib/api/*.Api.json"],
       "outputs": ["dist/**", "tests/test-results/**"],
+      "dependsOn": ["^build", "update-translations"]
+    },
+    "update-translations": {
+      "cache": false,
       "dependsOn": ["^build"]
     },
     "check": {

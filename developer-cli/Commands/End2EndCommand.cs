@@ -14,6 +14,13 @@ public partial class End2EndCommand : Command
     // Get available self-contained systems
     private static readonly string[] AvailableSelfContainedSystems = SelfContainedSystemHelper.GetAvailableSelfContainedSystems();
 
+    private static readonly HttpClient HttpClient = new(new HttpClientHandler
+        {
+            AllowAutoRedirect = true,
+            ServerCertificateCustomValidationCallback = (_, _, _, _) => true
+        }
+    ) { Timeout = TimeSpan.FromSeconds(5) };
+
     public End2EndCommand() : base("e2e", "Run end-to-end tests using Playwright")
     {
         var searchTermsArgument = new Argument<string[]>("search-terms") { Description = "Search terms for test filtering (e.g., 'user management', '@smoke', 'smoke', 'comprehensive', 'user-management-flows.spec.ts')", DefaultValueFactory = _ => [] };
@@ -521,15 +528,7 @@ public partial class End2EndCommand : Command
         {
             try
             {
-                using var httpClient = new HttpClient(new HttpClientHandler
-                    {
-                        AllowAutoRedirect = true,
-                        ServerCertificateCustomValidationCallback = (_, _, _, _) => true
-                    }
-                );
-                httpClient.Timeout = TimeSpan.FromSeconds(5);
-
-                var response = httpClient.Send(new HttpRequestMessage(HttpMethod.Head, BaseUrl));
+                var response = HttpClient.Send(new HttpRequestMessage(HttpMethod.Head, BaseUrl));
 
                 if (response.IsSuccessStatusCode)
                 {

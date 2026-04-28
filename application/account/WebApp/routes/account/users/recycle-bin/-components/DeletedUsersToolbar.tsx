@@ -79,7 +79,6 @@ export function DeletedUsersToolbar({
         <>
           <Button
             variant="secondary"
-            className="max-sm:grow"
             onClick={handleRestore}
             disabled={isRestoring}
             aria-label={selectedUsers.length === 1 ? t`Restore user` : t`Restore ${selectedUsers.length} users`}
@@ -99,7 +98,6 @@ export function DeletedUsersToolbar({
           </Button>
           <Button
             variant="destructive"
-            className="max-sm:grow"
             onClick={() => onPermanentlyDelete(selectedUsers)}
             disabled={isRestoring}
             aria-label={
@@ -115,7 +113,6 @@ export function DeletedUsersToolbar({
       ) : (
         <Button
           variant="destructive"
-          className="max-sm:grow"
           onClick={() => onEmptyRecycleBin(deletedUsersData?.totalCount ?? 0)}
           aria-label={t`Empty recycle bin`}
         >

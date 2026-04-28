@@ -10,7 +10,7 @@ interface DeletedUsersTableSkeletonProps {
 export function DeletedUsersTableSkeleton({ isMultiSelectMode, isMobile }: Readonly<DeletedUsersTableSkeletonProps>) {
   return (
     <div className="deleted-users-table min-h-48 flex-1 overflow-auto">
-      <Table aria-label={t`Deleted users loading`}>
+      <Table rowSize="spacious" aria-label={t`Deleted users loading`}>
         <TableBody>
           <TableRow className="h-10">
             {isMultiSelectMode && (

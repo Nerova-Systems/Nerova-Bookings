@@ -1,35 +1,69 @@
 import { t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
-import { collapsedContext, MenuButton, SideMenu, SideMenuSeparator } from "@repo/ui/components/SideMenu";
-import { useNavigate } from "@tanstack/react-router";
+import {
+  collapsedContext,
+  Sidebar,
+  SidebarContent,
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarGroupLabel,
+  SidebarHeader,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  SidebarRail
+} from "@repo/ui/components/Sidebar";
+import { Link as RouterLink, useNavigate, useRouter } from "@tanstack/react-router";
 import MobileMenu from "account/MobileMenu";
 import UserMenu from "account/UserMenu";
 import { LayoutDashboardIcon } from "lucide-react";
-import { useContext } from "react";
+import { use } from "react";
 
-function LogoContent() {
-  const isCollapsed = useContext(collapsedContext);
+const normalizePath = (path: string): string => path.replace(/\/$/, "") || "/";
+
+function HeaderUserMenu() {
+  // Federated UserMenu reads the same shimmed `collapsedContext` value provided by SidebarProvider.
+  const isCollapsed = use(collapsedContext);
   return <UserMenu isCollapsed={isCollapsed} />;
 }
 
 export function MainSideMenu() {
+  const router = useRouter();
+  const currentPath = normalizePath(router.state.location.pathname);
   const navigate = useNavigate();
   const handleNavigate = (path: string) => {
     navigate({ to: path });
   };
 
   return (
-    <SideMenu
-      sidebarToggleAriaLabel={t`Toggle sidebar`}
-      mobileMenuAriaLabel={t`Open navigation menu`}
-      topMenuContent={<MobileMenu onNavigate={handleNavigate} />}
-      logoContent={<LogoContent />}
-    >
-      <SideMenuSeparator>
-        <Trans>Navigation</Trans>
-      </SideMenuSeparator>
-
-      <MenuButton icon={LayoutDashboardIcon} label={t`Dashboard`} href="/dashboard" />
-    </SideMenu>
+    <Sidebar collapsible="icon" mobileContent={<MobileMenu onNavigate={handleNavigate} />}>
+      <nav className="contents" aria-label={t`Main navigation`}>
+        <SidebarHeader>
+          <HeaderUserMenu />
+        </SidebarHeader>
+        <SidebarContent>
+          <SidebarGroup>
+            <SidebarGroupLabel>
+              <Trans>Navigation</Trans>
+            </SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild={true} isActive={currentPath === "/dashboard"} tooltip={t`Dashboard`}>
+                    <RouterLink to="/dashboard">
+                      <LayoutDashboardIcon />
+                      <span>
+                        <Trans>Dashboard</Trans>
+                      </span>
+                    </RouterLink>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        </SidebarContent>
+      </nav>
+      <SidebarRail />
+    </Sidebar>
   );
 }

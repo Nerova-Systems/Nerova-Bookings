@@ -91,7 +91,7 @@ export function OtpVerificationForm({
             </p>
           )}
         </div>
-        <Button type="submit" className="mt-4 w-full text-center" disabled={isSubmitDisabled}>
+        <Button type="submit" className="mt-4 w-full text-center" isPending={isSubmitting} disabled={isSubmitDisabled}>
           {isSubmitting ? <Trans>Verifying...</Trans> : <Trans>Verify</Trans>}
         </Button>
       </div>

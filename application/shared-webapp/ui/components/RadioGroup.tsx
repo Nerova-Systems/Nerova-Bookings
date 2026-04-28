@@ -12,10 +12,8 @@ function RadioGroupItem({ className, ...props }: RadioPrimitive.Root.Props) {
   return (
     <RadioPrimitive.Root
       data-slot="radio-group-item"
-      // NOTE: This diverges from stock ShadCN to use outline-based focus ring instead of ring utilities,
-      // and active:border-primary for press feedback.
       className={cn(
-        "group/radio-group-item peer relative flex aspect-square size-4 shrink-0 cursor-pointer rounded-full border border-input text-primary shadow-xs outline-ring after:absolute after:-inset-x-3 after:-inset-y-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 active:border-primary disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-destructive aria-invalid:outline-destructive dark:bg-input/30 dark:aria-invalid:border-destructive/50",
+        "group/radio-group-item peer relative flex aspect-square size-4 shrink-0 cursor-pointer rounded-full border border-input text-primary shadow-xs outline-ring after:absolute after:-inset-x-3 after:-inset-y-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 active:border-primary disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-destructive aria-invalid:outline-destructive data-[label-focus]:outline data-[label-focus]:outline-2 data-[label-focus]:outline-offset-2 dark:bg-input/30 dark:aria-invalid:border-destructive/50",
         className
       )}
       {...props}

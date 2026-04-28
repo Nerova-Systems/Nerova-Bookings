@@ -172,12 +172,12 @@ public static class SharedInfrastructureConfiguration
                     {
                         var requestPath = httpContext.Request.Path.ToString();
 
-                        if (EndpointTelemetryFilter.ExcludedPaths.Any(excludePath => requestPath.StartsWith(excludePath)))
+                        if (EndpointTelemetryFilter.ExcludedPaths.Any(requestPath.StartsWith))
                         {
                             return false;
                         }
 
-                        if (EndpointTelemetryFilter.ExcludedFileExtensions.Any(excludeExtension => requestPath.EndsWith(excludeExtension)))
+                        if (EndpointTelemetryFilter.ExcludedFileExtensions.Any(requestPath.EndsWith))
                         {
                             return false;
                         }

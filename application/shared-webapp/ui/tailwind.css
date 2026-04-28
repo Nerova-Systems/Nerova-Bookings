@@ -122,6 +122,11 @@
     width: 52rem;
 }
 
+/* Soft destructive halo around a field when it is invalid and focused. Used with aria-invalid:focus-visible: and aria-invalid:focus: variants. */
+@utility shadow-error-halo {
+    box-shadow: 0 0 0 2px color-mix(in oklch, var(--destructive) 60%, transparent);
+}
+
 @layer base {
     * {
         @apply border-border;
@@ -145,8 +150,7 @@
 }
 
 /* Root font size with user-configurable scale (default 1 = 100%) */
-/* Mobile: 16px base ensures 44px touch targets (--control-height: 2.75rem) */
-/* Desktop: 22px base for comfortable reading on larger screens */
+/* Control heights are responsive: 40px desktop default, 44px on mobile (Apple HIG touch targets) */
 /* Change --zoom-level via JavaScript to apply user preference (e.g., 1.25 for 125%) */
 html {
     --zoom-level: 1;

@@ -1,19 +1,17 @@
 import type * as React from "react";
 
+import { useRouterState } from "@tanstack/react-router";
 import { XIcon } from "lucide-react";
 import { createContext, useCallback, useContext, useEffect, useRef, useState } from "react";
-import { createPortal } from "react-dom";
 
 import { cn } from "../utils";
 import { Button } from "./Button";
 
-// Context for SidePane state
+// Context so nested children (Header / Close / etc) can request the pane close without threading props.
 interface SidePaneContextValue {
-  isOpen: boolean;
   onClose: () => void;
   needsFullscreen: boolean;
 }
-
 const SidePaneContext = createContext<SidePaneContextValue | null>(null);
 
 function useSidePaneContext() {
@@ -24,23 +22,41 @@ function useSidePaneContext() {
   return context;
 }
 
-// Hook for accessibility features
+// Minimum content width for side-by-side layout (main + 24rem side pane).
+const SIDE_PANE_WIDTH_REM = 24;
+const MIN_SIDE_BY_SIDE_WIDTH_REM = SIDE_PANE_WIDTH_REM * 2;
+
+// When the viewport is too narrow for side-by-side, the pane switches to a full-screen drawer with a backdrop.
+function useNeedsFullscreen() {
+  const [needsFullscreen, setNeedsFullscreen] = useState(false);
+
+  useEffect(() => {
+    const rootFontSize = () => Number.parseFloat(getComputedStyle(document.documentElement).fontSize);
+    const check = () => {
+      setNeedsFullscreen(window.innerWidth < MIN_SIDE_BY_SIDE_WIDTH_REM * rootFontSize());
+    };
+    check();
+    window.addEventListener("resize", check);
+    return () => window.removeEventListener("resize", check);
+  }, []);
+
+  return needsFullscreen;
+}
+
 function useSidePaneAccessibility(
   isOpen: boolean,
   onClose: () => void,
   needsFullscreen: boolean,
-  sidePaneRef: React.RefObject<HTMLElement | null>
+  paneRef: React.RefObject<HTMLElement | null>
 ) {
   const previouslyFocusedElement = useRef<HTMLElement | null>(null);
 
-  // Store previously focused element
   useEffect(() => {
     if (isOpen && needsFullscreen) {
       previouslyFocusedElement.current = document.activeElement as HTMLElement;
     }
   }, [isOpen, needsFullscreen]);
 
-  // Restore focus on close
   useEffect(() => {
     if (!isOpen && previouslyFocusedElement.current) {
       previouslyFocusedElement.current.focus();
@@ -48,98 +64,54 @@ function useSidePaneAccessibility(
     }
   }, [isOpen]);
 
-  // Prevent body scroll when fullscreen
+  // Only lock body scroll in fullscreen mode — wide-viewport docked panes coexist with scrolling content.
   useEffect(() => {
     if (isOpen && needsFullscreen) {
-      const originalStyle = window.getComputedStyle(document.body).overflow;
+      const originalOverflow = document.body.style.overflow;
       document.body.style.overflow = "hidden";
       return () => {
-        document.body.style.overflow = originalStyle;
+        document.body.style.overflow = originalOverflow;
       };
     }
   }, [isOpen, needsFullscreen]);
 
-  // Escape key handler
   useEffect(() => {
     if (!isOpen) {
       return;
     }
-
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
         event.preventDefault();
         onClose();
       }
     };
-
     document.addEventListener("keydown", handleKeyDown);
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, [isOpen, onClose]);
 
-  // Focus trap for fullscreen mode
+  // Focus trap only in fullscreen mode (docked mode shares focus with surrounding content).
   useEffect(() => {
-    if (!isOpen || !needsFullscreen || !sidePaneRef.current) {
+    if (!isOpen || !needsFullscreen || !paneRef.current) {
       return;
     }
-
-    const focusableElements = sidePaneRef.current.querySelectorAll(
+    const focusable = paneRef.current.querySelectorAll<HTMLElement>(
       'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
     );
-    const firstElement = focusableElements[0] as HTMLElement;
-    const lastElement = focusableElements[focusableElements.length - 1] as HTMLElement;
-
-    const handleTabKey = (event: KeyboardEvent) => {
-      if (event.key !== "Tab") {
-        return;
-      }
-
-      if (event.shiftKey && document.activeElement === firstElement) {
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+    const handleTab = (event: KeyboardEvent) => {
+      if (event.key !== "Tab") return;
+      if (event.shiftKey && document.activeElement === first) {
         event.preventDefault();
-        lastElement.focus();
-      } else if (!event.shiftKey && document.activeElement === lastElement) {
+        last?.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
         event.preventDefault();
-        firstElement.focus();
+        first?.focus();
       }
     };
-
-    document.addEventListener("keydown", handleTabKey);
-    return () => document.removeEventListener("keydown", handleTabKey);
-  }, [isOpen, needsFullscreen, sidePaneRef]);
-}
-
-// Side pane width in rem (matches w-96 = 24rem)
-const SIDE_PANE_WIDTH_REM = 24;
-
-// Hook to detect if there's not enough room for side-by-side layout (50-50 split)
-// Shows fullscreen if content area can't fit table + side pane at equal widths
-function useNeedsFullscreen() {
-  const [needsFullscreen, setNeedsFullscreen] = useState(false);
-
-  useEffect(() => {
-    const checkSpace = () => {
-      const rootFontSize = parseFloat(getComputedStyle(document.documentElement).fontSize);
-      const sidePaneWidth = SIDE_PANE_WIDTH_REM * rootFontSize;
-
-      // Get side menu width from CSS variable or use 0 if not present
-      const sideMenuWidth =
-        parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--side-menu-collapsed-width")) *
-          rootFontSize || 0;
-
-      // Available content width (viewport minus side menu)
-      const availableWidth = window.innerWidth - sideMenuWidth;
-
-      // Need at least 2x side pane width for 50-50 split
-      const minWidthForSideBySide = sidePaneWidth * 2;
-
-      setNeedsFullscreen(availableWidth < minWidthForSideBySide);
-    };
-
-    checkSpace();
-    window.addEventListener("resize", checkSpace);
-    return () => window.removeEventListener("resize", checkSpace);
-  }, []);
-
-  return needsFullscreen;
+    document.addEventListener("keydown", handleTab);
+    return () => document.removeEventListener("keydown", handleTab);
+  }, [isOpen, needsFullscreen, paneRef]);
 }
 
 type WindowWithTracking = {
@@ -148,7 +120,6 @@ type WindowWithTracking = {
 
 let pendingCloseTimer: ReturnType<typeof setTimeout> | undefined;
 
-// Main SidePane component
 interface SidePaneProps {
   children: React.ReactNode;
   isOpen: boolean;
@@ -168,12 +139,33 @@ function SidePane({
   className,
   "aria-label": ariaLabel
 }: Readonly<SidePaneProps>) {
-  const sidePaneRef = useRef<HTMLElement>(null);
+  const paneRef = useRef<HTMLElement>(null);
   const needsFullscreen = useNeedsFullscreen();
   const prevOpen = useRef(false);
   const prevKey = useRef(trackingKey);
   const isOpenRef = useRef(isOpen);
   isOpenRef.current = isOpen;
+
+  // Auto-close when the user navigates to a different pathname/hash. Consumers whose pane visibility
+  // is derived state (not a boolean they can flip) still benefit — the pane unmounts internally even
+  // if `isOpen` stays true until the consumer clears its source state on the next interaction.
+  const currentLocation = useRouterState({ select: (s) => `${s.location.pathname}${s.location.hash}` });
+  const openedAtLocationRef = useRef<string | null>(null);
+  const [closedByNavigation, setClosedByNavigation] = useState(false);
+
+  useEffect(() => {
+    if (!isOpen) {
+      openedAtLocationRef.current = null;
+      setClosedByNavigation(false);
+      return;
+    }
+    if (openedAtLocationRef.current === null) {
+      openedAtLocationRef.current = currentLocation;
+    } else if (openedAtLocationRef.current !== currentLocation) {
+      setClosedByNavigation(true);
+      onOpenChange(false);
+    }
+  }, [isOpen, currentLocation, onOpenChange]);
 
   useEffect(() => {
     const opened = isOpen && !prevOpen.current;
@@ -206,47 +198,44 @@ function SidePane({
     onOpenChange(false);
   }, [onOpenChange]);
 
-  useSidePaneAccessibility(isOpen, onClose, needsFullscreen, sidePaneRef);
+  useSidePaneAccessibility(isOpen, onClose, needsFullscreen, paneRef);
 
-  if (!isOpen) {
+  if (!isOpen || closedByNavigation) {
     return null;
   }
 
-  const content = (
-    <>
-      {/* Backdrop for fullscreen mode */}
+  // Wide viewport: SidePane renders inline (a regular flex child in AppLayout's row) so the main column
+  // naturally shrinks to make room for it. The AppLayout keeps the sidePane slot at its intrinsic width.
+  // Narrow viewport: the pane full-bleeds with a backdrop so it overlays everything.
+  return (
+    <SidePaneContext.Provider value={{ onClose, needsFullscreen }}>
       {needsFullscreen && (
-        <div
-          className="fixed top-[calc(var(--past-due-banner-height,0rem)+var(--invitation-banner-height,0rem))] right-0 bottom-0 left-0 z-[35] bg-black/50"
-          aria-hidden="true"
+        <button
+          type="button"
+          aria-label="Close side panel"
+          tabIndex={-1}
           onClick={onClose}
+          className="fixed top-[calc(var(--past-due-banner-height,0rem)+var(--invitation-banner-height,0rem))] right-0 bottom-0 left-0 z-[35] bg-black/50"
         />
       )}
-
-      {/* Side pane */}
-      <section
-        ref={sidePaneRef}
+      <aside
+        ref={paneRef}
+        role="region"
         className={cn(
-          "relative flex h-full w-full flex-col bg-card",
-          needsFullscreen &&
-            "fixed top-[calc(var(--past-due-banner-height,0rem)+var(--invitation-banner-height,0rem))] right-0 bottom-0 left-0 z-[45] h-auto",
+          "flex h-full shrink-0 flex-col bg-card",
+          needsFullscreen
+            ? "fixed top-[calc(var(--past-due-banner-height,0rem)+var(--invitation-banner-height,0rem))] right-0 bottom-0 left-0 z-40"
+            : "w-[var(--side-pane-width,24rem)] border-l border-border",
           className
         )}
         aria-label={ariaLabel}
       >
         {children}
-      </section>
-    </>
-  );
-
-  return (
-    <SidePaneContext.Provider value={{ isOpen, onClose, needsFullscreen }}>
-      {needsFullscreen ? createPortal(content, document.body) : content}
+      </aside>
     </SidePaneContext.Provider>
   );
 }
 
-// Header component
 interface SidePaneHeaderProps {
   children: React.ReactNode;
   className?: string;
@@ -280,7 +269,6 @@ function SidePaneHeader({
   );
 }
 
-// Body component with scrolling
 interface SidePaneBodyProps {
   children: React.ReactNode;
   className?: string;
@@ -290,7 +278,6 @@ function SidePaneBody({ children, className }: Readonly<SidePaneBodyProps>) {
   return <div className={cn("flex-1 overflow-y-auto p-4", className)}>{children}</div>;
 }
 
-// Footer component
 interface SidePaneFooterProps {
   children: React.ReactNode;
   className?: string;
@@ -300,7 +287,6 @@ function SidePaneFooter({ children, className }: Readonly<SidePaneFooterProps>) 
   return <div className={cn("mt-auto p-4 pb-[max(1rem,env(safe-area-inset-bottom))]", className)}>{children}</div>;
 }
 
-// Close button that can be used anywhere
 function SidePaneClose({ children, className, ...props }: React.ComponentProps<typeof Button>) {
   const { onClose } = useSidePaneContext();
 

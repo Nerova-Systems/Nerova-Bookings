@@ -1,6 +1,6 @@
+import { t } from "@lingui/core/macro";
 import React, { useEffect, useRef, useState } from "react";
 
-import { useSideMenuLayout } from "../hooks/useSideMenuLayout";
 import { cn } from "../utils";
 import { getSideMenuCollapsedWidth } from "../utils/responsive";
 
@@ -14,6 +14,7 @@ type AppLayoutProps = {
   maxWidth?: string;
   balanceWidth?: string;
   sidePane?: React.ReactNode;
+  beforeHeader?: React.ReactNode;
   browserTitle?: string;
   title?: React.ReactNode;
   subtitle?: React.ReactNode;
@@ -35,20 +36,6 @@ type AppLayoutProps = {
  * - full: Content takes full width with standard padding
  * - center: Content is always centered with configurable max width (default: 40rem)
  */
-function useBodyScrollLock(isLocked: boolean) {
-  useEffect(() => {
-    if (isLocked) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "";
-    }
-
-    return () => {
-      document.body.style.overflow = "";
-    };
-  }, [isLocked]);
-}
-
 function useStickyHeader(enabled: boolean, headerRef: React.RefObject<HTMLDivElement | null>) {
   const [isSticky, setIsSticky] = useState(false);
   const observerRef = useRef<IntersectionObserver | null>(null);
@@ -130,36 +117,49 @@ function useScrollAwayHeader(enabled: boolean, contentRef: React.RefObject<HTMLD
   return { isFullyScrolled };
 }
 
+// Shared wrapper for the slot above the h1 title (e.g. breadcrumbs). Negative top margin pulls it up toward the top of the
+// header area so the slot sits visually tight to the edge without inflating the header's total height. Hidden on mobile
+// because typical consumers (breadcrumbs) already hide their own content at that breakpoint, leaving the wrapper as wasted
+// vertical space -- collapsing it here reclaims that area without forcing every consumer to pass a responsive class.
+function BeforeHeader({ children }: { children: React.ReactNode }) {
+  return <div className="-mt-2.5 mb-3 hidden h-11 items-center sm:-mt-3.5 sm:flex">{children}</div>;
+}
+
 interface HeaderContentProps {
   title: React.ReactNode;
   subtitle?: React.ReactNode;
+  beforeHeader?: React.ReactNode;
   isSticky: boolean;
 }
 
-const HeaderContent = React.forwardRef<HTMLDivElement, HeaderContentProps>(({ title, subtitle, isSticky }, ref) => (
-  <div ref={ref} className="mb-4">
-    <h1 className={cn("transition-opacity duration-200", isSticky ? "opacity-0 sm:opacity-100" : "opacity-100")}>
-      {title}
-    </h1>
-    {subtitle && (
-      <p
-        className={cn(
-          "mt-2 mb-0 text-muted-foreground",
-          "transition-opacity duration-200",
-          isSticky ? "opacity-0 sm:opacity-100" : "opacity-100"
-        )}
-      >
-        {subtitle}
-      </p>
-    )}
-  </div>
-));
+const HeaderContent = React.forwardRef<HTMLDivElement, HeaderContentProps>(
+  ({ title, subtitle, beforeHeader, isSticky }, ref) => (
+    <div ref={ref} className="mb-4">
+      {beforeHeader && <BeforeHeader>{beforeHeader}</BeforeHeader>}
+      <h1 className={cn("transition-opacity duration-200", isSticky ? "opacity-0 sm:opacity-100" : "opacity-100")}>
+        {title}
+      </h1>
+      {subtitle && (
+        <p
+          className={cn(
+            "mt-2 mb-0 text-muted-foreground",
+            "transition-opacity duration-200",
+            isSticky ? "opacity-0 sm:opacity-100" : "opacity-100"
+          )}
+        >
+          {subtitle}
+        </p>
+      )}
+    </div>
+  )
+);
 
 HeaderContent.displayName = "HeaderContent";
 
 interface ScrollAwayContentProps {
   title: React.ReactNode;
   subtitle?: React.ReactNode;
+  beforeHeader?: React.ReactNode;
   headerRef: React.RefObject<HTMLDivElement | null>;
   children: React.ReactNode;
   variant: AppLayoutVariant;
@@ -170,6 +170,7 @@ interface ScrollAwayContentProps {
 function ScrollAwayContent({
   title,
   subtitle,
+  beforeHeader,
   headerRef,
   children,
   variant,
@@ -188,6 +189,7 @@ function ScrollAwayContent({
     <>
       {/* Header - scrolls naturally with content */}
       <div ref={headerRef} className="scroll-away-header mb-4">
+        {beforeHeader && <BeforeHeader>{beforeHeader}</BeforeHeader>}
         <h1>{title}</h1>
         {subtitle && <p className="mt-2 mb-0 text-muted-foreground">{subtitle}</p>}
       </div>
@@ -215,6 +217,7 @@ interface StandardContentProps {
   balanceWidth?: string;
   title?: React.ReactNode;
   subtitle?: React.ReactNode;
+  beforeHeader?: React.ReactNode;
   headerRef: React.RefObject<HTMLDivElement | null>;
   isSticky: boolean;
   children: React.ReactNode;
@@ -226,6 +229,7 @@ function StandardContent({
   balanceWidth,
   title,
   subtitle,
+  beforeHeader,
   headerRef,
   isSticky,
   children
@@ -242,7 +246,15 @@ function StandardContent({
     return (
       <div className="flex min-h-0 w-full flex-1 flex-col items-center">
         <div className="flex min-h-0 w-full flex-1 flex-col" style={{ maxWidth }}>
-          {title && <HeaderContent ref={headerRef} title={title} subtitle={subtitle} isSticky={isSticky} />}
+          {title && (
+            <HeaderContent
+              ref={headerRef}
+              title={title}
+              subtitle={subtitle}
+              beforeHeader={beforeHeader}
+              isSticky={isSticky}
+            />
+          )}
           {wrappedChildren}
         </div>
       </div>
@@ -251,7 +263,15 @@ function StandardContent({
 
   return (
     <>
-      {title && <HeaderContent ref={headerRef} title={title} subtitle={subtitle} isSticky={isSticky} />}
+      {title && (
+        <HeaderContent
+          ref={headerRef}
+          title={title}
+          subtitle={subtitle}
+          beforeHeader={beforeHeader}
+          isSticky={isSticky}
+        />
+      )}
       {wrappedChildren}
     </>
   );
@@ -267,16 +287,17 @@ export function AppLayout({
   maxWidth = "40rem",
   balanceWidth,
   sidePane,
+  beforeHeader,
   title,
   browserTitle,
   subtitle,
   scrollAwayHeader = true
 }: Readonly<AppLayoutProps>) {
-  const { className, style, isOverlayOpen } = useSideMenuLayout();
+  // Assumes rendered inside a <SidebarProvider> + <SidebarInset>, which owns the sidebar/content
+  // split. AppLayout only handles the main content column (header, scroll behavior, side pane).
   const headerRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
 
-  useBodyScrollLock(isOverlayOpen);
   const isSticky = useStickyHeader(!!title && !scrollAwayHeader, headerRef);
   const { isFullyScrolled } = useScrollAwayHeader(scrollAwayHeader && !!title, contentRef);
 
@@ -289,16 +310,15 @@ export function AppLayout({
 
   return (
     <div className="flex min-h-dvh flex-1 flex-col">
-      <div
-        className={`${className} ${sidePane ? "grid grid-cols-[1fr_24rem] sm:grid" : "flex flex-col"} min-h-0 overflow-hidden`}
-        style={style}
-      >
+      {/* Row layout: main takes remaining width, sidePane reserves its own column.
+          When the pane opens, main naturally shrinks because it has `min-w-0 flex-1`. */}
+      <div className="flex min-h-0 flex-1 overflow-hidden">
         {/* Mobile sticky header - appears when page header scrolls out of view */}
         {/* z-30 to stack above sticky content (z-10) like toolbars and table headers */}
         {title && (
           <div
             className={cn(
-              "fixed top-[var(--banner-offset,0rem)] right-0 left-0 z-30 border-b border-border bg-background px-[16px] py-3",
+              "fixed top-(--banner-offset,0rem) right-0 left-0 z-30 border-b border-border bg-background px-[16px] py-3",
               "flex flex-col items-center justify-center text-center sm:hidden",
               "transform transition-all duration-200",
               (scrollAwayHeader ? isFullyScrolled : isSticky)
@@ -312,17 +332,20 @@ export function AppLayout({
         )}
 
         {/* Main content area */}
+        {/* NOTE: horizontal padding is intentionally in px (not rem). Outer margins should stay fixed when the user */}
+        {/* scales UI via --zoom-level -- growing content should consume extra space inward, not push against the viewport edges. */}
         <main
           ref={contentRef}
-          className="flex min-h-0 w-full flex-1 flex-col overflow-y-auto bg-background px-[16px] pt-4 transition-all duration-100 ease-in-out [-webkit-overflow-scrolling:touch] focus:outline-none sm:px-[32px] sm:pt-8"
+          className="flex min-h-0 w-full min-w-0 flex-1 flex-col overflow-y-auto bg-background px-[16px] pt-4 transition-all duration-100 ease-in-out [-webkit-overflow-scrolling:touch] focus:outline-none sm:px-[32px] sm:pt-8"
           id="main-content"
-          aria-label="Main content"
+          aria-label={t`Main content`}
           tabIndex={-1}
         >
           {scrollAwayHeader && title ? (
             <ScrollAwayContent
               title={title}
               subtitle={subtitle}
+              beforeHeader={beforeHeader}
               headerRef={headerRef}
               variant={variant}
               maxWidth={maxWidth}
@@ -338,6 +361,7 @@ export function AppLayout({
               balanceWidth={balanceWidth}
               title={title}
               subtitle={subtitle}
+              beforeHeader={beforeHeader}
               headerRef={headerRef}
               isSticky={isSticky}
             >
@@ -347,15 +371,8 @@ export function AppLayout({
           )}
         </main>
 
-        {/* Side pane area - fullscreen mode uses portal, side-by-side uses this wrapper */}
-        {sidePane && (
-          <aside
-            className="fixed top-[var(--banner-offset,0rem)] right-0 bottom-0 left-0 z-40 bg-card md:left-auto md:z-10 md:w-96"
-            aria-label="Side panel"
-          >
-            {sidePane}
-          </aside>
-        )}
+        {/* SidePane handles its own docking/overlay — renders as a fixed-position aside. */}
+        {sidePane}
       </div>
     </div>
   );

@@ -12,7 +12,7 @@ type UserDetails = components["schemas"]["UserDetails"];
 interface UserTableProps {
   selectedUsers: UserDetails[];
   onSelectedUsersChange: (users: UserDetails[]) => void;
-  onViewProfile: (user: UserDetails | null, isKeyboardOpen?: boolean) => void;
+  onViewProfile: (user: UserDetails | null) => void;
   onDeleteUser: (user: UserDetails) => void;
   onChangeRole: (user: UserDetails) => void;
   onUsersLoaded?: (users: UserDetails[]) => void;

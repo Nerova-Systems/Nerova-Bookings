@@ -97,7 +97,7 @@ export function DeleteUserDialog({ users, isOpen, onOpenChange, onUsersDeleted }
           <AlertDialogCancel variant="secondary" disabled={isPending}>
             <Trans>Cancel</Trans>
           </AlertDialogCancel>
-          <AlertDialogAction variant="destructive" disabled={isPending} onClick={handleDelete}>
+          <AlertDialogAction variant="destructive" isPending={isPending} onClick={handleDelete}>
             <Trans>Delete</Trans>
           </AlertDialogAction>
         </AlertDialogFooter>

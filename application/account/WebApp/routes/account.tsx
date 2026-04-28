@@ -1,4 +1,5 @@
 import { requireAuthentication } from "@repo/infrastructure/auth/routeGuards";
+import { SidebarInset, SidebarProvider } from "@repo/ui/components/Sidebar";
 import { createFileRoute, Outlet, useLocation } from "@tanstack/react-router";
 
 import SuspendedPage from "@/federated-modules/subscription/SuspendedPage";
@@ -20,9 +21,11 @@ function AccountLayout() {
   }
 
   return (
-    <>
+    <SidebarProvider>
       <AccountSideMenu />
-      <Outlet />
-    </>
+      <SidebarInset>
+        <Outlet />
+      </SidebarInset>
+    </SidebarProvider>
   );
 }

@@ -143,7 +143,7 @@ public sealed class OpenTelemetryEnricherTests
         var enricher = new OpenTelemetryEnricher(executionContext);
 
         // Act & Assert - Should not throw when Activity.Current is null
-        var act = () => enricher.Apply();
+        var act = enricher.Apply;
         act.Should().NotThrow();
     }
 }

@@ -87,7 +87,7 @@ export default function LocaleSwitcher({
           render={
             <Button
               variant="ghost"
-              className="flex h-11 w-full items-center justify-start gap-4 px-3 py-2 text-base font-normal text-muted-foreground hover:bg-hover-background hover:text-foreground"
+              className="flex h-[var(--control-height)] w-full items-center justify-start gap-4 px-3 py-2 text-base font-normal text-muted-foreground hover:bg-hover-background hover:text-foreground"
               style={{ pointerEvents: "auto" }}
             >
               <div className="flex size-6 shrink-0 items-center justify-center">

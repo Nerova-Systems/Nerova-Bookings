@@ -126,15 +126,20 @@ export function StartSignupForm() {
         type="email"
         label={t`Email`}
         autoFocus={true}
-        isRequired={true}
+        required={true}
         value={email}
         onChange={setEmail}
         autoComplete="email webauthn"
         placeholder={t`yourname@example.com`}
         className="flex w-full flex-col"
-        isDisabled={isPending}
+        disabled={isPending}
       />
-      <Button type="submit" disabled={isPending} className="mt-4 w-full text-center">
+      <Button
+        type="submit"
+        isPending={startSignupMutation.isPending}
+        disabled={isPending}
+        className="mt-4 w-full text-center"
+      >
         {startSignupMutation.isPending ? (
           <Trans>Sending verification code...</Trans>
         ) : (
@@ -155,10 +160,10 @@ export function StartSignupForm() {
             variant="outline"
             className="w-full"
             onClick={handleGoogleSignup}
+            isPending={isGoogleSignupPending}
             disabled={isPending}
-            aria-busy={isGoogleSignupPending}
           >
-            <img src={googleIconUrl} alt="" aria-hidden="true" className="size-5" />
+            {!isGoogleSignupPending && <img src={googleIconUrl} alt="" aria-hidden="true" className="size-5" />}
             {isGoogleSignupPending ? <Trans>Redirecting...</Trans> : <Trans>Sign up with Google</Trans>}
           </Button>
         </>

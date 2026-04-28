@@ -1,43 +1,244 @@
 import type * as React from "react";
 
-import { createContext, use, useEffect, useRef, useState } from "react";
+import { createContext, use, useEffect, useLayoutEffect, useRef, useState } from "react";
 
 import { cn } from "../utils";
 
-interface TableKeyboardNavigationContext {
-  focusedRowIndex: number;
-  setFocusedRowIndex: (index: number) => void;
+type TableRowSize = "compact" | "spacious";
+type RowKey = string | number;
+type SelectionMode = "none" | "single" | "multiple";
+
+interface TableSelectionContextValue {
+  focusedKey: RowKey | null;
+  selectedKeys: ReadonlySet<RowKey>;
+  hasSelection: boolean;
+  isKeyboardNavigating: boolean;
 }
 
-const TableKeyboardNavigationContext = createContext<TableKeyboardNavigationContext | null>(null);
+const TableSelectionContext = createContext<TableSelectionContextValue | null>(null);
+const TableRowSizeContext = createContext<TableRowSize>("compact");
+const TableStickyHeaderContext = createContext<boolean>(false);
+
+const EMPTY_KEYS: ReadonlySet<RowKey> = new Set();
+
+// Descendants that manage their own keyboard and mouse behaviour. Clicks on these should not
+// be intercepted by the table. Checkboxes are explicitly excluded; the Table owns checkbox clicks
+// so clicking a row and clicking its checkbox behave identically.
+const INTERACTIVE_SELECTOR =
+  'button:not([role="checkbox"]), [role="menuitem"], a[href], input:not([type="checkbox"]), select, textarea';
+
+function parseRowKey(value: string): RowKey {
+  const numeric = Number(value);
+  return value !== "" && !Number.isNaN(numeric) && String(numeric) === value ? numeric : value;
+}
+
+function rowSelector(key: RowKey): string {
+  return `tbody tr[data-row-key="${CSS.escape(String(key))}"]`;
+}
+
+function toggle(keys: ReadonlySet<RowKey>, key: RowKey): Set<RowKey> {
+  const next = new Set<RowKey>(keys);
+  if (next.has(key)) {
+    next.delete(key);
+  } else {
+    next.add(key);
+  }
+  return next;
+}
+
+function range(anchor: RowKey, target: RowKey, orderedKeys: RowKey[]): Set<RowKey> {
+  const anchorIdx = orderedKeys.indexOf(anchor);
+  const targetIdx = orderedKeys.indexOf(target);
+  if (anchorIdx < 0 || targetIdx < 0) {
+    return new Set<RowKey>([target]);
+  }
+  const [start, end] = anchorIdx <= targetIdx ? [anchorIdx, targetIdx] : [targetIdx, anchorIdx];
+  return new Set<RowKey>(orderedKeys.slice(start, end + 1));
+}
+
+// Each interaction produces an Outcome. A single apply step writes the outcome back to the
+// component (selection callback, focus state, anchor ref, activate callback). Keeping the
+// per-event logic as pure functions means each rule has one place to live.
+//
+// `transient` marks a selection that came from a plain click (or from a preceding transient arrow
+// replace). Arrow navigation replaces transient selections with the focused row, but preserves
+// explicit batches built via Cmd/Shift-click or Space toggle. An unselect-down-to-one via Space on
+// an explicit batch still counts as explicit, so the remaining row survives arrow navigation.
+interface Outcome {
+  selection?: Set<RowKey>;
+  focusKey?: RowKey;
+  anchorKey?: RowKey | null;
+  activate?: RowKey;
+  transient?: boolean;
+}
+
+// Clicking a row body vs. clicking its checkbox must feel different:
+//  - Plain row click = "make this the current row" (replace selection + activate). In multi mode
+//    a plain click clears any prior batch; Cmd/Ctrl and Shift build it. On the next keyboard nav
+//    the single-row selection gives way to keyboard semantics (handled in outcomeForArrow).
+//  - Checkbox click = "add/remove from the batch" (toggle, never activates).
+function outcomeForClick(
+  key: RowKey,
+  mode: SelectionMode,
+  modKey: boolean,
+  shift: boolean,
+  isCheckboxClick: boolean,
+  selectedKeys: ReadonlySet<RowKey>,
+  anchorKey: RowKey | null,
+  orderedKeys: RowKey[]
+): Outcome {
+  if (mode === "none") {
+    return {};
+  }
+  if (mode === "single") {
+    return { selection: new Set<RowKey>([key]), focusKey: key, anchorKey: key, activate: key, transient: true };
+  }
+  // multiple
+  if (isCheckboxClick) {
+    if (shift && anchorKey != null) {
+      return { selection: range(anchorKey, key, orderedKeys), focusKey: key, transient: false };
+    }
+    return { selection: toggle(selectedKeys, key), focusKey: key, anchorKey: key, transient: false };
+  }
+  // row body click
+  if (shift && anchorKey != null) {
+    return { selection: range(anchorKey, key, orderedKeys), focusKey: key, transient: false };
+  }
+  if (modKey) {
+    return { selection: toggle(selectedKeys, key), focusKey: key, anchorKey: key, transient: false };
+  }
+  return { selection: new Set<RowKey>([key]), focusKey: key, anchorKey: key, activate: key, transient: true };
+}
+
+function outcomeForArrow(
+  direction: "up" | "down",
+  shift: boolean,
+  mode: SelectionMode,
+  orderedKeys: RowKey[],
+  focusedKey: RowKey | null,
+  anchorKey: RowKey | null,
+  isTransientSelection: boolean,
+  activateOnNavigate: boolean
+): Outcome {
+  if (mode === "none" || orderedKeys.length === 0) {
+    return {};
+  }
+  const currentIdx = focusedKey != null ? orderedKeys.indexOf(focusedKey) : -1;
+  let nextIdx: number;
+  if (direction === "down") {
+    if (currentIdx < 0) {
+      nextIdx = 0;
+    } else if (currentIdx >= orderedKeys.length - 1) {
+      return {};
+    } else {
+      nextIdx = currentIdx + 1;
+    }
+  } else {
+    if (currentIdx <= 0) {
+      return {};
+    }
+    nextIdx = currentIdx - 1;
+  }
+  const nextKey = orderedKeys[nextIdx];
+
+  if (shift && mode === "multiple") {
+    const anchor = anchorKey ?? focusedKey ?? nextKey;
+    return {
+      selection: range(anchor, nextKey, orderedKeys),
+      focusKey: nextKey,
+      anchorKey: anchor,
+      transient: false
+    };
+  }
+
+  const outcome: Outcome = { focusKey: nextKey, anchorKey: nextKey };
+  // Selection follows keyboard focus when it represents a single row from a plain click or prior
+  // arrow replace (transient). In single mode this is always the case. Explicit multi-select
+  // batches built via Cmd/Shift-click or Space toggle are preserved even when the batch has been
+  // whittled down to one row, so the user doesn't lose their explicit selection.
+  if (mode === "single" || isTransientSelection) {
+    outcome.selection = new Set<RowKey>([nextKey]);
+    outcome.transient = true;
+  }
+  if (activateOnNavigate) {
+    outcome.activate = nextKey;
+  }
+  return outcome;
+}
+
+function outcomeForEnter(focusedKey: RowKey | null): Outcome {
+  return focusedKey != null ? { activate: focusedKey } : {};
+}
+
+function outcomeForSpace(mode: SelectionMode, focusedKey: RowKey | null, selectedKeys: ReadonlySet<RowKey>): Outcome {
+  if (focusedKey == null || mode === "none") {
+    return {};
+  }
+  if (mode === "single") {
+    return { activate: focusedKey };
+  }
+  return { selection: toggle(selectedKeys, focusedKey), anchorKey: focusedKey, transient: false };
+}
 
 interface TableProps extends React.ComponentProps<"table"> {
-  selectedIndex?: number;
-  onNavigate?: (index: number) => void;
-  onActivate?: (index: number) => void;
+  rowSize: TableRowSize;
+  selectionMode?: SelectionMode;
+  selectedKeys?: ReadonlySet<RowKey>;
+  onSelectionChange?: (keys: Set<RowKey>) => void;
+  onActivate?: (key: RowKey) => void;
+  activateOnNavigate?: boolean;
+  scrollToKey?: RowKey;
+  stickyHeader?: boolean;
 }
 
-// NOTE: This diverges from stock ShadCN to add optional keyboard navigation with roving tabindex.
-// Pass selectedIndex, onNavigate, and onActivate to enable arrow key navigation between body rows.
-// TableRow accepts an optional index prop to participate in keyboard navigation via context.
-function Table({ className, selectedIndex, onNavigate, onActivate, ...props }: TableProps) {
-  const hasKeyboardNavigation = onNavigate != null;
+function Table({
+  className,
+  rowSize,
+  selectionMode = "none",
+  selectedKeys,
+  onSelectionChange,
+  onActivate,
+  activateOnNavigate = false,
+  scrollToKey,
+  stickyHeader = false,
+  ...props
+}: TableProps) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const [focusedRowIndex, setFocusedRowIndex] = useState<number>(0);
+  const hasSelection = selectionMode !== "none";
+  const effectiveSelectedKeys = selectedKeys ?? EMPTY_KEYS;
+  const [focusedKey, setFocusedKey] = useState<RowKey | null>(null);
+  const [isKeyboardNavigating, setIsKeyboardNavigating] = useState(false);
+  const anchorKeyRef = useRef<RowKey | null>(null);
+  const transientSelectionRef = useRef(false);
 
-  // NOTE: This diverges from stock ShadCN to scroll the selected row into view (e.g., deep links).
-  // Uses manual scrollTop instead of scrollIntoView to avoid changing the browser's sequential
-  // focus navigation starting point, which would make Tab skip the "Skip to main content" link.
+  const stateRef = useRef({
+    selectionMode,
+    selectedKeys: effectiveSelectedKeys,
+    activateOnNavigate,
+    onSelectionChange,
+    onActivate,
+    focusedKey
+  });
+  stateRef.current = {
+    selectionMode,
+    selectedKeys: effectiveSelectedKeys,
+    activateOnNavigate,
+    onSelectionChange,
+    onActivate,
+    focusedKey
+  };
+
+  // Scroll a deep-linked row into view without hijacking the sequential focus navigation starting
+  // point (scrollIntoView would make Tab skip past the "Skip to main content" link).
   useEffect(() => {
-    if (selectedIndex == null || selectedIndex < 0) {
+    if (scrollToKey == null) {
       return;
     }
     const container = containerRef.current;
-    const row = container?.querySelectorAll("tbody tr")[selectedIndex] as HTMLElement | undefined;
+    const row = container?.querySelector<HTMLElement>(rowSelector(scrollToKey));
     if (!row) {
       return;
     }
-
     let scrollable: HTMLElement | null = row.parentElement;
     while (scrollable && scrollable.scrollHeight <= scrollable.clientHeight) {
       scrollable = scrollable.parentElement;
@@ -45,7 +246,6 @@ function Table({ className, selectedIndex, onNavigate, onActivate, ...props }: T
     if (!scrollable) {
       return;
     }
-
     const rowRect = row.getBoundingClientRect();
     const scrollableRect = scrollable.getBoundingClientRect();
     if (rowRect.top < scrollableRect.top) {
@@ -53,92 +253,224 @@ function Table({ className, selectedIndex, onNavigate, onActivate, ...props }: T
     } else if (rowRect.bottom > scrollableRect.bottom) {
       scrollable.scrollTop += rowRect.bottom - scrollableRect.bottom;
     }
-  }, [selectedIndex]);
+  }, [scrollToKey]);
+
+  // Keep focusedKey valid as rows/selection change (e.g. pagination, filtering). Prefer the current
+  // focused row so rapid keyboard actions aren't reset by selection updates; only fall back to
+  // scrollToKey / first selected / first row when the current focus is stale. A MutationObserver
+  // on tbody catches pagination/filtering row swaps that don't change any prop (without this the
+  // roving tabindex stays on a page-1 row after paginating to page 2, so Tab skips the table body).
+  useEffect(() => {
+    if (!hasSelection) {
+      return;
+    }
+    const container = containerRef.current;
+    if (!container) {
+      return;
+    }
+    const rowExists = (key: RowKey) => container.querySelector(rowSelector(key)) != null;
+    const validate = () => {
+      setFocusedKey((current) => {
+        if (current != null && rowExists(current)) {
+          return current;
+        }
+        if (scrollToKey != null && rowExists(scrollToKey)) {
+          return scrollToKey;
+        }
+        for (const key of effectiveSelectedKeys) {
+          if (rowExists(key)) {
+            return key;
+          }
+        }
+        const first = container.querySelector<HTMLElement>("tbody tr[data-row-key]");
+        return first?.dataset.rowKey != null ? parseRowKey(first.dataset.rowKey) : null;
+      });
+    };
+
+    validate();
+
+    const tbody = container.querySelector("tbody");
+    if (tbody == null) {
+      return;
+    }
+    const observer = new MutationObserver(validate);
+    observer.observe(tbody, { childList: true });
+    return () => observer.disconnect();
+  }, [hasSelection, scrollToKey, effectiveSelectedKeys]);
 
   useEffect(() => {
-    if (!hasKeyboardNavigation) {
+    if (!hasSelection) {
+      return;
+    }
+    const container = containerRef.current;
+    const tableElement = container?.querySelector("table");
+    if (!container || !tableElement) {
       return;
     }
 
-    const handleKeyDown = (event: KeyboardEvent) => {
-      const container = containerRef.current;
-      if (!container?.contains(document.activeElement)) {
-        return;
+    const readOrderedKeys = (): RowKey[] =>
+      Array.from(container.querySelectorAll<HTMLElement>("tbody tr[data-row-key]"))
+        .map((row) => row.dataset.rowKey)
+        .filter((value): value is string => value != null)
+        .map(parseRowKey);
+
+    const applyOutcome = (outcome: Outcome) => {
+      const state = stateRef.current;
+      // Keep stateRef in sync synchronously so the next keypress (before React re-renders) sees
+      // the updated selection/focus. Without this, rapid Shift+Arrow presses read stale focus and
+      // the range stops growing after one extension.
+      if (outcome.selection != null) {
+        state.onSelectionChange?.(outcome.selection);
+        stateRef.current = { ...stateRef.current, selectedKeys: outcome.selection };
       }
-
-      const target = event.target as HTMLElement;
-
-      // Only handle keyboard navigation when focus is inside the table body.
-      // Column headers, buttons, and other elements handle their own keyboard events.
-      if (!target.closest("tbody")) {
-        return;
+      if (outcome.anchorKey !== undefined) {
+        anchorKeyRef.current = outcome.anchorKey;
       }
-      if (target.tagName === "BUTTON" || target.closest("button")) {
-        return;
-      }
-
-      const rows = container.querySelectorAll("tbody tr");
-      const rowCount = rows.length;
-      if (rowCount === 0) {
-        return;
-      }
-
-      const currentIndex = selectedIndex != null && selectedIndex >= 0 ? selectedIndex : -1;
-
-      if ((event.key === "Enter" || event.key === " ") && currentIndex >= 0) {
-        event.preventDefault();
-        event.stopPropagation();
-        onActivate?.(currentIndex);
-        return;
-      }
-
-      // NOTE: This diverges from stock ShadCN to clamp at first/last row instead of wrapping around.
-      if (event.key === "ArrowDown" || event.key === "ArrowUp") {
-        event.preventDefault();
-        let nextIndex: number;
-        if (event.key === "ArrowDown") {
-          if (currentIndex >= rowCount - 1) {
-            return;
-          }
-          nextIndex = currentIndex + 1;
-        } else {
-          if (currentIndex <= 0) {
-            return;
-          }
-          nextIndex = currentIndex - 1;
-        }
-        setFocusedRowIndex(nextIndex);
-        onNavigate(nextIndex);
-
-        const row = rows[nextIndex] as HTMLElement | undefined;
+      if (outcome.focusKey !== undefined) {
+        stateRef.current = { ...stateRef.current, focusedKey: outcome.focusKey };
+        setFocusedKey(outcome.focusKey);
+        const row = container.querySelector<HTMLElement>(rowSelector(outcome.focusKey));
         row?.scrollIntoView({ block: "nearest" });
         row?.focus();
       }
+      if (outcome.activate !== undefined) {
+        state.onActivate?.(outcome.activate);
+      }
+      if (outcome.transient !== undefined) {
+        transientSelectionRef.current = outcome.transient;
+      }
     };
 
+    const handleClick = (event: MouseEvent) => {
+      // BaseUI's Checkbox forwards a real click on its button to a hidden <input> via a synthetic
+      // click(); that second click bubbles through the table too. Skip untrusted events so the
+      // handler runs exactly once per user interaction.
+      if (!event.isTrusted) {
+        return;
+      }
+      const target = event.target as HTMLElement | null;
+      if (!target) {
+        return;
+      }
+      const row = target.closest<HTMLElement>("tbody tr[data-row-key]");
+      if (!row || !container.contains(row)) {
+        return;
+      }
+      if (target.closest(INTERACTIVE_SELECTOR) != null) {
+        return;
+      }
+      const state = stateRef.current;
+      // Treat any click inside a cell that contains a checkbox as a checkbox click, even if the
+      // pointer missed the checkbox itself -- this makes the whole checkbox column act as a big
+      // hit target without affecting clicks on other columns.
+      const cell = target.closest<HTMLElement>("td");
+      const cellHasCheckbox = cell?.querySelector('[role="checkbox"]') != null;
+      const isCheckboxClick = cellHasCheckbox || target.closest('[role="checkbox"]') != null;
+      const outcome = outcomeForClick(
+        parseRowKey(row.dataset.rowKey ?? ""),
+        state.selectionMode,
+        event.metaKey || event.ctrlKey,
+        event.shiftKey,
+        isCheckboxClick,
+        state.selectedKeys,
+        anchorKeyRef.current,
+        readOrderedKeys()
+      );
+      // Prevent the default checkbox toggle when the click landed on the actual checkbox; the Table
+      // owns selection, so letting BaseUI also flip its controlled state would double-fire. For
+      // clicks in the checkbox cell but off the checkbox, there's no default to prevent.
+      if (target.closest('[role="checkbox"]') != null) {
+        event.preventDefault();
+      }
+      applyOutcome(outcome);
+    };
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (!container.contains(document.activeElement)) {
+        return;
+      }
+      const target = event.target as HTMLElement | null;
+      if (!target?.closest("tbody")) {
+        return;
+      }
+      if (target.closest(INTERACTIVE_SELECTOR) != null) {
+        return;
+      }
+      const state = stateRef.current;
+      let outcome: Outcome | null = null;
+      if (event.key === "Enter") {
+        outcome = outcomeForEnter(state.focusedKey);
+      } else if (event.key === " ") {
+        outcome = outcomeForSpace(state.selectionMode, state.focusedKey, state.selectedKeys);
+      } else if (event.key === "ArrowDown" || event.key === "ArrowUp") {
+        outcome = outcomeForArrow(
+          event.key === "ArrowDown" ? "down" : "up",
+          event.shiftKey,
+          state.selectionMode,
+          readOrderedKeys(),
+          state.focusedKey,
+          anchorKeyRef.current,
+          transientSelectionRef.current,
+          state.activateOnNavigate
+        );
+      }
+      if (outcome == null) {
+        return;
+      }
+      if (outcome.focusKey !== undefined || outcome.selection != null || outcome.activate !== undefined) {
+        event.preventDefault();
+        event.stopPropagation();
+      }
+      setIsKeyboardNavigating(true);
+      applyOutcome(outcome);
+    };
+
+    const handlePointerMove = () => {
+      setIsKeyboardNavigating((current) => (current ? false : current));
+    };
+
+    tableElement.addEventListener("click", handleClick, true);
     document.addEventListener("keydown", handleKeyDown, true);
-    return () => document.removeEventListener("keydown", handleKeyDown, true);
-  }, [hasKeyboardNavigation, selectedIndex, onNavigate, onActivate]);
+    tableElement.addEventListener("pointermove", handlePointerMove);
+    return () => {
+      tableElement.removeEventListener("click", handleClick, true);
+      document.removeEventListener("keydown", handleKeyDown, true);
+      tableElement.removeEventListener("pointermove", handlePointerMove);
+    };
+  }, [hasSelection]);
 
   const table = (
     <div ref={containerRef} data-slot="table-container" className="relative w-full overflow-x-auto">
       <table data-slot="table" className={cn("w-full caption-bottom text-sm", className)} {...props} />
     </div>
   );
+  const withRowSize = <TableRowSizeContext value={rowSize}>{table}</TableRowSizeContext>;
+  const withSticky = <TableStickyHeaderContext value={stickyHeader}>{withRowSize}</TableStickyHeaderContext>;
 
-  if (!hasKeyboardNavigation) {
-    return table;
+  if (!hasSelection) {
+    return withSticky;
   }
 
   return (
-    <TableKeyboardNavigationContext value={{ focusedRowIndex, setFocusedRowIndex }}>
-      {table}
-    </TableKeyboardNavigationContext>
+    <TableSelectionContext
+      value={{ focusedKey, selectedKeys: effectiveSelectedKeys, hasSelection, isKeyboardNavigating }}
+    >
+      {withSticky}
+    </TableSelectionContext>
   );
 }
 
 function TableHeader({ className, ...props }: React.ComponentProps<"thead">) {
-  return <thead data-slot="table-header" className={cn("[&_tr]:border-b", className)} {...props} />;
+  const sticky = use(TableStickyHeaderContext);
+  return (
+    <TableRowSizeContext value="compact">
+      <thead
+        data-slot="table-header"
+        className={cn("[&_tr]:border-b", sticky && "sticky top-0 z-10 [&_tr]:bg-background", className)}
+        {...props}
+      />
+    </TableRowSizeContext>
+  );
 }
 
 function TableBody({ className, ...props }: React.ComponentProps<"tbody">) {
@@ -156,32 +488,41 @@ function TableFooter({ className, ...props }: React.ComponentProps<"tfoot">) {
 }
 
 interface TableRowProps extends React.ComponentProps<"tr"> {
-  index?: number;
+  rowKey?: RowKey;
 }
 
-function TableRow({ className, index, ...props }: TableRowProps) {
-  const keyboardNavigation = use(TableKeyboardNavigationContext);
-  const hasNavigation = keyboardNavigation != null && index != null;
+const rowSizeStyles: Record<TableRowSize, string> = {
+  compact: "h-11",
+  spacious: "h-[4.5rem]"
+};
+
+function TableRow({ className, rowKey, ...props }: TableRowProps) {
+  const selection = use(TableSelectionContext);
+  const rowSize = use(TableRowSizeContext);
+  const isSelectable = selection != null && rowKey != null;
+  const isSelected = isSelectable && selection.selectedKeys.has(rowKey);
+  const tabIndex = isSelectable ? (selection.focusedKey === rowKey ? 0 : -1) : undefined;
+  const suppressHover = selection?.isKeyboardNavigating ?? false;
 
   return (
     <tr
       data-slot="table-row"
-      // NOTE: This diverges from stock ShadCN to add focus ring styles using outline instead of ring utilities,
-      // active:bg-muted for press feedback, and keyboard navigation via roving tabindex when an index prop and navigation context are present.
+      data-row-key={rowKey != null ? String(rowKey) : undefined}
+      data-state={isSelected ? "selected" : undefined}
       className={cn(
-        "rounded-md border-b outline-ring transition-colors hover:bg-muted/50 focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-2 active:bg-muted data-[state=selected]:bg-muted",
+        "rounded-md border-b outline-ring transition-colors focus-visible:outline-2 focus-visible:-outline-offset-2 active:bg-muted data-[state=selected]:bg-active-background",
+        !suppressHover && "hover:bg-hover-background data-[state=selected]:hover:bg-active-background",
+        rowSizeStyles[rowSize],
+        isSelectable && "cursor-pointer select-none",
         className
       )}
-      tabIndex={hasNavigation ? (index === keyboardNavigation.focusedRowIndex ? 0 : -1) : undefined}
-      onFocus={hasNavigation ? () => keyboardNavigation.setFocusedRowIndex(index) : undefined}
+      tabIndex={tabIndex}
       {...props}
     />
   );
 }
 
-// NOTE: This diverges from stock ShadCN to make clickable column headers keyboard-accessible.
-// When onClick is present, the header gets tabIndex={0} and responds to Enter/Space.
-function TableHead({ className, onClick, onKeyDown, ...props }: React.ComponentProps<"th">) {
+function TableHead({ className, onClick, onKeyDown, children, ...props }: React.ComponentProps<"th">) {
   const isInteractive = onClick != null;
 
   const handleKeyDown = isInteractive
@@ -199,20 +540,50 @@ function TableHead({ className, onClick, onKeyDown, ...props }: React.ComponentP
     <th
       data-slot="table-head"
       className={cn(
-        "h-10 px-2 text-left align-middle font-medium whitespace-nowrap text-foreground outline-ring focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-2 [&:has([role=checkbox])]:pr-0",
+        "h-10 rounded-sm px-2 text-left align-middle text-xs font-bold whitespace-nowrap text-foreground outline-ring focus-visible:outline-2 focus-visible:-outline-offset-2 [&:has([role=checkbox])]:pr-0",
+        isInteractive && "cursor-pointer select-none",
         className
       )}
       onClick={onClick}
       onKeyDown={handleKeyDown}
       tabIndex={isInteractive ? 0 : undefined}
       {...props}
-    />
+    >
+      <span className="inline-flex items-center gap-1">{children}</span>
+    </th>
   );
 }
 
+// Any focusable descendant of a body <TableCell> is pulled out of the tab order so large tables
+// don't force keyboard users to cycle through every row's action buttons, checkboxes, and dropdowns.
+// Rows themselves are focusable via roving tabindex; activation happens on Enter/Space. Header cells
+// are exempt. Opt back in per element with `data-keep-tab-stop`.
+function useSuppressTabStops(cellRef: React.RefObject<HTMLElement | null>) {
+  useLayoutEffect(() => {
+    const cell = cellRef.current;
+    if (!cell) {
+      return;
+    }
+    const selector =
+      'button, [role="checkbox"], [role="switch"], [role="radio"], a[href], input, select, textarea, [tabindex]';
+    const focusable = cell.querySelectorAll<HTMLElement>(selector);
+    focusable.forEach((element) => {
+      if (element.dataset.keepTabStop !== undefined) {
+        return;
+      }
+      if (element.tabIndex !== -1) {
+        element.tabIndex = -1;
+      }
+    });
+  });
+}
+
 function TableCell({ className, ...props }: React.ComponentProps<"td">) {
+  const cellRef = useRef<HTMLTableCellElement>(null);
+  useSuppressTabStops(cellRef);
   return (
     <td
+      ref={cellRef}
       data-slot="table-cell"
       className={cn("p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0", className)}
       {...props}
@@ -227,3 +598,4 @@ function TableCaption({ className, ...props }: React.ComponentProps<"caption">) 
 }
 
 export { Table, TableHeader, TableBody, TableFooter, TableHead, TableRow, TableCell, TableCaption };
+export type { RowKey, TableRowSize };

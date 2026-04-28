@@ -34,17 +34,14 @@ msgstr "Skjul detaljer"
 msgid "Log out"
 msgstr "Log ud"
 
+msgid "Main navigation"
+msgstr "Hovednavigation"
+
 msgid "Manage tenants, view system data, see exceptions, and perform various tasks for operational and support teams."
 msgstr "Administrer lejere, se systemdata, se undtagelser og udfør forskellige opgaver for drifts- og supportteams."
 
-msgid "More information"
-msgstr "Mere information"
-
 msgid "Navigation"
 msgstr "Navigation"
-
-msgid "Open navigation menu"
-msgstr "Åbn navigationsmenu"
 
 msgid "Page not found"
 msgstr "Siden blev ikke fundet"
@@ -66,9 +63,6 @@ msgstr "Noget gik galt"
 
 msgid "The page you are looking for does not exist or was moved."
 msgstr "Siden du leder efter findes ikke eller er blevet flyttet."
-
-msgid "Toggle sidebar"
-msgstr "Vis/skjul sidepanel"
 
 msgid "Try again"
 msgstr "Prøv igen"

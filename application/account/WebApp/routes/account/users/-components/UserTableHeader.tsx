@@ -19,67 +19,42 @@ export function UserTableHeader({ sortDescriptor, isMobile, onSortChange }: Read
   return (
     <TableHeader className="z-10 bg-inherit sm:sticky sm:top-0">
       <TableRow>
-        <TableHead
-          data-column={SortableUserProperties.Name}
-          className="cursor-pointer select-none"
-          onClick={() => onSortChange(SortableUserProperties.Name)}
-        >
-          <div className="flex items-center gap-1 text-xs font-bold">
-            <span>
-              <Trans>Name</Trans>
-            </span>
-            <SortIndicator sortDescriptor={sortDescriptor} columnId={SortableUserProperties.Name} />
-          </div>
+        <TableHead data-column={SortableUserProperties.Name} onClick={() => onSortChange(SortableUserProperties.Name)}>
+          <Trans>Name</Trans>
+          <SortIndicator sortDescriptor={sortDescriptor} columnId={SortableUserProperties.Name} />
         </TableHead>
         {!isMobile && (
           <>
             <TableHead
               data-column={SortableUserProperties.Email}
-              className="cursor-pointer select-none"
               onClick={() => onSortChange(SortableUserProperties.Email)}
             >
-              <div className="flex items-center gap-1 text-xs font-bold">
-                <span>
-                  <Trans>Email</Trans>
-                </span>
-                <SortIndicator sortDescriptor={sortDescriptor} columnId={SortableUserProperties.Email} />
-              </div>
+              <Trans>Email</Trans>
+              <SortIndicator sortDescriptor={sortDescriptor} columnId={SortableUserProperties.Email} />
             </TableHead>
             <TableHead
               data-column={SortableUserProperties.CreatedAt}
-              className="w-[7rem] min-w-[4rem] cursor-pointer select-none"
+              className="w-[7rem] min-w-[4rem]"
               onClick={() => onSortChange(SortableUserProperties.CreatedAt)}
             >
-              <div className="flex items-center gap-1 text-xs font-bold">
-                <span>
-                  <Trans>Created</Trans>
-                </span>
-                <SortIndicator sortDescriptor={sortDescriptor} columnId={SortableUserProperties.CreatedAt} />
-              </div>
+              <Trans>Created</Trans>
+              <SortIndicator sortDescriptor={sortDescriptor} columnId={SortableUserProperties.CreatedAt} />
             </TableHead>
             <TableHead
               data-column={SortableUserProperties.LastSeenAt}
-              className="w-[7.5rem] min-w-[4rem] cursor-pointer select-none"
+              className="w-[7.5rem] min-w-[4rem]"
               onClick={() => onSortChange(SortableUserProperties.LastSeenAt)}
             >
-              <div className="flex items-center gap-1 text-xs font-bold">
-                <span>
-                  <Trans>Last seen</Trans>
-                </span>
-                <SortIndicator sortDescriptor={sortDescriptor} columnId={SortableUserProperties.LastSeenAt} />
-              </div>
+              <Trans>Last seen</Trans>
+              <SortIndicator sortDescriptor={sortDescriptor} columnId={SortableUserProperties.LastSeenAt} />
             </TableHead>
             <TableHead
               data-column={SortableUserProperties.Role}
-              className="w-[8.5rem] cursor-pointer select-none"
+              className="w-[8.5rem]"
               onClick={() => onSortChange(SortableUserProperties.Role)}
             >
-              <div className="flex items-center gap-1 text-xs font-bold">
-                <span>
-                  <Trans>Role</Trans>
-                </span>
-                <SortIndicator sortDescriptor={sortDescriptor} columnId={SortableUserProperties.Role} />
-              </div>
+              <Trans>Role</Trans>
+              <SortIndicator sortDescriptor={sortDescriptor} columnId={SortableUserProperties.Role} />
             </TableHead>
           </>
         )}

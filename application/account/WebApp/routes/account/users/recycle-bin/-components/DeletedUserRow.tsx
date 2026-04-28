@@ -17,29 +17,18 @@ interface DeletedUserRowProps {
   user: DeletedUserDetails;
   isSelected: boolean;
   isMultiSelectMode: boolean;
-  onSelectRow: (user: DeletedUserDetails, isCheckboxClick: boolean) => void;
-  onRowClick: (user: DeletedUserDetails, event: React.MouseEvent) => void;
 }
 
-export function DeletedUserRow({
-  user,
-  isSelected,
-  isMultiSelectMode,
-  onSelectRow,
-  onRowClick
-}: Readonly<DeletedUserRowProps>) {
+export function DeletedUserRow({ user, isSelected, isMultiSelectMode }: Readonly<DeletedUserRowProps>) {
   return (
-    <TableRow
-      key={user.id}
-      data-state={isSelected ? "selected" : undefined}
-      className={`cursor-pointer select-none ${isSelected ? "bg-active-background hover:bg-active-background" : "hover:bg-hover-background"}`}
-      onClick={(event) => onRowClick(user, event)}
-    >
+    <TableRow rowKey={user.id}>
       {isMultiSelectMode && (
         <TableCell>
           <Checkbox
             checked={isSelected}
-            onCheckedChange={() => onSelectRow(user, true)}
+            onCheckedChange={() => {
+              /* selection is driven by the Table click delegation */
+            }}
             aria-label={t`Select ${user.firstName} ${user.lastName}`}
           />
         </TableCell>

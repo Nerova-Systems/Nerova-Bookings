@@ -5,7 +5,15 @@ import { authSyncService, type TenantSwitchedMessage } from "@repo/infrastructur
 import { loggedInPath } from "@repo/infrastructure/auth/constants";
 import { useUserInfo } from "@repo/infrastructure/auth/hooks";
 import { Button } from "@repo/ui/components/Button";
-import { MenuButton, overlayContext, SideMenuSeparator } from "@repo/ui/components/SideMenu";
+import {
+  overlayContext,
+  SidebarContent,
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarGroupLabel,
+  SidebarMenu,
+  SidebarMenuItem
+} from "@repo/ui/components/Sidebar";
 import { TenantLogo } from "@repo/ui/components/TenantLogo";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@repo/ui/components/Tooltip";
 import { LayoutDashboardIcon, MessageCircleQuestion } from "lucide-react";
@@ -95,6 +103,9 @@ export interface MobileMenuProps {
   onNavigate?: (path: string) => void;
 }
 
+// Rich mobile navigation surface rendered inside the Sidebar's mobile Sheet. Shows tenant info,
+// user actions, tenant switcher, navigation links, and a support button. Federated so both the
+// Main and Account apps can reuse it inside their mobile sidebars.
 export default function MobileMenu({ onNavigate }: Readonly<MobileMenuProps>) {
   const userInfo = useUserInfo();
   const overlayCtx = useContext(overlayContext);
@@ -110,23 +121,21 @@ export default function MobileMenu({ onNavigate }: Readonly<MobileMenuProps>) {
     }
   }, [userInfo?.isAuthenticated]);
 
+  const closeMenu = () => {
+    if (overlayCtx?.isOpen) {
+      overlayCtx.close();
+    }
+  };
+
   const handleOpenSupportDialog = () => {
     window.dispatchEvent(new CustomEvent("open-support-dialog"));
-    setTimeout(() => {
-      if (overlayCtx?.isOpen) {
-        overlayCtx.close();
-      }
-    }, 100);
+    setTimeout(closeMenu, 100);
   };
 
   const handleOpenTenantSwitcher = () => {
     trackInteraction("Switch account", "menu", "Open");
     window.dispatchEvent(new CustomEvent("open-tenant-switcher", { detail: { tenants } }));
-    setTimeout(() => {
-      if (overlayCtx?.isOpen) {
-        overlayCtx.close();
-      }
-    }, 100);
+    setTimeout(closeMenu, 100);
   };
 
   const currentTenant = tenants.find((tenant) => tenant.tenantId === userInfo?.tenantId);
@@ -137,31 +146,56 @@ export default function MobileMenu({ onNavigate }: Readonly<MobileMenuProps>) {
   return (
     <div className="flex h-full flex-col">
       {userInfo?.isAuthenticated && (
-        <div className="-mx-3 -mt-5 mb-2 flex items-center justify-center gap-3 bg-muted px-3 py-2.5 dark:bg-transparent">
+        <div className="mb-2 flex items-center justify-center gap-3 bg-muted px-3 py-2.5 dark:bg-transparent">
           <TenantLogo logoUrl={currentTenantLogoUrl} tenantName={currentTenantNameForLogo} size="sm" />
-          <h5 className="mb-0 min-w-0 overflow-hidden font-normal text-ellipsis whitespace-nowrap">
-            {currentTenantName}
-          </h5>
+          <h5 className="min-w-0 overflow-hidden font-normal text-ellipsis whitespace-nowrap">{currentTenantName}</h5>
         </div>
       )}
-      <div className="flex-1 overflow-x-hidden overflow-y-auto px-1 py-1">
-        <MobileMenuContent tenants={tenants} onOpenTenantSwitcher={handleOpenTenantSwitcher} />
+      <SidebarContent>
+        <SidebarGroup>
+          <SidebarGroupContent>
+            {/* mx-1 mirrors SidebarMenuItem so user/account buttons share the 12px offset used by
+                Dashboard below (SidebarGroup p-2 + mx-1 = 12px). */}
+            <div className="mx-1">
+              <MobileMenuContent tenants={tenants} onOpenTenantSwitcher={handleOpenTenantSwitcher} />
+            </div>
+          </SidebarGroupContent>
+        </SidebarGroup>
 
-        <div className="my-3 border-b border-border" />
-
-        <div className="flex flex-col">
-          <SideMenuSeparator>
+        <SidebarGroup>
+          <SidebarGroupLabel>
             <Trans>Navigation</Trans>
-          </SideMenuSeparator>
-          <MenuButton
-            icon={LayoutDashboardIcon}
-            label={t`Dashboard`}
-            href="/dashboard"
-            federatedNavigation={true}
-            onNavigate={onNavigate}
-          />
-        </div>
-      </div>
+          </SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              <SidebarMenuItem>
+                {/* `onNavigate` is provided by the Account app (federated) and the Main app's Dashboard
+                    SCS-local navigator, avoiding full page reloads when both apps are loaded together.
+                    When absent, fall back to a hard navigation — correct for /dashboard since it may live
+                    in a different SCS than the current Account sidebar. Uses a plain <Button> rather than
+                    <SidebarMenuButton> because @repo/ui isn't shared across module federation, so the
+                    federated MobileMenu can't reach the host's SidebarProvider context. */}
+                <Button
+                  variant="ghost"
+                  onClick={() => {
+                    if (onNavigate) {
+                      onNavigate("/dashboard");
+                    } else {
+                      window.location.href = "/dashboard";
+                    }
+                    closeMenu();
+                  }}
+                  className="flex h-[var(--control-height)] w-full items-center justify-start gap-4 rounded-md pr-3 pl-[1.125rem] text-left text-sm font-normal text-muted-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground active:bg-sidebar-accent active:text-sidebar-accent-foreground"
+                  aria-label={t`Dashboard`}
+                >
+                  <LayoutDashboardIcon className="size-5 shrink-0" />
+                  <Trans>Dashboard</Trans>
+                </Button>
+              </SidebarMenuItem>
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+      </SidebarContent>
 
       <div className="absolute bottom-3 left-3 z-10 supports-[bottom:max(0px)]:bottom-[max(0.5rem,calc(env(safe-area-inset-bottom)-0.5rem))]">
         <Tooltip>
@@ -183,6 +217,10 @@ export default function MobileMenu({ onNavigate }: Readonly<MobileMenuProps>) {
           </TooltipContent>
         </Tooltip>
       </div>
+      {/* Mounts the SupportDialog + TenantSwitcherDrawer event listeners. On desktop these are
+          mounted inside UserMenu (in the sidebar header), but the header isn't rendered in the
+          mobile overlay, so we mount them here too. */}
+      <MobileMenuDialogs />
     </div>
   );
 }

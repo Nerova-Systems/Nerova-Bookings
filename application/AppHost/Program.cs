@@ -16,7 +16,8 @@ SecretManagerHelper.GenerateAuthenticationTokenSigningKey("authentication-token-
 
 var (googleOAuthConfigured, googleOAuthClientId, googleOAuthClientSecret) = ConfigureGoogleOAuthParameters();
 
-var (payFastConfigured, payFastMerchantId, payFastMerchantKey, payFastPassphrase, payFastSandbox, payFastNotifyUrl, payFastReturnUrl, payFastCancelUrl, payFastAllowedIps) = ConfigurePayFastParameters();
+var (stripeConfigured, stripePublishableKey, stripeApiKey, stripeWebhookSecret) = ConfigureStripeParameters();
+var stripeFullyConfigured = stripeConfigured && builder.Configuration["Parameters:stripe-webhook-secret"] is not null and not "not-configured";
 
 var postgresPassword = builder.CreateStablePassword("postgres-password");
 var postgres = builder.AddPostgres("postgres", password: postgresPassword, port: 9002)
@@ -73,14 +74,11 @@ var accountApi = builder
     .WithEnvironment("OAuth__Google__ClientId", googleOAuthClientId)
     .WithEnvironment("OAuth__Google__ClientSecret", googleOAuthClientSecret)
     .WithEnvironment("OAuth__AllowMockProvider", "true")
-    .WithEnvironment("PayFast__MerchantId", payFastMerchantId)
-    .WithEnvironment("PayFast__MerchantKey", payFastMerchantKey)
-    .WithEnvironment("PayFast__Passphrase", payFastPassphrase)
-    .WithEnvironment("PayFast__Sandbox", payFastSandbox)
-    .WithEnvironment("PayFast__NotifyUrl", payFastNotifyUrl)
-    .WithEnvironment("PayFast__ReturnUrl", payFastReturnUrl)
-    .WithEnvironment("PayFast__CancelUrl", payFastCancelUrl)
-    .WithEnvironment("PayFast__AllowedIps", payFastAllowedIps)
+    .WithEnvironment("Stripe__SubscriptionEnabled", stripeFullyConfigured ? "true" : "false")
+    .WithEnvironment("Stripe__ApiKey", stripeApiKey)
+    .WithEnvironment("Stripe__WebhookSecret", stripeWebhookSecret)
+    .WithEnvironment("Stripe__PublishableKey", stripePublishableKey)
+    .WithEnvironment("Stripe__AllowMockProvider", "true")
     .WaitFor(accountWorkers);
 
 var backOfficeDatabase = postgres
@@ -114,7 +112,7 @@ var mainApi = builder
     .WithReference(mainDatabase)
     .WithReference(azureStorage)
     .WithEnvironment("PUBLIC_GOOGLE_OAUTH_ENABLED", googleOAuthConfigured ? "true" : "false")
-    .WithEnvironment("PUBLIC_SUBSCRIPTION_ENABLED", payFastConfigured ? "true" : "false")
+    .WithEnvironment("PUBLIC_SUBSCRIPTION_ENABLED", stripeFullyConfigured ? "true" : "false")
     .WaitFor(mainWorkers);
 
 var appGateway = builder
@@ -130,9 +128,23 @@ var appGateway = builder
 appGateway.WithUrl($"{appGateway.GetEndpoint("https")}/back-office", "Back Office");
 appGateway.WithUrl($"{appGateway.GetEndpoint("https")}/openapi", "Open API");
 
+AddStripeCliContainer();
+
 await builder.Build().RunAsync();
 
 return;
+
+void AddStripeCliContainer()
+{
+    if (stripeConfigured)
+    {
+        builder
+            .AddContainer("stripe-cli", "stripe/stripe-cli:latest")
+            .WithArgs("listen", "--forward-to", "https://host.docker.internal:9000/api/account/subscriptions/stripe-webhook", "--skip-verify")
+            .WithEnvironment("STRIPE_API_KEY", stripeApiKey)
+            .WithLifetime(ContainerLifetime.Persistent);
+    }
+}
 
 (bool Configured, IResourceBuilder<ParameterResource> ClientId, IResourceBuilder<ParameterResource> ClientSecret) ConfigureGoogleOAuthParameters()
 {
@@ -182,63 +194,58 @@ return;
     );
 }
 
-(bool Configured,
-    IResourceBuilder<ParameterResource> MerchantId,
-    IResourceBuilder<ParameterResource> MerchantKey,
-    IResourceBuilder<ParameterResource> Passphrase,
-    IResourceBuilder<ParameterResource> Sandbox,
-    IResourceBuilder<ParameterResource> NotifyUrl,
-    IResourceBuilder<ParameterResource> ReturnUrl,
-    IResourceBuilder<ParameterResource> CancelUrl,
-    IResourceBuilder<ParameterResource> AllowedIps) ConfigurePayFastParameters()
+(bool Configured, IResourceBuilder<ParameterResource> PublishableKey, IResourceBuilder<ParameterResource> ApiKey, IResourceBuilder<ParameterResource> WebhookSecret) ConfigureStripeParameters()
 {
-    _ = builder.AddParameter("payfast-enabled")
+    _ = builder.AddParameter("stripe-enabled")
         .WithDescription("""
-                         **PayFast Integration** -- Enables subscription billing via PayFast tokenization (Type 2).
+                         **Stripe Integration** -- Enables embedded checkout, prorated plan upgrades, automatic tax management, localized invoices, billing history with refunds, and more.
 
-                         **Important**: Set up a [PayFast sandbox account](https://sandbox.payfast.co.za) and configure credentials according to the guide in README.md **before** enabling this.
+                         **Important**: Set up a [Stripe sandbox environment](https://dashboard.stripe.com) and configure it according to the guide in README.md **before** enabling this.
 
-                         - Enter `true` to enable PayFast, or `false` to skip. This can be changed later.
-                         - After enabling, **restart Aspire** to be prompted for Merchant ID and Merchant Key.
+                         - Enter `true` to enable Stripe, or `false` to skip. This can be changed later.
+                         - Setup requires **2 restarts** after enabling: first for API keys, then for the webhook secret from the stripe-cli container.
 
                          See **README.md** for full setup instructions.
                          """, true
         );
 
-    var configured = builder.Configuration["Parameters:payfast-enabled"] == "true";
+    var configured = builder.Configuration["Parameters:stripe-enabled"] == "true";
 
     if (configured)
     {
-        var merchantId = builder.AddParameter("payfast-merchant-id", true)
-            .WithDescription("PayFast Merchant ID from the [PayFast Dashboard](https://www.payfast.co.za/merchant).", true);
-        var merchantKey = builder.AddParameter("payfast-merchant-key", true)
-            .WithDescription("PayFast Merchant Key from the [PayFast Dashboard](https://www.payfast.co.za/merchant).", true);
-        var passphrase = builder.AddParameter("payfast-passphrase", true)
-            .WithDescription("PayFast Passphrase set in the [PayFast Dashboard](https://www.payfast.co.za/merchant) under Security.", true);
-        var sandbox = builder.AddParameter("payfast-sandbox", true)
-            .WithDescription("Set to `true` for sandbox/testing or `false` for live payments.", true);
-        var notifyUrl = builder.AddParameter("payfast-notify-url", true)
-            .WithDescription("ITN callback URL — must be publicly reachable by PayFast (e.g. ngrok URL in development).", true);
-        var returnUrl = builder.AddParameter("payfast-return-url", true)
-            .WithDescription("URL PayFast redirects to after a successful payment.", true);
-        var cancelUrl = builder.AddParameter("payfast-cancel-url", true)
-            .WithDescription("URL PayFast redirects to when a payment is cancelled.", true);
-        var allowedIps = builder.AddParameter("payfast-allowed-ips", true)
-            .WithDescription("Comma-separated list of PayFast ITN IP addresses allowed to post callbacks.", true);
+        var publishableKey = builder.AddParameter("stripe-publishable-key", true)
+            .WithDescription("""
+                             Stripe Publishable Key from the [Stripe Dashboard](https://dashboard.stripe.com/apikeys). Starts with `pk_test_` or `pk_live_`.
 
-        return (configured, merchantId, merchantKey, passphrase, sandbox, notifyUrl, returnUrl, cancelUrl, allowedIps);
+                             **After entering this and the Secret Key, restart Aspire.** The stripe-cli container will start and generate a webhook secret, which you will enter on the next restart.
+
+                             See **README.md** for full setup instructions.
+                             """, true
+            );
+        var apiKey = builder.AddParameter("stripe-api-key", true)
+            .WithDescription("""
+                             Stripe Secret Key from the [Stripe Dashboard](https://dashboard.stripe.com/apikeys). Starts with `sk_test_` or `sk_live_`.
+
+                             **After entering this and the Publishable Key, restart Aspire.** The stripe-cli container will start and generate a webhook secret, which you will enter on the next restart.
+
+                             See **README.md** for full setup instructions.
+                             """, true
+            );
+
+        var apiKeyConfigured = builder.Configuration["Parameters:stripe-api-key"] is not null;
+        var webhookSecret = apiKeyConfigured
+            ? builder.AddParameter("stripe-webhook-secret", true)
+                .WithDescription("Webhook signing secret. Find it in the [Stripe Dashboard Workbench](https://dashboard.stripe.com/test/workbench/webhooks) or in the stripe-cli container logs after the previous restart. Starts with `whsec_`.", true)
+            : builder.CreateResourceBuilder(new ParameterResource("stripe-webhook-secret", _ => "not-configured", true));
+
+        return (configured, publishableKey, apiKey, webhookSecret);
     }
 
     return (
         configured,
-        builder.CreateResourceBuilder(new ParameterResource("payfast-merchant-id", _ => "not-configured", true)),
-        builder.CreateResourceBuilder(new ParameterResource("payfast-merchant-key", _ => "not-configured", true)),
-        builder.CreateResourceBuilder(new ParameterResource("payfast-passphrase", _ => "not-configured", true)),
-        builder.CreateResourceBuilder(new ParameterResource("payfast-sandbox", _ => "true", true)),
-        builder.CreateResourceBuilder(new ParameterResource("payfast-notify-url", _ => "not-configured", true)),
-        builder.CreateResourceBuilder(new ParameterResource("payfast-return-url", _ => "not-configured", true)),
-        builder.CreateResourceBuilder(new ParameterResource("payfast-cancel-url", _ => "not-configured", true)),
-        builder.CreateResourceBuilder(new ParameterResource("payfast-allowed-ips", _ => "not-configured", true))
+        builder.CreateResourceBuilder(new ParameterResource("stripe-publishable-key", _ => "not-configured", true)),
+        builder.CreateResourceBuilder(new ParameterResource("stripe-api-key", _ => "not-configured", true)),
+        builder.CreateResourceBuilder(new ParameterResource("stripe-webhook-secret", _ => "not-configured", true))
     );
 }
 
@@ -257,15 +264,13 @@ void CreateBlobContainer(string containerName)
 
 void CheckPortAvailability()
 {
-    Thread.Sleep(500); // Allow time for previous process to fully release ports
-
     var ports = new[] { (9098, "Resource Service"), (9097, "Dashboard"), (9001, "Aspire") };
     var blocked = ports.Where(p => !IsPortAvailable(p.Item1)).ToList();
 
-    if (blocked.Any())
+    if (blocked.Count > 0)
     {
         Console.WriteLine($"⚠️  Port conflicts: {string.Join(", ", blocked.Select(b => $"{b.Item1} ({b.Item2})"))}");
-        Console.WriteLine("   Services already running. Stop them first using 'watch --stop' command or the watch MCP tool with stop flag.");
+        Console.WriteLine("   Services already running. Stop them first using 'run --stop'.");
         Environment.Exit(1);
     }
 

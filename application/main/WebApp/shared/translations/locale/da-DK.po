@@ -52,23 +52,17 @@ msgstr "Her er dit overblik over hvad der sker."
 msgid "Log in"
 msgstr "Log ind"
 
-msgid "More information"
-msgstr "Mere information"
+msgid "Main navigation"
+msgstr "Hovednavigation"
 
 msgid "Navigation"
 msgstr "Navigation"
-
-msgid "Open navigation menu"
-msgstr "Åbn navigationsmenu"
 
 msgid "Replace this sample page with your own product information and branding."
 msgstr "Erstat denne eksempelside med dine egne produktinformationer og branding."
 
 msgid "This is where your personalized dashboard content will appear. Stay tuned for updates."
-msgstr "Her vil dit personaliserede dashboardindhold vises. Hold dig opdateret."
-
-msgid "Toggle sidebar"
-msgstr "Skift sidepanel"
+msgstr "Her vil dit personlige dashboard-indhold blive vist. Hold dig opdateret."
 
 msgid "Welcome to PlatformPlatform"
 msgstr "Velkommen til PlatformPlatform"

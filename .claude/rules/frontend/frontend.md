@@ -13,7 +13,7 @@ Use LSP tools aggressively for code investigation: `goToDefinition`, `findRefere
 
 ## Browser Testing
 
-Use browser MCP tools to test at `https://localhost:9000`. Use `UNLOCK` as OTP verification code (localhost only). Use `run` MCP tool to restart the server if needed (wait a few seconds after restart).
+Use browser MCP tools to test at `[APP_URL]`. Use `UNLOCK` as OTP verification code (localhost only).
 
 ## Architecture Overview
 
@@ -28,27 +28,34 @@ Use browser MCP tools to test at `https://localhost:9000`. Use `UNLOCK` as OTP v
    - Common UI exposed via federation in `federated-modules/`
    - Shared components in `application/shared-webapp/`
    - Don't import directly between self-contained systems
-   - Use `window.location.href` for navigation between systems (not TanStack Router)
 
-3. **API Integration**:
+3. **Navigation**:
+   - **Within a self-contained system**: Use `useNavigate()` hook or `<Link>` component from TanStack Router
+   - **Account to Main**: Account runs as a federated module inside Main with a memory router. Use the `useMainNavigation()` hook (backed by `MainNavigationContext`) to navigate back to Main, not `window.location.href`
+   - **To Back-Office**: Back-Office is a separate SPA, so use `window.location.href` for full-page navigation
+   - Only use `window.location.href` when navigating to a different SPA or for full-page reloads (e.g., logout)
+
+4. **API Integration**:
    - API client auto-generated from OpenAPI spec
    - Located in `shared/lib/api/client.ts`
+   - A SPA only calls its own self-contained system's endpoints via that system's generated OpenAPI client. Prefixes: `main` → `/api/*`, `account` → `/api/account/*`, `back-office` → `/api/back-office/*`, etc. Cross-system needs go backend-to-backend via `/internal-api/...`, exposed to the SPA through a facade endpoint in its own system
    - Never make direct fetch calls
    - Server state lives in TanStack Query only
    - Use `queryClient.invalidateQueries()` to refresh data after mutations
 
-4. **ShadCN 2.0 with BaseUI** (not Radix UI):
+5. **ShadCN 2.0 with BaseUI** (not Radix UI):
    - **BaseUI** (`@base-ui/react`): Headless primitives providing accessibility and behavior
    - **ShadCN 2.0**: Pre-styled components built on BaseUI, using class-variance-authority (cva)
    - Install components via `npx shadcn add <component>` - never copy manually
    - After installing: change `@/utils` to `../utils` and rename file to PascalCase (e.g., `button.tsx` to `Button.tsx`)
+   - **Divergences**: Tracked in `application/shared-webapp/ui/components/README.md` (Component Inventory table + Global Divergence Patterns section). Do not add inline `// NOTE: This diverges from stock ShadCN ...` comments. When reinstalling a component, consult its inventory row and reapply the listed divergences.
    - **Never use `*:` or `**:` variants**: These Tailwind child/descendant variants generate `:is()` CSS selectors that the module federation CSS scoping plugin cannot scope, causing specificity bugs in production. In shared components, use `[&>*]:` or `[&_*]:` selectors instead. In application code, prefer putting the utility class directly on each child element (e.g., `className="max-sm:grow"` on each button instead of `max-sm:*:grow` on the parent)
    - **Focus ring**: Replace ShadCN's default `focus-visible:ring-*` / `focus-visible:border-ring` utilities with `outline-ring focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2`. Use `outline-primary` or `outline-destructive` for colored variants instead of `outline-ring`
    - **Apple HIG compliance**: Interactive controls must use CSS variable heights: `h-[var(--control-height)]` (44px default), `h-[var(--control-height-sm)]` (36px), `h-[var(--control-height-xs)]` (28px). For controls like checkboxes/switches where 44px visual size is too large, ensure a 44px minimum tap target using `after:absolute after:-inset-3`
    - Import from `@repo/ui/components/`, never from BaseUI directly
    - Only create custom components when no ShadCN equivalent exists (edge cases)
    - **Cursor pointer**: Replace `cursor-default` with `cursor-pointer` on clickable elements
-   - **Icon-only buttons**: Must have a `Tooltip` wrapper. Use descriptive labels -- e.g., "Account settings" not "Settings", "Log out" not "Logout"
+   - **Icon-only buttons**: Must have a `Tooltip` wrapper. Use descriptive labels, e.g., "Account settings" not "Settings", "Log out" not "Logout"
    - **Active state feedback**: Add press feedback to interactive elements using `active:` pseudo-class with background color changes. Buttons/triggers: `active:bg-primary/70` (or variant-specific active backgrounds). Menu/list items: `active:bg-accent`. Small controls (checkbox, radio): `active:border-primary`
    - **Use BaseUI `render` prop** to customize underlying elements (not Radix's `asChild`): `<DialogClose render={<Button />}>Close</DialogClose>`
 
@@ -66,13 +73,14 @@ Use browser MCP tools to test at `https://localhost:9000`. Use `UNLOCK` as OTP v
    - Don't use acronyms (e.g., use `errorMessage` not `errMsg`, `button` not `btn`, `authentication` not `auth`)
    - Prioritize code readability and maintainability
    - Don't introduce new npm dependencies
+   - **No barrel export files**: Do not create `index.ts` files that only re-export components from a folder. Import each component directly from its file (e.g., `import { Button } from "../components/Button"` not `import { Button } from "../components"`)
    - **Workspace package imports**: Within the same package (e.g., within `@repo/ui`), use relative imports (`../components/Button`) to avoid circular dependencies. Between different packages, use absolute imports (`@repo/ui/components/Button`)
    - Use ShadCN components instead of native HTML elements like `<a>`, `<button>`, `<fieldset>`, `<form>`, `<input>`, `<label>`, `<ol>`, `<p>`, `<progress>`, `<select>`, `<table>`, `<textarea>`, `<ul>` (native `<div>`, `<span>`, `<section>`, `<article>`, `<img>`, `<h1>`-`<h4>` are acceptable)
    - **Headings**: Use native `<h1>`-`<h4>` elements with global styles from `tailwind.css`. Never override font sizes or weights - use the correct semantic level for the visual hierarchy. Allowed overrides: alignment (`text-center`), margins (`mb-X`), visibility (`hidden sm:block`). Exception: Hero/marketing pages can override sizes
    - Use native `<img>` for images. Keep it simple for small logos/icons. For large images:
      - **LCP images** (large hero images): Add `fetchPriority="high"`
      - **Below-the-fold images**: Add `loading="lazy"`
-     - Never use `width`/`height` HTML attributes -- use Tailwind `size-*` classes instead
+     - Never use `width`/`height` HTML attributes. Use Tailwind `size-*` classes instead
      - Always include localized `alt` text using the `t` macro (e.g., `alt={t\`Description\`}`)
    - **Square dimensions**: Use Tailwind's `size-N` utility instead of `h-N w-N` for any square element (e.g., `size-4` not `h-4 w-4`). Only use separate `h-N w-N` for rectangular dimensions
    - **Rem-based sizing**: All sizes must use `rem`, never `px`. This enables UI scaling via the `--zoom-level` CSS variable while maintaining aspect ratios.
@@ -109,23 +117,25 @@ Use browser MCP tools to test at `https://localhost:9000`. Use `UNLOCK` as OTP v
    - Use `isMediumViewportOrLarger()` for desktop-specific features
 
 5. Z-index layering (don't invent new values):
-   - `z-0` to `z-10`: **Content** -- sticky table headers, sticky toolbars, inline badges, calendar layers
-   - `z-20`: **App bars** -- desktop top bar, mobile floating menu button
-   - `z-30`: **Navigation + mobile header** -- side menu, mobile sticky header (animates below banners)
-   - `z-[35]`: **Backdrops** -- dimmed overlays behind panels and overlay-mode navigation
-   - `z-40`: **Banners + panels** -- banner container (above mobile header), side panes, mobile full-screen menus, side menu in overlay mode
-   - `z-50`: **Popups** -- dialogs, dropdowns, popovers, tooltips (ShadCN default)
-   - `z-[60]`: **Toasts** -- always visible, even above dialogs
-   - `z-[99]`: **Critical** -- full-screen loaders, system overlays (e.g., account switching)
-   - `z-100`: **Select popup** -- Select dropdown renders above dialogs (ShadCN default)
+   - `z-0` to `z-10`: **Content**: sticky table headers, sticky toolbars, inline badges, calendar layers
+   - `z-20`: **App bars**: desktop top bar, mobile floating menu button
+   - `z-30`: **Navigation + mobile header**: side menu, mobile sticky header (animates below banners)
+   - `z-[35]`: **Backdrops**: dimmed overlays behind panels and overlay-mode navigation
+   - `z-40`: **Banners + panels**: banner container (above mobile header), side panes, mobile full-screen menus, side menu in overlay mode
+   - `z-50`: **Popups**: dialogs, dropdowns, popovers, tooltips (ShadCN default)
+   - `z-[60]`: **Toasts**: always visible, even above dialogs
+   - `z-[99]`: **Critical**: full-screen loaders, system overlays (e.g., account switching)
+   - `z-100`: **Select popup**: Select dropdown renders above dialogs (ShadCN default)
 
 6. Dialog structure and DirtyDialog patterns:
-   - **Always use DialogBody** for content between DialogHeader and DialogFooter - it provides proper scrolling for tall content
-   - **X button**: Built-in close button shows unsaved warning if dirty
-   - **Cancel button**: Use `<DialogClose render={<Button type="reset" .../>}>` - the `type="reset"` bypasses the warning
-   - Always clear dirty state in `onSuccess` and `onCloseComplete`
+   - Split every dialog into two components in the same file: wrapper owns only `isOpen` + `DirtyDialog`/`DialogContent`/`DialogHeader` shell, body lives inside `<DialogContent>` and owns all state/mutation/form. Body unmounts on close, so state auto-resets on reopen — no `handleCloseComplete`, no `mutation.reset()`
+   - Body signals dirtiness with `useDialogSetDirty()` from `@repo/ui/components/DirtyDialogContext`. `DirtyDialog` tracks the flag internally and clears it on close
+   - `DialogBody` between `DialogHeader` and `DialogFooter` (scroll container)
+   - In dialogs use `DialogForm` (not `Form`); a `<Form>` between `DialogContent` and `DialogBody` breaks the scroll chain
+   - Cancel button: `<DialogClose render={<Button type="reset" ... />}>` — `type="reset"` skips the unsaved-changes warning
+   - Close on success: call `onClose` from the wrapper. Do not reset anything by hand — unmount does it
 
-7. **Telemetry tracking** (all tracked as `trackPageView`, not custom events): `Dialog`, `AlertDialog`, `SidePane`, and `TablePagination` require a `trackingTitle` prop (e.g., `trackingTitle="Invite user"`). `DropdownMenu` accepts an optional `trackingTitle` prop for menu open/close tracking, and `DropdownMenuItem` accepts an optional `trackingLabel` prop for item selection tracking (e.g., `trackingLabel="Upload logo"`). For custom interactions, use `trackInteraction(name, type, action)` from `ApplicationInsightsProvider` -- this also emits a page view, not a custom event. Route-level page tracking uses `staticData: { trackingTitle: "Page name" }` in route definitions
+7. **Telemetry tracking** (all tracked as `trackPageView`, not custom events): `Dialog`, `AlertDialog`, `SidePane`, and `TablePagination` require a `trackingTitle` prop (e.g., `trackingTitle="Invite user"`). `DropdownMenu` accepts an optional `trackingTitle` prop for menu open/close tracking, and `DropdownMenuItem` accepts an optional `trackingLabel` prop for item selection tracking (e.g., `trackingLabel="Upload logo"`). For custom interactions, use `trackInteraction(name, type, action)` from `ApplicationInsightsProvider`. This also emits a page view, not a custom event. Route-level page tracking uses `staticData: { trackingTitle: "Page name" }` in route definitions
 
 8. **Empty states**: Use the `Empty` component with icon, title, and description when there is no content to display
 
@@ -137,7 +147,7 @@ Use browser MCP tools to test at `https://localhost:9000`. Use `UNLOCK` as OTP v
     - Reference existing implementations to maintain consistency
 
 11. Build and format your changes:
-    - After each minor change, use the **execute MCP tool** with `command: "build"` for frontend
+    - After each minor change, use the **build** MCP tool for frontend
     - This ensures consistent code style across the codebase
 
 12. Verify your changes:
@@ -149,91 +159,77 @@ Use browser MCP tools to test at `https://localhost:9000`. Use `UNLOCK` as OTP v
 ## Examples
 
 ```tsx
-// ✅ DO: Correct patterns
-export function UserPicker({ isOpen, onOpenChange }: UserPickerProps) {
-  const [isFormDirty, setIsFormDirty] = useState(false);
-  const { data } = api.useQuery("get", "/api/account/users", { enabled: isOpen });
-  const activeUsers = (data?.users ?? []).filter((u) => u.isActive); // ✅ Compute derived values inline
-
-  const inviteMutation = api.useMutation("post", "/api/account/users/invite", {
-    onSuccess: () => { // ✅ Show toast in onSuccess (not useEffect)
-      setIsFormDirty(false);
-      toast.success(t`Success`, { description: t`User invited` });
-      onOpenChange(false);
-    }
-  });
-
-  const handleCloseComplete = () => setIsFormDirty(false);
-
+// ✅ DO: Wrapper + body split; body unmounts on close so state auto-resets
+export function InviteUserDialog({ isOpen, onOpenChange }: InviteUserDialogProps) {
+  const handleClose = () => onOpenChange(false);
   return (
-    <DirtyDialog open={isOpen} onOpenChange={onOpenChange} hasUnsavedChanges={isFormDirty}
-                 onCloseComplete={handleCloseComplete}>
-      <DialogContent className="sm:w-dialog-md"> // ✅ Use dialog width classes, rem for arbitrary values
+    <DirtyDialog open={isOpen} onOpenChange={onOpenChange} trackingTitle="Invite user">
+      <DialogContent className="sm:w-dialog-md"> // ✅ Dialog width classes, not arbitrary values
         <DialogHeader>
-          <DialogTitle><Trans>Select users</Trans></DialogTitle>
+          <DialogTitle><Trans>Invite user</Trans></DialogTitle>
         </DialogHeader>
-        <Form onSubmit={mutationSubmitter(inviteMutation)}>
-          <DialogBody> // ✅ Always wrap content in DialogBody
-            <TextField name="email" label={t`Email`} onChange={() => setIsFormDirty(true)} />
-          </DialogBody>
-          <DialogFooter>
-            <DialogClose render={<Button type="reset" variant="secondary" disabled={inviteMutation.isPending} />}> // ✅ type="reset" bypasses warning
-              <Trans>Cancel</Trans>
-            </DialogClose>
-            <Button type="submit" disabled={inviteMutation.isPending}> // ✅ Use disabled for pending
-              {inviteMutation.isPending ? <Trans>Sending...</Trans> : <Trans>Send invite</Trans>}
-            </Button>
-          </DialogFooter>
-        </Form>
+        <InviteUserDialogBody onClose={handleClose} />
       </DialogContent>
     </DirtyDialog>
   );
 }
 
-// ❌ DON'T: Common anti-patterns
-function BadUserDialog({ users, selectedId, isOpen, onClose }) {
-  const [filteredUsers, setFilteredUsers] = useState([]); // ❌ State for derived values
-  const [isAdmin, setIsAdmin] = useState(false); // ❌ Duplicate state that can be calculated
-
-  const inviteMutation = api.useMutation("post", "/api/users/invite");
-
-  useEffect(() => { // ❌ useEffect for calculations - compute inline instead
-    setFilteredUsers(users.filter(u => u.isActive));
-    setIsAdmin(users.some(u => u.id === selectedId && u.role === "admin")); // ❌ Hardcode strings - use API contract types
-  }, [users, selectedId]);
-
-  useEffect(() => { // ❌ useEffect watching isSuccess causes toast timing issues
-    if (inviteMutation.isSuccess) {
-      toast.success("Success");
+function InviteUserDialogBody({ onClose }: { onClose: () => void }) { // ✅ Body owns all state/mutation
+  const setDirty = useDialogSetDirty();
+  const inviteMutation = api.useMutation("post", "/api/account/users/invite", {
+    onSuccess: () => { // ✅ Toast in onSuccess (not useEffect)
+      toast.success(t`Success`, { description: t`User invited` });
+      onClose(); // ✅ Body unmounts → state gone naturally, no reset code
     }
-  }, [inviteMutation.isSuccess]);
-
-  const getDisplayName = useCallback((user) => { // ❌ Premature useCallback without performance need
-    return `${user.firstName} ${user.lastName}`;
-  }, []);
-
-  const handleSelect = (id) => console.log(id); // ❌ "handle" + noun (use handleSelectUser), console.log
+  });
 
   return (
-    <DirtyDialog open={isOpen} onOpenChange={onClose} hasUnsavedChanges={true}>
+    <DialogForm // ✅ DialogForm (not Form) preserves the DialogBody scroll chain
+      onSubmit={mutationSubmitter(inviteMutation)}
+      validationErrors={inviteMutation.error?.errors}
+    >
+      <DialogBody> // ✅ Always wrap content in DialogBody
+        <TextField autoFocus required name="email" label={t`Email`} onChange={() => setDirty(true)} />
+      </DialogBody>
+      <DialogFooter>
+        <DialogClose render={<Button type="reset" variant="secondary" disabled={inviteMutation.isPending} />}> // ✅ type="reset" bypasses warning; disabled (not isPending) — no spinner on Cancel
+          <Trans>Cancel</Trans>
+        </DialogClose>
+        <Button type="submit" isPending={inviteMutation.isPending}> // ✅ isPending auto-disables and prepends <Spinner />
+          {inviteMutation.isPending ? <Trans>Sending...</Trans> : <Trans>Send invite</Trans>}
+        </Button>
+      </DialogFooter>
+    </DialogForm>
+  );
+}
+
+// ❌ DON'T: State in the wrapper, manual reset plumbing, removed DirtyDialog props
+function BadInviteUserDialog({ isOpen, onOpenChange }) {
+  const [isFormDirty, setIsFormDirty] = useState(false); // ❌ State in wrapper → persists across close/reopen
+  const inviteMutation = api.useMutation("post", "/api/users/invite"); // ❌ Mutation in wrapper → stale errors on reopen
+
+  useEffect(() => { // ❌ useEffect watching isSuccess causes toast timing issues
+    if (inviteMutation.isSuccess) toast.success("Success");
+  }, [inviteMutation.isSuccess]);
+
+  const handleCloseComplete = () => { // ❌ Manual reset plumbing — symptom of wrong state location
+    setIsFormDirty(false);
+    inviteMutation.reset();
+  };
+
+  return (
+    <DirtyDialog open={isOpen} onOpenChange={onOpenChange}
+                 hasUnsavedChanges={isFormDirty} onCloseComplete={handleCloseComplete}> // ❌ Not DirtyDialog props; body owns dirtiness via `useDialogSetDirty()`
       <DialogContent className="sm:max-w-lg bg-white"> // ❌ max-w-lg (use w-dialog-md), hardcoded colors
-        <h2>User Mgmt</h2> // ❌ Use DialogTitle in dialogs (not h2), acronym "Mgmt", missing <Trans>
-        // ❌ Missing DialogBody wrapper - content won't scroll properly
-        <ul> // ❌ Native <ul> - use ListBox
-          {filteredUsers.map(user => (
-            <li key={user.id} onClick={() => handleSelect(user.id)}> // ❌ Native <li>
-              <img src={user.avatarUrl} /> // ❌ Native <img> - use Avatar
-              <Text className="text-sm">{user.email}</Text> // ❌ text-sm with Text causes blur
-              {getDisplayName(user)}
-            </li>
-          ))}
-        </ul>
+        <h2>User Mgmt</h2> // ❌ Use DialogTitle (not h2), acronym "Mgmt", missing <Trans>
+        // ❌ Missing DialogBody → content won't scroll properly
+        <TextField name="email" onChange={() => setIsFormDirty(true)} />
         <DialogFooter>
-          <DialogClose render={<Button variant="secondary" />}> // ❌ Missing type="reset" (will show unwanted warning)
+          <DialogClose render={<Button variant="secondary" />}> // ❌ Missing type="reset"
             Cancel
           </DialogClose>
           <Button type="submit"> // ❌ Missing disabled={isPending}
-            <Trans>Submit</Trans> // ❌ Missing isPending text pattern, generic "Submit" text
+            <Trans>Submit</Trans> // ❌ Missing isPending branch, generic text
           </Button>
         </DialogFooter>
       </DialogContent>

@@ -72,17 +72,29 @@ async function loadRemoteTranslations(remoteName: string, locale: Locale): Promi
 }
 
 /**
+ * Load translations from `@repo/ui` (the shared component library catalog).
+ * These are merged underneath the host SPA's own messages so the host can override.
+ */
+async function loadSharedTranslations(locale: Locale): Promise<Messages | null> {
+  try {
+    const module = await import(`@repo/ui/translations/locale/${locale}.ts`);
+    return module?.messages ?? null;
+  } catch {
+    return null;
+  }
+}
+
+/**
  * Creates a translation loader that merges translations from federated modules
  */
 function createFederatedLoader(
   baseLoader: (locale: Locale) => Promise<LocaleFile>
 ): (locale: Locale) => Promise<LocaleFile> {
   return async (locale: Locale): Promise<LocaleFile> => {
-    // Load base translations first
-    const baseMessages = await baseLoader(locale);
+    const [sharedMessages, baseMessages] = await Promise.all([loadSharedTranslations(locale), baseLoader(locale)]);
 
-    // Load and merge translations from all configured remotes
-    const allMessages = { ...baseMessages.messages };
+    // Precedence (last write wins): shared < own < federated remote
+    const allMessages = { ...sharedMessages, ...baseMessages.messages };
 
     await Promise.all(
       FEDERATED_TRANSLATION_REMOTES.map(async (remoteName) => {

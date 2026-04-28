@@ -34,17 +34,14 @@ msgstr "Hide details"
 msgid "Log out"
 msgstr "Log out"
 
+msgid "Main navigation"
+msgstr "Main navigation"
+
 msgid "Manage tenants, view system data, see exceptions, and perform various tasks for operational and support teams."
 msgstr "Manage tenants, view system data, see exceptions, and perform various tasks for operational and support teams."
 
-msgid "More information"
-msgstr "More information"
-
 msgid "Navigation"
 msgstr "Navigation"
-
-msgid "Open navigation menu"
-msgstr "Open navigation menu"
 
 msgid "Page not found"
 msgstr "Page not found"
@@ -66,9 +63,6 @@ msgstr "Something went wrong"
 
 msgid "The page you are looking for does not exist or was moved."
 msgstr "The page you are looking for does not exist or was moved."
-
-msgid "Toggle sidebar"
-msgstr "Toggle sidebar"
 
 msgid "Try again"
 msgstr "Try again"
