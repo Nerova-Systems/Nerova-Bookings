@@ -11,7 +11,12 @@ export function createLinguiConfig(): LinguiConfig {
     catalogs: [
       {
         path: "<rootDir>/shared/translations/locale/{locale}",
-        include: ["<rootDir>/**/*.ts", "<rootDir>/**/*.tsx"],
+        include: [
+          "<rootDir>/**/*.ts",
+          "<rootDir>/**/*.tsx",
+          "<rootDir>/../../shared-webapp/ui/**/*.ts",
+          "<rootDir>/../../shared-webapp/ui/**/*.tsx"
+        ],
         exclude: ["**/node_modules/**", "**/dist", "**/*.d.ts", "**/*.test.*", "**/.*"]
       }
     ],

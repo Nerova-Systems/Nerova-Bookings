@@ -7,7 +7,6 @@ using Microsoft.Extensions.Hosting;
 using NJsonSchema.Generation;
 using SharedKernel.Antiforgery;
 using SharedKernel.Authentication;
-using SharedKernel.Authorization;
 using SharedKernel.Endpoints;
 using SharedKernel.ExecutionContext;
 using SharedKernel.Middleware;
@@ -185,7 +184,7 @@ public static class ApiDependencyConfiguration
                     }
                 );
 
-            return services.AddAuthorization(SysOpAuthorization.AddPolicy);
+            return services.AddAuthorization();
         }
 
         public IServiceCollection AddHttpForwardHeaders()

@@ -24,7 +24,7 @@
 
 Kick-start building top-tier B2B & B2C cloud SaaS products with sleek design, fully localized and accessible, vertical slice architecture, automated and fast DevOps, and top-notch security.
 
-Built to demonstrate seamless flow: backend contracts feed a fully-typed React UI, pipelines make fully automated deployments to Azure, and a multi-agent workflow built on Claude Code's native [Agent Teams](https://code.claude.com/docs/en/agent-teams) where PlatformPlatform-expert agents collaborate to deliver complete features following the opinionated architecture. Think of it as a ready-made blueprint, not a pile of parts to assemble.
+Built to demonstrate seamless flow: backend contracts feed a fully-typed React UI, pipelines make fully automated deployments to Azure, and a multi-agent AI workflow where PlatformPlatform-expert agents collaborate to deliver complete features following the opinionated architecture. Think of it as a ready-made blueprint, not a pile of parts to assemble.
 
 ## What's inside
 
@@ -34,13 +34,13 @@ Built to demonstrate seamless flow: backend contracts feed a fully-typed React U
 * **Infrastructure** - Cost efficient and scalable Azure PaaS services like Azure Container Apps, Azure PostgreSQL, etc.
 * **Developer CLI** - Extendable .NET CLI for DevEx - set up CI/CD is one command and a couple of questions
 * **AI rules** - 30+ rules & workflows for Claude Code - sync to other editors can be enabled via `.gitignore`
-* **Multi-agent development** - Agent Teams workflow where specialized Claude Code agents with deep PlatformPlatform expertise collaborate end-to-end
+* **Multi-agent workflow** (Experimental) - Specialized autonomous AI agents expert in PlatformPlatform's architecture
+
+![Multi Agent Workflow](https://platformplatformgithub.blob.core.windows.net/multi-agent-workflow.png)
 
 Follow our [up-to-date roadmap](https://github.com/orgs/PlatformPlatform/projects/2/views/2) with core SaaS features like SSO, monitoring, alerts, multi-region, feature flags, back office for support, etc.
 
 Show your support for our project - give us a star on GitHub! It truly means a lot! ⭐
-
-<img src="https://platformplatformgithub.blob.core.windows.net/$root/PlatformPlatformDemo.gif" alt="PlatformPlatform Demo" title="PlatformPlatform Demo" />
 
 # Getting Started
 
@@ -80,13 +80,6 @@ For development, you need .NET, Docker, and Node. And GitHub and Azure CLI for s
     winget install OpenJS.NodeJS
     ```
 
-4.	(Recommended) Install language servers for enhanced Claude Code support:
-
-    ```powershell
-    npm install -g typescript-language-server typescript
-    dotnet tool install -g csharp-ls
-    ```
-
 </details>
 
 <details>
@@ -114,13 +107,6 @@ Open a terminal and run the following commands (if not installed):
    # Option B: Node.js directly
    brew install node
    ```
-
-4. (Recommended) Install language servers for enhanced Claude Code support:
-
-   ```bash
-   npm install -g typescript-language-server typescript
-   dotnet tool install -g csharp-ls
-   ````
 
 </details>
 
@@ -183,21 +169,14 @@ Open a terminal and run the following commands (if not installed):
 
 6. **Log out and log back in** to apply Docker group and shell configuration changes.
 
-7. (Recommended) Install language servers for enhanced Claude Code support
-
-   ```bash
-   npm install -g typescript-language-server typescript
-   dotnet tool install -g csharp-ls
-   ```
-
-8. (Optional) If using Snap Chromium, trust the certificate in its sandbox
+7. (Optional) If using Snap Chromium, trust the certificate in its sandbox
 
    ```bash
    certutil -d sql:$HOME/snap/chromium/current/.pki/nssdb -L >/dev/null 2>&1 || (mkdir -p $HOME/snap/chromium/current/.pki/nssdb && certutil -d sql:$HOME/snap/chromium/current/.pki/nssdb -N --empty-password)
    dotnet dev-certs https --trust
    ```
 
-9. (Optional) Install GitHub CLI and Azure CLI (needed for CI/CD setup)
+8. (Optional) Install GitHub CLI and Azure CLI (needed for CI/CD setup)
 
    ```bash
    (type -p wget >/dev/null || (sudo apt update && sudo apt-get install wget -y)) \
@@ -239,21 +218,23 @@ Using Aspire, docker images with PostgreSQL, Blob Storage emulator, and developm
 With the CLI installed:
 
 ```bash
-pp run # First time downloading Docker containers will take several minutes
+pp run --attach
 ```
 
 Or without the CLI:
 
 ```bash
 cd application/AppHost
-dotnet run
+dotnet run # First time downloading Docker containers will take several minutes
 ```
 
 Alternatively, open the [PlatformPlatform](./application/PlatformPlatform.slnx) solution in Rider or Visual Studio and run the [Aspire AppHost](./application/AppHost/AppHost.csproj) project.
 
-On first startup, Aspire will prompt for PayFast settings. Enter the sandbox merchant details to enable subscription payments, or leave them empty to skip local payment processing.
+On first startup, Aspire will prompt for `stripe-enabled` -- enter `true` to configure Stripe integration (see the optional Stripe setup section below) or `false` to skip.
 
-Once the Aspire dashboard fully loads, click to the WebApp and sign up for a new account (https://localhost:9000/signup). A one-time password (OTP) will be sent to the development mail server, but for local development, you can always use the code `UNLOCK` instead of checking the mail server.
+Once the Aspire dashboard fully loads, click to the WebApp and sign up for a new account (https://localhost:9000/signup). A one-time password (OTP) will be sent to the development mail server, but for local development, you can always use the code `UNLOCK` instead of checking the mail server. As shown here:
+
+<img src="https://platformplatformgithub.blob.core.windows.net/$root/local-development-exp.gif" alt="Getting Started" title="Developer Experience" width="800"/>
 
 ### 3.1 (Optional) Set up Google OAuth for "Sign in with Google" on localhost
 
@@ -286,27 +267,43 @@ PlatformPlatform supports authentication via Google OAuth using OpenID Connect w
 
 All values are stored securely in .NET user secrets and persist across restarts.
 
-### 3.2 (Optional) Set up PayFast sandbox for localhost
+### 3.2 (Optional) Set up Stripe sandbox for localhost
 
-PlatformPlatform uses PayFast for subscription payments. The application initiates PayFast onsite payments for new subscriptions and reactivations, stores recurring tokens locally, charges upgrades and monthly renewals through PayFast's recurring billing API, and receives payment state through PayFast ITN callbacks.
+PlatformPlatform includes a comprehensive Stripe integration for subscription management and payments: embedded Stripe checkout and payment elements, prorated plan upgrades and downgrades, tax management, localized UI and invoice text, refund overview in billing history, telemetry events for the subscription lifecycle, grandfather pricing for existing subscribers, dunning and failed payment recovery, and full sync between Stripe and the local database via webhooks. The Stripe Dashboard must be set up and configured according to the Stripe Dashboard setup guide below before enabling Stripe in Aspire.
 
 <details>
 
-<summary>PayFast sandbox setup</summary>
+<summary>Stripe Dashboard setup</summary>
 
-Each developer should use their own PayFast sandbox merchant credentials so ITN callbacks and recurring tokens do not overlap between local databases.
+Each developer needs their own Stripe sandbox. The local database stays in sync with Stripe via webhook events -- when payments, subscriptions, or billing details change in Stripe, webhook events update the local database with matching customer and subscription IDs. If developers share a sandbox, webhook events from one developer's actions would corrupt another developer's local database.
 
-1. Create or open a PayFast sandbox merchant account.
-2. Enable recurring billing/tokenization for the sandbox merchant.
-3. Note the Merchant ID, Merchant Key, and Passphrase.
-4. Configure the ITN notify URL to `https://localhost:9000/api/account/subscriptions/payfast/itn` when testing callbacks through a tunnel, or use the deployed environment URL for hosted environments.
-5. Use `https://localhost:9000/account/billing` for the return and cancel URLs in local development.
+1. **Create a sandbox**: Go to [Stripe Dashboard](https://dashboard.stripe.com) and create an account. Click the **account picker** (top-left) > **Sandboxes** > **Create**. Name it `dev-yourname` and open it. All subsequent steps are performed inside your sandbox.
+2. **Create products**: Navigate to **Product catalog** > **+ Create product**. Create a `Standard` product with **Recurring** / **Monthly** pricing (e.g., 19 EUR), then a `Premium` product (e.g., 39 EUR). Important: Click **More pricing options** and add `standard_monthly` and `premium_monthly` respectively in the **Lookup key** field.
+3. **Disable non-card payment methods**: Go to **Settings** (gear icon) > **Payments** > **Payment methods**. Turn off every payment method except **Cards** (and **Cartes Bancaires** which cannot be disabled)
+4. **Limit to 1 subscription**: Go to **Settings** > **Payments** > **Checkout and Payment Links**, scroll to **Subscriptions**, and enable **Limit customers to 1 subscription**. Add link to `https://app.yourcompany.com/account/billing` (`https://localhost:9000/account/billing` is not valid)
+5. **Configure failed payment recovery**: Go to **Settings** > **Billing** > **Subscriptions and emails** > **Manage failed payments**, and configure desired retry behavior
+6. **Configure email notifications**: Go to **Settings** > **Billing** > **Subscriptions and emails** > **Email notifications and customer management**, and enable all settings as you see fit. Set "Use your own custom link" to `https://localhost:9000/account/billing`
+7. **Enable 3D Secure**: Go to **Settings** > **Billing** > **Subscriptions and emails** > **Manage payments that require confirmation**, and check off **Enable 3D Secure**. The embedded Stripe components support showing e.g. Visa and Danish MitID multi-factor confirmation dialogs
+8. **Set invoice prefix**: Go to **Settings** > **Billing** > **Invoices**. In the **Invoice numbering** section, change the **Invoice prefix** to something meaningful for your organization, and optionally reset the **Invoice sequence** if needed
+9. **Disable payment link in invoice emails**: Go to **Settings** > **Billing** > **Invoices** and uncheck **Include a link to a payment page in the invoice email**
+10. **Set up Tax**: Go to **More** > **Tax** > **Locations** > **+ Add test registration** and follow the guide. Below is an example for a Danish company (adapt based on your business):
+    - Fill out the "Add head office address" side pane with your company address. Click **Continue**
+    - In "Add Tax registration" select your country (e.g., **Denmark**) and **I'm already registered**. Click **Continue**
+    - Select **Domestic** (e.g., "registered in Denmark"). Click **Continue**
+    - Select **No** to "Do you want to collect VAT on cross-border sales...". Click **Continue**
+    - Select **Yes** to "Have your sales of goods or digital services... been less than EUR 10,000". Click **Continue**
+    - Select **Start collecting immediately** in "Schedule tax collection". Click **Continue**
+    - Select **Software as a service (SaaS) - business use** in "Confirm your tax rates" (should show 25% for Denmark). Click **Start collecting**
+11. **Get API keys**: Navigate to **Developers** > **API keys**. Note the **Publishable key** (`pk_test_...`) and **Secret key** (`sk_test_...`). These will be needed for the Aspire configuration below.
 
 </details>
 
-**Aspire parameter configuration**:
+**Aspire parameter configuration** (two restarts required):
 
-Enter the PayFast Merchant ID, Merchant Key, Passphrase, sandbox flag, notify URL, return URL, and cancel URL when Aspire prompts for subscription payment settings.
+1. **First restart**: Aspire prompts for the **Publishable key** and **Secret key** (API key). Once entered, the Stripe CLI container starts and connects to Stripe. Find the generated webhook signing secret in either:
+   - The **Stripe Dashboard** under **Developers** > **Workbench** > **Webhooks** -- click the three-dot menu on the event destination to reveal the signing secret
+   - The **stripe-cli** container logs in the Aspire dashboard (look for "Your webhook signing secret is whsec_...")
+2. **Second restart**: Aspire prompts for the **Webhook secret**. Enter the `whsec_` value from the previous step.
 
 All values are stored securely in .NET user secrets and persist across restarts.
 
@@ -345,79 +342,64 @@ Remember to add redirect URIs for each environment in your Google Cloud Console 
 - `https://app.yourproduct.com/api/account/authentication/Google/login/callback`
 - `https://app.yourproduct.com/api/account/authentication/Google/signup/callback`
 
-### (Optional) Configure PayFast for staging and production
+### (Optional) Configure Stripe for staging and production
 
-Create separate PayFast merchant credentials for each environment. For production, use live PayFast credentials and set `PAYFAST_SANDBOX=false`.
+Create a separate Stripe account (or sandbox) for each environment. For production, use a live Stripe account instead of a sandbox. Follow the Stripe Dashboard setup steps in [section 3.2](#32-optional-set-up-stripe-sandbox-for-localhost) to configure products, payment methods, tax, invoices, and other settings.
 
-Configure the PayFast ITN notify URL for each environment:
+On localhost, the Stripe CLI container automatically forwards webhook events. On staging and production, you need to configure a webhook endpoint manually in the Stripe Dashboard:
 
-- `https://staging.yourproduct.com/api/account/subscriptions/payfast/itn`
-- `https://app.yourproduct.com/api/account/subscriptions/payfast/itn`
+1. Go to **Developers** > **Webhooks** > **Add destination**
+2. Keep **Your account** selected. Under events, select the **Charge**, **Checkout**, **Credit Note**, **Customer**, **Invoice**, **Payment Intent**, **Payment Method**, **Price**, **Product**, **Refund**, **Setup Intent**, and **Subscription Schedule** categories (roughly 91 events as of March 2026, though Stripe may add or remove events over time). Do not use **Select all** as it includes v2 thin-payload events the handler does not support. Click **Continue**
+3. Select **Webhook endpoint** as the destination type
+4. Set the **Destination name** to the environment (e.g., `Staging` or `Production`), set the **Endpoint URL** to `https://app.yourproduct.com/api/account/subscriptions/stripe-webhook` (replace with your actual domain), and click **Continue**
+5. On the destination detail page, click **Reveal** under **Signing secret** to get the webhook secret (`whsec_...`)
 
-Use the Developer CLI to store PayFast credentials as GitHub variables and secrets for deployment to Azure Key Vault:
+Use the Developer CLI to store Stripe credentials as GitHub secrets for deployment to Azure Key Vault:
 
 ```bash
 pp github-config
 ```
 
-Select the **PayFast** group and enter the Merchant ID, Merchant Key, Passphrase, sandbox flag, and optional allowed IP list. The subscription feature is automatically enabled on Azure when the merchant ID, merchant key, and passphrase are present in Key Vault.
+Select the **Stripe** group and enter the **Publishable Key**, **API Key** (Secret key), and **Webhook Secret** (the signing secret from the webhook endpoint). The subscription feature is automatically enabled on Azure when all three secrets are present in Key Vault.
 
-# Multi-Agent Development with Claude Code
+# Experimental: Agentic Workflow with Claude Code
 
-PlatformPlatform includes a multi-agent autonomous development workflow powered by [Claude Code Agent Teams](https://code.claude.com/docs/en/agent-teams). Specialized AI agents collaborate to deliver complete features, from requirements to production-ready code, while enforcing enterprise-grade quality standards.
-
-The entire process can take several hours depending on complexity, but at the end you get a fully implemented feature: backend logic, database migrations, API endpoints, frontend UI, localization, and end-to-end tests. All committed. All tests passing. Ready to ship.
-
-The agents work like a real engineering team, inside the tools you already use. Features and tasks live in your existing product management system (Linear, Azure DevOps, Jira, or markdown files on disk), not in a bespoke AI-only tracker. Write the feature and tasks yourself, or have the team lead interview you and create them for you. From there, the team lead delegates to engineers, who move tasks from planned to active when they start. Reviewers move them to review. The Guardian moves them to completed on a successful commit. You watch progress, comment on tasks, reprioritize, add bugs mid-flight, or restart tasks the agents got wrong, exactly the same way you would with a human team. The full audit trail lives in your product management tool alongside all your other work.
-
-<img src="https://platformplatformgithub.blob.core.windows.net/$root/MultiAgentLinearWorkflow.gif" alt="Multi Agent Workflow Linear" title="Multi Agent Workflow Linear" />
+PlatformPlatform includes a multi-agent autonomous development workflow powered by [Claude Code](https://claude.com/product/claude-code). Nine specialized AI agents collaborate to deliver complete features, from requirements to production-ready code, while enforcing enterprise-grade quality standards.
 
 ## What makes this different
 
 **Zero-tolerance code reviews**: AI agents follow rules well until they hit problems, then cut corners, which is why many struggle to get AI to write production-ready code. Dedicated reviewer agents catch this. They reject any code that can objectively be made better: compiler warnings, static analysis errors, browser console warnings, or deviation from established patterns. All warnings including warnings in seemingly unrelated parts of the system are fixed. This boy scout rule approach ensures every commit meets production standards.
 
-**Native Agent Teams coordination**: Built on Claude Code's Agent Teams primitives: `TeamCreate`, `Task` with `team_name`, `SendMessage`, and a shared `TaskList`. The team lead spawns and coordinates all agents automatically.
+**Interactive sessions with full visibility**: Each agent runs in an interactive Claude Code session. You can watch their work in real-time, intervene to guide decisions, or let them run autonomously. Unlike normal Claude Code agents that work in the background like a black box, you're always in control.
 
-**Real collaboration via `SendInterruptSignal`**: Native Agent Teams are fragile out of the box. Agents treat `SendMessage` like an inbox: they finish their current task fully before reading the next message, so a team lead that sends a nudge mid-flight never hears back. Team leads then assume the agent is stuck, spawn replacements, and the new agents behave the same way. PlatformPlatform ships a custom MCP command, `SendInterruptSignal`, that solves this. It pairs with an ID-correlated follow-up `SendMessage` and is auto-delivered by a `PostToolUse` hook as a blocking error on the target agent's next tool call. Agents skip stale queued messages until they find the matching interrupt ID. Engineers interrupt QA when contracts change. Reviewers interrupt engineers with in-progress findings. The result is agents that truly collaborate in real time instead of talking past each other.
+**Persistent memory across interactions**: Agents maintain context between delegations. When an engineer requests a follow-up review, the same reviewer continues with full knowledge of prior feedback. No re-explaining needed.
 
-**Plan before acting**: The team lead always starts in plan mode. Before spawning any agents, it investigates the work, then presents a plan describing which agents will be spawned, what each will do, and the expected sequence. Implementation begins only once the user approves. Small tasks get brief plans, large tasks get detailed plans.
+**Cross-team collaboration**: Agents can communicate directly. If the frontend engineer needs a backend API change, they ask the backend engineer, wait for implementation and review approval, then continue their work automatically. All work is locally on the same branch, but each agent only changes, reviews, and commits code within their area of expertise.
 
-**Parallel execution with task sets**: Backend, frontend, and E2E tracks run concurrently within each task set. Engineers implement in parallel, reviewers validate independently, and the Guardian commits everything in dependency order once all tracks are approved.
+**No context window exhaustion**: Traditional AI agents must clear or compact their context as conversations grow, forgetting important details. With specialized agents for each domain, no single agent accumulates context bloat. The frontend engineer doesn't need backend implementation details. The system ensures that every new task starts with a fresh context window, but agents always read the feature description first to maintain the big picture.
 
-**Guardian-owned commits**: A dedicated Guardian owns all git writes. Reviewers send one approval message per track with the full file list; the Guardian stages it atomically. Once every track is staged, the Guardian runs the pre-commit pipeline (build, test, format, lint, Aspire restart, smoke tests) and commits in dependency order. No other agent touches git.
+**Self-healing orchestration**: The developer-cli hosts each agent process. If an agent stops for whatever reason, the worker-host detects it and recovers automatically. E.g. if an agent forgets to signal completion, they hit Claude Code session rate limit, the server needs to be restarted, or database migrations are needed. The system will try to self-heal and continue until the feature is complete.
 
-**Explicit task status ownership**: Every status transition has exactly one owner. Engineers move tasks from planned to active when starting. Reviewers move active to review when reviewing. Engineers move review back to active when fixing findings. The Guardian moves review to completed on a successful commit. Each agent verifies the expected state before acting, so status changes are auditable and never drift silently.
+**Automatic problem reporting**: When agents encounter unclear situations (duplicate tasks, missing tools), they file problem reports. The pair-programmer agent can analyze these reports and fix workflow issues.
 
-**Andon cord**: Every agent acts as a quality stop-signal. If something is off (a task in the wrong status, uncommitted changes from a previous task, validation failures that cannot be resolved, any warning or error signal), the agent pulls the andon cord: stop work and escalate to the team lead. The team lead treats andon cord escalations as highest priority and resolves them before any other work continues.
-
-**Architect coherence across task sets**: A persistent architect agent tracks how implementation evolves. Engineers discuss with the architect when they need to diverge from the plan during development. After each commit, the architect reads divergence notes and updates upcoming tasks when the implementation reveals something that changes future plans.
-
-**Continuous regression testing**: A regression tester runs visual and functional tests via Claude in Chrome browser automation throughout the implementation, catching UI regressions and console errors in real time.
-
-**Cross-team collaboration**: Agents talk to each other directly, not through the team lead. If the frontend engineer needs a backend API change, they message the backend engineer, wait for implementation, then continue. QA notifies engineers when tests expose bugs. The team lead stays out of the loop on day-to-day chatter and only steps in to redirect or unblock.
-
-**No context window exhaustion**: With specialized agents for each domain, no single agent accumulates context bloat. Fresh engineer and reviewer pairs are spawned for each task set, always starting with a clean context window while persistent agents (guardian, architect, regression tester) maintain continuity across the feature.
-
-**Tool-agnostic product management**: A single `PRODUCT_MANAGEMENT_TOOL` configuration value maps generic `[feature]`, `[task]`, and `[subtask]` terminology to the chosen tool. Configure the MCP server for your tool once and you are set. Agents resolve tool-specific details (status names, API shapes, ID formats) via `.claude/reference/product-management/{tool}.md` at runtime. Swap tools without changing agents.
+**Standard product management tool integration**: Works with Linear, Azure DevOps, Jira, GitHub, or markdown files in the local filesystem. Tasks flow through statuses (planned → active → review → completed) with full audit trail. Adjust tasks mid-flight or restart features entirely if the first attempt misses the mark.
 
 ## Agent roles
 
-**Team lead** (launched via the developer CLI):
-- Coordinates the full agent team. Spawns all sub-agents, delegates work, and tracks progress. Never writes code directly
-
-**Persistent agents** (alive for the whole feature):
-- **guardian**: Owns all git commits, Aspire restarts, and final validation. Zero tolerance for failures
-- **architect**: Tracks implementation evolution across task sets, reviews divergence notes, and updates upcoming tasks
-- **regression-tester**: Continuous visual and functional testing via Claude in Chrome
-- **researcher**: Investigation specialist. Spawned on the first research request and reused for subsequent questions. Reports findings but never writes code
-
-**Fresh agents** (spawned per task set by the team lead):
-- **backend**, **frontend**, **qa**: Engineers who implement code within their specialty
-- **backend-reviewer**, **frontend-reviewer**, **qa-reviewer**: Zero-tolerance gatekeepers who review line-by-line, then send one approval message per track to the Guardian for atomic staging and commit
+- **tech-lead**: Interviews you with targeted multiple-choice questions to rapidly gather requirements, researches codebase patterns, and creates a PRD with implementable tasks
+- **coordinator**: Maintains the big picture across hour-long implementation sessions, ensuring engineers work structured and stay aligned with feature goals
+- **backend-engineer**, **frontend-engineer**, **qa-engineer**: Implement code within their specialty
+- **backend-reviewer**, **frontend-reviewer**, **qa-reviewer**: Zero-tolerance gatekeepers who reject any deviation from established standards, then commit approved code
 
 ## How to use
 
 This workflow requires Claude Code and will not work with other AI coding assistants.
+
+(Optional) For enhanced Claude Code LSP support (enables go-to-definition and find-references):
+
+```bash
+npm install -g typescript-language-server typescript
+```
 
 ### 1. Create a feature branch
 
@@ -425,43 +407,41 @@ This workflow requires Claude Code and will not work with other AI coding assist
 git checkout -b feature-name
 ```
 
-### 2. Configure your product management tool (one-time setup)
+### 2. Define your feature with the tech-lead
 
-Pick a tool. The name must match a file in [.claude/reference/product-management/](./.claude/reference/product-management/): `Linear`, `AzureDevOps`, `Jira`, or `Markdown` (for tracking features and tasks as markdown files in your repo).
-
-Set the value in [AGENTS.md](./AGENTS.md):
-
-```
-PRODUCT_MANAGEMENT_TOOL="Linear"
-```
-
-Then configure the MCP server for that tool. Each reference file contains the exact MCP configuration under its **MCP Configuration** section (e.g., [Linear.md](./.claude/reference/product-management/Linear.md)). The `Markdown` option needs no MCP, since it reads and writes local files directly.
-
-### 3. Define your feature
-
-Start the team lead agent using the [Developer CLI](#2-optional-install-the-developer-cli):
+Start the tech-lead agent using the [Developer CLI](#2-optional-install-the-developer-cli):
 
 ```bash
-pp claude-agent team-lead
+pp claude-agent tech-lead
 ```
 
-Use the `/create-prd` skill. The team lead will guide you through a brief interview to understand what you want to build, then generate a complete feature specification with tasks in your configured product management tool (Linear, Azure DevOps, Jira, GitHub, or markdown files).
+If you prefer not to install the CLI, run `dotnet run claude-agent tech-lead` from the `developer-cli` directory.
 
-### 4. Let the team lead take over
+Run the `/process:create-prd` slash command. The tech-lead will guide you through a brief interview to understand what you want to build, then generate a complete feature specification with tasks in your product management tool (Linear, Azure DevOps, Jira, GitHub, or markdown files).
 
-Tell the team lead which feature to implement by providing the title or ID. From here, the team lead spawns all the agents automatically: guardian, architect, regression tester, and fresh engineer/reviewer pairs for each task set.
+### 3. Launch the agent team
 
-Backend and frontend engineers work in parallel. QA writes tests alongside implementation and runs them once backend and frontend are approved and staged. Reviewers scrutinize every change line by line and send one approval message per track. The Guardian runs the pre-commit pipeline (build, test, format, lint, Aspire restart, smoke tests) once all tracks are staged, then commits in dependency order (backend, frontend, E2E).
-
-## Ad-hoc work without the agent team
-
-For smaller tasks, bug fixes, or exploratory work that don't need the full agent team, use the pair programmer instead:
+Open seven terminal windows and start each agent:
 
 ```bash
-pp claude-agent pair-programmer
+pp claude-agent coordinator
+pp claude-agent backend-engineer
+pp claude-agent frontend-engineer
+pp claude-agent backend-reviewer
+pp claude-agent frontend-reviewer
+pp claude-agent qa-engineer
+pp claude-agent qa-reviewer
 ```
 
-The pair programmer is a standalone agent that works directly with you as a hands-on collaborator. It is not part of the agent team workflow above. It can spawn sub-agents when the task benefits from parallel work or code review.
+If you prefer not to install the CLI, run `dotnet run claude-agent [agent-name]` from the `developer-cli` directory.
+
+### 4. Watch the magic happen
+
+Tell the coordinator which feature to implement by providing the title or ID of the feature created with the tech-lead. From here, the agents take over.
+
+The coordinator breaks down the feature into tasks and delegates them to engineers. Each engineer claims their task, studies the requirements, and builds according to project rules and guidelines - writing tests, running migrations, restarting servers, and handling all the details. When implementation is complete, reviewers scrutinize every change and only approve code that meets production standards.
+
+The entire process can take several hours depending on complexity, but at the end you get a fully implemented feature: backend logic, database migrations, API endpoints, frontend UI, localization, and end-to-end tests. All committed. All tests passing. Ready to ship.
 
 # Inside Our Monorepo
 
@@ -469,8 +449,9 @@ PlatformPlatform is a [monorepo](https://en.wikipedia.org/wiki/Monorepo) contain
 
 ```bash
 .
-├─ .claude               # Claude Code agent definitions and team configurations
-│  ├─ agents             # Agent Teams agent definitions (team-lead, engineers, reviewers, etc.)
+├─ .claude               # Claude Code AI rules, commands, and samples
+│  ├─ agents             # Claude Code agent definitions for Task tool subagents
+│  ├─ agentic-workflow   # Agentic workflow with system prompts and MCP configs (Claude Code only)
 │  ├─ commands           # Slash commands and workflows
 │  ├─ hooks              # Claude Code hooks to enforce MCP tool usage and prevent dangerous git operations
 │  └─ rules              # AI rules for code generation patterns
@@ -535,8 +516,10 @@ The backend is built using the most popular, mature, and commonly used technolog
 - **MediatR pipelines**: MediatR pipeline behaviors are used to ensure consistent handling of cross-cutting concerns like validation, unit of work, and handling of domain events.
 - **Strongly Typed IDs**: The codebase uses strongly typed IDs, which are a combination of the entity type and the entity ID. This is even at the outer API layer, and Swagger translates this to the underlying contract. This ensures type safety and consistency across the codebase.
 - **JetBrains Code style and Cleanup**: JetBrains Rider/ReSharper is used for code style and automatic cleanup (configured in `.DotSettings`), ensuring consistent code formatting. No need to discuss tabs vs. spaces anymore; Invalid formatting breaks the build.
-- **Self-contained systems**: The codebase is organized into self-contained systems. A self-contained system is a large microservice (or a small monolith) that contains the full stack including frontend, background jobs, etc. These can be developed, tested, deployed, and scaled in isolation, making it a good compromise between a large monolith and many small microservices. Unlike the popular backend-for-frontend (BFF) style with one shared frontend, this allows teams to work fully independently. The main SCS is the shell application where you build your product.
+- **Monolith prepared for self-contained systems**: The codebase is organized into a monolith, but the architecture is prepared for splitting in to self-contained systems. A self-contained system is a large microservice (or a small monolith) that contains the full stack including frontend, background jobs, etc. These can be developed, tested, deployed, and scaled in isolation, making it a good compromise between a large monolith and many small microservices. Unlike the popular backend-for-frontend (BFF) style with one shared frontend, this allows teams to work fully independently.
 - **Shared Kernel**: The codebase uses a shared kernel for all the boilerplate code required to build a clean codebase. The shared kernel ensures consistency between self-contained systems, e.g., enforcing tenant isolation, auditing, tracking, implementation of tactical DDD patterns like aggregate, entities, repository base, ID generation, etc.
+
+Although some features like multi-tenancy are not yet implemented, the current implementation serves as a solid foundation for building business logic without unnecessary boilerplate.
 
 </details>
 
@@ -549,8 +532,6 @@ The frontend is built with these technologies:
 - [ShadCN 2.0](https://ui.shadcn.com) with [Base UI](https://base-ui.com)
 - [Tanstack Router](https://tanstack.com/router)
 - [Tanstack Query](https://tanstack.com/query)
-- [Lingui](https://lingui.dev) for internationalization (i18n)
-- [oxlint](https://oxc.rs/docs/guide/usage/linter) and [oxfmt](https://oxc.rs/docs/guide/usage/formatter) for linting and formatting
 - [Node](https://nodejs.org/en)
 
 ### Azure Cloud Infrastructure With Enterprise-Grade Security and Zero Secrets

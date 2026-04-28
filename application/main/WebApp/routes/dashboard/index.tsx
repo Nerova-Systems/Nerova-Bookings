@@ -2,7 +2,6 @@ import { t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
 import { useUserInfo } from "@repo/infrastructure/auth/hooks";
 import { AppLayout } from "@repo/ui/components/AppLayout";
-import { SidebarInset, SidebarProvider } from "@repo/ui/components/Sidebar";
 import { createFileRoute } from "@tanstack/react-router";
 import { LayoutDashboardIcon } from "lucide-react";
 
@@ -49,19 +48,17 @@ function DashboardPage() {
   const userInfo = useUserInfo();
 
   return (
-    <SidebarProvider>
+    <>
       <MainSideMenu />
-      <SidebarInset>
-        <AppLayout
-          variant="center"
-          maxWidth="64rem"
-          browserTitle={t`Dashboard`}
-          title={getTimeBasedGreeting(userInfo?.firstName)}
-          subtitle={t`Here's your overview of what's happening.`}
-        >
-          <EmptyDashboard />
-        </AppLayout>
-      </SidebarInset>
-    </SidebarProvider>
+      <AppLayout
+        variant="center"
+        maxWidth="64rem"
+        browserTitle={t`Dashboard`}
+        title={getTimeBasedGreeting(userInfo?.firstName)}
+        subtitle={t`Here's your overview of what's happening.`}
+      >
+        <EmptyDashboard />
+      </AppLayout>
+    </>
   );
 }

@@ -88,20 +88,12 @@ public sealed class UpgradeSubscriptionHandler(
             }
             logger.LogInformation("PayFast adhoc charge SUCCEEDED for upgrade {SubscriptionId}: R{Amount}", subscription.Id, proratedCharge);
 
-            // PayFast may or may not fire an ITN for adhoc charges on Tokenization tokens — record the
-            // payment transaction directly so the user always sees it in their billing history. If an
-            // ITN does fire, the duplicate-detection in HandlePayFastItn will skip the second insert.
-            var transaction = new PaymentTransaction(
-                PaymentTransactionId.NewId(),
-                proratedCharge,
-                SubscriptionPlanPricing.Currency,
-                PaymentTransactionStatus.Succeeded,
-                now,
-                null,
-                null,
-                null
-            );
-            subscription.SetPaymentTransactions(subscription.PaymentTransactions.Add(transaction));
+            // PayFast fires an ITN webhook for the adhoc charge that runs concurrently with this handler
+            // and writes its own changes to the subscription (RenewBillingPeriod + payment transaction).
+            // Reload to pick up that fresh state — without this we'd hit a concurrency conflict on
+            // ModifiedAt when saving. The ITN owns the payment transaction record; we only own the plan
+            // change.
+            subscription = await subscriptionRepository.GetCurrentAsync(cancellationToken);
         }
         else
         {

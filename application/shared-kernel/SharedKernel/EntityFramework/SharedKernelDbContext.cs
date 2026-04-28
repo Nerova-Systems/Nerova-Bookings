@@ -1,15 +1,9 @@
 using System.Linq.Expressions;
 using Humanizer;
-using MassTransit;
-using MassTransit.EntityFrameworkCoreIntegration;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using SharedKernel.Domain;
 using SharedKernel.ExecutionContext;
-using SharedKernel.Integrations.Email;
-using SharedKernel.Outbox;
-using MassTransitOutboxMessage = MassTransit.EntityFrameworkCoreIntegration.OutboxMessage;
-using LegacyOutboxMessage = SharedKernel.Outbox.OutboxMessage;
 
 namespace SharedKernel.EntityFramework;
 
@@ -23,10 +17,6 @@ public abstract class SharedKernelDbContext<TContext>(DbContextOptions<TContext>
     private readonly HashSet<object> _entitiesMarkedForPurge = [];
 
     protected TenantId? TenantId => executionContext.TenantId;
-
-    public DbSet<LegacyOutboxMessage> OutboxMessages => Set<LegacyOutboxMessage>();
-
-    public DbSet<TransactionalEmailMessage> TransactionalEmailMessages => Set<TransactionalEmailMessage>();
 
     void IPurgeTracker.MarkForPurge(object entity)
     {
@@ -52,8 +42,6 @@ public abstract class SharedKernelDbContext<TContext>(DbContextOptions<TContext>
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(TContext).Assembly);
-        ConfigureOutbox(modelBuilder);
-        ConfigureTransactionalEmail(modelBuilder);
 
         // Set pluralized table names for all aggregates
         foreach (var entityType in modelBuilder.Model.GetEntityTypes())
@@ -70,53 +58,9 @@ public abstract class SharedKernelDbContext<TContext>(DbContextOptions<TContext>
         // Ensures that all enum properties are stored as strings in the database.
         modelBuilder.UseStringForEnums();
 
-        ConfigureMassTransitOutbox(modelBuilder);
         ApplyNamedQueryFilters(modelBuilder);
 
         base.OnModelCreating(modelBuilder);
-    }
-
-    private static void ConfigureOutbox(ModelBuilder modelBuilder)
-    {
-        modelBuilder.Entity<LegacyOutboxMessage>(entity =>
-            {
-                entity.HasKey(e => e.Id);
-                entity.Property(e => e.Type).IsRequired();
-                entity.Property(e => e.Payload).HasColumnType("jsonb").IsRequired();
-                entity.HasIndex(e => new { e.ProcessedAt, e.NextAttemptAt, e.LockedUntilAt });
-                entity.HasIndex(e => e.DeadLetteredAt);
-            }
-        );
-    }
-
-    private static void ConfigureTransactionalEmail(ModelBuilder modelBuilder)
-    {
-        modelBuilder.Entity<TransactionalEmailMessage>(entity =>
-            {
-                entity.HasKey(e => e.Id);
-                entity.Property(e => e.Recipient).HasMaxLength(320).IsRequired();
-                entity.Property(e => e.Subject).HasMaxLength(500).IsRequired();
-                entity.Property(e => e.HtmlContent).IsRequired();
-                entity.Property(e => e.TemplateKey).HasMaxLength(100).IsRequired();
-                entity.Property(e => e.Status).HasConversion<string>().IsRequired();
-                entity.Property(e => e.CorrelationId).HasMaxLength(200);
-                entity.Property(e => e.LastError).HasMaxLength(2000);
-                entity.HasIndex(e => new { e.Status, e.NextAttemptAt });
-                entity.HasIndex(e => e.TemplateKey);
-                entity.HasIndex(e => e.CorrelationId);
-            }
-        );
-    }
-
-    private static void ConfigureMassTransitOutbox(ModelBuilder modelBuilder)
-    {
-        modelBuilder.AddInboxStateEntity();
-        modelBuilder.AddOutboxMessageEntity();
-        modelBuilder.AddOutboxStateEntity();
-
-        modelBuilder.Entity<InboxState>().ToTable("masstransit_inbox_states");
-        modelBuilder.Entity<MassTransitOutboxMessage>().ToTable("masstransit_outbox_messages");
-        modelBuilder.Entity<OutboxState>().ToTable("masstransit_outbox_states");
     }
 
     /// <summary>

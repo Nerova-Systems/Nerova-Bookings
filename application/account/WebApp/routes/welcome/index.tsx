@@ -113,7 +113,7 @@ function AccountSetupForm({ onComplete }: AccountSetupFormProps) {
             <Skeleton className="size-16 rounded-md" />
             <Skeleton className="h-16 flex-1" />
           </div>
-          <Skeleton className="mt-4 h-[var(--control-height)] w-full" />
+          <Skeleton className="mt-4 h-11 w-full" />
         </div>
       ) : (
         <>
@@ -124,7 +124,7 @@ function AccountSetupForm({ onComplete }: AccountSetupFormProps) {
             onLogoFileSelect={setSelectedLogoFile}
           />
 
-          <Button type="submit" isPending={isPending} className="mt-4 w-full">
+          <Button type="submit" disabled={isPending} className="mt-4 w-full">
             {isPending ? <Trans>Saving...</Trans> : <Trans>Continue</Trans>}
           </Button>
         </>
@@ -208,7 +208,7 @@ function ProfileSetupForm() {
           </div>
           <Skeleton className="h-16 w-full" />
           <Skeleton className="h-16 w-full" />
-          <Skeleton className="mt-4 h-[var(--control-height)] w-full" />
+          <Skeleton className="mt-4 h-11 w-full" />
         </div>
       ) : (
         <>
@@ -221,7 +221,7 @@ function ProfileSetupForm() {
             />
           </div>
 
-          <Button type="submit" isPending={isPending} className="mt-4 w-full">
+          <Button type="submit" disabled={isPending} className="mt-4 w-full">
             {isPending ? <Trans>Saving...</Trans> : <Trans>Continue</Trans>}
           </Button>
         </>

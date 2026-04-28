@@ -15,20 +15,26 @@ type UserDetails = components["schemas"]["UserDetails"];
 
 interface UserTableRowProps {
   user: UserDetails;
+  index: number;
+  isSelected: boolean;
   isMobile: boolean;
   currentUserRole: string | undefined;
   currentUserId: string | undefined;
+  onRowClick: (user: UserDetails, event: React.MouseEvent) => void;
   onSelectedUsersChange: (users: UserDetails[]) => void;
-  onViewProfile: (user: UserDetails) => void;
+  onViewProfile: (user: UserDetails, isKeyboardOpen?: boolean) => void;
   onDeleteUser: (user: UserDetails) => void;
   onChangeRole: (user: UserDetails) => void;
 }
 
 export function UserTableRow({
   user,
+  index,
+  isSelected,
   isMobile,
   currentUserRole,
   currentUserId,
+  onRowClick,
   onSelectedUsersChange,
   onViewProfile,
   onDeleteUser,
@@ -79,7 +85,13 @@ export function UserTableRow({
   };
 
   return (
-    <TableRow rowKey={user.id}>
+    <TableRow
+      key={user.id}
+      data-state={isSelected ? "selected" : undefined}
+      className={`cursor-pointer select-none ${isSelected ? "bg-active-background hover:bg-active-background" : "hover:bg-hover-background"}`}
+      onClick={(event) => onRowClick(user, event)}
+      index={index}
+    >
       <TableCell className="pr-8">
         {isMobile ? <MobileUserActionMenu {...actionMenuProps}>{userRowContent}</MobileUserActionMenu> : userRowContent}
       </TableCell>

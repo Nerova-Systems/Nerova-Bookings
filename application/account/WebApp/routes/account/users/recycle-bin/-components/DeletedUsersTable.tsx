@@ -1,5 +1,3 @@
-import type { RowKey } from "@repo/ui/components/Table";
-
 import { t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
 import { Checkbox } from "@repo/ui/components/Checkbox";
@@ -60,26 +58,45 @@ export function DeletedUsersTable({
     }
   });
 
-  const users = useMemo(() => deletedUsersData?.users ?? [], [deletedUsersData?.users]);
+  const selectedUserIds = useMemo(() => new Set(selectedUsers.map((user) => user.id)), [selectedUsers]);
   const isMultiSelectMode = !isTouchDevice() && isMediumViewportOrLarger();
-
-  const selectedKeys = useMemo<ReadonlySet<RowKey>>(
-    () => new Set(selectedUsers.map((user) => user.id)),
-    [selectedUsers]
-  );
-
-  const handleSelectionChange = useCallback(
-    (keys: Set<RowKey>) => {
-      onSelectedUsersChange(users.filter((user) => keys.has(user.id)));
-    },
-    [onSelectedUsersChange, users]
-  );
 
   const handleSelectAll = useCallback(
     (checked: boolean) => {
-      onSelectedUsersChange(checked ? users : []);
+      if (checked) {
+        onSelectedUsersChange(deletedUsersData?.users ?? []);
+      } else {
+        onSelectedUsersChange([]);
+      }
     },
-    [onSelectedUsersChange, users]
+    [deletedUsersData?.users, onSelectedUsersChange]
+  );
+
+  const handleSelectRow = useCallback(
+    (user: DeletedUserDetails, isCheckboxClick: boolean) => {
+      if (isMultiSelectMode && isCheckboxClick) {
+        const isSelected = selectedUserIds.has(user.id);
+        if (isSelected) {
+          onSelectedUsersChange(selectedUsers.filter((u) => u.id !== user.id));
+        } else {
+          onSelectedUsersChange([...selectedUsers, user]);
+        }
+      } else {
+        onSelectedUsersChange([user]);
+      }
+    },
+    [isMultiSelectMode, selectedUserIds, selectedUsers, onSelectedUsersChange]
+  );
+
+  const handleRowClick = useCallback(
+    (user: DeletedUserDetails, event: React.MouseEvent) => {
+      const target = event.target as HTMLElement;
+      if (target.closest("button") || target.closest('[data-slot="checkbox"]')) {
+        return;
+      }
+      handleSelectRow(user, false);
+    },
+    [handleSelectRow]
   );
 
   // NOTE: Skeleton loading state uses <table><tbody> without <thead> to work around a Firefox
@@ -89,6 +106,7 @@ export function DeletedUsersTable({
     return <DeletedUsersTableSkeleton isMultiSelectMode={isMultiSelectMode} isMobile={isMobile} />;
   }
 
+  const users = deletedUsersData?.users ?? [];
   const currentPage = (deletedUsersData?.currentPageOffset ?? 0) + 1;
   const totalPages = deletedUsersData?.totalPages ?? 1;
 
@@ -96,19 +114,14 @@ export function DeletedUsersTable({
     return <DeletedUsersEmptyState />;
   }
 
-  const allSelected = users.length > 0 && selectedKeys.size === users.length;
-  const someSelected = selectedKeys.size > 0 && selectedKeys.size < users.length;
+  const usersLength = users.length;
+  const allSelected = usersLength > 0 && selectedUserIds.size === usersLength;
+  const someSelected = selectedUserIds.size > 0 && selectedUserIds.size < usersLength;
 
   return (
     <>
       <div className="deleted-users-table min-h-48 flex-1 overflow-auto">
-        <Table
-          rowSize="spacious"
-          aria-label={t`Deleted users`}
-          selectionMode={isMultiSelectMode ? "multiple" : "single"}
-          selectedKeys={selectedKeys}
-          onSelectionChange={handleSelectionChange}
-        >
+        <Table aria-label={t`Deleted users`}>
           <TableHeader className="sticky top-0 z-10 bg-inherit">
             <TableRow>
               {isMultiSelectMode && (
@@ -122,21 +135,29 @@ export function DeletedUsersTable({
                 </TableHead>
               )}
               <TableHead className={isSmallViewportOrLarger() ? "min-w-[16rem]" : ""}>
-                <Trans>Name</Trans>
+                <span className="text-xs font-bold">
+                  <Trans>Name</Trans>
+                </span>
               </TableHead>
               {isSmallViewportOrLarger() && (
                 <TableHead className="min-w-[10rem]">
-                  <Trans>Email</Trans>
+                  <span className="text-xs font-bold">
+                    <Trans>Email</Trans>
+                  </span>
                 </TableHead>
               )}
               {isMediumViewportOrLarger() && (
                 <TableHead className="w-[9rem] min-w-[7.5rem]">
-                  <Trans>Deleted</Trans>
+                  <span className="text-xs font-bold">
+                    <Trans>Deleted</Trans>
+                  </span>
                 </TableHead>
               )}
               {isSmallViewportOrLarger() && (
                 <TableHead className="w-[6rem]">
-                  <Trans>Role</Trans>
+                  <span className="text-xs font-bold">
+                    <Trans>Role</Trans>
+                  </span>
                 </TableHead>
               )}
             </TableRow>
@@ -146,8 +167,10 @@ export function DeletedUsersTable({
               <DeletedUserRow
                 key={user.id}
                 user={user}
-                isSelected={selectedKeys.has(user.id)}
+                isSelected={selectedUserIds.has(user.id)}
                 isMultiSelectMode={isMultiSelectMode}
+                onSelectRow={handleSelectRow}
+                onRowClick={handleRowClick}
               />
             ))}
           </TableBody>

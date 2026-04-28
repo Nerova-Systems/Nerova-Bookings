@@ -37,13 +37,13 @@ public static class SslCertificateManager
         }
 
         Process.Start(new ProcessStartInfo
-        {
-            FileName = "dotnet",
-            Arguments = $"dev-certs https --trust -ep {certificateLocation} -p {password}",
-            RedirectStandardOutput = false,
-            RedirectStandardError = false,
-            UseShellExecute = false
-        }
+            {
+                FileName = "dotnet",
+                Arguments = $"dev-certs https --trust -ep {certificateLocation} -p {password}",
+                RedirectStandardOutput = false,
+                RedirectStandardError = false,
+                UseShellExecute = false
+            }
         )!.WaitForExit();
     }
 

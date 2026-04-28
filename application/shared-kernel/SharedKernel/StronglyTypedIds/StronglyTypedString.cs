@@ -5,7 +5,7 @@ namespace SharedKernel.StronglyTypedIds;
 
 /// <summary>
 ///     This is a strongly typed ID for string values. It uses a custom string value with an optional prefix.
-///     IDs can be prefixed with the value of the <see cref="IdPrefixAttribute" />.
+///     IDs can be prefixed with the value of the <see cref="IdPrefixAttribute" /> inspired by Stripe's API.
 /// </summary>
 public abstract record StronglyTypedString<T>(string Value) : StronglyTypedId<string, T>(Value)
     where T : StronglyTypedString<T>

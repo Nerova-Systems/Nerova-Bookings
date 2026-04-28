@@ -27,9 +27,9 @@ public sealed class ExternalAuthenticationServiceTests
         httpContextAccessor.HttpContext.Returns(httpContext);
         var configuration = new ConfigurationBuilder()
             .AddInMemoryCollection(new Dictionary<string, string?>
-            {
-                ["OAuth:AllowMockProvider"] = allowMockProvider.ToString().ToLowerInvariant()
-            }
+                {
+                    ["OAuth:AllowMockProvider"] = allowMockProvider.ToString().ToLowerInvariant()
+                }
             )
             .Build();
         var oauthProviderFactory = new OAuthProviderFactory(new ServiceCollection().BuildServiceProvider(), configuration);

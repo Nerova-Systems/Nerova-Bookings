@@ -4,7 +4,6 @@ using AppHost;
 using Azure.Storage.Blobs;
 using Microsoft.Extensions.Configuration;
 using Projects;
-using SharedKernel.Catalog;
 
 // Check for port conflicts before starting
 CheckPortAvailability();
@@ -35,22 +34,13 @@ var azureStorage = builder
         }
     )
     .WithAnnotation(new ContainerImageAnnotation
-    {
-        Registry = "mcr.microsoft.com",
-        Image = "azure-storage/azurite",
-        Tag = "latest"
-    }
+        {
+            Registry = "mcr.microsoft.com",
+            Image = "azure-storage/azurite",
+            Tag = "latest"
+        }
     )
     .AddBlobs("blobs");
-
-var messaging = builder
-    .AddAzureServiceBus("messaging")
-    .RunAsEmulator();
-
-foreach (var subscription in CatalogMessagingTopology.BackOfficeCatalogSubscriptions)
-{
-    messaging.AddServiceBusTopic(subscription.TopicName).AddServiceBusSubscription(subscription.BackOfficeSubscriptionName);
-}
 
 builder
     .AddContainer("mail-server", "axllent/mailpit")
@@ -73,7 +63,6 @@ var accountWorkers = builder
     .AddProject<Account_Workers>("account-workers")
     .WithReference(accountDatabase)
     .WithReference(azureStorage)
-    .WithReference(messaging)
     .WaitFor(accountDatabase);
 
 var accountApi = builder
@@ -81,7 +70,6 @@ var accountApi = builder
     .WithUrlConfiguration("/account")
     .WithReference(accountDatabase)
     .WithReference(azureStorage)
-    .WithReference(messaging)
     .WithEnvironment("OAuth__Google__ClientId", googleOAuthClientId)
     .WithEnvironment("OAuth__Google__ClientSecret", googleOAuthClientSecret)
     .WithEnvironment("OAuth__AllowMockProvider", "true")
@@ -102,7 +90,6 @@ var backOfficeWorkers = builder
     .AddProject<BackOffice_Workers>("back-office-workers")
     .WithReference(backOfficeDatabase)
     .WithReference(azureStorage)
-    .WithReference(messaging)
     .WaitFor(backOfficeDatabase);
 
 var backOfficeApi = builder
@@ -110,7 +97,6 @@ var backOfficeApi = builder
     .WithUrlConfiguration("/back-office")
     .WithReference(backOfficeDatabase)
     .WithReference(azureStorage)
-    .WithReference(messaging)
     .WaitFor(backOfficeWorkers);
 
 var mainDatabase = postgres

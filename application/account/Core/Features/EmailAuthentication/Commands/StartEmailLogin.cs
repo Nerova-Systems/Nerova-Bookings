@@ -29,7 +29,7 @@ public sealed class StartEmailLoginValidator : AbstractValidator<StartEmailLogin
 
 public sealed class StartEmailLoginHandler(
     IUserRepository userRepository,
-    ITransactionalEmailQueue emailQueue,
+    IEmailClient emailClient,
     StartEmailConfirmation startEmailConfirmation,
     ITelemetryEventsCollector events
 ) : IRequestHandler<StartEmailLoginCommand, Result<StartEmailLoginResponse>>
@@ -54,10 +54,8 @@ public sealed class StartEmailLoginHandler(
 
         if (user is null)
         {
-            await emailQueue.EnqueueAsync(command.Email.ToLower(), "Unknown user tried to login to PlatformPlatform",
+            await emailClient.SendAsync(command.Email.ToLower(), "Unknown user tried to login to PlatformPlatform",
                 UnknownUserEmailTemplate.Replace("{email}", command.Email),
-                TransactionalEmailTemplateKeys.UnknownLoginAttempt,
-                command.Email,
                 cancellationToken
             );
 
@@ -65,7 +63,7 @@ public sealed class StartEmailLoginHandler(
         }
 
         var result = await startEmailConfirmation.StartAsync(
-            user.Email, "PlatformPlatform login verification code", LoginEmailTemplate, TransactionalEmailTemplateKeys.LoginOtp, EmailLoginType.Login, cancellationToken
+            user.Email, "PlatformPlatform login verification code", LoginEmailTemplate, EmailLoginType.Login, cancellationToken
         );
 
         if (!result.IsSuccess) return Result<StartEmailLoginResponse>.From(result);

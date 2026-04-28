@@ -21,35 +21,23 @@ public sealed class GithubConfigCommand : Command
             "GOCSPX-xxxxxxxxxxxxxxxxxxxxxxxxxx",
             "Google OAuth"
         ),
-        ["PAYFAST_MERCHANT_ID"] = new GithubConfig(
-            "PayFast Merchant ID from the PayFast dashboard",
+        ["STRIPE_PUBLISHABLE_KEY"] = new GithubConfig(
+            "Stripe Publishable Key from the Stripe Dashboard API keys page",
             GithubType.Variable,
-            "10000100",
-            "PayFast"
+            "pk_test_xxx or pk_live_xxx",
+            "Stripe"
         ),
-        ["PAYFAST_MERCHANT_KEY"] = new GithubConfig(
-            "PayFast Merchant Key from the PayFast dashboard",
+        ["STRIPE_API_KEY"] = new GithubConfig(
+            "Stripe Secret Key from the Stripe Dashboard API keys page",
             GithubType.Secret,
-            "46f0cd694581a",
-            "PayFast"
+            "sk_test_xxx or sk_live_xxx",
+            "Stripe"
         ),
-        ["PAYFAST_PASSPHRASE"] = new GithubConfig(
-            "PayFast passphrase configured for the merchant account",
+        ["STRIPE_WEBHOOK_SECRET"] = new GithubConfig(
+            "Stripe Webhook Signing Secret from the Stripe Dashboard Webhooks page",
             GithubType.Secret,
-            "your-passphrase",
-            "PayFast"
-        ),
-        ["PAYFAST_SANDBOX"] = new GithubConfig(
-            "Set to true for PayFast sandbox mode, false for production",
-            GithubType.Variable,
-            "false",
-            "PayFast"
-        ),
-        ["PAYFAST_ALLOWED_IPS"] = new GithubConfig(
-            "Comma-separated PayFast ITN source IP allow-list; leave empty to use built-in defaults",
-            GithubType.Variable,
-            "197.97.145.144,197.97.145.145",
-            "PayFast"
+            "whsec_your_secret_here",
+            "Stripe"
         )
     };
 

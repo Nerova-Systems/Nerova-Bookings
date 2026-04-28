@@ -1,12 +1,13 @@
 import { trackInteraction } from "@repo/infrastructure/applicationInsights/ApplicationInsightsProvider";
-import { useSidebarSafe } from "@repo/ui/components/Sidebar";
+import { parseDateString } from "@repo/ui/components/DateRangePicker";
 import { useDebounce } from "@repo/ui/hooks/useDebounce";
+import { useSideMenuLayout } from "@repo/ui/hooks/useSideMenuLayout";
 import { useLocation, useNavigate } from "@tanstack/react-router";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import type { SearchParams } from "./userQueryingTypes";
 
-const THRESHOLD_FILTERS_EXPANDED_REM = 54;
+const THRESHOLD_FILTERS_EXPANDED_REM = 55.75;
 
 function getRemInPixels(): number {
   return parseFloat(getComputedStyle(document.documentElement).fontSize);
@@ -25,10 +26,7 @@ interface UseUserFiltersOptions {
 export function useUserFilters({ onFiltersUpdated, onFiltersExpandedChange }: UseUserFiltersOptions = {}) {
   const navigate = useNavigate();
   const searchParams = (useLocation().search as SearchParams) ?? {};
-  // The sidebar's mobile sheet overlays content; collapse expanded filters when it's open so they don't fight for space.
-  const sidebar = useSidebarSafe();
-  const isOverlayOpen = sidebar?.openMobile ?? false;
-  const isMobileMenuOpen = sidebar?.isMobile && sidebar.openMobile;
+  const { isOverlayOpen, isMobileMenuOpen } = useSideMenuLayout();
   const containerRef = useRef<HTMLDivElement>(null);
   const [search, setSearch] = useState(searchParams.search ?? "");
   const debouncedSearch = useDebounce(search, 500);
@@ -39,7 +37,7 @@ export function useUserFilters({ onFiltersUpdated, onFiltersExpandedChange }: Us
 
   const dateRange =
     searchParams.startDate && searchParams.endDate
-      ? { start: new Date(searchParams.startDate), end: new Date(searchParams.endDate) }
+      ? { start: parseDateString(searchParams.startDate), end: parseDateString(searchParams.endDate) }
       : null;
 
   const updateFilter = useCallback(

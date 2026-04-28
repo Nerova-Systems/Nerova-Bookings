@@ -8,7 +8,7 @@ namespace Account.Features.EmailAuthentication.Shared;
 
 public sealed class StartEmailConfirmation(
     IEmailLoginRepository emailLoginRepository,
-    ITransactionalEmailQueue emailQueue,
+    IEmailClient emailClient,
     IPasswordHasher<object> passwordHasher,
     TimeProvider timeProvider
 )
@@ -17,7 +17,6 @@ public sealed class StartEmailConfirmation(
         string email,
         string emailSubject,
         string emailBody,
-        string templateKey,
         EmailLoginType type,
         CancellationToken cancellationToken
     )
@@ -43,7 +42,7 @@ public sealed class StartEmailConfirmation(
         await emailLoginRepository.AddAsync(emailLogin, cancellationToken);
 
         var htmlContent = emailBody.Replace("{oneTimePassword}", oneTimePassword);
-        await emailQueue.EnqueueAsync(emailLogin.Email, emailSubject, htmlContent, templateKey, emailLogin.Id.Value, cancellationToken);
+        await emailClient.SendAsync(emailLogin.Email, emailSubject, htmlContent, cancellationToken);
 
         return emailLogin.Id;
     }

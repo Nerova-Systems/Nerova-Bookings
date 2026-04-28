@@ -3,7 +3,6 @@ using Account.Features.EmailAuthentication.Shared;
 using FluentValidation;
 using JetBrains.Annotations;
 using SharedKernel.Cqrs;
-using SharedKernel.Integrations.Email;
 using SharedKernel.Telemetry;
 using SharedKernel.Validation;
 
@@ -39,7 +38,6 @@ public sealed class StartEmailSignupHandler(StartEmailConfirmation startEmailCon
             <p style="text-align:center;font-family=sans-serif;font-size:16px">Enter it in your open browser window. It is only valid for a few minutes.</p>
             <p style="text-align:center;font-family=sans-serif;font-size:40px;background:#f5f4f5">{oneTimePassword}</p>
             """,
-            TransactionalEmailTemplateKeys.SignupOtp,
             EmailLoginType.Signup,
             cancellationToken
         );

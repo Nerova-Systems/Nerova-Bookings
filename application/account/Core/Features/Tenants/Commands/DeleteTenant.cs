@@ -1,10 +1,7 @@
-using Account.Features.Catalog;
 using Account.Features.Subscriptions.Domain;
 using Account.Features.Tenants.Domain;
 using JetBrains.Annotations;
-using MassTransit;
 using SharedKernel.Cqrs;
-using SharedKernel.Catalog;
 using SharedKernel.Domain;
 using SharedKernel.Telemetry;
 
@@ -13,7 +10,7 @@ namespace Account.Features.Tenants.Commands;
 [PublicAPI]
 public sealed record DeleteTenantCommand(TenantId Id) : ICommand, IRequest<Result>;
 
-public sealed class DeleteTenantHandler(ITenantRepository tenantRepository, ISubscriptionRepository subscriptionRepository, IPublishEndpoint publishEndpoint, ITelemetryEventsCollector events, TimeProvider timeProvider)
+public sealed class DeleteTenantHandler(ITenantRepository tenantRepository, ISubscriptionRepository subscriptionRepository, ITelemetryEventsCollector events)
     : IRequestHandler<DeleteTenantCommand, Result>
 {
     public async Task<Result> Handle(DeleteTenantCommand command, CancellationToken cancellationToken)
@@ -22,13 +19,12 @@ public sealed class DeleteTenantHandler(ITenantRepository tenantRepository, ISub
         if (tenant is null) return Result.NotFound($"Tenant with id '{command.Id}' not found.");
 
         var subscription = await subscriptionRepository.GetByTenantIdUnfilteredAsync(command.Id, cancellationToken);
-        if (subscription?.Status is SubscriptionStatus.Active or SubscriptionStatus.PastDue)
+        if (subscription?.HasActiveStripeSubscription() == true)
         {
             return Result.BadRequest("Cannot delete a tenant with an active subscription.");
         }
 
         tenantRepository.Remove(tenant);
-        await publishEndpoint.Publish(new TenantCatalogDeleted(tenant.Id, timeProvider.GetUtcNow()), cancellationToken);
 
         events.CollectEvent(new TenantDeleted(tenant.Id, tenant.State));
 

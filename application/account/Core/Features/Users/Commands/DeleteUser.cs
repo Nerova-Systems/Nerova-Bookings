@@ -1,8 +1,5 @@
-using Account.Features.Catalog;
 using Account.Features.Users.Domain;
 using JetBrains.Annotations;
-using MassTransit;
-using SharedKernel.Catalog;
 using SharedKernel.Cqrs;
 using SharedKernel.Domain;
 using SharedKernel.ExecutionContext;
@@ -13,7 +10,7 @@ namespace Account.Features.Users.Commands;
 [PublicAPI]
 public sealed record DeleteUserCommand(UserId Id) : ICommand, IRequest<Result>;
 
-public sealed class DeleteUserHandler(IUserRepository userRepository, IExecutionContext executionContext, IPublishEndpoint publishEndpoint, ITelemetryEventsCollector events, TimeProvider timeProvider)
+public sealed class DeleteUserHandler(IUserRepository userRepository, IExecutionContext executionContext, ITelemetryEventsCollector events)
     : IRequestHandler<DeleteUserCommand, Result>
 {
     public async Task<Result> Handle(DeleteUserCommand command, CancellationToken cancellationToken)
@@ -29,7 +26,6 @@ public sealed class DeleteUserHandler(IUserRepository userRepository, IExecution
         if (user is null) return Result.NotFound($"User with id '{command.Id}' not found.");
 
         userRepository.Remove(user);
-        await publishEndpoint.Publish(new UserCatalogDeleted(user.Id, user.TenantId, timeProvider.GetUtcNow()), cancellationToken);
         events.CollectEvent(new UserDeleted(user.Id));
 
         return Result.Success();

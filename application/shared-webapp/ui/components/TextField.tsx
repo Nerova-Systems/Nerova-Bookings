@@ -1,6 +1,8 @@
-import { useFieldError } from "../hooks/useFieldError";
+import { useContext } from "react";
+
 import { cn } from "../utils";
 import { Field, FieldDescription, FieldError, FieldLabel } from "./Field";
+import { FormValidationContext } from "./Form";
 import { Input } from "./Input";
 import { InputGroup, InputGroupAddon, InputGroupInput } from "./InputGroup";
 import { LabelWithTooltip } from "./LabelWithTooltip";
@@ -9,11 +11,14 @@ export interface TextFieldProps extends Omit<React.ComponentProps<"input">, "cla
   label?: string;
   description?: string;
   errorMessage?: string;
-  tooltip?: React.ReactNode;
+  tooltip?: string;
   className?: string;
   inputClassName?: string;
   startIcon?: React.ReactNode;
   onChange?: (value: string) => void;
+  isRequired?: boolean;
+  isDisabled?: boolean;
+  isReadOnly?: boolean;
 }
 
 export function TextField({
@@ -29,15 +34,26 @@ export function TextField({
   value,
   onChange,
   autoFocus,
-  required,
-  disabled,
-  readOnly,
+  isRequired,
+  isDisabled,
+  isReadOnly,
   ...props
 }: Readonly<TextFieldProps>) {
-  const { errors, isInvalid, markChanged, clearOnBlur } = useFieldError({ name, errorMessage });
+  const formErrors = useContext(FormValidationContext);
+  const fieldValidationErrors = name && formErrors && name in formErrors ? formErrors[name] : undefined;
+  const fieldErrorMessages = fieldValidationErrors
+    ? Array.isArray(fieldValidationErrors)
+      ? fieldValidationErrors
+      : [fieldValidationErrors]
+    : [];
+  const errors = errorMessage
+    ? [{ message: errorMessage }]
+    : fieldErrorMessages.length > 0
+      ? fieldErrorMessages.map((err) => ({ message: err }))
+      : undefined;
+  const isInvalid = errors && errors.length > 0;
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    markChanged();
     onChange?.(e.target.value);
   };
 
@@ -47,11 +63,10 @@ export function TextField({
     type,
     value,
     onChange: handleChange,
-    onBlur: clearOnBlur,
     autoFocus,
-    required,
-    disabled,
-    readOnly,
+    required: isRequired,
+    disabled: isDisabled,
+    readOnly: isReadOnly,
     "aria-invalid": isInvalid || undefined,
     ...props
   };
@@ -64,7 +79,7 @@ export function TextField({
         </FieldLabel>
       )}
       {startIcon ? (
-        <InputGroup data-disabled={disabled || undefined}>
+        <InputGroup>
           <InputGroupAddon>{startIcon}</InputGroupAddon>
           <InputGroupInput className={inputClassName} {...inputProps} />
         </InputGroup>

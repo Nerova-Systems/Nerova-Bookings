@@ -86,7 +86,7 @@ public abstract class EndpointBaseTest<TContext> : IDisposable where TContext : 
         Services.AddScoped<IEmailClient>(_ => EmailClient);
 
         PayFastClient = Substitute.For<IPayFastClient>();
-        PayFastClient.ProcessOnsitePaymentAsync(Arg.Any<SortedDictionary<string, string>>(), Arg.Any<CancellationToken>()).Returns("test-uuid");
+        PayFastClient.ProcessOnsitePaymentAsync(Arg.Any<IDictionary<string, string>>(), Arg.Any<CancellationToken>()).Returns("test-uuid");
         PayFastClient.ChargeTokenAsync(Arg.Any<string>(), Arg.Any<decimal>(), Arg.Any<string>(), Arg.Any<CancellationToken>()).Returns(true);
         PayFastClient.CancelSubscriptionAsync(Arg.Any<string>(), Arg.Any<CancellationToken>()).Returns(true);
         PayFastClient.FetchSubscriptionAsync(Arg.Any<string>(), Arg.Any<CancellationToken>())

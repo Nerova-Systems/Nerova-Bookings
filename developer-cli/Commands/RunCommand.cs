@@ -6,48 +6,75 @@ using Spectre.Console;
 namespace DeveloperCli.Commands;
 
 /// <summary>
-///     Command to start the Aspire AppHost. Use <c>restart</c> to start a fresh instance or <c>stop</c> to stop it.
+///     Command to manage Aspire AppHost lifecycle - start, stop, and monitor the application host.
 /// </summary>
 public class RunCommand : Command
 {
-    internal const int AspirePort = 9001;
-    internal const int DashboardPort = 9097;
-    internal const int ResourceServicePort = 9098;
+    private const int AspirePort = 9001;
+    private const int DashboardPort = 9097;
+    private const int ResourceServicePort = 9098;
 
     public RunCommand() : base("run", "Runs Aspire AppHost (use --watch for hot reload)")
     {
         var watchOption = new Option<bool>("--watch", "-w") { Description = "Enable watch mode for hot reload" };
-        var attachOption = new Option<bool>("--attach", "-a") { Description = "Keep the CLI process attached to the Aspire process (detached is the default)" };
+        var forceOption = new Option<bool>("--force") { Description = "Force start a fresh Aspire AppHost instance, stopping any existing one" };
+        var stopOption = new Option<bool>("--stop") { Description = "Stop any running Aspire AppHost instance without starting a new one" };
+        var attachOption = new Option<bool>("--attach", "-a") { Description = "Keep the CLI process attached to the Aspire process" };
+        var detachOption = new Option<bool>("--detach", "-d") { Description = "Run the Aspire process in detached mode (background)" };
         var publicUrlOption = new Option<string?>("--public-url") { Description = "Set the PUBLIC_URL environment variable for the app (e.g., https://example.ngrok-free.app)" };
 
         Options.Add(watchOption);
+        Options.Add(forceOption);
+        Options.Add(stopOption);
         Options.Add(attachOption);
+        Options.Add(detachOption);
         Options.Add(publicUrlOption);
 
         SetAction(parseResult => Execute(
                 parseResult.GetValue(watchOption),
+                parseResult.GetValue(forceOption),
+                parseResult.GetValue(stopOption),
                 parseResult.GetValue(attachOption),
+                parseResult.GetValue(detachOption),
                 parseResult.GetValue(publicUrlOption)
             )
         );
     }
 
-    private static void Execute(bool watch, bool attach, string? publicUrl)
+    private static void Execute(bool watch, bool force, bool stop, bool attach, bool detach, string? publicUrl)
     {
         Prerequisite.Ensure(Prerequisite.Dotnet, Prerequisite.Node, Prerequisite.Docker);
 
-        if (IsAspireRunning())
+        var isRunning = IsAspireRunning();
+
+        if (stop)
         {
-            AnsiConsole.MarkupLine($"[yellow]Aspire AppHost is already running on port {AspirePort}. Run 'pp stop' to stop it or 'pp restart' to start a fresh instance.[/]");
+            StopAspire();
+            return;
+        }
+
+        // Validate that either --attach or --detach is specified (but not both)
+        if (attach == detach)
+        {
+            AnsiConsole.MarkupLine("[red]You must specify either --attach (-a) or --detach (-d) mode.[/]");
             Environment.Exit(1);
         }
 
-        CheckForPortConflicts();
+        if (isRunning)
+        {
+            if (!force)
+            {
+                AnsiConsole.MarkupLine($"[yellow]Aspire AppHost is already running on port {AspirePort}. Use --force to force a fresh start or --stop to stop it.[/]");
+                Environment.Exit(1);
+            }
+
+            StopAspire();
+        }
 
         StartAspireAppHost(watch, attach, publicUrl);
     }
 
-    internal static bool IsAspireRunning()
+    private static bool IsAspireRunning()
     {
         // Check the main Aspire port
         if (Configuration.IsWindows)
@@ -99,56 +126,7 @@ public class RunCommand : Command
         return false;
     }
 
-    internal static void CheckForPortConflicts()
-    {
-        // Check if any Aspire port is held by a process from a different project
-        var ports = new[] { AspirePort, DashboardPort, ResourceServicePort };
-        var conflictSource = ports
-            .SelectMany(GetListeningProcessCommandLines)
-            .Select(FindProjectRoot)
-            .FirstOrDefault(root => root is not null);
-
-        if (conflictSource is null) return;
-
-        AnsiConsole.MarkupLine($"[red]Aspire ports are in use by another project: {conflictSource}[/]");
-        AnsiConsole.MarkupLine("[red]Stop that instance first, then try again.[/]");
-        Environment.Exit(1);
-    }
-
-    private static string[] GetListeningProcessCommandLines(int port)
-    {
-        if (Configuration.IsWindows)
-        {
-            var output = ProcessHelper.StartProcess($"""powershell -Command "Get-NetTCPConnection -LocalPort {port} -State Listen -ErrorAction SilentlyContinue | Select-Object -First 1 -ExpandProperty OwningProcess" """, redirectOutput: true, exitOnError: false).Trim();
-            if (string.IsNullOrWhiteSpace(output)) return [];
-
-            var commandLine = ProcessHelper.StartProcess($"""powershell -Command "(Get-Process -Id {output} -ErrorAction SilentlyContinue).CommandLine" """, redirectOutput: true, exitOnError: false).Trim();
-            return string.IsNullOrWhiteSpace(commandLine) ? [] : [commandLine];
-        }
-
-        var processIds = ProcessHelper.StartProcess($"lsof -i :{port} -sTCP:LISTEN -t", redirectOutput: true, exitOnError: false).Trim();
-        if (string.IsNullOrWhiteSpace(processIds)) return [];
-
-        return processIds
-            .Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
-            .Select(id => ProcessHelper.StartProcess($"ps -p {id} -o args=", redirectOutput: true, exitOnError: false).Trim())
-            .Where(args => !string.IsNullOrWhiteSpace(args))
-            .ToArray();
-    }
-
-    private static string? FindProjectRoot(string commandLine)
-    {
-        // Command lines contain paths like .../SomeProject/application/AppHost/...
-        var separator = commandLine.Contains('\\') ? "\\" : "/";
-        var marker = $"{separator}application{separator}";
-        var index = commandLine.IndexOf(marker, StringComparison.OrdinalIgnoreCase);
-        if (index == -1) return null;
-
-        var pathStart = commandLine.LastIndexOf(' ', index) + 1;
-        return commandLine[pathStart..index];
-    }
-
-    internal static void StopAspire()
+    private static void StopAspire()
     {
         AnsiConsole.MarkupLine("[blue]Stopping Aspire AppHost and all related services...[/]");
 
@@ -174,7 +152,7 @@ public class RunCommand : Command
                     var pid = parts[^1];
                     if (!processedPids.Add(pid)) continue;
 
-                    var processName = ProcessHelper.StartProcess($"""powershell -NoProfile -Command "(Get-Process -Id {pid} -ErrorAction SilentlyContinue).Name" """, redirectOutput: true, exitOnError: false);
+                    var processName = ProcessHelper.StartProcess($"""wmic process where ProcessId={pid} get Name /format:list""", redirectOutput: true, exitOnError: false);
 
                     if (processName.Contains("dotnet", StringComparison.OrdinalIgnoreCase) ||
                         processName.Contains("rsbuild-node", StringComparison.OrdinalIgnoreCase))
@@ -190,23 +168,24 @@ public class RunCommand : Command
             {
                 ProcessHelper.StartProcess($"taskkill /F /IM {processName}.exe", redirectOutput: true, exitOnError: false);
             }
-
-            // Kill any orphan cmd.exe that still holds the apphost log file open. When `dotnet run` is
-            // started via `cmd /c "... > apphost.log 2>&1"`, killing dotnet leaves the parent cmd alive
-            // with the log file still open, which causes the next `pp restart` to fail to delete the log.
-            ProcessHelper.StartProcess(
-                """powershell -NoProfile -Command "Get-CimInstance Win32_Process -Filter \"Name='cmd.exe'\" | Where-Object { $_.CommandLine -like '*aspire-apphost.log*' } | ForEach-Object { Stop-Process -Id $_.ProcessId -Force -ErrorAction SilentlyContinue }" """,
-                redirectOutput: true,
-                exitOnError: false
-            );
         }
         else
         {
-            // Find AppHost processes for this project, then kill each one and all its children
-            // (children include Aspire infrastructure: dcp, dcpproc, Aspire.Dashboard, etc.)
-            foreach (var processId in FindAppHostProcesses())
+            // Kill all processes on ports 9000-9999 that belong to our application
+            var pidsOutput = ProcessHelper.StartProcess("lsof -i :9000-9999 -sTCP:LISTEN -t", redirectOutput: true, exitOnError: false);
+            if (!string.IsNullOrWhiteSpace(pidsOutput))
             {
-                KillProcessTree(processId);
+                foreach (var pid in pidsOutput.Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+                {
+                    // Use full command line (args) since comm= truncates names on Linux
+                    var commandLine = ProcessHelper.StartProcess($"ps -p {pid} -o args=", redirectOutput: true, exitOnError: false).Trim();
+                    if (string.IsNullOrWhiteSpace(commandLine)) continue;
+
+                    if (commandLine.Contains(Configuration.SourceCodeFolder, StringComparison.OrdinalIgnoreCase))
+                    {
+                        ProcessHelper.StartProcess($"kill -9 {pid}", redirectOutput: true, exitOnError: false);
+                    }
+                }
             }
         }
 
@@ -216,37 +195,7 @@ public class RunCommand : Command
         AnsiConsole.MarkupLine("[green]Aspire AppHost stopped successfully.[/]");
     }
 
-    private static string[] FindAppHostProcesses()
-    {
-        var output = ProcessHelper.StartProcess("pgrep -f dotnet.*AppHost", redirectOutput: true, exitOnError: false);
-        if (string.IsNullOrWhiteSpace(output)) return [];
-
-        return output
-            .Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
-            .Where(processId =>
-                {
-                    var commandLine = ProcessHelper.StartProcess($"ps -p {processId} -o args=", redirectOutput: true, exitOnError: false).Trim();
-                    return commandLine.Contains(Configuration.SourceCodeFolder, StringComparison.OrdinalIgnoreCase);
-                }
-            )
-            .ToArray();
-    }
-
-    private static void KillProcessTree(string processId)
-    {
-        var children = ProcessHelper.StartProcess($"pgrep -P {processId}", redirectOutput: true, exitOnError: false);
-        if (!string.IsNullOrWhiteSpace(children))
-        {
-            foreach (var childId in children.Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
-            {
-                KillProcessTree(childId);
-            }
-        }
-
-        ProcessHelper.StartProcess($"kill -9 {processId}", redirectOutput: true, exitOnError: false);
-    }
-
-    internal static void StartAspireAppHost(bool watch, bool attach, string? publicUrl)
+    private static void StartAspireAppHost(bool watch, bool attach, string? publicUrl)
     {
         var mode = watch ? "watch" : "run";
         AnsiConsole.MarkupLine($"[blue]Starting Aspire AppHost in {mode} mode ({(attach ? "attached" : "detached")})...[/]");
@@ -268,82 +217,32 @@ public class RunCommand : Command
             ? $"dotnet watch --non-interactive --project {appHostProjectPath}"
             : $"dotnet run --project {appHostProjectPath}";
 
-        if (attach)
+        if (!attach && Configuration.IsWindows)
         {
-            if (publicUrl is not null)
-            {
-                ProcessHelper.StartProcess(command, Configuration.ApplicationFolder, waitForExit: true, environmentVariables: ("PUBLIC_URL", publicUrl));
-            }
-            else
-            {
-                ProcessHelper.StartProcess(command, Configuration.ApplicationFolder, waitForExit: true);
-            }
+            // For Windows in detached mode, use "start" command to truly detach
+            var detachedCommand = $"cmd /c start \"Aspire AppHost\" /min {command}";
+            ProcessHelper.StartProcess(
+                publicUrl is not null ? $"{detachedCommand} --environment PUBLIC_URL={publicUrl}" : detachedCommand,
+                Configuration.ApplicationFolder,
+                waitForExit: false
+            );
 
-            return;
-        }
-
-        var logPath = Path.Combine(Configuration.WorkspaceFolder, "developer-cli", "aspire-apphost.log");
-        Directory.CreateDirectory(Path.GetDirectoryName(logPath)!);
-        if (File.Exists(logPath)) File.Delete(logPath);
-
-        var detachedCommand = Configuration.IsWindows
-            ? $"cmd /c start \"\" /min cmd /c \"{command} > \"{logPath}\" 2>&1\""
-            : Configuration.IsMacOs
-                ? $"sh -c \"script -q -t 0 '{logPath}' {command} > /dev/null 2>&1 &\""
-                : $"sh -c \"script -q -f -c '{command}' '{logPath}' > /dev/null 2>&1 &\"";
-
-        if (publicUrl is not null)
-        {
-            ProcessHelper.StartProcess(detachedCommand, Configuration.ApplicationFolder, waitForExit: false, environmentVariables: ("PUBLIC_URL", publicUrl));
+            // Give it a moment to start
+            Thread.Sleep(2000);
+            AnsiConsole.MarkupLine("[green]Aspire AppHost started in detached mode.[/]");
         }
         else
         {
-            ProcessHelper.StartProcess(detachedCommand, Configuration.ApplicationFolder, waitForExit: false);
-        }
-
-        TailLogUntilReady(logPath);
-    }
-
-    private static void TailLogUntilReady(string logPath)
-    {
-        const string readyMarker = "Distributed application started.";
-        const string misleadingShutdownHint = " Press Ctrl+C to shut down.";
-        var deadline = DateTime.UtcNow.AddSeconds(60);
-        var offset = 0L;
-        var sawFirstLine = false;
-
-        AnsiConsole.MarkupLine("[dim]Waiting for AppHost output...[/]");
-
-        while (DateTime.UtcNow < deadline)
-        {
-            if (File.Exists(logPath))
+            // Attached mode or non-Windows
+            if (publicUrl is not null)
             {
-                using var stream = new FileStream(logPath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
-                stream.Seek(offset, SeekOrigin.Begin);
-                using var reader = new StreamReader(stream);
-
-                while (reader.ReadLine() is { } line)
-                {
-                    sawFirstLine = true;
-                    var displayLine = line.Replace(misleadingShutdownHint, "").TrimEnd();
-                    AnsiConsole.WriteLine(displayLine);
-
-                    if (line.Contains(readyMarker))
-                    {
-                        AnsiConsole.MarkupLine("[green]Aspire AppHost is ready.[/]");
-                        AnsiConsole.MarkupLine($"[dim]Stop with:[/] [yellow]{Configuration.AliasName} stop[/]");
-                        AnsiConsole.MarkupLine($"[dim]Logs:[/] {logPath}");
-                        return;
-                    }
-                }
-
-                offset = stream.Position;
+                ProcessHelper.StartProcess(command, Configuration.ApplicationFolder, waitForExit: attach, environmentVariables: ("PUBLIC_URL", publicUrl));
             }
-
-            Thread.Sleep(sawFirstLine ? 100 : 300);
+            else
+            {
+                ProcessHelper.StartProcess(command, Configuration.ApplicationFolder, waitForExit: attach);
+            }
         }
-
-        AnsiConsole.MarkupLine($"[yellow]Aspire did not report ready within 60s. Check {logPath}[/]");
     }
 
     private static void StartNgrokIfNeeded(string publicUrl)

@@ -16,7 +16,6 @@ import {
 import { cn } from "../utils";
 import { Button } from "./Button";
 import { DirtyDialogContext } from "./DirtyDialogContext";
-import { FormValidationContext, type ValidationErrors } from "./Form";
 
 type WindowWithTracking = {
   __trackInteraction?: (name: string, type: string, action: string, extraProperties?: Record<string, string>) => void;
@@ -100,6 +99,9 @@ function DialogPortal({ ...props }: DialogPrimitive.Portal.Props) {
   return <DialogPrimitive.Portal data-slot="dialog-portal" {...props} />;
 }
 
+// NOTE: This diverges from stock ShadCN to integrate with DirtyDialog.
+// When inside a DirtyDialog and the rendered element has type="reset",
+// the cancel button bypasses the unsaved changes warning.
 function DialogClose({ render, children, ...props }: DialogPrimitive.Close.Props) {
   const dirtyDialogContext = useContext(DirtyDialogContext);
   const trackingContext = useContext(DialogTrackingContext);
@@ -136,6 +138,8 @@ function DialogOverlay({ className, ...props }: DialogPrimitive.Backdrop.Props) 
   );
 }
 
+// NOTE: This diverges from stock ShadCN for mobile full-screen dialogs with scrollable content.
+// Mobile: full-screen (top-0, h-dvh), Desktop: centered modal (sm:top-1/2, sm:-translate-y-1/2).
 function DialogContent({
   className,
   children,
@@ -172,48 +176,12 @@ function DialogContent({
   );
 }
 
-type FormSubmitHandler = NonNullable<React.ComponentProps<"form">["onSubmit"]>;
-
-type DialogFormProps = Omit<React.ComponentProps<"form">, "onSubmit"> & {
-  onSubmit?: FormSubmitHandler;
-  validationErrors?: ValidationErrors;
-  validationBehavior?: "aria" | "native";
-};
-
-function DialogForm({
-  onSubmit,
-  validationErrors,
-  validationBehavior = "aria",
-  className,
-  children,
-  ...props
-}: DialogFormProps) {
-  const handleSubmit: FormSubmitHandler = (event) => {
-    if (validationBehavior === "aria") {
-      event.preventDefault();
-    }
-    onSubmit?.(event);
-  };
-
-  return (
-    <FormValidationContext.Provider value={validationErrors ?? {}}>
-      <form
-        data-slot="dialog-form"
-        {...props}
-        className={cn("flex min-h-0 flex-1 flex-col", className)}
-        onSubmit={handleSubmit}
-        noValidate={validationBehavior === "aria"}
-      >
-        {children}
-      </form>
-    </FormValidationContext.Provider>
-  );
-}
-
 function DialogHeader({ className, ...props }: React.ComponentProps<"div">) {
   return <div data-slot="dialog-header" className={cn("flex flex-col gap-2", className)} {...props} />;
 }
 
+// NOTE: This diverges from stock ShadCN to add padding for focus ring visibility.
+// The overflow-y-auto clips focus rings, so p-1 -m-1 provides space for the 3px ring.
 function DialogBody({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
@@ -247,6 +215,8 @@ function DialogFooter({
   );
 }
 
+// NOTE: This diverges from stock ShadCN to add top margin.
+// Removed mt-6 from global h2 styles, so DialogTitle (which is an h2) needs explicit top margin.
 function DialogTitle({ className, ...props }: DialogPrimitive.Title.Props) {
   return (
     <DialogPrimitive.Title
@@ -277,7 +247,6 @@ export {
   DialogContent,
   DialogDescription,
   DialogFooter,
-  DialogForm,
   DialogHeader,
   DialogOverlay,
   DialogPortal,

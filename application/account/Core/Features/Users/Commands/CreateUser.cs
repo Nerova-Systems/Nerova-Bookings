@@ -1,9 +1,7 @@
-using Account.Features.Catalog;
 using Account.Features.Users.Domain;
 using Account.Features.Users.Shared;
 using Account.Integrations.Gravatar;
 using FluentValidation;
-using MassTransit;
 using SharedKernel.Cqrs;
 using SharedKernel.Domain;
 using SharedKernel.ExecutionContext;
@@ -32,8 +30,7 @@ internal sealed class CreateUserHandler(
     AvatarUpdater avatarUpdater,
     GravatarClient gravatarClient,
     ITelemetryEventsCollector events,
-    IExecutionContext executionContext,
-    IPublishEndpoint publishEndpoint
+    IExecutionContext executionContext
 ) : IRequestHandler<CreateUserCommand, Result<UserId>>
 {
     public async Task<Result<UserId>> Handle(CreateUserCommand command, CancellationToken cancellationToken)
@@ -61,7 +58,6 @@ internal sealed class CreateUserHandler(
             events.CollectEvent(new GravatarUpdated(gravatar.Stream.Length));
         }
 
-        await publishEndpoint.Publish(CatalogEventFactory.UserUpserted(user), cancellationToken);
         events.CollectEvent(new UserCreated(user.Id, user.Avatar.IsGravatar));
 
         return user.Id;

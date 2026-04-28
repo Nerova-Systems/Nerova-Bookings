@@ -44,9 +44,9 @@ export function isNotFoundError(error: unknown): error is NotFoundError {
 }
 
 /**
- * Require subscription/billing to be enabled (payment processor configured).
+ * Require subscription/billing to be enabled (Stripe configured).
  * Throws NotFoundError if subscription is not enabled.
- * Use this in beforeLoad to hide subscription routes when payment processing is not configured.
+ * Use this in beforeLoad to hide subscription routes when Stripe is not configured.
  */
 export function requireSubscriptionEnabled(): void {
   if (import.meta.runtime_env.PUBLIC_SUBSCRIPTION_ENABLED !== "true") {

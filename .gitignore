@@ -425,11 +425,5 @@ playwright-report/
 # PlatformPlatform agent workspace
 .workspace
 
-# Nerova agent session artifacts
-.agents-work/
-
 # Generated Playwright combined config (created by pp e2e)
 application/playwright.combined.config.ts
-
-# Claude Code scheduled-tasks runtime lock
-.claude/scheduled_tasks.lock

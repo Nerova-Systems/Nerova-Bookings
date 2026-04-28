@@ -27,7 +27,7 @@ public sealed class InitiateSubscriptionTests : EndpointBaseTest<AccountDbContex
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var result = await response.Content.ReadFromJsonAsync<InitiateSubscriptionResponse>();
         result!.Uuid.Should().Be("test-uuid");
-        await PayFastClient.Received(1).ProcessOnsitePaymentAsync(Arg.Any<SortedDictionary<string, string>>(), Arg.Any<CancellationToken>());
+        await PayFastClient.Received(1).ProcessOnsitePaymentAsync(Arg.Any<IDictionary<string, string>>(), Arg.Any<CancellationToken>());
         TelemetryEventsCollectorSpy.CollectedEvents.Count.Should().Be(1);
         TelemetryEventsCollectorSpy.CollectedEvents[0].GetType().Name.Should().Be("SubscriptionCheckoutStarted");
     }
@@ -100,7 +100,7 @@ public sealed class InitiateSubscriptionTests : EndpointBaseTest<AccountDbContex
     public async Task InitiateSubscription_WhenPayFastFails_ShouldReturnBadRequest()
     {
         // Arrange
-        PayFastClient.ProcessOnsitePaymentAsync(Arg.Any<SortedDictionary<string, string>>(), Arg.Any<CancellationToken>()).Returns((string?)null);
+        PayFastClient.ProcessOnsitePaymentAsync(Arg.Any<IDictionary<string, string>>(), Arg.Any<CancellationToken>()).Returns((string?)null);
         var command = new InitiateSubscriptionCommand(SubscriptionPlan.Starter);
 
         // Act

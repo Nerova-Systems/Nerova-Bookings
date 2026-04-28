@@ -13,13 +13,6 @@ builder
 
 // Configure dependency injection services like Repositories, MediatR, Pipelines, FluentValidation validators, etc.
 builder.Services
-    .AddSharedMassTransit<BackOfficeDbContext>(
-        builder.Configuration,
-        builder.Environment,
-        [BackOffice.Configuration.Assembly],
-        addConsumers: true,
-        enableOutboxDelivery: true
-    )
     .AddWorkerServices()
     .AddBackOfficeServices();
 

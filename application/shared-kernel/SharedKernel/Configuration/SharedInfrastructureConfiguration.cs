@@ -70,10 +70,10 @@ public static class SharedInfrastructureConfiguration
                 var secretClient = new SecretClient(keyVaultUri, DefaultAzureCredential);
 
                 builder.Configuration.AddAzureKeyVault(secretClient, new AzureKeyVaultConfigurationOptions
-                {
-                    Manager = new KeyVaultSecretManager(),
-                    ReloadInterval = TimeSpan.FromMinutes(1)
-                }
+                    {
+                        Manager = new KeyVaultSecretManager(),
+                        ReloadInterval = TimeSpan.FromMinutes(1)
+                    }
                 );
             }
 
@@ -172,12 +172,12 @@ public static class SharedInfrastructureConfiguration
                     {
                         var requestPath = httpContext.Request.Path.ToString();
 
-                        if (EndpointTelemetryFilter.ExcludedPaths.Any(requestPath.StartsWith))
+                        if (EndpointTelemetryFilter.ExcludedPaths.Any(excludePath => requestPath.StartsWith(excludePath)))
                         {
                             return false;
                         }
 
-                        if (EndpointTelemetryFilter.ExcludedFileExtensions.Any(requestPath.EndsWith))
+                        if (EndpointTelemetryFilter.ExcludedFileExtensions.Any(excludeExtension => requestPath.EndsWith(excludeExtension)))
                         {
                             return false;
                         }

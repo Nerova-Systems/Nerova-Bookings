@@ -5,8 +5,10 @@ import { cva, type VariantProps } from "class-variance-authority";
 
 import { cn } from "../utils";
 
+// NOTE: Button-styled variants (button-primary, button-secondary, button-destructive) diverge from stock ShadCN Link
+// to include active backgrounds for press feedback, matching the Button component.
 const linkVariants = cva(
-  "inline-flex cursor-pointer items-center justify-center gap-2 rounded-md px-1 py-0.5 text-sm font-medium whitespace-nowrap outline-0 transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2",
+  "inline-flex cursor-pointer items-center justify-center gap-2 rounded-md px-1 py-0.5 font-medium whitespace-nowrap outline-0 transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2",
   {
     variants: {
       variant: {
@@ -15,14 +17,14 @@ const linkVariants = cva(
         destructive: "text-destructive outline-ring hover:text-destructive/90",
         ghost: "text-accent-foreground outline-ring hover:bg-hover-background hover:text-accent-foreground/90",
         logo: "p-0 outline-ring hover:bg-transparent",
-        icon: "size-[var(--control-height)] rounded-lg bg-background/50 text-muted-foreground outline-ring hover:bg-background hover:text-foreground",
+        icon: "size-10 rounded-lg bg-background/50 text-muted-foreground outline-ring hover:bg-background hover:text-foreground",
         button: "outline-ring",
         "button-primary":
-          "h-[var(--control-height)] bg-primary px-6 text-primary-foreground outline-primary hover:bg-primary/90 active:bg-primary/80 max-sm:w-full",
+          "h-[var(--control-height)] bg-primary px-2.5 text-primary-foreground outline-primary hover:bg-primary/90 active:bg-primary/80",
         "button-secondary":
-          "h-[var(--control-height)] border border-border bg-background px-6 text-foreground outline-ring hover:bg-hover-background active:bg-accent max-sm:w-full",
+          "h-[var(--control-height)] border border-border bg-background px-2.5 text-foreground outline-ring hover:bg-hover-background active:bg-accent",
         "button-destructive":
-          "h-[var(--control-height)] bg-destructive px-6 text-destructive-foreground outline-destructive hover:bg-destructive/90 active:bg-destructive/80 max-sm:w-full"
+          "h-[var(--control-height)] bg-destructive px-2.5 text-destructive-foreground outline-destructive hover:bg-destructive/90 active:bg-destructive/80"
       },
       underline: {
         true: "underline",
@@ -30,9 +32,9 @@ const linkVariants = cva(
         false: "no-underline"
       },
       size: {
-        sm: "text-xs",
-        md: "text-sm",
-        lg: "text-base"
+        md: "text-base",
+        sm: "text-sm",
+        lg: "text-lg"
       },
       disabled: {
         true: "pointer-events-none opacity-50"
@@ -84,10 +86,6 @@ function isExternalLink(href: string): boolean {
   return href.startsWith("http://") || href.startsWith("https://") || href.startsWith("mailto:");
 }
 
-function isHashLink(href: string): boolean {
-  return href.startsWith("#");
-}
-
 export function Link({
   href,
   children,
@@ -121,6 +119,8 @@ export function Link({
     return (
       <button
         type="button"
+        // oxlint-disable-next-line jsx-a11y/prefer-tag-over-role -- Button with role="link" is intentional for click-only links
+        role="link"
         className={linkClassName}
         onClick={onClick as (event: MouseEvent<HTMLButtonElement>) => void}
         {...props}
@@ -138,23 +138,6 @@ export function Link({
         className={linkClassName}
         target={target ?? "_blank"}
         rel={rel ?? "noopener noreferrer"}
-        onClick={onClick as (event: MouseEvent<HTMLAnchorElement>) => void}
-        aria-current={ariaCurrent}
-        aria-label={ariaLabel}
-      >
-        {children}
-      </a>
-    );
-  }
-
-  // In-page hash anchors (skip links, scroll targets) need native browser navigation,
-  // not TanStack Router — routing #foo would treat it as a path segment.
-  if (isHashLink(href)) {
-    const { "aria-current": ariaCurrent, "aria-label": ariaLabel } = props as InternalLinkProps;
-    return (
-      <a
-        href={href}
-        className={linkClassName}
         onClick={onClick as (event: MouseEvent<HTMLAnchorElement>) => void}
         aria-current={ariaCurrent}
         aria-label={ariaLabel}

@@ -2,34 +2,21 @@ import type * as React from "react";
 
 import { mergeProps } from "@base-ui/react/merge-props";
 import { useRender } from "@base-ui/react/use-render";
-import { t } from "@lingui/core/macro";
 import { ChevronRightIcon, MoreHorizontalIcon } from "lucide-react";
 import { Children, isValidElement, useEffect, useLayoutEffect, useRef, useState } from "react";
 
 import { cn } from "../utils";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "./DropdownMenu";
 
 function Breadcrumb({ className, ...props }: React.ComponentProps<"nav">) {
-  return <nav aria-label={t`Breadcrumb`} data-slot="breadcrumb" className={cn(className)} {...props} />;
+  return <nav aria-label="breadcrumb" data-slot="breadcrumb" className={cn(className)} {...props} />;
 }
 
-type BreadcrumbListProps = React.ComponentProps<"ol"> & {
-  separator?: React.ReactNode;
-};
-
-function BreadcrumbList({ className, children, separator, ...props }: BreadcrumbListProps) {
+function BreadcrumbList({ className, children, ...props }: React.ComponentProps<"ol">) {
   const listRef = useRef<HTMLOListElement>(null);
 
-  const childArray = Children.toArray(children).filter(isValidElement);
-  const items = childArray
-    .filter((child) => child.type !== BreadcrumbSeparator)
+  const items = Children.toArray(children)
+    .filter(isValidElement)
     .map((child) => (child.type === BreadcrumbItem ? child : <BreadcrumbItem key={child.key}>{child}</BreadcrumbItem>));
-  const customSeparator = childArray.find((child) => child.type === BreadcrumbSeparator) as
-    | React.ReactElement
-    | undefined;
-  const separatorContent =
-    separator ?? (customSeparator ? (customSeparator.props as { children?: React.ReactNode }).children : undefined);
-  const renderSeparator = (key: string) => <BreadcrumbSeparator key={key}>{separatorContent}</BreadcrumbSeparator>;
 
   const itemCount = items.length;
   const hasMiddleItems = itemCount > 2;
@@ -84,16 +71,6 @@ function BreadcrumbList({ className, children, separator, ...props }: Breadcrumb
   const showMiddleItems = collapseLevel === 0 && hasMiddleItems;
   const showEllipsis = collapseLevel > 0 && itemCount > 1;
 
-  const hiddenItems: React.ReactElement[] = [];
-  if (showEllipsis) {
-    if (!showFirstItem) {
-      hiddenItems.push(items[0] as React.ReactElement);
-    }
-    for (let i = 1; i < items.length - 1; i++) {
-      hiddenItems.push(items[i] as React.ReactElement);
-    }
-  }
-
   const rendered: React.ReactNode[] = [];
 
   if (items.length <= 1) {
@@ -101,32 +78,23 @@ function BreadcrumbList({ className, children, separator, ...props }: Breadcrumb
   } else {
     if (showFirstItem) {
       rendered.push(items[0]);
-      rendered.push(renderSeparator("__sep-0"));
+      rendered.push(<BreadcrumbSeparator key="__sep-0" />);
     }
 
     if (showMiddleItems) {
       for (let i = 1; i < items.length - 1; i++) {
         rendered.push(items[i]);
-        rendered.push(renderSeparator(`__sep-${i}`));
+        rendered.push(<BreadcrumbSeparator key={`__sep-${i}`} />);
       }
     }
 
     if (showEllipsis) {
       rendered.push(
         <BreadcrumbItem key="__ellipsis">
-          <DropdownMenu>
-            <DropdownMenuTrigger render={<BreadcrumbEllipsis aria-label={t`Show more`} />} />
-            <DropdownMenuContent align="start">
-              {hiddenItems.map((item, index) => (
-                <DropdownMenuItem key={item.key ?? index}>
-                  {(item.props as { children?: React.ReactNode }).children}
-                </DropdownMenuItem>
-              ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <BreadcrumbEllipsis />
         </BreadcrumbItem>
       );
-      rendered.push(renderSeparator("__sep-ellipsis"));
+      rendered.push(<BreadcrumbSeparator key="__sep-ellipsis" />);
     }
 
     rendered.push(items[items.length - 1]);
@@ -153,12 +121,14 @@ function BreadcrumbItem({ className, ...props }: React.ComponentProps<"li">) {
   );
 }
 
+// NOTE: This diverges from stock ShadCN to include text-sm styling.
+// This avoids needing size="sm" on every Link rendered inside BreadcrumbLink.
 function BreadcrumbLink({ className, render, ...props }: useRender.ComponentProps<"a">) {
   return useRender({
     defaultTagName: "a",
     props: mergeProps<"a">(
       {
-        className: cn("px-[0.0625rem] text-sm transition-colors hover:text-foreground", className)
+        className: cn("text-sm transition-colors hover:text-foreground", className)
       },
       props
     ),
@@ -194,20 +164,18 @@ function BreadcrumbSeparator({ children, className, ...props }: React.ComponentP
   );
 }
 
-function BreadcrumbEllipsis({ className, "aria-label": ariaLabel, ...props }: React.ComponentProps<"button">) {
+function BreadcrumbEllipsis({ className, ...props }: React.ComponentProps<"span">) {
   return (
-    <button
-      type="button"
+    <span
       data-slot="breadcrumb-ellipsis"
-      aria-label={ariaLabel}
-      className={cn(
-        "flex size-5 cursor-pointer items-center justify-center rounded transition-colors hover:text-foreground [&>svg]:size-4",
-        className
-      )}
+      role="presentation"
+      aria-hidden="true"
+      className={cn("flex size-5 items-center justify-center [&>svg]:size-4", className)}
       {...props}
     >
       <MoreHorizontalIcon />
-    </button>
+      <span className="sr-only">More</span>
+    </span>
   );
 }
 

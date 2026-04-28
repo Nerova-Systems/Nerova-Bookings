@@ -26,6 +26,20 @@ export default defineConfig({
       { from: "./routes/legal/dpa.en-US.md", to: "./legal/documents/dpa.md" }
     ]
   },
+  tools: {
+    rspack: {
+      // Exclude tests/e2e directory from file watching to prevent hot reloading issues
+      watchOptions: {
+        ignored: ["**/tests/**", "**/playwright-report/**"],
+        // Watch workspace packages for changes
+        followSymlinks: true
+      },
+      snapshot: {
+        // Include workspace packages in module snapshots for change detection
+        managedPaths: []
+      }
+    }
+  },
   plugins: [
     TailwindPlugin("#account"),
     pluginReact(),
@@ -37,7 +51,7 @@ export default defineConfig({
     FileSystemRouterPlugin(),
     RunTimeEnvironmentPlugin(customBuildEnv, { federationOnly: true }),
     LinguiPlugin(),
-    DevelopmentServerPlugin({ port: 9101, liveReload: false }),
+    DevelopmentServerPlugin({ port: 9101 }),
     ModuleFederationPlugin({
       exposes: {
         "./AccessDeniedPage": "./federated-modules/errorPages/AccessDeniedPage.tsx",

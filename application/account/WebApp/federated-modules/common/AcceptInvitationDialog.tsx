@@ -74,17 +74,11 @@ export function AcceptInvitationDialog({
           <Button
             variant="destructive"
             onClick={handleDeclineInvitation}
-            isPending={declineInvitationMutation.isPending}
-            disabled={isLoading}
+            disabled={isLoading || declineInvitationMutation.isPending}
           >
             {declineInvitationMutation.isPending ? <Trans>Declining...</Trans> : <Trans>Decline</Trans>}
           </Button>
-          <Button
-            variant="default"
-            onClick={onAccept}
-            isPending={isLoading}
-            disabled={declineInvitationMutation.isPending}
-          >
+          <Button variant="default" onClick={onAccept} disabled={isLoading || declineInvitationMutation.isPending}>
             {isLoading ? <Trans>Accepting...</Trans> : <Trans>Accept invitation</Trans>}
           </Button>
         </DialogFooter>

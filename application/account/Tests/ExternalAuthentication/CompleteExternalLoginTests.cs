@@ -408,7 +408,7 @@ public sealed class CompleteExternalLoginTests : ExternalAuthenticationTestBase
                 ("name", Faker.Company.CompanyName()),
                 ("state", nameof(TenantState.Active)),
                 ("logo", """{"Url":null,"Version":0}"""),
-                ("plan", nameof(SubscriptionPlan.Trial))
+                ("plan", nameof(SubscriptionPlan.Basis))
             ]
         );
 
@@ -417,20 +417,20 @@ public sealed class CompleteExternalLoginTests : ExternalAuthenticationTestBase
                 ("id", SubscriptionId.NewId().ToString()),
                 ("created_at", TimeProvider.GetUtcNow()),
                 ("modified_at", null),
-                ("status", nameof(SubscriptionStatus.Trial)),
-                ("plan", nameof(SubscriptionPlan.Trial)),
+                ("plan", nameof(SubscriptionPlan.Basis)),
                 ("scheduled_plan", null),
-                ("pay_fast_token", null),
-                ("pay_fast_payment_id", null),
-                ("trial_ends_at", TimeProvider.GetUtcNow().AddDays(30)),
-                ("next_billing_date", null),
-                ("current_period_start", null),
+                ("stripe_customer_id", null),
+                ("stripe_subscription_id", null),
+                ("current_price_amount", null),
+                ("current_price_currency", null),
                 ("current_period_end", null),
+                ("cancel_at_period_end", false),
                 ("first_payment_failed_at", null),
-                ("cancelled_at", null),
                 ("cancellation_reason", null),
                 ("cancellation_feedback", null),
-                ("payment_transactions", "[]")
+                ("payment_transactions", "[]"),
+                ("payment_method", null),
+                ("billing_info", null)
             ]
         );
 
@@ -586,7 +586,7 @@ public sealed class CompleteExternalLoginTests : ExternalAuthenticationTestBase
                 ("name", Faker.Company.CompanyName()),
                 ("state", nameof(TenantState.Active)),
                 ("logo", """{"Url":null,"Version":0}"""),
-                ("plan", nameof(SubscriptionPlan.Trial))
+                ("plan", nameof(SubscriptionPlan.Basis))
             ]
         );
 

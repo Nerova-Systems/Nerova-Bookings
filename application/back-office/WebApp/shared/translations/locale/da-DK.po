@@ -13,84 +13,17 @@ msgstr ""
 "Plural-Forms: \n"
 "X-Generator: @lingui/cli\n"
 
-#. placeholder {0}: minutes % 60
-msgid "{hours}h {0}m"
-msgstr ""
-
-msgid "{minutes}m"
-msgstr ""
-
-msgid "{seconds}s"
-msgstr ""
-
 msgid "Access denied"
 msgstr "Adgang nægtet"
-
-msgid "Actions"
-msgstr ""
-
-msgid "Active"
-msgstr ""
-
-msgid "Adjust the filters and try again."
-msgstr ""
-
-msgid "Adjust the search and try again."
-msgstr ""
-
-msgid "All"
-msgstr ""
 
 msgid "An unexpected error occurred while processing your request."
 msgstr "Der opstod en uventet fejl ved behandlingen."
 
-msgid "Attempts"
-msgstr ""
-
-msgid "Available"
-msgstr ""
-
-msgid "Back Office"
-msgstr ""
-
-msgid "Broker status"
-msgstr ""
-
-msgid "Check outbox, inbox, and broker subscription health."
-msgstr ""
-
 msgid "Contact your administrator if you believe this is a mistake."
 msgstr "Kontakt din administrator, hvis du mener, dette er en fejl."
 
-msgid "Created"
-msgstr ""
-
 msgid "Dashboard"
 msgstr "Dashboard"
-
-msgid "Dead letters"
-msgstr ""
-
-msgid "Dead-lettered"
-msgstr ""
-
-msgid "Deleted"
-msgstr ""
-
-msgid "DLQ"
-msgstr ""
-
-msgid "Email"
-msgstr ""
-
-msgid "Email log"
-msgstr ""
-
-msgid "Email scheduled for retry"
-msgstr ""
-
-msgid "Error"
-msgstr ""
 
 msgid "Go to home"
 msgstr "Gå til forsiden"
@@ -98,129 +31,23 @@ msgstr "Gå til forsiden"
 msgid "Hide details"
 msgstr "Skjul detaljer"
 
-msgid "Inspect transactional email delivery state and retry failed sends."
-msgstr ""
-
-msgid "Last error"
-msgstr ""
-
-msgid "Last seen"
-msgstr ""
-
-msgid "Latest received"
-msgstr ""
-
-msgid "Legacy outbox"
-msgstr ""
-
-msgid "Locked"
-msgstr ""
-
 msgid "Log out"
 msgstr "Log ud"
 
-msgid "Lookup users across tenants from the Back-office catalog."
-msgstr ""
+msgid "Manage tenants, view system data, see exceptions, and perform various tasks for operational and support teams."
+msgstr "Administrer lejere, se systemdata, se undtagelser og udfør forskellige opgaver for drifts- og supportteams."
 
-msgid "Lookup users by name, email, or tenant."
-msgstr ""
-
-msgid "Main navigation"
-msgstr "Hovednavigation"
-
-msgid "MassTransit inbox"
-msgstr ""
-
-msgid "MassTransit outbox"
-msgstr ""
-
-msgid "Message"
-msgstr ""
-
-msgid "Messaging"
-msgstr ""
-
-msgid "Messaging health"
-msgstr ""
-
-msgid "Modified"
-msgstr ""
-
-msgid "Monitor local outbox stores and Azure Service Bus catalog subscriptions."
-msgstr ""
-
-msgid "Monitor message delivery and retry failed work."
-msgstr ""
-
-msgid "Monitor message delivery health and retry unprocessed messages."
-msgstr ""
+msgid "More information"
+msgstr "Mere information"
 
 msgid "Navigation"
 msgstr "Navigation"
 
-msgid "Next attempt"
-msgstr ""
-
-msgid "No email messages"
-msgstr ""
-
-msgid "No matching messages"
-msgstr ""
-
-msgid "No matching tenants"
-msgstr ""
-
-msgid "No matching users"
-msgstr ""
-
-msgid "No outbox messages"
-msgstr ""
-
-msgid "No tenants yet"
-msgstr ""
-
-msgid "No users in catalog"
-msgstr ""
-
-msgid "No users yet"
-msgstr ""
-
-msgid "None"
-msgstr ""
-
-msgid "Oldest pending"
-msgstr ""
-
-msgid "Operate tenants and users from the synchronized platform catalog."
-msgstr ""
-
-#. placeholder {0}: tenant.id
-msgid "Operational catalog details for tenant {0}."
-msgstr ""
-
-msgid "Outbox"
-msgstr ""
-
-msgid "Outbox message scheduled for retry"
-msgstr ""
-
-msgid "Outbox messages will appear as platform events are enqueued."
-msgstr ""
-
-msgid "Overall status"
-msgstr ""
+msgid "Open navigation menu"
+msgstr "Åbn navigationsmenu"
 
 msgid "Page not found"
 msgstr "Siden blev ikke fundet"
-
-msgid "Pending"
-msgstr ""
-
-msgid "Pending outbox"
-msgstr ""
-
-msgid "Plan"
-msgstr ""
 
 msgid "PlatformPlatform logo"
 msgstr "PlatformPlatform logo"
@@ -231,122 +58,23 @@ msgstr "Tjek venligst URL'en eller vend tilbage til forsiden."
 msgid "Please try again or return to the home page."
 msgstr "Prøv venligst igen eller vend tilbage til forsiden."
 
-msgid "Processed"
-msgstr ""
-
-msgid "Queued login, invite, and billing emails will appear here."
-msgstr ""
-
-msgid "Restore tenant"
-msgstr ""
-
-msgid "Retry"
-msgstr ""
-
-msgid "Review catalog state and restore deleted tenants."
-msgstr ""
-
-msgid "Review the operational tenant catalog synchronized from Account."
-msgstr ""
-
-msgid "Role"
-msgstr ""
-
-msgid "Rows"
-msgstr ""
-
-msgid "Scheduled"
-msgstr ""
-
-msgid "Search"
-msgstr ""
-
-msgid "Search message type or error"
-msgstr ""
-
-msgid "Search tenants"
-msgstr ""
-
-msgid "Search users"
-msgstr ""
-
-msgid "Sent"
-msgstr ""
-
 msgid "Show details"
 msgstr "Vis detaljer"
 
 msgid "Something went wrong"
 msgstr "Noget gik galt"
 
-msgid "Source"
-msgstr ""
-
-msgid "State"
-msgstr ""
-
-msgid "Status"
-msgstr ""
-
-msgid "Subscription"
-msgstr ""
-
-msgid "Template"
-msgstr ""
-
-msgid "Tenant"
-msgstr ""
-
-msgid "Tenant details"
-msgstr ""
-
-msgid "Tenant not found"
-msgstr ""
-
-msgid "Tenant restore requested"
-msgstr ""
-
-msgid "Tenants"
-msgstr ""
-
-msgid "The catalog does not contain this tenant."
-msgstr ""
-
 msgid "The page you are looking for does not exist or was moved."
 msgstr "Siden du leder efter findes ikke eller er blevet flyttet."
 
-msgid "The tenant catalog will populate as Account publishes catalog events."
-msgstr ""
-
-msgid "The user catalog will populate as Account publishes catalog events."
-msgstr ""
-
-msgid "Total"
-msgstr ""
-
-msgid "Transfer DLQ"
-msgstr ""
+msgid "Toggle sidebar"
+msgstr "Vis/skjul sidepanel"
 
 msgid "Try again"
 msgstr "Prøv igen"
 
-msgid "Unavailable"
-msgstr ""
-
-msgid "User"
-msgstr ""
-
-msgid "User rows will appear after Account publishes user catalog events."
-msgstr ""
-
-msgid "Users"
-msgstr ""
-
-msgid "Users currently known for this tenant."
-msgstr ""
-
-msgid "View outbox rows"
-msgstr ""
+msgid "Welcome to the Back Office"
+msgstr "Velkommen til Back Office"
 
 msgid "You do not have permission to access this page."
 msgstr "Du har ikke tilladelse til at tilgaa denne side."

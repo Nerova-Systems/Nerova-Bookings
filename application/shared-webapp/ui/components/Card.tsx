@@ -1,5 +1,7 @@
 import { cn } from "../utils";
 
+// NOTE: This diverges from stock ShadCN to add min-w-0 (allows shrinking in grid/flex), overflow-hidden (contains content),
+// and active:bg-muted for press feedback on interactive cards.
 function Card({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
@@ -26,6 +28,7 @@ function CardHeader({ className, ...props }: React.ComponentProps<"div">) {
   );
 }
 
+// NOTE: This diverges from stock ShadCN to add text-lg and margin below title for visual separation from description.
 function CardTitle({ className, ...props }: React.ComponentProps<"div">) {
   return <div data-slot="card-title" className={cn("mb-1 text-lg leading-none font-semibold", className)} {...props} />;
 }

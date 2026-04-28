@@ -29,10 +29,12 @@ public static class IdGenerator
     }
 
     /// <summary>
-    ///     Derives a generator ID from the last IPv4 octet, or a random number when no IPv4 is found (e.g. localhost).
+    ///     Retrieves a unique generator ID based on the machine's IPv4 address.
     /// </summary>
     private static int GetUniqueGeneratorIdFromIpAddress()
     {
+        const string noNetworkAdapters = "No network adapters with an IPv4 address in the system. IdGenerator is meant to create unique IDs across multiple machines, and requires an IP address to do so.";
+
         var networkInterfaces = NetworkInterface.GetAllNetworkInterfaces()
             .Where(ni => ni.OperationalStatus == OperationalStatus.Up &&
                          ni.NetworkInterfaceType != NetworkInterfaceType.Loopback &&
@@ -53,6 +55,6 @@ public static class IdGenerator
             }
         }
 
-        return Random.Shared.Next(0, 256);
+        throw new InvalidOperationException(noNetworkAdapters);
     }
 }

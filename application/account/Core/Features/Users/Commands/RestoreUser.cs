@@ -1,7 +1,5 @@
-using Account.Features.Catalog;
 using Account.Features.Users.Domain;
 using JetBrains.Annotations;
-using MassTransit;
 using SharedKernel.Cqrs;
 using SharedKernel.Domain;
 using SharedKernel.ExecutionContext;
@@ -12,7 +10,7 @@ namespace Account.Features.Users.Commands;
 [PublicAPI]
 public sealed record RestoreUserCommand(UserId Id) : ICommand, IRequest<Result>;
 
-public sealed class RestoreUserHandler(IUserRepository userRepository, IExecutionContext executionContext, IPublishEndpoint publishEndpoint, ITelemetryEventsCollector events)
+public sealed class RestoreUserHandler(IUserRepository userRepository, IExecutionContext executionContext, ITelemetryEventsCollector events)
     : IRequestHandler<RestoreUserCommand, Result>
 {
     public async Task<Result> Handle(RestoreUserCommand command, CancellationToken cancellationToken)
@@ -29,7 +27,6 @@ public sealed class RestoreUserHandler(IUserRepository userRepository, IExecutio
         }
 
         userRepository.Restore(user);
-        await publishEndpoint.Publish(CatalogEventFactory.UserUpserted(user), cancellationToken);
 
         events.CollectEvent(new UserRestored(user.Id));
 

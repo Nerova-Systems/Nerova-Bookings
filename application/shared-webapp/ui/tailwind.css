@@ -122,11 +122,6 @@
     width: 52rem;
 }
 
-/* Soft destructive halo around a field when it is invalid and focused. Used with aria-invalid:focus-visible: and aria-invalid:focus: variants. */
-@utility shadow-error-halo {
-    box-shadow: 0 0 0 2px color-mix(in oklch, var(--destructive) 60%, transparent);
-}
-
 @layer base {
     * {
         @apply border-border;
@@ -150,7 +145,8 @@
 }
 
 /* Root font size with user-configurable scale (default 1 = 100%) */
-/* Control heights are responsive: 40px desktop default, 44px on mobile (Apple HIG touch targets) */
+/* Mobile: 16px base ensures 44px touch targets (--control-height: 2.75rem) */
+/* Desktop: 22px base for comfortable reading on larger screens */
 /* Change --zoom-level via JavaScript to apply user preference (e.g., 1.25 for 125%) */
 html {
     --zoom-level: 1;
@@ -366,6 +362,14 @@ body {
     color: white !important;
     background: var(--toast-bg) !important;
     border: 0.1rem solid var(--toast-color) !important;
+}
+
+/* Remove outer border and inner padding on embedded Stripe Elements */
+.StripeElement {
+    margin-top: -1rem;
+    margin-bottom: -0.5rem;
+    margin-left: -1rem;
+    margin-right: -1rem;
 }
 
 /* OTP input styling - use 3.5rem (size-14) as base, constrain only when 6 slots would overflow viewport */

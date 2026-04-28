@@ -3,23 +3,18 @@ using Azure.Security.KeyVault.Keys;
 using Azure.Security.KeyVault.Keys.Cryptography;
 using Azure.Security.KeyVault.Secrets;
 using FluentValidation;
-using MassTransit;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Http.Json;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.Extensions.Configuration;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
-using Microsoft.Extensions.Hosting;
 using SharedKernel.Authentication;
 using SharedKernel.Authentication.TokenGeneration;
 using SharedKernel.Authentication.TokenSigning;
-using SharedKernel.Catalog;
 using SharedKernel.DomainEvents;
 using SharedKernel.Integrations.Email;
-using SharedKernel.Outbox;
 using SharedKernel.Persistence;
 using SharedKernel.PipelineBehaviors;
 using SharedKernel.Platform;
@@ -59,76 +54,6 @@ public static class SharedDependencyConfiguration
 
     extension(IServiceCollection services)
     {
-        public IServiceCollection AddSharedMassTransit<T>(
-            IConfiguration configuration,
-            IHostEnvironment environment,
-            Assembly[] consumerAssemblies,
-            bool addConsumers,
-            bool enableOutboxDelivery,
-            Action<IBusRegistrationContext, IServiceBusBusFactoryConfigurator>? configureAzureServiceBus = null
-        )
-            where T : DbContext
-        {
-            return services.AddMassTransit(registration =>
-                {
-                    if (addConsumers)
-                    {
-                        registration.AddConsumers(consumerAssemblies);
-                    }
-
-                    registration.AddEntityFrameworkOutbox<T>(options =>
-                        {
-                            options.UsePostgres();
-                            options.UseBusOutbox(busOutbox =>
-                                {
-                                    if (!enableOutboxDelivery)
-                                    {
-                                        busOutbox.DisableDeliveryService();
-                                    }
-                                }
-                            );
-                        }
-                    );
-
-                    var serviceBusConnectionString = configuration.GetConnectionString("messaging");
-                    if (string.IsNullOrWhiteSpace(serviceBusConnectionString))
-                    {
-                        registration.UsingInMemory((context, configurator) =>
-                            {
-                                configurator.ConfigureEndpoints(context);
-                            }
-                        );
-                    }
-                    else
-                    {
-                        registration.UsingAzureServiceBus((context, configurator) =>
-                            {
-                                configurator.Host(serviceBusConnectionString);
-                                ConfigureCatalogEventTopics(configurator);
-
-                                if (configureAzureServiceBus is null)
-                                {
-                                    configurator.ConfigureEndpoints(context);
-                                }
-                                else
-                                {
-                                    configureAzureServiceBus(context, configurator);
-                                }
-                            }
-                        );
-                    }
-                }
-            );
-        }
-
-        private static void ConfigureCatalogEventTopics(IServiceBusBusFactoryConfigurator configurator)
-        {
-            configurator.Message<TenantCatalogUpserted>(x => x.SetEntityName(CatalogMessagingTopology.TenantCatalogUpsertedTopic));
-            configurator.Message<TenantCatalogDeleted>(x => x.SetEntityName(CatalogMessagingTopology.TenantCatalogDeletedTopic));
-            configurator.Message<UserCatalogUpserted>(x => x.SetEntityName(CatalogMessagingTopology.UserCatalogUpsertedTopic));
-            configurator.Message<UserCatalogDeleted>(x => x.SetEntityName(CatalogMessagingTopology.UserCatalogDeletedTopic));
-        }
-
         public IServiceCollection AddSharedServices<T>(Assembly[] assemblies)
             where T : DbContext
         {
@@ -148,10 +73,8 @@ public static class SharedDependencyConfiguration
                 .AddPersistenceHelpers<T>()
                 .AddDefaultHealthChecks()
                 .AddEmailClient()
-                .AddTransactionalEmail<T>()
                 .AddMediatRPipelineBehaviors()
                 .RegisterMediatRRequest(assemblies)
-                .RegisterOutboxMessageHandlers(assemblies)
                 .RegisterRepositories(assemblies);
         }
 
@@ -204,7 +127,6 @@ public static class SharedDependencyConfiguration
         {
             return services
                 .AddScoped<IUnitOfWork, UnitOfWork>(provider => new UnitOfWork(provider.GetRequiredService<T>()))
-                .AddScoped<IOutboxPublisher, OutboxPublisher>(provider => new OutboxPublisher(provider.GetRequiredService<T>(), provider.GetRequiredService<TimeProvider>()))
                 .AddScoped<IDomainEventCollector, DomainEventCollector>(provider =>
                     new DomainEventCollector(provider.GetRequiredService<T>())
                 );
@@ -232,13 +154,6 @@ public static class SharedDependencyConfiguration
             }
 
             return services;
-        }
-
-        private IServiceCollection AddTransactionalEmail<T>() where T : DbContext
-        {
-            return services
-                .AddScoped<ITransactionalEmailQueue, TransactionalEmailQueue<T>>()
-                .AddScoped<TransactionalEmailProcessor<T>>();
         }
 
         private IServiceCollection AddMediatRPipelineBehaviors()
@@ -276,17 +191,6 @@ public static class SharedDependencyConfiguration
                              type.BaseType.GetGenericTypeDefinition() == typeof(SoftDeletableRepositoryBase<,>))
                         ), false
                     )
-                    .AsImplementedInterfaces()
-                    .WithScopedLifetime()
-                );
-        }
-
-        public IServiceCollection RegisterOutboxMessageHandlers(Assembly[] assemblies)
-        {
-            return services
-                .Scan(scan => scan
-                    .FromAssemblies(assemblies)
-                    .AddClasses(classes => classes.AssignableTo<IOutboxMessageHandler>())
                     .AsImplementedInterfaces()
                     .WithScopedLifetime()
                 );

@@ -12,9 +12,6 @@
         <ProjectReference Include="..\..\shared-kernel\SharedKernel\SharedKernel.csproj"/>
     </ItemGroup>
 
-    <ItemGroup>
-        <PackageReference Include="MassTransit"/>
-    </ItemGroup>
 
 
 </Project>

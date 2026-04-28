@@ -9,7 +9,6 @@ public sealed class DatabaseSeeder
 {
     public readonly UserInfo Tenant1Member;
     public readonly UserInfo Tenant1Owner;
-    public readonly UserInfo SysOp;
     public readonly TenantId TenantId;
     private readonly Faker _faker = new();
 
@@ -38,18 +37,6 @@ public sealed class DatabaseSeeder
             IsAuthenticated = true,
             Locale = "en-US",
             Role = "Member",
-            TenantId = TenantId
-        };
-
-        SysOp = new UserInfo
-        {
-            Email = "sysop@platformplatform.net",
-            FirstName = _faker.Person.FirstName,
-            LastName = _faker.Person.LastName,
-            Id = UserId.NewId(),
-            IsAuthenticated = true,
-            Locale = "en-US",
-            Role = "Owner",
             TenantId = TenantId
         };
 

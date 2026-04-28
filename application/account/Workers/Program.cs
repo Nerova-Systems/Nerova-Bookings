@@ -3,8 +3,6 @@ using Account.Database;
 using Account.Features.Subscriptions.Jobs;
 using SharedKernel.Configuration;
 using SharedKernel.Database;
-using SharedKernel.Integrations.Email;
-using SharedKernel.Outbox;
 
 // Worker service is using WebApplication.CreateBuilder instead of Host.CreateDefaultBuilder to allow scaling to zero
 var builder = WebApplication.CreateBuilder(args);
@@ -16,14 +14,12 @@ builder
 
 // Configure dependency injection services like Repositories, MediatR, Pipelines, FluentValidation validators, etc.
 builder.Services
-    .AddSharedMassTransit<AccountDbContext>(builder.Configuration, builder.Environment, [], addConsumers: false, enableOutboxDelivery: true)
     .AddWorkerServices()
     .AddAccountServices()
     .AddHostedService<BillingJob>()
     .AddHostedService<BillingReconciliationJob>()
     .AddHostedService<BillingDunningJob>()
-    .AddHostedService<TrialExpiryNotificationJob>()
-    .AddHostedService<TransactionalEmailWorker<AccountDbContext>>();
+    .AddHostedService<TrialExpiryNotificationJob>();
 
 builder.Services.AddTransient<DatabaseMigrationService<AccountDbContext>>();
 builder.Services.AddTransient<DataMigrationRunner<AccountDbContext>>();

@@ -37,95 +37,95 @@ public class TrackEndpoints : IEndpoints
             switch (trackRequest.Data.BaseType)
             {
                 case "PageviewData":
+                {
+                    var telemetry = new PageViewTelemetry
                     {
-                        var telemetry = new PageViewTelemetry
-                        {
-                            Name = trackRequest.Data.BaseData.Name,
-                            Url = Uri.TryCreate(trackRequest.Data.BaseData.Url, UriKind.Absolute, out var pageViewUri) ? pageViewUri : null,
-                            Duration = trackRequest.Data.BaseData.Duration,
-                            Timestamp = trackRequest.Time,
-                            Id = trackRequest.Data.BaseData.Id
-                        };
+                        Name = trackRequest.Data.BaseData.Name,
+                        Url = Uri.TryCreate(trackRequest.Data.BaseData.Url, UriKind.Absolute, out var pageViewUri) ? pageViewUri : null,
+                        Duration = trackRequest.Data.BaseData.Duration,
+                        Timestamp = trackRequest.Time,
+                        Id = trackRequest.Data.BaseData.Id
+                    };
 
-                        CopyContextTags(telemetry.Context, trackRequest.Tags, ip);
-                        CopyDictionary(trackRequest.Data.BaseData.Properties, telemetry.Properties);
-                        CopyDictionary(trackRequest.Data.BaseData.Measurements, telemetry.Metrics);
+                    CopyContextTags(telemetry.Context, trackRequest.Tags, ip);
+                    CopyDictionary(trackRequest.Data.BaseData.Properties, telemetry.Properties);
+                    CopyDictionary(trackRequest.Data.BaseData.Measurements, telemetry.Metrics);
 
-                        telemetryClient.TrackPageView(telemetry);
-                        break;
-                    }
+                    telemetryClient.TrackPageView(telemetry);
+                    break;
+                }
                 case "PageviewPerformanceData":
+                {
+                    var telemetry = new PageViewPerformanceTelemetry
                     {
-                        var telemetry = new PageViewPerformanceTelemetry
-                        {
-                            Name = trackRequest.Data.BaseData.Name,
-                            Url = Uri.TryCreate(trackRequest.Data.BaseData.Url, UriKind.Absolute, out var perfUri) ? perfUri : null,
-                            Duration = trackRequest.Data.BaseData.Duration,
-                            Timestamp = trackRequest.Time,
-                            Id = trackRequest.Data.BaseData.Id,
-                            PerfTotal = trackRequest.Data.BaseData.PerfTotal,
-                            NetworkConnect = trackRequest.Data.BaseData.NetworkConnect,
-                            SentRequest = trackRequest.Data.BaseData.SentRequest,
-                            ReceivedResponse = trackRequest.Data.BaseData.ReceivedResponse,
-                            DomProcessing = trackRequest.Data.BaseData.DomProcessing
-                        };
+                        Name = trackRequest.Data.BaseData.Name,
+                        Url = Uri.TryCreate(trackRequest.Data.BaseData.Url, UriKind.Absolute, out var perfUri) ? perfUri : null,
+                        Duration = trackRequest.Data.BaseData.Duration,
+                        Timestamp = trackRequest.Time,
+                        Id = trackRequest.Data.BaseData.Id,
+                        PerfTotal = trackRequest.Data.BaseData.PerfTotal,
+                        NetworkConnect = trackRequest.Data.BaseData.NetworkConnect,
+                        SentRequest = trackRequest.Data.BaseData.SentRequest,
+                        ReceivedResponse = trackRequest.Data.BaseData.ReceivedResponse,
+                        DomProcessing = trackRequest.Data.BaseData.DomProcessing
+                    };
 
-                        CopyContextTags(telemetry.Context, trackRequest.Tags, ip);
-                        CopyDictionary(trackRequest.Data.BaseData.Properties, telemetry.Properties);
-                        CopyDictionary(trackRequest.Data.BaseData.Measurements, telemetry.Metrics);
+                    CopyContextTags(telemetry.Context, trackRequest.Tags, ip);
+                    CopyDictionary(trackRequest.Data.BaseData.Properties, telemetry.Properties);
+                    CopyDictionary(trackRequest.Data.BaseData.Measurements, telemetry.Metrics);
 
-                        telemetryClient.Track(telemetry);
-                        break;
-                    }
+                    telemetryClient.Track(telemetry);
+                    break;
+                }
                 case "ExceptionData":
+                {
+                    var exceptionDetailsInfos = GetExceptionDetailsInfos(trackRequest);
+                    var telemetry = new ExceptionTelemetry(exceptionDetailsInfos,
+                        trackRequest.Data.BaseData.SeverityLevel, trackRequest.Data.BaseType,
+                        trackRequest.Data.BaseData.Properties, new Dictionary<string, double>()
+                    )
                     {
-                        var exceptionDetailsInfos = GetExceptionDetailsInfos(trackRequest);
-                        var telemetry = new ExceptionTelemetry(exceptionDetailsInfos,
-                            trackRequest.Data.BaseData.SeverityLevel, trackRequest.Data.BaseType,
-                            trackRequest.Data.BaseData.Properties, new Dictionary<string, double>()
-                        )
+                        SeverityLevel = trackRequest.Data.BaseData.SeverityLevel,
+                        Timestamp = trackRequest.Time
+                    };
+
+                    CopyContextTags(telemetry.Context, trackRequest.Tags, ip);
+                    CopyDictionary(trackRequest.Data.BaseData.Properties, telemetry.Properties);
+                    CopyDictionary(trackRequest.Data.BaseData.Measurements, telemetry.Metrics);
+
+                    telemetryClient.TrackException(telemetry);
+                    break;
+                }
+                case "MetricData":
+                {
+                    foreach (var metric in trackRequest.Data.BaseData.Metrics)
+                    {
+                        var telemetry = new MetricTelemetry
                         {
-                            SeverityLevel = trackRequest.Data.BaseData.SeverityLevel,
+                            Name = metric.Name,
+                            Sum = metric.Value,
+                            Count = metric.Count,
                             Timestamp = trackRequest.Time
                         };
 
                         CopyContextTags(telemetry.Context, trackRequest.Tags, ip);
                         CopyDictionary(trackRequest.Data.BaseData.Properties, telemetry.Properties);
-                        CopyDictionary(trackRequest.Data.BaseData.Measurements, telemetry.Metrics);
 
-                        telemetryClient.TrackException(telemetry);
-                        break;
+                        telemetryClient.TrackMetric(telemetry);
                     }
-                case "MetricData":
-                    {
-                        foreach (var metric in trackRequest.Data.BaseData.Metrics)
-                        {
-                            var telemetry = new MetricTelemetry
-                            {
-                                Name = metric.Name,
-                                Sum = metric.Value,
-                                Count = metric.Count,
-                                Timestamp = trackRequest.Time
-                            };
 
-                            CopyContextTags(telemetry.Context, trackRequest.Tags, ip);
-                            CopyDictionary(trackRequest.Data.BaseData.Properties, telemetry.Properties);
-
-                            telemetryClient.TrackMetric(telemetry);
-                        }
-
-                        break;
-                    }
+                    break;
+                }
                 case "RemoteDependencyData":
-                    {
-                        // Ignore remote dependency data
-                        break;
-                    }
+                {
+                    // Ignore remote dependency data
+                    break;
+                }
                 default:
-                    {
-                        logger.LogWarning("Unsupported telemetry type: {BaseType}", trackRequest.Data.BaseType);
-                        break;
-                    }
+                {
+                    logger.LogWarning("Unsupported telemetry type: {BaseType}", trackRequest.Data.BaseType);
+                    break;
+                }
             }
         }
 

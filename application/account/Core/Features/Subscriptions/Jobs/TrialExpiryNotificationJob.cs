@@ -31,7 +31,7 @@ public sealed class TrialExpiryNotificationJob(IServiceScopeFactory scopeFactory
         using var scope = scopeFactory.CreateScope();
         var subscriptionRepository = scope.ServiceProvider.GetRequiredService<ISubscriptionRepository>();
         var dbContext = scope.ServiceProvider.GetRequiredService<AccountDbContext>();
-        var emailQueue = scope.ServiceProvider.GetRequiredService<ITransactionalEmailQueue>();
+        var emailClient = scope.ServiceProvider.GetRequiredService<IEmailClient>();
         var timeProvider = scope.ServiceProvider.GetRequiredService<TimeProvider>();
 
         var now = timeProvider.GetUtcNow();
@@ -57,14 +57,12 @@ public sealed class TrialExpiryNotificationJob(IServiceScopeFactory scopeFactory
             {
                 if (!ownerEmailsByTenantId.TryGetValue(subscription.TenantId, out var ownerEmail)) continue;
 
-                await SendTrialExpiryEmailAsync(subscription, daysUntilExpiry, ownerEmail, emailQueue, cancellationToken);
+                await SendTrialExpiryEmailAsync(subscription, daysUntilExpiry, ownerEmail, emailClient, cancellationToken);
             }
-
-            await dbContext.SaveChangesAsync(cancellationToken);
         }
     }
 
-    private async Task SendTrialExpiryEmailAsync(Subscription subscription, int daysUntilExpiry, string ownerEmail, ITransactionalEmailQueue emailQueue, CancellationToken cancellationToken)
+    private async Task SendTrialExpiryEmailAsync(Subscription subscription, int daysUntilExpiry, string ownerEmail, IEmailClient emailClient, CancellationToken cancellationToken)
     {
         try
         {
@@ -72,12 +70,10 @@ public sealed class TrialExpiryNotificationJob(IServiceScopeFactory scopeFactory
                 ? "Your Nerova Bookings trial expires tomorrow"
                 : $"Your Nerova Bookings trial expires in {daysUntilExpiry} days";
 
-            await emailQueue.EnqueueAsync(
+            await emailClient.SendAsync(
                 ownerEmail,
                 subject,
                 $"Your free trial ends in {daysUntilExpiry} day(s). Subscribe now to keep access to all features.",
-                TransactionalEmailTemplateKeys.TrialExpiry,
-                subscription.Id.Value,
                 cancellationToken
             );
         }

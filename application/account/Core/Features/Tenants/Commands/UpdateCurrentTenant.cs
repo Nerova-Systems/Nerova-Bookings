@@ -1,9 +1,7 @@
-using Account.Features.Catalog;
 using Account.Features.Tenants.Domain;
 using Account.Features.Users.Domain;
 using FluentValidation;
 using JetBrains.Annotations;
-using MassTransit;
 using SharedKernel.Authentication;
 using SharedKernel.Cqrs;
 using SharedKernel.ExecutionContext;
@@ -28,7 +26,6 @@ public sealed class UpdateCurrentTenantValidator : AbstractValidator<UpdateCurre
 public sealed class UpdateTenantHandler(
     ITenantRepository tenantRepository,
     IExecutionContext executionContext,
-    IPublishEndpoint publishEndpoint,
     ITelemetryEventsCollector events
 ) : IRequestHandler<UpdateCurrentTenantCommand, Result>
 {
@@ -51,7 +48,6 @@ public sealed class UpdateTenantHandler(
 
         tenant.Update(command.Name);
         tenantRepository.Update(tenant);
-        await publishEndpoint.Publish(CatalogEventFactory.TenantUpserted(tenant), cancellationToken);
 
         events.CollectEvent(new TenantUpdated());
 

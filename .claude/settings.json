@@ -1,84 +1,4 @@
 {
-  "env": {
-    "ENABLE_TOOL_SEARCH": "true",
-    "CLAUDE_CODE_DISABLE_GIT_INSTRUCTIONS": "1"
-  },
-  "permissions": {
-    "allow": [
-      "PowerShell(pp build --backend --quiet 2>&1)",
-      "PowerShell(pp build --frontend --quiet 2>&1)",
-      "PowerShell(\\(Get-Item \"C:\\\\Users\\\\colin\\\\dev\\\\booking-SaaS\"\\).Target)",
-      "Read(//c/Users/colin/dev/booking-SaaS/**)",
-      "PowerShell($item = Get-Item \"C:\\\\Users\\\\colin\\\\dev\\\\booking-SaaS\" -ErrorAction SilentlyContinue; if \\($null -ne $item\\) { \"$\\($item.FullName\\) | LinkType: $\\($item.LinkType\\) | Target: $\\($item.Target\\)\" } else { \"Does not exist\" })",
-      "Read(//c/Users/colin/dev//**)",
-      "Bash(npx tsc *)",
-      "PowerShell(Stop-Process -Id 34456 -Force)",
-      "PowerShell(Get-NetTCPConnection -LocalPort 9001 -State Listen -ErrorAction SilentlyContinue | ForEach-Object { Get-Process -Id $_.OwningProcess -ErrorAction SilentlyContinue } | Select-Object Id, ProcessName)",
-      "PowerShell(Get-Process | Where-Object { $_.Name -match \"dcpctrl|dotnet\" } | Select-Object Id, Name, StartTime | Format-Table -AutoSize)",
-      "mcp__plugin_playwright_playwright__browser_evaluate",
-      "PowerShell(Stop-Process -Id 2916 -Force -ErrorAction SilentlyContinue; Get-Process | Where-Object { $_.Name -eq \"dotnet\" } | Stop-Process -Force -ErrorAction SilentlyContinue; Write-Host \"Processes killed\")",
-      "PowerShell(Get-Process | Where-Object { $_.Name -match \"dcpctrl|dotnet\" } | Measure-Object | Select-Object Count)",
-      "PowerShell($procs = Get-Process | Where-Object { $_.Name -match \"dcpctrl|dotnet\" }; Write-Host \"Count: $\\($procs.Count\\)\")",
-      "PowerShell($procs = Get-Process | Where-Object { $_.Name -match \"dcpctrl|dotnet\" }; Write-Host \"Count: $\\($procs.Count\\)\"; $procs | Select-Object Id, Name, StartTime | Format-Table -AutoSize)",
-      "PowerShell($pids = \\(Get-Process | Where-Object { $_.Name -match \"dcpctrl|dotnet\" }\\).Id; Stop-Process -Id $pids -Force -ErrorAction SilentlyContinue; Write-Host \"Killed $\\($pids.Count\\) processes\")",
-      "PowerShell($procs = Get-Process | Where-Object { $_.Name -match \"dcpctrl|dotnet\" }; Write-Host \"Process count: $\\($procs.Count\\)\")",
-      "PowerShell(Stop-Process -Id 40344, 46100 -Force -ErrorAction SilentlyContinue)",
-      "Bash(pp test *)",
-      "mcp__plugin_playwright_playwright__browser_navigate",
-      "mcp__plugin_playwright_playwright__browser_snapshot",
-      "mcp__plugin_playwright_playwright__browser_fill_form",
-      "mcp__plugin_playwright_playwright__browser_click",
-      "PowerShell(pp restart 2>&1)",
-      "PowerShell(pp restart --public-url \"https://215e-169-1-35-95.ngrok-free.app\" 2>&1)",
-      "Bash(dotnet run *)",
-      "PowerShell(Stop-Process -Force)",
-      "mcp__plugin_playwright_playwright__browser_network_requests",
-      "Bash(python -c ' *)",
-      "PowerShell($logPath = \"C:\\\\Users\\\\colin\\\\dev\\\\NerovaBookings\\\\.workspace\\\\developer-cli\\\\aspire-apphost.log\"; $proc = \\(& \"C:\\\\Sysinternals\\\\handle64.exe\" -nobanner -accepteula $logPath 2>$null\\); $proc)",
-      "PowerShell(Get-NetTCPConnection -LocalPort 9000,9001,9098 -State Listen -ErrorAction SilentlyContinue)",
-      "PowerShell(docker exec -e PGPASSWORD='5EkB.7T5yfkN}y~D' postgres-78db10bb psql -U postgres -d account -c \"UPDATE subscriptions SET status='Trial', plan='Trial', pay_fast_token=NULL, cancelled_at=NULL, scheduled_plan=NULL, current_period_end=NULL, next_billing_date=NULL WHERE id='sub_01KPZGXR9B3GKSWYM6EPSKNVCW'; DELETE FROM payment_transactions WHERE tenant_id=1497184145489530880;\")",
-      "Bash(tasklist //FI \"imagename eq cmd.exe\" //FO csv)",
-      "Bash(tasklist //FI \"imagename eq AppHost.exe\" //FO csv)",
-      "PowerShell(Get-NetTCPConnection -LocalPort 9000,9001 -State Listen -ErrorAction SilentlyContinue)",
-      "PowerShell(Stop-Process -Id 7128 -Force -ErrorAction SilentlyContinue)",
-      "Bash(awk '{print $6, $7, $8}')",
-      "Read(//c/Users/colin/dev/NerovaBookings/**)",
-      "Read(//c/Users/colin/**)",
-      "Read(//c//**)",
-      "Read(//c/Users/**)",
-      "Bash(dotnet script *)",
-      "PowerShell($logToken = Select-String -Path \"C:\\\\Users\\\\colin\\\\dev\\\\NerovaBookings\\\\.workspace\\\\developer-cli\\\\aspire-apphost.log\" -Pattern \"login\\\\?t=\\([a-f0-9]+\\)\" | Select-Object -Last 1; if \\($logToken\\) { $matches = [regex]::Match\\($logToken.Line, 'login\\\\?t=\\([a-f0-9]+\\)'\\); Write-Host \"Latest token: $\\($matches.Groups[1].Value\\)\" })",
-      "Bash(awk '{print $6,$7,$8}')",
-      "mcp__plugin_playwright_playwright__browser_take_screenshot",
-      "mcp__plugin_playwright_playwright__browser_handle_dialog",
-      "PowerShell(try { $r = Invoke-WebRequest -Uri \"http://127.0.0.1:4040/api/requests/http?limit=20\" -UseBasicParsing; \\($r.Content | ConvertFrom-Json\\).requests | Select-Object -First 10 @{N='m';E={$_.request.method}}, uri, @{N='status';E={$_.response.status_code}} } catch { Write-Host \"ERR: $_\" })",
-      "PowerShell($resp = Invoke-WebRequest -Uri \"http://127.0.0.1:4040/api/requests/http?limit=30\" -UseBasicParsing -ErrorAction SilentlyContinue; if \\($resp\\) { $reqs = \\($resp.Content | ConvertFrom-Json\\).requests; Write-Host \"Total: $\\($reqs.Count\\)\"; $reqs | Select-Object -First 10 | ForEach-Object { \"$\\($_.request.method\\) $\\($_.uri\\) -> $\\($_.response.status_code\\)\" } } else { Write-Host \"ngrok inspector NOT reachable on 4040\" })",
-      "PowerShell(try { $r = Invoke-WebRequest -Uri \"https://215e-169-1-35-95.ngrok-free.app/api/account/subscriptions/payfast/itn\" -Method POST -Body \"test=1\" -ContentType \"application/x-www-form-urlencoded\" -UseBasicParsing -ErrorAction Stop -SkipHttpErrorCheck; Write-Host \"Status: $\\($r.StatusCode\\)\"; Write-Host \"Body: $\\($r.Content.Substring\\(0,[Math]::Min\\(200,$r.Content.Length\\)\\)\\)\" } catch { Write-Host \"ERR: $_\" })",
-      "PowerShell(try { $r = Invoke-WebRequest -Uri \"https://215e-169-1-35-95.ngrok-free.app/api/account/subscriptions/payfast/itn\" -Method POST -Body \"test=1\" -ContentType \"application/x-www-form-urlencoded\" -UseBasicParsing; Write-Host \"Status: $\\($r.StatusCode\\)\"; Write-Host $r.Content.Substring\\(0,[Math]::Min\\(200,$r.Content.Length\\)\\) } catch { Write-Host \"Status: $\\($_.Exception.Response.StatusCode\\)\"; if \\($_.Exception.Response\\) { $reader = [System.IO.StreamReader]::new\\($_.Exception.Response.GetResponseStream\\(\\)\\); Write-Host \"Body: $\\($reader.ReadToEnd\\(\\).Substring\\(0,500\\)\\)\" } })",
-      "PowerShell(Get-Process -Name ngrok -ErrorAction SilentlyContinue | Select-Object Id, StartTime; Write-Host \"---\"; try { $r = Invoke-WebRequest \"http://127.0.0.1:4040/inspect/http\" -UseBasicParsing -ErrorAction Stop; Write-Host \"Inspect: $\\($r.StatusCode\\)\" } catch { Write-Host \"Not on 4040\" })",
-      "PowerShell($r = Invoke-WebRequest \"http://127.0.0.1:4040/api/requests/http?limit=50\" -UseBasicParsing; $data = $r.Content | ConvertFrom-Json; Write-Host \"Count: $\\($data.requests.Count\\)\"; $data.requests | ForEach-Object { \"$\\($_.request.method\\) $\\($_.request.uri\\) -> $\\($_.response.status_code\\) at $\\($_.start\\)\" } | Select-Object -First 20)",
-      "PowerShell($r = Invoke-WebRequest \"http://127.0.0.1:4040/api/requests/http?limit=100\" -UseBasicParsing; $reqs = \\($r.Content | ConvertFrom-Json\\).requests; Write-Host \"Total: $\\($reqs.Count\\)\"; $reqs | ForEach-Object { $ua = ''; if \\($_.request.headers.'User-Agent'\\) { $ua = $_.request.headers.'User-Agent'[0].Substring\\(0, [Math]::Min\\(40, $_.request.headers.'User-Agent'[0].Length\\)\\) }; \"$\\($_.start\\) $\\($_.request.method\\) $\\($_.request.uri\\) -> $\\($_.response.status_code\\) UA=$ua\" })",
-      "PowerShell($conf = Invoke-WebRequest \"http://127.0.0.1:4040/api/tunnels\" -UseBasicParsing; \\($conf.Content | ConvertFrom-Json\\) | ConvertTo-Json -Depth 6 | Select-String -Pattern \"addr|verify|inspect|public_url\" | Select-Object -First 10)",
-      "Bash(python)",
-      "PowerShell(docker exec -e PGPASSWORD='5EkB.7T5yfkN}y~D' postgres-78db10bb psql -U postgres -d account -c \"SELECT id, status, plan, pay_fast_token, current_period_end FROM subscriptions WHERE pay_fast_token IS NOT NULL;\")",
-      "PowerShell(docker exec -e PGPASSWORD='5EkB.7T5yfkN}y~D' postgres-78db10bb psql -U postgres -d account -c \"SELECT s.id, t.name as tenant, s.status, s.plan, s.scheduled_plan, s.pay_fast_token IS NOT NULL as has_token, s.current_period_start, s.current_period_end FROM subscriptions s JOIN tenants t ON s.tenant_id = t.id;\")",
-      "PowerShell($tokenLine = Select-String -Path \"C:\\\\Users\\\\colin\\\\dev\\\\NerovaBookings\\\\.workspace\\\\developer-cli\\\\aspire-apphost.log\" -Pattern \"login\\\\?t=\" | Select-Object -Last 1; if \\($tokenLine\\) { Write-Host $tokenLine.Line })",
-      "PowerShell(docker exec -e PGPASSWORD='5EkB.7T5yfkN}y~D' postgres-78db10bb psql -U postgres -d account -c \"SELECT s.id, t.name, jsonb_array_length\\(s.payment_transactions\\) as txn_count, s.payment_transactions FROM subscriptions s JOIN tenants t ON s.tenant_id = t.id WHERE t.name = 'Nerova Systems';\")",
-      "PowerShell(docker exec -e PGPASSWORD='5EkB.7T5yfkN}y~D' postgres-78db10bb psql -U postgres -d account -c \"SELECT s.id, t.name, t.id as tenant_id, s.status, s.plan, s.scheduled_plan, s.pay_fast_token IS NOT NULL as has_token, s.current_period_end, jsonb_array_length\\(s.payment_transactions\\) as txn_count FROM subscriptions s JOIN tenants t ON s.tenant_id = t.id ORDER BY s.created_at DESC;\")",
-      "PowerShell(docker exec -e PGPASSWORD='5EkB.7T5yfkN}y~D' postgres-78db10bb psql -U postgres -d account -c \"SELECT id, jsonb_array_length\\(payment_transactions\\) as count, payment_transactions FROM subscriptions WHERE id = 'sub_01KQ4MAQNJEF1PAVS1DPBPN5RW';\")",
-      "PowerShell($dashUrl = \\(Select-String -Path \"C:\\\\Users\\\\colin\\\\dev\\\\NerovaBookings\\\\.workspace\\\\developer-cli\\\\aspire-apphost.log\" -Pattern \"login\\\\?t=\" | Select-Object -Last 1\\).Line; Write-Host $dashUrl)",
-      "Bash(git -C \"C:/Users/colin/dev/NerovaBookings\" status)",
-      "Bash(git -C \"C:/Users/colin/dev/NerovaBookings\" log --oneline -20)",
-      "Bash(git -C \"C:/Users/colin/dev/NerovaBookings\" log --oneline HEAD..MERGE_HEAD)",
-      "Bash(git -C \"C:/Users/colin/dev/NerovaBookings\" diff --stat HEAD MERGE_HEAD)",
-      "Bash(git ls-tree *)",
-      "Bash(grep -E '\\\\.\\(tsx|ts\\)$')",
-      "Bash(git show *)"
-    ],
-    "additionalDirectories": [
-      "C:\\Users\\colin\\AppData\\Roaming\\Microsoft\\UserSecrets\\platformplatform-f817f2a1-ac57-4756-aef2-a57ca864bbd3"
-    ]
-  },
   "enabledMcpjsonServers": [
     "developer-cli"
   ],
@@ -92,24 +12,6 @@
             "command": ".claude/hooks/pre-tool-use-bash.sh"
           }
         ]
-      },
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": ".claude/hooks/pre-tool-use-excuse-check.sh"
-          }
-        ]
-      }
-    ],
-    "Stop": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": ".claude/hooks/stop-excuse-check.sh"
-          }
-        ]
       }
     ],
     "PostToolUse": [
@@ -121,19 +23,10 @@
             "command": ".claude/hooks/post-tool-use-bash.sh"
           }
         ]
-      },
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": ".claude/hooks/check-interrupt.sh"
-          }
-        ]
       }
     ]
   },
   "enabledPlugins": {
-    "typescript-lsp@claude-plugins-official": true,
-    "csharp-lsp@claude-plugins-official": true
+    "typescript-lsp@claude-plugins-official": true
   }
 }

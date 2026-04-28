@@ -33,7 +33,7 @@ public sealed class DatabaseSeeder
         Tenant1MemberSession = Session.Create(Tenant1.Id, Tenant1Member.Id, LoginMethod.OneTimePassword, "TestUserAgent", IPAddress.Loopback);
         accountDbContext.Set<Session>().AddRange(Tenant1MemberSession);
 
-        Tenant1Subscription = Subscription.Create(Tenant1.Id, DateTimeOffset.UtcNow);
+        Tenant1Subscription = Subscription.Create(Tenant1.Id);
         accountDbContext.Set<Subscription>().Add(Tenant1Subscription);
 
         accountDbContext.SaveChanges();
