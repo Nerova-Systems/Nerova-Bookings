@@ -1,3 +1,7 @@
+import type { Appointment } from "@/shared/lib/appointmentsApi";
+
+import { formatDayNumber, formatWeekday } from "@/shared/lib/dateFormatting";
+
 type EventType = "confirmed" | "pending" | "sync" | "blocked";
 
 interface CalEvent {
@@ -16,58 +20,6 @@ interface DayColumn {
   closed?: boolean;
 }
 
-const DAYS: DayColumn[] = [
-  {
-    day: "Mon",
-    date: "21",
-    events: [
-      { label: "10:00 · Refilwe", type: "confirmed", topPct: 8.3, heightPct: 8.3 },
-      { label: "13:00 · Pieter", type: "confirmed", topPct: 33.3, heightPct: 8.3 },
-      { label: "Personal · Google", type: "sync", topPct: 50, heightPct: 16.6 }
-    ]
-  },
-  {
-    day: "Tue",
-    date: "22",
-    isToday: true,
-    events: [
-      { label: "09:00 · Liam · awaiting confirm", type: "pending", topPct: 8.3, heightPct: 16.6 },
-      { label: "10:30 · Thandi · 30m", type: "pending", topPct: 20.8, heightPct: 4.1 },
-      { label: "13:00 · Pieter", type: "confirmed", topPct: 41.6, heightPct: 8.3 },
-      { label: "15:30 · Group · 4 ppl", type: "confirmed", topPct: 62.5, heightPct: 12.5 }
-    ]
-  },
-  {
-    day: "Wed",
-    date: "23",
-    events: [
-      { label: "09:30 · Refilwe", type: "pending", topPct: 12.5, heightPct: 8.3 },
-      { label: "11:00 · Marco", type: "confirmed", topPct: 25, heightPct: 4.1 },
-      { label: "Lunch · Google", type: "sync", topPct: 45.8, heightPct: 8.3 },
-      { label: "14:00 · Aisha · pay overdue", type: "pending", topPct: 62.5, heightPct: 8.3 }
-    ]
-  },
-  {
-    day: "Thu",
-    date: "24",
-    events: [
-      { label: "Blocked", type: "blocked", topPct: 0, heightPct: 33.3 },
-      { label: "14:00 · Mia", type: "confirmed", topPct: 50, heightPct: 8.3 }
-    ]
-  },
-  {
-    day: "Fri",
-    date: "25",
-    events: [
-      { label: "10:00 · Sipho", type: "confirmed", topPct: 8.3, heightPct: 8.3 },
-      { label: "12:00 · Ayanda", type: "confirmed", topPct: 25, heightPct: 8.3 },
-      { label: "15:00 · Olivia", type: "confirmed", topPct: 50, heightPct: 12.5 }
-    ]
-  },
-  { day: "Sat", date: "26", isWeekend: true, events: [], closed: true },
-  { day: "Sun", date: "27", isWeekend: true, events: [], closed: true }
-];
-
 const HOURS = ["8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18"];
 
 function eventClasses(type: EventType): string {
@@ -77,7 +29,9 @@ function eventClasses(type: EventType): string {
   return "bg-black/5 border-border text-muted-foreground";
 }
 
-export function WeekGrid() {
+export function WeekGrid({ appointments }: { appointments: Appointment[] }) {
+  const days = buildDays(appointments);
+
   return (
     <>
       <div className="grid h-[38.75rem] grid-cols-[3rem_1fr] overflow-hidden rounded-xl border border-border bg-background">
@@ -93,7 +47,7 @@ export function WeekGrid() {
           ))}
         </div>
         <div className="grid grid-cols-7">
-          {DAYS.map((col) => (
+          {days.map((col) => (
             <div
               key={col.date}
               className={`flex flex-col border-r border-border last:border-0 ${col.isWeekend ? "bg-muted/50" : ""}`}
@@ -147,7 +101,7 @@ export function WeekGrid() {
         {[
           { type: "confirmed" as const, label: "Confirmed" },
           { type: "pending" as const, label: "Awaiting confirmation" },
-          { type: "sync" as const, label: "External (Google sync)" },
+          { type: "sync" as const, label: "External busy blocks (Google/Microsoft via Nango)" },
           { type: "blocked" as const, label: "Blocked time" }
         ].map((item) => (
           <span key={item.label} className="inline-flex items-center gap-1.5">
@@ -158,4 +112,59 @@ export function WeekGrid() {
       </div>
     </>
   );
+}
+
+function buildDays(appointments: Appointment[]): DayColumn[] {
+  const firstDate = appointments.length > 0 ? new Date(appointments[0].startAt) : new Date();
+  const weekStart = startOfWeek(firstDate);
+  const todayKey = dateKey(new Date());
+
+  return Array.from({ length: 7 }, (_, index) => {
+    const date = new Date(weekStart);
+    date.setDate(weekStart.getDate() + index);
+    const isWeekend = date.getDay() === 0 || date.getDay() === 6;
+    const events = appointments
+      .filter((appointment) => dateKey(new Date(appointment.startAt)) === dateKey(date))
+      .map(toCalendarEvent);
+
+    if (index === 2) {
+      events.push({ label: "External busy · Nango", type: "sync", topPct: 45.8, heightPct: 8.3 });
+    }
+
+    return {
+      day: formatWeekday(date),
+      date: formatDayNumber(date),
+      isToday: dateKey(date) === todayKey,
+      isWeekend,
+      events,
+      closed: isWeekend
+    };
+  });
+}
+
+function toCalendarEvent(appointment: Appointment): CalEvent {
+  const start = new Date(appointment.startAt);
+  const end = new Date(appointment.endAt);
+  const minutesFromStart = (start.getHours() - 8) * 60 + start.getMinutes();
+  const durationMinutes = Math.max(30, (end.getTime() - start.getTime()) / 60000);
+  const type = appointment.status === "confirmed" ? "confirmed" : "pending";
+
+  return {
+    label: `${appointment.time} · ${appointment.name} · ${appointment.statusLabel}`,
+    type,
+    topPct: Math.max(0, Math.min(92, (minutesFromStart / 600) * 100)),
+    heightPct: Math.max(4.1, (durationMinutes / 600) * 100)
+  };
+}
+
+function startOfWeek(date: Date) {
+  const next = new Date(date);
+  const day = next.getDay() === 0 ? 7 : next.getDay();
+  next.setDate(next.getDate() - day + 1);
+  next.setHours(0, 0, 0, 0);
+  return next;
+}
+
+function dateKey(date: Date) {
+  return date.toISOString().slice(0, 10);
 }

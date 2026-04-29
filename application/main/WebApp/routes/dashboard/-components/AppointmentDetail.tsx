@@ -1,9 +1,18 @@
 import { Trans } from "@lingui/react/macro";
 import { Button } from "@repo/ui/components/Button";
 
+import { formatDayGroup, formatTime } from "@/shared/lib/dateFormatting";
+
 import { StatusDot, type Appointment } from "./appointmentTypes";
 
-export function AppointmentDetail({ appointment }: { appointment: Appointment }) {
+interface AppointmentDetailProps {
+  appointment: Appointment;
+  onConfirm: (id: string) => void;
+}
+
+export function AppointmentDetail({ appointment, onConfirm }: AppointmentDetailProps) {
+  const when = formatDateTimeRange(appointment.startAt, appointment.endAt);
+
   return (
     <div className="flex min-h-0 flex-col border-r border-border bg-background">
       <div className="flex-shrink-0 border-b border-border px-6 pt-4.5 pb-3.5">
@@ -23,13 +32,13 @@ export function AppointmentDetail({ appointment }: { appointment: Appointment })
           </span>
         </div>
         <div className="mt-1 text-[12.5px] text-muted-foreground">
-          Tue 22 April · 09:00 – 10:00 (60 min) · Sea Point studio
+          {when.summary} ({appointment.duration}) · {appointment.location}
         </div>
       </div>
 
       <div className="flex-1 space-y-6 overflow-y-auto px-6 py-4">
         <div className="flex flex-wrap gap-2">
-          <Button size="sm">
+          <Button size="sm" onClick={() => onConfirm(appointment.id)} disabled={appointment.status === "confirmed"}>
             <Trans>Confirm booking</Trans>
           </Button>
           <Button variant="outline" size="sm">
@@ -55,34 +64,40 @@ export function AppointmentDetail({ appointment }: { appointment: Appointment })
             <span className="text-muted-foreground">Service</span>
             <span className="text-foreground">
               <strong>{appointment.service}</strong>
-              <span className="text-muted-foreground"> · 60 min · {appointment.amount}</span>
+              <span className="text-muted-foreground">
+                {" "}
+                · {appointment.duration} · {appointment.amount}
+              </span>
             </span>
             <span className="text-muted-foreground">When</span>
-            <span>Tue 22 April · 09:00–10:00 · Africa/Johannesburg</span>
+            <span>{when.detail} · Africa/Johannesburg</span>
             <span className="text-muted-foreground">Where</span>
             <span>
-              14 Main Rd, Sea Point, Cape Town{" "}
+              {appointment.location}{" "}
               <span className="ml-1 rounded bg-muted px-1.5 py-0.5 text-[10.5px] font-medium text-foreground">
                 Physical
               </span>
             </span>
-            <span className="text-muted-foreground">Booked</span>
-            <span>22 Apr 06:14 via WhatsApp Flow</span>
-            <span className="text-muted-foreground">Source</span>
-            <span>+27 82 341 7890 · profile name "Liam B."</span>
+            <span className="text-muted-foreground">Booked via</span>
+            <span>{appointment.channel.replace("via ", "")}</span>
+            <span className="text-muted-foreground">Client</span>
+            <span>
+              {appointment.phone}
+              {appointment.email ? ` · ${appointment.email}` : ""}
+            </span>
           </div>
         </div>
 
         <div>
           <div className="mb-2.5 text-[11px] font-semibold tracking-[0.06em] text-muted-foreground uppercase">
-            <Trans>Answers from the flow</Trans>
+            <Trans>Flow answers</Trans>
           </div>
           <div className="space-y-2.5">
             {[
-              { q: "Is this your first visit?", a: "No — last visit was Feb 2026." },
+              { q: "Service request", a: `${appointment.service} for ${appointment.duration}.` },
               {
-                q: "Anything we should know?",
-                a: "Sore left shoulder from Tuesday's gym session. Prefer firm pressure on right side."
+                q: "Operational note",
+                a: appointment.clientAlert ?? appointment.clientInternalNote ?? "No intake notes captured yet."
               }
             ].map((qa) => (
               <div key={qa.q} className="border-l-2 border-border pl-3">
@@ -96,51 +111,51 @@ export function AppointmentDetail({ appointment }: { appointment: Appointment })
         <div>
           <div className="mb-2.5 flex items-center gap-2">
             <span className="text-[11px] font-semibold tracking-[0.06em] text-muted-foreground uppercase">
-              <Trans>Conversation transcript</Trans>
+              <Trans>Lifecycle events</Trans>
             </span>
-            <span className="inline-flex items-center gap-1 rounded-full bg-success/10 px-1.5 py-0.5 text-[10.5px] font-medium text-success">
-              <svg width="9" height="9" viewBox="0 0 9 9" fill="none" stroke="currentColor" strokeWidth="1.6">
-                <circle cx="4.5" cy="4.5" r="3.5" />
-                <polyline points="3,4.5 4.2,5.7 6,3.7" />
-              </svg>
-              <Trans>Fully automated</Trans>
+            <span className="inline-flex items-center gap-1 rounded-full bg-muted px-1.5 py-0.5 text-[10.5px] font-medium text-muted-foreground">
+              <Trans>Fixed flow model</Trans>
             </span>
           </div>
           <div className="flex flex-col gap-2 rounded-xl border border-border bg-muted p-3.5">
-            <div className="flex max-w-[80%] flex-col gap-0.5 self-start">
-              <span className="px-1 text-[10.5px] text-muted-foreground">Liam · 06:12</span>
-              <div className="rounded-xl border border-border bg-background px-3 py-1.5 text-[0.8125rem] leading-snug">
-                Hi! I&apos;d like to book.
-              </div>
-            </div>
-            <div className="flex max-w-[80%] flex-col items-end gap-0.5 self-end">
-              <span className="px-1 text-[10.5px] text-muted-foreground">Nerova bot · 06:12</span>
-              <div className="rounded-xl border border-[rgba(44,122,79,0.2)] bg-[#dcf8c6] px-3 py-1.5 text-[0.8125rem] leading-snug text-[#1b3a26] dark:bg-[#1b3a26] dark:text-[#dcf8c6]">
-                Hi Liam 👋 Tap below to pick a service &amp; time.
-              </div>
-              <div className="rounded-lg border border-border bg-background px-3 py-1.5 text-[0.8rem] font-medium text-foreground">
-                📅 Book an appointment
-              </div>
-            </div>
-            <div className="flex max-w-[80%] flex-col gap-0.5 self-start">
-              <span className="px-1 text-[10.5px] text-muted-foreground">Liam · 06:14</span>
-              <div className="rounded-xl border border-border bg-background px-3 py-1.5 text-[0.8125rem] leading-snug italic">
-                Submitted booking flow: Full consultation · Tue 22 April · 09:00
-              </div>
-            </div>
-            <div className="flex max-w-[80%] flex-col items-end gap-0.5 self-end">
-              <span className="px-1 text-[10.5px] text-muted-foreground">Nerova bot · 06:14</span>
-              <div className="rounded-xl border border-[rgba(44,122,79,0.2)] bg-[#dcf8c6] px-3 py-1.5 text-[0.8125rem] leading-snug text-[#1b3a26] dark:bg-[#1b3a26] dark:text-[#dcf8c6]">
-                Thanks Liam — your request has been sent to Sarah&apos;s Studio for confirmation. We&apos;ll message you
-                the moment it&apos;s confirmed.
-              </div>
-            </div>
+            <EventLine title="Booking request" value={`${appointment.name} selected ${appointment.service}.`} />
+            <EventLine title="Slot hold" value={`${when.summary} was reserved pending operator review.`} />
+            <EventLine title="Payment state" value={appointment.statusLabel} />
+            <EventLine
+              title="Future channel"
+              value="WhatsApp transport is deferred; this record can be reused by fixed WhatsApp flows later."
+            />
           </div>
           <p className="mt-2 text-[11.5px] text-muted-foreground">
-            <Trans>Conversations are managed by the Nerova bot. Handle the booking lifecycle from this panel.</Trans>
+            <Trans>
+              This panel manages the booking lifecycle now through the app and public booking page. WhatsApp delivery
+              plugs into the same fixed flow events later.
+            </Trans>
           </p>
         </div>
       </div>
     </div>
   );
+}
+
+function EventLine({ title, value }: { title: string; value: string }) {
+  return (
+    <div className="rounded-lg border border-border bg-background px-3 py-2">
+      <div className="text-[10.5px] font-semibold tracking-[0.05em] text-muted-foreground uppercase">{title}</div>
+      <div className="mt-0.5 text-[0.8125rem]">{value}</div>
+    </div>
+  );
+}
+
+function formatDateTimeRange(startAt: string, endAt: string) {
+  const start = new Date(startAt);
+  const end = new Date(endAt);
+  const date = formatDayGroup(start);
+  const startTime = formatTime(start);
+  const endTime = formatTime(end);
+
+  return {
+    summary: `${date} · ${startTime}-${endTime}`,
+    detail: `${date} · ${startTime}-${endTime}`
+  };
 }

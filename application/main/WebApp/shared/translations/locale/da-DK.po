@@ -13,12 +13,6 @@ msgstr ""
 "Plural-Forms: \n"
 "X-Generator: @lingui/cli\n"
 
-msgid "142 clients · 8 added this month"
-msgstr ""
-
-msgid "8 active across 3 categories"
-msgstr ""
-
 msgid "Actions"
 msgstr ""
 
@@ -40,19 +34,31 @@ msgstr ""
 msgid "Analytics | Nerova"
 msgstr ""
 
-msgid "Answers from the flow"
-msgstr ""
-
 msgid "Archived"
 msgstr ""
 
 msgid "Archived services are hidden from the booking flow."
 msgstr ""
 
+msgid "Available slots"
+msgstr ""
+
 msgid "Block time"
 msgstr ""
 
+msgid "Book an appointment"
+msgstr ""
+
+msgid "Book appointment | Nerova"
+msgstr ""
+
 msgid "Booking"
+msgstr ""
+
+msgid "Booking confirmation | Nerova"
+msgstr ""
+
+msgid "Booking received"
 msgstr ""
 
 msgid "Booking sources"
@@ -70,6 +76,12 @@ msgstr ""
 msgid "Calendar | Nerova"
 msgstr ""
 
+msgid "Checking transaction reference..."
+msgstr ""
+
+msgid "Choose a service, pick a slot, then enter your details."
+msgstr ""
+
 msgid "Clients"
 msgstr ""
 
@@ -85,19 +97,25 @@ msgstr ""
 msgid "Confirm booking"
 msgstr ""
 
-msgid "Conversation transcript"
-msgstr ""
-
-msgid "Conversations are managed by the Nerova bot. Handle the booking lifecycle from this panel."
+msgid "Confirm request"
 msgstr ""
 
 msgid "Daily"
 msgstr ""
 
+msgid "Done"
+msgstr ""
+
 msgid "Export CSV"
 msgstr ""
 
-msgid "Fully automated"
+msgid "Fixed flow model"
+msgstr ""
+
+msgid "Flow answers"
+msgstr ""
+
+msgid "Google and Microsoft calendar busy blocks via Nango"
 msgstr ""
 
 msgid "Import contacts"
@@ -107,6 +125,15 @@ msgid "Internal notes"
 msgstr ""
 
 msgid "Jump to"
+msgstr ""
+
+msgid "Lifecycle events"
+msgstr ""
+
+msgid "Loading appointments…"
+msgstr ""
+
+msgid "Loading confirmation..."
 msgstr ""
 
 msgid "Main"
@@ -130,13 +157,28 @@ msgstr ""
 msgid "No clients match your search."
 msgstr ""
 
+msgid "No deposit required for this service."
+msgstr ""
+
+msgid "No open slots for this date."
+msgstr ""
+
 msgid "No results found."
 msgstr ""
 
-msgid "Operational feed · 7 items need review"
+msgid "Operational feed"
 msgstr ""
 
 msgid "Operational metrics · last 30 days"
+msgstr ""
+
+msgid "Payment confirmation | Nerova"
+msgstr ""
+
+msgid "Payment needs review"
+msgstr ""
+
+msgid "Public booking test path"
 msgstr ""
 
 msgid "Recent visits"
@@ -166,13 +208,22 @@ msgstr ""
 msgid "Send payment link"
 msgstr ""
 
+msgid "Service"
+msgstr ""
+
 msgid "Services"
 msgstr ""
 
 msgid "Services | Nerova"
 msgstr ""
 
-msgid "Synced via Google · 6 busy blocks imported"
+msgid "The payment return is verified server-side before the appointment is marked paid."
+msgstr ""
+
+msgid "This panel manages the booking lifecycle now through the app and public booking page. WhatsApp delivery plugs into the same fixed flow events later."
+msgstr ""
+
+msgid "This uses the same service, availability, client, appointment, and payment records that future fixed WhatsApp flows will use."
 msgstr ""
 
 msgid "Today"
@@ -181,11 +232,23 @@ msgstr ""
 msgid "Top services"
 msgstr ""
 
+msgid "Verifying payment"
+msgstr ""
+
+msgid "View booking"
+msgstr ""
+
 msgid "View calendar"
 msgstr ""
 
 msgid "View full profile →"
 msgstr ""
 
+msgid "We could not verify this payment reference yet."
+msgstr ""
+
 msgid "Week view · Africa/Johannesburg"
+msgstr ""
+
+msgid "Your appointment request has been saved."
 msgstr ""

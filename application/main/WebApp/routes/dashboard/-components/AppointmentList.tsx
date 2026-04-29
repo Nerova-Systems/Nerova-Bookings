@@ -1,4 +1,4 @@
-import { APPOINTMENTS, StatusDot, statusTextClass, type Appointment } from "./appointmentTypes";
+import { StatusDot, statusTextClass, type Appointment } from "./appointmentTypes";
 
 export type FilterTab = "all" | "needs-action" | "paid" | "today";
 
@@ -6,19 +6,21 @@ export function AppointmentList({
   selectedId,
   onSelect,
   activeTab,
-  onTabChange
+  onTabChange,
+  appointments
 }: {
   selectedId: string;
   onSelect: (id: string) => void;
   activeTab: FilterTab;
   onTabChange: (tab: FilterTab) => void;
+  appointments: Appointment[];
 }) {
-  const needsActionCount = APPOINTMENTS.filter((a) => a.needsAction).length;
+  const needsActionCount = appointments.filter((a) => a.needsAction).length;
 
-  const filtered = APPOINTMENTS.filter((a) => {
+  const filtered = appointments.filter((a) => {
     if (activeTab === "needs-action") return a.needsAction;
     if (activeTab === "paid") return a.status === "confirmed";
-    if (activeTab === "today") return a.dayGroup.startsWith("Today");
+    if (activeTab === "today") return a.dayGroup === appointments[0]?.dayGroup;
     return true;
   });
 
@@ -29,7 +31,7 @@ export function AppointmentList({
   }, {});
 
   const tabs: { key: FilterTab; label: string; count?: number }[] = [
-    { key: "all", label: "All", count: APPOINTMENTS.length },
+    { key: "all", label: "All", count: appointments.length },
     { key: "needs-action", label: "Needs action", count: needsActionCount },
     { key: "paid", label: "Paid" },
     { key: "today", label: "Today" }

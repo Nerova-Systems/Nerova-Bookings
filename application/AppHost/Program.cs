@@ -17,6 +17,7 @@ SecretManagerHelper.GenerateAuthenticationTokenSigningKey("authentication-token-
 var (googleOAuthConfigured, googleOAuthClientId, googleOAuthClientSecret) = ConfigureGoogleOAuthParameters();
 
 var (payFastConfigured, payFastMerchantId, payFastMerchantKey, payFastPassphrase, payFastSandbox, payFastNotifyUrl, payFastReturnUrl, payFastCancelUrl, payFastAllowedIps) = ConfigurePayFastParameters();
+var (paystackConfigured, paystackPublicKey, paystackSecretKey, paystackCallbackUrl, paystackWebhookUrl) = ConfigurePaystackParameters();
 
 var postgresPassword = builder.CreateStablePassword("postgres-password");
 var postgres = builder.AddPostgres("postgres", password: postgresPassword, port: 9002)
@@ -115,6 +116,11 @@ var mainApi = builder
     .WithReference(azureStorage)
     .WithEnvironment("PUBLIC_GOOGLE_OAUTH_ENABLED", googleOAuthConfigured ? "true" : "false")
     .WithEnvironment("PUBLIC_SUBSCRIPTION_ENABLED", payFastConfigured ? "true" : "false")
+    .WithEnvironment("PUBLIC_PAYSTACK_ENABLED", paystackConfigured ? "true" : "false")
+    .WithEnvironment("PAYSTACK_PUBLIC_KEY", paystackPublicKey)
+    .WithEnvironment("PAYSTACK_SECRET_KEY", paystackSecretKey)
+    .WithEnvironment("PAYSTACK_CALLBACK_URL", paystackCallbackUrl)
+    .WithEnvironment("PAYSTACK_WEBHOOK_URL", paystackWebhookUrl)
     .WaitFor(mainWorkers);
 
 var appGateway = builder
@@ -239,6 +245,50 @@ return;
         builder.CreateResourceBuilder(new ParameterResource("payfast-return-url", _ => "not-configured", true)),
         builder.CreateResourceBuilder(new ParameterResource("payfast-cancel-url", _ => "not-configured", true)),
         builder.CreateResourceBuilder(new ParameterResource("payfast-allowed-ips", _ => "not-configured", true))
+    );
+}
+
+(bool Configured,
+    IResourceBuilder<ParameterResource> PublicKey,
+    IResourceBuilder<ParameterResource> SecretKey,
+    IResourceBuilder<ParameterResource> CallbackUrl,
+    IResourceBuilder<ParameterResource> WebhookUrl) ConfigurePaystackParameters()
+{
+    _ = builder.AddParameter("paystack-enabled")
+        .WithDescription("Enable Paystack for client appointment deposits/payments. Set to `true` after test keys are available.", true);
+
+    var configured = builder.Configuration["Parameters:paystack-enabled"] == "true";
+
+    if (configured)
+    {
+        var publicKey = builder.AddParameter("paystack-public-key", true)
+            .WithDescription("Paystack test public key used by public appointment payment screens.", true);
+        var secretKey = builder.AddParameter("paystack-secret-key", true)
+            .WithDescription("Paystack test secret key used for server-side transaction verification and webhook signatures.", true);
+        var callbackUrl = builder.CreateResourceBuilder(
+            new ParameterResource(
+                "paystack-callback-url",
+                _ => builder.Configuration["Parameters:paystack-callback-url"] ?? "https://localhost:9000/book/payment/callback",
+                true
+            )
+        );
+        var webhookUrl = builder.CreateResourceBuilder(
+            new ParameterResource(
+                "paystack-webhook-url",
+                _ => builder.Configuration["Parameters:paystack-webhook-url"] ?? "https://localhost:9000/api/main/payments/paystack/webhook",
+                true
+            )
+        );
+
+        return (configured, publicKey, secretKey, callbackUrl, webhookUrl);
+    }
+
+    return (
+        configured,
+        builder.CreateResourceBuilder(new ParameterResource("paystack-public-key", _ => "not-configured", true)),
+        builder.CreateResourceBuilder(new ParameterResource("paystack-secret-key", _ => "not-configured", true)),
+        builder.CreateResourceBuilder(new ParameterResource("paystack-callback-url", _ => "not-configured", true)),
+        builder.CreateResourceBuilder(new ParameterResource("paystack-webhook-url", _ => "not-configured", true))
     );
 }
 

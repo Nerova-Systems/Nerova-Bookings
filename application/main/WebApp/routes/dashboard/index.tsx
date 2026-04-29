@@ -5,9 +5,10 @@ import { createFileRoute } from "@tanstack/react-router";
 import { SearchIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 
+import { useAppointmentShell, useConfirmAppointment, type Appointment } from "@/shared/lib/appointmentsApi";
+
 import { AppointmentDetail } from "./-components/AppointmentDetail";
 import { AppointmentList, type FilterTab } from "./-components/AppointmentList";
-import { APPOINTMENTS } from "./-components/appointmentTypes";
 import { ClientPanel } from "./-components/ClientPanel";
 import { CommandPalette } from "./-components/CommandPalette";
 
@@ -16,12 +17,23 @@ export const Route = createFileRoute("/dashboard/")({
   component: ActivityPage
 });
 
+const EMPTY_APPOINTMENTS: Appointment[] = [];
+
 function ActivityPage() {
   const [selectedId, setSelectedId] = useState("1");
   const [activeTab, setActiveTab] = useState<FilterTab>("all");
   const [cmdkOpen, setCmdkOpen] = useState(false);
+  const shellQuery = useAppointmentShell();
+  const confirmMutation = useConfirmAppointment();
 
-  const selectedAppointment = APPOINTMENTS.find((a) => a.id === selectedId) ?? APPOINTMENTS[0];
+  const appointments = shellQuery.data?.appointments ?? EMPTY_APPOINTMENTS;
+  const selectedAppointment = appointments.find((a) => a.id === selectedId) ?? appointments[0];
+
+  useEffect(() => {
+    if (appointments.length > 0 && !appointments.some((a) => a.id === selectedId)) {
+      setSelectedId(appointments[0].id);
+    }
+  }, [appointments, selectedId]);
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
@@ -46,7 +58,8 @@ function ActivityPage() {
             <Trans>Activity</Trans>
           </h1>
           <span className="text-[12.5px] text-muted-foreground">
-            <Trans>Operational feed · 7 items need review</Trans>
+            <Trans>Operational feed</Trans>
+            {appointments.length > 0 && ` · ${appointments.filter((a) => a.needsAction).length} items need review`}
           </span>
         </div>
         <div className="ml-auto flex items-center gap-2">
@@ -73,14 +86,26 @@ function ActivityPage() {
       </header>
 
       <div className="grid min-h-0 flex-1 grid-cols-[380px_1fr_320px] overflow-hidden">
-        <AppointmentList
-          selectedId={selectedId}
-          onSelect={setSelectedId}
-          activeTab={activeTab}
-          onTabChange={setActiveTab}
-        />
-        <AppointmentDetail appointment={selectedAppointment} />
-        <ClientPanel appointment={selectedAppointment} />
+        {shellQuery.isLoading || !selectedAppointment ? (
+          <div className="col-span-3 flex items-center justify-center text-sm text-muted-foreground">
+            <Trans>Loading appointments…</Trans>
+          </div>
+        ) : (
+          <>
+            <AppointmentList
+              selectedId={selectedId}
+              onSelect={setSelectedId}
+              activeTab={activeTab}
+              onTabChange={setActiveTab}
+              appointments={appointments}
+            />
+            <AppointmentDetail
+              appointment={selectedAppointment}
+              onConfirm={(id) => confirmMutation.mutate(id, { onSuccess: () => shellQuery.refetch() })}
+            />
+            <ClientPanel appointment={selectedAppointment} />
+          </>
+        )}
       </div>
 
       <CommandPalette open={cmdkOpen} onOpenChange={setCmdkOpen} />

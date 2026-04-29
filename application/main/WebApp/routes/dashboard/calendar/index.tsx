@@ -5,6 +5,8 @@ import { createFileRoute } from "@tanstack/react-router";
 import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
 import { useEffect } from "react";
 
+import { useAppointmentShell } from "@/shared/lib/appointmentsApi";
+
 import { WeekGrid } from "./-components/WeekGrid";
 
 export const Route = createFileRoute("/dashboard/calendar/")({
@@ -13,6 +15,9 @@ export const Route = createFileRoute("/dashboard/calendar/")({
 });
 
 function CalendarPage() {
+  const shellQuery = useAppointmentShell();
+  const appointments = shellQuery.data?.appointments ?? [];
+
   useEffect(() => {
     document.title = t`Calendar | Nerova`;
   }, []);
@@ -63,7 +68,7 @@ function CalendarPage() {
           <div className="ml-auto flex items-center gap-2">
             <div className="inline-flex items-center gap-1.5 rounded-full bg-muted px-2.5 py-1 text-xs text-muted-foreground">
               <span className="size-1.5 rounded-full bg-success shadow-[0_0_0_3px_rgba(44,122,79,0.2)]" />
-              <Trans>Synced via Google · 6 busy blocks imported</Trans>
+              <Trans>Google and Microsoft calendar busy blocks via Nango</Trans>
             </div>
             <div className="inline-flex gap-0.5 rounded-lg bg-muted p-0.5">
               {(["Day", "Week", "Month"] as const).map((v) => (
@@ -81,7 +86,7 @@ function CalendarPage() {
           </div>
         </div>
 
-        <WeekGrid />
+        <WeekGrid appointments={appointments} />
       </div>
     </div>
   );

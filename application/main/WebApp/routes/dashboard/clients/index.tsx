@@ -5,7 +5,9 @@ import { createFileRoute } from "@tanstack/react-router";
 import { SearchIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 
-import { CLIENTS, FILTER_COUNTS, FILTER_LABELS, FlagDot, type Filter } from "./-components/clientData";
+import { useAppointmentShell } from "@/shared/lib/appointmentsApi";
+
+import { FILTER_LABELS, FlagDot, type Filter } from "./-components/clientData";
 
 export const Route = createFileRoute("/dashboard/clients/")({
   staticData: { trackingTitle: "Clients" },
@@ -15,12 +17,20 @@ export const Route = createFileRoute("/dashboard/clients/")({
 function ClientsPage() {
   const [search, setSearch] = useState("");
   const [activeFilter, setActiveFilter] = useState<Filter>("all");
+  const shellQuery = useAppointmentShell();
+  const clients = shellQuery.data?.clients ?? [];
+  const filterCounts = {
+    all: clients.length,
+    vip: clients.filter((client) => client.status === "VIP").length,
+    new: clients.filter((client) => client.status === "New").length,
+    blocked: clients.filter((client) => client.status === "Blocked").length
+  };
 
   useEffect(() => {
     document.title = t`Clients | Nerova`;
   }, []);
 
-  const filtered = CLIENTS.filter((c) => {
+  const filtered = clients.filter((c) => {
     const matchesSearch =
       search === "" || c.name.toLowerCase().includes(search.toLowerCase()) || c.phone.includes(search);
     const matchesFilter =
@@ -39,7 +49,7 @@ function ClientsPage() {
             <Trans>Clients</Trans>
           </h1>
           <span className="text-[12.5px] text-muted-foreground">
-            <Trans>142 clients · 8 added this month</Trans>
+            {clients.length} clients · {clients.filter((client) => client.status === "New").length} new
           </span>
         </div>
         <div className="ml-auto flex items-center gap-2">
@@ -80,7 +90,7 @@ function ClientsPage() {
                 <span
                   className={`rounded-full px-1.5 text-[10.5px] ${activeFilter === f ? "bg-background/20" : "bg-muted text-muted-foreground"}`}
                 >
-                  {FILTER_COUNTS[f]}
+                  {filterCounts[f]}
                 </span>
               </button>
             ))}

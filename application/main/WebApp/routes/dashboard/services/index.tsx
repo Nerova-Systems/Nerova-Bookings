@@ -4,7 +4,9 @@ import { Button } from "@repo/ui/components/Button";
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect } from "react";
 
-import { ARCHIVED, CATEGORIES, ServiceCard } from "./-components/ServiceCard";
+import { useAppointmentShell, type Service, type ServiceCategory } from "@/shared/lib/appointmentsApi";
+
+import { ServiceCard } from "./-components/ServiceCard";
 
 export const Route = createFileRoute("/dashboard/services/")({
   staticData: { trackingTitle: "Services" },
@@ -12,7 +14,11 @@ export const Route = createFileRoute("/dashboard/services/")({
 });
 
 function ServicesPage() {
-  const totalActive = CATEGORIES.reduce((sum, c) => sum + c.services.length, 0);
+  const shellQuery = useAppointmentShell();
+  const categories = groupServices(shellQuery.data?.categories ?? [], shellQuery.data?.services ?? []);
+  const archived = (shellQuery.data?.services ?? []).filter((service) => service.archived);
+  const activeServices = (shellQuery.data?.services ?? []).filter((service) => !service.archived);
+  const totalBookings = activeServices.reduce((sum, service) => sum + service.bookingsThisMonth, 0);
 
   useEffect(() => {
     document.title = t`Services | Nerova`;
@@ -26,7 +32,7 @@ function ServicesPage() {
             <Trans>Services</Trans>
           </h1>
           <span className="text-[12.5px] text-muted-foreground">
-            <Trans>8 active across 3 categories</Trans>
+            {activeServices.length} active across {categories.length} categories
           </span>
         </div>
         <div className="ml-auto flex items-center gap-2">
@@ -42,10 +48,10 @@ function ServicesPage() {
       <div className="flex-1 overflow-y-auto px-7 py-6">
         <div className="mb-6 grid grid-cols-4 gap-3">
           {[
-            { value: totalActive, label: "Active services" },
-            { value: CATEGORIES.length, label: "Categories" },
-            { value: 42, label: "Bookings this month" },
-            { value: ARCHIVED.length, label: "Archived" }
+            { value: activeServices.length, label: "Active services" },
+            { value: categories.length, label: "Categories" },
+            { value: totalBookings, label: "Bookings this month" },
+            { value: archived.length, label: "Archived" }
           ].map((stat) => (
             <div key={stat.label} className="rounded-xl border border-border bg-background p-4">
               <div className="font-display text-[1.75rem] leading-none font-semibold">{stat.value}</div>
@@ -54,7 +60,7 @@ function ServicesPage() {
           ))}
         </div>
 
-        {CATEGORIES.map((cat) => (
+        {categories.map((cat) => (
           <div key={cat.name} className="mb-7">
             <div className="mb-2.5 flex items-baseline gap-3">
               <h3 className="font-display text-[15px]">{cat.name}</h3>
@@ -74,16 +80,16 @@ function ServicesPage() {
           </div>
         ))}
 
-        {ARCHIVED.length > 0 && (
+        {archived.length > 0 && (
           <div className="mb-7">
             <div className="mb-2.5 flex items-baseline gap-3">
               <h3 className="font-display text-[15px]">
                 <Trans>Archived</Trans>
               </h3>
-              <span className="text-xs text-muted-foreground">{ARCHIVED.length} service</span>
+              <span className="text-xs text-muted-foreground">{archived.length} service</span>
             </div>
             <div className="grid grid-cols-[repeat(auto-fill,minmax(16.25rem,1fr))] gap-3">
-              {ARCHIVED.map((svc) => (
+              {archived.map((svc) => (
                 <ServiceCard key={svc.name} service={svc} />
               ))}
             </div>
@@ -98,4 +104,13 @@ function ServicesPage() {
       </div>
     </div>
   );
+}
+
+function groupServices(categories: ServiceCategory[], services: Service[]) {
+  return categories
+    .map((category) => ({
+      name: category.name,
+      services: services.filter((service) => service.categoryId === category.id && !service.archived)
+    }))
+    .filter((category) => category.services.length > 0);
 }
