@@ -15,7 +15,8 @@ export function PaymentsSection() {
             Payments belong inside the booking sequence
           </h2>
           <p className="mt-5 text-lg leading-8 text-[#d4d4d8]">
-            Nerova separates business subscription billing from client appointment payments, then brings client payment prompts into the fixed WhatsApp flow.
+            Nerova separates business subscription billing from client appointment payments, then brings client payment
+            prompts into the fixed WhatsApp flow.
           </p>
         </div>
 
@@ -26,13 +27,18 @@ export function PaymentsSection() {
                 <div className="flex size-12 items-center justify-center rounded-2xl bg-white text-[#111111]">
                   {index === 0 ? <ReceiptIcon className="size-6" /> : <CreditCardIcon className="size-6" />}
                 </div>
-                <span className="rounded-full bg-white px-3 py-1 text-xs font-semibold text-[#111111]">{stage.label}</span>
+                <span className="rounded-full bg-white px-3 py-1 text-xs font-semibold text-[#111111]">
+                  {stage.label}
+                </span>
               </div>
               <h3 className="text-2xl font-semibold">{stage.title}</h3>
               <p className="mt-3 leading-7 text-[#d4d4d8]">{stage.description}</p>
               <div className="mt-5 flex flex-wrap gap-2">
                 {stage.methods.map((method) => (
-                  <span key={method} className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1.5 text-sm font-medium">
+                  <span
+                    key={method}
+                    className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1.5 text-sm font-medium"
+                  >
                     <CheckIcon className="size-4" />
                     {method}
                   </span>
@@ -56,7 +62,8 @@ export function EnterpriseSection() {
             Custom operations for specialized teams. Coming soon.
           </h2>
           <p className="mt-5 leading-7 text-[#d4d4d8]">
-            Enterprise is where Nerova will support tailored workflows and custom operational datasets for specialized appointment businesses.
+            Enterprise is where Nerova will support tailored workflows and custom operational datasets for specialized
+            appointment businesses.
           </p>
         </div>
         <div className="grid gap-4">

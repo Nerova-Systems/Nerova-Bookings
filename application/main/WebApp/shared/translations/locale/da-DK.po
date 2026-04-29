@@ -13,44 +13,179 @@ msgstr ""
 "Plural-Forms: \n"
 "X-Generator: @lingui/cli\n"
 
-msgid "Burning the midnight oil, {firstName}?"
-msgstr "Sidder du stadig oppe, {firstName}?"
+msgid "142 clients · 8 added this month"
+msgstr ""
 
-msgid "Burning the midnight oil?"
-msgstr "Sidder du stadig oppe?"
+msgid "8 active across 3 categories"
+msgstr ""
 
-msgid "Dashboard"
-msgstr "Dashboard"
+msgid "Actions"
+msgstr ""
 
-msgid "Good afternoon"
-msgstr "God eftermiddag"
+msgid "Activity"
+msgstr ""
 
-msgid "Good afternoon, {firstName}"
-msgstr "God eftermiddag, {firstName}"
+msgid "Activity | Nerova"
+msgstr ""
 
-msgid "Good evening"
-msgstr "God aften"
+msgid "Add client"
+msgstr ""
 
-msgid "Good evening, {firstName}"
-msgstr "God aften, {firstName}"
+msgid "Alerts"
+msgstr ""
 
-msgid "Good morning"
-msgstr "God morgen"
+msgid "Analytics"
+msgstr ""
 
-msgid "Good morning, {firstName}"
-msgstr "God morgen, {firstName}"
+msgid "Analytics | Nerova"
+msgstr ""
 
-msgid "Here's your overview of what's happening."
-msgstr "Her er dit overblik over hvad der sker."
+msgid "Answers from the flow"
+msgstr ""
+
+msgid "Archived"
+msgstr ""
+
+msgid "Archived services are hidden from the booking flow."
+msgstr ""
+
+msgid "Block time"
+msgstr ""
+
+msgid "Booking"
+msgstr ""
+
+msgid "Booking sources"
+msgstr ""
+
+msgid "Bookings over time"
+msgstr ""
+
+msgid "by bookings"
+msgstr ""
+
+msgid "Calendar"
+msgstr ""
+
+msgid "Calendar | Nerova"
+msgstr ""
+
+msgid "Clients"
+msgstr ""
+
+msgid "Clients | Nerova"
+msgstr ""
+
+msgid "Command palette"
+msgstr ""
+
+msgid "Compare ranges"
+msgstr ""
+
+msgid "Confirm booking"
+msgstr ""
+
+msgid "Conversation transcript"
+msgstr ""
+
+msgid "Conversations are managed by the Nerova bot. Handle the booking lifecycle from this panel."
+msgstr ""
+
+msgid "Daily"
+msgstr ""
+
+msgid "Export CSV"
+msgstr ""
+
+msgid "Fully automated"
+msgstr ""
+
+msgid "Import contacts"
+msgstr ""
+
+msgid "Internal notes"
+msgstr ""
+
+msgid "Jump to"
+msgstr ""
+
+msgid "Main"
+msgstr ""
 
 msgid "Main navigation"
 msgstr "Hovednavigation"
 
-msgid "Navigation"
-msgstr "Navigation"
+msgid "Manage categories"
+msgstr ""
 
-msgid "This is where your personalized dashboard content will appear. Stay tuned for updates."
-msgstr "Her vil dit personlige dashboard-indhold blive vist. Hold dig opdateret."
+msgid "More options"
+msgstr ""
 
-msgid "Your dashboard is empty"
-msgstr "Dit dashboard er tomt"
+msgid "New manual booking"
+msgstr ""
+
+msgid "New service"
+msgstr ""
+
+msgid "No clients match your search."
+msgstr ""
+
+msgid "No results found."
+msgstr ""
+
+msgid "Operational feed · 7 items need review"
+msgstr ""
+
+msgid "Operational metrics · last 30 days"
+msgstr ""
+
+msgid "Recent visits"
+msgstr ""
+
+msgid "Reorder"
+msgstr ""
+
+msgid "Reschedule"
+msgstr ""
+
+msgid "Restore any service to make it bookable again."
+msgstr ""
+
+msgid "Search anything"
+msgstr ""
+
+msgid "Search clients, bookings, services or jump to a screen"
+msgstr ""
+
+msgid "Search clients, bookings, services…"
+msgstr ""
+
+msgid "Search clients…"
+msgstr ""
+
+msgid "Send payment link"
+msgstr ""
+
+msgid "Services"
+msgstr ""
+
+msgid "Services | Nerova"
+msgstr ""
+
+msgid "Synced via Google · 6 busy blocks imported"
+msgstr ""
+
+msgid "Today"
+msgstr ""
+
+msgid "Top services"
+msgstr ""
+
+msgid "View calendar"
+msgstr ""
+
+msgid "View full profile →"
+msgstr ""
+
+msgid "Week view · Africa/Johannesburg"
+msgstr ""

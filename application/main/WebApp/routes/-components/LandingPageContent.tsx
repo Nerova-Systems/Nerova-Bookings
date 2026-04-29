@@ -1,13 +1,8 @@
 import { lazy } from "react";
 
-import { LandingHero } from "./LandingHero";
 import { EnterpriseSection, FinalCtaSection, PaymentsSection } from "./LandingConversionSections";
-import {
-  FoundationSection,
-  IntegrationsSection,
-  WhyNerovaSection,
-  WorkflowSection
-} from "./LandingSections";
+import { LandingHero } from "./LandingHero";
+import { FoundationSection, IntegrationsSection, WhyNerovaSection, WorkflowSection } from "./LandingSections";
 import { PricingSection } from "./PricingSection";
 
 const PublicFooter = lazy(() => import("account/PublicFooter"));

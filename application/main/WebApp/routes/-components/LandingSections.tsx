@@ -32,13 +32,17 @@ export function WhyNerovaSection() {
             Built for the way appointment businesses already communicate
           </h2>
           <p className="mt-5 text-lg leading-8 text-[#374151]">
-            Nerova turns WhatsApp conversations into controlled business operations, without sending customers into a generic portal or an unpredictable bot.
+            Nerova turns WhatsApp conversations into controlled business operations, without sending customers into a
+            generic portal or an unpredictable bot.
           </p>
         </div>
 
         <div className="grid gap-4">
           {whyNerovaPoints.map((point, index) => (
-            <article key={point.title} className="grid gap-4 rounded-2xl border border-[#e5e7eb] bg-[#f8f9fa] p-5 md:grid-cols-[3.5rem_1fr]">
+            <article
+              key={point.title}
+              className="grid gap-4 rounded-2xl border border-[#e5e7eb] bg-[#f8f9fa] p-5 md:grid-cols-[3.5rem_1fr]"
+            >
               <div className="flex size-12 items-center justify-center rounded-2xl bg-white">
                 {index === 0 && <MessageCircleIcon className="size-6" />}
                 {index === 1 && <ShieldCheckIcon className="size-6" />}
@@ -66,7 +70,8 @@ export function WorkflowSection() {
             Calendar depth, service control, and team operations
           </h2>
           <p className="mt-5 text-lg leading-8 text-[#374151]">
-            Nerova is the one-stop professional foundation for service businesses: detailed scheduling, configurable services, staff views, and client payment flows.
+            Nerova is the one-stop professional foundation for service businesses: detailed scheduling, configurable
+            services, staff views, and client payment flows.
           </p>
         </div>
 
@@ -75,7 +80,10 @@ export function WorkflowSection() {
             const Icon = workflowIcons[index] ?? CalendarCheck2Icon;
 
             return (
-              <article key={workflow.title} className="grid gap-5 rounded-2xl border border-[#e5e7eb] bg-white p-5 md:grid-cols-[4rem_1fr_auto] md:items-center">
+              <article
+                key={workflow.title}
+                className="grid gap-5 rounded-2xl border border-[#e5e7eb] bg-white p-5 md:grid-cols-[4rem_1fr_auto] md:items-center"
+              >
                 <div className="flex size-14 items-center justify-center rounded-2xl bg-[#f5f5f5] text-[#111111]">
                   <Icon className="size-6" />
                 </div>
@@ -83,7 +91,9 @@ export function WorkflowSection() {
                   <h3 className="text-xl font-semibold">{workflow.title}</h3>
                   <p className="mt-2 leading-7 text-[#374151]">{workflow.description}</p>
                 </div>
-                <span className="w-fit rounded-full bg-[#f5f5f5] px-3 py-1 text-sm font-medium text-[#374151]">{workflow.metric}</span>
+                <span className="w-fit rounded-full bg-[#f5f5f5] px-3 py-1 text-sm font-medium text-[#374151]">
+                  {workflow.metric}
+                </span>
               </article>
             );
           })}
@@ -103,7 +113,8 @@ export function FoundationSection() {
             The business foundation is already part of the platform
           </h2>
           <p className="mt-5 text-lg leading-8 text-[#374151]">
-            The appointment product builds on account, tenant, team, and subscription capabilities already present in the application.
+            The appointment product builds on account, tenant, team, and subscription capabilities already present in
+            the application.
           </p>
         </div>
 
@@ -137,7 +148,8 @@ export function IntegrationsSection() {
             Work with the tools your business already uses
           </h2>
           <p className="text-lg leading-8 text-[#374151]">
-            Integrations are central to Nerova. The first rollout starts with Google tools, then expands to Microsoft and a broader Nango-powered library.
+            Integrations are central to Nerova. The first rollout starts with Google tools, then expands to Microsoft
+            and a broader Nango-powered library.
           </p>
         </div>
 

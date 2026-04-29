@@ -1,0 +1,101 @@
+import { t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
+import { Button } from "@repo/ui/components/Button";
+import { createFileRoute } from "@tanstack/react-router";
+import { useEffect } from "react";
+
+import { ARCHIVED, CATEGORIES, ServiceCard } from "./-components/ServiceCard";
+
+export const Route = createFileRoute("/dashboard/services/")({
+  staticData: { trackingTitle: "Services" },
+  component: ServicesPage
+});
+
+function ServicesPage() {
+  const totalActive = CATEGORIES.reduce((sum, c) => sum + c.services.length, 0);
+
+  useEffect(() => {
+    document.title = t`Services | Nerova`;
+  }, []);
+
+  return (
+    <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
+      <header className="sticky top-0 z-20 flex shrink-0 items-center gap-4 border-b border-border bg-background px-7 py-3.5">
+        <div className="flex flex-col gap-0.5">
+          <h1 className="font-display text-[1.375rem] leading-tight">
+            <Trans>Services</Trans>
+          </h1>
+          <span className="text-[12.5px] text-muted-foreground">
+            <Trans>8 active across 3 categories</Trans>
+          </span>
+        </div>
+        <div className="ml-auto flex items-center gap-2">
+          <Button variant="outline" size="sm">
+            <Trans>Manage categories</Trans>
+          </Button>
+          <Button size="sm">
+            <Trans>New service</Trans>
+          </Button>
+        </div>
+      </header>
+
+      <div className="flex-1 overflow-y-auto px-7 py-6">
+        <div className="mb-6 grid grid-cols-4 gap-3">
+          {[
+            { value: totalActive, label: "Active services" },
+            { value: CATEGORIES.length, label: "Categories" },
+            { value: 42, label: "Bookings this month" },
+            { value: ARCHIVED.length, label: "Archived" }
+          ].map((stat) => (
+            <div key={stat.label} className="rounded-xl border border-border bg-background p-4">
+              <div className="font-display text-[1.75rem] leading-none font-semibold">{stat.value}</div>
+              <div className="mt-1 text-xs text-muted-foreground">{stat.label}</div>
+            </div>
+          ))}
+        </div>
+
+        {CATEGORIES.map((cat) => (
+          <div key={cat.name} className="mb-7">
+            <div className="mb-2.5 flex items-baseline gap-3">
+              <h3 className="font-display text-[15px]">{cat.name}</h3>
+              <span className="text-xs text-muted-foreground">{cat.services.length} services</span>
+              <button
+                type="button"
+                className="ml-auto text-[12.5px] font-medium text-foreground underline decoration-border underline-offset-3 transition-colors hover:decoration-foreground"
+              >
+                <Trans>Reorder</Trans>
+              </button>
+            </div>
+            <div className="grid grid-cols-[repeat(auto-fill,minmax(16.25rem,1fr))] gap-3">
+              {cat.services.map((svc) => (
+                <ServiceCard key={svc.name} service={svc} />
+              ))}
+            </div>
+          </div>
+        ))}
+
+        {ARCHIVED.length > 0 && (
+          <div className="mb-7">
+            <div className="mb-2.5 flex items-baseline gap-3">
+              <h3 className="font-display text-[15px]">
+                <Trans>Archived</Trans>
+              </h3>
+              <span className="text-xs text-muted-foreground">{ARCHIVED.length} service</span>
+            </div>
+            <div className="grid grid-cols-[repeat(auto-fill,minmax(16.25rem,1fr))] gap-3">
+              {ARCHIVED.map((svc) => (
+                <ServiceCard key={svc.name} service={svc} />
+              ))}
+            </div>
+            <div className="mt-2 rounded-lg bg-muted px-3.5 py-2.5 text-xs text-muted-foreground">
+              <Trans>Archived services are hidden from the booking flow.</Trans>{" "}
+              <strong className="font-medium text-foreground">
+                <Trans>Restore any service to make it bookable again.</Trans>
+              </strong>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}

@@ -127,7 +127,15 @@ test.describe("@smoke", () => {
           status: 200,
           contentType: "application/json",
           json: billingHistory([
-            { id: "txn_mock_1", amount: 299.0, currency: "ZAR", status: "Succeeded", date: "2026-02-24T00:00:00Z", invoiceUrl: null, creditNoteUrl: null }
+            {
+              id: "txn_mock_1",
+              amount: 299.0,
+              currency: "ZAR",
+              status: "Succeeded",
+              date: "2026-02-24T00:00:00Z",
+              invoiceUrl: null,
+              creditNoteUrl: null
+            }
           ])
         });
       });
@@ -333,7 +341,14 @@ test.describe("@smoke", () => {
         await route.fulfill({
           status: 200,
           contentType: "application/json",
-          json: { id: 1, createdAt: "2026-01-01T00:00:00Z", modifiedAt: null, name: "Test Organization", state: "Suspended", logoUrl: null }
+          json: {
+            id: 1,
+            createdAt: "2026-01-01T00:00:00Z",
+            modifiedAt: null,
+            name: "Test Organization",
+            state: "Suspended",
+            logoUrl: null
+          }
         });
       });
 
@@ -401,7 +416,14 @@ test.describe("@smoke", () => {
         await route.fulfill({
           status: 200,
           contentType: "application/json",
-          json: { id: 1, createdAt: "2026-01-01T00:00:00Z", modifiedAt: null, name: "Test Organization", state: "Suspended", logoUrl: null }
+          json: {
+            id: 1,
+            createdAt: "2026-01-01T00:00:00Z",
+            modifiedAt: null,
+            name: "Test Organization",
+            state: "Suspended",
+            logoUrl: null
+          }
         });
       });
 
@@ -487,8 +509,24 @@ test.describe("@comprehensive", () => {
           status: 200,
           contentType: "application/json",
           json: billingHistory([
-            { id: "txn_1", amount: 299.0, currency: "ZAR", status: "Succeeded", date: "2026-02-24T00:00:00Z", invoiceUrl: null, creditNoteUrl: null },
-            { id: "txn_2", amount: 299.0, currency: "ZAR", status: "Refunded", date: "2026-01-24T00:00:00Z", invoiceUrl: null, creditNoteUrl: null }
+            {
+              id: "txn_1",
+              amount: 299.0,
+              currency: "ZAR",
+              status: "Succeeded",
+              date: "2026-02-24T00:00:00Z",
+              invoiceUrl: null,
+              creditNoteUrl: null
+            },
+            {
+              id: "txn_2",
+              amount: 299.0,
+              currency: "ZAR",
+              status: "Refunded",
+              date: "2026-01-24T00:00:00Z",
+              invoiceUrl: null,
+              creditNoteUrl: null
+            }
           ])
         });
       });

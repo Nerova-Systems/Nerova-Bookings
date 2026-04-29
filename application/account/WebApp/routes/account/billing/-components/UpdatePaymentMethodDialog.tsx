@@ -41,7 +41,12 @@ export function UpdatePaymentMethodDialog({ isOpen, onOpenChange }: Readonly<Upd
   });
 
   return (
-    <Dialog open={isOpen} onOpenChange={onOpenChange} disablePointerDismissal={true} trackingTitle="Update payment method">
+    <Dialog
+      open={isOpen}
+      onOpenChange={onOpenChange}
+      disablePointerDismissal={true}
+      trackingTitle="Update payment method"
+    >
       <DialogContent className="sm:w-dialog-md">
         <DialogHeader>
           <DialogTitle>

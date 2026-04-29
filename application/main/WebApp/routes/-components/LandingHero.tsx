@@ -1,13 +1,8 @@
+import type { LucideIcon } from "lucide-react";
+
 import { useIsAuthenticated } from "@repo/infrastructure/auth/hooks";
 import { Link } from "@repo/ui/components/Link";
-import {
-  CalendarDaysIcon,
-  CreditCardIcon,
-  MessageCircleIcon,
-  RouteIcon,
-  ShieldCheckIcon
-} from "lucide-react";
-import type { LucideIcon } from "lucide-react";
+import { CalendarDaysIcon, CreditCardIcon, MessageCircleIcon, RouteIcon, ShieldCheckIcon } from "lucide-react";
 
 import { fixedFlowSteps, landingHero } from "@/shared/content/landingContent";
 
@@ -96,7 +91,9 @@ function HeroOperationsMockup() {
               <span className="flex size-8 items-center justify-center rounded-full bg-[#111111] text-sm font-semibold text-white">
                 {index + 1}
               </span>
-              <span className="rounded-full bg-white px-2.5 py-1 text-xs font-semibold text-[#374151]">{step.label}</span>
+              <span className="rounded-full bg-white px-2.5 py-1 text-xs font-semibold text-[#374151]">
+                {step.label}
+              </span>
             </div>
             <p className="text-sm font-semibold">{step.title}</p>
             <p className="mt-1 text-sm leading-6 text-[#6b7280]">{step.description}</p>

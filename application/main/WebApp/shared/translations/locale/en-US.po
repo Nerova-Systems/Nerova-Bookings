@@ -13,44 +13,179 @@ msgstr ""
 "Language-Team: \n"
 "Plural-Forms: \n"
 
-msgid "Burning the midnight oil, {firstName}?"
-msgstr "Burning the midnight oil, {firstName}?"
+msgid "142 clients · 8 added this month"
+msgstr "142 clients · 8 added this month"
 
-msgid "Burning the midnight oil?"
-msgstr "Burning the midnight oil?"
+msgid "8 active across 3 categories"
+msgstr "8 active across 3 categories"
 
-msgid "Dashboard"
-msgstr "Dashboard"
+msgid "Actions"
+msgstr "Actions"
 
-msgid "Good afternoon"
-msgstr "Good afternoon"
+msgid "Activity"
+msgstr "Activity"
 
-msgid "Good afternoon, {firstName}"
-msgstr "Good afternoon, {firstName}"
+msgid "Activity | Nerova"
+msgstr "Activity | Nerova"
 
-msgid "Good evening"
-msgstr "Good evening"
+msgid "Add client"
+msgstr "Add client"
 
-msgid "Good evening, {firstName}"
-msgstr "Good evening, {firstName}"
+msgid "Alerts"
+msgstr "Alerts"
 
-msgid "Good morning"
-msgstr "Good morning"
+msgid "Analytics"
+msgstr "Analytics"
 
-msgid "Good morning, {firstName}"
-msgstr "Good morning, {firstName}"
+msgid "Analytics | Nerova"
+msgstr "Analytics | Nerova"
 
-msgid "Here's your overview of what's happening."
-msgstr "Here's your overview of what's happening."
+msgid "Answers from the flow"
+msgstr "Answers from the flow"
+
+msgid "Archived"
+msgstr "Archived"
+
+msgid "Archived services are hidden from the booking flow."
+msgstr "Archived services are hidden from the booking flow."
+
+msgid "Block time"
+msgstr "Block time"
+
+msgid "Booking"
+msgstr "Booking"
+
+msgid "Booking sources"
+msgstr "Booking sources"
+
+msgid "Bookings over time"
+msgstr "Bookings over time"
+
+msgid "by bookings"
+msgstr "by bookings"
+
+msgid "Calendar"
+msgstr "Calendar"
+
+msgid "Calendar | Nerova"
+msgstr "Calendar | Nerova"
+
+msgid "Clients"
+msgstr "Clients"
+
+msgid "Clients | Nerova"
+msgstr "Clients | Nerova"
+
+msgid "Command palette"
+msgstr "Command palette"
+
+msgid "Compare ranges"
+msgstr "Compare ranges"
+
+msgid "Confirm booking"
+msgstr "Confirm booking"
+
+msgid "Conversation transcript"
+msgstr "Conversation transcript"
+
+msgid "Conversations are managed by the Nerova bot. Handle the booking lifecycle from this panel."
+msgstr "Conversations are managed by the Nerova bot. Handle the booking lifecycle from this panel."
+
+msgid "Daily"
+msgstr "Daily"
+
+msgid "Export CSV"
+msgstr "Export CSV"
+
+msgid "Fully automated"
+msgstr "Fully automated"
+
+msgid "Import contacts"
+msgstr "Import contacts"
+
+msgid "Internal notes"
+msgstr "Internal notes"
+
+msgid "Jump to"
+msgstr "Jump to"
+
+msgid "Main"
+msgstr "Main"
 
 msgid "Main navigation"
 msgstr "Main navigation"
 
-msgid "Navigation"
-msgstr "Navigation"
+msgid "Manage categories"
+msgstr "Manage categories"
 
-msgid "This is where your personalized dashboard content will appear. Stay tuned for updates."
-msgstr "This is where your personalized dashboard content will appear. Stay tuned for updates."
+msgid "More options"
+msgstr "More options"
 
-msgid "Your dashboard is empty"
-msgstr "Your dashboard is empty"
+msgid "New manual booking"
+msgstr "New manual booking"
+
+msgid "New service"
+msgstr "New service"
+
+msgid "No clients match your search."
+msgstr "No clients match your search."
+
+msgid "No results found."
+msgstr "No results found."
+
+msgid "Operational feed · 7 items need review"
+msgstr "Operational feed · 7 items need review"
+
+msgid "Operational metrics · last 30 days"
+msgstr "Operational metrics · last 30 days"
+
+msgid "Recent visits"
+msgstr "Recent visits"
+
+msgid "Reorder"
+msgstr "Reorder"
+
+msgid "Reschedule"
+msgstr "Reschedule"
+
+msgid "Restore any service to make it bookable again."
+msgstr "Restore any service to make it bookable again."
+
+msgid "Search anything"
+msgstr "Search anything"
+
+msgid "Search clients, bookings, services or jump to a screen"
+msgstr "Search clients, bookings, services or jump to a screen"
+
+msgid "Search clients, bookings, services…"
+msgstr "Search clients, bookings, services…"
+
+msgid "Search clients…"
+msgstr "Search clients…"
+
+msgid "Send payment link"
+msgstr "Send payment link"
+
+msgid "Services"
+msgstr "Services"
+
+msgid "Services | Nerova"
+msgstr "Services | Nerova"
+
+msgid "Synced via Google · 6 busy blocks imported"
+msgstr "Synced via Google · 6 busy blocks imported"
+
+msgid "Today"
+msgstr "Today"
+
+msgid "Top services"
+msgstr "Top services"
+
+msgid "View calendar"
+msgstr "View calendar"
+
+msgid "View full profile →"
+msgstr "View full profile →"
+
+msgid "Week view · Africa/Johannesburg"
+msgstr "Week view · Africa/Johannesburg"

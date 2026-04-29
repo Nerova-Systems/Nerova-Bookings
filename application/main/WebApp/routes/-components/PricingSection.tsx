@@ -21,7 +21,10 @@ export function PricingSection() {
           <table className="w-full min-w-[58rem] text-left">
             <thead>
               <tr>
-                <th scope="col" className="w-[18rem] border-b border-[#e5e7eb] bg-[#f8f9fa] p-5 text-sm font-semibold text-[#6b7280]">
+                <th
+                  scope="col"
+                  className="w-[18rem] border-b border-[#e5e7eb] bg-[#f8f9fa] p-5 text-sm font-semibold text-[#6b7280]"
+                >
                   Feature
                 </th>
                 {pricingPlans.map((plan) => (
@@ -45,7 +48,9 @@ export function PricingSection() {
                           <span className="text-3xl font-semibold">{plan.price}</span>
                           {!plan.comingSoon && <span className="pb-1 text-sm font-normal text-[#6b7280]">/month</span>}
                         </div>
-                        {plan.mappedPlan && <p className="text-xs font-medium text-[#898989]">{plan.mappedPlan} plan</p>}
+                        {plan.mappedPlan && (
+                          <p className="text-xs font-medium text-[#898989]">{plan.mappedPlan} plan</p>
+                        )}
                       </div>
                       <p className="text-sm leading-6 font-normal text-[#374151]">{plan.description}</p>
                       <PlanCta plan={plan} />
@@ -87,7 +92,12 @@ function PlanCta({ plan }: { readonly plan: (typeof pricingPlans)[number] }) {
   }
 
   return (
-    <Link href={plan.href} variant={plan.featured ? "button-primary" : "button-secondary"} underline={false} className="mt-auto h-10 px-4">
+    <Link
+      href={plan.href}
+      variant={plan.featured ? "button-primary" : "button-secondary"}
+      underline={false}
+      className="mt-auto h-10 px-4"
+    >
       {plan.cta}
     </Link>
   );

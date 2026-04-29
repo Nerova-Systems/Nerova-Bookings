@@ -1,3 +1,5 @@
+import type { LucideIcon } from "lucide-react";
+
 import { t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
 import { loginPath, signUpPath } from "@repo/infrastructure/auth/constants";
@@ -18,7 +20,6 @@ import {
   UsersRoundIcon
 } from "lucide-react";
 import { Suspense, useState } from "react";
-import type { LucideIcon } from "lucide-react";
 
 import UserMenu from "@/federated-modules/userMenu/UserMenu";
 
@@ -120,16 +121,28 @@ export default function PublicNavigation() {
             {isSolutionsOpen && <SolutionsMegaMenu />}
           </div>
 
-          <a href="/#product" className="inline-flex h-10 items-center rounded-full px-4 text-sm font-medium text-foreground hover:bg-muted">
+          <a
+            href="/#product"
+            className="inline-flex h-10 items-center rounded-full px-4 text-sm font-medium text-foreground hover:bg-muted"
+          >
             <Trans>Product</Trans>
           </a>
-          <a href="/#why-nerova" className="inline-flex h-10 items-center rounded-full px-4 text-sm font-medium text-foreground hover:bg-muted">
+          <a
+            href="/#why-nerova"
+            className="inline-flex h-10 items-center rounded-full px-4 text-sm font-medium text-foreground hover:bg-muted"
+          >
             <Trans>Why us</Trans>
           </a>
-          <a href="/#integrations" className="inline-flex h-10 items-center rounded-full px-4 text-sm font-medium text-foreground hover:bg-muted">
+          <a
+            href="/#integrations"
+            className="inline-flex h-10 items-center rounded-full px-4 text-sm font-medium text-foreground hover:bg-muted"
+          >
             <Trans>Integrations</Trans>
           </a>
-          <a href="/#pricing" className="inline-flex h-10 items-center rounded-full px-4 text-sm font-medium text-foreground hover:bg-muted">
+          <a
+            href="/#pricing"
+            className="inline-flex h-10 items-center rounded-full px-4 text-sm font-medium text-foreground hover:bg-muted"
+          >
             <Trans>Pricing</Trans>
           </a>
         </div>
@@ -140,7 +153,12 @@ export default function PublicNavigation() {
           </Suspense>
         ) : (
           <div className="flex items-center gap-2">
-            <Link href={loginPath} variant="button-secondary" underline={false} className="hidden h-10 px-4 sm:inline-flex">
+            <Link
+              href={loginPath}
+              variant="button-secondary"
+              underline={false}
+              className="hidden h-10 px-4 sm:inline-flex"
+            >
               <Trans>Log in</Trans>
             </Link>
             <Link href={signUpPath} variant="button-primary" underline={false} className="h-10 rounded-2xl px-4">
@@ -170,7 +188,10 @@ function SolutionsMegaMenu() {
             <DatabaseZapIcon className="mb-5 size-10 text-white" />
             <h3 className="text-3xl font-semibold">Custom datasets</h3>
             <p className="mt-3 max-w-sm text-sm leading-6 text-white/70">
-              <Trans>Enterprise workflows for specialized appointment teams. Coming soon, with no self-serve checkout path yet.</Trans>
+              <Trans>
+                Enterprise workflows for specialized appointment teams. Coming soon, with no self-serve checkout path
+                yet.
+              </Trans>
             </p>
           </div>
         </div>
@@ -185,7 +206,11 @@ function SolutionColumn({ title, items }: { readonly title: string; readonly ite
       <h2 className="mb-4 text-sm font-semibold text-muted-foreground">{title}</h2>
       <div className="grid gap-3">
         {items.map(({ title: itemTitle, description, href, Icon }) => (
-          <a key={itemTitle} href={href} className="grid grid-cols-[4.5rem_1fr] gap-4 rounded-2xl p-3 transition-colors hover:bg-muted">
+          <a
+            key={itemTitle}
+            href={href}
+            className="grid grid-cols-[4.5rem_1fr] gap-4 rounded-2xl p-3 transition-colors hover:bg-muted"
+          >
             <span className="flex size-16 items-center justify-center rounded-2xl border border-border bg-muted/40">
               <Icon className="size-7 text-foreground" />
             </span>

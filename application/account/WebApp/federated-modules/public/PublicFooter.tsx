@@ -15,7 +15,10 @@ export default function PublicFooter() {
               Nerova
             </Link>
             <p className="mt-4 leading-7">
-              <Trans>Business operations for appointment teams, starting with bookings, staff schedules, services, payments, and integrations.</Trans>
+              <Trans>
+                Business operations for appointment teams, starting with bookings, staff schedules, services, payments,
+                and integrations.
+              </Trans>
             </p>
           </div>
 
@@ -74,7 +77,13 @@ export default function PublicFooter() {
   );
 }
 
-function FooterColumn({ title, links }: { readonly title: string; readonly links: readonly (readonly [string, string])[] }) {
+function FooterColumn({
+  title,
+  links
+}: {
+  readonly title: string;
+  readonly links: readonly (readonly [string, string])[];
+}) {
   return (
     <div>
       <h2 className="text-sm font-semibold text-white">{title}</h2>

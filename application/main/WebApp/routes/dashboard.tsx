@@ -1,6 +1,9 @@
 import { requireAuthentication } from "@repo/infrastructure/auth/routeGuards";
+import { SidebarInset, SidebarProvider } from "@repo/ui/components/Sidebar";
 import { createFileRoute, Outlet, useLocation } from "@tanstack/react-router";
 import { lazy, Suspense } from "react";
+
+import { MainSideMenu } from "@/shared/components/MainSideMenu";
 
 const NotFoundPage = lazy(() => import("account/NotFoundPage"));
 const TenantStateGuard = lazy(() => import("account/TenantStateGuard"));
@@ -17,7 +20,12 @@ function DashboardLayout() {
   return (
     <Suspense fallback={null}>
       <TenantStateGuard pathname={location.pathname}>
-        <Outlet />
+        <SidebarProvider>
+          <MainSideMenu />
+          <SidebarInset>
+            <Outlet />
+          </SidebarInset>
+        </SidebarProvider>
       </TenantStateGuard>
     </Suspense>
   );

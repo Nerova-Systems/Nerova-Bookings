@@ -26,7 +26,9 @@ test.describe("@smoke", () => {
     })();
 
     await step("Verify product positioning sections")(async () => {
-      await expect(page.getByRole("heading", { name: "Built for the way appointment businesses already communicate" })).toBeVisible();
+      await expect(
+        page.getByRole("heading", { name: "Built for the way appointment businesses already communicate" })
+      ).toBeVisible();
       await expect(page.getByText("WhatsApp-first, not web-form first")).toBeVisible();
       await expect(page.getByText("Fixed flows, not an AI chatbot")).toBeVisible();
       await expect(page.getByText("Account and workspace foundation")).toBeVisible();

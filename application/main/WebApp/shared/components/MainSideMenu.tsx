@@ -16,13 +16,12 @@ import {
 import { Link as RouterLink, useNavigate, useRouter } from "@tanstack/react-router";
 import MobileMenu from "account/MobileMenu";
 import UserMenu from "account/UserMenu";
-import { LayoutDashboardIcon } from "lucide-react";
+import { ActivityIcon, BarChart2Icon, CalendarIcon, Grid2X2Icon, UsersIcon } from "lucide-react";
 import { use } from "react";
 
 const normalizePath = (path: string): string => path.replace(/\/$/, "") || "/";
 
 function HeaderUserMenu() {
-  // Federated UserMenu reads the same shimmed `collapsedContext` value provided by SidebarProvider.
   const isCollapsed = use(collapsedContext);
   return <UserMenu isCollapsed={isCollapsed} />;
 }
@@ -35,6 +34,8 @@ export function MainSideMenu() {
     navigate({ to: path });
   };
 
+  const isActive = (path: string) => currentPath === path || currentPath.startsWith(path + "/");
+
   return (
     <Sidebar collapsible="icon" mobileContent={<MobileMenu onNavigate={handleNavigate} />}>
       <nav className="contents" aria-label={t`Main navigation`}>
@@ -44,16 +45,60 @@ export function MainSideMenu() {
         <SidebarContent>
           <SidebarGroup>
             <SidebarGroupLabel>
-              <Trans>Navigation</Trans>
+              <Trans>Main</Trans>
             </SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
                 <SidebarMenuItem>
-                  <SidebarMenuButton asChild={true} isActive={currentPath === "/dashboard"} tooltip={t`Dashboard`}>
+                  <SidebarMenuButton
+                    asChild={true}
+                    isActive={isActive("/dashboard") && currentPath === "/dashboard"}
+                    tooltip={t`Activity`}
+                  >
                     <RouterLink to="/dashboard">
-                      <LayoutDashboardIcon />
+                      <ActivityIcon />
                       <span>
-                        <Trans>Dashboard</Trans>
+                        <Trans>Activity</Trans>
+                      </span>
+                    </RouterLink>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild={true} isActive={isActive("/dashboard/calendar")} tooltip={t`Calendar`}>
+                    <RouterLink to="/dashboard/calendar">
+                      <CalendarIcon />
+                      <span>
+                        <Trans>Calendar</Trans>
+                      </span>
+                    </RouterLink>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild={true} isActive={isActive("/dashboard/services")} tooltip={t`Services`}>
+                    <RouterLink to="/dashboard/services">
+                      <Grid2X2Icon />
+                      <span>
+                        <Trans>Services</Trans>
+                      </span>
+                    </RouterLink>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild={true} isActive={isActive("/dashboard/clients")} tooltip={t`Clients`}>
+                    <RouterLink to="/dashboard/clients">
+                      <UsersIcon />
+                      <span>
+                        <Trans>Clients</Trans>
+                      </span>
+                    </RouterLink>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild={true} isActive={isActive("/dashboard/analytics")} tooltip={t`Analytics`}>
+                    <RouterLink to="/dashboard/analytics">
+                      <BarChart2Icon />
+                      <span>
+                        <Trans>Analytics</Trans>
                       </span>
                     </RouterLink>
                   </SidebarMenuButton>

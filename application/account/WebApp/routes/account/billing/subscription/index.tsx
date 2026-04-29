@@ -49,9 +49,7 @@ function PlansPage() {
     <>
       <AppLayout variant="center" maxWidth="64rem" title={t`Subscription`} subtitle={t`Manage your subscription plan.`}>
         <BillingTabNavigation activeTab="subscription" />
-        {isCancelled && (
-          <CancellationBanner currentPlan={state.currentPlan} formattedPeriodEnd={formattedPeriodEnd} />
-        )}
+        {isCancelled && <CancellationBanner currentPlan={state.currentPlan} formattedPeriodEnd={formattedPeriodEnd} />}
         {scheduledPlan && !isCancelled && (
           <DowngradeBanner scheduledPlan={scheduledPlan} formattedPeriodEnd={formattedPeriodEnd} />
         )}
