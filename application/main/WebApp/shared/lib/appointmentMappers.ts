@@ -40,6 +40,8 @@ function mapAppointment(appointment: ApiAppointment): Appointment {
     publicReference: appointment.publicReference,
     clientId: appointment.clientId,
     serviceId: appointment.serviceId,
+    serviceVersionId: appointment.serviceVersionId,
+    serviceVersionNumber: appointment.serviceVersionNumber,
     dayGroup: formatDayGroup(start),
     time: formatTime(start),
     duration: `${appointment.durationMinutes}m`,
@@ -102,7 +104,9 @@ function mapClient(client: ApiClient): Client {
     status: client.status,
     flag: client.alert ? "alert" : client.status === "Blocked" ? "blocked" : null,
     alert: client.alert,
-    internalNote: client.internalNote
+    internalNote: client.internalNote,
+    noShowCount: client.noShowCount,
+    appointmentHistory: client.appointmentHistory
   };
 }
 

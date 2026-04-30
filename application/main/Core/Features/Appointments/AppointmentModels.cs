@@ -83,6 +83,27 @@ public sealed class BookableService : ITenantScopedEntity
     public int SortOrder { get; set; }
 }
 
+public sealed class BookableServiceVersion : ITenantScopedEntity
+{
+    public string Id { get; set; } = Guid.NewGuid().ToString("N");
+    public TenantId TenantId { get; set; } = null!;
+    public string ServiceId { get; set; } = string.Empty;
+    public int VersionNumber { get; set; }
+    public string CategoryId { get; set; } = string.Empty;
+    public string Name { get; set; } = string.Empty;
+    public string Description { get; set; } = string.Empty;
+    public string Mode { get; set; } = "physical";
+    public int DurationMinutes { get; set; }
+    public int PriceCents { get; set; }
+    public int DepositCents { get; set; }
+    public ServicePaymentPolicy PaymentPolicy { get; set; }
+    public int BufferBeforeMinutes { get; set; }
+    public int BufferAfterMinutes { get; set; }
+    public string Location { get; set; } = string.Empty;
+    public bool IsActive { get; set; } = true;
+    public DateTimeOffset CreatedAt { get; set; }
+}
+
 public sealed class StaffMember : ITenantScopedEntity
 {
     public string Id { get; set; } = Guid.NewGuid().ToString("N");
@@ -148,6 +169,7 @@ public sealed class Appointment : ITenantScopedEntity
     public string PublicReference { get; set; } = Guid.NewGuid().ToString("N")[..10];
     public string ClientId { get; set; } = string.Empty;
     public string ServiceId { get; set; } = string.Empty;
+    public string ServiceVersionId { get; set; } = string.Empty;
     public string StaffMemberId { get; set; } = string.Empty;
     public DateTimeOffset StartAt { get; set; }
     public DateTimeOffset EndAt { get; set; }

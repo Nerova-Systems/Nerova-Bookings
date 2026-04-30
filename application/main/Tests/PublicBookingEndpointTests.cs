@@ -194,6 +194,29 @@ public sealed class PublicBookingEndpointTests : EndpointBaseTest<MainDbContext>
         second.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }
 
+    [Fact]
+    public async Task PublicBooking_ShouldAttachLatestServiceVersion()
+    {
+        TwilioVerifyClient = new FakeTwilioVerifyClient();
+        var profile = await ReadPublicProfileAsync();
+        var serviceId = profile["services"]!.AsArray().Single(service => service!["name"]!.GetValue<string>() == "Express session")!["id"]!.GetValue<string>();
+        await UpdatePublicServiceVersionAsync(serviceId);
+        var phoneVerificationToken = await VerifyPhoneAsync("+27 82 555 0101");
+        var slots = await AnonymousHttpClient.GetFromJsonAsync<JsonArray>($"/api/main/public-booking/sea-point-studio/slots?serviceId={serviceId}&date=2026-04-27");
+
+        var response = await CreateVerifiedBookingAsync(serviceId, slots![0]!["startAt"]!.GetValue<DateTimeOffset>(), "+27 82 555 0101", phoneVerificationToken);
+
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        var body = await response.Content.ReadFromJsonAsync<JsonObject>();
+        using var scope = Provider.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<MainDbContext>();
+        var appointment = await db.Appointments.IgnoreQueryFilters().SingleAsync(appointment => appointment.PublicReference == body!["reference"]!.GetValue<string>());
+        var version = await db.BookableServiceVersions.IgnoreQueryFilters().SingleAsync(version => version.Id == appointment.ServiceVersionId);
+        version.VersionNumber.Should().Be(2);
+        version.Name.Should().Be("Express session v2");
+        version.PriceCents.Should().Be(33000);
+    }
+
     protected override void RegisterMockLoggers(IServiceCollection services)
     {
         services.RemoveAll<ITwilioVerifyClient>();
@@ -240,6 +263,41 @@ public sealed class PublicBookingEndpointTests : EndpointBaseTest<MainDbContext>
                 answers = new Dictionary<string, string>()
             }
         );
+    }
+
+    private async Task UpdatePublicServiceVersionAsync(string serviceId)
+    {
+        using var scope = Provider.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<MainDbContext>();
+        var service = await db.BookableServices.IgnoreQueryFilters().AsTracking().SingleAsync(service => service.Id == serviceId);
+        service.Name = "Express session v2";
+        service.Description = "Updated short session";
+        service.PriceCents = 33000;
+        service.Location = "Updated studio";
+        var versionNumbers = await db.BookableServiceVersions.IgnoreQueryFilters()
+            .Where(version => version.ServiceId == serviceId)
+            .Select(version => version.VersionNumber)
+            .ToListAsync();
+        db.BookableServiceVersions.Add(new BookableServiceVersion
+        {
+            TenantId = service.TenantId,
+            ServiceId = service.Id,
+            VersionNumber = versionNumbers.Count == 0 ? 1 : versionNumbers.Max() + 1,
+            CategoryId = service.CategoryId,
+            Name = service.Name,
+            Description = service.Description,
+            Mode = service.Mode,
+            DurationMinutes = service.DurationMinutes,
+            PriceCents = service.PriceCents,
+            DepositCents = service.DepositCents,
+            PaymentPolicy = service.PaymentPolicy,
+            BufferBeforeMinutes = service.BufferBeforeMinutes,
+            BufferAfterMinutes = service.BufferAfterMinutes,
+            Location = service.Location,
+            IsActive = service.IsActive,
+            CreatedAt = DateTimeOffset.UtcNow
+        });
+        await db.SaveChangesAsync();
     }
 
     private sealed class FakeTwilioVerifyClient : ITwilioVerifyClient

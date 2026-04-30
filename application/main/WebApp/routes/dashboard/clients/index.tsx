@@ -5,8 +5,9 @@ import { createFileRoute } from "@tanstack/react-router";
 import { SearchIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 
-import { useAppointmentShell } from "@/shared/lib/appointmentsApi";
+import { useAppointmentShell, useUpdateClient } from "@/shared/lib/appointmentsApi";
 
+import { ClientDrawer } from "./-components/ClientDrawer";
 import { FILTER_LABELS, FlagDot, type Filter } from "./-components/clientData";
 
 export const Route = createFileRoute("/dashboard/clients/")({
@@ -17,8 +18,11 @@ export const Route = createFileRoute("/dashboard/clients/")({
 function ClientsPage() {
   const [search, setSearch] = useState("");
   const [activeFilter, setActiveFilter] = useState<Filter>("all");
+  const [selectedClientId, setSelectedClientId] = useState<string | undefined>();
   const shellQuery = useAppointmentShell();
+  const updateClient = useUpdateClient();
   const clients = shellQuery.data?.clients ?? [];
+  const selectedClient = clients.find((client) => client.id === selectedClientId);
   const filterCounts = {
     all: clients.length,
     vip: clients.filter((client) => client.status === "VIP").length,
@@ -108,9 +112,11 @@ function ClientsPage() {
             <span />
           </div>
           {filtered.map((client) => (
-            <div
-              key={client.name}
-              className={`grid cursor-pointer grid-cols-[1.6fr_1.2fr_0.5fr_0.7fr_0.9fr_0.5fr_2rem] items-center gap-3 border-t border-border px-4 py-2.5 text-[0.8125rem] text-foreground transition-colors hover:bg-muted ${
+            <button
+              key={client.id}
+              type="button"
+              onClick={() => setSelectedClientId(client.id)}
+              className={`grid w-full grid-cols-[1.6fr_1.2fr_0.5fr_0.7fr_0.9fr_0.5fr_2rem] items-center gap-3 border-t border-border px-4 py-2.5 text-left text-[0.8125rem] text-foreground transition-colors hover:bg-muted ${
                 client.status === "Blocked" ? "opacity-70" : ""
               }`}
             >
@@ -130,7 +136,7 @@ function ClientsPage() {
               <div className="flex items-center justify-center">
                 <FlagDot flag={client.flag} />
               </div>
-            </div>
+            </button>
           ))}
           {filtered.length === 0 && (
             <div className="border-t border-border px-4 py-10 text-center text-sm text-muted-foreground">
@@ -139,6 +145,15 @@ function ClientsPage() {
           )}
         </div>
       </div>
+      {selectedClient && (
+        <ClientDrawer
+          client={selectedClient}
+          pending={updateClient.isPending}
+          error={updateClient.error}
+          onClose={() => setSelectedClientId(undefined)}
+          onSave={(request) => updateClient.mutate({ id: selectedClient.id, request })}
+        />
+      )}
     </div>
   );
 }

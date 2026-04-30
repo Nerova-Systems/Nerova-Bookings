@@ -17,6 +17,8 @@ export interface Appointment {
   publicReference: string;
   clientId: string;
   serviceId: string;
+  serviceVersionId: string;
+  serviceVersionNumber: number;
   dayGroup: string;
   time: string;
   duration: string;
@@ -77,6 +79,23 @@ export interface Client {
   flag: "alert" | "overdue" | "blocked" | null;
   alert?: string;
   internalNote?: string;
+  noShowCount: number;
+  appointmentHistory: ClientAppointmentHistory[];
+}
+
+export interface ClientAppointmentHistory {
+  id: string;
+  publicReference: string;
+  startAt: string;
+  endAt: string;
+  serviceName: string;
+  priceCents: number;
+  depositCents: number;
+  paymentPolicy: ServicePaymentPolicy;
+  status: string;
+  paymentStatus: string;
+  source: string;
+  location: string;
 }
 
 export interface Analytics {
@@ -133,6 +152,8 @@ export interface ApiAppointment {
   publicReference: string;
   clientId: string;
   serviceId: string;
+  serviceVersionId: string;
+  serviceVersionNumber: number;
   startAt: string;
   endAt: string;
   clientName: string;
@@ -175,5 +196,7 @@ export interface ApiClient {
   internalNote?: string;
   visitCount: number;
   lifetimeSpendCents: number;
+  noShowCount: number;
   lastVisitAt?: string;
+  appointmentHistory: ClientAppointmentHistory[];
 }

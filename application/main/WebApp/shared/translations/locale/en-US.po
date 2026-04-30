@@ -37,6 +37,9 @@ msgstr "Appointment payments settle into this business bank account through a Pa
 msgid "Appointment payments, Paystack payouts, and settlement status"
 msgstr "Appointment payments, Paystack payouts, and settlement status"
 
+msgid "Appointments"
+msgstr "Appointments"
+
 msgid "Apps"
 msgstr "Apps"
 
@@ -148,6 +151,9 @@ msgstr "Export CSV"
 msgid "Flow answers"
 msgstr "Flow answers"
 
+msgid "Future client rewards, visit milestones, packages, and credit tracking will live here."
+msgstr "Future client rewards, visit milestones, packages, and credit tracking will live here."
+
 msgid "Google and Microsoft are priority-one integrations through Nango"
 msgstr "Google and Microsoft are priority-one integrations through Nango"
 
@@ -156,6 +162,9 @@ msgstr "Google and Microsoft calendar busy blocks via Nango"
 
 msgid "Import contacts"
 msgstr "Import contacts"
+
+msgid "Information"
+msgstr "Information"
 
 msgid "Integration library"
 msgstr "Integration library"
@@ -175,6 +184,12 @@ msgstr "Loading confirmation..."
 msgid "Loading payments..."
 msgstr "Loading payments..."
 
+msgid "Loyalty"
+msgstr "Loyalty"
+
+msgid "Loyalty program coming later"
+msgstr "Loyalty program coming later"
+
 msgid "Main navigation"
 msgstr "Main navigation"
 
@@ -192,6 +207,9 @@ msgstr "New service"
 
 msgid "Next action"
 msgstr "Next action"
+
+msgid "No appointment history yet."
+msgstr "No appointment history yet."
 
 msgid "No appointments from today onward."
 msgstr "No appointments from today onward."
@@ -259,8 +277,14 @@ msgstr "Reorder"
 msgid "Reschedule"
 msgstr "Reschedule"
 
+msgid "Reset"
+msgstr "Reset"
+
 msgid "Restore any service to make it bookable again."
 msgstr "Restore any service to make it bookable again."
+
+msgid "Save client"
+msgstr "Save client"
 
 msgid "Save payout account"
 msgstr "Save payout account"

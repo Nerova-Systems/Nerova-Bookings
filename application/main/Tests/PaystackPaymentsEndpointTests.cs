@@ -120,9 +120,17 @@ public sealed class PaystackPaymentsEndpointTests : EndpointBaseTest<MainDbConte
     public async Task CreateTerminalIntent_WhenPaystackConfigured_ShouldCreateSplitTerminalAndAppointmentIntent()
     {
         PaystackClient = new FakePaystackClient();
+        TwilioVerifyClient = new FakeTwilioVerifyClient();
         await SeedShellAsync();
         await AuthenticatedOwnerHttpClient.PostAsJsonAsync("/api/main/app/payments/paystack/subaccount", NewSubaccountRequest("1234567890"));
-        var appointmentId = await ReadCollectAfterAppointmentIdAsync();
+        var service = await UpdateServicePaymentPolicyAsync("Express session", ServicePaymentPolicy.CollectAfterAppointment, 0);
+        var bookingResponse = await AnonymousHttpClient.PostAsJsonAsync(
+            "/api/main/public-booking/sea-point-studio/appointments",
+            await VerifiedPublicBookingRequestAsync(service.Id)
+        );
+        bookingResponse.EnsureSuccessStatusCode();
+        var booking = await bookingResponse.Content.ReadFromJsonAsync<PublicBookingCreatedResponse>();
+        var appointmentId = (await ReadAppointmentByReferenceAsync(booking!.Reference)).Id;
 
         var response = await AuthenticatedOwnerHttpClient.PostAsJsonAsync($"/api/main/app/appointments/{appointmentId}/payments/terminal-intent", new { });
 
@@ -231,6 +239,9 @@ public sealed class PaystackPaymentsEndpointTests : EndpointBaseTest<MainDbConte
         var service = await db.BookableServices.IgnoreQueryFilters().AsTracking().SingleAsync(s => s.Id == appointment.ServiceId);
         service.PaymentPolicy = ServicePaymentPolicy.CollectAfterAppointment;
         service.DepositCents = 0;
+        var version = NewServiceVersion(service, await NextVersionNumberAsync(db, service.Id));
+        db.BookableServiceVersions.Add(version);
+        appointment.ServiceVersionId = version.Id;
         appointment.PaymentStatus = AppointmentPaymentStatus.Pending;
         await db.SaveChangesAsync();
         return appointment.Id;
@@ -243,8 +254,41 @@ public sealed class PaystackPaymentsEndpointTests : EndpointBaseTest<MainDbConte
         var service = await db.BookableServices.IgnoreQueryFilters().AsTracking().SingleAsync(s => s.Name == serviceName);
         service.PaymentPolicy = paymentPolicy;
         service.DepositCents = depositCents;
+        db.BookableServiceVersions.Add(NewServiceVersion(service, await NextVersionNumberAsync(db, service.Id)));
         await db.SaveChangesAsync();
         return service;
+    }
+
+    private static async Task<int> NextVersionNumberAsync(MainDbContext db, string serviceId)
+    {
+        var versions = await db.BookableServiceVersions.IgnoreQueryFilters()
+            .Where(version => version.ServiceId == serviceId)
+            .Select(version => version.VersionNumber)
+            .ToListAsync();
+        return versions.Count == 0 ? 1 : versions.Max() + 1;
+    }
+
+    private static BookableServiceVersion NewServiceVersion(BookableService service, int versionNumber)
+    {
+        return new BookableServiceVersion
+        {
+            TenantId = service.TenantId,
+            ServiceId = service.Id,
+            VersionNumber = versionNumber,
+            CategoryId = service.CategoryId,
+            Name = service.Name,
+            Description = service.Description,
+            Mode = service.Mode,
+            DurationMinutes = service.DurationMinutes,
+            PriceCents = service.PriceCents,
+            DepositCents = service.DepositCents,
+            PaymentPolicy = service.PaymentPolicy,
+            BufferBeforeMinutes = service.BufferBeforeMinutes,
+            BufferAfterMinutes = service.BufferAfterMinutes,
+            Location = service.Location,
+            IsActive = service.IsActive,
+            CreatedAt = DateTimeOffset.UtcNow
+        };
     }
 
     private async Task<Appointment> ReadAppointmentByReferenceAsync(string reference)

@@ -20,21 +20,46 @@ public sealed class AppOperationsEndpointTests : EndpointBaseTest<MainDbContext>
         create.StatusCode.Should().Be(HttpStatusCode.OK);
         var service = await ReadServiceByNameAsync("Deep tissue");
         service.PriceCents.Should().Be(60000);
+        (await ReadServiceVersionsAsync(service.Id)).Should().ContainSingle(version => version.VersionNumber == 1);
 
         var update = await AuthenticatedOwnerHttpClient.PutAsJsonAsync($"/api/main/app/services/{service.Id}", NewServiceRequest("Deep tissue plus", 75000));
         update.StatusCode.Should().Be(HttpStatusCode.OK);
         service = await ReadServiceByNameAsync("Deep tissue plus");
         service.PriceCents.Should().Be(75000);
+        (await ReadServiceVersionsAsync(service.Id)).Should().Contain(version => version.VersionNumber == 2 && version.PriceCents == 75000);
 
         var archive = await AuthenticatedOwnerHttpClient.PostAsync($"/api/main/app/services/{service.Id}/archive", null);
         archive.StatusCode.Should().Be(HttpStatusCode.OK);
         service = await ReadServiceByNameAsync("Deep tissue plus");
         service.IsActive.Should().BeFalse();
+        (await ReadServiceVersionsAsync(service.Id)).Should().Contain(version => version.VersionNumber == 3 && !version.IsActive);
 
         var restore = await AuthenticatedOwnerHttpClient.PostAsync($"/api/main/app/services/{service.Id}/restore", null);
         restore.StatusCode.Should().Be(HttpStatusCode.OK);
         service = await ReadServiceByNameAsync("Deep tissue plus");
         service.IsActive.Should().BeTrue();
+        (await ReadServiceVersionsAsync(service.Id)).Should().Contain(version => version.VersionNumber == 4 && version.IsActive);
+    }
+
+    [Fact]
+    public async Task UpdateService_WhenAppointmentAlreadyBooked_ShouldKeepAppointmentServiceVersion()
+    {
+        await SeedShellAsync();
+        var appointment = await ReadFirstAppointmentAsync();
+        var originalVersion = await ReadServiceVersionAsync(appointment.ServiceVersionId);
+
+        var update = await AuthenticatedOwnerHttpClient.PutAsJsonAsync(
+            $"/api/main/app/services/{appointment.ServiceId}",
+            NewServiceRequest("Changed service", 99000, "FullPaymentBeforeBooking")
+        );
+
+        update.StatusCode.Should().Be(HttpStatusCode.OK);
+        appointment = await ReadAppointmentAsync(appointment.Id);
+        appointment.ServiceVersionId.Should().Be(originalVersion.Id);
+        var appointmentVersion = await ReadServiceVersionAsync(appointment.ServiceVersionId);
+        appointmentVersion.Name.Should().Be(originalVersion.Name);
+        appointmentVersion.PriceCents.Should().Be(originalVersion.PriceCents);
+        appointmentVersion.PaymentPolicy.Should().Be(originalVersion.PaymentPolicy);
     }
 
     [Fact]
@@ -81,6 +106,22 @@ public sealed class AppOperationsEndpointTests : EndpointBaseTest<MainDbContext>
         client.InternalNote.Should().Be("Always confirm parking instructions.");
     }
 
+    [Fact]
+    public async Task Shell_ShouldReturnClientAppointmentHistoryNewestFirst()
+    {
+        var response = await AuthenticatedOwnerHttpClient.GetAsync("/api/main/app/shell");
+
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        var body = await response.Content.ReadAsStringAsync();
+        body.Should().Contain("appointmentHistory");
+        using var scope = Provider.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<MainDbContext>();
+        var client = await db.Clients.IgnoreQueryFilters().FirstAsync(client => client.Name == "Liam Botha");
+        var appointment = await db.Appointments.IgnoreQueryFilters().SingleAsync(appointment => appointment.ClientId == client.Id);
+        var version = await db.BookableServiceVersions.IgnoreQueryFilters().SingleAsync(version => version.Id == appointment.ServiceVersionId);
+        body.Should().Contain(version.Name);
+    }
+
     private async Task SeedShellAsync()
     {
         var response = await AuthenticatedOwnerHttpClient.GetAsync("/api/main/app/shell");
@@ -92,6 +133,20 @@ public sealed class AppOperationsEndpointTests : EndpointBaseTest<MainDbContext>
         using var scope = Provider.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<MainDbContext>();
         return await db.BookableServices.IgnoreQueryFilters().SingleAsync(service => service.Name == name);
+    }
+
+    private async Task<List<BookableServiceVersion>> ReadServiceVersionsAsync(string serviceId)
+    {
+        using var scope = Provider.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<MainDbContext>();
+        return await db.BookableServiceVersions.IgnoreQueryFilters().Where(version => version.ServiceId == serviceId).OrderBy(version => version.VersionNumber).ToListAsync();
+    }
+
+    private async Task<BookableServiceVersion> ReadServiceVersionAsync(string id)
+    {
+        using var scope = Provider.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<MainDbContext>();
+        return await db.BookableServiceVersions.IgnoreQueryFilters().SingleAsync(version => version.Id == id);
     }
 
     private async Task<Appointment> ReadFirstAppointmentAsync()
@@ -122,7 +177,7 @@ public sealed class AppOperationsEndpointTests : EndpointBaseTest<MainDbContext>
         return await db.Clients.IgnoreQueryFilters().SingleAsync(client => client.Id == id);
     }
 
-    private static object NewServiceRequest(string name, int priceCents)
+    private static object NewServiceRequest(string name, int priceCents, string? paymentPolicy = null)
     {
         return new
         {
@@ -133,6 +188,7 @@ public sealed class AppOperationsEndpointTests : EndpointBaseTest<MainDbContext>
             durationMinutes = 60,
             priceCents,
             depositCents = 15000,
+            paymentPolicy,
             bufferBeforeMinutes = 5,
             bufferAfterMinutes = 10,
             location = "Sea Point studio"

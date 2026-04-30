@@ -1,25 +1,10 @@
 import { t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
-import {
-  CommandDialog,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-  CommandShortcut
-} from "@repo/ui/components/Command";
+import { CommandDialog, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList, CommandShortcut } from "@repo/ui/components/Command";
 import { useNavigate } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 
-import {
-  useAppointmentShell,
-  type Appointment,
-  type AppointmentShell,
-  type Client,
-  type IntegrationConnection,
-  type Service
-} from "@/shared/lib/appointmentsApi";
+import { useAppointmentShell, type Appointment, type AppointmentShell, type Client, type IntegrationConnection, type Service } from "@/shared/lib/appointmentsApi";
 
 type SearchGroup = "Navigate" | "Appointments" | "Clients" | "Services" | "Payments" | "Apps";
 
@@ -36,23 +21,11 @@ interface SearchResult {
 
 const PAGES: SearchResult[] = [
   pageResult("activity", "Activity", "Operational feed and review queue", "/dashboard", "Workspace"),
-  pageResult(
-    "calendar",
-    "Calendar",
-    "Availability, bookings and external busy blocks",
-    "/dashboard/calendar",
-    "Workspace"
-  ),
+  pageResult("calendar", "Calendar", "Availability, bookings and external busy blocks", "/dashboard/calendar", "Workspace"),
   pageResult("clients", "Clients", "Client database, notes and visit history", "/dashboard/clients", "Workspace"),
   pageResult("payments", "Payments", "Appointment deposits and Paystack status", "/dashboard/payments", "Business"),
   pageResult("services", "Services", "Service catalogue, prices and deposits", "/dashboard/services", "Business"),
-  pageResult(
-    "analytics",
-    "Analytics",
-    "Bookings, revenue, no-shows and service mix",
-    "/dashboard/analytics",
-    "Business"
-  ),
+  pageResult("analytics", "Analytics", "Bookings, revenue, no-shows and service mix", "/dashboard/analytics", "Business"),
   pageResult("apps", "Apps", "Google, Microsoft and Nango integrations", "/dashboard/apps", "Business")
 ];
 

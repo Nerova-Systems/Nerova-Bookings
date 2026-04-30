@@ -37,6 +37,9 @@ msgstr ""
 msgid "Appointment payments, Paystack payouts, and settlement status"
 msgstr ""
 
+msgid "Appointments"
+msgstr ""
+
 msgid "Apps"
 msgstr ""
 
@@ -148,6 +151,9 @@ msgstr ""
 msgid "Flow answers"
 msgstr ""
 
+msgid "Future client rewards, visit milestones, packages, and credit tracking will live here."
+msgstr ""
+
 msgid "Google and Microsoft are priority-one integrations through Nango"
 msgstr ""
 
@@ -155,6 +161,9 @@ msgid "Google and Microsoft calendar busy blocks via Nango"
 msgstr ""
 
 msgid "Import contacts"
+msgstr ""
+
+msgid "Information"
 msgstr ""
 
 msgid "Integration library"
@@ -175,6 +184,12 @@ msgstr ""
 msgid "Loading payments..."
 msgstr ""
 
+msgid "Loyalty"
+msgstr ""
+
+msgid "Loyalty program coming later"
+msgstr ""
+
 msgid "Main navigation"
 msgstr "Hovednavigation"
 
@@ -191,6 +206,9 @@ msgid "New service"
 msgstr ""
 
 msgid "Next action"
+msgstr ""
+
+msgid "No appointment history yet."
 msgstr ""
 
 msgid "No appointments from today onward."
@@ -259,7 +277,13 @@ msgstr ""
 msgid "Reschedule"
 msgstr ""
 
+msgid "Reset"
+msgstr ""
+
 msgid "Restore any service to make it bookable again."
+msgstr ""
+
+msgid "Save client"
 msgstr ""
 
 msgid "Save payout account"

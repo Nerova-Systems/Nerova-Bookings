@@ -11,6 +11,7 @@ public sealed class MainDbContext(DbContextOptions<MainDbContext> options, IExec
     public DbSet<BusinessProfile> BusinessProfiles => Set<BusinessProfile>();
     public DbSet<ServiceCategory> ServiceCategories => Set<ServiceCategory>();
     public DbSet<BookableService> BookableServices => Set<BookableService>();
+    public DbSet<BookableServiceVersion> BookableServiceVersions => Set<BookableServiceVersion>();
     public DbSet<StaffMember> StaffMembers => Set<StaffMember>();
     public DbSet<AvailabilityRule> AvailabilityRules => Set<AvailabilityRule>();
     public DbSet<ExternalBusyBlock> ExternalBusyBlocks => Set<ExternalBusyBlock>();

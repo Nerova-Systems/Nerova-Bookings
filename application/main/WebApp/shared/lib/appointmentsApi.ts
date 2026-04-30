@@ -138,6 +138,28 @@ export function useRestoreService() {
   return useServiceStateMutation("restore");
 }
 
+export function useUpdateClient() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({
+      id,
+      request
+    }: {
+      id: string;
+      request: { name: string; phone: string; email: string; status: string; alert?: string; internalNote?: string };
+    }) => {
+      const response = await enhancedFetch(`/api/main/app/clients/${id}`, {
+        method: "PUT",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify(request)
+      });
+      if (!response.ok) throw new Error(await response.text());
+      return mapShell((await response.json()) as ApiShell);
+    },
+    onSuccess: (shell) => queryClient.setQueryData(["appointment-shell"], shell)
+  });
+}
+
 function useServiceStateMutation(action: "archive" | "restore") {
   const queryClient = useQueryClient();
   return useMutation({

@@ -56,7 +56,7 @@ public sealed class AppointmentEndpoints : IEndpoints
         return Results.Ok(await BuildShellAsync(db, cancellationToken));
     }
 
-    private static async Task<IResult> CreateService(CreateServiceRequest request, MainDbContext db, IExecutionContext executionContext, CancellationToken cancellationToken)
+    private static async Task<IResult> CreateService(CreateServiceRequest request, MainDbContext db, IExecutionContext executionContext, TimeProvider timeProvider, CancellationToken cancellationToken)
     {
         var tenantId = RequireTenant(executionContext);
         await EnsureDefaultCategoryAsync(db, tenantId, cancellationToken);
@@ -83,11 +83,12 @@ public sealed class AppointmentEndpoints : IEndpoints
             SortOrder = 100
         };
         db.BookableServices.Add(service);
+        db.BookableServiceVersions.Add(CreateServiceVersion(service, 1, timeProvider.GetUtcNow()));
         await db.SaveChangesAsync(cancellationToken);
         return Results.Ok(await BuildShellAsync(db, cancellationToken));
     }
 
-    private static async Task<IResult> UpdateService(string id, CreateServiceRequest request, MainDbContext db, IExecutionContext executionContext, CancellationToken cancellationToken)
+    private static async Task<IResult> UpdateService(string id, CreateServiceRequest request, MainDbContext db, IExecutionContext executionContext, TimeProvider timeProvider, CancellationToken cancellationToken)
     {
         var tenantId = RequireTenant(executionContext);
         var service = await db.BookableServices.AsTracking().FirstOrDefaultAsync(s => s.Id == id, cancellationToken);
@@ -109,24 +110,27 @@ public sealed class AppointmentEndpoints : IEndpoints
         service.BufferBeforeMinutes = request.BufferBeforeMinutes;
         service.BufferAfterMinutes = request.BufferAfterMinutes;
         service.Location = request.Location;
+        await AddNextServiceVersionAsync(db, service, timeProvider.GetUtcNow(), cancellationToken);
         await db.SaveChangesAsync(cancellationToken);
         return Results.Ok(await BuildShellAsync(db, cancellationToken));
     }
 
-    private static async Task<IResult> ArchiveService(string id, MainDbContext db, CancellationToken cancellationToken)
+    private static async Task<IResult> ArchiveService(string id, MainDbContext db, TimeProvider timeProvider, CancellationToken cancellationToken)
     {
         var service = await db.BookableServices.AsTracking().FirstOrDefaultAsync(s => s.Id == id, cancellationToken);
         if (service is null) return Results.NotFound();
         service.IsActive = false;
+        await AddNextServiceVersionAsync(db, service, timeProvider.GetUtcNow(), cancellationToken);
         await db.SaveChangesAsync(cancellationToken);
         return Results.Ok(await BuildShellAsync(db, cancellationToken));
     }
 
-    private static async Task<IResult> RestoreService(string id, MainDbContext db, CancellationToken cancellationToken)
+    private static async Task<IResult> RestoreService(string id, MainDbContext db, TimeProvider timeProvider, CancellationToken cancellationToken)
     {
         var service = await db.BookableServices.AsTracking().FirstOrDefaultAsync(s => s.Id == id, cancellationToken);
         if (service is null) return Results.NotFound();
         service.IsActive = true;
+        await AddNextServiceVersionAsync(db, service, timeProvider.GetUtcNow(), cancellationToken);
         await db.SaveChangesAsync(cancellationToken);
         return Results.Ok(await BuildShellAsync(db, cancellationToken));
     }
@@ -301,8 +305,9 @@ public sealed class AppointmentEndpoints : IEndpoints
         var service = await db.BookableServices.IgnoreQueryFilters().FirstOrDefaultAsync(s => s.Id == request.ServiceId && s.TenantId == profile.TenantId && s.IsActive, cancellationToken);
         if (service is null) return Results.BadRequest("Service is not bookable.");
 
+        var serviceVersion = await GetLatestServiceVersionAsync(db, service, timeProvider.GetUtcNow(), cancellationToken);
         var startAt = request.StartAt.ToUniversalTime();
-        var endAt = startAt.AddMinutes(service.DurationMinutes);
+        var endAt = startAt.AddMinutes(serviceVersion.DurationMinutes);
         var existingAppointments = await db.Appointments.IgnoreQueryFilters()
             .Where(a => a.TenantId == profile.TenantId && a.Status != AppointmentStatus.Cancelled)
             .ToListAsync(cancellationToken);
@@ -328,13 +333,14 @@ public sealed class AppointmentEndpoints : IEndpoints
         }
 
         var staff = await db.StaffMembers.IgnoreQueryFilters().FirstAsync(s => s.TenantId == profile.TenantId && s.IsActive, cancellationToken);
-        var paymentPolicy = NormalizePaymentPolicy(service.PaymentPolicy.ToString(), service.DepositCents);
+        var paymentPolicy = NormalizePaymentPolicy(serviceVersion.PaymentPolicy.ToString(), serviceVersion.DepositCents);
         var requiresHostedPayment = paymentPolicy is ServicePaymentPolicy.DepositBeforeBooking or ServicePaymentPolicy.FullPaymentBeforeBooking;
         var appointment = new Appointment
         {
             TenantId = profile.TenantId,
             ClientId = client.Id,
             ServiceId = service.Id,
+            ServiceVersionId = serviceVersion.Id,
             StaffMemberId = staff.Id,
             StartAt = startAt,
             EndAt = endAt,
@@ -352,7 +358,7 @@ public sealed class AppointmentEndpoints : IEndpoints
         {
             var subaccountCode = await GetActivePaystackSubaccountCodeAsync(db, profile.TenantId, true, cancellationToken);
             if (subaccountCode is null) return Results.BadRequest("Connect Paystack payouts before accepting appointment payments.");
-            var intent = CreatePaymentIntent(profile.TenantId, appointment.Id, GetPaymentAmountCents(service), AppointmentPaymentChannel.HostedCheckout, timeProvider.GetUtcNow());
+            var intent = CreatePaymentIntent(profile.TenantId, appointment.Id, GetPaymentAmountCents(serviceVersion), AppointmentPaymentChannel.HostedCheckout, timeProvider.GetUtcNow());
             intent.AuthorizationUrl = await TryInitializePaystackTransactionAsync(intent, request.Email, subaccountCode, paystackClient, cancellationToken);
             paymentUrl = intent.AuthorizationUrl;
             db.AppointmentPaymentIntents.Add(intent);
@@ -375,13 +381,13 @@ public sealed class AppointmentEndpoints : IEndpoints
         if (appointment is null) return Results.NotFound();
         var subaccountCode = await GetActivePaystackSubaccountCodeAsync(db, appointment.TenantId, false, cancellationToken);
         if (subaccountCode is null) return Results.BadRequest("Connect Paystack payouts before accepting appointment payments.");
-        var service = await db.BookableServices.FirstAsync(s => s.Id == appointment.ServiceId, cancellationToken);
-        var paymentPolicy = NormalizePaymentPolicy(service.PaymentPolicy.ToString(), service.DepositCents);
+        var serviceVersion = await GetAppointmentServiceVersionAsync(db, appointment, cancellationToken);
+        var paymentPolicy = NormalizePaymentPolicy(serviceVersion.PaymentPolicy.ToString(), serviceVersion.DepositCents);
         if (paymentPolicy == ServicePaymentPolicy.CollectAfterAppointment)
         {
             return Results.BadRequest("Use the virtual terminal to collect after-appointment payments.");
         }
-        var intent = CreatePaymentIntent(appointment.TenantId, appointment.Id, GetPaymentAmountCents(service), AppointmentPaymentChannel.HostedCheckout, timeProvider.GetUtcNow());
+        var intent = CreatePaymentIntent(appointment.TenantId, appointment.Id, GetPaymentAmountCents(serviceVersion), AppointmentPaymentChannel.HostedCheckout, timeProvider.GetUtcNow());
         var client = await db.Clients.FirstAsync(c => c.Id == appointment.ClientId, cancellationToken);
         intent.AuthorizationUrl = await TryInitializePaystackTransactionAsync(intent, client.Email, subaccountCode, paystackClient, cancellationToken);
         db.AppointmentPaymentIntents.Add(intent);
@@ -394,8 +400,8 @@ public sealed class AppointmentEndpoints : IEndpoints
     {
         var appointment = await db.Appointments.AsTracking().FirstOrDefaultAsync(a => a.Id == id, cancellationToken);
         if (appointment is null) return Results.NotFound();
-        var service = await db.BookableServices.FirstAsync(s => s.Id == appointment.ServiceId, cancellationToken);
-        if (NormalizePaymentPolicy(service.PaymentPolicy.ToString(), service.DepositCents) != ServicePaymentPolicy.CollectAfterAppointment)
+        var serviceVersion = await GetAppointmentServiceVersionAsync(db, appointment, cancellationToken);
+        if (NormalizePaymentPolicy(serviceVersion.PaymentPolicy.ToString(), serviceVersion.DepositCents) != ServicePaymentPolicy.CollectAfterAppointment)
         {
             return Results.BadRequest("This service is not configured for virtual terminal collection.");
         }
@@ -422,7 +428,7 @@ public sealed class AppointmentEndpoints : IEndpoints
             pendingIntent.Status = "Superseded";
         }
 
-        var intent = CreatePaymentIntent(appointment.TenantId, appointment.Id, service.PriceCents, AppointmentPaymentChannel.VirtualTerminal, timeProvider.GetUtcNow());
+        var intent = CreatePaymentIntent(appointment.TenantId, appointment.Id, serviceVersion.PriceCents, AppointmentPaymentChannel.VirtualTerminal, timeProvider.GetUtcNow());
         intent.VirtualTerminalCode = subaccount.VirtualTerminalCode;
         db.AppointmentPaymentIntents.Add(intent);
         appointment.PaymentStatus = AppointmentPaymentStatus.Pending;
@@ -445,8 +451,8 @@ public sealed class AppointmentEndpoints : IEndpoints
         }
         intent.Status = "Confirmed";
         intent.ConfirmedAt = timeProvider.GetUtcNow();
-        var service = await db.BookableServices.IgnoreQueryFilters().FirstAsync(s => s.Id == appointment.ServiceId, cancellationToken);
-        appointment.PaymentStatus = NormalizePaymentPolicy(service.PaymentPolicy.ToString(), service.DepositCents) == ServicePaymentPolicy.DepositBeforeBooking
+        var serviceVersion = await GetAppointmentServiceVersionAsync(db, appointment, cancellationToken);
+        appointment.PaymentStatus = NormalizePaymentPolicy(serviceVersion.PaymentPolicy.ToString(), serviceVersion.DepositCents) == ServicePaymentPolicy.DepositBeforeBooking
             ? AppointmentPaymentStatus.DepositPaid
             : AppointmentPaymentStatus.Paid;
         appointment.Status = AppointmentStatus.Confirmed;
@@ -500,11 +506,12 @@ public sealed class AppointmentEndpoints : IEndpoints
         var appointments = (await db.Appointments.ToListAsync(cancellationToken)).OrderByDescending(a => a.StartAt).ToList();
         var clients = await db.Clients.ToListAsync(cancellationToken);
         var services = await db.BookableServices.ToListAsync(cancellationToken);
+        var serviceVersions = await db.BookableServiceVersions.ToListAsync(cancellationToken);
         var intents = (await db.AppointmentPaymentIntents.ToListAsync(cancellationToken)).OrderByDescending(i => i.CreatedAt).Take(25).ToList();
         return Results.Ok(new PaymentOverviewResponse(
-            BuildPaymentStats(appointments, services),
+            BuildPaymentStats(appointments, services, serviceVersions),
             subaccount is null ? null : ToPaystackSubaccountDto(subaccount),
-            intents.Select(intent => ToPaymentIntentDto(intent, appointments, clients, services))
+            intents.Select(intent => ToPaymentIntentDto(intent, appointments, clients, services, serviceVersions))
         ));
     }
 
@@ -618,48 +625,140 @@ public sealed class AppointmentEndpoints : IEndpoints
         return executionContext.TenantId ?? throw new InvalidOperationException("A tenant context is required.");
     }
 
+    private static async Task AddNextServiceVersionAsync(MainDbContext db, BookableService service, DateTimeOffset now, CancellationToken cancellationToken)
+    {
+        var existingVersions = await db.BookableServiceVersions
+            .Where(version => version.ServiceId == service.Id)
+            .Select(version => version.VersionNumber)
+            .ToListAsync(cancellationToken);
+        var nextVersion = existingVersions.Count == 0 ? 1 : existingVersions.Max() + 1;
+        db.BookableServiceVersions.Add(CreateServiceVersion(service, nextVersion, now));
+    }
+
+    private static BookableServiceVersion CreateServiceVersion(BookableService service, int versionNumber, DateTimeOffset now)
+    {
+        return new BookableServiceVersion
+        {
+            TenantId = service.TenantId,
+            ServiceId = service.Id,
+            VersionNumber = versionNumber,
+            CategoryId = service.CategoryId,
+            Name = service.Name,
+            Description = service.Description,
+            Mode = service.Mode,
+            DurationMinutes = service.DurationMinutes,
+            PriceCents = service.PriceCents,
+            DepositCents = service.DepositCents,
+            PaymentPolicy = service.PaymentPolicy,
+            BufferBeforeMinutes = service.BufferBeforeMinutes,
+            BufferAfterMinutes = service.BufferAfterMinutes,
+            Location = service.Location,
+            IsActive = service.IsActive,
+            CreatedAt = now
+        };
+    }
+
+    private static async Task<BookableServiceVersion> GetLatestServiceVersionAsync(MainDbContext db, BookableService service, DateTimeOffset now, CancellationToken cancellationToken)
+    {
+        var version = await db.BookableServiceVersions.IgnoreQueryFilters()
+            .Where(v => v.TenantId == service.TenantId && v.ServiceId == service.Id)
+            .OrderByDescending(v => v.VersionNumber)
+            .FirstOrDefaultAsync(cancellationToken);
+        if (version is not null) return version;
+
+        version = CreateServiceVersion(service, 1, now);
+        db.BookableServiceVersions.Add(version);
+        return version;
+    }
+
+    private static async Task<BookableServiceVersion> GetAppointmentServiceVersionAsync(MainDbContext db, Appointment appointment, CancellationToken cancellationToken)
+    {
+        if (!string.IsNullOrWhiteSpace(appointment.ServiceVersionId))
+        {
+            var version = await db.BookableServiceVersions.IgnoreQueryFilters().FirstOrDefaultAsync(v => v.Id == appointment.ServiceVersionId, cancellationToken);
+            if (version is not null) return version;
+        }
+
+        return await db.BookableServiceVersions.IgnoreQueryFilters()
+            .Where(v => v.TenantId == appointment.TenantId && v.ServiceId == appointment.ServiceId)
+            .OrderByDescending(v => v.VersionNumber)
+            .FirstAsync(cancellationToken);
+    }
+
+    private static async Task EnsureServiceVersionBackfillAsync(MainDbContext db, DateTimeOffset now, CancellationToken cancellationToken)
+    {
+        var services = await db.BookableServices.ToListAsync(cancellationToken);
+        var versions = await db.BookableServiceVersions.ToListAsync(cancellationToken);
+        foreach (var service in services.Where(service => versions.All(version => version.ServiceId != service.Id)))
+        {
+            var version = CreateServiceVersion(service, 1, now);
+            db.BookableServiceVersions.Add(version);
+            versions.Add(version);
+        }
+
+        var appointments = await db.Appointments.AsTracking().ToListAsync(cancellationToken);
+        foreach (var appointment in appointments.Where(appointment => string.IsNullOrWhiteSpace(appointment.ServiceVersionId)))
+        {
+            appointment.ServiceVersionId = versions
+                .Where(version => version.ServiceId == appointment.ServiceId)
+                .OrderByDescending(version => version.VersionNumber)
+                .First()
+                .Id;
+        }
+
+        if (db.ChangeTracker.HasChanges())
+        {
+            await db.SaveChangesAsync(cancellationToken);
+        }
+    }
+
     private static async Task<AppShellResponse> BuildShellAsync(MainDbContext db, CancellationToken cancellationToken)
     {
+        await EnsureServiceVersionBackfillAsync(db, DateTimeOffset.UtcNow, cancellationToken);
         var appointments = (await db.Appointments.ToListAsync(cancellationToken)).OrderBy(a => a.StartAt).ToList();
         var clients = await db.Clients.ToListAsync(cancellationToken);
         var services = await db.BookableServices.OrderBy(s => s.SortOrder).ToListAsync(cancellationToken);
+        var serviceVersions = await db.BookableServiceVersions.ToListAsync(cancellationToken);
         var categories = await db.ServiceCategories.OrderBy(c => c.SortOrder).ToListAsync(cancellationToken);
         var profile = await db.BusinessProfiles.FirstAsync(cancellationToken);
         var integrations = await db.IntegrationConnections.OrderBy(i => i.Provider).ThenBy(i => i.Capability).ToListAsync(cancellationToken);
         return new AppShellResponse(
             new BusinessProfileDto(profile.Name, profile.Slug, profile.TimeZone, profile.Address, profile.PublicBookingEnabled),
-            appointments.Select(a => ToAppointmentDto(a, clients, services)),
+            appointments.Select(a => ToAppointmentDto(a, clients, services, serviceVersions)),
             services.Select(ToServiceDto),
             categories.Select(c => new ServiceCategoryDto(c.Id, c.Name)),
-            clients.Select(c => ToClientDto(c, appointments, services)),
-            BuildAnalytics(appointments, services, clients),
+            clients.Select(c => ToClientDto(c, appointments, services, serviceVersions)),
+            BuildAnalytics(appointments, services, serviceVersions, clients),
             integrations.Select(i => new IntegrationConnectionDto(i.Provider, i.Capability, i.Status, i.LastSyncedAt))
         );
     }
 
-    private static AppointmentDto ToAppointmentDto(Appointment appointment, List<Client> clients, List<BookableService> services)
+    private static AppointmentDto ToAppointmentDto(Appointment appointment, List<Client> clients, List<BookableService> services, List<BookableServiceVersion> serviceVersions)
     {
         var client = clients.First(c => c.Id == appointment.ClientId);
         var service = services.First(s => s.Id == appointment.ServiceId);
+        var version = GetServiceVersionForAppointment(appointment, serviceVersions) ?? CreateFallbackVersion(service, appointment.CreatedAt);
         return new AppointmentDto(
             appointment.Id,
             appointment.PublicReference,
             client.Id,
             service.Id,
+            version.Id,
+            version.VersionNumber,
             appointment.StartAt,
             appointment.EndAt,
             client.Name,
             client.Phone,
             client.Email,
-            service.Name,
-            service.DurationMinutes,
-            service.PriceCents,
-            service.DepositCents,
-            service.PaymentPolicy.ToString(),
+            version.Name,
+            version.DurationMinutes,
+            version.PriceCents,
+            version.DepositCents,
+            version.PaymentPolicy.ToString(),
             appointment.Status.ToString(),
             appointment.PaymentStatus.ToString(),
             appointment.Source.ToString(),
-            service.Location,
+            version.Location,
             appointment.AnswersJson,
             client.Status,
             client.Alert,
@@ -671,7 +770,8 @@ public sealed class AppointmentEndpoints : IEndpoints
     {
         var client = await db.Clients.IgnoreQueryFilters().FirstAsync(c => c.Id == appointment.ClientId, cancellationToken);
         var service = await db.BookableServices.IgnoreQueryFilters().FirstAsync(s => s.Id == appointment.ServiceId, cancellationToken);
-        return ToAppointmentDto(appointment, [client], [service]);
+        var serviceVersion = await GetAppointmentServiceVersionAsync(db, appointment, cancellationToken);
+        return ToAppointmentDto(appointment, [client], [service], [serviceVersion]);
     }
 
     private static ServiceDto ToServiceDto(BookableService service)
@@ -679,22 +779,77 @@ public sealed class AppointmentEndpoints : IEndpoints
         return new ServiceDto(service.Id, service.CategoryId, service.Name, service.Mode, service.DurationMinutes, service.PriceCents, service.DepositCents, service.PaymentPolicy.ToString(), service.Location, service.IsActive);
     }
 
-    private static ClientDto ToClientDto(Client client, List<Appointment> appointments, List<BookableService> services)
+    private static ClientAppointmentHistoryDto ToClientAppointmentHistoryDto(Appointment appointment, List<BookableService> services, List<BookableServiceVersion> serviceVersions)
     {
-        var clientAppointments = appointments.Where(a => a.ClientId == client.Id).ToList();
-        var lifetime = clientAppointments.Sum(a => services.First(s => s.Id == a.ServiceId).PriceCents);
-        return new ClientDto(client.Id, client.Name, client.Phone, client.Email, client.Status, client.Alert, client.InternalNote, clientAppointments.Count, lifetime, clientAppointments.OrderByDescending(a => a.StartAt).FirstOrDefault()?.StartAt);
+        var service = services.First(s => s.Id == appointment.ServiceId);
+        var version = GetServiceVersionForAppointment(appointment, serviceVersions) ?? CreateFallbackVersion(service, appointment.CreatedAt);
+        return new ClientAppointmentHistoryDto(
+            appointment.Id,
+            appointment.PublicReference,
+            appointment.StartAt,
+            appointment.EndAt,
+            version.Name,
+            version.PriceCents,
+            version.DepositCents,
+            version.PaymentPolicy.ToString(),
+            appointment.Status.ToString(),
+            appointment.PaymentStatus.ToString(),
+            appointment.Source.ToString(),
+            version.Location
+        );
     }
 
-    private static AnalyticsDto BuildAnalytics(List<Appointment> appointments, List<BookableService> services, List<Client> clients)
+    private static BookableServiceVersion? GetServiceVersionForAppointment(Appointment appointment, List<BookableServiceVersion> serviceVersions)
+    {
+        return serviceVersions.FirstOrDefault(version => version.Id == appointment.ServiceVersionId) ??
+               serviceVersions
+                   .Where(version => version.ServiceId == appointment.ServiceId)
+                   .OrderByDescending(version => version.VersionNumber)
+                   .FirstOrDefault();
+    }
+
+    private static BookableServiceVersion CreateFallbackVersion(BookableService service, DateTimeOffset createdAt)
+    {
+        return new BookableServiceVersion
+        {
+            Id = $"{service.Id}_fallback",
+            TenantId = service.TenantId,
+            ServiceId = service.Id,
+            VersionNumber = 1,
+            CategoryId = service.CategoryId,
+            Name = service.Name,
+            Description = service.Description,
+            Mode = service.Mode,
+            DurationMinutes = service.DurationMinutes,
+            PriceCents = service.PriceCents,
+            DepositCents = service.DepositCents,
+            PaymentPolicy = service.PaymentPolicy,
+            BufferBeforeMinutes = service.BufferBeforeMinutes,
+            BufferAfterMinutes = service.BufferAfterMinutes,
+            Location = service.Location,
+            IsActive = service.IsActive,
+            CreatedAt = createdAt
+        };
+    }
+
+    private static ClientDto ToClientDto(Client client, List<Appointment> appointments, List<BookableService> services, List<BookableServiceVersion> serviceVersions)
+    {
+        var clientAppointments = appointments.Where(a => a.ClientId == client.Id).OrderByDescending(a => a.StartAt).ToList();
+        var lifetime = clientAppointments.Sum(a => GetServiceVersionForAppointment(a, serviceVersions)?.PriceCents ?? services.First(s => s.Id == a.ServiceId).PriceCents);
+        var noShows = clientAppointments.Count(a => a.Status == AppointmentStatus.NoShow);
+        var history = clientAppointments.Select(a => ToClientAppointmentHistoryDto(a, services, serviceVersions)).ToList();
+        return new ClientDto(client.Id, client.Name, client.Phone, client.Email, client.Status, client.Alert, client.InternalNote, clientAppointments.Count, lifetime, noShows, clientAppointments.FirstOrDefault()?.StartAt, history);
+    }
+
+    private static AnalyticsDto BuildAnalytics(List<Appointment> appointments, List<BookableService> services, List<BookableServiceVersion> serviceVersions, List<Client> clients)
     {
         var revenue = appointments.Where(a => a.PaymentStatus is AppointmentPaymentStatus.Paid or AppointmentPaymentStatus.DepositPaid or AppointmentPaymentStatus.NotRequired)
-            .Sum(a => services.First(s => s.Id == a.ServiceId).PriceCents);
+            .Sum(a => GetServiceVersionForAppointment(a, serviceVersions)?.PriceCents ?? services.First(s => s.Id == a.ServiceId).PriceCents);
         var noShows = appointments.Count(a => a.Status == AppointmentStatus.NoShow);
         return new AnalyticsDto(appointments.Count, revenue, clients.Count, appointments.Count == 0 ? 0 : revenue / appointments.Count, appointments.Count == 0 ? 0 : Math.Round(noShows * 100m / appointments.Count, 1));
     }
 
-    private static PaymentStatsDto BuildPaymentStats(List<Appointment> appointments, List<BookableService> services)
+    private static PaymentStatsDto BuildPaymentStats(List<Appointment> appointments, List<BookableService> services, List<BookableServiceVersion> serviceVersions)
     {
         var paid = appointments.Where(a => a.PaymentStatus is AppointmentPaymentStatus.Paid or AppointmentPaymentStatus.DepositPaid or AppointmentPaymentStatus.NotRequired).ToList();
         var pending = appointments.Where(a => a.PaymentStatus is AppointmentPaymentStatus.Pending or AppointmentPaymentStatus.Failed).ToList();
@@ -703,16 +858,17 @@ public sealed class AppointmentEndpoints : IEndpoints
             paid.Count,
             appointments.Count(a => a.PaymentStatus != AppointmentPaymentStatus.Paid && a.PaymentStatus != AppointmentPaymentStatus.DepositPaid && a.PaymentStatus != AppointmentPaymentStatus.NotRequired),
             appointments.Count(a => a.PaymentStatus == AppointmentPaymentStatus.Failed),
-            pending.Sum(a => services.First(s => s.Id == a.ServiceId).DepositCents > 0 ? services.First(s => s.Id == a.ServiceId).DepositCents : services.First(s => s.Id == a.ServiceId).PriceCents),
-            paid.Sum(a => services.First(s => s.Id == a.ServiceId).PriceCents)
+            pending.Sum(a => GetPaymentAmountCents(GetServiceVersionForAppointment(a, serviceVersions) ?? CreateFallbackVersion(services.First(s => s.Id == a.ServiceId), a.CreatedAt))),
+            paid.Sum(a => GetServiceVersionForAppointment(a, serviceVersions)?.PriceCents ?? services.First(s => s.Id == a.ServiceId).PriceCents)
         );
     }
 
-    private static PaymentIntentDto ToPaymentIntentDto(AppointmentPaymentIntent intent, List<Appointment> appointments, List<Client> clients, List<BookableService> services)
+    private static PaymentIntentDto ToPaymentIntentDto(AppointmentPaymentIntent intent, List<Appointment> appointments, List<Client> clients, List<BookableService> services, List<BookableServiceVersion> serviceVersions)
     {
         var appointment = appointments.FirstOrDefault(a => a.Id == intent.AppointmentId);
         var client = appointment is null ? null : clients.FirstOrDefault(c => c.Id == appointment.ClientId);
-        var service = appointment is null ? null : services.FirstOrDefault(s => s.Id == appointment.ServiceId);
+        var service = appointment is null ? null : GetServiceVersionForAppointment(appointment, serviceVersions);
+        var currentService = appointment is null ? null : services.FirstOrDefault(s => s.Id == appointment.ServiceId);
         return new PaymentIntentDto(
             intent.Reference,
             intent.AmountCents,
@@ -722,7 +878,7 @@ public sealed class AppointmentEndpoints : IEndpoints
             intent.ConfirmedAt,
             appointment?.PublicReference ?? string.Empty,
             client?.Name ?? "Unknown client",
-            service?.Name ?? "Unknown service"
+            service?.Name ?? currentService?.Name ?? "Unknown service"
         );
     }
 
@@ -861,6 +1017,13 @@ public sealed class AppointmentEndpoints : IEndpoints
         return NormalizePaymentPolicy(service.PaymentPolicy.ToString(), service.DepositCents) == ServicePaymentPolicy.DepositBeforeBooking
             ? service.DepositCents
             : service.PriceCents;
+    }
+
+    private static int GetPaymentAmountCents(BookableServiceVersion serviceVersion)
+    {
+        return NormalizePaymentPolicy(serviceVersion.PaymentPolicy.ToString(), serviceVersion.DepositCents) == ServicePaymentPolicy.DepositBeforeBooking
+            ? serviceVersion.DepositCents
+            : serviceVersion.PriceCents;
     }
 
     private static ServicePaymentPolicy NormalizePaymentPolicy(string? paymentPolicy, int depositCents)
@@ -1045,11 +1208,13 @@ public sealed class AppointmentEndpoints : IEndpoints
         var follow = new BookableService { TenantId = tenantId, CategoryId = category.Id, Name = "Follow-up visit", Mode = "virtual", DurationMinutes = 20, PriceCents = 15000, DepositCents = 0, PaymentPolicy = ServicePaymentPolicy.NoPaymentRequired, Location = "Manual link per booking", SortOrder = 3 };
         var workshop = new BookableService { TenantId = tenantId, CategoryId = group.Id, Name = "Group workshop", Mode = "physical", DurationMinutes = 90, PriceCents = 85000, DepositCents = 25000, PaymentPolicy = ServicePaymentPolicy.DepositBeforeBooking, Location = "Sea Point studio", SortOrder = 4 };
         db.AddRange(profile, category, group, staff, full, express, follow, workshop);
+        var serviceVersions = new[] { full, express, follow, workshop }.Select(service => CreateServiceVersion(service, 1, now)).ToArray();
+        db.BookableServiceVersions.AddRange(serviceVersions);
         foreach (var day in new[] { DayOfWeek.Monday, DayOfWeek.Tuesday, DayOfWeek.Wednesday, DayOfWeek.Thursday, DayOfWeek.Friday })
         {
             db.AvailabilityRules.Add(new AvailabilityRule { TenantId = tenantId, StaffMemberId = staff.Id, DayOfWeek = day, StartTime = new TimeOnly(9, 0), EndTime = new TimeOnly(17, 0) });
         }
-        await SeedAppointmentsAsync(db, tenantId, staff, [full, express, follow, workshop], now);
+        await SeedAppointmentsAsync(db, tenantId, staff, [full, express, follow, workshop], serviceVersions, now);
         await EnsureIntegrationRowsAsync(db, tenantId, cancellationToken);
         await db.SaveChangesAsync(cancellationToken);
     }
@@ -1061,7 +1226,7 @@ public sealed class AppointmentEndpoints : IEndpoints
         await SeedTenantAsync(db, new TenantId(1), now, cancellationToken);
     }
 
-    private static Task SeedAppointmentsAsync(MainDbContext db, TenantId tenantId, StaffMember staff, BookableService[] services, DateTimeOffset now)
+    private static Task SeedAppointmentsAsync(MainDbContext db, TenantId tenantId, StaffMember staff, BookableService[] services, BookableServiceVersion[] serviceVersions, DateTimeOffset now)
     {
         var clients = new[]
         {
@@ -1083,7 +1248,8 @@ public sealed class AppointmentEndpoints : IEndpoints
         };
         foreach (var row in data)
         {
-            var appointment = new Appointment { TenantId = tenantId, ClientId = row.Item1.Id, ServiceId = row.Item2.Id, StaffMemberId = staff.Id, StartAt = row.Item3, EndAt = row.Item3.AddMinutes(row.Item2.DurationMinutes), Status = row.Item4, PaymentStatus = row.Item5, Source = row.Item6, CreatedAt = now };
+            var serviceVersion = serviceVersions.Single(version => version.ServiceId == row.Item2.Id);
+            var appointment = new Appointment { TenantId = tenantId, ClientId = row.Item1.Id, ServiceId = row.Item2.Id, ServiceVersionId = serviceVersion.Id, StaffMemberId = staff.Id, StartAt = row.Item3, EndAt = row.Item3.AddMinutes(serviceVersion.DurationMinutes), Status = row.Item4, PaymentStatus = row.Item5, Source = row.Item6, CreatedAt = now };
             db.Appointments.Add(appointment);
             AddFlowEvents(db, appointment, now);
         }
@@ -1093,10 +1259,11 @@ public sealed class AppointmentEndpoints : IEndpoints
 
 public sealed record AppShellResponse(BusinessProfileDto Profile, IEnumerable<AppointmentDto> Appointments, IEnumerable<ServiceDto> Services, IEnumerable<ServiceCategoryDto> Categories, IEnumerable<ClientDto> Clients, AnalyticsDto Analytics, IEnumerable<IntegrationConnectionDto> Integrations);
 public sealed record BusinessProfileDto(string Name, string Slug, string TimeZone, string Address, bool PublicBookingEnabled);
-public sealed record AppointmentDto(string Id, string PublicReference, string ClientId, string ServiceId, DateTimeOffset StartAt, DateTimeOffset EndAt, string ClientName, string ClientPhone, string ClientEmail, string ServiceName, int DurationMinutes, int PriceCents, int DepositCents, string PaymentPolicy, string Status, string PaymentStatus, string Source, string Location, string AnswersJson, string ClientStatus, string? ClientAlert, string? ClientInternalNote);
+public sealed record AppointmentDto(string Id, string PublicReference, string ClientId, string ServiceId, string ServiceVersionId, int ServiceVersionNumber, DateTimeOffset StartAt, DateTimeOffset EndAt, string ClientName, string ClientPhone, string ClientEmail, string ServiceName, int DurationMinutes, int PriceCents, int DepositCents, string PaymentPolicy, string Status, string PaymentStatus, string Source, string Location, string AnswersJson, string ClientStatus, string? ClientAlert, string? ClientInternalNote);
 public sealed record ServiceDto(string Id, string CategoryId, string Name, string Mode, int DurationMinutes, int PriceCents, int DepositCents, string PaymentPolicy, string Location, bool IsActive);
 public sealed record ServiceCategoryDto(string Id, string Name);
-public sealed record ClientDto(string Id, string Name, string Phone, string Email, string Status, string? Alert, string? InternalNote, int VisitCount, int LifetimeSpendCents, DateTimeOffset? LastVisitAt);
+public sealed record ClientDto(string Id, string Name, string Phone, string Email, string Status, string? Alert, string? InternalNote, int VisitCount, int LifetimeSpendCents, int NoShowCount, DateTimeOffset? LastVisitAt, IEnumerable<ClientAppointmentHistoryDto> AppointmentHistory);
+public sealed record ClientAppointmentHistoryDto(string Id, string PublicReference, DateTimeOffset StartAt, DateTimeOffset EndAt, string ServiceName, int PriceCents, int DepositCents, string PaymentPolicy, string Status, string PaymentStatus, string Source, string Location);
 public sealed record AnalyticsDto(int Bookings, int RevenueCents, int ClientsServed, int AverageBookingValueCents, decimal NoShowRate);
 public sealed record IntegrationConnectionDto(string Provider, string Capability, string Status, DateTimeOffset? LastSyncedAt);
 public sealed record SlotDto(DateTimeOffset StartAt, DateTimeOffset EndAt);

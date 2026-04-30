@@ -5,82 +5,24 @@ import { Trans } from "@lingui/react/macro";
 import { loginPath, signUpPath } from "@repo/infrastructure/auth/constants";
 import { useIsAuthenticated } from "@repo/infrastructure/auth/hooks";
 import { Link } from "@repo/ui/components/Link";
-import {
-  CalendarDaysIcon,
-  ChevronDownIcon,
-  CreditCardIcon,
-  DatabaseZapIcon,
-  HospitalIcon,
-  MessageCircleIcon,
-  PlugZapIcon,
-  ScissorsIcon,
-  SparklesIcon,
-  StoreIcon,
-  UserRoundIcon,
-  UsersRoundIcon
-} from "lucide-react";
+import { CalendarDaysIcon, ChevronDownIcon, CreditCardIcon, DatabaseZapIcon, HospitalIcon, MessageCircleIcon, PlugZapIcon, ScissorsIcon, SparklesIcon, StoreIcon, UserRoundIcon, UsersRoundIcon } from "lucide-react";
 import { Suspense, useState } from "react";
 
 import UserMenu from "@/federated-modules/userMenu/UserMenu";
 
 const businessSolutions: readonly SolutionItem[] = [
-  {
-    title: "Solo operators",
-    description: "Fixed WhatsApp booking flows for independent service businesses.",
-    href: "/#why-nerova",
-    Icon: UserRoundIcon
-  },
-  {
-    title: "Studios and salons",
-    description: "Services, staff schedules, reminders, and payment prompts for small teams.",
-    href: "/#product",
-    Icon: ScissorsIcon
-  },
-  {
-    title: "Clinics and practices",
-    description: "Structured appointment operations for consultation-led teams.",
-    href: "/#product",
-    Icon: HospitalIcon
-  },
-  {
-    title: "Multi-team businesses",
-    description: "Stronger controls across calendars, staff, services, and account billing.",
-    href: "/#pricing",
-    Icon: StoreIcon
-  }
+  { title: "Solo operators", description: "Fixed WhatsApp booking flows for independent service businesses.", href: "/#why-nerova", Icon: UserRoundIcon },
+  { title: "Studios and salons", description: "Services, staff schedules, reminders, and payment prompts for small teams.", href: "/#product", Icon: ScissorsIcon },
+  { title: "Clinics and practices", description: "Structured appointment operations for consultation-led teams.", href: "/#product", Icon: HospitalIcon },
+  { title: "Multi-team businesses", description: "Stronger controls across calendars, staff, services, and account billing.", href: "/#pricing", Icon: StoreIcon }
 ];
 
 const workflowSolutions: readonly SolutionItem[] = [
-  {
-    title: "WhatsApp flows",
-    description: "Fixed booking, confirmation, reminder, reschedule, and payment sequences.",
-    href: "/#why-nerova",
-    Icon: MessageCircleIcon
-  },
-  {
-    title: "Bookings",
-    description: "Availability, client intake, and confirmed appointment flows.",
-    href: "/#product",
-    Icon: CalendarDaysIcon
-  },
-  {
-    title: "Staff schedules",
-    description: "Daily team views for appointments, service notes, and handoffs.",
-    href: "/#product",
-    Icon: UsersRoundIcon
-  },
-  {
-    title: "Payments",
-    description: "PayFast subscriptions now, planned Stitch client payment flows next.",
-    href: "/#payments",
-    Icon: CreditCardIcon
-  },
-  {
-    title: "Integrations",
-    description: "Google tools first, Microsoft later, and Nango-powered connectors over time.",
-    href: "/#integrations",
-    Icon: PlugZapIcon
-  }
+  { title: "WhatsApp flows", description: "Fixed booking, confirmation, reminder, reschedule, and payment sequences.", href: "/#why-nerova", Icon: MessageCircleIcon },
+  { title: "Bookings", description: "Availability, client intake, and confirmed appointment flows.", href: "/#product", Icon: CalendarDaysIcon },
+  { title: "Staff schedules", description: "Daily team views for appointments, service notes, and handoffs.", href: "/#product", Icon: UsersRoundIcon },
+  { title: "Payments", description: "PayFast subscriptions now, planned Stitch client payment flows next.", href: "/#payments", Icon: CreditCardIcon },
+  { title: "Integrations", description: "Google tools first, Microsoft later, and Nango-powered connectors over time.", href: "/#integrations", Icon: PlugZapIcon }
 ];
 
 type SolutionItem = {
@@ -153,12 +95,7 @@ export default function PublicNavigation() {
           </Suspense>
         ) : (
           <div className="flex items-center gap-2">
-            <Link
-              href={loginPath}
-              variant="button-secondary"
-              underline={false}
-              className="hidden h-10 px-4 sm:inline-flex"
-            >
+            <Link href={loginPath} variant="button-secondary" underline={false} className="hidden h-10 px-4 sm:inline-flex">
               <Trans>Log in</Trans>
             </Link>
             <Link href={signUpPath} variant="button-primary" underline={false} className="h-10 rounded-2xl px-4">

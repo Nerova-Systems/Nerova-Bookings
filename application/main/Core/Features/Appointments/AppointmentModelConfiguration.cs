@@ -40,6 +40,20 @@ public sealed class BookableServiceConfiguration : IEntityTypeConfiguration<Book
     }
 }
 
+public sealed class BookableServiceVersionConfiguration : IEntityTypeConfiguration<BookableServiceVersion>
+{
+    public void Configure(EntityTypeBuilder<BookableServiceVersion> builder)
+    {
+        builder.HasKey(x => x.Id);
+        builder.MapStronglyTypedLongId<BookableServiceVersion, TenantId>(x => x.TenantId);
+        builder.HasIndex(x => new { x.ServiceId, x.VersionNumber }).IsUnique();
+        builder.Property(x => x.Name).HasMaxLength(160);
+        builder.Property(x => x.Mode).HasMaxLength(32);
+        builder.Property(x => x.PaymentPolicy).HasConversion<string>().HasMaxLength(40);
+        builder.Property(x => x.Location).HasMaxLength(240);
+    }
+}
+
 public sealed class StaffMemberConfiguration : IEntityTypeConfiguration<StaffMember>
 {
     public void Configure(EntityTypeBuilder<StaffMember> builder)
@@ -102,6 +116,7 @@ public sealed class AppointmentConfiguration : IEntityTypeConfiguration<Appointm
         builder.HasKey(x => x.Id);
         builder.MapStronglyTypedLongId<Appointment, TenantId>(x => x.TenantId);
         builder.HasIndex(x => x.PublicReference).IsUnique();
+        builder.Property(x => x.ServiceVersionId).HasMaxLength(64);
     }
 }
 
