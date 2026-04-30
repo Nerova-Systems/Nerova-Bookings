@@ -15,6 +15,7 @@ public sealed class MainDbContext(DbContextOptions<MainDbContext> options, IExec
     public DbSet<AvailabilityRule> AvailabilityRules => Set<AvailabilityRule>();
     public DbSet<ExternalBusyBlock> ExternalBusyBlocks => Set<ExternalBusyBlock>();
     public DbSet<Client> Clients => Set<Client>();
+    public DbSet<PublicPhoneVerification> PublicPhoneVerifications => Set<PublicPhoneVerification>();
     public DbSet<Appointment> Appointments => Set<Appointment>();
     public DbSet<AppointmentPaymentIntent> AppointmentPaymentIntents => Set<AppointmentPaymentIntent>();
     public DbSet<PaystackSubaccount> PaystackSubaccounts => Set<PaystackSubaccount>();

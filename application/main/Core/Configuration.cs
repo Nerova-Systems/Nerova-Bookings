@@ -24,6 +24,7 @@ public static class Configuration
         public IServiceCollection AddMainServices()
         {
             services.AddScoped<IPaystackClient, PaystackClient>();
+            services.AddScoped<ITwilioVerifyClient, TwilioVerifyClient>();
             return services.AddSharedServices<MainDbContext>([Assembly]);
         }
     }

@@ -18,6 +18,7 @@ var (googleOAuthConfigured, googleOAuthClientId, googleOAuthClientSecret) = Conf
 
 var (payFastConfigured, payFastMerchantId, payFastMerchantKey, payFastPassphrase, payFastSandbox, payFastNotifyUrl, payFastReturnUrl, payFastCancelUrl, payFastAllowedIps) = ConfigurePayFastParameters();
 var (paystackConfigured, paystackPublicKey, paystackSecretKey, paystackCallbackUrl, paystackWebhookUrl) = ConfigurePaystackParameters();
+var (twilioConfigured, twilioAccountSid, twilioAuthToken, twilioVerifyServiceSid) = ConfigureTwilioParameters();
 
 var postgresPassword = builder.CreateStablePassword("postgres-password");
 var postgres = builder.AddPostgres("postgres", password: postgresPassword, port: 9002)
@@ -121,6 +122,10 @@ var mainApi = builder
     .WithEnvironment("PAYSTACK_SECRET_KEY", paystackSecretKey)
     .WithEnvironment("PAYSTACK_CALLBACK_URL", paystackCallbackUrl)
     .WithEnvironment("PAYSTACK_WEBHOOK_URL", paystackWebhookUrl)
+    .WithEnvironment("PUBLIC_TWILIO_VERIFY_ENABLED", twilioConfigured ? "true" : "false")
+    .WithEnvironment("TWILIO_ACCOUNT_SID", twilioAccountSid)
+    .WithEnvironment("TWILIO_AUTH_TOKEN", twilioAuthToken)
+    .WithEnvironment("TWILIO_VERIFY_SERVICE_SID", twilioVerifyServiceSid)
     .WaitFor(mainWorkers);
 
 var appGateway = builder
@@ -289,6 +294,48 @@ return;
         builder.CreateResourceBuilder(new ParameterResource("paystack-secret-key", _ => "not-configured", true)),
         builder.CreateResourceBuilder(new ParameterResource("paystack-callback-url", _ => "not-configured", true)),
         builder.CreateResourceBuilder(new ParameterResource("paystack-webhook-url", _ => "not-configured", true))
+    );
+}
+
+(bool Configured,
+    IResourceBuilder<ParameterResource> AccountSid,
+    IResourceBuilder<ParameterResource> AuthToken,
+    IResourceBuilder<ParameterResource> VerifyServiceSid) ConfigureTwilioParameters()
+{
+    _ = builder.AddParameter("twilio-verify-enabled")
+        .WithDescription("Enable Twilio Verify SMS OTP for public booking phone verification. Set to `true` after Verify credentials are configured.", true);
+
+    var accountSidFromEnvironment = Environment.GetEnvironmentVariable("TWILIO_ACCOUNT_SID");
+    var authTokenFromEnvironment = Environment.GetEnvironmentVariable("TWILIO_AUTH_TOKEN");
+    var verifyServiceSidFromEnvironment = Environment.GetEnvironmentVariable("TWILIO_VERIFY_SERVICE_SID");
+    var configured = builder.Configuration["Parameters:twilio-verify-enabled"] == "true" ||
+                     (!string.IsNullOrWhiteSpace(accountSidFromEnvironment) &&
+                      !string.IsNullOrWhiteSpace(authTokenFromEnvironment) &&
+                      !string.IsNullOrWhiteSpace(verifyServiceSidFromEnvironment));
+
+    if (configured)
+    {
+        var accountSid = string.IsNullOrWhiteSpace(accountSidFromEnvironment)
+            ? builder.AddParameter("twilio-account-sid", true)
+                .WithDescription("Twilio Account SID used for Verify SMS requests.", true)
+            : builder.CreateResourceBuilder(new ParameterResource("twilio-account-sid", _ => accountSidFromEnvironment, true));
+        var authToken = string.IsNullOrWhiteSpace(authTokenFromEnvironment)
+            ? builder.AddParameter("twilio-auth-token", true)
+                .WithDescription("Twilio Auth Token used for Verify SMS requests.", true)
+            : builder.CreateResourceBuilder(new ParameterResource("twilio-auth-token", _ => authTokenFromEnvironment, true));
+        var verifyServiceSid = string.IsNullOrWhiteSpace(verifyServiceSidFromEnvironment)
+            ? builder.AddParameter("twilio-verify-service-sid", true)
+                .WithDescription("Twilio Verify Service SID for public booking OTP checks.", true)
+            : builder.CreateResourceBuilder(new ParameterResource("twilio-verify-service-sid", _ => verifyServiceSidFromEnvironment, true));
+
+        return (configured, accountSid, authToken, verifyServiceSid);
+    }
+
+    return (
+        configured,
+        builder.CreateResourceBuilder(new ParameterResource("twilio-account-sid", _ => "not-configured", true)),
+        builder.CreateResourceBuilder(new ParameterResource("twilio-auth-token", _ => "not-configured", true)),
+        builder.CreateResourceBuilder(new ParameterResource("twilio-verify-service-sid", _ => "not-configured", true))
     );
 }
 

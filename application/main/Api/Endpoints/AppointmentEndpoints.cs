@@ -39,6 +39,8 @@ public sealed class AppointmentEndpoints : IEndpoints
         var booking = routes.MapGroup("/api/main/public-booking").WithTags("Public booking");
         booking.MapGet("/{businessSlug}", GetPublicBookingProfile);
         booking.MapGet("/{businessSlug}/client-prefill", GetPublicClientPrefill);
+        booking.MapPost("/{businessSlug}/phone-verifications", StartPublicPhoneVerification).DisableAntiforgery();
+        booking.MapPost("/{businessSlug}/phone-verifications/check", CheckPublicPhoneVerification).DisableAntiforgery();
         booking.MapGet("/{businessSlug}/slots", GetPublicSlots);
         booking.MapPost("/{businessSlug}/appointments", CreatePublicAppointment).DisableAntiforgery();
         booking.MapGet("/confirmation/{reference}", GetPublicConfirmation);
@@ -199,15 +201,71 @@ public sealed class AppointmentEndpoints : IEndpoints
         var profile = await db.BusinessProfiles.IgnoreQueryFilters().FirstOrDefaultAsync(p => p.Slug == businessSlug && p.PublicBookingEnabled, cancellationToken);
         if (profile is null) return Results.NotFound();
 
-        var normalizedPhone = NormalizePhone(phone);
-        if (normalizedPhone.Length == 0) return Results.Ok(new PublicClientPrefillResponse(string.Empty, string.Empty));
+        return Results.BadRequest("Verify your phone number before requesting saved booking details.");
+    }
+
+    private static async Task<IResult> StartPublicPhoneVerification(string businessSlug, StartPhoneVerificationRequest request, MainDbContext db, TimeProvider timeProvider, ITwilioVerifyClient twilioVerifyClient, CancellationToken cancellationToken)
+    {
+        await SeedPublicDemoTenantAsync(db, timeProvider.GetUtcNow(), cancellationToken);
+        var profile = await db.BusinessProfiles.IgnoreQueryFilters().FirstOrDefaultAsync(p => p.Slug == businessSlug && p.PublicBookingEnabled, cancellationToken);
+        if (profile is null) return Results.NotFound();
+
+        var normalizedPhone = NormalizePhone(request.Phone);
+        if (normalizedPhone.Length == 0) return Results.BadRequest("Enter a valid phone number.");
+
+        var now = timeProvider.GetUtcNow();
+        var started = await twilioVerifyClient.StartVerificationAsync(normalizedPhone, cancellationToken);
+        var verification = new PublicPhoneVerification
+        {
+            TenantId = profile.TenantId,
+            Phone = normalizedPhone,
+            MaskedPhone = MaskPhone(normalizedPhone),
+            ProviderSid = started.Sid,
+            Status = "Pending",
+            CreatedAt = now,
+            ExpiresAt = now.AddMinutes(10)
+        };
+        db.PublicPhoneVerifications.Add(verification);
+        await db.SaveChangesAsync(cancellationToken);
+
+        return Results.Ok(new StartPhoneVerificationResponse(verification.MaskedPhone, verification.ExpiresAt, 60));
+    }
+
+    private static async Task<IResult> CheckPublicPhoneVerification(string businessSlug, CheckPhoneVerificationRequest request, MainDbContext db, TimeProvider timeProvider, ITwilioVerifyClient twilioVerifyClient, CancellationToken cancellationToken)
+    {
+        await SeedPublicDemoTenantAsync(db, timeProvider.GetUtcNow(), cancellationToken);
+        var profile = await db.BusinessProfiles.IgnoreQueryFilters().FirstOrDefaultAsync(p => p.Slug == businessSlug && p.PublicBookingEnabled, cancellationToken);
+        if (profile is null) return Results.NotFound();
+
+        var normalizedPhone = NormalizePhone(request.Phone);
+        if (normalizedPhone.Length == 0) return Results.BadRequest("Enter a valid phone number.");
+
+        var now = timeProvider.GetUtcNow();
+        var pendingVerifications = await db.PublicPhoneVerifications.IgnoreQueryFilters().AsTracking()
+            .Where(v => v.Phone == normalizedPhone && v.Status == "Pending")
+            .ToListAsync(cancellationToken);
+        var verification = pendingVerifications
+            .Where(v => v.TenantId == profile.TenantId && v.ExpiresAt > now)
+            .OrderByDescending(v => v.CreatedAt)
+            .FirstOrDefault();
+        if (verification is null) return Results.BadRequest("Start phone verification before checking a code.");
+
+        var approved = await twilioVerifyClient.CheckVerificationAsync(normalizedPhone, request.Code, cancellationToken);
+        if (!approved) return Results.BadRequest("Invalid verification code.");
+
+        var token = CreatePhoneVerificationToken();
+        verification.Status = "Verified";
+        verification.VerifiedAt = now;
+        verification.ExpiresAt = now.AddMinutes(15);
+        verification.VerificationTokenHash = HashPhoneVerificationToken(token);
 
         var tenantClients = await db.Clients.IgnoreQueryFilters()
             .Where(c => c.TenantId == profile.TenantId)
             .ToListAsync(cancellationToken);
         var client = tenantClients.FirstOrDefault(c => NormalizePhone(c.Phone) == normalizedPhone);
+        await db.SaveChangesAsync(cancellationToken);
 
-        return Results.Ok(new PublicClientPrefillResponse(client?.Name ?? string.Empty, client?.Email ?? string.Empty));
+        return Results.Ok(new CheckPhoneVerificationResponse(token, verification.MaskedPhone, client?.Name ?? string.Empty, client?.Email ?? string.Empty));
     }
 
     private static async Task<IResult> GetPublicSlots(string businessSlug, string serviceId, DateOnly date, MainDbContext db, TimeProvider timeProvider, CancellationToken cancellationToken)
@@ -236,13 +294,16 @@ public sealed class AppointmentEndpoints : IEndpoints
         if (overlaps) return Results.Conflict("Selected slot is no longer available.");
 
         var normalizedPhone = NormalizePhone(request.Phone);
+        var verification = await ConsumePhoneVerificationAsync(db, profile.TenantId, normalizedPhone, request.PhoneVerificationToken, timeProvider.GetUtcNow(), cancellationToken);
+        if (verification is null) return Results.BadRequest("Verify your phone number before booking.");
+
         var tenantClients = await db.Clients.IgnoreQueryFilters().AsTracking()
             .Where(c => c.TenantId == profile.TenantId)
             .ToListAsync(cancellationToken);
         var client = tenantClients.FirstOrDefault(c => NormalizePhone(c.Phone) == normalizedPhone);
         if (client is null)
         {
-            client = new Client { TenantId = profile.TenantId, Name = request.Name, Phone = request.Phone, Email = request.Email, Status = "New" };
+            client = new Client { TenantId = profile.TenantId, Name = request.Name, Phone = verification.Phone, Email = request.Email, Status = "New" };
             db.Clients.Add(client);
         }
 
@@ -849,18 +910,70 @@ public sealed class AppointmentEndpoints : IEndpoints
         return !string.IsNullOrWhiteSpace(secret) && secret.StartsWith("sk_", StringComparison.Ordinal);
     }
 
+    private static async Task<PublicPhoneVerification?> ConsumePhoneVerificationAsync(MainDbContext db, TenantId tenantId, string normalizedPhone, string? token, DateTimeOffset now, CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrWhiteSpace(normalizedPhone) || string.IsNullOrWhiteSpace(token)) return null;
+
+        var tokenHash = HashPhoneVerificationToken(token);
+        var verifiedCandidates = await db.PublicPhoneVerifications.IgnoreQueryFilters().AsTracking()
+            .Where(v => v.Phone == normalizedPhone && v.Status == "Verified" && v.VerificationTokenHash == tokenHash)
+            .ToListAsync(cancellationToken);
+        var verification = verifiedCandidates
+            .Where(v => v.TenantId == tenantId && v.ConsumedAt == null && v.ExpiresAt > now)
+            .OrderByDescending(v => v.VerifiedAt)
+            .FirstOrDefault();
+        if (verification is null) return null;
+
+        verification.Status = "Consumed";
+        verification.ConsumedAt = now;
+        return verification;
+    }
+
+    private static string CreatePhoneVerificationToken()
+    {
+        return $"pv_{Base64UrlEncode(RandomNumberGenerator.GetBytes(32))}";
+    }
+
+    private static string HashPhoneVerificationToken(string token)
+    {
+        return Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(token)));
+    }
+
+    private static string Base64UrlEncode(byte[] bytes)
+    {
+        return Convert.ToBase64String(bytes).TrimEnd('=').Replace('+', '-').Replace('/', '_');
+    }
+
     private static string NormalizePhone(string phone)
     {
         if (string.IsNullOrWhiteSpace(phone)) return string.Empty;
-        var builder = new StringBuilder(phone.Length);
+        var trimmed = phone.Trim();
+        var builder = new StringBuilder(trimmed.Length);
+        var hasLeadingPlus = trimmed.StartsWith('+');
         foreach (var character in phone.Trim())
         {
-            if (char.IsDigit(character) || character == '+')
+            if (char.IsDigit(character))
             {
                 builder.Append(character);
             }
         }
-        return builder.ToString();
+        var digits = builder.ToString();
+        if (digits.Length == 0) return string.Empty;
+        if (hasLeadingPlus) return $"+{digits}";
+        if (digits.StartsWith("00", StringComparison.Ordinal)) return $"+{digits[2..]}";
+        if (digits.StartsWith("27", StringComparison.Ordinal)) return $"+{digits}";
+        if (digits.StartsWith('0') && digits.Length == 10) return $"+27{digits[1..]}";
+        if (digits.Length == 9) return $"+27{digits}";
+        return digits.Length >= 8 ? $"+{digits}" : string.Empty;
+    }
+
+    private static string MaskPhone(string phone)
+    {
+        var digits = new string(phone.Where(char.IsDigit).ToArray());
+        if (digits.Length <= 4) return "****";
+        var tail = digits[^4..];
+        var prefix = phone.StartsWith("+27", StringComparison.Ordinal) ? "+27 " : string.Empty;
+        return $"{prefix}*** *** {tail}";
     }
 
     private static void AddFlowEvents(MainDbContext db, Appointment appointment, DateTimeOffset now)
@@ -960,7 +1073,11 @@ public sealed record IntegrationConnectionDto(string Provider, string Capability
 public sealed record SlotDto(DateTimeOffset StartAt, DateTimeOffset EndAt);
 public sealed record PublicBookingProfileResponse(string Name, string Slug, string TimeZone, string Address, string? LogoUrl, IEnumerable<ServiceDto> Services);
 public sealed record PublicClientPrefillResponse(string Name, string Email);
-public sealed record PublicBookingRequest(string ServiceId, DateTimeOffset StartAt, string Name, string Phone, string Email, Dictionary<string, string> Answers);
+public sealed record StartPhoneVerificationRequest(string Phone);
+public sealed record StartPhoneVerificationResponse(string MaskedPhone, DateTimeOffset ExpiresAt, int ResendAfterSeconds);
+public sealed record CheckPhoneVerificationRequest(string Phone, string Code);
+public sealed record CheckPhoneVerificationResponse(string PhoneVerificationToken, string MaskedPhone, string Name, string Email);
+public sealed record PublicBookingRequest(string ServiceId, DateTimeOffset StartAt, string Name, string Phone, string Email, string? PhoneVerificationToken, Dictionary<string, string> Answers);
 public sealed record PublicBookingCreatedResponse(string Reference, bool PaymentRequired, string? PaymentUrl);
 public sealed record CreateServiceRequest(string Name, string CategoryName, string? Description, string Mode, int DurationMinutes, int PriceCents, int DepositCents, string? PaymentPolicy, int BufferBeforeMinutes, int BufferAfterMinutes, string Location);
 public sealed record UpdateAppointmentStatusRequest(string Status, string? PaymentStatus);

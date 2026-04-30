@@ -1,8 +1,9 @@
 import { Trans } from "@lingui/react/macro";
 import { useState } from "react";
 
-import { money } from "@/shared/lib/appointmentsApi";
 import type { PublicBookingProfile, PublicBookingService } from "@/shared/lib/publicBookingApi";
+
+import { money } from "@/shared/lib/appointmentsApi";
 
 export function StepHeading({ step, title, description }: { step: string; title: string; description: string }) {
   return (
@@ -102,7 +103,7 @@ export function TextInput({
         value={value}
         autoComplete={autoComplete}
         onChange={(event) => onChange(event.target.value)}
-        className="h-12 w-full rounded-xl border border-border bg-background px-3 text-sm outline-none transition-colors focus:border-foreground"
+        className="h-12 w-full rounded-xl border border-border bg-background px-3 text-sm transition-colors outline-none focus:border-foreground"
       />
     </label>
   );

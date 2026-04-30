@@ -1,8 +1,9 @@
 import { Trans } from "@lingui/react/macro";
 import { Button } from "@repo/ui/components/Button";
 
-import { money } from "@/shared/lib/appointmentsApi";
 import type { PublicBookingService } from "@/shared/lib/publicBookingApi";
+
+import { money } from "@/shared/lib/appointmentsApi";
 
 export function BookingFooter({
   selectedService,

@@ -1,5 +1,6 @@
 using System.Net;
 using System.Net.Http.Json;
+using System.Text.Json.Nodes;
 using FluentAssertions;
 using Main.Api.Endpoints;
 using Main.Database;
@@ -14,6 +15,7 @@ namespace Main.Tests;
 public sealed class PaystackPaymentsEndpointTests : EndpointBaseTest<MainDbContext>
 {
     private static FakePaystackClient PaystackClient { get; set; } = new();
+    private static FakeTwilioVerifyClient TwilioVerifyClient { get; set; } = new();
 
     [Fact]
     public async Task SavePaystackSubaccount_WhenNew_ShouldCreateAndStoreMaskedAccountNumber()
@@ -79,11 +81,12 @@ public sealed class PaystackPaymentsEndpointTests : EndpointBaseTest<MainDbConte
     public async Task CreatePublicAppointment_WhenServiceRequiresFullPaymentBeforeBooking_ShouldInitializeFullPricePayment()
     {
         PaystackClient = new FakePaystackClient();
+        TwilioVerifyClient = new FakeTwilioVerifyClient();
         await SeedShellAsync();
         await AuthenticatedOwnerHttpClient.PostAsJsonAsync("/api/main/app/payments/paystack/subaccount", NewSubaccountRequest("1234567890"));
         var service = await UpdateServicePaymentPolicyAsync("Express session", ServicePaymentPolicy.FullPaymentBeforeBooking, 0);
 
-        var response = await AnonymousHttpClient.PostAsJsonAsync("/api/main/public-booking/sea-point-studio/appointments", PublicBookingRequest(service.Id));
+        var response = await AnonymousHttpClient.PostAsJsonAsync("/api/main/public-booking/sea-point-studio/appointments", await VerifiedPublicBookingRequestAsync(service.Id));
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var body = await response.Content.ReadFromJsonAsync<PublicBookingCreatedResponse>();
@@ -96,10 +99,11 @@ public sealed class PaystackPaymentsEndpointTests : EndpointBaseTest<MainDbConte
     public async Task CreatePublicAppointment_WhenServiceCollectsAfterAppointment_ShouldSkipCheckoutAndTrackPendingPayment()
     {
         PaystackClient = new FakePaystackClient();
+        TwilioVerifyClient = new FakeTwilioVerifyClient();
         await SeedShellAsync();
         var service = await UpdateServicePaymentPolicyAsync("Express session", ServicePaymentPolicy.CollectAfterAppointment, 0);
 
-        var response = await AnonymousHttpClient.PostAsJsonAsync("/api/main/public-booking/sea-point-studio/appointments", PublicBookingRequest(service.Id));
+        var response = await AnonymousHttpClient.PostAsJsonAsync("/api/main/public-booking/sea-point-studio/appointments", await VerifiedPublicBookingRequestAsync(service.Id));
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var body = await response.Content.ReadFromJsonAsync<PublicBookingCreatedResponse>();
@@ -121,7 +125,8 @@ public sealed class PaystackPaymentsEndpointTests : EndpointBaseTest<MainDbConte
 
         var response = await AuthenticatedOwnerHttpClient.PostAsJsonAsync($"/api/main/app/appointments/{appointmentId}/payments/terminal-intent", new { });
 
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        var responseBody = await response.Content.ReadAsStringAsync();
+        response.StatusCode.Should().Be(HttpStatusCode.OK, responseBody);
         PaystackClient.CreateSplitCalls.Should().Be(1);
         PaystackClient.CreateVirtualTerminalCalls.Should().Be(1);
         PaystackClient.AssignSplitToVirtualTerminalCalls.Should().Be(1);
@@ -154,6 +159,8 @@ public sealed class PaystackPaymentsEndpointTests : EndpointBaseTest<MainDbConte
     {
         services.RemoveAll<IPaystackClient>();
         services.AddSingleton<IPaystackClient>(_ => PaystackClient);
+        services.RemoveAll<ITwilioVerifyClient>();
+        services.AddSingleton<ITwilioVerifyClient>(_ => TwilioVerifyClient);
         base.RegisterMockLoggers(services);
     }
 
@@ -177,7 +184,7 @@ public sealed class PaystackPaymentsEndpointTests : EndpointBaseTest<MainDbConte
         var query =
             from appointment in db.Appointments.IgnoreQueryFilters()
             join service in db.BookableServices.IgnoreQueryFilters() on appointment.ServiceId equals service.Id
-            where service.DepositCents > 0
+            where service.DepositCents > 0 && appointment.PaymentStatus == AppointmentPaymentStatus.Pending
             select appointment.Id;
         return await query.FirstAsync();
     }
@@ -235,7 +242,20 @@ public sealed class PaystackPaymentsEndpointTests : EndpointBaseTest<MainDbConte
         };
     }
 
-    private static object PublicBookingRequest(string serviceId)
+    private async Task<object> VerifiedPublicBookingRequestAsync(string serviceId)
+    {
+        var phone = "+27 82 111 0000";
+        await AnonymousHttpClient.PostAsJsonAsync("/api/main/public-booking/sea-point-studio/phone-verifications", new { phone });
+        var response = await AnonymousHttpClient.PostAsJsonAsync(
+            "/api/main/public-booking/sea-point-studio/phone-verifications/check",
+            new { phone, code = "123456" }
+        );
+        response.EnsureSuccessStatusCode();
+        var body = await response.Content.ReadFromJsonAsync<JsonObject>();
+        return PublicBookingRequest(serviceId, body!["phoneVerificationToken"]!.GetValue<string>());
+    }
+
+    private static object PublicBookingRequest(string serviceId, string phoneVerificationToken)
     {
         return new
         {
@@ -244,6 +264,7 @@ public sealed class PaystackPaymentsEndpointTests : EndpointBaseTest<MainDbConte
             name = "Terminal Client",
             phone = "+27 82 111 0000",
             email = "terminal@example.com",
+            phoneVerificationToken,
             answers = new Dictionary<string, string>()
         };
     }
@@ -316,6 +337,19 @@ public sealed class PaystackPaymentsEndpointTests : EndpointBaseTest<MainDbConte
         private static PaystackSubaccountResult ToResult(PaystackSubaccountRequest request)
         {
             return new PaystackSubaccountResult("ACCT_test", 123, request.BusinessName, request.BankName, request.BankCode, request.AccountName, request.AccountNumber, "ZAR", true, true, "auto");
+        }
+    }
+
+    private sealed class FakeTwilioVerifyClient : ITwilioVerifyClient
+    {
+        public Task<TwilioVerificationStarted> StartVerificationAsync(string phone, CancellationToken cancellationToken)
+        {
+            return Task.FromResult(new TwilioVerificationStarted("VE_test", "pending"));
+        }
+
+        public Task<bool> CheckVerificationAsync(string phone, string code, CancellationToken cancellationToken)
+        {
+            return Task.FromResult(code == "123456");
         }
     }
 }

@@ -1,8 +1,9 @@
 import { Trans } from "@lingui/react/macro";
 
+import type { PublicBookingService, Slot } from "@/shared/lib/publicBookingApi";
+
 import { money } from "@/shared/lib/appointmentsApi";
 import { formatTime } from "@/shared/lib/dateFormatting";
-import type { PublicBookingService, Slot } from "@/shared/lib/publicBookingApi";
 
 import { StepHeading, TextInput } from "./PublicBookingParts";
 
@@ -18,7 +19,7 @@ export function ServicePicker({
   return (
     <section>
       <StepHeading
-        step="1"
+        step="2"
         title="Choose a service"
         description="Pick the appointment type that matches what you need."
       />
@@ -76,7 +77,7 @@ export function SlotPicker({
   return (
     <section>
       <StepHeading
-        step="2"
+        step="3"
         title="Choose a time"
         description="Available times update from the same calendar used by the business."
       />
@@ -90,7 +91,7 @@ export function SlotPicker({
             type="date"
             value={date}
             onChange={(event) => onDateChange(event.target.value)}
-            className="h-12 w-full rounded-xl border border-border bg-background px-3 text-sm outline-none transition-colors focus:border-foreground"
+            className="h-12 w-full rounded-xl border border-border bg-background px-3 text-sm transition-colors outline-none focus:border-foreground"
           />
         </label>
         <div>
@@ -126,44 +127,33 @@ export function SlotPicker({
 
 export function BookingFields({
   name,
-  phone,
   email,
   note,
-  isCheckingPhone,
   onNameChange,
-  onPhoneChange,
   onEmailChange,
   onNoteChange
 }: {
   name: string;
-  phone: string;
   email: string;
   note: string;
-  isCheckingPhone: boolean;
   onNameChange: (value: string) => void;
-  onPhoneChange: (value: string) => void;
   onEmailChange: (value: string) => void;
   onNoteChange: (value: string) => void;
 }) {
   return (
     <section>
       <StepHeading
-        step="3"
+        step="4"
         title="Your details"
-        description="Start with your phone number so returning clients can be filled in quickly."
+        description="Confirm the details the business should use for this appointment."
       />
       <div className="grid gap-3">
         <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)] gap-3 max-sm:grid-cols-1">
-          <TextInput label="Phone number" value={phone} onChange={onPhoneChange} autoComplete="tel" />
+          <TextInput label="Name" value={name} onChange={onNameChange} autoComplete="name" />
           <TextInput label="Email" value={email} onChange={onEmailChange} autoComplete="email" />
         </div>
-        <TextInput label="Name" value={name} onChange={onNameChange} autoComplete="name" />
         <div className="min-h-5 text-xs text-muted-foreground">
-          {isCheckingPhone ? (
-            <Trans>Checking for saved booking details...</Trans>
-          ) : (
-            <Trans>Your phone number is used only to prepare this booking.</Trans>
-          )}
+          <Trans>Your phone number stays locked to the verified number for this booking.</Trans>
         </div>
         <label className="text-sm font-medium" htmlFor="booking-note">
           <span className="mb-2 block">Anything we should know?</span>
@@ -171,7 +161,7 @@ export function BookingFields({
             id="booking-note"
             value={note}
             onChange={(event) => onNoteChange(event.target.value)}
-            className="min-h-28 w-full resize-none rounded-xl border border-border bg-background px-3 py-3 text-sm outline-none transition-colors focus:border-foreground"
+            className="min-h-28 w-full resize-none rounded-xl border border-border bg-background px-3 py-3 text-sm transition-colors outline-none focus:border-foreground"
           />
         </label>
       </div>

@@ -2,7 +2,12 @@ import { Trans } from "@lingui/react/macro";
 import { Button } from "@repo/ui/components/Button";
 import { useState } from "react";
 
-import type { Service, ServiceCategory, ServiceMutationRequest, ServicePaymentPolicy } from "@/shared/lib/appointmentsApi";
+import type {
+  Service,
+  ServiceCategory,
+  ServiceMutationRequest,
+  ServicePaymentPolicy
+} from "@/shared/lib/appointmentsApi";
 
 interface ServiceFormDialogProps {
   service?: Service;
@@ -13,7 +18,8 @@ interface ServiceFormDialogProps {
 }
 
 export function ServiceFormDialog({ service, categories, pending, onClose, onSubmit }: ServiceFormDialogProps) {
-  const category = categories.find((item) => item.id === service?.categoryId)?.name ?? categories[0]?.name ?? "Consultations";
+  const category =
+    categories.find((item) => item.id === service?.categoryId)?.name ?? categories[0]?.name ?? "Consultations";
   const [form, setForm] = useState({
     name: service?.name ?? "",
     categoryName: category,
@@ -47,14 +53,25 @@ export function ServiceFormDialog({ service, categories, pending, onClose, onSub
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-foreground/25 p-4 backdrop-blur-sm">
       <div className="w-full max-w-2xl overflow-hidden rounded-lg border border-border bg-background shadow-2xl">
         <div className="border-b border-border px-5 py-4">
-          <h2 className="font-display text-lg font-semibold">{service ? <Trans>Edit service</Trans> : <Trans>New service</Trans>}</h2>
+          <h2 className="font-display text-lg font-semibold">
+            {service ? <Trans>Edit service</Trans> : <Trans>New service</Trans>}
+          </h2>
           <p className="mt-1 text-sm text-muted-foreground">
             <Trans>Services control public booking availability, pricing, deposits, and operator scheduling.</Trans>
           </p>
         </div>
         <div className="grid max-h-[70vh] gap-4 overflow-y-auto px-5 py-4 md:grid-cols-2">
-          <Field label="Service name" value={form.name} onChange={(name) => setForm((current) => ({ ...current, name }))} />
-          <Field label="Category" value={form.categoryName} onChange={(categoryName) => setForm((current) => ({ ...current, categoryName }))} list="service-categories" />
+          <Field
+            label="Service name"
+            value={form.name}
+            onChange={(name) => setForm((current) => ({ ...current, name }))}
+          />
+          <Field
+            label="Category"
+            value={form.categoryName}
+            onChange={(categoryName) => setForm((current) => ({ ...current, categoryName }))}
+            list="service-categories"
+          />
           <datalist id="service-categories">
             {categories.map((item) => (
               <option key={item.id} value={item.name} />
@@ -64,7 +81,9 @@ export function ServiceFormDialog({ service, categories, pending, onClose, onSub
             <span className="text-xs font-semibold text-muted-foreground">Mode</span>
             <select
               value={form.mode}
-              onChange={(event) => setForm((current) => ({ ...current, mode: event.target.value as ServiceMutationRequest["mode"] }))}
+              onChange={(event) =>
+                setForm((current) => ({ ...current, mode: event.target.value as ServiceMutationRequest["mode"] }))
+              }
               className="h-10 rounded-md border border-border bg-background px-3 text-sm outline-none focus:border-foreground/40"
             >
               <option value="physical">Physical</option>
@@ -72,8 +91,16 @@ export function ServiceFormDialog({ service, categories, pending, onClose, onSub
               <option value="mobile">At client</option>
             </select>
           </label>
-          <Field label="Duration (minutes)" value={form.durationMinutes} onChange={(durationMinutes) => setForm((current) => ({ ...current, durationMinutes }))} />
-          <Field label="Price (R)" value={form.price} onChange={(price) => setForm((current) => ({ ...current, price }))} />
+          <Field
+            label="Duration (minutes)"
+            value={form.durationMinutes}
+            onChange={(durationMinutes) => setForm((current) => ({ ...current, durationMinutes }))}
+          />
+          <Field
+            label="Price (R)"
+            value={form.price}
+            onChange={(price) => setForm((current) => ({ ...current, price }))}
+          />
           <label className="grid gap-1.5 text-sm">
             <span className="text-xs font-semibold text-muted-foreground">Payment rule</span>
             <select
@@ -94,7 +121,11 @@ export function ServiceFormDialog({ service, categories, pending, onClose, onSub
             </select>
           </label>
           {form.paymentPolicy === "DepositBeforeBooking" ? (
-            <Field label="Deposit (R)" value={form.deposit} onChange={(deposit) => setForm((current) => ({ ...current, deposit }))} />
+            <Field
+              label="Deposit (R)"
+              value={form.deposit}
+              onChange={(deposit) => setForm((current) => ({ ...current, deposit }))}
+            />
           ) : (
             <div className="rounded-md border border-border bg-muted/50 px-3 py-2 text-sm text-muted-foreground">
               {form.paymentPolicy === "FullPaymentBeforeBooking"
@@ -104,17 +135,33 @@ export function ServiceFormDialog({ service, categories, pending, onClose, onSub
                   : "Booking does not require appointment payment tracking."}
             </div>
           )}
-          <Field label="Buffer before (minutes)" value={form.bufferBeforeMinutes} onChange={(bufferBeforeMinutes) => setForm((current) => ({ ...current, bufferBeforeMinutes }))} />
-          <Field label="Buffer after (minutes)" value={form.bufferAfterMinutes} onChange={(bufferAfterMinutes) => setForm((current) => ({ ...current, bufferAfterMinutes }))} />
+          <Field
+            label="Buffer before (minutes)"
+            value={form.bufferBeforeMinutes}
+            onChange={(bufferBeforeMinutes) => setForm((current) => ({ ...current, bufferBeforeMinutes }))}
+          />
+          <Field
+            label="Buffer after (minutes)"
+            value={form.bufferAfterMinutes}
+            onChange={(bufferAfterMinutes) => setForm((current) => ({ ...current, bufferAfterMinutes }))}
+          />
           <div className="md:col-span-2">
-            <Field label="Location" value={form.location} onChange={(location) => setForm((current) => ({ ...current, location }))} />
+            <Field
+              label="Location"
+              value={form.location}
+              onChange={(location) => setForm((current) => ({ ...current, location }))}
+            />
           </div>
         </div>
         <div className="flex items-center justify-end gap-2 border-t border-border px-5 py-4">
           <Button type="button" variant="outline" onClick={onClose}>
             <Trans>Cancel</Trans>
           </Button>
-          <Button type="button" disabled={pending || form.name.trim() === "" || form.location.trim() === ""} onClick={submit}>
+          <Button
+            type="button"
+            disabled={pending || form.name.trim() === "" || form.location.trim() === ""}
+            onClick={submit}
+          >
             {service ? <Trans>Save service</Trans> : <Trans>Create service</Trans>}
           </Button>
         </div>
@@ -123,7 +170,17 @@ export function ServiceFormDialog({ service, categories, pending, onClose, onSub
   );
 }
 
-function Field({ label, value, onChange, list }: { label: string; value: string; onChange: (value: string) => void; list?: string }) {
+function Field({
+  label,
+  value,
+  onChange,
+  list
+}: {
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  list?: string;
+}) {
   return (
     <label className="grid gap-1.5 text-sm">
       <span className="text-xs font-semibold text-muted-foreground">{label}</span>

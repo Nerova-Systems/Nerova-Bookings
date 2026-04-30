@@ -24,7 +24,15 @@ export interface PublicBookingProfile {
   services: PublicBookingService[];
 }
 
-export interface PublicClientPrefill {
+export interface PublicPhoneVerificationStarted {
+  maskedPhone: string;
+  expiresAt: string;
+  resendAfterSeconds: number;
+}
+
+export interface PublicPhoneVerificationChecked {
+  phoneVerificationToken: string;
+  maskedPhone: string;
   name: string;
   email: string;
 }
@@ -77,16 +85,30 @@ export function usePublicSlots(businessSlug: string, serviceId: string | undefin
   });
 }
 
-export function usePublicClientPrefill(businessSlug: string, phone: string) {
-  const normalizedPhone = phone.replace(/[^\d+]/g, "");
-  return useQuery({
-    enabled: normalizedPhone.length >= 8,
-    queryKey: ["public-booking-client-prefill", businessSlug, normalizedPhone],
-    queryFn: async () => {
-      const response = await enhancedFetch(
-        `/api/main/public-booking/${businessSlug}/client-prefill?phone=${encodeURIComponent(normalizedPhone)}`
-      );
-      return (await response.json()) as PublicClientPrefill;
+export function useStartPublicPhoneVerification(businessSlug: string) {
+  return useMutation({
+    mutationFn: async (request: { phone: string }) => {
+      const response = await enhancedFetch(`/api/main/public-booking/${businessSlug}/phone-verifications`, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify(request)
+      });
+      if (!response.ok) throw new Error(await response.text());
+      return (await response.json()) as PublicPhoneVerificationStarted;
+    }
+  });
+}
+
+export function useCheckPublicPhoneVerification(businessSlug: string) {
+  return useMutation({
+    mutationFn: async (request: { phone: string; code: string }) => {
+      const response = await enhancedFetch(`/api/main/public-booking/${businessSlug}/phone-verifications/check`, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify(request)
+      });
+      if (!response.ok) throw new Error(await response.text());
+      return (await response.json()) as PublicPhoneVerificationChecked;
     }
   });
 }
@@ -99,6 +121,7 @@ export function useCreatePublicBooking(businessSlug: string) {
       name: string;
       phone: string;
       email: string;
+      phoneVerificationToken: string;
       answers: Record<string, string>;
     }) => {
       const response = await enhancedFetch(`/api/main/public-booking/${businessSlug}/appointments`, {

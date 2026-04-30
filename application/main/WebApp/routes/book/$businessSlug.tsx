@@ -4,17 +4,15 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 
 import {
+  useCheckPublicPhoneVerification,
   useCreatePublicBooking,
   usePublicBookingProfile,
-  usePublicClientPrefill,
-  usePublicSlots
+  usePublicSlots,
+  useStartPublicPhoneVerification
 } from "@/shared/lib/publicBookingApi";
 
-import {
-  BookingFields,
-  ServicePicker,
-  SlotPicker
-} from "./-components/PublicBookingControls";
+import { PhoneVerificationStep } from "./-components/PhoneVerificationStep";
+import { BookingFields, ServicePicker, SlotPicker } from "./-components/PublicBookingControls";
 import { BookingFooter } from "./-components/PublicBookingFooter";
 import { BookingIntro, PublicShell } from "./-components/PublicBookingParts";
 
@@ -32,12 +30,18 @@ function PublicBookingPage() {
   const [slotStart, setSlotStart] = useState("");
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
+  const [verificationCode, setVerificationCode] = useState("");
+  const [phoneVerificationToken, setPhoneVerificationToken] = useState("");
+  const [maskedPhone, setMaskedPhone] = useState<string | undefined>();
+  const [verificationError, setVerificationError] = useState<string | undefined>();
   const [email, setEmail] = useState("");
   const [note, setNote] = useState("");
   const slotsQuery = usePublicSlots(businessSlug, serviceId, date);
-  const prefillQuery = usePublicClientPrefill(businessSlug, phone);
+  const startPhoneVerification = useStartPublicPhoneVerification(businessSlug);
+  const checkPhoneVerification = useCheckPublicPhoneVerification(businessSlug);
   const createBooking = useCreatePublicBooking(businessSlug);
   const selectedService = profileQuery.data?.services.find((service) => service.id === serviceId);
+  const isPhoneVerified = Boolean(phoneVerificationToken);
 
   useEffect(() => {
     document.title = t`Book appointment | Nerova`;
@@ -47,20 +51,15 @@ function PublicBookingPage() {
     if (!serviceId && firstServiceId) setServiceId(firstServiceId);
   }, [firstServiceId, serviceId]);
 
-  useEffect(() => {
-    if (!prefillQuery.data) return;
-    setName(prefillQuery.data.name);
-    setEmail(prefillQuery.data.email);
-  }, [prefillQuery.data]);
-
   const submit = async () => {
-    if (!serviceId || !slotStart || !name || !phone || !email) return;
+    if (!serviceId || !slotStart || !name || !phone || !email || !phoneVerificationToken) return;
     const result = await createBooking.mutateAsync({
       serviceId,
       startAt: slotStart,
       name,
       phone,
       email,
+      phoneVerificationToken,
       answers: { note }
     });
     if (result.paymentUrl) {
@@ -68,6 +67,38 @@ function PublicBookingPage() {
       return;
     }
     navigate({ to: "/book/confirmation/$reference", params: { reference: result.reference } });
+  };
+
+  const resetVerifiedPhone = (nextPhone: string) => {
+    setPhone(nextPhone);
+    setVerificationCode("");
+    setPhoneVerificationToken("");
+    setMaskedPhone(undefined);
+    setVerificationError(undefined);
+  };
+
+  const sendCode = async () => {
+    setVerificationError(undefined);
+    try {
+      const result = await startPhoneVerification.mutateAsync({ phone });
+      setMaskedPhone(result.maskedPhone);
+      setVerificationCode("");
+    } catch (error) {
+      setVerificationError(error instanceof Error ? error.message : "Could not send verification code.");
+    }
+  };
+
+  const verifyCode = async () => {
+    setVerificationError(undefined);
+    try {
+      const result = await checkPhoneVerification.mutateAsync({ phone, code: verificationCode });
+      setPhoneVerificationToken(result.phoneVerificationToken);
+      setMaskedPhone(result.maskedPhone);
+      setName(result.name);
+      setEmail(result.email);
+    } catch (error) {
+      setVerificationError(error instanceof Error ? error.message : "Could not verify that code.");
+    }
   };
 
   if (profileQuery.isLoading) {
@@ -99,38 +130,65 @@ function PublicBookingPage() {
           </div>
 
           <div className="grid gap-8">
-            <ServicePicker
-              services={profileQuery.data.services}
-              serviceId={serviceId}
-              onSelect={(nextServiceId) => {
-                setServiceId(nextServiceId);
-                setSlotStart("");
-              }}
-            />
-            <SlotPicker
-              date={date}
-              slots={slotsQuery.data ?? []}
-              slotStart={slotStart}
-              onDateChange={(nextDate) => {
-                setDate(nextDate);
-                setSlotStart("");
-              }}
-              onSlotSelect={setSlotStart}
-            />
-            <BookingFields
-              name={name}
+            <PhoneVerificationStep
               phone={phone}
-              email={email}
-              note={note}
-              isCheckingPhone={prefillQuery.isFetching}
-              onNameChange={setName}
-              onPhoneChange={setPhone}
-              onEmailChange={setEmail}
-              onNoteChange={setNote}
+              code={verificationCode}
+              maskedPhone={maskedPhone}
+              isVerified={isPhoneVerified}
+              isSending={startPhoneVerification.isPending}
+              isChecking={checkPhoneVerification.isPending}
+              error={verificationError}
+              onPhoneChange={resetVerifiedPhone}
+              onCodeChange={setVerificationCode}
+              onSendCode={sendCode}
+              onCheckCode={verifyCode}
             />
+            {!isPhoneVerified && (
+              <div className="rounded-2xl border border-dashed border-border bg-muted/40 px-5 py-4 text-sm text-muted-foreground">
+                Verify your phone number to unlock service selection, available times, and booking submission.
+              </div>
+            )}
+            {isPhoneVerified && (
+              <>
+                <ServicePicker
+                  services={profileQuery.data.services}
+                  serviceId={serviceId}
+                  onSelect={(nextServiceId) => {
+                    setServiceId(nextServiceId);
+                    setSlotStart("");
+                  }}
+                />
+                <SlotPicker
+                  date={date}
+                  slots={slotsQuery.data ?? []}
+                  slotStart={slotStart}
+                  onDateChange={(nextDate) => {
+                    setDate(nextDate);
+                    setSlotStart("");
+                  }}
+                  onSlotSelect={setSlotStart}
+                />
+                <BookingFields
+                  name={name}
+                  email={email}
+                  note={note}
+                  onNameChange={setName}
+                  onEmailChange={setEmail}
+                  onNoteChange={setNote}
+                />
+              </>
+            )}
             <BookingFooter
               selectedService={selectedService}
-              disabled={!serviceId || !slotStart || !name || !phone || !email || createBooking.isPending}
+              disabled={
+                !serviceId ||
+                !slotStart ||
+                !name ||
+                !phone ||
+                !email ||
+                !phoneVerificationToken ||
+                createBooking.isPending
+              }
               isSubmitting={createBooking.isPending}
               onSubmit={submit}
             />

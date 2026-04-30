@@ -125,6 +125,22 @@ public sealed class Client : ITenantScopedEntity
     public string? InternalNote { get; set; }
 }
 
+public sealed class PublicPhoneVerification : ITenantScopedEntity
+{
+    public string Id { get; set; } = Guid.NewGuid().ToString("N");
+    public TenantId TenantId { get; set; } = null!;
+    public string Phone { get; set; } = string.Empty;
+    public string MaskedPhone { get; set; } = string.Empty;
+    public string Provider { get; set; } = "TwilioVerify";
+    public string? ProviderSid { get; set; }
+    public string Status { get; set; } = "Pending";
+    public string? VerificationTokenHash { get; set; }
+    public DateTimeOffset ExpiresAt { get; set; }
+    public DateTimeOffset? VerifiedAt { get; set; }
+    public DateTimeOffset? ConsumedAt { get; set; }
+    public DateTimeOffset CreatedAt { get; set; }
+}
+
 public sealed class Appointment : ITenantScopedEntity
 {
     public string Id { get; set; } = Guid.NewGuid().ToString("N");

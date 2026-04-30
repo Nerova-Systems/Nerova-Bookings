@@ -79,6 +79,22 @@ public sealed class ClientConfiguration : IEntityTypeConfiguration<Client>
     }
 }
 
+public sealed class PublicPhoneVerificationConfiguration : IEntityTypeConfiguration<PublicPhoneVerification>
+{
+    public void Configure(EntityTypeBuilder<PublicPhoneVerification> builder)
+    {
+        builder.HasKey(x => x.Id);
+        builder.MapStronglyTypedLongId<PublicPhoneVerification, TenantId>(x => x.TenantId);
+        builder.HasIndex(x => new { x.TenantId, x.Phone, x.Status });
+        builder.Property(x => x.Phone).HasMaxLength(32);
+        builder.Property(x => x.MaskedPhone).HasMaxLength(32);
+        builder.Property(x => x.Provider).HasMaxLength(40);
+        builder.Property(x => x.ProviderSid).HasMaxLength(80);
+        builder.Property(x => x.Status).HasMaxLength(32);
+        builder.Property(x => x.VerificationTokenHash).HasMaxLength(128);
+    }
+}
+
 public sealed class AppointmentConfiguration : IEntityTypeConfiguration<Appointment>
 {
     public void Configure(EntityTypeBuilder<Appointment> builder)

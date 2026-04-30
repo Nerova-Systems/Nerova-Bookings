@@ -62,7 +62,11 @@ export function AppointmentDetail({
           <div className="grid gap-3">
             <div className="flex flex-wrap items-center gap-2">
               <Button size="sm" onClick={runPrimaryAction} disabled={!canConfirm && appointment.status !== "confirmed"}>
-                {appointment.status === "confirmed" ? <Trans>Complete appointment</Trans> : <Trans>Confirm booking</Trans>}
+                {appointment.status === "confirmed" ? (
+                  <Trans>Complete appointment</Trans>
+                ) : (
+                  <Trans>Confirm booking</Trans>
+                )}
               </Button>
               <Button variant="outline" size="sm">
                 <Trans>Reschedule</Trans>

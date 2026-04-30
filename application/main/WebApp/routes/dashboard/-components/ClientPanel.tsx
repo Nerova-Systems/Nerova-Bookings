@@ -59,7 +59,13 @@ export function ClientPanel({ appointment, client }: { appointment: Appointment;
         <div className="mb-1.5 text-[10.5px] font-semibold tracking-[0.06em] text-muted-foreground uppercase">
           <Trans>Recent visits</Trans>
         </div>
-        {[{ date: appointment.dayGroup, service: appointment.service, amount: `${appointment.amount} · ${appointment.statusLabel}` }].map((visit) => (
+        {[
+          {
+            date: appointment.dayGroup,
+            service: appointment.service,
+            amount: `${appointment.amount} · ${appointment.statusLabel}`
+          }
+        ].map((visit) => (
           <div
             key={visit.service}
             className="grid grid-cols-[3.5rem_1fr] gap-2 border-b border-border py-2 text-[12px] last:border-0"

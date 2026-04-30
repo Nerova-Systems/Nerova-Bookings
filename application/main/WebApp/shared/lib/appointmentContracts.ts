@@ -1,5 +1,16 @@
-export type AppointmentStatus = "pending" | "confirmed" | "payment-not-sent" | "payment-overdue" | "completed" | "cancelled" | "no-show";
-export type ServicePaymentPolicy = "NoPaymentRequired" | "DepositBeforeBooking" | "FullPaymentBeforeBooking" | "CollectAfterAppointment";
+export type AppointmentStatus =
+  | "pending"
+  | "confirmed"
+  | "payment-not-sent"
+  | "payment-overdue"
+  | "completed"
+  | "cancelled"
+  | "no-show";
+export type ServicePaymentPolicy =
+  | "NoPaymentRequired"
+  | "DepositBeforeBooking"
+  | "FullPaymentBeforeBooking"
+  | "CollectAfterAppointment";
 
 export interface Appointment {
   id: string;

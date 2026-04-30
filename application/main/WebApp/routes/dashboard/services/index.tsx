@@ -55,10 +55,13 @@ function ServicesPage() {
           <Button variant="outline" size="sm">
             <Trans>Manage categories</Trans>
           </Button>
-          <Button size="sm" onClick={() => {
-            setEditingService(null);
-            setFormOpen(true);
-          }}>
+          <Button
+            size="sm"
+            onClick={() => {
+              setEditingService(null);
+              setFormOpen(true);
+            }}
+          >
             <Trans>New service</Trans>
           </Button>
         </div>
@@ -93,10 +96,16 @@ function ServicesPage() {
             </div>
             <div className="grid grid-cols-[repeat(auto-fill,minmax(16.25rem,1fr))] gap-3">
               {cat.services.map((svc) => (
-                <ServiceCard key={svc.id} service={svc} onEdit={(service) => {
-                  setEditingService(service);
-                  setFormOpen(true);
-                }} onArchive={(id) => archiveService.mutate(id)} onRestore={(id) => restoreService.mutate(id)} />
+                <ServiceCard
+                  key={svc.id}
+                  service={svc}
+                  onEdit={(service) => {
+                    setEditingService(service);
+                    setFormOpen(true);
+                  }}
+                  onArchive={(id) => archiveService.mutate(id)}
+                  onRestore={(id) => restoreService.mutate(id)}
+                />
               ))}
             </div>
           </div>
@@ -112,10 +121,16 @@ function ServicesPage() {
             </div>
             <div className="grid grid-cols-[repeat(auto-fill,minmax(16.25rem,1fr))] gap-3">
               {archived.map((svc) => (
-                <ServiceCard key={svc.id} service={svc} onEdit={(service) => {
-                  setEditingService(service);
-                  setFormOpen(true);
-                }} onArchive={(id) => archiveService.mutate(id)} onRestore={(id) => restoreService.mutate(id)} />
+                <ServiceCard
+                  key={svc.id}
+                  service={svc}
+                  onEdit={(service) => {
+                    setEditingService(service);
+                    setFormOpen(true);
+                  }}
+                  onArchive={(id) => archiveService.mutate(id)}
+                  onRestore={(id) => restoreService.mutate(id)}
+                />
               ))}
             </div>
             <div className="mt-2 rounded-lg bg-muted px-3.5 py-2.5 text-xs text-muted-foreground">

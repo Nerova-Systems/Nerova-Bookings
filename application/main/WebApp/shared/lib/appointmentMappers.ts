@@ -127,7 +127,8 @@ function statusLabel(status: AppointmentStatus) {
 }
 
 export function paymentPolicyLabel(paymentPolicy: ServicePaymentPolicy, depositCents = 0) {
-  if (paymentPolicy === "DepositBeforeBooking") return depositCents > 0 ? "Deposit before booking" : "Deposit before booking";
+  if (paymentPolicy === "DepositBeforeBooking")
+    return depositCents > 0 ? "Deposit before booking" : "Deposit before booking";
   if (paymentPolicy === "FullPaymentBeforeBooking") return "Full payment before booking";
   if (paymentPolicy === "CollectAfterAppointment") return "Collect after appointment";
   return "No payment required";

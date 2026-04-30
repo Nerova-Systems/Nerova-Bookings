@@ -9,7 +9,17 @@ function modeBadgeClasses(mode: Service["mode"]): string {
   return "bg-warning/10 text-warning";
 }
 
-export function ServiceCard({ service, onEdit, onArchive, onRestore }: { service: Service; onEdit: (service: Service) => void; onArchive: (id: string) => void; onRestore: (id: string) => void }) {
+export function ServiceCard({
+  service,
+  onEdit,
+  onArchive,
+  onRestore
+}: {
+  service: Service;
+  onEdit: (service: Service) => void;
+  onArchive: (id: string) => void;
+  onRestore: (id: string) => void;
+}) {
   return (
     <article
       className={`flex flex-col gap-2 rounded-xl border border-border bg-background p-3.5 transition-colors hover:border-foreground/20 ${

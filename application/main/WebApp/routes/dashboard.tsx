@@ -3,9 +3,10 @@ import { SidebarInset, SidebarProvider } from "@repo/ui/components/Sidebar";
 import { createFileRoute, Outlet, useLocation } from "@tanstack/react-router";
 import { lazy, Suspense } from "react";
 
+import { MainSideMenu } from "@/shared/components/MainSideMenu";
+
 import { CmdkProvider, useCmdk } from "./dashboard/-components/CmdkContext";
 import { CommandPalette } from "./dashboard/-components/CommandPalette";
-import { MainSideMenu } from "@/shared/components/MainSideMenu";
 
 const NotFoundPage = lazy(() => import("account/NotFoundPage"));
 const TenantStateGuard = lazy(() => import("account/TenantStateGuard"));

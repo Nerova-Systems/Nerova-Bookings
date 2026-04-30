@@ -94,9 +94,6 @@ msgstr "Cancel"
 msgid "Change bank details"
 msgstr "Change bank details"
 
-msgid "Checking for saved booking details..."
-msgstr "Checking for saved booking details..."
-
 msgid "Checking transaction reference..."
 msgstr "Checking transaction reference..."
 
@@ -355,5 +352,5 @@ msgstr "Workspace search"
 msgid "Your appointment request has been saved."
 msgstr "Your appointment request has been saved."
 
-msgid "Your phone number is used only to prepare this booking."
-msgstr "Your phone number is used only to prepare this booking."
+msgid "Your phone number stays locked to the verified number for this booking."
+msgstr "Your phone number stays locked to the verified number for this booking."

@@ -16,7 +16,15 @@ import {
 import { Link as RouterLink, useNavigate, useRouter } from "@tanstack/react-router";
 import MobileMenu from "account/MobileMenu";
 import UserMenu from "account/UserMenu";
-import { ActivityIcon, BarChart2Icon, CalendarIcon, CreditCardIcon, Grid2X2Icon, PlugIcon, UsersIcon } from "lucide-react";
+import {
+  ActivityIcon,
+  BarChart2Icon,
+  CalendarIcon,
+  CreditCardIcon,
+  Grid2X2Icon,
+  PlugIcon,
+  UsersIcon
+} from "lucide-react";
 import { use } from "react";
 
 const normalizePath = (path: string): string => path.replace(/\/$/, "") || "/";

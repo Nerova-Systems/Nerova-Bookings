@@ -23,7 +23,9 @@ export function AppointmentPaymentBlock({
           </div>
           <div className="mt-1 text-sm font-medium">{paymentPolicyText(appointment)}</div>
         </div>
-        <span className={`rounded-full px-2 py-1 text-[11px] font-medium ${isPaid ? "bg-success/10 text-success" : "bg-warning/10 text-warning"}`}>
+        <span
+          className={`rounded-full px-2 py-1 text-[11px] font-medium ${isPaid ? "bg-success/10 text-success" : "bg-warning/10 text-warning"}`}
+        >
           {paymentStatusText(appointment.paymentStatus)}
         </span>
       </div>
@@ -35,7 +37,11 @@ export function AppointmentPaymentBlock({
       </div>
       {canUseTerminal && (
         <div className="mt-3 flex flex-wrap items-center gap-2 border-t border-border pt-3">
-          <Button size="sm" onClick={() => onCreateTerminalPayment(appointment.id)} disabled={isCreatingTerminalPayment}>
+          <Button
+            size="sm"
+            onClick={() => onCreateTerminalPayment(appointment.id)}
+            disabled={isCreatingTerminalPayment}
+          >
             {isCreatingTerminalPayment ? <Trans>Opening terminal...</Trans> : <Trans>Collect with terminal</Trans>}
           </Button>
           <span className="text-xs text-muted-foreground">
@@ -45,7 +51,9 @@ export function AppointmentPaymentBlock({
       )}
       {!canUseTerminal && appointment.paymentPolicy !== "NoPaymentRequired" && !isPaid && (
         <div className="mt-3 rounded-lg bg-muted px-3 py-2 text-xs text-muted-foreground">
-          <Trans>Waiting for Paystack verification. Payment state updates from verified callbacks or webhooks only.</Trans>
+          <Trans>
+            Waiting for Paystack verification. Payment state updates from verified callbacks or webhooks only.
+          </Trans>
         </div>
       )}
     </section>

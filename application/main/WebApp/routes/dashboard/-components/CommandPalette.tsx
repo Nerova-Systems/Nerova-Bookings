@@ -36,11 +36,23 @@ interface SearchResult {
 
 const PAGES: SearchResult[] = [
   pageResult("activity", "Activity", "Operational feed and review queue", "/dashboard", "Workspace"),
-  pageResult("calendar", "Calendar", "Availability, bookings and external busy blocks", "/dashboard/calendar", "Workspace"),
+  pageResult(
+    "calendar",
+    "Calendar",
+    "Availability, bookings and external busy blocks",
+    "/dashboard/calendar",
+    "Workspace"
+  ),
   pageResult("clients", "Clients", "Client database, notes and visit history", "/dashboard/clients", "Workspace"),
   pageResult("payments", "Payments", "Appointment deposits and Paystack status", "/dashboard/payments", "Business"),
   pageResult("services", "Services", "Service catalogue, prices and deposits", "/dashboard/services", "Business"),
-  pageResult("analytics", "Analytics", "Bookings, revenue, no-shows and service mix", "/dashboard/analytics", "Business"),
+  pageResult(
+    "analytics",
+    "Analytics",
+    "Bookings, revenue, no-shows and service mix",
+    "/dashboard/analytics",
+    "Business"
+  ),
   pageResult("apps", "Apps", "Google, Microsoft and Nango integrations", "/dashboard/apps", "Business")
 ];
 
@@ -78,7 +90,11 @@ export function CommandPalette({ open, onOpenChange }: { open: boolean; onOpenCh
         {groupResults(results).map(([group, items]) => (
           <CommandGroup key={group} heading={group}>
             {items.map((item) => (
-              <CommandItem key={item.id} value={`${item.title} ${item.detail} ${item.keywords}`} onSelect={() => jump(item)}>
+              <CommandItem
+                key={item.id}
+                value={`${item.title} ${item.detail} ${item.keywords}`}
+                onSelect={() => jump(item)}
+              >
                 <div className="min-w-0 flex-1">
                   <div className="truncate font-medium">{item.title}</div>
                   <div className="truncate text-xs text-muted-foreground">{item.detail}</div>
@@ -199,5 +215,8 @@ function pageResult(id: string, title: string, detail: string, to: string, short
 }
 
 function normalize(value: string) {
-  return value.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+  return value
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim();
 }
