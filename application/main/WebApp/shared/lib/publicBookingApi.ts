@@ -150,7 +150,10 @@ export function useConfirmPaystackReference(reference: string) {
     enabled: Boolean(reference),
     queryKey: ["paystack-confirm", reference],
     queryFn: async () => {
-      const response = await enhancedFetch(`/api/main/payments/paystack/confirm?reference=${reference}`);
+      const response = await enhancedFetch(
+        `/api/main/payments/paystack/confirm?reference=${encodeURIComponent(reference)}`
+      );
+      if (!response.ok) throw new Error(await response.text());
       return (await response.json()) as { appointmentReference: string; status: string };
     }
   });

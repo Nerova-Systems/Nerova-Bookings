@@ -1,5 +1,4 @@
 import { t } from "@lingui/core/macro";
-import { Trans } from "@lingui/react/macro";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 
@@ -12,9 +11,8 @@ import {
 } from "@/shared/lib/publicBookingApi";
 
 import { PhoneVerificationStep } from "./-components/PhoneVerificationStep";
-import { BookingFields, ServicePicker, SlotPicker } from "./-components/PublicBookingControls";
-import { BookingFooter } from "./-components/PublicBookingFooter";
-import { BookingIntro, PublicShell } from "./-components/PublicBookingParts";
+import { BookingIntro, BookingPageHeader, PublicShell } from "./-components/PublicBookingParts";
+import { PublicBookingSteps } from "./-components/PublicBookingSteps";
 
 export const Route = createFileRoute("/book/$businessSlug")({
   component: PublicBookingPage
@@ -42,6 +40,8 @@ function PublicBookingPage() {
   const createBooking = useCreatePublicBooking(businessSlug);
   const selectedService = profileQuery.data?.services.find((service) => service.id === serviceId);
   const isPhoneVerified = Boolean(phoneVerificationToken);
+  const isSubmitDisabled =
+    !serviceId || !slotStart || !name || !phone || !email || !phoneVerificationToken || createBooking.isPending;
 
   useEffect(() => {
     document.title = t`Book appointment | Nerova`;
@@ -101,6 +101,16 @@ function PublicBookingPage() {
     }
   };
 
+  const selectService = (nextServiceId: string) => {
+    setServiceId(nextServiceId);
+    setSlotStart("");
+  };
+
+  const selectDate = (nextDate: string) => {
+    setDate(nextDate);
+    setSlotStart("");
+  };
+
   if (profileQuery.isLoading) {
     return <PublicShell title="Loading booking page" subtitle="Preparing available services." />;
   }
@@ -110,24 +120,12 @@ function PublicBookingPage() {
   }
 
   return (
-    <main className="min-h-screen bg-[#f5f2ec] text-foreground">
-      <div className="mx-auto grid min-h-screen max-w-7xl grid-cols-[minmax(18rem,24rem)_1fr] bg-background shadow-[0_0_80px_rgba(24,24,27,0.10)] max-lg:block">
+    <main className="min-h-screen bg-muted text-foreground">
+      <div className="mx-auto grid min-h-screen max-w-7xl grid-cols-[minmax(18rem,24rem)_1fr] bg-background shadow-[0_0_80px_rgba(24,24,27,0.10)] max-lg:block dark:shadow-none">
         <BookingIntro profile={profileQuery.data} selectedService={selectedService} />
 
         <section className="px-6 py-6 sm:px-8 lg:px-10 lg:py-8">
-          <div className="mb-8 flex flex-wrap items-start justify-between gap-4 border-b border-border pb-6">
-            <div>
-              <div className="text-xs font-semibold tracking-[0.16em] text-muted-foreground uppercase">
-                <Trans>Public booking</Trans>
-              </div>
-              <h2 className="mt-2 font-display text-3xl font-semibold tracking-tight">
-                <Trans>Book an appointment</Trans>
-              </h2>
-            </div>
-            <div className="rounded-full border border-border bg-muted px-3 py-1 text-xs font-medium text-muted-foreground">
-              {profileQuery.data.timeZone}
-            </div>
-          </div>
+          <BookingPageHeader timeZone={profileQuery.data.timeZone} />
 
           <div className="grid gap-8">
             <PhoneVerificationStep
@@ -149,49 +147,27 @@ function PublicBookingPage() {
               </div>
             )}
             {isPhoneVerified && (
-              <>
-                <ServicePicker
-                  services={profileQuery.data.services}
-                  serviceId={serviceId}
-                  onSelect={(nextServiceId) => {
-                    setServiceId(nextServiceId);
-                    setSlotStart("");
-                  }}
-                />
-                <SlotPicker
-                  date={date}
-                  slots={slotsQuery.data ?? []}
-                  slotStart={slotStart}
-                  onDateChange={(nextDate) => {
-                    setDate(nextDate);
-                    setSlotStart("");
-                  }}
-                  onSlotSelect={setSlotStart}
-                />
-                <BookingFields
-                  name={name}
-                  email={email}
-                  note={note}
-                  onNameChange={setName}
-                  onEmailChange={setEmail}
-                  onNoteChange={setNote}
-                />
-              </>
+              <PublicBookingSteps
+                profile={profileQuery.data}
+                serviceId={serviceId}
+                selectedService={selectedService}
+                date={date}
+                slots={slotsQuery.data ?? []}
+                slotStart={slotStart}
+                name={name}
+                email={email}
+                note={note}
+                isSubmitDisabled={isSubmitDisabled}
+                isSubmitting={createBooking.isPending}
+                onServiceSelect={selectService}
+                onDateChange={selectDate}
+                onSlotSelect={setSlotStart}
+                onNameChange={setName}
+                onEmailChange={setEmail}
+                onNoteChange={setNote}
+                onSubmit={submit}
+              />
             )}
-            <BookingFooter
-              selectedService={selectedService}
-              disabled={
-                !serviceId ||
-                !slotStart ||
-                !name ||
-                !phone ||
-                !email ||
-                !phoneVerificationToken ||
-                createBooking.isPending
-              }
-              isSubmitting={createBooking.isPending}
-              onSubmit={submit}
-            />
           </div>
         </section>
       </div>

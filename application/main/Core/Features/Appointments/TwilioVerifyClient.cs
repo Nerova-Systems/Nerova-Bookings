@@ -49,7 +49,7 @@ public sealed class TwilioVerifyClient(IHttpClientFactory httpClientFactory) : I
         AddBasicAuthorization(message);
 
         var response = await httpClientFactory.CreateClient().SendAsync(message, cancellationToken);
-        if (!response.IsSuccessStatusCode) return false;
+        await EnsureSuccessAsync(response, cancellationToken);
         var json = await response.Content.ReadFromJsonAsync<JsonElement>(cancellationToken);
         return json.TryGetProperty("status", out var status) && status.GetString() == "approved";
     }

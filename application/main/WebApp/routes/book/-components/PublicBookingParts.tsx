@@ -58,6 +58,24 @@ export function BookingIntro({
   );
 }
 
+export function BookingPageHeader({ timeZone }: { timeZone: string }) {
+  return (
+    <div className="mb-8 flex flex-wrap items-start justify-between gap-4 border-b border-border pb-6">
+      <div>
+        <div className="text-xs font-semibold tracking-[0.16em] text-muted-foreground uppercase">
+          <Trans>Public booking</Trans>
+        </div>
+        <h2 className="mt-2 font-display text-3xl font-semibold tracking-tight">
+          <Trans>Book an appointment</Trans>
+        </h2>
+      </div>
+      <div className="rounded-full border border-border bg-muted px-3 py-1 text-xs font-medium text-muted-foreground">
+        {timeZone}
+      </div>
+    </div>
+  );
+}
+
 function BusinessLogo({ profile }: { profile: PublicBookingProfile }) {
   const [imageFailed, setImageFailed] = useState(false);
   const initials = profile.name
@@ -111,8 +129,8 @@ export function TextInput({
 
 export function PublicShell({ title, subtitle }: { title: string; subtitle: string }) {
   return (
-    <main className="flex min-h-screen items-center justify-center bg-[#f7f7f5] px-6">
-      <div className="rounded-xl border border-border bg-background p-8 text-center">
+    <main className="flex min-h-screen items-center justify-center bg-muted px-6 text-foreground">
+      <div className="rounded-xl border border-border bg-card p-8 text-center text-card-foreground">
         <h1 className="font-display text-2xl font-semibold">{title}</h1>
         <p className="mt-2 text-sm text-muted-foreground">{subtitle}</p>
       </div>

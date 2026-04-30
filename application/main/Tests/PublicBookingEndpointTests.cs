@@ -56,6 +56,23 @@ public sealed class PublicBookingEndpointTests : EndpointBaseTest<MainDbContext>
     }
 
     [Fact]
+    public async Task StartPhoneVerification_WhenTwilioAuthenticationFails_ShouldReturnUsefulConfigurationError()
+    {
+        TwilioVerifyClient = new FakeTwilioVerifyClient { ShouldThrowAuthenticationError = true };
+        await ReadPublicProfileAsync();
+
+        var response = await AnonymousHttpClient.PostAsJsonAsync(
+            "/api/main/public-booking/sea-point-studio/phone-verifications",
+            new { phone = "082 341 7890" }
+        );
+
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        var body = await response.Content.ReadAsStringAsync();
+        body.Should().Contain("SMS verification is not authenticated.");
+        body.Should().NotContain("\"code\":20003");
+    }
+
+    [Fact]
     public async Task CheckPhoneVerification_WhenApproved_ShouldReturnSafePrefillForExistingClient()
     {
         TwilioVerifyClient = new FakeTwilioVerifyClient();
@@ -131,7 +148,7 @@ public sealed class PublicBookingEndpointTests : EndpointBaseTest<MainDbContext>
         clients.Should().ContainSingle();
         clients[0].Name.Should().Be("Liam Botha");
         clients[0].Email.Should().Be("liam@example.com");
-        clients[0].Phone.Should().Be("+27 82 341 7890");
+        clients[0].Phone.Should().Be("+27823417890");
     }
 
     [Fact]
@@ -228,15 +245,24 @@ public sealed class PublicBookingEndpointTests : EndpointBaseTest<MainDbContext>
     private sealed class FakeTwilioVerifyClient : ITwilioVerifyClient
     {
         public string? LastStartedPhone { get; private set; }
+        public bool ShouldThrowAuthenticationError { get; init; }
 
         public Task<TwilioVerificationStarted> StartVerificationAsync(string phone, CancellationToken cancellationToken)
         {
+            if (ShouldThrowAuthenticationError)
+            {
+                throw new InvalidOperationException("{\"code\":20003,\"message\":\"Authenticate\",\"status\":401}");
+            }
             LastStartedPhone = phone;
             return Task.FromResult(new TwilioVerificationStarted("VE_test", "pending"));
         }
 
         public Task<bool> CheckVerificationAsync(string phone, string code, CancellationToken cancellationToken)
         {
+            if (ShouldThrowAuthenticationError)
+            {
+                throw new InvalidOperationException("{\"code\":20003,\"message\":\"Authenticate\",\"status\":401}");
+            }
             return Task.FromResult(code == "123456");
         }
     }

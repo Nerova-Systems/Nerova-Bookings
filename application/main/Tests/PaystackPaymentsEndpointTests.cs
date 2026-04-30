@@ -1,5 +1,6 @@
 using System.Net;
 using System.Net.Http.Json;
+using System.Text;
 using System.Text.Json.Nodes;
 using FluentAssertions;
 using Main.Api.Endpoints;
@@ -153,6 +154,38 @@ public sealed class PaystackPaymentsEndpointTests : EndpointBaseTest<MainDbConte
         var db = scope.ServiceProvider.GetRequiredService<MainDbContext>();
         var appointment = await db.Appointments.IgnoreQueryFilters().SingleAsync(a => a.Id == appointmentId);
         appointment.PaymentStatus.Should().Be(AppointmentPaymentStatus.Pending);
+    }
+
+    [Fact]
+    public async Task IsTransactionSuccessfulAsync_WhenRequestedAmountMatches_ShouldVerifyPayment()
+    {
+        var responseBody = """
+            {
+              "status": true,
+              "message": "Verification successful",
+              "data": {
+                "status": "success",
+                "reference": "ps_reference",
+                "amount": 40333,
+                "requested_amount": 15000,
+                "currency": "ZAR"
+              }
+            }
+            """;
+        using var httpClient = new HttpClient(new StaticJsonHandler(responseBody));
+        var paystackClient = new PaystackClient(new SingleHttpClientFactory(httpClient));
+        var previousSecret = Environment.GetEnvironmentVariable("PAYSTACK_SECRET_KEY");
+        Environment.SetEnvironmentVariable("PAYSTACK_SECRET_KEY", "sk_test_unit");
+        try
+        {
+            var result = await paystackClient.IsTransactionSuccessfulAsync("ps_reference", 15000, CancellationToken.None);
+
+            result.Should().BeTrue();
+        }
+        finally
+        {
+            Environment.SetEnvironmentVariable("PAYSTACK_SECRET_KEY", previousSecret);
+        }
     }
 
     protected override void RegisterMockLoggers(IServiceCollection services)
@@ -350,6 +383,25 @@ public sealed class PaystackPaymentsEndpointTests : EndpointBaseTest<MainDbConte
         public Task<bool> CheckVerificationAsync(string phone, string code, CancellationToken cancellationToken)
         {
             return Task.FromResult(code == "123456");
+        }
+    }
+
+    private sealed class SingleHttpClientFactory(HttpClient httpClient) : IHttpClientFactory
+    {
+        public HttpClient CreateClient(string name)
+        {
+            return httpClient;
+        }
+    }
+
+    private sealed class StaticJsonHandler(string responseBody) : HttpMessageHandler
+    {
+        protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+        {
+            return Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK)
+            {
+                Content = new StringContent(responseBody, Encoding.UTF8, "application/json")
+            });
         }
     }
 }

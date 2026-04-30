@@ -60,7 +60,8 @@ public sealed class PaystackClient(IHttpClientFactory httpClientFactory) : IPays
         return json.GetProperty("status").GetBoolean() &&
                data.GetProperty("status").GetString() == "success" &&
                data.GetProperty("reference").GetString() == reference &&
-               data.GetProperty("amount").GetInt32() == amountCents;
+               IsExpectedCurrency(data) &&
+               IsExpectedAmount(data, amountCents);
     }
 
     public async Task<IReadOnlyList<PaystackBankOption>> ListBanksAsync(CancellationToken cancellationToken)
@@ -247,6 +248,29 @@ public sealed class PaystackClient(IHttpClientFactory httpClientFactory) : IPays
     {
         var secret = Environment.GetEnvironmentVariable("PAYSTACK_SECRET_KEY");
         return !string.IsNullOrWhiteSpace(secret) && secret.StartsWith("sk_", StringComparison.Ordinal) ? secret : null;
+    }
+
+    private static bool IsExpectedCurrency(JsonElement data)
+    {
+        return !data.TryGetProperty("currency", out var currency) ||
+               string.Equals(currency.GetString(), "ZAR", StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static bool IsExpectedAmount(JsonElement data, int amountCents)
+    {
+        if (TryReadInt32(data, "requested_amount", out var requestedAmount))
+        {
+            return requestedAmount == amountCents;
+        }
+        return TryReadInt32(data, "amount", out var amount) && amount == amountCents;
+    }
+
+    private static bool TryReadInt32(JsonElement data, string propertyName, out int value)
+    {
+        value = 0;
+        return data.TryGetProperty(propertyName, out var property) &&
+               property.ValueKind == JsonValueKind.Number &&
+               property.TryGetInt32(out value);
     }
 }
 

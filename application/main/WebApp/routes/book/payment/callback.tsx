@@ -13,7 +13,7 @@ export const Route = createFileRoute("/book/payment/callback")({
 function PaystackCallbackPage() {
   const location = useLocation();
   const params = new URLSearchParams(location.searchStr);
-  const reference = params.get("reference") ?? "";
+  const reference = params.get("reference") ?? params.get("trxref") ?? "";
   const confirmationQuery = useConfirmPaystackReference(reference);
   const appointmentReference = confirmationQuery.data?.appointmentReference;
 
@@ -22,7 +22,7 @@ function PaystackCallbackPage() {
   }, []);
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-[#f7f7f5] px-6 text-foreground">
+    <main className="flex min-h-screen items-center justify-center bg-muted px-6 text-foreground">
       <section className="w-full max-w-lg rounded-xl border border-border bg-background p-8 text-center">
         <div className="mb-2 text-xs font-semibold tracking-[0.12em] text-muted-foreground uppercase">Paystack</div>
         <h1 className="font-display text-3xl font-semibold">

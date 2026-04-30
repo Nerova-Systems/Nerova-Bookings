@@ -214,7 +214,15 @@ public sealed class AppointmentEndpoints : IEndpoints
         if (normalizedPhone.Length == 0) return Results.BadRequest("Enter a valid phone number.");
 
         var now = timeProvider.GetUtcNow();
-        var started = await twilioVerifyClient.StartVerificationAsync(normalizedPhone, cancellationToken);
+        TwilioVerificationStarted started;
+        try
+        {
+            started = await twilioVerifyClient.StartVerificationAsync(normalizedPhone, cancellationToken);
+        }
+        catch (InvalidOperationException exception)
+        {
+            return Results.BadRequest(ToPublicTwilioError(exception));
+        }
         var verification = new PublicPhoneVerification
         {
             TenantId = profile.TenantId,
@@ -250,7 +258,15 @@ public sealed class AppointmentEndpoints : IEndpoints
             .FirstOrDefault();
         if (verification is null) return Results.BadRequest("Start phone verification before checking a code.");
 
-        var approved = await twilioVerifyClient.CheckVerificationAsync(normalizedPhone, request.Code, cancellationToken);
+        bool approved;
+        try
+        {
+            approved = await twilioVerifyClient.CheckVerificationAsync(normalizedPhone, request.Code, cancellationToken);
+        }
+        catch (InvalidOperationException exception)
+        {
+            return Results.BadRequest(ToPublicTwilioError(exception));
+        }
         if (!approved) return Results.BadRequest("Invalid verification code.");
 
         var token = CreatePhoneVerificationToken();
@@ -305,6 +321,10 @@ public sealed class AppointmentEndpoints : IEndpoints
         {
             client = new Client { TenantId = profile.TenantId, Name = request.Name, Phone = verification.Phone, Email = request.Email, Status = "New" };
             db.Clients.Add(client);
+        }
+        else
+        {
+            client.Phone = verification.Phone;
         }
 
         var staff = await db.StaffMembers.IgnoreQueryFilters().FirstAsync(s => s.TenantId == profile.TenantId && s.IsActive, cancellationToken);
@@ -974,6 +994,15 @@ public sealed class AppointmentEndpoints : IEndpoints
         var tail = digits[^4..];
         var prefix = phone.StartsWith("+27", StringComparison.Ordinal) ? "+27 " : string.Empty;
         return $"{prefix}*** *** {tail}";
+    }
+
+    private static string ToPublicTwilioError(Exception exception)
+    {
+        if (exception.Message.Contains("20003", StringComparison.Ordinal) || exception.Message.Contains("Authenticate", StringComparison.OrdinalIgnoreCase))
+        {
+            return "SMS verification is not authenticated. Check that TWILIO_ACCOUNT_SID and TWILIO_AUTH_TOKEN belong to the account that owns TWILIO_VERIFY_SERVICE_SID.";
+        }
+        return "SMS verification is temporarily unavailable. Please try again later.";
     }
 
     private static void AddFlowEvents(MainDbContext db, Appointment appointment, DateTimeOffset now)
