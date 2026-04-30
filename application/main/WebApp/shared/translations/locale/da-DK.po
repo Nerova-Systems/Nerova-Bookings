@@ -157,9 +157,6 @@ msgstr ""
 msgid "Google and Microsoft are priority-one integrations through Nango"
 msgstr ""
 
-msgid "Google and Microsoft calendar busy blocks via Nango"
-msgstr ""
-
 msgid "Import contacts"
 msgstr ""
 
@@ -175,7 +172,13 @@ msgstr ""
 msgid "Lifecycle events"
 msgstr ""
 
+msgid "Live availability and busy blocks"
+msgstr ""
+
 msgid "Loading appointments…"
+msgstr ""
+
+msgid "Loading availability slots"
 msgstr ""
 
 msgid "Loading confirmation..."
@@ -281,6 +284,9 @@ msgid "Reset"
 msgstr ""
 
 msgid "Restore any service to make it bookable again."
+msgstr ""
+
+msgid "Save block"
 msgstr ""
 
 msgid "Save client"

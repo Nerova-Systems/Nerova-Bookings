@@ -107,7 +107,7 @@ export function AppointmentDetail({
               <strong>{appointment.service}</strong>
               <span className="text-muted-foreground">
                 {" "}
-                · {appointment.duration} · {appointment.amount}
+                · v{appointment.serviceVersionNumber} · {appointment.duration} · {appointment.amount}
               </span>
             </span>
             <span className="text-muted-foreground">When</span>

@@ -13,6 +13,7 @@ export interface PublicBookingService {
   paymentPolicy: ServicePaymentPolicy;
   location: string;
   isActive: boolean;
+  latestVersionNumber: number;
 }
 
 export interface PublicBookingProfile {

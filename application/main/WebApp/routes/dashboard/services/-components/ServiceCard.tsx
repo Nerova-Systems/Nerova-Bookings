@@ -33,6 +33,9 @@ export function ServiceCard({
           <span className="size-[5px] rounded-full bg-current" />
           {service.modeLabel}
         </span>
+        <span className="rounded-full border border-border px-2 py-0.5 font-mono text-[10.5px] text-muted-foreground">
+          v{service.latestVersionNumber}
+        </span>
         {service.archived ? (
           <button
             type="button"

@@ -37,7 +37,12 @@ export function ServicePicker({
           >
             <div className="flex min-h-20 flex-col justify-between">
               <div>
-                <div className="font-medium">{service.name}</div>
+                <div className="flex items-center gap-2">
+                  <span className="font-medium">{service.name}</span>
+                  <span className="rounded-full bg-current/10 px-2 py-0.5 font-mono text-[10.5px]">
+                    v{service.latestVersionNumber}
+                  </span>
+                </div>
                 <div className="mt-1 text-xs opacity-70">{service.mode} appointment</div>
               </div>
               <div className="mt-4 flex flex-wrap gap-2 text-xs">

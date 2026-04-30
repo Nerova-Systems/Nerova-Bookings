@@ -4,6 +4,7 @@ import { Button } from "@repo/ui/components/Button";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { SearchIcon } from "lucide-react";
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 
 import {
   useAppointmentShell,
@@ -120,11 +121,32 @@ function ActivityPage() {
             />
             <AppointmentDetail
               appointment={selectedAppointment}
-              onConfirm={(id) => confirmMutation.mutate(id, { onSuccess: () => shellQuery.refetch() })}
-              onStatusChange={(id, status) => statusMutation.mutate({ id, status })}
+              onConfirm={(id) =>
+                confirmMutation.mutate(id, {
+                  onSuccess: () => {
+                    toast.success("Booking confirmed.");
+                    shellQuery.refetch();
+                  },
+                  onError: (error) => toast.error(error instanceof Error ? error.message : "Could not confirm booking.")
+                })
+              }
+              onStatusChange={(id, status) =>
+                statusMutation.mutate(
+                  { id, status },
+                  {
+                    onSuccess: () => toast.success(`Booking marked ${status}.`),
+                    onError: (error) => toast.error(error instanceof Error ? error.message : "Could not update booking.")
+                  }
+                )
+              }
               onCreateTerminalPayment={async (id) => {
-                const intent = await terminalPaymentMutation.mutateAsync(id);
-                window.open(intent.terminalUrl, "_blank", "noopener,noreferrer");
+                try {
+                  const intent = await terminalPaymentMutation.mutateAsync(id);
+                  toast.success("Terminal payment link created.");
+                  window.open(intent.terminalUrl, "_blank", "noopener,noreferrer");
+                } catch (error) {
+                  toast.error(error instanceof Error ? error.message : "Could not create terminal payment link.");
+                }
               }}
               isCreatingTerminalPayment={terminalPaymentMutation.isPending}
             />

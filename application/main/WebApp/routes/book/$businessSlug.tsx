@@ -1,6 +1,7 @@
 import { t } from "@lingui/core/macro";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 
 import {
   useCheckPublicPhoneVerification,
@@ -40,8 +41,7 @@ function PublicBookingPage() {
   const createBooking = useCreatePublicBooking(businessSlug);
   const selectedService = profileQuery.data?.services.find((service) => service.id === serviceId);
   const isPhoneVerified = Boolean(phoneVerificationToken);
-  const isSubmitDisabled =
-    !serviceId || !slotStart || !name || !phone || !email || !phoneVerificationToken || createBooking.isPending;
+  const isSubmitDisabled = !serviceId || !slotStart || !name || !phone || !email || !phoneVerificationToken || createBooking.isPending;
 
   useEffect(() => {
     document.title = t`Book appointment | Nerova`;
@@ -53,20 +53,26 @@ function PublicBookingPage() {
 
   const submit = async () => {
     if (!serviceId || !slotStart || !name || !phone || !email || !phoneVerificationToken) return;
-    const result = await createBooking.mutateAsync({
-      serviceId,
-      startAt: slotStart,
-      name,
-      phone,
-      email,
-      phoneVerificationToken,
-      answers: { note }
-    });
-    if (result.paymentUrl) {
-      window.location.assign(result.paymentUrl);
-      return;
+    try {
+      const result = await createBooking.mutateAsync({
+        serviceId,
+        startAt: slotStart,
+        name,
+        phone,
+        email,
+        phoneVerificationToken,
+        answers: { note }
+      });
+      toast.success("Booking request created.");
+      if (result.paymentUrl) {
+        toast.message("Opening secure payment.");
+        window.location.assign(result.paymentUrl);
+        return;
+      }
+      navigate({ to: "/book/confirmation/$reference", params: { reference: result.reference } });
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Could not create booking.");
     }
-    navigate({ to: "/book/confirmation/$reference", params: { reference: result.reference } });
   };
 
   const resetVerifiedPhone = (nextPhone: string) => {
@@ -83,8 +89,11 @@ function PublicBookingPage() {
       const result = await startPhoneVerification.mutateAsync({ phone });
       setMaskedPhone(result.maskedPhone);
       setVerificationCode("");
+      toast.success("Verification code sent.");
     } catch (error) {
-      setVerificationError(error instanceof Error ? error.message : "Could not send verification code.");
+      const message = error instanceof Error ? error.message : "Could not send verification code.";
+      setVerificationError(message);
+      toast.error(message);
     }
   };
 
@@ -96,8 +105,11 @@ function PublicBookingPage() {
       setMaskedPhone(result.maskedPhone);
       setName(result.name);
       setEmail(result.email);
+      toast.success("Phone verified.");
     } catch (error) {
-      setVerificationError(error instanceof Error ? error.message : "Could not verify that code.");
+      const message = error instanceof Error ? error.message : "Could not verify that code.";
+      setVerificationError(message);
+      toast.error(message);
     }
   };
 
@@ -111,13 +123,9 @@ function PublicBookingPage() {
     setSlotStart("");
   };
 
-  if (profileQuery.isLoading) {
-    return <PublicShell title="Loading booking page" subtitle="Preparing available services." />;
-  }
+  if (profileQuery.isLoading) return <PublicShell title="Loading booking page" subtitle="Preparing available services." />;
 
-  if (!profileQuery.data) {
-    return <PublicShell title="Booking page unavailable" subtitle="This business is not accepting public bookings." />;
-  }
+  if (!profileQuery.data) return <PublicShell title="Booking page unavailable" subtitle="This business is not accepting public bookings." />;
 
   return (
     <main className="min-h-screen bg-muted text-foreground">

@@ -134,6 +134,17 @@ public sealed class ExternalBusyBlock : ITenantScopedEntity
     public string Label { get; set; } = string.Empty;
 }
 
+public sealed class ManualCalendarBlock : ITenantScopedEntity
+{
+    public string Id { get; set; } = Guid.NewGuid().ToString("N");
+    public TenantId TenantId { get; set; } = null!;
+    public string? StaffMemberId { get; set; }
+    public string Title { get; set; } = string.Empty;
+    public DateTimeOffset StartAt { get; set; }
+    public DateTimeOffset EndAt { get; set; }
+    public DateTimeOffset CreatedAt { get; set; }
+}
+
 public sealed class Client : ITenantScopedEntity
 {
     public string Id { get; set; } = Guid.NewGuid().ToString("N");

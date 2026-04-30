@@ -79,6 +79,19 @@ public sealed class ExternalBusyBlockConfiguration : IEntityTypeConfiguration<Ex
     {
         builder.HasKey(x => x.Id);
         builder.MapStronglyTypedLongId<ExternalBusyBlock, TenantId>(x => x.TenantId);
+        builder.Property(x => x.Provider).HasMaxLength(80);
+        builder.Property(x => x.Label).HasMaxLength(160);
+    }
+}
+
+public sealed class ManualCalendarBlockConfiguration : IEntityTypeConfiguration<ManualCalendarBlock>
+{
+    public void Configure(EntityTypeBuilder<ManualCalendarBlock> builder)
+    {
+        builder.HasKey(x => x.Id);
+        builder.MapStronglyTypedLongId<ManualCalendarBlock, TenantId>(x => x.TenantId);
+        builder.Property(x => x.StaffMemberId).HasMaxLength(64);
+        builder.Property(x => x.Title).HasMaxLength(160);
     }
 }
 

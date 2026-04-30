@@ -3,6 +3,7 @@ import { Trans } from "@lingui/react/macro";
 import { Button } from "@repo/ui/components/Button";
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 
 import {
   useAppointmentShell,
@@ -35,6 +36,16 @@ function ServicesPage() {
   const archived = (shellQuery.data?.services ?? []).filter((service) => service.archived);
   const activeServices = (shellQuery.data?.services ?? []).filter((service) => !service.archived);
   const totalBookings = activeServices.reduce((sum, service) => sum + service.bookingsThisMonth, 0);
+  const handleArchive = (id: string) =>
+    archiveService.mutate(id, {
+      onSuccess: () => toast.success("Service archived."),
+      onError: (error) => toast.error(error instanceof Error ? error.message : "Could not archive service.")
+    });
+  const handleRestore = (id: string) =>
+    restoreService.mutate(id, {
+      onSuccess: () => toast.success("Service restored."),
+      onError: (error) => toast.error(error instanceof Error ? error.message : "Could not restore service.")
+    });
 
   useEffect(() => {
     document.title = t`Services | Nerova`;
@@ -96,16 +107,7 @@ function ServicesPage() {
             </div>
             <div className="grid grid-cols-[repeat(auto-fill,minmax(16.25rem,1fr))] gap-3">
               {cat.services.map((svc) => (
-                <ServiceCard
-                  key={svc.id}
-                  service={svc}
-                  onEdit={(service) => {
-                    setEditingService(service);
-                    setFormOpen(true);
-                  }}
-                  onArchive={(id) => archiveService.mutate(id)}
-                  onRestore={(id) => restoreService.mutate(id)}
-                />
+                <ServiceCard key={svc.id} service={svc} onEdit={(service) => openServiceForm(service, setEditingService, setFormOpen)} onArchive={handleArchive} onRestore={handleRestore} />
               ))}
             </div>
           </div>
@@ -121,16 +123,7 @@ function ServicesPage() {
             </div>
             <div className="grid grid-cols-[repeat(auto-fill,minmax(16.25rem,1fr))] gap-3">
               {archived.map((svc) => (
-                <ServiceCard
-                  key={svc.id}
-                  service={svc}
-                  onEdit={(service) => {
-                    setEditingService(service);
-                    setFormOpen(true);
-                  }}
-                  onArchive={(id) => archiveService.mutate(id)}
-                  onRestore={(id) => restoreService.mutate(id)}
-                />
+                <ServiceCard key={svc.id} service={svc} onEdit={(service) => openServiceForm(service, setEditingService, setFormOpen)} onArchive={handleArchive} onRestore={handleRestore} />
               ))}
             </div>
             <div className="mt-2 rounded-lg bg-muted px-3.5 py-2.5 text-xs text-muted-foreground">
@@ -150,9 +143,9 @@ function ServicesPage() {
           onClose={() => setFormOpen(false)}
           onSubmit={(request: ServiceMutationRequest) => {
             if (editingService) {
-              updateService.mutate({ id: editingService.id, request }, { onSuccess: () => setFormOpen(false) });
+              updateService.mutate({ id: editingService.id, request }, { onSuccess: () => closeServiceForm("Service updated.", setFormOpen), onError: (error) => toast.error(error instanceof Error ? error.message : "Could not update service.") });
             } else {
-              createService.mutate(request, { onSuccess: () => setFormOpen(false) });
+              createService.mutate(request, { onSuccess: () => closeServiceForm("Service created.", setFormOpen), onError: (error) => toast.error(error instanceof Error ? error.message : "Could not create service.") });
             }
           }}
         />
@@ -168,4 +161,14 @@ function groupServices(categories: ServiceCategory[], services: Service[]) {
       services: services.filter((service) => service.categoryId === category.id && !service.archived)
     }))
     .filter((category) => category.services.length > 0);
+}
+
+function openServiceForm(service: Service, setEditingService: (service: Service) => void, setFormOpen: (open: boolean) => void) {
+  setEditingService(service);
+  setFormOpen(true);
+}
+
+function closeServiceForm(message: string, setFormOpen: (open: boolean) => void) {
+  toast.success(message);
+  setFormOpen(false);
 }

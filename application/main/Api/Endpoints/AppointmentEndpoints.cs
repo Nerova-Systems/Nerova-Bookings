@@ -23,6 +23,7 @@ public sealed class AppointmentEndpoints : IEndpoints
         app.MapPut("/services/{id}", UpdateService);
         app.MapPost("/services/{id}/archive", ArchiveService);
         app.MapPost("/services/{id}/restore", RestoreService);
+        app.MapPost("/calendar/blocks", CreateCalendarBlock);
         app.MapPost("/appointments/{id}/confirm", ConfirmAppointment);
         app.MapPost("/appointments/{id}/status", UpdateAppointmentStatus);
         app.MapPost("/appointments/{id}/payments/terminal-intent", CreateTerminalPaymentIntent);
@@ -135,6 +136,24 @@ public sealed class AppointmentEndpoints : IEndpoints
         return Results.Ok(await BuildShellAsync(db, cancellationToken));
     }
 
+    private static async Task<IResult> CreateCalendarBlock(CreateCalendarBlockRequest request, MainDbContext db, IExecutionContext executionContext, TimeProvider timeProvider, CancellationToken cancellationToken)
+    {
+        var tenantId = RequireTenant(executionContext);
+        if (request.EndAt <= request.StartAt) return Results.BadRequest("Block end time must be after start time.");
+        var title = string.IsNullOrWhiteSpace(request.Title) ? "Blocked time" : request.Title.Trim();
+        db.ManualCalendarBlocks.Add(new ManualCalendarBlock
+        {
+            TenantId = tenantId,
+            StaffMemberId = string.IsNullOrWhiteSpace(request.StaffMemberId) ? null : request.StaffMemberId,
+            Title = title,
+            StartAt = request.StartAt,
+            EndAt = request.EndAt,
+            CreatedAt = timeProvider.GetUtcNow()
+        });
+        await db.SaveChangesAsync(cancellationToken);
+        return Results.Ok(await BuildShellAsync(db, cancellationToken));
+    }
+
     private static async Task<IResult> ConfirmAppointment(string id, MainDbContext db, CancellationToken cancellationToken)
     {
         var appointment = await db.Appointments.AsTracking().FirstOrDefaultAsync(a => a.Id == id, cancellationToken);
@@ -196,7 +215,10 @@ public sealed class AppointmentEndpoints : IEndpoints
             .Where(s => s.TenantId == profile.TenantId && s.IsActive)
             .OrderBy(s => s.SortOrder)
             .ToListAsync(cancellationToken);
-        return Results.Ok(new PublicBookingProfileResponse(profile.Name, profile.Slug, profile.TimeZone, profile.Address, profile.LogoUrl, services.Select(ToServiceDto)));
+        var serviceVersions = await db.BookableServiceVersions.IgnoreQueryFilters()
+            .Where(v => v.TenantId == profile.TenantId)
+            .ToListAsync(cancellationToken);
+        return Results.Ok(new PublicBookingProfileResponse(profile.Name, profile.Slug, profile.TimeZone, profile.Address, profile.LogoUrl, services.Select(service => ToServiceDto(service, serviceVersions))));
     }
 
     private static async Task<IResult> GetPublicClientPrefill(string businessSlug, string phone, MainDbContext db, TimeProvider timeProvider, CancellationToken cancellationToken)
@@ -722,14 +744,18 @@ public sealed class AppointmentEndpoints : IEndpoints
         var categories = await db.ServiceCategories.OrderBy(c => c.SortOrder).ToListAsync(cancellationToken);
         var profile = await db.BusinessProfiles.FirstAsync(cancellationToken);
         var integrations = await db.IntegrationConnections.OrderBy(i => i.Provider).ThenBy(i => i.Capability).ToListAsync(cancellationToken);
+        var manualBlocks = (await db.ManualCalendarBlocks.ToListAsync(cancellationToken)).OrderBy(b => b.StartAt).ToList();
+        var externalBlocks = (await db.ExternalBusyBlocks.ToListAsync(cancellationToken)).OrderBy(b => b.StartAt).ToList();
         return new AppShellResponse(
             new BusinessProfileDto(profile.Name, profile.Slug, profile.TimeZone, profile.Address, profile.PublicBookingEnabled),
             appointments.Select(a => ToAppointmentDto(a, clients, services, serviceVersions)),
-            services.Select(ToServiceDto),
+            services.Select(service => ToServiceDto(service, serviceVersions)),
             categories.Select(c => new ServiceCategoryDto(c.Id, c.Name)),
             clients.Select(c => ToClientDto(c, appointments, services, serviceVersions)),
             BuildAnalytics(appointments, services, serviceVersions, clients),
-            integrations.Select(i => new IntegrationConnectionDto(i.Provider, i.Capability, i.Status, i.LastSyncedAt))
+            integrations.Select(i => new IntegrationConnectionDto(i.Provider, i.Capability, i.Status, i.LastSyncedAt)),
+            manualBlocks.Select(ToManualCalendarBlockDto)
+                .Concat(externalBlocks.Select(ToExternalCalendarBlockDto))
         );
     }
 
@@ -774,9 +800,24 @@ public sealed class AppointmentEndpoints : IEndpoints
         return ToAppointmentDto(appointment, [client], [service], [serviceVersion]);
     }
 
-    private static ServiceDto ToServiceDto(BookableService service)
+    private static ServiceDto ToServiceDto(BookableService service, List<BookableServiceVersion> serviceVersions)
     {
-        return new ServiceDto(service.Id, service.CategoryId, service.Name, service.Mode, service.DurationMinutes, service.PriceCents, service.DepositCents, service.PaymentPolicy.ToString(), service.Location, service.IsActive);
+        var latestVersionNumber = serviceVersions
+            .Where(version => version.ServiceId == service.Id)
+            .Select(version => version.VersionNumber)
+            .DefaultIfEmpty(1)
+            .Max();
+        return new ServiceDto(service.Id, service.CategoryId, service.Name, service.Mode, service.DurationMinutes, service.PriceCents, service.DepositCents, service.PaymentPolicy.ToString(), service.Location, service.IsActive, latestVersionNumber);
+    }
+
+    private static CalendarBlockDto ToManualCalendarBlockDto(ManualCalendarBlock block)
+    {
+        return new CalendarBlockDto(block.Id, block.Title, block.StartAt, block.EndAt, "manual");
+    }
+
+    private static CalendarBlockDto ToExternalCalendarBlockDto(ExternalBusyBlock block)
+    {
+        return new CalendarBlockDto(block.Id, $"{block.Provider} · {block.Label}", block.StartAt, block.EndAt, "external");
     }
 
     private static ClientAppointmentHistoryDto ToClientAppointmentHistoryDto(Appointment appointment, List<BookableService> services, List<BookableServiceVersion> serviceVersions)
@@ -980,6 +1021,14 @@ public sealed class AppointmentEndpoints : IEndpoints
             .Where(a => a.TenantId == tenantId && a.Status != AppointmentStatus.Cancelled)
             .ToListAsync(cancellationToken);
         var existing = tenantAppointments.Where(a => a.StartAt < dayEnd && a.EndAt > dayStart).ToList();
+        var tenantManualBlocks = await db.ManualCalendarBlocks.IgnoreQueryFilters()
+            .Where(b => b.TenantId == tenantId)
+            .ToListAsync(cancellationToken);
+        var manualBlocks = tenantManualBlocks.Where(b => b.StartAt < dayEnd && b.EndAt > dayStart).ToList();
+        var tenantExternalBlocks = await db.ExternalBusyBlocks.IgnoreQueryFilters()
+            .Where(b => b.TenantId == tenantId)
+            .ToListAsync(cancellationToken);
+        var externalBlocks = tenantExternalBlocks.Where(b => b.StartAt < dayEnd && b.EndAt > dayStart).ToList();
         var slots = new List<SlotDto>();
         foreach (var rule in rules)
         {
@@ -989,7 +1038,10 @@ public sealed class AppointmentEndpoints : IEndpoints
             {
                 var start = new DateTimeOffset(cursor, TimeSpan.FromHours(2));
                 var slotEnd = start.AddMinutes(service.DurationMinutes);
-                if (!existing.Any(a => a.StartAt < slotEnd && a.EndAt > start))
+                var hasConflict = existing.Any(a => a.StartAt < slotEnd && a.EndAt > start) ||
+                                  manualBlocks.Any(b => b.StartAt <= slotEnd && b.EndAt > start) ||
+                                  externalBlocks.Any(b => b.StartAt <= slotEnd && b.EndAt > start);
+                if (!hasConflict)
                 {
                     slots.Add(new SlotDto(start, slotEnd));
                 }
@@ -1257,15 +1309,16 @@ public sealed class AppointmentEndpoints : IEndpoints
     }
 }
 
-public sealed record AppShellResponse(BusinessProfileDto Profile, IEnumerable<AppointmentDto> Appointments, IEnumerable<ServiceDto> Services, IEnumerable<ServiceCategoryDto> Categories, IEnumerable<ClientDto> Clients, AnalyticsDto Analytics, IEnumerable<IntegrationConnectionDto> Integrations);
+public sealed record AppShellResponse(BusinessProfileDto Profile, IEnumerable<AppointmentDto> Appointments, IEnumerable<ServiceDto> Services, IEnumerable<ServiceCategoryDto> Categories, IEnumerable<ClientDto> Clients, AnalyticsDto Analytics, IEnumerable<IntegrationConnectionDto> Integrations, IEnumerable<CalendarBlockDto> CalendarBlocks);
 public sealed record BusinessProfileDto(string Name, string Slug, string TimeZone, string Address, bool PublicBookingEnabled);
 public sealed record AppointmentDto(string Id, string PublicReference, string ClientId, string ServiceId, string ServiceVersionId, int ServiceVersionNumber, DateTimeOffset StartAt, DateTimeOffset EndAt, string ClientName, string ClientPhone, string ClientEmail, string ServiceName, int DurationMinutes, int PriceCents, int DepositCents, string PaymentPolicy, string Status, string PaymentStatus, string Source, string Location, string AnswersJson, string ClientStatus, string? ClientAlert, string? ClientInternalNote);
-public sealed record ServiceDto(string Id, string CategoryId, string Name, string Mode, int DurationMinutes, int PriceCents, int DepositCents, string PaymentPolicy, string Location, bool IsActive);
+public sealed record ServiceDto(string Id, string CategoryId, string Name, string Mode, int DurationMinutes, int PriceCents, int DepositCents, string PaymentPolicy, string Location, bool IsActive, int LatestVersionNumber);
 public sealed record ServiceCategoryDto(string Id, string Name);
 public sealed record ClientDto(string Id, string Name, string Phone, string Email, string Status, string? Alert, string? InternalNote, int VisitCount, int LifetimeSpendCents, int NoShowCount, DateTimeOffset? LastVisitAt, IEnumerable<ClientAppointmentHistoryDto> AppointmentHistory);
 public sealed record ClientAppointmentHistoryDto(string Id, string PublicReference, DateTimeOffset StartAt, DateTimeOffset EndAt, string ServiceName, int PriceCents, int DepositCents, string PaymentPolicy, string Status, string PaymentStatus, string Source, string Location);
 public sealed record AnalyticsDto(int Bookings, int RevenueCents, int ClientsServed, int AverageBookingValueCents, decimal NoShowRate);
 public sealed record IntegrationConnectionDto(string Provider, string Capability, string Status, DateTimeOffset? LastSyncedAt);
+public sealed record CalendarBlockDto(string Id, string Title, DateTimeOffset StartAt, DateTimeOffset EndAt, string Type);
 public sealed record SlotDto(DateTimeOffset StartAt, DateTimeOffset EndAt);
 public sealed record PublicBookingProfileResponse(string Name, string Slug, string TimeZone, string Address, string? LogoUrl, IEnumerable<ServiceDto> Services);
 public sealed record PublicClientPrefillResponse(string Name, string Email);
@@ -1276,6 +1329,7 @@ public sealed record CheckPhoneVerificationResponse(string PhoneVerificationToke
 public sealed record PublicBookingRequest(string ServiceId, DateTimeOffset StartAt, string Name, string Phone, string Email, string? PhoneVerificationToken, Dictionary<string, string> Answers);
 public sealed record PublicBookingCreatedResponse(string Reference, bool PaymentRequired, string? PaymentUrl);
 public sealed record CreateServiceRequest(string Name, string CategoryName, string? Description, string Mode, int DurationMinutes, int PriceCents, int DepositCents, string? PaymentPolicy, int BufferBeforeMinutes, int BufferAfterMinutes, string Location);
+public sealed record CreateCalendarBlockRequest(string Title, DateTimeOffset StartAt, DateTimeOffset EndAt, string? StaffMemberId);
 public sealed record UpdateAppointmentStatusRequest(string Status, string? PaymentStatus);
 public sealed record UpdateClientRequest(string Name, string Phone, string Email, string Status, string? Alert, string? InternalNote);
 public sealed record PaystackInitializeRequest(string AppointmentId);

@@ -28,7 +28,8 @@ export function mapShell(shell: ApiShell): AppointmentShell {
       averageBookingValue: money(shell.analytics.averageBookingValueCents),
       noShowRate: `${shell.analytics.noShowRate}%`
     },
-    integrations: shell.integrations
+    integrations: shell.integrations,
+    calendarBlocks: shell.calendarBlocks
   };
 }
 
@@ -83,7 +84,8 @@ function mapService(service: ApiService, appointments: Appointment[]): Service {
     archived: !service.isActive,
     durationMinutes: service.durationMinutes,
     priceCents: service.priceCents,
-    depositCents: service.depositCents
+    depositCents: service.depositCents,
+    latestVersionNumber: service.latestVersionNumber
   };
 }
 

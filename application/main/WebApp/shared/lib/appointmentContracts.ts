@@ -1,16 +1,5 @@
-export type AppointmentStatus =
-  | "pending"
-  | "confirmed"
-  | "payment-not-sent"
-  | "payment-overdue"
-  | "completed"
-  | "cancelled"
-  | "no-show";
-export type ServicePaymentPolicy =
-  | "NoPaymentRequired"
-  | "DepositBeforeBooking"
-  | "FullPaymentBeforeBooking"
-  | "CollectAfterAppointment";
+export type AppointmentStatus = "pending" | "confirmed" | "payment-not-sent" | "payment-overdue" | "completed" | "cancelled" | "no-show";
+export type ServicePaymentPolicy = "NoPaymentRequired" | "DepositBeforeBooking" | "FullPaymentBeforeBooking" | "CollectAfterAppointment";
 
 export interface Appointment {
   id: string;
@@ -59,12 +48,10 @@ export interface Service {
   durationMinutes: number;
   priceCents: number;
   depositCents: number;
+  latestVersionNumber: number;
 }
 
-export interface ServiceCategory {
-  id: string;
-  name: string;
-}
+export interface ServiceCategory { id: string; name: string }
 
 export interface Client {
   id: string;
@@ -98,20 +85,10 @@ export interface ClientAppointmentHistory {
   location: string;
 }
 
-export interface Analytics {
-  bookings: number;
-  revenue: string;
-  clientsServed: number;
-  averageBookingValue: string;
-  noShowRate: string;
-}
-
-export interface IntegrationConnection {
-  provider: string;
-  capability: string;
-  status: string;
-  lastSyncedAt?: string;
-}
+export interface Analytics { bookings: number; revenue: string; clientsServed: number; averageBookingValue: string; noShowRate: string }
+export interface IntegrationConnection { provider: string; capability: string; status: string; lastSyncedAt?: string }
+export interface CalendarBlock { id: string; title: string; startAt: string; endAt: string; type: "manual" | "external" }
+export interface Slot { startAt: string; endAt: string }
 
 export interface AppointmentShell {
   profile: BusinessProfile;
@@ -121,15 +98,10 @@ export interface AppointmentShell {
   clients: Client[];
   analytics: Analytics;
   integrations: IntegrationConnection[];
+  calendarBlocks: CalendarBlock[];
 }
 
-export interface BusinessProfile {
-  name: string;
-  slug: string;
-  timeZone: string;
-  address: string;
-  publicBookingEnabled: boolean;
-}
+export interface BusinessProfile { name: string; slug: string; timeZone: string; address: string; publicBookingEnabled: boolean }
 
 export interface ApiShell {
   profile: BusinessProfile;
@@ -145,6 +117,7 @@ export interface ApiShell {
     noShowRate: number;
   };
   integrations: IntegrationConnection[];
+  calendarBlocks: CalendarBlock[];
 }
 
 export interface ApiAppointment {
@@ -184,6 +157,7 @@ export interface ApiService {
   paymentPolicy: ServicePaymentPolicy;
   location: string;
   isActive: boolean;
+  latestVersionNumber: number;
 }
 
 export interface ApiClient {

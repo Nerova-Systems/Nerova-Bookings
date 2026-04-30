@@ -1,5 +1,6 @@
 using System.Net;
 using System.Net.Http.Json;
+using System.Text.Json.Nodes;
 using FluentAssertions;
 using Main.Database;
 using Main.Features.Appointments;
@@ -42,6 +43,23 @@ public sealed class AppOperationsEndpointTests : EndpointBaseTest<MainDbContext>
     }
 
     [Fact]
+    public async Task Shell_ShouldExposeLatestServiceVersionNumber()
+    {
+        await SeedShellAsync();
+        var service = await ReadServiceByNameAsync("Express session");
+
+        var update = await AuthenticatedOwnerHttpClient.PutAsJsonAsync(
+            $"/api/main/app/services/{service.Id}",
+            NewServiceRequest("Express session updated", 33000)
+        );
+
+        update.StatusCode.Should().Be(HttpStatusCode.OK);
+        var shell = await AuthenticatedOwnerHttpClient.GetFromJsonAsync<JsonObject>("/api/main/app/shell");
+        var serviceDto = shell!["services"]!.AsArray().Single(item => item!["id"]!.GetValue<string>() == service.Id)!;
+        serviceDto["latestVersionNumber"]!.GetValue<int>().Should().Be(2);
+    }
+
+    [Fact]
     public async Task UpdateService_WhenAppointmentAlreadyBooked_ShouldKeepAppointmentServiceVersion()
     {
         await SeedShellAsync();
@@ -78,6 +96,64 @@ public sealed class AppOperationsEndpointTests : EndpointBaseTest<MainDbContext>
         appointment = await ReadAppointmentAsync(appointment.Id);
         appointment.Status.Should().Be(AppointmentStatus.Completed);
         appointment.PaymentStatus.Should().Be(originalPaymentStatus);
+    }
+
+    [Fact]
+    public async Task CreateCalendarBlock_ShouldHideOverlappingAvailabilitySlots()
+    {
+        await SeedShellAsync();
+        var service = await ReadServiceByNameAsync("Express session");
+
+        var create = await AuthenticatedOwnerHttpClient.PostAsJsonAsync(
+            "/api/main/app/calendar/blocks",
+            new
+            {
+                title = "Supply run",
+                startAt = new DateTimeOffset(2026, 4, 27, 10, 0, 0, TimeSpan.FromHours(2)),
+                endAt = new DateTimeOffset(2026, 4, 27, 11, 0, 0, TimeSpan.FromHours(2))
+            }
+        );
+
+        create.StatusCode.Should().Be(HttpStatusCode.OK);
+        var slots = await AuthenticatedOwnerHttpClient.GetFromJsonAsync<JsonArray>(
+            $"/api/main/app/availability/slots?serviceId={service.Id}&date=2026-04-27"
+        );
+        slots.Should().NotBeNull();
+        slots!.Select(slot => slot!["startAt"]!.GetValue<DateTimeOffset>())
+            .Should()
+            .NotContain(start => start >= new DateTimeOffset(2026, 4, 27, 9, 30, 0, TimeSpan.FromHours(2)) &&
+                                 start < new DateTimeOffset(2026, 4, 27, 11, 0, 0, TimeSpan.FromHours(2)));
+    }
+
+    [Fact]
+    public async Task AvailabilitySlots_ShouldExcludeExternalBusyBlocks()
+    {
+        await SeedShellAsync();
+        var service = await ReadServiceByNameAsync("Express session");
+        using (var scope = Provider.CreateScope())
+        {
+            var db = scope.ServiceProvider.GetRequiredService<MainDbContext>();
+            var tenantId = (await db.BookableServices.IgnoreQueryFilters().SingleAsync(s => s.Id == service.Id)).TenantId;
+            db.ExternalBusyBlocks.Add(new ExternalBusyBlock
+            {
+                TenantId = tenantId,
+                Provider = "Google",
+                Label = "Busy",
+                StartAt = new DateTimeOffset(2026, 4, 27, 13, 0, 0, TimeSpan.FromHours(2)),
+                EndAt = new DateTimeOffset(2026, 4, 27, 14, 0, 0, TimeSpan.FromHours(2))
+            });
+            await db.SaveChangesAsync();
+        }
+
+        var slots = await AuthenticatedOwnerHttpClient.GetFromJsonAsync<JsonArray>(
+            $"/api/main/app/availability/slots?serviceId={service.Id}&date=2026-04-27"
+        );
+
+        slots.Should().NotBeNull();
+        slots!.Select(slot => slot!["startAt"]!.GetValue<DateTimeOffset>())
+            .Should()
+            .NotContain(start => start >= new DateTimeOffset(2026, 4, 27, 12, 30, 0, TimeSpan.FromHours(2)) &&
+                                 start < new DateTimeOffset(2026, 4, 27, 14, 0, 0, TimeSpan.FromHours(2)));
     }
 
     [Fact]

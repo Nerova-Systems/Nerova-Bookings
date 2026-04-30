@@ -1,14 +1,15 @@
-import type { Appointment } from "@/shared/lib/appointmentsApi";
+import type { Appointment, CalendarBlock, Slot } from "@/shared/lib/appointmentsApi";
 
 import { formatDayNumber, formatWeekday } from "@/shared/lib/dateFormatting";
 
-type EventType = "confirmed" | "pending" | "sync" | "blocked";
+type EventType = "confirmed" | "pending" | "sync" | "blocked" | "slot";
 
 interface CalEvent {
   label: string;
   type: EventType;
   topPct: number;
   heightPct: number;
+  zIndex: number;
 }
 
 interface DayColumn {
@@ -21,16 +22,29 @@ interface DayColumn {
 }
 
 const HOURS = ["8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18"];
+const CALENDAR_START_HOUR = 8;
+const CALENDAR_MINUTES = 660;
 
 function eventClasses(type: EventType): string {
   if (type === "confirmed") return "bg-success/10 border-success/30 text-[#1b3a26] dark:text-[#b9e3c5]";
   if (type === "pending") return "bg-warning/10 border-warning/30 text-[#6e3210] dark:text-[#f0c8a5]";
   if (type === "sync") return "bg-muted border-border text-muted-foreground";
+  if (type === "slot") return "border-success/25 bg-success/[0.035] text-success/80";
   return "bg-black/5 border-border text-muted-foreground";
 }
 
-export function WeekGrid({ appointments }: { appointments: Appointment[] }) {
-  const days = buildDays(appointments);
+export function WeekGrid({
+  appointments,
+  slots,
+  blocks,
+  weekStart
+}: {
+  appointments: Appointment[];
+  slots: Slot[];
+  blocks: CalendarBlock[];
+  weekStart: Date;
+}) {
+  const days = buildDays(appointments, slots, blocks, weekStart);
 
   return (
     <>
@@ -83,8 +97,8 @@ export function WeekGrid({ appointments }: { appointments: Appointment[] }) {
                     {col.events.map((ev, i) => (
                       <div
                         key={i}
-                        className={`absolute right-1 left-1 cursor-pointer overflow-hidden rounded-[5px] border px-1.5 py-1 text-[10.5px] leading-tight ${eventClasses(ev.type)}`}
-                        style={{ top: `${ev.topPct}%`, height: `${ev.heightPct}%` }}
+                        className={`absolute right-1 left-1 overflow-hidden rounded-[5px] border px-1.5 py-1 text-[10.5px] leading-tight ${ev.type === "slot" ? "pointer-events-none border-dashed" : "cursor-pointer"} ${eventClasses(ev.type)}`}
+                        style={{ top: `${ev.topPct}%`, height: `${ev.heightPct}%`, zIndex: ev.zIndex }}
                       >
                         {ev.label}
                       </div>
@@ -101,6 +115,7 @@ export function WeekGrid({ appointments }: { appointments: Appointment[] }) {
         {[
           { type: "confirmed" as const, label: "Confirmed" },
           { type: "pending" as const, label: "Awaiting confirmation" },
+          { type: "slot" as const, label: "Available slot" },
           { type: "sync" as const, label: "External busy blocks (Google/Microsoft via Nango)" },
           { type: "blocked" as const, label: "Blocked time" }
         ].map((item) => (
@@ -114,9 +129,7 @@ export function WeekGrid({ appointments }: { appointments: Appointment[] }) {
   );
 }
 
-function buildDays(appointments: Appointment[]): DayColumn[] {
-  const firstDate = appointments.length > 0 ? new Date(appointments[0].startAt) : new Date();
-  const weekStart = startOfWeek(firstDate);
+function buildDays(appointments: Appointment[], slots: Slot[], blocks: CalendarBlock[], weekStart: Date): DayColumn[] {
   const todayKey = dateKey(new Date());
 
   return Array.from({ length: 7 }, (_, index) => {
@@ -126,10 +139,15 @@ function buildDays(appointments: Appointment[]): DayColumn[] {
     const events = appointments
       .filter((appointment) => dateKey(new Date(appointment.startAt)) === dateKey(date))
       .map(toCalendarEvent);
-
-    if (index === 2) {
-      events.push({ label: "External busy · Nango", type: "sync", topPct: 45.8, heightPct: 8.3 });
-    }
+    events.push(
+      ...slots
+        .filter((slot) => dateKey(new Date(slot.startAt)) === dateKey(date))
+        .map(toSlotEvent),
+      ...blocks
+        .filter((block) => dateKey(new Date(block.startAt)) === dateKey(date))
+        .map(toBlockEvent)
+    );
+    events.sort((a, b) => a.topPct - b.topPct || a.zIndex - b.zIndex);
 
     return {
       day: formatWeekday(date),
@@ -145,24 +163,55 @@ function buildDays(appointments: Appointment[]): DayColumn[] {
 function toCalendarEvent(appointment: Appointment): CalEvent {
   const start = new Date(appointment.startAt);
   const end = new Date(appointment.endAt);
-  const minutesFromStart = (start.getHours() - 8) * 60 + start.getMinutes();
+  const minutesFromStart = (start.getHours() - CALENDAR_START_HOUR) * 60 + start.getMinutes();
   const durationMinutes = Math.max(30, (end.getTime() - start.getTime()) / 60000);
   const type = appointment.status === "confirmed" ? "confirmed" : "pending";
 
   return {
-    label: `${appointment.time} · ${appointment.name} · ${appointment.statusLabel}`,
+    label: `${appointment.time} · ${appointment.name} · ${appointment.statusLabel} · v${appointment.serviceVersionNumber}`,
     type,
-    topPct: Math.max(0, Math.min(92, (minutesFromStart / 600) * 100)),
-    heightPct: Math.max(4.1, (durationMinutes / 600) * 100)
+    topPct: eventTop(minutesFromStart),
+    heightPct: eventHeight(durationMinutes),
+    zIndex: 3
   };
 }
 
-function startOfWeek(date: Date) {
-  const next = new Date(date);
-  const day = next.getDay() === 0 ? 7 : next.getDay();
-  next.setDate(next.getDate() - day + 1);
-  next.setHours(0, 0, 0, 0);
-  return next;
+function toSlotEvent(slot: Slot): CalEvent {
+  const start = new Date(slot.startAt);
+  const end = new Date(slot.endAt);
+  const minutesFromStart = (start.getHours() - CALENDAR_START_HOUR) * 60 + start.getMinutes();
+  const durationMinutes = Math.max(30, (end.getTime() - start.getTime()) / 60000);
+
+  return {
+    label: "Available",
+    type: "slot",
+    topPct: eventTop(minutesFromStart),
+    heightPct: eventHeight(durationMinutes),
+    zIndex: 1
+  };
+}
+
+function toBlockEvent(block: CalendarBlock): CalEvent {
+  const start = new Date(block.startAt);
+  const end = new Date(block.endAt);
+  const minutesFromStart = (start.getHours() - CALENDAR_START_HOUR) * 60 + start.getMinutes();
+  const durationMinutes = Math.max(30, (end.getTime() - start.getTime()) / 60000);
+
+  return {
+    label: block.type === "manual" ? `Blocked · ${block.title}` : `${block.title} · Sync`,
+    type: block.type === "manual" ? "blocked" : "sync",
+    topPct: eventTop(minutesFromStart),
+    heightPct: eventHeight(durationMinutes),
+    zIndex: 2
+  };
+}
+
+function eventTop(minutesFromStart: number) {
+  return Math.max(0, Math.min(96, (minutesFromStart / CALENDAR_MINUTES) * 100));
+}
+
+function eventHeight(durationMinutes: number) {
+  return Math.max(4.1, (durationMinutes / CALENDAR_MINUTES) * 100);
 }
 
 function dateKey(date: Date) {

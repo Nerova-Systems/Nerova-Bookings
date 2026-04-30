@@ -10,10 +10,12 @@ export type {
   Appointment,
   AppointmentShell,
   AppointmentStatus,
+  CalendarBlock,
   Client,
   IntegrationConnection,
   Service,
   ServiceCategory,
+  Slot,
   ServicePaymentPolicy
 } from "./appointmentContracts";
 export { money };
@@ -30,6 +32,13 @@ export interface ServiceMutationRequest {
   bufferBeforeMinutes: number;
   bufferAfterMinutes: number;
   location: string;
+}
+
+export interface CalendarBlockMutationRequest {
+  title: string;
+  startAt: string;
+  endAt: string;
+  staffMemberId?: string;
 }
 
 export function useAppointmentShell() {
@@ -50,6 +59,25 @@ export function useConfirmAppointment() {
       return mapShell((await response.json()) as ApiShell);
     },
     onSuccess: (shell) => queryClient.setQueryData(["appointment-shell"], shell)
+  });
+}
+
+export function useCreateCalendarBlock() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (request: CalendarBlockMutationRequest) => {
+      const response = await enhancedFetch("/api/main/app/calendar/blocks", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify(request)
+      });
+      if (!response.ok) throw new Error(await response.text());
+      return mapShell((await response.json()) as ApiShell);
+    },
+    onSuccess: async (shell) => {
+      queryClient.setQueryData(["appointment-shell"], shell);
+      await queryClient.invalidateQueries({ queryKey: ["availability-slots"] });
+    }
   });
 }
 
