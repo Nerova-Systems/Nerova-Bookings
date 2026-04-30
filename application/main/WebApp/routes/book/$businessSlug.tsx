@@ -3,14 +3,19 @@ import { Trans } from "@lingui/react/macro";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 
-import { useCreatePublicBooking, usePublicBookingProfile, usePublicSlots } from "@/shared/lib/publicBookingApi";
+import {
+  useCreatePublicBooking,
+  usePublicBookingProfile,
+  usePublicClientPrefill,
+  usePublicSlots
+} from "@/shared/lib/publicBookingApi";
 
 import {
   BookingFields,
-  BookingFooter,
   ServicePicker,
   SlotPicker
 } from "./-components/PublicBookingControls";
+import { BookingFooter } from "./-components/PublicBookingFooter";
 import { BookingIntro, PublicShell } from "./-components/PublicBookingParts";
 
 export const Route = createFileRoute("/book/$businessSlug")({
@@ -30,6 +35,7 @@ function PublicBookingPage() {
   const [email, setEmail] = useState("");
   const [note, setNote] = useState("");
   const slotsQuery = usePublicSlots(businessSlug, serviceId, date);
+  const prefillQuery = usePublicClientPrefill(businessSlug, phone);
   const createBooking = useCreatePublicBooking(businessSlug);
   const selectedService = profileQuery.data?.services.find((service) => service.id === serviceId);
 
@@ -40,6 +46,12 @@ function PublicBookingPage() {
   useEffect(() => {
     if (!serviceId && firstServiceId) setServiceId(firstServiceId);
   }, [firstServiceId, serviceId]);
+
+  useEffect(() => {
+    if (!prefillQuery.data) return;
+    setName(prefillQuery.data.name);
+    setEmail(prefillQuery.data.email);
+  }, [prefillQuery.data]);
 
   const submit = async () => {
     if (!serviceId || !slotStart || !name || !phone || !email) return;
@@ -67,21 +79,26 @@ function PublicBookingPage() {
   }
 
   return (
-    <main className="min-h-screen bg-[#f7f7f5] text-foreground">
-      <div className="mx-auto grid min-h-screen max-w-6xl grid-cols-[22rem_1fr] gap-0 border-x border-border bg-background">
-        <BookingIntro profile={profileQuery.data} />
+    <main className="min-h-screen bg-[#f5f2ec] text-foreground">
+      <div className="mx-auto grid min-h-screen max-w-7xl grid-cols-[minmax(18rem,24rem)_1fr] bg-background shadow-[0_0_80px_rgba(24,24,27,0.10)] max-lg:block">
+        <BookingIntro profile={profileQuery.data} selectedService={selectedService} />
 
-        <section className="p-8">
-          <div className="mb-6">
-            <h2 className="font-display text-2xl font-semibold">
-              <Trans>Book an appointment</Trans>
-            </h2>
-            <p className="mt-1 text-sm text-muted-foreground">
-              <Trans>Choose a service, pick a slot, then enter your details.</Trans>
-            </p>
+        <section className="px-6 py-6 sm:px-8 lg:px-10 lg:py-8">
+          <div className="mb-8 flex flex-wrap items-start justify-between gap-4 border-b border-border pb-6">
+            <div>
+              <div className="text-xs font-semibold tracking-[0.16em] text-muted-foreground uppercase">
+                <Trans>Public booking</Trans>
+              </div>
+              <h2 className="mt-2 font-display text-3xl font-semibold tracking-tight">
+                <Trans>Book an appointment</Trans>
+              </h2>
+            </div>
+            <div className="rounded-full border border-border bg-muted px-3 py-1 text-xs font-medium text-muted-foreground">
+              {profileQuery.data.timeZone}
+            </div>
           </div>
 
-          <div className="grid gap-6">
+          <div className="grid gap-8">
             <ServicePicker
               services={profileQuery.data.services}
               serviceId={serviceId}
@@ -105,6 +122,7 @@ function PublicBookingPage() {
               phone={phone}
               email={email}
               note={note}
+              isCheckingPhone={prefillQuery.isFetching}
               onNameChange={setName}
               onPhoneChange={setPhone}
               onEmailChange={setEmail}
@@ -112,7 +130,8 @@ function PublicBookingPage() {
             />
             <BookingFooter
               selectedService={selectedService}
-              disabled={!serviceId || !slotStart || !name || !phone || !email}
+              disabled={!serviceId || !slotStart || !name || !phone || !email || createBooking.isPending}
+              isSubmitting={createBooking.isPending}
               onSubmit={submit}
             />
           </div>

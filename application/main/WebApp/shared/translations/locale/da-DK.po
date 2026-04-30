@@ -13,9 +13,6 @@ msgstr ""
 "Plural-Forms: \n"
 "X-Generator: @lingui/cli\n"
 
-msgid "Actions"
-msgstr ""
-
 msgid "Activity"
 msgstr ""
 
@@ -32,6 +29,18 @@ msgid "Analytics"
 msgstr ""
 
 msgid "Analytics | Nerova"
+msgstr ""
+
+msgid "Appointment payments settle into this business bank account through a Paystack subaccount."
+msgstr ""
+
+msgid "Appointment payments, Paystack payouts, and settlement status"
+msgstr ""
+
+msgid "Apps"
+msgstr ""
+
+msgid "Apps | Nerova"
 msgstr ""
 
 msgid "Archived"
@@ -67,6 +76,9 @@ msgstr ""
 msgid "Bookings over time"
 msgstr ""
 
+msgid "Business"
+msgstr ""
+
 msgid "by bookings"
 msgstr ""
 
@@ -76,10 +88,16 @@ msgstr ""
 msgid "Calendar | Nerova"
 msgstr ""
 
-msgid "Checking transaction reference..."
+msgid "Cancel"
 msgstr ""
 
-msgid "Choose a service, pick a slot, then enter your details."
+msgid "Change bank details"
+msgstr ""
+
+msgid "Checking for saved booking details..."
+msgstr ""
+
+msgid "Checking transaction reference..."
 msgstr ""
 
 msgid "Clients"
@@ -88,16 +106,34 @@ msgstr ""
 msgid "Clients | Nerova"
 msgstr ""
 
-msgid "Command palette"
+msgid "Close-out actions"
+msgstr ""
+
+msgid "Collect with terminal"
 msgstr ""
 
 msgid "Compare ranges"
 msgstr ""
 
+msgid "Complete"
+msgstr ""
+
+msgid "Complete appointment"
+msgstr ""
+
 msgid "Confirm booking"
 msgstr ""
 
-msgid "Confirm request"
+msgid "Confirming..."
+msgstr ""
+
+msgid "Connected"
+msgstr ""
+
+msgid "Create service"
+msgstr ""
+
+msgid "Creates an appointment-linked Paystack terminal payment."
 msgstr ""
 
 msgid "Daily"
@@ -106,13 +142,16 @@ msgstr ""
 msgid "Done"
 msgstr ""
 
+msgid "Edit service"
+msgstr ""
+
 msgid "Export CSV"
 msgstr ""
 
-msgid "Fixed flow model"
+msgid "Flow answers"
 msgstr ""
 
-msgid "Flow answers"
+msgid "Google and Microsoft are priority-one integrations through Nango"
 msgstr ""
 
 msgid "Google and Microsoft calendar busy blocks via Nango"
@@ -121,10 +160,10 @@ msgstr ""
 msgid "Import contacts"
 msgstr ""
 
-msgid "Internal notes"
+msgid "Integration library"
 msgstr ""
 
-msgid "Jump to"
+msgid "Internal notes"
 msgstr ""
 
 msgid "Lifecycle events"
@@ -136,7 +175,7 @@ msgstr ""
 msgid "Loading confirmation..."
 msgstr ""
 
-msgid "Main"
+msgid "Loading payments..."
 msgstr ""
 
 msgid "Main navigation"
@@ -154,6 +193,12 @@ msgstr ""
 msgid "New service"
 msgstr ""
 
+msgid "Next action"
+msgstr ""
+
+msgid "No appointments from today onward."
+msgstr ""
+
 msgid "No clients match your search."
 msgstr ""
 
@@ -163,7 +208,16 @@ msgstr ""
 msgid "No open slots for this date."
 msgstr ""
 
+msgid "No Paystack payment attempts yet."
+msgstr ""
+
 msgid "No results found."
+msgstr ""
+
+msgid "No-show"
+msgstr ""
+
+msgid "Opening terminal..."
 msgstr ""
 
 msgid "Operational feed"
@@ -172,13 +226,31 @@ msgstr ""
 msgid "Operational metrics · last 30 days"
 msgstr ""
 
+msgid "Payment"
+msgstr ""
+
 msgid "Payment confirmation | Nerova"
 msgstr ""
 
 msgid "Payment needs review"
 msgstr ""
 
-msgid "Public booking test path"
+msgid "Payments"
+msgstr ""
+
+msgid "Payments | Nerova"
+msgstr ""
+
+msgid "Paystack payouts"
+msgstr ""
+
+msgid "Powered by Nerova"
+msgstr ""
+
+msgid "Public booking"
+msgstr ""
+
+msgid "Recent appointment payments"
 msgstr ""
 
 msgid "Recent visits"
@@ -193,22 +265,25 @@ msgstr ""
 msgid "Restore any service to make it bookable again."
 msgstr ""
 
-msgid "Search anything"
+msgid "Save payout account"
 msgstr ""
 
-msgid "Search clients, bookings, services or jump to a screen"
+msgid "Save service"
 msgstr ""
 
-msgid "Search clients, bookings, services…"
+msgid "Search bookings, clients, services, payments, apps, or jump to a screen"
+msgstr ""
+
+msgid "Search bookings, clients, services..."
 msgstr ""
 
 msgid "Search clients…"
 msgstr ""
 
-msgid "Send payment link"
+msgid "Search Liam, overdue payments, Google Calendar, Full consultation..."
 msgstr ""
 
-msgid "Service"
+msgid "Send appointment payments directly to your business bank account."
 msgstr ""
 
 msgid "Services"
@@ -217,19 +292,37 @@ msgstr ""
 msgid "Services | Nerova"
 msgstr ""
 
+msgid "Services control public booking availability, pricing, deposits, and operator scheduling."
+msgstr ""
+
+msgid "Set up bank details"
+msgstr ""
+
+msgid "Set up payouts"
+msgstr ""
+
+msgid "Set up Paystack payouts"
+msgstr ""
+
+msgid "Settlements"
+msgstr ""
+
+msgid "Setup required"
+msgstr ""
+
 msgid "The payment return is verified server-side before the appointment is marked paid."
 msgstr ""
 
-msgid "This panel manages the booking lifecycle now through the app and public booking page. WhatsApp delivery plugs into the same fixed flow events later."
-msgstr ""
-
-msgid "This uses the same service, availability, client, appointment, and payment records that future fixed WhatsApp flows will use."
+msgid "These app records are the foundation for calendar busy blocks, contact imports, and email handoffs."
 msgstr ""
 
 msgid "Today"
 msgstr ""
 
 msgid "Top services"
+msgstr ""
+
+msgid "Verify account with Paystack"
 msgstr ""
 
 msgid "Verifying payment"
@@ -244,11 +337,23 @@ msgstr ""
 msgid "View full profile →"
 msgstr ""
 
+msgid "Waiting for Paystack verification. Payment state updates from verified callbacks or webhooks only."
+msgstr ""
+
 msgid "We could not verify this payment reference yet."
 msgstr ""
 
 msgid "Week view · Africa/Johannesburg"
 msgstr ""
 
+msgid "Workspace"
+msgstr ""
+
+msgid "Workspace search"
+msgstr ""
+
 msgid "Your appointment request has been saved."
+msgstr ""
+
+msgid "Your phone number is used only to prepare this booking."
 msgstr ""

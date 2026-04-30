@@ -1,3 +1,5 @@
+import { isTodayInTimeZone } from "@/shared/lib/dateFormatting";
+
 import { StatusDot, statusTextClass, type Appointment } from "./appointmentTypes";
 
 export type FilterTab = "all" | "needs-action" | "paid" | "today";
@@ -7,20 +9,22 @@ export function AppointmentList({
   onSelect,
   activeTab,
   onTabChange,
-  appointments
+  appointments,
+  timeZone
 }: {
   selectedId: string;
   onSelect: (id: string) => void;
   activeTab: FilterTab;
   onTabChange: (tab: FilterTab) => void;
   appointments: Appointment[];
+  timeZone: string;
 }) {
   const needsActionCount = appointments.filter((a) => a.needsAction).length;
 
   const filtered = appointments.filter((a) => {
     if (activeTab === "needs-action") return a.needsAction;
-    if (activeTab === "paid") return a.status === "confirmed";
-    if (activeTab === "today") return a.dayGroup === appointments[0]?.dayGroup;
+    if (activeTab === "paid") return ["DepositPaid", "Paid", "NotRequired"].includes(a.paymentStatus);
+    if (activeTab === "today") return isTodayInTimeZone(new Date(a.startAt), timeZone);
     return true;
   });
 

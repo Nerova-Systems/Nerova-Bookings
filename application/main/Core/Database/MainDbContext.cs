@@ -17,6 +17,7 @@ public sealed class MainDbContext(DbContextOptions<MainDbContext> options, IExec
     public DbSet<Client> Clients => Set<Client>();
     public DbSet<Appointment> Appointments => Set<Appointment>();
     public DbSet<AppointmentPaymentIntent> AppointmentPaymentIntents => Set<AppointmentPaymentIntent>();
+    public DbSet<PaystackSubaccount> PaystackSubaccounts => Set<PaystackSubaccount>();
     public DbSet<AppointmentFlowEvent> AppointmentFlowEvents => Set<AppointmentFlowEvent>();
     public DbSet<IntegrationConnection> IntegrationConnections => Set<IntegrationConnection>();
 }

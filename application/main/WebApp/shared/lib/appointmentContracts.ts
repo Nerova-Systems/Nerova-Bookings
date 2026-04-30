@@ -1,8 +1,11 @@
-export type AppointmentStatus = "pending" | "confirmed" | "payment-not-sent" | "payment-overdue";
+export type AppointmentStatus = "pending" | "confirmed" | "payment-not-sent" | "payment-overdue" | "completed" | "cancelled" | "no-show";
+export type ServicePaymentPolicy = "NoPaymentRequired" | "DepositBeforeBooking" | "FullPaymentBeforeBooking" | "CollectAfterAppointment";
 
 export interface Appointment {
   id: string;
   publicReference: string;
+  clientId: string;
+  serviceId: string;
   dayGroup: string;
   time: string;
   duration: string;
@@ -12,6 +15,9 @@ export interface Appointment {
   service: string;
   status: AppointmentStatus;
   statusLabel: string;
+  paymentStatus: string;
+  paymentPolicy: ServicePaymentPolicy;
+  paymentAmountCents: number;
   channel: string;
   amount: string;
   needsAction: boolean;
@@ -32,9 +38,14 @@ export interface Service {
   duration: string;
   price: string;
   deposit: string;
+  paymentPolicy: ServicePaymentPolicy;
+  paymentPolicyLabel: string;
   location: string;
   bookingsThisMonth: number;
   archived?: boolean;
+  durationMinutes: number;
+  priceCents: number;
+  depositCents: number;
 }
 
 export interface ServiceCategory {
@@ -73,6 +84,7 @@ export interface IntegrationConnection {
 }
 
 export interface AppointmentShell {
+  profile: BusinessProfile;
   appointments: Appointment[];
   services: Service[];
   categories: ServiceCategory[];
@@ -81,7 +93,16 @@ export interface AppointmentShell {
   integrations: IntegrationConnection[];
 }
 
+export interface BusinessProfile {
+  name: string;
+  slug: string;
+  timeZone: string;
+  address: string;
+  publicBookingEnabled: boolean;
+}
+
 export interface ApiShell {
+  profile: BusinessProfile;
   appointments: ApiAppointment[];
   services: ApiService[];
   categories: ServiceCategory[];
@@ -99,6 +120,8 @@ export interface ApiShell {
 export interface ApiAppointment {
   id: string;
   publicReference: string;
+  clientId: string;
+  serviceId: string;
   startAt: string;
   endAt: string;
   clientName: string;
@@ -108,6 +131,7 @@ export interface ApiAppointment {
   durationMinutes: number;
   priceCents: number;
   depositCents: number;
+  paymentPolicy: ServicePaymentPolicy;
   status: string;
   paymentStatus: string;
   source: string;
@@ -125,6 +149,7 @@ export interface ApiService {
   durationMinutes: number;
   priceCents: number;
   depositCents: number;
+  paymentPolicy: ServicePaymentPolicy;
   location: string;
   isActive: boolean;
 }

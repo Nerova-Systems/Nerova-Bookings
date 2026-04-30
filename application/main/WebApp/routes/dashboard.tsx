@@ -3,6 +3,8 @@ import { SidebarInset, SidebarProvider } from "@repo/ui/components/Sidebar";
 import { createFileRoute, Outlet, useLocation } from "@tanstack/react-router";
 import { lazy, Suspense } from "react";
 
+import { CmdkProvider, useCmdk } from "./dashboard/-components/CmdkContext";
+import { CommandPalette } from "./dashboard/-components/CommandPalette";
 import { MainSideMenu } from "@/shared/components/MainSideMenu";
 
 const NotFoundPage = lazy(() => import("account/NotFoundPage"));
@@ -20,13 +22,21 @@ function DashboardLayout() {
   return (
     <Suspense fallback={null}>
       <TenantStateGuard pathname={location.pathname}>
-        <SidebarProvider>
-          <MainSideMenu />
-          <SidebarInset>
-            <Outlet />
-          </SidebarInset>
-        </SidebarProvider>
+        <CmdkProvider>
+          <SidebarProvider>
+            <MainSideMenu />
+            <SidebarInset>
+              <Outlet />
+            </SidebarInset>
+            <DashboardCommandPalette />
+          </SidebarProvider>
+        </CmdkProvider>
       </TenantStateGuard>
     </Suspense>
   );
+}
+
+function DashboardCommandPalette() {
+  const { open, setOpen } = useCmdk();
+  return <CommandPalette open={open} onOpenChange={setOpen} />;
 }

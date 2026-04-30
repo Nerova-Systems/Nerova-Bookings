@@ -1,10 +1,13 @@
 import { Trans } from "@lingui/react/macro";
 import { useNavigate } from "@tanstack/react-router";
 
+import type { Client } from "@/shared/lib/appointmentsApi";
+
 import { type Appointment } from "./appointmentTypes";
 
-export function ClientPanel({ appointment }: { appointment: Appointment }) {
+export function ClientPanel({ appointment, client }: { appointment: Appointment; client?: Client }) {
   const navigate = useNavigate();
+  const status = client?.status ?? appointment.clientStatus;
   return (
     <div className="space-y-4 overflow-y-auto bg-background p-4">
       <div className="flex flex-col items-center rounded-xl border border-border p-3 text-center">
@@ -16,18 +19,20 @@ export function ClientPanel({ appointment }: { appointment: Appointment }) {
             .join("")}
         </div>
         <div className="text-sm font-semibold">{appointment.name}</div>
-        <div className="mt-0.5 font-mono text-[11.5px] text-muted-foreground">+27 82 341 7890</div>
+        <div className="mt-0.5 font-mono text-[11.5px] text-muted-foreground">{appointment.phone}</div>
         <div className="mt-2 flex flex-wrap justify-center gap-1">
-          <span className="rounded bg-muted px-1.5 py-0.5 text-[10.5px] font-medium text-foreground">Returning</span>
-          <span className="rounded bg-muted px-1.5 py-0.5 text-[10.5px] font-medium text-foreground">VIP</span>
+          <span className="rounded bg-muted px-1.5 py-0.5 text-[10.5px] font-medium text-foreground">
+            {client && client.visits > 1 ? "Returning" : "New"}
+          </span>
+          <span className="rounded bg-muted px-1.5 py-0.5 text-[10.5px] font-medium text-foreground">{status}</span>
         </div>
       </div>
 
       <div className="grid grid-cols-3 gap-1.5">
         {[
-          { value: "12", label: "Visits" },
-          { value: "R 5 280", label: "Lifetime" },
-          { value: "2%", label: "No-show" }
+          { value: String(client?.visits ?? 1), label: "Visits" },
+          { value: client?.lifetime ?? appointment.amount, label: "Lifetime" },
+          { value: appointment.status === "no-show" ? "1" : "0", label: "No-show" }
         ].map((stat) => (
           <div key={stat.label} className="rounded-lg border border-border p-2 text-center">
             <div className="font-display text-[15px] font-semibold">{stat.value}</div>
@@ -46,7 +51,7 @@ export function ClientPanel({ appointment }: { appointment: Appointment }) {
             <line x1="6.5" y1="5" x2="6.5" y2="8" />
             <circle cx="6.5" cy="9.5" r="0.5" fill="currentColor" />
           </svg>
-          Sensitive shoulder — prefers firm pressure
+          {client?.alert ?? appointment.clientAlert ?? "No active client alerts."}
         </div>
       </div>
 
@@ -54,13 +59,9 @@ export function ClientPanel({ appointment }: { appointment: Appointment }) {
         <div className="mb-1.5 text-[10.5px] font-semibold tracking-[0.06em] text-muted-foreground uppercase">
           <Trans>Recent visits</Trans>
         </div>
-        {[
-          { date: "12 Feb\n2026", service: "Full consultation", amount: "R 450 · paid" },
-          { date: "04 Jan\n2026", service: "Follow-up visit", amount: "R 150 · paid" },
-          { date: "18 Dec\n2025", service: "Express session", amount: "R 220 · paid" }
-        ].map((visit, i) => (
+        {[{ date: appointment.dayGroup, service: appointment.service, amount: `${appointment.amount} · ${appointment.statusLabel}` }].map((visit) => (
           <div
-            key={i}
+            key={visit.service}
             className="grid grid-cols-[3.5rem_1fr] gap-2 border-b border-border py-2 text-[12px] last:border-0"
           >
             <div className="font-mono text-[11px] leading-tight whitespace-pre-line text-muted-foreground">
@@ -79,8 +80,8 @@ export function ClientPanel({ appointment }: { appointment: Appointment }) {
           <Trans>Internal notes</Trans>
         </div>
         <div className="rounded-lg bg-muted p-2.5 text-[12px]">
-          <div className="mb-0.5 text-[10.5px] text-muted-foreground">Sarah · 12 Feb</div>
-          Switched to firm pressure on right side — much better feedback. Continue.
+          <div className="mb-0.5 text-[10.5px] text-muted-foreground">Internal profile note</div>
+          {client?.internalNote ?? appointment.clientInternalNote ?? "No internal notes yet."}
         </div>
       </div>
 

@@ -25,7 +25,8 @@ public sealed class DatabaseSeeder
             IsAuthenticated = true,
             Locale = "en-US",
             Role = "Owner",
-            TenantId = TenantId
+            TenantId = TenantId,
+            TenantName = "Tenant 1"
         };
 
         Tenant1Member = new UserInfo
@@ -37,7 +38,8 @@ public sealed class DatabaseSeeder
             IsAuthenticated = true,
             Locale = "en-US",
             Role = "Member",
-            TenantId = TenantId
+            TenantId = TenantId,
+            TenantName = "Tenant 1"
         };
 
         mainDbContext.SaveChanges();

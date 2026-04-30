@@ -4,13 +4,17 @@ export type { Appointment, AppointmentStatus };
 
 export function statusDotClass(status: AppointmentStatus) {
   if (status === "confirmed") return "bg-success";
+  if (status === "completed") return "bg-success";
   if (status === "pending") return "bg-warning";
+  if (status === "payment-not-sent") return "bg-warning";
   return "bg-destructive";
 }
 
 export function statusTextClass(status: AppointmentStatus) {
   if (status === "confirmed") return "text-success";
+  if (status === "completed") return "text-success";
   if (status === "pending") return "text-warning";
+  if (status === "payment-not-sent") return "text-warning";
   return "text-destructive";
 }
 

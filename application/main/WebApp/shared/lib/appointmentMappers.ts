@@ -7,7 +7,8 @@ import type {
   AppointmentShell,
   AppointmentStatus,
   Client,
-  Service
+  Service,
+  ServicePaymentPolicy
 } from "./appointmentContracts";
 
 import { formatDayGroup, formatShortDate, formatTime, formatWholeNumber } from "./dateFormatting";
@@ -15,6 +16,7 @@ import { formatDayGroup, formatShortDate, formatTime, formatWholeNumber } from "
 export function mapShell(shell: ApiShell): AppointmentShell {
   const appointments = shell.appointments.map(mapAppointment);
   return {
+    profile: shell.profile,
     appointments,
     services: shell.services.map((service) => mapService(service, appointments)),
     categories: shell.categories,
@@ -36,6 +38,8 @@ function mapAppointment(appointment: ApiAppointment): Appointment {
   return {
     id: appointment.id,
     publicReference: appointment.publicReference,
+    clientId: appointment.clientId,
+    serviceId: appointment.serviceId,
     dayGroup: formatDayGroup(start),
     time: formatTime(start),
     duration: `${appointment.durationMinutes}m`,
@@ -45,6 +49,9 @@ function mapAppointment(appointment: ApiAppointment): Appointment {
     service: appointment.serviceName,
     status,
     statusLabel: statusLabel(status),
+    paymentStatus: appointment.paymentStatus,
+    paymentPolicy: appointment.paymentPolicy,
+    paymentAmountCents: paymentAmountCents(appointment.paymentPolicy, appointment.priceCents, appointment.depositCents),
     channel: appointment.source === "Manual" ? "via Manual booking" : "via Public booking page",
     amount: money(appointment.priceCents),
     needsAction: status !== "confirmed",
@@ -67,9 +74,14 @@ function mapService(service: ApiService, appointments: Appointment[]): Service {
     duration: `${service.durationMinutes} min`,
     price: money(service.priceCents),
     deposit: service.depositCents > 0 ? money(service.depositCents) : "None",
+    paymentPolicy: service.paymentPolicy,
+    paymentPolicyLabel: paymentPolicyLabel(service.paymentPolicy, service.depositCents),
     location: service.location,
     bookingsThisMonth: appointments.filter((appointment) => appointment.service === service.name).length,
-    archived: !service.isActive
+    archived: !service.isActive,
+    durationMinutes: service.durationMinutes,
+    priceCents: service.priceCents,
+    depositCents: service.depositCents
   };
 }
 
@@ -95,6 +107,9 @@ function mapClient(client: ApiClient): Client {
 }
 
 function mapStatus(status: string, paymentStatus: string): AppointmentStatus {
+  if (status === "Completed") return "completed";
+  if (status === "Cancelled") return "cancelled";
+  if (status === "NoShow") return "no-show";
   if (status === "Confirmed") return "confirmed";
   if (paymentStatus === "Failed") return "payment-overdue";
   if (paymentStatus === "Pending") return "payment-not-sent";
@@ -103,9 +118,25 @@ function mapStatus(status: string, paymentStatus: string): AppointmentStatus {
 
 function statusLabel(status: AppointmentStatus) {
   if (status === "confirmed") return "Confirmed";
+  if (status === "completed") return "Completed";
+  if (status === "cancelled") return "Cancelled";
+  if (status === "no-show") return "No-show";
   if (status === "payment-not-sent") return "Payment link not sent";
   if (status === "payment-overdue") return "Payment overdue";
   return "Awaiting confirmation";
+}
+
+export function paymentPolicyLabel(paymentPolicy: ServicePaymentPolicy, depositCents = 0) {
+  if (paymentPolicy === "DepositBeforeBooking") return depositCents > 0 ? "Deposit before booking" : "Deposit before booking";
+  if (paymentPolicy === "FullPaymentBeforeBooking") return "Full payment before booking";
+  if (paymentPolicy === "CollectAfterAppointment") return "Collect after appointment";
+  return "No payment required";
+}
+
+function paymentAmountCents(paymentPolicy: ServicePaymentPolicy, priceCents: number, depositCents: number) {
+  if (paymentPolicy === "NoPaymentRequired") return 0;
+  if (paymentPolicy === "DepositBeforeBooking") return depositCents;
+  return priceCents;
 }
 
 export function money(cents: number) {

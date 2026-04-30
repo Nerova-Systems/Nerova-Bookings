@@ -3,15 +3,33 @@ import { Button } from "@repo/ui/components/Button";
 
 import { formatDayGroup, formatTime } from "@/shared/lib/dateFormatting";
 
+import { AppointmentPaymentBlock } from "./AppointmentPaymentBlock";
 import { StatusDot, type Appointment } from "./appointmentTypes";
 
 interface AppointmentDetailProps {
   appointment: Appointment;
   onConfirm: (id: string) => void;
+  onStatusChange: (id: string, status: string) => void;
+  onCreateTerminalPayment: (id: string) => Promise<void>;
+  isCreatingTerminalPayment: boolean;
 }
 
-export function AppointmentDetail({ appointment, onConfirm }: AppointmentDetailProps) {
+export function AppointmentDetail({
+  appointment,
+  onConfirm,
+  onStatusChange,
+  onCreateTerminalPayment,
+  isCreatingTerminalPayment
+}: AppointmentDetailProps) {
   const when = formatDateTimeRange(appointment.startAt, appointment.endAt);
+  const canConfirm = !["confirmed", "completed", "cancelled", "no-show"].includes(appointment.status);
+  const runPrimaryAction = () => {
+    if (appointment.status === "confirmed") {
+      onStatusChange(appointment.id, "Completed");
+      return;
+    }
+    onConfirm(appointment.id);
+  };
 
   return (
     <div className="flex min-h-0 flex-col border-r border-border bg-background">
@@ -36,31 +54,50 @@ export function AppointmentDetail({ appointment, onConfirm }: AppointmentDetailP
         </div>
       </div>
 
-      <div className="flex-1 space-y-6 overflow-y-auto px-6 py-4">
-        <div className="flex flex-wrap gap-2">
-          <Button size="sm" onClick={() => onConfirm(appointment.id)} disabled={appointment.status === "confirmed"}>
-            <Trans>Confirm booking</Trans>
-          </Button>
-          <Button variant="outline" size="sm">
-            <Trans>Send payment link</Trans>
-          </Button>
-          <Button variant="outline" size="sm">
-            <Trans>Reschedule</Trans>
-          </Button>
-          <Button variant="outline" size="sm" className="px-2">
-            <span className="flex gap-0.5">
-              <span className="size-1 rounded-full bg-foreground" />
-              <span className="size-1 rounded-full bg-foreground" />
-              <span className="size-1 rounded-full bg-foreground" />
-            </span>
-          </Button>
-        </div>
+      <div className="flex-1 space-y-5 overflow-y-auto px-6 py-4">
+        <section className="rounded-xl border border-border bg-muted/40 p-3">
+          <div className="mb-2 text-[11px] font-semibold tracking-[0.06em] text-muted-foreground uppercase">
+            <Trans>Next action</Trans>
+          </div>
+          <div className="grid gap-3">
+            <div className="flex flex-wrap items-center gap-2">
+              <Button size="sm" onClick={runPrimaryAction} disabled={!canConfirm && appointment.status !== "confirmed"}>
+                {appointment.status === "confirmed" ? <Trans>Complete appointment</Trans> : <Trans>Confirm booking</Trans>}
+              </Button>
+              <Button variant="outline" size="sm">
+                <Trans>Reschedule</Trans>
+              </Button>
+            </div>
+            <details className="group rounded-lg border border-border bg-background px-3 py-2">
+              <summary className="cursor-pointer text-[12px] font-medium text-muted-foreground transition-colors group-open:text-foreground">
+                <Trans>Close-out actions</Trans>
+              </summary>
+              <div className="mt-3 flex flex-wrap gap-2">
+                <Button variant="outline" size="sm" onClick={() => onStatusChange(appointment.id, "Completed")}>
+                  <Trans>Complete</Trans>
+                </Button>
+                <Button variant="outline" size="sm" onClick={() => onStatusChange(appointment.id, "NoShow")}>
+                  <Trans>No-show</Trans>
+                </Button>
+                <Button variant="outline" size="sm" onClick={() => onStatusChange(appointment.id, "Cancelled")}>
+                  <Trans>Cancel</Trans>
+                </Button>
+              </div>
+            </details>
+          </div>
+        </section>
 
-        <div>
+        <AppointmentPaymentBlock
+          appointment={appointment}
+          onCreateTerminalPayment={onCreateTerminalPayment}
+          isCreatingTerminalPayment={isCreatingTerminalPayment}
+        />
+
+        <section>
           <div className="mb-2.5 text-[11px] font-semibold tracking-[0.06em] text-muted-foreground uppercase">
             <Trans>Booking</Trans>
           </div>
-          <div className="grid grid-cols-[7rem_1fr] gap-x-3 gap-y-1.5 text-[0.8125rem]">
+          <div className="grid grid-cols-[7rem_1fr] gap-x-3 gap-y-1.5 rounded-xl border border-border px-4 py-3 text-[0.8125rem]">
             <span className="text-muted-foreground">Service</span>
             <span className="text-foreground">
               <strong>{appointment.service}</strong>
@@ -86,54 +123,41 @@ export function AppointmentDetail({ appointment, onConfirm }: AppointmentDetailP
               {appointment.email ? ` · ${appointment.email}` : ""}
             </span>
           </div>
-        </div>
+        </section>
 
-        <div>
-          <div className="mb-2.5 text-[11px] font-semibold tracking-[0.06em] text-muted-foreground uppercase">
+        <details className="rounded-xl border border-border px-4 py-3">
+          <summary className="cursor-pointer text-[11px] font-semibold tracking-[0.06em] text-muted-foreground uppercase">
             <Trans>Flow answers</Trans>
+          </summary>
+          <div className="mt-3 space-y-2.5">
+            <AnswerLine label="Service request" value={`${appointment.service} for ${appointment.duration}.`} />
+            <AnswerLine
+              label="Operational note"
+              value={appointment.clientAlert ?? appointment.clientInternalNote ?? "No intake notes captured yet."}
+            />
           </div>
-          <div className="space-y-2.5">
-            {[
-              { q: "Service request", a: `${appointment.service} for ${appointment.duration}.` },
-              {
-                q: "Operational note",
-                a: appointment.clientAlert ?? appointment.clientInternalNote ?? "No intake notes captured yet."
-              }
-            ].map((qa) => (
-              <div key={qa.q} className="border-l-2 border-border pl-3">
-                <div className="mb-0.5 text-[12px] text-muted-foreground">{qa.q}</div>
-                <div className="text-[0.8125rem]">{qa.a}</div>
-              </div>
-            ))}
-          </div>
-        </div>
+        </details>
 
-        <div>
-          <div className="mb-2.5 flex items-center gap-2">
-            <span className="text-[11px] font-semibold tracking-[0.06em] text-muted-foreground uppercase">
-              <Trans>Lifecycle events</Trans>
-            </span>
-            <span className="inline-flex items-center gap-1 rounded-full bg-muted px-1.5 py-0.5 text-[10.5px] font-medium text-muted-foreground">
-              <Trans>Fixed flow model</Trans>
-            </span>
-          </div>
-          <div className="flex flex-col gap-2 rounded-xl border border-border bg-muted p-3.5">
+        <details className="rounded-xl border border-border px-4 py-3">
+          <summary className="cursor-pointer text-[11px] font-semibold tracking-[0.06em] text-muted-foreground uppercase">
+            <Trans>Lifecycle events</Trans>
+          </summary>
+          <div className="mt-3 flex flex-col gap-2 rounded-xl bg-muted p-3.5">
             <EventLine title="Booking request" value={`${appointment.name} selected ${appointment.service}.`} />
             <EventLine title="Slot hold" value={`${when.summary} was reserved pending operator review.`} />
             <EventLine title="Payment state" value={appointment.statusLabel} />
-            <EventLine
-              title="Future channel"
-              value="WhatsApp transport is deferred; this record can be reused by fixed WhatsApp flows later."
-            />
           </div>
-          <p className="mt-2 text-[11.5px] text-muted-foreground">
-            <Trans>
-              This panel manages the booking lifecycle now through the app and public booking page. WhatsApp delivery
-              plugs into the same fixed flow events later.
-            </Trans>
-          </p>
-        </div>
+        </details>
       </div>
+    </div>
+  );
+}
+
+function AnswerLine({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="border-l-2 border-border pl-3">
+      <div className="mb-0.5 text-[12px] text-muted-foreground">{label}</div>
+      <div className="text-[0.8125rem]">{value}</div>
     </div>
   );
 }

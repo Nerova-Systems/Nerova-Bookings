@@ -14,6 +14,7 @@ public sealed class BusinessProfileConfiguration : IEntityTypeConfiguration<Busi
         builder.HasIndex(x => x.Slug).IsUnique();
         builder.Property(x => x.Name).HasMaxLength(160);
         builder.Property(x => x.Slug).HasMaxLength(120);
+        builder.Property(x => x.LogoUrl).HasMaxLength(512);
     }
 }
 
@@ -35,6 +36,7 @@ public sealed class BookableServiceConfiguration : IEntityTypeConfiguration<Book
         builder.MapStronglyTypedLongId<BookableService, TenantId>(x => x.TenantId);
         builder.Property(x => x.Name).HasMaxLength(160);
         builder.Property(x => x.Mode).HasMaxLength(32);
+        builder.Property(x => x.PaymentPolicy).HasConversion<string>().HasMaxLength(40);
     }
 }
 
@@ -94,6 +96,32 @@ public sealed class AppointmentPaymentIntentConfiguration : IEntityTypeConfigura
         builder.HasKey(x => x.Id);
         builder.MapStronglyTypedLongId<AppointmentPaymentIntent, TenantId>(x => x.TenantId);
         builder.HasIndex(x => x.Reference).IsUnique();
+        builder.Property(x => x.Channel).HasConversion<string>().HasMaxLength(40);
+        builder.Property(x => x.VirtualTerminalCode).HasMaxLength(80);
+    }
+}
+
+public sealed class PaystackSubaccountConfiguration : IEntityTypeConfiguration<PaystackSubaccount>
+{
+    public void Configure(EntityTypeBuilder<PaystackSubaccount> builder)
+    {
+        builder.HasKey(x => x.Id);
+        builder.MapStronglyTypedLongId<PaystackSubaccount, TenantId>(x => x.TenantId);
+        builder.HasIndex(x => x.TenantId).IsUnique();
+        builder.HasIndex(x => x.SubaccountCode).IsUnique();
+        builder.Property(x => x.SubaccountCode).HasMaxLength(80);
+        builder.Property(x => x.SplitCode).HasMaxLength(80);
+        builder.Property(x => x.VirtualTerminalCode).HasMaxLength(80);
+        builder.Property(x => x.BusinessName).HasMaxLength(160);
+        builder.Property(x => x.SettlementBankName).HasMaxLength(160);
+        builder.Property(x => x.SettlementBankCode).HasMaxLength(32);
+        builder.Property(x => x.AccountName).HasMaxLength(160);
+        builder.Property(x => x.MaskedAccountNumber).HasMaxLength(32);
+        builder.Property(x => x.Currency).HasMaxLength(8);
+        builder.Property(x => x.PrimaryContactName).HasMaxLength(160);
+        builder.Property(x => x.PrimaryContactEmail).HasMaxLength(320);
+        builder.Property(x => x.PrimaryContactPhone).HasMaxLength(64);
+        builder.Property(x => x.SettlementSchedule).HasMaxLength(32);
     }
 }
 

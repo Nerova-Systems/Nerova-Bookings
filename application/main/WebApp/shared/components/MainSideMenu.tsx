@@ -16,7 +16,7 @@ import {
 import { Link as RouterLink, useNavigate, useRouter } from "@tanstack/react-router";
 import MobileMenu from "account/MobileMenu";
 import UserMenu from "account/UserMenu";
-import { ActivityIcon, BarChart2Icon, CalendarIcon, Grid2X2Icon, UsersIcon } from "lucide-react";
+import { ActivityIcon, BarChart2Icon, CalendarIcon, CreditCardIcon, Grid2X2Icon, PlugIcon, UsersIcon } from "lucide-react";
 import { use } from "react";
 
 const normalizePath = (path: string): string => path.replace(/\/$/, "") || "/";
@@ -45,7 +45,7 @@ export function MainSideMenu() {
         <SidebarContent>
           <SidebarGroup>
             <SidebarGroupLabel>
-              <Trans>Main</Trans>
+              <Trans>Workspace</Trans>
             </SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
@@ -74,6 +74,35 @@ export function MainSideMenu() {
                   </SidebarMenuButton>
                 </SidebarMenuItem>
                 <SidebarMenuItem>
+                  <SidebarMenuButton asChild={true} isActive={isActive("/dashboard/clients")} tooltip={t`Clients`}>
+                    <RouterLink to="/dashboard/clients">
+                      <UsersIcon />
+                      <span>
+                        <Trans>Clients</Trans>
+                      </span>
+                    </RouterLink>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+          <SidebarGroup>
+            <SidebarGroupLabel>
+              <Trans>Business</Trans>
+            </SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild={true} isActive={isActive("/dashboard/payments")} tooltip={t`Payments`}>
+                    <RouterLink to="/dashboard/payments">
+                      <CreditCardIcon />
+                      <span>
+                        <Trans>Payments</Trans>
+                      </span>
+                    </RouterLink>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
                   <SidebarMenuButton asChild={true} isActive={isActive("/dashboard/services")} tooltip={t`Services`}>
                     <RouterLink to="/dashboard/services">
                       <Grid2X2Icon />
@@ -84,21 +113,21 @@ export function MainSideMenu() {
                   </SidebarMenuButton>
                 </SidebarMenuItem>
                 <SidebarMenuItem>
-                  <SidebarMenuButton asChild={true} isActive={isActive("/dashboard/clients")} tooltip={t`Clients`}>
-                    <RouterLink to="/dashboard/clients">
-                      <UsersIcon />
-                      <span>
-                        <Trans>Clients</Trans>
-                      </span>
-                    </RouterLink>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-                <SidebarMenuItem>
                   <SidebarMenuButton asChild={true} isActive={isActive("/dashboard/analytics")} tooltip={t`Analytics`}>
                     <RouterLink to="/dashboard/analytics">
                       <BarChart2Icon />
                       <span>
                         <Trans>Analytics</Trans>
+                      </span>
+                    </RouterLink>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild={true} isActive={isActive("/dashboard/apps")} tooltip={t`Apps`}>
+                    <RouterLink to="/dashboard/apps">
+                      <PlugIcon />
+                      <span>
+                        <Trans>Apps</Trans>
                       </span>
                     </RouterLink>
                   </SidebarMenuButton>

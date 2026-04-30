@@ -156,11 +156,12 @@ public class SinglePageAppConfiguration
         {
             $"script-src {trustedHosts} 'nonce-{{NONCE_PLACEHOLDER}}' 'strict-dynamic' https:",
             $"script-src-elem {trustedHosts} https://js.stripe.com 'nonce-{{NONCE_PLACEHOLDER}}'",
-            $"style-src {trustedHosts} 'nonce-{{NONCE_PLACEHOLDER}}'",
-            $"style-src-elem {trustedHosts} 'nonce-{{NONCE_PLACEHOLDER}}'",
+            $"style-src {trustedHosts} https://fonts.cdnfonts.com 'nonce-{{NONCE_PLACEHOLDER}}'",
+            $"style-src-elem {trustedHosts} https://fonts.cdnfonts.com 'nonce-{{NONCE_PLACEHOLDER}}'",
             $"default-src {trustedHosts}",
             $"connect-src {trustedHosts} https://js.stripe.com https://api.stripe.com data:",
             $"frame-src {trustedHosts} https://js.stripe.com",
+            $"font-src {trustedHosts} https://fonts.cdnfonts.com data:",
             $"img-src {trustedHosts} data: blob:",
             "object-src 'none'",
             "base-uri 'none'"

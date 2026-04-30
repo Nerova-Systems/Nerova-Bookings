@@ -2,11 +2,21 @@ import { t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
 import { Button } from "@repo/ui/components/Button";
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
-import { useAppointmentShell, type Service, type ServiceCategory } from "@/shared/lib/appointmentsApi";
+import {
+  useAppointmentShell,
+  useArchiveService,
+  useCreateService,
+  useRestoreService,
+  useUpdateService,
+  type Service,
+  type ServiceCategory,
+  type ServiceMutationRequest
+} from "@/shared/lib/appointmentsApi";
 
 import { ServiceCard } from "./-components/ServiceCard";
+import { ServiceFormDialog } from "./-components/ServiceFormDialog";
 
 export const Route = createFileRoute("/dashboard/services/")({
   staticData: { trackingTitle: "Services" },
@@ -14,7 +24,13 @@ export const Route = createFileRoute("/dashboard/services/")({
 });
 
 function ServicesPage() {
+  const [editingService, setEditingService] = useState<Service | null>(null);
+  const [formOpen, setFormOpen] = useState(false);
   const shellQuery = useAppointmentShell();
+  const createService = useCreateService();
+  const updateService = useUpdateService();
+  const archiveService = useArchiveService();
+  const restoreService = useRestoreService();
   const categories = groupServices(shellQuery.data?.categories ?? [], shellQuery.data?.services ?? []);
   const archived = (shellQuery.data?.services ?? []).filter((service) => service.archived);
   const activeServices = (shellQuery.data?.services ?? []).filter((service) => !service.archived);
@@ -39,7 +55,10 @@ function ServicesPage() {
           <Button variant="outline" size="sm">
             <Trans>Manage categories</Trans>
           </Button>
-          <Button size="sm">
+          <Button size="sm" onClick={() => {
+            setEditingService(null);
+            setFormOpen(true);
+          }}>
             <Trans>New service</Trans>
           </Button>
         </div>
@@ -74,7 +93,10 @@ function ServicesPage() {
             </div>
             <div className="grid grid-cols-[repeat(auto-fill,minmax(16.25rem,1fr))] gap-3">
               {cat.services.map((svc) => (
-                <ServiceCard key={svc.name} service={svc} />
+                <ServiceCard key={svc.id} service={svc} onEdit={(service) => {
+                  setEditingService(service);
+                  setFormOpen(true);
+                }} onArchive={(id) => archiveService.mutate(id)} onRestore={(id) => restoreService.mutate(id)} />
               ))}
             </div>
           </div>
@@ -90,7 +112,10 @@ function ServicesPage() {
             </div>
             <div className="grid grid-cols-[repeat(auto-fill,minmax(16.25rem,1fr))] gap-3">
               {archived.map((svc) => (
-                <ServiceCard key={svc.name} service={svc} />
+                <ServiceCard key={svc.id} service={svc} onEdit={(service) => {
+                  setEditingService(service);
+                  setFormOpen(true);
+                }} onArchive={(id) => archiveService.mutate(id)} onRestore={(id) => restoreService.mutate(id)} />
               ))}
             </div>
             <div className="mt-2 rounded-lg bg-muted px-3.5 py-2.5 text-xs text-muted-foreground">
@@ -102,6 +127,21 @@ function ServicesPage() {
           </div>
         )}
       </div>
+      {formOpen && (
+        <ServiceFormDialog
+          service={editingService ?? undefined}
+          categories={shellQuery.data?.categories ?? []}
+          pending={createService.isPending || updateService.isPending}
+          onClose={() => setFormOpen(false)}
+          onSubmit={(request: ServiceMutationRequest) => {
+            if (editingService) {
+              updateService.mutate({ id: editingService.id, request }, { onSuccess: () => setFormOpen(false) });
+            } else {
+              createService.mutate(request, { onSuccess: () => setFormOpen(false) });
+            }
+          }}
+        />
+      )}
     </div>
   );
 }

@@ -39,6 +39,25 @@ export function formatWholeNumber(value: number) {
   return String(value).replace(/\B(?=(\d{3})+(?!\d))/g, " ");
 }
 
+export function businessDateKey(date: Date, timeZone: string) {
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit"
+  }).formatToParts(date);
+  const values = Object.fromEntries(parts.map((part) => [part.type, part.value]));
+  return `${values.year}-${values.month}-${values.day}`;
+}
+
+export function isTodayInTimeZone(date: Date, timeZone: string, now = new Date()) {
+  return businessDateKey(date, timeZone) === businessDateKey(now, timeZone);
+}
+
+export function isTodayOrFutureInTimeZone(date: Date, timeZone: string, now = new Date()) {
+  return businessDateKey(date, timeZone) >= businessDateKey(now, timeZone);
+}
+
 function twoDigits(value: number) {
   return String(value).padStart(2, "0");
 }

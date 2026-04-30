@@ -1,5 +1,5 @@
 import { t } from "@lingui/core/macro";
-import { MoreHorizontalIcon } from "lucide-react";
+import { ArchiveIcon, MoreHorizontalIcon, RotateCcwIcon } from "lucide-react";
 
 import type { Service } from "@/shared/lib/appointmentsApi";
 
@@ -9,7 +9,7 @@ function modeBadgeClasses(mode: Service["mode"]): string {
   return "bg-warning/10 text-warning";
 }
 
-export function ServiceCard({ service }: { service: Service }) {
+export function ServiceCard({ service, onEdit, onArchive, onRestore }: { service: Service; onEdit: (service: Service) => void; onArchive: (id: string) => void; onRestore: (id: string) => void }) {
   return (
     <article
       className={`flex flex-col gap-2 rounded-xl border border-border bg-background p-3.5 transition-colors hover:border-foreground/20 ${
@@ -24,10 +24,18 @@ export function ServiceCard({ service }: { service: Service }) {
           {service.modeLabel}
         </span>
         {service.archived ? (
-          <span className="ml-auto text-[10.5px] tracking-[0.04em] text-muted-foreground uppercase">Archived</span>
+          <button
+            type="button"
+            onClick={() => onRestore(service.id)}
+            className="ml-auto inline-flex items-center gap-1 text-[11px] text-muted-foreground hover:text-foreground"
+          >
+            <RotateCcwIcon className="size-3" />
+            Restore
+          </button>
         ) : (
           <button
             type="button"
+            onClick={() => onEdit(service)}
             className="ml-auto p-0.5 text-muted-foreground hover:text-foreground"
             aria-label={t`More options`}
           >
@@ -44,6 +52,16 @@ export function ServiceCard({ service }: { service: Service }) {
         <span className="text-foreground">{service.location}</span>
         {!service.archived && <span>{service.bookingsThisMonth} booked · this month</span>}
       </div>
+      {!service.archived && (
+        <button
+          type="button"
+          onClick={() => onArchive(service.id)}
+          className="mt-1 inline-flex items-center gap-1 self-start text-[11.5px] text-muted-foreground hover:text-destructive"
+        >
+          <ArchiveIcon className="size-3" />
+          Archive
+        </button>
+      )}
     </article>
   );
 }

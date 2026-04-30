@@ -29,6 +29,20 @@ public enum AppointmentSource
     WhatsAppFlow
 }
 
+public enum ServicePaymentPolicy
+{
+    NoPaymentRequired,
+    DepositBeforeBooking,
+    FullPaymentBeforeBooking,
+    CollectAfterAppointment
+}
+
+public enum AppointmentPaymentChannel
+{
+    HostedCheckout,
+    VirtualTerminal
+}
+
 public sealed class BusinessProfile : ITenantScopedEntity
 {
     public string Id { get; set; } = Guid.NewGuid().ToString("N");
@@ -38,6 +52,7 @@ public sealed class BusinessProfile : ITenantScopedEntity
     public string TimeZone { get; set; } = "Africa/Johannesburg";
     public string Currency { get; set; } = "ZAR";
     public string Address { get; set; } = "14 Main Rd, Sea Point, Cape Town";
+    public string? LogoUrl { get; set; }
     public bool PublicBookingEnabled { get; set; } = true;
 }
 
@@ -60,6 +75,7 @@ public sealed class BookableService : ITenantScopedEntity
     public int DurationMinutes { get; set; }
     public int PriceCents { get; set; }
     public int DepositCents { get; set; }
+    public ServicePaymentPolicy PaymentPolicy { get; set; }
     public int BufferBeforeMinutes { get; set; }
     public int BufferAfterMinutes { get; set; }
     public string Location { get; set; } = string.Empty;
@@ -132,12 +148,37 @@ public sealed class AppointmentPaymentIntent : ITenantScopedEntity
     public TenantId TenantId { get; set; } = null!;
     public string AppointmentId { get; set; } = string.Empty;
     public string Provider { get; set; } = "Paystack";
+    public AppointmentPaymentChannel Channel { get; set; } = AppointmentPaymentChannel.HostedCheckout;
     public string Reference { get; set; } = string.Empty;
     public int AmountCents { get; set; }
     public string Status { get; set; } = "Pending";
     public string? AuthorizationUrl { get; set; }
+    public string? VirtualTerminalCode { get; set; }
     public DateTimeOffset CreatedAt { get; set; }
     public DateTimeOffset? ConfirmedAt { get; set; }
+}
+
+public sealed class PaystackSubaccount : ITenantScopedEntity
+{
+    public string Id { get; set; } = Guid.NewGuid().ToString("N");
+    public TenantId TenantId { get; set; } = null!;
+    public string SubaccountCode { get; set; } = string.Empty;
+    public int? SubaccountId { get; set; }
+    public string? SplitCode { get; set; }
+    public string? VirtualTerminalCode { get; set; }
+    public string BusinessName { get; set; } = string.Empty;
+    public string SettlementBankName { get; set; } = string.Empty;
+    public string SettlementBankCode { get; set; } = string.Empty;
+    public string AccountName { get; set; } = string.Empty;
+    public string MaskedAccountNumber { get; set; } = string.Empty;
+    public string Currency { get; set; } = "ZAR";
+    public string? PrimaryContactName { get; set; }
+    public string? PrimaryContactEmail { get; set; }
+    public string? PrimaryContactPhone { get; set; }
+    public bool IsActive { get; set; }
+    public bool IsVerified { get; set; }
+    public string SettlementSchedule { get; set; } = "auto";
+    public DateTimeOffset LastSyncedAt { get; set; }
 }
 
 public sealed class AppointmentFlowEvent : ITenantScopedEntity

@@ -1,46 +1,108 @@
 import { Trans } from "@lingui/react/macro";
+import { useState } from "react";
 
-import type { PublicBookingProfile } from "@/shared/lib/publicBookingApi";
+import { money } from "@/shared/lib/appointmentsApi";
+import type { PublicBookingProfile, PublicBookingService } from "@/shared/lib/publicBookingApi";
 
-export function BookingIntro({ profile }: { profile: PublicBookingProfile }) {
+export function StepHeading({ step, title, description }: { step: string; title: string; description: string }) {
   return (
-    <aside className="border-r border-border p-8">
-      <div className="mb-8">
-        <div className="mb-2 text-xs font-semibold tracking-[0.12em] text-muted-foreground uppercase">Nerova</div>
-        <h1 className="font-display text-3xl font-semibold">{profile.name}</h1>
-        <p className="mt-2 text-sm text-muted-foreground">{profile.address}</p>
+    <div className="mb-4 flex items-start gap-3">
+      <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-foreground text-xs font-semibold text-background">
+        {step}
       </div>
-      <div className="rounded-xl border border-border bg-muted p-4 text-sm">
-        <div className="font-medium">
-          <Trans>Public booking test path</Trans>
+      <div>
+        <h3 className="font-display text-xl font-semibold tracking-tight">{title}</h3>
+        <p className="mt-1 text-sm text-muted-foreground">{description}</p>
+      </div>
+    </div>
+  );
+}
+
+export function BookingIntro({
+  profile,
+  selectedService
+}: {
+  profile: PublicBookingProfile;
+  selectedService?: PublicBookingService;
+}) {
+  return (
+    <aside className="relative overflow-hidden border-r border-border bg-[#181818] p-8 text-white max-lg:border-r-0 max-lg:p-6">
+      <div className="absolute inset-x-0 top-0 h-48 bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.28),transparent_45%)]" />
+      <div className="relative flex min-h-[calc(100vh-4rem)] flex-col justify-between gap-8 max-lg:min-h-0">
+        <div>
+          <BusinessLogo profile={profile} />
+          <div className="mt-6 text-xs font-semibold tracking-[0.16em] text-white/50 uppercase">Book with</div>
+          <h1 className="mt-2 font-display text-4xl font-semibold tracking-tight">{profile.name}</h1>
+          <p className="mt-3 max-w-xs text-sm leading-6 text-white/65">{profile.address}</p>
         </div>
-        <p className="mt-1 text-muted-foreground">
-          <Trans>
-            This uses the same service, availability, client, appointment, and payment records that future fixed
-            WhatsApp flows will use.
-          </Trans>
-        </p>
+
+        <div className="grid gap-4">
+          {selectedService && (
+            <div className="rounded-2xl border border-white/10 bg-white/[0.08] p-4">
+              <div className="text-xs font-semibold tracking-[0.14em] text-white/50 uppercase">Selected service</div>
+              <div className="mt-3 font-medium">{selectedService.name}</div>
+              <div className="mt-2 flex flex-wrap gap-2 text-xs text-white/70">
+                <span>{selectedService.durationMinutes} min</span>
+                <span>{money(selectedService.priceCents)}</span>
+                {selectedService.depositCents > 0 && <span>{money(selectedService.depositCents)} deposit</span>}
+              </div>
+            </div>
+          )}
+          <div className="text-xs text-white/45">
+            <Trans>Powered by Nerova</Trans>
+          </div>
+        </div>
       </div>
     </aside>
+  );
+}
+
+function BusinessLogo({ profile }: { profile: PublicBookingProfile }) {
+  const [imageFailed, setImageFailed] = useState(false);
+  const initials = profile.name
+    .split(" ")
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0]?.toUpperCase())
+    .join("");
+
+  if (profile.logoUrl && !imageFailed) {
+    return (
+      <img
+        src={profile.logoUrl}
+        alt={`${profile.name} logo`}
+        onError={() => setImageFailed(true)}
+        className="size-16 rounded-2xl border border-white/15 bg-white object-cover"
+      />
+    );
+  }
+
+  return (
+    <div className="flex size-16 items-center justify-center rounded-2xl border border-white/15 bg-white text-xl font-semibold text-[#181818]">
+      {initials || "N"}
+    </div>
   );
 }
 
 export function TextInput({
   label,
   value,
-  onChange
+  onChange,
+  autoComplete
 }: {
   label: string;
   value: string;
   onChange: (value: string) => void;
+  autoComplete?: string;
 }) {
   return (
     <label className="text-sm font-medium">
-      <span className="mb-1 block">{label}</span>
+      <span className="mb-2 block">{label}</span>
       <input
         value={value}
+        autoComplete={autoComplete}
         onChange={(event) => onChange(event.target.value)}
-        className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm"
+        className="h-12 w-full rounded-xl border border-border bg-background px-3 text-sm outline-none transition-colors focus:border-foreground"
       />
     </label>
   );

@@ -1,4 +1,5 @@
 using Main.Database;
+using Main.Features.Appointments;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using SharedKernel.Configuration;
@@ -22,6 +23,7 @@ public static class Configuration
     {
         public IServiceCollection AddMainServices()
         {
+            services.AddScoped<IPaystackClient, PaystackClient>();
             return services.AddSharedServices<MainDbContext>([Assembly]);
         }
     }

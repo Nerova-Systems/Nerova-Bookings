@@ -1,6 +1,8 @@
 import { enhancedFetch } from "@repo/infrastructure/http/httpClient";
 import { useMutation, useQuery } from "@tanstack/react-query";
 
+import type { ServicePaymentPolicy } from "./appointmentContracts";
+
 export interface PublicBookingService {
   id: string;
   name: string;
@@ -8,6 +10,7 @@ export interface PublicBookingService {
   durationMinutes: number;
   priceCents: number;
   depositCents: number;
+  paymentPolicy: ServicePaymentPolicy;
   location: string;
   isActive: boolean;
 }
@@ -17,7 +20,13 @@ export interface PublicBookingProfile {
   slug: string;
   timeZone: string;
   address: string;
+  logoUrl?: string;
   services: PublicBookingService[];
+}
+
+export interface PublicClientPrefill {
+  name: string;
+  email: string;
 }
 
 export interface Slot {
@@ -64,6 +73,20 @@ export function usePublicSlots(businessSlug: string, serviceId: string | undefin
         `/api/main/public-booking/${businessSlug}/slots?serviceId=${serviceId}&date=${date}`
       );
       return (await response.json()) as Slot[];
+    }
+  });
+}
+
+export function usePublicClientPrefill(businessSlug: string, phone: string) {
+  const normalizedPhone = phone.replace(/[^\d+]/g, "");
+  return useQuery({
+    enabled: normalizedPhone.length >= 8,
+    queryKey: ["public-booking-client-prefill", businessSlug, normalizedPhone],
+    queryFn: async () => {
+      const response = await enhancedFetch(
+        `/api/main/public-booking/${businessSlug}/client-prefill?phone=${encodeURIComponent(normalizedPhone)}`
+      );
+      return (await response.json()) as PublicClientPrefill;
     }
   });
 }
