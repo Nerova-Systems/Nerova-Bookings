@@ -157,6 +157,127 @@ public sealed class AppOperationsEndpointTests : EndpointBaseTest<MainDbContext>
     }
 
     [Fact]
+    public async Task UpdateWeeklyAvailability_ShouldAllowSaturdayAndLateEveningSlots()
+    {
+        await SeedShellAsync();
+        var service = await ReadServiceByNameAsync("Express session");
+
+        var update = await AuthenticatedOwnerHttpClient.PutAsJsonAsync(
+            "/api/main/app/availability/weekly",
+            new
+            {
+                days = new[]
+                {
+                    new { dayOfWeek = "Saturday", windows = new[] { new { startTime = "18:00", endTime = "21:00" } } }
+                }
+            }
+        );
+
+        update.StatusCode.Should().Be(HttpStatusCode.OK);
+        var slots = await AuthenticatedOwnerHttpClient.GetFromJsonAsync<JsonArray>(
+            $"/api/main/app/availability/slots?serviceId={service.Id}&date=2026-05-02"
+        );
+        slots.Should().NotBeNull();
+        var starts = slots!.Select(slot => slot!["startAt"]!.GetValue<DateTimeOffset>()).ToList();
+        starts.Should().Contain(new DateTimeOffset(2026, 5, 2, 18, 0, 0, TimeSpan.FromHours(2)));
+        starts.Should().Contain(new DateTimeOffset(2026, 5, 2, 20, 30, 0, TimeSpan.FromHours(2)));
+    }
+
+    [Fact]
+    public async Task UpdateWeeklyAvailability_ShouldSupportMultipleWindowsAndClosedDays()
+    {
+        await SeedShellAsync();
+        var service = await ReadServiceByNameAsync("Express session");
+
+        var update = await AuthenticatedOwnerHttpClient.PutAsJsonAsync(
+            "/api/main/app/availability/weekly",
+            new
+            {
+                days = new object[]
+                {
+                    new { dayOfWeek = "Monday", windows = new[] { new { startTime = "09:00", endTime = "11:00" }, new { startTime = "14:00", endTime = "16:00" } } },
+                    new { dayOfWeek = "Tuesday", windows = Array.Empty<object>() }
+                }
+            }
+        );
+
+        update.StatusCode.Should().Be(HttpStatusCode.OK);
+        var mondaySlots = await AuthenticatedOwnerHttpClient.GetFromJsonAsync<JsonArray>(
+            $"/api/main/app/availability/slots?serviceId={service.Id}&date=2026-05-04"
+        );
+        mondaySlots.Should().NotBeNull();
+        var mondayStarts = mondaySlots!.Select(slot => slot!["startAt"]!.GetValue<DateTimeOffset>()).ToList();
+        mondayStarts.Should().Contain(new DateTimeOffset(2026, 5, 4, 9, 0, 0, TimeSpan.FromHours(2)));
+        mondayStarts.Should().Contain(new DateTimeOffset(2026, 5, 4, 15, 30, 0, TimeSpan.FromHours(2)));
+        mondayStarts.Should().NotContain(start => start >= new DateTimeOffset(2026, 5, 4, 11, 0, 0, TimeSpan.FromHours(2)) &&
+                                                  start < new DateTimeOffset(2026, 5, 4, 14, 0, 0, TimeSpan.FromHours(2)));
+
+        var tuesdaySlots = await AuthenticatedOwnerHttpClient.GetFromJsonAsync<JsonArray>(
+            $"/api/main/app/availability/slots?serviceId={service.Id}&date=2026-05-05"
+        );
+        tuesdaySlots.Should().BeEmpty();
+    }
+
+    [Fact]
+    public async Task CreateClosure_ShouldRemoveSlotsAndExposeClosure()
+    {
+        await SeedShellAsync();
+        var service = await ReadServiceByNameAsync("Express session");
+
+        var create = await AuthenticatedOwnerHttpClient.PostAsJsonAsync(
+            "/api/main/app/availability/closures",
+            new { startDate = "2026-04-27", endDate = "2026-04-27", label = "Staff training" }
+        );
+
+        create.StatusCode.Should().Be(HttpStatusCode.OK);
+        var shell = await create.Content.ReadFromJsonAsync<JsonObject>();
+        shell!["closures"]!.AsArray().Should().Contain(item => item!["label"]!.GetValue<string>() == "Staff training");
+        var slots = await AuthenticatedOwnerHttpClient.GetFromJsonAsync<JsonArray>(
+            $"/api/main/app/availability/slots?serviceId={service.Id}&date=2026-04-27"
+        );
+        slots.Should().BeEmpty();
+    }
+
+    [Fact]
+    public async Task PublicHoliday_ShouldRemoveSlotsAndExposeAutomaticClosure()
+    {
+        await SeedShellAsync();
+        var service = await ReadServiceByNameAsync("Express session");
+
+        var shell = await AuthenticatedOwnerHttpClient.GetFromJsonAsync<JsonObject>("/api/main/app/shell");
+        shell!["closures"]!.AsArray().Should().Contain(item => item!["label"]!.GetValue<string>() == "Workers' Day" &&
+                                                               item!["type"]!.GetValue<string>() == "publicHoliday");
+        var slots = await AuthenticatedOwnerHttpClient.GetFromJsonAsync<JsonArray>(
+            $"/api/main/app/availability/slots?serviceId={service.Id}&date=2026-05-01"
+        );
+        slots.Should().BeEmpty();
+    }
+
+    [Fact]
+    public async Task UpdateHolidaySettings_ShouldAllowSelectedPublicHolidaySlots()
+    {
+        await SeedShellAsync();
+        var service = await ReadServiceByNameAsync("Express session");
+
+        var update = await AuthenticatedOwnerHttpClient.PutAsJsonAsync(
+            "/api/main/app/availability/holidays",
+            new { countryCode = "ZA", openHolidayIds = new[] { "ZA-2026-05-01" } }
+        );
+
+        update.StatusCode.Should().Be(HttpStatusCode.OK);
+        var shell = await update.Content.ReadFromJsonAsync<JsonObject>();
+        shell!["holidaySettings"]!["countryCode"]!.GetValue<string>().Should().Be("ZA");
+        shell["closures"]!.AsArray().Should().NotContain(item => item!["id"]!.GetValue<string>() == "ZA-2026-05-01");
+        var slots = await AuthenticatedOwnerHttpClient.GetFromJsonAsync<JsonArray>(
+            $"/api/main/app/availability/slots?serviceId={service.Id}&date=2026-05-01"
+        );
+        slots.Should().NotBeEmpty();
+        slots!.Select(slot => slot!["startAt"]!.GetValue<DateTimeOffset>())
+            .Should()
+            .Contain(new DateTimeOffset(2026, 5, 1, 9, 0, 0, TimeSpan.FromHours(2)));
+    }
+
+    [Fact]
     public async Task UpdateClient_ShouldPersistOperationalNotes()
     {
         await SeedShellAsync();

@@ -19,6 +19,10 @@ public sealed class AppointmentEndpoints : IEndpoints
         var app = routes.MapGroup("/api/main/app").RequireAuthorization().WithTags("Nerova App");
         app.MapGet("/shell", GetShell);
         app.MapGet("/availability/slots", GetAuthenticatedSlots);
+        app.MapPut("/availability/weekly", UpdateWeeklyAvailability);
+        app.MapPut("/availability/holidays", UpdateHolidaySettings);
+        app.MapPost("/availability/closures", CreateClosure);
+        app.MapDelete("/availability/closures/{id}", DeleteClosure);
         app.MapPost("/services", CreateService);
         app.MapPut("/services/{id}", UpdateService);
         app.MapPost("/services/{id}/archive", ArchiveService);
@@ -150,6 +154,109 @@ public sealed class AppointmentEndpoints : IEndpoints
             EndAt = request.EndAt,
             CreatedAt = timeProvider.GetUtcNow()
         });
+        await db.SaveChangesAsync(cancellationToken);
+        return Results.Ok(await BuildShellAsync(db, cancellationToken));
+    }
+
+    private static async Task<IResult> UpdateWeeklyAvailability(WeeklyAvailabilityRequest request, MainDbContext db, IExecutionContext executionContext, CancellationToken cancellationToken)
+    {
+        var tenantId = RequireTenant(executionContext);
+        var rules = new List<AvailabilityRule>();
+        var windowsByDay = new Dictionary<DayOfWeek, List<(TimeOnly Start, TimeOnly End)>>();
+
+        foreach (var day in request.Days ?? [])
+        {
+            if (!TryParseDayOfWeek(day.DayOfWeek, out var dayOfWeek))
+            {
+                return Results.BadRequest("Unsupported day of week.");
+            }
+
+            var dayWindows = windowsByDay.GetValueOrDefault(dayOfWeek) ?? [];
+            foreach (var window in day.Windows ?? [])
+            {
+                if (!TimeOnly.TryParse(window.StartTime, out var startTime) || !TimeOnly.TryParse(window.EndTime, out var endTime))
+                {
+                    return Results.BadRequest("Availability windows must use HH:mm times.");
+                }
+                if (endTime <= startTime)
+                {
+                    return Results.BadRequest("Availability window end time must be after start time.");
+                }
+                dayWindows.Add((startTime, endTime));
+            }
+            windowsByDay[dayOfWeek] = dayWindows;
+        }
+
+        foreach (var entry in windowsByDay)
+        {
+            var ordered = entry.Value.OrderBy(window => window.Start).ToList();
+            for (var index = 1; index < ordered.Count; index++)
+            {
+                if (ordered[index].Start < ordered[index - 1].End)
+                {
+                    return Results.BadRequest("Availability windows cannot overlap.");
+                }
+            }
+
+            rules.AddRange(ordered.Select(window => new AvailabilityRule
+            {
+                TenantId = tenantId,
+                DayOfWeek = entry.Key,
+                StartTime = window.Start,
+                EndTime = window.End
+            }));
+        }
+
+        var existing = await db.AvailabilityRules.AsTracking().Where(rule => rule.TenantId == tenantId).ToListAsync(cancellationToken);
+        db.AvailabilityRules.RemoveRange(existing);
+        db.AvailabilityRules.AddRange(rules);
+        await db.SaveChangesAsync(cancellationToken);
+        return Results.Ok(await BuildShellAsync(db, cancellationToken));
+    }
+
+    private static async Task<IResult> UpdateHolidaySettings(HolidaySettingsRequest request, MainDbContext db, IExecutionContext executionContext, CancellationToken cancellationToken)
+    {
+        var tenantId = RequireTenant(executionContext);
+        var profile = await db.BusinessProfiles.AsTracking().FirstAsync(profile => profile.TenantId == tenantId, cancellationToken);
+        var countryCode = NormalizeHolidayCountryCode(request.CountryCode);
+        var supportedHolidayIds = BuildPublicHolidays(countryCode, DateTimeOffset.UtcNow.Year - 1, DateTimeOffset.UtcNow.Year + 2)
+            .Select(holiday => holiday.Id)
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+        var openHolidayIds = (request.OpenHolidayIds ?? [])
+            .Where(id => supportedHolidayIds.Contains(id))
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .OrderBy(id => id)
+            .ToArray();
+        profile.HolidayCountryCode = countryCode;
+        profile.OpenPublicHolidayIdsJson = JsonSerializer.Serialize(openHolidayIds);
+        await db.SaveChangesAsync(cancellationToken);
+        return Results.Ok(await BuildShellAsync(db, cancellationToken));
+    }
+
+    private static async Task<IResult> CreateClosure(CreateClosureRequest request, MainDbContext db, IExecutionContext executionContext, TimeProvider timeProvider, CancellationToken cancellationToken)
+    {
+        var tenantId = RequireTenant(executionContext);
+        if (request.EndDate < request.StartDate) return Results.BadRequest("Closure end date must be on or after start date.");
+        var label = string.IsNullOrWhiteSpace(request.Label) ? "Closed" : request.Label.Trim();
+        db.BusinessClosures.Add(new BusinessClosure
+        {
+            TenantId = tenantId,
+            StartDate = request.StartDate,
+            EndDate = request.EndDate,
+            Label = label,
+            Type = "manual",
+            CreatedAt = timeProvider.GetUtcNow()
+        });
+        await db.SaveChangesAsync(cancellationToken);
+        return Results.Ok(await BuildShellAsync(db, cancellationToken));
+    }
+
+    private static async Task<IResult> DeleteClosure(string id, MainDbContext db, IExecutionContext executionContext, CancellationToken cancellationToken)
+    {
+        var tenantId = RequireTenant(executionContext);
+        var closure = await db.BusinessClosures.AsTracking().FirstOrDefaultAsync(item => item.Id == id && item.TenantId == tenantId, cancellationToken);
+        if (closure is null) return Results.NotFound();
+        db.BusinessClosures.Remove(closure);
         await db.SaveChangesAsync(cancellationToken);
         return Results.Ok(await BuildShellAsync(db, cancellationToken));
     }
@@ -330,6 +437,12 @@ public sealed class AppointmentEndpoints : IEndpoints
         var serviceVersion = await GetLatestServiceVersionAsync(db, service, timeProvider.GetUtcNow(), cancellationToken);
         var startAt = request.StartAt.ToUniversalTime();
         var endAt = startAt.AddMinutes(serviceVersion.DurationMinutes);
+        var requestedDate = DateOnly.FromDateTime(request.StartAt.ToOffset(TimeSpan.FromHours(2)).DateTime);
+        var availableSlots = await BuildSlotsAsync(db, service.Id, requestedDate, cancellationToken, profile.TenantId);
+        if (!availableSlots.Any(slot => slot.StartAt.ToUniversalTime() == request.StartAt.ToUniversalTime()))
+        {
+            return Results.Conflict("Selected slot is no longer available.");
+        }
         var existingAppointments = await db.Appointments.IgnoreQueryFilters()
             .Where(a => a.TenantId == profile.TenantId && a.Status != AppointmentStatus.Cancelled)
             .ToListAsync(cancellationToken);
@@ -744,8 +857,11 @@ public sealed class AppointmentEndpoints : IEndpoints
         var categories = await db.ServiceCategories.OrderBy(c => c.SortOrder).ToListAsync(cancellationToken);
         var profile = await db.BusinessProfiles.FirstAsync(cancellationToken);
         var integrations = await db.IntegrationConnections.OrderBy(i => i.Provider).ThenBy(i => i.Capability).ToListAsync(cancellationToken);
+        var availabilityRules = await db.AvailabilityRules.OrderBy(rule => rule.DayOfWeek).ThenBy(rule => rule.StartTime).ToListAsync(cancellationToken);
+        var manualClosures = await db.BusinessClosures.OrderBy(closure => closure.StartDate).ToListAsync(cancellationToken);
         var manualBlocks = (await db.ManualCalendarBlocks.ToListAsync(cancellationToken)).OrderBy(b => b.StartAt).ToList();
         var externalBlocks = (await db.ExternalBusyBlocks.ToListAsync(cancellationToken)).OrderBy(b => b.StartAt).ToList();
+        var holidaySettings = BuildHolidaySettings(profile, DateTimeOffset.UtcNow.Year - 1, DateTimeOffset.UtcNow.Year + 2);
         return new AppShellResponse(
             new BusinessProfileDto(profile.Name, profile.Slug, profile.TimeZone, profile.Address, profile.PublicBookingEnabled),
             appointments.Select(a => ToAppointmentDto(a, clients, services, serviceVersions)),
@@ -754,6 +870,9 @@ public sealed class AppointmentEndpoints : IEndpoints
             clients.Select(c => ToClientDto(c, appointments, services, serviceVersions)),
             BuildAnalytics(appointments, services, serviceVersions, clients),
             integrations.Select(i => new IntegrationConnectionDto(i.Provider, i.Capability, i.Status, i.LastSyncedAt)),
+            availabilityRules.Select(ToAvailabilityRuleDto),
+            holidaySettings,
+            manualClosures.Select(ToClosureDto).Concat(holidaySettings.Holidays.Where(holiday => !holiday.IsOpen).Select(ToHolidayClosureDto)),
             manualBlocks.Select(ToManualCalendarBlockDto)
                 .Concat(externalBlocks.Select(ToExternalCalendarBlockDto))
         );
@@ -818,6 +937,21 @@ public sealed class AppointmentEndpoints : IEndpoints
     private static CalendarBlockDto ToExternalCalendarBlockDto(ExternalBusyBlock block)
     {
         return new CalendarBlockDto(block.Id, $"{block.Provider} · {block.Label}", block.StartAt, block.EndAt, "external");
+    }
+
+    private static AvailabilityRuleDto ToAvailabilityRuleDto(AvailabilityRule rule)
+    {
+        return new AvailabilityRuleDto(rule.Id, rule.DayOfWeek.ToString(), rule.StartTime.ToString("HH:mm"), rule.EndTime.ToString("HH:mm"));
+    }
+
+    private static ClosureDto ToClosureDto(BusinessClosure closure)
+    {
+        return new ClosureDto(closure.Id, closure.StartDate, closure.EndDate, closure.Label, closure.Type);
+    }
+
+    private static ClosureDto ToHolidayClosureDto(PublicHolidayDto holiday)
+    {
+        return new ClosureDto(holiday.Id, holiday.Date, holiday.Date, holiday.Label, "publicHoliday");
     }
 
     private static ClientAppointmentHistoryDto ToClientAppointmentHistoryDto(Appointment appointment, List<BookableService> services, List<BookableServiceVersion> serviceVersions)
@@ -1017,6 +1151,10 @@ public sealed class AppointmentEndpoints : IEndpoints
         var rules = await db.AvailabilityRules.IgnoreQueryFilters().Where(r => r.TenantId == tenantId && r.DayOfWeek == date.DayOfWeek).ToListAsync(cancellationToken);
         var dayStart = new DateTimeOffset(date.ToDateTime(TimeOnly.MinValue), TimeSpan.FromHours(2));
         var dayEnd = dayStart.AddDays(1);
+        if (await IsClosedAsync(db, tenantId, date, cancellationToken))
+        {
+            return [];
+        }
         var tenantAppointments = await db.Appointments.IgnoreQueryFilters()
             .Where(a => a.TenantId == tenantId && a.Status != AppointmentStatus.Cancelled)
             .ToListAsync(cancellationToken);
@@ -1049,6 +1187,180 @@ public sealed class AppointmentEndpoints : IEndpoints
             }
         }
         return slots;
+    }
+
+    private static async Task<bool> IsClosedAsync(MainDbContext db, TenantId tenantId, DateOnly date, CancellationToken cancellationToken)
+    {
+        var manualClosures = await db.BusinessClosures.IgnoreQueryFilters()
+            .Where(closure => closure.TenantId == tenantId)
+            .ToListAsync(cancellationToken);
+        var profile = await db.BusinessProfiles.IgnoreQueryFilters().FirstAsync(profile => profile.TenantId == tenantId, cancellationToken);
+        var openHolidayIds = ReadOpenHolidayIds(profile);
+        var holidayCountryCode = NormalizeHolidayCountryCode(profile.HolidayCountryCode);
+        return manualClosures.Any(closure => closure.StartDate <= date && closure.EndDate >= date) ||
+               BuildPublicHolidays(holidayCountryCode, date.Year, date.Year)
+                   .Any(holiday => holiday.Date == date && !openHolidayIds.Contains(holiday.Id));
+    }
+
+    private static bool TryParseDayOfWeek(string dayOfWeek, out DayOfWeek parsed)
+    {
+        if (Enum.TryParse(dayOfWeek, true, out parsed))
+        {
+            return true;
+        }
+        if (int.TryParse(dayOfWeek, out var numeric) && numeric >= 0 && numeric <= 6)
+        {
+            parsed = (DayOfWeek)numeric;
+            return true;
+        }
+        return false;
+    }
+
+    private static HolidaySettingsDto BuildHolidaySettings(BusinessProfile profile, int startYear, int endYear)
+    {
+        var countryCode = NormalizeHolidayCountryCode(profile.HolidayCountryCode);
+        var openHolidayIds = ReadOpenHolidayIds(profile);
+        var holidays = BuildPublicHolidays(countryCode, startYear, endYear)
+            .Select(holiday => holiday with { IsOpen = openHolidayIds.Contains(holiday.Id) })
+            .ToList();
+        return new HolidaySettingsDto(countryCode, SupportedHolidayCountries(), holidays);
+    }
+
+    private static IReadOnlyList<PublicHolidayDto> BuildPublicHolidays(string countryCode, int startYear, int endYear)
+    {
+        return Enumerable.Range(startYear, endYear - startYear + 1)
+            .SelectMany(year => countryCode == "US" ? BuildUnitedStatesPublicHolidays(year) : BuildSouthAfricanPublicHolidays(year))
+            .OrderBy(holiday => holiday.Date)
+            .ToList();
+    }
+
+    private static IReadOnlyList<PublicHolidayDto> BuildSouthAfricanPublicHolidays(int year)
+    {
+        var easter = CalculateEasterSunday(year);
+        var holidays = new List<(DateOnly Date, string Label)>
+        {
+            (new DateOnly(year, 1, 1), "New Year's Day"),
+            (new DateOnly(year, 3, 21), "Human Rights Day"),
+            (easter.AddDays(-2), "Good Friday"),
+            (easter.AddDays(1), "Family Day"),
+            (new DateOnly(year, 4, 27), "Freedom Day"),
+            (new DateOnly(year, 5, 1), "Workers' Day"),
+            (new DateOnly(year, 6, 16), "Youth Day"),
+            (new DateOnly(year, 8, 9), "National Women's Day"),
+            (new DateOnly(year, 9, 24), "Heritage Day"),
+            (new DateOnly(year, 12, 16), "Day of Reconciliation"),
+            (new DateOnly(year, 12, 25), "Christmas Day"),
+            (new DateOnly(year, 12, 26), "Day of Goodwill")
+        };
+
+        var observed = holidays
+            .Where(holiday => holiday.Date.DayOfWeek == DayOfWeek.Sunday)
+            .Select(holiday => (Date: holiday.Date.AddDays(1), Label: $"{holiday.Label} observed"));
+
+        return holidays.Concat(observed)
+            .OrderBy(holiday => holiday.Date)
+            .Select(holiday => new PublicHolidayDto($"ZA-{holiday.Date:yyyy-MM-dd}", "ZA", holiday.Date, holiday.Label, false))
+            .ToList();
+    }
+
+    private static IReadOnlyList<PublicHolidayDto> BuildUnitedStatesPublicHolidays(int year)
+    {
+        var holidays = new List<(DateOnly Date, string Label)>
+        {
+            (ObservedFixedHoliday(year, 1, 1), "New Year's Day"),
+            (NthWeekday(year, 1, DayOfWeek.Monday, 3), "Martin Luther King Jr. Day"),
+            (NthWeekday(year, 2, DayOfWeek.Monday, 3), "Washington's Birthday"),
+            (LastWeekday(year, 5, DayOfWeek.Monday), "Memorial Day"),
+            (ObservedFixedHoliday(year, 6, 19), "Juneteenth"),
+            (ObservedFixedHoliday(year, 7, 4), "Independence Day"),
+            (NthWeekday(year, 9, DayOfWeek.Monday, 1), "Labor Day"),
+            (NthWeekday(year, 10, DayOfWeek.Monday, 2), "Columbus Day"),
+            (ObservedFixedHoliday(year, 11, 11), "Veterans Day"),
+            (NthWeekday(year, 11, DayOfWeek.Thursday, 4), "Thanksgiving Day"),
+            (ObservedFixedHoliday(year, 12, 25), "Christmas Day")
+        };
+        return holidays
+            .OrderBy(holiday => holiday.Date)
+            .Select(holiday => new PublicHolidayDto($"US-{holiday.Date:yyyy-MM-dd}", "US", holiday.Date, holiday.Label, false))
+            .ToList();
+    }
+
+    private static string NormalizeHolidayCountryCode(string? countryCode)
+    {
+        var normalized = string.IsNullOrWhiteSpace(countryCode) ? "ZA" : countryCode.Trim().ToUpperInvariant();
+        return normalized == "US" ? "US" : "ZA";
+    }
+
+    private static IReadOnlySet<string> ReadOpenHolidayIds(BusinessProfile profile)
+    {
+        try
+        {
+            return JsonSerializer.Deserialize<string[]>(profile.OpenPublicHolidayIdsJson)?.ToHashSet(StringComparer.OrdinalIgnoreCase) ??
+                   new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        }
+        catch (JsonException)
+        {
+            return new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        }
+    }
+
+    private static IReadOnlyList<HolidayCountryDto> SupportedHolidayCountries()
+    {
+        return
+        [
+            new HolidayCountryDto("ZA", "South Africa"),
+            new HolidayCountryDto("US", "United States")
+        ];
+    }
+
+    private static DateOnly ObservedFixedHoliday(int year, int month, int day)
+    {
+        var date = new DateOnly(year, month, day);
+        return date.DayOfWeek switch
+        {
+            DayOfWeek.Saturday => date.AddDays(-1),
+            DayOfWeek.Sunday => date.AddDays(1),
+            _ => date
+        };
+    }
+
+    private static DateOnly NthWeekday(int year, int month, DayOfWeek dayOfWeek, int occurrence)
+    {
+        var date = new DateOnly(year, month, 1);
+        while (date.DayOfWeek != dayOfWeek)
+        {
+            date = date.AddDays(1);
+        }
+        return date.AddDays((occurrence - 1) * 7);
+    }
+
+    private static DateOnly LastWeekday(int year, int month, DayOfWeek dayOfWeek)
+    {
+        var date = new DateOnly(year, month, DateTime.DaysInMonth(year, month));
+        while (date.DayOfWeek != dayOfWeek)
+        {
+            date = date.AddDays(-1);
+        }
+        return date;
+    }
+
+    private static DateOnly CalculateEasterSunday(int year)
+    {
+        var a = year % 19;
+        var b = year / 100;
+        var c = year % 100;
+        var d = b / 4;
+        var e = b % 4;
+        var f = (b + 8) / 25;
+        var g = (b - f + 1) / 3;
+        var h = (19 * a + b - d - g + 15) % 30;
+        var i = c / 4;
+        var k = c % 4;
+        var l = (32 + 2 * e + 2 * i - h - k) % 7;
+        var m = (a + 11 * h + 22 * l) / 451;
+        var month = (h + l - 7 * m + 114) / 31;
+        var day = ((h + l - 7 * m + 114) % 31) + 1;
+        return new DateOnly(year, month, day);
     }
 
     private static AppointmentPaymentIntent CreatePaymentIntent(TenantId tenantId, string appointmentId, int amountCents, AppointmentPaymentChannel channel, DateTimeOffset now)
@@ -1309,7 +1621,7 @@ public sealed class AppointmentEndpoints : IEndpoints
     }
 }
 
-public sealed record AppShellResponse(BusinessProfileDto Profile, IEnumerable<AppointmentDto> Appointments, IEnumerable<ServiceDto> Services, IEnumerable<ServiceCategoryDto> Categories, IEnumerable<ClientDto> Clients, AnalyticsDto Analytics, IEnumerable<IntegrationConnectionDto> Integrations, IEnumerable<CalendarBlockDto> CalendarBlocks);
+public sealed record AppShellResponse(BusinessProfileDto Profile, IEnumerable<AppointmentDto> Appointments, IEnumerable<ServiceDto> Services, IEnumerable<ServiceCategoryDto> Categories, IEnumerable<ClientDto> Clients, AnalyticsDto Analytics, IEnumerable<IntegrationConnectionDto> Integrations, IEnumerable<AvailabilityRuleDto> AvailabilityRules, HolidaySettingsDto HolidaySettings, IEnumerable<ClosureDto> Closures, IEnumerable<CalendarBlockDto> CalendarBlocks);
 public sealed record BusinessProfileDto(string Name, string Slug, string TimeZone, string Address, bool PublicBookingEnabled);
 public sealed record AppointmentDto(string Id, string PublicReference, string ClientId, string ServiceId, string ServiceVersionId, int ServiceVersionNumber, DateTimeOffset StartAt, DateTimeOffset EndAt, string ClientName, string ClientPhone, string ClientEmail, string ServiceName, int DurationMinutes, int PriceCents, int DepositCents, string PaymentPolicy, string Status, string PaymentStatus, string Source, string Location, string AnswersJson, string ClientStatus, string? ClientAlert, string? ClientInternalNote);
 public sealed record ServiceDto(string Id, string CategoryId, string Name, string Mode, int DurationMinutes, int PriceCents, int DepositCents, string PaymentPolicy, string Location, bool IsActive, int LatestVersionNumber);
@@ -1318,6 +1630,11 @@ public sealed record ClientDto(string Id, string Name, string Phone, string Emai
 public sealed record ClientAppointmentHistoryDto(string Id, string PublicReference, DateTimeOffset StartAt, DateTimeOffset EndAt, string ServiceName, int PriceCents, int DepositCents, string PaymentPolicy, string Status, string PaymentStatus, string Source, string Location);
 public sealed record AnalyticsDto(int Bookings, int RevenueCents, int ClientsServed, int AverageBookingValueCents, decimal NoShowRate);
 public sealed record IntegrationConnectionDto(string Provider, string Capability, string Status, DateTimeOffset? LastSyncedAt);
+public sealed record AvailabilityRuleDto(string Id, string DayOfWeek, string StartTime, string EndTime);
+public sealed record HolidaySettingsDto(string CountryCode, IEnumerable<HolidayCountryDto> Countries, IEnumerable<PublicHolidayDto> Holidays);
+public sealed record HolidayCountryDto(string Code, string Name);
+public sealed record PublicHolidayDto(string Id, string CountryCode, DateOnly Date, string Label, bool IsOpen);
+public sealed record ClosureDto(string Id, DateOnly StartDate, DateOnly EndDate, string Label, string Type);
 public sealed record CalendarBlockDto(string Id, string Title, DateTimeOffset StartAt, DateTimeOffset EndAt, string Type);
 public sealed record SlotDto(DateTimeOffset StartAt, DateTimeOffset EndAt);
 public sealed record PublicBookingProfileResponse(string Name, string Slug, string TimeZone, string Address, string? LogoUrl, IEnumerable<ServiceDto> Services);
@@ -1330,6 +1647,11 @@ public sealed record PublicBookingRequest(string ServiceId, DateTimeOffset Start
 public sealed record PublicBookingCreatedResponse(string Reference, bool PaymentRequired, string? PaymentUrl);
 public sealed record CreateServiceRequest(string Name, string CategoryName, string? Description, string Mode, int DurationMinutes, int PriceCents, int DepositCents, string? PaymentPolicy, int BufferBeforeMinutes, int BufferAfterMinutes, string Location);
 public sealed record CreateCalendarBlockRequest(string Title, DateTimeOffset StartAt, DateTimeOffset EndAt, string? StaffMemberId);
+public sealed record WeeklyAvailabilityRequest(IEnumerable<AvailabilityDayRequest>? Days);
+public sealed record AvailabilityDayRequest(string DayOfWeek, IEnumerable<AvailabilityWindowRequest>? Windows);
+public sealed record AvailabilityWindowRequest(string StartTime, string EndTime);
+public sealed record HolidaySettingsRequest(string CountryCode, IEnumerable<string>? OpenHolidayIds);
+public sealed record CreateClosureRequest(DateOnly StartDate, DateOnly EndDate, string Label);
 public sealed record UpdateAppointmentStatusRequest(string Status, string? PaymentStatus);
 public sealed record UpdateClientRequest(string Name, string Phone, string Email, string Status, string? Alert, string? InternalNote);
 public sealed record PaystackInitializeRequest(string AppointmentId);

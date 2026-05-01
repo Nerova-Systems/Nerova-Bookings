@@ -29,6 +29,9 @@ export function mapShell(shell: ApiShell): AppointmentShell {
       noShowRate: `${shell.analytics.noShowRate}%`
     },
     integrations: shell.integrations,
+    availabilityRules: shell.availabilityRules,
+    holidaySettings: shell.holidaySettings,
+    closures: shell.closures,
     calendarBlocks: shell.calendarBlocks
   };
 }

@@ -26,7 +26,7 @@ const PAGES: SearchResult[] = [
   pageResult("payments", "Payments", "Appointment deposits and Paystack status", "/dashboard/payments", "Business"),
   pageResult("services", "Services", "Service catalogue, prices and deposits", "/dashboard/services", "Business"),
   pageResult("analytics", "Analytics", "Bookings, revenue, no-shows and service mix", "/dashboard/analytics", "Business"),
-  pageResult("apps", "Apps", "Google, Microsoft and Nango integrations", "/dashboard/apps", "Business")
+  pageResult("apps", "Apps", "Google, Microsoft and Nango integrations", "/dashboard/apps/store", "Business")
 ];
 
 export function CommandPalette({ open, onOpenChange }: { open: boolean; onOpenChange: (v: boolean) => void }) {
@@ -149,7 +149,7 @@ function buildAppResults(integrations: IntegrationConnection[]): SearchResult[] 
     title: `${integration.provider} ${integration.capability}`,
     detail: `${integration.status} via Nango`,
     keywords: "integration app calendar contacts email gmail outlook microsoft google nango",
-    to: "/dashboard/apps"
+    to: "/dashboard/apps/store"
   }));
 }
 

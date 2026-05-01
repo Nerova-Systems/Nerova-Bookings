@@ -87,6 +87,11 @@ export interface ClientAppointmentHistory {
 
 export interface Analytics { bookings: number; revenue: string; clientsServed: number; averageBookingValue: string; noShowRate: string }
 export interface IntegrationConnection { provider: string; capability: string; status: string; lastSyncedAt?: string }
+export interface AvailabilityRule { id: string; dayOfWeek: string; startTime: string; endTime: string }
+export interface HolidayCountry { code: string; name: string }
+export interface PublicHoliday { id: string; countryCode: string; date: string; label: string; isOpen: boolean }
+export interface HolidaySettings { countryCode: string; countries: HolidayCountry[]; holidays: PublicHoliday[] }
+export interface BusinessClosure { id: string; startDate: string; endDate: string; label: string; type: "manual" | "publicHoliday" }
 export interface CalendarBlock { id: string; title: string; startAt: string; endAt: string; type: "manual" | "external" }
 export interface Slot { startAt: string; endAt: string }
 
@@ -98,6 +103,9 @@ export interface AppointmentShell {
   clients: Client[];
   analytics: Analytics;
   integrations: IntegrationConnection[];
+  availabilityRules: AvailabilityRule[];
+  holidaySettings: HolidaySettings;
+  closures: BusinessClosure[];
   calendarBlocks: CalendarBlock[];
 }
 
@@ -117,6 +125,9 @@ export interface ApiShell {
     noShowRate: number;
   };
   integrations: IntegrationConnection[];
+  availabilityRules: AvailabilityRule[];
+  holidaySettings: HolidaySettings;
+  closures: BusinessClosure[];
   calendarBlocks: CalendarBlock[];
 }
 

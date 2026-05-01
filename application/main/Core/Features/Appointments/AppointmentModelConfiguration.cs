@@ -15,6 +15,7 @@ public sealed class BusinessProfileConfiguration : IEntityTypeConfiguration<Busi
         builder.Property(x => x.Name).HasMaxLength(160);
         builder.Property(x => x.Slug).HasMaxLength(120);
         builder.Property(x => x.LogoUrl).HasMaxLength(512);
+        builder.Property(x => x.HolidayCountryCode).HasMaxLength(8);
     }
 }
 
@@ -70,6 +71,18 @@ public sealed class AvailabilityRuleConfiguration : IEntityTypeConfiguration<Ava
     {
         builder.HasKey(x => x.Id);
         builder.MapStronglyTypedLongId<AvailabilityRule, TenantId>(x => x.TenantId);
+    }
+}
+
+public sealed class BusinessClosureConfiguration : IEntityTypeConfiguration<BusinessClosure>
+{
+    public void Configure(EntityTypeBuilder<BusinessClosure> builder)
+    {
+        builder.HasKey(x => x.Id);
+        builder.MapStronglyTypedLongId<BusinessClosure, TenantId>(x => x.TenantId);
+        builder.HasIndex(x => new { x.TenantId, x.StartDate, x.EndDate });
+        builder.Property(x => x.Label).HasMaxLength(160);
+        builder.Property(x => x.Type).HasMaxLength(32);
     }
 }
 

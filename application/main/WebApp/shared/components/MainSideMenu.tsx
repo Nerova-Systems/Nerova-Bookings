@@ -11,6 +11,9 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarMenuSub,
+  SidebarMenuSubButton,
+  SidebarMenuSubItem,
   SidebarRail
 } from "@repo/ui/components/Sidebar";
 import { Link as RouterLink, useNavigate, useRouter } from "@tanstack/react-router";
@@ -20,12 +23,13 @@ import {
   ActivityIcon,
   BarChart2Icon,
   CalendarIcon,
+  ChevronDownIcon,
   CreditCardIcon,
   Grid2X2Icon,
   PlugIcon,
   UsersIcon
 } from "lucide-react";
-import { use } from "react";
+import { use, useEffect, useState } from "react";
 
 const normalizePath = (path: string): string => path.replace(/\/$/, "") || "/";
 
@@ -38,11 +42,16 @@ export function MainSideMenu() {
   const router = useRouter();
   const currentPath = normalizePath(router.state.location.pathname);
   const navigate = useNavigate();
+  const [appsExpanded, setAppsExpanded] = useState(currentPath.startsWith("/dashboard/apps"));
   const handleNavigate = (path: string) => {
     navigate({ to: path });
   };
 
   const isActive = (path: string) => currentPath === path || currentPath.startsWith(path + "/");
+
+  useEffect(() => {
+    if (currentPath.startsWith("/dashboard/apps")) setAppsExpanded(true);
+  }, [currentPath]);
 
   return (
     <Sidebar collapsible="icon" mobileContent={<MobileMenu onNavigate={handleNavigate} />}>
@@ -131,14 +140,43 @@ export function MainSideMenu() {
                   </SidebarMenuButton>
                 </SidebarMenuItem>
                 <SidebarMenuItem>
-                  <SidebarMenuButton asChild={true} isActive={isActive("/dashboard/apps")} tooltip={t`Apps`}>
-                    <RouterLink to="/dashboard/apps">
-                      <PlugIcon />
-                      <span>
-                        <Trans>Apps</Trans>
-                      </span>
-                    </RouterLink>
+                  <SidebarMenuButton
+                    type="button"
+                    isActive={isActive("/dashboard/apps")}
+                    tooltip={t`Apps`}
+                    onClick={() => {
+                      setAppsExpanded((expanded) => !expanded);
+                      if (!isActive("/dashboard/apps")) navigate({ to: "/dashboard/apps/store" });
+                    }}
+                  >
+                    <PlugIcon />
+                    <span>
+                      <Trans>Apps</Trans>
+                    </span>
+                    <ChevronDownIcon className={`ml-auto transition-transform ${appsExpanded ? "rotate-180" : ""}`} />
                   </SidebarMenuButton>
+                  <SidebarMenuSub isExpanded={appsExpanded}>
+                    <SidebarMenuSubItem>
+                      <SidebarMenuSubButton asChild={true} isActive={isActive("/dashboard/apps/store")} tooltip={t`App store`}>
+                        <RouterLink to="/dashboard/apps/store">
+                          <Grid2X2Icon />
+                          <span>
+                            <Trans>App store</Trans>
+                          </span>
+                        </RouterLink>
+                      </SidebarMenuSubButton>
+                    </SidebarMenuSubItem>
+                    <SidebarMenuSubItem>
+                      <SidebarMenuSubButton asChild={true} isActive={isActive("/dashboard/apps/installed")} tooltip={t`Installed apps`}>
+                        <RouterLink to="/dashboard/apps/installed">
+                          <PlugIcon />
+                          <span>
+                            <Trans>Installed apps</Trans>
+                          </span>
+                        </RouterLink>
+                      </SidebarMenuSubButton>
+                    </SidebarMenuSubItem>
+                  </SidebarMenuSub>
                 </SidebarMenuItem>
               </SidebarMenu>
             </SidebarGroupContent>

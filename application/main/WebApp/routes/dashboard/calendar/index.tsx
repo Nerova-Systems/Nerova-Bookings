@@ -2,14 +2,14 @@ import { t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
 import { Button } from "@repo/ui/components/Button";
 import { createFileRoute } from "@tanstack/react-router";
-import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
+import { CalendarClockIcon, ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
 import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { toast } from "sonner";
 
-import { useWeekAvailabilitySlots } from "@/shared/lib/availabilityApi";
 import { useAppointmentShell, useCreateCalendarBlock, type Appointment } from "@/shared/lib/appointmentsApi";
 import { formatShortDate } from "@/shared/lib/dateFormatting";
 
+import { AvailabilityDialog } from "./-components/AvailabilityDialog";
 import { BlockTimeDialog, type BlockTimeForm } from "./-components/BlockTimeDialog";
 import { WeekGrid } from "./-components/WeekGrid";
 
@@ -23,18 +23,15 @@ const EMPTY_APPOINTMENTS: Appointment[] = [];
 function CalendarPage() {
   const shellQuery = useAppointmentShell();
   const appointments = shellQuery.data?.appointments ?? EMPTY_APPOINTMENTS;
-  const firstAppointmentStart = shellQuery.data?.appointments[0]?.startAt;
-  const physicalServices = (shellQuery.data?.services ?? []).filter((service) => service.mode === "physical" && !service.archived);
-  const [selectedServiceId, setSelectedServiceId] = useState<string>();
   const [customWeekStart, setCustomWeekStart] = useState<Date | null>(null);
   const [blockOpen, setBlockOpen] = useState(false);
+  const [availabilityOpen, setAvailabilityOpen] = useState(false);
   const [blockForm, setBlockForm] = useState<BlockTimeForm>({ title: "Blocked time", date: "", start: "12:00", end: "13:00" });
   const createBlock = useCreateCalendarBlock();
 
   const defaultWeekStart = useMemo(() => {
-    const firstDate = firstAppointmentStart ? new Date(firstAppointmentStart) : new Date();
-    return startOfWeek(firstDate);
-  }, [firstAppointmentStart]);
+    return startOfWeek(new Date());
+  }, []);
   const weekStart = customWeekStart ?? defaultWeekStart;
   const weekDates = useMemo(
     () =>
@@ -45,16 +42,10 @@ function CalendarPage() {
       }),
     [weekStart]
   );
-  const selectedService = physicalServices.find((service) => service.id === selectedServiceId) ?? physicalServices[0];
-  const availability = useWeekAvailabilitySlots(selectedService?.id, weekDates);
 
   useEffect(() => {
     document.title = t`Calendar | Nerova`;
   }, []);
-
-  useEffect(() => {
-    if (!selectedServiceId && physicalServices[0]) setSelectedServiceId(physicalServices[0].id);
-  }, [physicalServices, selectedServiceId]);
 
   const moveWeek = (offset: number) => {
     const next = new Date(weekStart);
@@ -99,6 +90,10 @@ function CalendarPage() {
           </span>
         </div>
         <div className="ml-auto flex items-center gap-2">
+          <Button variant="outline" size="sm" onClick={() => setAvailabilityOpen(true)}>
+            <CalendarClockIcon className="size-4" />
+            <Trans>Availability</Trans>
+          </Button>
           <Button variant="outline" size="sm" onClick={openBlockDialog}>
             <Trans>Block time</Trans>
           </Button>
@@ -133,41 +128,29 @@ function CalendarPage() {
             <span className="pl-1.5 font-display text-base font-semibold">{weekLabel(weekStart)}</span>
           </div>
           <div className="ml-auto flex items-center gap-2">
-            {physicalServices.length > 0 && (
-              <select
-                value={selectedService?.id ?? ""}
-                onChange={(event) => setSelectedServiceId(event.target.value)}
-                className="h-8 rounded-lg border border-border bg-background px-2.5 text-xs font-medium text-foreground"
-              >
-                {physicalServices.map((service) => (
-                  <option key={service.id} value={service.id}>
-                    {service.name} · v{service.latestVersionNumber}
-                  </option>
-                ))}
-              </select>
-            )}
             <div className="inline-flex items-center gap-1.5 rounded-full bg-muted px-2.5 py-1 text-xs text-muted-foreground">
               <span className="size-1.5 rounded-full bg-success shadow-[0_0_0_3px_rgba(44,122,79,0.2)]" />
-              {availability.isLoading ? <Trans>Loading availability slots</Trans> : <Trans>Live availability and busy blocks</Trans>}
-            </div>
-            <div className="inline-flex gap-0.5 rounded-lg bg-muted p-0.5">
-              {(["Day", "Week", "Month"] as const).map((v) => (
-                <button
-                  key={v}
-                  type="button"
-                  className={`rounded-md px-2.5 py-1 text-xs font-medium transition-colors ${
-                    v === "Week" ? "bg-background text-foreground shadow-sm" : "text-muted-foreground"
-                  }`}
-                >
-                  {v}
-                </button>
-              ))}
+              <Trans>Business hours and busy blocks</Trans>
             </div>
           </div>
         </div>
 
-        <WeekGrid appointments={appointments} slots={availability.slots} blocks={shellQuery.data?.calendarBlocks ?? []} weekStart={weekStart} />
+        <WeekGrid
+          appointments={appointments}
+          blocks={shellQuery.data?.calendarBlocks ?? []}
+          availabilityRules={shellQuery.data?.availabilityRules ?? []}
+          closures={shellQuery.data?.closures ?? []}
+          weekStart={weekStart}
+          timeZone={shellQuery.data?.profile.timeZone ?? "Africa/Johannesburg"}
+        />
       </div>
+      <AvailabilityDialog
+        open={availabilityOpen}
+        rules={shellQuery.data?.availabilityRules ?? []}
+        closures={shellQuery.data?.closures ?? []}
+        holidaySettings={shellQuery.data?.holidaySettings}
+        onClose={() => setAvailabilityOpen(false)}
+      />
       {blockOpen && (
         <BlockTimeDialog form={blockForm} pending={createBlock.isPending} onChange={setBlockForm} onClose={() => setBlockOpen(false)} onSubmit={submitBlock} />
       )}

@@ -54,6 +54,8 @@ public sealed class BusinessProfile : ITenantScopedEntity
     public string Address { get; set; } = "14 Main Rd, Sea Point, Cape Town";
     public string? LogoUrl { get; set; }
     public bool PublicBookingEnabled { get; set; } = true;
+    public string HolidayCountryCode { get; set; } = "ZA";
+    public string OpenPublicHolidayIdsJson { get; set; } = "[]";
 }
 
 public sealed class ServiceCategory : ITenantScopedEntity
@@ -122,6 +124,17 @@ public sealed class AvailabilityRule : ITenantScopedEntity
     public DayOfWeek DayOfWeek { get; set; }
     public TimeOnly StartTime { get; set; }
     public TimeOnly EndTime { get; set; }
+}
+
+public sealed class BusinessClosure : ITenantScopedEntity
+{
+    public string Id { get; set; } = Guid.NewGuid().ToString("N");
+    public TenantId TenantId { get; set; } = null!;
+    public DateOnly StartDate { get; set; }
+    public DateOnly EndDate { get; set; }
+    public string Label { get; set; } = string.Empty;
+    public string Type { get; set; } = "manual";
+    public DateTimeOffset CreatedAt { get; set; }
 }
 
 public sealed class ExternalBusyBlock : ITenantScopedEntity

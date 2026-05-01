@@ -31,6 +31,15 @@ msgstr "Analytics"
 msgid "Analytics | Nerova"
 msgstr "Analytics | Nerova"
 
+msgid "App details | Nerova"
+msgstr "App details | Nerova"
+
+msgid "App store"
+msgstr "App store"
+
+msgid "App store | Nerova"
+msgstr "App store | Nerova"
+
 msgid "Appointment payments settle into this business bank account through a Paystack subaccount."
 msgstr "Appointment payments settle into this business bank account through a Paystack subaccount."
 
@@ -43,14 +52,14 @@ msgstr "Appointments"
 msgid "Apps"
 msgstr "Apps"
 
-msgid "Apps | Nerova"
-msgstr "Apps | Nerova"
-
 msgid "Archived"
 msgstr "Archived"
 
 msgid "Archived services are hidden from the booking flow."
 msgstr "Archived services are hidden from the booking flow."
+
+msgid "Availability"
+msgstr "Availability"
 
 msgid "Available slots"
 msgstr "Available slots"
@@ -81,6 +90,9 @@ msgstr "Bookings over time"
 
 msgid "Business"
 msgstr "Business"
+
+msgid "Business hours and busy blocks"
+msgstr "Business hours and busy blocks"
 
 msgid "by bookings"
 msgstr "by bookings"
@@ -154,17 +166,17 @@ msgstr "Flow answers"
 msgid "Future client rewards, visit milestones, packages, and credit tracking will live here."
 msgstr "Future client rewards, visit milestones, packages, and credit tracking will live here."
 
-msgid "Google and Microsoft are priority-one integrations through Nango"
-msgstr "Google and Microsoft are priority-one integrations through Nango"
-
 msgid "Import contacts"
 msgstr "Import contacts"
 
 msgid "Information"
 msgstr "Information"
 
-msgid "Integration library"
-msgstr "Integration library"
+msgid "Installed apps"
+msgstr "Installed apps"
+
+msgid "Installed apps | Nerova"
+msgstr "Installed apps | Nerova"
 
 msgid "Internal notes"
 msgstr "Internal notes"
@@ -172,14 +184,8 @@ msgstr "Internal notes"
 msgid "Lifecycle events"
 msgstr "Lifecycle events"
 
-msgid "Live availability and busy blocks"
-msgstr "Live availability and busy blocks"
-
 msgid "Loading appointments…"
 msgstr "Loading appointments…"
-
-msgid "Loading availability slots"
-msgstr "Loading availability slots"
 
 msgid "Loading confirmation..."
 msgstr "Loading confirmation..."
@@ -339,9 +345,6 @@ msgstr "Setup required"
 
 msgid "The payment return is verified server-side before the appointment is marked paid."
 msgstr "The payment return is verified server-side before the appointment is marked paid."
-
-msgid "These app records are the foundation for calendar busy blocks, contact imports, and email handoffs."
-msgstr "These app records are the foundation for calendar busy blocks, contact imports, and email handoffs."
 
 msgid "Today"
 msgstr "Today"

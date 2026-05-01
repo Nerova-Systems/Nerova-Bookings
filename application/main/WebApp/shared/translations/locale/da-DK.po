@@ -31,6 +31,15 @@ msgstr ""
 msgid "Analytics | Nerova"
 msgstr ""
 
+msgid "App details | Nerova"
+msgstr ""
+
+msgid "App store"
+msgstr ""
+
+msgid "App store | Nerova"
+msgstr ""
+
 msgid "Appointment payments settle into this business bank account through a Paystack subaccount."
 msgstr ""
 
@@ -43,13 +52,13 @@ msgstr ""
 msgid "Apps"
 msgstr ""
 
-msgid "Apps | Nerova"
-msgstr ""
-
 msgid "Archived"
 msgstr ""
 
 msgid "Archived services are hidden from the booking flow."
+msgstr ""
+
+msgid "Availability"
 msgstr ""
 
 msgid "Available slots"
@@ -80,6 +89,9 @@ msgid "Bookings over time"
 msgstr ""
 
 msgid "Business"
+msgstr ""
+
+msgid "Business hours and busy blocks"
 msgstr ""
 
 msgid "by bookings"
@@ -154,16 +166,16 @@ msgstr ""
 msgid "Future client rewards, visit milestones, packages, and credit tracking will live here."
 msgstr ""
 
-msgid "Google and Microsoft are priority-one integrations through Nango"
-msgstr ""
-
 msgid "Import contacts"
 msgstr ""
 
 msgid "Information"
 msgstr ""
 
-msgid "Integration library"
+msgid "Installed apps"
+msgstr ""
+
+msgid "Installed apps | Nerova"
 msgstr ""
 
 msgid "Internal notes"
@@ -172,13 +184,7 @@ msgstr ""
 msgid "Lifecycle events"
 msgstr ""
 
-msgid "Live availability and busy blocks"
-msgstr ""
-
 msgid "Loading appointments…"
-msgstr ""
-
-msgid "Loading availability slots"
 msgstr ""
 
 msgid "Loading confirmation..."
@@ -338,9 +344,6 @@ msgid "Setup required"
 msgstr ""
 
 msgid "The payment return is verified server-side before the appointment is marked paid."
-msgstr ""
-
-msgid "These app records are the foundation for calendar busy blocks, contact imports, and email handoffs."
 msgstr ""
 
 msgid "Today"
