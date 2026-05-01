@@ -1,3 +1,4 @@
+/* eslint-disable max-lines-per-function */
 import { t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
 import {
@@ -20,13 +21,13 @@ import { Link as RouterLink, useNavigate, useRouter } from "@tanstack/react-rout
 import MobileMenu from "account/MobileMenu";
 import UserMenu from "account/UserMenu";
 import {
-  ActivityIcon,
   BarChart2Icon,
   CalendarIcon,
   ChevronDownIcon,
-  CreditCardIcon,
   Grid2X2Icon,
+  Clock3Icon,
   PlugIcon,
+  SettingsIcon,
   UsersIcon
 } from "lucide-react";
 import { use, useEffect, useState } from "react";
@@ -69,23 +70,23 @@ export function MainSideMenu() {
                 <SidebarMenuItem>
                   <SidebarMenuButton
                     asChild={true}
-                    isActive={isActive("/dashboard") && currentPath === "/dashboard"}
-                    tooltip={t`Activity`}
+                    isActive={isActive("/dashboard/bookings") || currentPath === "/dashboard"}
+                    tooltip={t`Bookings`}
                   >
-                    <RouterLink to="/dashboard">
-                      <ActivityIcon />
+                    <RouterLink to="/dashboard/bookings">
+                      <CalendarIcon />
                       <span>
-                        <Trans>Activity</Trans>
+                        <Trans>Bookings</Trans>
                       </span>
                     </RouterLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
                 <SidebarMenuItem>
-                  <SidebarMenuButton asChild={true} isActive={isActive("/dashboard/calendar")} tooltip={t`Calendar`}>
-                    <RouterLink to="/dashboard/calendar">
-                      <CalendarIcon />
+                  <SidebarMenuButton asChild={true} isActive={isActive("/dashboard/availability")} tooltip={t`Availability`}>
+                    <RouterLink to="/dashboard/availability">
+                      <Clock3Icon />
                       <span>
-                        <Trans>Calendar</Trans>
+                        <Trans>Availability</Trans>
                       </span>
                     </RouterLink>
                   </SidebarMenuButton>
@@ -109,16 +110,6 @@ export function MainSideMenu() {
             </SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
-                <SidebarMenuItem>
-                  <SidebarMenuButton asChild={true} isActive={isActive("/dashboard/payments")} tooltip={t`Payments`}>
-                    <RouterLink to="/dashboard/payments">
-                      <CreditCardIcon />
-                      <span>
-                        <Trans>Payments</Trans>
-                      </span>
-                    </RouterLink>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
                 <SidebarMenuItem>
                   <SidebarMenuButton asChild={true} isActive={isActive("/dashboard/services")} tooltip={t`Services`}>
                     <RouterLink to="/dashboard/services">
@@ -177,6 +168,25 @@ export function MainSideMenu() {
                       </SidebarMenuSubButton>
                     </SidebarMenuSubItem>
                   </SidebarMenuSub>
+                </SidebarMenuItem>
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+          <SidebarGroup>
+            <SidebarGroupLabel>
+              <Trans>Settings</Trans>
+            </SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild={true} isActive={isActive("/dashboard/settings/out-of-office")} tooltip={t`Out of office`}>
+                    <RouterLink to="/dashboard/settings/out-of-office">
+                      <SettingsIcon />
+                      <span>
+                        <Trans>Out of office</Trans>
+                      </span>
+                    </RouterLink>
+                  </SidebarMenuButton>
                 </SidebarMenuItem>
               </SidebarMenu>
             </SidebarGroupContent>

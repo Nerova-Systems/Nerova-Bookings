@@ -15,15 +15,19 @@ interface SearchResult {
   detail: string;
   keywords: string;
   to: string;
+  search?: Record<string, string>;
   appointmentId?: string;
   shortcut?: string;
 }
 
 const PAGES: SearchResult[] = [
-  pageResult("activity", "Activity", "Operational feed and review queue", "/dashboard", "Workspace"),
-  pageResult("calendar", "Calendar", "Availability, bookings and external busy blocks", "/dashboard/calendar", "Workspace"),
+  pageResult("bookings", "Bookings", "Booking list, calendar view, and review queue", "/dashboard/bookings", "Workspace"),
+  pageResult("availability", "Availability", "Working hours and date overrides", "/dashboard/availability", "Workspace"),
+  pageResult("out-of-office", "Out of office", "OOO dates and public holidays", "/dashboard/settings/out-of-office", "Workspace"),
   pageResult("clients", "Clients", "Client database, notes and visit history", "/dashboard/clients", "Workspace"),
-  pageResult("payments", "Payments", "Appointment deposits and Paystack status", "/dashboard/payments", "Business"),
+  pageResult("payments", "Payments", "Appointment deposits and Paystack status", "/dashboard/apps/installed", "Business", {
+    category: "Payment"
+  }),
   pageResult("services", "Services", "Service catalogue, prices and deposits", "/dashboard/services", "Business"),
   pageResult("analytics", "Analytics", "Bookings, revenue, no-shows and service mix", "/dashboard/analytics", "Business"),
   pageResult("apps", "Apps", "Google, Microsoft and Nango integrations", "/dashboard/apps/store", "Business")
@@ -39,7 +43,7 @@ export function CommandPalette({ open, onOpenChange }: { open: boolean; onOpenCh
     if (item.appointmentId) sessionStorage.setItem("nerova:selectedAppointment", item.appointmentId);
     onOpenChange(false);
     setQuery("");
-    navigate({ to: item.to });
+    navigate({ to: item.to, search: item.search });
   };
 
   return (
@@ -101,7 +105,7 @@ function buildAppointmentResults(appointments: Appointment[]): SearchResult[] {
     title: `${appointment.name} - ${appointment.service}`,
     detail: `${appointment.dayGroup} at ${appointment.time} - ${appointment.statusLabel}`,
     keywords: `${appointment.phone} ${appointment.email} ${appointment.amount} ${appointment.channel}`,
-    to: "/dashboard",
+    to: "/dashboard/bookings",
     appointmentId: appointment.id
   }));
 }
@@ -137,7 +141,7 @@ function buildPaymentResults(appointments: Appointment[]): SearchResult[] {
       title: `${appointment.statusLabel} - ${appointment.name}`,
       detail: `${appointment.amount} for ${appointment.service}`,
       keywords: `${appointment.phone} ${appointment.email} deposit paystack overdue pending payment`,
-      to: "/dashboard",
+      to: "/dashboard/bookings",
       appointmentId: appointment.id
     }));
 }
@@ -183,8 +187,8 @@ function groupResults(results: SearchResult[]) {
     .filter(([, items]) => items.length > 0);
 }
 
-function pageResult(id: string, title: string, detail: string, to: string, shortcut: string): SearchResult {
-  return { id: `page-${id}`, group: "Navigate", title, detail, keywords: `${title} ${detail}`, to, shortcut };
+function pageResult(id: string, title: string, detail: string, to: string, shortcut: string, search?: Record<string, string>): SearchResult {
+  return { id: `page-${id}`, group: "Navigate", title, detail, keywords: `${title} ${detail}`, to, shortcut, search };
 }
 
 function normalize(value: string) {

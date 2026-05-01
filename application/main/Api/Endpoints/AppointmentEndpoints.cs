@@ -1563,7 +1563,8 @@ public sealed class AppointmentEndpoints : IEndpoints
     private static async Task SeedTenantAsync(MainDbContext db, TenantId tenantId, DateTimeOffset now, CancellationToken cancellationToken)
     {
         if (await db.BusinessProfiles.AnyAsync(cancellationToken)) return;
-        var profile = new BusinessProfile { TenantId = tenantId, Name = "Sea Point studio", Slug = "sea-point-studio", LogoUrl = "/logos/sea-point-studio.svg" };
+        var profileSlug = await ResolveSeedProfileSlugAsync(db, tenantId, cancellationToken);
+        var profile = new BusinessProfile { TenantId = tenantId, Name = "Sea Point studio", Slug = profileSlug, LogoUrl = "/logos/sea-point-studio.svg" };
         var category = new ServiceCategory { TenantId = tenantId, Name = "Consultations", SortOrder = 1 };
         var group = new ServiceCategory { TenantId = tenantId, Name = "Group sessions", SortOrder = 2 };
         var staff = new StaffMember { TenantId = tenantId, Name = "Sarah", Email = "sarah@nerovasystems.com", Phone = "+27 82 000 0000" };
@@ -1581,6 +1582,29 @@ public sealed class AppointmentEndpoints : IEndpoints
         await SeedAppointmentsAsync(db, tenantId, staff, [full, express, follow, workshop], serviceVersions, now);
         await EnsureIntegrationRowsAsync(db, tenantId, cancellationToken);
         await db.SaveChangesAsync(cancellationToken);
+    }
+
+    private static async Task<string> ResolveSeedProfileSlugAsync(MainDbContext db, TenantId tenantId, CancellationToken cancellationToken)
+    {
+        const string baseSlug = "sea-point-studio";
+        if (!await db.BusinessProfiles.IgnoreQueryFilters().AnyAsync(profile => profile.Slug == baseSlug, cancellationToken))
+        {
+            return baseSlug;
+        }
+
+        var tenantSlug = $"{baseSlug}-{tenantId.Value}";
+        if (!await db.BusinessProfiles.IgnoreQueryFilters().AnyAsync(profile => profile.Slug == tenantSlug, cancellationToken))
+        {
+            return tenantSlug;
+        }
+
+        var suffix = 2;
+        while (await db.BusinessProfiles.IgnoreQueryFilters().AnyAsync(profile => profile.Slug == $"{tenantSlug}-{suffix}", cancellationToken))
+        {
+            suffix++;
+        }
+
+        return $"{tenantSlug}-{suffix}";
     }
 
     private static async Task SeedPublicDemoTenantAsync(MainDbContext db, DateTimeOffset now, CancellationToken cancellationToken)

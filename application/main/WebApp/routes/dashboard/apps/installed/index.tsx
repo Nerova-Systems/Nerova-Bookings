@@ -1,12 +1,14 @@
+/* eslint-disable max-lines */
 import { t } from "@lingui/core/macro";
 import { Button } from "@repo/ui/components/Button";
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import {
   BarChart3Icon,
   BotIcon,
   CalendarDaysIcon,
   CreditCardIcon,
   Grid3X3Icon,
+  Loader2Icon,
   MailIcon,
   PlusIcon,
   UsersIcon,
@@ -15,13 +17,20 @@ import {
 import { useEffect, useMemo, useState } from "react";
 
 import { useAppointmentShell } from "@/shared/lib/appointmentsApi";
+import { usePaymentOverview, usePaystackSettlements } from "@/shared/lib/paymentsApi";
 
 import { AppLogo } from "../-components/AppLogo";
 import { INSTALLED_CATEGORIES } from "../-components/appCategories";
 import { APP_CATALOG, type AppCategory } from "../-components/appCatalog";
+import { PaymentQueue, PaymentStatsPanel, PayoutPanel } from "../../payments/-components/PaymentsPanels";
+import { PaystackSetupDialog } from "../../payments/-components/PaystackSetupDialog";
+import { SettlementPanel } from "../../payments/-components/SettlementPanel";
 
 export const Route = createFileRoute("/dashboard/apps/installed/")({
   staticData: { trackingTitle: "Installed apps" },
+  validateSearch: (search: Record<string, unknown>): { category?: AppCategory } => ({
+    category: isInstalledCategory(search.category) ? search.category : "Calendar"
+  }),
   component: InstalledAppsPage
 });
 
@@ -37,7 +46,9 @@ const CATEGORY_ICONS = {
 };
 
 function InstalledAppsPage() {
-  const [category, setCategory] = useState<AppCategory>("Calendar");
+  const navigate = useNavigate();
+  const search = Route.useSearch();
+  const category = search.category ?? "Calendar";
   const shellQuery = useAppointmentShell();
   const googleCalendar = APP_CATALOG.find((app) => app.slug === "google-calendar") ?? APP_CATALOG[0];
   const calendarIntegration = useMemo(
@@ -64,7 +75,7 @@ function InstalledAppsPage() {
               <button
                 key={item}
                 type="button"
-                onClick={() => setCategory(item)}
+                onClick={() => navigate({ to: "/dashboard/apps/installed", search: { category: item } })}
                 className={`flex h-12 w-full items-center gap-3 rounded-xl px-4 text-left text-lg font-semibold transition-colors ${
                   category === item ? "bg-white/[0.08] text-white" : "text-white/85 hover:bg-white/5"
                 }`}
@@ -79,12 +90,53 @@ function InstalledAppsPage() {
         <section className="min-w-0">
           {category === "Calendar" ? (
             <CalendarInstalledSettings app={googleCalendar} status={calendarIntegration?.status ?? "Demo"} />
+          ) : category === "Payment" ? (
+            <PaymentInstalledSettings />
           ) : (
             <EmptyInstalledCategory category={category} />
           )}
         </section>
       </div>
     </main>
+  );
+}
+
+function PaymentInstalledSettings() {
+  const [setupOpen, setSetupOpen] = useState(false);
+  const overviewQuery = usePaymentOverview();
+  const subaccount = overviewQuery.data?.subaccount;
+  const settlementsQuery = usePaystackSettlements(Boolean(subaccount?.isActive));
+
+  return (
+    <div>
+      <div className="mb-9 flex flex-wrap items-start gap-4">
+        <div>
+          <h2 className="font-display text-3xl font-semibold">Payments</h2>
+          <p className="mt-1 text-lg text-white/50">Manage Paystack payouts, appointment payments, and settlement status</p>
+        </div>
+        <Button type="button" className="ml-auto" onClick={() => setSetupOpen(true)}>
+          {subaccount ? "Change bank details" : "Set up bank details"}
+        </Button>
+      </div>
+
+      {overviewQuery.isLoading ? (
+        <div className="flex h-64 items-center justify-center rounded-3xl border border-white/10 bg-[#202020] text-sm text-white/55">
+          <Loader2Icon className="mr-2 size-4 animate-spin" />
+          Loading payments...
+        </div>
+      ) : (
+        <div className="grid gap-5 text-foreground">
+          <PayoutPanel subaccount={subaccount} onSetup={() => setSetupOpen(true)} />
+          <PaymentStatsPanel stats={overviewQuery.data?.stats} />
+          <div className="grid gap-5 xl:grid-cols-[minmax(0,1.35fr)_minmax(22rem,0.65fr)]">
+            <PaymentQueue payments={overviewQuery.data?.recentPayments ?? []} />
+            <SettlementPanel loading={settlementsQuery.isLoading} settlements={settlementsQuery.data ?? []} hasSubaccount={Boolean(subaccount?.isActive)} />
+          </div>
+        </div>
+      )}
+
+      {setupOpen && <PaystackSetupDialog subaccount={subaccount} onClose={() => setSetupOpen(false)} />}
+    </div>
   );
 }
 
@@ -172,4 +224,8 @@ function EmptyInstalledCategory({ category }: { category: AppCategory }) {
       <p className="mt-2 text-lg text-white/50">Installed app settings for this category will appear here.</p>
     </div>
   );
+}
+
+function isInstalledCategory(value: unknown): value is AppCategory {
+  return typeof value === "string" && INSTALLED_CATEGORIES.includes(value as AppCategory);
 }

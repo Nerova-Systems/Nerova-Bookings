@@ -8,7 +8,9 @@ export function WeekGrid({
   availabilityRules,
   closures,
   weekStart,
-  timeZone
+  timeZone,
+  selectedAppointmentId,
+  onAppointmentSelect
 }: {
   appointments: Appointment[];
   blocks: CalendarBlock[];
@@ -16,6 +18,8 @@ export function WeekGrid({
   closures: BusinessClosure[];
   weekStart: Date;
   timeZone: string;
+  selectedAppointmentId?: string | null;
+  onAppointmentSelect?: (appointmentId: string) => void;
 }) {
   const range = buildHourRange(appointments, blocks, availabilityRules, weekStart);
   const days = buildDays(appointments, blocks, availabilityRules, closures, weekStart, range);
@@ -89,15 +93,29 @@ export function WeekGrid({
                     <span className="absolute -top-[4px] -left-[4px] size-2 rounded-full bg-red-500" />
                   </div>
                 )}
-                {day.events.map((event, index) => (
-                  <div
-                    key={`${day.dateKey}-${event.label}-${index}`}
-                    className={`absolute right-1.5 left-1.5 overflow-hidden rounded-md border px-2 py-1.5 text-[11px] leading-tight shadow-sm ${eventClasses(event.type)}`}
-                    style={{ top: `${event.topPct}%`, height: `${event.heightPct}%`, zIndex: event.zIndex }}
-                  >
-                    {event.label}
-                  </div>
-                ))}
+                {day.events.map((event, index) => {
+                  const isSelected = event.appointmentId && event.appointmentId === selectedAppointmentId;
+                  const className = `absolute right-1.5 left-1.5 overflow-hidden rounded-md border px-2 py-1.5 text-left text-[11px] leading-tight shadow-sm transition-[box-shadow,transform] ${eventClasses(event.type)} ${
+                    isSelected ? "ring-2 ring-white" : ""
+                  }`;
+                  const style = { top: `${event.topPct}%`, height: `${event.heightPct}%`, zIndex: event.zIndex };
+
+                  return event.appointmentId && onAppointmentSelect ? (
+                    <button
+                      key={`${day.dateKey}-${event.label}-${index}`}
+                      type="button"
+                      className={className}
+                      style={style}
+                      onClick={() => onAppointmentSelect(event.appointmentId!)}
+                    >
+                      {event.label}
+                    </button>
+                  ) : (
+                    <div key={`${day.dateKey}-${event.label}-${index}`} className={className} style={style}>
+                      {event.label}
+                    </div>
+                  );
+                })}
               </div>
             ))}
           </div>

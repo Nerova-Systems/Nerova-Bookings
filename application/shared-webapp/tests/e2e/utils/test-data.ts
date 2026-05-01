@@ -168,9 +168,13 @@ export async function completeSignupFlow(
   await page.getByRole("textbox", { name: "Last name" }).fill(user.lastName);
   await page.getByRole("button", { name: "Continue" }).click();
 
-  // Step 6: Verify redirect to dashboard after welcome flow
-  await expect(page).toHaveURL("/dashboard");
+  // Step 6: Verify redirect to the dashboard landing page after welcome flow.
+  await expect(page).toHaveURL(/\/dashboard(?:\/bookings(?:\?.*)?)?$/);
+  if (page.url().includes("/dashboard/bookings")) {
+    await expect(page.getByRole("button", { name: "Upcoming" })).toBeVisible();
+  } else {
     await expect(page.getByRole("heading", { name: "Your dashboard is empty" })).toBeVisible();
+  }
 
   // Step 6: Logout if requested (useful for login flow tests)
   if (!keepUserLoggedIn) {

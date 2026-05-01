@@ -13,13 +13,22 @@ msgstr ""
 "Plural-Forms: \n"
 "X-Generator: @lingui/cli\n"
 
-msgid "Activity"
+msgid "Add"
 msgstr ""
 
-msgid "Activity | Nerova"
+msgid "Add a redirect"
+msgstr ""
+
+msgid "Add an override"
 msgstr ""
 
 msgid "Add client"
+msgstr ""
+
+msgid "Add dates when your availability changes from your daily hours."
+msgstr ""
+
+msgid "Add OOO"
 msgstr ""
 
 msgid "Alerts"
@@ -43,9 +52,6 @@ msgstr ""
 msgid "Appointment payments settle into this business bank account through a Paystack subaccount."
 msgstr ""
 
-msgid "Appointment payments, Paystack payouts, and settlement status"
-msgstr ""
-
 msgid "Appointments"
 msgstr ""
 
@@ -61,7 +67,13 @@ msgstr ""
 msgid "Availability"
 msgstr ""
 
+msgid "Availability | Nerova"
+msgstr ""
+
 msgid "Available slots"
+msgstr ""
+
+msgid "Back"
 msgstr ""
 
 msgid "Block time"
@@ -85,22 +97,22 @@ msgstr ""
 msgid "Booking sources"
 msgstr ""
 
+msgid "Bookings"
+msgstr ""
+
+msgid "Bookings | Nerova"
+msgstr ""
+
 msgid "Bookings over time"
+msgstr ""
+
+msgid "Bookings that match this view will show up here."
 msgstr ""
 
 msgid "Business"
 msgstr ""
 
-msgid "Business hours and busy blocks"
-msgstr ""
-
 msgid "by bookings"
-msgstr ""
-
-msgid "Calendar"
-msgstr ""
-
-msgid "Calendar | Nerova"
 msgstr ""
 
 msgid "Cancel"
@@ -121,7 +133,13 @@ msgstr ""
 msgid "Close-out actions"
 msgstr ""
 
+msgid "Closed"
+msgstr ""
+
 msgid "Collect with terminal"
+msgstr ""
+
+msgid "Communicate to your bookers when you're not available to take bookings."
 msgstr ""
 
 msgid "Compare ranges"
@@ -133,6 +151,12 @@ msgstr ""
 msgid "Complete appointment"
 msgstr ""
 
+msgid "Configure times when you are available for bookings."
+msgstr ""
+
+msgid "Confirm"
+msgstr ""
+
 msgid "Confirm booking"
 msgstr ""
 
@@ -140,6 +164,12 @@ msgid "Confirming..."
 msgstr ""
 
 msgid "Connected"
+msgstr ""
+
+msgid "Create"
+msgstr ""
+
+msgid "Create an OOO"
 msgstr ""
 
 msgid "Create service"
@@ -151,6 +181,15 @@ msgstr ""
 msgid "Daily"
 msgstr ""
 
+msgid "Date overrides"
+msgstr ""
+
+msgid "Date range"
+msgstr ""
+
+msgid "Default"
+msgstr ""
+
 msgid "Done"
 msgstr ""
 
@@ -160,10 +199,22 @@ msgstr ""
 msgid "Export CSV"
 msgstr ""
 
+msgid "Filter"
+msgstr ""
+
 msgid "Flow answers"
 msgstr ""
 
 msgid "Future client rewards, visit milestones, packages, and credit tracking will live here."
+msgstr ""
+
+msgid "Go Out of Office"
+msgstr ""
+
+msgid "Holiday notice"
+msgstr ""
+
+msgid "Holidays"
 msgstr ""
 
 msgid "Import contacts"
@@ -181,16 +232,22 @@ msgstr ""
 msgid "Internal notes"
 msgstr ""
 
+msgid "Join call"
+msgstr ""
+
+msgid "Launch troubleshooter"
+msgstr ""
+
+msgid "Let your bookers know when you're OOO."
+msgstr ""
+
 msgid "Lifecycle events"
 msgstr ""
 
-msgid "Loading appointments…"
+msgid "Loading bookings..."
 msgstr ""
 
 msgid "Loading confirmation..."
-msgstr ""
-
-msgid "Loading payments..."
 msgstr ""
 
 msgid "Loyalty"
@@ -208,7 +265,13 @@ msgstr ""
 msgid "More options"
 msgstr ""
 
-msgid "New manual booking"
+msgid "My availability"
+msgstr ""
+
+msgid "My OOO"
+msgstr ""
+
+msgid "New"
 msgstr ""
 
 msgid "New service"
@@ -218,9 +281,6 @@ msgid "Next action"
 msgstr ""
 
 msgid "No appointment history yet."
-msgstr ""
-
-msgid "No appointments from today onward."
 msgstr ""
 
 msgid "No clients match your search."
@@ -241,13 +301,22 @@ msgstr ""
 msgid "No-show"
 msgstr ""
 
+msgid "Notes"
+msgstr ""
+
 msgid "Opening terminal..."
 msgstr ""
 
-msgid "Operational feed"
+msgid "Operational metrics · last 30 days"
 msgstr ""
 
-msgid "Operational metrics · last 30 days"
+msgid "Out of office"
+msgstr ""
+
+msgid "Out of office | Nerova"
+msgstr ""
+
+msgid "Overview"
 msgstr ""
 
 msgid "Payment"
@@ -259,12 +328,6 @@ msgstr ""
 msgid "Payment needs review"
 msgstr ""
 
-msgid "Payments"
-msgstr ""
-
-msgid "Payments | Nerova"
-msgstr ""
-
 msgid "Paystack payouts"
 msgstr ""
 
@@ -272,6 +335,9 @@ msgid "Powered by Nerova"
 msgstr ""
 
 msgid "Public booking"
+msgstr ""
+
+msgid "Reason"
 msgstr ""
 
 msgid "Recent appointment payments"
@@ -292,6 +358,9 @@ msgstr ""
 msgid "Restore any service to make it bookable again."
 msgstr ""
 
+msgid "Save"
+msgstr ""
+
 msgid "Save block"
 msgstr ""
 
@@ -304,16 +373,22 @@ msgstr ""
 msgid "Save service"
 msgstr ""
 
-msgid "Search bookings, clients, services, payments, apps, or jump to a screen"
+msgid "Saved filters"
 msgstr ""
 
-msgid "Search bookings, clients, services..."
+msgid "Search bookings"
+msgstr ""
+
+msgid "Search bookings, clients, services, payments, apps, or jump to a screen"
 msgstr ""
 
 msgid "Search clients…"
 msgstr ""
 
 msgid "Search Liam, overdue payments, Google Calendar, Full consultation..."
+msgstr ""
+
+msgid "Select a booking on the calendar to view details."
 msgstr ""
 
 msgid "Send appointment payments directly to your business bank account."
@@ -328,7 +403,7 @@ msgstr ""
 msgid "Services control public booking availability, pricing, deposits, and operator scheduling."
 msgstr ""
 
-msgid "Set up bank details"
+msgid "Set as default"
 msgstr ""
 
 msgid "Set up payouts"
@@ -337,13 +412,31 @@ msgstr ""
 msgid "Set up Paystack payouts"
 msgstr ""
 
+msgid "Settings"
+msgstr ""
+
 msgid "Settlements"
 msgstr ""
 
 msgid "Setup required"
 msgstr ""
 
+msgid "Show note on public booking page"
+msgstr ""
+
+msgid "Something doesn't look right?"
+msgstr ""
+
+msgid "Team availability"
+msgstr ""
+
+msgid "Temporarily out-of-office?"
+msgstr ""
+
 msgid "The payment return is verified server-side before the appointment is marked paid."
+msgstr ""
+
+msgid "Timezone"
 msgstr ""
 
 msgid "Today"
@@ -361,9 +454,6 @@ msgstr ""
 msgid "View booking"
 msgstr ""
 
-msgid "View calendar"
-msgstr ""
-
 msgid "View full profile →"
 msgstr ""
 
@@ -373,7 +463,13 @@ msgstr ""
 msgid "We could not verify this payment reference yet."
 msgstr ""
 
-msgid "Week view · Africa/Johannesburg"
+msgid "We will automatically mark you as unavailable for the selected holidays"
+msgstr ""
+
+msgid "Working hours"
+msgstr ""
+
+msgid "Working hours | Nerova"
 msgstr ""
 
 msgid "Workspace"

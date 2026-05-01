@@ -5,6 +5,7 @@ import { formatDayNumber, formatWeekday } from "@/shared/lib/dateFormatting";
 type EventType = "confirmed" | "pending" | "sync" | "blocked";
 
 interface PositionedItem {
+  appointmentId?: string;
   label: string;
   type: EventType;
   topPct: number;
@@ -143,6 +144,7 @@ function toAppointmentItem(appointment: Appointment, startHour: number, totalMin
   const end = new Date(appointment.endAt);
   const type = appointment.status === "confirmed" ? "confirmed" : "pending";
   return {
+    appointmentId: appointment.id,
     label: `${appointment.time} ${appointment.name} - ${appointment.statusLabel} - v${appointment.serviceVersionNumber}`,
     type,
     ...position(start, end, startHour, totalMinutes),
