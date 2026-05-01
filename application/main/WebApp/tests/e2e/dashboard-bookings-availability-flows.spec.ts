@@ -39,6 +39,7 @@ test.describe("@smoke", () => {
     await step("Open Out of office tabs")(async () => {
       await ownerPage.goto("/dashboard/settings/out-of-office");
 
+      await expect(ownerPage).toHaveURL(/\/user\/out-of-office/);
       await expect(ownerPage.getByRole("heading", { name: "Out of office" })).toBeVisible();
       await expect(ownerPage.getByRole("button", { name: "My OOO" })).toBeVisible();
       await ownerPage.getByRole("button", { name: "Holidays" }).click();

@@ -164,7 +164,11 @@ function BookingsPage() {
           <Trans>Loading bookings...</Trans>
         </div>
       ) : view === "calendar" ? (
-        <div className="grid min-h-0 flex-1 grid-cols-[minmax(0,1fr)_minmax(25rem,38vw)] overflow-hidden max-xl:grid-cols-1">
+        <div
+          className={`grid min-h-0 flex-1 overflow-hidden ${
+            selectedAppointment ? "grid-cols-[minmax(0,1fr)_minmax(25rem,38vw)] max-xl:grid-cols-1" : "grid-cols-1"
+          }`}
+        >
           <main className="min-h-0 overflow-y-auto px-5 py-5">
             <div className="mb-4 flex flex-wrap items-center gap-2">
               <Button variant="outline" size="sm" className="border-white/15 bg-transparent text-white hover:bg-white/[0.08]" onClick={() => setCustomWeekStart(null)}>
@@ -199,14 +203,16 @@ function BookingsPage() {
               onAppointmentSelect={setSelectedId}
             />
           </main>
-          <BookingDrawer
-            appointment={selectedAppointment}
-            onClose={() => setSelectedId(null)}
-            onConfirm={confirmBooking}
-            onStatusChange={updateStatus}
-            onCreateTerminalPayment={createTerminalPayment}
-            isCreatingTerminalPayment={terminalPaymentMutation.isPending}
-          />
+          {selectedAppointment && (
+            <BookingDrawer
+              appointment={selectedAppointment}
+              onClose={() => setSelectedId(null)}
+              onConfirm={confirmBooking}
+              onStatusChange={updateStatus}
+              onCreateTerminalPayment={createTerminalPayment}
+              isCreatingTerminalPayment={terminalPaymentMutation.isPending}
+            />
+          )}
         </div>
       ) : (
           <BookingsList

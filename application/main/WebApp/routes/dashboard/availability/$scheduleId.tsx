@@ -107,7 +107,7 @@ function EditAvailabilityPage() {
         <p className="mt-2 text-base text-white/65">
           <Trans>Add dates when your availability changes from your daily hours.</Trans>
         </p>
-        <Button variant="outline" size="sm" className="mt-6 border-white/15 bg-transparent text-white hover:bg-white/[0.08]" onClick={() => navigate({ to: "/dashboard/settings/out-of-office" })}>
+        <Button variant="outline" size="sm" className="mt-6 border-white/15 bg-transparent text-white hover:bg-white/[0.08]" onClick={() => navigate({ href: "/user/out-of-office" })}>
           <Trans>Add an override</Trans>
         </Button>
       </section>

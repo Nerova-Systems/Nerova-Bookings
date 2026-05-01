@@ -1,3 +1,4 @@
+/* eslint-disable max-lines-per-function */
 import { t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
 import { authSyncService } from "@repo/infrastructure/auth/AuthSyncService";
@@ -9,7 +10,17 @@ import { Button } from "@repo/ui/components/Button";
 import { overlayContext } from "@repo/ui/components/Sidebar";
 import { useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
-import { ChevronDownIcon, LogOutIcon, MonitorSmartphoneIcon, SlidersHorizontalIcon, UserIcon } from "lucide-react";
+import {
+  BellIcon,
+  CalendarDaysIcon,
+  ChevronDownIcon,
+  Clock3Icon,
+  LogOutIcon,
+  MonitorSmartphoneIcon,
+  SlidersHorizontalIcon,
+  UserIcon,
+  VideoIcon
+} from "lucide-react";
 import { useContext, useState } from "react";
 
 import { logoutApi, type TenantInfo } from "../common/tenantUtils";
@@ -101,14 +112,58 @@ export function MobileMenuContent({
               </Button>
               <Button
                 variant="ghost"
-                onClick={() => navigateTo("/user/preferences")}
-                className={menuItemClassName(pathname, "/user/preferences")}
-                aria-label={t`User preferences`}
+                onClick={() => navigateTo("/user/general")}
+                className={menuItemClassName(pathname, "/user/general")}
+                aria-label={t`General`}
               >
                 <div className="flex size-6 shrink-0 items-center justify-center">
                   <SlidersHorizontalIcon className="size-5 stroke-current" />
                 </div>
-                <Trans>Preferences</Trans>
+                <Trans>General</Trans>
+              </Button>
+              <Button
+                variant="ghost"
+                onClick={() => navigateTo("/user/calendars")}
+                className={menuItemClassName(pathname, "/user/calendars")}
+                aria-label={t`Calendars`}
+              >
+                <div className="flex size-6 shrink-0 items-center justify-center">
+                  <CalendarDaysIcon className="size-5 stroke-current" />
+                </div>
+                <Trans>Calendars</Trans>
+              </Button>
+              <Button
+                variant="ghost"
+                onClick={() => navigateTo("/user/conferencing")}
+                className={menuItemClassName(pathname, "/user/conferencing")}
+                aria-label={t`Conferencing`}
+              >
+                <div className="flex size-6 shrink-0 items-center justify-center">
+                  <VideoIcon className="size-5 stroke-current" />
+                </div>
+                <Trans>Conferencing</Trans>
+              </Button>
+              <Button
+                variant="ghost"
+                onClick={() => navigateTo("/user/out-of-office")}
+                className={menuItemClassName(pathname, "/user/out-of-office")}
+                aria-label={t`Out of office`}
+              >
+                <div className="flex size-6 shrink-0 items-center justify-center">
+                  <Clock3Icon className="size-5 stroke-current" />
+                </div>
+                <Trans>Out of office</Trans>
+              </Button>
+              <Button
+                variant="ghost"
+                onClick={() => navigateTo("/user/push-notifications")}
+                className={menuItemClassName(pathname, "/user/push-notifications")}
+                aria-label={t`Push notifications`}
+              >
+                <div className="flex size-6 shrink-0 items-center justify-center">
+                  <BellIcon className="size-5 stroke-current" />
+                </div>
+                <Trans>Push notifications</Trans>
               </Button>
               <Button
                 variant="ghost"

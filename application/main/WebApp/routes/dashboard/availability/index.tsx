@@ -85,7 +85,7 @@ function AvailabilityPage() {
         <button
           type="button"
           className="font-semibold underline underline-offset-4"
-          onClick={() => navigate({ to: "/dashboard/settings/out-of-office" })}
+          onClick={() => navigate({ href: "/user/out-of-office" })}
         >
           <Trans>Add a redirect</Trans>
         </button>

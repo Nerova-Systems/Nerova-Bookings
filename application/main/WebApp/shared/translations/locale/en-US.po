@@ -13,9 +13,6 @@ msgstr ""
 "Language-Team: \n"
 "Plural-Forms: \n"
 
-msgid "Add"
-msgstr "Add"
-
 msgid "Add a redirect"
 msgstr "Add a redirect"
 
@@ -27,9 +24,6 @@ msgstr "Add client"
 
 msgid "Add dates when your availability changes from your daily hours."
 msgstr "Add dates when your availability changes from your daily hours."
-
-msgid "Add OOO"
-msgstr "Add OOO"
 
 msgid "Alerts"
 msgstr "Alerts"
@@ -72,9 +66,6 @@ msgstr "Availability | Nerova"
 
 msgid "Available slots"
 msgstr "Available slots"
-
-msgid "Back"
-msgstr "Back"
 
 msgid "Block time"
 msgstr "Block time"
@@ -139,9 +130,6 @@ msgstr "Closed"
 msgid "Collect with terminal"
 msgstr "Collect with terminal"
 
-msgid "Communicate to your bookers when you're not available to take bookings."
-msgstr "Communicate to your bookers when you're not available to take bookings."
-
 msgid "Compare ranges"
 msgstr "Compare ranges"
 
@@ -166,12 +154,6 @@ msgstr "Confirming..."
 msgid "Connected"
 msgstr "Connected"
 
-msgid "Create"
-msgstr "Create"
-
-msgid "Create an OOO"
-msgstr "Create an OOO"
-
 msgid "Create service"
 msgstr "Create service"
 
@@ -183,9 +165,6 @@ msgstr "Daily"
 
 msgid "Date overrides"
 msgstr "Date overrides"
-
-msgid "Date range"
-msgstr "Date range"
 
 msgid "Default"
 msgstr "Default"
@@ -208,15 +187,6 @@ msgstr "Flow answers"
 msgid "Future client rewards, visit milestones, packages, and credit tracking will live here."
 msgstr "Future client rewards, visit milestones, packages, and credit tracking will live here."
 
-msgid "Go Out of Office"
-msgstr "Go Out of Office"
-
-msgid "Holiday notice"
-msgstr "Holiday notice"
-
-msgid "Holidays"
-msgstr "Holidays"
-
 msgid "Import contacts"
 msgstr "Import contacts"
 
@@ -237,9 +207,6 @@ msgstr "Join call"
 
 msgid "Launch troubleshooter"
 msgstr "Launch troubleshooter"
-
-msgid "Let your bookers know when you're OOO."
-msgstr "Let your bookers know when you're OOO."
 
 msgid "Lifecycle events"
 msgstr "Lifecycle events"
@@ -267,9 +234,6 @@ msgstr "More options"
 
 msgid "My availability"
 msgstr "My availability"
-
-msgid "My OOO"
-msgstr "My OOO"
 
 msgid "New"
 msgstr "New"
@@ -301,23 +265,11 @@ msgstr "No results found."
 msgid "No-show"
 msgstr "No-show"
 
-msgid "Notes"
-msgstr "Notes"
-
 msgid "Opening terminal..."
 msgstr "Opening terminal..."
 
 msgid "Operational metrics · last 30 days"
 msgstr "Operational metrics · last 30 days"
-
-msgid "Out of office"
-msgstr "Out of office"
-
-msgid "Out of office | Nerova"
-msgstr "Out of office | Nerova"
-
-msgid "Overview"
-msgstr "Overview"
 
 msgid "Payment"
 msgstr "Payment"
@@ -336,9 +288,6 @@ msgstr "Powered by Nerova"
 
 msgid "Public booking"
 msgstr "Public booking"
-
-msgid "Reason"
-msgstr "Reason"
 
 msgid "Recent appointment payments"
 msgstr "Recent appointment payments"
@@ -372,9 +321,6 @@ msgstr "Save payout account"
 
 msgid "Save service"
 msgstr "Save service"
-
-msgid "Saved filters"
-msgstr "Saved filters"
 
 msgid "Search bookings"
 msgstr "Search bookings"
@@ -412,17 +358,11 @@ msgstr "Set up payouts"
 msgid "Set up Paystack payouts"
 msgstr "Set up Paystack payouts"
 
-msgid "Settings"
-msgstr "Settings"
-
 msgid "Settlements"
 msgstr "Settlements"
 
 msgid "Setup required"
 msgstr "Setup required"
-
-msgid "Show note on public booking page"
-msgstr "Show note on public booking page"
 
 msgid "Something doesn't look right?"
 msgstr "Something doesn't look right?"
@@ -462,9 +402,6 @@ msgstr "Waiting for Paystack verification. Payment state updates from verified c
 
 msgid "We could not verify this payment reference yet."
 msgstr "We could not verify this payment reference yet."
-
-msgid "We will automatically mark you as unavailable for the selected holidays"
-msgstr "We will automatically mark you as unavailable for the selected holidays"
 
 msgid "Working hours"
 msgstr "Working hours"

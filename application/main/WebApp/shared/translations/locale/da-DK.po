@@ -13,9 +13,6 @@ msgstr ""
 "Plural-Forms: \n"
 "X-Generator: @lingui/cli\n"
 
-msgid "Add"
-msgstr ""
-
 msgid "Add a redirect"
 msgstr ""
 
@@ -26,9 +23,6 @@ msgid "Add client"
 msgstr ""
 
 msgid "Add dates when your availability changes from your daily hours."
-msgstr ""
-
-msgid "Add OOO"
 msgstr ""
 
 msgid "Alerts"
@@ -71,9 +65,6 @@ msgid "Availability | Nerova"
 msgstr ""
 
 msgid "Available slots"
-msgstr ""
-
-msgid "Back"
 msgstr ""
 
 msgid "Block time"
@@ -139,9 +130,6 @@ msgstr ""
 msgid "Collect with terminal"
 msgstr ""
 
-msgid "Communicate to your bookers when you're not available to take bookings."
-msgstr ""
-
 msgid "Compare ranges"
 msgstr ""
 
@@ -166,12 +154,6 @@ msgstr ""
 msgid "Connected"
 msgstr ""
 
-msgid "Create"
-msgstr ""
-
-msgid "Create an OOO"
-msgstr ""
-
 msgid "Create service"
 msgstr ""
 
@@ -182,9 +164,6 @@ msgid "Daily"
 msgstr ""
 
 msgid "Date overrides"
-msgstr ""
-
-msgid "Date range"
 msgstr ""
 
 msgid "Default"
@@ -208,15 +187,6 @@ msgstr ""
 msgid "Future client rewards, visit milestones, packages, and credit tracking will live here."
 msgstr ""
 
-msgid "Go Out of Office"
-msgstr ""
-
-msgid "Holiday notice"
-msgstr ""
-
-msgid "Holidays"
-msgstr ""
-
 msgid "Import contacts"
 msgstr ""
 
@@ -236,9 +206,6 @@ msgid "Join call"
 msgstr ""
 
 msgid "Launch troubleshooter"
-msgstr ""
-
-msgid "Let your bookers know when you're OOO."
 msgstr ""
 
 msgid "Lifecycle events"
@@ -266,9 +233,6 @@ msgid "More options"
 msgstr ""
 
 msgid "My availability"
-msgstr ""
-
-msgid "My OOO"
 msgstr ""
 
 msgid "New"
@@ -301,22 +265,10 @@ msgstr ""
 msgid "No-show"
 msgstr ""
 
-msgid "Notes"
-msgstr ""
-
 msgid "Opening terminal..."
 msgstr ""
 
 msgid "Operational metrics · last 30 days"
-msgstr ""
-
-msgid "Out of office"
-msgstr ""
-
-msgid "Out of office | Nerova"
-msgstr ""
-
-msgid "Overview"
 msgstr ""
 
 msgid "Payment"
@@ -335,9 +287,6 @@ msgid "Powered by Nerova"
 msgstr ""
 
 msgid "Public booking"
-msgstr ""
-
-msgid "Reason"
 msgstr ""
 
 msgid "Recent appointment payments"
@@ -371,9 +320,6 @@ msgid "Save payout account"
 msgstr ""
 
 msgid "Save service"
-msgstr ""
-
-msgid "Saved filters"
 msgstr ""
 
 msgid "Search bookings"
@@ -412,16 +358,10 @@ msgstr ""
 msgid "Set up Paystack payouts"
 msgstr ""
 
-msgid "Settings"
-msgstr ""
-
 msgid "Settlements"
 msgstr ""
 
 msgid "Setup required"
-msgstr ""
-
-msgid "Show note on public booking page"
 msgstr ""
 
 msgid "Something doesn't look right?"
@@ -461,9 +401,6 @@ msgid "Waiting for Paystack verification. Payment state updates from verified ca
 msgstr ""
 
 msgid "We could not verify this payment reference yet."
-msgstr ""
-
-msgid "We will automatically mark you as unavailable for the selected holidays"
 msgstr ""
 
 msgid "Working hours"

@@ -6,10 +6,10 @@ import { step } from "@shared/e2e/utils/test-step-wrapper";
 
 test.describe("@comprehensive", () => {
   /**
-   * Tests theme switching functionality via preferences page across different viewport sizes.
+   * Tests theme switching functionality via general settings page across different viewport sizes.
    * Covers:
    * - CSP nonce configuration in meta tag and response headers
-   * - Theme switching between light, dark, and system modes via preferences page
+   * - Theme switching between light, dark, and system modes via general settings page
    * - Theme persistence across page reloads
    * - Theme persistence across navigation
    * - Theme behavior at different viewport sizes (mobile, tablet, desktop, 4K)
@@ -36,9 +36,9 @@ test.describe("@comprehensive", () => {
       expect(cspHeader).toContain("style-src");
     })();
 
-    await step("Navigate to preferences page & select dark theme")(async () => {
-      await ownerPage.goto("/user/preferences");
-      await expect(ownerPage.getByRole("heading", { name: "Preferences" })).toBeVisible();
+    await step("Navigate to general settings page & select dark theme")(async () => {
+      await ownerPage.goto("/user/general");
+      await expect(ownerPage.getByRole("heading", { name: "General" })).toBeVisible();
 
       await ownerPage.getByRole("button", { name: "Dark" }).click();
 
@@ -48,7 +48,7 @@ test.describe("@comprehensive", () => {
     await step("Reload page & verify dark theme persists")(async () => {
       await ownerPage.reload();
 
-      await expect(ownerPage.getByRole("heading", { name: "Preferences" })).toBeVisible();
+      await expect(ownerPage.getByRole("heading", { name: "General" })).toBeVisible();
       await expect(ownerPage.locator("html")).toHaveClass("dark");
     })();
 
@@ -60,9 +60,9 @@ test.describe("@comprehensive", () => {
       await expect(ownerPage.locator("html")).toHaveClass("dark");
     })();
 
-    await step("Navigate to preferences & select system theme")(async () => {
-      await ownerPage.goto("/user/preferences");
-      await expect(ownerPage.getByRole("heading", { name: "Preferences" })).toBeVisible();
+    await step("Navigate to general settings & select system theme")(async () => {
+      await ownerPage.goto("/user/general");
+      await expect(ownerPage.getByRole("heading", { name: "General" })).toBeVisible();
 
       await ownerPage.getByRole("button", { name: "System" }).click();
 
@@ -79,9 +79,9 @@ test.describe("@comprehensive", () => {
       await expect(ownerPage.locator("html")).not.toHaveClass("dark");
     })();
 
-    await step("Navigate to preferences at 4K & select dark theme")(async () => {
-      await ownerPage.goto("/user/preferences");
-      await expect(ownerPage.getByRole("heading", { name: "Preferences" })).toBeVisible();
+    await step("Navigate to general settings at 4K & select dark theme")(async () => {
+      await ownerPage.goto("/user/general");
+      await expect(ownerPage.getByRole("heading", { name: "General" })).toBeVisible();
 
       await ownerPage.getByRole("button", { name: "Dark" }).click();
 
@@ -119,9 +119,9 @@ test.describe("@comprehensive", () => {
       await expect(ownerPage.getByRole("button", { name: "User menu" })).not.toBeVisible();
     })();
 
-    await step("Navigate to preferences on mobile & switch to light theme")(async () => {
-      await ownerPage.goto("/user/preferences");
-      await expect(ownerPage.getByRole("heading", { name: "Preferences" })).toBeVisible();
+    await step("Navigate to general settings on mobile & switch to light theme")(async () => {
+      await ownerPage.goto("/user/general");
+      await expect(ownerPage.getByRole("heading", { name: "General" })).toBeVisible();
 
       await ownerPage.getByRole("button", { name: "Light" }).click();
 
@@ -138,9 +138,9 @@ test.describe("@comprehensive", () => {
       await expect(ownerPage.getByRole("button", { name: "Toggle sidebar" })).toBeVisible();
     })();
 
-    await step("Navigate to preferences & set dark theme before session test")(async () => {
-      await ownerPage.goto("/user/preferences");
-      await expect(ownerPage.getByRole("heading", { name: "Preferences" })).toBeVisible();
+    await step("Navigate to general settings & set dark theme before session test")(async () => {
+      await ownerPage.goto("/user/general");
+      await expect(ownerPage.getByRole("heading", { name: "General" })).toBeVisible();
 
       await ownerPage.getByRole("button", { name: "Dark" }).click();
 
@@ -162,7 +162,7 @@ test.describe("@comprehensive", () => {
   /**
    * Tests theme persistence across logout/login cycles, 404 page, and error page functionality.
    * Covers:
-   * - Theme switching via preferences page
+   * - Theme switching via general settings page
    * - Theme persistence across logout and login cycles
    * - 404 page displays for non-existent routes
    * - Error page can be triggered via Konami code
@@ -192,9 +192,9 @@ test.describe("@comprehensive", () => {
       await expect(page.getByRole("heading", { name: "Overview" })).toBeVisible();
     })();
 
-    await step("Navigate to preferences & select dark theme")(async () => {
-      await page.goto("/user/preferences");
-      await expect(page.getByRole("heading", { name: "Preferences" })).toBeVisible();
+    await step("Navigate to general settings & select dark theme")(async () => {
+      await page.goto("/user/general");
+      await expect(page.getByRole("heading", { name: "General" })).toBeVisible();
 
       await page.getByRole("button", { name: "Dark" }).click();
 

@@ -55,9 +55,9 @@ export function UserMenuDropdownContent({
 
       <UserProfileCard userInfo={userInfo} onNavigateToProfile={onNavigateToProfile} />
 
-      <DropdownMenuItem onClick={onNavigateToPreferences} aria-label={t`Change user preferences`}>
+      <DropdownMenuItem onClick={onNavigateToPreferences} aria-label={t`General user settings`}>
         <SlidersHorizontalIcon className="size-5" />
-        <Trans>Preferences</Trans>
+        <Trans>General</Trans>
       </DropdownMenuItem>
 
       <DropdownMenuItem onClick={onLogout} aria-label={t`Log out`}>

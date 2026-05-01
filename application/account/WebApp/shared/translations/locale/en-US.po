@@ -199,11 +199,20 @@ msgstr "Active users"
 msgid "Active users in the past 30 days"
 msgstr "Active users in the past 30 days"
 
+msgid "Add"
+msgstr "Add"
+
 msgid "Add an extra layer of security to your account."
 msgstr "Add an extra layer of security to your account."
 
 msgid "Add billing information"
 msgstr "Add billing information"
+
+msgid "Add calendar"
+msgstr "Add calendar"
+
+msgid "Add events to"
+msgstr "Add events to"
 
 msgid "Add more in the Users menu"
 msgstr "Add more in the Users menu"
@@ -214,11 +223,17 @@ msgstr "Add notes about this recipe"
 msgid "Add notes here"
 msgstr "Add notes here"
 
+msgid "Add OOO"
+msgstr "Add OOO"
+
 msgid "Add profile picture"
 msgstr "Add profile picture"
 
 msgid "Add recipe"
 msgstr "Add recipe"
+
+msgid "Add to calendar"
+msgstr "Add to calendar"
 
 msgid "Add to favorites"
 msgstr "Add to favorites"
@@ -229,11 +244,20 @@ msgstr "Add your account name"
 msgid "Add your account name and logo."
 msgstr "Add your account name and logo."
 
+msgid "Add your favourite video conferencing apps for your meetings"
+msgstr "Add your favourite video conferencing apps for your meetings"
+
 msgid "Add your first recipe to start building your personal cookbook."
 msgstr "Add your first recipe to start building your personal cookbook."
 
 msgid "Added"
 msgstr "Added"
+
+msgid "Adding events to"
+msgstr "Adding events to"
+
+msgid "Additional notes"
+msgstr "Additional notes"
 
 msgid "Address (fixed 2 lines)"
 msgstr "Address (fixed 2 lines)"
@@ -279,6 +303,18 @@ msgstr "All modifiers"
 
 msgid "All users"
 msgstr "All users"
+
+msgid "Allow attendees to book through dynamic group bookings"
+msgstr "Allow attendees to book through dynamic group bookings"
+
+msgid "Allow browser notifications"
+msgstr "Allow browser notifications"
+
+msgid "Allow search engine indexing"
+msgstr "Allow search engine indexing"
+
+msgid "Allow search engines to access your public content"
+msgstr "Allow search engines to access your public content"
 
 msgid "Always underlined"
 msgstr "Always underlined"
@@ -474,6 +510,18 @@ msgstr "Breadcrumb — simple"
 msgid "Browse all recipes"
 msgstr "Browse all recipes"
 
+msgid "Browser notifications"
+msgstr "Browser notifications"
+
+msgid "Browser notifications are not supported in this browser."
+msgstr "Browser notifications are not supported in this browser."
+
+msgid "Browser notifications enabled."
+msgstr "Browser notifications enabled."
+
+msgid "Browser notifications were not enabled."
+msgstr "Browser notifications were not enabled."
+
 msgid "Built on <0>PlatformPlatform<1/></0> - an open-source platform by industry experts showcasing how to build enterprise-grade B2B SaaS products"
 msgstr "Built on <0>PlatformPlatform<1/></0> - an open-source platform by industry experts showcasing how to build enterprise-grade B2B SaaS products"
 
@@ -507,6 +555,9 @@ msgstr "By continuing, you accept our policies"
 msgid "By default only one item is open at a time. Pass openMultiple to allow several panels to stay open together."
 msgstr "By default only one item is open at a time. Pass openMultiple to allow several panels to stay open together."
 
+msgid "Cal Video is the in-house web-based video conferencing platform powered by Daily.co."
+msgstr "Cal Video is the in-house web-based video conferencing platform powered by Daily.co."
+
 msgid "Calendar"
 msgstr "Calendar"
 
@@ -518,6 +569,18 @@ msgstr "Calendar (range)"
 
 msgid "Calendar (single)"
 msgstr "Calendar (single)"
+
+msgid "Calendar connection setup is coming next."
+msgstr "Calendar connection setup is coming next."
+
+msgid "Calendar disconnect management is coming next."
+msgstr "Calendar disconnect management is coming next."
+
+msgid "Calendar sync settings are coming next."
+msgstr "Calendar sync settings are coming next."
+
+msgid "Calendars"
+msgstr "Calendars"
 
 msgid "Can change ingredients and instructions"
 msgstr "Can change ingredients and instructions"
@@ -591,9 +654,6 @@ msgstr "Change role"
 msgid "Change theme"
 msgstr "Change theme"
 
-msgid "Change user preferences"
-msgstr "Change user preferences"
-
 msgid "Change user role"
 msgstr "Change user role"
 
@@ -615,6 +675,9 @@ msgstr "Changing to {0} {1} on {formattedPeriodEndLong}"
 msgid "Charts"
 msgstr "Charts"
 
+msgid "Check for conflicts"
+msgstr "Check for conflicts"
+
 msgid "Check your spam folder."
 msgstr "Check your spam folder."
 
@@ -632,6 +695,9 @@ msgstr "Chiles rellenos"
 
 msgid "Choose a plan to get started."
 msgstr "Choose a plan to get started."
+
+msgid "Choose an OOO start date."
+msgstr "Choose an OOO start date."
 
 msgid "Choose how the application looks to you on this device."
 msgstr "Choose how the application looks to you on this device."
@@ -665,6 +731,9 @@ msgstr "Close recipe details"
 
 msgid "Close user profile"
 msgstr "Close user profile"
+
+msgid "Closed by default. Toggle a holiday on when the business is open."
+msgstr "Closed by default. Toggle a holiday on when the business is open."
 
 msgid "Co-author"
 msgstr "Co-author"
@@ -708,14 +777,32 @@ msgstr "Command"
 msgid "Command palette"
 msgstr "Command palette"
 
+msgid "Communicate to your bookers when you're not available to take bookings."
+msgstr "Communicate to your bookers when you're not available to take bookings."
+
 msgid "Components"
 msgstr "Components"
+
+msgid "Conferencing"
+msgstr "Conferencing"
+
+msgid "Conferencing app management is coming next."
+msgstr "Conferencing app management is coming next."
+
+msgid "Configure how your event types interact with your calendars"
+msgstr "Configure how your event types interact with your calendars"
 
 msgid "Confirm action"
 msgstr "Confirm action"
 
 msgid "Confirm downgrade"
 msgstr "Confirm downgrade"
+
+msgid "Conflict calendar connection is coming next."
+msgstr "Conflict calendar connection is coming next."
+
+msgid "Connected accounts"
+msgstr "Connected accounts"
 
 msgid "Contact support"
 msgstr "Contact support"
@@ -756,11 +843,26 @@ msgstr "Cooking time"
 msgid "Coq au vin"
 msgstr "Coq au vin"
 
+msgid "Could not create OOO."
+msgstr "Could not create OOO."
+
+msgid "Could not remove OOO."
+msgstr "Could not remove OOO."
+
+msgid "Could not update public holiday."
+msgstr "Could not update public holiday."
+
+msgid "Could not update public holidays."
+msgstr "Could not update public holidays."
+
 msgid "Country"
 msgstr "Country"
 
 msgid "Create"
 msgstr "Create"
+
+msgid "Create an OOO"
+msgstr "Create an OOO"
 
 msgid "Create new account"
 msgstr "Create new account"
@@ -800,9 +902,6 @@ msgstr "Current plan"
 
 msgid "Customer deleted"
 msgstr "Customer deleted"
-
-msgid "Customize your theme, language, and zoom settings."
-msgstr "Customize your theme, language, and zoom settings."
 
 msgid "Danger zone"
 msgstr "Danger zone"
@@ -863,6 +962,9 @@ msgstr "Default"
 
 msgid "Default alert"
 msgstr "Default alert"
+
+msgid "Default reminder"
+msgstr "Default reminder"
 
 msgid "Delete"
 msgstr "Delete"
@@ -990,6 +1092,9 @@ msgstr "Dropzone"
 
 msgid "Duplicate"
 msgstr "Duplicate"
+
+msgid "Dynamic group links"
+msgstr "Dynamic group links"
 
 msgid "E.g. Acme Corp"
 msgstr "E.g. Acme Corp"
@@ -1140,6 +1245,9 @@ msgstr "Features"
 msgid "Feel free to reach out with any questions or issues you may have."
 msgstr "Feel free to reach out with any questions or issues you may have."
 
+msgid "Filter"
+msgstr "Filter"
+
 msgid "Filters"
 msgstr "Filters"
 
@@ -1203,11 +1311,23 @@ msgstr "GDPR compliant"
 msgid "GDPR Compliant"
 msgstr "GDPR Compliant"
 
+msgid "General"
+msgstr "General"
+
+msgid "General settings saved."
+msgstr "General settings saved."
+
+msgid "General user settings"
+msgstr "General user settings"
+
 msgid "Ghost"
 msgstr "Ghost"
 
 msgid "GitHub deploys directly to Azure without passwords or API keys"
 msgstr "GitHub deploys directly to Azure without passwords or API keys"
+
+msgid "Go Out of Office"
+msgstr "Go Out of Office"
 
 msgid "Go to account settings"
 msgstr "Go to account settings"
@@ -1217,6 +1337,12 @@ msgstr "Go to home"
 
 msgid "Google"
 msgstr "Google"
+
+msgid "Google connector management will be handled in the connector wiring phase."
+msgstr "Google connector management will be handled in the connector wiring phase."
+
+msgid "Google Meet is Google's web-based video conferencing platform, designed to compete with major conferencing platforms."
+msgstr "Google Meet is Google's web-based video conferencing platform, designed to compete with major conferencing platforms."
 
 msgid "Green curry"
 msgstr "Green curry"
@@ -1232,6 +1358,15 @@ msgstr "Hi! Welcome back"
 
 msgid "Hide details"
 msgstr "Hide details"
+
+msgid "Holiday notice"
+msgstr "Holiday notice"
+
+msgid "Holiday settings are loading."
+msgstr "Holiday settings are loading."
+
+msgid "Holidays"
+msgstr "Holidays"
 
 msgid "Home"
 msgstr "Home"
@@ -1434,6 +1569,9 @@ msgstr "Left sheet"
 msgid "Legal and Compliance"
 msgstr "Legal and Compliance"
 
+msgid "Let your bookers know when you're OOO."
+msgstr "Let your bookers know when you're OOO."
+
 msgid "Let's set up your account"
 msgstr "Let's set up your account"
 
@@ -1515,8 +1653,17 @@ msgstr "Main navigation"
 msgid "Manage"
 msgstr "Manage"
 
+msgid "Manage settings for your language, timezone, and interface."
+msgstr "Manage settings for your language, timezone, and interface."
+
+msgid "Manage settings for your Nerova profile"
+msgstr "Manage settings for your Nerova profile"
+
 msgid "Manage subscription"
 msgstr "Manage subscription"
+
+msgid "Manage whether this browser receives booking alerts."
+msgstr "Manage whether this browser receives booking alerts."
 
 msgid "Manage your account here."
 msgstr "Manage your account here."
@@ -1599,6 +1746,12 @@ msgstr "Modifier combo"
 msgid "Mole poblano"
 msgstr "Mole poblano"
 
+msgid "Monthly digest email"
+msgstr "Monthly digest email"
+
+msgid "Monthly digest email for teams"
+msgstr "Monthly digest email for teams"
+
 msgid "More export options"
 msgstr "More export options"
 
@@ -1625,6 +1778,9 @@ msgstr "Multi-select summary side pane"
 
 msgid "Muted"
 msgstr "Muted"
+
+msgid "My OOO"
+msgstr "My OOO"
 
 msgid "Name"
 msgstr "Name"
@@ -1707,6 +1863,9 @@ msgstr "Not yet"
 msgid "Note"
 msgstr "Note"
 
+msgid "Notes"
+msgstr "Notes"
+
 msgid "Notifications"
 msgstr "Notifications"
 
@@ -1743,8 +1902,23 @@ msgstr "Only owners can change user roles"
 msgid "Only trusted personnel access data through Azure AD authentication"
 msgstr "Only trusted personnel access data through Azure AD authentication"
 
+msgid "OOO created."
+msgstr "OOO created."
+
+msgid "OOO end date must be on or after the start date."
+msgstr "OOO end date must be on or after the start date."
+
+msgid "OOO filters are coming next."
+msgstr "OOO filters are coming next."
+
+msgid "OOO removed."
+msgstr "OOO removed."
+
 msgid "Open command palette"
 msgstr "Open command palette"
+
+msgid "Open conferencing app options"
+msgstr "Open conferencing app options"
 
 msgid "Open side pane"
 msgstr "Open side pane"
@@ -1781,6 +1955,9 @@ msgstr "Other reason"
 
 msgid "Our support team will assist you with the account deletion process and ensure all your data is properly removed."
 msgstr "Our support team will assist you with the account deletion process and ensure all your data is properly removed."
+
+msgid "Out of office"
+msgstr "Out of office"
 
 msgid "Outline"
 msgstr "Outline"
@@ -1939,6 +2116,9 @@ msgstr "Premium"
 msgid "press <0>?</0> to view all shortcuts."
 msgstr "press <0>?</0> to view all shortcuts."
 
+msgid "Prevent impersonation on bookings"
+msgstr "Prevent impersonation on bookings"
+
 msgid "Preview app"
 msgstr "Preview app"
 
@@ -1987,11 +2167,23 @@ msgstr "Profile updated successfully"
 msgid "Progress"
 msgstr "Progress"
 
+msgid "Public holiday country updated."
+msgstr "Public holiday country updated."
+
+msgid "Public holiday marked closed."
+msgstr "Public holiday marked closed."
+
+msgid "Public holiday marked open."
+msgstr "Public holiday marked open."
+
 msgid "Public navigation"
 msgstr "Public navigation"
 
 msgid "Publish now"
 msgstr "Publish now"
+
+msgid "Push notifications"
+msgstr "Push notifications"
 
 msgid "Quick note"
 msgstr "Quick note"
@@ -2035,8 +2227,14 @@ msgstr "Read only access to the recipe"
 msgid "Ready to publish?"
 msgstr "Ready to publish?"
 
+msgid "Reason"
+msgstr "Reason"
+
 msgid "Rebase and merge"
 msgstr "Rebase and merge"
+
+msgid "Receive push notifications when a booker submits an instant meeting booking."
+msgstr "Receive push notifications when a booker submits an instant meeting booking."
 
 msgid "Recipe"
 msgstr "Recipe"
@@ -2105,11 +2303,17 @@ msgstr "Remove"
 msgid "Remove {0}"
 msgstr "Remove {0}"
 
+msgid "Remove calendar"
+msgstr "Remove calendar"
+
 msgid "Remove image from {label}"
 msgstr "Remove image from {label}"
 
 msgid "Remove logo"
 msgstr "Remove logo"
+
+msgid "Remove OOO"
+msgstr "Remove OOO"
 
 msgid "Remove profile picture"
 msgstr "Remove profile picture"
@@ -2202,6 +2406,12 @@ msgstr "Save note"
 msgid "Save page as..."
 msgstr "Save page as..."
 
+msgid "Saved filters"
+msgstr "Saved filters"
+
+msgid "Saved OOO filters are coming next."
+msgstr "Saved OOO filters are coming next."
+
 msgid "Saved recipes"
 msgstr "Saved recipes"
 
@@ -2274,11 +2484,14 @@ msgstr "Select country"
 msgid "Select dates"
 msgstr "Select dates"
 
+msgid "Select where to add events when you're booked."
+msgstr "Select where to add events when you're booked."
+
+msgid "Select which calendars you want to check for conflicts to prevent double bookings."
+msgstr "Select which calendars you want to check for conflicts to prevent double bookings."
+
 msgid "Select with groups"
 msgstr "Select with groups"
-
-msgid "Select your preferred language. Saved to your profile."
-msgstr "Select your preferred language. Saved to your profile."
 
 msgid "Selected recipes"
 msgstr "Selected recipes"
@@ -2306,6 +2519,9 @@ msgstr "Session revoked successfully"
 
 msgid "Sessions"
 msgstr "Sessions"
+
+msgid "Set the default reminder time for events added to your Google Calendar."
+msgstr "Set the default reminder time for events added to your Google Calendar."
 
 msgid "Set the recipe's difficulty and favorite status."
 msgstr "Set the recipe's difficulty and favorite status."
@@ -2351,6 +2567,9 @@ msgstr "Show details"
 
 msgid "Show dismissable banner"
 msgstr "Show dismissable banner"
+
+msgid "Show note on public booking page"
+msgstr "Show note on public booking page"
 
 msgid "Show search filters"
 msgstr "Show search filters"
@@ -2474,6 +2693,9 @@ msgstr "Standard user access"
 
 msgid "Start free trial"
 msgstr "Start free trial"
+
+msgid "Start of week"
+msgstr "Start of week"
 
 msgid "Starter"
 msgstr "Starter"
@@ -2626,14 +2848,26 @@ msgstr "This is an informational message."
 msgid "This is the region where your data is stored"
 msgstr "This is the region where your data is stored"
 
+msgid "This preference will be connected in the next account settings pass."
+msgstr "This preference will be connected in the next account settings pass."
+
+msgid "This setting will be connected in the next account settings pass."
+msgstr "This setting will be connected in the next account settings pass."
+
 msgid "This will permanently delete <0>{totalDeletedUsersCount} users</0> in the recycle bin."
 msgstr "This will permanently delete <0>{totalDeletedUsersCount} users</0> in the recycle bin."
 
 msgid "This will permanently delete <0>1 user</0> in the recycle bin."
 msgstr "This will permanently delete <0>1 user</0> in the recycle bin."
 
+msgid "Time format"
+msgstr "Time format"
+
 msgid "Time zone"
 msgstr "Time zone"
+
+msgid "Timezone"
+msgstr "Timezone"
 
 msgid "Tinkers with food on weekends. Recipe library curator since 2024."
 msgstr "Tinkers with food on weekends. Recipe library curator since 2024."
@@ -2658,6 +2892,9 @@ msgstr "Toggle group"
 
 msgid "Toggle italic"
 msgstr "Toggle italic"
+
+msgid "Toggle the calendars you want to check for conflicts to prevent double bookings."
+msgstr "Toggle the calendars you want to check for conflicts to prevent double bookings."
 
 msgid "Toggle underline"
 msgstr "Toggle underline"
@@ -2764,6 +3001,9 @@ msgstr "Unnamed account"
 msgid "Unsaved changes"
 msgstr "Unsaved changes"
 
+msgid "Update"
+msgstr "Update"
+
 msgid "Update on PayFast"
 msgstr "Update on PayFast"
 
@@ -2775,9 +3015,6 @@ msgstr "Update the billing details associated with your subscription."
 
 msgid "Update your personal information and profile photo."
 msgstr "Update your personal information and profile photo."
-
-msgid "Update your profile picture and personal details here."
-msgstr "Update your profile picture and personal details here."
 
 msgid "Upgrade"
 msgstr "Upgrade"
@@ -2834,9 +3071,6 @@ msgstr "User not in current view"
 msgid "User permanently deleted: {userDisplayName}"
 msgstr "User permanently deleted: {userDisplayName}"
 
-msgid "User preferences"
-msgstr "User preferences"
-
 msgid "User profile"
 msgstr "User profile"
 
@@ -2891,6 +3125,9 @@ msgstr "Verify"
 msgid "Verifying..."
 msgstr "Verifying..."
 
+msgid "Video app connection setup is coming next."
+msgstr "Video app connection setup is coming next."
+
 msgid "View active users"
 msgstr "View active users"
 
@@ -2927,8 +3164,14 @@ msgstr "We detected a security issue with your login attempt. Please try again."
 msgid "We detected suspicious activity on your account. Someone may have attempted to take over your session."
 msgstr "We detected suspicious activity on your account. Someone may have attempted to take over your session."
 
+msgid "We will automatically mark you as unavailable for the selected holidays"
+msgstr "We will automatically mark you as unavailable for the selected holidays"
+
 msgid "What's at the market this week"
 msgstr "What's at the market this week"
+
+msgid "When enabled, anyone trying to book events using your email address must verify they own it."
+msgstr "When enabled, anyone trying to book events using your email address must verify they own it."
 
 msgid "When to use Accordion"
 msgstr "When to use Accordion"
@@ -2950,6 +3193,9 @@ msgstr "Yakitori skewers"
 
 msgid "Yesterday"
 msgstr "Yesterday"
+
+msgid "You can override this on a per-event basis in the advanced settings in each event type."
+msgstr "You can override this on a per-event basis in the advanced settings in each event type."
 
 msgid "You cannot change your own role"
 msgstr "You cannot change your own role"

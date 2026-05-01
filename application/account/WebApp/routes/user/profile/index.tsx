@@ -105,26 +105,38 @@ function ProfilePage() {
         variant="center"
         maxWidth="64rem"
         balanceWidth="16rem"
-        title={t`User profile`}
-        subtitle={t`Update your profile picture and personal details here.`}
+        title={t`Profile`}
+        subtitle={t`Manage settings for your Nerova profile`}
       >
         <Form
           onSubmit={mutationSubmitter(saveMutation)}
           validationBehavior="aria"
           validationErrors={saveMutation.error?.errors}
-          className="flex flex-col gap-4"
+          className="flex flex-col gap-4 pt-6"
           onChange={() => setIsFormDirty(true)}
         >
-          <UserProfileFields
-            layout="horizontal"
-            user={user}
-            isPending={saveMutation.isPending}
-            onAvatarFileSelect={handleAvatarFileSelect}
-            onAvatarRemove={handleAvatarRemove}
-          />
+          <section className="rounded-xl border border-border bg-card p-5">
+            <UserProfileFields
+              layout="horizontal"
+              user={user}
+              isPending={saveMutation.isPending}
+              onAvatarFileSelect={handleAvatarFileSelect}
+              onAvatarRemove={handleAvatarRemove}
+            />
+          </section>
 
-          <div className="mt-4 md:grid md:grid-cols-[8.5rem_1fr] md:gap-8">
-            <div />
+          <section className="rounded-xl border border-border bg-card">
+            <div className="px-5 py-4">
+              <h2 className="text-sm font-semibold">
+                <Trans>Connected accounts</Trans>
+              </h2>
+              <p className="mt-1 text-sm text-muted-foreground">
+                <Trans>Google connector management will be handled in the connector wiring phase.</Trans>
+              </p>
+            </div>
+          </section>
+
+          <div className="rounded-xl border border-border bg-muted/30 px-5 py-4">
             <div className="flex sm:justify-end">
               <Button type="submit" isPending={saveMutation.isPending}>
                 {saveMutation.isPending ? <Trans>Saving...</Trans> : <Trans>Save changes</Trans>}

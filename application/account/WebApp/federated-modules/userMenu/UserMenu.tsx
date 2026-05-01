@@ -88,7 +88,7 @@ export default function UserMenu({ isCollapsed: isCollapsedProp }: Readonly<User
 
   const handleNavigateToPreferences = () => {
     closeMenuAndOverlay();
-    navigate({ to: "/user/preferences" });
+    navigate({ to: "/user/general" });
   };
 
   const handleNavigateToProfile = () => {

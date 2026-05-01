@@ -23,7 +23,7 @@ interface SearchResult {
 const PAGES: SearchResult[] = [
   pageResult("bookings", "Bookings", "Booking list, calendar view, and review queue", "/dashboard/bookings", "Workspace"),
   pageResult("availability", "Availability", "Working hours and date overrides", "/dashboard/availability", "Workspace"),
-  pageResult("out-of-office", "Out of office", "OOO dates and public holidays", "/dashboard/settings/out-of-office", "Workspace"),
+  pageResult("out-of-office", "Out of office", "OOO dates and public holidays", "/user/out-of-office", "Workspace"),
   pageResult("clients", "Clients", "Client database, notes and visit history", "/dashboard/clients", "Workspace"),
   pageResult("payments", "Payments", "Appointment deposits and Paystack status", "/dashboard/apps/installed", "Business", {
     category: "Payment"

@@ -197,11 +197,20 @@ msgstr "Aktive brugere"
 msgid "Active users in the past 30 days"
 msgstr "Aktive brugere i de sidste 30 dage"
 
+msgid "Add"
+msgstr ""
+
 msgid "Add an extra layer of security to your account."
 msgstr ""
 
 msgid "Add billing information"
 msgstr "Tilføj faktureringsoplysninger"
+
+msgid "Add calendar"
+msgstr ""
+
+msgid "Add events to"
+msgstr ""
 
 msgid "Add more in the Users menu"
 msgstr "Tilføj flere i Brugere menuen"
@@ -212,10 +221,16 @@ msgstr ""
 msgid "Add notes here"
 msgstr ""
 
+msgid "Add OOO"
+msgstr ""
+
 msgid "Add profile picture"
 msgstr "Tilføj profilbillede"
 
 msgid "Add recipe"
+msgstr ""
+
+msgid "Add to calendar"
 msgstr ""
 
 msgid "Add to favorites"
@@ -227,10 +242,19 @@ msgstr "Tilføj dit kontonavn"
 msgid "Add your account name and logo."
 msgstr "Tilføj dit kontonavn og logo."
 
+msgid "Add your favourite video conferencing apps for your meetings"
+msgstr ""
+
 msgid "Add your first recipe to start building your personal cookbook."
 msgstr ""
 
 msgid "Added"
+msgstr ""
+
+msgid "Adding events to"
+msgstr ""
+
+msgid "Additional notes"
 msgstr ""
 
 msgid "Address (fixed 2 lines)"
@@ -277,6 +301,18 @@ msgstr ""
 
 msgid "All users"
 msgstr "Alle brugere"
+
+msgid "Allow attendees to book through dynamic group bookings"
+msgstr ""
+
+msgid "Allow browser notifications"
+msgstr ""
+
+msgid "Allow search engine indexing"
+msgstr ""
+
+msgid "Allow search engines to access your public content"
+msgstr ""
 
 msgid "Always underlined"
 msgstr ""
@@ -472,6 +508,18 @@ msgstr ""
 msgid "Browse all recipes"
 msgstr ""
 
+msgid "Browser notifications"
+msgstr ""
+
+msgid "Browser notifications are not supported in this browser."
+msgstr ""
+
+msgid "Browser notifications enabled."
+msgstr ""
+
+msgid "Browser notifications were not enabled."
+msgstr ""
+
 msgid "Built on <0>PlatformPlatform<1/></0> - an open-source platform by industry experts showcasing how to build enterprise-grade B2B SaaS products"
 msgstr "Bygget på <0>PlatformPlatform<1/></0> - en open-source platform af brancheeksperter til professionel B2B SaaS udvikling"
 
@@ -505,6 +553,9 @@ msgstr "Ved at fortsætte accepterer du vores vilkår"
 msgid "By default only one item is open at a time. Pass openMultiple to allow several panels to stay open together."
 msgstr ""
 
+msgid "Cal Video is the in-house web-based video conferencing platform powered by Daily.co."
+msgstr ""
+
 msgid "Calendar"
 msgstr ""
 
@@ -515,6 +566,18 @@ msgid "Calendar (range)"
 msgstr ""
 
 msgid "Calendar (single)"
+msgstr ""
+
+msgid "Calendar connection setup is coming next."
+msgstr ""
+
+msgid "Calendar disconnect management is coming next."
+msgstr ""
+
+msgid "Calendar sync settings are coming next."
+msgstr ""
+
+msgid "Calendars"
 msgstr ""
 
 msgid "Can change ingredients and instructions"
@@ -589,9 +652,6 @@ msgstr "Skift rolle"
 msgid "Change theme"
 msgstr "Skift tema"
 
-msgid "Change user preferences"
-msgstr "Skift bruger præferencer"
-
 msgid "Change user role"
 msgstr "Skift brugerrolle"
 
@@ -613,6 +673,9 @@ msgstr "Skifter til {0} {1} den {formattedPeriodEndLong}"
 msgid "Charts"
 msgstr ""
 
+msgid "Check for conflicts"
+msgstr ""
+
 msgid "Check your spam folder."
 msgstr "Tjek din spammappe."
 
@@ -630,6 +693,9 @@ msgstr ""
 
 msgid "Choose a plan to get started."
 msgstr "Vælg en plan for at komme i gang."
+
+msgid "Choose an OOO start date."
+msgstr ""
 
 msgid "Choose how the application looks to you on this device."
 msgstr "Vælg hvordan applikationen ser ud for dig på denne enhed."
@@ -663,6 +729,9 @@ msgstr ""
 
 msgid "Close user profile"
 msgstr "Luk brugerprofil"
+
+msgid "Closed by default. Toggle a holiday on when the business is open."
+msgstr ""
 
 msgid "Co-author"
 msgstr ""
@@ -706,7 +775,19 @@ msgstr ""
 msgid "Command palette"
 msgstr ""
 
+msgid "Communicate to your bookers when you're not available to take bookings."
+msgstr ""
+
 msgid "Components"
+msgstr ""
+
+msgid "Conferencing"
+msgstr ""
+
+msgid "Conferencing app management is coming next."
+msgstr ""
+
+msgid "Configure how your event types interact with your calendars"
 msgstr ""
 
 msgid "Confirm action"
@@ -714,6 +795,12 @@ msgstr ""
 
 msgid "Confirm downgrade"
 msgstr "Bekræft nedgradering"
+
+msgid "Conflict calendar connection is coming next."
+msgstr ""
+
+msgid "Connected accounts"
+msgstr ""
 
 msgid "Contact support"
 msgstr "Kontakt support"
@@ -754,10 +841,25 @@ msgstr ""
 msgid "Coq au vin"
 msgstr ""
 
+msgid "Could not create OOO."
+msgstr ""
+
+msgid "Could not remove OOO."
+msgstr ""
+
+msgid "Could not update public holiday."
+msgstr ""
+
+msgid "Could not update public holidays."
+msgstr ""
+
 msgid "Country"
 msgstr "Land"
 
 msgid "Create"
+msgstr ""
+
+msgid "Create an OOO"
 msgstr ""
 
 msgid "Create new account"
@@ -798,9 +900,6 @@ msgstr "Nuværende plan"
 
 msgid "Customer deleted"
 msgstr "Kunde slettet"
-
-msgid "Customize your theme, language, and zoom settings."
-msgstr "Tilpas dit tema, sprog og zoomindstillinger."
 
 msgid "Danger zone"
 msgstr "Farezone"
@@ -860,6 +959,9 @@ msgid "Default"
 msgstr "Standard"
 
 msgid "Default alert"
+msgstr ""
+
+msgid "Default reminder"
 msgstr ""
 
 msgid "Delete"
@@ -987,6 +1089,9 @@ msgid "Dropzone"
 msgstr ""
 
 msgid "Duplicate"
+msgstr ""
+
+msgid "Dynamic group links"
 msgstr ""
 
 msgid "E.g. Acme Corp"
@@ -1138,6 +1243,9 @@ msgstr ""
 msgid "Feel free to reach out with any questions or issues you may have."
 msgstr "Du er velkommen til at kontakte os med eventuelle spørgsmål eller problemer, du måtte have."
 
+msgid "Filter"
+msgstr ""
+
 msgid "Filters"
 msgstr "Filtre"
 
@@ -1201,11 +1309,23 @@ msgstr "GDPR-kompatibel"
 msgid "GDPR Compliant"
 msgstr "GDPR-kompatibel"
 
+msgid "General"
+msgstr ""
+
+msgid "General settings saved."
+msgstr ""
+
+msgid "General user settings"
+msgstr ""
+
 msgid "Ghost"
 msgstr ""
 
 msgid "GitHub deploys directly to Azure without passwords or API keys"
 msgstr "GitHub deployer direkte til Azure uden adgangskoder eller API-nøgler"
+
+msgid "Go Out of Office"
+msgstr ""
 
 msgid "Go to account settings"
 msgstr "Gå til kontoindstillinger"
@@ -1215,6 +1335,12 @@ msgstr "Gå til forsiden"
 
 msgid "Google"
 msgstr "Google"
+
+msgid "Google connector management will be handled in the connector wiring phase."
+msgstr ""
+
+msgid "Google Meet is Google's web-based video conferencing platform, designed to compete with major conferencing platforms."
+msgstr ""
 
 msgid "Green curry"
 msgstr ""
@@ -1230,6 +1356,15 @@ msgstr "Hej! Velkommen tilbage"
 
 msgid "Hide details"
 msgstr "Skjul detaljer"
+
+msgid "Holiday notice"
+msgstr ""
+
+msgid "Holiday settings are loading."
+msgstr ""
+
+msgid "Holidays"
+msgstr ""
 
 msgid "Home"
 msgstr ""
@@ -1432,6 +1567,9 @@ msgstr ""
 msgid "Legal and Compliance"
 msgstr "Juridisk og overholdelse"
 
+msgid "Let your bookers know when you're OOO."
+msgstr ""
+
 msgid "Let's set up your account"
 msgstr "Lad os opsætte din konto"
 
@@ -1513,8 +1651,17 @@ msgstr ""
 msgid "Manage"
 msgstr ""
 
+msgid "Manage settings for your language, timezone, and interface."
+msgstr ""
+
+msgid "Manage settings for your Nerova profile"
+msgstr ""
+
 msgid "Manage subscription"
 msgstr "Administrer abonnement"
+
+msgid "Manage whether this browser receives booking alerts."
+msgstr ""
 
 msgid "Manage your account here."
 msgstr "Administrer din konto her."
@@ -1597,6 +1744,12 @@ msgstr ""
 msgid "Mole poblano"
 msgstr ""
 
+msgid "Monthly digest email"
+msgstr ""
+
+msgid "Monthly digest email for teams"
+msgstr ""
+
 msgid "More export options"
 msgstr ""
 
@@ -1622,6 +1775,9 @@ msgid "Multi-select summary side pane"
 msgstr ""
 
 msgid "Muted"
+msgstr ""
+
+msgid "My OOO"
 msgstr ""
 
 msgid "Name"
@@ -1705,6 +1861,9 @@ msgstr ""
 msgid "Note"
 msgstr ""
 
+msgid "Notes"
+msgstr ""
+
 msgid "Notifications"
 msgstr ""
 
@@ -1741,7 +1900,22 @@ msgstr "Kun ejere kan ændre brugerroller"
 msgid "Only trusted personnel access data through Azure AD authentication"
 msgstr "Kun betroet personale får adgang til data gennem Azure AD autentificering"
 
+msgid "OOO created."
+msgstr ""
+
+msgid "OOO end date must be on or after the start date."
+msgstr ""
+
+msgid "OOO filters are coming next."
+msgstr ""
+
+msgid "OOO removed."
+msgstr ""
+
 msgid "Open command palette"
+msgstr ""
+
+msgid "Open conferencing app options"
 msgstr ""
 
 msgid "Open side pane"
@@ -1779,6 +1953,9 @@ msgstr "Anden grund"
 
 msgid "Our support team will assist you with the account deletion process and ensure all your data is properly removed."
 msgstr "Vores supportteam hjælper dig med at slette din konto og sikrer, at alle dine data bliver fjernet."
+
+msgid "Out of office"
+msgstr ""
 
 msgid "Outline"
 msgstr ""
@@ -1937,6 +2114,9 @@ msgstr "Premium"
 msgid "press <0>?</0> to view all shortcuts."
 msgstr ""
 
+msgid "Prevent impersonation on bookings"
+msgstr ""
+
 msgid "Preview app"
 msgstr ""
 
@@ -1985,10 +2165,22 @@ msgstr "Profil opdateret succesfuldt"
 msgid "Progress"
 msgstr ""
 
+msgid "Public holiday country updated."
+msgstr ""
+
+msgid "Public holiday marked closed."
+msgstr ""
+
+msgid "Public holiday marked open."
+msgstr ""
+
 msgid "Public navigation"
 msgstr ""
 
 msgid "Publish now"
+msgstr ""
+
+msgid "Push notifications"
 msgstr ""
 
 msgid "Quick note"
@@ -2033,7 +2225,13 @@ msgstr ""
 msgid "Ready to publish?"
 msgstr ""
 
+msgid "Reason"
+msgstr ""
+
 msgid "Rebase and merge"
+msgstr ""
+
+msgid "Receive push notifications when a booker submits an instant meeting booking."
 msgstr ""
 
 msgid "Recipe"
@@ -2103,11 +2301,17 @@ msgstr ""
 msgid "Remove {0}"
 msgstr ""
 
+msgid "Remove calendar"
+msgstr ""
+
 msgid "Remove image from {label}"
 msgstr ""
 
 msgid "Remove logo"
 msgstr "Fjern logo"
+
+msgid "Remove OOO"
+msgstr ""
 
 msgid "Remove profile picture"
 msgstr "Fjern profilbillede"
@@ -2200,6 +2404,12 @@ msgstr ""
 msgid "Save page as..."
 msgstr ""
 
+msgid "Saved filters"
+msgstr ""
+
+msgid "Saved OOO filters are coming next."
+msgstr ""
+
 msgid "Saved recipes"
 msgstr ""
 
@@ -2272,11 +2482,14 @@ msgstr "Vælg land"
 msgid "Select dates"
 msgstr "Vælg datoer"
 
-msgid "Select with groups"
+msgid "Select where to add events when you're booked."
 msgstr ""
 
-msgid "Select your preferred language. Saved to your profile."
-msgstr "Vælg dit foretrukne sprog. Gemt på din profil."
+msgid "Select which calendars you want to check for conflicts to prevent double bookings."
+msgstr ""
+
+msgid "Select with groups"
+msgstr ""
 
 msgid "Selected recipes"
 msgstr ""
@@ -2304,6 +2517,9 @@ msgstr "Session tilbagekaldt succesfuldt"
 
 msgid "Sessions"
 msgstr "Sessioner"
+
+msgid "Set the default reminder time for events added to your Google Calendar."
+msgstr ""
 
 msgid "Set the recipe's difficulty and favorite status."
 msgstr ""
@@ -2348,6 +2564,9 @@ msgid "Show details"
 msgstr "Vis detaljer"
 
 msgid "Show dismissable banner"
+msgstr ""
+
+msgid "Show note on public booking page"
 msgstr ""
 
 msgid "Show search filters"
@@ -2471,6 +2690,9 @@ msgid "Standard user access"
 msgstr "Standard brugeradgang"
 
 msgid "Start free trial"
+msgstr ""
+
+msgid "Start of week"
 msgstr ""
 
 msgid "Starter"
@@ -2624,13 +2846,25 @@ msgstr ""
 msgid "This is the region where your data is stored"
 msgstr "Dette er den region, hvor dine data er lagret"
 
+msgid "This preference will be connected in the next account settings pass."
+msgstr ""
+
+msgid "This setting will be connected in the next account settings pass."
+msgstr ""
+
 msgid "This will permanently delete <0>{totalDeletedUsersCount} users</0> in the recycle bin."
 msgstr "Dette vil permanent slette <0>{totalDeletedUsersCount} brugere</0> i papirkurven."
 
 msgid "This will permanently delete <0>1 user</0> in the recycle bin."
 msgstr "Dette vil permanent slette <0>1 bruger</0> i papirkurven."
 
+msgid "Time format"
+msgstr ""
+
 msgid "Time zone"
+msgstr ""
+
+msgid "Timezone"
 msgstr ""
 
 msgid "Tinkers with food on weekends. Recipe library curator since 2024."
@@ -2655,6 +2889,9 @@ msgid "Toggle group"
 msgstr ""
 
 msgid "Toggle italic"
+msgstr ""
+
+msgid "Toggle the calendars you want to check for conflicts to prevent double bookings."
 msgstr ""
 
 msgid "Toggle underline"
@@ -2762,6 +2999,9 @@ msgstr "Unavngivet konto"
 msgid "Unsaved changes"
 msgstr "Ugemte ændringer"
 
+msgid "Update"
+msgstr ""
+
 msgid "Update on PayFast"
 msgstr ""
 
@@ -2773,9 +3013,6 @@ msgstr "Opdater faktureringsoplysningerne tilknyttet dit abonnement."
 
 msgid "Update your personal information and profile photo."
 msgstr ""
-
-msgid "Update your profile picture and personal details here."
-msgstr "Opdater dit profilbillede og personlige oplysninger her."
 
 msgid "Upgrade"
 msgstr "Opgrader"
@@ -2832,9 +3069,6 @@ msgstr "Bruger ikke i nuværende visning"
 msgid "User permanently deleted: {userDisplayName}"
 msgstr "Bruger slettet permanent: {userDisplayName}"
 
-msgid "User preferences"
-msgstr "Bruger præferencer"
-
 msgid "User profile"
 msgstr "Brugerprofil"
 
@@ -2889,6 +3123,9 @@ msgstr "Bekræft"
 msgid "Verifying..."
 msgstr "Bekræfter..."
 
+msgid "Video app connection setup is coming next."
+msgstr ""
+
 msgid "View active users"
 msgstr "Se aktive brugere"
 
@@ -2925,7 +3162,13 @@ msgstr "Vi opdagede et sikkerhedsproblem med dit loginforsøg. Prøv venligst ig
 msgid "We detected suspicious activity on your account. Someone may have attempted to take over your session."
 msgstr "Vi opdagede mistænkelig aktivitet på din konto. Nogen kan have forsøgt at overtage din session."
 
+msgid "We will automatically mark you as unavailable for the selected holidays"
+msgstr ""
+
 msgid "What's at the market this week"
+msgstr ""
+
+msgid "When enabled, anyone trying to book events using your email address must verify they own it."
 msgstr ""
 
 msgid "When to use Accordion"
@@ -2947,6 +3190,9 @@ msgid "Yakitori skewers"
 msgstr ""
 
 msgid "Yesterday"
+msgstr ""
+
+msgid "You can override this on a per-event basis in the advanced settings in each event type."
 msgstr ""
 
 msgid "You cannot change your own role"

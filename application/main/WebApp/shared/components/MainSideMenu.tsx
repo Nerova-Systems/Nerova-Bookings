@@ -27,7 +27,6 @@ import {
   Grid2X2Icon,
   Clock3Icon,
   PlugIcon,
-  SettingsIcon,
   UsersIcon
 } from "lucide-react";
 import { use, useEffect, useState } from "react";
@@ -168,25 +167,6 @@ export function MainSideMenu() {
                       </SidebarMenuSubButton>
                     </SidebarMenuSubItem>
                   </SidebarMenuSub>
-                </SidebarMenuItem>
-              </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
-          <SidebarGroup>
-            <SidebarGroupLabel>
-              <Trans>Settings</Trans>
-            </SidebarGroupLabel>
-            <SidebarGroupContent>
-              <SidebarMenu>
-                <SidebarMenuItem>
-                  <SidebarMenuButton asChild={true} isActive={isActive("/dashboard/settings/out-of-office")} tooltip={t`Out of office`}>
-                    <RouterLink to="/dashboard/settings/out-of-office">
-                      <SettingsIcon />
-                      <span>
-                        <Trans>Out of office</Trans>
-                      </span>
-                    </RouterLink>
-                  </SidebarMenuButton>
                 </SidebarMenuItem>
               </SidebarMenu>
             </SidebarGroupContent>

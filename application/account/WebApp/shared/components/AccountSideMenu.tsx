@@ -1,3 +1,4 @@
+/* eslint-disable max-lines-per-function */
 import { t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
 import { useUserInfo } from "@repo/infrastructure/auth/hooks";
@@ -17,12 +18,16 @@ import {
 import { Link as RouterLink, useRouter } from "@tanstack/react-router";
 import {
   Building2Icon,
+  CalendarDaysIcon,
+  BellIcon,
   CreditCardIcon,
   HomeIcon,
   MonitorSmartphoneIcon,
   SlidersHorizontalIcon,
   UserIcon,
-  UsersIcon
+  UsersIcon,
+  VideoIcon,
+  Clock3Icon
 } from "lucide-react";
 import { use } from "react";
 
@@ -75,15 +80,51 @@ export function AccountSideMenu() {
                   </SidebarMenuButton>
                 </SidebarMenuItem>
                 <SidebarMenuItem>
-                  <SidebarMenuButton
-                    asChild={true}
-                    isActive={isActive("/user/preferences")}
-                    tooltip={t`User preferences`}
-                  >
-                    <RouterLink to="/user/preferences" aria-label={t`User preferences`}>
+                  <SidebarMenuButton asChild={true} isActive={isActive("/user/general")} tooltip={t`General`}>
+                    <RouterLink to="/user/general" aria-label={t`General`}>
                       <SlidersHorizontalIcon />
                       <span>
-                        <Trans>Preferences</Trans>
+                        <Trans>General</Trans>
+                      </span>
+                    </RouterLink>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild={true} isActive={isActive("/user/calendars")} tooltip={t`Calendars`}>
+                    <RouterLink to="/user/calendars" aria-label={t`Calendars`}>
+                      <CalendarDaysIcon />
+                      <span>
+                        <Trans>Calendars</Trans>
+                      </span>
+                    </RouterLink>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild={true} isActive={isActive("/user/conferencing")} tooltip={t`Conferencing`}>
+                    <RouterLink to="/user/conferencing" aria-label={t`Conferencing`}>
+                      <VideoIcon />
+                      <span>
+                        <Trans>Conferencing</Trans>
+                      </span>
+                    </RouterLink>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild={true} isActive={isActive("/user/out-of-office")} tooltip={t`Out of office`}>
+                    <RouterLink to="/user/out-of-office" aria-label={t`Out of office`}>
+                      <Clock3Icon />
+                      <span>
+                        <Trans>Out of office</Trans>
+                      </span>
+                    </RouterLink>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild={true} isActive={isActive("/user/push-notifications")} tooltip={t`Push notifications`}>
+                    <RouterLink to="/user/push-notifications" aria-label={t`Push notifications`}>
+                      <BellIcon />
+                      <span>
+                        <Trans>Push notifications</Trans>
                       </span>
                     </RouterLink>
                   </SidebarMenuButton>

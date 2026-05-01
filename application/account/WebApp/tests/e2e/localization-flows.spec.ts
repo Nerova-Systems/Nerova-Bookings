@@ -113,14 +113,14 @@ test.describe("@comprehensive", () => {
       await expect(page.evaluate(() => localStorage.getItem("preferred-locale"))).resolves.toBe("da-DK");
     })();
 
-    await step("Navigate to preferences & change language to English")(async () => {
-      await page.goto("/user/preferences");
+    await step("Navigate to general settings & change language to English")(async () => {
+      await page.goto("/user/general");
       await expect(page.getByRole("heading", { name: "Bruger præferencer" })).toBeVisible();
 
       await page.getByRole("button", { name: "English" }).click();
 
       // Language change triggers page reload
-      await expect(page.getByRole("heading", { name: "Preferences" })).toBeVisible();
+      await expect(page.getByRole("heading", { name: "General" })).toBeVisible();
 
       await expect(page.evaluate(() => localStorage.getItem("preferred-locale"))).resolves.toBe("en-US");
     })();
