@@ -11,12 +11,15 @@ import {
   Loader2Icon,
   MailIcon,
   PlusIcon,
+  RefreshCwIcon,
   UsersIcon,
   VideoIcon
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
+import { toast } from "sonner";
 
 import { useAppointmentShell } from "@/shared/lib/appointmentsApi";
+import { useCreateIntegrationConnectSession, useSyncIntegrationConnections } from "@/shared/lib/integrationsApi";
 import { usePaymentOverview, usePaystackSettlements } from "@/shared/lib/paymentsApi";
 
 import { AppLogo } from "../-components/AppLogo";
@@ -141,6 +144,29 @@ function PaymentInstalledSettings() {
 }
 
 function CalendarInstalledSettings({ app, status }: { app: typeof APP_CATALOG[number]; status: string }) {
+  const connectSessionMutation = useCreateIntegrationConnectSession();
+  const syncConnectionsMutation = useSyncIntegrationConnections();
+  const actionPending = connectSessionMutation.isPending || syncConnectionsMutation.isPending;
+
+  async function handleAddCalendar() {
+    try {
+      const session = await connectSessionMutation.mutateAsync({ appSlug: app.slug });
+      window.open(session.connectLink, "_blank", "noopener,noreferrer");
+      toast.success("Finish Google Calendar authorization in the new tab, then refresh status here.");
+    } catch (error) {
+      toast.error(readError(error, "Could not start Google Calendar connection."));
+    }
+  }
+
+  async function handleRefreshStatus() {
+    try {
+      await syncConnectionsMutation.mutateAsync({ appSlug: app.slug });
+      toast.success("Google Calendar connection status refreshed.");
+    } catch (error) {
+      toast.error(readError(error, "Could not refresh Google Calendar status."));
+    }
+  }
+
   return (
     <div>
       <div className="mb-9 flex flex-wrap items-start gap-4">
@@ -148,9 +174,13 @@ function CalendarInstalledSettings({ app, status }: { app: typeof APP_CATALOG[nu
           <h2 className="font-display text-3xl font-semibold">Calendars</h2>
           <p className="mt-1 text-lg text-white/50">Configure how your event types interact with your calendars</p>
         </div>
-        <Button type="button" variant="outline" className="ml-auto border-white/15 bg-transparent text-white hover:bg-white/[0.08]">
-          <PlusIcon className="size-4" />
+        <Button type="button" variant="outline" disabled={actionPending} className="ml-auto border-white/15 bg-transparent text-white hover:bg-white/[0.08]" onClick={handleAddCalendar}>
+          {connectSessionMutation.isPending ? <Loader2Icon className="size-4 animate-spin" /> : <PlusIcon className="size-4" />}
           Add calendar
+        </Button>
+        <Button type="button" variant="outline" disabled={actionPending} className="border-white/15 bg-transparent text-white hover:bg-white/[0.08]" onClick={handleRefreshStatus}>
+          {syncConnectionsMutation.isPending ? <Loader2Icon className="size-4 animate-spin" /> : <RefreshCwIcon className="size-4" />}
+          Refresh status
         </Button>
       </div>
 
@@ -199,6 +229,10 @@ function CalendarInstalledSettings({ app, status }: { app: typeof APP_CATALOG[nu
       </section>
     </div>
   );
+}
+
+function readError(error: unknown, fallback: string) {
+  return error instanceof Error && error.message.trim().length > 0 ? error.message : fallback;
 }
 
 function SettingSelect({ label, value, help }: { label: string; value: string; help: string }) {

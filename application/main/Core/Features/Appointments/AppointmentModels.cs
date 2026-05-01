@@ -43,6 +43,13 @@ public enum AppointmentPaymentChannel
     VirtualTerminal
 }
 
+public enum ConnectorOwnerType
+{
+    Tenant,
+    Location,
+    StaffMember
+}
+
 public sealed class BusinessProfile : ITenantScopedEntity
 {
     public string Id { get; set; } = Guid.NewGuid().ToString("N");
@@ -58,6 +65,17 @@ public sealed class BusinessProfile : ITenantScopedEntity
     public string OpenPublicHolidayIdsJson { get; set; } = "[]";
 }
 
+public sealed class BusinessLocation : ITenantScopedEntity
+{
+    public string Id { get; set; } = Guid.NewGuid().ToString("N");
+    public TenantId TenantId { get; set; } = null!;
+    public string Name { get; set; } = "Nerova Studio";
+    public string TimeZone { get; set; } = "Africa/Johannesburg";
+    public string Address { get; set; } = string.Empty;
+    public bool IsDefault { get; set; }
+    public bool IsActive { get; set; } = true;
+}
+
 public sealed class ServiceCategory : ITenantScopedEntity
 {
     public string Id { get; set; } = Guid.NewGuid().ToString("N");
@@ -70,6 +88,7 @@ public sealed class BookableService : ITenantScopedEntity
 {
     public string Id { get; set; } = Guid.NewGuid().ToString("N");
     public TenantId TenantId { get; set; } = null!;
+    public string LocationId { get; set; } = string.Empty;
     public string CategoryId { get; set; } = string.Empty;
     public string Name { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
@@ -89,6 +108,7 @@ public sealed class BookableServiceVersion : ITenantScopedEntity
 {
     public string Id { get; set; } = Guid.NewGuid().ToString("N");
     public TenantId TenantId { get; set; } = null!;
+    public string LocationId { get; set; } = string.Empty;
     public string ServiceId { get; set; } = string.Empty;
     public int VersionNumber { get; set; }
     public string CategoryId { get; set; } = string.Empty;
@@ -110,10 +130,41 @@ public sealed class StaffMember : ITenantScopedEntity
 {
     public string Id { get; set; } = Guid.NewGuid().ToString("N");
     public TenantId TenantId { get; set; } = null!;
+    public string LocationId { get; set; } = string.Empty;
+    public string? UserId { get; set; }
     public string Name { get; set; } = string.Empty;
     public string Email { get; set; } = string.Empty;
     public string Phone { get; set; } = string.Empty;
     public bool IsActive { get; set; } = true;
+}
+
+public sealed class SchedulingResource : ITenantScopedEntity
+{
+    public string Id { get; set; } = Guid.NewGuid().ToString("N");
+    public TenantId TenantId { get; set; } = null!;
+    public string LocationId { get; set; } = string.Empty;
+    public string Name { get; set; } = string.Empty;
+    public string Type { get; set; } = string.Empty;
+    public bool IsActive { get; set; } = true;
+}
+
+public sealed class BookableServiceResource : ITenantScopedEntity
+{
+    public string Id { get; set; } = Guid.NewGuid().ToString("N");
+    public TenantId TenantId { get; set; } = null!;
+    public string ServiceId { get; set; } = string.Empty;
+    public string ResourceId { get; set; } = string.Empty;
+}
+
+public sealed class ResourceReservation : ITenantScopedEntity
+{
+    public string Id { get; set; } = Guid.NewGuid().ToString("N");
+    public TenantId TenantId { get; set; } = null!;
+    public string ResourceId { get; set; } = string.Empty;
+    public string? AppointmentId { get; set; }
+    public DateTimeOffset StartAt { get; set; }
+    public DateTimeOffset EndAt { get; set; }
+    public string Source { get; set; } = string.Empty;
 }
 
 public sealed class AvailabilityRule : ITenantScopedEntity
@@ -192,6 +243,7 @@ public sealed class Appointment : ITenantScopedEntity
     public TenantId TenantId { get; set; } = null!;
     public string PublicReference { get; set; } = Guid.NewGuid().ToString("N")[..10];
     public string ClientId { get; set; } = string.Empty;
+    public string LocationId { get; set; } = string.Empty;
     public string ServiceId { get; set; } = string.Empty;
     public string ServiceVersionId { get; set; } = string.Empty;
     public string StaffMemberId { get; set; } = string.Empty;
@@ -202,6 +254,58 @@ public sealed class Appointment : ITenantScopedEntity
     public AppointmentSource Source { get; set; }
     public string AnswersJson { get; set; } = "[]";
     public DateTimeOffset CreatedAt { get; set; }
+}
+
+public sealed class AppointmentParticipant : ITenantScopedEntity
+{
+    public string Id { get; set; } = Guid.NewGuid().ToString("N");
+    public TenantId TenantId { get; set; } = null!;
+    public string AppointmentId { get; set; } = string.Empty;
+    public string ClientId { get; set; } = string.Empty;
+    public string Role { get; set; } = "Guest";
+    public DateTimeOffset CreatedAt { get; set; }
+}
+
+public sealed class AppointmentRescheduleRequest : ITenantScopedEntity
+{
+    public string Id { get; set; } = Guid.NewGuid().ToString("N");
+    public TenantId TenantId { get; set; } = null!;
+    public string AppointmentId { get; set; } = string.Empty;
+    public string TokenHash { get; set; } = string.Empty;
+    public DateTimeOffset ProposedStartAt { get; set; }
+    public DateTimeOffset ProposedEndAt { get; set; }
+    public string Note { get; set; } = string.Empty;
+    public string Status { get; set; } = "Pending";
+    public string NotificationChannel { get; set; } = "WhatsApp";
+    public DateTimeOffset ExpiresAt { get; set; }
+    public DateTimeOffset CreatedAt { get; set; }
+    public DateTimeOffset? RespondedAt { get; set; }
+}
+
+public sealed class AppointmentExternalCalendarEvent : ITenantScopedEntity
+{
+    public string Id { get; set; } = Guid.NewGuid().ToString("N");
+    public TenantId TenantId { get; set; } = null!;
+    public string AppointmentId { get; set; } = string.Empty;
+    public string Provider { get; set; } = "Google";
+    public string CalendarId { get; set; } = "primary";
+    public string ExternalEventId { get; set; } = string.Empty;
+    public string? MeetUrl { get; set; }
+    public DateTimeOffset LastSyncedAt { get; set; }
+}
+
+public sealed class IntegrationCalendar : ITenantScopedEntity
+{
+    public string Id { get; set; } = Guid.NewGuid().ToString("N");
+    public TenantId TenantId { get; set; } = null!;
+    public string IntegrationConnectionId { get; set; } = string.Empty;
+    public string ExternalCalendarId { get; set; } = string.Empty;
+    public string Name { get; set; } = string.Empty;
+    public bool IsPrimary { get; set; }
+    public bool CanWrite { get; set; }
+    public bool AddEventsToCalendar { get; set; }
+    public bool CheckForConflicts { get; set; }
+    public DateTimeOffset LastSyncedAt { get; set; }
 }
 
 public sealed class AppointmentPaymentIntent : ITenantScopedEntity
@@ -260,6 +364,9 @@ public sealed class IntegrationConnection : ITenantScopedEntity
     public TenantId TenantId { get; set; } = null!;
     public string Provider { get; set; } = string.Empty;
     public string Capability { get; set; } = string.Empty;
+    public ConnectorOwnerType OwnerType { get; set; } = ConnectorOwnerType.Tenant;
+    public string OwnerId { get; set; } = string.Empty;
+    public string? ExternalConnectionId { get; set; }
     public string Status { get; set; } = "NotConnected";
     public DateTimeOffset? LastSyncedAt { get; set; }
 }

@@ -83,19 +83,10 @@ function EditAvailabilityPage() {
             <select
               className="h-12 w-full rounded-xl border border-white/15 bg-[#111] px-4 text-base font-semibold text-white outline-none"
               value={shellQuery.data?.profile.timeZone ?? "Africa/Johannesburg"}
-              onChange={() => toast.message("Timezone changes are coming next.")}
+              disabled
             >
               <option>Africa/Johannesburg</option>
             </select>
-          </section>
-
-          <section className="rounded-xl border border-white/10 bg-[#171717] p-5">
-            <h2 className="text-base font-semibold">
-              <Trans>Something doesn't look right?</Trans>
-            </h2>
-            <Button variant="outline" size="sm" className="mt-5 border-white/15 bg-transparent text-white hover:bg-white/[0.08]" onClick={() => toast.message("Troubleshooter is coming next.")}>
-              <Trans>Launch troubleshooter</Trans>
-            </Button>
           </section>
         </aside>
       </div>

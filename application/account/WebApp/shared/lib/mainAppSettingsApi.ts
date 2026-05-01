@@ -33,6 +33,7 @@ export interface IntegrationConnection {
   capability: string;
   status: string;
   lastSyncedAt?: string;
+  externalConnectionId?: string | null;
 }
 
 export interface MainAppointmentShell {
@@ -121,6 +122,38 @@ export function useDeleteClosure() {
     onSuccess: async (shell) => {
       queryClient.setQueryData(mainShellQueryKey, shell);
       await queryClient.invalidateQueries({ queryKey: ["availability-slots"] });
+    }
+  });
+}
+
+export function useCreateIntegrationConnectSession() {
+  return useMutation({
+    mutationFn: async (request: { appSlug: string }) => {
+      const response = await enhancedFetch("/api/main/integrations/connect-session", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify(request)
+      });
+      if (!response.ok) throw new Error(await response.text());
+      return (await response.json()) as { connectLink: string; expiresAt: string; integrationKey: string };
+    }
+  });
+}
+
+export function useSyncIntegrationConnections() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (request: { appSlug: string }) => {
+      const response = await enhancedFetch("/api/main/integrations/sync-connections", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify(request)
+      });
+      if (!response.ok) throw new Error(await response.text());
+      return (await response.json()) as IntegrationConnection[];
+    },
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: mainShellQueryKey });
     }
   });
 }

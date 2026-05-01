@@ -9,6 +9,7 @@ using Microsoft.EntityFrameworkCore;
 using SharedKernel.Domain;
 using SharedKernel.Endpoints;
 using SharedKernel.ExecutionContext;
+using SharedKernel.Integrations.Email;
 
 namespace Main.Api.Endpoints;
 
@@ -28,6 +29,9 @@ public sealed class AppointmentEndpoints : IEndpoints
         app.MapPost("/services/{id}/archive", ArchiveService);
         app.MapPost("/services/{id}/restore", RestoreService);
         app.MapPost("/calendar/blocks", CreateCalendarBlock);
+        app.MapPost("/appointments/{id}/participants", AddAppointmentParticipant);
+        app.MapPut("/appointments/{id}/location", UpdateAppointmentLocation);
+        app.MapPost("/appointments/{id}/reschedule-requests", CreateRescheduleRequest);
         app.MapPost("/appointments/{id}/confirm", ConfirmAppointment);
         app.MapPost("/appointments/{id}/status", UpdateAppointmentStatus);
         app.MapPost("/appointments/{id}/payments/terminal-intent", CreateTerminalPaymentIntent);
@@ -48,6 +52,9 @@ public sealed class AppointmentEndpoints : IEndpoints
         booking.MapPost("/{businessSlug}/phone-verifications/check", CheckPublicPhoneVerification).DisableAntiforgery();
         booking.MapGet("/{businessSlug}/slots", GetPublicSlots);
         booking.MapPost("/{businessSlug}/appointments", CreatePublicAppointment).DisableAntiforgery();
+        booking.MapGet("/approvals/{token}", GetRescheduleApproval);
+        booking.MapPost("/approvals/{token}/approve", ApproveRescheduleRequest).DisableAntiforgery();
+        booking.MapPost("/approvals/{token}/reject", RejectRescheduleRequest).DisableAntiforgery();
         booking.MapGet("/confirmation/{reference}", GetPublicConfirmation);
 
         routes.MapPost("/api/main/payments/paystack/webhook", HandlePaystackWebhook).WithTags("Paystack").DisableAntiforgery();
@@ -57,14 +64,15 @@ public sealed class AppointmentEndpoints : IEndpoints
     private static async Task<IResult> GetShell(MainDbContext db, IExecutionContext executionContext, TimeProvider timeProvider, CancellationToken cancellationToken)
     {
         var tenantId = RequireTenant(executionContext);
-        await SeedTenantAsync(db, tenantId, timeProvider.GetUtcNow(), cancellationToken);
-        return Results.Ok(await BuildShellAsync(db, cancellationToken));
+        await SeedTenantAsync(db, tenantId, timeProvider.GetUtcNow(), executionContext.UserInfo.Id?.ToString(), cancellationToken);
+        return Results.Ok(await BuildShellAsync(db, cancellationToken, executionContext.UserInfo.Id?.ToString()));
     }
 
     private static async Task<IResult> CreateService(CreateServiceRequest request, MainDbContext db, IExecutionContext executionContext, TimeProvider timeProvider, CancellationToken cancellationToken)
     {
         var tenantId = RequireTenant(executionContext);
         await EnsureDefaultCategoryAsync(db, tenantId, cancellationToken);
+        var location = await EnsureDefaultLocationAsync(db, tenantId, cancellationToken);
         var category = await db.ServiceCategories.AsTracking().FirstOrDefaultAsync(c => c.Name == request.CategoryName, cancellationToken);
         if (category is null)
         {
@@ -74,6 +82,7 @@ public sealed class AppointmentEndpoints : IEndpoints
         var service = new BookableService
         {
             TenantId = tenantId,
+            LocationId = location.Id,
             CategoryId = category.Id,
             Name = request.Name,
             Description = request.Description ?? string.Empty,
@@ -98,6 +107,10 @@ public sealed class AppointmentEndpoints : IEndpoints
         var tenantId = RequireTenant(executionContext);
         var service = await db.BookableServices.AsTracking().FirstOrDefaultAsync(s => s.Id == id, cancellationToken);
         if (service is null) return Results.NotFound();
+        if (string.IsNullOrWhiteSpace(service.LocationId))
+        {
+            service.LocationId = (await EnsureDefaultLocationAsync(db, tenantId, cancellationToken)).Id;
+        }
         var category = await db.ServiceCategories.AsTracking().FirstOrDefaultAsync(c => c.Name == request.CategoryName, cancellationToken);
         if (category is null)
         {
@@ -156,6 +169,119 @@ public sealed class AppointmentEndpoints : IEndpoints
         });
         await db.SaveChangesAsync(cancellationToken);
         return Results.Ok(await BuildShellAsync(db, cancellationToken));
+    }
+
+    private static async Task<IResult> AddAppointmentParticipant(string id, AppointmentParticipantRequest request, MainDbContext db, IExecutionContext executionContext, TimeProvider timeProvider, INangoClient nangoClient, CancellationToken cancellationToken)
+    {
+        var tenantId = RequireTenant(executionContext);
+        var appointment = await db.Appointments.AsTracking().FirstOrDefaultAsync(appointment => appointment.Id == id && appointment.TenantId == tenantId, cancellationToken);
+        if (appointment is null) return Results.NotFound();
+        if (string.IsNullOrWhiteSpace(request.Name)) return Results.BadRequest("Guest name is required.");
+        if (string.IsNullOrWhiteSpace(request.Phone) && string.IsNullOrWhiteSpace(request.Email)) return Results.BadRequest("Guest phone or email is required.");
+
+        var normalizedPhone = NormalizePhone(request.Phone ?? string.Empty);
+        var email = (request.Email ?? string.Empty).Trim().ToLowerInvariant();
+        var candidates = await db.Clients.AsTracking().Where(client => client.TenantId == tenantId).ToListAsync(cancellationToken);
+        var client = candidates.FirstOrDefault(client =>
+            (!string.IsNullOrWhiteSpace(email) && string.Equals(client.Email, email, StringComparison.OrdinalIgnoreCase)) ||
+            (!string.IsNullOrWhiteSpace(normalizedPhone) && NormalizePhone(client.Phone) == normalizedPhone));
+        if (client is null)
+        {
+            client = new Client
+            {
+                TenantId = tenantId,
+                Name = request.Name.Trim(),
+                Phone = normalizedPhone,
+                Email = email,
+                Status = "Active"
+            };
+            db.Clients.Add(client);
+        }
+
+        if (!await db.AppointmentParticipants.AnyAsync(participant => participant.AppointmentId == id && participant.ClientId == client.Id, cancellationToken))
+        {
+            db.AppointmentParticipants.Add(new AppointmentParticipant
+            {
+                TenantId = tenantId,
+                AppointmentId = id,
+                ClientId = client.Id,
+                CreatedAt = timeProvider.GetUtcNow()
+            });
+        }
+
+        await db.SaveChangesAsync(cancellationToken);
+        await SyncGoogleCalendarEventIfConnectedAsync(db, appointment, nangoClient, timeProvider.GetUtcNow(), cancellationToken);
+        return Results.Ok(await BuildShellAsync(db, cancellationToken));
+    }
+
+    private static async Task<IResult> UpdateAppointmentLocation(string id, UpdateAppointmentLocationRequest request, MainDbContext db, IExecutionContext executionContext, TimeProvider timeProvider, INangoClient nangoClient, IEmailClient emailClient, CancellationToken cancellationToken)
+    {
+        var tenantId = RequireTenant(executionContext);
+        var appointment = await db.Appointments.AsTracking().FirstOrDefaultAsync(appointment => appointment.Id == id && appointment.TenantId == tenantId, cancellationToken);
+        if (appointment is null) return Results.NotFound();
+        if (string.IsNullOrWhiteSpace(request.Location)) return Results.BadRequest("Location is required.");
+
+        var serviceVersion = await GetAppointmentServiceVersionAsync(db, appointment, cancellationToken);
+        serviceVersion.Location = request.Location.Trim();
+        await db.SaveChangesAsync(cancellationToken);
+        await SyncGoogleCalendarEventIfConnectedAsync(db, appointment, nangoClient, timeProvider.GetUtcNow(), cancellationToken);
+        await NotifyClientAsync(db, appointment, "Booking location updated", $"Your booking location is now: {serviceVersion.Location}", emailClient, cancellationToken);
+        return Results.Ok(await BuildShellAsync(db, cancellationToken));
+    }
+
+    private static async Task<IResult> CreateRescheduleRequest(string id, CreateRescheduleRequest request, MainDbContext db, IExecutionContext executionContext, TimeProvider timeProvider, ITwilioWhatsAppClient whatsAppClient, IEmailClient emailClient, CancellationToken cancellationToken)
+    {
+        var tenantId = RequireTenant(executionContext);
+        var appointment = await db.Appointments.AsTracking().FirstOrDefaultAsync(appointment => appointment.Id == id && appointment.TenantId == tenantId, cancellationToken);
+        if (appointment is null) return Results.NotFound();
+        if (appointment.Status == AppointmentStatus.Cancelled) return Results.BadRequest("Cancelled bookings cannot be rescheduled.");
+        var serviceVersion = await GetAppointmentServiceVersionAsync(db, appointment, cancellationToken);
+        var proposedStart = request.ProposedStartAt.ToUniversalTime();
+        var proposedEnd = proposedStart.AddMinutes(serviceVersion.DurationMinutes);
+        if (proposedStart <= timeProvider.GetUtcNow()) return Results.BadRequest("Choose a future time.");
+        if (await HasAppointmentConflictAsync(db, appointment.TenantId, appointment.Id, proposedStart, proposedEnd, cancellationToken))
+        {
+            return Results.Conflict("Selected slot is no longer available.");
+        }
+
+        var now = timeProvider.GetUtcNow();
+        var token = CreateApprovalToken();
+        db.AppointmentRescheduleRequests.Add(new AppointmentRescheduleRequest
+        {
+            TenantId = appointment.TenantId,
+            AppointmentId = appointment.Id,
+            TokenHash = HashApprovalToken(token),
+            ProposedStartAt = proposedStart,
+            ProposedEndAt = proposedEnd,
+            Note = request.Note?.Trim() ?? string.Empty,
+            Status = "Pending",
+            ExpiresAt = now.AddDays(7),
+            CreatedAt = now
+        });
+        db.AppointmentFlowEvents.Add(new AppointmentFlowEvent
+        {
+            TenantId = appointment.TenantId,
+            AppointmentId = appointment.Id,
+            Type = "RescheduleRequested",
+            Status = "Pending",
+            ScheduledFor = now,
+            PayloadJson = JsonSerializer.Serialize(new { proposedStartAt = proposedStart, proposedEndAt = proposedEnd })
+        });
+        await db.SaveChangesAsync(cancellationToken);
+
+        var approvalUrl = BuildPublicUrl($"/book/approval/{token}");
+        var message = $"Please approve or reject your booking reschedule request: {approvalUrl}";
+        var client = await db.Clients.IgnoreQueryFilters().FirstAsync(client => client.Id == appointment.ClientId, cancellationToken);
+        try
+        {
+            await whatsAppClient.SendAsync(client.Phone, message, cancellationToken);
+        }
+        catch (InvalidOperationException exception)
+        {
+            return Results.Problem($"Reschedule request was saved, but WhatsApp could not be sent: {exception.Message}", statusCode: StatusCodes.Status502BadGateway);
+        }
+        await SendEmailIfAvailableAsync(client.Email, "Booking reschedule approval", message, emailClient, cancellationToken);
+        return Results.Ok(new RescheduleRequestResponse(approvalUrl, token, "Pending"));
     }
 
     private static async Task<IResult> UpdateWeeklyAvailability(WeeklyAvailabilityRequest request, MainDbContext db, IExecutionContext executionContext, CancellationToken cancellationToken)
@@ -261,16 +387,18 @@ public sealed class AppointmentEndpoints : IEndpoints
         return Results.Ok(await BuildShellAsync(db, cancellationToken));
     }
 
-    private static async Task<IResult> ConfirmAppointment(string id, MainDbContext db, CancellationToken cancellationToken)
+    private static async Task<IResult> ConfirmAppointment(string id, MainDbContext db, TimeProvider timeProvider, INangoClient nangoClient, IEmailClient emailClient, CancellationToken cancellationToken)
     {
         var appointment = await db.Appointments.AsTracking().FirstOrDefaultAsync(a => a.Id == id, cancellationToken);
         if (appointment is null) return Results.NotFound();
         appointment.Status = AppointmentStatus.Confirmed;
         await db.SaveChangesAsync(cancellationToken);
+        await SyncGoogleCalendarEventIfConnectedAsync(db, appointment, nangoClient, timeProvider.GetUtcNow(), cancellationToken);
+        await NotifyClientAsync(db, appointment, "Booking confirmed", "Your booking has been confirmed.", emailClient, cancellationToken);
         return Results.Ok(await BuildShellAsync(db, cancellationToken));
     }
 
-    private static async Task<IResult> UpdateAppointmentStatus(string id, UpdateAppointmentStatusRequest request, MainDbContext db, TimeProvider timeProvider, CancellationToken cancellationToken)
+    private static async Task<IResult> UpdateAppointmentStatus(string id, UpdateAppointmentStatusRequest request, MainDbContext db, TimeProvider timeProvider, INangoClient nangoClient, IEmailClient emailClient, CancellationToken cancellationToken)
     {
         var appointment = await db.Appointments.AsTracking().FirstOrDefaultAsync(a => a.Id == id, cancellationToken);
         if (appointment is null) return Results.NotFound();
@@ -290,6 +418,15 @@ public sealed class AppointmentEndpoints : IEndpoints
             PayloadJson = "{}"
         });
         await db.SaveChangesAsync(cancellationToken);
+        if (status == AppointmentStatus.Cancelled)
+        {
+            await DeleteGoogleCalendarEventIfConnectedAsync(db, appointment, nangoClient, cancellationToken);
+            await NotifyClientAsync(db, appointment, "Booking cancelled", "Your booking has been cancelled.", emailClient, cancellationToken);
+        }
+        else if (status is AppointmentStatus.Completed or AppointmentStatus.NoShow or AppointmentStatus.Confirmed)
+        {
+            await SyncGoogleCalendarEventIfConnectedAsync(db, appointment, nangoClient, timeProvider.GetUtcNow(), cancellationToken);
+        }
         return Results.Ok(await BuildShellAsync(db, cancellationToken));
     }
 
@@ -474,6 +611,7 @@ public sealed class AppointmentEndpoints : IEndpoints
         {
             TenantId = profile.TenantId,
             ClientId = client.Id,
+            LocationId = string.IsNullOrWhiteSpace(serviceVersion.LocationId) ? service.LocationId : serviceVersion.LocationId,
             ServiceId = service.Id,
             ServiceVersionId = serviceVersion.Id,
             StaffMemberId = staff.Id,
@@ -508,6 +646,66 @@ public sealed class AppointmentEndpoints : IEndpoints
         var appointment = await db.Appointments.IgnoreQueryFilters().FirstOrDefaultAsync(a => a.PublicReference == reference, cancellationToken);
         if (appointment is null) return Results.NotFound();
         return Results.Ok(await ToAppointmentDetailAsync(db, appointment, cancellationToken));
+    }
+
+    private static async Task<IResult> GetRescheduleApproval(string token, MainDbContext db, TimeProvider timeProvider, CancellationToken cancellationToken)
+    {
+        var request = await FindPendingApprovalAsync(db, token, timeProvider.GetUtcNow(), cancellationToken);
+        if (request is null) return Results.NotFound();
+        var appointment = await db.Appointments.IgnoreQueryFilters().FirstAsync(appointment => appointment.Id == request.AppointmentId, cancellationToken);
+        var detail = await ToAppointmentDetailAsync(db, appointment, cancellationToken);
+        return Results.Ok(new RescheduleApprovalResponse(detail, request.ProposedStartAt, request.ProposedEndAt, request.Note, request.Status));
+    }
+
+    private static async Task<IResult> ApproveRescheduleRequest(string token, MainDbContext db, TimeProvider timeProvider, INangoClient nangoClient, IEmailClient emailClient, CancellationToken cancellationToken)
+    {
+        var request = await FindPendingApprovalAsync(db, token, timeProvider.GetUtcNow(), cancellationToken);
+        if (request is null) return Results.NotFound();
+        var appointment = await db.Appointments.IgnoreQueryFilters().AsTracking().FirstAsync(appointment => appointment.Id == request.AppointmentId, cancellationToken);
+        if (await HasAppointmentConflictAsync(db, appointment.TenantId, appointment.Id, request.ProposedStartAt, request.ProposedEndAt, cancellationToken))
+        {
+            return Results.Conflict("Selected slot is no longer available.");
+        }
+
+        appointment.StartAt = request.ProposedStartAt;
+        appointment.EndAt = request.ProposedEndAt;
+        appointment.Status = AppointmentStatus.Confirmed;
+        request.Status = "Approved";
+        request.RespondedAt = timeProvider.GetUtcNow();
+        db.AppointmentFlowEvents.Add(new AppointmentFlowEvent
+        {
+            TenantId = appointment.TenantId,
+            AppointmentId = appointment.Id,
+            Type = "RescheduleApproved",
+            Status = "Completed",
+            ScheduledFor = timeProvider.GetUtcNow(),
+            PayloadJson = "{}"
+        });
+        await db.SaveChangesAsync(cancellationToken);
+        await SyncGoogleCalendarEventIfConnectedAsync(db, appointment, nangoClient, timeProvider.GetUtcNow(), cancellationToken);
+        await NotifyClientAsync(db, appointment, "Booking rescheduled", "Your booking reschedule has been approved.", emailClient, cancellationToken);
+        return Results.Ok(new PublicApprovalResultResponse(appointment.PublicReference, "Approved"));
+    }
+
+    private static async Task<IResult> RejectRescheduleRequest(string token, MainDbContext db, TimeProvider timeProvider, IEmailClient emailClient, CancellationToken cancellationToken)
+    {
+        var request = await FindPendingApprovalAsync(db, token, timeProvider.GetUtcNow(), cancellationToken);
+        if (request is null) return Results.NotFound();
+        var appointment = await db.Appointments.IgnoreQueryFilters().FirstAsync(appointment => appointment.Id == request.AppointmentId, cancellationToken);
+        request.Status = "Rejected";
+        request.RespondedAt = timeProvider.GetUtcNow();
+        db.AppointmentFlowEvents.Add(new AppointmentFlowEvent
+        {
+            TenantId = appointment.TenantId,
+            AppointmentId = appointment.Id,
+            Type = "RescheduleRejected",
+            Status = "Completed",
+            ScheduledFor = timeProvider.GetUtcNow(),
+            PayloadJson = "{}"
+        });
+        await db.SaveChangesAsync(cancellationToken);
+        await NotifyClientAsync(db, appointment, "Booking reschedule rejected", "Your original booking time is unchanged.", emailClient, cancellationToken);
+        return Results.Ok(new PublicApprovalResultResponse(appointment.PublicReference, "Rejected"));
     }
 
     private static async Task<IResult> InitializePaystackPayment(PaystackInitializeRequest request, MainDbContext db, TimeProvider timeProvider, IPaystackClient paystackClient, CancellationToken cancellationToken)
@@ -636,7 +834,7 @@ public sealed class AppointmentEndpoints : IEndpoints
     private static async Task<IResult> GetPaymentOverview(MainDbContext db, IExecutionContext executionContext, TimeProvider timeProvider, CancellationToken cancellationToken)
     {
         var tenantId = RequireTenant(executionContext);
-        await SeedTenantAsync(db, tenantId, timeProvider.GetUtcNow(), cancellationToken);
+        await SeedTenantAsync(db, tenantId, timeProvider.GetUtcNow(), executionContext.UserInfo.Id?.ToString(), cancellationToken);
         var subaccount = await db.PaystackSubaccounts.FirstOrDefaultAsync(cancellationToken);
         var appointments = (await db.Appointments.ToListAsync(cancellationToken)).OrderByDescending(a => a.StartAt).ToList();
         var clients = await db.Clients.ToListAsync(cancellationToken);
@@ -775,6 +973,7 @@ public sealed class AppointmentEndpoints : IEndpoints
         return new BookableServiceVersion
         {
             TenantId = service.TenantId,
+            LocationId = service.LocationId,
             ServiceId = service.Id,
             VersionNumber = versionNumber,
             CategoryId = service.CategoryId,
@@ -847,8 +1046,9 @@ public sealed class AppointmentEndpoints : IEndpoints
         }
     }
 
-    private static async Task<AppShellResponse> BuildShellAsync(MainDbContext db, CancellationToken cancellationToken)
+    private static async Task<AppShellResponse> BuildShellAsync(MainDbContext db, CancellationToken cancellationToken, string? ownerUserId = null)
     {
+        await EnsureSchedulingFoundationBackfillAsync(db, ownerUserId, cancellationToken);
         await EnsureServiceVersionBackfillAsync(db, DateTimeOffset.UtcNow, cancellationToken);
         var appointments = (await db.Appointments.ToListAsync(cancellationToken)).OrderBy(a => a.StartAt).ToList();
         var clients = await db.Clients.ToListAsync(cancellationToken);
@@ -857,6 +1057,7 @@ public sealed class AppointmentEndpoints : IEndpoints
         var categories = await db.ServiceCategories.OrderBy(c => c.SortOrder).ToListAsync(cancellationToken);
         var profile = await db.BusinessProfiles.FirstAsync(cancellationToken);
         var integrations = await db.IntegrationConnections.OrderBy(i => i.Provider).ThenBy(i => i.Capability).ToListAsync(cancellationToken);
+        var externalEvents = await db.AppointmentExternalCalendarEvents.ToListAsync(cancellationToken);
         var availabilityRules = await db.AvailabilityRules.OrderBy(rule => rule.DayOfWeek).ThenBy(rule => rule.StartTime).ToListAsync(cancellationToken);
         var manualClosures = await db.BusinessClosures.OrderBy(closure => closure.StartDate).ToListAsync(cancellationToken);
         var manualBlocks = (await db.ManualCalendarBlocks.ToListAsync(cancellationToken)).OrderBy(b => b.StartAt).ToList();
@@ -864,12 +1065,12 @@ public sealed class AppointmentEndpoints : IEndpoints
         var holidaySettings = BuildHolidaySettings(profile, DateTimeOffset.UtcNow.Year - 1, DateTimeOffset.UtcNow.Year + 2);
         return new AppShellResponse(
             new BusinessProfileDto(profile.Name, profile.Slug, profile.TimeZone, profile.Address, profile.PublicBookingEnabled),
-            appointments.Select(a => ToAppointmentDto(a, clients, services, serviceVersions)),
+            appointments.Select(a => ToAppointmentDto(a, clients, services, serviceVersions, externalEvents)),
             services.Select(service => ToServiceDto(service, serviceVersions)),
             categories.Select(c => new ServiceCategoryDto(c.Id, c.Name)),
             clients.Select(c => ToClientDto(c, appointments, services, serviceVersions)),
             BuildAnalytics(appointments, services, serviceVersions, clients),
-            integrations.Select(i => new IntegrationConnectionDto(i.Provider, i.Capability, i.Status, i.LastSyncedAt)),
+            integrations.Select(i => new IntegrationConnectionDto(i.Provider, i.Capability, i.Status, i.LastSyncedAt, i.OwnerType.ToString(), i.OwnerId, i.ExternalConnectionId)),
             availabilityRules.Select(ToAvailabilityRuleDto),
             holidaySettings,
             manualClosures.Select(ToClosureDto).Concat(holidaySettings.Holidays.Where(holiday => !holiday.IsOpen).Select(ToHolidayClosureDto)),
@@ -878,7 +1079,7 @@ public sealed class AppointmentEndpoints : IEndpoints
         );
     }
 
-    private static AppointmentDto ToAppointmentDto(Appointment appointment, List<Client> clients, List<BookableService> services, List<BookableServiceVersion> serviceVersions)
+    private static AppointmentDto ToAppointmentDto(Appointment appointment, List<Client> clients, List<BookableService> services, List<BookableServiceVersion> serviceVersions, List<AppointmentExternalCalendarEvent>? externalEvents = null)
     {
         var client = clients.First(c => c.Id == appointment.ClientId);
         var service = services.First(s => s.Id == appointment.ServiceId);
@@ -907,7 +1108,8 @@ public sealed class AppointmentEndpoints : IEndpoints
             appointment.AnswersJson,
             client.Status,
             client.Alert,
-            client.InternalNote
+            client.InternalNote,
+            externalEvents?.FirstOrDefault(item => item.AppointmentId == appointment.Id)?.MeetUrl
         );
     }
 
@@ -916,7 +1118,8 @@ public sealed class AppointmentEndpoints : IEndpoints
         var client = await db.Clients.IgnoreQueryFilters().FirstAsync(c => c.Id == appointment.ClientId, cancellationToken);
         var service = await db.BookableServices.IgnoreQueryFilters().FirstAsync(s => s.Id == appointment.ServiceId, cancellationToken);
         var serviceVersion = await GetAppointmentServiceVersionAsync(db, appointment, cancellationToken);
-        return ToAppointmentDto(appointment, [client], [service], [serviceVersion]);
+        var externalEvents = await db.AppointmentExternalCalendarEvents.IgnoreQueryFilters().Where(item => item.AppointmentId == appointment.Id).ToListAsync(cancellationToken);
+        return ToAppointmentDto(appointment, [client], [service], [serviceVersion], externalEvents);
     }
 
     private static ServiceDto ToServiceDto(BookableService service, List<BookableServiceVersion> serviceVersions)
@@ -989,6 +1192,7 @@ public sealed class AppointmentEndpoints : IEndpoints
         {
             Id = $"{service.Id}_fallback",
             TenantId = service.TenantId,
+            LocationId = service.LocationId,
             ServiceId = service.Id,
             VersionNumber = 1,
             CategoryId = service.CategoryId,
@@ -1167,6 +1371,18 @@ public sealed class AppointmentEndpoints : IEndpoints
             .Where(b => b.TenantId == tenantId)
             .ToListAsync(cancellationToken);
         var externalBlocks = tenantExternalBlocks.Where(b => b.StartAt < dayEnd && b.EndAt > dayStart).ToList();
+        var requiredResourceIds = await db.BookableServiceResources.IgnoreQueryFilters()
+            .Where(resource => resource.TenantId == tenantId && resource.ServiceId == serviceId)
+            .Select(resource => resource.ResourceId)
+            .ToListAsync(cancellationToken);
+        var resourceReservations = requiredResourceIds.Count == 0
+            ? []
+            : await db.ResourceReservations.IgnoreQueryFilters()
+                .Where(reservation => reservation.TenantId == tenantId &&
+                                      requiredResourceIds.Contains(reservation.ResourceId) &&
+                                      reservation.StartAt < dayEnd &&
+                                      reservation.EndAt > dayStart)
+                .ToListAsync(cancellationToken);
         var slots = new List<SlotDto>();
         foreach (var rule in rules)
         {
@@ -1178,7 +1394,8 @@ public sealed class AppointmentEndpoints : IEndpoints
                 var slotEnd = start.AddMinutes(service.DurationMinutes);
                 var hasConflict = existing.Any(a => a.StartAt < slotEnd && a.EndAt > start) ||
                                   manualBlocks.Any(b => b.StartAt <= slotEnd && b.EndAt > start) ||
-                                  externalBlocks.Any(b => b.StartAt <= slotEnd && b.EndAt > start);
+                                  externalBlocks.Any(b => b.StartAt <= slotEnd && b.EndAt > start) ||
+                                  resourceReservations.Any(reservation => reservation.StartAt < slotEnd && reservation.EndAt > start);
                 if (!hasConflict)
                 {
                     slots.Add(new SlotDto(start, slotEnd));
@@ -1540,11 +1757,271 @@ public sealed class AppointmentEndpoints : IEndpoints
         }
     }
 
+    private static async Task<bool> HasAppointmentConflictAsync(MainDbContext db, TenantId tenantId, string appointmentIdToIgnore, DateTimeOffset startAt, DateTimeOffset endAt, CancellationToken cancellationToken)
+    {
+        var appointments = await db.Appointments.IgnoreQueryFilters()
+            .Where(appointment => appointment.TenantId == tenantId && appointment.Id != appointmentIdToIgnore && appointment.Status != AppointmentStatus.Cancelled)
+            .ToListAsync(cancellationToken);
+        if (appointments.Any(appointment => appointment.StartAt < endAt && appointment.EndAt > startAt))
+        {
+            return true;
+        }
+
+        var manualBlocks = await db.ManualCalendarBlocks.IgnoreQueryFilters()
+            .Where(block => block.TenantId == tenantId)
+            .ToListAsync(cancellationToken);
+        if (manualBlocks.Any(block => block.StartAt < endAt && block.EndAt > startAt))
+        {
+            return true;
+        }
+
+        var externalBlocks = await db.ExternalBusyBlocks.IgnoreQueryFilters()
+            .Where(block => block.TenantId == tenantId)
+            .ToListAsync(cancellationToken);
+        return externalBlocks.Any(block => block.StartAt < endAt && block.EndAt > startAt);
+    }
+
+    private static async Task SyncGoogleCalendarEventIfConnectedAsync(MainDbContext db, Appointment appointment, INangoClient nangoClient, DateTimeOffset now, CancellationToken cancellationToken)
+    {
+        var connection = await ResolveGoogleCalendarConnectionAsync(db, appointment, cancellationToken);
+        if (connection is null || string.IsNullOrWhiteSpace(connection.ExternalConnectionId)) return;
+
+        var calendarId = await ResolveAddToCalendarIdAsync(db, connection, cancellationToken);
+        var request = await BuildCalendarEventRequestAsync(db, appointment, calendarId, cancellationToken);
+        var existing = await db.AppointmentExternalCalendarEvents.IgnoreQueryFilters().AsTracking()
+            .FirstOrDefaultAsync(item => item.AppointmentId == appointment.Id && item.Provider == "Google", cancellationToken);
+
+        NangoCalendarEvent result;
+        if (existing is null || string.IsNullOrWhiteSpace(existing.ExternalEventId))
+        {
+            result = await nangoClient.CreateCalendarEventAsync("google-calendar", connection.ExternalConnectionId, request, cancellationToken);
+            existing ??= new AppointmentExternalCalendarEvent
+            {
+                TenantId = appointment.TenantId,
+                AppointmentId = appointment.Id,
+                Provider = "Google",
+                CalendarId = calendarId
+            };
+            db.AppointmentExternalCalendarEvents.Add(existing);
+        }
+        else
+        {
+            result = await nangoClient.UpdateCalendarEventAsync("google-calendar", connection.ExternalConnectionId, existing.CalendarId, existing.ExternalEventId, request, cancellationToken);
+        }
+
+        existing.CalendarId = calendarId;
+        existing.ExternalEventId = string.IsNullOrWhiteSpace(result.EventId) ? existing.ExternalEventId : result.EventId;
+        existing.MeetUrl = result.MeetUrl ?? existing.MeetUrl;
+        existing.LastSyncedAt = now;
+        await db.SaveChangesAsync(cancellationToken);
+    }
+
+    private static async Task DeleteGoogleCalendarEventIfConnectedAsync(MainDbContext db, Appointment appointment, INangoClient nangoClient, CancellationToken cancellationToken)
+    {
+        var external = await db.AppointmentExternalCalendarEvents.IgnoreQueryFilters().AsTracking()
+            .FirstOrDefaultAsync(item => item.AppointmentId == appointment.Id && item.Provider == "Google", cancellationToken);
+        if (external is null || string.IsNullOrWhiteSpace(external.ExternalEventId)) return;
+
+        var connection = await ResolveGoogleCalendarConnectionAsync(db, appointment, cancellationToken);
+        if (connection is not null && !string.IsNullOrWhiteSpace(connection.ExternalConnectionId))
+        {
+            await nangoClient.DeleteCalendarEventAsync("google-calendar", connection.ExternalConnectionId, external.CalendarId, external.ExternalEventId, cancellationToken);
+        }
+
+        db.AppointmentExternalCalendarEvents.Remove(external);
+        await db.SaveChangesAsync(cancellationToken);
+    }
+
+    private static async Task<IntegrationConnection?> ResolveGoogleCalendarConnectionAsync(MainDbContext db, Appointment appointment, CancellationToken cancellationToken)
+    {
+        return await db.IntegrationConnections.IgnoreQueryFilters().AsTracking()
+                   .Where(connection => connection.TenantId == appointment.TenantId &&
+                                        connection.Provider == "Google" &&
+                                        connection.Capability == "Calendar" &&
+                                        connection.OwnerType == ConnectorOwnerType.StaffMember &&
+                                        connection.OwnerId == appointment.StaffMemberId &&
+                                        connection.Status == "Connected")
+                   .FirstOrDefaultAsync(cancellationToken)
+               ?? await db.IntegrationConnections.IgnoreQueryFilters().AsTracking()
+                   .Where(connection => connection.TenantId == appointment.TenantId &&
+                                        connection.Provider == "Google" &&
+                                        connection.Capability == "Calendar" &&
+                                        connection.Status == "Connected")
+                   .FirstOrDefaultAsync(cancellationToken);
+    }
+
+    private static async Task<string> ResolveAddToCalendarIdAsync(MainDbContext db, IntegrationConnection connection, CancellationToken cancellationToken)
+    {
+        var calendars = await db.IntegrationCalendars.IgnoreQueryFilters()
+            .Where(calendar => calendar.IntegrationConnectionId == connection.Id)
+            .ToListAsync(cancellationToken);
+        return calendars.FirstOrDefault(calendar => calendar.AddEventsToCalendar)?.ExternalCalendarId
+               ?? calendars.FirstOrDefault(calendar => calendar.IsPrimary)?.ExternalCalendarId
+               ?? "primary";
+    }
+
+    private static async Task<NangoCalendarEventRequest> BuildCalendarEventRequestAsync(MainDbContext db, Appointment appointment, string calendarId, CancellationToken cancellationToken)
+    {
+        var client = await db.Clients.IgnoreQueryFilters().FirstAsync(item => item.Id == appointment.ClientId, cancellationToken);
+        var serviceVersion = await GetAppointmentServiceVersionAsync(db, appointment, cancellationToken);
+        var profile = await db.BusinessProfiles.IgnoreQueryFilters().FirstAsync(profile => profile.TenantId == appointment.TenantId, cancellationToken);
+        var participantClients = await db.AppointmentParticipants.IgnoreQueryFilters()
+            .Where(participant => participant.AppointmentId == appointment.Id)
+            .Join(db.Clients.IgnoreQueryFilters(), participant => participant.ClientId, participantClient => participantClient.Id, (_, participantClient) => participantClient)
+            .ToListAsync(cancellationToken);
+        var attendees = new[] { client }
+            .Concat(participantClients)
+            .Where(item => !string.IsNullOrWhiteSpace(item.Email))
+            .GroupBy(item => item.Email.Trim().ToLowerInvariant())
+            .Select(group => new NangoCalendarAttendee(group.First().Name, group.First().Email))
+            .ToList();
+
+        return new NangoCalendarEventRequest(
+            appointment.Id,
+            calendarId,
+            $"{serviceVersion.DurationMinutes} min meeting between {client.Name} and {serviceVersion.Name}",
+            $"Nerova booking reference: {appointment.PublicReference}",
+            serviceVersion.Location,
+            appointment.StartAt,
+            appointment.EndAt,
+            profile.TimeZone,
+            $"nerova-{appointment.Id}",
+            attendees
+        );
+    }
+
+    private static async Task NotifyClientAsync(MainDbContext db, Appointment appointment, string subject, string body, IEmailClient emailClient, CancellationToken cancellationToken)
+    {
+        var client = await db.Clients.IgnoreQueryFilters().FirstAsync(client => client.Id == appointment.ClientId, cancellationToken);
+        await SendEmailIfAvailableAsync(client.Email, subject, body, emailClient, cancellationToken);
+    }
+
+    private static async Task SendEmailIfAvailableAsync(string? email, string subject, string body, IEmailClient emailClient, CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrWhiteSpace(email)) return;
+        await emailClient.SendAsync(email.Trim(), subject, $"<p>{System.Net.WebUtility.HtmlEncode(body)}</p>", cancellationToken);
+    }
+
+    private static async Task<AppointmentRescheduleRequest?> FindPendingApprovalAsync(MainDbContext db, string token, DateTimeOffset now, CancellationToken cancellationToken)
+    {
+        var tokenHash = HashApprovalToken(token);
+        var candidates = await db.AppointmentRescheduleRequests.IgnoreQueryFilters().AsTracking()
+            .Where(request => request.TokenHash == tokenHash && request.Status == "Pending")
+            .ToListAsync(cancellationToken);
+        return candidates.FirstOrDefault(request => request.ExpiresAt > now);
+    }
+
+    private static string CreateApprovalToken()
+    {
+        return $"ar_{Base64UrlEncode(RandomNumberGenerator.GetBytes(32))}";
+    }
+
+    private static string HashApprovalToken(string token)
+    {
+        return Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(token)));
+    }
+
+    private static string BuildPublicUrl(string path)
+    {
+        var publicUrl = Environment.GetEnvironmentVariable(SharedKernel.SinglePageApp.SinglePageAppConfiguration.PublicUrlKey);
+        if (string.IsNullOrWhiteSpace(publicUrl) || publicUrl == "not-configured")
+        {
+            publicUrl = "https://localhost:9000";
+        }
+        return $"{publicUrl.TrimEnd('/')}/{path.TrimStart('/')}";
+    }
+
     private static async Task EnsureDefaultCategoryAsync(MainDbContext db, TenantId tenantId, CancellationToken cancellationToken)
     {
         if (!await db.ServiceCategories.AnyAsync(cancellationToken))
         {
             db.ServiceCategories.Add(new ServiceCategory { TenantId = tenantId, Name = "Consultations", SortOrder = 1 });
+            await db.SaveChangesAsync(cancellationToken);
+        }
+    }
+
+    private static async Task<BusinessLocation> EnsureDefaultLocationAsync(MainDbContext db, TenantId tenantId, CancellationToken cancellationToken)
+    {
+        var location = await db.BusinessLocations.AsTracking().FirstOrDefaultAsync(location => location.IsDefault, cancellationToken);
+        if (location is not null) return location;
+
+        var profile = await db.BusinessProfiles.FirstOrDefaultAsync(cancellationToken);
+        location = new BusinessLocation
+        {
+            TenantId = tenantId,
+            Name = "Nerova Studio",
+            TimeZone = profile?.TimeZone ?? "Africa/Johannesburg",
+            Address = profile?.Address ?? string.Empty,
+            IsDefault = true,
+            IsActive = true
+        };
+        db.BusinessLocations.Add(location);
+        await db.SaveChangesAsync(cancellationToken);
+        return location;
+    }
+
+    private static async Task EnsureSchedulingFoundationBackfillAsync(MainDbContext db, string? ownerUserId, CancellationToken cancellationToken)
+    {
+        var profiles = await db.BusinessProfiles.AsTracking().ToListAsync(cancellationToken);
+        foreach (var profile in profiles)
+        {
+            var location = await db.BusinessLocations.AsTracking().FirstOrDefaultAsync(location => location.TenantId == profile.TenantId && location.IsDefault, cancellationToken);
+            if (location is null)
+            {
+                location = new BusinessLocation
+                {
+                    TenantId = profile.TenantId,
+                    Name = "Nerova Studio",
+                    TimeZone = profile.TimeZone,
+                    Address = profile.Address,
+                    IsDefault = true,
+                    IsActive = true
+                };
+                db.BusinessLocations.Add(location);
+            }
+
+            var staffMembers = await db.StaffMembers.AsTracking().Where(staff => staff.TenantId == profile.TenantId).ToListAsync(cancellationToken);
+            foreach (var staff in staffMembers)
+            {
+                if (string.IsNullOrWhiteSpace(staff.LocationId))
+                {
+                    staff.LocationId = location.Id;
+                }
+
+                if (string.IsNullOrWhiteSpace(staff.UserId))
+                {
+                    staff.UserId = ownerUserId ?? $"tenant-{profile.TenantId}";
+                }
+            }
+
+            var services = await db.BookableServices.AsTracking().Where(service => service.TenantId == profile.TenantId).ToListAsync(cancellationToken);
+            foreach (var service in services.Where(service => string.IsNullOrWhiteSpace(service.LocationId)))
+            {
+                service.LocationId = location.Id;
+            }
+
+            var versions = await db.BookableServiceVersions.AsTracking().Where(version => version.TenantId == profile.TenantId).ToListAsync(cancellationToken);
+            foreach (var version in versions.Where(version => string.IsNullOrWhiteSpace(version.LocationId)))
+            {
+                version.LocationId = services.FirstOrDefault(service => service.Id == version.ServiceId)?.LocationId ?? location.Id;
+            }
+
+            var appointments = await db.Appointments.AsTracking().Where(appointment => appointment.TenantId == profile.TenantId).ToListAsync(cancellationToken);
+            foreach (var appointment in appointments.Where(appointment => string.IsNullOrWhiteSpace(appointment.LocationId)))
+            {
+                appointment.LocationId = services.FirstOrDefault(service => service.Id == appointment.ServiceId)?.LocationId ?? location.Id;
+            }
+
+            var tenantIntegrations = await db.IntegrationConnections.AsTracking().Where(connection => connection.TenantId == profile.TenantId).ToListAsync(cancellationToken);
+            foreach (var integration in tenantIntegrations.Where(connection => string.IsNullOrWhiteSpace(connection.OwnerId)))
+            {
+                integration.OwnerType = ConnectorOwnerType.Tenant;
+                integration.OwnerId = profile.TenantId.ToString();
+            }
+        }
+
+        if (db.ChangeTracker.HasChanges())
+        {
             await db.SaveChangesAsync(cancellationToken);
         }
     }
@@ -1555,24 +2032,33 @@ public sealed class AppointmentEndpoints : IEndpoints
         foreach (var provider in new[] { "Google", "Microsoft" })
         foreach (var capability in new[] { "Calendar", "Contacts", "Email" })
         {
-            db.IntegrationConnections.Add(new IntegrationConnection { TenantId = tenantId, Provider = provider, Capability = capability, Status = "PriorityOne" });
+            db.IntegrationConnections.Add(new IntegrationConnection
+            {
+                TenantId = tenantId,
+                Provider = provider,
+                Capability = capability,
+                OwnerType = ConnectorOwnerType.Tenant,
+                OwnerId = tenantId.ToString(),
+                Status = "PriorityOne"
+            });
         }
         await db.SaveChangesAsync(cancellationToken);
     }
 
-    private static async Task SeedTenantAsync(MainDbContext db, TenantId tenantId, DateTimeOffset now, CancellationToken cancellationToken)
+    private static async Task SeedTenantAsync(MainDbContext db, TenantId tenantId, DateTimeOffset now, string? ownerUserId, CancellationToken cancellationToken)
     {
         if (await db.BusinessProfiles.AnyAsync(cancellationToken)) return;
         var profileSlug = await ResolveSeedProfileSlugAsync(db, tenantId, cancellationToken);
         var profile = new BusinessProfile { TenantId = tenantId, Name = "Sea Point studio", Slug = profileSlug, LogoUrl = "/logos/sea-point-studio.svg" };
+        var location = new BusinessLocation { TenantId = tenantId, Name = "Nerova Studio", TimeZone = profile.TimeZone, Address = profile.Address, IsDefault = true, IsActive = true };
         var category = new ServiceCategory { TenantId = tenantId, Name = "Consultations", SortOrder = 1 };
         var group = new ServiceCategory { TenantId = tenantId, Name = "Group sessions", SortOrder = 2 };
-        var staff = new StaffMember { TenantId = tenantId, Name = "Sarah", Email = "sarah@nerovasystems.com", Phone = "+27 82 000 0000" };
-        var full = new BookableService { TenantId = tenantId, CategoryId = category.Id, Name = "Full consultation", Mode = "physical", DurationMinutes = 60, PriceCents = 45000, DepositCents = 15000, PaymentPolicy = ServicePaymentPolicy.DepositBeforeBooking, Location = "Sea Point studio", SortOrder = 1 };
-        var express = new BookableService { TenantId = tenantId, CategoryId = category.Id, Name = "Express session", Mode = "physical", DurationMinutes = 30, PriceCents = 22000, DepositCents = 0, PaymentPolicy = ServicePaymentPolicy.NoPaymentRequired, Location = "Sea Point studio", SortOrder = 2 };
-        var follow = new BookableService { TenantId = tenantId, CategoryId = category.Id, Name = "Follow-up visit", Mode = "virtual", DurationMinutes = 20, PriceCents = 15000, DepositCents = 0, PaymentPolicy = ServicePaymentPolicy.NoPaymentRequired, Location = "Manual link per booking", SortOrder = 3 };
-        var workshop = new BookableService { TenantId = tenantId, CategoryId = group.Id, Name = "Group workshop", Mode = "physical", DurationMinutes = 90, PriceCents = 85000, DepositCents = 25000, PaymentPolicy = ServicePaymentPolicy.DepositBeforeBooking, Location = "Sea Point studio", SortOrder = 4 };
-        db.AddRange(profile, category, group, staff, full, express, follow, workshop);
+        var staff = new StaffMember { TenantId = tenantId, LocationId = location.Id, UserId = ownerUserId ?? $"tenant-{tenantId}", Name = "Sarah", Email = "sarah@nerovasystems.com", Phone = "+27 82 000 0000" };
+        var full = new BookableService { TenantId = tenantId, LocationId = location.Id, CategoryId = category.Id, Name = "Full consultation", Mode = "physical", DurationMinutes = 60, PriceCents = 45000, DepositCents = 15000, PaymentPolicy = ServicePaymentPolicy.DepositBeforeBooking, Location = "Sea Point studio", SortOrder = 1 };
+        var express = new BookableService { TenantId = tenantId, LocationId = location.Id, CategoryId = category.Id, Name = "Express session", Mode = "physical", DurationMinutes = 30, PriceCents = 22000, DepositCents = 0, PaymentPolicy = ServicePaymentPolicy.NoPaymentRequired, Location = "Sea Point studio", SortOrder = 2 };
+        var follow = new BookableService { TenantId = tenantId, LocationId = location.Id, CategoryId = category.Id, Name = "Follow-up visit", Mode = "virtual", DurationMinutes = 20, PriceCents = 15000, DepositCents = 0, PaymentPolicy = ServicePaymentPolicy.NoPaymentRequired, Location = "Manual link per booking", SortOrder = 3 };
+        var workshop = new BookableService { TenantId = tenantId, LocationId = location.Id, CategoryId = group.Id, Name = "Group workshop", Mode = "physical", DurationMinutes = 90, PriceCents = 85000, DepositCents = 25000, PaymentPolicy = ServicePaymentPolicy.DepositBeforeBooking, Location = "Sea Point studio", SortOrder = 4 };
+        db.AddRange(profile, location, category, group, staff, full, express, follow, workshop);
         var serviceVersions = new[] { full, express, follow, workshop }.Select(service => CreateServiceVersion(service, 1, now)).ToArray();
         db.BookableServiceVersions.AddRange(serviceVersions);
         foreach (var day in new[] { DayOfWeek.Monday, DayOfWeek.Tuesday, DayOfWeek.Wednesday, DayOfWeek.Thursday, DayOfWeek.Friday })
@@ -1609,9 +2095,24 @@ public sealed class AppointmentEndpoints : IEndpoints
 
     private static async Task SeedPublicDemoTenantAsync(MainDbContext db, DateTimeOffset now, CancellationToken cancellationToken)
     {
-        var hasPublicDemo = await db.BusinessProfiles.IgnoreQueryFilters().AnyAsync(p => p.Slug == "sea-point-studio", cancellationToken);
-        if (hasPublicDemo) return;
-        await SeedTenantAsync(db, new TenantId(1), now, cancellationToken);
+        var profile = await db.BusinessProfiles.IgnoreQueryFilters().AsTracking().FirstOrDefaultAsync(p => p.Slug == "sea-point-studio", cancellationToken);
+        if (profile is not null)
+        {
+            await EnsurePublicDemoHolidayFixtureAsync(db, profile, cancellationToken);
+            return;
+        }
+
+        await SeedTenantAsync(db, new TenantId(1), now, null, cancellationToken);
+        profile = await db.BusinessProfiles.IgnoreQueryFilters().AsTracking().FirstAsync(p => p.Slug == "sea-point-studio", cancellationToken);
+        await EnsurePublicDemoHolidayFixtureAsync(db, profile, cancellationToken);
+    }
+
+    private static async Task EnsurePublicDemoHolidayFixtureAsync(MainDbContext db, BusinessProfile profile, CancellationToken cancellationToken)
+    {
+        var openHolidayIds = ReadOpenHolidayIds(profile).ToHashSet(StringComparer.OrdinalIgnoreCase);
+        if (!openHolidayIds.Add("ZA-2026-04-27")) return;
+        profile.OpenPublicHolidayIdsJson = JsonSerializer.Serialize(openHolidayIds.OrderBy(id => id));
+        await db.SaveChangesAsync(cancellationToken);
     }
 
     private static Task SeedAppointmentsAsync(MainDbContext db, TenantId tenantId, StaffMember staff, BookableService[] services, BookableServiceVersion[] serviceVersions, DateTimeOffset now)
@@ -1637,7 +2138,7 @@ public sealed class AppointmentEndpoints : IEndpoints
         foreach (var row in data)
         {
             var serviceVersion = serviceVersions.Single(version => version.ServiceId == row.Item2.Id);
-            var appointment = new Appointment { TenantId = tenantId, ClientId = row.Item1.Id, ServiceId = row.Item2.Id, ServiceVersionId = serviceVersion.Id, StaffMemberId = staff.Id, StartAt = row.Item3, EndAt = row.Item3.AddMinutes(serviceVersion.DurationMinutes), Status = row.Item4, PaymentStatus = row.Item5, Source = row.Item6, CreatedAt = now };
+            var appointment = new Appointment { TenantId = tenantId, ClientId = row.Item1.Id, LocationId = row.Item2.LocationId, ServiceId = row.Item2.Id, ServiceVersionId = serviceVersion.Id, StaffMemberId = staff.Id, StartAt = row.Item3, EndAt = row.Item3.AddMinutes(serviceVersion.DurationMinutes), Status = row.Item4, PaymentStatus = row.Item5, Source = row.Item6, CreatedAt = now };
             db.Appointments.Add(appointment);
             AddFlowEvents(db, appointment, now);
         }
@@ -1647,13 +2148,13 @@ public sealed class AppointmentEndpoints : IEndpoints
 
 public sealed record AppShellResponse(BusinessProfileDto Profile, IEnumerable<AppointmentDto> Appointments, IEnumerable<ServiceDto> Services, IEnumerable<ServiceCategoryDto> Categories, IEnumerable<ClientDto> Clients, AnalyticsDto Analytics, IEnumerable<IntegrationConnectionDto> Integrations, IEnumerable<AvailabilityRuleDto> AvailabilityRules, HolidaySettingsDto HolidaySettings, IEnumerable<ClosureDto> Closures, IEnumerable<CalendarBlockDto> CalendarBlocks);
 public sealed record BusinessProfileDto(string Name, string Slug, string TimeZone, string Address, bool PublicBookingEnabled);
-public sealed record AppointmentDto(string Id, string PublicReference, string ClientId, string ServiceId, string ServiceVersionId, int ServiceVersionNumber, DateTimeOffset StartAt, DateTimeOffset EndAt, string ClientName, string ClientPhone, string ClientEmail, string ServiceName, int DurationMinutes, int PriceCents, int DepositCents, string PaymentPolicy, string Status, string PaymentStatus, string Source, string Location, string AnswersJson, string ClientStatus, string? ClientAlert, string? ClientInternalNote);
+public sealed record AppointmentDto(string Id, string PublicReference, string ClientId, string ServiceId, string ServiceVersionId, int ServiceVersionNumber, DateTimeOffset StartAt, DateTimeOffset EndAt, string ClientName, string ClientPhone, string ClientEmail, string ServiceName, int DurationMinutes, int PriceCents, int DepositCents, string PaymentPolicy, string Status, string PaymentStatus, string Source, string Location, string AnswersJson, string ClientStatus, string? ClientAlert, string? ClientInternalNote, string? MeetUrl);
 public sealed record ServiceDto(string Id, string CategoryId, string Name, string Mode, int DurationMinutes, int PriceCents, int DepositCents, string PaymentPolicy, string Location, bool IsActive, int LatestVersionNumber);
 public sealed record ServiceCategoryDto(string Id, string Name);
 public sealed record ClientDto(string Id, string Name, string Phone, string Email, string Status, string? Alert, string? InternalNote, int VisitCount, int LifetimeSpendCents, int NoShowCount, DateTimeOffset? LastVisitAt, IEnumerable<ClientAppointmentHistoryDto> AppointmentHistory);
 public sealed record ClientAppointmentHistoryDto(string Id, string PublicReference, DateTimeOffset StartAt, DateTimeOffset EndAt, string ServiceName, int PriceCents, int DepositCents, string PaymentPolicy, string Status, string PaymentStatus, string Source, string Location);
 public sealed record AnalyticsDto(int Bookings, int RevenueCents, int ClientsServed, int AverageBookingValueCents, decimal NoShowRate);
-public sealed record IntegrationConnectionDto(string Provider, string Capability, string Status, DateTimeOffset? LastSyncedAt);
+public sealed record IntegrationConnectionDto(string Provider, string Capability, string Status, DateTimeOffset? LastSyncedAt, string OwnerType, string OwnerId, string? ExternalConnectionId);
 public sealed record AvailabilityRuleDto(string Id, string DayOfWeek, string StartTime, string EndTime);
 public sealed record HolidaySettingsDto(string CountryCode, IEnumerable<HolidayCountryDto> Countries, IEnumerable<PublicHolidayDto> Holidays);
 public sealed record HolidayCountryDto(string Code, string Name);
@@ -1676,6 +2177,12 @@ public sealed record AvailabilityDayRequest(string DayOfWeek, IEnumerable<Availa
 public sealed record AvailabilityWindowRequest(string StartTime, string EndTime);
 public sealed record HolidaySettingsRequest(string CountryCode, IEnumerable<string>? OpenHolidayIds);
 public sealed record CreateClosureRequest(DateOnly StartDate, DateOnly EndDate, string Label);
+public sealed record AppointmentParticipantRequest(string Name, string? Phone, string? Email);
+public sealed record UpdateAppointmentLocationRequest(string Location);
+public sealed record CreateRescheduleRequest(DateTimeOffset ProposedStartAt, string? Note);
+public sealed record RescheduleRequestResponse(string ApprovalUrl, string ApprovalToken, string Status);
+public sealed record RescheduleApprovalResponse(AppointmentDto Appointment, DateTimeOffset ProposedStartAt, DateTimeOffset ProposedEndAt, string Note, string Status);
+public sealed record PublicApprovalResultResponse(string AppointmentReference, string Status);
 public sealed record UpdateAppointmentStatusRequest(string Status, string? PaymentStatus);
 public sealed record UpdateClientRequest(string Name, string Phone, string Email, string Status, string? Alert, string? InternalNote);
 public sealed record PaystackInitializeRequest(string AppointmentId);

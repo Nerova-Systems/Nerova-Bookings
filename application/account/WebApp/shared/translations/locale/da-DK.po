@@ -397,6 +397,9 @@ msgstr "Autentificering deles på tværs af alle faner. For at bruge flere konti
 msgid "Authentication was cancelled or denied. Please try again if you want to continue."
 msgstr "Godkendelse blev annulleret eller afvist. Prøv venligst igen, hvis du vil fortsætte."
 
+msgid "Available through Google Calendar"
+msgstr ""
+
 msgid "Avatar fallback and badge"
 msgstr ""
 
@@ -568,13 +571,7 @@ msgstr ""
 msgid "Calendar (single)"
 msgstr ""
 
-msgid "Calendar connection setup is coming next."
-msgstr ""
-
-msgid "Calendar disconnect management is coming next."
-msgstr ""
-
-msgid "Calendar sync settings are coming next."
+msgid "Calendar and conferencing connections are managed from the user settings pages."
 msgstr ""
 
 msgid "Calendars"
@@ -784,9 +781,6 @@ msgstr ""
 msgid "Conferencing"
 msgstr ""
 
-msgid "Conferencing app management is coming next."
-msgstr ""
-
 msgid "Configure how your event types interact with your calendars"
 msgstr ""
 
@@ -796,7 +790,7 @@ msgstr ""
 msgid "Confirm downgrade"
 msgstr "Bekræft nedgradering"
 
-msgid "Conflict calendar connection is coming next."
+msgid "Connect Google Calendar"
 msgstr ""
 
 msgid "Connected accounts"
@@ -844,7 +838,13 @@ msgstr ""
 msgid "Could not create OOO."
 msgstr ""
 
+msgid "Could not refresh Google Calendar status."
+msgstr ""
+
 msgid "Could not remove OOO."
+msgstr ""
+
+msgid "Could not start Google Calendar connection."
 msgstr ""
 
 msgid "Could not update public holiday."
@@ -1243,11 +1243,11 @@ msgstr ""
 msgid "Feel free to reach out with any questions or issues you may have."
 msgstr "Du er velkommen til at kontakte os med eventuelle spørgsmål eller problemer, du måtte have."
 
-msgid "Filter"
-msgstr ""
-
 msgid "Filters"
 msgstr "Filtre"
+
+msgid "Finish Google Calendar authorization in the new tab, then refresh status here."
+msgstr ""
 
 msgid "Firefox"
 msgstr ""
@@ -1336,7 +1336,7 @@ msgstr "Gå til forsiden"
 msgid "Google"
 msgstr "Google"
 
-msgid "Google connector management will be handled in the connector wiring phase."
+msgid "Google Calendar connection status refreshed."
 msgstr ""
 
 msgid "Google Meet is Google's web-based video conferencing platform, designed to compete with major conferencing platforms."
@@ -1906,16 +1906,10 @@ msgstr ""
 msgid "OOO end date must be on or after the start date."
 msgstr ""
 
-msgid "OOO filters are coming next."
-msgstr ""
-
 msgid "OOO removed."
 msgstr ""
 
 msgid "Open command palette"
-msgstr ""
-
-msgid "Open conferencing app options"
 msgstr ""
 
 msgid "Open side pane"
@@ -2279,6 +2273,9 @@ msgstr "Reference-ID: {id}"
 msgid "Refine the recipe list. Changes apply when you close the sheet."
 msgstr ""
 
+msgid "Refresh status"
+msgstr ""
+
 msgid "Refunded"
 msgstr "Refunderet"
 
@@ -2299,9 +2296,6 @@ msgstr ""
 
 #. placeholder {0}: image.file.name
 msgid "Remove {0}"
-msgstr ""
-
-msgid "Remove calendar"
 msgstr ""
 
 msgid "Remove image from {label}"
@@ -2402,12 +2396,6 @@ msgid "Save note"
 msgstr ""
 
 msgid "Save page as..."
-msgstr ""
-
-msgid "Saved filters"
-msgstr ""
-
-msgid "Saved OOO filters are coming next."
 msgstr ""
 
 msgid "Saved recipes"
@@ -3122,9 +3110,6 @@ msgstr "Bekræft"
 
 msgid "Verifying..."
 msgstr "Bekræfter..."
-
-msgid "Video app connection setup is coming next."
-msgstr ""
 
 msgid "View active users"
 msgstr "Se aktive brugere"

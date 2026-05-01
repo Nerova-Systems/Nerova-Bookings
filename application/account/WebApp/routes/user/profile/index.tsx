@@ -131,7 +131,7 @@ function ProfilePage() {
                 <Trans>Connected accounts</Trans>
               </h2>
               <p className="mt-1 text-sm text-muted-foreground">
-                <Trans>Google connector management will be handled in the connector wiring phase.</Trans>
+                <Trans>Calendar and conferencing connections are managed from the user settings pages.</Trans>
               </p>
             </div>
           </section>

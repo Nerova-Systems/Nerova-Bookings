@@ -6,7 +6,7 @@ import { Button } from "@repo/ui/components/Button";
 import { Input } from "@repo/ui/components/Input";
 import { Switch } from "@repo/ui/components/Switch";
 import { createFileRoute } from "@tanstack/react-router";
-import { BookmarkIcon, Clock3Icon, FilterIcon, PlusIcon, SearchIcon, Trash2Icon } from "lucide-react";
+import { Clock3Icon, PlusIcon, SearchIcon, Trash2Icon } from "lucide-react";
 import { useMemo, useState, type FormEvent, type ReactNode } from "react";
 import { toast } from "sonner";
 
@@ -91,18 +91,7 @@ function MyOooTab({ closures, holidaySettings, onAdd }: { closures: BusinessClos
             className="h-auto border-0 bg-transparent px-0 py-0 shadow-none focus-visible:outline-none"
           />
         </div>
-        <Button type="button" variant="outline" className="h-12" onClick={() => toast.info(t`OOO filters are coming next.`)}>
-          <FilterIcon className="size-4" />
-          <Trans>Filter</Trans>
-        </Button>
-        <Button type="button" variant="outline" className="ml-auto h-12" onClick={() => toast.info(t`Saved OOO filters are coming next.`)}>
-          <BookmarkIcon className="size-4" />
-          <Trans>Save</Trans>
-        </Button>
-        <Button type="button" variant="outline" className="h-12" onClick={() => toast.info(t`Saved OOO filters are coming next.`)}>
-          <FilterIcon className="size-4" />
-          <Trans>Saved filters</Trans>
-        </Button>
+        <div className="ml-auto" />
       </div>
 
       <section className="mt-7 min-h-[28rem] rounded-xl border border-dashed border-border bg-card">

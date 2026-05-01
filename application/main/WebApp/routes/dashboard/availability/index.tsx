@@ -1,10 +1,8 @@
 import { t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
-import { Button } from "@repo/ui/components/Button";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { Clock3Icon, Globe2Icon, MoreHorizontalIcon, PlusIcon } from "lucide-react";
-import { useEffect, useMemo, useState, type ReactNode } from "react";
-import { toast } from "sonner";
+import { Clock3Icon, Globe2Icon, MoreHorizontalIcon } from "lucide-react";
+import { useEffect, useMemo } from "react";
 
 import { useAppointmentShell, type AvailabilityRule } from "@/shared/lib/appointmentsApi";
 
@@ -16,7 +14,6 @@ export const Route = createFileRoute("/dashboard/availability/")({
 function AvailabilityPage() {
   const navigate = useNavigate();
   const shellQuery = useAppointmentShell();
-  const [scope, setScope] = useState<"mine" | "team">("mine");
   const summary = useMemo(() => summarizeAvailability(shellQuery.data?.availabilityRules ?? []), [shellQuery.data?.availabilityRules]);
 
   useEffect(() => {
@@ -33,20 +30,6 @@ function AvailabilityPage() {
           <p className="mt-1 text-lg text-white/80">
             <Trans>Configure times when you are available for bookings.</Trans>
           </p>
-        </div>
-        <div className="ml-auto flex items-center gap-2">
-          <div className="flex rounded-xl bg-white/[0.04] p-1">
-            <ScopeButton active={scope === "mine"} onClick={() => setScope("mine")}>
-              <Trans>My availability</Trans>
-            </ScopeButton>
-            <ScopeButton active={scope === "team"} onClick={() => setScope("team")}>
-              <Trans>Team availability</Trans>
-            </ScopeButton>
-          </div>
-          <Button size="sm" onClick={() => toast.message("Additional availability schedules are coming next.")}>
-            <PlusIcon className="size-4" />
-            <Trans>New</Trans>
-          </Button>
         </div>
       </header>
 
@@ -91,20 +74,6 @@ function AvailabilityPage() {
         </button>
       </div>
     </main>
-  );
-}
-
-function ScopeButton({ active, onClick, children }: { active: boolean; onClick: () => void; children: ReactNode }) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={`rounded-lg px-3 py-2 text-sm font-semibold transition-colors ${
-        active ? "bg-[#101010] text-white shadow-[0_0_0_1px_rgba(255,255,255,0.08)]" : "text-white/70 hover:text-white"
-      }`}
-    >
-      {children}
-    </button>
   );
 }
 

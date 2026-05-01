@@ -3,10 +3,10 @@ import { Trans } from "@lingui/react/macro";
 import { AppLayout } from "@repo/ui/components/AppLayout";
 import { Button } from "@repo/ui/components/Button";
 import { createFileRoute } from "@tanstack/react-router";
-import { PlusIcon, Trash2Icon } from "lucide-react";
+import { Loader2Icon, PlusIcon, RefreshCwIcon } from "lucide-react";
 import { toast } from "sonner";
 
-import { useMainAppointmentShell } from "@/shared/lib/mainAppSettingsApi";
+import { useCreateIntegrationConnectSession, useMainAppointmentShell, useSyncIntegrationConnections } from "@/shared/lib/mainAppSettingsApi";
 
 export const Route = createFileRoute("/user/calendars/")({
   staticData: { trackingTitle: "Calendars" },
@@ -15,10 +15,32 @@ export const Route = createFileRoute("/user/calendars/")({
 
 function CalendarsPage() {
   const shellQuery = useMainAppointmentShell();
+  const connectSessionMutation = useCreateIntegrationConnectSession();
+  const syncConnectionsMutation = useSyncIntegrationConnections();
   const calendarIntegration = shellQuery.data?.integrations.find(
     (integration) => integration.provider === "Google" && integration.capability === "Calendar"
   );
-  const status = calendarIntegration?.status ?? "Demo";
+  const status = calendarIntegration?.status ?? "Not connected";
+  const actionPending = connectSessionMutation.isPending || syncConnectionsMutation.isPending;
+
+  async function handleAddCalendar() {
+    try {
+      const session = await connectSessionMutation.mutateAsync({ appSlug: "google-calendar" });
+      window.open(session.connectLink, "_blank", "noopener,noreferrer");
+      toast.success(t`Finish Google Calendar authorization in the new tab, then refresh status here.`);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : t`Could not start Google Calendar connection.`);
+    }
+  }
+
+  async function handleRefreshStatus() {
+    try {
+      await syncConnectionsMutation.mutateAsync({ appSlug: "google-calendar" });
+      toast.success(t`Google Calendar connection status refreshed.`);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : t`Could not refresh Google Calendar status.`);
+    }
+  }
 
   return (
     <AppLayout
@@ -30,9 +52,13 @@ function CalendarsPage() {
     >
       <div className="flex flex-col gap-4 pt-6">
         <div className="flex justify-end">
-          <Button type="button" variant="outline" onClick={() => toast.info(t`Calendar connection setup is coming next.`)}>
-            <PlusIcon className="size-4" />
+          <Button type="button" variant="outline" disabled={actionPending} onClick={handleAddCalendar}>
+            {connectSessionMutation.isPending ? <Loader2Icon className="size-4 animate-spin" /> : <PlusIcon className="size-4" />}
             <Trans>Add calendar</Trans>
+          </Button>
+          <Button type="button" variant="outline" className="ml-2" disabled={actionPending} onClick={handleRefreshStatus}>
+            {syncConnectionsMutation.isPending ? <Loader2Icon className="size-4 animate-spin" /> : <RefreshCwIcon className="size-4" />}
+            <Trans>Refresh status</Trans>
           </Button>
         </div>
 
@@ -69,15 +95,6 @@ function CalendarsPage() {
                 <Trans>Select which calendars you want to check for conflicts to prevent double bookings.</Trans>
               </p>
             </div>
-            <Button
-              type="button"
-              variant="outline"
-              className="ml-auto"
-              onClick={() => toast.info(t`Conflict calendar connection is coming next.`)}
-            >
-              <PlusIcon className="size-4" />
-              <Trans>Add</Trans>
-            </Button>
           </div>
           <div className="border-t border-border bg-muted/20 px-5 py-4">
             <div className="flex items-center gap-4">
@@ -87,30 +104,17 @@ function CalendarsPage() {
                 <div className="truncate text-sm text-muted-foreground">colinswart0@gmail.com</div>
               </div>
               <span className="ml-auto rounded-full border border-border px-2 py-1 text-xs text-muted-foreground">{status}</span>
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon-sm"
-                onClick={() => toast.info(t`Calendar disconnect management is coming next.`)}
-                aria-label={t`Remove calendar`}
-              >
-                <Trash2Icon className="size-4 text-destructive" />
-              </Button>
             </div>
             <div className="mt-4 grid gap-2 text-sm text-muted-foreground">
               <span>
                 <Trans>Toggle the calendars you want to check for conflicts to prevent double bookings.</Trans>
               </span>
               <label className="flex items-center gap-3">
-                <input type="checkbox" defaultChecked={true} onChange={() => toast.info(t`Calendar sync settings are coming next.`)} />
+                <input type="checkbox" defaultChecked={true} disabled />
                 <span>colinswart0@gmail.com</span>
                 <span className="rounded bg-primary/15 px-2 py-0.5 text-xs text-primary">
                   <Trans>Adding events to</Trans>
                 </span>
-              </label>
-              <label className="flex items-center gap-3">
-                <input type="checkbox" onChange={() => toast.info(t`Calendar sync settings are coming next.`)} />
-                <span>Family</span>
               </label>
             </div>
           </div>

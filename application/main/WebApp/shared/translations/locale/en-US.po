@@ -49,6 +49,9 @@ msgstr "Appointment payments settle into this business bank account through a Pa
 msgid "Appointments"
 msgstr "Appointments"
 
+msgid "Approve reschedule"
+msgstr "Approve reschedule"
+
 msgid "Apps"
 msgstr "Apps"
 
@@ -178,9 +181,6 @@ msgstr "Edit service"
 msgid "Export CSV"
 msgstr "Export CSV"
 
-msgid "Filter"
-msgstr "Filter"
-
 msgid "Flow answers"
 msgstr "Flow answers"
 
@@ -205,9 +205,6 @@ msgstr "Internal notes"
 msgid "Join call"
 msgstr "Join call"
 
-msgid "Launch troubleshooter"
-msgstr "Launch troubleshooter"
-
 msgid "Lifecycle events"
 msgstr "Lifecycle events"
 
@@ -231,12 +228,6 @@ msgstr "Manage categories"
 
 msgid "More options"
 msgstr "More options"
-
-msgid "My availability"
-msgstr "My availability"
-
-msgid "New"
-msgstr "New"
 
 msgid "New service"
 msgstr "New service"
@@ -294,6 +285,9 @@ msgstr "Recent appointment payments"
 
 msgid "Recent visits"
 msgstr "Recent visits"
+
+msgid "Reject"
+msgstr "Reject"
 
 msgid "Reorder"
 msgstr "Reorder"
@@ -363,12 +357,6 @@ msgstr "Settlements"
 
 msgid "Setup required"
 msgstr "Setup required"
-
-msgid "Something doesn't look right?"
-msgstr "Something doesn't look right?"
-
-msgid "Team availability"
-msgstr "Team availability"
 
 msgid "Temporarily out-of-office?"
 msgstr "Temporarily out-of-office?"

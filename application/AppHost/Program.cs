@@ -18,7 +18,8 @@ var (googleOAuthConfigured, googleOAuthClientId, googleOAuthClientSecret) = Conf
 
 var (payFastConfigured, payFastMerchantId, payFastMerchantKey, payFastPassphrase, payFastSandbox, payFastNotifyUrl, payFastReturnUrl, payFastCancelUrl, payFastAllowedIps) = ConfigurePayFastParameters();
 var (paystackConfigured, paystackPublicKey, paystackSecretKey, paystackCallbackUrl, paystackWebhookUrl) = ConfigurePaystackParameters();
-var (twilioConfigured, twilioAccountSid, twilioAuthToken, twilioVerifyServiceSid) = ConfigureTwilioParameters();
+var (twilioConfigured, twilioAccountSid, twilioAuthToken, twilioVerifyServiceSid, twilioWhatsAppFrom) = ConfigureTwilioParameters();
+var (nangoConfigured, nangoToolboxSecretKey, nangoServerUrl) = ConfigureNangoParameters();
 
 var postgresPassword = builder.CreateStablePassword("postgres-password");
 var postgres = builder.AddPostgres("postgres", password: postgresPassword, port: 9002)
@@ -108,6 +109,9 @@ var mainWorkers = builder
     .AddProject<Main_Workers>("main-workers")
     .WithReference(mainDatabase)
     .WithReference(azureStorage)
+    .WithEnvironment("NANGO_TOOLBOX_SECRET_KEY", nangoToolboxSecretKey)
+    .WithEnvironment("NANGO_SECRET_KEY", nangoToolboxSecretKey)
+    .WithEnvironment("NANGO_SERVER_URL", nangoServerUrl)
     .WaitFor(mainDatabase);
 
 var mainApi = builder
@@ -126,6 +130,11 @@ var mainApi = builder
     .WithEnvironment("TWILIO_ACCOUNT_SID", twilioAccountSid)
     .WithEnvironment("TWILIO_AUTH_TOKEN", twilioAuthToken)
     .WithEnvironment("TWILIO_VERIFY_SERVICE_SID", twilioVerifyServiceSid)
+    .WithEnvironment("TWILIO_WHATSAPP_FROM", twilioWhatsAppFrom)
+    .WithEnvironment("PUBLIC_NANGO_ENABLED", nangoConfigured ? "true" : "false")
+    .WithEnvironment("NANGO_TOOLBOX_SECRET_KEY", nangoToolboxSecretKey)
+    .WithEnvironment("NANGO_SECRET_KEY", nangoToolboxSecretKey)
+    .WithEnvironment("NANGO_SERVER_URL", nangoServerUrl)
     .WaitFor(mainWorkers);
 
 var appGateway = builder
@@ -300,7 +309,8 @@ return;
 (bool Configured,
     IResourceBuilder<ParameterResource> AccountSid,
     IResourceBuilder<ParameterResource> AuthToken,
-    IResourceBuilder<ParameterResource> VerifyServiceSid) ConfigureTwilioParameters()
+    IResourceBuilder<ParameterResource> VerifyServiceSid,
+    IResourceBuilder<ParameterResource> WhatsAppFrom) ConfigureTwilioParameters()
 {
     _ = builder.AddParameter("twilio-verify-enabled")
         .WithDescription("Enable Twilio Verify SMS OTP for public booking phone verification. Set to `true` after Verify credentials are configured.", true);
@@ -308,34 +318,96 @@ return;
     var accountSidFromEnvironment = Environment.GetEnvironmentVariable("TWILIO_ACCOUNT_SID");
     var authTokenFromEnvironment = Environment.GetEnvironmentVariable("TWILIO_AUTH_TOKEN");
     var verifyServiceSidFromEnvironment = Environment.GetEnvironmentVariable("TWILIO_VERIFY_SERVICE_SID");
+    var whatsAppFromEnvironment = Environment.GetEnvironmentVariable("TWILIO_WHATSAPP_FROM");
     var configured = builder.Configuration["Parameters:twilio-verify-enabled"] == "true" ||
                      (!string.IsNullOrWhiteSpace(accountSidFromEnvironment) &&
                       !string.IsNullOrWhiteSpace(authTokenFromEnvironment) &&
                       !string.IsNullOrWhiteSpace(verifyServiceSidFromEnvironment));
+    var whatsAppConfigured = builder.Configuration["Parameters:twilio-whatsapp-enabled"] == "true" ||
+                             !string.IsNullOrWhiteSpace(whatsAppFromEnvironment);
 
-    if (configured)
+    _ = builder.AddParameter("twilio-whatsapp-enabled")
+        .WithDescription("Enable Twilio WhatsApp messaging for reschedule approval links. Set to `true` after the WhatsApp sender is approved.", true);
+
+    if (configured || whatsAppConfigured)
     {
         var accountSid = string.IsNullOrWhiteSpace(accountSidFromEnvironment)
-            ? builder.AddParameter("twilio-account-sid", true)
-                .WithDescription("Twilio Account SID used for Verify SMS requests.", true)
+            ? builder.AddParameter("twilio-account-sid", true).WithDescription("Twilio Account SID used for Verify SMS and WhatsApp messaging.", true)
             : builder.CreateResourceBuilder(new ParameterResource("twilio-account-sid", _ => accountSidFromEnvironment, true));
         var authToken = string.IsNullOrWhiteSpace(authTokenFromEnvironment)
-            ? builder.AddParameter("twilio-auth-token", true)
-                .WithDescription("Twilio Auth Token used for Verify SMS requests.", true)
+            ? builder.AddParameter("twilio-auth-token", true).WithDescription("Twilio Auth Token used for Verify SMS and WhatsApp messaging.", true)
             : builder.CreateResourceBuilder(new ParameterResource("twilio-auth-token", _ => authTokenFromEnvironment, true));
-        var verifyServiceSid = string.IsNullOrWhiteSpace(verifyServiceSidFromEnvironment)
+        var verifyServiceSid = configured && string.IsNullOrWhiteSpace(verifyServiceSidFromEnvironment)
             ? builder.AddParameter("twilio-verify-service-sid", true)
                 .WithDescription("Twilio Verify Service SID for public booking OTP checks.", true)
-            : builder.CreateResourceBuilder(new ParameterResource("twilio-verify-service-sid", _ => verifyServiceSidFromEnvironment, true));
+            : builder.CreateResourceBuilder(new ParameterResource("twilio-verify-service-sid", _ => string.IsNullOrWhiteSpace(verifyServiceSidFromEnvironment) ? "not-configured" : verifyServiceSidFromEnvironment, true));
+        var whatsAppFrom = whatsAppConfigured && string.IsNullOrWhiteSpace(whatsAppFromEnvironment)
+            ? builder.AddParameter("twilio-whatsapp-from", true)
+                .WithDescription("Twilio WhatsApp sender, for example +14155238886 or your approved WhatsApp Business sender.", true)
+            : builder.CreateResourceBuilder(new ParameterResource("twilio-whatsapp-from", _ => string.IsNullOrWhiteSpace(whatsAppFromEnvironment) ? "not-configured" : whatsAppFromEnvironment, true));
 
-        return (configured, accountSid, authToken, verifyServiceSid);
+        return (configured || whatsAppConfigured, accountSid, authToken, verifyServiceSid, whatsAppFrom);
     }
 
     return (
         configured,
         builder.CreateResourceBuilder(new ParameterResource("twilio-account-sid", _ => "not-configured", true)),
         builder.CreateResourceBuilder(new ParameterResource("twilio-auth-token", _ => "not-configured", true)),
-        builder.CreateResourceBuilder(new ParameterResource("twilio-verify-service-sid", _ => "not-configured", true))
+        builder.CreateResourceBuilder(new ParameterResource("twilio-verify-service-sid", _ => "not-configured", true)),
+        builder.CreateResourceBuilder(new ParameterResource("twilio-whatsapp-from", _ => "not-configured", true))
+    );
+}
+
+(bool Configured,
+    IResourceBuilder<ParameterResource> ToolboxSecretKey,
+    IResourceBuilder<ParameterResource> ServerUrl) ConfigureNangoParameters()
+{
+    _ = builder.AddParameter("nango-enabled")
+        .WithDescription("""
+                         **Nango Connectors** -- Enables Nango-backed connector setup, starting with Google Calendar.
+
+                         **Important**: Create the `google-calendar` integration in Nango before enabling this.
+
+                         - Enter `true` to enable Nango connector flows, or `false` to skip.
+                         - After enabling, restart Aspire to be prompted for the Nango secret key.
+
+                         The server URL defaults to Nango Cloud: `https://api.nango.dev`.
+                         """, true);
+
+    var secretFromEnvironment = Environment.GetEnvironmentVariable("NANGO_TOOLBOX_SECRET_KEY");
+    if (string.IsNullOrWhiteSpace(secretFromEnvironment))
+    {
+        secretFromEnvironment = Environment.GetEnvironmentVariable("NANGO_SECRET_KEY");
+    }
+
+    var serverUrlFromEnvironment = Environment.GetEnvironmentVariable("NANGO_SERVER_URL");
+    var configured = builder.Configuration["Parameters:nango-enabled"] == "true" ||
+                     !string.IsNullOrWhiteSpace(secretFromEnvironment);
+
+    var serverUrl = string.IsNullOrWhiteSpace(serverUrlFromEnvironment)
+        ? builder.CreateResourceBuilder(
+            new ParameterResource(
+                "nango-server-url",
+                _ => builder.Configuration["Parameters:nango-server-url"] ?? "https://api.nango.dev",
+                true
+            )
+        )
+        : builder.CreateResourceBuilder(new ParameterResource("nango-server-url", _ => serverUrlFromEnvironment, true));
+
+    if (configured)
+    {
+        var toolboxSecretKey = string.IsNullOrWhiteSpace(secretFromEnvironment)
+            ? builder.AddParameter("nango-toolbox-secret-key", true)
+                .WithDescription("Nango secret key used to create connect sessions and read connection metadata.", true)
+            : builder.CreateResourceBuilder(new ParameterResource("nango-toolbox-secret-key", _ => secretFromEnvironment, true));
+
+        return (configured, toolboxSecretKey, serverUrl);
+    }
+
+    return (
+        configured,
+        builder.CreateResourceBuilder(new ParameterResource("nango-toolbox-secret-key", _ => "not-configured", true)),
+        serverUrl
     );
 }
 

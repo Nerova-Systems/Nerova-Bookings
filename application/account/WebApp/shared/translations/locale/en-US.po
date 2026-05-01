@@ -399,6 +399,9 @@ msgstr "Authentication is shared across all tabs. To use multiple accounts simul
 msgid "Authentication was cancelled or denied. Please try again if you want to continue."
 msgstr "Authentication was cancelled or denied. Please try again if you want to continue."
 
+msgid "Available through Google Calendar"
+msgstr "Available through Google Calendar"
+
 msgid "Avatar fallback and badge"
 msgstr "Avatar fallback and badge"
 
@@ -570,14 +573,8 @@ msgstr "Calendar (range)"
 msgid "Calendar (single)"
 msgstr "Calendar (single)"
 
-msgid "Calendar connection setup is coming next."
-msgstr "Calendar connection setup is coming next."
-
-msgid "Calendar disconnect management is coming next."
-msgstr "Calendar disconnect management is coming next."
-
-msgid "Calendar sync settings are coming next."
-msgstr "Calendar sync settings are coming next."
+msgid "Calendar and conferencing connections are managed from the user settings pages."
+msgstr "Calendar and conferencing connections are managed from the user settings pages."
 
 msgid "Calendars"
 msgstr "Calendars"
@@ -786,9 +783,6 @@ msgstr "Components"
 msgid "Conferencing"
 msgstr "Conferencing"
 
-msgid "Conferencing app management is coming next."
-msgstr "Conferencing app management is coming next."
-
 msgid "Configure how your event types interact with your calendars"
 msgstr "Configure how your event types interact with your calendars"
 
@@ -798,8 +792,8 @@ msgstr "Confirm action"
 msgid "Confirm downgrade"
 msgstr "Confirm downgrade"
 
-msgid "Conflict calendar connection is coming next."
-msgstr "Conflict calendar connection is coming next."
+msgid "Connect Google Calendar"
+msgstr "Connect Google Calendar"
 
 msgid "Connected accounts"
 msgstr "Connected accounts"
@@ -846,8 +840,14 @@ msgstr "Coq au vin"
 msgid "Could not create OOO."
 msgstr "Could not create OOO."
 
+msgid "Could not refresh Google Calendar status."
+msgstr "Could not refresh Google Calendar status."
+
 msgid "Could not remove OOO."
 msgstr "Could not remove OOO."
+
+msgid "Could not start Google Calendar connection."
+msgstr "Could not start Google Calendar connection."
 
 msgid "Could not update public holiday."
 msgstr "Could not update public holiday."
@@ -1245,11 +1245,11 @@ msgstr "Features"
 msgid "Feel free to reach out with any questions or issues you may have."
 msgstr "Feel free to reach out with any questions or issues you may have."
 
-msgid "Filter"
-msgstr "Filter"
-
 msgid "Filters"
 msgstr "Filters"
+
+msgid "Finish Google Calendar authorization in the new tab, then refresh status here."
+msgstr "Finish Google Calendar authorization in the new tab, then refresh status here."
 
 msgid "Firefox"
 msgstr "Firefox"
@@ -1338,8 +1338,8 @@ msgstr "Go to home"
 msgid "Google"
 msgstr "Google"
 
-msgid "Google connector management will be handled in the connector wiring phase."
-msgstr "Google connector management will be handled in the connector wiring phase."
+msgid "Google Calendar connection status refreshed."
+msgstr "Google Calendar connection status refreshed."
 
 msgid "Google Meet is Google's web-based video conferencing platform, designed to compete with major conferencing platforms."
 msgstr "Google Meet is Google's web-based video conferencing platform, designed to compete with major conferencing platforms."
@@ -1908,17 +1908,11 @@ msgstr "OOO created."
 msgid "OOO end date must be on or after the start date."
 msgstr "OOO end date must be on or after the start date."
 
-msgid "OOO filters are coming next."
-msgstr "OOO filters are coming next."
-
 msgid "OOO removed."
 msgstr "OOO removed."
 
 msgid "Open command palette"
 msgstr "Open command palette"
-
-msgid "Open conferencing app options"
-msgstr "Open conferencing app options"
 
 msgid "Open side pane"
 msgstr "Open side pane"
@@ -2281,6 +2275,9 @@ msgstr "Reference ID: {id}"
 msgid "Refine the recipe list. Changes apply when you close the sheet."
 msgstr "Refine the recipe list. Changes apply when you close the sheet."
 
+msgid "Refresh status"
+msgstr "Refresh status"
+
 msgid "Refunded"
 msgstr "Refunded"
 
@@ -2302,9 +2299,6 @@ msgstr "Remove"
 #. placeholder {0}: image.file.name
 msgid "Remove {0}"
 msgstr "Remove {0}"
-
-msgid "Remove calendar"
-msgstr "Remove calendar"
 
 msgid "Remove image from {label}"
 msgstr "Remove image from {label}"
@@ -2405,12 +2399,6 @@ msgstr "Save note"
 
 msgid "Save page as..."
 msgstr "Save page as..."
-
-msgid "Saved filters"
-msgstr "Saved filters"
-
-msgid "Saved OOO filters are coming next."
-msgstr "Saved OOO filters are coming next."
 
 msgid "Saved recipes"
 msgstr "Saved recipes"
@@ -3124,9 +3112,6 @@ msgstr "Verify"
 
 msgid "Verifying..."
 msgstr "Verifying..."
-
-msgid "Video app connection setup is coming next."
-msgstr "Video app connection setup is coming next."
 
 msgid "View active users"
 msgstr "View active users"

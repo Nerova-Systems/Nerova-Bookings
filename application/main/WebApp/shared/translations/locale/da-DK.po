@@ -49,6 +49,9 @@ msgstr ""
 msgid "Appointments"
 msgstr ""
 
+msgid "Approve reschedule"
+msgstr ""
+
 msgid "Apps"
 msgstr ""
 
@@ -178,9 +181,6 @@ msgstr ""
 msgid "Export CSV"
 msgstr ""
 
-msgid "Filter"
-msgstr ""
-
 msgid "Flow answers"
 msgstr ""
 
@@ -205,9 +205,6 @@ msgstr ""
 msgid "Join call"
 msgstr ""
 
-msgid "Launch troubleshooter"
-msgstr ""
-
 msgid "Lifecycle events"
 msgstr ""
 
@@ -230,12 +227,6 @@ msgid "Manage categories"
 msgstr ""
 
 msgid "More options"
-msgstr ""
-
-msgid "My availability"
-msgstr ""
-
-msgid "New"
 msgstr ""
 
 msgid "New service"
@@ -293,6 +284,9 @@ msgid "Recent appointment payments"
 msgstr ""
 
 msgid "Recent visits"
+msgstr ""
+
+msgid "Reject"
 msgstr ""
 
 msgid "Reorder"
@@ -362,12 +356,6 @@ msgid "Settlements"
 msgstr ""
 
 msgid "Setup required"
-msgstr ""
-
-msgid "Something doesn't look right?"
-msgstr ""
-
-msgid "Team availability"
 msgstr ""
 
 msgid "Temporarily out-of-office?"

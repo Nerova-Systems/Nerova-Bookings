@@ -23,8 +23,11 @@ public static class Configuration
     {
         public IServiceCollection AddMainServices()
         {
+            services.AddHttpClient();
+            services.AddScoped<INangoClient, NangoClient>();
             services.AddScoped<IPaystackClient, PaystackClient>();
             services.AddScoped<ITwilioVerifyClient, TwilioVerifyClient>();
+            services.AddScoped<ITwilioWhatsAppClient, TwilioWhatsAppClient>();
             return services.AddSharedServices<MainDbContext>([Assembly]);
         }
     }

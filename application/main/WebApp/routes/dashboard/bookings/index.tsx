@@ -10,7 +10,6 @@ import {
   ChevronRightIcon,
   CircleSlashIcon,
   Clock3Icon,
-  FilterIcon,
   ListIcon,
   MoreHorizontalIcon,
   SearchIcon,
@@ -23,8 +22,11 @@ import { toast } from "sonner";
 
 import {
   useAppointmentShell,
+  useAddAppointmentParticipant,
   useConfirmAppointment,
+  useCreateRescheduleRequest,
   useCreateTerminalPaymentIntent,
+  useUpdateAppointmentLocation,
   useUpdateAppointmentStatus,
   type Appointment
 } from "@/shared/lib/appointmentsApi";
@@ -62,6 +64,9 @@ function BookingsPage() {
   const shellQuery = useAppointmentShell();
   const confirmMutation = useConfirmAppointment();
   const statusMutation = useUpdateAppointmentStatus();
+  const addParticipantMutation = useAddAppointmentParticipant();
+  const locationMutation = useUpdateAppointmentLocation();
+  const rescheduleMutation = useCreateRescheduleRequest();
   const terminalPaymentMutation = useCreateTerminalPaymentIntent();
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [customWeekStart, setCustomWeekStart] = useState<Date | null>(null);
@@ -119,6 +124,45 @@ function BookingsPage() {
       }
     );
 
+  const addGuest = (appointment: Appointment) => {
+    const name = window.prompt("Guest name");
+    if (!name) return;
+    const email = window.prompt("Guest email") ?? "";
+    const phone = window.prompt("Guest phone") ?? "";
+    addParticipantMutation.mutate(
+      { id: appointment.id, request: { name, email, phone } },
+      {
+        onSuccess: () => toast.success("Guest added to booking."),
+        onError: (error) => toast.error(error instanceof Error ? error.message : "Could not add guest.")
+      }
+    );
+  };
+
+  const editLocation = (appointment: Appointment) => {
+    const location = window.prompt("Booking location or meeting link", appointment.location);
+    if (!location) return;
+    locationMutation.mutate(
+      { id: appointment.id, location },
+      {
+        onSuccess: () => toast.success("Booking location updated."),
+        onError: (error) => toast.error(error instanceof Error ? error.message : "Could not update location.")
+      }
+    );
+  };
+
+  const requestReschedule = (appointment: Appointment) => {
+    const proposedStartAt = window.prompt("New start time, for example 2026-05-13T13:30:00+02:00", appointment.startAt);
+    if (!proposedStartAt) return;
+    const note = window.prompt("Message to client") ?? "";
+    rescheduleMutation.mutate(
+      { id: appointment.id, proposedStartAt, note },
+      {
+        onSuccess: () => toast.success("Reschedule approval sent to the client."),
+        onError: (error) => toast.error(error instanceof Error ? error.message : "Could not request reschedule.")
+      }
+    );
+  };
+
   const createTerminalPayment = async (id: string) => {
     try {
       const intent = await terminalPaymentMutation.mutateAsync(id);
@@ -134,10 +178,6 @@ function BookingsPage() {
       <header className="shrink-0 border-b border-white/10 px-5 py-4">
         <div className="flex flex-wrap items-center gap-3">
           <BookingTabs activeTab={tab} appointments={appointments} timeZone={timeZone} onChange={setTab} />
-          <Button variant="outline" size="sm" className="border-white/15 bg-transparent text-white hover:bg-white/[0.08]">
-            <FilterIcon className="size-4" />
-            <Trans>Filter</Trans>
-          </Button>
           <button
             type="button"
             onClick={() => setCmdkOpen(true)}
@@ -208,7 +248,9 @@ function BookingsPage() {
               appointment={selectedAppointment}
               onClose={() => setSelectedId(null)}
               onConfirm={confirmBooking}
-              onStatusChange={updateStatus}
+              onAddGuest={addGuest}
+              onEditLocation={editLocation}
+              onRequestReschedule={requestReschedule}
               onCreateTerminalPayment={createTerminalPayment}
               isCreatingTerminalPayment={terminalPaymentMutation.isPending}
             />
@@ -219,6 +261,9 @@ function BookingsPage() {
             tab={tab}
             appointments={filteredAppointments}
             onStatusChange={updateStatus}
+            onAddGuest={addGuest}
+            onEditLocation={editLocation}
+            onRequestReschedule={requestReschedule}
             onSelect={(appointment) => {
             setSelectedId(appointment.id);
             setView("calendar");
@@ -272,11 +317,17 @@ function BookingsList({
   tab,
   appointments,
   onStatusChange,
+  onAddGuest,
+  onEditLocation,
+  onRequestReschedule,
   onSelect
 }: {
   tab: BookingTab;
   appointments: Appointment[];
   onStatusChange: (id: string, status: string) => void;
+  onAddGuest: (appointment: Appointment) => void;
+  onEditLocation: (appointment: Appointment) => void;
+  onRequestReschedule: (appointment: Appointment) => void;
   onSelect: (appointment: Appointment) => void;
 }) {
   const groups = appointments.reduce<Record<string, Appointment[]>>((acc, appointment) => {
@@ -301,6 +352,9 @@ function BookingsList({
                   key={appointment.id}
                   appointment={appointment}
                   onStatusChange={onStatusChange}
+                  onAddGuest={() => onAddGuest(appointment)}
+                  onEditLocation={() => onEditLocation(appointment)}
+                  onRequestReschedule={() => onRequestReschedule(appointment)}
                   onSelect={() => onSelect(appointment)}
                 />
               ))}
@@ -322,10 +376,16 @@ function BookingsList({
 function BookingRow({
   appointment,
   onStatusChange,
+  onAddGuest,
+  onEditLocation,
+  onRequestReschedule,
   onSelect
 }: {
   appointment: Appointment;
   onStatusChange: (id: string, status: string) => void;
+  onAddGuest: () => void;
+  onEditLocation: () => void;
+  onRequestReschedule: () => void;
   onSelect: () => void;
 }) {
   const when = formatAppointmentWhen(appointment);
@@ -359,9 +419,9 @@ function BookingRow({
           <MoreHorizontalIcon className="size-4" />
         </summary>
         <div className="absolute top-11 right-0 z-30 w-64 overflow-hidden rounded-xl border border-white/10 bg-[#121212] py-2 shadow-2xl">
-          <MenuButton onClick={() => toast.message("Reschedule booking is coming next.")} icon={<Clock3Icon className="size-4" />} label="Reschedule booking" />
-          <MenuButton onClick={() => toast.message("Request reschedule is coming next.")} icon={<UserPlusIcon className="size-4" />} label="Request reschedule" />
-          <MenuButton onClick={() => toast.message("Location editing is coming next.")} icon={<VideoIcon className="size-4" />} label="Edit location" />
+          <MenuButton onClick={onRequestReschedule} icon={<Clock3Icon className="size-4" />} label="Request reschedule" />
+          <MenuButton onClick={onAddGuest} icon={<UserPlusIcon className="size-4" />} label="Add guests" />
+          <MenuButton onClick={onEditLocation} icon={<VideoIcon className="size-4" />} label="Edit location" />
           <div className="my-2 border-t border-white/10" />
           <MenuButton onClick={() => onStatusChange(appointment.id, "Completed")} icon={<CheckCircle2Icon className="size-4" />} label="Complete event" />
           <MenuButton onClick={() => onStatusChange(appointment.id, "NoShow")} icon={<CircleSlashIcon className="size-4" />} label="Mark as no-show" />
@@ -376,14 +436,18 @@ function BookingDrawer({
   appointment,
   onClose,
   onConfirm,
-  onStatusChange,
+  onAddGuest,
+  onEditLocation,
+  onRequestReschedule,
   onCreateTerminalPayment,
   isCreatingTerminalPayment
 }: {
   appointment: Appointment | null;
   onClose: () => void;
   onConfirm: (id: string) => void;
-  onStatusChange: (id: string, status: string) => void;
+  onAddGuest: (appointment: Appointment) => void;
+  onEditLocation: (appointment: Appointment) => void;
+  onRequestReschedule: (appointment: Appointment) => void;
   onCreateTerminalPayment: (id: string) => Promise<void>;
   isCreatingTerminalPayment: boolean;
 }) {
@@ -449,15 +513,24 @@ function BookingDrawer({
         />
       </div>
       <div className="flex items-center gap-2 border-t border-white/10 px-6 py-4">
-        <Button variant="outline" size="sm" className="border-white/15 bg-transparent text-white hover:bg-white/[0.08]" onClick={() => toast.message("Join link handling is coming next.")}>
-          <VideoIcon className="size-4" />
-          <Trans>Join call</Trans>
-        </Button>
+        {appointment.meetUrl && (
+          <Button variant="outline" size="sm" className="border-white/15 bg-transparent text-white hover:bg-white/[0.08]" onClick={() => window.open(appointment.meetUrl!, "_blank", "noopener,noreferrer")}>
+            <VideoIcon className="size-4" />
+            <Trans>Join call</Trans>
+          </Button>
+        )}
         <Button size="sm" className="ml-auto" disabled={!canConfirm} onClick={() => onConfirm(appointment.id)}>
           <Trans>Confirm</Trans>
         </Button>
-        <Button variant="outline" size="icon-sm" className="border-white/15 bg-transparent text-white hover:bg-white/[0.08]" onClick={() => onStatusChange(appointment.id, "Cancelled")}>
-          <MoreHorizontalIcon className="size-4" />
+        <Button variant="outline" size="sm" className="border-white/15 bg-transparent text-white hover:bg-white/[0.08]" onClick={() => onRequestReschedule(appointment)}>
+          <Clock3Icon className="size-4" />
+          <Trans>Reschedule</Trans>
+        </Button>
+        <Button variant="outline" size="icon-sm" className="border-white/15 bg-transparent text-white hover:bg-white/[0.08]" onClick={() => onAddGuest(appointment)} aria-label="Add guest">
+          <UserPlusIcon className="size-4" />
+        </Button>
+        <Button variant="outline" size="icon-sm" className="border-white/15 bg-transparent text-white hover:bg-white/[0.08]" onClick={() => onEditLocation(appointment)} aria-label="Edit location">
+          <VideoIcon className="size-4" />
         </Button>
       </div>
     </aside>

@@ -29,12 +29,26 @@ public sealed class ServiceCategoryConfiguration : IEntityTypeConfiguration<Serv
     }
 }
 
+public sealed class BusinessLocationConfiguration : IEntityTypeConfiguration<BusinessLocation>
+{
+    public void Configure(EntityTypeBuilder<BusinessLocation> builder)
+    {
+        builder.HasKey(x => x.Id);
+        builder.MapStronglyTypedLongId<BusinessLocation, TenantId>(x => x.TenantId);
+        builder.Property(x => x.Name).HasMaxLength(160);
+        builder.Property(x => x.TimeZone).HasMaxLength(80);
+        builder.Property(x => x.Address).HasMaxLength(240);
+        builder.HasIndex(x => new { x.TenantId, x.IsDefault });
+    }
+}
+
 public sealed class BookableServiceConfiguration : IEntityTypeConfiguration<BookableService>
 {
     public void Configure(EntityTypeBuilder<BookableService> builder)
     {
         builder.HasKey(x => x.Id);
         builder.MapStronglyTypedLongId<BookableService, TenantId>(x => x.TenantId);
+        builder.Property(x => x.LocationId).HasMaxLength(64);
         builder.Property(x => x.Name).HasMaxLength(160);
         builder.Property(x => x.Mode).HasMaxLength(32);
         builder.Property(x => x.PaymentPolicy).HasConversion<string>().HasMaxLength(40);
@@ -48,6 +62,7 @@ public sealed class BookableServiceVersionConfiguration : IEntityTypeConfigurati
         builder.HasKey(x => x.Id);
         builder.MapStronglyTypedLongId<BookableServiceVersion, TenantId>(x => x.TenantId);
         builder.HasIndex(x => new { x.ServiceId, x.VersionNumber }).IsUnique();
+        builder.Property(x => x.LocationId).HasMaxLength(64);
         builder.Property(x => x.Name).HasMaxLength(160);
         builder.Property(x => x.Mode).HasMaxLength(32);
         builder.Property(x => x.PaymentPolicy).HasConversion<string>().HasMaxLength(40);
@@ -61,7 +76,46 @@ public sealed class StaffMemberConfiguration : IEntityTypeConfiguration<StaffMem
     {
         builder.HasKey(x => x.Id);
         builder.MapStronglyTypedLongId<StaffMember, TenantId>(x => x.TenantId);
+        builder.Property(x => x.LocationId).HasMaxLength(64);
+        builder.Property(x => x.UserId).HasMaxLength(32);
         builder.Property(x => x.Name).HasMaxLength(160);
+    }
+}
+
+public sealed class SchedulingResourceConfiguration : IEntityTypeConfiguration<SchedulingResource>
+{
+    public void Configure(EntityTypeBuilder<SchedulingResource> builder)
+    {
+        builder.HasKey(x => x.Id);
+        builder.MapStronglyTypedLongId<SchedulingResource, TenantId>(x => x.TenantId);
+        builder.Property(x => x.LocationId).HasMaxLength(64);
+        builder.Property(x => x.Name).HasMaxLength(160);
+        builder.Property(x => x.Type).HasMaxLength(80);
+    }
+}
+
+public sealed class BookableServiceResourceConfiguration : IEntityTypeConfiguration<BookableServiceResource>
+{
+    public void Configure(EntityTypeBuilder<BookableServiceResource> builder)
+    {
+        builder.HasKey(x => x.Id);
+        builder.MapStronglyTypedLongId<BookableServiceResource, TenantId>(x => x.TenantId);
+        builder.Property(x => x.ServiceId).HasMaxLength(64);
+        builder.Property(x => x.ResourceId).HasMaxLength(64);
+        builder.HasIndex(x => new { x.TenantId, x.ServiceId, x.ResourceId }).IsUnique();
+    }
+}
+
+public sealed class ResourceReservationConfiguration : IEntityTypeConfiguration<ResourceReservation>
+{
+    public void Configure(EntityTypeBuilder<ResourceReservation> builder)
+    {
+        builder.HasKey(x => x.Id);
+        builder.MapStronglyTypedLongId<ResourceReservation, TenantId>(x => x.TenantId);
+        builder.Property(x => x.ResourceId).HasMaxLength(64);
+        builder.Property(x => x.AppointmentId).HasMaxLength(64);
+        builder.Property(x => x.Source).HasMaxLength(80);
+        builder.HasIndex(x => new { x.TenantId, x.ResourceId, x.StartAt, x.EndAt });
     }
 }
 
@@ -142,7 +196,65 @@ public sealed class AppointmentConfiguration : IEntityTypeConfiguration<Appointm
         builder.HasKey(x => x.Id);
         builder.MapStronglyTypedLongId<Appointment, TenantId>(x => x.TenantId);
         builder.HasIndex(x => x.PublicReference).IsUnique();
+        builder.Property(x => x.LocationId).HasMaxLength(64);
         builder.Property(x => x.ServiceVersionId).HasMaxLength(64);
+    }
+}
+
+public sealed class AppointmentParticipantConfiguration : IEntityTypeConfiguration<AppointmentParticipant>
+{
+    public void Configure(EntityTypeBuilder<AppointmentParticipant> builder)
+    {
+        builder.HasKey(x => x.Id);
+        builder.MapStronglyTypedLongId<AppointmentParticipant, TenantId>(x => x.TenantId);
+        builder.Property(x => x.AppointmentId).HasMaxLength(64);
+        builder.Property(x => x.ClientId).HasMaxLength(64);
+        builder.Property(x => x.Role).HasMaxLength(40);
+        builder.HasIndex(x => new { x.TenantId, x.AppointmentId, x.ClientId }).IsUnique();
+    }
+}
+
+public sealed class AppointmentRescheduleRequestConfiguration : IEntityTypeConfiguration<AppointmentRescheduleRequest>
+{
+    public void Configure(EntityTypeBuilder<AppointmentRescheduleRequest> builder)
+    {
+        builder.HasKey(x => x.Id);
+        builder.MapStronglyTypedLongId<AppointmentRescheduleRequest, TenantId>(x => x.TenantId);
+        builder.Property(x => x.AppointmentId).HasMaxLength(64);
+        builder.Property(x => x.TokenHash).HasMaxLength(128);
+        builder.Property(x => x.Note).HasMaxLength(1000);
+        builder.Property(x => x.Status).HasMaxLength(32);
+        builder.Property(x => x.NotificationChannel).HasMaxLength(32);
+        builder.HasIndex(x => x.TokenHash).IsUnique();
+        builder.HasIndex(x => new { x.TenantId, x.AppointmentId, x.Status });
+    }
+}
+
+public sealed class AppointmentExternalCalendarEventConfiguration : IEntityTypeConfiguration<AppointmentExternalCalendarEvent>
+{
+    public void Configure(EntityTypeBuilder<AppointmentExternalCalendarEvent> builder)
+    {
+        builder.HasKey(x => x.Id);
+        builder.MapStronglyTypedLongId<AppointmentExternalCalendarEvent, TenantId>(x => x.TenantId);
+        builder.Property(x => x.AppointmentId).HasMaxLength(64);
+        builder.Property(x => x.Provider).HasMaxLength(80);
+        builder.Property(x => x.CalendarId).HasMaxLength(320);
+        builder.Property(x => x.ExternalEventId).HasMaxLength(320);
+        builder.Property(x => x.MeetUrl).HasMaxLength(512);
+        builder.HasIndex(x => new { x.TenantId, x.AppointmentId, x.Provider }).IsUnique();
+    }
+}
+
+public sealed class IntegrationCalendarConfiguration : IEntityTypeConfiguration<IntegrationCalendar>
+{
+    public void Configure(EntityTypeBuilder<IntegrationCalendar> builder)
+    {
+        builder.HasKey(x => x.Id);
+        builder.MapStronglyTypedLongId<IntegrationCalendar, TenantId>(x => x.TenantId);
+        builder.Property(x => x.IntegrationConnectionId).HasMaxLength(64);
+        builder.Property(x => x.ExternalCalendarId).HasMaxLength(320);
+        builder.Property(x => x.Name).HasMaxLength(240);
+        builder.HasIndex(x => new { x.TenantId, x.IntegrationConnectionId, x.ExternalCalendarId }).IsUnique();
     }
 }
 
@@ -197,5 +309,8 @@ public sealed class IntegrationConnectionConfiguration : IEntityTypeConfiguratio
     {
         builder.HasKey(x => x.Id);
         builder.MapStronglyTypedLongId<IntegrationConnection, TenantId>(x => x.TenantId);
+        builder.Property(x => x.OwnerType).HasConversion<string>().HasMaxLength(40);
+        builder.Property(x => x.OwnerId).HasMaxLength(80);
+        builder.Property(x => x.ExternalConnectionId).HasMaxLength(160);
     }
 }

@@ -1,10 +1,9 @@
 import { t } from "@lingui/core/macro";
-import { Trans } from "@lingui/react/macro";
 import { AppLayout } from "@repo/ui/components/AppLayout";
-import { Button } from "@repo/ui/components/Button";
 import { createFileRoute } from "@tanstack/react-router";
-import { MoreHorizontalIcon, PlusIcon, VideoIcon } from "lucide-react";
-import { toast } from "sonner";
+import { VideoIcon } from "lucide-react";
+
+import { useMainAppointmentShell } from "@/shared/lib/mainAppSettingsApi";
 
 export const Route = createFileRoute("/user/conferencing/")({
   staticData: { trackingTitle: "Conferencing" },
@@ -12,6 +11,11 @@ export const Route = createFileRoute("/user/conferencing/")({
 });
 
 function ConferencingPage() {
+  const shellQuery = useMainAppointmentShell();
+  const googleCalendarConnected = shellQuery.data?.integrations.some(
+    (integration) => integration.provider === "Google" && integration.capability === "Calendar" && integration.status === "Connected"
+  );
+
   return (
     <AppLayout
       variant="center"
@@ -20,12 +24,6 @@ function ConferencingPage() {
       title={t`Conferencing`}
       subtitle={t`Add your favourite video conferencing apps for your meetings`}
     >
-      <div className="mt-6 flex justify-end">
-        <Button type="button" variant="outline" onClick={() => toast.info(t`Video app connection setup is coming next.`)}>
-          <PlusIcon className="size-4" />
-          <Trans>Add</Trans>
-        </Button>
-      </div>
       <section className="mt-6 overflow-hidden rounded-xl border border-border bg-card">
         <ConferencingRow
           name="Cal Video"
@@ -35,6 +33,7 @@ function ConferencingPage() {
         />
         <ConferencingRow
           name="Google Meet"
+          badge={googleCalendarConnected ? t`Available through Google Calendar` : t`Connect Google Calendar`}
           description={t`Google Meet is Google's web-based video conferencing platform, designed to compete with major conferencing platforms.`}
           colorClassName="bg-emerald-600"
         />
@@ -66,15 +65,6 @@ function ConferencingRow({
         </div>
         <p className="mt-1 text-sm leading-relaxed text-muted-foreground">{description}</p>
       </div>
-      <Button
-        type="button"
-        variant="ghost"
-        size="icon-sm"
-        onClick={() => toast.info(t`Conferencing app management is coming next.`)}
-        aria-label={t`Open conferencing app options`}
-      >
-        <MoreHorizontalIcon className="size-4" />
-      </Button>
     </div>
   );
 }

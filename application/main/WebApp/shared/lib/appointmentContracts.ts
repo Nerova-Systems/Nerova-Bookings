@@ -26,6 +26,7 @@ export interface Appointment {
   startAt: string;
   endAt: string;
   location: string;
+  meetUrl?: string | null;
   clientStatus: string;
   clientAlert?: string;
   clientInternalNote?: string;
@@ -86,7 +87,15 @@ export interface ClientAppointmentHistory {
 }
 
 export interface Analytics { bookings: number; revenue: string; clientsServed: number; averageBookingValue: string; noShowRate: string }
-export interface IntegrationConnection { provider: string; capability: string; status: string; lastSyncedAt?: string }
+export interface IntegrationConnection {
+  provider: string;
+  capability: string;
+  status: string;
+  lastSyncedAt?: string | null;
+  ownerType: "Tenant" | "Location" | "StaffMember" | string;
+  ownerId: string;
+  externalConnectionId?: string | null;
+}
 export interface AvailabilityRule { id: string; dayOfWeek: string; startTime: string; endTime: string }
 export interface HolidayCountry { code: string; name: string }
 export interface PublicHoliday { id: string; countryCode: string; date: string; label: string; isOpen: boolean }
@@ -152,6 +161,7 @@ export interface ApiAppointment {
   paymentStatus: string;
   source: string;
   location: string;
+  meetUrl?: string | null;
   clientStatus: string;
   clientAlert?: string;
   clientInternalNote?: string;

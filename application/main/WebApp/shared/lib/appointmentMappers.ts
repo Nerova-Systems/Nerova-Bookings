@@ -64,6 +64,7 @@ function mapAppointment(appointment: ApiAppointment): Appointment {
     startAt: appointment.startAt,
     endAt: appointment.endAt,
     location: appointment.location,
+    meetUrl: appointment.meetUrl,
     clientStatus: appointment.clientStatus,
     clientAlert: appointment.clientAlert,
     clientInternalNote: appointment.clientInternalNote

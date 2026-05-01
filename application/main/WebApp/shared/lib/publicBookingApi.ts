@@ -63,6 +63,14 @@ export interface PublicConfirmation {
   location: string;
 }
 
+export interface PublicRescheduleApproval {
+  appointment: PublicConfirmation;
+  proposedStartAt: string;
+  proposedEndAt: string;
+  note: string;
+  status: string;
+}
+
 export function usePublicBookingProfile(businessSlug: string) {
   return useQuery({
     queryKey: ["public-booking-profile", businessSlug],
@@ -142,6 +150,31 @@ export function usePublicConfirmation(reference: string) {
     queryFn: async () => {
       const response = await enhancedFetch(`/api/main/public-booking/confirmation/${reference}`);
       return (await response.json()) as PublicConfirmation;
+    }
+  });
+}
+
+export function usePublicRescheduleApproval(token: string) {
+  return useQuery({
+    queryKey: ["public-reschedule-approval", token],
+    queryFn: async () => {
+      const response = await enhancedFetch(`/api/main/public-booking/approvals/${token}`);
+      if (!response.ok) throw new Error(await response.text());
+      return (await response.json()) as PublicRescheduleApproval;
+    }
+  });
+}
+
+export function useRespondToRescheduleApproval(token: string, decision: "approve" | "reject") {
+  return useMutation({
+    mutationFn: async () => {
+      const response = await enhancedFetch(`/api/main/public-booking/approvals/${token}/${decision}`, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({})
+      });
+      if (!response.ok) throw new Error(await response.text());
+      return (await response.json()) as { appointmentReference: string; status: string };
     }
   });
 }

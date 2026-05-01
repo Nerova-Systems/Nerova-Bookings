@@ -1,3 +1,4 @@
+/* eslint-disable max-lines */
 import { enhancedFetch } from "@repo/infrastructure/http/httpClient";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
@@ -81,6 +82,56 @@ export function useCreateCalendarBlock() {
     onSuccess: async (shell) => {
       queryClient.setQueryData(["appointment-shell"], shell);
       await queryClient.invalidateQueries({ queryKey: ["availability-slots"] });
+    }
+  });
+}
+
+export function useAddAppointmentParticipant() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, request }: { id: string; request: { name: string; phone?: string; email?: string } }) => {
+      const response = await enhancedFetch(`/api/main/app/appointments/${id}/participants`, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify(request)
+      });
+      if (!response.ok) throw new Error(await response.text());
+      return mapShell((await response.json()) as ApiShell);
+    },
+    onSuccess: (shell) => queryClient.setQueryData(["appointment-shell"], shell)
+  });
+}
+
+export function useUpdateAppointmentLocation() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, location }: { id: string; location: string }) => {
+      const response = await enhancedFetch(`/api/main/app/appointments/${id}/location`, {
+        method: "PUT",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ location })
+      });
+      if (!response.ok) throw new Error(await response.text());
+      return mapShell((await response.json()) as ApiShell);
+    },
+    onSuccess: (shell) => queryClient.setQueryData(["appointment-shell"], shell)
+  });
+}
+
+export function useCreateRescheduleRequest() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, proposedStartAt, note }: { id: string; proposedStartAt: string; note?: string }) => {
+      const response = await enhancedFetch(`/api/main/app/appointments/${id}/reschedule-requests`, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ proposedStartAt, note })
+      });
+      if (!response.ok) throw new Error(await response.text());
+      return (await response.json()) as { approvalUrl: string; approvalToken: string; status: string };
+    },
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["appointment-shell"] });
     }
   });
 }
