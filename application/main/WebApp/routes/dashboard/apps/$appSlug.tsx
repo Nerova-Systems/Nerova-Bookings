@@ -1,3 +1,4 @@
+/* eslint-disable max-lines */
 import { t } from "@lingui/core/macro";
 import { Button } from "@repo/ui/components/Button";
 import { createFileRoute, Link } from "@tanstack/react-router";
@@ -7,6 +8,7 @@ import { toast } from "sonner";
 
 import { useAppointmentShell } from "@/shared/lib/appointmentsApi";
 import { useCreateIntegrationConnectSession, useSyncIntegrationConnections } from "@/shared/lib/integrationsApi";
+import { useClaimWhatsAppNumber, useProvisionWhatsAppSubaccount, useWhatsAppMessagingStatus } from "@/shared/lib/messagingApi";
 
 import { AppLogo } from "./-components/AppLogo";
 import { AppPreview } from "./-components/AppPreview";
@@ -23,6 +25,10 @@ function AppDetailsPage() {
   const shellQuery = useAppointmentShell();
   const connectSessionMutation = useCreateIntegrationConnectSession();
   const syncConnectionsMutation = useSyncIntegrationConnections();
+  const usesWhatsAppProvisioning = appSlug === "whatsapp";
+  const whatsAppStatusQuery = useWhatsAppMessagingStatus(usesWhatsAppProvisioning);
+  const provisionWhatsAppMutation = useProvisionWhatsAppSubaccount();
+  const claimWhatsAppNumberMutation = useClaimWhatsAppNumber();
   const googleCalendarIntegration = useMemo(
     () => shellQuery.data?.integrations.find((integration) => integration.provider === "Google" && integration.capability === "Calendar"),
     [shellQuery.data?.integrations]
@@ -50,7 +56,7 @@ function AppDetailsPage() {
   const appSlugForAction = app.slug;
   const usesNangoConnect = appSlugForAction === "google-calendar";
   const isInstalled = usesNangoConnect ? googleCalendarIntegration?.status === "Connected" : app.installState === "installed";
-  const actionPending = connectSessionMutation.isPending || syncConnectionsMutation.isPending;
+  const actionPending = connectSessionMutation.isPending || syncConnectionsMutation.isPending || provisionWhatsAppMutation.isPending || claimWhatsAppNumberMutation.isPending;
 
   async function handlePrimaryAction() {
     try {
@@ -68,6 +74,24 @@ function AppDetailsPage() {
       toast.success("Google Calendar connection status refreshed.");
     } catch (error) {
       toast.error(readError(error, "Could not refresh Google Calendar status."));
+    }
+  }
+
+  async function handleProvisionWhatsApp() {
+    try {
+      await provisionWhatsAppMutation.mutateAsync();
+      toast.success("WhatsApp tenant setup started. Twilio subaccount and lifecycle templates are ready.");
+    } catch (error) {
+      toast.error(readError(error, "Could not start WhatsApp tenant setup."));
+    }
+  }
+
+  async function handleClaimWhatsAppNumber() {
+    try {
+      await claimWhatsAppNumberMutation.mutateAsync();
+      toast.success("South African business number assigned.");
+    } catch (error) {
+      toast.error(readError(error, "Could not assign a South African WhatsApp number."));
     }
   }
 
@@ -95,43 +119,25 @@ function AppDetailsPage() {
             <span>Published by {app.publisher}</span>
           </div>
 
-          <div className="mt-12 flex flex-wrap gap-4">
-            {isInstalled && (
-              <Button type="button" variant="outline" disabled className="border-white/10 bg-transparent text-white/50">
-                <CheckIcon className="size-4" />1 active install
-              </Button>
-            )}
-            {usesNangoConnect ? (
-              <Button
-                type="button"
-                variant="outline"
-                className="border-white/20 bg-transparent text-white hover:bg-white/10"
-                disabled={actionPending}
-                onClick={handlePrimaryAction}
-              >
-                {connectSessionMutation.isPending && <Loader2Icon className="size-4 animate-spin" />}
-                {isInstalled ? "Reconnect" : "Install app"}
-              </Button>
-            ) : (
-              <span className="inline-flex h-10 items-center rounded-xl border border-white/10 px-4 text-sm font-semibold text-white/45">
-                Not available in MVP
-              </span>
-            )}
-            {usesNangoConnect && (
-              <Button
-                type="button"
-                variant="outline"
-                className="border-white/20 bg-transparent text-white hover:bg-white/10"
-                disabled={actionPending}
-                onClick={handleRefreshStatus}
-              >
-                {syncConnectionsMutation.isPending ? <Loader2Icon className="size-4 animate-spin" /> : <RefreshCwIcon className="size-4" />}
-                Refresh status
-              </Button>
-            )}
-          </div>
+          <AppActionButtons
+            actionPending={actionPending}
+            canClaimWhatsAppNumber={Boolean(whatsAppStatusQuery.data?.twilioSubaccountSid)}
+            isInstalled={isInstalled}
+            isClaimingWhatsAppNumber={claimWhatsAppNumberMutation.isPending}
+            isConnecting={connectSessionMutation.isPending}
+            isProvisioningWhatsApp={provisionWhatsAppMutation.isPending}
+            isRefreshing={syncConnectionsMutation.isPending}
+            onClaimWhatsAppNumber={handleClaimWhatsAppNumber}
+            onPrimaryAction={handlePrimaryAction}
+            onProvisionWhatsApp={handleProvisionWhatsApp}
+            onRefreshStatus={handleRefreshStatus}
+            usesNangoConnect={usesNangoConnect}
+            usesWhatsAppProvisioning={usesWhatsAppProvisioning}
+          />
 
           <p className="mt-12 text-xl leading-8 text-white/75">{app.description}</p>
+
+          {usesWhatsAppProvisioning && <WhatsAppReadiness status={whatsAppStatusQuery.data} loading={whatsAppStatusQuery.isLoading} />}
 
           <section className="mt-12 space-y-8">
             <DetailBlock title="Pricing" value={app.pricing} />
@@ -150,6 +156,119 @@ function AppDetailsPage() {
         </aside>
       </div>
     </main>
+  );
+}
+
+function AppActionButtons({
+  actionPending,
+  canClaimWhatsAppNumber,
+  isClaimingWhatsAppNumber,
+  isConnecting,
+  isInstalled,
+  isProvisioningWhatsApp,
+  isRefreshing,
+  onClaimWhatsAppNumber,
+  onPrimaryAction,
+  onProvisionWhatsApp,
+  onRefreshStatus,
+  usesNangoConnect,
+  usesWhatsAppProvisioning
+}: {
+  actionPending: boolean;
+  canClaimWhatsAppNumber: boolean;
+  isClaimingWhatsAppNumber: boolean;
+  isConnecting: boolean;
+  isInstalled: boolean;
+  isProvisioningWhatsApp: boolean;
+  isRefreshing: boolean;
+  onClaimWhatsAppNumber: () => void;
+  onPrimaryAction: () => void;
+  onProvisionWhatsApp: () => void;
+  onRefreshStatus: () => void;
+  usesNangoConnect: boolean;
+  usesWhatsAppProvisioning: boolean;
+}) {
+  return (
+    <div className="mt-12 flex flex-wrap gap-4">
+      {isInstalled && (
+        <Button type="button" variant="outline" disabled className="border-white/10 bg-transparent text-white/50">
+          <CheckIcon className="size-4" />1 active install
+        </Button>
+      )}
+      {usesNangoConnect ? (
+        <Button type="button" variant="outline" className="border-white/20 bg-transparent text-white hover:bg-white/10" disabled={actionPending} onClick={onPrimaryAction}>
+          {isConnecting && <Loader2Icon className="size-4 animate-spin" />}
+          {isInstalled ? "Reconnect" : "Install app"}
+        </Button>
+      ) : usesWhatsAppProvisioning ? (
+        <Button type="button" variant="outline" className="border-white/20 bg-transparent text-white hover:bg-white/10" disabled={actionPending} onClick={onProvisionWhatsApp}>
+          {isProvisioningWhatsApp && <Loader2Icon className="size-4 animate-spin" />}
+          Start setup
+        </Button>
+      ) : (
+        <span className="inline-flex h-10 items-center rounded-xl border border-white/10 px-4 text-sm font-semibold text-white/45">Not available in MVP</span>
+      )}
+      {usesNangoConnect && (
+        <Button type="button" variant="outline" className="border-white/20 bg-transparent text-white hover:bg-white/10" disabled={actionPending} onClick={onRefreshStatus}>
+          {isRefreshing ? <Loader2Icon className="size-4 animate-spin" /> : <RefreshCwIcon className="size-4" />}
+          Refresh status
+        </Button>
+      )}
+      {usesWhatsAppProvisioning && (
+        <Button
+          type="button"
+          variant="outline"
+          className="border-white/20 bg-transparent text-white hover:bg-white/10"
+          disabled={actionPending || !canClaimWhatsAppNumber}
+          onClick={onClaimWhatsAppNumber}
+        >
+          {isClaimingWhatsAppNumber ? <Loader2Icon className="size-4 animate-spin" /> : <RefreshCwIcon className="size-4" />}
+          Claim ZA number
+        </Button>
+      )}
+    </div>
+  );
+}
+
+function WhatsAppReadiness({ status, loading }: { status: ReturnType<typeof useWhatsAppMessagingStatus>["data"]; loading: boolean }) {
+  if (loading) {
+    return (
+      <section className="mt-10 rounded-3xl border border-white/10 bg-[#202020] p-6 text-white/55">
+        <Loader2Icon className="mr-2 inline size-4 animate-spin" />
+        Loading WhatsApp readiness...
+      </section>
+    );
+  }
+
+  if (!status) return null;
+
+  return (
+    <section className="mt-10 rounded-3xl border border-white/10 bg-[#202020] p-6">
+      <div className="flex flex-wrap items-start gap-4">
+        <div>
+          <h2 className="text-xl font-semibold">Setup readiness</h2>
+          <p className="mt-1 text-white/55">
+            {status.phoneNumber ? `Assigned number: ${status.phoneNumber}` : "No South African number assigned yet."}
+          </p>
+        </div>
+        <span className="ml-auto rounded-full border border-white/10 px-3 py-1 text-sm text-white/65">{status.whatsAppApprovalStatus}</span>
+      </div>
+      <div className="mt-5 grid gap-3">
+        {status.readiness.map((item) => (
+          <div key={item.key} className="flex items-center gap-3 rounded-2xl border border-white/10 bg-[#191919] px-4 py-3">
+            <span className={`flex size-5 items-center justify-center rounded-full text-xs ${item.isReady ? "bg-emerald-500 text-white" : "bg-white/10 text-white/45"}`}>
+              {item.isReady ? <CheckIcon className="size-3.5" /> : null}
+            </span>
+            <span className="font-semibold text-white/85">{item.label}</span>
+          </div>
+        ))}
+      </div>
+      {!status.canSendMessages && (
+        <p className="mt-5 rounded-2xl border border-amber-400/20 bg-amber-400/10 px-4 py-3 text-sm text-amber-100">
+          Client WhatsApp sending stays disabled until the tenant sender is approved by WhatsApp/Meta.
+        </p>
+      )}
+    </section>
   );
 }
 

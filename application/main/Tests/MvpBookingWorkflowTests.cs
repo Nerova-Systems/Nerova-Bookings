@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using NSubstitute;
+using SharedKernel.Domain;
 using SharedKernel.Integrations.Email;
 using Xunit;
 
@@ -190,7 +191,7 @@ public sealed class MvpBookingWorkflowTests : EndpointBaseTest<MainDbContext>
             LastMessageBody = null;
         }
 
-        public Task SendAsync(string toPhone, string message, CancellationToken cancellationToken)
+        public Task SendAsync(TenantId tenantId, string toPhone, string message, CancellationToken cancellationToken)
         {
             LastMessageTo = toPhone;
             LastMessageBody = message;

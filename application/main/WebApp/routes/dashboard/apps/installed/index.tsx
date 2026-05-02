@@ -20,6 +20,7 @@ import { toast } from "sonner";
 
 import { useAppointmentShell } from "@/shared/lib/appointmentsApi";
 import { useCreateIntegrationConnectSession, useSyncIntegrationConnections } from "@/shared/lib/integrationsApi";
+import { useClaimWhatsAppNumber, useProvisionWhatsAppSubaccount, useWhatsAppMessagingStatus } from "@/shared/lib/messagingApi";
 import { usePaymentOverview, usePaystackSettlements } from "@/shared/lib/paymentsApi";
 
 import { AppLogo } from "../-components/AppLogo";
@@ -54,6 +55,7 @@ function InstalledAppsPage() {
   const category = search.category ?? "Calendar";
   const shellQuery = useAppointmentShell();
   const googleCalendar = APP_CATALOG.find((app) => app.slug === "google-calendar") ?? APP_CATALOG[0];
+  const whatsapp = APP_CATALOG.find((app) => app.slug === "whatsapp") ?? APP_CATALOG[0];
   const calendarIntegration = useMemo(
     () => shellQuery.data?.integrations.find((integration) => integration.provider === "Google" && integration.capability === "Calendar"),
     [shellQuery.data?.integrations]
@@ -93,6 +95,8 @@ function InstalledAppsPage() {
         <section className="min-w-0">
           {category === "Calendar" ? (
             <CalendarInstalledSettings app={googleCalendar} status={calendarIntegration?.status ?? "Demo"} />
+          ) : category === "Messaging" ? (
+            <MessagingInstalledSettings app={whatsapp} />
           ) : category === "Payment" ? (
             <PaymentInstalledSettings />
           ) : (
@@ -101,6 +105,95 @@ function InstalledAppsPage() {
         </section>
       </div>
     </main>
+  );
+}
+
+function MessagingInstalledSettings({ app }: { app: typeof APP_CATALOG[number] }) {
+  const statusQuery = useWhatsAppMessagingStatus();
+  const provisionMutation = useProvisionWhatsAppSubaccount();
+  const claimNumberMutation = useClaimWhatsAppNumber();
+  const status = statusQuery.data;
+  const pending = provisionMutation.isPending || claimNumberMutation.isPending;
+
+  async function handleProvision() {
+    try {
+      await provisionMutation.mutateAsync();
+      toast.success("WhatsApp tenant setup started.");
+    } catch (error) {
+      toast.error(readError(error, "Could not start WhatsApp setup."));
+    }
+  }
+
+  async function handleClaimNumber() {
+    try {
+      await claimNumberMutation.mutateAsync();
+      toast.success("South African business number assigned.");
+    } catch (error) {
+      toast.error(readError(error, "Could not assign a South African number."));
+    }
+  }
+
+  return (
+    <div>
+      <div className="mb-9 flex flex-wrap items-start gap-4">
+        <div>
+          <h2 className="font-display text-3xl font-semibold">Messaging</h2>
+          <p className="mt-1 text-lg text-white/50">Manage WhatsApp setup, number assignment, and sender readiness</p>
+        </div>
+        <Button type="button" variant="outline" disabled={pending} className="ml-auto border-white/15 bg-transparent text-white hover:bg-white/[0.08]" onClick={handleProvision}>
+          {provisionMutation.isPending ? <Loader2Icon className="size-4 animate-spin" /> : <PlusIcon className="size-4" />}
+          Start setup
+        </Button>
+        <Button
+          type="button"
+          variant="outline"
+          disabled={pending || !status?.twilioSubaccountSid}
+          className="border-white/15 bg-transparent text-white hover:bg-white/[0.08]"
+          onClick={handleClaimNumber}
+        >
+          {claimNumberMutation.isPending ? <Loader2Icon className="size-4 animate-spin" /> : <RefreshCwIcon className="size-4" />}
+          Claim ZA number
+        </Button>
+      </div>
+
+      <section className="overflow-hidden rounded-3xl border border-white/10 bg-[#202020]">
+        <div className="flex items-center gap-5 px-9 py-7">
+          <AppLogo app={app} size="sm" />
+          <div>
+            <h3 className="text-xl font-semibold">WhatsApp</h3>
+            <p className="mt-1 text-lg text-white/45">Provider: Twilio</p>
+          </div>
+          <span className="ml-auto rounded-full border border-white/10 px-3 py-1 text-sm text-white/65">{status?.whatsAppApprovalStatus ?? "NotSubmitted"}</span>
+        </div>
+        <div className="border-t border-white/10 bg-[#191919] px-9 py-7">
+          {statusQuery.isLoading ? (
+            <div className="text-white/55">
+              <Loader2Icon className="mr-2 inline size-4 animate-spin" />
+              Loading WhatsApp readiness...
+            </div>
+          ) : (
+            <div className="grid gap-3">
+              <StatusLine label="Provisioning" value={status?.status ?? "NotProvisioned"} />
+              <StatusLine label="Country" value={status?.countryCode ?? "ZA"} />
+              <StatusLine label="Assigned number" value={status?.phoneNumber ?? "Not assigned"} />
+              <StatusLine label="Lifecycle templates" value={`${status?.templateCount ?? 0} configured`} />
+            </div>
+          )}
+          <p className="mt-5 rounded-2xl border border-amber-400/20 bg-amber-400/10 px-4 py-3 text-sm text-amber-100">
+            WhatsApp client messaging remains disabled until the tenant sender is approved by WhatsApp/Meta.
+          </p>
+        </div>
+      </section>
+    </div>
+  );
+}
+
+function StatusLine({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="flex flex-wrap items-center gap-3 rounded-2xl border border-white/10 bg-[#202020] px-4 py-3">
+      <span className="text-white/45">{label}</span>
+      <span className="ml-auto font-semibold text-white/85">{value}</span>
+    </div>
   );
 }
 

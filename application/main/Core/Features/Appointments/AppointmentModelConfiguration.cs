@@ -189,6 +189,68 @@ public sealed class PublicPhoneVerificationConfiguration : IEntityTypeConfigurat
     }
 }
 
+public sealed class TenantMessagingProfileConfiguration : IEntityTypeConfiguration<TenantMessagingProfile>
+{
+    public void Configure(EntityTypeBuilder<TenantMessagingProfile> builder)
+    {
+        builder.HasKey(x => x.Id);
+        builder.MapStronglyTypedLongId<TenantMessagingProfile, TenantId>(x => x.TenantId);
+        builder.Property(x => x.AppSlug).HasMaxLength(40);
+        builder.Property(x => x.Provider).HasMaxLength(40);
+        builder.Property(x => x.OwnerType).HasConversion<string>().HasMaxLength(40);
+        builder.Property(x => x.OwnerId).HasMaxLength(80);
+        builder.Property(x => x.CountryCode).HasMaxLength(8);
+        builder.Property(x => x.TwilioSubaccountSid).HasMaxLength(80);
+        builder.Property(x => x.TwilioSubaccountStatus).HasMaxLength(40);
+        builder.Property(x => x.TwilioMessagingServiceSid).HasMaxLength(80);
+        builder.Property(x => x.ProvisioningStatus).HasMaxLength(40);
+        builder.Property(x => x.WhatsAppApprovalStatus).HasMaxLength(40);
+        builder.Property(x => x.DisplayName).HasMaxLength(160);
+        builder.Property(x => x.BusinessCategory).HasMaxLength(80);
+        builder.Property(x => x.Description).HasMaxLength(500);
+        builder.Property(x => x.WebsiteUrl).HasMaxLength(320);
+        builder.Property(x => x.SupportEmail).HasMaxLength(320);
+        builder.Property(x => x.Address).HasMaxLength(320);
+        builder.Property(x => x.LogoUrl).HasMaxLength(512);
+        builder.HasIndex(x => new { x.TenantId, x.AppSlug, x.OwnerType, x.OwnerId }).IsUnique();
+    }
+}
+
+public sealed class TenantPhoneNumberAssignmentConfiguration : IEntityTypeConfiguration<TenantPhoneNumberAssignment>
+{
+    public void Configure(EntityTypeBuilder<TenantPhoneNumberAssignment> builder)
+    {
+        builder.HasKey(x => x.Id);
+        builder.MapStronglyTypedLongId<TenantPhoneNumberAssignment, TenantId>(x => x.TenantId);
+        builder.Property(x => x.MessagingProfileId).HasMaxLength(64);
+        builder.Property(x => x.PhoneNumber).HasMaxLength(32);
+        builder.Property(x => x.TwilioPhoneNumberSid).HasMaxLength(80);
+        builder.Property(x => x.CountryCode).HasMaxLength(8);
+        builder.Property(x => x.WebhookUrl).HasMaxLength(512);
+        builder.Property(x => x.AssignmentStatus).HasMaxLength(40);
+        builder.HasIndex(x => new { x.TenantId, x.MessagingProfileId, x.AssignmentStatus });
+        builder.HasIndex(x => x.PhoneNumber).IsUnique();
+        builder.HasIndex(x => x.TwilioPhoneNumberSid).IsUnique();
+    }
+}
+
+public sealed class TenantMessageTemplateConfiguration : IEntityTypeConfiguration<TenantMessageTemplate>
+{
+    public void Configure(EntityTypeBuilder<TenantMessageTemplate> builder)
+    {
+        builder.HasKey(x => x.Id);
+        builder.MapStronglyTypedLongId<TenantMessageTemplate, TenantId>(x => x.TenantId);
+        builder.Property(x => x.MessagingProfileId).HasMaxLength(64);
+        builder.Property(x => x.TemplateKey).HasMaxLength(80);
+        builder.Property(x => x.DisplayName).HasMaxLength(160);
+        builder.Property(x => x.Category).HasMaxLength(40);
+        builder.Property(x => x.Language).HasMaxLength(16);
+        builder.Property(x => x.ApprovalStatus).HasMaxLength(40);
+        builder.Property(x => x.ExternalTemplateId).HasMaxLength(160);
+        builder.HasIndex(x => new { x.TenantId, x.MessagingProfileId, x.TemplateKey, x.Language }).IsUnique();
+    }
+}
+
 public sealed class AppointmentConfiguration : IEntityTypeConfiguration<Appointment>
 {
     public void Configure(EntityTypeBuilder<Appointment> builder)

@@ -1,7 +1,9 @@
+/* eslint-disable max-lines */
 import {
   CalendarDaysIcon,
   CreditCardIcon,
   MailIcon,
+  MessageCircleIcon,
   type LucideIcon,
   VideoIcon
 } from "lucide-react";
@@ -99,6 +101,24 @@ export const APP_CATALOG: AppCatalogItem[] = [
     logoText: "O",
     logoClassName: "bg-blue-600 text-white",
     Icon: CalendarDaysIcon
+  },
+  {
+    slug: "whatsapp",
+    name: "WhatsApp",
+    provider: "Twilio",
+    category: "Messaging",
+    shortDescription: "Assign a business number and prepare WhatsApp booking flows.",
+    description:
+      "WhatsApp is the tenant-owned communication channel for Nerova booking confirmations, reminders, reschedule approvals, payments, follow-ups, and lifecycle messaging. Twilio provides the number provisioning, sender approval, templates, and delivery infrastructure behind the scenes.",
+    pricing: "Twilio and WhatsApp conversation fees apply",
+    publisher: "Nerova",
+    support: "support@nerova.app",
+    capabilities: ["Tenant number", "Sender approval", "Lifecycle templates", "Delivery webhooks"],
+    installState: "available",
+    accentClassName: "from-emerald-400/30 via-green-500/20 to-white/10",
+    logoText: "WA",
+    logoClassName: "bg-emerald-500 text-white",
+    Icon: MessageCircleIcon
   },
   {
     slug: "gmail",

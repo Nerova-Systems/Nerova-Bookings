@@ -274,7 +274,7 @@ public sealed class AppointmentEndpoints : IEndpoints
         var client = await db.Clients.IgnoreQueryFilters().FirstAsync(client => client.Id == appointment.ClientId, cancellationToken);
         try
         {
-            await whatsAppClient.SendAsync(client.Phone, message, cancellationToken);
+            await whatsAppClient.SendAsync(appointment.TenantId, client.Phone, message, cancellationToken);
         }
         catch (InvalidOperationException exception)
         {

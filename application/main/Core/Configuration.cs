@@ -28,6 +28,7 @@ public static class Configuration
             services.AddScoped<IPaystackClient, PaystackClient>();
             services.AddScoped<ITwilioVerifyClient, TwilioVerifyClient>();
             services.AddScoped<ITwilioWhatsAppClient, TwilioWhatsAppClient>();
+            services.AddScoped<ITwilioMessagingProvisioningClient, TwilioMessagingProvisioningClient>();
             return services.AddSharedServices<MainDbContext>([Assembly]);
         }
     }

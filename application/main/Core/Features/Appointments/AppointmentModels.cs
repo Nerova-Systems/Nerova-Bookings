@@ -50,6 +50,13 @@ public enum ConnectorOwnerType
     StaffMember
 }
 
+public enum MessagingOwnerType
+{
+    Tenant,
+    Location,
+    StaffMember
+}
+
 public sealed class BusinessProfile : ITenantScopedEntity
 {
     public string Id { get; set; } = Guid.NewGuid().ToString("N");
@@ -235,6 +242,62 @@ public sealed class PublicPhoneVerification : ITenantScopedEntity
     public DateTimeOffset? VerifiedAt { get; set; }
     public DateTimeOffset? ConsumedAt { get; set; }
     public DateTimeOffset CreatedAt { get; set; }
+}
+
+public sealed class TenantMessagingProfile : ITenantScopedEntity
+{
+    public string Id { get; set; } = Guid.NewGuid().ToString("N");
+    public TenantId TenantId { get; set; } = null!;
+    public string AppSlug { get; set; } = "whatsapp";
+    public string Provider { get; set; } = "Twilio";
+    public MessagingOwnerType OwnerType { get; set; } = MessagingOwnerType.Tenant;
+    public string OwnerId { get; set; } = string.Empty;
+    public string CountryCode { get; set; } = "ZA";
+    public string TwilioSubaccountSid { get; set; } = string.Empty;
+    public string TwilioSubaccountStatus { get; set; } = string.Empty;
+    public string? TwilioMessagingServiceSid { get; set; }
+    public string ProvisioningStatus { get; set; } = "NotProvisioned";
+    public string WhatsAppApprovalStatus { get; set; } = "NotSubmitted";
+    public string DisplayName { get; set; } = string.Empty;
+    public string BusinessCategory { get; set; } = string.Empty;
+    public string Description { get; set; } = string.Empty;
+    public string WebsiteUrl { get; set; } = string.Empty;
+    public string SupportEmail { get; set; } = string.Empty;
+    public string Address { get; set; } = string.Empty;
+    public string? LogoUrl { get; set; }
+    public DateTimeOffset CreatedAt { get; set; }
+    public DateTimeOffset LastSyncedAt { get; set; }
+}
+
+public sealed class TenantPhoneNumberAssignment : ITenantScopedEntity
+{
+    public string Id { get; set; } = Guid.NewGuid().ToString("N");
+    public TenantId TenantId { get; set; } = null!;
+    public string MessagingProfileId { get; set; } = string.Empty;
+    public string PhoneNumber { get; set; } = string.Empty;
+    public string TwilioPhoneNumberSid { get; set; } = string.Empty;
+    public string CountryCode { get; set; } = "ZA";
+    public bool SmsCapable { get; set; }
+    public bool WhatsAppCapable { get; set; }
+    public string WebhookUrl { get; set; } = string.Empty;
+    public string AssignmentStatus { get; set; } = "Assigned";
+    public DateTimeOffset CreatedAt { get; set; }
+    public DateTimeOffset LastSyncedAt { get; set; }
+}
+
+public sealed class TenantMessageTemplate : ITenantScopedEntity
+{
+    public string Id { get; set; } = Guid.NewGuid().ToString("N");
+    public TenantId TenantId { get; set; } = null!;
+    public string MessagingProfileId { get; set; } = string.Empty;
+    public string TemplateKey { get; set; } = string.Empty;
+    public string DisplayName { get; set; } = string.Empty;
+    public string Category { get; set; } = "Utility";
+    public string Language { get; set; } = "en";
+    public string ApprovalStatus { get; set; } = "NotSubmitted";
+    public string? ExternalTemplateId { get; set; }
+    public DateTimeOffset CreatedAt { get; set; }
+    public DateTimeOffset LastSyncedAt { get; set; }
 }
 
 public sealed class Appointment : ITenantScopedEntity

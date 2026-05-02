@@ -32,7 +32,7 @@ var (googleOAuthConfigured, googleOAuthClientId, googleOAuthClientSecret) = Conf
 
 var (payFastConfigured, payFastMerchantId, payFastMerchantKey, payFastPassphrase, payFastSandbox, payFastNotifyUrl, payFastReturnUrl, payFastCancelUrl, payFastAllowedIps) = ConfigurePayFastParameters();
 var (paystackConfigured, paystackPublicKey, paystackSecretKey, paystackCallbackUrl, paystackWebhookUrl) = ConfigurePaystackParameters();
-var (twilioConfigured, twilioAccountSid, twilioAuthToken, twilioVerifyServiceSid, twilioWhatsAppFrom) = ConfigureTwilioParameters();
+var (twilioConfigured, twilioAccountSid, twilioAuthToken, twilioVerifyServiceSid) = ConfigureTwilioParameters();
 var (nangoConfigured, nangoToolboxSecretKey, nangoServerUrl) = ConfigureNangoParameters();
 
 var postgresPassword = builder.CreateStablePassword("postgres-password");
@@ -150,8 +150,9 @@ var mainApi = builder
     .WithEnvironment("PUBLIC_TWILIO_VERIFY_ENABLED", twilioConfigured ? "true" : "false")
     .WithEnvironment("TWILIO_ACCOUNT_SID", twilioAccountSid)
     .WithEnvironment("TWILIO_AUTH_TOKEN", twilioAuthToken)
+    .WithEnvironment("TWILIO_MASTER_ACCOUNT_SID", twilioAccountSid)
+    .WithEnvironment("TWILIO_MASTER_AUTH_TOKEN", twilioAuthToken)
     .WithEnvironment("TWILIO_VERIFY_SERVICE_SID", twilioVerifyServiceSid)
-    .WithEnvironment("TWILIO_WHATSAPP_FROM", twilioWhatsAppFrom)
     .WithEnvironment("PUBLIC_NANGO_ENABLED", nangoConfigured ? "true" : "false")
     .WithEnvironment("NANGO_TOOLBOX_SECRET_KEY", nangoToolboxSecretKey)
     .WithEnvironment("NANGO_SECRET_KEY", nangoToolboxSecretKey)
@@ -337,8 +338,7 @@ return;
 (bool Configured,
     IResourceBuilder<ParameterResource> AccountSid,
     IResourceBuilder<ParameterResource> AuthToken,
-    IResourceBuilder<ParameterResource> VerifyServiceSid,
-    IResourceBuilder<ParameterResource> WhatsAppFrom) ConfigureTwilioParameters()
+    IResourceBuilder<ParameterResource> VerifyServiceSid) ConfigureTwilioParameters()
 {
     _ = builder.AddParameter("twilio-verify-enabled")
         .WithDescription("Enable Twilio Verify SMS OTP for public booking phone verification. Set to `true` after Verify credentials are configured.", true);
@@ -346,16 +346,20 @@ return;
     var accountSidFromEnvironment = Environment.GetEnvironmentVariable("TWILIO_ACCOUNT_SID");
     var authTokenFromEnvironment = Environment.GetEnvironmentVariable("TWILIO_AUTH_TOKEN");
     var verifyServiceSidFromEnvironment = Environment.GetEnvironmentVariable("TWILIO_VERIFY_SERVICE_SID");
-    var whatsAppFromEnvironment = Environment.GetEnvironmentVariable("TWILIO_WHATSAPP_FROM");
+    var masterAccountSidFromEnvironment = Environment.GetEnvironmentVariable("TWILIO_MASTER_ACCOUNT_SID");
+    var masterAuthTokenFromEnvironment = Environment.GetEnvironmentVariable("TWILIO_MASTER_AUTH_TOKEN");
+    accountSidFromEnvironment = string.IsNullOrWhiteSpace(masterAccountSidFromEnvironment) ? accountSidFromEnvironment : masterAccountSidFromEnvironment;
+    authTokenFromEnvironment = string.IsNullOrWhiteSpace(masterAuthTokenFromEnvironment) ? authTokenFromEnvironment : masterAuthTokenFromEnvironment;
     var configured = builder.Configuration["Parameters:twilio-verify-enabled"] == "true" ||
                      (!string.IsNullOrWhiteSpace(accountSidFromEnvironment) &&
                       !string.IsNullOrWhiteSpace(authTokenFromEnvironment) &&
                       !string.IsNullOrWhiteSpace(verifyServiceSidFromEnvironment));
     var whatsAppConfigured = builder.Configuration["Parameters:twilio-whatsapp-enabled"] == "true" ||
-                             !string.IsNullOrWhiteSpace(whatsAppFromEnvironment);
+                             (!string.IsNullOrWhiteSpace(accountSidFromEnvironment) &&
+                              !string.IsNullOrWhiteSpace(authTokenFromEnvironment));
 
     _ = builder.AddParameter("twilio-whatsapp-enabled")
-        .WithDescription("Enable Twilio WhatsApp messaging for reschedule approval links. Set to `true` after the WhatsApp sender is approved.", true);
+        .WithDescription("Enable Twilio tenant WhatsApp provisioning. This uses platform/master Twilio credentials; tenant senders are assigned and approved per business.", true);
 
     if (configured || whatsAppConfigured)
     {
@@ -369,20 +373,15 @@ return;
             ? builder.AddParameter("twilio-verify-service-sid", true)
                 .WithDescription("Twilio Verify Service SID for public booking OTP checks.", true)
             : builder.CreateResourceBuilder(new ParameterResource("twilio-verify-service-sid", _ => string.IsNullOrWhiteSpace(verifyServiceSidFromEnvironment) ? "not-configured" : verifyServiceSidFromEnvironment, true));
-        var whatsAppFrom = whatsAppConfigured && string.IsNullOrWhiteSpace(whatsAppFromEnvironment)
-            ? builder.AddParameter("twilio-whatsapp-from", true)
-                .WithDescription("Twilio WhatsApp sender, for example +14155238886 or your approved WhatsApp Business sender.", true)
-            : builder.CreateResourceBuilder(new ParameterResource("twilio-whatsapp-from", _ => string.IsNullOrWhiteSpace(whatsAppFromEnvironment) ? "not-configured" : whatsAppFromEnvironment, true));
 
-        return (configured || whatsAppConfigured, accountSid, authToken, verifyServiceSid, whatsAppFrom);
+        return (configured || whatsAppConfigured, accountSid, authToken, verifyServiceSid);
     }
 
     return (
         configured,
         builder.CreateResourceBuilder(new ParameterResource("twilio-account-sid", _ => "not-configured", true)),
         builder.CreateResourceBuilder(new ParameterResource("twilio-auth-token", _ => "not-configured", true)),
-        builder.CreateResourceBuilder(new ParameterResource("twilio-verify-service-sid", _ => "not-configured", true)),
-        builder.CreateResourceBuilder(new ParameterResource("twilio-whatsapp-from", _ => "not-configured", true))
+        builder.CreateResourceBuilder(new ParameterResource("twilio-verify-service-sid", _ => "not-configured", true))
     );
 }
 

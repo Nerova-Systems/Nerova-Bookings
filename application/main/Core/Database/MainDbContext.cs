@@ -23,6 +23,9 @@ public sealed class MainDbContext(DbContextOptions<MainDbContext> options, IExec
     public DbSet<ManualCalendarBlock> ManualCalendarBlocks => Set<ManualCalendarBlock>();
     public DbSet<Client> Clients => Set<Client>();
     public DbSet<PublicPhoneVerification> PublicPhoneVerifications => Set<PublicPhoneVerification>();
+    public DbSet<TenantMessagingProfile> TenantMessagingProfiles => Set<TenantMessagingProfile>();
+    public DbSet<TenantPhoneNumberAssignment> TenantPhoneNumberAssignments => Set<TenantPhoneNumberAssignment>();
+    public DbSet<TenantMessageTemplate> TenantMessageTemplates => Set<TenantMessageTemplate>();
     public DbSet<Appointment> Appointments => Set<Appointment>();
     public DbSet<AppointmentParticipant> AppointmentParticipants => Set<AppointmentParticipant>();
     public DbSet<AppointmentRescheduleRequest> AppointmentRescheduleRequests => Set<AppointmentRescheduleRequest>();
