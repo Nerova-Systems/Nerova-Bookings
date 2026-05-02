@@ -1,4 +1,7 @@
+using System.Net;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpOverrides;
@@ -7,6 +10,8 @@ using Microsoft.Extensions.Hosting;
 using NJsonSchema.Generation;
 using SharedKernel.Antiforgery;
 using SharedKernel.Authentication;
+using SharedKernel.Authentication.BackOfficeIdentity;
+using SharedKernel.Authentication.MockEasyAuth;
 using SharedKernel.Endpoints;
 using SharedKernel.ExecutionContext;
 using SharedKernel.Middleware;
@@ -14,6 +19,7 @@ using SharedKernel.OpenApi;
 using SharedKernel.SinglePageApp;
 using SharedKernel.StronglyTypedIds;
 using SharedKernel.Telemetry;
+using IPNetwork = System.Net.IPNetwork;
 
 namespace SharedKernel.Configuration;
 
@@ -40,13 +46,32 @@ public static class ApiDependencyConfiguration
             return builder;
         }
 
-        public WebApplicationBuilder AddDevelopmentPort(int port)
+        public WebApplicationBuilder AddDevelopmentPort()
         {
+            // KESTREL_PORT is set by AppHost from the base port in .workspace/port.txt.
+            // BACK_OFFICE_KESTREL_PORT is optional; AppHost sets it on the consolidated account-api so
+            // back-office.dev.localhost can hit Kestrel directly without traversing AppGateway,
+            // mirroring the production split where back-office is its own ACA container app with its
+            // own external ingress. Outside Aspire (e.g. unit tests via WebApplicationFactory)
+            // ConfigureKestrel is not invoked.
             builder.WebHost.ConfigureKestrel((context, serverOptions) =>
                 {
                     if (!context.HostingEnvironment.IsDevelopment()) return;
+
+                    if (!int.TryParse(Environment.GetEnvironmentVariable("KESTREL_PORT"), out var port) || port <= 0)
+                    {
+                        throw new InvalidOperationException(
+                            "KESTREL_PORT environment variable is required for development startup. Run via Aspire AppHost or set KESTREL_PORT manually."
+                        );
+                    }
+
                     serverOptions.ConfigureEndpointDefaults(listenOptions => listenOptions.UseHttps());
                     serverOptions.ListenLocalhost(port, listenOptions => listenOptions.UseHttps());
+
+                    if (int.TryParse(Environment.GetEnvironmentVariable("BACK_OFFICE_KESTREL_PORT"), out var backOfficePort) && backOfficePort > 0)
+                    {
+                        serverOptions.ListenLocalhost(backOfficePort, listenOptions => listenOptions.UseHttps());
+                    }
                 }
             );
             return builder;
@@ -55,9 +80,9 @@ public static class ApiDependencyConfiguration
 
     extension(IServiceCollection services)
     {
-        public IServiceCollection AddApiServices(Assembly[] assemblies)
+        public IServiceCollection AddApiServices(Assembly[] assemblies, ApiDocumentLayout documentLayout = ApiDocumentLayout.Single)
         {
-            return services
+            services
                 .AddApiExecutionContext()
                 .AddExceptionHandler<GlobalExceptionHandler>()
                 .AddTransient<TelemetryContextMiddleware>()
@@ -66,7 +91,7 @@ public static class ApiDependencyConfiguration
                 .AddProblemDetails()
                 .AddEndpointsApiExplorer()
                 .AddApiEndpoints(assemblies)
-                .AddOpenApiConfiguration(assemblies)
+                .AddOpenApiConfiguration(assemblies, documentLayout)
                 .AddAuthConfiguration()
                 .AddAntiforgery(options =>
                     {
@@ -75,6 +100,19 @@ public static class ApiDependencyConfiguration
                     }
                 )
                 .AddHttpForwardHeaders();
+
+            // BackOffice:Host is required only when this API hosts the back-office route group.
+            // Other APIs (e.g. Main.Api, the legacy back-office/Api kept until PP-1149) skip the
+            // option so their startup doesn't fail validation for a config they never use.
+            if (documentLayout == ApiDocumentLayout.AccountAndBackOffice)
+            {
+                services.AddOptions<BackOfficeHostOptions>()
+                    .BindConfiguration(BackOfficeHostOptions.SectionName)
+                    .ValidateDataAnnotations()
+                    .ValidateOnStart();
+            }
+
+            return services;
         }
 
         private IServiceCollection AddApiExecutionContext()
@@ -102,13 +140,15 @@ public static class ApiDependencyConfiguration
 
             app
                 .UseForwardedHeaders()
+                .UseRouting() // Explicit so it runs AFTER UseForwardedHeaders. Without this, ASP.NET Core inserts UseRouting at the start of the pipeline and the SPA-host fallback (UseHostScopedSinglePageAppFallback's RequireHost) sees the unrewritten Host header forwarded by YARP (the destination address), not the public host promoted from X-Forwarded-Host.
+                .UseMockEasyAuthInDevelopment() // Dev-only: serve /.auth/login/aad and inject X-MS-CLIENT-PRINCIPAL-* headers from a dev cookie. Must run before authentication.
                 .UseAuthentication() // Must be above TelemetryContextMiddleware to ensure authentication happens first
                 .UseAuthorization()
                 .UseAntiforgery()
                 .UseMiddleware<AntiforgeryMiddleware>()
                 .UseMiddleware<TelemetryContextMiddleware>() // It must be above ModelBindingExceptionHandlerMiddleware to ensure that model binding problems are annotated correctly
                 .UseMiddleware<ModelBindingExceptionHandlerMiddleware>() // Enable support for proxy headers such as X-Forwarded-For and X-Forwarded-Proto. Should run before other middleware
-                .UseOpenApi(options => options.Path = "/openapi/v1.json"); // Adds the OpenAPI generator that uses the ASP. NET Core API Explorer
+                .UseOpenApi(options => options.Path = "/openapi/{documentName}.json"); // Adds the OpenAPI generator that uses the ASP. NET Core API Explorer; one route per registered document
 
             return app.UseApiEndpoints();
         }
@@ -146,21 +186,56 @@ public static class ApiDependencyConfiguration
 
     extension(IServiceCollection services)
     {
-        private IServiceCollection AddOpenApiConfiguration(Assembly[] assemblies)
+        private IServiceCollection AddOpenApiConfiguration(Assembly[] assemblies, ApiDocumentLayout documentLayout)
         {
-            return services.AddOpenApiDocument((settings, _) =>
+            var allAssemblies = assemblies.Concat([Assembly.GetExecutingAssembly()]).ToArray();
+
+            if (documentLayout == ApiDocumentLayout.Single)
+            {
+                services.AddOpenApiDocument((settings, _) =>
+                    {
+                        settings.DocumentName = "v1";
+                        settings.Title = "PlatformPlatform API";
+                        settings.Version = "v1";
+
+                        var options = (SystemTextJsonSchemaGeneratorSettings)settings.SchemaSettings;
+                        options.SerializerOptions = SharedDependencyConfiguration.DefaultJsonSerializerOptions;
+                        settings.DocumentProcessors.Add(new StronglyTypedDocumentProcessor(allAssemblies));
+                        settings.DocumentProcessors.Add(new PublicApiEnumDocumentProcessor(allAssemblies));
+                    }
+                );
+                return services;
+            }
+
+            services.AddOpenApiDocument((settings, _) =>
                 {
-                    settings.DocumentName = "v1";
-                    settings.Title = "PlatformPlatform API";
+                    settings.DocumentName = OpenApiDocumentNames.Account;
+                    settings.Title = "PlatformPlatform Account API";
                     settings.Version = "v1";
+                    settings.ApiGroupNames = [OpenApiDocumentNames.Account];
 
                     var options = (SystemTextJsonSchemaGeneratorSettings)settings.SchemaSettings;
                     options.SerializerOptions = SharedDependencyConfiguration.DefaultJsonSerializerOptions;
-                    var allAssemblies = assemblies.Concat([Assembly.GetExecutingAssembly()]).ToArray();
                     settings.DocumentProcessors.Add(new StronglyTypedDocumentProcessor(allAssemblies));
                     settings.DocumentProcessors.Add(new PublicApiEnumDocumentProcessor(allAssemblies));
                 }
             );
+
+            services.AddOpenApiDocument((settings, _) =>
+                {
+                    settings.DocumentName = OpenApiDocumentNames.BackOffice;
+                    settings.Title = "PlatformPlatform Back Office API";
+                    settings.Version = "v1";
+                    settings.ApiGroupNames = [OpenApiDocumentNames.BackOffice];
+
+                    var options = (SystemTextJsonSchemaGeneratorSettings)settings.SchemaSettings;
+                    options.SerializerOptions = SharedDependencyConfiguration.DefaultJsonSerializerOptions;
+                    settings.DocumentProcessors.Add(new StronglyTypedDocumentProcessor(allAssemblies));
+                    settings.DocumentProcessors.Add(new PublicApiEnumDocumentProcessor(allAssemblies));
+                }
+            );
+
+            return services;
         }
 
         private IServiceCollection AddAuthConfiguration()
@@ -182,9 +257,28 @@ public static class ApiDependencyConfiguration
                             clockSkew: TimeSpan.FromSeconds(5) // In Azure, we don't need any clock skew, but this must be a higher value than the AppGateway
                         );
                     }
-                );
+                )
+                .AddScheme<AuthenticationSchemeOptions, BackOfficeIdentityHandler>(BackOfficeIdentityDefaults.AuthenticationScheme, _ => { });
 
-            return services.AddAuthorization();
+            services.AddSingleton<IAuthorizationHandler, BackOfficeAdminAuthorizationHandler>();
+
+            return services.AddAuthorization(authOptions =>
+                {
+                    authOptions.AddPolicy(BackOfficeIdentityDefaults.PolicyName, policy =>
+                        {
+                            policy.AuthenticationSchemes = [BackOfficeIdentityDefaults.AuthenticationScheme];
+                            policy.RequireAuthenticatedUser();
+                        }
+                    );
+                    authOptions.AddPolicy(BackOfficeIdentityDefaults.AdminPolicyName, policy =>
+                        {
+                            policy.AuthenticationSchemes = [BackOfficeIdentityDefaults.AuthenticationScheme];
+                            policy.RequireAuthenticatedUser();
+                            policy.AddRequirements(new BackOfficeAdminRequirement());
+                        }
+                    );
+                }
+            );
         }
 
         public IServiceCollection AddHttpForwardHeaders()
@@ -193,9 +287,26 @@ public static class ApiDependencyConfiguration
             // This is required when running behind a reverse proxy like YARP or Azure Container Apps
             return services.Configure<ForwardedHeadersOptions>(options =>
                 {
-                    // Enable support for proxy headers such as X-Forwarded-For and X-Forwarded-Proto
+                    // X-Forwarded-For surfaces real upstream client IPs in App Insights / logs.
+                    // X-Forwarded-Proto sets Request.Scheme so generated absolute URLs use https.
+                    // X-Forwarded-Host is intentionally NOT enabled: each Azure container app
+                    // registers only the SPA it serves (see Account.Api Program.cs), so endpoint
+                    // matching no longer depends on Request.Host being rewritten from forwarded
+                    // headers, and dev's dual-Kestrel setup delivers the right Host directly.
                     options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+                    options.ForwardLimit = 1;
+                    // Honor forwarded headers only from trusted proxies. Loopback covers the Aspire
+                    // localhost stack. RFC 6598 (100.64.0.0/10) covers ACA's mesh envoy, which
+                    // presents from shared address space rather than from the customer VNet -- it is
+                    // the immediate peer for both AppGateway pods and internal account-api / main-api
+                    // pods. Externally-exposed services sit behind that envoy, which strips
+                    // client-supplied X-Forwarded-* and sets its own, so trusting this range does not
+                    // let external callers spoof the headers. PP-1066: keeps trust scoped to networks
+                    // we control.
                     options.KnownIPNetworks.Clear();
+                    options.KnownIPNetworks.Add(new IPNetwork(IPAddress.Parse("127.0.0.0"), 8));
+                    options.KnownIPNetworks.Add(new IPNetwork(IPAddress.IPv6Loopback, 128));
+                    options.KnownIPNetworks.Add(new IPNetwork(IPAddress.Parse("100.64.0.0"), 10));
                     options.KnownProxies.Clear();
                 }
             );

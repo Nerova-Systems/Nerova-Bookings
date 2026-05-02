@@ -44,7 +44,7 @@ public sealed class AuthenticationTokenService(
 
         httpContext.Response.Headers.Remove(AuthenticationTokenHttpKeys.RefreshTokenHttpHeaderKey);
         httpContext.Response.Headers.Remove(AuthenticationTokenHttpKeys.AccessTokenHttpHeaderKey);
-        var hostCookieOptions = new CookieOptions { Secure = true };
+        var hostCookieOptions = new CookieOptions { Secure = true, Path = "/" };
         httpContext.Response.Cookies.Delete(AuthenticationTokenHttpKeys.RefreshTokenCookieName, hostCookieOptions);
         httpContext.Response.Cookies.Delete(AuthenticationTokenHttpKeys.AccessTokenCookieName, hostCookieOptions);
     }

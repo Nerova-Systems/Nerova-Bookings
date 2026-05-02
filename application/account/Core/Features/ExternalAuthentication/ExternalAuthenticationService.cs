@@ -18,7 +18,8 @@ public sealed class ExternalAuthenticationService(IHttpContextAccessor httpConte
     private const string ExternalLoginCookieName = "__Host-external-login";
     private const string LocaleCookieName = "__Host-external-login-locale";
 
-    private static readonly string PublicUrl = Environment.GetEnvironmentVariable(SinglePageAppConfiguration.PublicUrlKey)
+    private static readonly string PublicUrl = Environment.GetEnvironmentVariable("OAUTH_PUBLIC_URL")
+                                               ?? Environment.GetEnvironmentVariable(SinglePageAppConfiguration.PublicUrlKey)
                                                ?? throw new InvalidOperationException($"'{SinglePageAppConfiguration.PublicUrlKey}' environment variable is not configured.");
 
     private readonly IDataProtector _dataProtector = dataProtectionProvider.CreateProtector(DataProtectionPurpose);

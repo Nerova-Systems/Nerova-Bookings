@@ -1,6 +1,7 @@
 using System.CommandLine;
 using DeveloperCli.Installation;
 using DeveloperCli.Utilities;
+using SharedKernel.Configuration;
 using Spectre.Console;
 
 namespace DeveloperCli.Commands;
@@ -10,10 +11,6 @@ namespace DeveloperCli.Commands;
 /// </summary>
 public class RunCommand : Command
 {
-    internal const int AspirePort = 9001;
-    internal const int DashboardPort = 9097;
-    internal const int ResourceServicePort = 9098;
-
     public RunCommand() : base("run", "Runs Aspire AppHost (use --watch for hot reload)")
     {
         var watchOption = new Option<bool>("--watch", "-w") { Description = "Enable watch mode for hot reload" };
@@ -32,13 +29,26 @@ public class RunCommand : Command
         );
     }
 
+    // The CLI binary is published outside the repo, so PortAllocation.Load (which walks up from
+    // AppContext.BaseDirectory) cannot find the repo. Use the CLI's known SourceCodeFolder instead.
+    internal static PortAllocation Ports => PortAllocation.LoadFrom(Configuration.SourceCodeFolder);
+
+    internal static int AspirePort => Ports.Aspire;
+
+    internal static int DashboardPort => Ports.OtelEndpoint;
+
+    internal static int ResourceServicePort => Ports.ResourceService;
+
     private static void Execute(bool watch, bool attach, string? publicUrl)
     {
         Prerequisite.Ensure(Prerequisite.Dotnet, Prerequisite.Node, Prerequisite.Docker);
 
-        if (IsAspireRunning())
+        // Refuse if Aspire is already on the currently configured port.
+        // Skipped in a fresh worktree (no port.txt) where the check would false-positive on another worktree's stack.
+        if (PortAllocation.PortFileExists(Configuration.SourceCodeFolder) && IsAspireRunning())
         {
-            AnsiConsole.MarkupLine($"[yellow]Aspire AppHost is already running on port {AspirePort}. Run 'pp stop' to stop it or 'pp restart' to start a fresh instance.[/]");
+            var alias = Configuration.AliasName;
+            AnsiConsole.MarkupLine($"[yellow]Aspire AppHost is already running on port {AspirePort}. Run '{alias} stop' to stop it or '{alias} restart' to start a fresh instance.[/]");
             Environment.Exit(1);
         }
 
@@ -154,7 +164,8 @@ public class RunCommand : Command
 
         if (Configuration.IsWindows)
         {
-            // Kill all dotnet and rsbuild-node processes on ports 9000-9999
+            // Kill dotnet and rsbuild-node processes listening on any port in the explicit allocation.
+            var allPorts = Ports.AllPorts;
             var netstatOutput = ProcessHelper.StartProcess("""cmd /c "netstat -ano | findstr LISTENING" """, redirectOutput: true, exitOnError: false);
             if (!string.IsNullOrWhiteSpace(netstatOutput))
             {
@@ -169,7 +180,7 @@ public class RunCommand : Command
                     var portIndex = address.LastIndexOf(':');
                     if (portIndex == -1) continue;
 
-                    if (!int.TryParse(address[(portIndex + 1)..], out var port) || port < 9000 || port > 9999) continue;
+                    if (!int.TryParse(address[(portIndex + 1)..], out var port) || !allPorts.Contains(port)) continue;
 
                     var pid = parts[^1];
                     if (!processedPids.Add(pid)) continue;
@@ -259,17 +270,15 @@ public class RunCommand : Command
             ? $"dotnet watch --non-interactive --project {appHostProjectPath}"
             : $"dotnet run --project {appHostProjectPath}";
 
+        // AppHost reads .workspace/port.txt itself and overrides the Aspire dashboard env vars
+        // before CreateBuilder. PUBLIC_URL is the only env var the CLI needs to forward.
+        var envVars = publicUrl is not null
+            ? new[] { ("PUBLIC_URL", publicUrl) }
+            : Array.Empty<(string Name, string Value)>();
+
         if (attach)
         {
-            if (publicUrl is not null)
-            {
-                ProcessHelper.StartProcess(command, Configuration.ApplicationFolder, waitForExit: true, environmentVariables: ("PUBLIC_URL", publicUrl));
-            }
-            else
-            {
-                ProcessHelper.StartProcess(command, Configuration.ApplicationFolder, waitForExit: true);
-            }
-
+            ProcessHelper.StartProcess(command, Configuration.ApplicationFolder, waitForExit: true, environmentVariables: envVars);
             return;
         }
 
@@ -283,14 +292,7 @@ public class RunCommand : Command
                 ? $"sh -c \"script -q -t 0 '{logPath}' {command} > /dev/null 2>&1 &\""
                 : $"sh -c \"script -q -f -c '{command}' '{logPath}' > /dev/null 2>&1 &\"";
 
-        if (publicUrl is not null)
-        {
-            ProcessHelper.StartProcess(detachedCommand, Configuration.ApplicationFolder, waitForExit: false, environmentVariables: ("PUBLIC_URL", publicUrl));
-        }
-        else
-        {
-            ProcessHelper.StartProcess(detachedCommand, Configuration.ApplicationFolder, waitForExit: false);
-        }
+        ProcessHelper.StartProcess(detachedCommand, Configuration.ApplicationFolder, waitForExit: false, environmentVariables: envVars);
 
         TailLogUntilReady(logPath);
     }
@@ -375,7 +377,7 @@ public class RunCommand : Command
         AnsiConsole.MarkupLine("[blue]Starting ngrok tunnel...[/]");
 
         // Start ngrok in detached mode
-        var ngrokCommand = $"ngrok http --url={subdomain}.ngrok-free.app https://localhost:9000";
+        var ngrokCommand = $"ngrok http --url={subdomain}.ngrok-free.app https://app.dev.localhost:{Ports.AppGateway}";
 
         // Use shell to handle backgrounding properly on macOS/Linux
         ProcessHelper.StartProcess(

@@ -3,6 +3,7 @@ using Account.Features.Users.Queries;
 using SharedKernel.ApiResults;
 using SharedKernel.Domain;
 using SharedKernel.Endpoints;
+using SharedKernel.OpenApi;
 
 namespace Account.Api.Endpoints;
 
@@ -12,7 +13,7 @@ public sealed class UserEndpoints : IEndpoints
 
     public void MapEndpoints(IEndpointRouteBuilder routes)
     {
-        var group = routes.MapGroup(RoutesPrefix).WithTags("Users").RequireAuthorization().ProducesValidationProblem();
+        var group = routes.MapGroup(RoutesPrefix).WithTags("Users").WithGroupName(OpenApiDocumentNames.Account).RequireAuthorization().ProducesValidationProblem();
 
         group.MapGet("/", async Task<ApiResult<UsersResponse>> ([AsParameters] GetUsersQuery query, IMediator mediator)
             => await mediator.Send(query)

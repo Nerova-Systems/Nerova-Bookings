@@ -11,11 +11,15 @@ public class SinglePageAppConfiguration
 {
     public const string PublicUrlKey = "PUBLIC_URL";
     public const string CdnUrlKey = "CDN_URL";
+    public const string DefaultWebAppProjectName = "WebApp";
     private const string PublicKeyPrefix = "PUBLIC_";
     private const string ApplicationVersionKey = "APPLICATION_VERSION";
     public static readonly string[] SupportedLocalizations = ["en-US", "da-DK"];
 
-    public static readonly string BuildRootPath = GetWebAppDistRoot("WebApp", "dist");
+    // Default bundle directory for callers that host a single SPA (the original layout). Multi-SPA
+    // hosts (e.g. consolidated account-api hosting both account/WebApp and account/BackOffice)
+    // construct one SinglePageAppConfiguration per SPA via the WebAppProjectName parameter.
+    public static readonly string BuildRootPath = GetWebAppDistRoot(DefaultWebAppProjectName, "dist");
 
     public static readonly JsonSerializerOptions JsonHtmlEncodingOptions =
         new(SharedDependencyConfiguration.DefaultJsonSerializerOptions)
@@ -30,11 +34,19 @@ public class SinglePageAppConfiguration
     private string? _htmlTemplate;
     private string? _remoteEntryJsContent;
 
-    public SinglePageAppConfiguration(bool isDevelopment, Dictionary<string, string>? environmentVariables)
+    public SinglePageAppConfiguration(
+        bool isDevelopment,
+        Dictionary<string, string>? environmentVariables,
+        string webAppProjectName = DefaultWebAppProjectName,
+        string? publicUrlOverride = null,
+        string? cdnUrlOverride = null
+    )
     {
-        // Environment variables are empty when generating EF Core migrations
-        PublicUrl = Environment.GetEnvironmentVariable(PublicUrlKey) ?? string.Empty;
-        CdnUrl = Environment.GetEnvironmentVariable(CdnUrlKey) ?? string.Empty;
+        // Per-host overrides win over the process-wide env vars so a single process can host multiple SPAs
+        // on different hostnames (e.g. consolidated account-api). Env vars remain the source of truth for
+        // single-SPA hosts and EF Core migration generation (where neither env vars nor overrides are set).
+        PublicUrl = publicUrlOverride ?? Environment.GetEnvironmentVariable(PublicUrlKey) ?? string.Empty;
+        CdnUrl = cdnUrlOverride ?? Environment.GetEnvironmentVariable(CdnUrlKey) ?? string.Empty;
         var applicationVersion = Assembly.GetEntryAssembly()!.GetName().Version!.ToString();
 
         StaticRuntimeEnvironment = new Dictionary<string, string>
@@ -60,11 +72,14 @@ public class SinglePageAppConfiguration
         VerifyRuntimeEnvironment(StaticRuntimeEnvironment);
 
         _isDevelopment = isDevelopment;
-        _htmlTemplatePath = Path.Combine(BuildRootPath, "index.html");
-        _remoteEntryJsPath = Path.Combine(BuildRootPath, "remoteEntry.js");
+        BundleDirectory = webAppProjectName == DefaultWebAppProjectName ? BuildRootPath : GetWebAppDistRoot(webAppProjectName, "dist");
+        _htmlTemplatePath = Path.Combine(BundleDirectory, "index.html");
+        _remoteEntryJsPath = Path.Combine(BundleDirectory, "remoteEntry.js");
         PermissionPolicies = GetPermissionsPolicies();
         ContentSecurityPolicies = GetContentSecurityPolicies();
     }
+
+    public string BundleDirectory { get; }
 
     private string CdnUrl { get; }
 
@@ -112,17 +127,29 @@ public class SinglePageAppConfiguration
 
     private static string GetWebAppDistRoot(string webAppProjectName, string webAppDistRootName)
     {
+        // Walk up looking for <webAppProjectName>/main.tsx (the React entry point, source-controlled in every
+        // SPA) or <webAppProjectName>/<dist>/index.html (production deployments where main.tsx is gone but the
+        // built bundle is). Either marker reliably identifies the SPA folder across local dev, CI before the
+        // frontend build, and the deployed Azure container. Matching just on the bare folder name would stop
+        // at unrelated same-named directories like account/Tests/BackOffice.
         var assemblyPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)!;
 
         var directoryInfo = new DirectoryInfo(assemblyPath);
-        while (directoryInfo!.GetDirectories(webAppProjectName).Length == 0 &&
-               !Path.Exists(Path.Join(directoryInfo.FullName, webAppProjectName, webAppDistRootName))
-              )
+        while (directoryInfo is not null)
         {
+            var candidate = Path.Join(directoryInfo.FullName, webAppProjectName);
+            if (File.Exists(Path.Join(candidate, "main.tsx")) ||
+                File.Exists(Path.Join(candidate, webAppDistRootName, "index.html")))
+            {
+                return Path.Join(candidate, webAppDistRootName);
+            }
+
             directoryInfo = directoryInfo.Parent;
         }
 
-        return Path.Join(directoryInfo.FullName, webAppProjectName, webAppDistRootName);
+        throw new InvalidOperationException(
+            $"Could not locate the SPA project '{webAppProjectName}' walking up from '{assemblyPath}'."
+        );
     }
 
     private static StringValues GetPermissionsPolicies()

@@ -8,8 +8,6 @@ public sealed class Settings
 
     public static Settings Current => Instance.Value;
 
-    public required IdentityConfig Identity { get; init; }
-
     public required BrandingConfig Branding { get; init; }
 
     private static Settings LoadFromEmbeddedResource()
@@ -28,11 +26,6 @@ public sealed class Settings
 
         return JsonSerializer.Deserialize<Settings>(stream, options)
                ?? throw new InvalidOperationException("Failed to deserialize platform settings");
-    }
-
-    public sealed class IdentityConfig
-    {
-        public required string InternalEmailDomain { get; init; }
     }
 
     public sealed class BrandingConfig

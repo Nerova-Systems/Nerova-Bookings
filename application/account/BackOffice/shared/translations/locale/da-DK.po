@@ -1,0 +1,182 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2023-12-15 20:50+0100\n"
+"PO-Revision-Date: \n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: da-DK\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: \n"
+"X-Generator: @lingui/cli\n"
+
+msgid "Accounts"
+msgstr "Konti"
+
+msgid "Accounts (coming soon)"
+msgstr "Konti (kommer snart)"
+
+msgid "Admin"
+msgstr "Admin"
+
+msgid "An unexpected error occurred while processing your request."
+msgstr "Der opstod en uventet fejl ved behandlingen."
+
+msgid "Back Office"
+msgstr "Back Office"
+
+msgid "BackOffice - Localhost"
+msgstr "BackOffice - Localhost"
+
+msgid "Change language"
+msgstr "Skift sprog"
+
+msgid "Change theme"
+msgstr "Skift tema"
+
+msgid "Change zoom level"
+msgstr "Skift zoomniveau"
+
+msgid "Coming soon"
+msgstr "Kommer snart"
+
+msgid "Contact your administrator."
+msgstr "Kontakt din administrator."
+
+msgid "Dark"
+msgstr "Mørk"
+
+msgid "Dashboard"
+msgstr "Dashboard"
+
+msgid "Default"
+msgstr "Standard"
+
+msgid "Feature flags"
+msgstr "Feature flags"
+
+msgid "Feature flags (coming soon)"
+msgstr "Feature flags (kommer snart)"
+
+msgid "Go to home"
+msgstr "Gå til forsiden"
+
+msgid "Hide details"
+msgstr "Skjul detaljer"
+
+msgid "Language"
+msgstr "Sprog"
+
+msgid "Large"
+msgstr "Stor"
+
+msgid "Larger"
+msgstr "Større"
+
+msgid "Light"
+msgstr "Lys"
+
+msgid "Local development sign-in. Production uses Azure Container Apps built-in Entra ID authentication."
+msgstr "Login til lokal udvikling. Produktion bruger Azure Container Apps' indbyggede Entra ID-godkendelse."
+
+msgid "Log in"
+msgstr "Log ind"
+
+msgid "Log in with admin rights"
+msgstr "Log ind med administratorrettigheder"
+
+msgid "Log in without group claims"
+msgstr "Log ind uden gruppeclaims"
+
+msgid "Log out"
+msgstr "Log ud"
+
+msgid "Logging in..."
+msgstr "Logger ind..."
+
+msgid "Logo"
+msgstr "Logo"
+
+msgid "Main navigation"
+msgstr "Hovednavigation"
+
+msgid "Manage accounts, view system data, see exceptions, and perform various tasks for operational and support teams."
+msgstr "Administrer konti, se systemdata, se undtagelser og udfør forskellige opgaver for drifts- og supportteams."
+
+msgid "Navigation"
+msgstr "Navigation"
+
+msgid "No back-office access"
+msgstr "Ingen adgang til Back Office"
+
+msgid "Page not found"
+msgstr "Siden blev ikke fundet"
+
+msgid "PlatformPlatform logo"
+msgstr "PlatformPlatform logo"
+
+msgid "Please check the URL or return to the home page."
+msgstr "Tjek venligst URL'en eller vend tilbage til forsiden."
+
+msgid "Please try again or return to the home page."
+msgstr "Prøv venligst igen eller vend tilbage til forsiden."
+
+msgid "Screenshots of the dashboard project with desktop and mobile versions"
+msgstr "Skærmbilleder af dashboard-projektet i desktop- og mobilversioner"
+
+msgid "Show details"
+msgstr "Vis detaljer"
+
+msgid "Small"
+msgstr "Lille"
+
+msgid "Something went wrong"
+msgstr "Noget gik galt"
+
+msgid "Support"
+msgstr "Support"
+
+msgid "Support (coming soon)"
+msgstr "Support (kommer snart)"
+
+msgid "System"
+msgstr "System"
+
+msgid "The page you are looking for does not exist or was moved."
+msgstr "Siden du leder efter findes ikke eller er blevet flyttet."
+
+msgid "Theme"
+msgstr "Tema"
+
+msgid "Try again"
+msgstr "Prøv igen"
+
+msgid "User"
+msgstr "Bruger"
+
+msgid "User menu"
+msgstr "Brugermenu"
+
+msgid "Users"
+msgstr "Brugere"
+
+msgid "Users (coming soon)"
+msgstr "Brugere (kommer snart)"
+
+msgid "Wait list"
+msgstr "Venteliste"
+
+msgid "Wait list (coming soon)"
+msgstr "Venteliste (kommer snart)"
+
+msgid "Welcome to the Back Office"
+msgstr "Velkommen til Back Office"
+
+msgid "Your account is not in the required group."
+msgstr "Din konto er ikke i den krævede gruppe."
+
+msgid "Zoom"
+msgstr "Zoom"

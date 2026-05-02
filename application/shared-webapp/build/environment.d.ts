@@ -96,10 +96,6 @@ export declare global {
      * Tenant logo URL
      **/
     tenantLogoUrl?: string | null;
-    /**
-     * Is internal user (has access to BackOffice)
-     **/
-    isInternalUser?: boolean;
   }
 
   /**

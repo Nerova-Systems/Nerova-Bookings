@@ -1,6 +1,7 @@
 {
   "enabledMcpjsonServers": [
-    "developer-cli"
+    "aspire",
+    "shadcn"
   ],
   "hooks": {
     "PreToolUse": [

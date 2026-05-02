@@ -49,10 +49,10 @@ There are a couple of exceptions:
 Examples of cluster-specific resources:
 - Resource Group: `ppdemo-stage-weu`, `ppdemo-prod-eus2`
 - PostgreSQL: `ppdemo-stage-weu`, `ppdemo-prod-eus2`
-- PostgreSQL database: `main`, `account`, `back-office`
+- PostgreSQL database: `main`, `account`
 - Azure Container App Environment: `ppdemo-stage-weu`, `ppdemo-prod-eus2`
-- Azure Container Apps: `main-api`, `account-api`, `back-office-worker`
-- Managed Identity: `ppdemo-stage-weu-main`, `ppdemo-stage-weu-account`, `ppdemo-prod-eus2-back-office`
+- Azure Container Apps: `main-api`, `account-api`, `account-workers`
+- Managed Identity: `ppdemo-stage-weu-main`, `ppdemo-stage-weu-account`
 - Key Vault: `ppdemo-stage-weu`, `ppdemo-prod-eus2`
 - Virtual Network: `ppdemo-stage-weu`, `ppdemo-prod-eus2`
 - Communication Service: `ppdemo-stage-weu`, `ppdemo-prod-eus2`

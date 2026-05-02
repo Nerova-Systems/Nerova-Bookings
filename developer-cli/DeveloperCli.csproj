@@ -20,8 +20,6 @@
         <PackageReference Include="Microsoft.Extensions.AI.OpenAI" Version="10.5.0" />
         <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="10.0.7" />
         <PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.7" />
-        <PackageReference Include="ModelContextProtocol" Version="1.2.0" />
-        <PackageReference Include="ModelContextProtocol.Core" Version="1.2.0" />
         <PackageReference Include="OpenAI" Version="2.10.0" />
         <PackageReference Include="Spectre.Console" Version="0.55.2" />
         <PackageReference Include="System.CommandLine" Version="2.0.7" />
@@ -30,5 +28,12 @@
         <None Remove="DeveloperCli.slnx" />
         <None Remove="DeveloperCli.slnx.DotSettings" />
         <None Remove="Directory.Build.props" />
+    </ItemGroup>
+    <ItemGroup>
+        <!-- Linked source from shared-kernel: developer-cli is a single-file CLI that intentionally
+             stays isolated from shared-kernel's heavy dependency closure (MediatR, EFCore, NSwag,
+             OpenTelemetry, multiple Azure SDKs). PortAllocation is the shared definition; AppGateway
+             and AppHost get it natively, developer-cli compiles the same file. -->
+        <Compile Include="..\application\shared-kernel\SharedKernel\Configuration\PortAllocation.cs" Link="Utilities\PortAllocation.cs"/>
     </ItemGroup>
 </Project>

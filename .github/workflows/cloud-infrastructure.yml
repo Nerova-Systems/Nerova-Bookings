@@ -37,6 +37,9 @@ jobs:
       shared_location: ${{ vars.STAGING_SHARED_LOCATION }}
       cluster_location: ${{ vars.STAGING_CLUSTER_LOCATION }}
       domain_name: ${{ vars.STAGING_DOMAIN_NAME }}
+      back_office_domain_name: ${{ vars.STAGING_BACK_OFFICE_DOMAIN_NAME || '-' }}
+      back_office_entra_client_id: ${{ vars.STAGING_BACK_OFFICE_ENTRA_CLIENT_ID }}
+      back_office_admins_group_id: ${{ vars.STAGING_BACK_OFFICE_ADMINS_GROUP_ID || '-' }}
       postgres_admin_object_id: ${{ vars.STAGING_POSTGRES_ADMIN_OBJECT_ID }}
       production_service_principal_object_id: ${{ vars.PRODUCTION_SERVICE_PRINCIPAL_OBJECT_ID }}
 
@@ -55,5 +58,8 @@ jobs:
       shared_location: ${{ vars.PRODUCTION_SHARED_LOCATION }}
       cluster_location: ${{ vars.PRODUCTION_CLUSTER1_LOCATION }}
       domain_name: ${{ vars.PRODUCTION_DOMAIN_NAME }}
+      back_office_domain_name: ${{ vars.PRODUCTION_BACK_OFFICE_DOMAIN_NAME || '-' }}
+      back_office_entra_client_id: ${{ vars.PRODUCTION_BACK_OFFICE_ENTRA_CLIENT_ID }}
+      back_office_admins_group_id: ${{ vars.PRODUCTION_BACK_OFFICE_ADMINS_GROUP_ID || '-' }}
       postgres_admin_object_id: ${{ vars.PRODUCTION_POSTGRES_ADMIN_OBJECT_ID }}
       tenant_id: ${{ vars.TENANT_ID }}

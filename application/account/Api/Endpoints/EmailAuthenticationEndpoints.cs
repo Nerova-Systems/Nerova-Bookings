@@ -2,6 +2,7 @@ using Account.Features.EmailAuthentication.Commands;
 using Account.Features.EmailAuthentication.Domain;
 using SharedKernel.ApiResults;
 using SharedKernel.Endpoints;
+using SharedKernel.OpenApi;
 
 namespace Account.Api.Endpoints;
 
@@ -11,7 +12,7 @@ public sealed class EmailAuthenticationEndpoints : IEndpoints
 
     public void MapEndpoints(IEndpointRouteBuilder routes)
     {
-        var group = routes.MapGroup(RoutesPrefix).WithTags("EmailAuthentication").RequireAuthorization().ProducesValidationProblem();
+        var group = routes.MapGroup(RoutesPrefix).WithTags("EmailAuthentication").WithGroupName(OpenApiDocumentNames.Account).RequireAuthorization().ProducesValidationProblem();
 
         group.MapPost("/login/start", async Task<ApiResult<StartEmailLoginResponse>> (StartEmailLoginCommand command, IMediator mediator)
             => await mediator.Send(command)

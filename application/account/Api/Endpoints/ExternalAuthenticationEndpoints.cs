@@ -3,6 +3,7 @@ using Account.Features.ExternalAuthentication.Domain;
 using Microsoft.AspNetCore.Mvc;
 using SharedKernel.ApiResults;
 using SharedKernel.Endpoints;
+using SharedKernel.OpenApi;
 
 namespace Account.Api.Endpoints;
 
@@ -12,7 +13,7 @@ public sealed class ExternalAuthenticationEndpoints : IEndpoints
 
     public void MapEndpoints(IEndpointRouteBuilder routes)
     {
-        var group = routes.MapGroup(RoutesPrefix).WithTags("ExternalAuthentication").RequireAuthorization().ProducesValidationProblem();
+        var group = routes.MapGroup(RoutesPrefix).WithTags("ExternalAuthentication").WithGroupName(OpenApiDocumentNames.Account).RequireAuthorization().ProducesValidationProblem();
 
         group.MapGet("/{provider}/login/start", async Task<ApiResult<string>> (ExternalProviderType provider, [AsParameters] StartExternalLoginCommand command, IMediator mediator)
             => await mediator.Send(command with { ProviderType = provider })

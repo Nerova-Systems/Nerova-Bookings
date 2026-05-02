@@ -23,17 +23,18 @@ args = CommandLineArgumentsPreprocessor.PreprocessArguments(args);
 
 WorkspaceHelper.EnsureWorkspace();
 
-// Check if running MCP command - skip all output to keep stdout clean for MCP protocol
-var isMcpCommand = args.Length > 0 && args[0] == "mcp";
+// Skip preamble for commands that need a clean stdout (MCP protocol, skills parsing CLI output).
+var isQuietCommand = args.Length > 0 && (args[0] == "mcp" || args[0] == "claude-command");
 var solutionName = new DirectoryInfo(Configuration.SourceCodeFolder).Name;
 
-if (!isMcpCommand && !args.Contains("-q") && !args.Contains("--quiet"))
+if (!isQuietCommand && !args.Contains("-q") && !args.Contains("--quiet"))
 {
     if (args.Length == 1 && (args[0] == "--help" || args[0] == "-h" || args[0] == "-?"))
     {
         var figletText = new FigletText(solutionName);
         AnsiConsole.Write(figletText);
         Prerequisite.Recommend(Prerequisite.TypeScriptLanguageServer, Prerequisite.CSharpLanguageServer);
+        Prerequisite.WarnIfAspireCliDoesNotMatchSdk();
     }
 
     AnsiConsole.WriteLine($"Source code folder: {Configuration.SourceCodeFolder} \n");
@@ -53,6 +54,7 @@ rootCommand.Options.Add(traceOption);
 
 var allCommands = Assembly.GetExecutingAssembly().GetTypes()
     .Where(t => !t.IsAbstract && t.IsAssignableTo(typeof(Command)))
+    .Where(t => t.Namespace != "DeveloperCli.Commands.ClaudeCommand")
     .Select(Activator.CreateInstance)
     .Cast<Command>()
     .ToList();

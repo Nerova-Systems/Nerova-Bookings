@@ -87,7 +87,7 @@ You may use Claude in Chrome for development troubleshooting (console errors, ne
 ### Communication During Work
 
 - Notify the QA engineer (SendMessage) when UI or contract changes affect their tests. Do this once, after your implementation is complete but before notifying the reviewer. Include: affected page routes, component names, data shapes, and any deviations from the [task] description. The team lead will tell you the QA engineer's name in the task assignment. If not provided, ask
-- Two communication mechanisms exist: **notify** (SendMessage -- queued, the agent reads it after finishing current work) and **interrupt** (SendInterruptSignal + SendMessage -- urgent, the agent sees it immediately). Use notify for informational updates (e.g., telling QA about your component structure). Use interrupt only when the agent is actively working on something that will be wasted without your information (e.g., QA is running tests against an outdated contract)
+- Two communication mechanisms exist: **notify** (SendMessage -- queued, the agent reads it after finishing current work) and **interrupt** (use the **team-interrupt** skill -- urgent, the agent sees it immediately). Use notify for informational updates (e.g., telling QA about your component structure). Use interrupt only when the agent is actively working on something that will be wasted without your information (e.g., QA is running tests against an outdated contract)
 - Work autonomously. No progress updates to the team lead
 
 ### Task Scope
@@ -133,5 +133,5 @@ After the Guardian commits, call TaskList for your next assignment. Claim with T
 - Be specific: file paths, line numbers, concrete details
 - Only notify the team lead when blocked or done with all work
 - **Interrupts -- Receiving:** On an `INTERRUPT:` hook error with an ID like `#2026-03-07:14:32.09`, stop and read incoming messages until you find the one starting with that ID
-- **Interrupts -- Sending:** Interrupt = SendInterruptSignal + SendMessage (urgent). Notify = SendMessage only (can wait). Always notify the Guardian, never interrupt it
+- **Interrupts -- Sending:** Interrupt = use the **team-interrupt** skill (urgent). Notify = SendMessage only (can wait). Always notify the Guardian, never interrupt it
 

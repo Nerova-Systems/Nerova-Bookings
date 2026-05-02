@@ -2,13 +2,27 @@ using System.Net;
 using System.Net.Sockets;
 using AppHost;
 using Azure.Storage.Blobs;
-using Microsoft.Extensions.Configuration;
 using Projects;
+using SharedKernel.Authentication.MockEasyAuth;
+using SharedKernel.Configuration;
 
-// Check for port conflicts before starting
-CheckPortAvailability();
+// Read the port allocation before CreateBuilder so we can set Aspire's dashboard env vars
+// (ASPNETCORE_URLS, DOTNET_DASHBOARD_OTLP_ENDPOINT_URL, etc.) before Aspire reads them.
+var ports = PortAllocation.Load();
+
+OverrideAspireDashboardEnvironmentVariables(ports);
 
 var builder = DistributedApplication.CreateBuilder(args);
+
+CheckPortAvailability(ports);
+
+var appHostname = builder.Configuration["Hostnames:App"] ?? "app.dev.localhost";
+var backOfficeHostname = builder.Configuration["Hostnames:BackOffice"] ?? "back-office.dev.localhost";
+
+var appBaseUrl = $"https://{appHostname}:{ports.AppGateway}";
+// Localhost mirrors the Azure post-split topology: back-office traffic bypasses AppGateway and
+// hits the consolidated account-api process directly on a dedicated Kestrel port.
+var backOfficeBaseUrl = $"https://{backOfficeHostname}:{ports.BackOfficeApi}";
 
 var certificatePassword = await builder.CreateSslCertificateIfNotExists();
 
@@ -22,8 +36,8 @@ var (twilioConfigured, twilioAccountSid, twilioAuthToken, twilioVerifyServiceSid
 var (nangoConfigured, nangoToolboxSecretKey, nangoServerUrl) = ConfigureNangoParameters();
 
 var postgresPassword = builder.CreateStablePassword("postgres-password");
-var postgres = builder.AddPostgres("postgres", password: postgresPassword, port: 9002)
-    .WithDataVolume("platform-platform-postgres-data")
+var postgres = builder.AddPostgres("postgres", password: postgresPassword, port: ports.Postgres)
+    .WithDataVolume($"platform-platform{ports.VolumeNameInfix}-postgres-data")
     .WithLifetime(ContainerLifetime.Persistent)
     .WithArgs("-c", "wal_level=logical");
 
@@ -31,8 +45,8 @@ var azureStorage = builder
     .AddAzureStorage("azure-storage")
     .RunAsEmulator(resourceBuilder =>
         {
-            resourceBuilder.WithDataVolume("platform-platform-azure-storage-data");
-            resourceBuilder.WithBlobPort(10000);
+            resourceBuilder.WithDataVolume($"platform-platform{ports.VolumeNameInfix}-azure-storage-data");
+            resourceBuilder.WithBlobPort(ports.Blob);
             resourceBuilder.WithLifetime(ContainerLifetime.Persistent);
         }
     )
@@ -43,12 +57,12 @@ var azureStorage = builder
             Tag = "latest"
         }
     )
-    .AddBlobs("blobs");
+    .AddBlobs("blob-storage");
 
 builder
     .AddContainer("mail-server", "axllent/mailpit")
-    .WithHttpEndpoint(9003, 8025)
-    .WithEndpoint(9004, 1025)
+    .WithHttpEndpoint(ports.MailpitHttp, 8025)
+    .WithEndpoint(ports.MailpitSmtp, 1025)
     .WithLifetime(ContainerLifetime.Persistent)
     .WithUrlForEndpoint("http", u => u.DisplayText = "Read mail here");
 
@@ -57,20 +71,41 @@ CreateBlobContainer("logos");
 
 var frontendBuild = builder
     .AddJavaScriptApp("frontend-build", "../")
-    .WithEnvironment("CERTIFICATE_PASSWORD", certificatePassword);
+    .WithEnvironment("CERTIFICATE_PASSWORD", certificatePassword)
+    .WithEnvironment("MAIN_STATIC_PORT", ports.MainStatic.ToString())
+    .WithEnvironment("ACCOUNT_STATIC_PORT", ports.AccountStatic.ToString())
+    .WithEnvironment("BACK_OFFICE_STATIC_PORT", ports.BackOfficeStatic.ToString());
 
 var accountDatabase = postgres
     .AddDatabase("account-database", "account");
 
 var accountWorkers = builder
     .AddProject<Account_Workers>("account-workers")
+    .WithEnvironment("KESTREL_PORT", ports.AccountWorkers.ToString())
     .WithReference(accountDatabase)
     .WithReference(azureStorage)
     .WaitFor(accountDatabase);
 
 var accountApi = builder
     .AddProject<Account_Api>("account-api")
-    .WithUrlConfiguration("/account")
+    .WithEnvironment("KESTREL_PORT", ports.AccountApi.ToString())
+    // Second Kestrel port for back-office.dev.localhost so localhost mirrors the Azure post-split
+    // topology where back-office has its own external ingress and AppGateway is not in the path.
+    .WithEnvironment("BACK_OFFICE_KESTREL_PORT", ports.BackOfficeApi.ToString())
+    // BackOfficeDevStaticProxy forwards /static/* and HMR traffic on the back-office Kestrel listener
+    // to the rsbuild dev server. Dev-only; production builds serve a baked bundle from disk.
+    .WithEnvironment("BACK_OFFICE_STATIC_PORT", ports.BackOfficeStatic.ToString())
+    // Back-office bundle URLs target the dedicated Kestrel port directly (no AppGateway).
+    .WithEnvironment("BACK_OFFICE_PUBLIC_URL", backOfficeBaseUrl)
+    .WithEnvironment("BACK_OFFICE_CDN_URL", backOfficeBaseUrl)
+    .WithUrlConfiguration(appHostname, ports.AppGateway, "/account")
+    // Google OAuth's redirect_uri whitelist requires literal 'localhost', not subdomains like
+    // 'app.dev.localhost'. The callback then 301's via LocalhostRedirectMiddleware back to the
+    // canonical 'app.dev.localhost' so OAuth-state session cookies flow with the redirected request.
+    .WithEnvironment("OAUTH_PUBLIC_URL", "https://localhost:" + ports.AppGateway)
+    .WithEnvironment("Hostnames__App", appHostname)
+    .WithEnvironment("BackOffice__Host", backOfficeHostname)
+    .WithEnvironment("BackOffice__AdminsGroupId", MockEasyAuthIdentities.MockAdminsGroupId)
     .WithReference(accountDatabase)
     .WithReference(azureStorage)
     .WithEnvironment("OAuth__Google__ClientId", googleOAuthClientId)
@@ -86,27 +121,12 @@ var accountApi = builder
     .WithEnvironment("PayFast__AllowedIps", payFastAllowedIps)
     .WaitFor(accountWorkers);
 
-var backOfficeDatabase = postgres
-    .AddDatabase("back-office-database", "back-office");
-
-var backOfficeWorkers = builder
-    .AddProject<BackOffice_Workers>("back-office-workers")
-    .WithReference(backOfficeDatabase)
-    .WithReference(azureStorage)
-    .WaitFor(backOfficeDatabase);
-
-var backOfficeApi = builder
-    .AddProject<BackOffice_Api>("back-office-api")
-    .WithUrlConfiguration("/back-office")
-    .WithReference(backOfficeDatabase)
-    .WithReference(azureStorage)
-    .WaitFor(backOfficeWorkers);
-
 var mainDatabase = postgres
     .AddDatabase("main-database", "main");
 
 var mainWorkers = builder
     .AddProject<Main_Workers>("main-workers")
+    .WithEnvironment("KESTREL_PORT", ports.MainWorkers.ToString())
     .WithReference(mainDatabase)
     .WithReference(azureStorage)
     .WithEnvironment("NANGO_TOOLBOX_SECRET_KEY", nangoToolboxSecretKey)
@@ -116,7 +136,8 @@ var mainWorkers = builder
 
 var mainApi = builder
     .AddProject<Main_Api>("main-api")
-    .WithUrlConfiguration("")
+    .WithEnvironment("KESTREL_PORT", ports.MainApi.ToString())
+    .WithUrlConfiguration(appHostname, ports.AppGateway, "")
     .WithReference(mainDatabase)
     .WithReference(azureStorage)
     .WithEnvironment("PUBLIC_GOOGLE_OAUTH_ENABLED", googleOAuthConfigured ? "true" : "false")
@@ -137,18 +158,25 @@ var mainApi = builder
     .WithEnvironment("NANGO_SERVER_URL", nangoServerUrl)
     .WaitFor(mainWorkers);
 
-var appGateway = builder
+builder
     .AddProject<AppGateway>("app-gateway")
     .WithReference(frontendBuild)
     .WithReference(accountApi)
-    .WithReference(backOfficeApi)
     .WithReference(mainApi)
     .WaitFor(accountApi)
     .WaitFor(frontendBuild)
-    .WithUrlForEndpoint("https", url => url.DisplayText = "Web App");
-
-appGateway.WithUrl($"{appGateway.GetEndpoint("https")}/back-office", "Back Office");
-appGateway.WithUrl($"{appGateway.GetEndpoint("https")}/openapi", "Open API");
+    .WithEnvironment("ASPNETCORE_URLS", "https://localhost:" + ports.AppGateway)
+    .WithEnvironment("Hostnames__App", appHostname)
+    .WithUrls(context =>
+        {
+            // Replace the auto-published "https" endpoint URL with three explicit dashboard URLs.
+            // DisplayOrder: higher values sort higher in the list (Web App > Back Office > Open API).
+            context.Urls.Clear();
+            context.Urls.Add(new ResourceUrlAnnotation { Url = appBaseUrl, DisplayText = "Web App", DisplayOrder = 300 });
+            context.Urls.Add(new ResourceUrlAnnotation { Url = backOfficeBaseUrl, DisplayText = "Back Office", DisplayOrder = 200 });
+            context.Urls.Add(new ResourceUrlAnnotation { Url = $"{appBaseUrl}/openapi", DisplayText = "Open API", DisplayOrder = 100 });
+        }
+    );
 
 await builder.Build().RunAsync();
 
@@ -413,7 +441,11 @@ return;
 
 void CreateBlobContainer(string containerName)
 {
-    var connectionString = builder.Configuration.GetConnectionString("blob-storage");
+    // Build the Azurite connection string dynamically from the actual blob port so this works on
+    // any base port (parallel stacks from git worktrees rely on this). The default development
+    // account key is the well-known Azurite credential and is safe to keep in source.
+    var connectionString =
+        $"DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;BlobEndpoint=http://127.0.0.1:{ports.Blob}/devstoreaccount1";
 
     new Task(() =>
         {
@@ -424,10 +456,23 @@ void CreateBlobContainer(string containerName)
     ).Start();
 }
 
-void CheckPortAvailability()
+void OverrideAspireDashboardEnvironmentVariables(PortAllocation portAllocation)
 {
-    var ports = new[] { (9098, "Resource Service"), (9097, "Dashboard"), (9001, "Aspire") };
-    var blocked = ports.Where(p => !IsPortAvailable(p.Item1)).ToList();
+    // Must be set before DistributedApplication.CreateBuilder so Aspire picks them up.
+    Environment.SetEnvironmentVariable("ASPNETCORE_URLS", $"https://localhost:{portAllocation.Aspire}");
+    Environment.SetEnvironmentVariable("DOTNET_DASHBOARD_OTLP_ENDPOINT_URL", $"https://localhost:{portAllocation.OtelEndpoint}");
+    Environment.SetEnvironmentVariable("DOTNET_RESOURCE_SERVICE_ENDPOINT_URL", $"https://localhost:{portAllocation.ResourceService}");
+}
+
+void CheckPortAvailability(PortAllocation portAllocation)
+{
+    var portsToCheck = new[]
+    {
+        (portAllocation.ResourceService, "Resource Service"),
+        (portAllocation.OtelEndpoint, "Dashboard"),
+        (portAllocation.Aspire, "Aspire")
+    };
+    var blocked = portsToCheck.Where(p => !IsPortAvailable(p.Item1)).ToList();
 
     if (blocked.Count > 0)
     {

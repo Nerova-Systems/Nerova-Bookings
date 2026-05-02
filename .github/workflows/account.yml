@@ -127,6 +127,11 @@ jobs:
         working-directory: application/account/WebApp
         run: npm run publish
 
+      - name: Publish Back Office Frontend Artifacts
+        if: ${{ steps.determine_deployment.outputs.deploy_staging == 'true' }}
+        working-directory: application/account/BackOffice
+        run: npm run publish
+
       - name: Publish API Build
         if: ${{ steps.determine_deployment.outputs.deploy_staging == 'true' }}
         working-directory: application/account
@@ -217,6 +222,10 @@ jobs:
         working-directory: application/account/WebApp
         run: npm run lint
 
+      - name: Run Back Office Lint
+        working-directory: application/account/BackOffice
+        run: npm run lint
+
   database-migrations-stage:
     name: Database Staging
     if: ${{ vars.STAGING_CLUSTER_ENABLED == 'true' }}
@@ -270,6 +279,25 @@ jobs:
       docker_context: ./application/account
       docker_file: ./Workers/Dockerfile
 
+  back-office-stage:
+    name: Back Office Staging
+    if: ${{ needs.build-and-test.outputs.deploy_staging == 'true' }}
+    needs: [build-and-test, database-migrations-stage, api-stage]
+    uses: ./.github/workflows/_deploy-container.yml
+    secrets: inherit
+    with:
+      azure_environment: "stage"
+      cluster_location_acronym: ${{ vars.STAGING_CLUSTER_LOCATION_ACRONYM }}
+      service_principal_id: ${{ vars.STAGING_SERVICE_PRINCIPAL_ID }}
+      subscription_id: ${{ vars.STAGING_SUBSCRIPTION_ID }}
+      image_name: account-api
+      container_app_name: back-office
+      version: ${{ needs.build-and-test.outputs.version }}
+      artifacts_name: account-api
+      artifacts_path: application/account/Api/publish
+      docker_context: ./application/account
+      docker_file: ./Api/Dockerfile
+
   database-migrations-prod1:
     name: Database Production
     if: ${{ needs.build-and-test.outputs.deploy_production == 'true' }}
@@ -322,3 +350,22 @@ jobs:
       artifacts_path: application/account/Workers/publish
       docker_context: ./application/account
       docker_file: ./Workers/Dockerfile
+
+  back-office-prod1:
+    name: Back Office Production
+    if: ${{ needs.build-and-test.outputs.deploy_production == 'true' }}
+    needs: [build-and-test, database-migrations-prod1, api-prod1]
+    uses: ./.github/workflows/_deploy-container.yml
+    secrets: inherit
+    with:
+      azure_environment: "prod"
+      cluster_location_acronym: ${{ vars.PRODUCTION_CLUSTER1_LOCATION_ACRONYM }}
+      service_principal_id: ${{ vars.PRODUCTION_SERVICE_PRINCIPAL_ID }}
+      subscription_id: ${{ vars.PRODUCTION_SUBSCRIPTION_ID }}
+      image_name: account-api
+      container_app_name: back-office
+      version: ${{ needs.build-and-test.outputs.version }}
+      artifacts_name: account-api
+      artifacts_path: application/account/Api/publish
+      docker_context: ./application/account
+      docker_file: ./Api/Dockerfile

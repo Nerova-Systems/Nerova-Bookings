@@ -159,12 +159,7 @@ test.describe("@comprehensive", () => {
    */
   test("should redirect to session-revoked error page when session is revoked from another browser", async ({
     page
-  }, testInfo) => {
-    test.skip(
-      testInfo.project.name === "webkit",
-      "WebKit __Host- cookie handling prevents refresh token from being sent after access token manipulation"
-    );
-
+  }) => {
     const context = createTestContext(page);
     const owner = testUser();
     const browser = page.context().browser() as Browser;
@@ -251,14 +246,7 @@ test.describe("@comprehensive", () => {
    * 5. Browser B tries to refresh (session already revoked)
    * 6. Both browsers see the replay_attack error page
    */
-  test("should redirect to replay_attack error page when refresh token replay is detected", async ({
-    page
-  }, testInfo) => {
-    test.skip(
-      testInfo.project.name === "webkit",
-      "WebKit __Host- cookie handling prevents programmatic cookie manipulation required for replay attack simulation"
-    );
-
+  test("should redirect to replay_attack error page when refresh token replay is detected", async ({ page }) => {
     const context = createTestContext(page);
     const owner = testUser();
     const browser = page.context().browser() as Browser;

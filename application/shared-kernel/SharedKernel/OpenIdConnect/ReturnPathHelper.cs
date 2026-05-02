@@ -49,7 +49,7 @@ public static class ReturnPathHelper
         httpContext.Response.Cookies.Delete(ReturnPathCookieName, new CookieOptions { Secure = true });
     }
 
-    private static bool IsValidRelativePath(string path)
+    public static bool IsValidRelativePath(string path)
     {
         if (!path.StartsWith('/'))
         {

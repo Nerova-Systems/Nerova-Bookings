@@ -15,6 +15,7 @@ param userAssignedIdentityName string
 param ingress bool
 param hasProbesEndpoint bool
 param domainName string = ''
+param additionalDomainName string = ''
 param external bool = false
 param environmentVariables object[] = []
 param revisionSuffix string
@@ -25,9 +26,11 @@ resource userAssignedIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@
 }
 
 var certificateName = '${domainName}-certificate' // Note: The `-certificate` is used to detect if a certificate in deploy-cluster.sh
+var additionalCertificateName = '${additionalDomainName}-certificate'
 var isCustomDomainSet = domainName != ''
+var isAdditionalDomainSet = additionalDomainName != ''
 
-var customDomainConfiguration = isCustomDomainSet
+var primaryDomainBinding = isCustomDomainSet
   ? [
       {
         name: domainName
@@ -35,6 +38,17 @@ var customDomainConfiguration = isCustomDomainSet
       }
     ]
   : []
+
+var additionalDomainBinding = isAdditionalDomainSet
+  ? [
+      {
+        name: additionalDomainName
+        bindingType: 'Auto'
+      }
+    ]
+  : []
+
+var customDomainConfiguration = concat(primaryDomainBinding, additionalDomainBinding)
 
 module newManagedCertificate './managed-certificate.bicep' = if (isCustomDomainSet) {
   name: '${clusterResourceGroupName}-${name}-managed-certificate'
@@ -46,6 +60,19 @@ module newManagedCertificate './managed-certificate.bicep' = if (isCustomDomainS
     tags: tags
     containerAppsEnvironmentName: containerAppsEnvironmentName
     domainName: domainName
+  }
+}
+
+module additionalManagedCertificate './managed-certificate.bicep' = if (isAdditionalDomainSet) {
+  name: '${clusterResourceGroupName}-${name}-additional-managed-certificate'
+  scope: resourceGroup(clusterResourceGroupName)
+  dependsOn: [containerApp]
+  params: {
+    name: additionalCertificateName
+    location: location
+    tags: tags
+    containerAppsEnvironmentName: containerAppsEnvironmentName
+    domainName: additionalDomainName
   }
 }
 

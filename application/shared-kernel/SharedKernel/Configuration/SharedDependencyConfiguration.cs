@@ -150,7 +150,9 @@ public static class SharedDependencyConfiguration
             }
             else
             {
-                services.AddTransient<IEmailClient, DevelopmentEmailClient>();
+                services
+                    .AddSingleton(_ => PortAllocation.Load())
+                    .AddTransient<IEmailClient, DevelopmentEmailClient>();
             }
 
             return services;

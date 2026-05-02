@@ -1,5 +1,6 @@
 using System.CommandLine;
 using DeveloperCli.Installation;
+using SharedKernel.Configuration;
 
 namespace DeveloperCli.Commands;
 
@@ -30,7 +31,8 @@ public class RestartCommand : Command
     {
         Prerequisite.Ensure(Prerequisite.Dotnet, Prerequisite.Node, Prerequisite.Docker);
 
-        if (RunCommand.IsAspireRunning())
+        // Skip stop in a fresh checkout (no port.txt) -- nothing to stop, and the check would otherwise false-positive on another stack.
+        if (PortAllocation.PortFileExists(Configuration.SourceCodeFolder) && RunCommand.IsAspireRunning())
         {
             RunCommand.StopAspire();
         }

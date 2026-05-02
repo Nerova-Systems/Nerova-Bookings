@@ -84,4 +84,4 @@ Notify the team lead with your findings when done. Before going idle, always not
 - Never send more than one message to the same agent without getting a response
 - Be specific: file paths, concrete details
 - **Interrupts -- Receiving:** On an `INTERRUPT:` hook error with an ID like `#2026-03-07:14:32.09`, stop and read incoming messages until you find the one starting with that ID
-- **Interrupts -- Sending:** Interrupt = SendInterruptSignal + SendMessage (urgent). Notify = SendMessage only (can wait). Always notify the Guardian, never interrupt it
+- **Interrupts -- Sending:** Interrupt = use the **team-interrupt** skill (urgent). Notify = SendMessage only (can wait). Always notify the Guardian, never interrupt it

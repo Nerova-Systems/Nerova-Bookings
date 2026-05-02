@@ -72,8 +72,8 @@ If you need to add changes after submitting for review (e.g., a new endpoint the
 
 ### Communication During Work
 
-- Notify the frontend engineer (SendMessage) when contract changes affect their work. Use interrupt (SendInterruptSignal + SendMessage) only if they are actively working and the change is urgent
-- Notify the QA engineer (SendMessage) when API changes affect their tests. Use interrupt (SendInterruptSignal + SendMessage) only if tests are actively running against stale contracts
+- Notify the frontend engineer (SendMessage) when contract changes affect their work. Use interrupt (use the **team-interrupt** skill) only if they are actively working and the change is urgent
+- Notify the QA engineer (SendMessage) when API changes affect their tests. Use interrupt (use the **team-interrupt** skill) only if tests are actively running against stale contracts
 - Work autonomously. No progress updates to the team lead
 
 ### Task Scope
@@ -123,5 +123,5 @@ After the Guardian commits, call TaskList for your next assignment. Claim with T
 - Be specific: file paths, line numbers, concrete details
 - Only notify the team lead when blocked or done with all work
 - **Interrupts -- Receiving:** On an `INTERRUPT:` hook error with an ID like `#2026-03-07:14:32.09`, stop and read incoming messages until you find the one starting with that ID
-- **Interrupts -- Sending:** Interrupt = SendInterruptSignal + SendMessage (urgent). Notify = SendMessage only (can wait). Always notify the Guardian, never interrupt it
+- **Interrupts -- Sending:** Interrupt = use the **team-interrupt** skill (urgent). Notify = SendMessage only (can wait). Always notify the Guardian, never interrupt it
 

@@ -16,10 +16,12 @@ test.describe("@smoke", () => {
    * - Owner vs Member UI visibility (invite button, danger zone, bulk actions)
    * - Self-action restrictions (cannot delete or change own role)
    * - Access denied page for role-restricted routes (recycle-bin requires Owner/Admin)
-   * - Access denied page for internal-user-restricted routes (back-office requires internal user)
    *
    * Note: Current test fixtures infrastructure creates only Owner users, so we test
    * by creating users with different roles and switching between them in a single session.
+   * The back-office surface lives on its own subdomain (back-office.dev.localhost) post host-based
+   * routing, so cross-app access-denied for non-internal users is enforced by auth-cookie-domain
+   * isolation, not by an in-app AccessDeniedPage. That flow is covered by the back-office smoke test.
    */
   test("should enforce permission-based UI visibility, self-action restrictions, and access denied pages", async ({
     page
@@ -214,13 +216,6 @@ test.describe("@smoke", () => {
       await expect(page.getByRole("heading", { name: "Access denied" })).toBeVisible();
       await expect(page.getByText("You do not have permission to access this page.")).toBeVisible();
       await expect(page.getByRole("button", { name: "Go to home" })).toBeVisible();
-    })();
-
-    await step("Navigate to back-office as Member & verify access denied page displays")(async () => {
-      await page.goto("/back-office");
-
-      await expect(page.getByRole("heading", { name: "Access denied" })).toBeVisible();
-      await expect(page.getByText("You do not have permission to access this page.")).toBeVisible();
     })();
 
     await step("Click Go to home on access denied page & verify navigation to home")(async () => {

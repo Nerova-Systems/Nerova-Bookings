@@ -5,7 +5,7 @@ description: Guidelines for creating and updating AI rules and commands
 
 # AI Rules
 
-Guidelines for creating, updating, and reviewing AI configuration files (rules, commands/workflows, etc.). The `.claude/` directory is the source of truth and should be synced to other AI editors via the `sync_ai_rules` MCP tool.
+Guidelines for creating, updating, and reviewing AI configuration files (rules, commands/workflows, etc.). The `.claude/` directory is the source of truth and should be synced to other AI editors via `dotnet run --project developer-cli -- sync-ai-rules --quiet`.
 
 ## Directory Structure
 
@@ -100,7 +100,7 @@ The `[PRODUCT_MANAGEMENT_TOOL]` variable in `AGENTS.md` determines which specifi
 
 1. `.claude/` is the source of truth. Don't modify files in other editor directories directly
 
-2. Run the `sync_ai_rules` MCP tool after updating files
+2. Run `dotnet run --project developer-cli -- sync-ai-rules --quiet` after updating files
 
 ## Review Checklist
 
@@ -112,7 +112,7 @@ When reviewing changes to rules or commands:
 - [ ] Examples use ✅/❌ patterns where applicable
 - [ ] File organization matches its category
 - [ ] Tool-agnostic terminology used (no Issue, Epic, Story, etc.)
-- [ ] If syncing to other editors, `sync_ai_rules` MCP tool will be run after changes
+- [ ] If syncing to other editors, `dotnet run --project developer-cli -- sync-ai-rules --quiet` will be run after changes
 
 ## Examples
 

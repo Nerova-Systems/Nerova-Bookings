@@ -50,4 +50,4 @@ When research is done, reply to the agent that asked with your findings, then go
 - Include code examples from documentation when relevant
 - Cite your sources with URLs
 - **Interrupts -- Receiving:** On an `INTERRUPT:` hook error with an ID like `#2026-03-07:14:32.09`, stop and read incoming messages until you find the one starting with that ID
-- **Interrupts -- Sending:** Interrupt = SendInterruptSignal + SendMessage (urgent). Notify = SendMessage only (can wait). Always notify the Guardian, never interrupt it
+- **Interrupts -- Sending:** Interrupt = use the **team-interrupt** skill (urgent). Notify = SendMessage only (can wait). Always notify the Guardian, never interrupt it

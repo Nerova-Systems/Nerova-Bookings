@@ -30,8 +30,7 @@ public sealed class ApplicationInsightsTelemetryInitializerTests
             Locale = "en-US",
             ZoomLevel = "1.25",
             Theme = "dark",
-            Role = "Admin",
-            IsInternalUser = false
+            Role = "Admin"
         };
 
         var executionContext = Substitute.For<IExecutionContext>();
@@ -68,8 +67,7 @@ public sealed class ApplicationInsightsTelemetryInitializerTests
         var userInfo = new UserInfo
         {
             IsAuthenticated = false,
-            Locale = "en-US",
-            IsInternalUser = false
+            Locale = "en-US"
         };
 
         var executionContext = Substitute.For<IExecutionContext>();
@@ -105,8 +103,7 @@ public sealed class ApplicationInsightsTelemetryInitializerTests
             TenantId = tenantId,
             SessionId = null,
             Locale = "en-US",
-            Role = "Admin",
-            IsInternalUser = false
+            Role = "Admin"
         };
 
         var executionContext = Substitute.For<IExecutionContext>();

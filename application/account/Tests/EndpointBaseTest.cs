@@ -28,6 +28,9 @@ namespace Account.Tests;
 
 public abstract class EndpointBaseTest<TContext> : IDisposable where TContext : DbContext
 {
+    // Tests use the in-memory test server (WebApplicationFactory); no real listener is bound.
+    // SinglePageAppConfiguration only consumes this as a URI for CSP construction.
+    private const string TestPublicUrl = "https://localhost";
     protected readonly AccessTokenGenerator AccessTokenGenerator;
     protected readonly IEmailClient EmailClient;
     protected readonly IPayFastClient PayFastClient;
@@ -39,8 +42,8 @@ public abstract class EndpointBaseTest<TContext> : IDisposable where TContext : 
 
     protected EndpointBaseTest()
     {
-        Environment.SetEnvironmentVariable(SinglePageAppConfiguration.PublicUrlKey, "https://localhost:9000");
-        Environment.SetEnvironmentVariable(SinglePageAppConfiguration.CdnUrlKey, "https://localhost:9000/account");
+        Environment.SetEnvironmentVariable(SinglePageAppConfiguration.PublicUrlKey, TestPublicUrl);
+        Environment.SetEnvironmentVariable(SinglePageAppConfiguration.CdnUrlKey, $"{TestPublicUrl}/account");
         Environment.SetEnvironmentVariable(
             "APPLICATIONINSIGHTS_CONNECTION_STRING",
             "InstrumentationKey=00000000-0000-0000-0000-000000000000;IngestionEndpoint=https://localhost;LiveEndpoint=https://localhost"
@@ -116,18 +119,22 @@ public abstract class EndpointBaseTest<TContext> : IDisposable where TContext : 
                     }
                 );
 
-                builder.ConfigureAppConfiguration((_, config) =>
+                builder.ConfigureAppConfiguration((_, configuration) =>
                     {
-                        config.AddInMemoryCollection(new Dictionary<string, string?>
-                        {
-                            ["PayFast:MerchantId"] = "10043122",
-                            ["PayFast:MerchantKey"] = "6g0gkxnzbtx1t",
-                            ["PayFast:Passphrase"] = "nerovabookings",
-                            ["PayFast:Sandbox"] = "true",
-                            ["PayFast:NotifyUrl"] = "https://localhost:9000/api/account/subscriptions/payfast/itn",
-                            ["PayFast:ReturnUrl"] = "https://localhost:9000/account/billing",
-                            ["PayFast:CancelUrl"] = "https://localhost:9000/account/billing"
-                        });
+                        configuration.AddInMemoryCollection(new Dictionary<string, string?>
+                            {
+                                // Account-api hosts both the user-facing and back-office SPAs scoped via RequireHost
+                                // on each MapFallback. The TestServer sends requests to "localhost" by default.
+                                ["Hostnames:App"] = "localhost",
+                                ["PayFast:MerchantId"] = "10043122",
+                                ["PayFast:MerchantKey"] = "6g0gkxnzbtx1t",
+                                ["PayFast:Passphrase"] = "nerovabookings",
+                                ["PayFast:Sandbox"] = "true",
+                                ["PayFast:NotifyUrl"] = "https://localhost:9000/api/account/subscriptions/payfast/itn",
+                                ["PayFast:ReturnUrl"] = "https://localhost:9000/account/billing",
+                                ["PayFast:CancelUrl"] = "https://localhost:9000/account/billing"
+                            }
+                        );
                     }
                 );
 
@@ -228,8 +235,7 @@ public abstract class EndpointBaseTest<TContext> : IDisposable where TContext : 
             LastName = user.LastName,
             Title = user.Title,
             AvatarUrl = user.Avatar.Url,
-            Locale = user.Locale,
-            IsInternalUser = user.IsInternalUser
+            Locale = user.Locale
         };
     }
 }

@@ -1,11 +1,13 @@
 using System.Net.Mail;
+using SharedKernel.Configuration;
 
 namespace SharedKernel.Integrations.Email;
 
-public sealed class DevelopmentEmailClient : IEmailClient
+public sealed class DevelopmentEmailClient(PortAllocation ports) : IEmailClient
 {
     private const string Sender = "no-reply@localhost";
-    private readonly SmtpClient _emailSender = new("localhost", 9004);
+
+    private readonly SmtpClient _emailSender = new("localhost", ports.MailpitSmtp);
 
     public Task SendAsync(string recipient, string subject, string htmlContent, CancellationToken cancellationToken)
     {

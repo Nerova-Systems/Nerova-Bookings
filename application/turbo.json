@@ -1,9 +1,9 @@
 {
   "$schema": "https://turbo.build/schema.json",
-  "globalEnv": ["CERTIFICATE_PASSWORD"],
+  "globalEnv": ["CERTIFICATE_PASSWORD", "MAIN_STATIC_PORT", "ACCOUNT_STATIC_PORT", "BACK_OFFICE_STATIC_PORT"],
   "tasks": {
     "build": {
-      "inputs": ["$TURBO_DEFAULT$", "shared/lib/api/*.Api.json"],
+      "inputs": ["$TURBO_DEFAULT$", "shared/lib/api/*.Api.json", "shared/lib/api/*.Api_*.json"],
       "outputs": ["dist/**", "tests/test-results/**"],
       "dependsOn": ["^build", "update-translations"]
     },
@@ -18,12 +18,12 @@
     "dev": {
       "cache": false,
       "persistent": true,
-      "env": ["CERTIFICATE_PASSWORD"],
+      "env": ["CERTIFICATE_PASSWORD", "MAIN_STATIC_PORT", "ACCOUNT_STATIC_PORT", "BACK_OFFICE_STATIC_PORT"],
       "dependsOn": ["dev:setup"]
     },
     "dev:setup": {
       "dependsOn": ["^dev:setup"],
-      "inputs": ["$TURBO_DEFAULT$", "shared/lib/api/*.Api.json"],
+      "inputs": ["$TURBO_DEFAULT$", "shared/lib/api/*.Api.json", "shared/lib/api/*.Api_*.json"],
       "outputs": ["dist/**", "shared/lib/api/*.generated.d.ts"]
     },
     "format": {

@@ -94,6 +94,7 @@ public sealed class UpdatePackagesCommand : Command
             }
 
             UpdateAspireSdkVersion(dryRun);
+            Prerequisite.WarnIfAspireCliDoesNotMatchSdk();
             await UpdateDotnetToolsAsync(dryRun);
         }
 

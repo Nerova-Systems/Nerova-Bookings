@@ -40,7 +40,7 @@ public class AuthenticationCookieMiddleware(
 
             // For non-API requests (SPA routes): delete cookies and let the page load
             // The SPA will load without auth and redirect to login as needed
-            var hostCookieOptions = new CookieOptions { Secure = true };
+            var hostCookieOptions = new CookieOptions { Secure = true, Path = "/" };
             context.Response.Cookies.Delete(AuthenticationTokenHttpKeys.RefreshTokenCookieName, hostCookieOptions);
             context.Response.Cookies.Delete(AuthenticationTokenHttpKeys.AccessTokenCookieName, hostCookieOptions);
         }
@@ -77,7 +77,7 @@ public class AuthenticationCookieMiddleware(
             {
                 if (await ExtractExpirationFromTokenAsync(refreshToken) < timeProvider.GetUtcNow())
                 {
-                    var expiredCookieOptions = new CookieOptions { Secure = true };
+                    var expiredCookieOptions = new CookieOptions { Secure = true, Path = "/" };
                     context.Response.Cookies.Delete(AuthenticationTokenHttpKeys.RefreshTokenCookieName, expiredCookieOptions);
                     context.Response.Cookies.Delete(AuthenticationTokenHttpKeys.AccessTokenCookieName, expiredCookieOptions);
                     logger.LogDebug("The refresh-token has expired; authentication token cookies are removed");
@@ -185,7 +185,7 @@ public class AuthenticationCookieMiddleware(
             return;
         }
 
-        var hostCookieOptions = new CookieOptions { Secure = true };
+        var hostCookieOptions = new CookieOptions { Secure = true, Path = "/" };
         context.Response.Cookies.Delete(AuthenticationTokenHttpKeys.RefreshTokenCookieName, hostCookieOptions);
         context.Response.Cookies.Delete(AuthenticationTokenHttpKeys.AccessTokenCookieName, hostCookieOptions);
     }
@@ -199,11 +199,11 @@ public class AuthenticationCookieMiddleware(
         // having to first serve the SPA. This is only secure if iFrames are not allowed to host the site.
         var refreshTokenCookieOptions = new CookieOptions
         {
-            HttpOnly = true, Secure = true, SameSite = SameSiteMode.Lax, Expires = refreshTokenExpires
+            HttpOnly = true, Secure = true, SameSite = SameSiteMode.Lax, Expires = refreshTokenExpires, Path = "/"
         };
         context.Response.Cookies.Append(AuthenticationTokenHttpKeys.RefreshTokenCookieName, refreshToken, refreshTokenCookieOptions);
 
-        var accessTokenCookieOptions = new CookieOptions { HttpOnly = true, Secure = true, SameSite = SameSiteMode.Strict };
+        var accessTokenCookieOptions = new CookieOptions { HttpOnly = true, Secure = true, SameSite = SameSiteMode.Strict, Path = "/" };
         context.Response.Cookies.Append(AuthenticationTokenHttpKeys.AccessTokenCookieName, accessToken, accessTokenCookieOptions);
 
         context.Response.Headers.Remove(AuthenticationTokenHttpKeys.RefreshTokenHttpHeaderKey);

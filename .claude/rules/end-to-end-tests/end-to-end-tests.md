@@ -9,19 +9,19 @@ These rules outline the structure, patterns, and best practices for writing end-
 
 ## Implementation
 
-1. Use the **end-to-end MCP tool** to run end-to-end tests with these options:
+1. Use the **e2e** skill to run end-to-end tests with these options:
    - Test filtering: smoke tests only, specific browser, search terms
    - Change scoping: last failed tests, only changed tests
-   - Flaky test detection: repeat tests, retry on failure, stop on first failure
+   - Flaky test detection: retry on failure, stop on first failure
    - Performance: debug timing to see step execution times
-   - **Note**: The **end-to-end MCP tool** always runs with quiet mode automatically
+   - Always pass `--quiet`
 
 2. Test Search and Filtering:
    - Search by test tags: smoke, comprehensive
    - Search by test content: find tests containing specific text
    - Search by filename: find specific test files
-   - Multiple search terms: `end-to-end(searchTerms=["user", "management"])`
-   - The tool automatically detects which self-contained systems contain matching tests and only runs those
+   - Multiple search terms: `dotnet run --project developer-cli -- e2e "user" "management" --quiet`
+   - The CLI automatically detects which self-contained systems contain matching tests and only runs those
 
 3. Test-Driven Debugging Process:
    - Focus on one failing test at a time and make it pass before moving to the next

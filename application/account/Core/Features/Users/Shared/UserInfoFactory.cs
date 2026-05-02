@@ -39,8 +39,7 @@ public sealed class UserInfoFactory(ITenantRepository tenantRepository, ISubscri
             TenantName = tenant.Name,
             TenantLogoUrl = tenant.Logo.Url,
             SubscriptionPlan = subscription!.Plan.ToString(),
-            Locale = user.Locale,
-            IsInternalUser = user.IsInternalUser
+            Locale = user.Locale
         };
     }
 }

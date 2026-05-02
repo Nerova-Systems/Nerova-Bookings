@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using SharedKernel.Domain;
 using SharedKernel.Endpoints;
 using SharedKernel.ExecutionContext;
+using SharedKernel.OpenApi;
 
 namespace Account.Api.Endpoints;
 
@@ -14,7 +15,7 @@ public sealed class FeatureFlagEndpoints : IEndpoints
 
     public void MapEndpoints(IEndpointRouteBuilder routes)
     {
-        var group = routes.MapGroup(RoutesPrefix).WithTags("Feature flags").RequireAuthorization();
+        var group = routes.MapGroup(RoutesPrefix).WithTags("Feature flags").WithGroupName(OpenApiDocumentNames.Account).RequireAuthorization();
 
         group.MapGet("/", GetFeatureFlags);
         group.MapPut("/{key}/tenant-override", SetTenantOverride);

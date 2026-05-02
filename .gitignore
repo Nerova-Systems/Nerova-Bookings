@@ -3,8 +3,9 @@
 ##
 ## Get latest from https://github.com/github/gitignore/blob/master/VisualStudio.gitignore
 
-# Bicep generated parameter files
+# Bicep generated artifacts
 cloud-infrastructure/cluster/main-cluster.parameters.json
+cloud-infrastructure/cluster/main-cluster.json
 
 # User-specific files
 *.rsuser
@@ -393,6 +394,7 @@ FodyWeavers.xsd
 **/*.generated.ts
 **/Api/swagger.json
 **/lib/api/*.Api.json
+**/lib/api/*.Api_*.json
 
 # Frontend builds
 .swc/
@@ -430,3 +432,4 @@ application/playwright.combined.config.ts
 
 # Claude Code scheduled-tasks runtime lock
 .claude/scheduled_tasks.lock
+.claude/worktrees

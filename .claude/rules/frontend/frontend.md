@@ -13,7 +13,7 @@ Use LSP tools aggressively for code investigation: `goToDefinition`, `findRefere
 
 ## Browser Testing
 
-Use browser MCP tools to test at `[APP_URL]`. Use `UNLOCK` as OTP verification code (localhost only).
+Use browser MCP tools to test at `https://app.dev.localhost:<appGateway>`. Look up the `appGateway` port via the Aspire MCP `list_resources` tool, or read `.workspace/port.txt` for the base port (the gateway runs on the base port itself). Use `UNLOCK` as OTP verification code (localhost only).
 
 ## Architecture Overview
 
@@ -38,7 +38,7 @@ Use browser MCP tools to test at `[APP_URL]`. Use `UNLOCK` as OTP verification c
 4. **API Integration**:
    - API client auto-generated from OpenAPI spec
    - Located in `shared/lib/api/client.ts`
-   - A SPA only calls its own self-contained system's endpoints via that system's generated OpenAPI client. Prefixes: `main` → `/api/*`, `account` → `/api/account/*`, `back-office` → `/api/back-office/*`, etc. Cross-system needs go backend-to-backend via `/internal-api/...`, exposed to the SPA through a facade endpoint in its own system
+   - A SPA only calls its own self-contained system's endpoints via that system's generated OpenAPI client. Prefixes: `main` → `/api/*`, `account` (user-facing app) → `/api/account/*`, `account` (back-office surface) → `/api/back-office/*`. Cross-system needs go backend-to-backend via `/internal-api/...`, exposed to the SPA through a facade endpoint in its own system
    - Never make direct fetch calls
    - Server state lives in TanStack Query only
    - Use `queryClient.invalidateQueries()` to refresh data after mutations
@@ -147,11 +147,11 @@ Use browser MCP tools to test at `[APP_URL]`. Use `UNLOCK` as OTP verification c
     - Reference existing implementations to maintain consistency
 
 11. Build and format your changes:
-    - After each minor change, use the **build** MCP tool for frontend
+    - After each minor change, use the **build** skill (`--frontend --quiet`)
     - This ensures consistent code style across the codebase
 
 12. Verify your changes:
-    - When a feature is complete, run these MCP tools for frontend in sequence: **build**, **format**, **lint**
+    - When a feature is complete, run **build**, then **format** and **lint** in parallel (with `--no-build`), all scoped with `--frontend --quiet`
     - **ALL lint findings are blocking** - CI pipeline fails on any result marked "Issues found"
     - Severity level (note/warning/error) is irrelevant - fix all findings before proceeding
     - Fix any compiler warnings or test failures before proceeding

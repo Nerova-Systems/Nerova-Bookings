@@ -25,6 +25,9 @@ namespace Main.Tests;
 
 public abstract class EndpointBaseTest<TContext> : IDisposable where TContext : DbContext
 {
+    // Tests use the in-memory test server (WebApplicationFactory); no real listener is bound.
+    // SinglePageAppConfiguration only consumes this as a URI for CSP construction.
+    private const string TestPublicUrl = "https://localhost";
     protected readonly AccessTokenGenerator AccessTokenGenerator;
     protected readonly IEmailClient EmailClient;
     protected readonly Faker Faker = new();
@@ -35,8 +38,8 @@ public abstract class EndpointBaseTest<TContext> : IDisposable where TContext : 
 
     protected EndpointBaseTest()
     {
-        Environment.SetEnvironmentVariable(SinglePageAppConfiguration.PublicUrlKey, "https://localhost:9000");
-        Environment.SetEnvironmentVariable(SinglePageAppConfiguration.CdnUrlKey, "https://localhost:9000/main");
+        Environment.SetEnvironmentVariable(SinglePageAppConfiguration.PublicUrlKey, TestPublicUrl);
+        Environment.SetEnvironmentVariable(SinglePageAppConfiguration.CdnUrlKey, $"{TestPublicUrl}/main");
         Environment.SetEnvironmentVariable(
             "APPLICATIONINSIGHTS_CONNECTION_STRING",
             "InstrumentationKey=00000000-0000-0000-0000-000000000000;IngestionEndpoint=https://localhost;LiveEndpoint=https://localhost"

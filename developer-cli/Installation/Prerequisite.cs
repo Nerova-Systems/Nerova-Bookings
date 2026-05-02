@@ -46,6 +46,33 @@ public abstract record Prerequisite
         AnsiConsole.WriteLine();
     }
 
+    // Warns if the Aspire CLI is missing or its version does not match Aspire.AppHost.Sdk in
+    // AppHost.csproj. Soft warning -- the CLI is only required for the Aspire MCP integration,
+    // not for running the AppHost.
+    public static void WarnIfAspireCliDoesNotMatchSdk()
+    {
+        var appHostCsproj = Path.Combine(Configuration.ApplicationFolder, "AppHost", "AppHost.csproj");
+        if (!File.Exists(appHostCsproj)) return;
+
+        var sdkMatch = Regex.Match(File.ReadAllText(appHostCsproj), @"<Project\s+Sdk=""Aspire\.AppHost\.Sdk/(\d+\.\d+\.\d+)""");
+        if (!sdkMatch.Success) return;
+        var requiredVersion = sdkMatch.Groups[1].Value;
+
+        var versionOutput = ProcessHelper.StartProcess("aspire --version", Configuration.ApplicationFolder, true, exitOnError: false, throwOnError: false);
+        var installedMatch = Regex.Match(versionOutput, @"\d+\.\d+\.\d+");
+        var installedVersion = installedMatch.Success ? installedMatch.Value : null;
+
+        if (installedVersion == requiredVersion) return;
+
+        var installCommand = Configuration.IsWindows
+            ? "irm https://aspire.dev/install.ps1 | iex"
+            : "curl -sSL https://aspire.dev/install.sh | bash";
+        var current = installedVersion is null ? "not installed" : $"installed {installedVersion}";
+        AnsiConsole.MarkupLine($"[yellow]Recommended: Aspire CLI {requiredVersion} (matches AppHost.csproj), {current}. Install:[/]");
+        AnsiConsole.MarkupLine($"[yellow]  {installCommand}[/]");
+        AnsiConsole.WriteLine();
+    }
+
     protected abstract bool CheckExists();
 }
 

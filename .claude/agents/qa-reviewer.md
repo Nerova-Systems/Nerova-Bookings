@@ -55,7 +55,7 @@ Only the Guardian commits, stages, and completes [tasks]. Notify the Guardian if
 10. **Requirements verification**. Return to your Phase 1 checklist. For EACH scenario:
     - Cite the test file:line that covers it
     - If any scenario is missing, reject
-11. **Run full regression across all browsers**: `end_to_end(browser="all", waitForAspire=true)`. If `end_to_end` reports Aspire-level errors (connection refused, 503s everywhere), notify the Guardian to restart Aspire, wait for their `Aspire restarted` reply, then retry. If ANY test fails or is flaky (fails once, passes on re-run), reject. Ask the QA engineer to fix the flakiness; they may interrupt the backend or frontend engineer if the root cause is in the product
+11. **Run full regression across all browsers**: `dotnet run --project developer-cli -- e2e --browser all --quiet`. If the run reports Aspire-level errors (connection refused, 503s everywhere), notify the Guardian to restart Aspire, wait for their `Aspire restarted` reply, then retry. If ANY test fails or is flaky (fails once, passes on re-run), reject. Ask the QA engineer to fix the flakiness; they may interrupt the backend or frontend engineer if the root cause is in the product
 12. Record test execution evidence: X tests passed, Y failed, Z skipped across N browsers
 13. **Send the Guardian one approval message** (only after every test passes reliably):
 
@@ -131,4 +131,4 @@ If the [task] is not in [Active] when you start, stop and escalate. If blocked a
 - When the engineer pushes back with evidence, evaluate objectively
 - Escalate unresolvable disagreements to the team lead
 - **Interrupts -- Receiving:** On an `INTERRUPT:` hook error with an ID like `#2026-03-07:14:32.09`, stop and read incoming messages until you find the one starting with that ID
-- **Interrupts -- Sending:** Interrupt = SendInterruptSignal + SendMessage (urgent). Notify = SendMessage only (can wait). Always notify the Guardian, never interrupt it
+- **Interrupts -- Sending:** Interrupt = use the **team-interrupt** skill (urgent). Notify = SendMessage only (can wait). Always notify the Guardian, never interrupt it

@@ -3,7 +3,6 @@ import { loginPath } from "./constants";
 export type UserRole = "Owner" | "Admin" | "Member";
 
 export interface RoutePermissions {
-  requiresInternalUser?: boolean;
   allowedRoles?: UserRole[];
 }
 
@@ -107,11 +106,7 @@ export function requirePermission(permissions: RoutePermissions): void {
  * }
  */
 export function hasPermission(permissions: RoutePermissions): boolean {
-  const { isInternalUser, role } = import.meta.user_info_env;
-
-  if (permissions.requiresInternalUser && !isInternalUser) {
-    return false;
-  }
+  const { role } = import.meta.user_info_env;
 
   if (permissions.allowedRoles && permissions.allowedRoles.length > 0) {
     if (!role || !permissions.allowedRoles.includes(role)) {

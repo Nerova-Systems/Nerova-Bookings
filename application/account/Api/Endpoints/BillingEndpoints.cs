@@ -3,6 +3,7 @@ using Account.Features.Billing.Commands;
 using Account.Features.Billing.Queries;
 using SharedKernel.ApiResults;
 using SharedKernel.Endpoints;
+using SharedKernel.OpenApi;
 
 namespace Account.Api.Endpoints;
 
@@ -12,7 +13,7 @@ public sealed class BillingEndpoints : IEndpoints
 
     public void MapEndpoints(IEndpointRouteBuilder routes)
     {
-        var group = routes.MapGroup(RoutesPrefix).WithTags("Billing").RequireAuthorization().ProducesValidationProblem();
+        var group = routes.MapGroup(RoutesPrefix).WithTags("Billing").WithGroupName(OpenApiDocumentNames.Account).RequireAuthorization().ProducesValidationProblem();
 
         group.MapGet("/payment-history", async Task<ApiResult<PaymentHistoryResponse>> ([AsParameters] GetPaymentHistoryQuery query, IMediator mediator)
             => await mediator.Send(query)

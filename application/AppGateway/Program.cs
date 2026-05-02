@@ -1,18 +1,39 @@
+using AppGateway;
 using AppGateway.ApiAggregation;
 using AppGateway.Filters;
 using AppGateway.Middleware;
 using AppGateway.Transformations;
 using Azure.Core;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 using Scalar.AspNetCore;
 using SharedKernel.Configuration;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services
+    .AddOptions<HostnamesOptions>()
+    .Bind(builder.Configuration.GetSection(HostnamesOptions.SectionName))
+    .ValidateDataAnnotations()
+    .Validate(o => !string.IsNullOrWhiteSpace(o.App), "Hostnames:App must be configured.")
+    .ValidateOnStart();
+
+// PortAllocation reads .workspace/port.txt by walking up to the repo root for .git, which doesn't
+// exist in Azure Container Apps (working dir /app). Locally we load the real allocation; in Azure we
+// register a sentinel so downstream consumers (YARP filters, middleware, HttpClient factories) still
+// resolve the dependency, while their {SERVICE}_API_URL env-var paths take priority over the unused
+// port values.
+builder.Services.AddSingleton(SharedInfrastructureConfiguration.IsRunningInAzure
+    ? new PortAllocation(0)
+    : PortAllocation.Load()
+);
 
 var reverseProxyBuilder = builder.Services
     .AddReverseProxy()
     .LoadFromConfig(builder.Configuration.GetSection("ReverseProxy"))
     .AddConfigFilter<ClusterDestinationConfigFilter>()
     .AddConfigFilter<ApiExplorerRouteFilter>()
+    .AddConfigFilter<HostMatchConfigFilter>()
     .AddTransforms(context => context.RequestTransforms.Add(context.Services.GetRequiredService<BlockInternalApiTransform>()));
 
 if (SharedInfrastructureConfiguration.IsRunningInAzure)
@@ -40,9 +61,14 @@ builder.AddNamedBlobStorages([("account-storage", "ACCOUNT_STORAGE_URL")]);
 
 builder.WebHost.UseKestrel(option => option.AddServerHeader = false);
 
-builder.Services.AddHttpClient(
-    "Account",
-    client => { client.BaseAddress = new Uri(Environment.GetEnvironmentVariable("ACCOUNT_API_URL") ?? "https://localhost:9100"); }
+builder.Services.AddHttpClient("Account", (sp, client) =>
+    {
+        var ports = sp.GetRequiredService<PortAllocation>();
+        var productionUrl = Environment.GetEnvironmentVariable("ACCOUNT_API_URL");
+        client.BaseAddress = !string.IsNullOrEmpty(productionUrl)
+            ? new Uri(productionUrl)
+            : new Uri($"https://localhost:{ports.AccountApi}");
+    }
 );
 
 builder.Services
@@ -53,6 +79,7 @@ builder.Services
 builder.Services
     .AddSingleton(SharedDependencyConfiguration.GetTokenSigningService())
     .AddSingleton<BlockInternalApiTransform>()
+    .AddSingleton<LocalhostRedirectMiddleware>()
     .AddSingleton<AuthenticationCookieMiddleware>()
     .AddScoped<ApiAggregationService>();
 
@@ -61,6 +88,7 @@ var app = builder.Build();
 app.ApiAggregationEndpoints();
 
 app.UseForwardedHeaders() // Enable support for proxy headers such as X-Forwarded-For and X-Forwarded-Proto. Should run before other middleware.
+    .UseMiddleware<LocalhostRedirectMiddleware>()
     .UseOutputCache()
     .UseMiddleware<AuthenticationCookieMiddleware>();
 
@@ -74,5 +102,29 @@ app.MapScalarApiReference("/openapi", options =>
 );
 
 app.MapReverseProxy();
+
+app.MapFallback((HttpContext context, IOptions<HostnamesOptions> hostnameOptions, PortAllocation ports) =>
+    {
+        var hostnames = hostnameOptions.Value;
+        // Port is only meaningful for local Aspire stacks (non-standard ports). In Azure both the
+        // request Host.Port and the sentinel PortAllocation(0) leave us at 0; drop the suffix so the
+        // canonical URLs resolve to the standard https port behind ACA ingress.
+        var port = context.Request.Host.Port ?? ports.AppGateway;
+        var portSuffix = port == 0 ? string.Empty : $":{port}";
+        var problemDetails = new ProblemDetails
+        {
+            Status = StatusCodes.Status404NotFound,
+            Title = "Unknown host",
+            Detail = $"The host '{context.Request.Host}' is not recognized. Use one of the canonical URLs.",
+            Type = "https://tools.ietf.org/html/rfc9110#section-15.5.5",
+            Extensions =
+            {
+                ["canonicalUrls"] = new[] { $"https://{hostnames.App}{portSuffix}" }
+            }
+        };
+
+        return Results.Problem(problemDetails);
+    }
+);
 
 await app.RunAsync();

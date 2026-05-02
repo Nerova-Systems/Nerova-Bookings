@@ -3,6 +3,7 @@ using Account.Features.Authentication.Queries;
 using SharedKernel.ApiResults;
 using SharedKernel.Authentication.TokenGeneration;
 using SharedKernel.Endpoints;
+using SharedKernel.OpenApi;
 
 namespace Account.Api.Endpoints;
 
@@ -12,7 +13,7 @@ public sealed class AuthenticationEndpoints : IEndpoints
 
     public void MapEndpoints(IEndpointRouteBuilder routes)
     {
-        var group = routes.MapGroup(RoutesPrefix).WithTags("Authentication").RequireAuthorization().ProducesValidationProblem();
+        var group = routes.MapGroup(RoutesPrefix).WithTags("Authentication").WithGroupName(OpenApiDocumentNames.Account).RequireAuthorization().ProducesValidationProblem();
 
         group.MapPost("/logout", async Task<ApiResult> (IMediator mediator)
             => await mediator.Send(new LogoutCommand())
@@ -30,9 +31,11 @@ public sealed class AuthenticationEndpoints : IEndpoints
             => await mediator.Send(new RevokeSessionCommand { Id = id })
         );
 
-        // Note: This endpoint must be called with the refresh token as Bearer token in the Authorization header
+        // Note: This endpoint must be called with the refresh token as Bearer token in the Authorization header.
+        // Internal-only endpoint reachable backend-to-backend via the cluster's localhost address.
+        // BlockInternalApiTransform in AppGateway rejects external callers.
         routes.MapPost("/internal-api/account/authentication/refresh-authentication-tokens", async Task<ApiResult> (IMediator mediator)
             => await mediator.Send(new RefreshAuthenticationTokensCommand())
-        ).DisableAntiforgery();
+        ).WithGroupName(OpenApiDocumentNames.Account).DisableAntiforgery();
     }
 }

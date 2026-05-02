@@ -35,6 +35,7 @@ public class ClaudeAgentCommand : Command
         {
             // Check for optional LSP prerequisites (non-blocking)
             Prerequisite.Recommend(Prerequisite.TypeScriptLanguageServer, Prerequisite.CSharpLanguageServer);
+            Prerequisite.WarnIfAspireCliDoesNotMatchSdk();
 
             // If no agent type provided, prompt for selection
             if (string.IsNullOrEmpty(agentType))

@@ -36,8 +36,11 @@ export default function InvitationBanner() {
       setIsSwitching(true);
     },
     onSuccess: () => {
-      const targetPath = window.location.pathname === "/" ? loggedInPath : window.location.pathname;
-      window.location.href = targetPath;
+      if (window.location.pathname === "/") {
+        window.location.href = loggedInPath;
+      } else {
+        window.location.reload();
+      }
     },
     onError: () => {
       setIsSwitching(false);

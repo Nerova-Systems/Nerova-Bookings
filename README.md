@@ -5,18 +5,17 @@
 [![App Gateway](https://github.com/platformplatform/PlatformPlatform/actions/workflows/app-gateway.yml/badge.svg)](https://github.com/platformplatform/PlatformPlatform/actions/workflows/app-gateway.yml?query=branch%3Amain)
 [![Account](https://github.com/platformplatform/PlatformPlatform/actions/workflows/account.yml/badge.svg)](https://github.com/platformplatform/PlatformPlatform/actions/workflows/account.yml?query=branch%3Amain)
 [![Main](https://github.com/platformplatform/PlatformPlatform/actions/workflows/main.yml/badge.svg)](https://github.com/platformplatform/PlatformPlatform/actions/workflows/main.yml?query=branch%3Amain)
-[![Back Office](https://github.com/platformplatform/PlatformPlatform/actions/workflows/back-office.yml/badge.svg)](https://github.com/platformplatform/PlatformPlatform/actions/workflows/back-office.yml?query=branch%3Amain)
 [![Cloud Infrastructure](https://github.com/platformplatform/PlatformPlatform/actions/workflows/cloud-infrastructure.yml/badge.svg)](https://github.com/platformplatform/PlatformPlatform/actions/workflows/cloud-infrastructure.yml?query=branch%3Amain)
 
 [![GitHub issues with enhancement label](https://img.shields.io/github/issues-raw/platformplatform/PlatformPlatform/enhancement?label=enhancements&logo=github&color=%23A2EEEF)](https://github.com/orgs/PlatformPlatform/projects/1/views/3?filterQuery=-status%3A%22%E2%9C%85+Done%22+label%3Aenhancement)
 [![GitHub issues with roadmap label](https://img.shields.io/github/issues-raw/platformplatform/PlatformPlatform/roadmap?label=roadmap&logo=github&color=%23006B75)](https://github.com/orgs/PlatformPlatform/projects/2/views/2?filterQuery=is%3Aopen+label%3Aroadmap)
 [![GitHub issues with bug label](https://img.shields.io/github/issues-raw/platformplatform/PlatformPlatform/bug?label=bugs&logo=github&color=red)](https://github.com/platformplatform/PlatformPlatform/issues?q=is%3Aissue+is%3Aopen+label%3Abug)
 
-[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=PlatformPlatform_platformplatform&metric=coverage)](https://sonarcloud.io/component_measures?id=PlatformPlatform_platformplatform&metric=coverage)
-[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=PlatformPlatform_platformplatform&metric=alert_status)](https://sonarcloud.io/summary/overall?id=PlatformPlatform_platformplatform)
-[![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=PlatformPlatform_platformplatform&metric=security_rating)](https://sonarcloud.io/component_measures?id=PlatformPlatform_platformplatform&metric=Security)
-[![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=PlatformPlatform_platformplatform&metric=reliability_rating)](https://sonarcloud.io/component_measures?id=PlatformPlatform_platformplatform&metric=Reliability)
-[![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=PlatformPlatform_platformplatform&metric=sqale_rating)](https://sonarcloud.io/component_measures?id=PlatformPlatform_platformplatform&metric=Maintainability)
+<a href="https://sonarcloud.io/component_measures?id=PlatformPlatform_platformplatform&metric=coverage" target="_blank" rel="noopener noreferrer"><img src="https://sonarcloud.io/api/project_badges/measure?project=PlatformPlatform_platformplatform&metric=coverage" alt="Coverage" /></a>
+<a href="https://sonarcloud.io/summary/overall?id=PlatformPlatform_platformplatform" target="_blank" rel="noopener noreferrer"><img src="https://sonarcloud.io/api/project_badges/measure?project=PlatformPlatform_platformplatform&metric=alert_status" alt="Quality Gate Status" /></a>
+<a href="https://sonarcloud.io/component_measures?id=PlatformPlatform_platformplatform&metric=Security" target="_blank" rel="noopener noreferrer"><img src="https://sonarcloud.io/api/project_badges/measure?project=PlatformPlatform_platformplatform&metric=security_rating" alt="Security Rating" /></a>
+<a href="https://sonarcloud.io/component_measures?id=PlatformPlatform_platformplatform&metric=Reliability" target="_blank" rel="noopener noreferrer"><img src="https://sonarcloud.io/api/project_badges/measure?project=PlatformPlatform_platformplatform&metric=reliability_rating" alt="Reliability Rating" /></a>
+<a href="https://sonarcloud.io/component_measures?id=PlatformPlatform_platformplatform&metric=Maintainability" target="_blank" rel="noopener noreferrer"><img src="https://sonarcloud.io/api/project_badges/measure?project=PlatformPlatform_platformplatform&metric=sqale_rating" alt="Maintainability Rating" /></a>
 
 </h4>
 
@@ -80,7 +79,15 @@ For development, you need .NET, Docker, and Node. And GitHub and Azure CLI for s
     winget install OpenJS.NodeJS
     ```
 
-4.	(Recommended) Install language servers for enhanced Claude Code support:
+4.	(Recommended) Install the [Aspire CLI](https://aspire.dev/get-started/install-cli/) — provides the [Aspire MCP server](https://aspire.dev/get-started/aspire-mcp-server/) so Claude Code can inspect AppHost resources, logs, and traces:
+
+    ```powershell
+    irm https://aspire.dev/install.ps1 | iex
+    ```
+
+    Verify with `aspire --version`. Restart your terminal if the command is not yet on PATH.
+
+5.	(Recommended) Install language servers for enhanced Claude Code support:
 
     ```powershell
     npm install -g typescript-language-server typescript
@@ -115,7 +122,15 @@ Open a terminal and run the following commands (if not installed):
    brew install node
    ```
 
-4. (Recommended) Install language servers for enhanced Claude Code support:
+4. (Recommended) Install the [Aspire CLI](https://aspire.dev/get-started/install-cli/) — provides the [Aspire MCP server](https://aspire.dev/get-started/aspire-mcp-server/) so Claude Code can inspect AppHost resources, logs, and traces:
+
+   ```bash
+   curl -sSL https://aspire.dev/install.sh | bash
+   ```
+
+   Verify with `aspire --version`. Restart your terminal if the command is not yet on PATH.
+
+5. (Recommended) Install language servers for enhanced Claude Code support:
 
    ```bash
    npm install -g typescript-language-server typescript
@@ -167,7 +182,15 @@ Open a terminal and run the following commands (if not installed):
    sudo apt-get install -y nodejs
    ```
 
-5. Trust the HTTPS development certificate
+5. (Recommended) Install the [Aspire CLI](https://aspire.dev/get-started/install-cli/) — provides the [Aspire MCP server](https://aspire.dev/get-started/aspire-mcp-server/) so Claude Code can inspect AppHost resources, logs, and traces
+
+   ```bash
+   curl -sSL https://aspire.dev/install.sh | bash
+   ```
+
+   Verify with `aspire --version`. Restart your terminal if the command is not yet on PATH.
+
+6. Trust the HTTPS development certificate
 
    ```bash
    echo 'export SSL_CERT_DIR="$HOME/.aspnet/dev-certs/trust:${SSL_CERT_DIR:-/usr/lib/ssl/certs}"' >> ~/.bashrc
@@ -181,23 +204,23 @@ Open a terminal and run the following commands (if not installed):
    dotnet dev-certs https --trust
    ```
 
-6. **Log out and log back in** to apply Docker group and shell configuration changes.
+7. **Log out and log back in** to apply Docker group and shell configuration changes.
 
-7. (Recommended) Install language servers for enhanced Claude Code support
+8. (Recommended) Install language servers for enhanced Claude Code support
 
    ```bash
    npm install -g typescript-language-server typescript
    dotnet tool install -g csharp-ls
    ```
 
-8. (Optional) If using Snap Chromium, trust the certificate in its sandbox
+9. (Optional) If using Snap Chromium, trust the certificate in its sandbox
 
    ```bash
    certutil -d sql:$HOME/snap/chromium/current/.pki/nssdb -L >/dev/null 2>&1 || (mkdir -p $HOME/snap/chromium/current/.pki/nssdb && certutil -d sql:$HOME/snap/chromium/current/.pki/nssdb -N --empty-password)
    dotnet dev-certs https --trust
    ```
 
-9. (Optional) Install GitHub CLI and Azure CLI (needed for CI/CD setup)
+10. (Optional) Install GitHub CLI and Azure CLI (needed for CI/CD setup)
 
    ```bash
    (type -p wget >/dev/null || (sudo apt update && sudo apt-get install wget -y)) \
@@ -242,6 +265,8 @@ With the CLI installed:
 pp run # First time downloading Docker containers will take several minutes
 ```
 
+Pass an optional base port (e.g. `pp run 11000`) to run a parallel stack from another worktree.
+
 Or without the CLI:
 
 ```bash
@@ -253,7 +278,7 @@ Alternatively, open the [PlatformPlatform](./application/PlatformPlatform.slnx) 
 
 On first startup, Aspire will prompt for `stripe-enabled` -- enter `true` to configure Stripe integration (see the optional Stripe setup section below) or `false` to skip.
 
-Once the Aspire dashboard fully loads, click to the WebApp and sign up for a new account (https://localhost:9000/signup). A one-time password (OTP) will be sent to the development mail server, but for local development, you can always use the code `UNLOCK` instead of checking the mail server.
+Once the Aspire dashboard fully loads, click to the WebApp and sign up for a new account (https://app.dev.localhost:9000/signup). A one-time password (OTP) will be sent to the development mail server, but for local development, you can always use the code `UNLOCK` instead of checking the mail server.
 
 ### 3.1 (Optional) Set up Google OAuth for "Sign in with Google" on localhost
 
@@ -272,7 +297,7 @@ PlatformPlatform supports authentication via Google OAuth using OpenID Connect w
 5. Create OAuth client ID:
    - Application type: "Web application"
    - Name: "YourProduct Localhost"
-6. Add Authorized redirect URIs:
+6. Add Authorized redirect URIs (Google does not allow https://app.dev.localhost:9000/):
    - `https://localhost:9000/api/account/authentication/Google/login/callback`
    - `https://localhost:9000/api/account/authentication/Google/signup/callback`
 7. Note the Client ID and Client Secret
@@ -299,9 +324,9 @@ Each developer needs their own Stripe sandbox. The local database stays in sync 
 1. **Create a sandbox**: Go to [Stripe Dashboard](https://dashboard.stripe.com) and create an account. Click the **account picker** (top-left) > **Sandboxes** > **Create**. Name it `dev-yourname` and open it. All subsequent steps are performed inside your sandbox.
 2. **Create products**: Navigate to **Product catalog** > **+ Create product**. Create a `Standard` product with **Recurring** / **Monthly** pricing (e.g., 19 EUR), then a `Premium` product (e.g., 39 EUR). Important: Click **More pricing options** and add `standard_monthly` and `premium_monthly` respectively in the **Lookup key** field.
 3. **Disable non-card payment methods**: Go to **Settings** (gear icon) > **Payments** > **Payment methods**. Turn off every payment method except **Cards** (and **Cartes Bancaires** which cannot be disabled)
-4. **Limit to 1 subscription**: Go to **Settings** > **Payments** > **Checkout and Payment Links**, scroll to **Subscriptions**, and enable **Limit customers to 1 subscription**. Add link to `https://app.yourcompany.com/account/billing` (`https://localhost:9000/account/billing` is not valid)
+4. **Limit to 1 subscription**: Go to **Settings** > **Payments** > **Checkout and Payment Links**, scroll to **Subscriptions**, and enable **Limit customers to 1 subscription**. Add link to `https://app.dev.localhost:9000/account/billing`
 5. **Configure failed payment recovery**: Go to **Settings** > **Billing** > **Subscriptions and emails** > **Manage failed payments**, and configure desired retry behavior
-6. **Configure email notifications**: Go to **Settings** > **Billing** > **Subscriptions and emails** > **Email notifications and customer management**, and enable all settings as you see fit. Set "Use your own custom link" to `https://localhost:9000/account/billing`
+6. **Configure email notifications**: Go to **Settings** > **Billing** > **Subscriptions and emails** > **Email notifications and customer management**, and enable all settings as you see fit. Set "Use your own custom link" to `https://app.dev.localhost:9000/account/billing`
 7. **Enable 3D Secure**: Go to **Settings** > **Billing** > **Subscriptions and emails** > **Manage payments that require confirmation**, and check off **Enable 3D Secure**. The embedded Stripe components support showing e.g. Visa and Danish MitID multi-factor confirmation dialogs
 8. **Set invoice prefix**: Go to **Settings** > **Billing** > **Invoices**. In the **Invoice numbering** section, change the **Invoice prefix** to something meaningful for your organization, and optionally reset the **Invoice sequence** if needed
 9. **Disable payment link in invoice emails**: Go to **Settings** > **Billing** > **Invoices** and uncheck **Include a link to a payment page in the invoice email**
@@ -380,6 +405,14 @@ pp github-config
 ```
 
 Select the **Stripe** group and enter the **Publishable Key**, **API Key** (Secret key), and **Webhook Secret** (the signing secret from the webhook endpoint). The subscription feature is automatically enabled on Azure when all three secrets are present in Key Vault.
+
+### Back-office access
+
+The deploy command provisions everything needed for the back-office host automatically: an Entra ID app registration per environment with reply URLs scoped to `back-office.<domain>`, a `<env>-BackOfficeAdmins` security group, and the corresponding GitHub variables consumed by the cluster Bicep. The infrastructure deploy then provisions a dedicated Azure Container App for the back-office subdomain with Easy Auth bound to that Entra app.
+
+To grant a person access to the back-office host, add their Entra user account as a member of the `<env>-BackOfficeAdmins` security group. The platform Easy Auth redirects unauthenticated visitors to Entra ID; once signed in, the platform-issued token carries the group claim that the back-office uses to enforce admin-only endpoints.
+
+If a custom back-office domain is configured, add a DNS CNAME record for `back-office.<domain>` pointing at the cluster's Container Apps environment, the same way you would for `app.<domain>`.
 
 # Multi-Agent Development with Claude Code
 
@@ -503,18 +536,13 @@ PlatformPlatform is a [monorepo](https://en.wikipedia.org/wiki/Monorepo) contain
 │  │   ├─ Core           # Core business logic, application use cases, and infrastructure
 │  │   ├─ Workers        # Background workers for long-running tasks and event processing
 │  │   └─ Tests          # Tests for the Api, Core, and Workers
-│  ├─ account            # Federated module for authentication, user and account management
+│  ├─ account            # Federated module for authentication, user and account management; also hosts the back-office surface
 │  │   ├─ WebApp         # React SPA loaded into main via Module Federation
-│  │   ├─ Api            # Presentation layer exposing the API to WebApp or other clients
-│  │   ├─ Core           # Core business logic, application use cases, and infrastructure
-│  │   ├─ Workers        # Background workers for long-running tasks and event processing
-│  │   └─ Tests          # Tests for the Api, Core, and Workers
-│  ├─ back-office        # Standalone SCS for operations and support (separate login)
-│  │   ├─ WebApp         # React SPA frontend using TypeScript and ShadCN 2.0 with Base UI
-│  │   ├─ Api            # Presentation layer exposing the API to WebApp or other clients
-│  │   ├─ Core           # Core business logic, application use cases, and infrastructure
-│  │   ├─ Workers        # Background workers for long-running tasks and event processing
-│  │   └─ Tests          # Tests for the Api, Core, and Workers
+│  │   ├─ BackOffice     # React SPA for operations and support, served on its own host (Entra ID Easy Auth)
+│  │   ├─ Api             # Presentation layer exposing both account and back-office endpoints
+│  │   ├─ Core            # Core business logic, application use cases, and infrastructure
+│  │   ├─ Workers         # Background workers for long-running tasks and event processing
+│  │   └─ Tests           # Tests for the Api, Core, and Workers
 │  ├─ shared-kernel      # Reusable components and default configuration for all systems
 │  └─ shared-webapp      # Reusable ShadCN 2.0 components with Base UI that affect all systems
 ├─ cloud-infrastructure  # Contains Bash and Bicep scripts (IaC) for Azure resources
@@ -524,7 +552,7 @@ PlatformPlatform is a [monorepo](https://en.wikipedia.org/wiki/Monorepo) contain
 └─ developer-cli         # A .NET CLI tool for automating common developer tasks
 ```
 
-** A [Self-Contained System](https://scs-architecture.org/) is a large microservice (or a small monolith) that contains the full stack, including frontend, background jobs, etc. The `main` SCS is the shell application with catch-all routing where you build your product. The `account` SCS is loaded into main via Module Federation, enabling seamless navigation between product pages and account pages without full page reloads. The `back-office` SCS runs as a fully standalone application with its own login.
+** A [Self-Contained System](https://scs-architecture.org/) is a large microservice (or a small monolith) that contains the full stack, including frontend, background jobs, etc. The `main` SCS is the shell application with catch-all routing where you build your product. The `account` SCS is loaded into main via Module Federation, enabling seamless navigation between product pages and account pages without full page reloads. The back-office surface for operations and support is hosted by the `account` SCS as a separate SPA on its own hostname, authenticated via Entra ID (Azure Easy Auth in production, MockEasyAuth in development).
 
 # Technologies
 

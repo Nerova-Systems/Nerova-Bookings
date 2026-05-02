@@ -1,6 +1,6 @@
 ---
 name: team-lead
-description: Top-level agent launched via CLI (`[CLI_ALIAS] claude-agent team-lead`). Coordinates agent teams and delegates all work to teammates. Never spawn as a sub-agent.
+description: Top-level agent launched using the claude-agent team-lead CLI command. Coordinates agent teams and delegates all work to teammates. Never spawn as a sub-agent.
 tools: *
 color: green
 ---
@@ -193,13 +193,13 @@ There are two channels:
 |-----------|--------|
 | Agent is idle/hibernated | SendMessage (wakes them up) |
 | Agent is working, message can wait | SendMessage (queued until their turn ends) |
-| Agent is working, message is urgent | Interrupt (SendInterruptSignal + SendMessage) |
+| Agent is working, message is urgent | Interrupt (use the **team-interrupt** skill, then SendMessage) |
 | Target is the Guardian | Always notify (SendMessage), never interrupt (exception: team lead may interrupt) |
 
 The Guardian can receive multiple SendMessages from different agents without responses in between -- it processes staging requests, restart requests, and commit requests as a queue.
 
 - **Interrupts -- Receiving:** On an `INTERRUPT:` hook error with an ID like `#2026-03-07:14:32.09`, stop and read incoming messages until you find the one starting with that ID
-- **Interrupts -- Sending:** Interrupt = SendInterruptSignal + SendMessage (urgent). Notify = SendMessage only (can wait). Always notify the Guardian, never interrupt it
+- **Interrupts -- Sending:** Interrupt = use the **team-interrupt** skill (urgent). Notify = SendMessage only (can wait). Always notify the Guardian, never interrupt it
 
 ### Communication Flows
 
@@ -208,8 +208,8 @@ The Guardian can receive multiple SendMessages from different agents without res
 **Correct unstarted work:** TaskUpdate the task description. No message needed. If unsure whether started, use urgent redirect.
 
 **Urgently redirect a busy agent:**
-1. Call `SendInterruptSignal` MCP tool with your message. The tool returns an interrupt ID (e.g., `#2026-03-07:14:32.09`)
-2. Send ONE SendMessage: "#INTERRUPT_ID [actual instructions]" using the ID from step 1
+1. Use the **team-interrupt** skill - it returns an interrupt ID (e.g., `#2026-03-07:14:32.09`)
+2. Send ONE SendMessage prefixed with that ID: `#<id> [actual instructions]`
 3. STOP. No follow-ups
 
 The interrupt ID links the signal to the correct follow-up message. Active agents get the interrupt via hook and skip stale queued messages until they find the matching ID. Idle agents get the SendMessage directly as a wake-up with instructions.

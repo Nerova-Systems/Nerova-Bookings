@@ -1,30 +1,14 @@
 ## Build, Test, and Format
 
-Always use MCP tools (`build`, `test`, `format`, `lint`, `run`, `restart`, `stop`, `end_to_end`) instead of running dotnet/npm/npx commands directly. Run `build` first, then remaining tools with `noBuild=true`.
+Use the developer CLI skills (`build`, `test`, `format`, `lint`, `e2e`, `aspire-restart`, `team-interrupt`) for all code workflows. They invoke `dotnet run --project developer-cli -- <command>` directly. Never run `dotnet`, `npm`, or `npx` directly - the pre-tool-use Bash hook blocks them.
 
-On MCP failures fall back to the CLI (`[CLI_ALIAS] build --quiet`, `[CLI_ALIAS] test --quiet`, etc.).
+Run `build` first, then `format`, `lint`, `test` in parallel with `--no-build`.
 
-**Slow:** Aspire restart, backend format, backend lint, end-to-end tests. **Fast:** frontend format/lint, backend test. If any slow operation is needed, run everything in parallel Task agents. End-to-end tests use `waitForAspire=true`.
+**Slow:** Aspire restart, backend format, backend lint, end-to-end tests. **Fast:** frontend format/lint, backend test.
 
-**Aspire**: The `run`, `restart`, and `stop` MCP tools manage the AppHost at [APP_URL]. Use `restart` when backend changes or hot reload breaks. In the agentic workflow, only the Guardian agent calls these. All other agents must notify the Guardian if they need Aspire restarted.
+**Aspire**: The `aspire-restart` skill manages the AppHost - always use it; never `aspire run`, `aspire restart`, or the developer CLI's `run` command. Use the Aspire MCP `list_resources` tool to look up service URLs (or read `.workspace/port.txt` if you only need the base port). In the agentic workflow, only the Guardian agent restarts Aspire. All other agents must notify the Guardian if they need it restarted.
 
 Never commit, amend, or revert without explicit user instruction each time. Commit messages: one descriptive line in imperative form, no description body.
-
-## Application URL
-
-Whenever you see `[APP_URL]`, replace it with the configured value.
-
-```
-APP_URL="https://localhost:9000"
-```
-
-## CLI Alias Configuration
-
-Whenever you see `[CLI_ALIAS]`, replace it with the configured value.
-
-```
-CLI_ALIAS="pp"
-```
 
 ## Product Management Tool
 

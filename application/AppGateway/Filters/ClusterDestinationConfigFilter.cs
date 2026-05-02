@@ -1,22 +1,20 @@
+using SharedKernel.Configuration;
 using Yarp.ReverseProxy.Configuration;
 
 namespace AppGateway.Filters;
 
-public class ClusterDestinationConfigFilter : IProxyConfigFilter
+public class ClusterDestinationConfigFilter(PortAllocation ports) : IProxyConfigFilter
 {
     public ValueTask<ClusterConfig> ConfigureClusterAsync(ClusterConfig cluster, CancellationToken cancel)
     {
-        return cluster.ClusterId switch
+        var address = ResolveClusterAddress(cluster.ClusterId, ports);
+
+        var destination = cluster.Destinations!.Single();
+        var newDestinations = new Dictionary<string, DestinationConfig>(StringComparer.OrdinalIgnoreCase)
         {
-            "account-api" => ReplaceDestinationAddress(cluster, "ACCOUNT_API_URL"),
-            "account-static" => ReplaceDestinationAddress(cluster, "ACCOUNT_API_URL"),
-            "account-storage" => ReplaceDestinationAddress(cluster, "ACCOUNT_STORAGE_URL"),
-            "back-office-api" => ReplaceDestinationAddress(cluster, "BACK_OFFICE_API_URL"),
-            "back-office-static" => ReplaceDestinationAddress(cluster, "BACK_OFFICE_API_URL"),
-            "main-api" => ReplaceDestinationAddress(cluster, "MAIN_API_URL"),
-            "main-static" => ReplaceDestinationAddress(cluster, "MAIN_API_URL"),
-            _ => throw new InvalidOperationException($"Unknown Cluster ID {cluster.ClusterId}.")
+            { destination.Key, destination.Value with { Address = address } }
         };
+        return new ValueTask<ClusterConfig>(cluster with { Destinations = newDestinations });
     }
 
     public ValueTask<RouteConfig> ConfigureRouteAsync(RouteConfig route, ClusterConfig? cluster, CancellationToken cancel)
@@ -24,20 +22,36 @@ public class ClusterDestinationConfigFilter : IProxyConfigFilter
         return new ValueTask<RouteConfig>(route);
     }
 
-    private static ValueTask<ClusterConfig> ReplaceDestinationAddress(ClusterConfig cluster, string environmentVariable)
+    // Resolves a cluster's destination address. Production deploys (Bicep) set the full URL via
+    // {SERVICE}_API_URL environment variables; that takes priority. Local dev gets ports from
+    // PortAllocation and composes https://localhost:{port}. Used by both this filter (mutates the
+    // proxy's internal config) and ApiAggregationService (which reads the unfiltered config from
+    // IProxyConfigProvider and resolves destinations itself).
+    public static string ResolveClusterAddress(string clusterId, PortAllocation ports)
     {
-        var destinationAddress = Environment.GetEnvironmentVariable(environmentVariable);
-        if (destinationAddress is null) return new ValueTask<ClusterConfig>(cluster);
-
-        // Each cluster has a dictionary with one and only one destination
-        var destination = cluster.Destinations!.Single();
-
-        // This is read-only, so we'll create a new one with our updates
-        var newDestinations = new Dictionary<string, DestinationConfig>(StringComparer.OrdinalIgnoreCase)
+        return clusterId switch
         {
-            { destination.Key, destination.Value with { Address = destinationAddress } }
+            "account-api" => ResolveAddress("ACCOUNT_API_URL", ports.AccountApi),
+            "account-static" => ResolveAddress("ACCOUNT_API_URL", ports.AccountStatic),
+            "account-storage" => ResolveStorageAddress("ACCOUNT_STORAGE_URL", ports.Blob),
+            "main-api" => ResolveAddress("MAIN_API_URL", ports.MainApi),
+            "main-static" => ResolveAddress("MAIN_API_URL", ports.MainStatic),
+            "main-storage" => ResolveStorageAddress("MAIN_STORAGE_URL", ports.Blob),
+            _ => throw new InvalidOperationException($"Unknown Cluster ID {clusterId}.")
         };
+    }
 
-        return new ValueTask<ClusterConfig>(cluster with { Destinations = newDestinations });
+    private static string ResolveAddress(string productionUrlEnvironmentVariableName, int developmentPort)
+    {
+        var productionUrl = Environment.GetEnvironmentVariable(productionUrlEnvironmentVariableName);
+        if (!string.IsNullOrEmpty(productionUrl)) return productionUrl;
+        return $"https://localhost:{developmentPort}";
+    }
+
+    private static string ResolveStorageAddress(string productionUrlEnvironmentVariableName, int blobPort)
+    {
+        var productionUrl = Environment.GetEnvironmentVariable(productionUrlEnvironmentVariableName);
+        if (!string.IsNullOrEmpty(productionUrl)) return productionUrl;
+        return $"http://127.0.0.1:{blobPort}/devstoreaccount1";
     }
 }

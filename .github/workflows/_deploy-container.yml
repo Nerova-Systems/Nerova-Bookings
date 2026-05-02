@@ -18,6 +18,10 @@ on:
       image_name:
         required: true
         type: string
+      container_app_name:
+        required: false
+        type: string
+        default: ""
       version:
         required: true
         type: string
@@ -69,7 +73,7 @@ jobs:
 
       # For production, import image from staging instead of building
       - name: Import Container Image from Staging to Production
-        if: inputs.azure_environment == 'prod'
+        if: inputs.azure_environment == 'prod' && inputs.container_app_name == ''
         run: |
           STAGING_REGISTRY_ID="/subscriptions/${{ vars.STAGING_SUBSCRIPTION_ID }}/resourceGroups/${{ env.UNIQUE_PREFIX }}-stage-global/providers/Microsoft.ContainerRegistry/registries/${{ env.UNIQUE_PREFIX }}stage"
 
@@ -82,11 +86,11 @@ jobs:
 
       # For staging, build and push the image
       - name: Setup Docker Buildx
-        if: inputs.azure_environment == 'stage'
+        if: inputs.azure_environment == 'stage' && inputs.container_app_name == ''
         uses: docker/setup-buildx-action@v4
 
       - name: Build and Push Container Image
-        if: inputs.azure_environment == 'stage'
+        if: inputs.azure_environment == 'stage' && inputs.container_app_name == ''
         working-directory: ${{ inputs.docker_context }}
         run: |
           docker buildx create --use
@@ -102,14 +106,15 @@ jobs:
         run: |
           CLUSTER_RESOURCE_GROUP_NAME="${{ env.UNIQUE_PREFIX }}-${{ env.ENVIRONMENT }}-${{ env.CLUSTER_LOCATION_ACRONYM }}"
           SUFFIX=$(echo "${{ inputs.version }}" | sed 's/\./-/g')
-          az containerapp update --name ${{ inputs.image_name }} --resource-group "$CLUSTER_RESOURCE_GROUP_NAME" --image "${{ env.UNIQUE_PREFIX }}${{ env.ENVIRONMENT }}.azurecr.io/${{ inputs.image_name }}:${{ inputs.version }}" --revision-suffix $SUFFIX
+          TARGET_APP="${{ inputs.container_app_name != '' && inputs.container_app_name || inputs.image_name }}"
+          az containerapp update --name "$TARGET_APP" --resource-group "$CLUSTER_RESOURCE_GROUP_NAME" --image "${{ env.UNIQUE_PREFIX }}${{ env.ENVIRONMENT }}.azurecr.io/${{ inputs.image_name }}:${{ inputs.version }}" --revision-suffix $SUFFIX
 
           echo "Waiting for the new revision to be active..."
           for i in {1..10}; do
             sleep 15
 
-            RUNNING_STATUS=$(az containerapp revision list --name ${{ inputs.image_name }} --resource-group "$CLUSTER_RESOURCE_GROUP_NAME" --query "[?contains(name, '$SUFFIX')].properties.runningState" --output tsv)
-            HEALTH_STATUS=$(az containerapp revision list --name ${{ inputs.image_name }} --resource-group "$CLUSTER_RESOURCE_GROUP_NAME" --query "[?contains(name, '$SUFFIX')].properties.healthState" --output tsv)
+            RUNNING_STATUS=$(az containerapp revision list --name "$TARGET_APP" --resource-group "$CLUSTER_RESOURCE_GROUP_NAME" --query "[?contains(name, '$SUFFIX')].properties.runningState" --output tsv)
+            HEALTH_STATUS=$(az containerapp revision list --name "$TARGET_APP" --resource-group "$CLUSTER_RESOURCE_GROUP_NAME" --query "[?contains(name, '$SUFFIX')].properties.healthState" --output tsv)
             if [[ "$HEALTH_STATUS" == "Healthy" ]]; then
               echo "New revision is healthy. Running state: $RUNNING_STATUS"
               exit 0

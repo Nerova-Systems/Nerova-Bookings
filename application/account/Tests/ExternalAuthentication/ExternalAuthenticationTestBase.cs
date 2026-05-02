@@ -33,6 +33,9 @@ namespace Account.Tests.ExternalAuthentication;
 
 public abstract class ExternalAuthenticationTestBase : IDisposable
 {
+    // Tests use the in-memory test server (WebApplicationFactory); no real listener is bound.
+    // SinglePageAppConfiguration only consumes this as a URI.
+    protected const string PublicUrl = "https://localhost";
     protected readonly Faker Faker = new();
     protected readonly TimeProvider TimeProvider;
     private readonly WebApplicationFactory<Program> _webApplicationFactory;
@@ -40,8 +43,8 @@ public abstract class ExternalAuthenticationTestBase : IDisposable
 
     protected ExternalAuthenticationTestBase()
     {
-        Environment.SetEnvironmentVariable(SinglePageAppConfiguration.PublicUrlKey, "https://localhost:9000");
-        Environment.SetEnvironmentVariable(SinglePageAppConfiguration.CdnUrlKey, "https://localhost:9000/account");
+        Environment.SetEnvironmentVariable(SinglePageAppConfiguration.PublicUrlKey, PublicUrl);
+        Environment.SetEnvironmentVariable(SinglePageAppConfiguration.CdnUrlKey, $"{PublicUrl}/account");
         Environment.SetEnvironmentVariable(
             "APPLICATIONINSIGHTS_CONNECTION_STRING",
             "InstrumentationKey=00000000-0000-0000-0000-000000000000;IngestionEndpoint=https://localhost;LiveEndpoint=https://localhost"
@@ -259,7 +262,7 @@ public abstract class ExternalAuthenticationTestBase : IDisposable
     private static Uri ToAbsoluteUri(string url)
     {
         var uri = new Uri(url, UriKind.RelativeOrAbsolute);
-        return uri.IsAbsoluteUri ? uri : new Uri(new Uri("https://localhost:9000"), url);
+        return uri.IsAbsoluteUri ? uri : new Uri(new Uri(PublicUrl), url);
     }
 
     private static string[] ExtractSetCookieHeaders(HttpResponseMessage response)

@@ -1,5 +1,12 @@
+using System.Security.Claims;
 using Account;
+using Account.Api;
+using Microsoft.Extensions.Options;
+using SharedKernel.Authentication;
+using SharedKernel.Authentication.BackOfficeIdentity;
 using SharedKernel.Configuration;
+using SharedKernel.ExecutionContext;
+using SharedKernel.OpenApi;
 using SharedKernel.SinglePageApp;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -7,18 +14,137 @@ var builder = WebApplication.CreateBuilder(args);
 // Configure storage infrastructure like Database, BlobStorage, Logging, Telemetry, Entity Framework DB Context, etc.
 builder
     .AddApiInfrastructure()
-    .AddDevelopmentPort(9100)
+    .AddDevelopmentPort()
     .AddAccountInfrastructure();
 
 // Configure dependency injection services like Repositories, MediatR, Pipelines, FluentValidation validators, etc.
 builder.Services
-    .AddApiServices([Assembly.GetExecutingAssembly(), Configuration.Assembly])
-    .AddAccountServices();
+    .AddApiServices([Assembly.GetExecutingAssembly(), Configuration.Assembly], ApiDocumentLayout.AccountAndBackOffice)
+    .AddAccountServices()
+    .AddBackOfficeDevStaticProxy();
 
 var app = builder.Build();
 
-app
-    .UseApiServices() // Add common configuration for all APIs like Swagger, HSTS, and DeveloperExceptionPage.
-    .UseFederatedModuleStaticFiles(); // Serve federated module files (remoteEntry.js, JS/CSS bundles)
+// At runtime AppHost surfaces both hostnames. At build time (dotnet-getdocument invokes Program.Main
+// to generate OpenAPI), neither is set; fall back to placeholders so Program startup completes and
+// the OpenAPI emitter can run. Production parity is enforced by AppHost passing real values.
+var appHostname = app.Configuration["Hostnames:App"] ?? "app.unconfigured.invalid";
+var backOfficeHostname = app.Services.GetRequiredService<IOptions<BackOfficeHostOptions>>().Value.Host;
+
+// Per-host bundle URLs. The process-wide PUBLIC_URL/CDN_URL env vars are set by AppHost for the
+// user-facing host only, so the back-office host must inject its own to avoid embedding the account
+// SPA's bundle URLs into back-office HTML. AppHost sets BACK_OFFICE_PUBLIC_URL/BACK_OFFICE_CDN_URL
+// explicitly because back-office now binds a dedicated Kestrel port (not AppGateway's port), so
+// host substitution alone would yield the wrong port. Falls back to host-substitution for any
+// runtime that hasn't set the explicit vars yet.
+var appPublicUrl = Environment.GetEnvironmentVariable(SinglePageAppConfiguration.PublicUrlKey);
+var appCdnUrl = Environment.GetEnvironmentVariable(SinglePageAppConfiguration.CdnUrlKey);
+var backOfficePublicUrl =
+    Environment.GetEnvironmentVariable("BACK_OFFICE_PUBLIC_URL")
+    ?? (appPublicUrl is null ? null : ReplaceHost(appPublicUrl, appHostname, backOfficeHostname));
+var backOfficeCdnUrl = Environment.GetEnvironmentVariable("BACK_OFFICE_CDN_URL") ?? backOfficePublicUrl;
+
+// The /login picker is the dev-only MockEasyAuth identity selector. In Azure-deployed instances the
+// path must not be reachable: it is removed from the auth-gate exemption list (so the back-office
+// authorize policy applies) and short-circuited to 401 below to reject even authenticated requests.
+string[] backOfficeUnauthenticatedPaths = SharedInfrastructureConfiguration.IsRunningInAzure ? [] : ["/login"];
+
+if (SharedInfrastructureConfiguration.IsRunningInAzure)
+{
+    app.MapGet("/login", Results.Unauthorized).RequireHost(backOfficeHostname);
+}
+
+// Dev-only: forward back-office static-asset and HMR traffic on the back-office Kestrel listener to
+// the rsbuild dev server. Registered before UseApiServices so the conditional branch short-circuits
+// matching requests before the auth-gated SPA fallback.
+app.UseBackOfficeDevStaticProxy(backOfficeHostname);
+
+app.UseApiServices(); // Add common configuration for all APIs like Swagger, HSTS, and DeveloperExceptionPage.
+
+if (SharedInfrastructureConfiguration.IsRunningInAzure)
+{
+    // Production: same image runs in two ACA container apps. The back-office one carries an explicit
+    // env var; account-api does not. Each registers only the SPA it serves, so endpoint matching does
+    // not depend on Request.Host being correctly rewritten from X-Forwarded-Host through the ACA mesh.
+    var isBackOfficeContainer = app.Configuration.GetValue("BackOffice:IsBackOfficeContainer", false);
+
+    if (isBackOfficeContainer)
+    {
+        app.UseSingleSpaFallback(
+            new HostScopedSinglePageApp(
+                backOfficeHostname,
+                "BackOffice",
+                BuildBackOfficeUserInfo,
+                backOfficePublicUrl,
+                backOfficeCdnUrl,
+                BackOfficeIdentityDefaults.PolicyName,
+                unauthenticatedPaths: backOfficeUnauthenticatedPaths
+            )
+        );
+    }
+    else
+    {
+        app.UseSingleSpaFallback(
+            new HostScopedSinglePageApp(
+                appHostname,
+                "WebApp",
+                context => context.RequestServices.GetRequiredService<IExecutionContext>().UserInfo,
+                appPublicUrl,
+                appCdnUrl
+            )
+        );
+    }
+}
+else
+{
+    // Local dev (Aspire): one process serves both SPAs via dual Kestrel listeners; host-scoped
+    // fallback disambiguates because Aspire really delivers requests with the right Host header.
+    app.UseHostScopedSinglePageAppFallback(
+        new HostScopedSinglePageApp(
+            appHostname,
+            "WebApp",
+            context => context.RequestServices.GetRequiredService<IExecutionContext>().UserInfo,
+            appPublicUrl,
+            appCdnUrl
+        ),
+        new HostScopedSinglePageApp(
+            backOfficeHostname,
+            "BackOffice",
+            BuildBackOfficeUserInfo,
+            backOfficePublicUrl,
+            backOfficeCdnUrl,
+            BackOfficeIdentityDefaults.PolicyName,
+            unauthenticatedPaths: backOfficeUnauthenticatedPaths
+        )
+    );
+}
 
 await app.RunAsync();
+return;
+
+static string ReplaceHost(string url, string oldHost, string newHost)
+{
+    var uri = new Uri(url);
+    var builder = new UriBuilder(uri) { Host = uri.Host.Equals(oldHost, StringComparison.OrdinalIgnoreCase) ? newHost : uri.Host };
+    return builder.Uri.ToString().TrimEnd('/');
+}
+
+static UserInfo BuildBackOfficeUserInfo(HttpContext context)
+{
+    var principal = context.User;
+    if (principal.Identity?.IsAuthenticated != true)
+    {
+        return UserInfo.System;
+    }
+
+    var displayName = principal.FindFirstValue(ClaimTypes.Name);
+    var groups = string.Join(',', principal.FindAll(BackOfficeIdentityDefaults.GroupsClaimType).Select(c => c.Value));
+
+    return new UserInfo
+    {
+        IsAuthenticated = true,
+        Locale = "en-US",
+        FirstName = displayName,
+        Role = string.IsNullOrEmpty(groups) ? null : groups
+    };
+}

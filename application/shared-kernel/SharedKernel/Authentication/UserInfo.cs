@@ -1,7 +1,6 @@
 using System.Security.Claims;
 using SharedKernel.Authentication.TokenGeneration;
 using SharedKernel.Domain;
-using SharedKernel.Platform;
 using SharedKernel.SinglePageApp;
 
 namespace SharedKernel.Authentication;
@@ -20,8 +19,7 @@ public class UserInfo
     public static readonly UserInfo System = new()
     {
         IsAuthenticated = false,
-        Locale = DefaultLocale,
-        IsInternalUser = false
+        Locale = DefaultLocale
     };
 
     public bool IsAuthenticated { get; init; }
@@ -50,8 +48,6 @@ public class UserInfo
 
     public string? SubscriptionPlan { get; init; }
 
-    public bool IsInternalUser { get; init; }
-
     public string? ZoomLevel { get; init; }
 
     public string? Theme { get; init; }
@@ -67,15 +63,13 @@ public class UserInfo
                 IsAuthenticated = user?.Identity?.IsAuthenticated ?? false,
                 Locale = GetValidLocale(browserLocale),
                 ZoomLevel = zoomLevel,
-                Theme = theme,
-                IsInternalUser = false
+                Theme = theme
             };
         }
 
         var userId = user.FindFirstValue(ClaimTypes.NameIdentifier);
         var tenantId = user.FindFirstValue("tenant_id");
         var sessionId = user.FindFirstValue("session_id");
-        var email = user.FindFirstValue(ClaimTypes.Email);
         return new UserInfo
         {
             IsAuthenticated = true,
@@ -83,7 +77,7 @@ public class UserInfo
             TenantId = tenantId == null ? null : new TenantId(long.Parse(tenantId)),
             SessionId = sessionId == null ? null : new SessionId(sessionId),
             Role = user.FindFirstValue(ClaimTypes.Role),
-            Email = email,
+            Email = user.FindFirstValue(ClaimTypes.Email),
             FirstName = user.FindFirstValue(ClaimTypes.GivenName),
             LastName = user.FindFirstValue(ClaimTypes.Surname),
             Title = user.FindFirstValue("title"),
@@ -93,8 +87,7 @@ public class UserInfo
             SubscriptionPlan = user.FindFirstValue("subscription_plan"),
             Locale = GetValidLocale(user.FindFirstValue("locale")),
             ZoomLevel = zoomLevel,
-            Theme = theme,
-            IsInternalUser = IsInternalUserEmail(email)
+            Theme = theme
         };
     }
 
@@ -116,10 +109,5 @@ public class UserInfo
             .FirstOrDefault(sl => sl.StartsWith(baseLanguageCode, StringComparison.OrdinalIgnoreCase));
 
         return foundLocale ?? DefaultLocale;
-    }
-
-    private static bool IsInternalUserEmail(string? email)
-    {
-        return email is not null && email.EndsWith(Settings.Current.Identity.InternalEmailDomain, StringComparison.OrdinalIgnoreCase);
     }
 }

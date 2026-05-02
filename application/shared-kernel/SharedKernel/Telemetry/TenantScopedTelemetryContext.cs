@@ -12,8 +12,7 @@ public static class TenantScopedTelemetryContext
         {
             IsAuthenticated = false,
             Locale = "en-US",
-            SubscriptionPlan = subscriptionPlan,
-            IsInternalUser = false
+            SubscriptionPlan = subscriptionPlan
         };
 
         Activity.Current?.SetTag("tenant.id", tenantId.Value);

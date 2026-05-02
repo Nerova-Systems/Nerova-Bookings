@@ -4,9 +4,9 @@ public static class ConfigurationExtensions
 {
     extension<TDestination>(IResourceBuilder<TDestination> builder) where TDestination : IResourceWithEnvironment
     {
-        public IResourceBuilder<TDestination> WithUrlConfiguration(string applicationBasePath)
+        public IResourceBuilder<TDestination> WithUrlConfiguration(string hostname, int gatewayPort, string applicationBasePath)
         {
-            var baseUrl = Environment.GetEnvironmentVariable("PUBLIC_URL") ?? "https://localhost:9000";
+            var baseUrl = $"https://{hostname}:{gatewayPort}";
             applicationBasePath = applicationBasePath.TrimEnd('/');
 
             return builder

@@ -77,8 +77,11 @@ export function MobileMenuDialogs() {
         authSyncService.broadcast(message);
       }
 
-      const targetPath = window.location.pathname === "/" ? loggedInPath : window.location.pathname;
-      window.location.href = targetPath;
+      if (window.location.pathname === "/") {
+        window.location.href = loggedInPath;
+      } else {
+        window.location.reload();
+      }
     } catch {
       setIsSwitching(false);
     }

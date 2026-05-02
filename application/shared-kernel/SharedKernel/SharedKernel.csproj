@@ -60,4 +60,8 @@
         <EmbeddedResource Include="Platform\platform-settings.jsonc"/>
     </ItemGroup>
 
+    <ItemGroup>
+        <InternalsVisibleTo Include="SharedKernel.Tests"/>
+    </ItemGroup>
+
 </Project>

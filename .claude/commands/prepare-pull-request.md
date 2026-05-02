@@ -28,22 +28,22 @@ Use this workflow to create pull request titles and descriptions.
    - **Summary & Motivation**: Start with the most important change, use bullet points for multiple changes, and mention minor fixes last
    - **Checklist**: Do not change the checklist from .github/PULL_REQUEST_TEMPLATE.md, and do not [x] the list—this should be a manual task
 
-5. Build, test, format and lint the codebase using the MCP tools:
+5. Optionally build, test, format and lint the codebase using the developer CLI skills (skip if validation has already been done in this session):
 
    **For backend changes** (`*.cs` files):
-   1. Run **build** first: `build(backend=true)`
-   2. Then run **format**, **test**, **lint** in parallel (or sequentially if parallel not supported):
-      - `format(backend=true)`
-      - `test(backend=true)`
-      - `lint(backend=true)`
+   1. Run **build** first: `dotnet run --project developer-cli -- build --backend --quiet`
+   2. Then run **format**, **test**, **lint** in parallel with `--no-build`:
+      - `dotnet run --project developer-cli -- format --backend --no-build --quiet`
+      - `dotnet run --project developer-cli -- test --no-build --quiet`
+      - `dotnet run --project developer-cli -- lint --backend --no-build --quiet`
 
    **For frontend changes** (`*.ts`, `*.tsx` files):
-   1. Run **build** first: `build(frontend=true)`
-   2. Then run **format** and **lint** in parallel (or sequentially if parallel not supported):
-      - `format(frontend=true)`
-      - `lint(frontend=true)`
+   1. Run **build** first: `dotnet run --project developer-cli -- build --frontend --quiet`
+   2. Then run **format** and **lint** in parallel with `--no-build`:
+      - `dotnet run --project developer-cli -- format --frontend --no-build --quiet`
+      - `dotnet run --project developer-cli -- lint --frontend --no-build --quiet`
 
-   If there are errors, they must be fixed before the pull request can be created.
+   If you do run validation and find errors, they must be fixed before the pull request can be created.
 
 6. Save the pull request title (as a level 1 heading) and description to `.workspace/<branch-name>/pull-request.md`
    - End with a clickable link to the saved file using the full absolute path

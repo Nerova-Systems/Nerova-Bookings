@@ -30,6 +30,17 @@ on:
       domain_name:
         required: true
         type: string
+      back_office_domain_name:
+        required: false
+        type: string
+        default: "-"
+      back_office_entra_client_id:
+        required: true
+        type: string
+      back_office_admins_group_id:
+        required: false
+        type: string
+        default: "-"
       postgres_admin_object_id:
         required: true
         type: string
@@ -80,12 +91,14 @@ jobs:
         id: deploy_cluster
         env:
           POSTGRES_ADMIN_OBJECT_ID: ${{ inputs.postgres_admin_object_id }}
+          BACK_OFFICE_ENTRA_CLIENT_ID: ${{ inputs.back_office_entra_client_id }}
+          BACK_OFFICE_ADMINS_GROUP_ID: ${{ inputs.back_office_admins_group_id }}
           GOOGLE_OAUTH_CLIENT_ID: ${{ vars.GOOGLE_OAUTH_CLIENT_ID }}
           GOOGLE_OAUTH_CLIENT_SECRET: ${{ secrets.GOOGLE_OAUTH_CLIENT_SECRET }}
           STRIPE_PUBLISHABLE_KEY: ${{ vars.STRIPE_PUBLISHABLE_KEY }}
           STRIPE_API_KEY: ${{ secrets.STRIPE_API_KEY }}
           STRIPE_WEBHOOK_SECRET: ${{ secrets.STRIPE_WEBHOOK_SECRET }}
-        run: bash ./cloud-infrastructure/cluster/deploy-cluster.sh ${{ inputs.unique_prefix }} ${{ inputs.azure_environment }} ${{ inputs.cluster_location }} ${{ inputs.cluster_location_acronym }} ${{ inputs.postgres_admin_object_id }} ${{ inputs.domain_name }} --plan
+        run: bash ./cloud-infrastructure/cluster/deploy-cluster.sh ${{ inputs.unique_prefix }} ${{ inputs.azure_environment }} ${{ inputs.cluster_location }} ${{ inputs.cluster_location_acronym }} ${{ inputs.postgres_admin_object_id }} "${{ inputs.domain_name }}" "${{ inputs.back_office_domain_name || '-' }}" --plan
 
       - name: Show DNS Configuration
         if: ${{ inputs.domain_name != '' && inputs.domain_name != '-' }}
@@ -109,6 +122,25 @@ jobs:
               echo "$(date +"%Y-%m-%dT%H:%M:%S") Please add the following DNS entries and then retry:"
               echo "- A TXT record with the name 'asuid.${{ inputs.domain_name }}' and the value '$custom_domain_verification_id'."
               echo "- A CNAME record with the Host name '${{ inputs.domain_name }}' that points to address 'app-gateway.$default_domain'."
+            fi
+
+            if [[ "${{ inputs.back_office_domain_name }}" != "" ]] && [[ "${{ inputs.back_office_domain_name }}" != "-" ]]; then
+              # Check if back-office already has the back-office custom domain configured
+              back_office_details=$(az containerapp show --name back-office --resource-group $CLUSTER_RESOURCE_GROUP_NAME 2>&1 || echo "")
+
+              if [[ "$back_office_details" != "" ]] && [[ "$back_office_details" != *"ResourceNotFound"* ]] && [[ "$back_office_details" != *"ResourceGroupNotFound"* ]]; then
+                back_office_custom_domains=$(echo "$back_office_details" | jq -r '.properties.configuration.ingress.customDomains // []')
+              else
+                back_office_custom_domains="[]"
+              fi
+
+              if [[ "$back_office_custom_domains" != "[]" ]] && [[ "$back_office_custom_domains" != "null" ]]; then
+                echo "$(date +"%Y-%m-%dT%H:%M:%S") Custom domain '${{ inputs.back_office_domain_name }}' is already configured correctly on back-office."
+              else
+                echo "$(date +"%Y-%m-%dT%H:%M:%S") Please add the following DNS entries for the back-office hostname and then retry:"
+                echo "- A TXT record with the name 'asuid.${{ inputs.back_office_domain_name }}' and the value '$custom_domain_verification_id'."
+                echo "- A CNAME record with the Host name '${{ inputs.back_office_domain_name }}' that points to address 'back-office.$default_domain'."
+              fi
             fi
           else
             echo "$(date +"%Y-%m-%dT%H:%M:%S") DNS configuration instructions will be shown after the Container Apps Environment is created."
@@ -146,12 +178,14 @@ jobs:
         id: deploy_cluster
         env:
           POSTGRES_ADMIN_OBJECT_ID: ${{ inputs.postgres_admin_object_id }}
+          BACK_OFFICE_ENTRA_CLIENT_ID: ${{ inputs.back_office_entra_client_id }}
+          BACK_OFFICE_ADMINS_GROUP_ID: ${{ inputs.back_office_admins_group_id }}
           GOOGLE_OAUTH_CLIENT_ID: ${{ vars.GOOGLE_OAUTH_CLIENT_ID }}
           GOOGLE_OAUTH_CLIENT_SECRET: ${{ secrets.GOOGLE_OAUTH_CLIENT_SECRET }}
           STRIPE_PUBLISHABLE_KEY: ${{ vars.STRIPE_PUBLISHABLE_KEY }}
           STRIPE_API_KEY: ${{ secrets.STRIPE_API_KEY }}
           STRIPE_WEBHOOK_SECRET: ${{ secrets.STRIPE_WEBHOOK_SECRET }}
-        run: bash ./cloud-infrastructure/cluster/deploy-cluster.sh ${{ inputs.unique_prefix }} ${{ inputs.azure_environment }} ${{ inputs.cluster_location }} ${{ inputs.cluster_location_acronym }} ${{ inputs.postgres_admin_object_id }} ${{ inputs.domain_name }} --apply
+        run: bash ./cloud-infrastructure/cluster/deploy-cluster.sh ${{ inputs.unique_prefix }} ${{ inputs.azure_environment }} ${{ inputs.cluster_location }} ${{ inputs.cluster_location_acronym }} ${{ inputs.postgres_admin_object_id }} "${{ inputs.domain_name }}" "${{ inputs.back_office_domain_name || '-' }}" --apply
 
       - name: Refresh Azure Tokens # The previous step may take a while, so we refresh the token to avoid timeouts
         uses: azure/login@v3
@@ -174,7 +208,6 @@ jobs:
       - name: Grant Database Permissions
         run: |
           bash ./cloud-infrastructure/cluster/grant-database-permissions.sh ${{ inputs.unique_prefix }} ${{ inputs.azure_environment }} ${{ inputs.cluster_location_acronym }} 'account' ${{ steps.deploy_cluster.outputs.ACCOUNT_IDENTITY_CLIENT_ID }}
-          bash ./cloud-infrastructure/cluster/grant-database-permissions.sh ${{ inputs.unique_prefix }} ${{ inputs.azure_environment }} ${{ inputs.cluster_location_acronym }} 'back-office' ${{ steps.deploy_cluster.outputs.BACK_OFFICE_IDENTITY_CLIENT_ID }}
           bash ./cloud-infrastructure/cluster/grant-database-permissions.sh ${{ inputs.unique_prefix }} ${{ inputs.azure_environment }} ${{ inputs.cluster_location_acronym }} 'main' ${{ steps.deploy_cluster.outputs.MAIN_IDENTITY_CLIENT_ID }}
 
       - name: Close Firewall

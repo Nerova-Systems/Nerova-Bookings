@@ -1,6 +1,7 @@
 import { faker } from "@faker-js/faker";
 import { expect, type Page } from "@playwright/test";
 import { test } from "@shared/e2e/fixtures/page-auth";
+import { getBaseUrl } from "@shared/e2e/utils/constants";
 import { createTestContext } from "@shared/e2e/utils/test-assertions";
 import { step } from "@shared/e2e/utils/test-step-wrapper";
 
@@ -18,7 +19,7 @@ async function setMockProviderCookie(page: Page, value: string): Promise<void> {
     {
       name: MOCK_PROVIDER_COOKIE,
       value: value,
-      url: "https://localhost:9000"
+      url: getBaseUrl()
     }
   ]);
 }

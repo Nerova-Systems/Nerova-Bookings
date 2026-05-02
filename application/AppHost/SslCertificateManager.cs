@@ -9,6 +9,10 @@ namespace AppHost;
 
 public static class SslCertificateManager
 {
+    private const string CertificateDomain = "localhost";
+
+    private const string RequiredSanDnsName = "*.dev.localhost";
+
     private static string UserSecretsId => Assembly.GetEntryAssembly()!.GetCustomAttribute<UserSecretsIdAttribute>()!.UserSecretsId;
 
     private static string GetCertificateLocation(string domain)
@@ -21,7 +25,7 @@ public static class SslCertificateManager
     {
         if (File.Exists(certificateLocation))
         {
-            Console.WriteLine($"Certificate {certificateLocation} exists, but password {password} was invalid. Creating a new certificate.");
+            Console.WriteLine($"Certificate {certificateLocation} exists but the stored password is invalid. Creating a new certificate.");
 
             File.Delete(certificateLocation);
         }
@@ -39,7 +43,26 @@ public static class SslCertificateManager
         Process.Start(new ProcessStartInfo
             {
                 FileName = "dotnet",
-                Arguments = $"dev-certs https --trust -ep {certificateLocation} -p {password}",
+                Arguments = $"dev-certs https --trust --export-path {certificateLocation} --password {password}",
+                RedirectStandardOutput = false,
+                RedirectStandardError = false,
+                UseShellExecute = false
+            }
+        )!.WaitForExit();
+    }
+
+    private static bool HasRequiredSan(X509Certificate2 certificate)
+    {
+        var sanExtension = certificate.Extensions.OfType<X509SubjectAlternativeNameExtension>().FirstOrDefault();
+        return sanExtension is not null && sanExtension.EnumerateDnsNames().Any(name => name == RequiredSanDnsName);
+    }
+
+    private static void CleanExistingDeveloperCertificates()
+    {
+        Process.Start(new ProcessStartInfo
+            {
+                FileName = "dotnet",
+                Arguments = "dev-certs https --clean",
                 RedirectStandardOutput = false,
                 RedirectStandardError = false,
                 UseShellExecute = false
@@ -58,13 +81,19 @@ public static class SslCertificateManager
                                       ?? await builder.CreateStablePassword(certificatePasswordKey).Resource.GetValueAsync(cancellationToken)
                                       ?? throw new InvalidOperationException("Failed to retrieve or create certificate password.");
 
-            var certificateLocation = GetCertificateLocation("localhost");
+            var certificateLocation = GetCertificateLocation(CertificateDomain);
             try
             {
-                var certificate2 = X509CertificateLoader.LoadPkcs12FromFile(certificateLocation, certificatePassword);
-                if (certificate2.NotAfter < DateTime.UtcNow)
+                var certificate = X509CertificateLoader.LoadPkcs12FromFile(certificateLocation, certificatePassword);
+                if (certificate.NotAfter < TimeProvider.System.GetUtcNow().UtcDateTime)
                 {
                     Console.WriteLine($"Certificate {certificateLocation} is expired. Creating a new certificate.");
+                    CreateNewSelfSignedDeveloperCertificate(certificateLocation, certificatePassword);
+                }
+                else if (!HasRequiredSan(certificate))
+                {
+                    Console.WriteLine($"Certificate {certificateLocation} is missing the {RequiredSanDnsName} SAN. Cleaning existing dev-certs and creating a new certificate.");
+                    CleanExistingDeveloperCertificates();
                     CreateNewSelfSignedDeveloperCertificate(certificateLocation, certificatePassword);
                 }
             }

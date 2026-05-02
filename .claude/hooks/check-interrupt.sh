@@ -16,7 +16,7 @@ for SIGNALS_DIR in "$HOME/.claude/teams"/*/signals; do
   rm -f "$TMP_FILE"
   [ -z "$MESSAGE" ] && continue
   ESCAPED_MSG=$(printf '%s' "$MESSAGE" | sed 's/\\/\\\\/g; s/"/\\"/g' | tr '\n' ' ')
-  printf '{"decision":"block","reason":"INTERRUPT: %s"}\n' "$ESCAPED_MSG"
+  printf '{"decision":"block","reason":"INTERRUPT: %s. If you have ALREADY processed a message starting with that ID, continue your current work from there. Otherwise stop and wait for it."}\n' "$ESCAPED_MSG"
   exit 0
 done
 exit 0

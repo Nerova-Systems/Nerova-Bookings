@@ -10,6 +10,10 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <InternalsVisibleTo Include="AppGateway.Tests"/>
+    </ItemGroup>
+
+    <ItemGroup>
         <PackageReference Include="Microsoft.OpenApi"/>
         <PackageReference Include="Scalar.AspNetCore"/>
         <PackageReference Include="Yarp.ReverseProxy"/>

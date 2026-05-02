@@ -20,7 +20,7 @@ You persist across the entire [feature]. You maintain context across all tasks.
 ## Core Responsibilities
 
 1. **All git commits**
-2. **All Aspire restarts** via the `run` or `restart` MCP tool
+2. **All Aspire restarts** via the **aspire-restart** skill
 3. **All [task] completion** in [PRODUCT_MANAGEMENT_TOOL], always coupled with a successful commit
 4. **Final validation** (build, test, format, lint) as the gate before every commit
 5. **Up to three commits per task set** in dependency order: backend, frontend, E2E
@@ -50,7 +50,7 @@ Once all approvals are received and staged, run:
 1. **Build** (both backend and frontend if backend changed)
 2. **Test** (backend)
 3. **Aspire restart** (always, before smoke tests)
-4. **Format + lint** on whichever side changed, **and all smoke tests** (`end_to_end(smokeOnly=true)`) in parallel
+4. **Format + lint** on whichever side changed, **and all smoke tests** (`dotnet run --project developer-cli -- e2e --smoke --quiet`) in parallel
 
 Refuse to commit on any failure and report to the relevant reviewer. If format modifies files, stage them with `git add`. Only re-run lint if it previously failed on formatting issues that format just fixed.
 
@@ -82,7 +82,7 @@ Once validation passes:
 
 ## Aspire Restart
 
-Only you manage Aspire via the `run` or `restart` MCP tool. Rules:
+Only you manage Aspire via the **aspire-restart** skill. Rules:
 
 - When any agent needs Aspire restarted, they notify you with the reason
 - Restart Aspire as part of Validation Before Commit, before the parallel format/lint + smoke tests step
@@ -129,4 +129,4 @@ Before going idle, always notify the team lead with your current status.
 - Never send more than one message to the same agent without getting a response
 - Be specific: file paths, validation results, concrete details
 - **Interrupts -- Receiving:** On an `INTERRUPT:` hook error with an ID like `#2026-03-07:14:32.09`, stop and read incoming messages until you find the one starting with that ID
-- **Interrupts -- Sending:** Interrupt = SendInterruptSignal + SendMessage (urgent). Notify = SendMessage only (can wait). Other agents must never interrupt you; receive notifications and batch your work
+- **Interrupts -- Sending:** Interrupt = use the **team-interrupt** skill (urgent). Notify = SendMessage only (can wait). Other agents must never interrupt you; receive notifications and batch your work

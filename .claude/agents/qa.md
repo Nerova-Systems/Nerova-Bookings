@@ -74,9 +74,9 @@ When many tests fail at once (50+), the root cause is almost always a single sha
 
 ### After Implementing
 
-Run only the test files you changed using the **end_to_end** MCP tool with `waitForAspire=true`. Zero tolerance for failures. Iterate until all changed tests pass.
+Run only the test files you changed using the **e2e** skill (`--quiet`). Zero tolerance for failures. Iterate until all changed tests pass.
 
-If `end_to_end` reports Aspire-level errors (connection refused, 503s everywhere, unhealthy containers), notify the Guardian to restart Aspire. Wait for the Guardian's `Aspire restarted` reply, then retry.
+If the e2e run reports Aspire-level errors (connection refused, 503s everywhere, unhealthy containers), notify the Guardian to restart Aspire. Wait for the Guardian's `Aspire restarted` reply, then retry.
 
 The QA reviewer runs the full regression across all browsers before approving -- you do not need to run everything yourself. Exception: if the reviewer reports flaky tests, you may re-run the full suite to reproduce and diagnose before fixing.
 
@@ -169,4 +169,4 @@ After the Guardian commits, call TaskList for your next assignment. Claim with T
 - Be specific: file paths, test names, pass/fail counts, concrete details
 - Only notify the team lead when blocked or done with all work
 - **Interrupts -- Receiving:** On an `INTERRUPT:` hook error with an ID like `#2026-03-07:14:32.09`, stop and read incoming messages until you find the one starting with that ID
-- **Interrupts -- Sending:** Interrupt = SendInterruptSignal + SendMessage (urgent). Notify = SendMessage only (can wait). Always notify the Guardian, never interrupt it
+- **Interrupts -- Sending:** Interrupt = use the **team-interrupt** skill (urgent). Notify = SendMessage only (can wait). Always notify the Guardian, never interrupt it
