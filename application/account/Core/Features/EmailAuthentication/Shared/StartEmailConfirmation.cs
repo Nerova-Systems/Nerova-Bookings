@@ -2,12 +2,14 @@ using Account.Features.EmailAuthentication.Domain;
 using Microsoft.AspNetCore.Identity;
 using SharedKernel.Authentication;
 using SharedKernel.Cqrs;
+using SharedKernel.Emails;
 using SharedKernel.Integrations.Email;
 
 namespace Account.Features.EmailAuthentication.Shared;
 
 public sealed class StartEmailConfirmation(
     IEmailLoginRepository emailLoginRepository,
+    IEmailRenderer emailRenderer,
     IEmailClient emailClient,
     IPasswordHasher<object> passwordHasher,
     TimeProvider timeProvider
@@ -15,18 +17,11 @@ public sealed class StartEmailConfirmation(
 {
     public async Task<Result<EmailLoginId>> StartAsync(
         string email,
-        string emailSubject,
-        string emailBody,
         EmailLoginType type,
+        Func<string, EmailTemplateBase> templateFactory,
         CancellationToken cancellationToken
     )
     {
-        ArgumentException.ThrowIfNullOrEmpty(emailSubject);
-        if (!emailBody.Contains("{oneTimePassword}"))
-        {
-            throw new ArgumentException("Email body must contain {oneTimePassword} placeholder.", nameof(emailBody));
-        }
-
         var existingLogins = emailLoginRepository.GetByEmail(email).ToArray();
 
         var lockoutMinutes = type == EmailLoginType.Signup ? -60 : -15;
@@ -41,8 +36,12 @@ public sealed class StartEmailConfirmation(
 
         await emailLoginRepository.AddAsync(emailLogin, cancellationToken);
 
-        var htmlContent = emailBody.Replace("{oneTimePassword}", oneTimePassword);
-        await emailClient.SendAsync(new EmailMessage(emailLogin.Email, emailSubject, htmlContent, string.Empty), cancellationToken);
+        var template = templateFactory(oneTimePassword);
+        var rendered = emailRenderer.RenderEmail(template);
+        await emailClient.SendAsync(
+            new EmailMessage(emailLogin.Email, rendered.Subject, rendered.HtmlBody, rendered.PlainTextBody),
+            cancellationToken
+        );
 
         return emailLogin.Id;
     }

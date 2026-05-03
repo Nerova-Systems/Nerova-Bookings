@@ -7,6 +7,21 @@
       "outputs": ["dist/**", "tests/test-results/**"],
       "dependsOn": ["^build", "update-translations"]
     },
+    "@repo/emails#build": {
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        "../../account/WebApp/emails/**",
+        "../../main/WebApp/emails/**",
+        "!../../account/WebApp/emails/dist/**",
+        "!../../main/WebApp/emails/dist/**"
+      ],
+      "outputs": [
+        "dist/**",
+        "../../account/WebApp/emails/dist/**",
+        "../../main/WebApp/emails/dist/**"
+      ],
+      "dependsOn": ["^build", "update-translations"]
+    },
     "update-translations": {
       "cache": false,
       "dependsOn": ["^build"]

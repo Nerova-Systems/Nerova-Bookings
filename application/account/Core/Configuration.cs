@@ -12,6 +12,7 @@ using Account.Integrations.Stripe;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using SharedKernel.Configuration;
+using SharedKernel.Emails;
 using SharedKernel.OpenIdConnect;
 
 namespace Account;
@@ -51,6 +52,8 @@ public static class Configuration
             services.AddKeyedScoped<IOAuthProvider, GoogleOAuthProvider>("google");
             services.AddKeyedScoped<IOAuthProvider, MockOAuthProvider>("mock-google");
             services.AddScoped<OAuthProviderFactory>();
+
+            services.AddEmailRendering("WebApp");
 
             services.AddMemoryCache();
             services.AddSingleton<MockStripeState>();

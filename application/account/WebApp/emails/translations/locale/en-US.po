@@ -1,0 +1,62 @@
+msgid ""
+msgstr ""
+"POT-Creation-Date: 2026-05-03 00:00+0000\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: @lingui/cli\n"
+"Language: en-US\n"
+"Project-Id-Version: \n"
+"Report-Msgid-Bugs-To: \n"
+"PO-Revision-Date: \n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Plural-Forms: \n"
+
+msgid "<0/> invited you to join PlatformPlatform."
+msgstr "<0/> invited you to join PlatformPlatform."
+
+msgid "Confirm your email address"
+msgstr "Confirm your email address"
+
+msgid "Enter it in your open browser window. It is only valid for a few minutes."
+msgstr "Enter it in your open browser window. It is only valid for a few minutes."
+
+msgid "Here's your new verification code"
+msgstr "Here's your new verification code"
+
+msgid "Open the login page"
+msgstr "Open the login page"
+
+msgid "PlatformPlatform login verification code"
+msgstr "PlatformPlatform login verification code"
+
+msgid "This code will expire in a few minutes."
+msgstr "This code will expire in a few minutes."
+
+msgid "This request was made by entering your mail <0/>, but we have no record of such user."
+msgstr "This request was made by entering your mail <0/>, but we have no record of such user."
+
+msgid "To gain access, click the button below and login using <0/>."
+msgstr "To gain access, click the button below and login using <0/>."
+
+msgid "Unknown user tried to login to PlatformPlatform"
+msgstr "Unknown user tried to login to PlatformPlatform"
+
+msgid "We're sending this code again as you requested."
+msgstr "We're sending this code again as you requested."
+
+msgid "You can sign up for an account on the link below."
+msgstr "You can sign up for an account on the link below."
+
+msgid "You have been invited to PlatformPlatform"
+msgstr "You have been invited to PlatformPlatform"
+
+msgid "You or someone else tried to login to PlatformPlatform"
+msgstr "You or someone else tried to login to PlatformPlatform"
+
+msgid "Your confirmation code is below"
+msgstr "Your confirmation code is below"
+
+msgid "Your verification code (resend)"
+msgstr "Your verification code (resend)"

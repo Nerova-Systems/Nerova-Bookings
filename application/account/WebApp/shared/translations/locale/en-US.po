@@ -1066,6 +1066,9 @@ msgstr "Email me when a new device signs in."
 msgid "Email support"
 msgstr "Email support"
 
+msgid "Emails"
+msgstr "Emails"
+
 msgid "Empty"
 msgstr "Empty"
 
@@ -1488,6 +1491,9 @@ msgstr "Loading..."
 
 msgid "Local seasonal"
 msgstr "Local seasonal"
+
+msgid "Locale"
+msgstr "Locale"
 
 msgid "Log in"
 msgstr "Log in"
@@ -2554,6 +2560,9 @@ msgstr "Tell us a bit about yourself to get started."
 
 msgid "Tell us more..."
 msgstr "Tell us more..."
+
+msgid "Template"
+msgstr "Template"
 
 msgid "Terms"
 msgstr "Terms"

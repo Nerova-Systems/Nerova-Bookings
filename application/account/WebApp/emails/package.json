@@ -1,0 +1,11 @@
+{
+  "name": "@account-webapp/emails",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "devDependencies": {
+    "@repo/config": "*",
+    "@repo/emails": "*",
+    "@repo/infrastructure": "*"
+  }
+}

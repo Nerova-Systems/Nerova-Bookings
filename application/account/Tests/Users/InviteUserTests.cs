@@ -1,4 +1,5 @@
 using System.Net;
+using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text.Json;
 using Account.Database;
@@ -6,6 +7,7 @@ using Account.Features.Users.Commands;
 using Account.Features.Users.Domain;
 using FluentAssertions;
 using NSubstitute;
+using SharedKernel.Authentication;
 using SharedKernel.Domain;
 using SharedKernel.Integrations.Email;
 using SharedKernel.Tests;
@@ -63,8 +65,52 @@ public sealed class InviteUserTests : EndpointBaseTest<AccountDbContext>
         await EmailClient.Received(1).SendAsync(
             Arg.Is<EmailMessage>(m =>
                 m.Recipient == email.ToLower() &&
-                m.Subject == $"You have been invited to join {tenantName} on PlatformPlatform" &&
-                m.HtmlBody.Contains("To gain access")
+                m.Subject == "You have been invited to PlatformPlatform" &&
+                m.HtmlBody.Contains("invited you to join PlatformPlatform.") &&
+                m.HtmlBody.Contains("To gain access, click the button below and login using") &&
+                m.PlainTextBody.Contains("invited you to join PlatformPlatform.") &&
+                m.PlainTextBody.Contains(email.ToLower())
+            ),
+            Arg.Any<CancellationToken>()
+        );
+    }
+
+    [Fact]
+    public async Task InviteUser_WhenInviterHasDanishLocale_ShouldSendDanishInviteEmail()
+    {
+        // Arrange
+        var tenantName = "Test Company";
+        Connection.Update("tenants", "id", DatabaseSeeder.Tenant1.Id.ToString(), [("name", tenantName)]);
+
+        var danishOwnerInfo = new UserInfo
+        {
+            IsAuthenticated = true,
+            Id = DatabaseSeeder.Tenant1Owner.Id,
+            TenantId = DatabaseSeeder.Tenant1Owner.TenantId,
+            SessionId = DatabaseSeeder.Tenant1OwnerSession.Id,
+            Role = DatabaseSeeder.Tenant1Owner.Role.ToString(),
+            Email = DatabaseSeeder.Tenant1Owner.Email,
+            Locale = "da-DK"
+        };
+        var danishOwnerToken = AccessTokenGenerator.Generate(danishOwnerInfo);
+        AuthenticatedOwnerHttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", danishOwnerToken);
+
+        var email = Faker.Internet.UniqueEmail();
+        var command = new InviteUserCommand(email);
+
+        // Act
+        var response = await AuthenticatedOwnerHttpClient.PostAsJsonAsync("/api/account/users/invite", command);
+
+        // Assert
+        await response.ShouldBeSuccessfulPostRequest(hasLocation: false);
+
+        await EmailClient.Received(1).SendAsync(
+            Arg.Is<EmailMessage>(m =>
+                m.Recipient == email.ToLower() &&
+                m.Subject == "Du er inviteret til PlatformPlatform" &&
+                m.HtmlBody.Contains("har inviteret dig til at deltage i PlatformPlatform.") &&
+                m.PlainTextBody.Contains("har inviteret dig til at deltage i PlatformPlatform.") &&
+                m.PlainTextBody.Contains(email.ToLower())
             ),
             Arg.Any<CancellationToken>()
         );

@@ -8,6 +8,7 @@ import {
   LayoutGridIcon,
   LayoutTemplateIcon,
   type LucideIcon,
+  MailIcon,
   MousePointerClickIcon,
   PanelLeftIcon,
   PanelsTopLeftIcon,
@@ -33,7 +34,8 @@ export const componentsSections: readonly PreviewSection[] = [
   { hash: "resizable", label: <Trans>Resizable panels</Trans>, icon: LayoutDashboardIcon },
   { hash: "sidebar", label: <Trans>Sidebar</Trans>, icon: PanelLeftIcon },
   { hash: "tabs", label: <Trans>Tabs</Trans>, icon: SquareMousePointerIcon },
-  { hash: "media", label: <Trans>Media</Trans>, icon: ImageIcon }
+  { hash: "media", label: <Trans>Media</Trans>, icon: ImageIcon },
+  { hash: "emails", label: <Trans>Emails</Trans>, icon: MailIcon }
 ];
 
 export const examplesSections: readonly PreviewSection[] = [

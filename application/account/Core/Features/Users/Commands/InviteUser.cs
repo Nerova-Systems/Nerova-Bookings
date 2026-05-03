@@ -1,9 +1,11 @@
 using Account.Features.Tenants.Domain;
 using Account.Features.Users.Domain;
+using Account.Features.Users.EmailTemplates;
 using FluentValidation;
 using JetBrains.Annotations;
 using SharedKernel.Authentication;
 using SharedKernel.Cqrs;
+using SharedKernel.Emails;
 using SharedKernel.ExecutionContext;
 using SharedKernel.Integrations.Email;
 using SharedKernel.SinglePageApp;
@@ -29,6 +31,7 @@ public sealed class InviteUserValidator : AbstractValidator<InviteUserCommand>
 public sealed class InviteUserHandler(
     IUserRepository userRepository,
     ITenantRepository tenantRepository,
+    IEmailRenderer emailRenderer,
     IEmailClient emailClient,
     IExecutionContext executionContext,
     IMediator mediator,
@@ -76,21 +79,16 @@ public sealed class InviteUserHandler(
 
         var loginPath = $"{Environment.GetEnvironmentVariable(SinglePageAppConfiguration.PublicUrlKey)}/login";
         var inviter = $"{executionContext.UserInfo.FirstName} {executionContext.UserInfo.LastName}".Trim();
-        inviter = inviter.Length > 0 ? inviter : executionContext.UserInfo.Email;
+        inviter = inviter.Length > 0 ? inviter : executionContext.UserInfo.Email ?? string.Empty;
+        var inviterLocale = executionContext.UserInfo.Locale ?? "en-US";
+
+        var template = new InviteUserEmailTemplate(
+            inviterLocale,
+            new InviteUserEmailModel(inviter, tenant.Name, command.Email.ToLower(), loginPath)
+        );
+        var rendered = emailRenderer.RenderEmail(template);
         await emailClient.SendAsync(
-            new EmailMessage(
-                command.Email.ToLower(),
-                $"You have been invited to join {tenant.Name} on PlatformPlatform",
-                $"""
-                 <h1 style="text-align:center;font-family:sans-serif;font-size:20px">
-                   <b>{inviter}</b> invited you to join PlatformPlatform.
-                 </h1>
-                 <p style="text-align:center;font-family:sans-serif;font-size:16px">
-                   To gain access, <a href="{loginPath}" target="blank">go to this page in your open browser</a> and login using <b>{command.Email.ToLower()}</b>.
-                 </p>
-                 """,
-                string.Empty
-            ),
+            new EmailMessage(command.Email.ToLower(), rendered.Subject, rendered.HtmlBody, rendered.PlainTextBody),
             cancellationToken
         );
 

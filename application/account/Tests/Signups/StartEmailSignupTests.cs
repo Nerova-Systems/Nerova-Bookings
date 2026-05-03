@@ -42,7 +42,40 @@ public sealed class StartEmailSignupTests : EndpointBaseTest<AccountDbContext>
             Arg.Is<EmailMessage>(m =>
                 m.Recipient == email.ToLower() &&
                 m.Subject == "Confirm your email address" &&
-                m.HtmlBody.Contains("Your confirmation code is below")
+                m.HtmlBody.Contains("Your confirmation code is below") &&
+                m.HtmlBody.Contains("Enter it in your open browser window. It is only valid for a few minutes.") &&
+                m.PlainTextBody.Contains("Your confirmation code is below") &&
+                m.PlainTextBody.TrimEnd().Contains("@localhost #")
+            ),
+            Arg.Any<CancellationToken>()
+        );
+    }
+
+    [Fact]
+    public async Task StartSignup_WhenAnonymous_ShouldFallBackToDefaultLocale()
+    {
+        // Anonymous signup has no User row to read Locale from, and the API pipeline does not run
+        // UseRequestLocalization, so the inviter Accept-Language header is ignored. Anonymous signups
+        // therefore always render in the en-US default locale.
+        // Arrange
+        var email = Faker.Internet.UniqueEmail();
+        var command = new StartEmailSignupCommand(email);
+        AnonymousHttpClient.DefaultRequestHeaders.AcceptLanguage.Clear();
+        AnonymousHttpClient.DefaultRequestHeaders.AcceptLanguage.ParseAdd("da-DK");
+
+        // Act
+        var response = await AnonymousHttpClient.PostAsJsonAsync("/api/account/authentication/email/signup/start", command);
+
+        // Assert
+        response.EnsureSuccessStatusCode();
+
+        await EmailClient.Received(1).SendAsync(
+            Arg.Is<EmailMessage>(m =>
+                m.Recipient == email.ToLower() &&
+                m.Subject == "Confirm your email address" &&
+                m.HtmlBody.Contains("Your confirmation code is below") &&
+                m.PlainTextBody.Contains("Your confirmation code is below") &&
+                m.PlainTextBody.TrimEnd().Contains("@localhost #")
             ),
             Arg.Any<CancellationToken>()
         );

@@ -1064,6 +1064,9 @@ msgstr ""
 msgid "Email support"
 msgstr "E-mail-support"
 
+msgid "Emails"
+msgstr "E-mails"
+
 msgid "Empty"
 msgstr "Tom"
 
@@ -1486,6 +1489,9 @@ msgstr "Indlæser..."
 
 msgid "Local seasonal"
 msgstr "Lokalt og sæsonbestemt"
+
+msgid "Locale"
+msgstr "Sprog"
 
 msgid "Log in"
 msgstr "Log ind"
@@ -2552,6 +2558,9 @@ msgstr "Fortæl os lidt om dig selv for at komme i gang."
 
 msgid "Tell us more..."
 msgstr "Fortæl os mere..."
+
+msgid "Template"
+msgstr "Skabelon"
 
 msgid "Terms"
 msgstr "Vilkår"

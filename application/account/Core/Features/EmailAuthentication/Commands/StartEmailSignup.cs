@@ -1,8 +1,10 @@
 using Account.Features.EmailAuthentication.Domain;
+using Account.Features.EmailAuthentication.EmailTemplates;
 using Account.Features.EmailAuthentication.Shared;
 using FluentValidation;
 using JetBrains.Annotations;
 using SharedKernel.Cqrs;
+using SharedKernel.ExecutionContext;
 using SharedKernel.Telemetry;
 using SharedKernel.Validation;
 
@@ -25,20 +27,22 @@ public sealed class StartEmailSignupValidator : AbstractValidator<StartEmailSign
     }
 }
 
-public sealed class StartEmailSignupHandler(StartEmailConfirmation startEmailConfirmation, ITelemetryEventsCollector events)
-    : IRequestHandler<StartEmailSignupCommand, Result<StartEmailSignupResponse>>
+public sealed class StartEmailSignupHandler(
+    StartEmailConfirmation startEmailConfirmation,
+    IExecutionContext executionContext,
+    ITelemetryEventsCollector events
+) : IRequestHandler<StartEmailSignupCommand, Result<StartEmailSignupResponse>>
 {
     public async Task<Result<StartEmailSignupResponse>> Handle(StartEmailSignupCommand command, CancellationToken cancellationToken)
     {
+        var locale = executionContext.UserInfo.Locale ?? "en-US";
+        var domain = EmailDomainHelper.GetPublicHost();
+        var expiryMinutes = EmailLogin.ValidForSeconds / 60;
+
         var result = await startEmailConfirmation.StartAsync(
             command.Email,
-            "Confirm your email address",
-            """
-            <h1 style="text-align:center;font-family=sans-serif;font-size:20px">Your confirmation code is below</h1>
-            <p style="text-align:center;font-family=sans-serif;font-size:16px">Enter it in your open browser window. It is only valid for a few minutes.</p>
-            <p style="text-align:center;font-family=sans-serif;font-size:40px;background:#f5f4f5">{oneTimePassword}</p>
-            """,
             EmailLoginType.Signup,
+            oneTimePassword => new StartSignupEmailTemplate(locale, new StartSignupEmailModel(oneTimePassword, domain, expiryMinutes)),
             cancellationToken
         );
 

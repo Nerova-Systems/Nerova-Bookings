@@ -12,7 +12,7 @@ export function createLinguiConfig(): LinguiConfig {
       {
         path: "<rootDir>/shared/translations/locale/{locale}",
         include: ["<rootDir>/**/*.ts", "<rootDir>/**/*.tsx"],
-        exclude: ["**/node_modules/**", "**/dist", "**/*.d.ts", "**/*.test.*", "**/.*"]
+        exclude: ["**/node_modules/**", "**/dist", "**/*.d.ts", "**/*.test.*", "**/.*", "**/emails/**"]
       }
     ],
     format: formatter({ origins: false })
