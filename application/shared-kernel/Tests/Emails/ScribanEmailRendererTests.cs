@@ -1,32 +1,25 @@
 using FluentAssertions;
-using HandlebarsDotNet;
+using Scriban.Runtime;
 using SharedKernel.Emails;
 using Xunit;
 
 namespace SharedKernel.Tests.Emails;
 
-public sealed class HandlebarsEmailRendererTests
+public sealed class ScribanEmailRendererTests
 {
-    private readonly IHandlebars _handlebars = CreateHandlebars();
+    private readonly ScriptObject _helpers = EmailHelpers.CreateScriptObject();
 
-    private static IHandlebars CreateHandlebars()
+    private ScribanEmailRenderer CreateRenderer(string html, string plainText)
     {
-        var handlebars = Handlebars.Create();
-        EmailHelpers.Register(handlebars);
-        return handlebars;
-    }
-
-    private HandlebarsEmailRenderer CreateRenderer(string html, string plainText)
-    {
-        return new HandlebarsEmailRenderer(_handlebars, new InMemoryEmailTemplateLoader(html, plainText));
+        return new ScribanEmailRenderer(_helpers, new InMemoryEmailTemplateLoader(html, plainText));
     }
 
     [Fact]
     public void RenderEmail_WhenTemplateHasVariables_ShouldSubstituteFromModel()
     {
         // Arrange
-        var html = "<html><head><title>Hello {{name}}</title></head><body><p>Welcome, {{name}}!</p></body></html>";
-        var plainText = "Welcome, {{name}}!";
+        var html = "<html><head><title>Hello {{ name }}</title></head><body><p>Welcome, {{ name }}!</p></body></html>";
+        var plainText = "Welcome, {{ name }}!";
         var renderer = CreateRenderer(html, plainText);
         var template = new TestTemplate("welcome", "en-US", new { name = "Alice" });
 
@@ -43,8 +36,8 @@ public sealed class HandlebarsEmailRendererTests
     public void RenderEmail_WhenTemplateHasLoop_ShouldRenderEachItem()
     {
         // Arrange
-        var html = "<html><head><title>Order</title></head><body><ul>{{#each items}}<li>{{this}}</li>{{/each}}</ul></body></html>";
-        var plainText = "{{#each items}}- {{this}}\n{{/each}}";
+        var html = "<html><head><title>Order</title></head><body><ul>{{ for item in items }}<li>{{ item }}</li>{{ end }}</ul></body></html>";
+        var plainText = "{{ for item in items }}- {{ item }}\n{{ end }}";
         var renderer = CreateRenderer(html, plainText);
         var template = new TestTemplate("order", "en-US", new { items = new[] { "Apple", "Banana", "Cherry" } });
 
@@ -60,8 +53,8 @@ public sealed class HandlebarsEmailRendererTests
     public void RenderEmail_WhenTemplateHasConditional_ShouldRenderBranch()
     {
         // Arrange
-        var html = "<html><head><title>Receipt</title></head><body>{{#if paid}}Thank you!{{else}}Please pay.{{/if}}</body></html>";
-        var plainText = "{{#if paid}}Thank you!{{else}}Please pay.{{/if}}";
+        var html = "<html><head><title>Receipt</title></head><body>{{ if paid }}Thank you!{{ else }}Please pay.{{ end }}</body></html>";
+        var plainText = "{{ if paid }}Thank you!{{ else }}Please pay.{{ end }}";
         var renderer = CreateRenderer(html, plainText);
 
         // Act
@@ -79,8 +72,8 @@ public sealed class HandlebarsEmailRendererTests
     public void RenderEmail_WhenFormatCurrencyHelperUsedInEnUs_ShouldFormatWithDollar()
     {
         // Arrange
-        var html = "<html><head><title>Invoice</title></head><body>{{formatCurrency amount currency=\"USD\" locale=\"en-US\"}}</body></html>";
-        var renderer = CreateRenderer(html, "{{formatCurrency amount currency=\"USD\" locale=\"en-US\"}}");
+        var html = "<html><head><title>Invoice</title></head><body>{{ amount | format_currency \"USD\" \"en-US\" }}</body></html>";
+        var renderer = CreateRenderer(html, "{{ amount | format_currency \"USD\" \"en-US\" }}");
         var template = new TestTemplate("invoice", "en-US", new { amount = 1234.56m });
 
         // Act
@@ -94,8 +87,8 @@ public sealed class HandlebarsEmailRendererTests
     public void RenderEmail_WhenFormatCurrencyHelperUsedInDaDk_ShouldFormatWithKronerAndDanishGrouping()
     {
         // Arrange
-        var html = "<html><head><title>Faktura</title></head><body>{{formatCurrency amount currency=\"DKK\" locale=\"da-DK\"}}</body></html>";
-        var renderer = CreateRenderer(html, "{{formatCurrency amount currency=\"DKK\" locale=\"da-DK\"}}");
+        var html = "<html><head><title>Faktura</title></head><body>{{ amount | format_currency \"DKK\" \"da-DK\" }}</body></html>";
+        var renderer = CreateRenderer(html, "{{ amount | format_currency \"DKK\" \"da-DK\" }}");
         var template = new TestTemplate("faktura", "da-DK", new { amount = 1234.56m });
 
         // Act
@@ -110,8 +103,8 @@ public sealed class HandlebarsEmailRendererTests
     {
         // Arrange
         var date = new DateTimeOffset(2026, 5, 3, 10, 0, 0, TimeSpan.Zero);
-        var html = "<html><head><title>Date</title></head><body>{{formatDate date locale=\"en-US\"}}</body></html>";
-        var plainText = "{{formatDate date locale=\"da-DK\"}}";
+        var html = "<html><head><title>Date</title></head><body>{{ date | format_date \"en-US\" }}</body></html>";
+        var plainText = "{{ date | format_date \"da-DK\" }}";
         var renderer = CreateRenderer(html, plainText);
         var template = new TestTemplate("date", "en-US", new { date });
 
@@ -128,8 +121,8 @@ public sealed class HandlebarsEmailRendererTests
     {
         // Arrange
         var date = new DateTimeOffset(2026, 5, 3, 10, 0, 0, TimeSpan.Zero);
-        var html = "<html><head><title>Date</title></head><body>{{formatDate date locale=\"en-US\" format=\"yyyy-MM-dd\"}}</body></html>";
-        var renderer = CreateRenderer(html, "{{formatDate date locale=\"en-US\" format=\"yyyy-MM-dd\"}}");
+        var html = "<html><head><title>Date</title></head><body>{{ date | format_date \"en-US\" \"yyyy-MM-dd\" }}</body></html>";
+        var renderer = CreateRenderer(html, "{{ date | format_date \"en-US\" \"yyyy-MM-dd\" }}");
         var template = new TestTemplate("date", "en-US", new { date });
 
         // Act
@@ -147,8 +140,8 @@ public sealed class HandlebarsEmailRendererTests
     public void RenderEmail_WhenPluralizeHelperUsed_ShouldPickCorrectForm(int count, string expected)
     {
         // Arrange
-        var html = "<html><head><title>Cart</title></head><body>{{pluralize count \"item\"}}</body></html>";
-        var renderer = CreateRenderer(html, "{{pluralize count \"item\"}}");
+        var html = "<html><head><title>Cart</title></head><body>{{ count | pluralize \"item\" }}</body></html>";
+        var renderer = CreateRenderer(html, "{{ count | pluralize \"item\" }}");
         var template = new TestTemplate("cart", "en-US", new { count });
 
         // Act
@@ -162,8 +155,8 @@ public sealed class HandlebarsEmailRendererTests
     public void RenderEmail_WhenPluralizeHelperWithExplicitPlural_ShouldUseProvidedPlural()
     {
         // Arrange
-        var html = "<html><head><title>Cart</title></head><body>{{pluralize count \"child\" \"children\"}}</body></html>";
-        var renderer = CreateRenderer(html, "{{pluralize count \"child\" \"children\"}}");
+        var html = "<html><head><title>Cart</title></head><body>{{ count | pluralize \"child\" \"children\" }}</body></html>";
+        var renderer = CreateRenderer(html, "{{ count | pluralize \"child\" \"children\" }}");
 
         // Act
         var single = renderer.RenderEmail(new TestTemplate("cart", "en-US", new { count = 1 }));
@@ -178,8 +171,8 @@ public sealed class HandlebarsEmailRendererTests
     public void RenderEmail_WhenHtmlAndPlainTextShareModel_ShouldProduceConsistentValues()
     {
         // Arrange: a finance-style template using all three helpers in both formats.
-        var html = "<html><head><title>Receipt for {{customer}}</title></head><body><p>{{customer}}, you owe {{formatCurrency amount currency=\"USD\" locale=\"en-US\"}} due on {{formatDate dueDate locale=\"en-US\" format=\"yyyy-MM-dd\"}} ({{pluralize lineItemCount \"item\"}}).</p></body></html>";
-        var plainText = "{{customer}}, you owe {{formatCurrency amount currency=\"USD\" locale=\"en-US\"}} due on {{formatDate dueDate locale=\"en-US\" format=\"yyyy-MM-dd\"}} ({{pluralize lineItemCount \"item\"}}).";
+        var html = "<html><head><title>Receipt for {{ customer }}</title></head><body><p>{{ customer }}, you owe {{ amount | format_currency \"USD\" \"en-US\" }} due on {{ dueDate | format_date \"en-US\" \"yyyy-MM-dd\" }} ({{ lineItemCount | pluralize \"item\" }}).</p></body></html>";
+        var plainText = "{{ customer }}, you owe {{ amount | format_currency \"USD\" \"en-US\" }} due on {{ dueDate | format_date \"en-US\" \"yyyy-MM-dd\" }} ({{ lineItemCount | pluralize \"item\" }}).";
         var renderer = CreateRenderer(html, plainText);
         var template = new TestTemplate("receipt", "en-US", new
             {
@@ -218,9 +211,8 @@ public sealed class HandlebarsEmailRendererTests
     {
         // Arrange: real loader pointed at a temp directory with no template files.
         using var tempDir = new TemporaryDirectory();
-        var handlebars = CreateHandlebars();
         var loader = new FileSystemEmailTemplateLoader(tempDir.Path, false);
-        var renderer = new HandlebarsEmailRenderer(handlebars, loader);
+        var renderer = new ScribanEmailRenderer(_helpers, loader);
 
         // Act
         var act = () => renderer.RenderEmail(new TestTemplate("missing", "en-US", new { }));
@@ -233,7 +225,7 @@ public sealed class HandlebarsEmailRendererTests
     public void RenderEmail_WhenSubjectHasInternalWhitespace_ShouldCollapseToSingleSpaces()
     {
         // Arrange: title with newlines/tabs inside should produce a clean subject.
-        var html = "<html><head><title>\n  Hello\t  {{name}}  \n</title></head><body></body></html>";
+        var html = "<html><head><title>\n  Hello\t  {{ name }}  \n</title></head><body></body></html>";
         var renderer = CreateRenderer(html, "");
         var template = new TestTemplate("hello", "en-US", new { name = "Alice" });
 
@@ -242,6 +234,45 @@ public sealed class HandlebarsEmailRendererTests
 
         // Assert
         result.Subject.Should().Be("Hello Alice");
+    }
+
+    [Fact]
+    public void RenderEmail_WhenModelHasPascalCaseProperties_ShouldPreserveOriginalNames()
+    {
+        // Regression guard for the identity renamer in ScribanEmailRenderer. Without it, Scriban's default
+        // member renamer rewrites PascalCase property names to snake_case during Import (e.g., OneTimePassword
+        // -> one_time_password), silently breaking every production email template that references the model
+        // with its original C# name like {{ OneTimePassword }} or {{ TenantName }}.
+        var html = "<html><head><title>Code: {{ OneTimePassword }}</title></head><body><p>Tenant: {{ TenantName }}, login at {{ LoginUrl }}</p></body></html>";
+        var renderer = CreateRenderer(html, "Code: {{ OneTimePassword }} for {{ TenantName }}");
+        var template = new TestTemplate("pascal-case", "en-US", new
+            {
+                OneTimePassword = "ABC123",
+                TenantName = "Acme",
+                LoginUrl = "https://example.com/login"
+            }
+        );
+
+        // Act
+        var result = renderer.RenderEmail(template);
+
+        // Assert
+        result.Subject.Should().Be("Code: ABC123");
+        result.HtmlBody.Should().Contain("Tenant: Acme, login at https://example.com/login");
+        result.PlainTextBody.Should().Be("Code: ABC123 for Acme");
+    }
+
+    [Fact]
+    public void RenderEmail_WhenTemplateHasParseError_ShouldThrowWithTemplateName()
+    {
+        // Arrange: unterminated for-loop should be caught at parse time.
+        var renderer = CreateRenderer("<html><head><title>Bad</title></head><body>{{ for x in items }}no end</body></html>", "");
+
+        // Act
+        var act = () => renderer.RenderEmail(new TestTemplate("bad-template", "en-US", new { items = Array.Empty<string>() }));
+
+        // Assert
+        act.Should().Throw<InvalidOperationException>().WithMessage("*bad-template*Scriban*");
     }
 
     private sealed record TestTemplate(string Name, string Locale, object Model) : EmailTemplateBase(Name, Locale, Model);

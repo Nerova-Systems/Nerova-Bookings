@@ -66,7 +66,7 @@ export default function Demo({ locale }: DemoProps) {
         <Loop path="items" sample={[{ name: "Invoice 1042" }, { name: "Invoice 1043" }]}>
           {() => (
             <div>
-              - <Value path="name" sample="" />
+              - <Value path="item.name" sample="" />
             </div>
           )}
         </Loop>
@@ -76,8 +76,7 @@ export default function Demo({ locale }: DemoProps) {
         <If path="hasOutstandingBalance" sample={true}>
           <Badge variant="warning">
             <Trans>
-              Outstanding balance:{" "}
-              <Value path='formatCurrency balance currency="USD" locale="en-US"' sample="$129.00" />
+              Outstanding balance: <Value path='balance | format_currency "USD" "en-US"' sample="$129.00" />
             </Trans>
           </Badge>
           <Else>

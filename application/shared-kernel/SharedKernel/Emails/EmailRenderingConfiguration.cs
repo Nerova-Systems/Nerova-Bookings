@@ -1,7 +1,7 @@
-using HandlebarsDotNet;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
+using Scriban.Runtime;
 using SharedKernel.Configuration;
 
 namespace SharedKernel.Emails;
@@ -40,16 +40,10 @@ public static class EmailRenderingConfiguration
         {
             var emailsDistPath = ResolveEmailsDistPath(webAppProjectName);
 
-            services.AddSingleton<IHandlebars>(_ =>
-                {
-                    var handlebars = Handlebars.Create();
-                    EmailHelpers.Register(handlebars);
-                    return handlebars;
-                }
-            );
+            services.AddSingleton<ScriptObject>(_ => EmailHelpers.CreateScriptObject());
 
             services.AddSingleton<IEmailTemplateLoader>(_ => new FileSystemEmailTemplateLoader(emailsDistPath, !SharedInfrastructureConfiguration.IsRunningInAzure));
-            services.AddSingleton<IEmailRenderer, HandlebarsEmailRenderer>();
+            services.AddSingleton<IEmailRenderer, ScribanEmailRenderer>();
 
             return services;
         }

@@ -14,24 +14,25 @@ type ElseProps = {
   children: ReactNode;
 };
 
-// Emits {{#if path}}...{{else}}...{{/if}} in build mode and selects the matching branch in preview
-// mode. The truthy branch is everything outside <Else>, and the falsy branch is the (optional) <Else>
-// child. Authors write a single <If> with a nested <Else> sibling rather than a paired component.
+// Emits {{ if path }}...{{ else }}...{{ end }} in build mode and selects the matching branch in
+// preview mode. The truthy branch is everything outside <Else>, and the falsy branch is the
+// (optional) <Else> child. Authors write a single <If> with a nested <Else> sibling rather than a
+// paired component.
 export function If({ path, sample, children }: IfProps) {
   const { truthy, falsy } = splitElseBranch(children);
 
   if (getEmailRenderMode() === "build") {
     return (
       <>
-        {`{{#if ${path}}}`}
+        {`{{ if ${path} }}`}
         {truthy}
         {falsy === null ? null : (
           <>
-            {"{{else}}"}
+            {"{{ else }}"}
             {falsy}
           </>
         )}
-        {"{{/if}}"}
+        {"{{ end }}"}
       </>
     );
   }

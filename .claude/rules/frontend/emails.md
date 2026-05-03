@@ -1,11 +1,11 @@
 ---
 paths: application/*/WebApp/emails/**,application/shared-webapp/emails/**
-description: Authoring localized transactional email templates with React Email plus the @repo/emails component library and Handlebars helpers
+description: Authoring localized transactional email templates with React Email plus the @repo/emails component library and Scriban helpers
 ---
 
 # Emails
 
-Guidelines for authoring transactional email templates that ship as Handlebars-substituted HTML and plaintext for the .NET backend's email renderer.
+Guidelines for authoring transactional email templates that ship as Scriban-substituted HTML and plaintext for the .NET backend's email renderer.
 
 ## Implementation
 
@@ -20,17 +20,20 @@ Guidelines for authoring transactional email templates that ship as Handlebars-s
    - Add new components only when an existing one is genuinely insufficient — prefer composition
    - Style with Tailwind classes already supported by `@react-email/components`. Email-friendly Tailwind cannot inline complex selectors, so avoid `[&_*]:`, `first:[&_*]:`, and similar child-combinator variants — use inline `style={{ ... }}` for per-child overrides instead
 
-3. Substitute runtime values with the JSX helpers — never hand-write `{{...}}`:
-   - `<Value path="user.firstName" sample="Alex" />` → emits `{{user.firstName}}` in the build, renders `Alex` in the dev preview
-   - `<Loop path="items" sample={[{...}, {...}]}>{(item) => <div><Value path="name" sample="" /></div>}</Loop>` → emits `{{#each items}}...{{/each}}`
-   - `<If path="hasBalance" sample={true}>...<Else>...</Else></If>` → emits `{{#if hasBalance}}...{{else}}...{{/if}}`. Omit `<Else>` to skip the else branch
+3. Substitute runtime values with the JSX helpers — never hand-write `{{ ... }}` in text content:
+   - `<Value path="user.firstName" sample="Alex" />` → emits `{{ user.firstName }}` in the build, renders `Alex` in the dev preview
+   - `<Loop path="items" sample={[{...}, {...}]}>{() => <div><Value path="item.name" sample="" /></div>}</Loop>` → emits `{{ for item in items }}...{{ end }}`. The iteration variable inside the loop is always named `item` (this is the Scriban binding name, fixed by the helper — the JSX render callback parameter is unused), so field references inside the loop must use `item.field` (Scriban requires explicit binding for field access; there is no implicit `this` like in Handlebars `{{#each}}`)
+   - `<If path="hasBalance" sample={true}>...<Else>...</Else></If>` → emits `{{ if hasBalance }}...{{ else }}...{{ end }}`. Omit `<Else>` to skip the else branch
    - `<OtpAutofill code="otpCode" domain="domain" />` emits the iOS-compatible `@{domain} #{code}` autofill suffix; place it once at the end of the template body so it lands on the last line of the plaintext output
+   - **Exception — HTML attributes and Trans strings.** `<Value>` renders a `<span>`, so it cannot live inside attributes like `href` or inside the literal text of a `<Trans>` marker. In those two cases, hand-write the Scriban placeholder verbatim:
+     - Attribute: `<Link href="{{LoginUrl}}">…</Link>` (the entire attribute value is a single placeholder)
+     - Trans string: `<Trans>{`You have been invited to join '{{'TenantName'}}' on PlatformPlatform`}</Trans>` — the ICU single-quote escape `'{{'…'}}'` is required so Lingui doesn't mistake `{{TenantName}}` for an ICU placeholder. The same escaped form lands verbatim in the `.po` files
 
-4. Use the Handlebars helpers registered in `SharedKernel/Emails/EmailHelpers.cs` for value formatting:
-   - `formatCurrency amount currency="USD" locale="en-US"` — both `currency` and `locale` are required
-   - `formatDate value locale="en-US" format?="yyyy-MM-dd"` — `format` is optional and defaults to the locale's long date pattern
-   - `pluralize count "singular" "plural"?` — the explicit plural is optional; Humanizer derives one when omitted
-   - Pass these as the `path` of `<Value>` (e.g., `<Value path={'formatCurrency balance currency="USD" locale="en-US"'} sample="$129.00" />`). `<Value>` renders raw HTML in build mode so the embedded quotes are preserved verbatim for Handlebars
+4. Use the Scriban helpers registered in `SharedKernel/Emails/EmailHelpers.cs` for value formatting (called with Scriban pipe syntax):
+   - `amount | format_currency "USD" "en-US"` — both currency code and locale are required
+   - `value | format_date "en-US" "yyyy-MM-dd"?` — format is optional and defaults to the locale's long date pattern
+   - `count | pluralize "singular" "plural"?` — explicit plural is optional; Humanizer derives one when omitted
+   - Pass these as the `path` of `<Value>` (e.g., `<Value path={'balance | format_currency "USD" "en-US"'} sample="$129.00" />`). `<Value>` renders raw HTML in build mode so the embedded quotes are preserved verbatim for Scriban
 
 5. Translate every user-facing string with the Lingui macro form, exactly like the rest of the app:
    - Import `Trans` from `@lingui/react/macro` and use the children form: `<Trans>Welcome to PlatformPlatform</Trans>`. Lingui's CLI applies the macro at extract time to populate `.po` ids, and the email build aliases `@lingui/react/macro` (via `tsconfig.json` paths and a tiny runtime wrapper at `application/shared-webapp/emails/build/lingui-macro-runtime.tsx`) so Node-side rendering produces the same id-and-message contract the macro generates in the SPA build
@@ -83,11 +86,11 @@ export default function Welcome({ locale }: { locale: string }) {
 ### Example 2 - Helpers and Conditional Branches
 
 ```tsx
-// ✅ DO: Use the macro form and let the helpers stand in for runtime values
+// ✅ DO: Use the macro form, prefix loop fields with `item.`, and pipe values through helpers
 <Loop path="invoices" sample={[{ id: "1042" }, { id: "1043" }]}>
   {() => (
     <div>
-      <Trans>Invoice <Value path="id" sample="" /></Trans>
+      <Trans>Invoice <Value path="item.id" sample="" /></Trans>
     </div>
   )}
 </Loop>
@@ -95,16 +98,21 @@ export default function Welcome({ locale }: { locale: string }) {
 <If path="hasBalance" sample={true}>
   <Trans>
     Outstanding balance:{" "}
-    <Value path={'formatCurrency balance currency="USD" locale="en-US"'} sample="$129.00" />
+    <Value path={'balance | format_currency "USD" "en-US"'} sample="$129.00" />
   </Trans>
   <Else>
     <Trans>You are all caught up.</Trans>
   </Else>
 </If>
 
-// ❌ DON'T: Hand-write Handlebars in JSX strings or invent opaque ids
-<div>{"{{#each invoices}}{{id}}{{/each}}"}</div>
+// ❌ DON'T: Hand-write Scriban in JSX strings or invent opaque ids
+<div>{"{{ for invoice in invoices }}{{ invoice.id }}{{ end }}"}</div>
 <Trans id="email.invoice.line">Invoice <0/></Trans>
+
+// ❌ DON'T: Reference loop fields without the `item.` prefix — Scriban needs explicit binding
+<Loop path="invoices" sample={[{ id: "1042" }]}>
+  {() => <div><Value path="id" sample="" /></div>}
+</Loop>
 ```
 
 ### Example 3 - OTP Autofill

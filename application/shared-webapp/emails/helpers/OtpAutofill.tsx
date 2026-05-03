@@ -12,8 +12,8 @@ type OtpAutofillProps = {
 // the last line of the .txt artifact — iOS reads from plaintext for autofill detection.
 export function OtpAutofill({ code, domain }: OtpAutofillProps) {
   const isBuild = getEmailRenderMode() === "build";
-  const codeValue = isBuild ? `{{${code}}}` : code;
-  const domainValue = isBuild ? `{{${domain}}}` : domain;
+  const codeValue = isBuild ? `{{ ${code} }}` : code;
+  const domainValue = isBuild ? `{{ ${domain} }}` : domain;
   return (
     <div aria-hidden="true" style={{ display: "none" }}>
       @{domainValue} #{codeValue}

@@ -8,17 +8,18 @@ type LoopProps<T> = {
   children: (item: T, index: number) => ReactNode;
 };
 
-// Emits {{#each path}}...{{/each}} in build mode. In preview mode iterates over `sample` so the
-// dev server renders realistic rows. The render function is invoked once with `this` to capture the
-// per-item markup; field references inside should use <Value path="field" .../> (Handlebars treats
-// {{field}} inside #each as relative to the current item).
+// Emits {{ for item in path }}...{{ end }} in build mode. The iteration variable is always named
+// `item` — references to fields inside the loop body must use <Value path="item.field" sample="..." />.
+// Scriban requires explicit binding for field access (no implicit `this` like Handlebars #each), so
+// authors prepend `item.` to every field reference. In preview mode the loop iterates over `sample`
+// so the React Email dev server renders realistic rows.
 export function Loop<T>({ path, sample, children }: LoopProps<T>) {
   if (getEmailRenderMode() === "build") {
     return (
       <>
-        {`{{#each ${path}}}`}
+        {`{{ for item in ${path} }}`}
         {children(sample[0] as T, 0)}
-        {"{{/each}}"}
+        {"{{ end }}"}
       </>
     );
   }
