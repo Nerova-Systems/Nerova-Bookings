@@ -97,7 +97,8 @@ public sealed class UpdateBillingInfoHandler(
             }
         }
 
-        // Subscription is updated and telemetry is collected in ProcessPendingPaystackEvents when Paystack confirms the state change via webhook
+        subscription.SetBillingInfo(billingInfo);
+        subscriptionRepository.Update(subscription);
 
         return Result.Success();
     }

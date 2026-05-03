@@ -42,7 +42,13 @@ public sealed class ConfirmSubscriptionCheckoutHandler(
 
         var paystackClient = paystackClientFactory.GetClient();
         var checkoutSubscriptionId = await paystackClient.GetCheckoutSessionSubscriptionIdAsync(command.Reference, cancellationToken);
+        PaymentMethod? verifiedPaymentMethod = null;
         if (checkoutSubscriptionId is null)
+        {
+            verifiedPaymentMethod = await paystackClient.GetPaymentMethodFromTransactionAsync(command.Reference, cancellationToken);
+        }
+
+        if (checkoutSubscriptionId is null && verifiedPaymentMethod is null)
         {
             return Result.BadRequest("Payment reference has not been verified by Paystack.");
         }
@@ -65,7 +71,7 @@ public sealed class ConfirmSubscriptionCheckoutHandler(
             paystackState.CurrentPriceAmount,
             paystackState.CurrentPriceCurrency,
             paystackState.CurrentPeriodEnd,
-            paystackState.PaymentMethod
+            paystackState.PaymentMethod ?? verifiedPaymentMethod
         );
         subscription.SetCancellation(paystackState.CancelAtPeriodEnd, paystackState.CancellationReason, paystackState.CancellationFeedback);
 

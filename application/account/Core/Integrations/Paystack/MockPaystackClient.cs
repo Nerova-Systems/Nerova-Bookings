@@ -7,6 +7,8 @@ public sealed class MockPaystackState
 {
     public string? OverrideSubscriptionStatus { get; set; }
 
+    public bool OmitSubscriptionIdFromCheckoutVerification { get; set; }
+
     public bool SimulateSubscriptionDeleted { get; set; }
 
     public bool SimulateCustomerDeleted { get; set; }
@@ -83,6 +85,11 @@ public sealed class MockPaystackClient(IConfiguration configuration, TimeProvide
     public Task<PaystackSubscriptionId?> GetCheckoutSessionSubscriptionIdAsync(string reference, CancellationToken cancellationToken)
     {
         EnsureEnabled();
+        if (state.OmitSubscriptionIdFromCheckoutVerification)
+        {
+            return Task.FromResult<PaystackSubscriptionId?>(null);
+        }
+
         return Task.FromResult<PaystackSubscriptionId?>(PaystackSubscriptionId.NewId(MockSubscriptionId));
     }
 

@@ -34,6 +34,10 @@ public sealed class UpdateBillingInfoTests : EndpointBaseTest<AccountDbContext>
 
         // Assert
         response.ShouldHaveEmptyHeaderAndLocationOnSuccess();
+        Connection.ExecuteScalar<string>(
+            "SELECT billing_info FROM subscriptions WHERE tenant_id = @TenantId",
+            [new { TenantId = DatabaseSeeder.Tenant1.Id.Value }]
+        ).Should().Contain("Test Organization");
     }
 
     [Fact]

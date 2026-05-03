@@ -49,6 +49,29 @@ public sealed class ConfirmSubscriptionCheckoutTests : EndpointBaseTest<AccountD
     }
 
     [Fact]
+    public async Task ConfirmSubscriptionCheckout_WhenVerifiedTransactionHasNoSubscriptionCode_ShouldActivateSubscription()
+    {
+        // Arrange
+        Connection.Update("subscriptions", "tenant_id", DatabaseSeeder.Tenant1.Id.Value, [
+                ("paystack_customer_id", MockPaystackClient.MockCustomerId),
+                ("billing_info", """{"Name":"Test Organization","Address":{"Line1":"Vestergade 12","PostalCode":"1456","City":"Copenhagen","Country":"DK"},"Email":"billing@example.com"}""")
+            ]
+        );
+        PaystackState.OmitSubscriptionIdFromCheckoutVerification = true;
+        var command = new ConfirmSubscriptionCheckoutCommand(MockPaystackClient.MockReference);
+
+        // Act
+        var response = await AuthenticatedOwnerHttpClient.PostAsJsonAsync("/api/account/subscriptions/confirm-checkout", command);
+
+        // Assert
+        response.EnsureSuccessStatusCode();
+        Connection.ExecuteScalar<string>(
+            "SELECT paystack_subscription_id FROM subscriptions WHERE tenant_id = @tenantId",
+            [new { tenantId = DatabaseSeeder.Tenant1.Id.Value }]
+        ).Should().Be(MockPaystackClient.MockSubscriptionId);
+    }
+
+    [Fact]
     public async Task ConfirmSubscriptionCheckout_WhenNonOwner_ShouldReturnForbidden()
     {
         // Arrange
