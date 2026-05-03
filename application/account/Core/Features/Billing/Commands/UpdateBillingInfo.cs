@@ -1,85 +1,105 @@
 using Account.Features.Subscriptions.Domain;
 using Account.Features.Users.Domain;
+using Account.Integrations.Paystack;
 using FluentValidation;
 using JetBrains.Annotations;
 using SharedKernel.Cqrs;
 using SharedKernel.ExecutionContext;
-using SharedKernel.Telemetry;
+using SharedKernel.Validation;
 
 namespace Account.Features.Billing.Commands;
 
 [PublicAPI]
 public sealed record UpdateBillingInfoCommand(
     string Name,
-    string Line1,
-    string? Line2,
+    string Address,
     string PostalCode,
     string City,
     string? State,
     string Country,
     string Email,
     string? TaxId
-) : ICommand, IRequest<Result>;
+)
+    : ICommand, IRequest<Result>;
 
 public sealed class UpdateBillingInfoValidator : AbstractValidator<UpdateBillingInfoCommand>
 {
     public UpdateBillingInfoValidator()
     {
-        RuleFor(x => x.Name).NotEmpty().MaximumLength(200).WithMessage("Name must be between 1 and 200 characters.");
-        RuleFor(x => x.Email).NotEmpty().EmailAddress().MaximumLength(200).WithMessage("A valid email is required.");
-        RuleFor(x => x.Line1).NotEmpty().MaximumLength(200).WithMessage("Address line 1 must be between 1 and 200 characters.");
-        RuleFor(x => x.PostalCode).NotEmpty().MaximumLength(20).WithMessage("Postal code must be between 1 and 20 characters.");
-        RuleFor(x => x.City).NotEmpty().MaximumLength(100).WithMessage("City must be between 1 and 100 characters.");
-        RuleFor(x => x.Country).NotEmpty().Length(2).WithMessage("Country must be a 2-letter ISO code.");
-        RuleFor(x => x.Line2).MaximumLength(200).WithMessage("Address line 2 must be at most 200 characters.");
-        RuleFor(x => x.State).MaximumLength(100).WithMessage("State must be at most 100 characters.");
-        RuleFor(x => x.TaxId).MaximumLength(50).WithMessage("Tax ID must be at most 50 characters.");
+        RuleFor(x => x.Name).Length(1, 100).WithMessage("Name must be between 1 and 100 characters.");
+        RuleFor(x => x.Address).Length(1, 200).WithMessage("Address must be between 1 and 200 characters.");
+        RuleFor(x => x.PostalCode).Length(1, 10).WithMessage("Postal code must be between 1 and 10 characters.");
+        RuleFor(x => x.City).Length(1, 50).WithMessage("City must be between 1 and 50 characters.");
+        RuleFor(x => x.State).MaximumLength(50).WithMessage("State must be no longer than 50 characters.");
+        RuleFor(x => x.Country).Length(2).WithMessage("Country is required.");
+        RuleFor(x => x.Email).SetValidator(new SharedValidations.Email());
+        RuleFor(x => x.TaxId).MaximumLength(20).WithMessage("Tax ID must be no longer than 20 characters.");
     }
 }
 
 public sealed class UpdateBillingInfoHandler(
     ISubscriptionRepository subscriptionRepository,
-    IExecutionContext executionContext,
-    ITelemetryEventsCollector events
+    PaystackClientFactory paystackClientFactory,
+    IExecutionContext executionContext
 ) : IRequestHandler<UpdateBillingInfoCommand, Result>
 {
     public async Task<Result> Handle(UpdateBillingInfoCommand command, CancellationToken cancellationToken)
     {
         if (executionContext.UserInfo.Role != nameof(UserRole.Owner))
         {
-            return Result.Forbidden("Only owners can update billing information.");
+            return Result.Forbidden("Only owners can manage billing information.");
         }
 
         var subscription = await subscriptionRepository.GetCurrentAsync(cancellationToken);
 
-        var isFirstTime = subscription.BillingInfo is null;
+        var paystackClient = paystackClientFactory.GetClient();
+
+        if (subscription.PaystackCustomerId is null)
+        {
+            if (executionContext.UserInfo.Email is null)
+            {
+                return Result.BadRequest("User email is required to create a Paystack customer.");
+            }
+
+            var customerId = await paystackClient.CreateCustomerAsync(command.Name, executionContext.UserInfo.Email, subscription.TenantId.Value, cancellationToken);
+            if (customerId is null)
+            {
+                return Result.BadRequest("Failed to create Paystack customer.");
+            }
+
+            subscription.SetPaystackCustomerId(customerId);
+            subscriptionRepository.Update(subscription);
+        }
+
+        var addressLines = command.Address.Split('\n', 2, StringSplitOptions.TrimEntries);
+        var line1 = addressLines[0];
+        var line2 = addressLines.Length > 1 ? addressLines[1] : null;
 
         var billingInfo = new BillingInfo(
-            command.Name.Trim(),
-            new BillingAddress(
-                command.Line1.Trim(),
-                string.IsNullOrWhiteSpace(command.Line2) ? null : command.Line2.Trim(),
-                command.PostalCode.Trim(),
-                command.City.Trim(),
-                string.IsNullOrWhiteSpace(command.State) ? null : command.State.Trim(),
-                command.Country.Trim().ToUpperInvariant()
-            ),
-            command.Email.Trim().ToLowerInvariant(),
-            string.IsNullOrWhiteSpace(command.TaxId) ? null : command.TaxId.Trim()
+            command.Name,
+            new BillingAddress(line1, line2, command.PostalCode, command.City, command.State, command.Country),
+            command.Email,
+            command.TaxId
         );
 
+        var success = await paystackClient.UpdateCustomerBillingInfoAsync(subscription.PaystackCustomerId!, billingInfo, executionContext.UserInfo.Locale, cancellationToken);
+        if (!success)
+        {
+            return Result.BadRequest("Failed to update billing information in Paystack.");
+        }
+
+        if (command.TaxId != subscription.BillingInfo?.TaxId)
+        {
+            var taxIdSynced = await paystackClient.SyncCustomerTaxIdAsync(subscription.PaystackCustomerId!, command.TaxId, cancellationToken);
+            if (!taxIdSynced)
+            {
+                return Result.BadRequest("TaxId", "The provided Tax ID is not valid.");
+            }
+        }
+
         subscription.SetBillingInfo(billingInfo);
-
-        if (isFirstTime)
-        {
-            events.CollectEvent(new BillingInfoAdded(subscription.Id, billingInfo.Address.Country, billingInfo.Address.PostalCode, billingInfo.Address.City));
-        }
-        else
-        {
-            events.CollectEvent(new BillingInfoUpdated(subscription.Id, billingInfo.Address.Country, billingInfo.Address.PostalCode, billingInfo.Address.City));
-        }
-
         subscriptionRepository.Update(subscription);
+
         return Result.Success();
     }
 }

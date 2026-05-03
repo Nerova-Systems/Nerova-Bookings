@@ -41,7 +41,8 @@ function PublicBookingPage() {
   const createBooking = useCreatePublicBooking(businessSlug);
   const selectedService = profileQuery.data?.services.find((service) => service.id === serviceId);
   const isPhoneVerified = Boolean(phoneVerificationToken);
-  const isSubmitDisabled = !serviceId || !slotStart || !name || !phone || !email || !phoneVerificationToken || createBooking.isPending;
+  const isSubmitDisabled =
+    !serviceId || !slotStart || !name || !phone || !email || !phoneVerificationToken || createBooking.isPending;
 
   useEffect(() => {
     document.title = t`Book appointment | Nerova`;
@@ -123,9 +124,11 @@ function PublicBookingPage() {
     setSlotStart("");
   };
 
-  if (profileQuery.isLoading) return <PublicShell title="Loading booking page" subtitle="Preparing available services." />;
+  if (profileQuery.isLoading)
+    return <PublicShell title="Loading booking page" subtitle="Preparing available services." />;
 
-  if (!profileQuery.data) return <PublicShell title="Booking page unavailable" subtitle="This business is not accepting public bookings." />;
+  if (!profileQuery.data)
+    return <PublicShell title="Booking page unavailable" subtitle="This business is not accepting public bookings." />;
 
   return (
     <main className="min-h-screen bg-muted text-foreground">

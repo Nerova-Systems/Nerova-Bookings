@@ -20,12 +20,16 @@ import { toast } from "sonner";
 
 import { useAppointmentShell } from "@/shared/lib/appointmentsApi";
 import { useCreateIntegrationConnectSession, useSyncIntegrationConnections } from "@/shared/lib/integrationsApi";
-import { useClaimWhatsAppNumber, useProvisionWhatsAppSubaccount, useWhatsAppMessagingStatus } from "@/shared/lib/messagingApi";
+import {
+  useClaimWhatsAppNumber,
+  useProvisionWhatsAppSubaccount,
+  useWhatsAppMessagingStatus
+} from "@/shared/lib/messagingApi";
 import { usePaymentOverview, usePaystackSettlements } from "@/shared/lib/paymentsApi";
 
-import { AppLogo } from "../-components/AppLogo";
-import { INSTALLED_CATEGORIES } from "../-components/appCategories";
 import { APP_CATALOG, type AppCategory } from "../-components/appCatalog";
+import { INSTALLED_CATEGORIES } from "../-components/appCategories";
+import { AppLogo } from "../-components/AppLogo";
 import { PaymentQueue, PaymentStatsPanel, PayoutPanel } from "../../payments/-components/PaymentsPanels";
 import { PaystackSetupDialog } from "../../payments/-components/PaystackSetupDialog";
 import { SettlementPanel } from "../../payments/-components/SettlementPanel";
@@ -57,7 +61,10 @@ function InstalledAppsPage() {
   const googleCalendar = APP_CATALOG.find((app) => app.slug === "google-calendar") ?? APP_CATALOG[0];
   const whatsapp = APP_CATALOG.find((app) => app.slug === "whatsapp") ?? APP_CATALOG[0];
   const calendarIntegration = useMemo(
-    () => shellQuery.data?.integrations.find((integration) => integration.provider === "Google" && integration.capability === "Calendar"),
+    () =>
+      shellQuery.data?.integrations.find(
+        (integration) => integration.provider === "Google" && integration.capability === "Calendar"
+      ),
     [shellQuery.data?.integrations]
   );
 
@@ -108,7 +115,7 @@ function InstalledAppsPage() {
   );
 }
 
-function MessagingInstalledSettings({ app }: { app: typeof APP_CATALOG[number] }) {
+function MessagingInstalledSettings({ app }: { app: (typeof APP_CATALOG)[number] }) {
   const statusQuery = useWhatsAppMessagingStatus();
   const provisionMutation = useProvisionWhatsAppSubaccount();
   const claimNumberMutation = useClaimWhatsAppNumber();
@@ -140,8 +147,18 @@ function MessagingInstalledSettings({ app }: { app: typeof APP_CATALOG[number] }
           <h2 className="font-display text-3xl font-semibold">Messaging</h2>
           <p className="mt-1 text-lg text-white/50">Manage WhatsApp setup, number assignment, and sender readiness</p>
         </div>
-        <Button type="button" variant="outline" disabled={pending} className="ml-auto border-white/15 bg-transparent text-white hover:bg-white/[0.08]" onClick={handleProvision}>
-          {provisionMutation.isPending ? <Loader2Icon className="size-4 animate-spin" /> : <PlusIcon className="size-4" />}
+        <Button
+          type="button"
+          variant="outline"
+          disabled={pending}
+          className="ml-auto border-white/15 bg-transparent text-white hover:bg-white/[0.08]"
+          onClick={handleProvision}
+        >
+          {provisionMutation.isPending ? (
+            <Loader2Icon className="size-4 animate-spin" />
+          ) : (
+            <PlusIcon className="size-4" />
+          )}
           Start setup
         </Button>
         <Button
@@ -151,7 +168,11 @@ function MessagingInstalledSettings({ app }: { app: typeof APP_CATALOG[number] }
           className="border-white/15 bg-transparent text-white hover:bg-white/[0.08]"
           onClick={handleClaimNumber}
         >
-          {claimNumberMutation.isPending ? <Loader2Icon className="size-4 animate-spin" /> : <RefreshCwIcon className="size-4" />}
+          {claimNumberMutation.isPending ? (
+            <Loader2Icon className="size-4 animate-spin" />
+          ) : (
+            <RefreshCwIcon className="size-4" />
+          )}
           Claim ZA number
         </Button>
       </div>
@@ -163,7 +184,9 @@ function MessagingInstalledSettings({ app }: { app: typeof APP_CATALOG[number] }
             <h3 className="text-xl font-semibold">WhatsApp</h3>
             <p className="mt-1 text-lg text-white/45">Provider: Twilio</p>
           </div>
-          <span className="ml-auto rounded-full border border-white/10 px-3 py-1 text-sm text-white/65">{status?.whatsAppApprovalStatus ?? "NotSubmitted"}</span>
+          <span className="ml-auto rounded-full border border-white/10 px-3 py-1 text-sm text-white/65">
+            {status?.whatsAppApprovalStatus ?? "NotSubmitted"}
+          </span>
         </div>
         <div className="border-t border-white/10 bg-[#191919] px-9 py-7">
           {statusQuery.isLoading ? (
@@ -208,7 +231,9 @@ function PaymentInstalledSettings() {
       <div className="mb-9 flex flex-wrap items-start gap-4">
         <div>
           <h2 className="font-display text-3xl font-semibold">Payments</h2>
-          <p className="mt-1 text-lg text-white/50">Manage Paystack payouts, appointment payments, and settlement status</p>
+          <p className="mt-1 text-lg text-white/50">
+            Manage Paystack payouts, appointment payments, and settlement status
+          </p>
         </div>
         <Button type="button" className="ml-auto" onClick={() => setSetupOpen(true)}>
           {subaccount ? "Change bank details" : "Set up bank details"}
@@ -226,7 +251,11 @@ function PaymentInstalledSettings() {
           <PaymentStatsPanel stats={overviewQuery.data?.stats} />
           <div className="grid gap-5 xl:grid-cols-[minmax(0,1.35fr)_minmax(22rem,0.65fr)]">
             <PaymentQueue payments={overviewQuery.data?.recentPayments ?? []} />
-            <SettlementPanel loading={settlementsQuery.isLoading} settlements={settlementsQuery.data ?? []} hasSubaccount={Boolean(subaccount?.isActive)} />
+            <SettlementPanel
+              loading={settlementsQuery.isLoading}
+              settlements={settlementsQuery.data ?? []}
+              hasSubaccount={Boolean(subaccount?.isActive)}
+            />
           </div>
         </div>
       )}
@@ -236,7 +265,7 @@ function PaymentInstalledSettings() {
   );
 }
 
-function CalendarInstalledSettings({ app, status }: { app: typeof APP_CATALOG[number]; status: string }) {
+function CalendarInstalledSettings({ app, status }: { app: (typeof APP_CATALOG)[number]; status: string }) {
   const connectSessionMutation = useCreateIntegrationConnectSession();
   const syncConnectionsMutation = useSyncIntegrationConnections();
   const actionPending = connectSessionMutation.isPending || syncConnectionsMutation.isPending;
@@ -267,12 +296,32 @@ function CalendarInstalledSettings({ app, status }: { app: typeof APP_CATALOG[nu
           <h2 className="font-display text-3xl font-semibold">Calendars</h2>
           <p className="mt-1 text-lg text-white/50">Configure how your event types interact with your calendars</p>
         </div>
-        <Button type="button" variant="outline" disabled={actionPending} className="ml-auto border-white/15 bg-transparent text-white hover:bg-white/[0.08]" onClick={handleAddCalendar}>
-          {connectSessionMutation.isPending ? <Loader2Icon className="size-4 animate-spin" /> : <PlusIcon className="size-4" />}
+        <Button
+          type="button"
+          variant="outline"
+          disabled={actionPending}
+          className="ml-auto border-white/15 bg-transparent text-white hover:bg-white/[0.08]"
+          onClick={handleAddCalendar}
+        >
+          {connectSessionMutation.isPending ? (
+            <Loader2Icon className="size-4 animate-spin" />
+          ) : (
+            <PlusIcon className="size-4" />
+          )}
           Add calendar
         </Button>
-        <Button type="button" variant="outline" disabled={actionPending} className="border-white/15 bg-transparent text-white hover:bg-white/[0.08]" onClick={handleRefreshStatus}>
-          {syncConnectionsMutation.isPending ? <Loader2Icon className="size-4 animate-spin" /> : <RefreshCwIcon className="size-4" />}
+        <Button
+          type="button"
+          variant="outline"
+          disabled={actionPending}
+          className="border-white/15 bg-transparent text-white hover:bg-white/[0.08]"
+          onClick={handleRefreshStatus}
+        >
+          {syncConnectionsMutation.isPending ? (
+            <Loader2Icon className="size-4 animate-spin" />
+          ) : (
+            <RefreshCwIcon className="size-4" />
+          )}
           Refresh status
         </Button>
       </div>
@@ -300,9 +349,15 @@ function CalendarInstalledSettings({ app, status }: { app: typeof APP_CATALOG[nu
         <div className="flex items-start gap-4 px-9 py-7">
           <div>
             <h3 className="text-xl font-semibold">Check for conflicts</h3>
-            <p className="mt-1 text-lg text-white/45">Select which calendars you want to check for conflicts to prevent double bookings.</p>
+            <p className="mt-1 text-lg text-white/45">
+              Select which calendars you want to check for conflicts to prevent double bookings.
+            </p>
           </div>
-          <Button type="button" variant="outline" className="ml-auto border-white/15 bg-transparent text-white hover:bg-white/[0.08]">
+          <Button
+            type="button"
+            variant="outline"
+            className="ml-auto border-white/15 bg-transparent text-white hover:bg-white/[0.08]"
+          >
             <PlusIcon className="size-4" />
             Add
           </Button>

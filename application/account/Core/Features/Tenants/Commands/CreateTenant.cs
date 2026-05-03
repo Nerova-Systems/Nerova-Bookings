@@ -13,7 +13,7 @@ internal sealed record CreateTenantCommand(string OwnerEmail, bool EmailConfirme
 
 internal sealed record CreateTenantResponse(TenantId TenantId, UserId UserId);
 
-internal sealed class CreateTenantHandler(ITenantRepository tenantRepository, ISubscriptionRepository subscriptionRepository, IMediator mediator, ITelemetryEventsCollector events, TimeProvider timeProvider)
+internal sealed class CreateTenantHandler(ITenantRepository tenantRepository, ISubscriptionRepository subscriptionRepository, IMediator mediator, ITelemetryEventsCollector events)
     : IRequestHandler<CreateTenantCommand, Result<CreateTenantResponse>>
 {
     public async Task<Result<CreateTenantResponse>> Handle(CreateTenantCommand command, CancellationToken cancellationToken)
@@ -21,7 +21,7 @@ internal sealed class CreateTenantHandler(ITenantRepository tenantRepository, IS
         var tenant = Tenant.Create(command.OwnerEmail);
         await tenantRepository.AddAsync(tenant, cancellationToken);
 
-        var subscription = Subscription.Create(tenant.Id, timeProvider.GetUtcNow());
+        var subscription = Subscription.Create(tenant.Id);
         await subscriptionRepository.AddAsync(subscription, cancellationToken);
 
         events.CollectEvent(new TenantCreated(tenant.Id, tenant.State));

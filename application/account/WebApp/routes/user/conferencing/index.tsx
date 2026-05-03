@@ -13,7 +13,8 @@ export const Route = createFileRoute("/user/conferencing/")({
 function ConferencingPage() {
   const shellQuery = useMainAppointmentShell();
   const googleCalendarConnected = shellQuery.data?.integrations.some(
-    (integration) => integration.provider === "Google" && integration.capability === "Calendar" && integration.status === "Connected"
+    (integration) =>
+      integration.provider === "Google" && integration.capability === "Calendar" && integration.status === "Connected"
   );
 
   return (
@@ -61,7 +62,11 @@ function ConferencingRow({
       <div className="min-w-0 flex-1">
         <div className="flex flex-wrap items-center gap-2">
           <span className="font-semibold">{name}</span>
-          {badge && <span className="rounded bg-emerald-500/15 px-2 py-0.5 text-xs font-semibold text-emerald-500">{badge}</span>}
+          {badge && (
+            <span className="rounded bg-emerald-500/15 px-2 py-0.5 text-xs font-semibold text-emerald-500">
+              {badge}
+            </span>
+          )}
         </div>
         <p className="mt-1 text-sm leading-relaxed text-muted-foreground">{description}</p>
       </div>

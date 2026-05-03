@@ -16,6 +16,10 @@ public static class Configuration
 
     public static readonly string AliasName = Assembly.GetExecutingAssembly().GetName().Name!;
 
+    // Set on the child process spawned by ChangeDetection so it skips re-detecting changes the
+    // parent just published. Per-CLI prefix avoids collisions across downstream developer CLIs.
+    public static readonly string SkipChangeDetectionEnvironmentVariable = $"{AliasName.ToUpperInvariant()}_SKIP_CHANGE_DETECTION";
+
     public static readonly string PublishFolder = IsWindows
         ? Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "PlatformPlatform")
         : Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".PlatformPlatform");

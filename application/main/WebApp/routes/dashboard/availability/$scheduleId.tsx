@@ -22,7 +22,10 @@ export const Route = createFileRoute("/dashboard/availability/$scheduleId")({
 function EditAvailabilityPage() {
   const navigate = useNavigate();
   const shellQuery = useAppointmentShell();
-  const initialDays = useMemo(() => buildInitialDays(shellQuery.data?.availabilityRules ?? []), [shellQuery.data?.availabilityRules]);
+  const initialDays = useMemo(
+    () => buildInitialDays(shellQuery.data?.availabilityRules ?? []),
+    [shellQuery.data?.availabilityRules]
+  );
   const [days, setDays] = useState<DayState[]>(initialDays);
   const [scheduleName, setScheduleName] = useState("Working hours");
   const updateAvailability = useUpdateWeeklyAvailability();
@@ -64,7 +67,12 @@ function EditAvailabilityPage() {
             <Switch checked={true} onCheckedChange={() => toast.message("This is already the default schedule.")} />
           </div>
           <div className="h-8 border-l border-white/15" />
-          <Button variant="outline" size="icon-sm" className="border-white/15 bg-transparent text-white hover:bg-white/[0.08]" onClick={() => toast.message("Deleting the default schedule is disabled.")}>
+          <Button
+            variant="outline"
+            size="icon-sm"
+            className="border-white/15 bg-transparent text-white hover:bg-white/[0.08]"
+            onClick={() => toast.message("Deleting the default schedule is disabled.")}
+          >
             <Trash2Icon className="size-4" />
           </Button>
         </div>
@@ -98,7 +106,12 @@ function EditAvailabilityPage() {
         <p className="mt-2 text-base text-white/65">
           <Trans>Add dates when your availability changes from your daily hours.</Trans>
         </p>
-        <Button variant="outline" size="sm" className="mt-6 border-white/15 bg-transparent text-white hover:bg-white/[0.08]" onClick={() => navigate({ href: "/user/out-of-office" })}>
+        <Button
+          variant="outline"
+          size="sm"
+          className="mt-6 border-white/15 bg-transparent text-white hover:bg-white/[0.08]"
+          onClick={() => navigate({ href: "/user/out-of-office" })}
+        >
           <Trans>Add an override</Trans>
         </Button>
       </section>
@@ -119,7 +132,10 @@ function AvailabilityEditor({ days, setDays }: { days: DayState[]; setDays: (day
         {days.map((day, dayIndex) => (
           <div key={day.dayOfWeek} className="grid grid-cols-[10rem_1fr_auto] items-start gap-4 max-lg:grid-cols-1">
             <label className="flex items-center gap-3 pt-2 text-lg font-semibold">
-              <Switch checked={day.enabled} onCheckedChange={(enabled) => updateDay(days, setDays, dayIndex, { enabled })} />
+              <Switch
+                checked={day.enabled}
+                onCheckedChange={(enabled) => updateDay(days, setDays, dayIndex, { enabled })}
+              />
               {day.dayOfWeek}
             </label>
             <div className="grid gap-3">
@@ -129,14 +145,18 @@ function AvailabilityEditor({ days, setDays }: { days: DayState[]; setDays: (day
                     <Input
                       type="time"
                       value={window.startTime}
-                      onChange={(event) => updateWindow(days, setDays, dayIndex, windowIndex, { startTime: event.target.value })}
+                      onChange={(event) =>
+                        updateWindow(days, setDays, dayIndex, windowIndex, { startTime: event.target.value })
+                      }
                       className="h-10 w-32 border-white/15 bg-[#171717] text-white"
                     />
                     <span className="text-white/55">-</span>
                     <Input
                       type="time"
                       value={window.endTime}
-                      onChange={(event) => updateWindow(days, setDays, dayIndex, windowIndex, { endTime: event.target.value })}
+                      onChange={(event) =>
+                        updateWindow(days, setDays, dayIndex, windowIndex, { endTime: event.target.value })
+                      }
                       className="h-10 w-32 border-white/15 bg-[#171717] text-white"
                     />
                     <Button

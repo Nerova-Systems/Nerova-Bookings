@@ -16,7 +16,7 @@ public sealed class DatabaseSeeder
     public readonly Session Tenant1OwnerSession;
     public readonly Subscription Tenant1Subscription;
 
-    public DatabaseSeeder(AccountDbContext accountDbContext, TimeProvider timeProvider)
+    public DatabaseSeeder(AccountDbContext accountDbContext)
     {
         Tenant1 = Tenant.Create("owner@tenant-1.com");
         accountDbContext.Set<Tenant>().AddRange(Tenant1);
@@ -33,7 +33,7 @@ public sealed class DatabaseSeeder
         Tenant1MemberSession = Session.Create(Tenant1.Id, Tenant1Member.Id, LoginMethod.OneTimePassword, "TestUserAgent", IPAddress.Loopback);
         accountDbContext.Set<Session>().AddRange(Tenant1MemberSession);
 
-        Tenant1Subscription = Subscription.Create(Tenant1.Id, timeProvider.GetUtcNow());
+        Tenant1Subscription = Subscription.Create(Tenant1.Id);
         accountDbContext.Set<Subscription>().Add(Tenant1Subscription);
 
         accountDbContext.SaveChanges();

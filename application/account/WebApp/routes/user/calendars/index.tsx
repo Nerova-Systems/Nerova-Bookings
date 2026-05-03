@@ -6,7 +6,11 @@ import { createFileRoute } from "@tanstack/react-router";
 import { Loader2Icon, PlusIcon, RefreshCwIcon } from "lucide-react";
 import { toast } from "sonner";
 
-import { useCreateIntegrationConnectSession, useMainAppointmentShell, useSyncIntegrationConnections } from "@/shared/lib/mainAppSettingsApi";
+import {
+  useCreateIntegrationConnectSession,
+  useMainAppointmentShell,
+  useSyncIntegrationConnections
+} from "@/shared/lib/mainAppSettingsApi";
 
 export const Route = createFileRoute("/user/calendars/")({
   staticData: { trackingTitle: "Calendars" },
@@ -53,11 +57,25 @@ function CalendarsPage() {
       <div className="flex flex-col gap-4 pt-6">
         <div className="flex justify-end">
           <Button type="button" variant="outline" disabled={actionPending} onClick={handleAddCalendar}>
-            {connectSessionMutation.isPending ? <Loader2Icon className="size-4 animate-spin" /> : <PlusIcon className="size-4" />}
+            {connectSessionMutation.isPending ? (
+              <Loader2Icon className="size-4 animate-spin" />
+            ) : (
+              <PlusIcon className="size-4" />
+            )}
             <Trans>Add calendar</Trans>
           </Button>
-          <Button type="button" variant="outline" className="ml-2" disabled={actionPending} onClick={handleRefreshStatus}>
-            {syncConnectionsMutation.isPending ? <Loader2Icon className="size-4 animate-spin" /> : <RefreshCwIcon className="size-4" />}
+          <Button
+            type="button"
+            variant="outline"
+            className="ml-2"
+            disabled={actionPending}
+            onClick={handleRefreshStatus}
+          >
+            {syncConnectionsMutation.isPending ? (
+              <Loader2Icon className="size-4 animate-spin" />
+            ) : (
+              <RefreshCwIcon className="size-4" />
+            )}
             <Trans>Refresh status</Trans>
           </Button>
         </div>
@@ -103,7 +121,9 @@ function CalendarsPage() {
                 <div className="font-semibold">Google Calendar</div>
                 <div className="truncate text-sm text-muted-foreground">colinswart0@gmail.com</div>
               </div>
-              <span className="ml-auto rounded-full border border-border px-2 py-1 text-xs text-muted-foreground">{status}</span>
+              <span className="ml-auto rounded-full border border-border px-2 py-1 text-xs text-muted-foreground">
+                {status}
+              </span>
             </div>
             <div className="mt-4 grid gap-2 text-sm text-muted-foreground">
               <span>
@@ -147,7 +167,7 @@ function GoogleCalendarLogo() {
       <span className="bg-yellow-400" />
       <span className="bg-green-500" />
       <span className="bg-red-500" />
-      <span className="absolute left-3 top-3 text-lg text-white">31</span>
+      <span className="absolute top-3 left-3 text-lg text-white">31</span>
     </div>
   );
 }

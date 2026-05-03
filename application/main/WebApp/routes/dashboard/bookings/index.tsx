@@ -33,8 +33,8 @@ import {
 import { businessDateKey, formatDayGroup, formatShortDate, formatTime } from "@/shared/lib/dateFormatting";
 
 import { AppointmentPaymentBlock } from "../-components/AppointmentPaymentBlock";
-import { useCmdk } from "../-components/CmdkContext";
 import { StatusDot, statusTextClass } from "../-components/appointmentTypes";
+import { useCmdk } from "../-components/CmdkContext";
 import { WeekGrid } from "../calendar/-components/WeekGrid";
 
 type BookingTab = "upcoming" | "unconfirmed" | "recurring" | "past" | "canceled";
@@ -75,7 +75,10 @@ function BookingsPage() {
   const view = search.view ?? "list";
   const timeZone = shellQuery.data?.profile.timeZone ?? DEFAULT_TIME_ZONE;
   const appointments = shellQuery.data?.appointments ?? EMPTY_APPOINTMENTS;
-  const filteredAppointments = useMemo(() => filterBookings(appointments, tab, timeZone), [appointments, tab, timeZone]);
+  const filteredAppointments = useMemo(
+    () => filterBookings(appointments, tab, timeZone),
+    [appointments, tab, timeZone]
+  );
   const selectedAppointment = filteredAppointments.find((appointment) => appointment.id === selectedId) ?? null;
   const weekStart = customWeekStart ?? startOfWeek(new Date());
 
@@ -211,7 +214,12 @@ function BookingsPage() {
         >
           <main className="min-h-0 overflow-y-auto px-5 py-5">
             <div className="mb-4 flex flex-wrap items-center gap-2">
-              <Button variant="outline" size="sm" className="border-white/15 bg-transparent text-white hover:bg-white/[0.08]" onClick={() => setCustomWeekStart(null)}>
+              <Button
+                variant="outline"
+                size="sm"
+                className="border-white/15 bg-transparent text-white hover:bg-white/[0.08]"
+                onClick={() => setCustomWeekStart(null)}
+              >
                 <Trans>Today</Trans>
               </Button>
               <button
@@ -230,7 +238,9 @@ function BookingsPage() {
               >
                 <ChevronRightIcon className="size-4" />
               </button>
-              <div className="ml-1 rounded-xl border border-white/10 px-3 py-2 text-sm font-semibold">{weekLabel(weekStart)}</div>
+              <div className="ml-1 rounded-xl border border-white/10 px-3 py-2 text-sm font-semibold">
+                {weekLabel(weekStart)}
+              </div>
             </div>
             <WeekGrid
               appointments={filteredAppointments}
@@ -257,14 +267,14 @@ function BookingsPage() {
           )}
         </div>
       ) : (
-          <BookingsList
-            tab={tab}
-            appointments={filteredAppointments}
-            onStatusChange={updateStatus}
-            onAddGuest={addGuest}
-            onEditLocation={editLocation}
-            onRequestReschedule={requestReschedule}
-            onSelect={(appointment) => {
+        <BookingsList
+          tab={tab}
+          appointments={filteredAppointments}
+          onStatusChange={updateStatus}
+          onAddGuest={addGuest}
+          onEditLocation={editLocation}
+          onRequestReschedule={requestReschedule}
+          onSelect={(appointment) => {
             setSelectedId(appointment.id);
             setView("calendar");
           }}
@@ -292,7 +302,9 @@ function BookingTabs({
     { key: "past", label: "Past" },
     { key: "canceled", label: "Canceled" }
   ];
-  const counts = Object.fromEntries(tabs.map((item) => [item.key, filterBookings(appointments, item.key, timeZone).length]));
+  const counts = Object.fromEntries(
+    tabs.map((item) => [item.key, filterBookings(appointments, item.key, timeZone).length])
+  );
 
   return (
     <div className="flex min-w-0 flex-wrap rounded-xl bg-white/[0.04] p-1">
@@ -302,7 +314,9 @@ function BookingTabs({
           type="button"
           onClick={() => onChange(item.key)}
           className={`rounded-lg px-3 py-2 text-sm font-semibold transition-colors ${
-            activeTab === item.key ? "bg-[#101010] text-white shadow-[0_0_0_1px_rgba(255,255,255,0.08)]" : "text-white/75 hover:text-white"
+            activeTab === item.key
+              ? "bg-[#101010] text-white shadow-[0_0_0_1px_rgba(255,255,255,0.08)]"
+              : "text-white/75 hover:text-white"
           }`}
         >
           {item.label}
@@ -410,7 +424,9 @@ function BookingRow({
             <StatusDot status={appointment.status} />
             {appointment.statusLabel}
           </span>
-          <span className="rounded-md bg-white/[0.06] px-2 py-1 text-white/65">v{appointment.serviceVersionNumber}</span>
+          <span className="rounded-md bg-white/[0.06] px-2 py-1 text-white/65">
+            v{appointment.serviceVersionNumber}
+          </span>
           <span className="rounded-md bg-white/[0.06] px-2 py-1 text-white/65">{appointment.amount}</span>
         </div>
       </button>
@@ -419,13 +435,30 @@ function BookingRow({
           <MoreHorizontalIcon className="size-4" />
         </summary>
         <div className="absolute top-11 right-0 z-30 w-64 overflow-hidden rounded-xl border border-white/10 bg-[#121212] py-2 shadow-2xl">
-          <MenuButton onClick={onRequestReschedule} icon={<Clock3Icon className="size-4" />} label="Request reschedule" />
+          <MenuButton
+            onClick={onRequestReschedule}
+            icon={<Clock3Icon className="size-4" />}
+            label="Request reschedule"
+          />
           <MenuButton onClick={onAddGuest} icon={<UserPlusIcon className="size-4" />} label="Add guests" />
           <MenuButton onClick={onEditLocation} icon={<VideoIcon className="size-4" />} label="Edit location" />
           <div className="my-2 border-t border-white/10" />
-          <MenuButton onClick={() => onStatusChange(appointment.id, "Completed")} icon={<CheckCircle2Icon className="size-4" />} label="Complete event" />
-          <MenuButton onClick={() => onStatusChange(appointment.id, "NoShow")} icon={<CircleSlashIcon className="size-4" />} label="Mark as no-show" />
-          <MenuButton onClick={() => onStatusChange(appointment.id, "Cancelled")} icon={<XIcon className="size-4" />} label="Cancel event" danger />
+          <MenuButton
+            onClick={() => onStatusChange(appointment.id, "Completed")}
+            icon={<CheckCircle2Icon className="size-4" />}
+            label="Complete event"
+          />
+          <MenuButton
+            onClick={() => onStatusChange(appointment.id, "NoShow")}
+            icon={<CircleSlashIcon className="size-4" />}
+            label="Mark as no-show"
+          />
+          <MenuButton
+            onClick={() => onStatusChange(appointment.id, "Cancelled")}
+            icon={<XIcon className="size-4" />}
+            label="Cancel event"
+            danger
+          />
         </div>
       </details>
     </div>
@@ -467,12 +500,19 @@ function BookingDrawer({
   return (
     <aside className="flex min-h-0 flex-col border-l border-white/10 bg-[#101010] text-white max-xl:fixed max-xl:inset-y-0 max-xl:right-0 max-xl:z-40 max-xl:w-[min(34rem,100vw)]">
       <div className="flex items-center justify-end gap-2 border-b border-white/10 px-6 py-4">
-        <button type="button" className="flex size-9 items-center justify-center rounded-lg border border-white/15 hover:bg-white/[0.08]" onClick={onClose} aria-label="Close booking drawer">
+        <button
+          type="button"
+          className="flex size-9 items-center justify-center rounded-lg border border-white/15 hover:bg-white/[0.08]"
+          onClick={onClose}
+          aria-label="Close booking drawer"
+        >
           <XIcon className="size-4" />
         </button>
       </div>
       <div className="flex-1 overflow-y-auto px-7 py-6">
-        <span className="inline-flex rounded-md bg-emerald-500/80 px-2 py-1 text-xs font-semibold text-white">{appointment.statusLabel}</span>
+        <span className="inline-flex rounded-md bg-emerald-500/80 px-2 py-1 text-xs font-semibold text-white">
+          {appointment.statusLabel}
+        </span>
         <div className="mt-4 border-l-2 border-white/25 pl-4">
           <h2 className="font-display text-2xl leading-tight font-semibold">
             {appointment.duration} meeting between {appointment.name} and {appointment.service}
@@ -514,7 +554,12 @@ function BookingDrawer({
       </div>
       <div className="flex items-center gap-2 border-t border-white/10 px-6 py-4">
         {appointment.meetUrl && (
-          <Button variant="outline" size="sm" className="border-white/15 bg-transparent text-white hover:bg-white/[0.08]" onClick={() => window.open(appointment.meetUrl!, "_blank", "noopener,noreferrer")}>
+          <Button
+            variant="outline"
+            size="sm"
+            className="border-white/15 bg-transparent text-white hover:bg-white/[0.08]"
+            onClick={() => window.open(appointment.meetUrl!, "_blank", "noopener,noreferrer")}
+          >
             <VideoIcon className="size-4" />
             <Trans>Join call</Trans>
           </Button>
@@ -522,14 +567,31 @@ function BookingDrawer({
         <Button size="sm" className="ml-auto" disabled={!canConfirm} onClick={() => onConfirm(appointment.id)}>
           <Trans>Confirm</Trans>
         </Button>
-        <Button variant="outline" size="sm" className="border-white/15 bg-transparent text-white hover:bg-white/[0.08]" onClick={() => onRequestReschedule(appointment)}>
+        <Button
+          variant="outline"
+          size="sm"
+          className="border-white/15 bg-transparent text-white hover:bg-white/[0.08]"
+          onClick={() => onRequestReschedule(appointment)}
+        >
           <Clock3Icon className="size-4" />
           <Trans>Reschedule</Trans>
         </Button>
-        <Button variant="outline" size="icon-sm" className="border-white/15 bg-transparent text-white hover:bg-white/[0.08]" onClick={() => onAddGuest(appointment)} aria-label="Add guest">
+        <Button
+          variant="outline"
+          size="icon-sm"
+          className="border-white/15 bg-transparent text-white hover:bg-white/[0.08]"
+          onClick={() => onAddGuest(appointment)}
+          aria-label="Add guest"
+        >
           <UserPlusIcon className="size-4" />
         </Button>
-        <Button variant="outline" size="icon-sm" className="border-white/15 bg-transparent text-white hover:bg-white/[0.08]" onClick={() => onEditLocation(appointment)} aria-label="Edit location">
+        <Button
+          variant="outline"
+          size="icon-sm"
+          className="border-white/15 bg-transparent text-white hover:bg-white/[0.08]"
+          onClick={() => onEditLocation(appointment)}
+          aria-label="Edit location"
+        >
           <VideoIcon className="size-4" />
         </Button>
       </div>
@@ -561,7 +623,17 @@ function EmptyBookings({ tab }: { tab: BookingTab }) {
   );
 }
 
-function IconToggle({ active, label, onClick, children }: { active: boolean; label: string; onClick: () => void; children: ReactNode }) {
+function IconToggle({
+  active,
+  label,
+  onClick,
+  children
+}: {
+  active: boolean;
+  label: string;
+  onClick: () => void;
+  children: ReactNode;
+}) {
   return (
     <button
       type="button"
@@ -576,7 +648,17 @@ function IconToggle({ active, label, onClick, children }: { active: boolean; lab
   );
 }
 
-function MenuButton({ icon, label, danger, onClick }: { icon: ReactNode; label: string; danger?: boolean; onClick: () => void }) {
+function MenuButton({
+  icon,
+  label,
+  danger,
+  onClick
+}: {
+  icon: ReactNode;
+  label: string;
+  danger?: boolean;
+  onClick: () => void;
+}) {
   return (
     <button
       type="button"
@@ -603,7 +685,9 @@ function DetailSection({ title, children }: { title: string; children: ReactNode
 function PersonLine({ name, detail, badge }: { name: string; detail: string; badge: string }) {
   return (
     <div className="mb-3 flex items-center gap-3 last:mb-0">
-      <div className="flex size-10 items-center justify-center rounded-full bg-white/10 text-sm font-semibold">{name.slice(0, 1)}</div>
+      <div className="flex size-10 items-center justify-center rounded-full bg-white/10 text-sm font-semibold">
+        {name.slice(0, 1)}
+      </div>
       <div className="min-w-0">
         <div className="font-semibold">
           {name} <span className="ml-1 rounded bg-violet-400/20 px-1.5 py-0.5 text-xs text-violet-200">{badge}</span>
@@ -630,8 +714,14 @@ function filterBookings(appointments: Appointment[], tab: BookingTab, timeZone: 
     const start = new Date(appointment.startAt);
     const appointmentDay = businessDateKey(start, timeZone);
     if (tab === "canceled") return appointment.status === "cancelled";
-    if (tab === "past") return appointment.status !== "cancelled" && (appointmentDay < todayKey || start.getTime() < now.getTime());
-    if (tab === "unconfirmed") return appointment.status === "pending" || appointment.status === "payment-not-sent" || appointment.status === "payment-overdue";
+    if (tab === "past")
+      return appointment.status !== "cancelled" && (appointmentDay < todayKey || start.getTime() < now.getTime());
+    if (tab === "unconfirmed")
+      return (
+        appointment.status === "pending" ||
+        appointment.status === "payment-not-sent" ||
+        appointment.status === "payment-overdue"
+      );
     if (tab === "recurring") return false;
     return appointment.status !== "cancelled" && appointmentDay >= todayKey;
   });
@@ -643,7 +733,9 @@ function filterBookings(appointments: Appointment[], tab: BookingTab, timeZone: 
 }
 
 function isBookingTab(value: unknown): value is BookingTab {
-  return value === "upcoming" || value === "unconfirmed" || value === "recurring" || value === "past" || value === "canceled";
+  return (
+    value === "upcoming" || value === "unconfirmed" || value === "recurring" || value === "past" || value === "canceled"
+  );
 }
 
 function startOfWeek(date: Date) {
@@ -665,7 +757,12 @@ function formatAppointmentWhen(appointment: Appointment) {
   const end = new Date(appointment.endAt);
   return {
     day: formatDayGroup(start).replace(" 0", " "),
-    longDay: new Intl.DateTimeFormat(undefined, { weekday: "long", month: "long", day: "numeric", year: "numeric" }).format(start),
+    longDay: new Intl.DateTimeFormat(undefined, {
+      weekday: "long",
+      month: "long",
+      day: "numeric",
+      year: "numeric"
+    }).format(start),
     timeRange: `${formatTime(start)} - ${formatTime(end)}`
   };
 }

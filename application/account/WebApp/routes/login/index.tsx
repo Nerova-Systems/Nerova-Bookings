@@ -23,6 +23,7 @@ import { clearLoginState, getLoginState, setLoginState } from "./-shared/loginSt
 
 export const Route = createFileRoute("/login/")({
   staticData: { trackingTitle: "Log in" },
+  beforeLoad: () => ({ disableAuthSync: true }),
   validateSearch: (search) => {
     const returnPath = search.returnPath as string | undefined;
     return {

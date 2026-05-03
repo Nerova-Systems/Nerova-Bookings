@@ -31,7 +31,15 @@ SecretManagerHelper.GenerateAuthenticationTokenSigningKey("authentication-token-
 var (googleOAuthConfigured, googleOAuthClientId, googleOAuthClientSecret) = ConfigureGoogleOAuthParameters();
 
 var (payFastConfigured, payFastMerchantId, payFastMerchantKey, payFastPassphrase, payFastSandbox, payFastNotifyUrl, payFastReturnUrl, payFastCancelUrl, payFastAllowedIps) = ConfigurePayFastParameters();
-var (paystackConfigured, paystackPublicKey, paystackSecretKey, paystackCallbackUrl, paystackWebhookUrl) = ConfigurePaystackParameters();
+var (
+    paystackConfigured,
+    paystackPublicKey,
+    paystackSecretKey,
+    paystackCallbackUrl,
+    paystackWebhookUrl,
+    paystackAccountCallbackUrl,
+    paystackStandardPlanCode,
+    paystackPremiumPlanCode) = ConfigurePaystackParameters();
 var (twilioConfigured, twilioAccountSid, twilioAuthToken, twilioVerifyServiceSid) = ConfigureTwilioParameters();
 var (nangoConfigured, nangoToolboxSecretKey, nangoServerUrl) = ConfigureNangoParameters();
 
@@ -84,6 +92,11 @@ var accountWorkers = builder
     .WithEnvironment("KESTREL_PORT", ports.AccountWorkers.ToString())
     .WithReference(accountDatabase)
     .WithReference(azureStorage)
+    .WithEnvironment("Paystack__SubscriptionEnabled", paystackConfigured ? "true" : "false")
+    .WithEnvironment("Paystack__SecretKey", paystackSecretKey)
+    .WithEnvironment("Paystack__WebhookSecret", paystackSecretKey)
+    .WithEnvironment("Paystack__Plans__Standard__Code", paystackStandardPlanCode)
+    .WithEnvironment("Paystack__Plans__Premium__Code", paystackPremiumPlanCode)
     .WaitFor(accountDatabase);
 
 var accountApi = builder
@@ -119,6 +132,13 @@ var accountApi = builder
     .WithEnvironment("PayFast__ReturnUrl", payFastReturnUrl)
     .WithEnvironment("PayFast__CancelUrl", payFastCancelUrl)
     .WithEnvironment("PayFast__AllowedIps", payFastAllowedIps)
+    .WithEnvironment("Paystack__SubscriptionEnabled", paystackConfigured ? "true" : "false")
+    .WithEnvironment("Paystack__AllowMockProvider", "true")
+    .WithEnvironment("Paystack__SecretKey", paystackSecretKey)
+    .WithEnvironment("Paystack__WebhookSecret", paystackSecretKey)
+    .WithEnvironment("Paystack__CallbackUrl", paystackAccountCallbackUrl)
+    .WithEnvironment("Paystack__Plans__Standard__Code", paystackStandardPlanCode)
+    .WithEnvironment("Paystack__Plans__Premium__Code", paystackPremiumPlanCode)
     .WaitFor(accountWorkers);
 
 var mainDatabase = postgres
@@ -295,10 +315,13 @@ return;
     IResourceBuilder<ParameterResource> PublicKey,
     IResourceBuilder<ParameterResource> SecretKey,
     IResourceBuilder<ParameterResource> CallbackUrl,
-    IResourceBuilder<ParameterResource> WebhookUrl) ConfigurePaystackParameters()
+    IResourceBuilder<ParameterResource> WebhookUrl,
+    IResourceBuilder<ParameterResource> AccountCallbackUrl,
+    IResourceBuilder<ParameterResource> StandardPlanCode,
+    IResourceBuilder<ParameterResource> PremiumPlanCode) ConfigurePaystackParameters()
 {
     _ = builder.AddParameter("paystack-enabled")
-        .WithDescription("Enable Paystack for client appointment deposits/payments. Set to `true` after test keys are available.", true);
+        .WithDescription("Enable Paystack for account subscriptions and client appointment deposits/payments. Set to `true` after test keys are available.", true);
 
     var configured = builder.Configuration["Parameters:paystack-enabled"] == "true";
 
@@ -311,7 +334,7 @@ return;
         var callbackUrl = builder.CreateResourceBuilder(
             new ParameterResource(
                 "paystack-callback-url",
-                _ => builder.Configuration["Parameters:paystack-callback-url"] ?? "https://localhost:9000/book/payment/callback",
+                _ => builder.Configuration["Parameters:paystack-callback-url"] ?? $"{appBaseUrl}/book/payment/callback",
                 true
             )
         );
@@ -322,8 +345,19 @@ return;
                 true
             )
         );
+        var accountCallbackUrl = builder.CreateResourceBuilder(
+            new ParameterResource(
+                "paystack-account-callback-url",
+                _ => builder.Configuration["Parameters:paystack-account-callback-url"] ?? $"{appBaseUrl}/account/billing/subscription",
+                true
+            )
+        );
+        var standardPlanCode = builder.AddParameter("paystack-standard-plan-code", true)
+            .WithDescription("Paystack plan code used for Standard account subscriptions.", true);
+        var premiumPlanCode = builder.AddParameter("paystack-premium-plan-code", true)
+            .WithDescription("Paystack plan code used for Premium account subscriptions.", true);
 
-        return (configured, publicKey, secretKey, callbackUrl, webhookUrl);
+        return (configured, publicKey, secretKey, callbackUrl, webhookUrl, accountCallbackUrl, standardPlanCode, premiumPlanCode);
     }
 
     return (
@@ -331,7 +365,10 @@ return;
         builder.CreateResourceBuilder(new ParameterResource("paystack-public-key", _ => "not-configured", true)),
         builder.CreateResourceBuilder(new ParameterResource("paystack-secret-key", _ => "not-configured", true)),
         builder.CreateResourceBuilder(new ParameterResource("paystack-callback-url", _ => "not-configured", true)),
-        builder.CreateResourceBuilder(new ParameterResource("paystack-webhook-url", _ => "not-configured", true))
+        builder.CreateResourceBuilder(new ParameterResource("paystack-webhook-url", _ => "not-configured", true)),
+        builder.CreateResourceBuilder(new ParameterResource("paystack-account-callback-url", _ => "not-configured", true)),
+        builder.CreateResourceBuilder(new ParameterResource("paystack-standard-plan-code", _ => "not-configured", true)),
+        builder.CreateResourceBuilder(new ParameterResource("paystack-premium-plan-code", _ => "not-configured", true))
     );
 }
 

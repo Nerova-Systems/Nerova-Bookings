@@ -1,6 +1,4 @@
 using Account.Features.Subscriptions.Domain;
-using Account.Features.Subscriptions.Jobs;
-using Account.Features.Tenants.Domain;
 using JetBrains.Annotations;
 using SharedKernel.Cqrs;
 
@@ -14,41 +12,42 @@ public sealed record SubscriptionResponse(
     SubscriptionId Id,
     SubscriptionPlan Plan,
     SubscriptionPlan? ScheduledPlan,
-    SubscriptionStatus Status,
-    DateTimeOffset TrialEndsAt,
+    bool HasPaystackCustomer,
+    bool HasPaystackSubscription,
+    decimal? CurrentPriceAmount,
+    string? CurrentPriceCurrency,
     DateTimeOffset? CurrentPeriodEnd,
-    DateTimeOffset? NextBillingDate,
-    DateTimeOffset? CancelledAt,
-    BillingInfo? BillingInfo,
+    bool CancelAtPeriodEnd,
+    bool IsPaymentFailed,
     PaymentMethod? PaymentMethod,
-    DateTimeOffset? GracePeriodEndsAt,
-    SuspensionReason? SuspensionReason
+    BillingInfo? BillingInfo,
+    bool HasPendingPaystackEvents
 );
 
-public sealed class GetCurrentSubscriptionHandler(ISubscriptionRepository subscriptionRepository, ITenantRepository tenantRepository)
+public sealed class GetCurrentSubscriptionHandler(ISubscriptionRepository subscriptionRepository, IPaystackEventRepository paystackEventRepository)
     : IRequestHandler<GetCurrentSubscriptionQuery, Result<SubscriptionResponse>>
 {
     public async Task<Result<SubscriptionResponse>> Handle(GetCurrentSubscriptionQuery query, CancellationToken cancellationToken)
     {
         var subscription = await subscriptionRepository.GetCurrentAsync(cancellationToken);
-        var tenant = await tenantRepository.GetByIdUnfilteredAsync(subscription.TenantId, cancellationToken);
-        DateTimeOffset? gracePeriodEndsAt = subscription.Status == SubscriptionStatus.PastDue && subscription.FirstPaymentFailedAt is not null
-            ? subscription.FirstPaymentFailedAt.Value.Add(BillingDunningService.PaymentGracePeriod)
-            : null;
+
+        var hasPendingPaystackEvents = subscription.PaystackCustomerId is not null
+                                     && await paystackEventRepository.HasPendingByPaystackCustomerIdAsync(subscription.PaystackCustomerId, cancellationToken);
 
         return new SubscriptionResponse(
             subscription.Id,
             subscription.Plan,
-            subscription.ScheduledPlan,
-            subscription.Status,
-            subscription.TrialEndsAt,
+            null,
+            subscription.PaystackCustomerId is not null,
+            subscription.PaystackSubscriptionId is not null,
+            subscription.CurrentPriceAmount,
+            subscription.CurrentPriceCurrency,
             subscription.CurrentPeriodEnd,
-            subscription.NextBillingDate,
-            subscription.CancelledAt,
-            subscription.BillingInfo,
+            subscription.CancelAtPeriodEnd,
+            subscription.FirstPaymentFailedAt is not null,
             subscription.PaymentMethod,
-            gracePeriodEndsAt,
-            tenant?.SuspensionReason
+            subscription.BillingInfo,
+            hasPendingPaystackEvents
         );
     }
 }

@@ -1,5 +1,16 @@
-export type AppointmentStatus = "pending" | "confirmed" | "payment-not-sent" | "payment-overdue" | "completed" | "cancelled" | "no-show";
-export type ServicePaymentPolicy = "NoPaymentRequired" | "DepositBeforeBooking" | "FullPaymentBeforeBooking" | "CollectAfterAppointment";
+export type AppointmentStatus =
+  | "pending"
+  | "confirmed"
+  | "payment-not-sent"
+  | "payment-overdue"
+  | "completed"
+  | "cancelled"
+  | "no-show";
+export type ServicePaymentPolicy =
+  | "NoPaymentRequired"
+  | "DepositBeforeBooking"
+  | "FullPaymentBeforeBooking"
+  | "CollectAfterAppointment";
 
 export interface Appointment {
   id: string;
@@ -52,7 +63,10 @@ export interface Service {
   latestVersionNumber: number;
 }
 
-export interface ServiceCategory { id: string; name: string }
+export interface ServiceCategory {
+  id: string;
+  name: string;
+}
 
 export interface Client {
   id: string;
@@ -86,7 +100,13 @@ export interface ClientAppointmentHistory {
   location: string;
 }
 
-export interface Analytics { bookings: number; revenue: string; clientsServed: number; averageBookingValue: string; noShowRate: string }
+export interface Analytics {
+  bookings: number;
+  revenue: string;
+  clientsServed: number;
+  averageBookingValue: string;
+  noShowRate: string;
+}
 export interface IntegrationConnection {
   provider: string;
   capability: string;
@@ -96,13 +116,46 @@ export interface IntegrationConnection {
   ownerId: string;
   externalConnectionId?: string | null;
 }
-export interface AvailabilityRule { id: string; dayOfWeek: string; startTime: string; endTime: string }
-export interface HolidayCountry { code: string; name: string }
-export interface PublicHoliday { id: string; countryCode: string; date: string; label: string; isOpen: boolean }
-export interface HolidaySettings { countryCode: string; countries: HolidayCountry[]; holidays: PublicHoliday[] }
-export interface BusinessClosure { id: string; startDate: string; endDate: string; label: string; type: "manual" | "publicHoliday" }
-export interface CalendarBlock { id: string; title: string; startAt: string; endAt: string; type: "manual" | "external" }
-export interface Slot { startAt: string; endAt: string }
+export interface AvailabilityRule {
+  id: string;
+  dayOfWeek: string;
+  startTime: string;
+  endTime: string;
+}
+export interface HolidayCountry {
+  code: string;
+  name: string;
+}
+export interface PublicHoliday {
+  id: string;
+  countryCode: string;
+  date: string;
+  label: string;
+  isOpen: boolean;
+}
+export interface HolidaySettings {
+  countryCode: string;
+  countries: HolidayCountry[];
+  holidays: PublicHoliday[];
+}
+export interface BusinessClosure {
+  id: string;
+  startDate: string;
+  endDate: string;
+  label: string;
+  type: "manual" | "publicHoliday";
+}
+export interface CalendarBlock {
+  id: string;
+  title: string;
+  startAt: string;
+  endAt: string;
+  type: "manual" | "external";
+}
+export interface Slot {
+  startAt: string;
+  endAt: string;
+}
 
 export interface AppointmentShell {
   profile: BusinessProfile;
@@ -118,7 +171,13 @@ export interface AppointmentShell {
   calendarBlocks: CalendarBlock[];
 }
 
-export interface BusinessProfile { name: string; slug: string; timeZone: string; address: string; publicBookingEnabled: boolean }
+export interface BusinessProfile {
+  name: string;
+  slug: string;
+  timeZone: string;
+  address: string;
+  publicBookingEnabled: boolean;
+}
 
 export interface ApiShell {
   profile: BusinessProfile;

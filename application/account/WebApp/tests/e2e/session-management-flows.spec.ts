@@ -233,10 +233,11 @@ test.describe("@comprehensive", () => {
   });
 
   /**
-   * REPLAY ATTACK DETECTION ERROR PAGE
+   * REPLAY ATTACK DETECTION REDIRECTS TO LOGIN
    *
    * Tests that when a refresh token is "stolen" and used from another browser,
-   * both browsers are eventually redirected to the replay_attack error page.
+   * both browsers are eventually redirected to the login page (server still records
+   * SessionReplayDetected for monitoring of genuine attacks).
    *
    * Flow:
    * 1. User logs in to browser A (refresh token version 1)
@@ -244,9 +245,9 @@ test.describe("@comprehensive", () => {
    * 3. Browser B uses stolen token twice (version becomes 3, grace period ends)
    * 4. Browser A tries to refresh (replay detected, session revoked)
    * 5. Browser B tries to refresh (session already revoked)
-   * 6. Both browsers see the replay_attack error page
+   * 6. Both browsers land on the login page
    */
-  test("should redirect to replay_attack error page when refresh token replay is detected", async ({ page }) => {
+  test("should redirect to login when refresh token replay is detected", async ({ page }) => {
     const context = createTestContext(page);
     const owner = testUser();
     const browser = page.context().browser() as Browser;
@@ -282,7 +283,7 @@ test.describe("@comprehensive", () => {
       await expect(secondPage.getByRole("heading", { name: "Users" })).toBeVisible();
     })();
 
-    await step("Navigate in victim browser after replay & verify replay_attack error page")(async () => {
+    await step("Navigate in victim browser after replay & verify redirect to login")(async () => {
       await secondPage.route("**/api/**", (route) => route.abort());
       await deleteAccessTokenCookie(page);
       context.monitoring.expectedStatusCodes.push(401);
@@ -293,13 +294,11 @@ test.describe("@comprehensive", () => {
         window.dispatchEvent(new Event("online"));
       });
 
-      await expect(page).toHaveURL(/\/error\?.*error=replay_attack/);
-      await expect(page.getByRole("heading", { name: "Security alert" })).toBeVisible();
-      await expect(page.getByText("We detected suspicious activity on your account.")).toBeVisible();
-      await expect(page.getByRole("button", { name: "Log in" })).toBeVisible();
+      await expect(page).toHaveURL(/\/login/);
+      await expect(page.getByRole("heading", { name: "Hi! Welcome back" })).toBeVisible();
     })();
 
-    await step("Attacker browser detects replay & shows replay_attack error page")(async () => {
+    await step("Attacker browser detects replay & redirects to login")(async () => {
       const secondPageContext = createTestContext(secondPage);
       secondPageContext.monitoring.expectedStatusCodes.push(401);
       await deleteAccessTokenCookie(secondPage);
@@ -310,16 +309,8 @@ test.describe("@comprehensive", () => {
         window.dispatchEvent(new Event("online"));
       });
 
-      await expect(secondPage).toHaveURL(/\/error\?.*error=replay_attack/);
-      await expect(secondPage.getByRole("heading", { name: "Security alert" })).toBeVisible();
-      await expect(secondPage.getByText("We detected suspicious activity on your account.")).toBeVisible();
-    })();
-
-    await step("Click login on replay_attack page & verify login page")(async () => {
-      await page.getByRole("button", { name: "Log in" }).click();
-
-      await expect(page).toHaveURL(/\/login/);
-      await expect(page.getByRole("heading", { name: "Hi! Welcome back" })).toBeVisible();
+      await expect(secondPage).toHaveURL(/\/login/);
+      await expect(secondPage.getByRole("heading", { name: "Hi! Welcome back" })).toBeVisible();
     })();
 
     await secondContext.close();

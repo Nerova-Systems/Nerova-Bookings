@@ -17,7 +17,6 @@ const UnauthorizedReason = {
 
 // Error codes used in /error page query parameter
 export const ErrorCode = {
-  ReplayAttack: "replay_attack",
   SessionRevoked: "session_revoked",
   SessionNotFound: "session_not_found",
   UserNotFound: "user_not_found",
@@ -35,7 +34,12 @@ const unauthorizedReasonHeaderKey = "x-unauthorized-reason";
 function getErrorCodeFromUnauthorizedReason(reason: string | null): string | null {
   switch (reason) {
     case UnauthorizedReason.ReplayAttackDetected:
-      return ErrorCode.ReplayAttack;
+      // Replay detection is overwhelmingly false-positive-driven for legitimate users (e.g. closing
+      // the browser mid cold-start refresh leaves their cookie stale and trips the grace check).
+      // Skipping the error page sends them straight to the login screen — same as if their session
+      // had simply expired. Server-side detection, telemetry, and session revocation remain intact
+      // for monitoring genuine attacks; the curious user can review their sessions at /user/sessions.
+      return null;
     case UnauthorizedReason.Revoked:
       return ErrorCode.SessionRevoked;
     case UnauthorizedReason.SessionNotFound:

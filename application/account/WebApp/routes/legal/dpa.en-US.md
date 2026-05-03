@@ -257,7 +257,7 @@ We are authorized to use the following Sub-Processors to process Personal Data o
 Sub-Processor                Service                                       Location
 Microsoft Azure              Cloud infrastructure and hosting              Region selected upon signup
 Azure Application Insights   Analytics and performance monitoring          EU region
-PayFast                      Payment processing                            South Africa
+Paystack                     Payment processing                            Global
 ```
 
 We will provide 14 days advance notice before engaging additional Sub-Processors or replacing existing ones as described in Section 5.

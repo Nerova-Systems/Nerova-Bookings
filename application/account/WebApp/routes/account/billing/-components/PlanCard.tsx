@@ -18,16 +18,13 @@ type PlanCardProps = {
   formattedPrice: string;
   currentPlan: SubscriptionPlan;
   cancelAtPeriodEnd: boolean;
-  scheduledPlan: SubscriptionPlan | null;
-  isPaymentConfigured: boolean;
+  isPaystackConfigured: boolean;
   onSubscribe: (plan: SubscriptionPlan) => void;
   onUpgrade: (plan: SubscriptionPlan) => void;
   onDowngrade: (plan: SubscriptionPlan) => void;
   onReactivate: () => void;
-  onCancelDowngrade: () => void;
   isPending: boolean;
   pendingPlan: SubscriptionPlan | null;
-  isCancelDowngradePending: boolean;
   currentPriceAmount?: number | null;
   currentPriceCurrency?: string | null;
   catalogUnitAmount?: number | null;
@@ -39,16 +36,13 @@ export function PlanCard({
   formattedPrice,
   currentPlan,
   cancelAtPeriodEnd,
-  scheduledPlan,
-  isPaymentConfigured,
+  isPaystackConfigured,
   onSubscribe,
   onUpgrade,
   onDowngrade,
   onReactivate,
-  onCancelDowngrade,
   isPending,
   pendingPlan,
-  isCancelDowngradePending,
   currentPriceAmount,
   currentPriceCurrency,
   catalogUnitAmount,
@@ -84,7 +78,7 @@ export function PlanCard({
             formattedPrice
           )}
         </div>
-        {taxExclusive && plan !== SubscriptionPlan.Trial && (
+        {taxExclusive && plan !== SubscriptionPlan.Basis && (
           <span className="text-sm font-normal text-muted-foreground">
             <Trans>Excl. tax</Trans>
           </span>
@@ -104,16 +98,13 @@ export function PlanCard({
           plan={plan}
           currentPlan={currentPlan}
           cancelAtPeriodEnd={cancelAtPeriodEnd}
-          scheduledPlan={scheduledPlan}
-          isPaymentConfigured={isPaymentConfigured}
+          isPaystackConfigured={isPaystackConfigured}
           onSubscribe={onSubscribe}
           onUpgrade={onUpgrade}
           onDowngrade={onDowngrade}
           onReactivate={onReactivate}
-          onCancelDowngrade={onCancelDowngrade}
           isPending={isPending}
           pendingPlan={pendingPlan}
-          isCancelDowngradePending={isCancelDowngradePending}
         />
       </div>
     </div>

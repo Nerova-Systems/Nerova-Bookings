@@ -38,67 +38,7 @@ export function CancellationBanner({
   );
 }
 
-interface DowngradeBannerProps {
-  scheduledPlan: SubscriptionPlan;
-  formattedPeriodEnd: string | null;
-  onCancelDowngrade?: () => void;
-}
-
-export function DowngradeBanner({
-  scheduledPlan,
-  formattedPeriodEnd,
-  onCancelDowngrade
-}: Readonly<DowngradeBannerProps>) {
-  return (
-    <div className="mb-6 flex items-center justify-between gap-3 rounded-lg border border-border bg-muted/50 p-4 text-sm text-muted-foreground">
-      <div className="flex items-center gap-3">
-        <AlertTriangleIcon className="size-4 shrink-0" />
-        {formattedPeriodEnd ? (
-          <Trans>
-            Your subscription will be downgraded to {getPlanLabel(scheduledPlan)} on {formattedPeriodEnd}.
-          </Trans>
-        ) : (
-          <Trans>
-            Your subscription will be downgraded to {getPlanLabel(scheduledPlan)} at the end of the current billing
-            period.
-          </Trans>
-        )}
-      </div>
-      {onCancelDowngrade && (
-        <Button size="sm" className="shrink-0" onClick={onCancelDowngrade}>
-          <Trans>Cancel downgrade</Trans>
-        </Button>
-      )}
-    </div>
-  );
-}
-
-interface PastDueBannerProps {
-  formattedGracePeriodEnd: string | null;
-  onRetryPayment?: () => void;
-}
-
-export function PastDueBanner({ formattedGracePeriodEnd, onRetryPayment }: Readonly<PastDueBannerProps>) {
-  return (
-    <div className="mb-6 flex items-center justify-between gap-3 rounded-lg border border-destructive/40 bg-destructive/5 p-4 text-sm text-destructive">
-      <div className="flex items-center gap-3">
-        <AlertTriangleIcon className="size-4 shrink-0" />
-        {formattedGracePeriodEnd ? (
-          <Trans>Payment failed. Update or retry payment before {formattedGracePeriodEnd} to avoid suspension.</Trans>
-        ) : (
-          <Trans>Payment failed. Update or retry payment to keep access active.</Trans>
-        )}
-      </div>
-      {onRetryPayment && (
-        <Button size="sm" className="shrink-0" onClick={onRetryPayment}>
-          <Trans>Retry payment</Trans>
-        </Button>
-      )}
-    </div>
-  );
-}
-
-export function BillingNotConfiguredBanner() {
+export function PaystackNotConfiguredBanner() {
   return (
     <div className="mb-6 flex items-center gap-3 rounded-lg border border-border bg-muted/50 p-4 text-sm text-muted-foreground">
       <AlertTriangleIcon className="size-4 shrink-0" />

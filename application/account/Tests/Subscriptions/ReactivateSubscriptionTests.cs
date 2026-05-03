@@ -13,67 +13,75 @@ namespace Account.Tests.Subscriptions;
 public sealed class ReactivateSubscriptionTests : EndpointBaseTest<AccountDbContext>
 {
     [Fact]
-    public async Task ReactivateSubscription_WhenCancelledAndOwner_ShouldSucceed()
-    {
-        // Arrange — put subscription into Cancelled state
-        Connection.Update("subscriptions", "tenant_id", DatabaseSeeder.Tenant1.Id.Value, [
-                ("status", nameof(SubscriptionStatus.Cancelled)),
-                ("plan", nameof(SubscriptionPlan.Standard))
-            ]
-        );
-
-        // Act
-        var response = await AuthenticatedOwnerHttpClient.PostAsync("/api/account/subscriptions/reactivate", null);
-
-        // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var result = await response.Content.ReadFromJsonAsync<ReactivateSubscriptionResponse>();
-        result!.Uuid.Should().Be("test-uuid");
-    }
-
-    [Fact]
-    public async Task ReactivateSubscription_WhenNotOwner_ShouldReturnForbidden()
+    public async Task ReactivateSubscription_WhenCancelled_ShouldSucceed()
     {
         // Arrange
         Connection.Update("subscriptions", "tenant_id", DatabaseSeeder.Tenant1.Id.Value, [
-                ("status", nameof(SubscriptionStatus.Cancelled)),
-                ("plan", nameof(SubscriptionPlan.Standard))
+                ("plan", nameof(SubscriptionPlan.Standard)),
+                ("paystack_customer_id", "CUS_test_123"),
+                ("paystack_subscription_id", "SUB_test_123"),
+                ("current_period_end", TimeProvider.GetUtcNow().AddDays(30)),
+                ("cancel_at_period_end", true)
             ]
         );
+        var command = new ReactivateSubscriptionCommand();
+        TelemetryEventsCollectorSpy.Reset();
 
         // Act
-        var response = await AuthenticatedMemberHttpClient.PostAsync("/api/account/subscriptions/reactivate", null);
+        var response = await AuthenticatedOwnerHttpClient.PostAsJsonAsync("/api/account/subscriptions/reactivate", command);
 
         // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
+        response.EnsureSuccessStatusCode();
+        var result = await response.Content.ReadFromJsonAsync<ReactivateSubscriptionResponse>();
+        result!.AuthorizationUrl.Should().BeNull();
+
+        TelemetryEventsCollectorSpy.CollectedEvents.Should().BeEmpty();
     }
 
     [Fact]
     public async Task ReactivateSubscription_WhenNotCancelled_ShouldReturnBadRequest()
     {
-        // Arrange — default seeded subscription is Trial (not Cancelled)
+        // Arrange
+        Connection.Update("subscriptions", "tenant_id", DatabaseSeeder.Tenant1.Id.Value, [
+                ("plan", nameof(SubscriptionPlan.Standard)),
+                ("paystack_customer_id", "CUS_test_123"),
+                ("paystack_subscription_id", "SUB_test_123"),
+                ("current_period_end", TimeProvider.GetUtcNow().AddDays(30))
+            ]
+        );
+        var command = new ReactivateSubscriptionCommand();
+        TelemetryEventsCollectorSpy.Reset();
 
         // Act
-        var response = await AuthenticatedOwnerHttpClient.PostAsync("/api/account/subscriptions/reactivate", null);
+        var response = await AuthenticatedOwnerHttpClient.PostAsJsonAsync("/api/account/subscriptions/reactivate", command);
 
         // Assert
         await response.ShouldHaveErrorStatusCode(HttpStatusCode.BadRequest, "Subscription is not cancelled. Nothing to reactivate.");
+
+        TelemetryEventsCollectorSpy.AreAllEventsDispatched.Should().BeFalse();
     }
 
     [Fact]
-    public async Task ReactivateSubscription_WhenActive_ShouldReturnBadRequest()
+    public async Task ReactivateSubscription_WhenNonOwner_ShouldReturnForbidden()
     {
         // Arrange
         Connection.Update("subscriptions", "tenant_id", DatabaseSeeder.Tenant1.Id.Value, [
-                ("status", nameof(SubscriptionStatus.Active)),
-                ("plan", nameof(SubscriptionPlan.Standard))
+                ("plan", nameof(SubscriptionPlan.Standard)),
+                ("paystack_customer_id", "CUS_test_123"),
+                ("paystack_subscription_id", "SUB_test_123"),
+                ("current_period_end", TimeProvider.GetUtcNow().AddDays(30)),
+                ("cancel_at_period_end", true)
             ]
         );
+        var command = new ReactivateSubscriptionCommand();
+        TelemetryEventsCollectorSpy.Reset();
 
         // Act
-        var response = await AuthenticatedOwnerHttpClient.PostAsync("/api/account/subscriptions/reactivate", null);
+        var response = await AuthenticatedMemberHttpClient.PostAsJsonAsync("/api/account/subscriptions/reactivate", command);
 
         // Assert
-        await response.ShouldHaveErrorStatusCode(HttpStatusCode.BadRequest, "Subscription is not cancelled. Nothing to reactivate.");
+        await response.ShouldHaveErrorStatusCode(HttpStatusCode.Forbidden, "Only owners can manage subscriptions.");
+
+        TelemetryEventsCollectorSpy.AreAllEventsDispatched.Should().BeFalse();
     }
 }

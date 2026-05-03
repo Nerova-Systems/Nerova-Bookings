@@ -1,7 +1,7 @@
 using System.Net.Http.Headers;
 using Account.Features.Users.Domain;
 using Account.Integrations.OAuth;
-using Account.Integrations.PayFast;
+using Account.Integrations.Paystack;
 using Bogus;
 using JetBrains.Annotations;
 using Microsoft.ApplicationInsights;
@@ -33,7 +33,6 @@ public abstract class EndpointBaseTest<TContext> : IDisposable where TContext : 
     private const string TestPublicUrl = "https://localhost";
     protected readonly AccessTokenGenerator AccessTokenGenerator;
     protected readonly IEmailClient EmailClient;
-    protected readonly IPayFastClient PayFastClient;
     protected readonly Faker Faker = new();
     protected readonly ServiceCollection Services;
     protected readonly TimeProvider TimeProvider;
@@ -48,6 +47,8 @@ public abstract class EndpointBaseTest<TContext> : IDisposable where TContext : 
             "APPLICATIONINSIGHTS_CONNECTION_STRING",
             "InstrumentationKey=00000000-0000-0000-0000-000000000000;IngestionEndpoint=https://localhost;LiveEndpoint=https://localhost"
         );
+        Environment.SetEnvironmentVariable("Paystack__AllowMockProvider", "true");
+
         Services = new ServiceCollection();
         TimeProvider = TimeProvider.System;
 
@@ -88,17 +89,6 @@ public abstract class EndpointBaseTest<TContext> : IDisposable where TContext : 
         EmailClient = Substitute.For<IEmailClient>();
         Services.AddScoped<IEmailClient>(_ => EmailClient);
 
-        PayFastClient = Substitute.For<IPayFastClient>();
-        PayFastClient.ProcessOnsitePaymentAsync(Arg.Any<IDictionary<string, string>>(), Arg.Any<CancellationToken>()).Returns("test-uuid");
-        PayFastClient.ChargeTokenAsync(Arg.Any<string>(), Arg.Any<decimal>(), Arg.Any<string>(), Arg.Any<CancellationToken>()).Returns(true);
-        PayFastClient.CancelSubscriptionAsync(Arg.Any<string>(), Arg.Any<CancellationToken>()).Returns(true);
-        PayFastClient.FetchSubscriptionAsync(Arg.Any<string>(), Arg.Any<CancellationToken>())
-            .Returns(callInfo => new PayFastSubscriptionDetails(callInfo.Arg<string>(), "active", null, null, null));
-        PayFastClient.UpdateSubscriptionAsync(Arg.Any<string>(), Arg.Any<decimal>(), Arg.Any<DateTimeOffset>(), Arg.Any<CancellationToken>()).Returns(true);
-        PayFastClient.RefundPaymentAsync(Arg.Any<string>(), Arg.Any<decimal>(), Arg.Any<string>(), Arg.Any<CancellationToken>())
-            .Returns(new PayFastRefundResult(false, false, null, "Manual refund"));
-        PayFastClient.GetUpdateCardUrl(Arg.Any<string>()).Returns(callInfo => $"https://sandbox.payfast.co.za/eng/recurring/update/{callInfo.Arg<string>()}");
-
         var telemetryChannel = Substitute.For<ITelemetryChannel>();
         Services.AddSingleton(new TelemetryClient(new TelemetryConfiguration { TelemetryChannel = telemetryChannel }));
 
@@ -121,18 +111,12 @@ public abstract class EndpointBaseTest<TContext> : IDisposable where TContext : 
 
                 builder.ConfigureAppConfiguration((_, configuration) =>
                     {
+                        // Account-api hosts both the user-facing and back-office SPAs scoped via RequireHost
+                        // on each MapFallback. The TestServer sends requests to "localhost" by default, so
+                        // configure Hostnames:App to match for the user-facing SPA shell.
                         configuration.AddInMemoryCollection(new Dictionary<string, string?>
                             {
-                                // Account-api hosts both the user-facing and back-office SPAs scoped via RequireHost
-                                // on each MapFallback. The TestServer sends requests to "localhost" by default.
-                                ["Hostnames:App"] = "localhost",
-                                ["PayFast:MerchantId"] = "10043122",
-                                ["PayFast:MerchantKey"] = "6g0gkxnzbtx1t",
-                                ["PayFast:Passphrase"] = "nerovabookings",
-                                ["PayFast:Sandbox"] = "true",
-                                ["PayFast:NotifyUrl"] = "https://localhost:9000/api/account/subscriptions/payfast/itn",
-                                ["PayFast:ReturnUrl"] = "https://localhost:9000/account/billing",
-                                ["PayFast:CancelUrl"] = "https://localhost:9000/account/billing"
+                                ["Hostnames:App"] = "localhost"
                             }
                         );
                     }
@@ -149,9 +133,6 @@ public abstract class EndpointBaseTest<TContext> : IDisposable where TContext : 
 
                         services.Remove(services.Single(d => d.ServiceType == typeof(IEmailClient)));
                         services.AddTransient<IEmailClient>(_ => EmailClient);
-
-                        services.Remove(services.Single(d => d.ServiceType == typeof(IPayFastClient)));
-                        services.AddTransient<IPayFastClient>(_ => PayFastClient);
 
                         RegisterMockLoggers(services);
 
@@ -200,6 +181,8 @@ public abstract class EndpointBaseTest<TContext> : IDisposable where TContext : 
     protected HttpClient AuthenticatedOwnerHttpClient { get; }
 
     protected HttpClient AuthenticatedMemberHttpClient { get; }
+
+    protected MockPaystackState PaystackState => _webApplicationFactory.Services.GetRequiredService<MockPaystackState>();
 
     public void Dispose()
     {

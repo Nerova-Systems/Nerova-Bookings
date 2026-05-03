@@ -13,73 +13,42 @@ namespace Account.Tests.Subscriptions;
 public sealed class CancelSubscriptionTests : EndpointBaseTest<AccountDbContext>
 {
     [Fact]
-    public async Task CancelSubscription_WhenActiveAndOwner_ShouldSucceed()
-    {
-        // Arrange — put subscription into Active state
-        Connection.Update("subscriptions", "tenant_id", DatabaseSeeder.Tenant1.Id.Value, [
-                ("status", nameof(SubscriptionStatus.Active)),
-                ("plan", nameof(SubscriptionPlan.Standard))
-            ]
-        );
-
-        var command = new CancelSubscriptionCommand(CancellationReason.TooExpensive, null);
-
-        // Act
-        var response = await AuthenticatedOwnerHttpClient.PostAsJsonAsync("/api/account/subscriptions/cancel", command);
-
-        // Assert
-        await response.ShouldBeSuccessfulPostRequest(hasLocation: false);
-    }
-
-    [Fact]
-    public async Task CancelSubscription_WhenPastDueAndOwner_ShouldSucceed()
-    {
-        // Arrange — put subscription into PastDue state
-        Connection.Update("subscriptions", "tenant_id", DatabaseSeeder.Tenant1.Id.Value, [
-                ("status", nameof(SubscriptionStatus.PastDue)),
-                ("plan", nameof(SubscriptionPlan.Starter))
-            ]
-        );
-
-        var command = new CancelSubscriptionCommand(CancellationReason.NoLongerNeeded, "No longer needed");
-
-        // Act
-        var response = await AuthenticatedOwnerHttpClient.PostAsJsonAsync("/api/account/subscriptions/cancel", command);
-
-        // Assert
-        await response.ShouldBeSuccessfulPostRequest(hasLocation: false);
-    }
-
-    [Fact]
-    public async Task CancelSubscription_WhenNotOwner_ShouldReturnForbidden()
+    public async Task CancelSubscription_WhenActiveSubscription_ShouldSucceed()
     {
         // Arrange
         Connection.Update("subscriptions", "tenant_id", DatabaseSeeder.Tenant1.Id.Value, [
-                ("status", nameof(SubscriptionStatus.Active)),
-                ("plan", nameof(SubscriptionPlan.Standard))
+                ("plan", nameof(SubscriptionPlan.Standard)),
+                ("paystack_customer_id", "CUS_test_123"),
+                ("paystack_subscription_id", "SUB_test_123"),
+                ("current_period_end", TimeProvider.GetUtcNow().AddDays(30))
             ]
         );
-
-        var command = new CancelSubscriptionCommand(CancellationReason.TooExpensive, null);
-
-        // Act
-        var response = await AuthenticatedMemberHttpClient.PostAsJsonAsync("/api/account/subscriptions/cancel", command);
-
-        // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
-    }
-
-    [Fact]
-    public async Task CancelSubscription_WhenTrialSubscription_ShouldReturnBadRequest()
-    {
-        // Arrange — default seeded subscription is Trial
-        var command = new CancelSubscriptionCommand(CancellationReason.TooExpensive, null);
+        var command = new CancelSubscriptionCommand(CancellationReason.TooExpensive, "The price doubled last month.");
+        TelemetryEventsCollectorSpy.Reset();
 
         // Act
         var response = await AuthenticatedOwnerHttpClient.PostAsJsonAsync("/api/account/subscriptions/cancel", command);
 
         // Assert
-        await response.ShouldHaveErrorStatusCode(HttpStatusCode.BadRequest, "Cannot cancel a subscription that is not active.");
+        response.EnsureSuccessStatusCode();
+
+        TelemetryEventsCollectorSpy.CollectedEvents.Should().BeEmpty();
+    }
+
+    [Fact]
+    public async Task CancelSubscription_WhenBasisSubscription_ShouldReturnBadRequest()
+    {
+        // Arrange
+        var command = new CancelSubscriptionCommand(CancellationReason.NoLongerNeeded, null);
+        TelemetryEventsCollectorSpy.Reset();
+
+        // Act
+        var response = await AuthenticatedOwnerHttpClient.PostAsJsonAsync("/api/account/subscriptions/cancel", command);
+
+        // Assert
+        await response.ShouldHaveErrorStatusCode(HttpStatusCode.BadRequest, "Cannot cancel a Basis subscription.");
+
+        TelemetryEventsCollectorSpy.AreAllEventsDispatched.Should().BeFalse();
     }
 
     [Fact]
@@ -87,55 +56,45 @@ public sealed class CancelSubscriptionTests : EndpointBaseTest<AccountDbContext>
     {
         // Arrange
         Connection.Update("subscriptions", "tenant_id", DatabaseSeeder.Tenant1.Id.Value, [
-                ("status", nameof(SubscriptionStatus.Cancelled)),
-                ("plan", nameof(SubscriptionPlan.Standard))
+                ("plan", nameof(SubscriptionPlan.Standard)),
+                ("paystack_customer_id", "CUS_test_123"),
+                ("paystack_subscription_id", "SUB_test_123"),
+                ("current_period_end", TimeProvider.GetUtcNow().AddDays(30)),
+                ("cancel_at_period_end", true)
             ]
         );
-
-        var command = new CancelSubscriptionCommand(CancellationReason.FoundAlternative, null);
+        var command = new CancelSubscriptionCommand(CancellationReason.FoundAlternative, "Switched to competitor.");
+        TelemetryEventsCollectorSpy.Reset();
 
         // Act
         var response = await AuthenticatedOwnerHttpClient.PostAsJsonAsync("/api/account/subscriptions/cancel", command);
 
         // Assert
-        await response.ShouldHaveErrorStatusCode(HttpStatusCode.BadRequest, "Subscription is already cancelled.");
+        await response.ShouldHaveErrorStatusCode(HttpStatusCode.BadRequest, "Subscription is already scheduled for cancellation.");
+
+        TelemetryEventsCollectorSpy.AreAllEventsDispatched.Should().BeFalse();
     }
 
     [Fact]
-    public async Task CancelSubscription_WhenExpiredSubscription_ShouldReturnBadRequest()
+    public async Task CancelSubscription_WhenNonOwner_ShouldReturnForbidden()
     {
         // Arrange
         Connection.Update("subscriptions", "tenant_id", DatabaseSeeder.Tenant1.Id.Value, [
-                ("status", nameof(SubscriptionStatus.Expired)),
-                ("plan", nameof(SubscriptionPlan.Standard))
+                ("plan", nameof(SubscriptionPlan.Standard)),
+                ("paystack_customer_id", "CUS_test_123"),
+                ("paystack_subscription_id", "SUB_test_123"),
+                ("current_period_end", TimeProvider.GetUtcNow().AddDays(30))
             ]
         );
-
-        var command = new CancelSubscriptionCommand(CancellationReason.TooExpensive, null);
-
-        // Act
-        var response = await AuthenticatedOwnerHttpClient.PostAsJsonAsync("/api/account/subscriptions/cancel", command);
-
-        // Assert
-        await response.ShouldHaveErrorStatusCode(HttpStatusCode.BadRequest, "Cannot cancel a subscription that is not active.");
-    }
-
-    [Fact]
-    public async Task CancelSubscription_WhenFeedbackContainsHtml_ShouldReturnValidationError()
-    {
-        // Arrange
-        Connection.Update("subscriptions", "tenant_id", DatabaseSeeder.Tenant1.Id.Value, [
-                ("status", nameof(SubscriptionStatus.Active)),
-                ("plan", nameof(SubscriptionPlan.Standard))
-            ]
-        );
-
-        var command = new CancelSubscriptionCommand(CancellationReason.Other, "<script>alert('xss')</script>");
+        var command = new CancelSubscriptionCommand(CancellationReason.Other, "Just testing.");
+        TelemetryEventsCollectorSpy.Reset();
 
         // Act
-        var response = await AuthenticatedOwnerHttpClient.PostAsJsonAsync("/api/account/subscriptions/cancel", command);
+        var response = await AuthenticatedMemberHttpClient.PostAsJsonAsync("/api/account/subscriptions/cancel", command);
 
         // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        await response.ShouldHaveErrorStatusCode(HttpStatusCode.Forbidden, "Only owners can manage subscriptions.");
+
+        TelemetryEventsCollectorSpy.AreAllEventsDispatched.Should().BeFalse();
     }
 }

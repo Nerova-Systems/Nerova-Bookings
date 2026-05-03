@@ -107,7 +107,13 @@ function ServicesPage() {
             </div>
             <div className="grid grid-cols-[repeat(auto-fill,minmax(16.25rem,1fr))] gap-3">
               {cat.services.map((svc) => (
-                <ServiceCard key={svc.id} service={svc} onEdit={(service) => openServiceForm(service, setEditingService, setFormOpen)} onArchive={handleArchive} onRestore={handleRestore} />
+                <ServiceCard
+                  key={svc.id}
+                  service={svc}
+                  onEdit={(service) => openServiceForm(service, setEditingService, setFormOpen)}
+                  onArchive={handleArchive}
+                  onRestore={handleRestore}
+                />
               ))}
             </div>
           </div>
@@ -123,7 +129,13 @@ function ServicesPage() {
             </div>
             <div className="grid grid-cols-[repeat(auto-fill,minmax(16.25rem,1fr))] gap-3">
               {archived.map((svc) => (
-                <ServiceCard key={svc.id} service={svc} onEdit={(service) => openServiceForm(service, setEditingService, setFormOpen)} onArchive={handleArchive} onRestore={handleRestore} />
+                <ServiceCard
+                  key={svc.id}
+                  service={svc}
+                  onEdit={(service) => openServiceForm(service, setEditingService, setFormOpen)}
+                  onArchive={handleArchive}
+                  onRestore={handleRestore}
+                />
               ))}
             </div>
             <div className="mt-2 rounded-lg bg-muted px-3.5 py-2.5 text-xs text-muted-foreground">
@@ -143,9 +155,18 @@ function ServicesPage() {
           onClose={() => setFormOpen(false)}
           onSubmit={(request: ServiceMutationRequest) => {
             if (editingService) {
-              updateService.mutate({ id: editingService.id, request }, { onSuccess: () => closeServiceForm("Service updated.", setFormOpen), onError: (error) => toast.error(error instanceof Error ? error.message : "Could not update service.") });
+              updateService.mutate(
+                { id: editingService.id, request },
+                {
+                  onSuccess: () => closeServiceForm("Service updated.", setFormOpen),
+                  onError: (error) => toast.error(error instanceof Error ? error.message : "Could not update service.")
+                }
+              );
             } else {
-              createService.mutate(request, { onSuccess: () => closeServiceForm("Service created.", setFormOpen), onError: (error) => toast.error(error instanceof Error ? error.message : "Could not create service.") });
+              createService.mutate(request, {
+                onSuccess: () => closeServiceForm("Service created.", setFormOpen),
+                onError: (error) => toast.error(error instanceof Error ? error.message : "Could not create service.")
+              });
             }
           }}
         />
@@ -163,7 +184,11 @@ function groupServices(categories: ServiceCategory[], services: Service[]) {
     .filter((category) => category.services.length > 0);
 }
 
-function openServiceForm(service: Service, setEditingService: (service: Service) => void, setFormOpen: (open: boolean) => void) {
+function openServiceForm(
+  service: Service,
+  setEditingService: (service: Service) => void,
+  setFormOpen: (open: boolean) => void
+) {
   setEditingService(service);
   setFormOpen(true);
 }

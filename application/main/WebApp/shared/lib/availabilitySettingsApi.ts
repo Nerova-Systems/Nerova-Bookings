@@ -2,6 +2,7 @@ import { enhancedFetch } from "@repo/infrastructure/http/httpClient";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import type { ApiShell } from "./appointmentContracts";
+
 import { mapShell } from "./appointmentMappers";
 
 export interface AvailabilityWindowMutationRequest {

@@ -1,7 +1,8 @@
+import type { ReactNode } from "react";
+
 import { Trans } from "@lingui/react/macro";
 import { CalendarDaysIcon, GiftIcon, UserRoundIcon, XIcon } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
-import type { ReactNode } from "react";
 
 import type { Client } from "@/shared/lib/appointmentsApi";
 
@@ -132,15 +133,7 @@ function Metric({ label, value }: { label: string; value: string }) {
   );
 }
 
-function TabButton({
-  active,
-  onClick,
-  children
-}: {
-  active: boolean;
-  onClick: () => void;
-  children: ReactNode;
-}) {
+function TabButton({ active, onClick, children }: { active: boolean; onClick: () => void; children: ReactNode }) {
   return (
     <button
       type="button"

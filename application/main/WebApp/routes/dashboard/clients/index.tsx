@@ -7,8 +7,8 @@ import { useEffect, useState } from "react";
 
 import { useAppointmentShell, useUpdateClient } from "@/shared/lib/appointmentsApi";
 
-import { ClientDrawer } from "./-components/ClientDrawer";
 import { FILTER_LABELS, FlagDot, type Filter } from "./-components/clientData";
+import { ClientDrawer } from "./-components/ClientDrawer";
 
 export const Route = createFileRoute("/dashboard/clients/")({
   staticData: { trackingTitle: "Clients" },

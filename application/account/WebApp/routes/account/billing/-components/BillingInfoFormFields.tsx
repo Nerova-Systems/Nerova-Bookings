@@ -1,9 +1,13 @@
 import { t } from "@lingui/core/macro";
+import { TextAreaField } from "@repo/ui/components/TextAreaField";
 import { TextField } from "@repo/ui/components/TextField";
 
 import type { components } from "@/shared/lib/api/api.generated";
 
-import { CountrySelect, type CountryOption } from "./CountrySelect";
+import type { CountryOption } from "./CountrySelect";
+
+import { stateRequiredCountries } from "./countryCodes";
+import { CountrySelect } from "./CountrySelect";
 
 type BillingInfo = components["schemas"]["BillingInfo"];
 
@@ -17,11 +21,6 @@ interface BillingInfoFormFieldsProps {
   onFieldChange: () => void;
 }
 
-/**
- * Renders the billing info form fields used in EditBillingInfoDialog. All fields are persisted on
- * the Subscription aggregate (PUT /api/account/billing/billing-info) and used purely for display
- * and invoicing — PayFast does not store this data.
- */
 export function BillingInfoFormFields({
   billingInfo,
   tenantName,
@@ -31,64 +30,94 @@ export function BillingInfoFormFields({
   onCountryChange,
   onFieldChange
 }: Readonly<BillingInfoFormFieldsProps>) {
+  const showStateField = selectedCountry != null && stateRequiredCountries.includes(selectedCountry);
+
   return (
-    <div className="flex flex-col gap-4">
+    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
       <TextField
-        autoFocus
-        name="name"
-        label={t`Billing name`}
-        defaultValue={billingInfo?.name ?? tenantName}
-        onChange={onFieldChange}
-        required
-      />
-      <TextField
+        autoFocus={true}
         name="email"
-        type="email"
         label={t`Billing email`}
-        defaultValue={billingInfo?.email ?? defaultEmail}
+        defaultValue={defaultEmail}
+        placeholder={t`billing@company.com`}
         onChange={onFieldChange}
-        required
+      />
+      <CountrySelect
+        countries={countries}
+        defaultValue={billingInfo?.address?.country ?? undefined}
+        onValueChange={onCountryChange}
       />
       <TextField
-        name="line1"
-        label={t`Address line 1`}
-        defaultValue={billingInfo?.address?.line1 ?? ""}
-        onChange={onFieldChange}
-        required
-      />
-      <TextField
-        name="line2"
-        label={t`Address line 2 (optional)`}
-        defaultValue={billingInfo?.address?.line2 ?? ""}
+        name="name"
+        label={t`Name`}
+        defaultValue={billingInfo?.name ?? tenantName}
+        placeholder={t`Name as it appears on invoices`}
+        className="sm:col-span-2"
         onChange={onFieldChange}
       />
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+      <TextAreaField
+        name="address"
+        label={t`Address`}
+        defaultValue={[billingInfo?.address?.line1, billingInfo?.address?.line2].filter(Boolean).join("\n")}
+        placeholder={t`Street address`}
+        textareaClassName="resize-none"
+        className="sm:col-span-2"
+        onChange={onFieldChange}
+        onKeyDown={(e) => {
+          if (e.key === "Enter") {
+            const lines = e.currentTarget.value.split("\n");
+            if (lines.length >= 2) {
+              e.preventDefault();
+            }
+          }
+        }}
+        onPaste={(e) => {
+          const textarea = e.currentTarget;
+          const paste = e.clipboardData.getData("text");
+          const before = textarea.value.slice(0, textarea.selectionStart);
+          const after = textarea.value.slice(textarea.selectionEnd);
+          const result = before + paste + after;
+          const lines = result.split("\n");
+          if (lines.length > 2) {
+            e.preventDefault();
+            textarea.value = lines.slice(0, 2).join("\n");
+            onFieldChange();
+          }
+        }}
+      />
+      <div className="grid grid-cols-3 gap-4 sm:col-span-2 sm:grid-cols-2">
         <TextField
           name="postalCode"
           label={t`Postal code`}
           defaultValue={billingInfo?.address?.postalCode ?? ""}
+          placeholder={t`Postal code`}
           onChange={onFieldChange}
-          required
         />
         <TextField
           name="city"
           label={t`City`}
           defaultValue={billingInfo?.address?.city ?? ""}
+          placeholder={t`City`}
+          className="col-span-2 sm:col-span-1"
           onChange={onFieldChange}
-          required
         />
       </div>
-      <TextField
-        name="state"
-        label={t`State / Province (optional)`}
-        defaultValue={billingInfo?.address?.state ?? ""}
-        onChange={onFieldChange}
-      />
-      <CountrySelect countries={countries} defaultValue={selectedCountry} onValueChange={onCountryChange} />
+      {showStateField && (
+        <TextField
+          name="state"
+          label={t`State / Province`}
+          defaultValue={billingInfo?.address?.state ?? ""}
+          placeholder={t`State or region`}
+          onChange={onFieldChange}
+        />
+      )}
       <TextField
         name="taxId"
-        label={t`Tax ID (optional)`}
+        label={t`Tax ID (VAT number)`}
         defaultValue={billingInfo?.taxId ?? ""}
+        placeholder={t`VAT number`}
+        description={t`Please include your country code`}
+        className={!showStateField ? "sm:col-span-2" : undefined}
         onChange={onFieldChange}
       />
     </div>

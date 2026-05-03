@@ -1,6 +1,7 @@
+import type { FormEvent } from "react";
+
 import { Trans } from "@lingui/react/macro";
 import { Button } from "@repo/ui/components/Button";
-import type { FormEvent } from "react";
 
 export interface BlockTimeForm {
   title: string;
@@ -34,7 +35,11 @@ export function BlockTimeDialog({
         <div className="grid gap-3">
           <label className="grid gap-1 text-xs font-medium">
             Title
-            <input value={form.title} onChange={(event) => onChange({ ...form, title: event.target.value })} className={inputClassName} />
+            <input
+              value={form.title}
+              onChange={(event) => onChange({ ...form, title: event.target.value })}
+              className={inputClassName}
+            />
           </label>
           <label className="grid gap-1 text-xs font-medium">
             Date

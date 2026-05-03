@@ -110,7 +110,11 @@ export function AccountSideMenu() {
                   </SidebarMenuButton>
                 </SidebarMenuItem>
                 <SidebarMenuItem>
-                  <SidebarMenuButton asChild={true} isActive={isActive("/user/out-of-office")} tooltip={t`Out of office`}>
+                  <SidebarMenuButton
+                    asChild={true}
+                    isActive={isActive("/user/out-of-office")}
+                    tooltip={t`Out of office`}
+                  >
                     <RouterLink to="/user/out-of-office" aria-label={t`Out of office`}>
                       <Clock3Icon />
                       <span>
@@ -120,7 +124,11 @@ export function AccountSideMenu() {
                   </SidebarMenuButton>
                 </SidebarMenuItem>
                 <SidebarMenuItem>
-                  <SidebarMenuButton asChild={true} isActive={isActive("/user/push-notifications")} tooltip={t`Push notifications`}>
+                  <SidebarMenuButton
+                    asChild={true}
+                    isActive={isActive("/user/push-notifications")}
+                    tooltip={t`Push notifications`}
+                  >
                     <RouterLink to="/user/push-notifications" aria-label={t`Push notifications`}>
                       <BellIcon />
                       <span>

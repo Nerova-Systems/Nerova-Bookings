@@ -3,6 +3,7 @@ import { Globe2Icon } from "lucide-react";
 import { toast } from "sonner";
 
 import type { HolidaySettings, PublicHoliday } from "@/shared/lib/appointmentsApi";
+
 import { useUpdateHolidaySettings } from "@/shared/lib/availabilitySettingsApi";
 
 interface HolidaySettingsPanelProps {
@@ -49,7 +50,9 @@ export function HolidaySettingsPanel({ holidaySettings }: HolidaySettingsPanelPr
           <Globe2Icon className="size-4 text-muted-foreground" />
           <div>
             <h3 className="text-sm font-medium">Public holidays</h3>
-            <p className="text-xs text-muted-foreground">Closed by default. Toggle a holiday on when the business is open.</p>
+            <p className="text-xs text-muted-foreground">
+              Closed by default. Toggle a holiday on when the business is open.
+            </p>
           </div>
         </div>
         <select

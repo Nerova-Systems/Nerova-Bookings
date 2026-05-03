@@ -1,4 +1,4 @@
-// Hardcoded ISO 3166-1 alpha-2 codes because Intl.DisplayNames resolves historical and pseudo codes that payment providers reject.
+// Hardcoded ISO 3166-1 alpha-2 codes because payment processors reject historical and pseudo country codes
 // prettier-ignore
 export const countryCodes = [
   "AD", "AE", "AF", "AG", "AI", "AL", "AM", "AO", "AQ", "AR", "AS", "AT", "AU", "AW", "AX", "AZ",

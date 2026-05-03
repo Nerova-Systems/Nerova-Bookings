@@ -17,9 +17,12 @@ public sealed class GetPaymentHistoryTests : EndpointBaseTest<AccountDbContext>
     {
         // Arrange
         var transactionId = PaymentTransactionId.NewId().ToString();
-        var transactionsJson = $$"""[{"Id":"{{transactionId}}","Amount":29.99,"Currency":"usd","Status":"Succeeded","Date":"2026-01-01T00:00:00+00:00","FailureReason":null,"InvoiceUrl":"https://invoice.test/123","Provider":"PayFast","ProviderPaymentId":"pf-123","ProviderStatus":"COMPLETE","RefundedAmount":10.00}]""";
+        var transactionsJson = $$"""[{"Id":"{{transactionId}}","Amount":29.99,"Currency":"zar","Status":"Succeeded","Date":"2026-01-01T00:00:00+00:00","FailureReason":null,"InvoiceUrl":"https://invoice.paystack.com/test"}]""";
         Connection.Update("subscriptions", "tenant_id", DatabaseSeeder.Tenant1.Id.Value, [
                 ("plan", nameof(SubscriptionPlan.Standard)),
+                ("paystack_customer_id", "CUS_test_123"),
+                ("paystack_subscription_id", "SUB_test_123"),
+                ("current_period_end", TimeProvider.GetUtcNow().AddDays(30)),
                 ("payment_transactions", transactionsJson)
             ]
         );
@@ -33,12 +36,8 @@ public sealed class GetPaymentHistoryTests : EndpointBaseTest<AccountDbContext>
         result!.TotalCount.Should().Be(1);
         result.Transactions.Should().HaveCount(1);
         result.Transactions[0].Amount.Should().Be(29.99m);
-        result.Transactions[0].Currency.Should().Be("usd");
+        result.Transactions[0].Currency.Should().Be("zar");
         result.Transactions[0].Status.Should().Be(PaymentTransactionStatus.Succeeded);
-        result.Transactions[0].Provider.Should().Be("PayFast");
-        result.Transactions[0].ProviderPaymentId.Should().Be("pf-123");
-        result.Transactions[0].RefundedAmount.Should().Be(10.00m);
-        result.Transactions[0].RefundStatus.Should().Be("PartiallyRefunded");
     }
 
     [Fact]

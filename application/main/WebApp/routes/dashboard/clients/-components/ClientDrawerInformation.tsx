@@ -1,7 +1,8 @@
+import type { Dispatch, SetStateAction } from "react";
+
 import { Trans } from "@lingui/react/macro";
 import { Button } from "@repo/ui/components/Button";
 import { Loader2Icon } from "lucide-react";
-import type { Dispatch, SetStateAction } from "react";
 
 import type { Client } from "@/shared/lib/appointmentsApi";
 
@@ -73,7 +74,11 @@ export function ClientDrawerInformation({
         <Button type="button" variant="outline" onClick={onReset}>
           <Trans>Reset</Trans>
         </Button>
-        <Button type="button" disabled={pending || form.name.trim() === "" || form.phone.trim() === ""} onClick={onSubmit}>
+        <Button
+          type="button"
+          disabled={pending || form.name.trim() === "" || form.phone.trim() === ""}
+          onClick={onSubmit}
+        >
           {pending && <Loader2Icon className="mr-2 size-4 animate-spin" />}
           <Trans>Save client</Trans>
         </Button>

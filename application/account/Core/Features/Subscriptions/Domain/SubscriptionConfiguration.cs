@@ -18,6 +18,25 @@ public sealed class SubscriptionConfiguration : IEntityTypeConfiguration<Subscri
         builder.MapStronglyTypedUuid<Subscription, SubscriptionId>(s => s.Id);
         builder.MapStronglyTypedLongId<Subscription, TenantId>(s => s.TenantId);
         builder.HasOne<Tenant>().WithMany().HasForeignKey(s => s.TenantId);
+        builder.MapStronglyTypedNullableId<Subscription, PaystackCustomerId, string>(s => s.PaystackCustomerId);
+        builder.MapStronglyTypedNullableId<Subscription, PaystackSubscriptionId, string>(s => s.PaystackSubscriptionId);
+        builder.HasIndex(s => s.PaystackCustomerId)
+            .HasDatabaseName("ix_subscriptions_paystack_customer_id")
+            .HasFilter("paystack_customer_id IS NOT NULL");
+
+        builder.Property(s => s.Plan)
+            .HasConversion(
+                v => v.ToString(),
+                v => v == "Trial" ? SubscriptionPlan.Basis : Enum.Parse<SubscriptionPlan>(v)
+            );
+
+        builder.Property(s => s.ScheduledPlan)
+            .HasConversion(
+                v => v.HasValue ? v.Value.ToString() : null,
+                v => v == null || v == "Trial" ? null : Enum.Parse<SubscriptionPlan>(v)
+            );
+
+        builder.Property(s => s.CurrentPriceAmount).HasPrecision(18, 2);
 
         builder.Property(s => s.PaymentTransactions)
             .HasColumnType("jsonb")
@@ -32,18 +51,13 @@ public sealed class SubscriptionConfiguration : IEntityTypeConfiguration<Subscri
                 )
             );
 
+        builder.OwnsOne(s => s.PaymentMethod, b => b.ToJson());
+
         builder.Property(s => s.BillingInfo)
             .HasColumnType("jsonb")
             .HasConversion(
                 v => v == null ? null : JsonSerializer.Serialize(v, JsonSerializerOptions),
-                v => string.IsNullOrEmpty(v) ? null : JsonSerializer.Deserialize<BillingInfo>(v, JsonSerializerOptions)
-            );
-
-        builder.Property(s => s.PaymentMethod)
-            .HasColumnType("jsonb")
-            .HasConversion(
-                v => v == null ? null : JsonSerializer.Serialize(v, JsonSerializerOptions),
-                v => string.IsNullOrEmpty(v) ? null : JsonSerializer.Deserialize<PaymentMethod>(v, JsonSerializerOptions)
+                v => v == null ? null : JsonSerializer.Deserialize<BillingInfo>(v, JsonSerializerOptions)
             );
     }
 }

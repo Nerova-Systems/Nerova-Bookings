@@ -11,8 +11,8 @@ import {
   DialogHeader,
   DialogTitle
 } from "@repo/ui/components/Dialog";
-import { useQueryClient } from "@tanstack/react-query";
-import { toast } from "sonner";
+import { LoaderCircleIcon } from "lucide-react";
+import { useEffect, useState } from "react";
 
 import { api } from "@/shared/lib/api/client";
 
@@ -21,29 +21,32 @@ interface UpdatePaymentMethodDialogProps {
   onOpenChange: (isOpen: boolean) => void;
 }
 
-/**
- * PayFast does not expose a card-collection iframe for updating an existing token's card. The
- * supported flow is to redirect the customer to PayFast's hosted page at
- * `/eng/recurring/update/{token}` where they enter new card details. The same token continues to
- * work after the update — no webhook fires for the card change itself, so the user simply returns
- * to our app and continues.
- */
 export function UpdatePaymentMethodDialog({ isOpen, onOpenChange }: Readonly<UpdatePaymentMethodDialogProps>) {
-  const queryClient = useQueryClient();
+  const [setupError, setSetupError] = useState<string | null>(null);
 
   const setupMutation = api.useMutation("post", "/api/account/billing/start-payment-method-setup", {
     onSuccess: (data) => {
-      window.open(data.updateUrl, "_blank", "noopener,noreferrer");
-      onOpenChange(false);
-      toast.success(t`Opening PayFast in a new tab to update your card.`);
-      queryClient.invalidateQueries({ queryKey: ["get", "/api/account/subscriptions/current"] });
+      window.location.assign(data.updateUrl);
+    },
+    onError: () => {
+      setSetupError(t`Payment method update could not be started.`);
     }
   });
+  const startSetup = setupMutation.mutate;
+
+  useEffect(() => {
+    if (isOpen) {
+      setSetupError(null);
+      startSetup({});
+    } else {
+      setSetupError(null);
+    }
+  }, [isOpen, startSetup]);
 
   return (
     <Dialog
       open={isOpen}
-      onOpenChange={onOpenChange}
+      onOpenChange={setupMutation.isPending ? undefined : onOpenChange}
       disablePointerDismissal={true}
       trackingTitle="Update payment method"
     >
@@ -53,25 +56,28 @@ export function UpdatePaymentMethodDialog({ isOpen, onOpenChange }: Readonly<Upd
             <Trans>Update payment method</Trans>
           </DialogTitle>
           <DialogDescription>
-            <Trans>
-              You'll be redirected to PayFast in a new tab where you can securely update the card on your subscription.
-              Your existing schedule and billing dates remain unchanged.
-            </Trans>
+            <Trans>You will be redirected to Paystack to update the payment method for this subscription.</Trans>
           </DialogDescription>
         </DialogHeader>
         <DialogBody>
-          <div className="text-sm text-muted-foreground">
-            <Trans>After updating your card, return to this tab — there's nothing else you need to do here.</Trans>
+          <div className="flex flex-col items-center gap-4 py-8">
+            <LoaderCircleIcon className="size-8 animate-spin text-primary" />
+            {setupError ? (
+              <p className="text-sm text-destructive">{setupError}</p>
+            ) : (
+              <p className="text-sm text-muted-foreground">
+                <Trans>Preparing payment method update...</Trans>
+              </p>
+            )}
           </div>
         </DialogBody>
-        <DialogFooter>
-          <DialogClose render={<Button type="reset" variant="secondary" disabled={setupMutation.isPending} />}>
-            <Trans>Cancel</Trans>
-          </DialogClose>
-          <Button onClick={() => setupMutation.mutate({})} isPending={setupMutation.isPending}>
-            {setupMutation.isPending ? <Trans>Opening...</Trans> : <Trans>Update on PayFast</Trans>}
-          </Button>
-        </DialogFooter>
+        {setupError && (
+          <DialogFooter>
+            <DialogClose render={<Button type="reset" variant="secondary" />}>
+              <Trans>Close</Trans>
+            </DialogClose>
+          </DialogFooter>
+        )}
       </DialogContent>
     </Dialog>
   );

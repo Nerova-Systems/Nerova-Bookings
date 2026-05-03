@@ -1,4 +1,3 @@
-using System.Net;
 using System.Net.Http.Json;
 using Account.Database;
 using Account.Features.Subscriptions.Domain;
@@ -13,34 +12,16 @@ namespace Account.Tests.Subscriptions;
 public sealed class GetCurrentSubscriptionTests : EndpointBaseTest<AccountDbContext>
 {
     [Fact]
-    public async Task GetCurrentSubscription_WhenOwner_ShouldReturnSubscription()
-    {
-        // Act
-        var response = await AuthenticatedOwnerHttpClient.GetAsync("/api/account/subscriptions/current");
-
-        // Assert
-        response.ShouldBeSuccessfulGetRequest();
-        var result = await response.Content.ReadFromJsonAsync<SubscriptionResponse>();
-        result!.Plan.Should().Be(SubscriptionPlan.Trial);
-        result.Status.Should().Be(SubscriptionStatus.Trial);
-        result.TrialEndsAt.Should().BeAfter(DateTimeOffset.UtcNow);
-        result.ScheduledPlan.Should().BeNull();
-        result.CurrentPeriodEnd.Should().BeNull();
-        result.NextBillingDate.Should().BeNull();
-        result.CancelledAt.Should().BeNull();
-        result.GracePeriodEndsAt.Should().BeNull();
-        result.SuspensionReason.Should().BeNull();
-    }
-
-    [Fact]
-    public async Task GetCurrentSubscription_WhenPastDue_ShouldReturnGracePeriodDeadline()
+    public async Task GetCurrentSubscription_WhenExists_ShouldReturnSubscription()
     {
         // Arrange
-        var firstFailedAt = TimeProvider.System.GetUtcNow().AddDays(-2);
         Connection.Update("subscriptions", "tenant_id", DatabaseSeeder.Tenant1.Id.Value, [
-                ("status", nameof(SubscriptionStatus.PastDue)),
                 ("plan", nameof(SubscriptionPlan.Standard)),
-                ("first_payment_failed_at", firstFailedAt)
+                ("paystack_customer_id", "CUS_test_123"),
+                ("paystack_subscription_id", "SUB_test_123"),
+                ("current_price_amount", 29.99),
+                ("current_price_currency", "ZAR"),
+                ("current_period_end", TimeProvider.GetUtcNow().AddDays(30))
             ]
         );
 
@@ -50,30 +31,20 @@ public sealed class GetCurrentSubscriptionTests : EndpointBaseTest<AccountDbCont
         // Assert
         response.ShouldBeSuccessfulGetRequest();
         var result = await response.Content.ReadFromJsonAsync<SubscriptionResponse>();
-        result!.Status.Should().Be(SubscriptionStatus.PastDue);
-        result.GracePeriodEndsAt.Should().BeCloseTo(firstFailedAt.AddDays(7), TimeSpan.FromSeconds(1));
+        result!.Plan.Should().Be(SubscriptionPlan.Standard);
+        result.HasPaystackSubscription.Should().BeTrue();
+        result.CancelAtPeriodEnd.Should().BeFalse();
+        result.CurrentPriceAmount.Should().Be(29.99m);
+        result.CurrentPriceCurrency.Should().Be("ZAR");
     }
 
     [Fact]
-    public async Task GetCurrentSubscription_WhenMember_ShouldAlsoReturnSubscription()
-    {
-        // Any authenticated user (including members) can view the current subscription
-        // Act
-        var response = await AuthenticatedMemberHttpClient.GetAsync("/api/account/subscriptions/current");
-
-        // Assert
-        response.ShouldBeSuccessfulGetRequest();
-        var result = await response.Content.ReadFromJsonAsync<SubscriptionResponse>();
-        result!.Status.Should().Be(SubscriptionStatus.Trial);
-    }
-
-    [Fact]
-    public async Task GetCurrentSubscription_WhenActiveSubscription_ShouldReturnCorrectStatus()
+    public async Task GetCurrentSubscription_WhenLegacyTrialPlanExists_ShouldReturnBasis()
     {
         // Arrange
         Connection.Update("subscriptions", "tenant_id", DatabaseSeeder.Tenant1.Id.Value, [
-                ("status", nameof(SubscriptionStatus.Active)),
-                ("plan", nameof(SubscriptionPlan.Standard))
+                ("plan", "Trial"),
+                ("scheduled_plan", "Trial")
             ]
         );
 
@@ -83,17 +54,7 @@ public sealed class GetCurrentSubscriptionTests : EndpointBaseTest<AccountDbCont
         // Assert
         response.ShouldBeSuccessfulGetRequest();
         var result = await response.Content.ReadFromJsonAsync<SubscriptionResponse>();
-        result!.Status.Should().Be(SubscriptionStatus.Active);
-        result.Plan.Should().Be(SubscriptionPlan.Standard);
-    }
-
-    [Fact]
-    public async Task GetCurrentSubscription_WhenUnauthenticated_ShouldReturnUnauthorized()
-    {
-        // Act
-        var response = await AnonymousHttpClient.GetAsync("/api/account/subscriptions/current");
-
-        // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
+        result!.Plan.Should().Be(SubscriptionPlan.Basis);
+        result.ScheduledPlan.Should().BeNull();
     }
 }

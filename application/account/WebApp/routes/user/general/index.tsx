@@ -1,3 +1,5 @@
+import type { ReactNode } from "react";
+
 /* eslint-disable max-lines-per-function */
 import { t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
@@ -5,7 +7,6 @@ import { AppLayout } from "@repo/ui/components/AppLayout";
 import { ToggleGroup, ToggleGroupItem } from "@repo/ui/components/ToggleGroup";
 import { createFileRoute } from "@tanstack/react-router";
 import { CalendarClockIcon, MoonIcon, SunIcon } from "lucide-react";
-import type { ReactNode } from "react";
 import { toast } from "sonner";
 
 import { ThemeMode, locales, usePreferences } from "../preferences/-components/usePreferences";
@@ -117,10 +118,7 @@ function GeneralPage() {
           </div>
         </section>
 
-        <PreferenceSection
-          title={t`Theme`}
-          description={t`Choose how the application looks to you on this device.`}
-        >
+        <PreferenceSection title={t`Theme`} description={t`Choose how the application looks to you on this device.`}>
           <ToggleGroup
             variant="outline"
             size="lg"
@@ -145,7 +143,10 @@ function GeneralPage() {
           </ToggleGroup>
         </PreferenceSection>
 
-        <PreferenceSection title={t`Zoom`} description={t`Adjust the interface size on this device to your preference.`}>
+        <PreferenceSection
+          title={t`Zoom`}
+          description={t`Adjust the interface size on this device to your preference.`}
+        >
           <ToggleGroup
             variant="outline"
             size="lg"
@@ -164,8 +165,14 @@ function GeneralPage() {
           </ToggleGroup>
         </PreferenceSection>
 
-        <PreferenceSwitch title={t`Dynamic group links`} description={t`Allow attendees to book through dynamic group bookings`} />
-        <PreferenceSwitch title={t`Allow search engine indexing`} description={t`Allow search engines to access your public content`} />
+        <PreferenceSwitch
+          title={t`Dynamic group links`}
+          description={t`Allow attendees to book through dynamic group bookings`}
+        />
+        <PreferenceSwitch
+          title={t`Allow search engine indexing`}
+          description={t`Allow search engines to access your public content`}
+        />
         <PreferenceSwitch title={t`Monthly digest email`} description={t`Monthly digest email for teams`} />
         <PreferenceSwitch
           title={t`Prevent impersonation on bookings`}
@@ -176,7 +183,15 @@ function GeneralPage() {
   );
 }
 
-function PreferenceSection({ title, description, children }: { title: string; description: string; children: ReactNode }) {
+function PreferenceSection({
+  title,
+  description,
+  children
+}: {
+  title: string;
+  description: string;
+  children: ReactNode;
+}) {
   return (
     <section className="rounded-xl border border-border bg-card p-5">
       <h3 className="text-lg font-semibold">{title}</h3>

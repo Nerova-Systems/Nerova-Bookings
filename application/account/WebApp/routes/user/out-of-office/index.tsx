@@ -56,7 +56,11 @@ function OutOfOfficePage() {
         </div>
 
         {tab === "my-ooo" ? (
-          <MyOooTab closures={manualClosures} holidaySettings={shellQuery.data?.holidaySettings} onAdd={() => setCreateOpen(true)} />
+          <MyOooTab
+            closures={manualClosures}
+            holidaySettings={shellQuery.data?.holidaySettings}
+            onAdd={() => setCreateOpen(true)}
+          />
         ) : (
           <HolidaysTab holidaySettings={shellQuery.data?.holidaySettings} />
         )}
@@ -73,10 +77,20 @@ function OutOfOfficePage() {
   );
 }
 
-function MyOooTab({ closures, holidaySettings, onAdd }: { closures: BusinessClosure[]; holidaySettings?: HolidaySettings; onAdd: () => void }) {
+function MyOooTab({
+  closures,
+  holidaySettings,
+  onAdd
+}: {
+  closures: BusinessClosure[];
+  holidaySettings?: HolidaySettings;
+  onAdd: () => void;
+}) {
   const [search, setSearch] = useState("");
   const deleteClosure = useDeleteClosure();
-  const filtered = closures.filter((closure) => `${closure.label} ${closure.startDate} ${closure.endDate}`.toLowerCase().includes(search.toLowerCase()));
+  const filtered = closures.filter((closure) =>
+    `${closure.label} ${closure.startDate} ${closure.endDate}`.toLowerCase().includes(search.toLowerCase())
+  );
   const closedHolidayCount = holidaySettings?.holidays.filter((holiday) => !holiday.isOpen).length ?? 0;
 
   return (
@@ -116,7 +130,10 @@ function MyOooTab({ closures, holidaySettings, onAdd }: { closures: BusinessClos
         ) : (
           <div>
             {filtered.map((closure) => (
-              <div key={closure.id} className="flex items-center gap-4 border-b border-border px-6 py-5 last:border-b-0">
+              <div
+                key={closure.id}
+                className="flex items-center gap-4 border-b border-border px-6 py-5 last:border-b-0"
+              >
                 <div className="flex size-11 items-center justify-center rounded-full bg-muted">
                   <Clock3Icon className="size-5 text-muted-foreground" />
                 </div>
@@ -155,7 +172,9 @@ function MyOooTab({ closures, holidaySettings, onAdd }: { closures: BusinessClos
         )}
       </section>
       {holidaySettings && (
-        <div className="mt-4 text-sm text-muted-foreground">{closedHolidayCount} holidays are currently blocking bookings.</div>
+        <div className="mt-4 text-sm text-muted-foreground">
+          {closedHolidayCount} holidays are currently blocking bookings.
+        </div>
       )}
     </>
   );
@@ -204,7 +223,8 @@ function CountrySelect({ holidaySettings }: { holidaySettings: HolidaySettings }
           { countryCode: event.target.value, openHolidayIds: [] },
           {
             onSuccess: () => toast.success(t`Public holiday country updated.`),
-            onError: (error) => toast.error(error instanceof Error ? error.message : t`Could not update public holidays.`)
+            onError: (error) =>
+              toast.error(error instanceof Error ? error.message : t`Could not update public holidays.`)
           }
         )
       }
@@ -246,7 +266,12 @@ function HolidayRow({ holiday, holidaySettings }: { holiday: PublicHoliday; holi
         <div className="truncate text-lg font-semibold">{holiday.label}</div>
         <div className="mt-1 text-muted-foreground">{formatDate(holiday.date)}</div>
       </div>
-      <Switch className="ml-auto" checked={holiday.isOpen} disabled={updateHolidaySettings.isPending} onCheckedChange={toggleHoliday} />
+      <Switch
+        className="ml-auto"
+        checked={holiday.isOpen}
+        disabled={updateHolidaySettings.isPending}
+        onCheckedChange={toggleHoliday}
+      />
     </div>
   );
 }
@@ -269,7 +294,10 @@ function CreateOooModal({
     showPublicNote: false
   });
   const createClosure = useCreateClosure();
-  const overlappingHoliday = useMemo(() => findOverlappingHoliday(holidaySettings, form.startDate, form.endDate), [holidaySettings, form.startDate, form.endDate]);
+  const overlappingHoliday = useMemo(
+    () => findOverlappingHoliday(holidaySettings, form.startDate, form.endDate),
+    [holidaySettings, form.startDate, form.endDate]
+  );
 
   const submit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -300,7 +328,10 @@ function CreateOooModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/70 px-4 py-8">
-      <form onSubmit={submit} className="w-full max-w-3xl overflow-hidden rounded-3xl border border-border bg-card shadow-2xl">
+      <form
+        onSubmit={submit}
+        className="w-full max-w-3xl overflow-hidden rounded-3xl border border-border bg-card shadow-2xl"
+      >
         <div className="max-h-[calc(100vh-7rem)] overflow-y-auto px-8 py-7">
           <h2 className="text-3xl font-semibold">
             <Trans>Go Out of Office</Trans>
@@ -329,7 +360,8 @@ function CreateOooModal({
                 <Trans>Holiday notice</Trans>
               </div>
               <div className="mt-2 text-muted-foreground">
-                {formatDate(overlappingHoliday.date)} is {overlappingHoliday.label}, which is already blocked as a holiday.
+                {formatDate(overlappingHoliday.date)} is {overlappingHoliday.label}, which is already blocked as a
+                holiday.
               </div>
             </div>
           )}
@@ -360,7 +392,10 @@ function CreateOooModal({
           </label>
 
           <div className="mt-4 flex items-center gap-3 text-base font-semibold text-muted-foreground">
-            <Switch checked={form.showPublicNote} onCheckedChange={(showPublicNote) => setForm((current) => ({ ...current, showPublicNote }))} />
+            <Switch
+              checked={form.showPublicNote}
+              onCheckedChange={(showPublicNote) => setForm((current) => ({ ...current, showPublicNote }))}
+            />
             <Trans>Show note on public booking page</Trans>
           </div>
         </div>
@@ -393,11 +428,15 @@ function OooTabButton({ active, onClick, children }: { active: boolean; onClick:
 }
 
 function findOverlappingHoliday(holidaySettings: HolidaySettings | undefined, startDate: string, endDate: string) {
-  return holidaySettings?.holidays.find((holiday) => holiday.date >= startDate && holiday.date <= endDate && !holiday.isOpen);
+  return holidaySettings?.holidays.find(
+    (holiday) => holiday.date >= startDate && holiday.date <= endDate && !holiday.isOpen
+  );
 }
 
 function formatDate(date: string) {
-  return new Intl.DateTimeFormat(undefined, { day: "numeric", month: "short", year: "numeric" }).format(new Date(`${date}T00:00:00`));
+  return new Intl.DateTimeFormat(undefined, { day: "numeric", month: "short", year: "numeric" }).format(
+    new Date(`${date}T00:00:00`)
+  );
 }
 
 function toDateInputValue(date: Date) {

@@ -9,6 +9,7 @@ public sealed class TelemetryContextMiddleware(IExecutionContext executionContex
     public async Task InvokeAsync(HttpContext context, RequestDelegate next)
     {
         ApplicationInsightsTelemetryInitializer.SetContext(executionContext);
+        ApplicationInsightsTelemetryInitializer.SetPublicUrl(PublicHostTelemetryEnricher.BuildPublicUrl(context.Request));
 
         openTelemetryEnricher.Apply();
 

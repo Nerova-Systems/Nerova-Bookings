@@ -1,26 +1,37 @@
 using JetBrains.Annotations;
+using SharedKernel.StronglyTypedIds;
 
 namespace Account.Features.Subscriptions.Domain;
+
+[PublicAPI]
+[IdPrefix("CUS")]
+[JsonConverter(typeof(StronglyTypedIdJsonConverter<string, PaystackCustomerId>))]
+public sealed record PaystackCustomerId(string Value) : StronglyTypedString<PaystackCustomerId>(Value)
+{
+    public override string ToString()
+    {
+        return Value;
+    }
+}
+
+[PublicAPI]
+[IdPrefix("SUB")]
+[JsonConverter(typeof(StronglyTypedIdJsonConverter<string, PaystackSubscriptionId>))]
+public sealed record PaystackSubscriptionId(string Value) : StronglyTypedString<PaystackSubscriptionId>(Value)
+{
+    public override string ToString()
+    {
+        return Value;
+    }
+}
 
 [PublicAPI]
 [JsonConverter(typeof(JsonStringEnumConverter))]
 public enum SubscriptionPlan
 {
-    Trial = 0,
-    Starter = 1,
-    Standard = 2,
-    Premium = 3
-}
-
-[PublicAPI]
-[JsonConverter(typeof(JsonStringEnumConverter))]
-public enum SubscriptionStatus
-{
-    Trial = 0,
-    Active = 1,
-    PastDue = 2,
-    Cancelled = 3,
-    Expired = 4
+    Basis = 0,
+    Standard = 1,
+    Premium = 2
 }
 
 [PublicAPI]
@@ -42,4 +53,14 @@ public enum PaymentTransactionStatus
     Failed,
     Pending,
     Refunded
+}
+
+[PublicAPI]
+[JsonConverter(typeof(JsonStringEnumConverter))]
+public enum PaystackEventStatus
+{
+    Pending,
+    Processed,
+    Ignored,
+    Failed
 }

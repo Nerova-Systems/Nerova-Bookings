@@ -22,7 +22,9 @@ export function PayoutPanel({ subaccount, onSetup }: { subaccount?: PaystackSuba
             </p>
           </div>
         </div>
-        <span className={`rounded-full px-2.5 py-1 text-xs ${connected ? "bg-success/10 text-success" : "bg-warning/10 text-warning"}`}>
+        <span
+          className={`rounded-full px-2.5 py-1 text-xs ${connected ? "bg-success/10 text-success" : "bg-warning/10 text-warning"}`}
+        >
           {connected ? <Trans>Connected</Trans> : <Trans>Setup required</Trans>}
         </span>
       </div>
@@ -34,7 +36,9 @@ export function PayoutPanel({ subaccount, onSetup }: { subaccount?: PaystackSuba
       </div>
       <div className="flex flex-wrap items-center justify-between gap-3 border-t border-border px-5 py-3 text-sm">
         <span className="text-muted-foreground">
-          {subaccount ? `Last synced ${formatDateTime(subaccount.lastSyncedAt)}` : "Connect payouts before accepting deposit payments."}
+          {subaccount
+            ? `Last synced ${formatDateTime(subaccount.lastSyncedAt)}`
+            : "Connect payouts before accepting deposit payments."}
         </span>
         <Button variant="outline" size="sm" onClick={onSetup}>
           {subaccount ? <Trans>Change bank details</Trans> : <Trans>Set up Paystack payouts</Trans>}
@@ -85,7 +89,13 @@ export function PaymentQueue({ payments }: { payments: PaymentIntent[] }) {
               <th className="px-4 py-2 font-medium">State</th>
             </tr>
           </thead>
-          <tbody>{payments.length === 0 ? <EmptyPaymentRow /> : payments.map((payment) => <PaymentRow key={payment.reference} payment={payment} />)}</tbody>
+          <tbody>
+            {payments.length === 0 ? (
+              <EmptyPaymentRow />
+            ) : (
+              payments.map((payment) => <PaymentRow key={payment.reference} payment={payment} />)
+            )}
+          </tbody>
         </table>
       </div>
     </section>
@@ -100,7 +110,9 @@ function PaymentRow({ payment }: { payment: PaymentIntent }) {
       <td className="px-4 py-3 font-mono text-xs">{payment.reference}</td>
       <td className="px-4 py-3">{paymentMoney(payment.amountCents)}</td>
       <td className="px-4 py-3">
-        <span className={`rounded-full px-2 py-1 text-xs ${payment.status === "Confirmed" ? "bg-success/10 text-success" : "bg-warning/10 text-warning"}`}>
+        <span
+          className={`rounded-full px-2 py-1 text-xs ${payment.status === "Confirmed" ? "bg-success/10 text-success" : "bg-warning/10 text-warning"}`}
+        >
           {payment.status}
         </span>
       </td>

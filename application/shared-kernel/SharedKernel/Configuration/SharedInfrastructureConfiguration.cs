@@ -15,6 +15,7 @@ using Npgsql;
 using OpenTelemetry.Instrumentation.AspNetCore;
 using OpenTelemetry.Logs;
 using OpenTelemetry.Metrics;
+using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 using SharedKernel.Integrations.BlobStorage;
 using SharedKernel.Telemetry;
@@ -25,7 +26,36 @@ public static class SharedInfrastructureConfiguration
 {
     public static readonly bool IsRunningInAzure = Environment.GetEnvironmentVariable("AZURE_CLIENT_ID") is not null;
 
+    public static readonly string? ServiceVersion = ResolveServiceVersion();
+
+    // Baked into the assembly at build time via /p:DeploymentCommitHash=<sha>
+    // /p:DeploymentGithubActionId=<run_id> in the deployment workflows. The Directory.Build.props at
+    // /application emits AssemblyMetadata attributes from those properties so each artifact carries
+    // its own provenance -- pulling and running the image anywhere produces the same telemetry stamp.
+    public static readonly string? DeploymentCommitHash = GetAssemblyMetadata("DeploymentCommitHash");
+
+    public static readonly string? DeploymentGithubActionId = GetAssemblyMetadata("DeploymentGithubActionId");
+
     public static DefaultAzureCredential DefaultAzureCredential => GetDefaultAzureCredential();
+
+    private static string? ResolveServiceVersion()
+    {
+        // The .NET SDK auto-appends "+<source revision id>" to AssemblyInformationalVersion when
+        // building inside a git checkout. Strip it so application_Version stays clean (the commit
+        // SHA travels separately as the deployment.commit_hash custom dimension).
+        var informationalVersion = Assembly.GetEntryAssembly()?.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion;
+        if (informationalVersion is null) return Assembly.GetEntryAssembly()?.GetName().Version?.ToString();
+
+        var plusIndex = informationalVersion.IndexOf('+');
+        return plusIndex < 0 ? informationalVersion : informationalVersion[..plusIndex];
+    }
+
+    private static string? GetAssemblyMetadata(string key)
+    {
+        return Assembly.GetEntryAssembly()?
+            .GetCustomAttributes<AssemblyMetadataAttribute>()
+            .FirstOrDefault(a => a.Key == key)?.Value;
+    }
 
     private static DefaultAzureCredential GetDefaultAzureCredential()
     {
@@ -44,17 +74,54 @@ public static class SharedInfrastructureConfiguration
                 .AddAzureKeyVaultConfiguration()
                 .ConfigureDatabaseContext<T>(connectionName)
                 .AddDefaultBlobStorage()
-                .AddConfigureOpenTelemetry()
-                .AddOpenTelemetryExporters();
+                .AddSharedTelemetry();
 
             builder.Services
-                .AddApplicationInsightsTelemetry()
                 .ConfigureHttpClientDefaults(http =>
                     {
-                        http.AddStandardResilienceHandler(); // Turn on resilience by default
+                        // 45s total request timeout for API-tier outbound calls (account-api, main-api).
+                        // Sized to absorb a downstream container scale-from-zero: ~31s P99 container start
+                        // plus ~12s P99 first-request slowness on account-api. Still tight enough to defend
+                        // against slow-loris / DoS upstream. AppGateway sets a longer per-client timeout for
+                        // its account-api refresh path because that path must deliver the rotated Set-Cookie
+                        // to the browser.
+                        // Retries are disabled: most 5xx errors during a bad release are persistent, so
+                        // retrying triples the load during incidents and inflates the failure rate in
+                        // Application Insights. Real transient errors are rare in same-region traffic.
+                        http.AddStandardResilienceHandler(options =>
+                            {
+                                options.TotalRequestTimeout.Timeout = TimeSpan.FromSeconds(45);
+                                options.Retry.ShouldHandle = _ => ValueTask.FromResult(false);
+                            }
+                        );
                         http.AddServiceDiscovery(); // Turn on service discovery by default
                     }
                 );
+
+            return builder;
+        }
+
+        // Wires OpenTelemetry tracing/logging/metrics, the Azure Monitor exporter, and Application
+        // Insights without requiring a DbContext. AppGateway and other database-less hosts should call
+        // this directly; AddSharedInfrastructure<T> calls it as part of the full bundle.
+        public IHostApplicationBuilder AddSharedTelemetry()
+        {
+            builder
+                .AddConfigureOpenTelemetry()
+                .AddOpenTelemetryExporters();
+
+            // Register service.version AFTER UseAzureMonitor so it wins the resource merge against
+            // the Azure Container Apps detector, which otherwise sets service.version to the revision
+            // name. The deployment.* tags travel as activity tags via DeploymentTagsProcessor since
+            // Azure Monitor only surfaces a fixed set of resource attributes on AppRequests.
+            if (ServiceVersion is not null)
+            {
+                builder.Services.AddOpenTelemetry().ConfigureResource(resource =>
+                    resource.AddAttributes([new KeyValuePair<string, object>("service.version", ServiceVersion)])
+                );
+            }
+
+            builder.Services.AddApplicationInsightsTelemetry();
 
             return builder;
         }
@@ -207,7 +274,23 @@ public static class SharedInfrastructureConfiguration
                         // We want to view all traces in development
                         if (builder.Environment.IsDevelopment()) tracing.SetSampler(new AlwaysOnSampler());
 
-                        tracing.AddAspNetCoreInstrumentation().AddGrpcClientInstrumentation().AddHttpClientInstrumentation();
+                        tracing
+                            .AddProcessor(new DeploymentTagsProcessor())
+                            .AddAspNetCoreInstrumentation(options =>
+                                {
+                                    options.EnrichWithHttpRequest = PublicHostTelemetryEnricher.Enrich;
+                                    // 4xx is a client problem (validation, auth, missing route); the server handled it.
+                                    // Mark OK so Application Insights doesn't flag it; only 5xx is a real server error.
+                                    options.EnrichWithHttpResponse = (activity, response) =>
+                                    {
+                                        if (response.StatusCode is >= 400 and < 500) activity.SetStatus(ActivityStatusCode.Ok);
+                                    };
+                                }
+                            )
+                            .AddGrpcClientInstrumentation()
+                            .AddHttpClientInstrumentation(options =>
+                                options.EnrichWithHttpRequestMessage = PublicHostTelemetryEnricher.EnrichOutbound
+                            );
                     }
                 );
 
@@ -252,7 +335,6 @@ public static class SharedInfrastructureConfiguration
             services
                 .AddApplicationInsightsTelemetry(applicationInsightsServiceOptions)
                 .AddApplicationInsightsTelemetryProcessor<EndpointTelemetryFilter>()
-                .AddScoped<OpenTelemetryEnricher>()
                 .AddSingleton<ITelemetryInitializer, ApplicationInsightsTelemetryInitializer>();
 
             if (!IsRunningInAzure)

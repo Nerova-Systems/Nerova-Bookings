@@ -14,7 +14,10 @@ export const Route = createFileRoute("/dashboard/availability/")({
 function AvailabilityPage() {
   const navigate = useNavigate();
   const shellQuery = useAppointmentShell();
-  const summary = useMemo(() => summarizeAvailability(shellQuery.data?.availabilityRules ?? []), [shellQuery.data?.availabilityRules]);
+  const summary = useMemo(
+    () => summarizeAvailability(shellQuery.data?.availabilityRules ?? []),
+    [shellQuery.data?.availabilityRules]
+  );
 
   useEffect(() => {
     document.title = t`Availability | Nerova`;

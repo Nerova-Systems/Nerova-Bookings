@@ -1,11 +1,4 @@
-import {
-  Dialog,
-  DialogBody,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle
-} from "@repo/ui/components/Dialog";
+import { Dialog, DialogBody, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@repo/ui/components/Dialog";
 import { useEffect, useMemo, useState } from "react";
 
 import type { AvailabilityRule, BusinessClosure, HolidaySettings } from "@/shared/lib/appointmentsApi";

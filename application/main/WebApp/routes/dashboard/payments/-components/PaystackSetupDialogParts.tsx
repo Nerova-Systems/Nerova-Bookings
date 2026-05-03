@@ -1,7 +1,8 @@
+import type { Dispatch, SetStateAction } from "react";
+
 import { Trans } from "@lingui/react/macro";
 import { Button } from "@repo/ui/components/Button";
 import { CheckCircle2Icon, ChevronRightIcon, Loader2Icon, LockKeyholeIcon, ShieldCheckIcon, XIcon } from "lucide-react";
-import type { Dispatch, SetStateAction } from "react";
 
 import type { PaystackBank, PaystackSubaccount } from "@/shared/lib/paymentsApi";
 
@@ -47,13 +48,22 @@ export function PaystackSetupSidebar({ activeStep, subaccount, onClose }: Sideba
             <Trans>Send appointment payments directly to your business bank account.</Trans>
           </p>
         </div>
-        <button type="button" className="rounded-full p-1.5 text-white/70 hover:bg-white/10 hover:text-white" onClick={onClose}>
+        <button
+          type="button"
+          className="rounded-full p-1.5 text-white/70 hover:bg-white/10 hover:text-white"
+          onClick={onClose}
+        >
           <XIcon className="size-4" />
         </button>
       </div>
       <div className="mt-6 grid gap-2 text-[11px] font-medium">
         {["Bank", "Verify", "Confirm"].map((step, index) => (
-          <StepItem key={step} active={step === activeStep} done={index < ["Bank", "Verify", "Confirm"].indexOf(activeStep)} label={step} />
+          <StepItem
+            key={step}
+            active={step === activeStep}
+            done={index < ["Bank", "Verify", "Confirm"].indexOf(activeStep)}
+            label={step}
+          />
         ))}
       </div>
       <div className="mt-6 grid gap-3 rounded-[4px] border border-white/10 bg-white/[0.06] p-4">
@@ -88,10 +98,18 @@ export function PaystackSetupForm({
       <div className="min-h-0 min-w-0 overflow-y-auto px-5 py-4">
         <div className="grid gap-4 md:grid-cols-2">
           <BankSelect banks={banks} banksLoading={banksLoading} value={form.bankCode} setForm={setForm} />
-          <Field label="Account number" value={form.accountNumber} onChange={(accountNumber) => setForm((current) => ({ ...current, accountNumber }))} />
+          <Field
+            label="Account number"
+            value={form.accountNumber}
+            onChange={(accountNumber) => setForm((current) => ({ ...current, accountNumber }))}
+          />
           <ResolveButton disabled={!canResolve || resolving} resolving={resolving} onResolve={onResolve} />
           <div className="md:col-span-2">
-            <Field label="Account holder" value={form.accountName} onChange={(accountName) => setForm((current) => ({ ...current, accountName }))} />
+            <Field
+              label="Account holder"
+              value={form.accountName}
+              onChange={(accountName) => setForm((current) => ({ ...current, accountName }))}
+            />
           </div>
           {form.accountName && <VerifiedAccount accountName={form.accountName} />}
           <ContactFields form={form} setForm={setForm} />
@@ -103,7 +121,17 @@ export function PaystackSetupForm({
   );
 }
 
-function BankSelect({ banks, banksLoading, value, setForm }: { banks: PaystackBank[]; banksLoading: boolean; value: string; setForm: FormProps["setForm"] }) {
+function BankSelect({
+  banks,
+  banksLoading,
+  value,
+  setForm
+}: {
+  banks: PaystackBank[];
+  banksLoading: boolean;
+  value: string;
+  setForm: FormProps["setForm"];
+}) {
   return (
     <label className="grid gap-1.5 text-sm">
       <span className="text-xs font-semibold text-[#5f7285]">Bank</span>
@@ -114,18 +142,38 @@ function BankSelect({ banks, banksLoading, value, setForm }: { banks: PaystackBa
       >
         <option value="">{banksLoading ? "Loading banks..." : "Select a South African bank"}</option>
         {banks.map((bank) => (
-          <option key={bank.code} value={bank.code}>{bank.name}</option>
+          <option key={bank.code} value={bank.code}>
+            {bank.name}
+          </option>
         ))}
       </select>
     </label>
   );
 }
 
-function ResolveButton({ disabled, resolving, onResolve }: { disabled: boolean; resolving: boolean; onResolve: () => void }) {
+function ResolveButton({
+  disabled,
+  resolving,
+  onResolve
+}: {
+  disabled: boolean;
+  resolving: boolean;
+  onResolve: () => void;
+}) {
   return (
     <div className="grid content-end gap-1.5">
-      <Button type="button" variant="outline" className="h-12 justify-center border-[#d9e3ec]" disabled={disabled} onClick={onResolve}>
-        {resolving ? <Loader2Icon className="mr-2 size-4 animate-spin" /> : <CheckCircle2Icon className="mr-2 size-4" />}
+      <Button
+        type="button"
+        variant="outline"
+        className="h-12 justify-center border-[#d9e3ec]"
+        disabled={disabled}
+        onClick={onResolve}
+      >
+        {resolving ? (
+          <Loader2Icon className="mr-2 size-4 animate-spin" />
+        ) : (
+          <CheckCircle2Icon className="mr-2 size-4" />
+        )}
         <Trans>Verify account with Paystack</Trans>
       </Button>
     </div>
@@ -144,17 +192,33 @@ function VerifiedAccount({ accountName }: { accountName: string }) {
 function ContactFields({ form, setForm }: { form: PaystackSetupFormState; setForm: FormProps["setForm"] }) {
   return (
     <div className="grid min-w-0 gap-4 border-t border-[#eef3f7] pt-4 md:col-span-2 md:grid-cols-2">
-      <Field label="Contact name" value={form.primaryContactName} onChange={(primaryContactName) => setForm((current) => ({ ...current, primaryContactName }))} />
-      <Field label="Contact email" value={form.primaryContactEmail} onChange={(primaryContactEmail) => setForm((current) => ({ ...current, primaryContactEmail }))} />
+      <Field
+        label="Contact name"
+        value={form.primaryContactName}
+        onChange={(primaryContactName) => setForm((current) => ({ ...current, primaryContactName }))}
+      />
+      <Field
+        label="Contact email"
+        value={form.primaryContactEmail}
+        onChange={(primaryContactEmail) => setForm((current) => ({ ...current, primaryContactEmail }))}
+      />
       <div className="md:col-span-2">
-        <Field label="Contact phone" value={form.primaryContactPhone} onChange={(primaryContactPhone) => setForm((current) => ({ ...current, primaryContactPhone }))} />
+        <Field
+          label="Contact phone"
+          value={form.primaryContactPhone}
+          onChange={(primaryContactPhone) => setForm((current) => ({ ...current, primaryContactPhone }))}
+        />
       </div>
     </div>
   );
 }
 
 function ErrorMessage({ message }: { message: string }) {
-  return <div className="rounded-[4px] border border-[#f4b8b8] bg-[#fff3f3] px-3 py-2 text-sm text-[#b42318] md:col-span-2">{message}</div>;
+  return (
+    <div className="rounded-[4px] border border-[#f4b8b8] bg-[#fff3f3] px-3 py-2 text-sm text-[#b42318] md:col-span-2">
+      {message}
+    </div>
+  );
 }
 
 function SaveFooter({ canSave, saving, onSave }: { canSave: boolean; saving: boolean; onSave: () => void }) {
@@ -164,7 +228,12 @@ function SaveFooter({ canSave, saving, onSave }: { canSave: boolean; saving: boo
         <LockKeyholeIcon className="size-3.5 shrink-0" />
         <span>Secured by Paystack. Nerova stores only masked bank details.</span>
       </div>
-      <Button type="button" className="h-12 w-full bg-[#011b33] px-5 text-white hover:bg-[#092844] md:w-auto" disabled={!canSave || saving} onClick={onSave}>
+      <Button
+        type="button"
+        className="h-12 w-full bg-[#011b33] px-5 text-white hover:bg-[#092844] md:w-auto"
+        disabled={!canSave || saving}
+        onClick={onSave}
+      >
         {saving && <Loader2Icon className="mr-2 size-4 animate-spin" />}
         <Trans>Save payout account</Trans>
         {!saving && <ChevronRightIcon className="ml-2 size-4" />}
@@ -174,7 +243,13 @@ function SaveFooter({ canSave, saving, onSave }: { canSave: boolean; saving: boo
 }
 
 function StepItem({ active, done, label }: { active: boolean; done: boolean; label: string }) {
-  return <div className={`flex items-center justify-center rounded-full px-3 py-1.5 ${active || done ? "bg-[#00c3f7] text-[#011b33]" : "bg-white/10 text-white/60"}`}>{done ? "Done" : label}</div>;
+  return (
+    <div
+      className={`flex items-center justify-center rounded-full px-3 py-1.5 ${active || done ? "bg-[#00c3f7] text-[#011b33]" : "bg-white/10 text-white/60"}`}
+    >
+      {done ? "Done" : label}
+    </div>
+  );
 }
 
 function SummaryRow({ label, value }: { label: string; value: string }) {
@@ -190,7 +265,11 @@ function Field({ label, value, onChange }: { label: string; value: string; onCha
   return (
     <label className="grid min-w-0 gap-1.5 text-sm">
       <span className="text-xs font-semibold text-[#5f7285]">{label}</span>
-      <input value={value} onChange={(event) => onChange(event.target.value)} className="h-12 w-full min-w-0 rounded-[4px] border border-[#d9e3ec] bg-white px-3 text-sm transition outline-none focus:border-[#00a5d8] focus:ring-2 focus:ring-[#00a5d8]/15" />
+      <input
+        value={value}
+        onChange={(event) => onChange(event.target.value)}
+        className="h-12 w-full min-w-0 rounded-[4px] border border-[#d9e3ec] bg-white px-3 text-sm transition outline-none focus:border-[#00a5d8] focus:ring-2 focus:ring-[#00a5d8]/15"
+      />
     </label>
   );
 }

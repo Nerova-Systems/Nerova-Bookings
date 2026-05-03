@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+# Copies .claude/settings.local.json from the main worktree into the current worktree.
+# Fires after `git checkout` (including via `git worktree add`), so a freshly created
+# worktree inherits the per-machine MCP env values that pp mcp-setup wrote to the
+# gitignored settings.local.json in the main worktree.
+#
+# Enabled per-clone via `git config core.hooksPath developer-cli/git-hooks` (run once by pp mcp-setup).
+
+# Skip file checkouts (git checkout -- file). $3 == 1 for branch / worktree checkouts.
+[ "$3" = "1" ] || exit 0
+
+main_git_dir=$(git rev-parse --git-common-dir 2>/dev/null) || exit 0
+main_worktree=$(cd "$(dirname "$main_git_dir")" && pwd)
+[ "$main_worktree" = "$PWD" ] && exit 0
+
+source_file="$main_worktree/.claude/settings.local.json"
+[ -f "$source_file" ] || exit 0
+
+mkdir -p "$PWD/.claude"
+cp "$source_file" "$PWD/.claude/settings.local.json"
+echo "post-checkout: copied .claude/settings.local.json from $main_worktree"

@@ -81,7 +81,11 @@ export function MainSideMenu() {
                   </SidebarMenuButton>
                 </SidebarMenuItem>
                 <SidebarMenuItem>
-                  <SidebarMenuButton asChild={true} isActive={isActive("/dashboard/availability")} tooltip={t`Availability`}>
+                  <SidebarMenuButton
+                    asChild={true}
+                    isActive={isActive("/dashboard/availability")}
+                    tooltip={t`Availability`}
+                  >
                     <RouterLink to="/dashboard/availability">
                       <Clock3Icon />
                       <span>
@@ -147,7 +151,11 @@ export function MainSideMenu() {
                   </SidebarMenuButton>
                   <SidebarMenuSub isExpanded={appsExpanded}>
                     <SidebarMenuSubItem>
-                      <SidebarMenuSubButton asChild={true} isActive={isActive("/dashboard/apps/store")} tooltip={t`App store`}>
+                      <SidebarMenuSubButton
+                        asChild={true}
+                        isActive={isActive("/dashboard/apps/store")}
+                        tooltip={t`App store`}
+                      >
                         <RouterLink to="/dashboard/apps/store">
                           <Grid2X2Icon />
                           <span>
@@ -157,7 +165,11 @@ export function MainSideMenu() {
                       </SidebarMenuSubButton>
                     </SidebarMenuSubItem>
                     <SidebarMenuSubItem>
-                      <SidebarMenuSubButton asChild={true} isActive={isActive("/dashboard/apps/installed")} tooltip={t`Installed apps`}>
+                      <SidebarMenuSubButton
+                        asChild={true}
+                        isActive={isActive("/dashboard/apps/installed")}
+                        tooltip={t`Installed apps`}
+                      >
                         <RouterLink to="/dashboard/apps/installed">
                           <PlugIcon />
                           <span>

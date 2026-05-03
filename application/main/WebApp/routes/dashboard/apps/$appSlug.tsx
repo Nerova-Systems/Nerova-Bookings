@@ -8,11 +8,15 @@ import { toast } from "sonner";
 
 import { useAppointmentShell } from "@/shared/lib/appointmentsApi";
 import { useCreateIntegrationConnectSession, useSyncIntegrationConnections } from "@/shared/lib/integrationsApi";
-import { useClaimWhatsAppNumber, useProvisionWhatsAppSubaccount, useWhatsAppMessagingStatus } from "@/shared/lib/messagingApi";
+import {
+  useClaimWhatsAppNumber,
+  useProvisionWhatsAppSubaccount,
+  useWhatsAppMessagingStatus
+} from "@/shared/lib/messagingApi";
 
+import { findApp } from "./-components/appCatalog";
 import { AppLogo } from "./-components/AppLogo";
 import { AppPreview } from "./-components/AppPreview";
-import { findApp } from "./-components/appCatalog";
 
 export const Route = createFileRoute("/dashboard/apps/$appSlug")({
   staticData: { trackingTitle: "App details" },
@@ -30,7 +34,10 @@ function AppDetailsPage() {
   const provisionWhatsAppMutation = useProvisionWhatsAppSubaccount();
   const claimWhatsAppNumberMutation = useClaimWhatsAppNumber();
   const googleCalendarIntegration = useMemo(
-    () => shellQuery.data?.integrations.find((integration) => integration.provider === "Google" && integration.capability === "Calendar"),
+    () =>
+      shellQuery.data?.integrations.find(
+        (integration) => integration.provider === "Google" && integration.capability === "Calendar"
+      ),
     [shellQuery.data?.integrations]
   );
 
@@ -55,8 +62,14 @@ function AppDetailsPage() {
 
   const appSlugForAction = app.slug;
   const usesNangoConnect = appSlugForAction === "google-calendar";
-  const isInstalled = usesNangoConnect ? googleCalendarIntegration?.status === "Connected" : app.installState === "installed";
-  const actionPending = connectSessionMutation.isPending || syncConnectionsMutation.isPending || provisionWhatsAppMutation.isPending || claimWhatsAppNumberMutation.isPending;
+  const isInstalled = usesNangoConnect
+    ? googleCalendarIntegration?.status === "Connected"
+    : app.installState === "installed";
+  const actionPending =
+    connectSessionMutation.isPending ||
+    syncConnectionsMutation.isPending ||
+    provisionWhatsAppMutation.isPending ||
+    claimWhatsAppNumberMutation.isPending;
 
   async function handlePrimaryAction() {
     try {
@@ -97,7 +110,10 @@ function AppDetailsPage() {
 
   return (
     <main className="flex min-h-0 flex-1 flex-col overflow-y-auto bg-[#0f0f0f] px-8 py-8 text-white">
-      <Link to="/dashboard/apps/store" className="inline-flex w-fit items-center gap-3 text-lg font-semibold text-white/85 hover:text-white">
+      <Link
+        to="/dashboard/apps/store"
+        className="inline-flex w-fit items-center gap-3 text-lg font-semibold text-white/85 hover:text-white"
+      >
         <ArrowLeftIcon className="size-5" />
         App store
       </Link>
@@ -111,7 +127,7 @@ function AppDetailsPage() {
         <aside className="min-w-0">
           <div className="flex items-center gap-6">
             <AppLogo app={app} size="lg" />
-            <h1 className="font-display text-5xl font-semibold leading-tight">{app.name}</h1>
+            <h1 className="font-display text-5xl leading-tight font-semibold">{app.name}</h1>
           </div>
 
           <div className="mt-7 flex flex-wrap items-center gap-2 text-lg font-semibold text-white/75">
@@ -137,7 +153,9 @@ function AppDetailsPage() {
 
           <p className="mt-12 text-xl leading-8 text-white/75">{app.description}</p>
 
-          {usesWhatsAppProvisioning && <WhatsAppReadiness status={whatsAppStatusQuery.data} loading={whatsAppStatusQuery.isLoading} />}
+          {usesWhatsAppProvisioning && (
+            <WhatsAppReadiness status={whatsAppStatusQuery.data} loading={whatsAppStatusQuery.isLoading} />
+          )}
 
           <section className="mt-12 space-y-8">
             <DetailBlock title="Pricing" value={app.pricing} />
@@ -146,7 +164,10 @@ function AppDetailsPage() {
               <h2 className="text-xl font-semibold">Capabilities</h2>
               <div className="mt-3 flex flex-wrap gap-2">
                 {app.capabilities.map((capability) => (
-                  <span key={capability} className="rounded-full border border-white/10 px-3 py-1.5 text-sm text-white/70">
+                  <span
+                    key={capability}
+                    className="rounded-full border border-white/10 px-3 py-1.5 text-sm text-white/70"
+                  >
                     {capability}
                   </span>
                 ))}
@@ -196,20 +217,40 @@ function AppActionButtons({
         </Button>
       )}
       {usesNangoConnect ? (
-        <Button type="button" variant="outline" className="border-white/20 bg-transparent text-white hover:bg-white/10" disabled={actionPending} onClick={onPrimaryAction}>
+        <Button
+          type="button"
+          variant="outline"
+          className="border-white/20 bg-transparent text-white hover:bg-white/10"
+          disabled={actionPending}
+          onClick={onPrimaryAction}
+        >
           {isConnecting && <Loader2Icon className="size-4 animate-spin" />}
           {isInstalled ? "Reconnect" : "Install app"}
         </Button>
       ) : usesWhatsAppProvisioning ? (
-        <Button type="button" variant="outline" className="border-white/20 bg-transparent text-white hover:bg-white/10" disabled={actionPending} onClick={onProvisionWhatsApp}>
+        <Button
+          type="button"
+          variant="outline"
+          className="border-white/20 bg-transparent text-white hover:bg-white/10"
+          disabled={actionPending}
+          onClick={onProvisionWhatsApp}
+        >
           {isProvisioningWhatsApp && <Loader2Icon className="size-4 animate-spin" />}
           Start setup
         </Button>
       ) : (
-        <span className="inline-flex h-10 items-center rounded-xl border border-white/10 px-4 text-sm font-semibold text-white/45">Not available in MVP</span>
+        <span className="inline-flex h-10 items-center rounded-xl border border-white/10 px-4 text-sm font-semibold text-white/45">
+          Not available in MVP
+        </span>
       )}
       {usesNangoConnect && (
-        <Button type="button" variant="outline" className="border-white/20 bg-transparent text-white hover:bg-white/10" disabled={actionPending} onClick={onRefreshStatus}>
+        <Button
+          type="button"
+          variant="outline"
+          className="border-white/20 bg-transparent text-white hover:bg-white/10"
+          disabled={actionPending}
+          onClick={onRefreshStatus}
+        >
           {isRefreshing ? <Loader2Icon className="size-4 animate-spin" /> : <RefreshCwIcon className="size-4" />}
           Refresh status
         </Button>
@@ -222,7 +263,11 @@ function AppActionButtons({
           disabled={actionPending || !canClaimWhatsAppNumber}
           onClick={onClaimWhatsAppNumber}
         >
-          {isClaimingWhatsAppNumber ? <Loader2Icon className="size-4 animate-spin" /> : <RefreshCwIcon className="size-4" />}
+          {isClaimingWhatsAppNumber ? (
+            <Loader2Icon className="size-4 animate-spin" />
+          ) : (
+            <RefreshCwIcon className="size-4" />
+          )}
           Claim ZA number
         </Button>
       )}
@@ -230,7 +275,13 @@ function AppActionButtons({
   );
 }
 
-function WhatsAppReadiness({ status, loading }: { status: ReturnType<typeof useWhatsAppMessagingStatus>["data"]; loading: boolean }) {
+function WhatsAppReadiness({
+  status,
+  loading
+}: {
+  status: ReturnType<typeof useWhatsAppMessagingStatus>["data"];
+  loading: boolean;
+}) {
   if (loading) {
     return (
       <section className="mt-10 rounded-3xl border border-white/10 bg-[#202020] p-6 text-white/55">
@@ -251,12 +302,19 @@ function WhatsAppReadiness({ status, loading }: { status: ReturnType<typeof useW
             {status.phoneNumber ? `Assigned number: ${status.phoneNumber}` : "No South African number assigned yet."}
           </p>
         </div>
-        <span className="ml-auto rounded-full border border-white/10 px-3 py-1 text-sm text-white/65">{status.whatsAppApprovalStatus}</span>
+        <span className="ml-auto rounded-full border border-white/10 px-3 py-1 text-sm text-white/65">
+          {status.whatsAppApprovalStatus}
+        </span>
       </div>
       <div className="mt-5 grid gap-3">
         {status.readiness.map((item) => (
-          <div key={item.key} className="flex items-center gap-3 rounded-2xl border border-white/10 bg-[#191919] px-4 py-3">
-            <span className={`flex size-5 items-center justify-center rounded-full text-xs ${item.isReady ? "bg-emerald-500 text-white" : "bg-white/10 text-white/45"}`}>
+          <div
+            key={item.key}
+            className="flex items-center gap-3 rounded-2xl border border-white/10 bg-[#191919] px-4 py-3"
+          >
+            <span
+              className={`flex size-5 items-center justify-center rounded-full text-xs ${item.isReady ? "bg-emerald-500 text-white" : "bg-white/10 text-white/45"}`}
+            >
               {item.isReady ? <CheckIcon className="size-3.5" /> : null}
             </span>
             <span className="font-semibold text-white/85">{item.label}</span>

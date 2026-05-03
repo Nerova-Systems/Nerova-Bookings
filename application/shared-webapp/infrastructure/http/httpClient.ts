@@ -11,8 +11,16 @@
 import { getHasPendingAuthSync } from "../auth/AuthSyncService";
 import { normalizeError } from "./errorHandler";
 
-// Default timeout must match GracePeriodSeconds in account/Core/Features/Authentication/Domain/Session.cs
-export const DEFAULT_TIMEOUT = 30000;
+/**
+ * Client-side timeout. Must be strictly longer than the longest server-side request the browser
+ * waits on so it never fires before the server can return a response. Aborting before the server
+ * resolves causes cookie-rotation responses to be lost mid-flight and triggers false replay-attack
+ * revocations. Sized to absorb a full all-cold chain (AppGateway + account-api + main-api each
+ * scaling from zero in series), with extra margin for downstream projects whose main-api carries
+ * substantial first-request cost. This timeout exists only as a final safety net for network
+ * blackholes.
+ */
+export const DEFAULT_TIMEOUT = 120000;
 
 /**
  * Direct fetch wrapper for non-strongly-typed HTTP calls

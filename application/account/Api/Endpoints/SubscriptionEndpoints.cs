@@ -1,4 +1,3 @@
-using Account.Database;
 using Account.Features.Subscriptions.Commands;
 using Account.Features.Subscriptions.Queries;
 using SharedKernel.ApiResults;
@@ -23,6 +22,10 @@ public sealed class SubscriptionEndpoints : IEndpoints
             => await mediator.Send(query)
         ).Produces<SubscriptionResponse>();
 
+        group.MapGet("/checkout-preview", async Task<ApiResult<CheckoutPreviewResponse>> ([AsParameters] GetCheckoutPreviewQuery query, IMediator mediator)
+            => await mediator.Send(query)
+        ).Produces<CheckoutPreviewResponse>();
+
         group.MapGet("/subscribe-preview", async Task<ApiResult<SubscribePreviewResponse>> ([AsParameters] GetSubscribePreviewQuery query, IMediator mediator)
             => await mediator.Send(query)
         ).Produces<SubscribePreviewResponse>();
@@ -31,25 +34,17 @@ public sealed class SubscriptionEndpoints : IEndpoints
             => await mediator.Send(query)
         ).Produces<UpgradePreviewResponse>();
 
-        group.MapGet("/update-card-url", async Task<ApiResult<UpdateCardUrlResponse>> ([AsParameters] GetUpdateCardUrlQuery query, IMediator mediator)
-            => await mediator.Send(query)
-        ).Produces<UpdateCardUrlResponse>();
-
-        group.MapPost("/initiate", async Task<ApiResult<InitiateSubscriptionResponse>> (InitiateSubscriptionCommand command, IMediator mediator)
+        group.MapPost("/start-checkout", async Task<ApiResult<StartSubscriptionCheckoutResponse>> (StartSubscriptionCheckoutCommand command, IMediator mediator)
             => await mediator.Send(command)
-        ).Produces<InitiateSubscriptionResponse>();
+        ).Produces<StartSubscriptionCheckoutResponse>();
 
-        group.MapPost("/upgrade", async Task<ApiResult> (UpgradeSubscriptionCommand command, IMediator mediator)
+        group.MapPost("/confirm-checkout", async Task<ApiResult> (ConfirmSubscriptionCheckoutCommand command, IMediator mediator)
             => await mediator.Send(command)
         );
 
-        group.MapPost("/schedule-downgrade", async Task<ApiResult> (ScheduleDowngradeCommand command, IMediator mediator)
+        group.MapPost("/upgrade", async Task<ApiResult<UpgradeSubscriptionResponse>> (UpgradeSubscriptionCommand command, IMediator mediator)
             => await mediator.Send(command)
-        );
-
-        group.MapPost("/cancel-scheduled-downgrade", async Task<ApiResult> (IMediator mediator)
-            => await mediator.Send(new CancelScheduledDowngradeCommand())
-        );
+        ).Produces<UpgradeSubscriptionResponse>();
 
         group.MapPost("/cancel", async Task<ApiResult> (CancelSubscriptionCommand command, IMediator mediator)
             => await mediator.Send(command)
@@ -59,29 +54,8 @@ public sealed class SubscriptionEndpoints : IEndpoints
             => await mediator.Send(new ReactivateSubscriptionCommand())
         ).Produces<ReactivateSubscriptionResponse>();
 
-        group.MapPost("/retry-charge", async Task<ApiResult> (IMediator mediator, AccountDbContext dbContext, ILogger<SubscriptionEndpoints> logger)
-            => await BillingEndpointRetry.ExecuteAsync(
-                async () =>
-                {
-                    var result = await mediator.Send(new RetryFailedChargeCommand());
-                    return (ApiResult)result;
-                },
-                dbContext,
-                logger
-            )
+        group.MapPost("/process-pending-events", async Task<ApiResult> (IMediator mediator)
+            => await mediator.Send(new ProcessPendingEventsCommand())
         );
-
-        // PayFast ITN webhook — no auth, receives form-encoded POST from PayFast servers
-        group.MapPost("/payfast/itn", async Task<ApiResult> (IFormCollection form, IMediator mediator, AccountDbContext dbContext, ILogger<SubscriptionEndpoints> logger)
-            => await BillingEndpointRetry.ExecuteAsync(
-                async () =>
-                {
-                    var result = await mediator.Send(new HandlePayFastItnCommand(form.ToDictionary(k => k.Key, v => v.Value.ToString())));
-                    return (ApiResult)result;
-                },
-                dbContext,
-                logger
-            )
-        ).AllowAnonymous().DisableAntiforgery();
     }
 }

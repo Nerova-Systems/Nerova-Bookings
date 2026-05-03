@@ -1,8 +1,9 @@
+import type { FormEvent } from "react";
+
 import { Button } from "@repo/ui/components/Button";
 import { Input } from "@repo/ui/components/Input";
 import { Switch } from "@repo/ui/components/Switch";
 import { PlusIcon, Trash2Icon } from "lucide-react";
-import type { FormEvent } from "react";
 import { toast } from "sonner";
 
 import { useUpdateWeeklyAvailability } from "@/shared/lib/availabilitySettingsApi";
@@ -97,7 +98,17 @@ function AvailabilityDayRow({
   );
 }
 
-function WindowRows({ day, dayIndex, days, setDays }: { day: DayState; dayIndex: number; days: DayState[]; setDays: (days: DayState[]) => void }) {
+function WindowRows({
+  day,
+  dayIndex,
+  days,
+  setDays
+}: {
+  day: DayState;
+  dayIndex: number;
+  days: DayState[];
+  setDays: (days: DayState[]) => void;
+}) {
   return (
     <div className="mt-3 grid gap-2">
       {day.windows.map((window, windowIndex) => (

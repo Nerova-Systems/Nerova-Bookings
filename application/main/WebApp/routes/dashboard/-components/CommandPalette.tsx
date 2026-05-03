@@ -1,10 +1,25 @@
 import { t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
-import { CommandDialog, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList, CommandShortcut } from "@repo/ui/components/Command";
+import {
+  CommandDialog,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+  CommandShortcut
+} from "@repo/ui/components/Command";
 import { useNavigate } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 
-import { useAppointmentShell, type Appointment, type AppointmentShell, type Client, type IntegrationConnection, type Service } from "@/shared/lib/appointmentsApi";
+import {
+  useAppointmentShell,
+  type Appointment,
+  type AppointmentShell,
+  type Client,
+  type IntegrationConnection,
+  type Service
+} from "@/shared/lib/appointmentsApi";
 
 type SearchGroup = "Navigate" | "Appointments" | "Clients" | "Services" | "Payments" | "Apps";
 
@@ -21,15 +36,40 @@ interface SearchResult {
 }
 
 const PAGES: SearchResult[] = [
-  pageResult("bookings", "Bookings", "Booking list, calendar view, and review queue", "/dashboard/bookings", "Workspace"),
-  pageResult("availability", "Availability", "Working hours and date overrides", "/dashboard/availability", "Workspace"),
+  pageResult(
+    "bookings",
+    "Bookings",
+    "Booking list, calendar view, and review queue",
+    "/dashboard/bookings",
+    "Workspace"
+  ),
+  pageResult(
+    "availability",
+    "Availability",
+    "Working hours and date overrides",
+    "/dashboard/availability",
+    "Workspace"
+  ),
   pageResult("out-of-office", "Out of office", "OOO dates and public holidays", "/user/out-of-office", "Workspace"),
   pageResult("clients", "Clients", "Client database, notes and visit history", "/dashboard/clients", "Workspace"),
-  pageResult("payments", "Payments", "Appointment deposits and Paystack status", "/dashboard/apps/installed", "Business", {
-    category: "Payment"
-  }),
+  pageResult(
+    "payments",
+    "Payments",
+    "Appointment deposits and Paystack status",
+    "/dashboard/apps/installed",
+    "Business",
+    {
+      category: "Payment"
+    }
+  ),
   pageResult("services", "Services", "Service catalogue, prices and deposits", "/dashboard/services", "Business"),
-  pageResult("analytics", "Analytics", "Bookings, revenue, no-shows and service mix", "/dashboard/analytics", "Business"),
+  pageResult(
+    "analytics",
+    "Analytics",
+    "Bookings, revenue, no-shows and service mix",
+    "/dashboard/analytics",
+    "Business"
+  ),
   pageResult("apps", "Apps", "Google, Microsoft and Nango integrations", "/dashboard/apps/store", "Business")
 ];
 
@@ -187,7 +227,14 @@ function groupResults(results: SearchResult[]) {
     .filter(([, items]) => items.length > 0);
 }
 
-function pageResult(id: string, title: string, detail: string, to: string, shortcut: string, search?: Record<string, string>): SearchResult {
+function pageResult(
+  id: string,
+  title: string,
+  detail: string,
+  to: string,
+  shortcut: string,
+  search?: Record<string, string>
+): SearchResult {
   return { id: `page-${id}`, group: "Navigate", title, detail, keywords: `${title} ${detail}`, to, shortcut, search };
 }
 

@@ -1,0 +1,102 @@
+using System.Net;
+using System.Net.Http.Json;
+using Account.Database;
+using Account.Features.Subscriptions.Domain;
+using Account.Features.Subscriptions.Queries;
+using FluentAssertions;
+using SharedKernel.Tests;
+using SharedKernel.Tests.Persistence;
+using Xunit;
+
+namespace Account.Tests.Subscriptions;
+
+public sealed class GetUpgradePreviewTests : EndpointBaseTest<AccountDbContext>
+{
+    [Fact]
+    public async Task GetUpgradePreview_WhenStandardToPremium_ShouldReturnPreview()
+    {
+        // Arrange
+        Connection.Update("subscriptions", "tenant_id", DatabaseSeeder.Tenant1.Id.Value, [
+                ("plan", nameof(SubscriptionPlan.Standard)),
+                ("paystack_customer_id", "CUS_test_123"),
+                ("paystack_subscription_id", "SUB_test_123"),
+                ("current_period_end", TimeProvider.GetUtcNow().AddDays(30))
+            ]
+        );
+
+        // Act
+        var response = await AuthenticatedOwnerHttpClient.GetAsync("/api/account/subscriptions/upgrade-preview?NewPlan=Premium");
+
+        // Assert
+        response.ShouldBeSuccessfulGetRequest();
+        var result = await response.Content.ReadFromJsonAsync<UpgradePreviewResponse>();
+        result!.TotalAmount.Should().BeGreaterThan(0);
+        result.Currency.Should().NotBeNullOrEmpty();
+        result.LineItems.Should().NotBeEmpty();
+        result.LineItems.Sum(i => i.Amount).Should().Be(result.TotalAmount);
+        var taxItem = result.LineItems.Should().ContainSingle(i => i.Description == "Tax").Which;
+        taxItem.Amount.Should().BeGreaterThan(0);
+        taxItem.IsProration.Should().BeFalse();
+        result.LineItems.Where(i => i.IsProration).Should().AllSatisfy(item =>
+            {
+                item.Description.Should().NotBeNullOrEmpty();
+                item.Currency.Should().NotBeNullOrEmpty();
+            }
+        );
+    }
+
+    [Fact]
+    public async Task GetUpgradePreview_WhenPlanNotHigher_ShouldReturnBadRequest()
+    {
+        // Arrange
+        Connection.Update("subscriptions", "tenant_id", DatabaseSeeder.Tenant1.Id.Value, [
+                ("plan", nameof(SubscriptionPlan.Premium)),
+                ("paystack_customer_id", "CUS_test_123"),
+                ("paystack_subscription_id", "SUB_test_123"),
+                ("current_period_end", TimeProvider.GetUtcNow().AddDays(30))
+            ]
+        );
+
+        // Act
+        var response = await AuthenticatedOwnerHttpClient.GetAsync("/api/account/subscriptions/upgrade-preview?NewPlan=Standard");
+
+        // Assert
+        await response.ShouldHaveErrorStatusCode(HttpStatusCode.BadRequest, "Cannot upgrade from 'Premium' to 'Standard'. Target plan must be higher.");
+    }
+
+    [Fact]
+    public async Task GetUpgradePreview_WhenNonOwner_ShouldReturnForbidden()
+    {
+        // Arrange
+        Connection.Update("subscriptions", "tenant_id", DatabaseSeeder.Tenant1.Id.Value, [
+                ("plan", nameof(SubscriptionPlan.Standard)),
+                ("paystack_customer_id", "CUS_test_123"),
+                ("paystack_subscription_id", "SUB_test_123"),
+                ("current_period_end", TimeProvider.GetUtcNow().AddDays(30))
+            ]
+        );
+
+        // Act
+        var response = await AuthenticatedMemberHttpClient.GetAsync("/api/account/subscriptions/upgrade-preview?NewPlan=Premium");
+
+        // Assert
+        await response.ShouldHaveErrorStatusCode(HttpStatusCode.Forbidden, "Only owners can manage subscriptions.");
+    }
+
+    [Fact]
+    public async Task GetUpgradePreview_WhenNoPaystackSubscription_ShouldReturnBadRequest()
+    {
+        // Arrange
+        Connection.Update("subscriptions", "tenant_id", DatabaseSeeder.Tenant1.Id.Value, [
+                ("plan", nameof(SubscriptionPlan.Standard)),
+                ("paystack_customer_id", "CUS_test_123")
+            ]
+        );
+
+        // Act
+        var response = await AuthenticatedOwnerHttpClient.GetAsync("/api/account/subscriptions/upgrade-preview?NewPlan=Premium");
+
+        // Assert
+        await response.ShouldHaveErrorStatusCode(HttpStatusCode.BadRequest, "No active Paystack subscription found.");
+    }
+}

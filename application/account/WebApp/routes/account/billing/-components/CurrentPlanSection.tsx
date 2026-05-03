@@ -21,7 +21,6 @@ type PlanPriceItem = components["schemas"]["PlanPriceItem"];
 interface CurrentPlanSectionProps {
   currentPlan: SubscriptionPlan;
   cancelAtPeriodEnd: boolean;
-  scheduledPlan: SubscriptionPlan | null;
   formattedPeriodEndLong: string | null;
   currentPriceAmount: number | null | undefined;
   currentPriceCurrency: string | null | undefined;
@@ -31,7 +30,6 @@ interface CurrentPlanSectionProps {
 export function CurrentPlanSection({
   currentPlan,
   cancelAtPeriodEnd,
-  scheduledPlan,
   formattedPeriodEndLong,
   currentPriceAmount,
   currentPriceCurrency,
@@ -71,14 +69,6 @@ export function CurrentPlanSection({
               ) : (
                 <Trans>Next billing date: {formattedPeriodEndLong}</Trans>
               )}
-            </ItemDescription>
-          )}
-          {scheduledPlan && !cancelAtPeriodEnd && (
-            <ItemDescription>
-              <Trans>
-                Changing to {getPlanLabel(scheduledPlan)} {getFormattedPrice(scheduledPlan, plans)} on{" "}
-                {formattedPeriodEndLong}
-              </Trans>
             </ItemDescription>
           )}
         </ItemContent>

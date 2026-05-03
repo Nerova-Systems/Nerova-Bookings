@@ -1,6 +1,8 @@
 using System.Net;
 using System.Security.Cryptography;
 using System.Text;
+using Polly.CircuitBreaker;
+using Polly.Timeout;
 using SharedKernel.Domain;
 
 namespace Account.Integrations.Gravatar;
@@ -34,9 +36,30 @@ public sealed class GravatarClient(HttpClient httpClient, ILogger<GravatarClient
                 response.Content.Headers.ContentType?.MediaType!
             );
         }
-        catch (TaskCanceledException ex)
+        catch (TimeoutRejectedException ex)
         {
-            logger.LogError(ex, "Timeout when fetching gravatar for user {UserId}", userId);
+            // Polly's AttemptTimeout / TotalRequestTimeout strategy raises this on a hung server before any HTTP response.
+            logger.LogError(ex, "Resilience timeout fetching gravatar for user {UserId}. Treating as unavailable", userId);
+            return null;
+        }
+        catch (BrokenCircuitException ex)
+        {
+            // Polly opened the circuit after repeated failures; subsequent calls fail fast until the circuit closes.
+            logger.LogError(ex, "Circuit open while fetching gravatar for user {UserId}. Treating as unavailable", userId);
+            return null;
+        }
+        catch (HttpRequestException ex)
+        {
+            // Surfaced by the standard resilience handler after retries exhaust on transient failures (5xx, network errors).
+            logger.LogError(ex, "Failed to fetch gravatar for user {UserId} after retries. Treating as unavailable", userId);
+            return null;
+        }
+        catch (OperationCanceledException ex) when (!cancellationToken.IsCancellationRequested)
+        {
+            // HttpClient.Timeout and the resilience pipeline raise OperationCanceledException subtypes
+            // (notably TaskCanceledException) on internal timeouts. The when-clause re-throws genuine
+            // caller-driven cancellation so MediatR sees it as a real cancellation, not an avatar miss.
+            logger.LogError(ex, "Timeout fetching gravatar for user {UserId}. Treating as unavailable", userId);
             return null;
         }
     }
