@@ -3,7 +3,10 @@ using System.Net.Http.Json;
 using Account.Database;
 using Account.Features.Billing.Commands;
 using Account.Features.Subscriptions.Domain;
+using Account.Features.Tenants.Domain;
+using Account.Integrations.Paystack;
 using FluentAssertions;
+using SharedKernel.Domain;
 using SharedKernel.Tests;
 using SharedKernel.Tests.Persistence;
 using SharedKernel.Validation;
@@ -64,6 +67,59 @@ public sealed class UpdateBillingInfoTests : EndpointBaseTest<AccountDbContext>
 
         // Assert
         response.ShouldHaveEmptyHeaderAndLocationOnSuccess();
+    }
+
+    [Fact]
+    public async Task UpdateBillingInfo_WhenPaystackReusesCustomerForAnotherTenant_ShouldSucceed()
+    {
+        // Arrange
+        var otherTenantId = TenantId.NewId();
+        Connection.Insert("tenants", [
+                ("id", otherTenantId.Value),
+                ("created_at", TimeProvider.GetUtcNow()),
+                ("modified_at", null),
+                ("name", "Other Tenant"),
+                ("state", nameof(TenantState.Active)),
+                ("plan", nameof(SubscriptionPlan.Basis)),
+                ("logo", """{"Url":null,"Version":0}"""),
+                ("suspension_reason", null),
+                ("suspended_at", null)
+            ]
+        );
+        Connection.Insert("subscriptions", [
+                ("tenant_id", otherTenantId.Value),
+                ("id", SubscriptionId.NewId().ToString()),
+                ("created_at", TimeProvider.GetUtcNow()),
+                ("modified_at", null),
+                ("plan", nameof(SubscriptionPlan.Basis)),
+                ("scheduled_plan", null),
+                ("paystack_customer_id", MockPaystackClient.MockCustomerId),
+                ("paystack_subscription_id", null),
+                ("current_price_amount", null),
+                ("current_price_currency", null),
+                ("current_period_end", null),
+                ("cancel_at_period_end", false),
+                ("first_payment_failed_at", null),
+                ("cancellation_reason", null),
+                ("cancellation_feedback", null),
+                ("payment_transactions", "[]"),
+                ("payment_method", null),
+                ("billing_info", null)
+            ]
+        );
+        var command = new UpdateBillingInfoCommand("Test Organization", "Vestergade 12", "1456", "Copenhagen", null, "DK", "billing@example.com", null);
+
+        // Act
+        var response = await AuthenticatedOwnerHttpClient.PutAsJsonAsync("/api/account/billing/billing-info", command);
+
+        // Assert
+        response.ShouldHaveEmptyHeaderAndLocationOnSuccess();
+        Connection.ExecuteScalar<string>(
+                "SELECT paystack_customer_id FROM subscriptions WHERE tenant_id = @TenantId",
+                [new { TenantId = DatabaseSeeder.Tenant1.Id.Value }]
+            )
+            .Should()
+            .Be(MockPaystackClient.MockCustomerId);
     }
 
     [Fact]

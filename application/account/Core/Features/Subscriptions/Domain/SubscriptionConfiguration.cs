@@ -20,6 +20,9 @@ public sealed class SubscriptionConfiguration : IEntityTypeConfiguration<Subscri
         builder.HasOne<Tenant>().WithMany().HasForeignKey(s => s.TenantId);
         builder.MapStronglyTypedNullableId<Subscription, PaystackCustomerId, string>(s => s.PaystackCustomerId);
         builder.MapStronglyTypedNullableId<Subscription, PaystackSubscriptionId, string>(s => s.PaystackSubscriptionId);
+        builder.HasIndex(s => s.PaystackCustomerId)
+            .HasDatabaseName("ix_subscriptions_paystack_customer_id")
+            .HasFilter("paystack_customer_id IS NOT NULL");
 
         builder.Property(s => s.Plan)
             .HasConversion(

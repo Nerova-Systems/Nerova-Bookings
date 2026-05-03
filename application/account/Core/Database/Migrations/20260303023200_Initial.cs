@@ -168,7 +168,7 @@ public sealed class Initial : Migration
         );
 
         migrationBuilder.CreateIndex("ix_subscriptions_tenant_id", "subscriptions", "tenant_id", unique: true);
-        migrationBuilder.CreateIndex("ix_subscriptions_paystack_customer_id", "subscriptions", "paystack_customer_id", unique: true, filter: "paystack_customer_id IS NOT NULL");
+        migrationBuilder.CreateIndex("ix_subscriptions_paystack_customer_id", "subscriptions", "paystack_customer_id", filter: "paystack_customer_id IS NOT NULL");
 
         migrationBuilder.CreateTable(
             "paystack_events",

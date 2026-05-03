@@ -2,9 +2,12 @@ import { t } from "@lingui/core/macro";
 import { requirePermission, requireSubscriptionEnabled } from "@repo/infrastructure/auth/routeGuards";
 import { AppLayout } from "@repo/ui/components/AppLayout";
 import { useFormatLongDate } from "@repo/ui/hooks/useSmartDate";
+import { useQueryClient } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
+import { useEffect, useRef } from "react";
+import { toast } from "sonner";
 
-import { SubscriptionPlan } from "@/shared/lib/api/client";
+import { api, SubscriptionPlan } from "@/shared/lib/api/client";
 
 import { BillingTabNavigation } from "../-components/BillingTabNavigation";
 import { PlanCardGrid } from "../-components/PlanCardGrid";
@@ -24,11 +27,35 @@ export const Route = createFileRoute("/account/billing/subscription/")({
 function PlansPage() {
   const state = usePlansPageState();
   const formatLongDate = useFormatLongDate();
+  const queryClient = useQueryClient();
+  const handledCheckoutReference = useRef<string | null>(null);
 
   const cancelAtPeriodEnd = state.subscription?.cancelAtPeriodEnd ?? false;
   const currentPeriodEnd = state.subscription?.currentPeriodEnd ?? null;
   const formattedPeriodEnd = formatLongDate(currentPeriodEnd);
   const isPaystackConfigured = (state.pricingCatalog?.plans?.length ?? 0) > 0;
+  const confirmCheckoutMutation = api.useMutation("post", "/api/account/subscriptions/confirm-checkout", {
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["get", "/api/account/subscriptions/current"] });
+      toast.success(t`Your subscription has been activated.`);
+    },
+    onError: () => {
+      toast.error(t`Payment could not be verified yet.`);
+    }
+  });
+  const confirmCheckout = confirmCheckoutMutation.mutate;
+
+  useEffect(() => {
+    const searchParams = new URLSearchParams(window.location.search);
+    const reference = searchParams.get("reference") ?? searchParams.get("trxref");
+    if (!reference || handledCheckoutReference.current === reference) {
+      return;
+    }
+
+    handledCheckoutReference.current = reference;
+    window.history.replaceState(null, "", window.location.pathname);
+    confirmCheckout({ body: { reference } });
+  }, [confirmCheckout]);
 
   const handleSubscribe = (plan: SubscriptionPlan) => {
     if (state.subscription?.billingInfo && state.subscription?.paymentMethod) {

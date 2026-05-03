@@ -1962,6 +1962,9 @@ msgstr ""
 msgid "Payment could not be processed. Please try again later."
 msgstr "Betalingen kunne ikke gennemføres. Prøv igen senere."
 
+msgid "Payment could not be verified yet."
+msgstr ""
+
 msgid "Payment failed"
 msgstr "Betaling mislykkedes"
 

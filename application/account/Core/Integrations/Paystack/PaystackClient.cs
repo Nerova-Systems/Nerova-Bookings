@@ -56,7 +56,7 @@ public sealed class PaystackClient(IHttpClientFactory httpClientFactory, IConfig
                 reference,
                 callback_url = GetCallbackUrl(),
                 plan = planSettings.PlanCode,
-                metadata = JsonSerializer.Serialize(new { paystackCustomerId = paystackCustomerId.Value, plan = plan.ToString() })
+                metadata = new { paystackCustomerId = paystackCustomerId.Value, plan = plan.ToString() }
             }, cancellationToken
         );
 
@@ -251,7 +251,7 @@ public sealed class PaystackClient(IHttpClientFactory httpClientFactory, IConfig
             {
                 first_name = nameParts.Length > 0 ? nameParts[0] : null,
                 last_name = nameParts.Length > 1 ? nameParts[1] : null,
-                metadata = JsonSerializer.Serialize(new { billingInfo.Address, billingInfo.TaxId, locale })
+                metadata = new { address = billingInfo.Address, taxId = billingInfo.TaxId, locale }
             }, cancellationToken
         );
 

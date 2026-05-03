@@ -1964,6 +1964,9 @@ msgstr "Payment checkout could not be started."
 msgid "Payment could not be processed. Please try again later."
 msgstr "Payment could not be processed. Please try again later."
 
+msgid "Payment could not be verified yet."
+msgstr "Payment could not be verified yet."
+
 msgid "Payment failed"
 msgstr "Payment failed"
 

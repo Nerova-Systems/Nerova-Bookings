@@ -14,12 +14,23 @@ function PaystackCallbackPage() {
   const location = useLocation();
   const params = new URLSearchParams(location.searchStr);
   const reference = params.get("reference") ?? params.get("trxref") ?? "";
-  const confirmationQuery = useConfirmPaystackReference(reference);
+  const isSubscriptionReference = reference.startsWith("NB-sub-");
+  const confirmationQuery = useConfirmPaystackReference(isSubscriptionReference ? "" : reference);
   const appointmentReference = confirmationQuery.data?.appointmentReference;
 
   useEffect(() => {
     document.title = t`Payment confirmation | Nerova`;
   }, []);
+
+  useEffect(() => {
+    if (!isSubscriptionReference) {
+      return;
+    }
+
+    const subscriptionUrl = new URL("/account/billing/subscription", window.location.origin);
+    subscriptionUrl.searchParams.set("reference", reference);
+    window.location.replace(subscriptionUrl.toString());
+  }, [isSubscriptionReference, reference]);
 
   return (
     <main className="flex min-h-screen items-center justify-center bg-muted px-6 text-foreground">
