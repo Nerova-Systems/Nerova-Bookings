@@ -5,5 +5,5 @@ type SeparatorProps = {
 };
 
 export function Separator({ className }: SeparatorProps) {
-  return <Hr className={`my-[1.5rem] border-t border-solid border-[#e2e8f0] ${className ?? ""}`} />;
+  return <Hr className={`email-separator my-[24px] border-t border-solid border-[#e2e8f0] ${className ?? ""}`} />;
 }

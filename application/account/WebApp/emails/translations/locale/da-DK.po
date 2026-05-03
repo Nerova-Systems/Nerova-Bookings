@@ -25,9 +25,6 @@ msgstr "Indtast den i dit åbne browservindue. Den er kun gyldig i få minutter.
 msgid "Here's your new verification code"
 msgstr "Her er din nye bekræftelseskode"
 
-msgid "Open the login page"
-msgstr "Åbn loginsiden"
-
 msgid "PlatformPlatform login verification code"
 msgstr "PlatformPlatform-bekræftelseskode til login"
 
@@ -37,8 +34,8 @@ msgstr "Denne kode udløber om få minutter."
 msgid "This request was made by entering your mail <0/>, but we have no record of such user."
 msgstr "Anmodningen blev foretaget ved indtastning af din e-mail <0/>, men vi har ingen registrering af en sådan bruger."
 
-msgid "To gain access, click the button below and login using <0/>."
-msgstr "For at få adgang skal du klikke på knappen nedenfor og logge ind med <0/>."
+msgid "To gain access, <0>go to this page in your open browser</0> and login using <1/>."
+msgstr "For at få adgang skal du <0>gå til denne side i din åbne browser</0> og logge ind med <1/>."
 
 msgid "Unknown user tried to login to PlatformPlatform"
 msgstr "Ukendt bruger forsøgte at logge ind på PlatformPlatform"
@@ -46,11 +43,11 @@ msgstr "Ukendt bruger forsøgte at logge ind på PlatformPlatform"
 msgid "We're sending this code again as you requested."
 msgstr "Vi sender denne kode igen, som du anmodede om."
 
-msgid "You can sign up for an account on the link below."
-msgstr "Du kan oprette en konto via linket nedenfor."
+msgid "You can sign up for an account on <0>'{{'SignupUrl'}}'</0>."
+msgstr "Du kan oprette en konto på <0>'{{'SignupUrl'}}'</0>."
 
-msgid "You have been invited to PlatformPlatform"
-msgstr "Du er inviteret til PlatformPlatform"
+msgid "You have been invited to join '{{'TenantName'}}' on PlatformPlatform"
+msgstr "Du er inviteret til at deltage i '{{'TenantName'}}' på PlatformPlatform"
 
 msgid "You or someone else tried to login to PlatformPlatform"
 msgstr "Du eller en anden forsøgte at logge ind på PlatformPlatform"

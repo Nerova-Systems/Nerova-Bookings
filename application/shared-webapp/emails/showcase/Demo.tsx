@@ -27,7 +27,7 @@ export default function Demo({ locale }: DemoProps) {
         <Trans>Welcome to PlatformPlatform</Trans>
       </Subject>
 
-      <Section className="mb-[1rem] text-center">
+      <Section className="mb-[16px] text-center">
         <Image src="https://placehold.co/240x64/png?text=Logo" alt="Logo" width="120" height="32" />
       </Section>
 
@@ -37,12 +37,12 @@ export default function Demo({ locale }: DemoProps) {
         </Trans>
       </Heading>
 
-      <Text className="m-0 mb-[1rem] text-[0.875rem] leading-[1.5rem]">
+      <Text className="m-[0px] mb-[16px] text-[14px] leading-[24px]">
         <Trans>Your verification code is below. It expires in 10 minutes.</Trans>
       </Text>
 
-      <Section className="my-[1rem] rounded-[0.5rem] bg-[#f1f5f9] p-[1rem] text-center">
-        <Text className="m-0 font-mono text-[1.5rem] tracking-[0.5rem] text-[#0f172a]">
+      <Section className="email-otp-box my-[16px] rounded-[8px] bg-[#f1f5f9] p-[16px] text-center">
+        <Text className="email-otp-text m-[0px] text-center font-mono text-[24px] tracking-[8px] text-[#0f172a]">
           <Value path="otpCode" sample="ABC123" />
         </Text>
       </Section>
@@ -72,7 +72,7 @@ export default function Demo({ locale }: DemoProps) {
         </Loop>
       </Alert>
 
-      <Section className="my-[1rem]">
+      <Section className="my-[16px]">
         <If path="hasOutstandingBalance" sample={true}>
           <Badge variant="warning">
             <Trans>

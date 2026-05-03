@@ -52,11 +52,12 @@ public sealed class StartEmailSignupTests : EndpointBaseTest<AccountDbContext>
     }
 
     [Fact]
-    public async Task StartSignup_WhenAnonymous_ShouldFallBackToDefaultLocale()
+    public async Task StartSignup_WhenAcceptLanguageIsDanish_ShouldSendDanishConfirmationEmail()
     {
-        // Anonymous signup has no User row to read Locale from, and the API pipeline does not run
-        // UseRequestLocalization, so the inviter Accept-Language header is ignored. Anonymous signups
-        // therefore always render in the en-US default locale.
+        // Anonymous signups have no User row to read Locale from, so the email locale comes from
+        // the request culture - which UseRequestLocalization populates from the Accept-Language
+        // header. Verifies the full chain: header → IRequestCultureFeature → UserInfo.Locale →
+        // EmailTemplateBase.Locale → dist/StartSignup.da-DK.html.
         // Arrange
         var email = Faker.Internet.UniqueEmail();
         var command = new StartEmailSignupCommand(email);
@@ -72,9 +73,9 @@ public sealed class StartEmailSignupTests : EndpointBaseTest<AccountDbContext>
         await EmailClient.Received(1).SendAsync(
             Arg.Is<EmailMessage>(m =>
                 m.Recipient == email.ToLower() &&
-                m.Subject == "Confirm your email address" &&
-                m.HtmlBody.Contains("Your confirmation code is below") &&
-                m.PlainTextBody.Contains("Your confirmation code is below") &&
+                m.Subject == "Bekræft din e-mailadresse" &&
+                m.HtmlBody.Contains("Din bekræftelseskode står herunder") &&
+                m.PlainTextBody.Contains("Din bekræftelseskode står herunder") &&
                 m.PlainTextBody.TrimEnd().Contains("@localhost #")
             ),
             Arg.Any<CancellationToken>()

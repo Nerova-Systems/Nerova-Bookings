@@ -22,17 +22,17 @@ export default function ResendEmailLogin({ locale }: ResendEmailLoginProps) {
         <Trans>Here's your new verification code</Trans>
       </Heading>
 
-      <Text className="m-0 mb-[1rem] text-center text-[0.875rem] leading-[1.5rem]">
+      <Text className="m-[0px] mb-[16px] text-center text-[14px] leading-[24px]">
         <Trans>We're sending this code again as you requested.</Trans>
       </Text>
 
-      <Section className="my-[1rem] rounded-[0.5rem] bg-[#f1f5f9] p-[1rem] text-center">
-        <Text className="m-0 font-mono text-[2rem] tracking-[0.5rem] text-[#0f172a]">
+      <Section className="email-otp-box my-[16px] rounded-[8px] bg-[#f1f5f9] p-[16px] text-center">
+        <Text className="email-otp-text m-[0px] text-center font-mono text-[32px] tracking-[8px] text-[#0f172a]">
           <Value path="OneTimePassword" sample="ABC123" />
         </Text>
       </Section>
 
-      <Text className="m-0 text-center text-[0.75rem] leading-[1.25rem] text-[#64748b]">
+      <Text className="email-muted m-[0px] text-center text-[12px] leading-[20px] text-[#64748b]">
         <Trans>This code will expire in a few minutes.</Trans>
       </Text>
 

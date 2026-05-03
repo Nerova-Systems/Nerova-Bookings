@@ -21,21 +21,21 @@ export default function UnknownUser({ locale }: UnknownUserProps) {
         <Trans>You or someone else tried to login to PlatformPlatform</Trans>
       </Heading>
 
-      <Text className="m-0 mb-[1rem] text-center text-[0.875rem] leading-[1.5rem]">
+      <Text className="m-[0px] mb-[16px] text-center text-[14px] leading-[24px]">
         <Trans>
           This request was made by entering your mail <Value path="Email" sample="alex@example.com" />, but we have no
           record of such user.
         </Trans>
       </Text>
 
-      <Text className="m-0 mb-[0.5rem] text-center text-[0.875rem] leading-[1.5rem]">
-        <Trans>You can sign up for an account on the link below.</Trans>
-      </Text>
-
-      <Text className="m-0 text-center text-[0.875rem] leading-[1.5rem]">
-        <Link href="{{SignupUrl}}" className="text-[#0f172a] underline">
-          <Value path="SignupUrl" sample="https://app.platformplatform.net/signup" />
-        </Link>
+      <Text className="m-[0px] text-center text-[14px] leading-[24px]">
+        <Trans>
+          You can sign up for an account on{" "}
+          <Link href="{{SignupUrl}}" className="email-link text-[#0f172a] underline">
+            {`'{{'SignupUrl'}}'`}
+          </Link>
+          .
+        </Trans>
       </Text>
     </TransactionalEmail>
   );

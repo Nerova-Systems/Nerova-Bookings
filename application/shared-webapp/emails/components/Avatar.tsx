@@ -4,11 +4,11 @@ import { Img, Section } from "@react-email/components";
 
 type AvatarSize = "sm" | "default" | "lg" | "xl";
 
-const sizeStyle: Record<AvatarSize, { dimension: string; fontSize: string }> = {
-  sm: { dimension: "1.5rem", fontSize: "0.75rem" },
-  default: { dimension: "2rem", fontSize: "0.875rem" },
-  lg: { dimension: "2.5rem", fontSize: "1rem" },
-  xl: { dimension: "3.5rem", fontSize: "1.125rem" }
+const sizePx: Record<AvatarSize, { dimension: number; fontSize: number }> = {
+  sm: { dimension: 24, fontSize: 12 },
+  default: { dimension: 32, fontSize: 14 },
+  lg: { dimension: 40, fontSize: 16 },
+  xl: { dimension: 56, fontSize: 18 }
 };
 
 type AvatarProps = {
@@ -19,7 +19,7 @@ type AvatarProps = {
 };
 
 export function Avatar({ src, alt, fallback, size = "default" }: AvatarProps) {
-  const { dimension, fontSize } = sizeStyle[size];
+  const { dimension, fontSize } = sizePx[size];
   if (src) {
     return (
       <Img
@@ -27,15 +27,22 @@ export function Avatar({ src, alt, fallback, size = "default" }: AvatarProps) {
         alt={alt}
         width={dimension}
         height={dimension}
-        className="inline-block rounded-full bg-[#f1f5f9] object-cover align-middle"
+        className="email-avatar rounded-full bg-[#f1f5f9] align-middle"
+        style={{ display: "inline-block", objectFit: "cover" }}
       />
     );
   }
 
   return (
     <span
-      className="inline-flex items-center justify-center rounded-full bg-[#f1f5f9] text-center align-middle text-[#475569]"
-      style={{ width: dimension, height: dimension, fontSize, lineHeight: dimension }}
+      className="email-avatar rounded-full bg-[#f1f5f9] text-center align-middle text-[#475569]"
+      style={{
+        display: "inline-block",
+        width: `${dimension}px`,
+        height: `${dimension}px`,
+        fontSize: `${fontSize}px`,
+        lineHeight: `${dimension}px`
+      }}
       aria-label={alt}
     >
       {fallback ?? ""}
@@ -47,14 +54,12 @@ type AvatarGroupProps = {
   children: ReactNode;
 };
 
-// Children render side-by-side with overlap. Email clients ignore complex CSS selectors, so the
-// overlap is achieved with inline `margin-left` on each Avatar's wrapper rather than a child
-// combinator. Apply `style={{ marginLeft: "-0.5rem" }}` on each non-first child if you want the
-// classic stacked-avatar look.
+// Children render side-by-side. Use plain inline-block on each child rather than inline-flex
+// so legacy clients (Outlook) lay them out correctly.
 export function AvatarGroup({ children }: AvatarGroupProps) {
   return (
     <Section>
-      <span className="inline-flex items-center">{children}</span>
+      <span style={{ display: "inline-block" }}>{children}</span>
     </Section>
   );
 }

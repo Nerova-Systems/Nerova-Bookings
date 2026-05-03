@@ -25,9 +25,6 @@ msgstr "Enter it in your open browser window. It is only valid for a few minutes
 msgid "Here's your new verification code"
 msgstr "Here's your new verification code"
 
-msgid "Open the login page"
-msgstr "Open the login page"
-
 msgid "PlatformPlatform login verification code"
 msgstr "PlatformPlatform login verification code"
 
@@ -37,8 +34,8 @@ msgstr "This code will expire in a few minutes."
 msgid "This request was made by entering your mail <0/>, but we have no record of such user."
 msgstr "This request was made by entering your mail <0/>, but we have no record of such user."
 
-msgid "To gain access, click the button below and login using <0/>."
-msgstr "To gain access, click the button below and login using <0/>."
+msgid "To gain access, <0>go to this page in your open browser</0> and login using <1/>."
+msgstr "To gain access, <0>go to this page in your open browser</0> and login using <1/>."
 
 msgid "Unknown user tried to login to PlatformPlatform"
 msgstr "Unknown user tried to login to PlatformPlatform"
@@ -46,11 +43,11 @@ msgstr "Unknown user tried to login to PlatformPlatform"
 msgid "We're sending this code again as you requested."
 msgstr "We're sending this code again as you requested."
 
-msgid "You can sign up for an account on the link below."
-msgstr "You can sign up for an account on the link below."
+msgid "You can sign up for an account on <0>'{{'SignupUrl'}}'</0>."
+msgstr "You can sign up for an account on <0>'{{'SignupUrl'}}'</0>."
 
-msgid "You have been invited to PlatformPlatform"
-msgstr "You have been invited to PlatformPlatform"
+msgid "You have been invited to join '{{'TenantName'}}' on PlatformPlatform"
+msgstr "You have been invited to join '{{'TenantName'}}' on PlatformPlatform"
 
 msgid "You or someone else tried to login to PlatformPlatform"
 msgstr "You or someone else tried to login to PlatformPlatform"

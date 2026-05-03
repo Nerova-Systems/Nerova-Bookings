@@ -6,25 +6,16 @@ type OtpAutofillProps = {
 };
 
 // iOS Mail (and Apple Messages) detects the trailing "@{domain} #{code}" pattern in the plaintext
-// body and offers a one-tap autofill suggestion above the keyboard. We render it in plaintext only
-// and add a visually hidden block in the HTML body — the visually hidden element keeps screen readers
-// from announcing the same code twice when the rest of the email already presents it visibly.
+// body and offers a one-tap autofill suggestion above the keyboard. The HTML mirror is hidden via
+// `display:none` (compatible with most clients; falls back to inline-but-styled if stripped). The
+// real value of this element is the plaintext-rendered counterpart that the build pipeline emits as
+// the last line of the .txt artifact — iOS reads from plaintext for autofill detection.
 export function OtpAutofill({ code, domain }: OtpAutofillProps) {
   const isBuild = getEmailRenderMode() === "build";
   const codeValue = isBuild ? `{{${code}}}` : code;
   const domainValue = isBuild ? `{{${domain}}}` : domain;
   return (
-    <div
-      aria-hidden="true"
-      style={{
-        position: "absolute",
-        left: "-9999px",
-        top: "auto",
-        width: "1px",
-        height: "1px",
-        overflow: "hidden"
-      }}
-    >
+    <div aria-hidden="true" style={{ display: "none" }}>
       @{domainValue} #{codeValue}
     </div>
   );

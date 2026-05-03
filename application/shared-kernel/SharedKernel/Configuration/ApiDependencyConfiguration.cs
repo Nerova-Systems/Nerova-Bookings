@@ -145,6 +145,7 @@ public static class ApiDependencyConfiguration
             app
                 .UseForwardedHeaders()
                 .UseRouting() // Explicit so it runs AFTER UseForwardedHeaders. Without this, ASP.NET Core inserts UseRouting at the start of the pipeline and the SPA-host fallback (UseHostScopedSinglePageAppFallback's RequireHost) sees the unrewritten Host header forwarded by YARP (the destination address), not the public host promoted from X-Forwarded-Host.
+                .UseRequestLocalization(SinglePageAppConfiguration.SupportedLocalizations) // Must run before endpoint execution so handlers can read the request culture via IExecutionContext.UserInfo.Locale (e.g. anonymous email senders that have no User row to read Locale from). The SPA fallback's UseRequestLocalization at the end of the pipeline only covers HTML fallback requests, not API endpoints.
                 .UseMockEasyAuthInDevelopment() // Dev-only: serve /.auth/login/aad and inject X-MS-CLIENT-PRINCIPAL-* headers from a dev cookie. Must run before authentication.
                 .UseAuthentication() // Must be above TelemetryContextMiddleware to ensure authentication happens first
                 .UseAuthorization()

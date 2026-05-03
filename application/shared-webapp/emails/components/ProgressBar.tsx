@@ -10,10 +10,10 @@ export function ProgressBar({ value, max = 100, label }: ProgressBarProps) {
   const clamped = Math.max(0, Math.min(value, max));
   const percent = max === 0 ? 0 : Math.round((clamped / max) * 100);
   return (
-    <Section className="my-[0.75rem]">
-      {label ? <div className="mb-[0.375rem] text-[0.75rem] text-[#475569]">{label}</div> : null}
-      <div className="h-[0.5rem] w-full overflow-hidden rounded-full bg-[#e2e8f0]">
-        <div className="h-full rounded-full bg-[#0f172a]" style={{ width: `${percent}%` }} />
+    <Section className="my-[12px]">
+      {label ? <div className="email-muted mb-[6px] text-[12px] text-[#475569]">{label}</div> : null}
+      <div className="email-progressbar-track h-[8px] w-full rounded-full bg-[#e2e8f0]">
+        <div className="email-progressbar-fill h-full rounded-full bg-[#0f172a]" style={{ width: `${percent}%` }} />
       </div>
     </Section>
   );

@@ -65,9 +65,10 @@ public sealed class InviteUserTests : EndpointBaseTest<AccountDbContext>
         await EmailClient.Received(1).SendAsync(
             Arg.Is<EmailMessage>(m =>
                 m.Recipient == email.ToLower() &&
-                m.Subject == "You have been invited to PlatformPlatform" &&
+                m.Subject == $"You have been invited to join {tenantName} on PlatformPlatform" &&
                 m.HtmlBody.Contains("invited you to join PlatformPlatform.") &&
-                m.HtmlBody.Contains("To gain access, click the button below and login using") &&
+                m.HtmlBody.Contains("To gain access") &&
+                m.HtmlBody.Contains("go to this page in your open browser") &&
                 m.PlainTextBody.Contains("invited you to join PlatformPlatform.") &&
                 m.PlainTextBody.Contains(email.ToLower())
             ),
@@ -107,7 +108,7 @@ public sealed class InviteUserTests : EndpointBaseTest<AccountDbContext>
         await EmailClient.Received(1).SendAsync(
             Arg.Is<EmailMessage>(m =>
                 m.Recipient == email.ToLower() &&
-                m.Subject == "Du er inviteret til PlatformPlatform" &&
+                m.Subject == $"Du er inviteret til at deltage i {tenantName} på PlatformPlatform" &&
                 m.HtmlBody.Contains("har inviteret dig til at deltage i PlatformPlatform.") &&
                 m.PlainTextBody.Contains("har inviteret dig til at deltage i PlatformPlatform.") &&
                 m.PlainTextBody.Contains(email.ToLower())
