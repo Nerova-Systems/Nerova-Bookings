@@ -17,7 +17,7 @@ import { BillingTabNavigation } from "./-components/BillingTabNavigation";
 import { CurrentPlanSection } from "./-components/CurrentPlanSection";
 import { InitialPlanSelection } from "./-components/InitialPlanSelection";
 import { PaymentMethodSection } from "./-components/PaymentMethodSection";
-import { CancellationBanner, DowngradeBanner } from "./-components/SubscriptionBanner";
+import { CancellationBanner } from "./-components/SubscriptionBanner";
 import { useBillingPageMutations } from "./-components/useBillingPageMutations";
 import { useSubscriptionPolling } from "./-components/useSubscriptionPolling";
 
@@ -33,7 +33,6 @@ export const Route = createFileRoute("/account/billing/")({
 function BillingPage() {
   const formatLongDate = useFormatLongDate();
   const { isPolling, isLoading, startPolling, subscription } = useSubscriptionPolling();
-  const [isCancelDowngradeDialogOpen, setIsCancelDowngradeDialogOpen] = useState(false);
   const [isReactivateDialogOpen, setIsReactivateDialogOpen] = useState(false);
   const [isEditBillingInfoOpen, setIsEditBillingInfoOpen] = useState(false);
   const [isUpdatePaymentMethodOpen, setIsUpdatePaymentMethodOpen] = useState(false);
@@ -47,15 +46,13 @@ function BillingPage() {
   const { data: pricingCatalog } = api.useQuery("get", "/api/account/subscriptions/pricing-catalog");
   const currentPlan = subscription?.plan ?? SubscriptionPlan.Basis;
 
-  const { reactivateMutation, cancelDowngradeMutation } = useBillingPageMutations({
+  const { reactivateMutation } = useBillingPageMutations({
     startPolling,
-    setIsReactivateDialogOpen,
-    setIsCancelDowngradeDialogOpen
+    setIsReactivateDialogOpen
   });
 
   const isPaystackConfigured = (pricingCatalog?.plans?.length ?? 0) > 0;
   const cancelAtPeriodEnd = subscription?.cancelAtPeriodEnd ?? false;
-  const scheduledPlan = subscription?.scheduledPlan ?? null;
   const currentPeriodEnd = subscription?.currentPeriodEnd ?? null;
   const hasPaystackCustomer = subscription?.hasPaystackCustomer ?? false;
   const formattedPeriodEndLong = formatLongDate(currentPeriodEnd);
@@ -92,17 +89,9 @@ function BillingPage() {
               onReactivate={() => setIsReactivateDialogOpen(true)}
             />
           )}
-          {scheduledPlan && !cancelAtPeriodEnd && (
-            <DowngradeBanner
-              scheduledPlan={scheduledPlan}
-              formattedPeriodEnd={formattedPeriodEndLong}
-              onCancelDowngrade={() => setIsCancelDowngradeDialogOpen(true)}
-            />
-          )}
           <CurrentPlanSection
             currentPlan={currentPlan}
             cancelAtPeriodEnd={cancelAtPeriodEnd}
-            scheduledPlan={scheduledPlan}
             formattedPeriodEndLong={formattedPeriodEndLong}
             currentPriceAmount={subscription?.currentPriceAmount}
             currentPriceCurrency={subscription?.currentPriceCurrency}
@@ -138,13 +127,7 @@ function BillingPage() {
         />
       )}
       <BillingPageDialogs
-        scheduledPlan={scheduledPlan}
-        isCancelDowngradeDialogOpen={isCancelDowngradeDialogOpen}
-        setIsCancelDowngradeDialogOpen={setIsCancelDowngradeDialogOpen}
-        onCancelDowngradeConfirm={() => cancelDowngradeMutation.mutate({})}
-        isCancelDowngradePending={cancelDowngradeMutation.isPending || isPolling}
         currentPlan={currentPlan}
-        currentPeriodEnd={currentPeriodEnd}
         isReactivateDialogOpen={isReactivateDialogOpen}
         setIsReactivateDialogOpen={setIsReactivateDialogOpen}
         onReactivateConfirm={() => reactivateMutation.mutate({})}

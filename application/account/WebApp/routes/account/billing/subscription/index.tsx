@@ -8,7 +8,7 @@ import { SubscriptionPlan } from "@/shared/lib/api/client";
 
 import { BillingTabNavigation } from "../-components/BillingTabNavigation";
 import { PlanCardGrid } from "../-components/PlanCardGrid";
-import { CancellationBanner, DowngradeBanner, PaystackNotConfiguredBanner } from "../-components/SubscriptionBanner";
+import { CancellationBanner, PaystackNotConfiguredBanner } from "../-components/SubscriptionBanner";
 import { SubscriptionDialogs } from "../-components/SubscriptionDialogs";
 import { usePlansPageState } from "../-components/usePlansPageState";
 
@@ -26,7 +26,6 @@ function PlansPage() {
   const formatLongDate = useFormatLongDate();
 
   const cancelAtPeriodEnd = state.subscription?.cancelAtPeriodEnd ?? false;
-  const scheduledPlan = state.subscription?.scheduledPlan ?? null;
   const currentPeriodEnd = state.subscription?.currentPeriodEnd ?? null;
   const formattedPeriodEnd = formatLongDate(currentPeriodEnd);
   const isPaystackConfigured = (state.pricingCatalog?.plans?.length ?? 0) > 0;
@@ -44,9 +43,6 @@ function PlansPage() {
   const handleDowngrade = (plan: SubscriptionPlan) => {
     if (plan === SubscriptionPlan.Basis) {
       state.setIsCancelDialogOpen(true);
-    } else {
-      state.setDowngradeTarget(plan);
-      state.setIsDowngradeDialogOpen(true);
     }
   };
 
@@ -57,15 +53,11 @@ function PlansPage() {
         {cancelAtPeriodEnd && (
           <CancellationBanner currentPlan={state.currentPlan} formattedPeriodEnd={formattedPeriodEnd} />
         )}
-        {scheduledPlan && !cancelAtPeriodEnd && (
-          <DowngradeBanner scheduledPlan={scheduledPlan} formattedPeriodEnd={formattedPeriodEnd} />
-        )}
         {!isPaystackConfigured && <PaystackNotConfiguredBanner />}
         <PlanCardGrid
           plans={state.pricingCatalog?.plans}
           currentPlan={state.currentPlan}
           cancelAtPeriodEnd={cancelAtPeriodEnd}
-          scheduledPlan={scheduledPlan}
           isPaystackConfigured={isPaystackConfigured}
           onSubscribe={handleSubscribe}
           onUpgrade={(plan) => {
@@ -74,10 +66,8 @@ function PlansPage() {
           }}
           onDowngrade={handleDowngrade}
           onReactivate={() => state.setIsReactivateDialogOpen(true)}
-          onCancelDowngrade={() => state.setIsCancelDowngradeDialogOpen(true)}
           isPending={state.isPending}
           pendingPlan={state.pendingPlan}
-          isCancelDowngradePending={state.cancelDowngradeMutation.isPending}
           currentPriceAmount={state.subscription?.currentPriceAmount}
           currentPriceCurrency={state.subscription?.currentPriceCurrency}
         />
@@ -98,16 +88,6 @@ function PlansPage() {
         onSubscribeConfirm={() => state.subscribeMutation.mutate({ body: { plan: state.subscribeTarget } })}
         isSubscribePending={state.subscribeMutation.isPending || state.isConfirmingPayment || state.isPolling}
         subscribeTarget={state.subscribeTarget}
-        isDowngradeDialogOpen={state.isDowngradeDialogOpen}
-        setIsDowngradeDialogOpen={state.setIsDowngradeDialogOpen}
-        onDowngradeConfirm={() => state.downgradeMutation.mutate({ body: { newPlan: state.downgradeTarget } })}
-        isDowngradePending={state.downgradeMutation.isPending || state.isPolling}
-        downgradeTarget={state.downgradeTarget}
-        scheduledPlan={scheduledPlan}
-        isCancelDowngradeDialogOpen={state.isCancelDowngradeDialogOpen}
-        setIsCancelDowngradeDialogOpen={state.setIsCancelDowngradeDialogOpen}
-        onCancelDowngradeConfirm={() => state.cancelDowngradeMutation.mutate({})}
-        isCancelDowngradePending={state.cancelDowngradeMutation.isPending || state.isPolling}
         currentPlan={state.currentPlan}
         isReactivateDialogOpen={state.isReactivateDialogOpen}
         setIsReactivateDialogOpen={state.setIsReactivateDialogOpen}

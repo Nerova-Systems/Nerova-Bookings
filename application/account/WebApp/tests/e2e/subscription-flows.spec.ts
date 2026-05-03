@@ -21,8 +21,8 @@ test.describe("@smoke", () => {
    * - Basis plan display with plan comparison cards (no-subscription view)
    * - Subscribe flow with billing info gate and mock checkout session callback
    * - Upgrade from Standard to Premium (subscription page)
-   * - Schedule downgrade from Premium to Standard (subscription page with mocked state)
-   * - Downgrade to Basis (free plan) with cancellation reason selection (subscription page)
+   * - Paid-plan downgrade disabled from Premium to Standard (subscription page with mocked state)
+   * - Cancel to Basis (free plan) with cancellation reason selection (subscription page)
    * - Cancelling state with reactivation banner and confirmation dialog
    * - Payment history table with invoice links
    * - Payment failed warning banner display
@@ -249,9 +249,8 @@ test.describe("@smoke", () => {
       await ownerPage.unroute("**/api/account/subscriptions/current");
     })();
 
-    // === DOWNGRADE FLOW (MOCKED PREMIUM STATE) ===
-    await step("Mock Premium subscription state & click Downgrade on Standard plan")(async () => {
-      let scheduledPlan: string | null = null;
+    // === PAID DOWNGRADE DISABLED (MOCKED PREMIUM STATE) ===
+    await step("Mock Premium subscription state & verify paid downgrade is not actionable")(async () => {
       await ownerPage.route("**/api/account/subscriptions/current", async (route) => {
         await route.fulfill({
           status: 200,
@@ -259,7 +258,7 @@ test.describe("@smoke", () => {
           json: {
             id: "sub_mock",
             plan: "Premium",
-            scheduledPlan,
+            scheduledPlan: null,
             hasPaystackCustomer: true,
             hasPaystackSubscription: true,
             currentPriceAmount: 99.0,
@@ -274,72 +273,59 @@ test.describe("@smoke", () => {
         });
       });
 
-      await ownerPage.route("**/api/account/subscriptions/schedule-downgrade", async (route) => {
-        scheduledPlan = "Standard";
-        await route.fulfill({ status: 200, contentType: "application/json", json: {} });
-      });
-
       await ownerPage.goto("/account/billing/subscription");
 
       const premiumCard = ownerPage.locator(".grid > div").filter({ hasText: "Premium" }).first();
       await expect(premiumCard.getByRole("button", { name: "Current plan" })).toBeDisabled();
 
       const standardCard = ownerPage.locator(".grid > div").filter({ hasText: "Standard" }).first();
-      await standardCard.getByRole("button", { name: "Downgrade" }).click();
+      await expect(standardCard.getByRole("button", { name: "Not available" })).toBeDisabled();
 
-      await expect(ownerPage.getByRole("alertdialog")).toBeVisible();
-      await expect(ownerPage.getByText("Downgrade to Standard")).toBeVisible();
-      await expect(ownerPage.getByText("Your plan will be downgraded to Standard")).toBeVisible();
-    })();
-
-    await step("Confirm downgrade & verify scheduled downgrade toast")(async () => {
-      await ownerPage.getByRole("button", { name: "Confirm downgrade" }).click();
-
-      await expectToastMessage(context, "Your downgrade has been scheduled.");
-      await ownerPage.unroute("**/api/account/subscriptions/schedule-downgrade");
+      const basisCard = ownerPage.locator(".grid > div").filter({ hasText: "Basis" }).first();
+      await expect(basisCard.getByRole("button", { name: "Cancel subscription" })).toBeVisible();
       await ownerPage.unroute("**/api/account/subscriptions/current");
     })();
 
     // === CANCEL SUBSCRIPTION ===
-    await step("Mock Standard subscription & click Downgrade on Basis card & verify cancel confirmation dialog")(
-      async () => {
-        let cancelAtPeriodEnd = false;
-        await ownerPage.route("**/api/account/subscriptions/current", async (route) => {
-          await route.fulfill({
-            status: 200,
-            contentType: "application/json",
-            json: {
-              id: "sub_mock",
-              plan: "Standard",
-              scheduledPlan: null,
-              hasPaystackCustomer: true,
-              hasPaystackSubscription: true,
-              currentPriceAmount: 29.0,
-              currentPriceCurrency: "ZAR",
-              currentPeriodEnd: "2026-03-24T00:00:00Z",
-              cancelAtPeriodEnd,
-              isPaymentFailed: false,
-              paymentMethod: null,
-              billingInfo: null,
-              hasPendingPaystackEvents: false
-            }
-          });
+    await step(
+      "Mock Standard subscription & click Cancel subscription on Basis card & verify cancel confirmation dialog"
+    )(async () => {
+      let cancelAtPeriodEnd = false;
+      await ownerPage.route("**/api/account/subscriptions/current", async (route) => {
+        await route.fulfill({
+          status: 200,
+          contentType: "application/json",
+          json: {
+            id: "sub_mock",
+            plan: "Standard",
+            scheduledPlan: null,
+            hasPaystackCustomer: true,
+            hasPaystackSubscription: true,
+            currentPriceAmount: 29.0,
+            currentPriceCurrency: "ZAR",
+            currentPeriodEnd: "2026-03-24T00:00:00Z",
+            cancelAtPeriodEnd,
+            isPaymentFailed: false,
+            paymentMethod: null,
+            billingInfo: null,
+            hasPendingPaystackEvents: false
+          }
         });
+      });
 
-        await ownerPage.route("**/api/account/subscriptions/cancel", async (route) => {
-          cancelAtPeriodEnd = true;
-          await route.fulfill({ status: 200, contentType: "application/json", json: {} });
-        });
+      await ownerPage.route("**/api/account/subscriptions/cancel", async (route) => {
+        cancelAtPeriodEnd = true;
+        await route.fulfill({ status: 200, contentType: "application/json", json: {} });
+      });
 
-        await ownerPage.goto("/account/billing/subscription");
+      await ownerPage.goto("/account/billing/subscription");
 
-        const basisCard = ownerPage.locator(".grid > div").filter({ hasText: "Basis" }).first();
-        await basisCard.getByRole("button", { name: "Downgrade" }).click();
+      const basisCard = ownerPage.locator(".grid > div").filter({ hasText: "Basis" }).first();
+      await basisCard.getByRole("button", { name: "Cancel subscription" }).click();
 
-        await expect(ownerPage.getByRole("alertdialog")).toBeVisible();
-        await expect(ownerPage.getByText("will switch to the free plan")).toBeVisible();
-      }
-    )();
+      await expect(ownerPage.getByRole("alertdialog")).toBeVisible();
+      await expect(ownerPage.getByText("will switch to the free plan")).toBeVisible();
+    })();
 
     await step("Select cancellation reason & confirm & verify subscription cancelled toast")(async () => {
       await ownerPage.getByRole("radio", { name: "No longer needed" }).click();
@@ -555,17 +541,15 @@ test.describe("@comprehensive", () => {
    *
    * Tests subscription features not covered by the smoke test:
    * - Tab navigation between Billing and Subscription pages
-   * - Scheduled downgrade banner on billing page with Cancel downgrade dialog
+   * - Scheduled downgrade state is ignored on billing page
    * - Edit billing info dialog with form fields and Tax ID display
    * - Payment history with refunded transaction and credit note link
    * - Empty payment history state
    * - Billing info display with full address details
    */
-  test("should handle tab navigation, scheduled downgrade banner, billing info editing, and payment history edge cases", async ({
+  test("should handle tab navigation, ignored scheduled downgrade state, billing info editing, and payment history edge cases", async ({
     ownerPage
   }) => {
-    const context = createTestContext(ownerPage);
-
     // === TAB NAVIGATION ===
     await step("Mock active subscription & navigate to billing page & verify tab navigation to Subscription")(
       async () => {
@@ -722,9 +706,8 @@ test.describe("@comprehensive", () => {
       await ownerPage.unroute("**/api/account/subscriptions/current");
     })();
 
-    // === SCHEDULED DOWNGRADE BANNER ON OVERVIEW ===
-    await step("Mock scheduled downgrade state & verify downgrade banner with cancel button on overview")(async () => {
-      let scheduledPlan: string | null = "Standard";
+    // === SCHEDULED DOWNGRADE STATE IGNORED ON OVERVIEW ===
+    await step("Mock scheduled downgrade state & verify no downgrade banner on overview")(async () => {
       await ownerPage.route("**/api/account/subscriptions/current", async (route) => {
         await route.fulfill({
           status: 200,
@@ -732,7 +715,7 @@ test.describe("@comprehensive", () => {
           json: {
             id: "sub_mock",
             plan: "Premium",
-            scheduledPlan,
+            scheduledPlan: "Standard",
             hasPaystackCustomer: true,
             hasPaystackSubscription: true,
             currentPriceAmount: 99.0,
@@ -755,26 +738,10 @@ test.describe("@comprehensive", () => {
         });
       });
 
-      await ownerPage.route("**/api/account/subscriptions/cancel-downgrade", async (route) => {
-        scheduledPlan = null;
-        await route.fulfill({ status: 200, contentType: "application/json", json: {} });
-      });
-
       await ownerPage.goto("/account/billing");
 
-      await expect(ownerPage.getByText("will be downgraded to Standard")).toBeVisible();
-      await expect(ownerPage.getByRole("button", { name: "Cancel downgrade" })).toBeVisible();
-    })();
-
-    await step("Click Cancel downgrade & confirm dialog & verify downgrade cancelled toast")(async () => {
-      await ownerPage.getByRole("button", { name: "Cancel downgrade" }).click();
-
-      await expect(ownerPage.getByRole("alertdialog")).toBeVisible();
-      await expect(ownerPage.getByText("Cancel scheduled downgrade")).toBeVisible();
-      await ownerPage.getByRole("alertdialog").getByRole("button", { name: "Cancel downgrade" }).click();
-
-      await expectToastMessage(context, "Your scheduled downgrade has been cancelled.");
-      await ownerPage.unroute("**/api/account/subscriptions/cancel-downgrade");
+      await expect(ownerPage.getByText("will be downgraded to Standard")).not.toBeVisible();
+      await expect(ownerPage.getByRole("button", { name: "Cancel downgrade" })).not.toBeVisible();
       await ownerPage.unroute("**/api/account/subscriptions/current");
       await ownerPage.unroute("**/api/account/billing/payment-history**");
     })();

@@ -35,16 +35,13 @@ export function InitialPlanSelection({
             formattedPrice={getFormattedPrice(plan, plans)}
             currentPlan={currentPlan}
             cancelAtPeriodEnd={false}
-            scheduledPlan={null}
             isPaystackConfigured={isPaystackConfigured}
             onSubscribe={onSubscribe}
             onUpgrade={() => {}}
             onDowngrade={() => {}}
             onReactivate={() => {}}
-            onCancelDowngrade={() => {}}
             isPending={false}
             pendingPlan={null}
-            isCancelDowngradePending={false}
           />
         ))}
       </div>

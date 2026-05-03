@@ -3,10 +3,8 @@ import { t } from "@lingui/core/macro";
 import type { components } from "@/shared/lib/api/api.generated";
 import type { CancellationReason, SubscriptionPlan } from "@/shared/lib/api/client";
 
-import { CancelDowngradeDialog } from "./CancelDowngradeDialog";
 import { CancelSubscriptionDialog } from "./CancelSubscriptionDialog";
 import { CheckoutDialog } from "./CheckoutDialog";
-import { DowngradeConfirmationDialog } from "./DowngradeConfirmationDialog";
 import { EditBillingInfoDialog } from "./EditBillingInfoDialog";
 import { ReactivateConfirmationDialog } from "./ReactivateConfirmationDialog";
 import { SubscribeConfirmationDialog } from "./SubscribeConfirmationDialog";
@@ -34,17 +32,6 @@ interface SubscriptionDialogsProps {
   isSubscribePending: boolean;
   subscribeTarget: SubscriptionPlan;
 
-  isDowngradeDialogOpen: boolean;
-  setIsDowngradeDialogOpen: (open: boolean) => void;
-  onDowngradeConfirm: () => void;
-  isDowngradePending: boolean;
-  downgradeTarget: SubscriptionPlan;
-
-  scheduledPlan: SubscriptionPlan | null;
-  isCancelDowngradeDialogOpen: boolean;
-  setIsCancelDowngradeDialogOpen: (open: boolean) => void;
-  onCancelDowngradeConfirm: () => void;
-  isCancelDowngradePending: boolean;
   currentPlan: SubscriptionPlan;
 
   isReactivateDialogOpen: boolean;
@@ -80,16 +67,6 @@ export function SubscriptionDialogs({
   onSubscribeConfirm,
   isSubscribePending,
   subscribeTarget,
-  isDowngradeDialogOpen,
-  setIsDowngradeDialogOpen,
-  onDowngradeConfirm,
-  isDowngradePending,
-  downgradeTarget,
-  scheduledPlan,
-  isCancelDowngradeDialogOpen,
-  setIsCancelDowngradeDialogOpen,
-  onCancelDowngradeConfirm,
-  isCancelDowngradePending,
   currentPlan,
   isReactivateDialogOpen,
   setIsReactivateDialogOpen,
@@ -134,27 +111,6 @@ export function SubscriptionDialogs({
         billingInfo={billingInfo}
         paymentMethod={paymentMethod}
       />
-
-      <DowngradeConfirmationDialog
-        isOpen={isDowngradeDialogOpen}
-        onOpenChange={setIsDowngradeDialogOpen}
-        onConfirm={onDowngradeConfirm}
-        isPending={isDowngradePending}
-        targetPlan={downgradeTarget}
-        currentPeriodEnd={currentPeriodEnd}
-      />
-
-      {scheduledPlan && (
-        <CancelDowngradeDialog
-          isOpen={isCancelDowngradeDialogOpen}
-          onOpenChange={setIsCancelDowngradeDialogOpen}
-          onConfirm={onCancelDowngradeConfirm}
-          isPending={isCancelDowngradePending}
-          currentPlan={currentPlan}
-          scheduledPlan={scheduledPlan}
-          currentPeriodEnd={currentPeriodEnd}
-        />
-      )}
 
       <ReactivateConfirmationDialog
         isOpen={isReactivateDialogOpen}

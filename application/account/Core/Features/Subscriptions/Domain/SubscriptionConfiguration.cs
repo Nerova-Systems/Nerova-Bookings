@@ -21,6 +21,18 @@ public sealed class SubscriptionConfiguration : IEntityTypeConfiguration<Subscri
         builder.MapStronglyTypedNullableId<Subscription, PaystackCustomerId, string>(s => s.PaystackCustomerId);
         builder.MapStronglyTypedNullableId<Subscription, PaystackSubscriptionId, string>(s => s.PaystackSubscriptionId);
 
+        builder.Property(s => s.Plan)
+            .HasConversion(
+                v => v.ToString(),
+                v => v == "Trial" ? SubscriptionPlan.Basis : Enum.Parse<SubscriptionPlan>(v)
+            );
+
+        builder.Property(s => s.ScheduledPlan)
+            .HasConversion(
+                v => v.HasValue ? v.Value.ToString() : null,
+                v => v == null || v == "Trial" ? null : Enum.Parse<SubscriptionPlan>(v)
+            );
+
         builder.Property(s => s.CurrentPriceAmount).HasPrecision(18, 2);
 
         builder.Property(s => s.PaymentTransactions)

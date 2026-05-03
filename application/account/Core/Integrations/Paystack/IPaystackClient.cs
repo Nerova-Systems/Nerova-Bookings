@@ -14,10 +14,6 @@ public interface IPaystackClient
 
     Task<UpgradeSubscriptionResult?> UpgradeSubscriptionAsync(PaystackSubscriptionId paystackSubscriptionId, SubscriptionPlan newPlan, CancellationToken cancellationToken);
 
-    Task<bool> ScheduleDowngradeAsync(PaystackSubscriptionId paystackSubscriptionId, SubscriptionPlan newPlan, CancellationToken cancellationToken);
-
-    Task<bool> CancelScheduledDowngradeAsync(PaystackSubscriptionId paystackSubscriptionId, CancellationToken cancellationToken);
-
     Task<bool> CancelSubscriptionAtPeriodEndAsync(PaystackSubscriptionId paystackSubscriptionId, CancellationReason reason, string? feedback, CancellationToken cancellationToken);
 
     Task<bool> ReactivateSubscriptionAsync(PaystackSubscriptionId paystackSubscriptionId, CancellationToken cancellationToken);

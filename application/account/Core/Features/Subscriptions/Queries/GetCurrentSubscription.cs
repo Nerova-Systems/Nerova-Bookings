@@ -37,7 +37,7 @@ public sealed class GetCurrentSubscriptionHandler(ISubscriptionRepository subscr
         return new SubscriptionResponse(
             subscription.Id,
             subscription.Plan,
-            subscription.ScheduledPlan,
+            null,
             subscription.PaystackCustomerId is not null,
             subscription.PaystackSubscriptionId is not null,
             subscription.CurrentPriceAmount,

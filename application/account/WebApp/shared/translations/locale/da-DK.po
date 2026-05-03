@@ -598,12 +598,6 @@ msgstr "Kan du ikke finde din kode?"
 msgid "Cancel"
 msgstr "Annuller"
 
-msgid "Cancel downgrade"
-msgstr "Annuller nedgradering"
-
-msgid "Cancel scheduled downgrade"
-msgstr "Annuller planlagt nedgradering"
-
 msgid "Cancel subscription"
 msgstr "Opsig abonnement"
 
@@ -664,11 +658,6 @@ msgstr "Skift zoomniveau"
 
 msgid "Changes published"
 msgstr "Ændringer udgivet"
-
-#. placeholder {0}: getPlanLabel(scheduledPlan)
-#. placeholder {1}: getFormattedPrice(scheduledPlan, plans)
-msgid "Changing to {0} {1} on {formattedPeriodEndLong}"
-msgstr "Skifter til {0} {1} den {formattedPeriodEndLong}"
 
 msgid "Charts"
 msgstr "Diagrammer"
@@ -786,9 +775,6 @@ msgstr ""
 
 msgid "Confirm action"
 msgstr "Bekræft handling"
-
-msgid "Confirm downgrade"
-msgstr "Bekræft nedgradering"
 
 msgid "Connect Google Calendar"
 msgstr ""
@@ -1063,12 +1049,6 @@ msgstr "Har du ikke en konto? <0>Opret en</0>"
 
 msgid "Done"
 msgstr "Udført"
-
-msgid "Downgrade"
-msgstr "Nedgrader"
-
-msgid "Downgrade to {planName}"
-msgstr "Nedgrader til {planName}"
 
 msgid "Drag-and-drop or click to browse. Previews use AspectRatio to keep thumbnails aligned."
 msgstr "Træk og slip, eller klik for at vælge. Previews bruger AspectRatio for at holde miniaturer justerede."
@@ -1493,9 +1473,6 @@ msgstr "Lige nu"
 msgid "Kbd"
 msgstr "Kbd"
 
-msgid "Keep downgrade"
-msgstr "Behold nedgradering"
-
 msgid "Keep subscription"
 msgstr "Behold abonnement"
 
@@ -1846,6 +1823,9 @@ msgstr "Ingen brugere fundet"
 
 msgid "None"
 msgstr "Ingen"
+
+msgid "Not available"
+msgstr ""
 
 msgid "Not yet"
 msgstr "Ikke endnu"
@@ -3208,9 +3188,6 @@ msgstr "Dine ændringer udgives og er synlige for alle teammedlemmer med det sam
 msgid "Your data stays in the Azure region you select at signup"
 msgstr "Dine data forbliver i den Azure region du vælger ved tilmelding"
 
-msgid "Your downgrade has been scheduled."
-msgstr "Din nedgradering er blevet planlagt."
-
 msgid "Your email address cannot be changed. An owner must delete your account and reinvite you with the new email address."
 msgstr "Din e-mailadresse kan ikke ændres. En ejer skal slette din konto og invitere dig igen med den nye e-mailadresse."
 
@@ -3226,17 +3203,8 @@ msgstr "Dit personlige kogebogsbibliotek."
 msgid "Your plan has been upgraded."
 msgstr "Dit abonnement er blevet opgraderet."
 
-msgid "Your plan will be downgraded to {planName} at the end of your current billing period on {formattedDate}. You will keep your current plan features until then."
-msgstr "Din plan vil blive nedgraderet til {planName} ved udgangen af din nuværende faktureringsperiode den {formattedDate}. Du beholder dine nuværende planfunktioner indtil da."
-
-msgid "Your plan will be downgraded to {planName} at the end of your current billing period. You will keep your current plan features until then."
-msgstr "Din plan vil blive nedgraderet til {planName} ved udgangen af din nuværende faktureringsperiode. Du beholder dine nuværende planfunktioner indtil da."
-
 msgid "Your profile has been verified"
 msgstr ""
-
-msgid "Your scheduled downgrade has been cancelled."
-msgstr "Din planlagte nedgradering er blevet afbrudt."
 
 msgid "Your session has expired."
 msgstr "Din session er udløbet."
@@ -3256,25 +3224,11 @@ msgstr "Dit abonnement er blevet opsagt."
 msgid "Your subscription has been reactivated."
 msgstr "Din opsigelse er blevet fortrudt."
 
-msgid "Your subscription is scheduled to downgrade from {currentPlanName} to {scheduledPlanName} on {formattedDate}. If you cancel the downgrade, you will stay on the {currentPlanName} plan."
-msgstr "Dit abonnement er planlagt til at blive nedgraderet fra {currentPlanName} til {scheduledPlanName} den {formattedDate}. Hvis du afbryder nedgraderingen, forbliver du på {currentPlanName}-planen."
-
-msgid "Your subscription is scheduled to downgrade from {currentPlanName} to {scheduledPlanName}. If you cancel the downgrade, you will stay on the {currentPlanName} plan."
-msgstr "Dit abonnement er planlagt til at blive nedgraderet fra {currentPlanName} til {scheduledPlanName}. Hvis du afbryder nedgraderingen, forbliver du på {currentPlanName}-planen."
-
 msgid "Your subscription may take a moment to appear."
 msgstr ""
 
 msgid "Your subscription will be cancelled at the end of the current billing period. After that, your account will switch to the free plan."
 msgstr "Dit abonnement vil blive opsagt ved udgangen af den nuværende faktureringsperiode. Herefter skifter din konto til den gratis plan."
-
-#. placeholder {0}: getPlanLabel(scheduledPlan)
-msgid "Your subscription will be downgraded to {0} at the end of the current billing period."
-msgstr "Dit abonnement vil blive nedgraderet til {0} ved udgangen af den nuværende faktureringsperiode."
-
-#. placeholder {0}: getPlanLabel(scheduledPlan)
-msgid "Your subscription will be downgraded to {0} on {formattedPeriodEnd}."
-msgstr "Dit abonnement vil blive nedgraderet til {0} den {formattedPeriodEnd}."
 
 msgid "Your subscription will remain active until {formattedDate}. After that, your account will switch to the free plan."
 msgstr "Dit abonnement forbliver aktivt indtil {formattedDate}. Herefter skifter din konto til den gratis plan."

@@ -162,18 +162,6 @@ public sealed class PaystackClient(IHttpClientFactory httpClientFactory, IConfig
         return new UpgradeSubscriptionResult(null, null);
     }
 
-    public Task<bool> ScheduleDowngradeAsync(PaystackSubscriptionId paystackSubscriptionId, SubscriptionPlan newPlan, CancellationToken cancellationToken)
-    {
-        logger.LogWarning("Paystack does not support scheduled subscription downgrades through the public API. Subscription '{SubscriptionId}' was not changed.", paystackSubscriptionId);
-        return Task.FromResult(false);
-    }
-
-    public Task<bool> CancelScheduledDowngradeAsync(PaystackSubscriptionId paystackSubscriptionId, CancellationToken cancellationToken)
-    {
-        logger.LogWarning("Paystack does not support cancelling scheduled downgrades because scheduled downgrades are not created. Subscription '{SubscriptionId}' was not changed.", paystackSubscriptionId);
-        return Task.FromResult(false);
-    }
-
     public async Task<bool> CancelSubscriptionAtPeriodEndAsync(PaystackSubscriptionId paystackSubscriptionId, CancellationReason reason, string? feedback, CancellationToken cancellationToken)
     {
         var subscription = await FetchSubscriptionAsync(paystackSubscriptionId, cancellationToken);

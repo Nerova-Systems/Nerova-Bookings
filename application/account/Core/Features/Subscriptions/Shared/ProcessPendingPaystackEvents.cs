@@ -95,9 +95,6 @@ public sealed class ProcessPendingPaystackEvents(
         var subscriptionCreated = subscription.PaystackSubscriptionId is null && paystackState?.PaystackSubscriptionId is not null;
         var subscriptionRenewed = subscription.CurrentPeriodEnd is not null && paystackState?.CurrentPeriodEnd is not null && paystackState.CurrentPeriodEnd > subscription.CurrentPeriodEnd;
         var subscriptionUpgraded = !subscriptionCreated && paystackState is not null && paystackState.Plan != subscription.Plan && paystackState.Plan.IsUpgradeFrom(subscription.Plan);
-        var downgradeScheduled = subscription.ScheduledPlan is null && paystackState?.ScheduledPlan is not null;
-        var downgradeCancelled = subscription.ScheduledPlan is not null && paystackState?.ScheduledPlan is null && paystackState is not null && paystackState.Plan == subscription.Plan;
-        var subscriptionDowngraded = subscription.ScheduledPlan is not null && paystackState?.ScheduledPlan is null && paystackState is not null && paystackState.Plan != subscription.Plan && subscription.Plan.IsUpgradeFrom(paystackState.Plan);
         var subscriptionCancelled = !subscription.CancelAtPeriodEnd && paystackState?.CancelAtPeriodEnd == true;
         var subscriptionReactivated = subscription.CancelAtPeriodEnd && paystackState?.CancelAtPeriodEnd == false;
         var subscriptionExpired = subscription.PaystackSubscriptionId is not null && paystackState is null && subscription is { CancelAtPeriodEnd: true, FirstPaymentFailedAt: null };
@@ -157,32 +154,6 @@ public sealed class ProcessPendingPaystackEvents(
         if (subscriptionUpgraded)
         {
             events.CollectEvent(new SubscriptionUpgraded(subscription.Id, previousPlan, subscription.Plan, daysOnCurrentPlan, previousPriceAmount!.Value, subscription.CurrentPriceAmount!.Value, subscription.CurrentPriceAmount!.Value - previousPriceAmount.Value, subscription.CurrentPriceCurrency!));
-        }
-
-        if (downgradeScheduled)
-        {
-            subscription.SetScheduledPlan(paystackState!.ScheduledPlan);
-            var daysUntilDowngrade = subscription.CurrentPeriodEnd is not null ? (int)(subscription.CurrentPeriodEnd.Value - now).TotalDays : (int?)null;
-            var priceCatalog = await paystackClient.GetPriceCatalogAsync(cancellationToken);
-            var scheduledPlanPrice = priceCatalog.Single(p => p.Plan == subscription.ScheduledPlan!.Value).UnitAmount;
-            events.CollectEvent(new SubscriptionDowngradeScheduled(subscription.Id, subscription.Plan, subscription.ScheduledPlan!.Value, daysUntilDowngrade, subscription.CurrentPriceAmount!.Value, scheduledPlanPrice - subscription.CurrentPriceAmount!.Value, subscription.CurrentPriceCurrency!));
-        }
-
-        if (downgradeCancelled)
-        {
-            var previousScheduledPlan = subscription.ScheduledPlan;
-            var daysSinceDowngradeScheduled = (int)(now - (subscription.ModifiedAt ?? subscription.CreatedAt)).TotalDays;
-            subscription.SetScheduledPlan(paystackState!.ScheduledPlan);
-            var daysUntilDowngrade = subscription.CurrentPeriodEnd is not null ? (int)(subscription.CurrentPeriodEnd.Value - now).TotalDays : (int?)null;
-            var priceCatalog = await paystackClient.GetPriceCatalogAsync(cancellationToken);
-            var scheduledPlanPrice = priceCatalog.Single(p => p.Plan == previousScheduledPlan!.Value).UnitAmount;
-            events.CollectEvent(new SubscriptionDowngradeCancelled(subscription.Id, subscription.Plan, previousScheduledPlan!.Value, daysUntilDowngrade, daysSinceDowngradeScheduled, subscription.CurrentPriceAmount!.Value, subscription.CurrentPriceAmount!.Value - scheduledPlanPrice, subscription.CurrentPriceCurrency!));
-        }
-
-        if (subscriptionDowngraded)
-        {
-            subscription.SetScheduledPlan(paystackState!.ScheduledPlan);
-            events.CollectEvent(new SubscriptionDowngraded(subscription.Id, previousPlan, subscription.Plan, daysOnCurrentPlan, previousPriceAmount!.Value, subscription.CurrentPriceAmount!.Value, subscription.CurrentPriceAmount!.Value - previousPriceAmount.Value, subscription.CurrentPriceCurrency!));
         }
 
         if (subscriptionCancelled)

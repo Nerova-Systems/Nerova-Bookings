@@ -37,4 +37,24 @@ public sealed class GetCurrentSubscriptionTests : EndpointBaseTest<AccountDbCont
         result.CurrentPriceAmount.Should().Be(29.99m);
         result.CurrentPriceCurrency.Should().Be("ZAR");
     }
+
+    [Fact]
+    public async Task GetCurrentSubscription_WhenLegacyTrialPlanExists_ShouldReturnBasis()
+    {
+        // Arrange
+        Connection.Update("subscriptions", "tenant_id", DatabaseSeeder.Tenant1.Id.Value, [
+                ("plan", "Trial"),
+                ("scheduled_plan", "Trial")
+            ]
+        );
+
+        // Act
+        var response = await AuthenticatedOwnerHttpClient.GetAsync("/api/account/subscriptions/current");
+
+        // Assert
+        response.ShouldBeSuccessfulGetRequest();
+        var result = await response.Content.ReadFromJsonAsync<SubscriptionResponse>();
+        result!.Plan.Should().Be(SubscriptionPlan.Basis);
+        result.ScheduledPlan.Should().BeNull();
+    }
 }

@@ -600,12 +600,6 @@ msgstr "Can't find your code?"
 msgid "Cancel"
 msgstr "Cancel"
 
-msgid "Cancel downgrade"
-msgstr "Cancel downgrade"
-
-msgid "Cancel scheduled downgrade"
-msgstr "Cancel scheduled downgrade"
-
 msgid "Cancel subscription"
 msgstr "Cancel subscription"
 
@@ -666,11 +660,6 @@ msgstr "Change zoom level"
 
 msgid "Changes published"
 msgstr "Changes published"
-
-#. placeholder {0}: getPlanLabel(scheduledPlan)
-#. placeholder {1}: getFormattedPrice(scheduledPlan, plans)
-msgid "Changing to {0} {1} on {formattedPeriodEndLong}"
-msgstr "Changing to {0} {1} on {formattedPeriodEndLong}"
 
 msgid "Charts"
 msgstr "Charts"
@@ -788,9 +777,6 @@ msgstr "Configure how your event types interact with your calendars"
 
 msgid "Confirm action"
 msgstr "Confirm action"
-
-msgid "Confirm downgrade"
-msgstr "Confirm downgrade"
 
 msgid "Connect Google Calendar"
 msgstr "Connect Google Calendar"
@@ -1065,12 +1051,6 @@ msgstr "Don't have an account? <0>Create one</0>"
 
 msgid "Done"
 msgstr "Done"
-
-msgid "Downgrade"
-msgstr "Downgrade"
-
-msgid "Downgrade to {planName}"
-msgstr "Downgrade to {planName}"
 
 msgid "Drag-and-drop or click to browse. Previews use AspectRatio to keep thumbnails aligned."
 msgstr "Drag-and-drop or click to browse. Previews use AspectRatio to keep thumbnails aligned."
@@ -1495,9 +1475,6 @@ msgstr "Just now"
 msgid "Kbd"
 msgstr "Kbd"
 
-msgid "Keep downgrade"
-msgstr "Keep downgrade"
-
 msgid "Keep subscription"
 msgstr "Keep subscription"
 
@@ -1848,6 +1825,9 @@ msgstr "No users found"
 
 msgid "None"
 msgstr "None"
+
+msgid "Not available"
+msgstr "Not available"
 
 msgid "Not yet"
 msgstr "Not yet"
@@ -3210,9 +3190,6 @@ msgstr "Your changes will be published and visible to all team members immediate
 msgid "Your data stays in the Azure region you select at signup"
 msgstr "Your data stays in the Azure region you select at signup"
 
-msgid "Your downgrade has been scheduled."
-msgstr "Your downgrade has been scheduled."
-
 msgid "Your email address cannot be changed. An owner must delete your account and reinvite you with the new email address."
 msgstr "Your email address cannot be changed. An owner must delete your account and reinvite you with the new email address."
 
@@ -3228,17 +3205,8 @@ msgstr "Your personal cookbook library."
 msgid "Your plan has been upgraded."
 msgstr "Your plan has been upgraded."
 
-msgid "Your plan will be downgraded to {planName} at the end of your current billing period on {formattedDate}. You will keep your current plan features until then."
-msgstr "Your plan will be downgraded to {planName} at the end of your current billing period on {formattedDate}. You will keep your current plan features until then."
-
-msgid "Your plan will be downgraded to {planName} at the end of your current billing period. You will keep your current plan features until then."
-msgstr "Your plan will be downgraded to {planName} at the end of your current billing period. You will keep your current plan features until then."
-
 msgid "Your profile has been verified"
 msgstr "Your profile has been verified"
-
-msgid "Your scheduled downgrade has been cancelled."
-msgstr "Your scheduled downgrade has been cancelled."
 
 msgid "Your session has expired."
 msgstr "Your session has expired."
@@ -3258,25 +3226,11 @@ msgstr "Your subscription has been cancelled."
 msgid "Your subscription has been reactivated."
 msgstr "Your subscription has been reactivated."
 
-msgid "Your subscription is scheduled to downgrade from {currentPlanName} to {scheduledPlanName} on {formattedDate}. If you cancel the downgrade, you will stay on the {currentPlanName} plan."
-msgstr "Your subscription is scheduled to downgrade from {currentPlanName} to {scheduledPlanName} on {formattedDate}. If you cancel the downgrade, you will stay on the {currentPlanName} plan."
-
-msgid "Your subscription is scheduled to downgrade from {currentPlanName} to {scheduledPlanName}. If you cancel the downgrade, you will stay on the {currentPlanName} plan."
-msgstr "Your subscription is scheduled to downgrade from {currentPlanName} to {scheduledPlanName}. If you cancel the downgrade, you will stay on the {currentPlanName} plan."
-
 msgid "Your subscription may take a moment to appear."
 msgstr "Your subscription may take a moment to appear."
 
 msgid "Your subscription will be cancelled at the end of the current billing period. After that, your account will switch to the free plan."
 msgstr "Your subscription will be cancelled at the end of the current billing period. After that, your account will switch to the free plan."
-
-#. placeholder {0}: getPlanLabel(scheduledPlan)
-msgid "Your subscription will be downgraded to {0} at the end of the current billing period."
-msgstr "Your subscription will be downgraded to {0} at the end of the current billing period."
-
-#. placeholder {0}: getPlanLabel(scheduledPlan)
-msgid "Your subscription will be downgraded to {0} on {formattedPeriodEnd}."
-msgstr "Your subscription will be downgraded to {0} on {formattedPeriodEnd}."
 
 msgid "Your subscription will remain active until {formattedDate}. After that, your account will switch to the free plan."
 msgstr "Your subscription will remain active until {formattedDate}. After that, your account will switch to the free plan."

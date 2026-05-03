@@ -92,18 +92,6 @@ public sealed class MockPaystackClient(IConfiguration configuration, TimeProvide
         return Task.FromResult<UpgradeSubscriptionResult?>(new UpgradeSubscriptionResult(null, null));
     }
 
-    public Task<bool> ScheduleDowngradeAsync(PaystackSubscriptionId paystackSubscriptionId, SubscriptionPlan newPlan, CancellationToken cancellationToken)
-    {
-        EnsureEnabled();
-        return Task.FromResult(true);
-    }
-
-    public Task<bool> CancelScheduledDowngradeAsync(PaystackSubscriptionId paystackSubscriptionId, CancellationToken cancellationToken)
-    {
-        EnsureEnabled();
-        return Task.FromResult(true);
-    }
-
     public Task<bool> CancelSubscriptionAtPeriodEndAsync(PaystackSubscriptionId paystackSubscriptionId, CancellationReason reason, string? feedback, CancellationToken cancellationToken)
     {
         EnsureEnabled();

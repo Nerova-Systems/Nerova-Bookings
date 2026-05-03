@@ -10,16 +10,13 @@ interface PlanCardGridProps {
   plans: PlanPriceItem[] | undefined;
   currentPlan: SubscriptionPlan;
   cancelAtPeriodEnd: boolean;
-  scheduledPlan: SubscriptionPlan | null;
   isPaystackConfigured: boolean;
   onSubscribe: (plan: SubscriptionPlan) => void;
   onUpgrade: (plan: SubscriptionPlan) => void;
   onDowngrade: (plan: SubscriptionPlan) => void;
   onReactivate: () => void;
-  onCancelDowngrade: () => void;
   isPending: boolean;
   pendingPlan: SubscriptionPlan | null;
-  isCancelDowngradePending: boolean;
   currentPriceAmount: number | null | undefined;
   currentPriceCurrency: string | null | undefined;
 }
@@ -28,16 +25,13 @@ export function PlanCardGrid({
   plans,
   currentPlan,
   cancelAtPeriodEnd,
-  scheduledPlan,
   isPaystackConfigured,
   onSubscribe,
   onUpgrade,
   onDowngrade,
   onReactivate,
-  onCancelDowngrade,
   isPending,
   pendingPlan,
-  isCancelDowngradePending,
   currentPriceAmount,
   currentPriceCurrency
 }: Readonly<PlanCardGridProps>) {
@@ -53,16 +47,13 @@ export function PlanCardGrid({
             formattedPrice={getFormattedPrice(plan, plans)}
             currentPlan={currentPlan}
             cancelAtPeriodEnd={cancelAtPeriodEnd}
-            scheduledPlan={scheduledPlan}
             isPaystackConfigured={isPaystackConfigured}
             onSubscribe={onSubscribe}
             onUpgrade={onUpgrade}
             onDowngrade={onDowngrade}
             onReactivate={onReactivate}
-            onCancelDowngrade={onCancelDowngrade}
             isPending={isPending}
             pendingPlan={pendingPlan}
-            isCancelDowngradePending={isCancelDowngradePending}
             currentPriceAmount={currentPriceAmount}
             currentPriceCurrency={currentPriceCurrency}
             catalogUnitAmount={getCatalogUnitAmount(plan, plans)}

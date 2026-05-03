@@ -38,41 +38,6 @@ export function CancellationBanner({
   );
 }
 
-interface DowngradeBannerProps {
-  scheduledPlan: SubscriptionPlan;
-  formattedPeriodEnd: string | null;
-  onCancelDowngrade?: () => void;
-}
-
-export function DowngradeBanner({
-  scheduledPlan,
-  formattedPeriodEnd,
-  onCancelDowngrade
-}: Readonly<DowngradeBannerProps>) {
-  return (
-    <div className="mb-6 flex items-center justify-between gap-3 rounded-lg border border-border bg-muted/50 p-4 text-sm text-muted-foreground">
-      <div className="flex items-center gap-3">
-        <AlertTriangleIcon className="size-4 shrink-0" />
-        {formattedPeriodEnd ? (
-          <Trans>
-            Your subscription will be downgraded to {getPlanLabel(scheduledPlan)} on {formattedPeriodEnd}.
-          </Trans>
-        ) : (
-          <Trans>
-            Your subscription will be downgraded to {getPlanLabel(scheduledPlan)} at the end of the current billing
-            period.
-          </Trans>
-        )}
-      </div>
-      {onCancelDowngrade && (
-        <Button size="sm" className="shrink-0" onClick={onCancelDowngrade}>
-          <Trans>Cancel downgrade</Trans>
-        </Button>
-      )}
-    </div>
-  );
-}
-
 export function PaystackNotConfiguredBanner() {
   return (
     <div className="mb-6 flex items-center gap-3 rounded-lg border border-border bg-muted/50 p-4 text-sm text-muted-foreground">

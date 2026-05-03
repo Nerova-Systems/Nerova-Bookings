@@ -81,6 +81,25 @@ public sealed class GetTenantsForUserTests : EndpointBaseTest<AccountDbContext>
     }
 
     [Fact]
+    public async Task GetTenants_WhenLegacyTrialPlanExists_ShouldReturnTenant()
+    {
+        // Arrange
+        Connection.Update("tenants", "id", DatabaseSeeder.Tenant1.Id.Value, [
+                ("plan", "Trial")
+            ]
+        );
+
+        // Act
+        var response = await AuthenticatedMemberHttpClient.GetAsync("/api/account/tenants");
+
+        // Assert
+        response.ShouldBeSuccessfulGetRequest();
+        var result = await response.Content.ReadFromJsonAsync<GetTenantsForUserResponse>();
+        result.Should().NotBeNull();
+        result.Tenants.Should().ContainSingle(t => t.TenantId == DatabaseSeeder.Tenant1.Id);
+    }
+
+    [Fact]
     public async Task GetTenants_Unauthenticated_ReturnsUnauthorized()
     {
         // Act

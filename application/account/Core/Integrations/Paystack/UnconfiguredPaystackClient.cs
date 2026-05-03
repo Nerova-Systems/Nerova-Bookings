@@ -34,18 +34,6 @@ public sealed class UnconfiguredPaystackClient(ILogger<UnconfiguredPaystackClien
         return Task.FromResult<UpgradeSubscriptionResult?>(null);
     }
 
-    public Task<bool> ScheduleDowngradeAsync(PaystackSubscriptionId paystackSubscriptionId, SubscriptionPlan newPlan, CancellationToken cancellationToken)
-    {
-        logger.LogWarning("Paystack is not configured. Cannot schedule downgrade for subscription '{SubscriptionId}'", paystackSubscriptionId);
-        return Task.FromResult(false);
-    }
-
-    public Task<bool> CancelScheduledDowngradeAsync(PaystackSubscriptionId paystackSubscriptionId, CancellationToken cancellationToken)
-    {
-        logger.LogWarning("Paystack is not configured. Cannot cancel scheduled downgrade for subscription '{SubscriptionId}'", paystackSubscriptionId);
-        return Task.FromResult(false);
-    }
-
     public Task<bool> CancelSubscriptionAtPeriodEndAsync(PaystackSubscriptionId paystackSubscriptionId, CancellationReason reason, string? feedback, CancellationToken cancellationToken)
     {
         logger.LogWarning("Paystack is not configured. Cannot cancel subscription '{SubscriptionId}'", paystackSubscriptionId);
