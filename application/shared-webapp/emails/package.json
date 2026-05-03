@@ -1,0 +1,34 @@
+{
+  "name": "@repo/emails",
+  "version": "0.0.0",
+  "private": true,
+  "license": "MIT",
+  "type": "module",
+  "exports": {
+    ".": "./index.ts",
+    "./components/*": "./components/*",
+    "./helpers/*": "./helpers/*",
+    "./build/*": "./build/*",
+    "./lingui.factory": "./lingui.factory.ts",
+    "./package.json": "./package.json"
+  },
+  "scripts": {
+    "build": "tsx ./build/build.ts",
+    "check": "oxfmt --check && oxlint",
+    "dev": "email dev --dir showcase --port 4000",
+    "format": "oxfmt && (oxlint --fix || true)",
+    "lint": "oxlint --deny-warnings"
+  },
+  "dependencies": {
+    "@react-email/components": "1.0.12",
+    "@react-email/render": "2.0.8",
+    "react-email": "6.0.5"
+  },
+  "devDependencies": {
+    "@repo/build": "*",
+    "@repo/config": "*",
+    "@repo/infrastructure": "*",
+    "handlebars": "4.7.9",
+    "tsx": "4.21.0"
+  }
+}

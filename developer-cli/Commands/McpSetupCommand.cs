@@ -98,9 +98,9 @@ public class McpSetupCommand : Command
                 Environment.Exit(1);
             }
 
-            if (picks.ContainsKey(environmentName))
+            if (picks.TryGetValue(environmentName, out var existingPick))
             {
-                AnsiConsole.MarkupLine($"[red]ERROR:[/] Multiple resources map to environment [yellow]{environmentName}[/]: '{picks[environmentName].Name}' and '{resource.Name}'.");
+                AnsiConsole.MarkupLine($"[red]ERROR:[/] Multiple resources map to environment [yellow]{environmentName}[/]: '{existingPick.Name}' and '{resource.Name}'.");
                 AnsiConsole.MarkupLine("[grey]Pick at most one resource per environment.[/]");
                 Environment.Exit(1);
             }

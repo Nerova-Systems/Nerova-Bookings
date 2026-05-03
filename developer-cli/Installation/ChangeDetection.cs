@@ -72,8 +72,12 @@ public static class ChangeDetection
         // Re-execute the original command against the freshly published binary so the user does not
         // have to retype it. Environment.ProcessPath now resolves to the new binary on disk; the old
         // executable's inode is still mapped into this process and gets cleaned up on exit.
-        var startInfo = new ProcessStartInfo { FileName = Environment.ProcessPath!, UseShellExecute = false };
-        startInfo.Environment[Configuration.SkipChangeDetectionEnvironmentVariable] = "1";
+        var startInfo = new ProcessStartInfo
+        {
+            FileName = Environment.ProcessPath!,
+            UseShellExecute = false,
+            Environment = { [Configuration.SkipChangeDetectionEnvironmentVariable] = "1" }
+        };
         foreach (var arg in Environment.GetCommandLineArgs().Skip(1))
         {
             startInfo.ArgumentList.Add(arg);
@@ -243,7 +247,7 @@ public static class ChangeDetection
                 // System.IO.Pipelines". POSIX rename(2) atomically swaps paths; the running process
                 // keeps its inode.
                 tempPublishFolder = Path.Combine(Configuration.PublishFolder, $".publish-{Configuration.AliasName}.tmp");
-                if (Directory.Exists(tempPublishFolder)) Directory.Delete(tempPublishFolder, recursive: true);
+                if (Directory.Exists(tempPublishFolder)) Directory.Delete(tempPublishFolder, true);
 
                 RunQuietlyOrExit(
                     $"dotnet publish DeveloperCli.csproj -o \"{tempPublishFolder}\"",
@@ -267,10 +271,10 @@ public static class ChangeDetection
                     if (string.Equals(fileName, configFileName, StringComparison.OrdinalIgnoreCase)) continue;
 
                     var targetPath = Path.Combine(Configuration.PublishFolder, fileName);
-                    File.Move(publishedFile, targetPath, overwrite: true);
+                    File.Move(publishedFile, targetPath, true);
                 }
 
-                Directory.Delete(tempPublishFolder, recursive: true);
+                Directory.Delete(tempPublishFolder, true);
                 tempPublishFolder = null;
             }
 
@@ -283,7 +287,7 @@ public static class ChangeDetection
         }
         catch (Exception e)
         {
-            AnsiConsole.MarkupLine($"[red]Failed to publish new CLI. Please run 'dotnet run' to fix.[/]");
+            AnsiConsole.MarkupLine("[red]Failed to publish new CLI. Please run 'dotnet run' to fix.[/]");
             AnsiConsole.WriteException(e);
             Environment.Exit(0);
         }
@@ -298,8 +302,14 @@ public static class ChangeDetection
 
             if (tempPublishFolder is not null && Directory.Exists(tempPublishFolder))
             {
-                try { Directory.Delete(tempPublishFolder, recursive: true); }
-                catch { /* best-effort cleanup */ }
+                try
+                {
+                    Directory.Delete(tempPublishFolder, true);
+                }
+                catch
+                {
+                    /* best-effort cleanup */
+                }
             }
         }
     }

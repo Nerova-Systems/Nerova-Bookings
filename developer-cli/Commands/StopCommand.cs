@@ -144,10 +144,10 @@ public sealed class StopCommand : Command
 
     private static void StopStack(StoppableStack stack)
     {
-        if (!stack.IsExternal && stack.BasePort.HasValue)
+        if (stack is { IsExternal: false, BasePort: { } basePort })
         {
             // PlatformPlatform worktree: use the existing path-and-port-aware stop logic.
-            RunCommand.StopAspire(stack.SourceFolder, new PortAllocation(stack.BasePort.Value));
+            RunCommand.StopAspire(stack.SourceFolder, new PortAllocation(basePort));
         }
         else if (stack.AspirePid is not null)
         {
