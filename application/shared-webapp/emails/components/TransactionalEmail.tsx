@@ -18,7 +18,7 @@ const FONT_STACK = "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helve
 //    html element extends to the viewport. Without an explicit html bg the page area outside the
 //    body shows whatever's behind it (white iframe chrome in webmail, a stark white margin in some
 //    desktop clients). Setting html bg ensures the visible page is uniform light gray (light mode)
-//    or dark navy (dark mode) regardless of how the client wraps the message.
+//    or neutral dark gray (dark mode) regardless of how the client wraps the message.
 //
 // 2. Dark-mode opt-in. React Email's Tailwind plugin emits non-standard nested syntax for dark:
 //    variants ( .foo { @media ... { ... } } ) which some email clients misinterpret as
@@ -26,33 +26,37 @@ const FONT_STACK = "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helve
 //    industry-standard pattern and degrades gracefully — clients that strip <style> blocks or
 //    don't honor the media query render the inline light defaults.
 //
+// Dark palette is neutral gray (matching Gmail/Outlook native dark mode) so downstream forks aren't
+// coupled to a brand-specific navy. The body bg #1f1f1f is the same value Gmail/Outlook clients use
+// when they auto-invert light themes, so the rendered email blends naturally with the client chrome.
+//
 // React Email's <Body> renders <body><table><tr><td style={...}>{children}</td></tr></table></body>.
 // The body's `style` prop (background, color, font) lands on the INNER td — which has no class — so
 // the dark-mode rules below also target ".email-body td" to flip that inner cell. Without this, the
-// outer <body> recolors to dark navy via @media but the inner td stays inline-light, leaving a
-// visible light strip inside a dark frame (and unstyled text inside still inherits the inline dark
-// color). The same descendant selector also flips the default text color for unclassed elements
-// (paragraphs, divs) inside the card — they inherit the td's color.
+// outer <body> recolors via @media but the inner td stays inline-light, leaving a visible light
+// strip inside a dark frame (and unstyled text inside still inherits the inline dark color). The
+// same descendant selector also flips the default text color for unclassed elements (paragraphs,
+// divs) inside the card — they inherit the td's color.
 const EMAIL_STYLES = `
 html { background-color: #f4f4f5; }
 @media (prefers-color-scheme: dark) {
-  html { background-color: #0b1220 !important; }
-  .email-body { background-color: #0b1220 !important; }
-  .email-body td { background-color: #0b1220 !important; color: #e2e8f0 !important; }
-  .email-card { background-color: #1e293b !important; color: #e2e8f0 !important; }
-  .email-card td { background-color: #1e293b !important; color: #e2e8f0 !important; }
-  .email-heading { color: #f1f5f9 !important; }
-  .email-otp-box { background-color: #0f172a !important; }
-  .email-otp-box td { background-color: #0f172a !important; }
-  .email-otp-text { color: #f1f5f9 !important; }
-  .email-muted { color: #94a3b8 !important; }
-  .email-link { color: #e2e8f0 !important; }
-  .email-button-default { background-color: #f1f5f9 !important; color: #0f172a !important; }
-  .email-progressbar-track { background-color: #334155 !important; }
-  .email-progressbar-fill { background-color: #f1f5f9 !important; }
-  .email-separator { border-top-color: #334155 !important; }
-  .email-alert-default { border-color: #334155 !important; background-color: #1e293b !important; color: #e2e8f0 !important; }
-  .email-avatar { background-color: #334155 !important; color: #cbd5e1 !important; }
+  html { background-color: #1f1f1f !important; }
+  .email-body { background-color: #1f1f1f !important; }
+  .email-body td { background-color: #1f1f1f !important; color: #e5e5e5 !important; }
+  .email-card { background-color: #2a2a2a !important; color: #e5e5e5 !important; }
+  .email-card td { background-color: #2a2a2a !important; color: #e5e5e5 !important; }
+  .email-heading { color: #fafafa !important; }
+  .email-otp-box { background-color: #171717 !important; }
+  .email-otp-box td { background-color: #171717 !important; }
+  .email-otp-text { color: #fafafa !important; }
+  .email-muted { color: #a3a3a3 !important; }
+  .email-link { color: #e5e5e5 !important; }
+  .email-button-default { background-color: #fafafa !important; color: #171717 !important; }
+  .email-progressbar-track { background-color: #404040 !important; }
+  .email-progressbar-fill { background-color: #fafafa !important; }
+  .email-separator { border-top-color: #404040 !important; }
+  .email-alert-default { border-color: #404040 !important; background-color: #2a2a2a !important; color: #e5e5e5 !important; }
+  .email-avatar { background-color: #404040 !important; color: #d4d4d4 !important; }
 }
 `.trim();
 
