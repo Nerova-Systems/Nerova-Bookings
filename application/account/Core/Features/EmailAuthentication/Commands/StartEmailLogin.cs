@@ -54,8 +54,13 @@ public sealed class StartEmailLoginHandler(
 
         if (user is null)
         {
-            await emailClient.SendAsync(command.Email.ToLower(), "Unknown user tried to login to PlatformPlatform",
-                UnknownUserEmailTemplate.Replace("{email}", command.Email),
+            await emailClient.SendAsync(
+                new EmailMessage(
+                    command.Email.ToLower(),
+                    "Unknown user tried to login to PlatformPlatform",
+                    UnknownUserEmailTemplate.Replace("{email}", command.Email),
+                    string.Empty
+                ),
                 cancellationToken
             );
 

@@ -7,6 +7,7 @@ using Account.Features.Users.Domain;
 using FluentAssertions;
 using NSubstitute;
 using SharedKernel.Domain;
+using SharedKernel.Integrations.Email;
 using SharedKernel.Tests;
 using SharedKernel.Tests.Persistence;
 using SharedKernel.Validation;
@@ -60,9 +61,11 @@ public sealed class InviteUserTests : EndpointBaseTest<AccountDbContext>
         TelemetryEventsCollectorSpy.AreAllEventsDispatched.Should().BeTrue();
 
         await EmailClient.Received(1).SendAsync(
-            email.ToLower(),
-            $"You have been invited to join {tenantName} on PlatformPlatform",
-            Arg.Is<string>(s => s.Contains("To gain access")),
+            Arg.Is<EmailMessage>(m =>
+                m.Recipient == email.ToLower() &&
+                m.Subject == $"You have been invited to join {tenantName} on PlatformPlatform" &&
+                m.HtmlBody.Contains("To gain access")
+            ),
             Arg.Any<CancellationToken>()
         );
     }

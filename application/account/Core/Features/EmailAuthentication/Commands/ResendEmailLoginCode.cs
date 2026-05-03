@@ -52,13 +52,18 @@ public sealed class ResendEmailLoginCodeHandler(
         var secondsSinceStarted = (timeProvider.GetUtcNow() - emailLogin.CreatedAt).TotalSeconds;
         events.CollectEvent(new EmailLoginCodeResend((int)secondsSinceStarted));
 
-        await emailClient.SendAsync(emailLogin.Email, "Your verification code (resend)",
-            $"""
-             <h1 style="text-align:center;font-family=sans-serif;font-size:20px">Here's your new verification code</h1>
-             <p style="text-align:center;font-family=sans-serif;font-size:16px">We're sending this code again as you requested.</p>
-             <p style="text-align:center;font-family=sans-serif;font-size:40px;background:#f5f4f5">{oneTimePassword}</p>
-             <p style="text-align:center;font-family=sans-serif;font-size:14px;color:#666">This code will expire in a few minutes.</p>
-             """,
+        await emailClient.SendAsync(
+            new EmailMessage(
+                emailLogin.Email,
+                "Your verification code (resend)",
+                $"""
+                 <h1 style="text-align:center;font-family=sans-serif;font-size:20px">Here's your new verification code</h1>
+                 <p style="text-align:center;font-family=sans-serif;font-size:16px">We're sending this code again as you requested.</p>
+                 <p style="text-align:center;font-family=sans-serif;font-size:40px;background:#f5f4f5">{oneTimePassword}</p>
+                 <p style="text-align:center;font-family=sans-serif;font-size:14px;color:#666">This code will expire in a few minutes.</p>
+                 """,
+                string.Empty
+            ),
             cancellationToken
         );
 

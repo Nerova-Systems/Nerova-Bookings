@@ -77,15 +77,20 @@ public sealed class InviteUserHandler(
         var loginPath = $"{Environment.GetEnvironmentVariable(SinglePageAppConfiguration.PublicUrlKey)}/login";
         var inviter = $"{executionContext.UserInfo.FirstName} {executionContext.UserInfo.LastName}".Trim();
         inviter = inviter.Length > 0 ? inviter : executionContext.UserInfo.Email;
-        await emailClient.SendAsync(command.Email.ToLower(), $"You have been invited to join {tenant.Name} on PlatformPlatform",
-            $"""
-             <h1 style="text-align:center;font-family:sans-serif;font-size:20px">
-               <b>{inviter}</b> invited you to join PlatformPlatform.
-             </h1>
-             <p style="text-align:center;font-family:sans-serif;font-size:16px">
-               To gain access, <a href="{loginPath}" target="blank">go to this page in your open browser</a> and login using <b>{command.Email.ToLower()}</b>.
-             </p>
-             """,
+        await emailClient.SendAsync(
+            new EmailMessage(
+                command.Email.ToLower(),
+                $"You have been invited to join {tenant.Name} on PlatformPlatform",
+                $"""
+                 <h1 style="text-align:center;font-family:sans-serif;font-size:20px">
+                   <b>{inviter}</b> invited you to join PlatformPlatform.
+                 </h1>
+                 <p style="text-align:center;font-family:sans-serif;font-size:16px">
+                   To gain access, <a href="{loginPath}" target="blank">go to this page in your open browser</a> and login using <b>{command.Email.ToLower()}</b>.
+                 </p>
+                 """,
+                string.Empty
+            ),
             cancellationToken
         );
 

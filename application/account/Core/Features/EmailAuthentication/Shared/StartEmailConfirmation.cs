@@ -42,7 +42,7 @@ public sealed class StartEmailConfirmation(
         await emailLoginRepository.AddAsync(emailLogin, cancellationToken);
 
         var htmlContent = emailBody.Replace("{oneTimePassword}", oneTimePassword);
-        await emailClient.SendAsync(emailLogin.Email, emailSubject, htmlContent, cancellationToken);
+        await emailClient.SendAsync(new EmailMessage(emailLogin.Email, emailSubject, htmlContent, string.Empty), cancellationToken);
 
         return emailLogin.Id;
     }
