@@ -49,10 +49,13 @@ function createHttpMiddleware() {
 
       // Send the user's preferred locale so the backend can localize responses (notably
       // transactional emails for anonymous flows where there is no User row to read Locale from).
-      // The backend's UseRequestLocalization middleware honors Accept-Language out of the box.
+      // Uses a custom X-Locale header rather than Accept-Language because the Fetch spec lists
+      // Accept-Language as a forbidden request header, so Firefox and WebKit silently drop it
+      // when set from JavaScript (only Chromium currently allows it). The backend's
+      // UseRequestLocalization middleware is configured with a matching X-Locale culture provider.
       const preferredLocale = localStorage.getItem(preferredLocaleKey);
       if (preferredLocale) {
-        request.headers.set("Accept-Language", preferredLocale);
+        request.headers.set("X-Locale", preferredLocale);
       }
 
       // Handle request timeout with AbortController

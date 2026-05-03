@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.AspNetCore.Localization;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using NJsonSchema.Generation;
@@ -27,7 +28,35 @@ public static class ApiDependencyConfiguration
 {
     private const string LocalhostCorsPolicyName = "LocalhostCorsPolicy";
 
+    // The frontend cannot set Accept-Language from JavaScript: the Fetch spec lists it as a
+    // forbidden request header, so Firefox and WebKit silently drop it (only Chromium currently
+    // allows it). The SPA's API client therefore sends X-Locale instead, and this culture provider
+    // is registered ahead of the default Accept-Language provider so the JS-supplied locale wins
+    // when present. Accept-Language remains as a fallback for legitimate browser-driven requests
+    // (e.g. the initial HTML navigation, server-rendered fallbacks).
+    private const string LocaleHeaderName = "X-Locale";
+
     private static readonly string LocalhostUrl = Environment.GetEnvironmentVariable(SinglePageAppConfiguration.PublicUrlKey)!;
+
+    private static RequestLocalizationOptions BuildApiRequestLocalizationOptions()
+    {
+        var options = new RequestLocalizationOptions()
+            .SetDefaultCulture(SinglePageAppConfiguration.SupportedLocalizations[0])
+            .AddSupportedCultures(SinglePageAppConfiguration.SupportedLocalizations)
+            .AddSupportedUICultures(SinglePageAppConfiguration.SupportedLocalizations);
+
+        options.RequestCultureProviders.Insert(0, new CustomRequestCultureProvider(context =>
+                {
+                    var headerValue = context.Request.Headers[LocaleHeaderName].ToString();
+                    if (string.IsNullOrWhiteSpace(headerValue)) return Task.FromResult<ProviderCultureResult?>(null);
+
+                    return Task.FromResult<ProviderCultureResult?>(new ProviderCultureResult(headerValue));
+                }
+            )
+        );
+
+        return options;
+    }
 
     extension(WebApplicationBuilder builder)
     {
@@ -145,7 +174,7 @@ public static class ApiDependencyConfiguration
             app
                 .UseForwardedHeaders()
                 .UseRouting() // Explicit so it runs AFTER UseForwardedHeaders. Without this, ASP.NET Core inserts UseRouting at the start of the pipeline and the SPA-host fallback (UseHostScopedSinglePageAppFallback's RequireHost) sees the unrewritten Host header forwarded by YARP (the destination address), not the public host promoted from X-Forwarded-Host.
-                .UseRequestLocalization(SinglePageAppConfiguration.SupportedLocalizations) // Must run before endpoint execution so handlers can read the request culture via IExecutionContext.UserInfo.Locale (e.g. anonymous email senders that have no User row to read Locale from). The SPA fallback's UseRequestLocalization at the end of the pipeline only covers HTML fallback requests, not API endpoints.
+                .UseRequestLocalization(BuildApiRequestLocalizationOptions()) // Must run before endpoint execution so handlers can read the request culture via IExecutionContext.UserInfo.Locale (e.g. anonymous email senders that have no User row to read Locale from). The SPA fallback's UseRequestLocalization at the end of the pipeline only covers HTML fallback requests, not API endpoints.
                 .UseMockEasyAuthInDevelopment() // Dev-only: serve /.auth/login/aad and inject X-MS-CLIENT-PRINCIPAL-* headers from a dev cookie. Must run before authentication.
                 .UseAuthentication() // Must be above TelemetryContextMiddleware to ensure authentication happens first
                 .UseAuthorization()

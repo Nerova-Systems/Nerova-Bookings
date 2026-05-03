@@ -52,17 +52,18 @@ public sealed class StartEmailSignupTests : EndpointBaseTest<AccountDbContext>
     }
 
     [Fact]
-    public async Task StartSignup_WhenAcceptLanguageIsDanish_ShouldSendDanishConfirmationEmail()
+    public async Task StartSignup_WhenLocaleHeaderIsDanish_ShouldSendDanishConfirmationEmail()
     {
         // Anonymous signups have no User row to read Locale from, so the email locale comes from
-        // the request culture - which UseRequestLocalization populates from the Accept-Language
-        // header. Verifies the full chain: header → IRequestCultureFeature → UserInfo.Locale →
-        // EmailTemplateBase.Locale → dist/StartSignup.da-DK.html.
+        // the request culture - which UseRequestLocalization populates from the X-Locale header
+        // sent by the SPA's API client (Accept-Language is a forbidden header in browsers, so the
+        // SPA cannot set it from JS). Verifies the full chain: header → IRequestCultureFeature →
+        // UserInfo.Locale → EmailTemplateBase.Locale → dist/StartSignup.da-DK.html.
         // Arrange
         var email = Faker.Internet.UniqueEmail();
         var command = new StartEmailSignupCommand(email);
-        AnonymousHttpClient.DefaultRequestHeaders.AcceptLanguage.Clear();
-        AnonymousHttpClient.DefaultRequestHeaders.AcceptLanguage.ParseAdd("da-DK");
+        AnonymousHttpClient.DefaultRequestHeaders.Remove("X-Locale");
+        AnonymousHttpClient.DefaultRequestHeaders.Add("X-Locale", "da-DK");
 
         // Act
         var response = await AnonymousHttpClient.PostAsJsonAsync("/api/account/authentication/email/signup/start", command);
