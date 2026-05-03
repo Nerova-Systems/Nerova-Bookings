@@ -160,12 +160,17 @@ public class RunCommand : Command
 
     internal static void StopAspire()
     {
-        AnsiConsole.MarkupLine("[blue]Stopping Aspire AppHost and all related services...[/]");
+        StopAspire(Configuration.SourceCodeFolder, Ports);
+    }
+
+    internal static void StopAspire(string sourceCodeFolder, PortAllocation portAllocation)
+    {
+        AnsiConsole.MarkupLine($"[blue]Stopping Aspire AppHost on base port {portAllocation.BasePort}...[/]");
 
         if (Configuration.IsWindows)
         {
             // Kill dotnet and rsbuild-node processes listening on any port in the explicit allocation.
-            var allPorts = Ports.AllPorts;
+            var allPorts = portAllocation.AllPorts;
             var netstatOutput = ProcessHelper.StartProcess("""cmd /c "netstat -ano | findstr LISTENING" """, redirectOutput: true, exitOnError: false);
             if (!string.IsNullOrWhiteSpace(netstatOutput))
             {
@@ -204,9 +209,9 @@ public class RunCommand : Command
         }
         else
         {
-            // Find AppHost processes for this project, then kill each one and all its children
+            // Find AppHost processes for this worktree, then kill each one and all its children
             // (children include Aspire infrastructure: dcp, dcpproc, Aspire.Dashboard, etc.)
-            foreach (var processId in FindAppHostProcesses())
+            foreach (var processId in FindAppHostProcesses(sourceCodeFolder))
             {
                 KillProcessTree(processId);
             }
@@ -215,10 +220,10 @@ public class RunCommand : Command
         // Wait a moment for processes to terminate
         Thread.Sleep(TimeSpan.FromSeconds(2));
 
-        AnsiConsole.MarkupLine("[green]Aspire AppHost stopped successfully.[/]");
+        AnsiConsole.MarkupLine("[green]Aspire AppHost stopped.[/]");
     }
 
-    private static string[] FindAppHostProcesses()
+    private static string[] FindAppHostProcesses(string sourceCodeFolder)
     {
         var output = ProcessHelper.StartProcess("pgrep -f dotnet.*AppHost", redirectOutput: true, exitOnError: false);
         if (string.IsNullOrWhiteSpace(output)) return [];
@@ -228,14 +233,20 @@ public class RunCommand : Command
             .Where(processId =>
                 {
                     var commandLine = ProcessHelper.StartProcess($"ps -p {processId} -o args=", redirectOutput: true, exitOnError: false).Trim();
-                    return commandLine.Contains(Configuration.SourceCodeFolder, StringComparison.OrdinalIgnoreCase);
+                    return commandLine.Contains(sourceCodeFolder, StringComparison.OrdinalIgnoreCase);
                 }
             )
             .ToArray();
     }
 
-    private static void KillProcessTree(string processId)
+    internal static void KillProcessTree(string processId)
     {
+        if (Configuration.IsWindows)
+        {
+            ProcessHelper.StartProcess($"taskkill /T /F /PID {processId}", redirectOutput: true, exitOnError: false);
+            return;
+        }
+
         var children = ProcessHelper.StartProcess($"pgrep -P {processId}", redirectOutput: true, exitOnError: false);
         if (!string.IsNullOrWhiteSpace(children))
         {

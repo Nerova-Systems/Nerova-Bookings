@@ -17,6 +17,7 @@ import { useLoginVerification } from "./-shared/useLoginVerification";
 
 export const Route = createFileRoute("/login/verify")({
   staticData: { trackingTitle: "Verify login" },
+  beforeLoad: () => ({ disableAuthSync: true }),
   validateSearch: (search) => {
     const returnPath = search.returnPath as string | undefined;
     return {

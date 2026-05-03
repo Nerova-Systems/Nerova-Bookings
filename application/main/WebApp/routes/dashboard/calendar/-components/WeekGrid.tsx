@@ -1,6 +1,14 @@
 import type { Appointment, AvailabilityRule, BusinessClosure, CalendarBlock } from "@/shared/lib/appointmentsApi";
 
-import { buildDays, buildHourRange, eventClasses, formatHour, gmtLabel, hourGrid, minutesFromStart } from "./weekGridModel";
+import {
+  buildDays,
+  buildHourRange,
+  eventClasses,
+  formatHour,
+  gmtLabel,
+  hourGrid,
+  minutesFromStart
+} from "./weekGridModel";
 
 export function WeekGrid({
   appointments,
@@ -52,16 +60,22 @@ export function WeekGrid({
                 </span>
               </div>
             ))}
-            <div className="relative border-r border-white/10 bg-[#161616]" style={{ minHeight: `${range.totalMinutes}px` }}>
-            {hours.map((hour) => (
-              <div
-                key={hour}
-                className="absolute right-3 font-medium text-[#a9a9a9]"
-                style={{ top: `${(((hour - range.startHour) * 60) / range.totalMinutes) * 100}%`, transform: "translateY(-0.55rem)" }}
-              >
-                {formatHour(hour)}
-              </div>
-            ))}
+            <div
+              className="relative border-r border-white/10 bg-[#161616]"
+              style={{ minHeight: `${range.totalMinutes}px` }}
+            >
+              {hours.map((hour) => (
+                <div
+                  key={hour}
+                  className="absolute right-3 font-medium text-[#a9a9a9]"
+                  style={{
+                    top: `${(((hour - range.startHour) * 60) / range.totalMinutes) * 100}%`,
+                    transform: "translateY(-0.55rem)"
+                  }}
+                >
+                  {formatHour(hour)}
+                </div>
+              ))}
             </div>
             {days.map((day) => (
               <div
@@ -81,18 +95,23 @@ export function WeekGrid({
                   />
                 ))}
                 {day.closure && (
-                  <div className="absolute inset-x-1 z-20 rounded-md border border-white/10 bg-black/55 px-2 py-2 text-xs font-medium text-[#d7d7d7]" style={{ top: "0.5rem" }}>
+                  <div
+                    className="absolute inset-x-1 z-20 rounded-md border border-white/10 bg-black/55 px-2 py-2 text-xs font-medium text-[#d7d7d7]"
+                    style={{ top: "0.5rem" }}
+                  >
                     Closed - {day.closure.label}
                   </div>
                 )}
                 {!day.closure && day.bands.length === 0 && (
                   <div className="absolute inset-0 flex items-center justify-center text-xs text-[#888]">Closed</div>
                 )}
-                {day.isToday && minutesFromStart(now, range.startHour) >= 0 && minutesFromStart(now, range.startHour) <= range.totalMinutes && (
-                  <div className="absolute right-0 left-0 z-30 border-t border-red-500" style={{ top: `${nowTop}%` }}>
-                    <span className="absolute -top-[4px] -left-[4px] size-2 rounded-full bg-red-500" />
-                  </div>
-                )}
+                {day.isToday &&
+                  minutesFromStart(now, range.startHour) >= 0 &&
+                  minutesFromStart(now, range.startHour) <= range.totalMinutes && (
+                    <div className="absolute right-0 left-0 z-30 border-t border-red-500" style={{ top: `${nowTop}%` }}>
+                      <span className="absolute -top-[4px] -left-[4px] size-2 rounded-full bg-red-500" />
+                    </div>
+                  )}
                 {day.events.map((event, index) => {
                   const isSelected = event.appointmentId && event.appointmentId === selectedAppointmentId;
                   const className = `absolute right-1.5 left-1.5 overflow-hidden rounded-md border px-2 py-1.5 text-left text-[11px] leading-tight shadow-sm transition-[box-shadow,transform] ${eventClasses(event.type)} ${

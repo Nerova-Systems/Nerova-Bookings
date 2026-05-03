@@ -1266,9 +1266,6 @@ msgstr "Fixed columns"
 msgid "For detailed compliance certifications and audit reports, visit Microsoft's official resources."
 msgstr "For detailed compliance certifications and audit reports, visit Microsoft's official resources."
 
-msgid "For your protection, you have been logged out. Please log in again to continue."
-msgstr "For your protection, you have been logged out. Please log in again to continue."
-
 msgid "Forward"
 msgstr "Forward"
 
@@ -2430,9 +2427,6 @@ msgstr "Search-driven menu with grouped items and inline shortcuts. Wrap it in C
 msgid "Secondary"
 msgstr "Secondary"
 
-msgid "Security alert"
-msgstr "Security alert"
-
 msgid "Security, privacy, and compliance information"
 msgstr "Security, privacy, and compliance information"
 
@@ -3145,9 +3139,6 @@ msgstr "Warning alert"
 
 msgid "We detected a security issue with your login attempt. Please try again."
 msgstr "We detected a security issue with your login attempt. Please try again."
-
-msgid "We detected suspicious activity on your account. Someone may have attempted to take over your session."
-msgstr "We detected suspicious activity on your account. Someone may have attempted to take over your session."
 
 msgid "We will automatically mark you as unavailable for the selected holidays"
 msgstr "We will automatically mark you as unavailable for the selected holidays"

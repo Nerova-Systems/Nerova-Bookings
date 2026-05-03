@@ -41,7 +41,7 @@ public static class Configuration
             services.AddHttpClient<GravatarClient>(client =>
                 {
                     client.BaseAddress = new Uri("https://gravatar.com/");
-                    client.Timeout = TimeSpan.FromSeconds(5);
+                    client.Timeout = TimeSpan.FromSeconds(2);
                 }
             );
 

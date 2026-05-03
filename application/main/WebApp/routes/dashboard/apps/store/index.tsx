@@ -1,13 +1,14 @@
+import type { ReactNode } from "react";
+
 import { t } from "@lingui/core/macro";
 import { Button } from "@repo/ui/components/Button";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowLeftIcon, ArrowRightIcon, SearchIcon } from "lucide-react";
-import type { ReactNode } from "react";
 import { useEffect, useMemo, useState } from "react";
 
-import { AppLogo } from "../-components/AppLogo";
-import { STORE_CATEGORIES } from "../-components/appCategories";
 import { filterApps, type AppCatalogItem } from "../-components/appCatalog";
+import { STORE_CATEGORIES } from "../-components/appCategories";
+import { AppLogo } from "../-components/AppLogo";
 
 export const Route = createFileRoute("/dashboard/apps/store/")({
   staticData: { trackingTitle: "App store" },
@@ -102,7 +103,9 @@ function StoreAppCard({ app }: { app: AppCatalogItem }) {
       <div className="mt-5 flex flex-wrap gap-2">
         <span className="rounded-full bg-white/10 px-2.5 py-1 text-xs font-medium text-white/80">{app.category}</span>
         {app.installState === "installed" && (
-          <span className="rounded-full bg-emerald-400/15 px-2.5 py-1 text-xs font-medium text-emerald-100">Installed</span>
+          <span className="rounded-full bg-emerald-400/15 px-2.5 py-1 text-xs font-medium text-emerald-100">
+            Installed
+          </span>
         )}
       </div>
     </Link>

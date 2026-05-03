@@ -64,9 +64,16 @@ function ApprovalPage() {
           <Info label="Client" value={approval.appointment.clientName} />
           <Info label="Location" value={approval.appointment.location} />
         </div>
-        {approval.note && <p className="mt-5 rounded-2xl border border-white/10 bg-white/[0.04] p-4 text-white/70">{approval.note}</p>}
+        {approval.note && (
+          <p className="mt-5 rounded-2xl border border-white/10 bg-white/[0.04] p-4 text-white/70">{approval.note}</p>
+        )}
         <div className="mt-8 flex flex-wrap justify-end gap-3">
-          <Button variant="outline" disabled={isPending} className="border-white/15 bg-transparent text-white hover:bg-white/[0.08]" onClick={() => respond("reject")}>
+          <Button
+            variant="outline"
+            disabled={isPending}
+            className="border-white/15 bg-transparent text-white hover:bg-white/[0.08]"
+            onClick={() => respond("reject")}
+          >
             <Trans>Reject</Trans>
           </Button>
           <Button disabled={isPending} onClick={() => respond("approve")}>
@@ -89,7 +96,12 @@ function Info({ label, value }: { label: string; value: string }) {
 }
 
 function formatWhen(start: Date, end: Date) {
-  const day = new Intl.DateTimeFormat(undefined, { weekday: "short", month: "short", day: "numeric", year: "numeric" }).format(start);
+  const day = new Intl.DateTimeFormat(undefined, {
+    weekday: "short",
+    month: "short",
+    day: "numeric",
+    year: "numeric"
+  }).format(start);
   const time = new Intl.DateTimeFormat(undefined, { hour: "numeric", minute: "2-digit" }).formatRange(start, end);
   return `${day}, ${time}`;
 }

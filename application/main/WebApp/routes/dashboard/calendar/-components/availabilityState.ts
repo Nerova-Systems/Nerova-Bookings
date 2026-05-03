@@ -26,7 +26,12 @@ export function buildInitialDays(rules: AvailabilityRule[]): DayState[] {
   });
 }
 
-export function updateDay(days: DayState[], setDays: (days: DayState[]) => void, dayIndex: number, patch: Partial<DayState>) {
+export function updateDay(
+  days: DayState[],
+  setDays: (days: DayState[]) => void,
+  dayIndex: number,
+  patch: Partial<DayState>
+) {
   setDays(days.map((day, index) => (index === dayIndex ? { ...day, ...patch } : day)));
 }
 

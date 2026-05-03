@@ -55,9 +55,7 @@ export function PhoneVerificationStep({
             onChange={(event) => onPhoneChange(formatZaPhoneInput(event.target.value))}
             className="h-14 w-full rounded-xl border border-input bg-background px-4 text-lg font-medium text-foreground transition-colors outline-none placeholder:text-muted-foreground focus:border-foreground disabled:bg-muted disabled:text-muted-foreground"
           />
-          <span className="mt-2 block text-xs text-muted-foreground">
-            Enter 10 digits, for example 082 123 4567.
-          </span>
+          <span className="mt-2 block text-xs text-muted-foreground">Enter 10 digits, for example 082 123 4567.</span>
         </label>
         <div className="flex items-end max-sm:block">
           <Button

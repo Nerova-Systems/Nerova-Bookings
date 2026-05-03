@@ -27,6 +27,7 @@ import { clearSignupState, getSignupState, setSignupState } from "./-shared/sign
 
 export const Route = createFileRoute("/signup/")({
   staticData: { trackingTitle: "Sign up" },
+  beforeLoad: () => ({ disableAuthSync: true }),
   component: function SignupRoute() {
     const { isAuthenticated } = import.meta.user_info_env;
     const { navigateToHome } = useMainNavigation();

@@ -30,12 +30,14 @@ internal sealed class GetTenantsForUserQueryHandler(
         var tenantIds = users.Select(u => u.TenantId).ToArray();
         var tenants = await tenantRepository.GetByIdsAsync(tenantIds, cancellationToken);
 
-        var tenantInfoList = tenants.Select(t =>
-            {
-                var user = users.Single(u => u.TenantId == t.Id);
-                return new TenantInfo(t.Id, t.Name, user.Id, t.Logo.Url, !user.EmailConfirmed);
-            }
-        ).ToArray();
+        var tenantInfoList = tenants
+            .OrderBy(t => t.Id)
+            .Select(t =>
+                {
+                    var user = users.Single(u => u.TenantId == t.Id);
+                    return new TenantInfo(t.Id, t.Name, user.Id, t.Logo.Url, !user.EmailConfirmed);
+                }
+            ).ToArray();
 
         return new GetTenantsForUserResponse(tenantInfoList);
     }

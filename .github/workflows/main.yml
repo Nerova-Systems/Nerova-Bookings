@@ -48,9 +48,8 @@ jobs:
       - name: Generate Version
         id: generate_version
         run: |
-          # Strip leading 0s of Hours and Minutes after midnight
-          MINUTE=$(printf "%s" $(date +"%-H%M") | sed 's/^0*//')
-          VERSION=$(date +"%Y.%-m.%-d.")$MINUTE
+          # Zero-padded so versions sort lexicographically and clock-time is unambiguous (e.g. 0904, not 94)
+          VERSION=$(date +"%Y.%m.%d.%H%M")
           echo "Generated version: $VERSION"
           echo "version=$VERSION" >> $GITHUB_OUTPUT
 
@@ -108,11 +107,11 @@ jobs:
         run: |
           if [[ "${{ vars.SONAR_PROJECT_KEY }}" == "" ]] || [[ "${{ vars.SONAR_ORGANIZATION }}" == "" ]] || [[ "${{ secrets.SONAR_TOKEN }}" == "" ]]; then
             echo "SonarCloud is not enabled. Skipping SonarCloud analysis."
-            dotnet build main/Main.slnf --no-restore /p:Version=${{ steps.generate_version.outputs.version }} &&
+            dotnet build main/Main.slnf --no-restore /p:Version=${{ steps.generate_version.outputs.version }} /p:DeploymentCommitHash=${{ github.event.pull_request.head.sha || github.sha }} /p:DeploymentGithubActionId=${{ github.run_id }} &&
             dotnet test main/Main.slnf --no-build
           else
             dotnet sonarscanner begin /k:"${{ vars.SONAR_PROJECT_KEY }}" /o:"${{ vars.SONAR_ORGANIZATION }}" /d:sonar.host.url="https://sonarcloud.io" /d:sonar.cs.dotcover.reportsPaths="coverage/dotCover.html" &&
-            dotnet build main/Main.slnf --no-restore /p:Version=${{ steps.generate_version.outputs.version }} &&
+            dotnet build main/Main.slnf --no-restore /p:Version=${{ steps.generate_version.outputs.version }} /p:DeploymentCommitHash=${{ github.event.pull_request.head.sha || github.sha }} /p:DeploymentGithubActionId=${{ github.run_id }} &&
             dotnet dotcover test main/Main.slnf --no-build --dcOutput=coverage/dotCover.html --dcReportType=HTML --dcFilters="+:Main*;+:SharedKernel;-:*.Tests;-:type=*.AppHost.*" &&
             dotnet sonarscanner end
           fi
@@ -131,8 +130,7 @@ jobs:
         if: ${{ steps.determine_deployment.outputs.deploy_staging == 'true' }}
         working-directory: application/main
         run: |
-          dotnet publish ./Api/Main.Api.csproj --no-restore --configuration Release --output ./Api/publish /p:Version=${{ steps.generate_version.outputs.version }}
-
+          dotnet publish ./Api/Main.Api.csproj --no-restore --configuration Release --output ./Api/publish /p:Version=${{ steps.generate_version.outputs.version }} /p:DeploymentCommitHash=${{ github.event.pull_request.head.sha || github.sha }} /p:DeploymentGithubActionId=${{ github.run_id }}
       - name: Save API Artifacts
         if: ${{ steps.determine_deployment.outputs.deploy_staging == 'true' }}
         uses: actions/upload-artifact@v7
@@ -144,8 +142,7 @@ jobs:
         if: ${{ steps.determine_deployment.outputs.deploy_staging == 'true' }}
         working-directory: application/main
         run: |
-          dotnet publish ./Workers/Main.Workers.csproj --no-restore --configuration Release --output ./Workers/publish /p:Version=${{ steps.generate_version.outputs.version }}
-
+          dotnet publish ./Workers/Main.Workers.csproj --no-restore --configuration Release --output ./Workers/publish /p:Version=${{ steps.generate_version.outputs.version }} /p:DeploymentCommitHash=${{ github.event.pull_request.head.sha || github.sha }} /p:DeploymentGithubActionId=${{ github.run_id }}
       - name: Save Workers Artifacts
         if: ${{ steps.determine_deployment.outputs.deploy_staging == 'true' }}
         uses: actions/upload-artifact@v7

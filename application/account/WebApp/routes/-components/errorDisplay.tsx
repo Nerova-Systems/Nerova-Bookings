@@ -16,7 +16,6 @@ export type ErrorDisplay = {
 };
 
 export const errorLabelMap: Record<string, string> = {
-  [ErrorCode.ReplayAttack]: "Security alert",
   [ErrorCode.SessionRevoked]: "Session ended",
   [ErrorCode.SessionNotFound]: "Session expired",
   [ErrorCode.SessionExpired]: "Session expired",
@@ -31,23 +30,6 @@ export const errorLabelMap: Record<string, string> = {
 
 export function getErrorDisplay(error: string): ErrorDisplay {
   switch (error) {
-    case ErrorCode.ReplayAttack:
-      return {
-        icon: <ShieldAlert className="size-10 text-destructive" />,
-        iconBackground: "bg-destructive/10",
-        title: <Trans>Security alert</Trans>,
-        message: (
-          <>
-            <Trans>
-              We detected suspicious activity on your account. Someone may have attempted to take over your session.
-            </Trans>
-            <br />
-            <Trans>For your protection, you have been logged out. Please log in again to continue.</Trans>
-          </>
-        ),
-        action: "login"
-      };
-
     case ErrorCode.SessionRevoked:
       return {
         icon: <LogOut className="size-10 text-muted-foreground" />,

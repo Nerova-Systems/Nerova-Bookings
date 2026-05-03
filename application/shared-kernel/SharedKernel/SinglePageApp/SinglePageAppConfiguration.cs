@@ -47,7 +47,11 @@ public class SinglePageAppConfiguration
         // single-SPA hosts and EF Core migration generation (where neither env vars nor overrides are set).
         PublicUrl = publicUrlOverride ?? Environment.GetEnvironmentVariable(PublicUrlKey) ?? string.Empty;
         CdnUrl = cdnUrlOverride ?? Environment.GetEnvironmentVariable(CdnUrlKey) ?? string.Empty;
-        var applicationVersion = Assembly.GetEntryAssembly()!.GetName().Version!.ToString();
+        // InformationalVersion preserves the zero-padded format ("2026.05.02.0914") that
+        // System.Version-based parsing would otherwise reduce to "2026.5.2.914".
+        var applicationVersion =
+            Assembly.GetEntryAssembly()!.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion
+            ?? Assembly.GetEntryAssembly()!.GetName().Version!.ToString();
 
         StaticRuntimeEnvironment = new Dictionary<string, string>
         {

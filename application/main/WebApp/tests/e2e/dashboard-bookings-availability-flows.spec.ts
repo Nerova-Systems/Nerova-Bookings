@@ -4,7 +4,9 @@ import { createTestContext } from "@shared/e2e/utils/test-assertions";
 import { step } from "@shared/e2e/utils/test-step-wrapper";
 
 test.describe("@smoke", () => {
-  test("should expose bookings, availability, out of office, and installed payment management", async ({ ownerPage }) => {
+  test("should expose bookings, availability, out of office, and installed payment management", async ({
+    ownerPage
+  }) => {
     createTestContext(ownerPage);
 
     await step("Redirect calendar to Bookings calendar view")(async () => {

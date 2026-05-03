@@ -2,6 +2,7 @@ import { t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
 import { TextField } from "@repo/ui/components/TextField";
 import { MailIcon } from "lucide-react";
+import { useState } from "react";
 
 import type { Schemas } from "@/shared/lib/api/client";
 
@@ -24,6 +25,14 @@ export function UserProfileFields({
   autoFocus,
   layout = "stacked"
 }: UserProfileFieldsProps) {
+  // Snapshot user once so TextField defaultValue stays stable. A later refetch (e.g. after
+  // saving the profile) would otherwise change defaultValue between renders and trigger
+  // Base UI's "default value of an uncontrolled FieldControl after being initialized" warning.
+  const [initialUser, setInitialUser] = useState(user);
+  if (initialUser === undefined && user !== undefined) {
+    setInitialUser(user);
+  }
+
   const avatarSection = (
     <UserAvatarPicker
       avatarUrl={user?.avatarUrl}
@@ -42,7 +51,7 @@ export function UserProfileFields({
           required={true}
           name="firstName"
           label={t`First name`}
-          defaultValue={user?.firstName}
+          defaultValue={initialUser?.firstName ?? ""}
           placeholder={t`E.g. Alex`}
           className="sm:flex-1"
         />
@@ -50,7 +59,7 @@ export function UserProfileFields({
           required={true}
           name="lastName"
           label={t`Last name`}
-          defaultValue={user?.lastName}
+          defaultValue={initialUser?.lastName ?? ""}
           placeholder={t`E.g. Taylor`}
           className="sm:flex-1"
         />
@@ -60,12 +69,17 @@ export function UserProfileFields({
         name="email"
         label={t`Email`}
         tooltip={t`Your email address cannot be changed. An owner must delete your account and reinvite you with the new email address.`}
-        value={user?.email}
+        value={initialUser?.email ?? ""}
         readOnly={true}
         startIcon={<MailIcon className="size-4" />}
       />
 
-      <TextField name="title" label={t`Title`} defaultValue={user?.title} placeholder={t`E.g. Software engineer`} />
+      <TextField
+        name="title"
+        label={t`Title`}
+        defaultValue={initialUser?.title ?? ""}
+        placeholder={t`E.g. Software engineer`}
+      />
     </>
   );
 

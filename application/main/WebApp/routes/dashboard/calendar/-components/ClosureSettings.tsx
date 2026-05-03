@@ -5,6 +5,7 @@ import { useState, type FormEvent } from "react";
 import { toast } from "sonner";
 
 import type { BusinessClosure } from "@/shared/lib/appointmentsApi";
+
 import { useCreateClosure, useDeleteClosure } from "@/shared/lib/availabilitySettingsApi";
 
 export function ClosureSettings({ closures }: { closures: BusinessClosure[] }) {
@@ -65,7 +66,9 @@ export function ClosureSettings({ closures }: { closures: BusinessClosure[] }) {
         </Button>
       </form>
       <div className="mt-3 max-h-52 overflow-y-auto rounded-lg border border-border">
-        {manualClosures.length === 0 && <div className="px-3 py-2 text-sm text-muted-foreground">No manual closed dates.</div>}
+        {manualClosures.length === 0 && (
+          <div className="px-3 py-2 text-sm text-muted-foreground">No manual closed dates.</div>
+        )}
         {manualClosures.map((closure) => (
           <ClosureRow key={closure.id} closure={closure} deleteClosure={deleteClosure} />
         ))}

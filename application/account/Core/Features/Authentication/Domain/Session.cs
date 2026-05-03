@@ -7,7 +7,6 @@ namespace Account.Features.Authentication.Domain;
 
 public sealed class Session : AggregateRoot<SessionId>, ITenantScopedEntity
 {
-    // Grace period must match DEFAULT_TIMEOUT in shared-webapp/infrastructure/http/httpClient.ts.
     // Allows in-flight requests using the previous token version to complete when a parallel request triggers a token refresh.
     public const int GracePeriodSeconds = 30;
 

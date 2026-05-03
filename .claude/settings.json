@@ -1,6 +1,8 @@
 {
   "enabledMcpjsonServers": [
     "aspire",
+    "azure-production",
+    "azure-staging",
     "shadcn"
   ],
   "hooks": {

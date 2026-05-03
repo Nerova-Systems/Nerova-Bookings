@@ -8,7 +8,15 @@ import {
   VideoIcon
 } from "lucide-react";
 
-export type AppCategory = "Analytics" | "AI & Automation" | "Calendar" | "Conferencing" | "CRM" | "Messaging" | "Payment" | "Other";
+export type AppCategory =
+  | "Analytics"
+  | "AI & Automation"
+  | "Calendar"
+  | "Conferencing"
+  | "CRM"
+  | "Messaging"
+  | "Payment"
+  | "Other";
 export type AppInstallState = "installed" | "available";
 
 export interface AppCatalogItem {

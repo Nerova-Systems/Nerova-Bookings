@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 import { t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
 import { TextField } from "@repo/ui/components/TextField";
+import { useState } from "react";
 
 import type { Schemas } from "@/shared/lib/api/client";
 
@@ -35,6 +36,14 @@ export function AccountFields({
   layout = "stacked",
   infoFields
 }: AccountFieldsProps) {
+  // Snapshot tenant once so TextField defaultValue stays stable. A later refetch (e.g. after
+  // saving account settings) would otherwise change defaultValue between renders and trigger
+  // Base UI's "default value of an uncontrolled FieldControl after being initialized" warning.
+  const [initialTenant, setInitialTenant] = useState(tenant);
+  if (initialTenant === undefined && tenant !== undefined) {
+    setInitialTenant(tenant);
+  }
+
   const logoSection = (
     <TenantLogoPicker
       logoUrl={tenant?.logoUrl}
@@ -52,7 +61,7 @@ export function AccountFields({
       autoFocus={autoFocus}
       required={true}
       name="name"
-      defaultValue={tenant?.name ?? ""}
+      defaultValue={initialTenant?.name ?? ""}
       disabled={isPending}
       readOnly={readOnly}
       label={t`Account name`}

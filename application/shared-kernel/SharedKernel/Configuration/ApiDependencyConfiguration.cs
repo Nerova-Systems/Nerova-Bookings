@@ -117,8 +117,12 @@ public static class ApiDependencyConfiguration
 
         private IServiceCollection AddApiExecutionContext()
         {
-            // Add the execution context service that will be used to make current user information available to the application
-            return services.AddScoped<IExecutionContext, HttpExecutionContext>();
+            // Add the execution context service that will be used to make current user information available to the application.
+            // OpenTelemetryEnricher depends on IExecutionContext, so it lives here -- AppGateway has no per-request execution
+            // context and only emits transport-level traces via AddSharedTelemetry.
+            return services
+                .AddScoped<IExecutionContext, HttpExecutionContext>()
+                .AddScoped<OpenTelemetryEnricher>();
         }
     }
 
@@ -287,7 +291,7 @@ public static class ApiDependencyConfiguration
             // This is required when running behind a reverse proxy like YARP or Azure Container Apps
             return services.Configure<ForwardedHeadersOptions>(options =>
                 {
-                    // X-Forwarded-For surfaces real upstream client IPs in App Insights / logs.
+                    // X-Forwarded-For surfaces real upstream client IPs in Application Insights / logs.
                     // X-Forwarded-Proto sets Request.Scheme so generated absolute URLs use https.
                     // X-Forwarded-Host is intentionally NOT enabled: each Azure container app
                     // registers only the SPA it serves (see Account.Api Program.cs), so endpoint

@@ -11,6 +11,10 @@ using SharedKernel.Configuration;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Wire OpenTelemetry, Azure Monitor exporter, and Application Insights so AppGateway requests,
+// dependencies, traces, and logs surface in the cluster's Application Insights workspace alongside the APIs.
+builder.AddSharedTelemetry();
+
 builder.Services
     .AddOptions<HostnamesOptions>()
     .Bind(builder.Configuration.GetSection(HostnamesOptions.SectionName))
@@ -68,6 +72,9 @@ builder.Services.AddHttpClient("Account", (sp, client) =>
         client.BaseAddress = !string.IsNullOrEmpty(productionUrl)
             ? new Uri(productionUrl)
             : new Uri($"https://localhost:{ports.AccountApi}");
+        // Allow cold-start refreshes to complete and deliver the new Set-Cookie back to the browser.
+        // The browser has no client-side timeout, so the gateway is the authoritative timeout for refresh.
+        client.Timeout = TimeSpan.FromSeconds(60);
     }
 );
 

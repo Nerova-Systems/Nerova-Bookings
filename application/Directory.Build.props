@@ -1,0 +1,10 @@
+<Project>
+
+    <!-- Bake build provenance into every assembly so deployed binaries carry their own metadata,
+         readable at runtime regardless of how or where they are run. -->
+    <ItemGroup>
+        <AssemblyMetadata Include="DeploymentCommitHash" Value="$(DeploymentCommitHash)" Condition="'$(DeploymentCommitHash)' != ''" />
+        <AssemblyMetadata Include="DeploymentGithubActionId" Value="$(DeploymentGithubActionId)" Condition="'$(DeploymentGithubActionId)' != ''" />
+    </ItemGroup>
+
+</Project>

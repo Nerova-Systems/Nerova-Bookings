@@ -1264,9 +1264,6 @@ msgstr ""
 msgid "For detailed compliance certifications and audit reports, visit Microsoft's official resources."
 msgstr "For detaljerede certificeringer og revisionsrapporter, besøg Microsofts officielle ressourcer."
 
-msgid "For your protection, you have been logged out. Please log in again to continue."
-msgstr "For din beskyttelse er du blevet logget ud. Log venligst ind igen for at fortsætte."
-
 msgid "Forward"
 msgstr ""
 
@@ -2428,9 +2425,6 @@ msgstr ""
 msgid "Secondary"
 msgstr ""
 
-msgid "Security alert"
-msgstr "Sikkerhedsadvarsel"
-
 msgid "Security, privacy, and compliance information"
 msgstr "Sikkerheds-, privatlivs- og overholdelsesoplysninger"
 
@@ -3143,9 +3137,6 @@ msgstr ""
 
 msgid "We detected a security issue with your login attempt. Please try again."
 msgstr "Vi opdagede et sikkerhedsproblem med dit loginforsøg. Prøv venligst igen."
-
-msgid "We detected suspicious activity on your account. Someone may have attempted to take over your session."
-msgstr "Vi opdagede mistænkelig aktivitet på din konto. Nogen kan have forsøgt at overtage din session."
 
 msgid "We will automatically mark you as unavailable for the selected holidays"
 msgstr ""
