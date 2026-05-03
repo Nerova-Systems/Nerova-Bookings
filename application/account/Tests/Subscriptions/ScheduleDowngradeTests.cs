@@ -13,105 +13,94 @@ namespace Account.Tests.Subscriptions;
 public sealed class ScheduleDowngradeTests : EndpointBaseTest<AccountDbContext>
 {
     [Fact]
-    public async Task ScheduleDowngrade_WhenActivePremiumAndOwner_ShouldScheduleDowngradeToStandard()
+    public async Task ScheduleDowngrade_WhenPremiumToStandard_ShouldSucceed()
     {
         // Arrange
         Connection.Update("subscriptions", "tenant_id", DatabaseSeeder.Tenant1.Id.Value, [
-                ("status", nameof(SubscriptionStatus.Active)),
                 ("plan", nameof(SubscriptionPlan.Premium)),
-                ("current_period_end", TimeProvider.System.GetUtcNow().AddDays(15))
+                ("paystack_customer_id", "CUS_test_123"),
+                ("paystack_subscription_id", "SUB_test_123"),
+                ("current_period_end", TimeProvider.GetUtcNow().AddDays(30))
             ]
         );
         var command = new ScheduleDowngradeCommand(SubscriptionPlan.Standard);
+        TelemetryEventsCollectorSpy.Reset();
 
         // Act
         var response = await AuthenticatedOwnerHttpClient.PostAsJsonAsync("/api/account/subscriptions/schedule-downgrade", command);
 
         // Assert
-        await response.ShouldBeSuccessfulPostRequest(hasLocation: false);
-        var scheduledPlan = Connection.ExecuteScalar<string?>("SELECT scheduled_plan FROM subscriptions WHERE tenant_id = @id", [new { id = DatabaseSeeder.Tenant1.Id.Value }]);
-        scheduledPlan.Should().Be(nameof(SubscriptionPlan.Standard));
-        TelemetryEventsCollectorSpy.CollectedEvents.Count.Should().Be(1);
-        TelemetryEventsCollectorSpy.CollectedEvents[0].GetType().Name.Should().Be("SubscriptionDowngradeScheduled");
+        response.EnsureSuccessStatusCode();
+
+        TelemetryEventsCollectorSpy.CollectedEvents.Should().BeEmpty();
     }
 
     [Fact]
-    public async Task ScheduleDowngrade_WhenActiveStandardAndOwner_ShouldScheduleDowngradeToStarter()
+    public async Task ScheduleDowngrade_WhenPlanNotLower_ShouldReturnBadRequest()
     {
         // Arrange
         Connection.Update("subscriptions", "tenant_id", DatabaseSeeder.Tenant1.Id.Value, [
-                ("status", nameof(SubscriptionStatus.Active)),
-                ("plan", nameof(SubscriptionPlan.Standard))
+                ("plan", nameof(SubscriptionPlan.Standard)),
+                ("paystack_customer_id", "CUS_test_123"),
+                ("paystack_subscription_id", "SUB_test_123"),
+                ("current_period_end", TimeProvider.GetUtcNow().AddDays(30))
             ]
         );
-        var command = new ScheduleDowngradeCommand(SubscriptionPlan.Starter);
+        var command = new ScheduleDowngradeCommand(SubscriptionPlan.Premium);
+        TelemetryEventsCollectorSpy.Reset();
 
         // Act
         var response = await AuthenticatedOwnerHttpClient.PostAsJsonAsync("/api/account/subscriptions/schedule-downgrade", command);
 
         // Assert
-        await response.ShouldBeSuccessfulPostRequest(hasLocation: false);
+        await response.ShouldHaveErrorStatusCode(HttpStatusCode.BadRequest, "Cannot downgrade from 'Standard' to 'Premium'. Target plan must be lower.");
+
+        TelemetryEventsCollectorSpy.AreAllEventsDispatched.Should().BeFalse();
     }
 
     [Fact]
-    public async Task ScheduleDowngrade_WhenNotActive_ShouldReturnBadRequest()
-    {
-        // Arrange — default is Trial
-        var command = new ScheduleDowngradeCommand(SubscriptionPlan.Starter);
-
-        // Act
-        var response = await AuthenticatedOwnerHttpClient.PostAsJsonAsync("/api/account/subscriptions/schedule-downgrade", command);
-
-        // Assert
-        await response.ShouldHaveErrorStatusCode(HttpStatusCode.BadRequest, "Subscription must be active to schedule a downgrade.");
-    }
-
-    [Fact]
-    public async Task ScheduleDowngrade_WhenUpgradePlanRequested_ShouldReturnBadRequest()
+    public async Task ScheduleDowngrade_WhenTargetIsBasis_ShouldReturnBadRequest()
     {
         // Arrange
         Connection.Update("subscriptions", "tenant_id", DatabaseSeeder.Tenant1.Id.Value, [
-                ("status", nameof(SubscriptionStatus.Active)),
-                ("plan", nameof(SubscriptionPlan.Starter))
+                ("plan", nameof(SubscriptionPlan.Standard)),
+                ("paystack_customer_id", "CUS_test_123"),
+                ("paystack_subscription_id", "SUB_test_123"),
+                ("current_period_end", TimeProvider.GetUtcNow().AddDays(30))
+            ]
+        );
+        var command = new ScheduleDowngradeCommand(SubscriptionPlan.Basis);
+        TelemetryEventsCollectorSpy.Reset();
+
+        // Act
+        var response = await AuthenticatedOwnerHttpClient.PostAsJsonAsync("/api/account/subscriptions/schedule-downgrade", command);
+
+        // Assert
+        await response.ShouldHaveErrorStatusCode(HttpStatusCode.BadRequest, "Cannot downgrade to the Basis plan.");
+
+        TelemetryEventsCollectorSpy.AreAllEventsDispatched.Should().BeFalse();
+    }
+
+    [Fact]
+    public async Task ScheduleDowngrade_WhenNonOwner_ShouldReturnForbidden()
+    {
+        // Arrange
+        Connection.Update("subscriptions", "tenant_id", DatabaseSeeder.Tenant1.Id.Value, [
+                ("plan", nameof(SubscriptionPlan.Premium)),
+                ("paystack_customer_id", "CUS_test_123"),
+                ("paystack_subscription_id", "SUB_test_123"),
+                ("current_period_end", TimeProvider.GetUtcNow().AddDays(30))
             ]
         );
         var command = new ScheduleDowngradeCommand(SubscriptionPlan.Standard);
-
-        // Act
-        var response = await AuthenticatedOwnerHttpClient.PostAsJsonAsync("/api/account/subscriptions/schedule-downgrade", command);
-
-        // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-    }
-
-    [Fact]
-    public async Task ScheduleDowngrade_WhenTrialPlanRequested_ShouldReturnBadRequest()
-    {
-        // Arrange
-        Connection.Update("subscriptions", "tenant_id", DatabaseSeeder.Tenant1.Id.Value, [
-                ("status", nameof(SubscriptionStatus.Active)),
-                ("plan", nameof(SubscriptionPlan.Standard))
-            ]
-        );
-        var command = new ScheduleDowngradeCommand(SubscriptionPlan.Trial);
-
-        // Act
-        var response = await AuthenticatedOwnerHttpClient.PostAsJsonAsync("/api/account/subscriptions/schedule-downgrade", command);
-
-        // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-    }
-
-    [Fact]
-    public async Task ScheduleDowngrade_WhenNotOwner_ShouldReturnForbidden()
-    {
-        // Arrange
-        var command = new ScheduleDowngradeCommand(SubscriptionPlan.Starter);
+        TelemetryEventsCollectorSpy.Reset();
 
         // Act
         var response = await AuthenticatedMemberHttpClient.PostAsJsonAsync("/api/account/subscriptions/schedule-downgrade", command);
 
         // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
+        await response.ShouldHaveErrorStatusCode(HttpStatusCode.Forbidden, "Only owners can manage subscriptions.");
+
+        TelemetryEventsCollectorSpy.AreAllEventsDispatched.Should().BeFalse();
     }
 }

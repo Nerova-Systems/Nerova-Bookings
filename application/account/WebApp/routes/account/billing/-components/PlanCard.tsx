@@ -19,7 +19,7 @@ type PlanCardProps = {
   currentPlan: SubscriptionPlan;
   cancelAtPeriodEnd: boolean;
   scheduledPlan: SubscriptionPlan | null;
-  isPaymentConfigured: boolean;
+  isPaystackConfigured: boolean;
   onSubscribe: (plan: SubscriptionPlan) => void;
   onUpgrade: (plan: SubscriptionPlan) => void;
   onDowngrade: (plan: SubscriptionPlan) => void;
@@ -40,7 +40,7 @@ export function PlanCard({
   currentPlan,
   cancelAtPeriodEnd,
   scheduledPlan,
-  isPaymentConfigured,
+  isPaystackConfigured,
   onSubscribe,
   onUpgrade,
   onDowngrade,
@@ -84,7 +84,7 @@ export function PlanCard({
             formattedPrice
           )}
         </div>
-        {taxExclusive && plan !== SubscriptionPlan.Trial && (
+        {taxExclusive && plan !== SubscriptionPlan.Basis && (
           <span className="text-sm font-normal text-muted-foreground">
             <Trans>Excl. tax</Trans>
           </span>
@@ -105,7 +105,7 @@ export function PlanCard({
           currentPlan={currentPlan}
           cancelAtPeriodEnd={cancelAtPeriodEnd}
           scheduledPlan={scheduledPlan}
-          isPaymentConfigured={isPaymentConfigured}
+          isPaystackConfigured={isPaystackConfigured}
           onSubscribe={onSubscribe}
           onUpgrade={onUpgrade}
           onDowngrade={onDowngrade}

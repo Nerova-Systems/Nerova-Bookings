@@ -1,9 +1,13 @@
+import { t } from "@lingui/core/macro";
+
 import type { components } from "@/shared/lib/api/api.generated";
 import type { CancellationReason, SubscriptionPlan } from "@/shared/lib/api/client";
 
 import { CancelDowngradeDialog } from "./CancelDowngradeDialog";
 import { CancelSubscriptionDialog } from "./CancelSubscriptionDialog";
+import { CheckoutDialog } from "./CheckoutDialog";
 import { DowngradeConfirmationDialog } from "./DowngradeConfirmationDialog";
+import { EditBillingInfoDialog } from "./EditBillingInfoDialog";
 import { ReactivateConfirmationDialog } from "./ReactivateConfirmationDialog";
 import { SubscribeConfirmationDialog } from "./SubscribeConfirmationDialog";
 import { UpgradeConfirmationDialog } from "./UpgradeConfirmationDialog";
@@ -29,8 +33,6 @@ interface SubscriptionDialogsProps {
   onSubscribeConfirm: () => void;
   isSubscribePending: boolean;
   subscribeTarget: SubscriptionPlan;
-  billingInfo: BillingInfo | null | undefined;
-  paymentMethod: PaymentMethod | null | undefined;
 
   isDowngradeDialogOpen: boolean;
   setIsDowngradeDialogOpen: (open: boolean) => void;
@@ -49,6 +51,17 @@ interface SubscriptionDialogsProps {
   setIsReactivateDialogOpen: (open: boolean) => void;
   onReactivateConfirm: () => void;
   isReactivatePending: boolean;
+
+  isEditBillingInfoOpen: boolean;
+  setIsEditBillingInfoOpen: (open: boolean) => void;
+  billingInfo: BillingInfo | null | undefined;
+  paymentMethod: PaymentMethod | null | undefined;
+  tenantName: string;
+  onBillingInfoSuccess: () => void;
+
+  isCheckoutDialogOpen: boolean;
+  setIsCheckoutDialogOpen: (open: boolean) => void;
+  checkoutPlan: SubscriptionPlan;
 }
 
 export function SubscriptionDialogs({
@@ -67,8 +80,6 @@ export function SubscriptionDialogs({
   onSubscribeConfirm,
   isSubscribePending,
   subscribeTarget,
-  billingInfo,
-  paymentMethod,
   isDowngradeDialogOpen,
   setIsDowngradeDialogOpen,
   onDowngradeConfirm,
@@ -83,7 +94,16 @@ export function SubscriptionDialogs({
   isReactivateDialogOpen,
   setIsReactivateDialogOpen,
   onReactivateConfirm,
-  isReactivatePending
+  isReactivatePending,
+  isEditBillingInfoOpen,
+  setIsEditBillingInfoOpen,
+  billingInfo,
+  paymentMethod,
+  tenantName,
+  onBillingInfoSuccess,
+  isCheckoutDialogOpen,
+  setIsCheckoutDialogOpen,
+  checkoutPlan
 }: Readonly<SubscriptionDialogsProps>) {
   return (
     <>
@@ -101,6 +121,8 @@ export function SubscriptionDialogs({
         onConfirm={onUpgradeConfirm}
         isPending={isUpgradePending}
         targetPlan={upgradeTarget}
+        billingInfo={billingInfo}
+        paymentMethod={paymentMethod}
       />
 
       <SubscribeConfirmationDialog
@@ -141,6 +163,18 @@ export function SubscriptionDialogs({
         isPending={isReactivatePending}
         currentPlan={currentPlan}
       />
+
+      <EditBillingInfoDialog
+        isOpen={isEditBillingInfoOpen}
+        onOpenChange={setIsEditBillingInfoOpen}
+        billingInfo={billingInfo}
+        tenantName={tenantName}
+        onSuccess={onBillingInfoSuccess}
+        submitLabel={t`Next`}
+        pendingLabel={t`Saving...`}
+      />
+
+      <CheckoutDialog isOpen={isCheckoutDialogOpen} onOpenChange={setIsCheckoutDialogOpen} plan={checkoutPlan} />
     </>
   );
 }

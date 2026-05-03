@@ -1,13 +1,11 @@
 import { t } from "@lingui/core/macro";
-import { toast } from "sonner";
 
-import { api, type SubscriptionPlan, SubscriptionStatus } from "@/shared/lib/api/client";
+import { api, type SubscriptionPlan } from "@/shared/lib/api/client";
 
 import type { useSubscriptionPolling } from "./useSubscriptionPolling";
 
 interface UseSubscriptionMutationsOptions {
   startPolling: ReturnType<typeof useSubscriptionPolling>["startPolling"];
-  currentPlan: SubscriptionPlan;
   downgradeTarget: SubscriptionPlan;
   setIsDowngradeDialogOpen: (open: boolean) => void;
   setIsCancelDialogOpen: (open: boolean) => void;
@@ -36,14 +34,14 @@ export function useSubscriptionLifecycleMutations({
   const cancelMutation = api.useMutation("post", "/api/account/subscriptions/cancel", {
     onSuccess: () => {
       startPolling({
-        check: (subscription) => subscription.status === SubscriptionStatus.Cancelled,
+        check: (subscription) => subscription.cancelAtPeriodEnd === true,
         successMessage: t`Your subscription has been cancelled.`,
         onComplete: () => setIsCancelDialogOpen(false)
       });
     }
   });
 
-  const cancelDowngradeMutation = api.useMutation("post", "/api/account/subscriptions/cancel-scheduled-downgrade", {
+  const cancelDowngradeMutation = api.useMutation("post", "/api/account/subscriptions/cancel-downgrade", {
     onSuccess: () => {
       startPolling({
         check: (subscription) => subscription.scheduledPlan == null,
@@ -54,21 +52,12 @@ export function useSubscriptionLifecycleMutations({
   });
 
   const reactivateMutation = api.useMutation("post", "/api/account/subscriptions/reactivate", {
-    onSuccess: (data) => {
-      if (data.uuid) {
-        setIsReactivateDialogOpen(false);
-        if (typeof window.payfast_do_onsite_payment === "function") {
-          window.payfast_do_onsite_payment({ uuid: data.uuid });
-        } else {
-          toast.error(t`Payment processor unavailable. Please refresh and try again.`);
-        }
-      } else {
-        startPolling({
-          check: (subscription) => subscription.status === SubscriptionStatus.Active,
-          successMessage: t`Your subscription has been reactivated.`,
-          onComplete: () => setIsReactivateDialogOpen(false)
-        });
-      }
+    onSuccess: () => {
+      startPolling({
+        check: (subscription) => subscription.cancelAtPeriodEnd === false,
+        successMessage: t`Your subscription has been reactivated.`,
+        onComplete: () => setIsReactivateDialogOpen(false)
+      });
     }
   });
 

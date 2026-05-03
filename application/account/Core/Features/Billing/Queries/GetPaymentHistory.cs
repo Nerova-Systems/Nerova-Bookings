@@ -20,12 +20,7 @@ public sealed record PaymentTransactionResponse(
     PaymentTransactionStatus Status,
     DateTimeOffset Date,
     string? InvoiceUrl,
-    string? CreditNoteUrl,
-    string? Provider,
-    string? ProviderPaymentId,
-    string? ProviderStatus,
-    decimal RefundedAmount,
-    string RefundStatus
+    string? CreditNoteUrl
 );
 
 public sealed class GetPaymentHistoryHandler(ISubscriptionRepository subscriptionRepository, IExecutionContext executionContext)
@@ -47,29 +42,9 @@ public sealed class GetPaymentHistoryHandler(ISubscriptionRepository subscriptio
         var paginatedTransactions = allTransactions
             .Skip(query.PageOffset * query.PageSize)
             .Take(query.PageSize)
-            .Select(t => new PaymentTransactionResponse(
-                    t.Id,
-                    t.Amount,
-                    t.Currency,
-                    t.Status,
-                    t.Date,
-                    t.InvoiceUrl,
-                    t.CreditNoteUrl,
-                    t.Provider,
-                    t.ProviderPaymentId,
-                    t.ProviderStatus,
-                    t.RefundedAmount,
-                    GetRefundStatus(t)
-                )
-            )
+            .Select(t => new PaymentTransactionResponse(t.Id, t.Amount, t.Currency, t.Status, t.Date, t.InvoiceUrl, t.CreditNoteUrl))
             .ToArray();
 
         return new PaymentHistoryResponse(allTransactions.Length, paginatedTransactions);
-    }
-
-    private static string GetRefundStatus(PaymentTransaction transaction)
-    {
-        if (transaction.RefundedAmount <= 0) return "None";
-        return transaction.RefundedAmount >= transaction.Amount ? "Refunded" : "PartiallyRefunded";
     }
 }

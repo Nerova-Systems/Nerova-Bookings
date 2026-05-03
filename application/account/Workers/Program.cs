@@ -1,6 +1,5 @@
 using Account;
 using Account.Database;
-using Account.Features.Subscriptions.Jobs;
 using SharedKernel.Configuration;
 using SharedKernel.Database;
 
@@ -15,11 +14,7 @@ builder
 // Configure dependency injection services like Repositories, MediatR, Pipelines, FluentValidation validators, etc.
 builder.Services
     .AddWorkerServices()
-    .AddAccountServices()
-    .AddHostedService<BillingJob>()
-    .AddHostedService<BillingReconciliationJob>()
-    .AddHostedService<BillingDunningJob>()
-    .AddHostedService<TrialExpiryNotificationJob>();
+    .AddAccountServices();
 
 builder.Services.AddTransient<DatabaseMigrationService<AccountDbContext>>();
 builder.Services.AddTransient<DataMigrationRunner<AccountDbContext>>();

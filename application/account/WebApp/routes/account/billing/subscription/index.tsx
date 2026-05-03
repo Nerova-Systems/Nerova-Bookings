@@ -4,11 +4,11 @@ import { AppLayout } from "@repo/ui/components/AppLayout";
 import { useFormatLongDate } from "@repo/ui/hooks/useSmartDate";
 import { createFileRoute } from "@tanstack/react-router";
 
-import { SubscriptionPlan, SubscriptionStatus } from "@/shared/lib/api/client";
+import { SubscriptionPlan } from "@/shared/lib/api/client";
 
 import { BillingTabNavigation } from "../-components/BillingTabNavigation";
 import { PlanCardGrid } from "../-components/PlanCardGrid";
-import { CancellationBanner, DowngradeBanner } from "../-components/SubscriptionBanner";
+import { CancellationBanner, DowngradeBanner, PaystackNotConfiguredBanner } from "../-components/SubscriptionBanner";
 import { SubscriptionDialogs } from "../-components/SubscriptionDialogs";
 import { usePlansPageState } from "../-components/usePlansPageState";
 
@@ -25,19 +25,24 @@ function PlansPage() {
   const state = usePlansPageState();
   const formatLongDate = useFormatLongDate();
 
-  const isCancelled = state.subscription?.status === SubscriptionStatus.Cancelled;
+  const cancelAtPeriodEnd = state.subscription?.cancelAtPeriodEnd ?? false;
   const scheduledPlan = state.subscription?.scheduledPlan ?? null;
   const currentPeriodEnd = state.subscription?.currentPeriodEnd ?? null;
   const formattedPeriodEnd = formatLongDate(currentPeriodEnd);
-  const isPaymentConfigured = state.pricingCatalog == null || state.pricingCatalog.plans.length > 0;
+  const isPaystackConfigured = (state.pricingCatalog?.plans?.length ?? 0) > 0;
 
   const handleSubscribe = (plan: SubscriptionPlan) => {
-    state.setSubscribeTarget(plan);
-    state.setIsSubscribeDialogOpen(true);
+    if (state.subscription?.billingInfo && state.subscription?.paymentMethod) {
+      state.setSubscribeTarget(plan);
+      state.setIsSubscribeDialogOpen(true);
+    } else {
+      state.setPendingCheckoutPlan(plan);
+      state.setIsEditBillingInfoOpen(true);
+    }
   };
 
   const handleDowngrade = (plan: SubscriptionPlan) => {
-    if (plan === SubscriptionPlan.Trial) {
+    if (plan === SubscriptionPlan.Basis) {
       state.setIsCancelDialogOpen(true);
     } else {
       state.setDowngradeTarget(plan);
@@ -49,16 +54,19 @@ function PlansPage() {
     <>
       <AppLayout variant="center" maxWidth="64rem" title={t`Subscription`} subtitle={t`Manage your subscription plan.`}>
         <BillingTabNavigation activeTab="subscription" />
-        {isCancelled && <CancellationBanner currentPlan={state.currentPlan} formattedPeriodEnd={formattedPeriodEnd} />}
-        {scheduledPlan && !isCancelled && (
+        {cancelAtPeriodEnd && (
+          <CancellationBanner currentPlan={state.currentPlan} formattedPeriodEnd={formattedPeriodEnd} />
+        )}
+        {scheduledPlan && !cancelAtPeriodEnd && (
           <DowngradeBanner scheduledPlan={scheduledPlan} formattedPeriodEnd={formattedPeriodEnd} />
         )}
+        {!isPaystackConfigured && <PaystackNotConfiguredBanner />}
         <PlanCardGrid
           plans={state.pricingCatalog?.plans}
           currentPlan={state.currentPlan}
-          cancelAtPeriodEnd={isCancelled}
+          cancelAtPeriodEnd={cancelAtPeriodEnd}
           scheduledPlan={scheduledPlan}
-          isPaymentConfigured={isPaymentConfigured}
+          isPaystackConfigured={isPaystackConfigured}
           onSubscribe={handleSubscribe}
           onUpgrade={(plan) => {
             state.setUpgradeTarget(plan);
@@ -70,8 +78,8 @@ function PlansPage() {
           isPending={state.isPending}
           pendingPlan={state.pendingPlan}
           isCancelDowngradePending={state.cancelDowngradeMutation.isPending}
-          currentPriceAmount={undefined}
-          currentPriceCurrency={undefined}
+          currentPriceAmount={state.subscription?.currentPriceAmount}
+          currentPriceCurrency={state.subscription?.currentPriceCurrency}
         />
       </AppLayout>
       <SubscriptionDialogs
@@ -83,15 +91,13 @@ function PlansPage() {
         isUpgradeDialogOpen={state.isUpgradeDialogOpen}
         setIsUpgradeDialogOpen={state.setIsUpgradeDialogOpen}
         onUpgradeConfirm={() => state.upgradeMutation.mutate({ body: { newPlan: state.upgradeTarget } })}
-        isUpgradePending={state.upgradeMutation.isPending || state.isPolling}
+        isUpgradePending={state.upgradeMutation.isPending || state.isConfirmingPayment || state.isPolling}
         upgradeTarget={state.upgradeTarget}
         isSubscribeDialogOpen={state.isSubscribeDialogOpen}
         setIsSubscribeDialogOpen={state.setIsSubscribeDialogOpen}
         onSubscribeConfirm={() => state.subscribeMutation.mutate({ body: { plan: state.subscribeTarget } })}
-        isSubscribePending={state.subscribeMutation.isPending || state.isPolling}
+        isSubscribePending={state.subscribeMutation.isPending || state.isConfirmingPayment || state.isPolling}
         subscribeTarget={state.subscribeTarget}
-        billingInfo={state.subscription?.billingInfo}
-        paymentMethod={state.subscription?.paymentMethod}
         isDowngradeDialogOpen={state.isDowngradeDialogOpen}
         setIsDowngradeDialogOpen={state.setIsDowngradeDialogOpen}
         onDowngradeConfirm={() => state.downgradeMutation.mutate({ body: { newPlan: state.downgradeTarget } })}
@@ -107,6 +113,15 @@ function PlansPage() {
         setIsReactivateDialogOpen={state.setIsReactivateDialogOpen}
         onReactivateConfirm={() => state.reactivateMutation.mutate({})}
         isReactivatePending={state.reactivateMutation.isPending || state.isPolling}
+        isEditBillingInfoOpen={state.isEditBillingInfoOpen}
+        setIsEditBillingInfoOpen={state.setIsEditBillingInfoOpen}
+        billingInfo={state.subscription?.billingInfo}
+        paymentMethod={state.subscription?.paymentMethod}
+        tenantName={state.tenant?.name ?? ""}
+        onBillingInfoSuccess={state.handleBillingInfoSuccess}
+        isCheckoutDialogOpen={state.isCheckoutDialogOpen}
+        setIsCheckoutDialogOpen={state.setIsCheckoutDialogOpen}
+        checkoutPlan={state.checkoutPlan}
       />
     </>
   );

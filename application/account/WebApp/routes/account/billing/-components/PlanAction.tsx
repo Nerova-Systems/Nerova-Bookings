@@ -10,7 +10,7 @@ interface PlanActionProps {
   currentPlan: SubscriptionPlan;
   cancelAtPeriodEnd: boolean;
   scheduledPlan: SubscriptionPlan | null;
-  isPaymentConfigured: boolean;
+  isPaystackConfigured: boolean;
   onSubscribe: (plan: SubscriptionPlan) => void;
   onUpgrade: (plan: SubscriptionPlan) => void;
   onDowngrade: (plan: SubscriptionPlan) => void;
@@ -26,7 +26,7 @@ export function PlanAction({
   currentPlan,
   cancelAtPeriodEnd,
   scheduledPlan,
-  isPaymentConfigured,
+  isPaystackConfigured,
   onSubscribe,
   onUpgrade,
   onDowngrade,
@@ -41,8 +41,8 @@ export function PlanAction({
   const isThisPlanPending = pendingPlan === plan;
   const isUpgrade = getPlanOrder(plan) > getPlanOrder(currentPlan);
   const isDowngrade = getPlanOrder(plan) < getPlanOrder(currentPlan);
-  const isBasis = currentPlan === SubscriptionPlan.Trial;
-  const disabled = isPending || !isPaymentConfigured;
+  const isBasis = currentPlan === SubscriptionPlan.Basis;
+  const disabled = isPending || !isPaystackConfigured;
 
   if (cancelAtPeriodEnd) {
     if (!isCurrent) {
@@ -67,7 +67,7 @@ export function PlanAction({
       </Button>
     );
   }
-  if (isBasis && plan !== SubscriptionPlan.Trial) {
+  if (isBasis && plan !== SubscriptionPlan.Basis) {
     return (
       <Button
         variant="default"

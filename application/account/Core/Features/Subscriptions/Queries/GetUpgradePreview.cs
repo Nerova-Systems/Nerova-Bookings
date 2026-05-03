@@ -1,6 +1,7 @@
 using Account.Features.Subscriptions.Domain;
 using Account.Features.Subscriptions.Shared;
 using Account.Features.Users.Domain;
+using Account.Integrations.Paystack;
 using JetBrains.Annotations;
 using SharedKernel.Cqrs;
 using SharedKernel.ExecutionContext;
@@ -16,7 +17,7 @@ public sealed record UpgradePreviewResponse(decimal TotalAmount, string Currency
 [PublicAPI]
 public sealed record UpgradePreviewLineItemResponse(string Description, decimal Amount, string Currency, bool IsProration, bool IsTax);
 
-public sealed class GetUpgradePreviewHandler(ISubscriptionRepository subscriptionRepository, IExecutionContext executionContext, TimeProvider timeProvider)
+public sealed class GetUpgradePreviewHandler(ISubscriptionRepository subscriptionRepository, PaystackClientFactory paystackClientFactory, IExecutionContext executionContext)
     : IRequestHandler<GetUpgradePreviewQuery, Result<UpgradePreviewResponse>>
 {
     public async Task<Result<UpgradePreviewResponse>> Handle(GetUpgradePreviewQuery query, CancellationToken cancellationToken)
@@ -28,9 +29,9 @@ public sealed class GetUpgradePreviewHandler(ISubscriptionRepository subscriptio
 
         var subscription = await subscriptionRepository.GetCurrentAsync(cancellationToken);
 
-        if (subscription.Status != SubscriptionStatus.Active)
+        if (subscription.PaystackSubscriptionId is null)
         {
-            return Result<UpgradePreviewResponse>.BadRequest("Subscription must be active to preview an upgrade.");
+            return Result<UpgradePreviewResponse>.BadRequest("No active Paystack subscription found.");
         }
 
         if (!query.NewPlan.IsUpgradeFrom(subscription.Plan))
@@ -38,23 +39,17 @@ public sealed class GetUpgradePreviewHandler(ISubscriptionRepository subscriptio
             return Result<UpgradePreviewResponse>.BadRequest($"Cannot upgrade from '{subscription.Plan}' to '{query.NewPlan}'. Target plan must be higher.");
         }
 
-        var now = timeProvider.GetUtcNow();
-        var currentPrice = SubscriptionPlanPricing.GetMonthlyPrice(subscription.Plan);
-        var newPrice = SubscriptionPlanPricing.GetMonthlyPrice(query.NewPlan);
-
-        var daysInPeriod = 30m;
-        var daysRemaining = subscription.CurrentPeriodEnd.HasValue ? (decimal)(subscription.CurrentPeriodEnd.Value - now).TotalDays : daysInPeriod;
-        daysRemaining = Math.Max(0, Math.Min(daysRemaining, daysInPeriod));
-
-        var proratedCharge = Math.Round((newPrice - currentPrice) * (daysRemaining / daysInPeriod), 2);
-        var currency = SubscriptionPlanPricing.Currency;
-
-        var lineItems = new[]
+        var paystackClient = paystackClientFactory.GetClient();
+        var preview = await paystackClient.GetUpgradePreviewAsync(subscription.PaystackSubscriptionId, query.NewPlan, cancellationToken);
+        if (preview is null)
         {
-            new UpgradePreviewLineItemResponse($"Unused time on {subscription.Plan} plan", -Math.Round(currentPrice * (daysRemaining / daysInPeriod), 2), currency, true, false),
-            new UpgradePreviewLineItemResponse($"Remaining time on {query.NewPlan} plan", Math.Round(newPrice * (daysRemaining / daysInPeriod), 2), currency, true, false)
-        };
+            return Result<UpgradePreviewResponse>.BadRequest("Failed to get upgrade preview from Paystack.");
+        }
 
-        return new UpgradePreviewResponse(proratedCharge, currency, lineItems);
+        var lineItems = preview.LineItems
+            .Select(item => new UpgradePreviewLineItemResponse(item.Description, item.Amount, item.Currency, item.IsProration, item.IsTax))
+            .ToArray();
+
+        return new UpgradePreviewResponse(preview.TotalAmount, preview.Currency, lineItems);
     }
 }

@@ -1,10 +1,9 @@
 using Account.Features.Subscriptions.Domain;
-using Account.Features.Subscriptions.Shared;
 using Account.Features.Users.Domain;
+using Account.Integrations.Paystack;
 using JetBrains.Annotations;
 using SharedKernel.Cqrs;
 using SharedKernel.ExecutionContext;
-using SharedKernel.Telemetry;
 
 namespace Account.Features.Subscriptions.Commands;
 
@@ -13,9 +12,9 @@ public sealed record CancelScheduledDowngradeCommand : ICommand, IRequest<Result
 
 public sealed class CancelScheduledDowngradeHandler(
     ISubscriptionRepository subscriptionRepository,
+    PaystackClientFactory paystackClientFactory,
     IExecutionContext executionContext,
-    ITelemetryEventsCollector events,
-    TimeProvider timeProvider
+    ILogger<CancelScheduledDowngradeHandler> logger
 ) : IRequestHandler<CancelScheduledDowngradeCommand, Result>
 {
     public async Task<Result> Handle(CancelScheduledDowngradeCommand command, CancellationToken cancellationToken)
@@ -27,24 +26,26 @@ public sealed class CancelScheduledDowngradeHandler(
 
         var subscription = await subscriptionRepository.GetCurrentAsync(cancellationToken);
 
+        if (subscription.PaystackSubscriptionId is null)
+        {
+            logger.LogWarning("No Paystack subscription found for subscription '{SubscriptionId}'", subscription.Id);
+            return Result.BadRequest("No active Paystack subscription found.");
+        }
+
         if (subscription.ScheduledPlan is null)
         {
             return Result.BadRequest("No scheduled downgrade to cancel.");
         }
 
-        var now = timeProvider.GetUtcNow();
-        var currentPrice = SubscriptionPlanPricing.GetMonthlyPrice(subscription.Plan);
-        var scheduledPrice = SubscriptionPlanPricing.GetMonthlyPrice(subscription.ScheduledPlan.Value);
-        var daysUntilDowngrade = subscription.CurrentPeriodEnd.HasValue ? (int?)(int)(subscription.CurrentPeriodEnd.Value - now).TotalDays : null;
-        var daysSinceScheduled = 0;
-        var mrrImpact = currentPrice - scheduledPrice;
+        var paystackClient = paystackClientFactory.GetClient();
+        var success = await paystackClient.CancelScheduledDowngradeAsync(subscription.PaystackSubscriptionId, cancellationToken);
+        if (!success)
+        {
+            return Result.BadRequest("Failed to cancel scheduled downgrade in Paystack.");
+        }
 
-        var scheduledPlan = subscription.ScheduledPlan.Value;
-        subscription.SetScheduledPlan(null);
+        // Subscription is updated and telemetry is collected in ProcessPendingPaystackEvents when Paystack confirms the state change via webhook
 
-        events.CollectEvent(new SubscriptionDowngradeCancelled(subscription.Id, subscription.Plan, scheduledPlan, daysUntilDowngrade, daysSinceScheduled, currentPrice, mrrImpact, SubscriptionPlanPricing.Currency));
-
-        subscriptionRepository.Update(subscription);
         return Result.Success();
     }
 }

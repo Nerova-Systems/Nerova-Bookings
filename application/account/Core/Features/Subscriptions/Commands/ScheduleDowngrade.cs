@@ -1,10 +1,10 @@
 using Account.Features.Subscriptions.Domain;
 using Account.Features.Subscriptions.Shared;
 using Account.Features.Users.Domain;
+using Account.Integrations.Paystack;
 using JetBrains.Annotations;
 using SharedKernel.Cqrs;
 using SharedKernel.ExecutionContext;
-using SharedKernel.Telemetry;
 
 namespace Account.Features.Subscriptions.Commands;
 
@@ -13,9 +13,9 @@ public sealed record ScheduleDowngradeCommand(SubscriptionPlan NewPlan) : IComma
 
 public sealed class ScheduleDowngradeHandler(
     ISubscriptionRepository subscriptionRepository,
+    PaystackClientFactory paystackClientFactory,
     IExecutionContext executionContext,
-    ITelemetryEventsCollector events,
-    TimeProvider timeProvider
+    ILogger<ScheduleDowngradeHandler> logger
 ) : IRequestHandler<ScheduleDowngradeCommand, Result>
 {
     public async Task<Result> Handle(ScheduleDowngradeCommand command, CancellationToken cancellationToken)
@@ -27,9 +27,10 @@ public sealed class ScheduleDowngradeHandler(
 
         var subscription = await subscriptionRepository.GetCurrentAsync(cancellationToken);
 
-        if (subscription.Status != SubscriptionStatus.Active)
+        if (subscription.PaystackSubscriptionId is null)
         {
-            return Result.BadRequest("Subscription must be active to schedule a downgrade.");
+            logger.LogWarning("No Paystack subscription found for subscription '{SubscriptionId}'", subscription.Id);
+            return Result.BadRequest("No active Paystack subscription found.");
         }
 
         if (!command.NewPlan.IsDowngradeFrom(subscription.Plan))
@@ -37,22 +38,20 @@ public sealed class ScheduleDowngradeHandler(
             return Result.BadRequest($"Cannot downgrade from '{subscription.Plan}' to '{command.NewPlan}'. Target plan must be lower.");
         }
 
-        if (command.NewPlan == SubscriptionPlan.Trial)
+        if (command.NewPlan == SubscriptionPlan.Basis)
         {
-            return Result.BadRequest("Cannot downgrade to the Trial plan.");
+            return Result.BadRequest("Cannot downgrade to the Basis plan.");
         }
 
-        var now = timeProvider.GetUtcNow();
-        var currentPrice = SubscriptionPlanPricing.GetMonthlyPrice(subscription.Plan);
-        var newPrice = SubscriptionPlanPricing.GetMonthlyPrice(command.NewPlan);
-        var daysUntilDowngrade = subscription.CurrentPeriodEnd.HasValue ? (int?)(int)(subscription.CurrentPeriodEnd.Value - now).TotalDays : null;
-        var mrrImpact = newPrice - currentPrice;
+        var paystackClient = paystackClientFactory.GetClient();
+        var success = await paystackClient.ScheduleDowngradeAsync(subscription.PaystackSubscriptionId, command.NewPlan, cancellationToken);
+        if (!success)
+        {
+            return Result.BadRequest("Failed to schedule downgrade in Paystack.");
+        }
 
-        subscription.SetScheduledPlan(command.NewPlan);
+        // Subscription is updated and telemetry is collected in ProcessPendingPaystackEvents when Paystack confirms the state change via webhook
 
-        events.CollectEvent(new SubscriptionDowngradeScheduled(subscription.Id, subscription.Plan, command.NewPlan, daysUntilDowngrade, currentPrice, mrrImpact, SubscriptionPlanPricing.Currency));
-
-        subscriptionRepository.Update(subscription);
         return Result.Success();
     }
 }

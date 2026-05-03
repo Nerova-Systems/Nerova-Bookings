@@ -190,6 +190,12 @@ msgstr "Achieved in Microsoft Defender for Cloud following Azure best practices"
 msgid "Action"
 msgstr "Action"
 
+msgid "Activating subscription"
+msgstr "Activating subscription"
+
+msgid "Activating your subscription..."
+msgstr "Activating your subscription..."
+
 msgid "Active"
 msgstr "Active"
 
@@ -259,14 +265,11 @@ msgstr "Adding events to"
 msgid "Additional notes"
 msgstr "Additional notes"
 
+msgid "Address"
+msgstr "Address"
+
 msgid "Address (fixed 2 lines)"
 msgstr "Address (fixed 2 lines)"
-
-msgid "Address line 1"
-msgstr "Address line 1"
-
-msgid "Address line 2 (optional)"
-msgstr "Address line 2 (optional)"
 
 msgid "Adjust the interface size on this device to your preference."
 msgstr "Adjust the interface size on this device to your preference."
@@ -282,9 +285,6 @@ msgstr "Advanced options"
 
 msgid "Advanced techniques, over 60 minutes"
 msgstr "Advanced techniques, over 60 minutes"
-
-msgid "After updating your card, return to this tab — there's nothing else you need to do here."
-msgstr "After updating your card, return to this tab — there's nothing else you need to do here."
 
 msgid "Alert dialogs"
 msgstr "Alert dialogs"
@@ -453,6 +453,9 @@ msgstr "Basic skills, under 30 minutes"
 msgid "Basic support"
 msgstr "Basic support"
 
+msgid "Basis"
+msgstr "Basis"
+
 msgid "Bill to"
 msgstr "Bill to"
 
@@ -468,17 +471,20 @@ msgstr "Billing email"
 msgid "Billing history"
 msgstr "Billing history"
 
+msgid "Billing information"
+msgstr "Billing information"
+
 msgid "Billing information updated"
 msgstr "Billing information updated"
 
 msgid "Billing is not configured. Please contact support to enable payment processing."
 msgstr "Billing is not configured. Please contact support to enable payment processing."
 
-msgid "Billing name"
-msgstr "Billing name"
-
 msgid "Billing tabs"
 msgstr "Billing tabs"
+
+msgid "billing@company.com"
+msgstr "billing@company.com"
 
 msgid "Boeuf bourguignon"
 msgstr "Boeuf bourguignon"
@@ -611,9 +617,6 @@ msgstr "Cancelling"
 
 msgid "Cancelling..."
 msgstr "Cancelling..."
-
-msgid "Card on file"
-msgstr "Card on file"
 
 msgid "Card-style preview shown on hover or focus. Use it for user mentions, link previews, or any compact context that would otherwise need a click."
 msgstr "Card-style preview shown on hover or focus. Use it for user mentions, link previews, or any compact context that would otherwise need a click."
@@ -764,9 +767,6 @@ msgstr "Combobox (free text)"
 
 msgid "Comfort in a bowl"
 msgstr "Comfort in a bowl"
-
-msgid "Coming soon"
-msgstr "Coming soon"
 
 msgid "Command"
 msgstr "Command"
@@ -1126,6 +1126,9 @@ msgstr "Easy"
 msgid "Edge"
 msgstr "Edge"
 
+msgid "Edit"
+msgstr "Edit"
+
 msgid "Edit billing information"
 msgstr "Edit billing information"
 
@@ -1177,9 +1180,6 @@ msgstr "Enter your email below to log in"
 msgid "Enter your verification code"
 msgstr "Enter your verification code"
 
-msgid "Enterprise workflows for specialized appointment teams. Coming soon, with no self-serve checkout path yet."
-msgstr "Enterprise workflows for specialized appointment teams. Coming soon, with no self-serve checkout path yet."
-
 msgid "Enterprise-grade Azure infrastructure"
 msgstr "Enterprise-grade Azure infrastructure"
 
@@ -1210,10 +1210,8 @@ msgstr "Expand Components"
 msgid "Expand Examples"
 msgstr "Expand Examples"
 
-#. placeholder {0}: paymentMethod.expMonth
-#. placeholder {1}: paymentMethod.expYear
-msgid "Expires {0}/{1}"
-msgstr "Expires {0}/{1}"
+msgid "expires"
+msgstr "expires"
 
 msgid "Export"
 msgstr "Export"
@@ -1418,9 +1416,6 @@ msgstr "Inline keyboard hint. Use it to call out shortcuts in tooltips, menus, a
 
 msgid "Inline tip:"
 msgstr "Inline tip:"
-
-msgid "Integrations"
-msgstr "Integrations"
 
 msgid "Invalid request"
 msgstr "Invalid request"
@@ -1665,17 +1660,14 @@ msgstr "Manage whether this browser receives booking alerts."
 msgid "Manage your account here."
 msgstr "Manage your account here."
 
-msgid "Manage your subscription and billing history."
-msgstr "Manage your subscription and billing history."
+msgid "Manage your payment methods and billing information."
+msgstr "Manage your payment methods and billing information."
 
 msgid "Manage your subscription plan."
 msgstr "Manage your subscription plan."
 
 msgid "Manage your users and permissions here."
 msgstr "Manage your users and permissions here."
-
-msgid "Managed by PayFast"
-msgstr "Managed by PayFast"
 
 msgid "Managed identities"
 msgstr "Managed identities"
@@ -1782,6 +1774,9 @@ msgstr "My OOO"
 msgid "Name"
 msgstr "Name"
 
+msgid "Name as it appears on invoices"
+msgstr "Name as it appears on invoices"
+
 msgid "Narrow bottom drawer"
 msgstr "Narrow bottom drawer"
 
@@ -1827,8 +1822,8 @@ msgstr "No account found for this email address. Please sign up to create an acc
 msgid "No active sessions found."
 msgstr "No active sessions found."
 
-msgid "No billing information on file."
-msgstr "No billing information on file."
+msgid "No billing information on file"
+msgstr "No billing information on file"
 
 msgid "No longer needed"
 msgstr "No longer needed"
@@ -1836,8 +1831,8 @@ msgstr "No longer needed"
 msgid "No payment history available."
 msgstr "No payment history available."
 
-msgid "No payment method on file."
-msgstr "No payment method on file."
+msgid "No payment method on file"
+msgstr "No payment method on file"
 
 msgid "No recipes yet"
 msgstr "No recipes yet"
@@ -1917,12 +1912,6 @@ msgstr "Open side pane"
 msgid "Opened documentation"
 msgstr "Opened documentation"
 
-msgid "Opening PayFast in a new tab to update your card."
-msgstr "Opening PayFast in a new tab to update your card."
-
-msgid "Opening..."
-msgstr "Opening..."
-
 msgid "Option A"
 msgstr "Option A"
 
@@ -1974,9 +1963,6 @@ msgstr "Page Views"
 msgid "Palak paneer"
 msgstr "Palak paneer"
 
-msgid "Partially refunded"
-msgstr "Partially refunded"
-
 msgid "Passkeys"
 msgstr "Passkeys"
 
@@ -1992,17 +1978,14 @@ msgstr "Pay and subscribe"
 msgid "Pay and upgrade"
 msgstr "Pay and upgrade"
 
-msgid "Payment could not be processed. Please update your card and try again."
-msgstr "Payment could not be processed. Please update your card and try again."
+msgid "Payment checkout could not be started."
+msgstr "Payment checkout could not be started."
+
+msgid "Payment could not be processed. Please try again later."
+msgstr "Payment could not be processed. Please try again later."
 
 msgid "Payment failed"
 msgstr "Payment failed"
-
-msgid "Payment failed. Update or retry payment before {formattedGracePeriodEnd} to avoid suspension."
-msgstr "Payment failed. Update or retry payment before {formattedGracePeriodEnd} to avoid suspension."
-
-msgid "Payment failed. Update or retry payment to keep access active."
-msgstr "Payment failed. Update or retry payment to keep access active."
 
 msgid "Payment failed. Your subscription will be suspended soon."
 msgstr "Payment failed. Your subscription will be suspended soon."
@@ -2010,8 +1993,11 @@ msgstr "Payment failed. Your subscription will be suspended soon."
 msgid "Payment method"
 msgstr "Payment method"
 
-msgid "Payment processor unavailable. Please refresh and try again."
-msgstr "Payment processor unavailable. Please refresh and try again."
+msgid "Payment method update could not be started."
+msgstr "Payment method update could not be started."
+
+msgid "Paystack Link"
+msgstr "Paystack Link"
 
 msgid "Pedro Duarte"
 msgstr "Pedro Duarte"
@@ -2077,6 +2063,9 @@ msgstr "Please check your email for a verification code sent to <0>{email}</0>"
 msgid "Please enter a valid email address"
 msgstr "Please enter a valid email address"
 
+msgid "Please include your country code"
+msgstr "Please include your country code"
+
 msgid "Please log in again to continue."
 msgstr "Please log in again to continue."
 
@@ -2088,6 +2077,9 @@ msgstr "Please select a JPEG, PNG, GIF, WebP, or SVG image."
 
 msgid "Please try again or return to the home page."
 msgstr "Please try again or return to the home page."
+
+msgid "Please wait while we confirm your payment. This may take a few moments."
+msgstr "Please wait while we confirm your payment. This may take a few moments."
 
 msgid "Postal code"
 msgstr "Postal code"
@@ -2103,6 +2095,12 @@ msgstr "Preferences"
 
 msgid "Premium"
 msgstr "Premium"
+
+msgid "Preparing checkout..."
+msgstr "Preparing checkout..."
+
+msgid "Preparing payment method update..."
+msgstr "Preparing payment method update..."
 
 msgid "press <0>?</0> to view all shortcuts."
 msgstr "press <0>?</0> to view all shortcuts."
@@ -2137,9 +2135,6 @@ msgstr "Privacy Policy"
 msgid "Processing..."
 msgstr "Processing..."
 
-msgid "Product"
-msgstr "Product"
-
 msgid "Profile"
 msgstr "Profile"
 
@@ -2166,9 +2161,6 @@ msgstr "Public holiday marked closed."
 
 msgid "Public holiday marked open."
 msgstr "Public holiday marked open."
-
-msgid "Public navigation"
-msgstr "Public navigation"
 
 msgid "Publish now"
 msgstr "Publish now"
@@ -2260,11 +2252,11 @@ msgstr "Recycle bin"
 msgid "Recycle bin is empty"
 msgstr "Recycle bin is empty"
 
+msgid "Redirecting to checkout"
+msgstr "Redirecting to checkout"
+
 msgid "Redirecting..."
 msgstr "Redirecting..."
-
-msgid "Reference"
-msgstr "Reference"
 
 msgid "Reference ID: {id}"
 msgstr "Reference ID: {id}"
@@ -2336,9 +2328,6 @@ msgstr "Restore user"
 
 msgid "Restoring..."
 msgstr "Restoring..."
-
-msgid "Retry payment"
-msgstr "Retry payment"
 
 msgid "Retry pending payment"
 msgstr "Retry pending payment"
@@ -2631,9 +2620,6 @@ msgstr "SOC and ISO Reports"
 msgid "SOC and ISO Reports (opens in new window)"
 msgstr "SOC and ISO Reports (opens in new window)"
 
-msgid "Solutions"
-msgstr "Solutions"
-
 msgid "Som tam salad"
 msgstr "Som tam salad"
 
@@ -2673,17 +2659,14 @@ msgstr "Standard"
 msgid "Standard user access"
 msgstr "Standard user access"
 
-msgid "Start free trial"
-msgstr "Start free trial"
-
 msgid "Start of week"
 msgstr "Start of week"
 
-msgid "Starter"
-msgstr "Starter"
+msgid "State / Province"
+msgstr "State / Province"
 
-msgid "State / Province (optional)"
-msgstr "State / Province (optional)"
+msgid "State or region"
+msgstr "State or region"
 
 msgid "Static preview of the Sidebar component. The fully interactive version — with drag-to-resize, hover-reveal toggle, and icon collapse — renders as the real sidemenu in each self-contained system."
 msgstr "Static preview of the Sidebar component. The fully interactive version — with drag-to-resize, hover-reveal toggle, and icon collapse — renders as the real sidemenu in each self-contained system."
@@ -2749,11 +2732,8 @@ msgstr "Tacos al pastor"
 msgid "Tax"
 msgstr "Tax"
 
-msgid "Tax ID (optional)"
-msgstr "Tax ID (optional)"
-
-msgid "Tax ID:"
-msgstr "Tax ID:"
+msgid "Tax ID (VAT number)"
+msgstr "Tax ID (VAT number)"
 
 msgid "Tell us a bit about yourself to get started."
 msgstr "Tell us a bit about yourself to get started."
@@ -2929,9 +2909,6 @@ msgstr "Transparency, security, and privacy are at the core of how we operate. R
 msgid "Trending up by 5.2% this month"
 msgstr "Trending up by 5.2% this month"
 
-msgid "Trial"
-msgstr "Trial"
-
 msgid "Trust Center"
 msgstr "Trust Center"
 
@@ -2985,9 +2962,6 @@ msgstr "Unsaved changes"
 
 msgid "Update"
 msgstr "Update"
-
-msgid "Update on PayFast"
-msgstr "Update on PayFast"
 
 msgid "Update payment method"
 msgstr "Update payment method"
@@ -3092,6 +3066,9 @@ msgstr "Users who haven't confirmed their email"
 msgid "Values"
 msgstr "Values"
 
+msgid "VAT number"
+msgstr "VAT number"
+
 msgid "Vegetable tempura"
 msgstr "Vegetable tempura"
 
@@ -3155,9 +3132,6 @@ msgstr "When to use Accordion"
 msgid "When you accept this invitation, your profile information (name, title, and avatar) from your current account will be copied to the new account."
 msgstr "When you accept this invitation, your profile information (name, title, and avatar) from your current account will be copied to the new account."
 
-msgid "Why us"
-msgstr "Why us"
-
 msgid "With icons"
 msgstr "With icons"
 
@@ -3199,8 +3173,11 @@ msgstr "You have unsaved changes. If you leave now, your changes will be lost."
 msgid "You were logged out from another browser tab."
 msgstr "You were logged out from another browser tab."
 
-msgid "You'll be redirected to PayFast in a new tab where you can securely update the card on your subscription. Your existing schedule and billing dates remain unchanged."
-msgstr "You'll be redirected to PayFast in a new tab where you can securely update the card on your subscription. Your existing schedule and billing dates remain unchanged."
+msgid "You will be redirected to Paystack to complete payment."
+msgstr "You will be redirected to Paystack to complete payment."
+
+msgid "You will be redirected to Paystack to update the payment method for this subscription."
+msgstr "You will be redirected to Paystack to update the payment method for this subscription."
 
 #. placeholder {0}: getPlanLabel(currentPlan)
 msgid "Your {0} subscription has been cancelled and will end on {formattedPeriodEnd}."
@@ -3269,6 +3246,9 @@ msgstr "Your session has expired."
 msgid "Your session was ended from another device."
 msgstr "Your session was ended from another device."
 
+msgid "Your subscription has been activated."
+msgstr "Your subscription has been activated."
+
 msgid "Your subscription has been cancelled and will end at the end of the current billing period."
 msgstr "Your subscription has been cancelled and will end at the end of the current billing period."
 
@@ -3283,6 +3263,9 @@ msgstr "Your subscription is scheduled to downgrade from {currentPlanName} to {s
 
 msgid "Your subscription is scheduled to downgrade from {currentPlanName} to {scheduledPlanName}. If you cancel the downgrade, you will stay on the {currentPlanName} plan."
 msgstr "Your subscription is scheduled to downgrade from {currentPlanName} to {scheduledPlanName}. If you cancel the downgrade, you will stay on the {currentPlanName} plan."
+
+msgid "Your subscription may take a moment to appear."
+msgstr "Your subscription may take a moment to appear."
 
 msgid "Your subscription will be cancelled at the end of the current billing period. After that, your account will switch to the free plan."
 msgstr "Your subscription will be cancelled at the end of the current billing period. After that, your account will switch to the free plan."
@@ -3314,4 +3297,4 @@ msgid "yourname@example.com"
 msgstr "yourname@example.com"
 
 msgid "Zoom"
-msgstr "Zoom"
+msgstr "Zoomtest-modify"

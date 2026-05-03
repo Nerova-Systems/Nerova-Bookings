@@ -4,7 +4,7 @@ import { useUserInfo } from "@repo/infrastructure/auth/hooks";
 import { Button } from "@repo/ui/components/Button";
 import { AlertTriangleIcon } from "lucide-react";
 
-import { api, SubscriptionStatus } from "@/shared/lib/api/client";
+import { api } from "@/shared/lib/api/client";
 
 export default function PaymentFailedBanner() {
   const userInfo = useUserInfo();
@@ -18,7 +18,7 @@ export default function PaymentFailedBanner() {
 
   const isOwner = userInfo?.role === "Owner";
 
-  if (subscription?.status !== SubscriptionStatus.PastDue) {
+  if (!subscription?.isPaymentFailed) {
     return null;
   }
 

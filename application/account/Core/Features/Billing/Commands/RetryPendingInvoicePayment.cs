@@ -1,8 +1,6 @@
 using Account.Features.Subscriptions.Domain;
-using Account.Features.Subscriptions.Shared;
-using Account.Features.Tenants.Domain;
 using Account.Features.Users.Domain;
-using Account.Integrations.PayFast;
+using Account.Integrations.Paystack;
 using JetBrains.Annotations;
 using SharedKernel.Cqrs;
 using SharedKernel.ExecutionContext;
@@ -14,73 +12,55 @@ namespace Account.Features.Billing.Commands;
 public sealed record RetryPendingInvoicePaymentCommand : ICommand, IRequest<Result<RetryPendingInvoicePaymentResponse>>;
 
 [PublicAPI]
-public sealed record RetryPendingInvoicePaymentResponse(bool Paid, string? Uuid);
+public sealed record RetryPendingInvoicePaymentResponse(bool Paid, string? AuthorizationUrl, string? Reference);
 
 public sealed class RetryPendingInvoicePaymentHandler(
     ISubscriptionRepository subscriptionRepository,
-    ITenantRepository tenantRepository,
+    PaystackClientFactory paystackClientFactory,
     IExecutionContext executionContext,
-    IPayFastClient payFastClient,
     ITelemetryEventsCollector events,
-    TimeProvider timeProvider
+    ILogger<RetryPendingInvoicePaymentHandler> logger
 ) : IRequestHandler<RetryPendingInvoicePaymentCommand, Result<RetryPendingInvoicePaymentResponse>>
 {
     public async Task<Result<RetryPendingInvoicePaymentResponse>> Handle(RetryPendingInvoicePaymentCommand command, CancellationToken cancellationToken)
     {
         if (executionContext.UserInfo.Role != nameof(UserRole.Owner))
         {
-            return Result<RetryPendingInvoicePaymentResponse>.Forbidden("Only owners can retry payments.");
+            return Result<RetryPendingInvoicePaymentResponse>.Forbidden("Only owners can manage subscriptions.");
         }
 
         var subscription = await subscriptionRepository.GetCurrentAsync(cancellationToken);
 
-        if (subscription.Status != SubscriptionStatus.PastDue)
+        if (subscription.PaystackSubscriptionId is null)
         {
-            return Result<RetryPendingInvoicePaymentResponse>.BadRequest("There is no pending invoice to retry.");
+            logger.LogWarning("No Paystack subscription found for subscription '{SubscriptionId}'", subscription.Id);
+            return Result<RetryPendingInvoicePaymentResponse>.BadRequest("No active Paystack subscription found.");
         }
 
-        if (subscription.PayFastToken is null)
+        var paystackClient = paystackClientFactory.GetClient();
+
+        var openInvoice = await paystackClient.GetOpenInvoiceAsync(subscription.PaystackSubscriptionId, cancellationToken);
+        if (openInvoice is null)
         {
-            return Result<RetryPendingInvoicePaymentResponse>.BadRequest("No payment method on file. Please update the card first.");
+            return Result<RetryPendingInvoicePaymentResponse>.BadRequest("No pending invoice found for this subscription.");
         }
 
-        var plan = subscription.Plan;
-        var amount = SubscriptionPlanPricing.GetMonthlyPrice(plan);
-        var charged = await payFastClient.ChargeTokenAsync(subscription.PayFastToken, amount, $"Nerova Bookings {plan} Plan — recovery", cancellationToken);
-
-        if (!charged)
+        var invoiceRetryResult = await paystackClient.RetryOpenInvoicePaymentAsync(subscription.PaystackSubscriptionId, null, cancellationToken);
+        if (invoiceRetryResult is null)
         {
-            return new RetryPendingInvoicePaymentResponse(false, null);
+            return Result<RetryPendingInvoicePaymentResponse>.BadRequest("Failed to retry invoice payment.");
         }
 
-        var now = timeProvider.GetUtcNow();
-        var daysInPastDue = subscription.FirstPaymentFailedAt.HasValue ? (int)(now - subscription.FirstPaymentFailedAt.Value).TotalDays : 0;
-        var transaction = new PaymentTransaction(
-            PaymentTransactionId.NewId(),
-            amount,
-            SubscriptionPlanPricing.Currency,
-            PaymentTransactionStatus.Succeeded,
-            now,
-            null,
-            null,
-            null
-        );
-        subscription.SetPaymentTransactions(subscription.PaymentTransactions.Add(transaction));
-        subscription.RenewBillingPeriod(now);
-        subscription.ClearPaymentFailure();
-
-        var tenant = await tenantRepository.GetByIdUnfilteredAsync(subscription.TenantId, cancellationToken);
-        if (tenant is not null && tenant.State == TenantState.Suspended && tenant.SuspensionReason == SuspensionReason.PaymentFailed)
+        if (invoiceRetryResult is { Paid: false, AuthorizationUrl: null, ErrorMessage: not null })
         {
-            tenant.Activate();
-            tenantRepository.Update(tenant);
+            return Result<RetryPendingInvoicePaymentResponse>.BadRequest(invoiceRetryResult.ErrorMessage);
         }
 
-        events.CollectEvent(new PendingInvoicePaymentRetried(subscription.Id));
-        events.CollectEvent(new PaymentRecovered(subscription.Id, plan, daysInPastDue, amount, SubscriptionPlanPricing.Currency));
+        if (invoiceRetryResult.Paid)
+        {
+            events.CollectEvent(new PendingInvoicePaymentRetried(subscription.Id));
+        }
 
-        subscriptionRepository.Update(subscription);
-
-        return new RetryPendingInvoicePaymentResponse(true, null);
+        return new RetryPendingInvoicePaymentResponse(invoiceRetryResult.Paid, invoiceRetryResult.AuthorizationUrl, invoiceRetryResult.Reference);
     }
 }

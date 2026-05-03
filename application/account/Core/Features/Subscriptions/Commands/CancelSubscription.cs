@@ -1,12 +1,10 @@
 using Account.Features.Subscriptions.Domain;
-using Account.Features.Subscriptions.Shared;
 using Account.Features.Users.Domain;
-using Account.Integrations.PayFast;
+using Account.Integrations.Paystack;
 using FluentValidation;
 using JetBrains.Annotations;
 using SharedKernel.Cqrs;
 using SharedKernel.ExecutionContext;
-using SharedKernel.Telemetry;
 
 namespace Account.Features.Subscriptions.Commands;
 
@@ -24,17 +22,15 @@ public sealed class CancelSubscriptionValidator : AbstractValidator<CancelSubscr
             .MaximumLength(500)
             .WithMessage("Feedback must be no longer than 500 characters.")
             .Must(feedback => !feedback!.Contains('<') && !feedback.Contains('>'))
-            .WithMessage("Feedback must not contain HTML.")
+            .WithMessage("Feedback must be no longer than 500 characters.")
             .When(x => x.Feedback is not null);
     }
 }
 
 public sealed class CancelSubscriptionHandler(
     ISubscriptionRepository subscriptionRepository,
+    PaystackClientFactory paystackClientFactory,
     IExecutionContext executionContext,
-    IPayFastClient payFastClient,
-    ITelemetryEventsCollector events,
-    TimeProvider timeProvider,
     ILogger<CancelSubscriptionHandler> logger
 ) : IRequestHandler<CancelSubscriptionCommand, Result>
 {
@@ -47,36 +43,31 @@ public sealed class CancelSubscriptionHandler(
 
         var subscription = await subscriptionRepository.GetCurrentAsync(cancellationToken);
 
-        if (subscription.Status == SubscriptionStatus.Trial || subscription.Status == SubscriptionStatus.Expired)
+        if (subscription.Plan == SubscriptionPlan.Basis)
         {
-            return Result.BadRequest("Cannot cancel a subscription that is not active.");
+            return Result.BadRequest("Cannot cancel a Basis subscription.");
         }
 
-        if (subscription.Status == SubscriptionStatus.Cancelled)
+        if (subscription.PaystackSubscriptionId is null)
         {
-            return Result.BadRequest("Subscription is already cancelled.");
+            logger.LogWarning("No Paystack subscription found for subscription '{SubscriptionId}'", subscription.Id);
+            return Result.BadRequest("No active Paystack subscription found.");
         }
 
-        if (subscription.PayFastToken is not null)
+        if (subscription.CancelAtPeriodEnd)
         {
-            var cancelled = await payFastClient.CancelSubscriptionAsync(subscription.PayFastToken, cancellationToken);
-            if (!cancelled)
-            {
-                logger.LogWarning("PayFast cancel API call failed for subscription {SubscriptionId} — proceeding with local cancellation", subscription.Id);
-            }
+            return Result.BadRequest("Subscription is already scheduled for cancellation.");
         }
 
-        var now = timeProvider.GetUtcNow();
-        var plan = subscription.Plan;
-        var price = SubscriptionPlanPricing.GetMonthlyPrice(plan);
-        var daysOnPlan = subscription.CurrentPeriodStart.HasValue ? (int)(now - subscription.CurrentPeriodStart.Value).TotalDays : 0;
-        var daysUntilExpiry = subscription.CurrentPeriodEnd.HasValue ? (int)(subscription.CurrentPeriodEnd.Value - now).TotalDays : (int?)null;
+        var paystackClient = paystackClientFactory.GetClient();
+        var success = await paystackClient.CancelSubscriptionAtPeriodEndAsync(subscription.PaystackSubscriptionId, command.Reason, command.Feedback, cancellationToken);
+        if (!success)
+        {
+            return Result.BadRequest("Failed to cancel subscription in Paystack.");
+        }
 
-        subscription.Cancel(command.Reason, command.Feedback, now);
+        // Subscription is updated and telemetry is collected in ProcessPendingPaystackEvents when Paystack confirms the state change via webhook
 
-        events.CollectEvent(new SubscriptionCancelled(subscription.Id, plan, command.Reason, daysUntilExpiry, daysOnPlan, price, price, SubscriptionPlanPricing.Currency));
-
-        subscriptionRepository.Update(subscription);
         return Result.Success();
     }
 }

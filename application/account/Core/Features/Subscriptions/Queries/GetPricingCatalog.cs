@@ -1,5 +1,5 @@
 using Account.Features.Subscriptions.Domain;
-using Account.Features.Subscriptions.Shared;
+using Account.Integrations.Paystack;
 using JetBrains.Annotations;
 using SharedKernel.Cqrs;
 
@@ -21,24 +21,13 @@ public sealed record PlanPriceItem(
     bool TaxInclusive
 );
 
-public sealed class GetPricingCatalogHandler : IRequestHandler<GetPricingCatalogQuery, Result<PricingCatalogResponse>>
+public sealed class GetPricingCatalogHandler(PaystackClientFactory paystackClientFactory)
+    : IRequestHandler<GetPricingCatalogQuery, Result<PricingCatalogResponse>>
 {
-    public Task<Result<PricingCatalogResponse>> Handle(GetPricingCatalogQuery query, CancellationToken cancellationToken)
+    public async Task<Result<PricingCatalogResponse>> Handle(GetPricingCatalogQuery query, CancellationToken cancellationToken)
     {
-        var plans = new[]
-        {
-            SubscriptionPlan.Starter,
-            SubscriptionPlan.Standard,
-            SubscriptionPlan.Premium
-        }.Select(plan => new PlanPriceItem(
-            plan,
-            SubscriptionPlanPricing.GetMonthlyPrice(plan),
-            SubscriptionPlanPricing.Currency,
-            "month",
-            1,
-            true
-        )).ToArray();
-
-        return Task.FromResult(Result<PricingCatalogResponse>.Success(new PricingCatalogResponse(plans)));
+        var catalogItems = await paystackClientFactory.GetClient().GetPriceCatalogAsync(cancellationToken);
+        var plans = catalogItems.Select(item => new PlanPriceItem(item.Plan, item.UnitAmount, item.Currency, item.Interval, item.IntervalCount, item.TaxInclusive)).ToArray();
+        return new PricingCatalogResponse(plans);
     }
 }

@@ -62,17 +62,14 @@ export function BillingHistoryTable() {
     <Table rowSize="compact">
       <TableHeader>
         <TableRow>
-          <TableHead>
+          <TableHead className="w-1/3">
             <Trans>Date</Trans>
           </TableHead>
-          <TableHead>
+          <TableHead className="w-1/3">
             <Trans>Amount</Trans>
           </TableHead>
-          <TableHead>
+          <TableHead className="w-1/3">
             <Trans>Status</Trans>
-          </TableHead>
-          <TableHead>
-            <Trans>Reference</Trans>
           </TableHead>
           <TableHead className="w-px text-right" />
         </TableRow>
@@ -89,14 +86,6 @@ export function BillingHistoryTable() {
             </TableCell>
             <TableCell>
               <Badge variant={getStatusVariant(transaction.status)}>{getStatusLabel(transaction.status)}</Badge>
-              {transaction.refundStatus === "PartiallyRefunded" && (
-                <div className="mt-1 text-xs text-muted-foreground">
-                  <Trans>Partially refunded</Trans>
-                </div>
-              )}
-            </TableCell>
-            <TableCell className="max-w-48 truncate text-xs text-muted-foreground">
-              {transaction.providerPaymentId ?? transaction.provider ?? "-"}
             </TableCell>
             <TableCell className="text-right">
               <div className="flex justify-end gap-1">

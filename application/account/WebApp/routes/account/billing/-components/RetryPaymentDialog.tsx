@@ -34,12 +34,6 @@ interface RetryPaymentDialogProps {
   currency: string;
 }
 
-/**
- * Retry a failed billing-period charge against the saved PayFast token. The backend (POST
- * /api/account/billing/retry-pending-invoice) calls PayFast's /subscriptions/{token}/adhoc API.
- * If the token has been revoked / expired, the response includes a UUID for the lightbox so the
- * user can register a new card.
- */
 export function RetryPaymentDialog({
   isOpen,
   onOpenChange,
@@ -52,22 +46,20 @@ export function RetryPaymentDialog({
 
   const retryMutation = api.useMutation("post", "/api/account/billing/retry-pending-invoice", {
     onSuccess: (data) => {
-      if (data.paid) {
+      if (data.authorizationUrl) {
+        window.location.assign(data.authorizationUrl);
+      } else if (data.paid) {
         queryClient.invalidateQueries();
         toast.success(t`Pending payment completed`);
-        onOpenChange(false);
+      } else {
+        toast.error(t`Payment could not be processed. Please try again later.`);
         return;
       }
-
-      if (data.uuid && typeof window.payfast_do_onsite_payment === "function") {
-        window.payfast_do_onsite_payment({ uuid: data.uuid });
-        onOpenChange(false);
-        return;
-      }
-
-      toast.error(t`Payment could not be processed. Please update your card and try again.`);
+      onOpenChange(false);
     }
   });
+
+  const isPending = retryMutation.isPending;
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange} disablePointerDismissal={true} trackingTitle="Retry payment">
@@ -108,11 +100,11 @@ export function RetryPaymentDialog({
           </div>
         </DialogBody>
         <DialogFooter>
-          <DialogClose render={<Button type="reset" variant="secondary" disabled={retryMutation.isPending} />}>
+          <DialogClose render={<Button type="reset" variant="secondary" disabled={isPending} />}>
             <Trans>Cancel</Trans>
           </DialogClose>
-          <Button onClick={() => retryMutation.mutate({})} isPending={retryMutation.isPending}>
-            {retryMutation.isPending ? <Trans>Processing...</Trans> : <Trans>Pay</Trans>}
+          <Button onClick={() => retryMutation.mutate({})} isPending={isPending}>
+            {isPending ? <Trans>Processing...</Trans> : <Trans>Pay</Trans>}
           </Button>
         </DialogFooter>
       </DialogContent>

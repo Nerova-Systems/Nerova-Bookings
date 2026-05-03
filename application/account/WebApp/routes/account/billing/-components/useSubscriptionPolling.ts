@@ -5,8 +5,8 @@ import { toast } from "sonner";
 
 import { api, type Schemas } from "@/shared/lib/api/client";
 
-const PollIntervalMs = 1000;
-const PollTimeoutMs = 15_000;
+const WebhookPollIntervalMs = 1000;
+const WebhookTimeoutMs = 15_000;
 
 type SubscriptionData = Schemas["SubscriptionResponse"];
 
@@ -17,13 +17,32 @@ export function useSubscriptionPolling() {
   const successMessageRef = useRef<string>("");
   const onCompleteRef = useRef<(() => void) | null>(null);
   const conditionMetRef = useRef(false);
+  const isProcessingPendingEvents = useRef(false);
 
   const { data: subscription, isLoading } = api.useQuery(
     "get",
     "/api/account/subscriptions/current",
     {},
-    { refetchInterval: isPolling ? PollIntervalMs : false }
+    { refetchInterval: isPolling ? WebhookPollIntervalMs : false }
   );
+
+  const processPendingEventsMutation = api.useMutation("post", "/api/account/subscriptions/process-pending-events", {
+    onSuccess: () => {
+      isProcessingPendingEvents.current = false;
+      queryClient.invalidateQueries({ queryKey: ["get", "/api/account/subscriptions/current"] });
+    },
+    onError: () => {
+      isProcessingPendingEvents.current = false;
+    }
+  });
+  const { mutate: processPendingEvents } = processPendingEventsMutation;
+
+  useEffect(() => {
+    if (subscription?.hasPendingPaystackEvents && !isProcessingPendingEvents.current) {
+      isProcessingPendingEvents.current = true;
+      processPendingEvents({});
+    }
+  }, [subscription?.hasPendingPaystackEvents, processPendingEvents]);
 
   function startPolling(options: {
     check: (subscription: SubscriptionData) => boolean;
@@ -62,7 +81,7 @@ export function useSubscriptionPolling() {
         toast.warning(t`Your changes may take a moment to appear.`);
         onCompleteRef.current?.();
       }
-    }, PollTimeoutMs);
+    }, WebhookTimeoutMs);
     return () => clearTimeout(timeout);
   }, [isPolling, queryClient]);
 
