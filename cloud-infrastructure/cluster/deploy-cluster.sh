@@ -54,6 +54,14 @@ export GOOGLE_OAUTH_CLIENT_SECRET
 export STRIPE_PUBLISHABLE_KEY
 export STRIPE_API_KEY
 export STRIPE_WEBHOOK_SECRET
+# Set to "true" by the deploy workflow's "Detect Email Custom Domain Verification" step once it
+# observes the CustomerManaged email domain (eTLD+1 of DOMAIN_NAME) as fully verified. When true,
+# Bicep links the domain to the CommunicationServices resource and the SENDER_EMAIL_ADDRESS env var
+# on account-api/main-api flips from no-reply@<azurecomm.net> to no-reply@<apex of DOMAIN_NAME>.
+# Defaults to "false" so mail keeps flowing on the AzureManaged sender during the verification window
+# and so the first apply (which always precedes verification) does not fail trying to link an
+# unverified domain. Operators do not flip this manually.
+export USE_CUSTOM_EMAIL_DOMAIN="${USE_CUSTOM_EMAIL_DOMAIN:-false}"
 
 export CONTAINER_REGISTRY_NAME=$UNIQUE_PREFIX$ENVIRONMENT
 export GLOBAL_RESOURCE_GROUP_NAME="$UNIQUE_PREFIX-$ENVIRONMENT-global"
