@@ -238,10 +238,10 @@ test.describe("@comprehensive", () => {
     await step("Fetch en-US unknown user email from Mailpit & assert subject, HTML, and plaintext")(async () => {
       const mail = await fetchLatestMailByRecipient(enUnknownEmail);
 
-      expect(mail.subject).toBe("Unknown user tried to login to PlatformPlatform");
-      expect(mail.html).toContain("You or someone else tried to login to PlatformPlatform");
+      expect(mail.subject).toBe("No account found");
+      expect(mail.html).toContain("Is this the right email address?");
       expect(mail.html).toContain(enUnknownEmail);
-      expect(mail.text).toContain("You or someone else tried to login to PlatformPlatform");
+      expect(mail.text).toContain("Is this the right email address?");
       expect(mail.text).toContain(enUnknownEmail);
     })();
 
@@ -261,10 +261,10 @@ test.describe("@comprehensive", () => {
       async () => {
         const mail = await fetchLatestMailByRecipient(daUnknownEmail);
 
-        expect(mail.subject).toBe("Ukendt bruger forsøgte at logge ind på PlatformPlatform");
-        expect(mail.html).toContain("Du eller en anden forsøgte at logge ind på PlatformPlatform");
+        expect(mail.subject).toBe("Ingen konto fundet");
+        expect(mail.html).toContain("Er det den rigtige e-mailadresse?");
         expect(mail.html).toContain(daUnknownEmail);
-        expect(mail.text).toContain("Du eller en anden forsøgte at logge ind på PlatformPlatform");
+        expect(mail.text).toContain("Er det den rigtige e-mailadresse?");
         expect(mail.text).toContain(daUnknownEmail);
       }
     )();
