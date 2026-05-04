@@ -9,7 +9,7 @@
     "dev:setup": "npm run update-translations && npm run swagger",
     "format": "oxfmt && (oxlint --fix || true)",
     "lint": "oxlint --deny-warnings",
-    "publish": "npm run build && mkdir -p ../Api/publish/WebApp/dist/ && rsync -r ./dist/ ../Api/publish/WebApp/dist/",
+    "publish": "npm run build && mkdir -p ../Api/publish/WebApp/dist/ && rsync -r ./dist/ ../Api/publish/WebApp/dist/ && if [ -d ./emails/dist ]; then mkdir -p ../Api/publish/WebApp/emails/dist/ && rsync -r ./emails/dist/ ../Api/publish/WebApp/emails/dist/; fi",
     "swagger": "openapi-typescript shared/lib/api/Main.Api.json -o shared/lib/api/api.generated.d.ts --properties-required-by-default -t --enum --alphabetize",
     "update-translations": "lingui extract --clean && lingui compile --typescript"
   },
