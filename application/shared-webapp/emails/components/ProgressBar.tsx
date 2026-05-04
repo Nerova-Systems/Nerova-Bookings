@@ -6,7 +6,7 @@ type ProgressBarProps = {
   label?: string;
 };
 
-export function ProgressBar({ value, max = 100, label }: ProgressBarProps) {
+export function ProgressBar({ value, max = 100, label }: Readonly<ProgressBarProps>) {
   const clamped = Math.max(0, Math.min(value, max));
   const percent = max === 0 ? 0 : Math.round((clamped / max) * 100);
   return (

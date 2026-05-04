@@ -11,7 +11,7 @@ type ResendEmailLoginProps = {
   locale: string;
 };
 
-export default function ResendEmailLogin({ locale }: ResendEmailLoginProps) {
+export default function ResendEmailLogin({ locale }: Readonly<ResendEmailLoginProps>) {
   return (
     <TransactionalEmail locale={locale} preview="Your verification code (resend)">
       <Subject>

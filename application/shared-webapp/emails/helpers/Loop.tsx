@@ -13,12 +13,12 @@ type LoopProps<T> = {
 // Scriban requires explicit binding for field access (no implicit `this` like Handlebars #each), so
 // authors prepend `item.` to every field reference. In preview mode the loop iterates over `sample`
 // so the React Email dev server renders realistic rows.
-export function Loop<T>({ path, sample, children }: LoopProps<T>) {
+export function Loop<T>({ path, sample, children }: Readonly<LoopProps<T>>) {
   if (getEmailRenderMode() === "build") {
     return (
       <>
         {`{{ for item in ${path} }}`}
-        {children(sample[0] as T, 0)}
+        {children(sample[0], 0)}
         {"{{ end }}"}
       </>
     );
@@ -27,7 +27,7 @@ export function Loop<T>({ path, sample, children }: LoopProps<T>) {
   return (
     <>
       {sample.map((item, index) => (
-        <span key={index}>{children(item, index)}</span>
+        <span key={`${path}-${index}`}>{children(item, index)}</span>
       ))}
     </>
   );

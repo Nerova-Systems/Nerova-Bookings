@@ -16,7 +16,7 @@ type BadgeProps = {
   children: ReactNode;
 };
 
-export function Badge({ variant = "default", children }: BadgeProps) {
+export function Badge({ variant = "default", children }: Readonly<BadgeProps>) {
   return (
     <span className={`inline-block rounded-full px-[10px] py-[2px] text-[12px] font-medium ${variantClass[variant]}`}>
       {children}

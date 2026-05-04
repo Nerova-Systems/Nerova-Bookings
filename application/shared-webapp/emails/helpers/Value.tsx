@@ -9,7 +9,7 @@ type ValueProps = {
 // expression in a `<span>` with `dangerouslySetInnerHTML` so React doesn't HTML-escape Scriban pipe
 // expressions like `amount | format_currency "USD" "en-US"`. The plaintext converter strips the
 // wrapping span, so the final `.txt` output stays clean.
-export function Value({ path, sample }: ValueProps) {
+export function Value({ path, sample }: Readonly<ValueProps>) {
   if (getEmailRenderMode() !== "build") {
     return <>{sample}</>;
   }

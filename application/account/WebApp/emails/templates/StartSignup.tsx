@@ -11,7 +11,7 @@ type StartSignupProps = {
   locale: string;
 };
 
-export default function StartSignup({ locale }: StartSignupProps) {
+export default function StartSignup({ locale }: Readonly<StartSignupProps>) {
   return (
     <TransactionalEmail locale={locale} preview="Confirm your email address">
       <Subject>

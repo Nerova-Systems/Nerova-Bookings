@@ -11,7 +11,7 @@ type StartLoginProps = {
   locale: string;
 };
 
-export default function StartLogin({ locale }: StartLoginProps) {
+export default function StartLogin({ locale }: Readonly<StartLoginProps>) {
   return (
     <TransactionalEmail locale={locale} preview="PlatformPlatform login verification code">
       <Subject>

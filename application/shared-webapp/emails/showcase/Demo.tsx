@@ -20,7 +20,7 @@ type DemoProps = {
   locale: string;
 };
 
-export default function Demo({ locale }: DemoProps) {
+export default function Demo({ locale }: Readonly<DemoProps>) {
   return (
     <TransactionalEmail locale={locale} preview="Demo email exercising every helper">
       <Subject>

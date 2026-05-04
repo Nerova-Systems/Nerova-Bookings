@@ -116,9 +116,9 @@ async function renderTemplate(target: BuildTarget, templatePath: string, name: s
     // eslint-disable-next-line no-await-in-loop
     const text = await render(wrapped, {
       plainText: true,
-      // The default html-to-text formatter uppercases <h1>/<h2> content; that mangles Handlebars
-      // expressions like {{firstName}} into {{FIRSTNAME}}, breaking runtime substitution. Pin every
-      // heading level to its original casing so the .txt output preserves the template variables.
+      // The default html-to-text formatter uppercases <h1>/<h2> content; that mangles Scriban
+      // expressions like {{ firstName }} into {{ FIRSTNAME }}, breaking runtime substitution. Pin
+      // every heading level to its original casing so the .txt output preserves the template variables.
       htmlToTextOptions: {
         selectors: [
           { selector: "h1", options: { uppercase: false } },
@@ -136,7 +136,9 @@ async function renderTemplate(target: BuildTarget, templatePath: string, name: s
   }
 }
 
-main().catch((error) => {
+try {
+  await main();
+} catch (error) {
   console.error("[emails] Build failed:", error);
   process.exit(1);
-});
+}

@@ -5,7 +5,6 @@
   "license": "MIT",
   "type": "module",
   "exports": {
-    ".": "./index.ts",
     "./components/*": "./components/*",
     "./helpers/*": "./helpers/*",
     "./build/*": "./build/*",
@@ -28,7 +27,6 @@
     "@repo/build": "*",
     "@repo/config": "*",
     "@repo/infrastructure": "*",
-    "handlebars": "4.7.9",
     "tsx": "4.21.0"
   }
 }

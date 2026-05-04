@@ -18,7 +18,7 @@ type AvatarProps = {
   size?: AvatarSize;
 };
 
-export function Avatar({ src, alt, fallback, size = "default" }: AvatarProps) {
+export function Avatar({ src, alt, fallback, size = "default" }: Readonly<AvatarProps>) {
   const { dimension, fontSize } = sizePx[size];
   if (src) {
     return (
@@ -56,7 +56,7 @@ type AvatarGroupProps = {
 
 // Children render side-by-side. Use plain inline-block on each child rather than inline-flex
 // so legacy clients (Outlook) lay them out correctly.
-export function AvatarGroup({ children }: AvatarGroupProps) {
+export function AvatarGroup({ children }: Readonly<AvatarGroupProps>) {
   return (
     <Section>
       <span style={{ display: "inline-block" }}>{children}</span>

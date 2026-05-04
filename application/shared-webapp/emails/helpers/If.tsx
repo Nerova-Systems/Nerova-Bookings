@@ -18,7 +18,7 @@ type ElseProps = {
 // preview mode. The truthy branch is everything outside <Else>, and the falsy branch is the
 // (optional) <Else> child. Authors write a single <If> with a nested <Else> sibling rather than a
 // paired component.
-export function If({ path, sample, children }: IfProps) {
+export function If({ path, sample, children }: Readonly<IfProps>) {
   const { truthy, falsy } = splitElseBranch(children);
 
   if (getEmailRenderMode() === "build") {
@@ -40,7 +40,7 @@ export function If({ path, sample, children }: IfProps) {
   return <>{sample ? truthy : (falsy ?? null)}</>;
 }
 
-export function Else({ children }: ElseProps) {
+export function Else({ children }: Readonly<ElseProps>) {
   return <>{children}</>;
 }
 

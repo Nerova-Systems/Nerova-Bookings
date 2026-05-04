@@ -10,7 +10,7 @@ type UnknownUserProps = {
   locale: string;
 };
 
-export default function UnknownUser({ locale }: UnknownUserProps) {
+export default function UnknownUser({ locale }: Readonly<UnknownUserProps>) {
   return (
     <TransactionalEmail locale={locale} preview="Unknown user tried to login to PlatformPlatform">
       <Subject>

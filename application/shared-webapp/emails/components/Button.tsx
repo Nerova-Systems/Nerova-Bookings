@@ -22,7 +22,7 @@ type ButtonProps = {
   children: ReactNode;
 };
 
-export function Button({ href, variant = "default", className, children }: ButtonProps) {
+export function Button({ href, variant = "default", className, children }: Readonly<ButtonProps>) {
   return (
     <ReactEmailButton
       href={href}

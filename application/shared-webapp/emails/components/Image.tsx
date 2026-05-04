@@ -8,6 +8,6 @@ type ImageProps = {
   className?: string;
 };
 
-export function Image({ src, alt, width, height, className }: ImageProps) {
+export function Image({ src, alt, width, height, className }: Readonly<ImageProps>) {
   return <Img src={src} alt={alt} width={width} height={height} className={className} />;
 }

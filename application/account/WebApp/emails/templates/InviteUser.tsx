@@ -10,7 +10,7 @@ type InviteUserProps = {
   locale: string;
 };
 
-export default function InviteUser({ locale }: InviteUserProps) {
+export default function InviteUser({ locale }: Readonly<InviteUserProps>) {
   return (
     <TransactionalEmail locale={locale} preview="You have been invited to PlatformPlatform">
       <Subject>

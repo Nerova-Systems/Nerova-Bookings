@@ -18,7 +18,7 @@ type AlertProps = {
   children: ReactNode;
 };
 
-export function Alert({ variant = "default", title, children }: AlertProps) {
+export function Alert({ variant = "default", title, children }: Readonly<AlertProps>) {
   return (
     <Section className={`my-[16px] rounded-[8px] border border-solid p-[16px] text-[14px] ${variantClass[variant]}`}>
       {title ? <div className="mb-[4px] font-semibold">{title}</div> : null}

@@ -60,7 +60,7 @@ html { background-color: #f4f4f5; }
 }
 `.trim();
 
-export function TransactionalEmail({ locale, preview, children }: TransactionalEmailProps) {
+export function TransactionalEmail({ locale, preview, children }: Readonly<TransactionalEmailProps>) {
   return (
     <Tailwind>
       <Html lang={locale}>

@@ -17,7 +17,7 @@ type HeadingProps = {
   children: ReactNode;
 };
 
-export function Heading({ level = 1, className, children }: HeadingProps) {
+export function Heading({ level = 1, className, children }: Readonly<HeadingProps>) {
   return (
     <ReactEmailHeading
       as={`h${level}`}

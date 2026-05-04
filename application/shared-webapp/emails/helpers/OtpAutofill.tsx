@@ -10,7 +10,7 @@ type OtpAutofillProps = {
 // `display:none` (compatible with most clients; falls back to inline-but-styled if stripped). The
 // real value of this element is the plaintext-rendered counterpart that the build pipeline emits as
 // the last line of the .txt artifact — iOS reads from plaintext for autofill detection.
-export function OtpAutofill({ code, domain }: OtpAutofillProps) {
+export function OtpAutofill({ code, domain }: Readonly<OtpAutofillProps>) {
   const isBuild = getEmailRenderMode() === "build";
   const codeValue = isBuild ? `{{ ${code} }}` : code;
   const domainValue = isBuild ? `{{ ${domain} }}` : domain;

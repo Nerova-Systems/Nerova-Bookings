@@ -39,11 +39,10 @@ import { Children, isValidElement } from "react";
 type TransProps = {
   id?: string;
   context?: string;
-  comment?: string;
   children: ReactNode;
 };
 
-export function Trans({ id, context, children }: TransProps): ReactElement | null {
+export function Trans({ id, context, children }: Readonly<TransProps>): ReactElement | null {
   const { message, values, components } = serializeChildren(children);
   const finalId = id ?? generateMessageId(message, context);
   return <RuntimeTrans id={finalId} message={message} values={values} components={components} />;
