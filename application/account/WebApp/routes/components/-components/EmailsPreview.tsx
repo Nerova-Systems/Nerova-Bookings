@@ -12,7 +12,7 @@ export function EmailsPreview() {
   const [template, setTemplate] = useState<Template>("StartSignup");
   const [locale, setLocale] = useState<Locale>("en-US");
 
-  const iframeSrc = `/emails/assets/${template}.${locale}.html`;
+  const iframeSrc = `/emails/assets/${template}.${locale}.preview.html`;
 
   return (
     <div className="flex flex-col gap-4">

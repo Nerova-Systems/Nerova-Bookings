@@ -20,6 +20,25 @@ const applicationRoot = resolve(sharedEmailsRoot, "..", "..");
 const SYSTEMS = ["account", "main"] as const;
 const LOCALES = Object.keys(i18nConfig);
 
+// Sample values used to substitute hand-written Scriban placeholders ({{ Name }}) that cannot go
+// through the JSX helpers — typically those that live inside href attributes or Lingui <Trans>
+// strings (see emails.md "Exception — HTML attributes and Trans strings"). Applied only to the
+// preview render output, never to the production .html/.txt artifacts.
+const PREVIEW_PLACEHOLDER_VALUES: Record<string, string> = {
+  SignupUrl: "https://app.platformplatform.net/signup",
+  LoginUrl: "https://app.platformplatform.net/login",
+  TenantName: "Acme Corp"
+};
+
+function substitutePreviewPlaceholders(input: string): string {
+  let result = input;
+  for (const [name, value] of Object.entries(PREVIEW_PLACEHOLDER_VALUES)) {
+    // Scriban accepts both `{{Name}}` and `{{ Name }}` — replace both forms.
+    result = result.replaceAll(`{{${name}}}`, value).replaceAll(`{{ ${name} }}`, value);
+  }
+  return result;
+}
+
 type BuildTarget = {
   label: string;
   // Folder containing lingui.config.ts and the translations/ directory.
@@ -111,28 +130,42 @@ async function renderTemplate(target: BuildTarget, templatePath: string, name: s
 
     const wrapped = createElement(I18nProvider, { i18n }, createElement(Template, { locale }));
 
-    // eslint-disable-next-line no-await-in-loop
-    const html = await render(wrapped, { pretty: false });
-    // eslint-disable-next-line no-await-in-loop
-    const text = await render(wrapped, {
-      plainText: true,
-      // The default html-to-text formatter uppercases <h1>/<h2> content; that mangles Scriban
-      // expressions like {{ firstName }} into {{ FIRSTNAME }}, breaking runtime substitution. Pin
-      // every heading level to its original casing so the .txt output preserves the template variables.
-      htmlToTextOptions: {
-        selectors: [
-          { selector: "h1", options: { uppercase: false } },
-          { selector: "h2", options: { uppercase: false } },
-          { selector: "h3", options: { uppercase: false } },
-          { selector: "h4", options: { uppercase: false } }
-        ]
-      }
-    });
+    // Two render passes per template/locale:
+    //   "build"   → helpers emit Scriban placeholders ({{ Var }}). The backend renders these at
+    //              runtime against the real model and sends the final email.
+    //   "preview" → helpers substitute their `sample` props with realistic dummy values. The in-app
+    //              preview page (BackOffice → Components → Emails) iframes these files so designers
+    //              can visually inspect the templates without sending live emails.
+    // Both outputs share the same .po catalogs, so translations only need to be entered once.
+    for (const mode of ["build", "preview"] as const) {
+      process.env.EMAIL_RENDER_MODE = mode;
 
-    writeFileSync(join(target.distDir, `${name}.${locale}.html`), html, "utf8");
-    writeFileSync(join(target.distDir, `${name}.${locale}.txt`), text, "utf8");
+      // eslint-disable-next-line no-await-in-loop
+      const html = await render(wrapped, { pretty: false });
+      // eslint-disable-next-line no-await-in-loop
+      const text = await render(wrapped, {
+        plainText: true,
+        // The default html-to-text formatter uppercases <h1>/<h2> content; that mangles Scriban
+        // expressions like {{ firstName }} into {{ FIRSTNAME }}, breaking runtime substitution. Pin
+        // every heading level to its original casing so the .txt output preserves the template variables.
+        htmlToTextOptions: {
+          selectors: [
+            { selector: "h1", options: { uppercase: false } },
+            { selector: "h2", options: { uppercase: false } },
+            { selector: "h3", options: { uppercase: false } },
+            { selector: "h4", options: { uppercase: false } }
+          ]
+        }
+      });
 
-    console.log(`[emails]   wrote ${name}.${locale}.{html,txt}`);
+      const suffix = mode === "build" ? "" : ".preview";
+      const finalHtml = mode === "preview" ? substitutePreviewPlaceholders(html) : html;
+      const finalText = mode === "preview" ? substitutePreviewPlaceholders(text) : text;
+      writeFileSync(join(target.distDir, `${name}.${locale}${suffix}.html`), finalHtml, "utf8");
+      writeFileSync(join(target.distDir, `${name}.${locale}${suffix}.txt`), finalText, "utf8");
+
+      console.log(`[emails]   wrote ${name}.${locale}${suffix}.{html,txt}`);
+    }
   }
 }
 

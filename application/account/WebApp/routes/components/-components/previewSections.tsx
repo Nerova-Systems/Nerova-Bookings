@@ -34,8 +34,7 @@ export const componentsSections: readonly PreviewSection[] = [
   { hash: "resizable", label: <Trans>Resizable panels</Trans>, icon: LayoutDashboardIcon },
   { hash: "sidebar", label: <Trans>Sidebar</Trans>, icon: PanelLeftIcon },
   { hash: "tabs", label: <Trans>Tabs</Trans>, icon: SquareMousePointerIcon },
-  { hash: "media", label: <Trans>Media</Trans>, icon: ImageIcon },
-  { hash: "emails", label: <Trans>Emails</Trans>, icon: MailIcon }
+  { hash: "media", label: <Trans>Media</Trans>, icon: ImageIcon }
 ];
 
 export const examplesSections: readonly PreviewSection[] = [
@@ -48,6 +47,9 @@ export const examplesSections: readonly PreviewSection[] = [
 
 export const chartsIcon = BarChart3Icon;
 export const chartsLabel = <Trans>Charts</Trans>;
+
+export const emailsIcon = MailIcon;
+export const emailsLabel = <Trans>Emails</Trans>;
 
 export function findSectionLabel(sections: readonly PreviewSection[], hash: string): React.ReactNode {
   return sections.find((section) => section.hash === hash)?.label ?? sections[0].label;

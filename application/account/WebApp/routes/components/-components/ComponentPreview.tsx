@@ -3,7 +3,6 @@ import { useEffect, useState } from "react";
 import { AlertsBadgesPreview } from "./AlertsBadgesPreview";
 import { ButtonsPreview } from "./ButtonsPreview";
 import { ControlsPreview } from "./ControlsPreview";
-import { EmailsPreview } from "./EmailsPreview";
 import { MediaTab } from "./MediaTab";
 import { NavigationPreview } from "./NavigationPreview";
 import { OverlaysPreview } from "./OverlaysPreview";
@@ -22,8 +21,7 @@ const sections: Record<string, React.ReactNode> = {
   resizable: <ResizablePreview />,
   sidebar: <SidebarPreview />,
   tabs: <TabsPreview />,
-  media: <MediaTab />,
-  emails: <EmailsPreview />
+  media: <MediaTab />
 };
 
 export function ComponentPreview() {
