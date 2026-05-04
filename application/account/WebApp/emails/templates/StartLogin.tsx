@@ -36,7 +36,7 @@ export default function StartLogin({ locale }: Readonly<StartLoginProps>) {
         </Text>
       </Section>
 
-      <Text className="email-muted m-[0px] mt-[16px] text-center text-[12px] leading-[20px] text-[#64748b]">
+      <Text className="email-muted m-[0px] mt-[16px] text-center text-[13px] leading-[20px] text-[#64748b]">
         <Trans>If you didn't try to log in, you can safely ignore this email — your account is secure.</Trans>
       </Text>
     </TransactionalEmail>

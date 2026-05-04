@@ -16,7 +16,7 @@ import { Img, Section } from "@react-email/components";
 // renderer to size the image correctly even when CSS is stripped.
 export function Header() {
   return (
-    <Section className="email-header bg-[#0f172a] px-[32px] py-[24px] text-center">
+    <Section className="email-header bg-[#11161f] px-[32px] py-[24px] text-center">
       <Img
         src="{{PublicUrl}}/email/logo-640x88.png"
         alt="PlatformPlatform"

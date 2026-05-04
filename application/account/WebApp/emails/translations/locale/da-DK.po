@@ -16,6 +16,9 @@ msgstr ""
 msgid "<0/> invited you to join PlatformPlatform."
 msgstr "<0/> har inviteret dig til at deltage i PlatformPlatform."
 
+msgid "An open-source platform for building enterprise-grade, multi-tenant B2B SaaS products."
+msgstr "Open source-platform til at bygge enterprise-grade, multi-tenant B2B-SaaS-produkter."
+
 msgid "Compliance"
 msgstr "Compliance"
 
@@ -46,11 +49,23 @@ msgstr "Hvis du ikke har forsøgt at logge ind, kan du roligt ignorere denne e-m
 msgid "If you don't recognize the sender, you can safely ignore this email."
 msgstr "Hvis du ikke kender afsenderen, kan du roligt ignorere denne e-mail."
 
+msgid "Is this the right email address?"
+msgstr "Er det den rigtige e-mailadresse?"
+
+msgid "It looks like there isn't a PlatformPlatform account tied to <0><1/></0>."
+msgstr "Det ser ud til, at der ikke er en PlatformPlatform-konto knyttet til <0><1/></0>."
+
+msgid "No account found"
+msgstr "Ingen konto fundet"
+
 msgid "PlatformPlatform login verification code"
 msgstr "PlatformPlatform-bekræftelseskode til login"
 
 msgid "Privacy"
 msgstr "Privatliv"
+
+msgid "Sign up for an account"
+msgstr "Opret en konto"
 
 msgid "Terms"
 msgstr "Vilkår"
@@ -58,26 +73,17 @@ msgstr "Vilkår"
 msgid "This code will expire in a few minutes."
 msgstr "Denne kode udløber om få minutter."
 
-msgid "This request was made by entering your mail <0/>, but we have no record of such user."
-msgstr "Anmodningen blev foretaget ved indtastning af din e-mail <0/>, men vi har ingen registrering af en sådan bruger."
-
-msgid "To gain access, <0>go to this page in your open browser</0> and login using <1/>."
-msgstr "For at få adgang skal du <0>gå til denne side i din åbne browser</0> og logge ind med <1/>."
-
-msgid "Unknown user tried to login to PlatformPlatform"
-msgstr "Ukendt bruger forsøgte at logge ind på PlatformPlatform"
+msgid "To gain access, <0>go to this page in your open browser</0> and login using <1><2/></1>."
+msgstr "For at få adgang skal du <0>gå til denne side i din åbne browser</0> og logge ind med <1><2/></1>."
 
 msgid "We're sending this code again as you requested."
 msgstr "Vi sender denne kode igen, som du anmodede om."
 
-msgid "You can sign up for an account on <0>'{{'SignupUrl'}}'</0>."
-msgstr "Du kan oprette en konto på <0>'{{'SignupUrl'}}'</0>."
+msgid "You can try again with a different email, or sign up for a new account."
+msgstr "Du kan prøve igen med en anden e-mailadresse eller oprette en ny konto."
 
 msgid "You have been invited to join '{{'TenantName'}}' on PlatformPlatform"
 msgstr "Du er inviteret til at deltage i '{{'TenantName'}}' på PlatformPlatform"
-
-msgid "You or someone else tried to login to PlatformPlatform"
-msgstr "Du eller en anden forsøgte at logge ind på PlatformPlatform"
 
 msgid "Your confirmation code is below"
 msgstr "Din bekræftelseskode står herunder"

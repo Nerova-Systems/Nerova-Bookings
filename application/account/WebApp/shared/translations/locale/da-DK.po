@@ -1490,9 +1490,6 @@ msgstr "Indlæser..."
 msgid "Local seasonal"
 msgstr "Lokalt og sæsonbestemt"
 
-msgid "Locale"
-msgstr "Sprog"
-
 msgid "Log in"
 msgstr "Log ind"
 
@@ -1673,8 +1670,8 @@ msgstr "Navigation og genveje"
 msgid "NavigationMenu"
 msgstr "NavigationMenu"
 
-msgid "Need a new building block? Browse the MIT-licensed recipes at <0>react.email/components<1/></0> and copy the source into <2>application/shared-webapp/emails/components/</2>."
-msgstr "Brug for en ny komponent? Gennemse de MIT-licenserede opskrifter på <0>react.email/components<1/></0>, og kopiér koden ind i <2>application/shared-webapp/emails/components/</2>."
+msgid "Need a new component? Copy a recipe from <0>react.email/components<1/></0>."
+msgstr "Brug for en ny komponent? Kopiér en opskrift fra <0>react.email/components<1/></0>."
 
 msgid "Need help? Our support team is here to assist you."
 msgstr "Har du brug for hjælp? Vores supportteam er klart til at hjælpe."

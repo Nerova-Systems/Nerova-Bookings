@@ -29,11 +29,15 @@ export default function InviteUser({ locale }: Readonly<InviteUserProps>) {
           <Link href="{{LoginUrl}}" className="email-link text-[#0f172a] underline">
             go to this page in your open browser
           </Link>{" "}
-          and login using <Value path="Email" sample="invitee@example.com" />.
+          and login using{" "}
+          <strong>
+            <Value path="Email" sample="invitee@example.com" />
+          </strong>
+          .
         </Trans>
       </Text>
 
-      <Text className="email-muted m-[0px] mt-[16px] text-center text-[12px] leading-[20px] text-[#64748b]">
+      <Text className="email-muted m-[0px] mt-[16px] text-center text-[13px] leading-[20px] text-[#64748b]">
         <Trans>If you don't recognize the sender, you can safely ignore this email.</Trans>
       </Text>
     </TransactionalEmail>

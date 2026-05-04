@@ -36,7 +36,7 @@ export default function StartSignup({ locale }: Readonly<StartSignupProps>) {
         </Text>
       </Section>
 
-      <Text className="email-muted m-[0px] mt-[16px] text-center text-[12px] leading-[20px] text-[#64748b]">
+      <Text className="email-muted m-[0px] mt-[16px] text-center text-[13px] leading-[20px] text-[#64748b]">
         <Trans>If you didn't request to sign up, you can safely ignore this email.</Trans>
       </Text>
     </TransactionalEmail>

@@ -16,6 +16,9 @@ msgstr ""
 msgid "<0/> invited you to join PlatformPlatform."
 msgstr "<0/> invited you to join PlatformPlatform."
 
+msgid "An open-source platform for building enterprise-grade, multi-tenant B2B SaaS products."
+msgstr "An open-source platform for building enterprise-grade, multi-tenant B2B SaaS products."
+
 msgid "Compliance"
 msgstr "Compliance"
 
@@ -46,11 +49,23 @@ msgstr "If you didn't try to log in, you can safely ignore this email — your a
 msgid "If you don't recognize the sender, you can safely ignore this email."
 msgstr "If you don't recognize the sender, you can safely ignore this email."
 
+msgid "Is this the right email address?"
+msgstr "Is this the right email address?"
+
+msgid "It looks like there isn't a PlatformPlatform account tied to <0><1/></0>."
+msgstr "It looks like there isn't a PlatformPlatform account tied to <0><1/></0>."
+
+msgid "No account found"
+msgstr "No account found"
+
 msgid "PlatformPlatform login verification code"
 msgstr "PlatformPlatform login verification code"
 
 msgid "Privacy"
 msgstr "Privacy"
+
+msgid "Sign up for an account"
+msgstr "Sign up for an account"
 
 msgid "Terms"
 msgstr "Terms"
@@ -58,26 +73,17 @@ msgstr "Terms"
 msgid "This code will expire in a few minutes."
 msgstr "This code will expire in a few minutes."
 
-msgid "This request was made by entering your mail <0/>, but we have no record of such user."
-msgstr "This request was made by entering your mail <0/>, but we have no record of such user."
-
-msgid "To gain access, <0>go to this page in your open browser</0> and login using <1/>."
-msgstr "To gain access, <0>go to this page in your open browser</0> and login using <1/>."
-
-msgid "Unknown user tried to login to PlatformPlatform"
-msgstr "Unknown user tried to login to PlatformPlatform"
+msgid "To gain access, <0>go to this page in your open browser</0> and login using <1><2/></1>."
+msgstr "To gain access, <0>go to this page in your open browser</0> and login using <1><2/></1>."
 
 msgid "We're sending this code again as you requested."
 msgstr "We're sending this code again as you requested."
 
-msgid "You can sign up for an account on <0>'{{'SignupUrl'}}'</0>."
-msgstr "You can sign up for an account on <0>'{{'SignupUrl'}}'</0>."
+msgid "You can try again with a different email, or sign up for a new account."
+msgstr "You can try again with a different email, or sign up for a new account."
 
 msgid "You have been invited to join '{{'TenantName'}}' on PlatformPlatform"
 msgstr "You have been invited to join '{{'TenantName'}}' on PlatformPlatform"
-
-msgid "You or someone else tried to login to PlatformPlatform"
-msgstr "You or someone else tried to login to PlatformPlatform"
 
 msgid "Your confirmation code is below"
 msgstr "Your confirmation code is below"

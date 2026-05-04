@@ -163,10 +163,10 @@ public sealed class StartEmailLoginTests : EndpointBaseTest<AccountDbContext>
         await EmailClient.Received(1).SendAsync(
             Arg.Is<EmailMessage>(m =>
                 m.Recipient == email.ToLower() &&
-                m.Subject == "Unknown user tried to login to PlatformPlatform" &&
-                m.HtmlBody.Contains("You or someone else tried to login to PlatformPlatform") &&
-                m.HtmlBody.Contains("This request was made by entering your mail") &&
-                m.PlainTextBody.Contains("You or someone else tried to login to PlatformPlatform") &&
+                m.Subject == "No account found" &&
+                m.HtmlBody.Contains("Is this the right email address?") &&
+                m.HtmlBody.Contains("PlatformPlatform account tied to") &&
+                m.PlainTextBody.Contains("Is this the right email address?") &&
                 m.PlainTextBody.Contains(email.ToLower())
             ),
             Arg.Any<CancellationToken>()
@@ -247,10 +247,10 @@ public sealed class StartEmailLoginTests : EndpointBaseTest<AccountDbContext>
         await EmailClient.Received(1).SendAsync(
             Arg.Is<EmailMessage>(m =>
                 m.Recipient == email.ToLower() &&
-                m.Subject == "Unknown user tried to login to PlatformPlatform" &&
-                m.HtmlBody.Contains("You or someone else tried to login to PlatformPlatform") &&
-                m.HtmlBody.Contains("This request was made by entering your mail") &&
-                m.PlainTextBody.Contains("You or someone else tried to login to PlatformPlatform") &&
+                m.Subject == "No account found" &&
+                m.HtmlBody.Contains("Is this the right email address?") &&
+                m.HtmlBody.Contains("PlatformPlatform account tied to") &&
+                m.PlainTextBody.Contains("Is this the right email address?") &&
                 m.PlainTextBody.Contains(email.ToLower())
             ),
             Arg.Any<CancellationToken>()

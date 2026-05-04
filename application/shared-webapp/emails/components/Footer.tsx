@@ -1,38 +1,49 @@
 import { Trans } from "@lingui/react/macro";
-import { Link, Section, Text } from "@react-email/components";
+import { Hr, Link, Section, Text } from "@react-email/components";
 
-// Adapted from react.email/components/footer-with-one-column (MIT). Stripped of the brand logo and
-// social-icon row since PlatformPlatform does not yet host those assets — the footer keeps the
-// universal pieces only: brand name and a row of legal links. Per-template "if you didn't do this"
-// reassurance lives inside each template's body, not in the footer, so it can be specific to the
-// action that triggered the email.
+// Adapted from react.email/components (MIT) — composes the official `<Section>`, `<Hr>`, `<Text>`,
+// and `<Link>` primitives into a transactional-email footer with three layers:
 //
-// TransactionalEmail renders this OUTSIDE the white card so it visually appears as a separate footer
-// section (Stripe/Linear/Notion convention).
+//   1. Brand identity — wordmark name + a one-liner explaining what PlatformPlatform is, so the
+//      recipient sees the brand context even if they don't recall signing up.
+//   2. <Hr> divider — react.email/components/divider styled with `.email-separator` so dark mode
+//      gets the existing `border-top-color: #404040` flip from EMAIL_STYLES.
+//   3. Legal links — Privacy / Terms / DPA / Compliance, each routed through the {{PublicUrl}}
+//      Scriban global so localhost dev, staging, and production all link to their own host.
 //
-// Legal links use the Scriban {{PublicUrl}} global injected by ScribanEmailRenderer at render time
-// from the PUBLIC_URL env var. localhost dev, staging, and production each link to their own host.
+// TransactionalEmail renders this OUTSIDE the white card so it visually appears as a separate
+// footer band (Stripe / Linear / Notion convention).
 export function Footer() {
   return (
-    <Section className="email-footer mx-auto mb-[40px] w-full max-w-[600px] px-[32px] text-center">
-      <Text className="m-[0px] text-[14px] leading-[20px] font-semibold text-[#0f172a]">PlatformPlatform</Text>
-      <Text className="email-muted m-[0px] mt-[8px] text-[12px] leading-[20px] text-[#64748b]">
-        <Link href="{{PublicUrl}}/legal/privacy" className="email-link text-[#64748b] underline">
-          <Trans>Privacy</Trans>
-        </Link>
-        {" · "}
-        <Link href="{{PublicUrl}}/legal/terms" className="email-link text-[#64748b] underline">
-          <Trans>Terms</Trans>
-        </Link>
-        {" · "}
-        <Link href="{{PublicUrl}}/legal/dpa" className="email-link text-[#64748b] underline">
-          <Trans>DPA</Trans>
-        </Link>
-        {" · "}
-        <Link href="{{PublicUrl}}/legal/compliance" className="email-link text-[#64748b] underline">
-          <Trans>Compliance</Trans>
-        </Link>
-      </Text>
+    <Section className="email-footer mx-auto mb-[40px] w-full max-w-[600px] text-center">
+      <Section>
+        <Text className="m-[0px] text-[14px] leading-[20px] font-semibold">PlatformPlatform</Text>
+        <Text className="email-muted m-[0px] mt-[4px] text-[13px] leading-[20px] text-[#64748b]">
+          <Trans>An open-source platform for building enterprise-grade, multi-tenant B2B SaaS products.</Trans>
+        </Text>
+      </Section>
+
+      <Hr className="email-separator my-[16px] border-t border-[#e2e8f0]" />
+
+      <Section>
+        <Text className="email-muted m-[0px] text-[13px] leading-[20px] text-[#64748b]">
+          <Link href="{{PublicUrl}}/legal/privacy" className="email-link text-[#64748b] underline">
+            <Trans>Privacy</Trans>
+          </Link>
+          {" · "}
+          <Link href="{{PublicUrl}}/legal/terms" className="email-link text-[#64748b] underline">
+            <Trans>Terms</Trans>
+          </Link>
+          {" · "}
+          <Link href="{{PublicUrl}}/legal/dpa" className="email-link text-[#64748b] underline">
+            <Trans>DPA</Trans>
+          </Link>
+          {" · "}
+          <Link href="{{PublicUrl}}/legal" className="email-link text-[#64748b] underline">
+            <Trans>Compliance</Trans>
+          </Link>
+        </Text>
+      </Section>
     </Section>
   );
 }

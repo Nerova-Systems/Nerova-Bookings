@@ -36,11 +36,11 @@ export default function ResendEmailLogin({ locale }: Readonly<ResendEmailLoginPr
         </Text>
       </Section>
 
-      <Text className="email-muted m-[0px] text-center text-[12px] leading-[20px] text-[#64748b]">
+      <Text className="email-muted m-[0px] text-center text-[13px] leading-[20px] text-[#64748b]">
         <Trans>This code will expire in a few minutes.</Trans>
       </Text>
 
-      <Text className="email-muted m-[0px] mt-[16px] text-center text-[12px] leading-[20px] text-[#64748b]">
+      <Text className="email-muted m-[0px] mt-[16px] text-center text-[13px] leading-[20px] text-[#64748b]">
         <Trans>If you didn't request a new code, you can safely ignore this email.</Trans>
       </Text>
     </TransactionalEmail>
