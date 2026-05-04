@@ -15,6 +15,7 @@ param mainVersion string
 param applicationInsightsConnectionString string
 param communicationServicesDataLocation string = 'europe'
 param mailSenderDisplayName string = 'PlatformPlatform'
+param useCustomEmailDomain bool = false
 param revisionSuffix string
 
 @description('Object ID of the Entra ID security group for PostgreSQL administration')
@@ -135,6 +136,20 @@ module stripeSecrets '../modules/key-vault-secrets.bicep' = if (!empty(stripeApi
   }
 }
 
+// Derive the email custom domain as the eTLD+1 (apex) of the cluster's ingress domainName. Cluster
+// ingress is typically a CNAME, and DNS rules forbid TXT/other records at the same name as a CNAME
+// (RFC 1034). The apex of a domain cannot itself be a CNAME, so SPF (TXT) and DKIM CNAMEs at
+// sub-subdomains of the apex can coexist freely with whatever else lives on the apex.
+// Apple Mail OTP autofill matches on eTLD+1, so a sender at the apex still autofills on any subdomain
+// of the same apex (e.g., sender no-reply@platformplatform.net autofills forms on
+// staging.platformplatform.net or app.platformplatform.net).
+// The "last two parts" derivation is correct for single-suffix TLDs (.net, .com, .io). It is wrong
+// for multi-part public suffixes like .co.uk - replace with an explicit param if that ever applies.
+var domainNameParts = split(domainName, '.')
+var emailDomainName = empty(domainName)
+  ? ''
+  : '${domainNameParts[length(domainNameParts) - 2]}.${domainNameParts[length(domainNameParts) - 1]}'
+
 module communicationService '../modules/communication-services.bicep' = {
   scope: clusterResourceGroup
   name: '${clusterResourceGroupName}-communication-services'
@@ -144,6 +159,8 @@ module communicationService '../modules/communication-services.bicep' = {
     dataLocation: communicationServicesDataLocation
     mailSenderDisplayName: mailSenderDisplayName
     keyVaultName: keyVault.outputs.name
+    emailDomainName: emailDomainName
+    useCustomEmailDomain: useCustomEmailDomain
   }
 }
 

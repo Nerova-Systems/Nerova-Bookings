@@ -7,6 +7,7 @@ param globalResourceGroupName = readEnvironmentVariable('GLOBAL_RESOURCE_GROUP_N
 param environment = readEnvironmentVariable('ENVIRONMENT')
 param containerRegistryName = readEnvironmentVariable('CONTAINER_REGISTRY_NAME')
 param domainName = readEnvironmentVariable('DOMAIN_NAME', '')
+param useCustomEmailDomain = readEnvironmentVariable('USE_CUSTOM_EMAIL_DOMAIN', 'false') == 'true'
 param backOfficeDomainName = readEnvironmentVariable('BACK_OFFICE_DOMAIN_NAME', '')
 param backOfficeEntraClientId = readEnvironmentVariable('BACK_OFFICE_ENTRA_CLIENT_ID')
 param backOfficeAdminsGroupId = readEnvironmentVariable('BACK_OFFICE_ADMINS_GROUP_ID', '')
