@@ -1,0 +1,64 @@
+model = "gpt-5.5"
+model_reasoning_effort = "high"
+personality = "pragmatic"
+
+# .claude/CLAUDE.md points at ../AGENTS.md. Codex reads AGENTS.md by default;
+# keep CLAUDE.md as a compatibility fallback if AGENTS.md is absent in a clone.
+project_doc_fallback_filenames = ["CLAUDE.md"]
+project_root_markers = [".git"]
+
+[features]
+multi_agent = true
+codex_hooks = true
+
+[mcp_servers.linear]
+url = "https://mcp.linear.app/mcp"
+tool_timeout_sec = 120
+
+[mcp_servers.developer-cli]
+command = "dotnet"
+args = ["run", "--no-build", "--project", "developer-cli", "mcp"]
+cwd = "C:\\Users\\colin\\dev\\NerovaBookings"
+startup_timeout_sec = 30
+tool_timeout_sec = 600
+
+[mcp_servers.aspire]
+command = "aspire"
+args = ["agent", "mcp"]
+cwd = "C:\\Users\\colin\\dev\\NerovaBookings"
+startup_timeout_sec = 30
+tool_timeout_sec = 120
+
+[mcp_servers.shadcn]
+command = "npx"
+args = ["-y", "shadcn@latest", "mcp"]
+cwd = "C:\\Users\\colin\\dev\\NerovaBookings"
+startup_timeout_sec = 30
+tool_timeout_sec = 120
+
+[mcp_servers.azure-staging]
+command = "powershell"
+args = ["-NoProfile", "-ExecutionPolicy", "Bypass", "-Command", "$env:AZURE_SUBSCRIPTION_ID=$env:AZURE_SUBSCRIPTION_ID_STAGING; npx -y @azure/mcp@latest server start --read-only --namespace monitor --namespace applicationinsights --namespace subscription --namespace group"]
+cwd = "C:\\Users\\colin\\dev\\NerovaBookings"
+env_vars = ["AZURE_TENANT_ID", "AZURE_SUBSCRIPTION_ID_STAGING"]
+startup_timeout_sec = 60
+tool_timeout_sec = 180
+
+[mcp_servers.azure-production]
+command = "powershell"
+args = ["-NoProfile", "-ExecutionPolicy", "Bypass", "-Command", "$env:AZURE_SUBSCRIPTION_ID=$env:AZURE_SUBSCRIPTION_ID_PRODUCTION; npx -y @azure/mcp@latest server start --read-only --namespace monitor --namespace applicationinsights --namespace subscription --namespace group"]
+cwd = "C:\\Users\\colin\\dev\\NerovaBookings"
+env_vars = ["AZURE_TENANT_ID", "AZURE_SUBSCRIPTION_ID_PRODUCTION"]
+startup_timeout_sec = 60
+tool_timeout_sec = 180
+
+[mcp_servers.nango]
+url = "https://api.nango.dev/mcp"
+bearer_token_env_var = "NANGO_TOOLBOX_SECRET_KEY"
+env_http_headers = { "connection-id" = "NANGO_CONNECTION_ID", "provider-config-key" = "NANGO_PROVIDER_CONFIG_KEY" }
+tool_timeout_sec = 180
+
+[mcp_servers.stitch]
+url = "https://stitch.googleapis.com/mcp"
+env_http_headers = { "X-Goog-Api-Key" = "STITCH_API_KEY" }
+tool_timeout_sec = 180

@@ -1,0 +1,130 @@
+# Repo-specific command policy for NerovaBookings.
+#
+# Codex .rules files are command execution policies. The Markdown files copied
+# from .claude/rules remain coding-guideline references; they are intentionally
+# not renamed to .rules because Markdown is not valid rule syntax.
+
+prefix_rule(
+    pattern = ["dotnet", "run", "--project", "developer-cli", "--", ["build", "format", "lint", "test", "e2e", "aspire-restart", "aspire-stop"]],
+    decision = "allow",
+    justification = "NerovaBookings code workflows must go through the developer CLI.",
+    match = [
+        "dotnet run --project developer-cli -- build",
+        "dotnet run --project developer-cli -- test --no-build",
+        "dotnet run --project developer-cli -- aspire-restart",
+    ],
+)
+
+prefix_rule(
+    pattern = ["dotnet", "run", "--no-build", "--project", "developer-cli", "mcp"],
+    decision = "allow",
+    justification = "Project MCP access is exposed by the developer CLI.",
+    match = [
+        "dotnet run --no-build --project developer-cli mcp",
+    ],
+)
+
+prefix_rule(
+    pattern = ["dotnet", ["build", "test", "restore", "publish", "pack"]],
+    decision = "forbidden",
+    justification = "Use the developer CLI skills instead of direct dotnet build/test/package commands.",
+    match = [
+        "dotnet build",
+        "dotnet test application/main/Tests",
+        "dotnet restore",
+    ],
+)
+
+prefix_rule(
+    pattern = ["npm"],
+    decision = "forbidden",
+    justification = "Use the developer CLI skills instead of direct npm commands.",
+    match = [
+        "npm install",
+        "npm test",
+        "npm run build",
+    ],
+)
+
+prefix_rule(
+    pattern = ["npx", ["vite", "tsc", "eslint", "playwright", "oxlint"]],
+    decision = "forbidden",
+    justification = "Use the developer CLI skills instead of direct frontend tooling commands.",
+    match = [
+        "npx vite build",
+        "npx tsc --noEmit",
+        "npx playwright test",
+    ],
+)
+
+prefix_rule(
+    pattern = ["npx", "-y", ["vite", "tsc", "eslint", "playwright", "oxlint"]],
+    decision = "forbidden",
+    justification = "Use the developer CLI skills instead of direct frontend tooling commands.",
+    match = [
+        "npx -y playwright test",
+        "npx -y tsc --noEmit",
+    ],
+    not_match = [
+        "npx -y @azure/mcp@latest server start --read-only",
+        "npx -y shadcn@latest mcp",
+    ],
+)
+
+prefix_rule(
+    pattern = ["aspire", ["run", "restart"]],
+    decision = "forbidden",
+    justification = "Use the aspire-restart skill; direct Aspire run/restart bypasses the repo workflow.",
+    match = [
+        "aspire run",
+        "aspire restart",
+    ],
+)
+
+prefix_rule(
+    pattern = ["aspire", "agent", "mcp"],
+    decision = "allow",
+    justification = "The Aspire MCP server is the approved way to inspect Aspire resources.",
+    match = [
+        "aspire agent mcp",
+    ],
+)
+
+prefix_rule(
+    pattern = ["git", ["commit", "push", "tag", "merge", "rebase"]],
+    decision = "prompt",
+    justification = "Git history mutations require explicit user instruction for this repo.",
+    match = [
+        "git commit -m \"Configure Codex\"",
+        "git push",
+        "git rebase main",
+    ],
+)
+
+prefix_rule(
+    pattern = ["git", "reset", "--hard"],
+    decision = "forbidden",
+    justification = "Never discard worktree changes without a direct user request and a safer targeted command.",
+    match = [
+        "git reset --hard",
+        "git reset --hard HEAD~1",
+    ],
+)
+
+prefix_rule(
+    pattern = ["git", "checkout", "--"],
+    decision = "forbidden",
+    justification = "Do not revert files implicitly; inspect and edit deliberately.",
+    match = [
+        "git checkout -- application/main",
+    ],
+)
+
+prefix_rule(
+    pattern = ["Remove-Item", "-Recurse", "-Force"],
+    decision = "prompt",
+    justification = "Recursive forced deletion must be reviewed before it runs.",
+    match = [
+        "Remove-Item -Recurse -Force .workspace",
+    ],
+)
