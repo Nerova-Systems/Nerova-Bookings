@@ -135,8 +135,12 @@ public class LintCommand : Command
             File.Delete(resultJsonPath);
         }
 
+        // Exclude rendered email artifacts from inspection. React Email emits Outlook-required table
+        // attributes (align, border, cellPadding, cellSpacing) that JetBrains flags as obsolete HTML5,
+        // but those attributes are mandatory for cross-client email rendering and cannot be removed.
+        // The dist folder is gitignored build output, not source.
         ProcessHelper.Run(
-            $"dotnet jb inspectcode {solutionFile.Name} --no-build --no-restore --output=result.json --severity=SUGGESTION",
+            $"dotnet jb inspectcode {solutionFile.Name} --no-build --no-restore --output=result.json --severity=SUGGESTION --exclude=**/emails/dist/**",
             solutionFile.Directory!.FullName,
             "Linting",
             quiet

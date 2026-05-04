@@ -5,6 +5,7 @@ using Microsoft.Extensions.Options;
 using SharedKernel.Authentication;
 using SharedKernel.Authentication.BackOfficeIdentity;
 using SharedKernel.Configuration;
+using SharedKernel.Emails;
 using SharedKernel.ExecutionContext;
 using SharedKernel.OpenApi;
 using SharedKernel.SinglePageApp;
@@ -60,6 +61,8 @@ if (SharedInfrastructureConfiguration.IsRunningInAzure)
 app.UseBackOfficeDevStaticProxy(backOfficeHostname);
 
 app.UseApiServices(); // Add common configuration for all APIs like Swagger, HSTS, and DeveloperExceptionPage.
+
+app.UseEmailStaticFiles("WebApp");
 
 if (SharedInfrastructureConfiguration.IsRunningInAzure)
 {

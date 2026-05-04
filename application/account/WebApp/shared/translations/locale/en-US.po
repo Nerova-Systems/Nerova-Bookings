@@ -1066,6 +1066,9 @@ msgstr "Email me when a new device signs in."
 msgid "Email support"
 msgstr "Email support"
 
+msgid "Emails"
+msgstr "Emails"
+
 msgid "Empty"
 msgstr "Empty"
 
@@ -1668,6 +1671,9 @@ msgstr "Navigation and shortcuts"
 
 msgid "NavigationMenu"
 msgstr "NavigationMenu"
+
+msgid "Need a new component? Copy a recipe from <0>react.email/components<1/></0>."
+msgstr "Need a new component? Copy a recipe from <0>react.email/components<1/></0>."
 
 msgid "Need help? Our support team is here to assist you."
 msgstr "Need help? Our support team is here to assist you."
@@ -2554,6 +2560,9 @@ msgstr "Tell us a bit about yourself to get started."
 
 msgid "Tell us more..."
 msgstr "Tell us more..."
+
+msgid "Template"
+msgstr "Template"
 
 msgid "Terms"
 msgstr "Terms"

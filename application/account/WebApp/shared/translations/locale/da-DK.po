@@ -716,7 +716,7 @@ msgid "Complete your payment to activate your subscription."
 msgstr "Gennemfør din betaling for at aktivere dit abonnement."
 
 msgid "Compliance"
-msgstr "Overholdelse"
+msgstr "Compliance"
 
 msgid "Components"
 msgstr "Komponenter"
@@ -1063,6 +1063,9 @@ msgstr ""
 
 msgid "Email support"
 msgstr "E-mail-support"
+
+msgid "Emails"
+msgstr "E-mails"
 
 msgid "Empty"
 msgstr "Tom"
@@ -1666,6 +1669,9 @@ msgstr "Navigation og genveje"
 
 msgid "NavigationMenu"
 msgstr "NavigationMenu"
+
+msgid "Need a new component? Copy a recipe from <0>react.email/components<1/></0>."
+msgstr "Brug for en ny komponent? Kopiér en opskrift fra <0>react.email/components<1/></0>."
 
 msgid "Need help? Our support team is here to assist you."
 msgstr "Har du brug for hjælp? Vores supportteam er klart til at hjælpe."
@@ -2552,6 +2558,9 @@ msgstr "Fortæl os lidt om dig selv for at komme i gang."
 
 msgid "Tell us more..."
 msgstr "Fortæl os mere..."
+
+msgid "Template"
+msgstr "Skabelon"
 
 msgid "Terms"
 msgstr "Vilkår"

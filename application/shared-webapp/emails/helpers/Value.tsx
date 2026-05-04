@@ -1,0 +1,18 @@
+import { getEmailRenderMode } from "./renderMode";
+
+type ValueProps = {
+  path: string;
+  sample: string | number;
+};
+
+// Emits {{ path }} in the built artifact and `sample` in the dev preview. The build wraps the raw
+// expression in a `<span>` with `dangerouslySetInnerHTML` so React doesn't HTML-escape Scriban pipe
+// expressions like `amount | format_currency "USD" "en-US"`. The plaintext converter strips the
+// wrapping span, so the final `.txt` output stays clean.
+export function Value({ path, sample }: Readonly<ValueProps>) {
+  if (getEmailRenderMode() !== "build") {
+    return <>{sample}</>;
+  }
+
+  return <span dangerouslySetInnerHTML={{ __html: `{{ ${path} }}` }} />;
+}

@@ -10,7 +10,7 @@ import { Link } from "@repo/ui/components/Link";
 import { useEffect, useState } from "react";
 
 type PreviewHeaderProps = Readonly<{
-  currentPage: "components" | "examples" | "charts";
+  currentPage: "components" | "examples" | "charts" | "emails";
   tabLabels: Record<string, React.ReactNode>;
   defaultTab: string;
   rightContent?: React.ReactNode;
@@ -19,7 +19,8 @@ type PreviewHeaderProps = Readonly<{
 const sectionConfig = {
   components: { href: "/components", label: <Trans>Components</Trans> },
   examples: { href: "/components/examples", label: <Trans>Examples</Trans> },
-  charts: { href: "/components/charts", label: <Trans>Charts</Trans> }
+  charts: { href: "/components/charts", label: <Trans>Charts</Trans> },
+  emails: { href: "/components/emails", label: <Trans>Emails</Trans> }
 } as const;
 
 export function PreviewHeader({ currentPage, tabLabels, defaultTab, rightContent }: PreviewHeaderProps) {

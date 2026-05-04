@@ -16,6 +16,7 @@ import createClient from "openapi-react-query";
 
 import { createAuthenticationMiddleware } from "../auth/AuthenticationMiddleware";
 import { getHasPendingAuthSync } from "../auth/AuthSyncService";
+import { preferredLocaleKey } from "../translations/constants";
 import { type HttpError, normalizeError } from "./errorHandler";
 import { DEFAULT_TIMEOUT } from "./httpClient";
 
@@ -45,6 +46,17 @@ function createHttpMiddleware() {
       request.headers.set("x-zoom-level", localStorage.getItem("zoom-level") ?? "1");
 
       request.headers.set("x-theme", document.documentElement.classList.contains("dark") ? "Dark" : "Light");
+
+      // Send the user's preferred locale so the backend can localize responses (notably
+      // transactional emails for anonymous flows where there is no User row to read Locale from).
+      // Uses a custom X-Locale header rather than Accept-Language because the Fetch spec lists
+      // Accept-Language as a forbidden request header, so Firefox and WebKit silently drop it
+      // when set from JavaScript (only Chromium currently allows it). The backend's
+      // UseRequestLocalization middleware is configured with a matching X-Locale culture provider.
+      const preferredLocale = localStorage.getItem(preferredLocaleKey);
+      if (preferredLocale) {
+        request.headers.set("X-Locale", preferredLocale);
+      }
 
       // Handle request timeout with AbortController
       const abortController = new AbortController();

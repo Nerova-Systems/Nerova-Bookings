@@ -7,6 +7,7 @@ using FluentAssertions;
 using Microsoft.AspNetCore.Identity;
 using NSubstitute;
 using SharedKernel.Authentication;
+using SharedKernel.Integrations.Email;
 using SharedKernel.Tests;
 using SharedKernel.Tests.Persistence;
 using SharedKernel.Validation;
@@ -38,9 +39,46 @@ public sealed class StartEmailSignupTests : EndpointBaseTest<AccountDbContext>
         TelemetryEventsCollectorSpy.AreAllEventsDispatched.Should().BeTrue();
 
         await EmailClient.Received(1).SendAsync(
-            email.ToLower(),
-            "Confirm your email address",
-            Arg.Is<string>(s => s.Contains("Your confirmation code is below")),
+            Arg.Is<EmailMessage>(m =>
+                m.Recipient == email.ToLower() &&
+                m.Subject == "Confirm your email address" &&
+                m.HtmlBody.Contains("Your confirmation code is below") &&
+                m.HtmlBody.Contains("Enter it in your open browser window. It is only valid for a few minutes.") &&
+                m.PlainTextBody.Contains("Your confirmation code is below") &&
+                m.PlainTextBody.TrimEnd().Contains("@localhost #")
+            ),
+            Arg.Any<CancellationToken>()
+        );
+    }
+
+    [Fact]
+    public async Task StartSignup_WhenLocaleHeaderIsDanish_ShouldSendDanishConfirmationEmail()
+    {
+        // Anonymous signups have no User row to read Locale from, so the email locale comes from
+        // the request culture - which UseRequestLocalization populates from the X-Locale header
+        // sent by the SPA's API client (Accept-Language is a forbidden header in browsers, so the
+        // SPA cannot set it from JS). Verifies the full chain: header → IRequestCultureFeature →
+        // UserInfo.Locale → EmailTemplateBase.Locale → dist/StartSignup.da-DK.html.
+        // Arrange
+        var email = Faker.Internet.UniqueEmail();
+        var command = new StartEmailSignupCommand(email);
+        AnonymousHttpClient.DefaultRequestHeaders.Remove("X-Locale");
+        AnonymousHttpClient.DefaultRequestHeaders.Add("X-Locale", "da-DK");
+
+        // Act
+        var response = await AnonymousHttpClient.PostAsJsonAsync("/api/account/authentication/email/signup/start", command);
+
+        // Assert
+        response.EnsureSuccessStatusCode();
+
+        await EmailClient.Received(1).SendAsync(
+            Arg.Is<EmailMessage>(m =>
+                m.Recipient == email.ToLower() &&
+                m.Subject == "Bekræft din e-mailadresse" &&
+                m.HtmlBody.Contains("Din bekræftelseskode står herunder") &&
+                m.PlainTextBody.Contains("Din bekræftelseskode står herunder") &&
+                m.PlainTextBody.TrimEnd().Contains("@localhost #")
+            ),
             Arg.Any<CancellationToken>()
         );
     }
@@ -63,7 +101,7 @@ public sealed class StartEmailSignupTests : EndpointBaseTest<AccountDbContext>
         await response.ShouldHaveErrorStatusCode(HttpStatusCode.BadRequest, expectedErrors);
 
         TelemetryEventsCollectorSpy.AreAllEventsDispatched.Should().BeFalse();
-        await EmailClient.DidNotReceive().SendAsync(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(), CancellationToken.None);
+        await EmailClient.DidNotReceive().SendAsync(Arg.Any<EmailMessage>(), CancellationToken.None);
     }
 
     [Fact]
@@ -99,6 +137,6 @@ public sealed class StartEmailSignupTests : EndpointBaseTest<AccountDbContext>
         await response.ShouldHaveErrorStatusCode(HttpStatusCode.TooManyRequests, "Too many attempts to confirm this email address. Please try again later.");
 
         TelemetryEventsCollectorSpy.AreAllEventsDispatched.Should().BeFalse();
-        await EmailClient.DidNotReceive().SendAsync(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(), CancellationToken.None);
+        await EmailClient.DidNotReceive().SendAsync(Arg.Any<EmailMessage>(), CancellationToken.None);
     }
 }

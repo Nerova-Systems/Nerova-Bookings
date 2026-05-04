@@ -12,12 +12,14 @@ public class BuildCommand : Command
     {
         var backendOption = new Option<bool>("--backend", "-b") { Description = "Build backend code" };
         var frontendOption = new Option<bool>("--frontend", "-f") { Description = "Build frontend code" };
+        var emailsOption = new Option<bool>("--emails", "-e") { Description = "Build email templates" };
         var cliOption = new Option<bool>("--cli", "-c") { Description = "Build developer-cli code" };
         var selfContainedSystemOption = new Option<string?>("<self-contained-system>", "--self-contained-system", "-s") { Description = "The name of the self-contained system to build (e.g., main, account, back-office)" };
         var quietOption = new Option<bool>("--quiet", "-q") { Description = "Minimal output mode" };
 
         Options.Add(backendOption);
         Options.Add(frontendOption);
+        Options.Add(emailsOption);
         Options.Add(cliOption);
         Options.Add(selfContainedSystemOption);
         Options.Add(quietOption);
@@ -25,6 +27,7 @@ public class BuildCommand : Command
         SetAction(parseResult => Execute(
                 parseResult.GetValue(backendOption),
                 parseResult.GetValue(frontendOption),
+                parseResult.GetValue(emailsOption),
                 parseResult.GetValue(cliOption),
                 parseResult.GetValue(selfContainedSystemOption),
                 parseResult.GetValue(quietOption)
@@ -32,22 +35,26 @@ public class BuildCommand : Command
         );
     }
 
-    private static void Execute(bool backend, bool frontend, bool developerCli, string? selfContainedSystem, bool quiet)
+    private static void Execute(bool backend, bool frontend, bool emails, bool developerCli, string? selfContainedSystem, bool quiet)
     {
-        var noFlags = !backend && !frontend && !developerCli;
+        var noFlags = !backend && !frontend && !emails && !developerCli;
         var buildBackend = backend || noFlags;
         var buildFrontend = frontend || noFlags;
         var buildDeveloperCli = developerCli || noFlags;
+        // --frontend and the no-flag default both build emails as part of the turbo run, so the
+        // standalone email build only fires when the user passes --emails without --frontend.
+        var buildEmailsStandalone = emails && !buildFrontend;
 
         // Ensure prerequisites based on what we're building
         if (buildBackend || buildDeveloperCli) Prerequisite.Ensure(Prerequisite.Dotnet);
-        if (buildFrontend) Prerequisite.Ensure(Prerequisite.Node);
+        if (buildFrontend || buildEmailsStandalone) Prerequisite.Ensure(Prerequisite.Node);
 
         try
         {
             var startTime = Stopwatch.GetTimestamp();
             var backendTime = TimeSpan.Zero;
             var frontendTime = TimeSpan.Zero;
+            var emailsTime = TimeSpan.Zero;
             var developerCliTime = TimeSpan.Zero;
 
             if (buildBackend)
@@ -69,11 +76,21 @@ public class BuildCommand : Command
                 frontendTime = Stopwatch.GetElapsedTime(startTime) - backendTime;
             }
 
+            if (buildEmailsStandalone)
+            {
+                if (!quiet) AnsiConsole.MarkupLine("[blue]Ensure npm packages are up to date...[/]");
+                ProcessHelper.Run("npm install --silent", Configuration.ApplicationFolder, "npm install", quiet);
+
+                if (!quiet) AnsiConsole.MarkupLine("\n[blue]Running emails build...[/]");
+                RunEmailsBuild(quiet);
+                emailsTime = Stopwatch.GetElapsedTime(startTime) - backendTime - frontendTime;
+            }
+
             if (buildDeveloperCli)
             {
                 if (!quiet) AnsiConsole.MarkupLine("[blue]Running developer-cli build...[/]");
                 RunDeveloperCliBuild(quiet);
-                developerCliTime = Stopwatch.GetElapsedTime(startTime) - backendTime - frontendTime;
+                developerCliTime = Stopwatch.GetElapsedTime(startTime) - backendTime - frontendTime - emailsTime;
             }
 
             if (quiet)
@@ -84,12 +101,13 @@ public class BuildCommand : Command
             {
                 AnsiConsole.MarkupLine($"[green]Build completed successfully in {Stopwatch.GetElapsedTime(startTime).Format()}[/]");
 
-                var multipleTargets = (buildBackend ? 1 : 0) + (buildFrontend ? 1 : 0) + (buildDeveloperCli ? 1 : 0) > 1;
+                var multipleTargets = (buildBackend ? 1 : 0) + (buildFrontend ? 1 : 0) + (buildEmailsStandalone ? 1 : 0) + (buildDeveloperCli ? 1 : 0) > 1;
                 if (multipleTargets)
                 {
                     var timingLines = new List<string>();
                     if (buildBackend) timingLines.Add($"Backend:       [green]{backendTime.Format()}[/]");
                     if (buildFrontend) timingLines.Add($"Frontend:      [green]{frontendTime.Format()}[/]");
+                    if (buildEmailsStandalone) timingLines.Add($"Emails:        [green]{emailsTime.Format()}[/]");
                     if (buildDeveloperCli) timingLines.Add($"Developer CLI: [green]{developerCliTime.Format()}[/]");
                     AnsiConsole.MarkupLine(string.Join(Environment.NewLine, timingLines));
                 }
@@ -191,5 +209,28 @@ public class BuildCommand : Command
     {
         var solutionFile = new FileInfo(Path.Combine(Configuration.CliFolder, "DeveloperCli.slnx"));
         ProcessHelper.Run($"dotnet build {solutionFile.Name}", solutionFile.Directory?.FullName, "Build", quiet);
+    }
+
+    private static void RunEmailsBuild(bool quiet)
+    {
+        // The full frontend build (turbo build) already runs the @repo/emails package's build script;
+        // when --emails is the only target we filter turbo down to that workspace so authors can iterate
+        // on templates without paying for the whole SPA build.
+        var command = "npx turbo build --filter=@repo/emails";
+        if (quiet)
+        {
+            var result = ProcessHelper.ExecuteQuietly(command, Configuration.ApplicationFolder);
+            if (!result.Success)
+            {
+                Console.WriteLine("Emails build failed.");
+                Console.WriteLine();
+                Console.WriteLine($"Full output: {result.TempFilePathWithSize}");
+                Environment.Exit(1);
+            }
+        }
+        else
+        {
+            ProcessHelper.StartProcess(command, Configuration.ApplicationFolder);
+        }
     }
 }

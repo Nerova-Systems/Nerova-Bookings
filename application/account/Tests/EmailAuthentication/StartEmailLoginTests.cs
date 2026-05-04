@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Identity;
 using NSubstitute;
 using SharedKernel.Authentication;
 using SharedKernel.Domain;
+using SharedKernel.Integrations.Email;
 using SharedKernel.Tests;
 using SharedKernel.Tests.Persistence;
 using SharedKernel.Validation;
@@ -41,9 +42,57 @@ public sealed class StartEmailLoginTests : EndpointBaseTest<AccountDbContext>
         TelemetryEventsCollectorSpy.AreAllEventsDispatched.Should().BeTrue();
 
         await EmailClient.Received(1).SendAsync(
-            email.ToLower(),
-            "PlatformPlatform login verification code",
-            Arg.Is<string>(s => s.Contains("Your confirmation code is below")),
+            Arg.Is<EmailMessage>(m =>
+                m.Recipient == email.ToLower() &&
+                m.Subject == "PlatformPlatform login verification code" &&
+                m.HtmlBody.Contains("Your confirmation code is below") &&
+                m.HtmlBody.Contains("Enter it in your open browser window. It is only valid for a few minutes.") &&
+                m.PlainTextBody.Contains("Your confirmation code is below") &&
+                m.PlainTextBody.Contains("Enter it in your open browser window. It is only valid for a few minutes.") &&
+                m.PlainTextBody.TrimEnd().Contains("@localhost #")
+            ),
+            Arg.Any<CancellationToken>()
+        );
+    }
+
+    [Fact]
+    public async Task StartEmailLogin_WhenUserHasDanishLocale_ShouldSendDanishLoginEmail()
+    {
+        // Arrange
+        var email = Faker.Internet.UniqueEmail().ToLowerInvariant();
+        Connection.Insert("users", [
+                ("tenant_id", DatabaseSeeder.Tenant1.Id.ToString()),
+                ("id", UserId.NewId().ToString()),
+                ("created_at", TimeProvider.GetUtcNow().AddDays(-30)),
+                ("modified_at", null),
+                ("deleted_at", null),
+                ("email", email),
+                ("first_name", Faker.Person.FirstName),
+                ("last_name", Faker.Person.LastName),
+                ("title", null),
+                ("role", nameof(UserRole.Member)),
+                ("email_confirmed", true),
+                ("avatar", JsonSerializer.Serialize(new Avatar())),
+                ("locale", "da-DK"),
+                ("external_identities", "[]")
+            ]
+        );
+        var command = new StartEmailLoginCommand(email);
+
+        // Act
+        var response = await AnonymousHttpClient.PostAsJsonAsync("/api/account/authentication/email/login/start", command);
+
+        // Assert
+        response.EnsureSuccessStatusCode();
+
+        await EmailClient.Received(1).SendAsync(
+            Arg.Is<EmailMessage>(m =>
+                m.Recipient == email &&
+                m.Subject == "PlatformPlatform-bekræftelseskode til login" &&
+                m.HtmlBody.Contains("Din bekræftelseskode står herunder") &&
+                m.PlainTextBody.Contains("Din bekræftelseskode står herunder") &&
+                m.PlainTextBody.TrimEnd().Contains("@localhost #")
+            ),
             Arg.Any<CancellationToken>()
         );
     }
@@ -65,7 +114,7 @@ public sealed class StartEmailLoginTests : EndpointBaseTest<AccountDbContext>
         await response.ShouldHaveErrorStatusCode(HttpStatusCode.BadRequest, expectedErrors);
 
         TelemetryEventsCollectorSpy.AreAllEventsDispatched.Should().BeFalse();
-        await EmailClient.DidNotReceive().SendAsync(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<CancellationToken>());
+        await EmailClient.DidNotReceive().SendAsync(Arg.Any<EmailMessage>(), Arg.Any<CancellationToken>());
     }
 
     [Theory]
@@ -90,7 +139,7 @@ public sealed class StartEmailLoginTests : EndpointBaseTest<AccountDbContext>
         await response.ShouldHaveErrorStatusCode(HttpStatusCode.BadRequest, expectedErrors);
 
         TelemetryEventsCollectorSpy.AreAllEventsDispatched.Should().BeFalse(scenario);
-        await EmailClient.DidNotReceive().SendAsync(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<CancellationToken>());
+        await EmailClient.DidNotReceive().SendAsync(Arg.Any<EmailMessage>(), Arg.Any<CancellationToken>());
     }
 
     [Fact]
@@ -112,9 +161,14 @@ public sealed class StartEmailLoginTests : EndpointBaseTest<AccountDbContext>
         TelemetryEventsCollectorSpy.CollectedEvents.Should().BeEmpty();
 
         await EmailClient.Received(1).SendAsync(
-            email.ToLower(),
-            "Unknown user tried to login to PlatformPlatform",
-            Arg.Is<string>(s => s.Contains("You or someone else tried to login to PlatformPlatform")),
+            Arg.Is<EmailMessage>(m =>
+                m.Recipient == email.ToLower() &&
+                m.Subject == "No account found" &&
+                m.HtmlBody.Contains("Is this the right email address?") &&
+                m.HtmlBody.Contains("PlatformPlatform account tied to") &&
+                m.PlainTextBody.Contains("Is this the right email address?") &&
+                m.PlainTextBody.Contains(email.ToLower())
+            ),
             Arg.Any<CancellationToken>()
         );
     }
@@ -151,7 +205,7 @@ public sealed class StartEmailLoginTests : EndpointBaseTest<AccountDbContext>
         await response.ShouldHaveErrorStatusCode(HttpStatusCode.TooManyRequests, "Too many attempts to confirm this email address. Please try again later.");
 
         TelemetryEventsCollectorSpy.AreAllEventsDispatched.Should().BeFalse();
-        await EmailClient.DidNotReceive().SendAsync(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(), CancellationToken.None);
+        await EmailClient.DidNotReceive().SendAsync(Arg.Any<EmailMessage>(), CancellationToken.None);
     }
 
     [Fact]
@@ -191,9 +245,14 @@ public sealed class StartEmailLoginTests : EndpointBaseTest<AccountDbContext>
         TelemetryEventsCollectorSpy.CollectedEvents.Should().BeEmpty();
 
         await EmailClient.Received(1).SendAsync(
-            email.ToLower(),
-            "Unknown user tried to login to PlatformPlatform",
-            Arg.Is<string>(s => s.Contains("You or someone else tried to login to PlatformPlatform")),
+            Arg.Is<EmailMessage>(m =>
+                m.Recipient == email.ToLower() &&
+                m.Subject == "No account found" &&
+                m.HtmlBody.Contains("Is this the right email address?") &&
+                m.HtmlBody.Contains("PlatformPlatform account tied to") &&
+                m.PlainTextBody.Contains("Is this the right email address?") &&
+                m.PlainTextBody.Contains(email.ToLower())
+            ),
             Arg.Any<CancellationToken>()
         );
     }

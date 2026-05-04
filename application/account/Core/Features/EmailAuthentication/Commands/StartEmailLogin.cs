@@ -1,10 +1,14 @@
 using Account.Features.EmailAuthentication.Domain;
+using Account.Features.EmailAuthentication.EmailTemplates;
 using Account.Features.EmailAuthentication.Shared;
 using Account.Features.Users.Domain;
 using FluentValidation;
 using JetBrains.Annotations;
 using SharedKernel.Cqrs;
+using SharedKernel.Emails;
+using SharedKernel.ExecutionContext;
 using SharedKernel.Integrations.Email;
+using SharedKernel.SinglePageApp;
 using SharedKernel.Telemetry;
 using SharedKernel.Validation;
 
@@ -29,41 +33,44 @@ public sealed class StartEmailLoginValidator : AbstractValidator<StartEmailLogin
 
 public sealed class StartEmailLoginHandler(
     IUserRepository userRepository,
+    IEmailRenderer emailRenderer,
     IEmailClient emailClient,
     StartEmailConfirmation startEmailConfirmation,
+    IExecutionContext executionContext,
     ITelemetryEventsCollector events
 ) : IRequestHandler<StartEmailLoginCommand, Result<StartEmailLoginResponse>>
 {
-    private const string UnknownUserEmailTemplate =
-        """
-        <h1 style="text-align:center;font-family=sans-serif;font-size:20px">You or someone else tried to login to PlatformPlatform</h1>
-        <p style="text-align:center;font-family=sans-serif;font-size:16px">This request was made by entering your mail {email}, but we have no record of such user.</p>
-        <p style="text-align:center;font-family=sans-serif;font-size:16px">You can sign up for an account on www.platformplatform.net/signup.</p>
-        """;
-
-    private const string LoginEmailTemplate =
-        """
-        <h1 style="text-align:center;font-family=sans-serif;font-size:20px">Your confirmation code is below</h1>
-        <p style="text-align:center;font-family=sans-serif;font-size:16px">Enter it in your open browser window. It is only valid for a few minutes.</p>
-        <p style="text-align:center;font-family=sans-serif;font-size:40px;background:#f5f4f5">{oneTimePassword}</p>
-        """;
-
     public async Task<Result<StartEmailLoginResponse>> Handle(StartEmailLoginCommand command, CancellationToken cancellationToken)
     {
         var user = await userRepository.GetUserByEmailUnfilteredAsync(command.Email, cancellationToken);
 
         if (user is null)
         {
-            await emailClient.SendAsync(command.Email.ToLower(), "Unknown user tried to login to PlatformPlatform",
-                UnknownUserEmailTemplate.Replace("{email}", command.Email),
+            var anonymousLocale = executionContext.UserInfo.Locale ?? "en-US";
+            var publicUrl = Environment.GetEnvironmentVariable(SinglePageAppConfiguration.PublicUrlKey) ?? string.Empty;
+            var signupUrl = string.IsNullOrEmpty(publicUrl) ? "/signup" : $"{publicUrl}/signup";
+            var unknownTemplate = new UnknownUserEmailTemplate(
+                anonymousLocale,
+                new UnknownUserEmailModel(command.Email, signupUrl)
+            );
+            var unknownRendered = emailRenderer.RenderEmail(unknownTemplate);
+            await emailClient.SendAsync(
+                new EmailMessage(command.Email.ToLower(), unknownRendered.Subject, unknownRendered.HtmlBody, unknownRendered.PlainTextBody),
                 cancellationToken
             );
 
             return new StartEmailLoginResponse(EmailLoginId.NewId(), EmailLogin.ValidForSeconds);
         }
 
+        var locale = string.IsNullOrEmpty(user.Locale) ? "en-US" : user.Locale;
+        var domain = EmailDomainHelper.GetPublicHost();
+        var expiryMinutes = EmailLogin.ValidForSeconds / 60;
+
         var result = await startEmailConfirmation.StartAsync(
-            user.Email, "PlatformPlatform login verification code", LoginEmailTemplate, EmailLoginType.Login, cancellationToken
+            user.Email,
+            EmailLoginType.Login,
+            oneTimePassword => new StartLoginEmailTemplate(locale, new StartLoginEmailModel(oneTimePassword, domain, expiryMinutes)),
+            cancellationToken
         );
 
         if (!result.IsSuccess) return Result<StartEmailLoginResponse>.From(result);

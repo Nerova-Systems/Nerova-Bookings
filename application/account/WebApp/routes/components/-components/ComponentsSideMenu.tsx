@@ -19,7 +19,14 @@ import { BlocksIcon, LayersIcon } from "lucide-react";
 import { CollapsibleMenu, useHash } from "./ComponentsCollapsibleMenu";
 import { PreviewAvatarMenu } from "./PreviewAvatarMenu";
 import { PreviewMobileMenu } from "./PreviewMobileMenu";
-import { chartsIcon as ChartsIcon, chartsLabel, componentsSections, examplesSections } from "./previewSections";
+import {
+  chartsIcon as ChartsIcon,
+  chartsLabel,
+  componentsSections,
+  emailsIcon as EmailsIcon,
+  emailsLabel,
+  examplesSections
+} from "./previewSections";
 
 const normalizePath = (path: string): string => path.replace(/\/$/, "") || "/";
 
@@ -29,6 +36,7 @@ export function ComponentsSideMenu() {
   const isComponentsPage = currentPath === "/components";
   const isExamplesPage = currentPath === "/components/examples";
   const isChartsPage = currentPath === "/components/charts";
+  const isEmailsPage = currentPath === "/components/emails";
 
   const componentsHash = useHash("controls");
   const examplesHash = useHash("dialogs");
@@ -72,6 +80,14 @@ export function ComponentsSideMenu() {
               <RouterLink to="/components/charts">
                 <ChartsIcon />
                 <span>{chartsLabel}</span>
+              </RouterLink>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+          <SidebarMenuItem>
+            <SidebarMenuButton asChild={true} isActive={isEmailsPage} tooltip={t`Emails`}>
+              <RouterLink to="/components/emails">
+                <EmailsIcon />
+                <span>{emailsLabel}</span>
               </RouterLink>
             </SidebarMenuButton>
           </SidebarMenuItem>

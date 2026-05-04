@@ -772,6 +772,7 @@ public sealed class UpdatePackagesCommand : Command
         AnsiConsole.WriteLine();
         AnsiConsole.MarkupLine("Analyzing npm packages in package.json...");
 
+        var workspaceMap = BuildNpmWorkspaceMap(packageJsonPath);
         var output = ProcessHelper.StartProcess("npm outdated --json", Configuration.ApplicationFolder, true, exitOnError: false, throwOnError: false);
 
         if (string.IsNullOrWhiteSpace(output))
@@ -794,73 +795,36 @@ public sealed class UpdatePackagesCommand : Command
         var outdatedPackages = JsonDocument.Parse(jsonOutput);
         var table = new Table();
         table.AddColumn("Package");
+        table.AddColumn("Workspace");
         table.AddColumn("Current Version");
         table.AddColumn("Latest Version");
         table.AddColumn("Update Type");
 
-        var npmPackageUpdatesToApply = new List<string>();
         var npmCandidates = new List<NpmCandidate>();
 
-        // First pass: collect all candidates
+        // First pass: collect all candidates. When the same package is outdated in multiple
+        // workspaces npm reports it as an array of entries; we emit one candidate per entry so
+        // each workspace's package.json is updated to its own correct version.
         foreach (var package in outdatedPackages.RootElement.EnumerateObject())
         {
             var packageName = package.Name;
+            var entries = package.Value.ValueKind == JsonValueKind.Array
+                ? package.Value.EnumerateArray().Where(e => e.ValueKind == JsonValueKind.Object).ToArray()
+                : [package.Value];
 
-            // npm outdated returns an array when the package is installed in multiple locations (e.g. workspaces); use the first entry
-            var packageInfo = package.Value;
-            if (packageInfo.ValueKind == JsonValueKind.Array)
+            foreach (var entry in entries)
             {
-                var firstEntry = packageInfo.EnumerateArray().FirstOrDefault();
-                if (firstEntry.ValueKind != JsonValueKind.Object) continue;
-                packageInfo = firstEntry;
+                AppendNpmCandidate(npmCandidates, packageName, entry, excludedPackages, includeMajorFrameworkUpdates, workspaceMap);
             }
-
-            if (IsPackageExcluded(packageName, excludedPackages))
-            {
-                var excludedWanted = packageInfo.TryGetProperty("wanted", out var packageWantedElement)
-                    ? packageWantedElement.GetString() ?? "unknown"
-                    : "unknown";
-                npmCandidates.Add(new NpmCandidate(packageName, excludedWanted, null) { IsExcluded = true });
-                continue;
-            }
-
-            if (!packageInfo.TryGetProperty("current", out var currentElement) ||
-                !packageInfo.TryGetProperty("wanted", out var wantedElement) ||
-                !packageInfo.TryGetProperty("latest", out var latestElement))
-            {
-                continue;
-            }
-
-            var currentVersion = currentElement.GetString();
-            var wantedVersion = wantedElement.GetString();
-            var latestVersion = latestElement.GetString();
-
-            if (currentVersion is null || wantedVersion is null || latestVersion is null) continue;
-
-            // Skip packages already at latest
-            if (wantedVersion == latestVersion) continue;
-
-            // Restrict @types/node to current major unless explicitly allowed
-            if (packageName == "@types/node" && !includeMajorFrameworkUpdates)
-            {
-                var resolved = GetHighestNpmVersionInMajor(packageName, GetMajorVersion(wantedVersion));
-                if (resolved is null || !IsNewerVersion(resolved, wantedVersion))
-                {
-                    continue;
-                }
-
-                latestVersion = resolved;
-            }
-
-            npmCandidates.Add(new NpmCandidate(packageName, wantedVersion, latestVersion));
         }
 
         // Family logic: when packages share the same current version (likely the same family),
         // an npm install fails with peer-dependency conflicts if some members can reach a new
         // major and others cannot. Pin the whole family to the lowest reachable target major.
+        // Scope grouping by workspace -- different workspaces may legitimately diverge.
         var npmFamilies = npmCandidates
             .Where(c => c is { IsExcluded: false, LatestVersion: not null })
-            .GroupBy(c => c.WantedVersion)
+            .GroupBy(c => (c.WorkspaceName, c.WantedVersion))
             .Where(g => g.Count() > 1)
             .ToList();
 
@@ -880,12 +844,16 @@ public sealed class UpdatePackagesCommand : Command
             }
         }
 
-        // Second pass: build table and install list from final candidate state
+        // Second pass: build table and install list (grouped by workspace) from final candidate state.
+        // Root-only updates use empty-string as the bucket key so the dictionary stays non-nullable.
+        var updatesByWorkspace = new Dictionary<string, List<string>>(StringComparer.Ordinal);
         foreach (var candidate in npmCandidates)
         {
+            var workspaceLabel = candidate.WorkspaceName ?? workspaceMap.RootName;
+
             if (candidate.IsExcluded)
             {
-                table.AddRow(candidate.PackageName, candidate.WantedVersion, "-", "[blue]Excluded[/]");
+                table.AddRow(candidate.PackageName, workspaceLabel, candidate.WantedVersion, "-", "[blue]Excluded[/]");
                 FrontendSummary.Excluded++;
                 continue;
             }
@@ -903,8 +871,16 @@ public sealed class UpdatePackagesCommand : Command
                 _ => "[green]Minor[/]"
             };
 
-            table.AddRow(candidate.PackageName, candidate.WantedVersion, candidate.LatestVersion, statusColor);
-            npmPackageUpdatesToApply.Add($"{candidate.PackageName}@{candidate.LatestVersion}");
+            table.AddRow(candidate.PackageName, workspaceLabel, candidate.WantedVersion, candidate.LatestVersion, statusColor);
+
+            var bucketKey = candidate.WorkspaceName ?? string.Empty;
+            if (!updatesByWorkspace.TryGetValue(bucketKey, out var list))
+            {
+                list = new List<string>();
+                updatesByWorkspace[bucketKey] = list;
+            }
+
+            list.Add($"{candidate.PackageName}@{candidate.LatestVersion}");
         }
 
         if (table.Rows.Count > 0)
@@ -917,14 +893,25 @@ public sealed class UpdatePackagesCommand : Command
             return;
         }
 
-        if (npmPackageUpdatesToApply.Count > 0 && !dryRun)
+        var totalUpdates = updatesByWorkspace.Values.Sum(l => l.Count);
+        if (totalUpdates > 0 && !dryRun)
         {
             AnsiConsole.WriteLine();
             AnsiConsole.MarkupLine("[blue]Updating packages...[/]");
 
-            // Use --save-exact to install exact versions without ^ prefix
-            var updateCommand = $"npm install --save-exact {string.Join(" ", npmPackageUpdatesToApply)}";
-            ProcessHelper.StartProcess(updateCommand, Configuration.ApplicationFolder);
+            // Run a separate `npm install` per workspace so each workspace's package.json picks up
+            // the new exact versions. With npm workspaces, omitting `-w` only updates root.
+            // Process workspace-scoped buckets first; the root-only bucket (empty-string key) runs last.
+            var orderedBuckets = updatesByWorkspace
+                .OrderBy(kvp => kvp.Key.Length == 0 ? 1 : 0)
+                .ThenBy(kvp => kvp.Key, StringComparer.Ordinal);
+            foreach (var (workspaceName, packagesForWorkspace) in orderedBuckets)
+            {
+                var workspaceFlag = workspaceName.Length == 0 ? string.Empty : $"-w {workspaceName} ";
+                var updateCommand = $"npm install --save-exact {workspaceFlag}{string.Join(" ", packagesForWorkspace)}";
+                ProcessHelper.StartProcess(updateCommand, Configuration.ApplicationFolder);
+            }
+
             AnsiConsole.MarkupLine("[green]npm packages updated successfully![/]");
 
             // Patch transitive vulnerabilities that resolve within the current semver ranges.
@@ -934,10 +921,113 @@ public sealed class UpdatePackagesCommand : Command
             AnsiConsole.MarkupLine("[blue]Running npm audit fix...[/]");
             ProcessHelper.StartProcess("npm audit fix", Configuration.ApplicationFolder, exitOnError: false, throwOnError: false);
         }
-        else if (npmPackageUpdatesToApply.Count > 0)
+        else if (totalUpdates > 0)
         {
-            AnsiConsole.MarkupLine($"[blue]Would update {npmPackageUpdatesToApply.Count} npm package(s) (dry-run mode)[/]");
+            AnsiConsole.MarkupLine($"[blue]Would update {totalUpdates} npm package(s) (dry-run mode)[/]");
         }
+    }
+
+    private static void AppendNpmCandidate(List<NpmCandidate> candidates, string packageName, JsonElement packageInfo, string[] excludedPackages, bool includeMajorFrameworkUpdates, NpmWorkspaceMap workspaceMap)
+    {
+        var workspaceName = ResolveWorkspaceName(packageInfo, workspaceMap);
+
+        if (IsPackageExcluded(packageName, excludedPackages))
+        {
+            var excludedWanted = packageInfo.TryGetProperty("wanted", out var packageWantedElement)
+                ? packageWantedElement.GetString() ?? "unknown"
+                : "unknown";
+            candidates.Add(new NpmCandidate(packageName, excludedWanted, null) { IsExcluded = true, WorkspaceName = workspaceName });
+            return;
+        }
+
+        if (!packageInfo.TryGetProperty("current", out var currentElement) ||
+            !packageInfo.TryGetProperty("wanted", out var wantedElement) ||
+            !packageInfo.TryGetProperty("latest", out var latestElement))
+        {
+            return;
+        }
+
+        var currentVersion = currentElement.GetString();
+        var wantedVersion = wantedElement.GetString();
+        var latestVersion = latestElement.GetString();
+
+        if (currentVersion is null || wantedVersion is null || latestVersion is null) return;
+
+        // Skip packages already at latest
+        if (wantedVersion == latestVersion) return;
+
+        // Restrict @types/node to current major unless explicitly allowed
+        if (packageName == "@types/node" && !includeMajorFrameworkUpdates)
+        {
+            var resolved = GetHighestNpmVersionInMajor(packageName, GetMajorVersion(wantedVersion));
+            if (resolved is null || !IsNewerVersion(resolved, wantedVersion))
+            {
+                return;
+            }
+
+            latestVersion = resolved;
+        }
+
+        candidates.Add(new NpmCandidate(packageName, wantedVersion, latestVersion) { WorkspaceName = workspaceName });
+    }
+
+    private static string? ResolveWorkspaceName(JsonElement packageInfo, NpmWorkspaceMap workspaceMap)
+    {
+        if (!packageInfo.TryGetProperty("dependent", out var dependentElement)) return null;
+        var dependent = dependentElement.GetString();
+        if (string.IsNullOrEmpty(dependent)) return null;
+        if (dependent == workspaceMap.RootName) return null;
+        return workspaceMap.DependentToFullName.GetValueOrDefault(dependent, dependent);
+    }
+
+    private static NpmWorkspaceMap BuildNpmWorkspaceMap(string rootPackageJsonPath)
+    {
+        var rootJson = JsonDocument.Parse(File.ReadAllText(rootPackageJsonPath));
+        var rootName = rootJson.RootElement.TryGetProperty("name", out var rootNameElement) ? rootNameElement.GetString() ?? "" : "";
+
+        var dependentToFullName = new Dictionary<string, string>(StringComparer.Ordinal);
+        if (!rootJson.RootElement.TryGetProperty("workspaces", out var workspacesElement) || workspacesElement.ValueKind != JsonValueKind.Array)
+        {
+            return new NpmWorkspaceMap(rootName, dependentToFullName);
+        }
+
+        var rootDirectory = Path.GetDirectoryName(rootPackageJsonPath)!;
+        foreach (var workspaceGlob in workspacesElement.EnumerateArray())
+        {
+            var pattern = workspaceGlob.GetString();
+            if (pattern is null) continue;
+            foreach (var workspaceDirectory in ExpandWorkspaceGlob(rootDirectory, pattern))
+            {
+                var workspacePackageJson = Path.Combine(workspaceDirectory, "package.json");
+                if (!File.Exists(workspacePackageJson)) continue;
+                var workspaceJson = JsonDocument.Parse(File.ReadAllText(workspacePackageJson));
+                if (!workspaceJson.RootElement.TryGetProperty("name", out var nameElement)) continue;
+                var fullName = nameElement.GetString();
+                if (string.IsNullOrEmpty(fullName)) continue;
+                // npm reports `dependent` as the unscoped form for scoped packages (@repo/ui -> "ui"),
+                // and as the package name as-is for unscoped ones (account-webapp -> "account-webapp").
+                var unscoped = fullName.StartsWith('@') ? fullName.Split('/', 2)[1] : fullName;
+                dependentToFullName[unscoped] = fullName;
+            }
+        }
+
+        return new NpmWorkspaceMap(rootName, dependentToFullName);
+    }
+
+    private static IEnumerable<string> ExpandWorkspaceGlob(string rootDirectory, string pattern)
+    {
+        // npm workspaces only use the trailing `*` form (e.g. "shared-webapp/*" or a literal path).
+        // Expand the trailing wildcard manually and return a literal path otherwise.
+        if (pattern.EndsWith("/*"))
+        {
+            var parentRelative = pattern[..^2];
+            var parentDirectory = Path.Combine(rootDirectory, parentRelative);
+            if (!Directory.Exists(parentDirectory)) return [];
+            return Directory.GetDirectories(parentDirectory);
+        }
+
+        var literalPath = Path.Combine(rootDirectory, pattern);
+        return Directory.Exists(literalPath) ? [literalPath] : [];
     }
 
     private static UpdateStatus GetNuGetUpdateStatus(string packageName, string currentVersion, string latestVersion)
@@ -1649,7 +1739,17 @@ public sealed class UpdatePackagesCommand : Command
         public string? LatestVersion { get; set; } = latestVersion;
 
         public bool IsExcluded { get; init; }
+
+        // Full workspace package name (e.g. "@repo/emails") when the outdated dep lives in a workspace,
+        // or null when it lives in the root application/package.json. Used to scope `npm install -w`.
+        public string? WorkspaceName { get; init; }
     }
+
+    // Maps `dependent` values reported by `npm outdated --json` to the full workspace package name.
+    // npm reports `dependent` as the unscoped form (e.g. "ui" for "@repo/ui") plus the root name as-is
+    // ("application"). The root entry is keyed by the root package name with a null value to indicate
+    // "no -w flag needed".
+    private sealed record NpmWorkspaceMap(string RootName, IReadOnlyDictionary<string, string> DependentToFullName);
 
     private record PackageDependency(string PackageName, string VersionRange);
 

@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "display": "Emails",
+  "extends": "@repo/config/typescript/react-library.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "types": ["node"],
+    "paths": {
+      "@lingui/react/macro": ["./build/lingui-macro-runtime.tsx"]
+    }
+  },
+  "exclude": ["node_modules", "dist"]
+}

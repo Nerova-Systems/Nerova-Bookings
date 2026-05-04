@@ -1,8 +1,12 @@
 using Account.Features.EmailAuthentication.Domain;
+using Account.Features.EmailAuthentication.EmailTemplates;
+using Account.Features.EmailAuthentication.Shared;
+using Account.Features.Users.Domain;
 using JetBrains.Annotations;
 using Microsoft.AspNetCore.Identity;
 using SharedKernel.Authentication;
 using SharedKernel.Cqrs;
+using SharedKernel.Emails;
 using SharedKernel.Integrations.Email;
 using SharedKernel.Telemetry;
 
@@ -20,6 +24,8 @@ public sealed record ResendEmailLoginCodeResponse(int ValidForSeconds);
 
 public sealed class ResendEmailLoginCodeHandler(
     IEmailLoginRepository emailLoginRepository,
+    IUserRepository userRepository,
+    IEmailRenderer emailRenderer,
     IEmailClient emailClient,
     IPasswordHasher<object> passwordHasher,
     ITelemetryEventsCollector events,
@@ -52,13 +58,15 @@ public sealed class ResendEmailLoginCodeHandler(
         var secondsSinceStarted = (timeProvider.GetUtcNow() - emailLogin.CreatedAt).TotalSeconds;
         events.CollectEvent(new EmailLoginCodeResend((int)secondsSinceStarted));
 
-        await emailClient.SendAsync(emailLogin.Email, "Your verification code (resend)",
-            $"""
-             <h1 style="text-align:center;font-family=sans-serif;font-size:20px">Here's your new verification code</h1>
-             <p style="text-align:center;font-family=sans-serif;font-size:16px">We're sending this code again as you requested.</p>
-             <p style="text-align:center;font-family=sans-serif;font-size:40px;background:#f5f4f5">{oneTimePassword}</p>
-             <p style="text-align:center;font-family=sans-serif;font-size:14px;color:#666">This code will expire in a few minutes.</p>
-             """,
+        var user = await userRepository.GetUserByEmailUnfilteredAsync(emailLogin.Email, cancellationToken);
+        var locale = user is { Locale.Length: > 0 } ? user.Locale : "en-US";
+        var template = new ResendEmailLoginEmailTemplate(
+            locale,
+            new ResendEmailLoginEmailModel(oneTimePassword, EmailDomainHelper.GetPublicHost(), EmailLogin.ValidForSeconds / 60)
+        );
+        var rendered = emailRenderer.RenderEmail(template);
+        await emailClient.SendAsync(
+            new EmailMessage(emailLogin.Email, rendered.Subject, rendered.HtmlBody, rendered.PlainTextBody),
             cancellationToken
         );
 
