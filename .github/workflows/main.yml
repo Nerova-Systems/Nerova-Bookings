@@ -99,6 +99,10 @@ jobs:
           distribution: "microsoft"
           java-version: "17"
 
+      - name: Build Email Templates
+        working-directory: application
+        run: npx turbo run build --filter=@repo/emails
+
       - name: Run Tests with dotCover and SonarScanner Reporting
         working-directory: application
         env:
