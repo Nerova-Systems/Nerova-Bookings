@@ -37,7 +37,7 @@
       "dependsOn": ["dev:setup"]
     },
     "dev:setup": {
-      "dependsOn": ["^dev:setup"],
+      "dependsOn": ["^dev:setup", "@repo/emails#build"],
       "inputs": ["$TURBO_DEFAULT$", "shared/lib/api/*.Api.json", "shared/lib/api/*.Api_*.json"],
       "outputs": ["dist/**", "shared/lib/api/*.generated.d.ts"]
     },
