@@ -57,7 +57,16 @@ public sealed class IntegrationEndpoints : IEndpoints
 
         try
         {
-            var nangoConnections = await nangoClient.ListConnectionsAsync(definition.IntegrationKey, cancellationToken);
+            var tags = BuildTags(definition, owner, executionContext);
+            var nangoConnections = await nangoClient.ListConnectionsAsync(
+                definition.IntegrationKey,
+                new Dictionary<string, string>
+                {
+                    ["end_user_id"] = tags["end_user_id"],
+                    ["organization_id"] = tags["organization_id"]
+                },
+                cancellationToken
+            );
             var nangoConnection = nangoConnections.FirstOrDefault();
             if (nangoConnection is null)
             {
@@ -188,7 +197,10 @@ public sealed class IntegrationEndpoints : IEndpoints
             ["provider"] = definition.Provider,
             ["capability"] = definition.Capability,
             ["app_slug"] = definition.AppSlug,
-            ["end_user_id"] = executionContext.UserInfo.Id?.ToString() ?? owner.TenantId.ToString()
+            ["end_user_id"] = owner.OwnerId,
+            ["end_user_email"] = string.Empty,
+            ["organization_id"] = owner.TenantId.ToString(),
+            ["user_id"] = executionContext.UserInfo.Id?.ToString() ?? string.Empty
         };
     }
 

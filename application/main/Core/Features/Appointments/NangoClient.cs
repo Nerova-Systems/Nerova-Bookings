@@ -7,7 +7,7 @@ namespace Main.Features.Appointments;
 public interface INangoClient
 {
     Task<NangoConnectSession> CreateConnectSessionAsync(NangoConnectSessionRequest request, CancellationToken cancellationToken);
-    Task<IReadOnlyList<NangoConnection>> ListConnectionsAsync(string integrationKey, CancellationToken cancellationToken);
+    Task<IReadOnlyList<NangoConnection>> ListConnectionsAsync(string integrationKey, IReadOnlyDictionary<string, string> tags, CancellationToken cancellationToken);
     Task<IReadOnlyList<NangoCalendar>> ListCalendarsAsync(string integrationKey, string connectionId, CancellationToken cancellationToken);
     Task<NangoCalendarEvent> CreateCalendarEventAsync(string integrationKey, string connectionId, NangoCalendarEventRequest request, CancellationToken cancellationToken);
     Task<NangoCalendarEvent> UpdateCalendarEventAsync(string integrationKey, string connectionId, string calendarId, string eventId, NangoCalendarEventRequest request, CancellationToken cancellationToken);
@@ -43,9 +43,9 @@ public sealed class NangoClient(IHttpClientFactory httpClientFactory) : INangoCl
         return new NangoConnectSession(connectLink, expiresAt);
     }
 
-    public async Task<IReadOnlyList<NangoConnection>> ListConnectionsAsync(string integrationKey, CancellationToken cancellationToken)
+    public async Task<IReadOnlyList<NangoConnection>> ListConnectionsAsync(string integrationKey, IReadOnlyDictionary<string, string> tags, CancellationToken cancellationToken)
     {
-        using var request = new HttpRequestMessage(HttpMethod.Get, new Uri(GetBaseUrl(), $"/connections?integrationId={Uri.EscapeDataString(integrationKey)}"));
+        using var request = new HttpRequestMessage(HttpMethod.Get, new Uri(GetBaseUrl(), $"/connections{BuildTagsQuery(tags)}"));
         AddAuthorization(request);
         var response = await httpClientFactory.CreateClient().SendAsync(request, cancellationToken);
         await EnsureSuccessAsync(response, cancellationToken);
@@ -53,10 +53,11 @@ public sealed class NangoClient(IHttpClientFactory httpClientFactory) : INangoCl
         var connections = ReadConnectionsArray(json);
         return connections
             .EnumerateArray()
+            .Where(connection => string.Equals(ReadString(connection, "provider_config_key", "providerConfigKey"), integrationKey, StringComparison.OrdinalIgnoreCase))
             .Select(connection => new NangoConnection(
                 ReadString(connection, "connection_id", "connectionId", "id") ?? string.Empty,
-                ReadString(connection, "end_user_id", "endUserId") ?? string.Empty,
-                ReadDateTimeOffset(connection, "updated_at", "updatedAt", "created_at", "createdAt", "last_fetched_at", "lastFetchedAt")
+                ReadNestedString(connection, "tags", "end_user_id", "endUserId") ?? ReadNestedString(connection, "end_user", "id", "endUserId") ?? ReadString(connection, "end_user_id", "endUserId") ?? string.Empty,
+                ReadDateTimeOffset(connection, "updated_at", "updatedAt", "created_at", "createdAt", "created")
             ))
             .Where(connection => !string.IsNullOrWhiteSpace(connection.ConnectionId))
             .ToList();
@@ -64,7 +65,7 @@ public sealed class NangoClient(IHttpClientFactory httpClientFactory) : INangoCl
 
     public async Task<IReadOnlyList<NangoCalendar>> ListCalendarsAsync(string integrationKey, string connectionId, CancellationToken cancellationToken)
     {
-        using var request = CreateProxyRequest(HttpMethod.Get, integrationKey, connectionId, "users/me/calendarList");
+        using var request = CreateProxyRequest(HttpMethod.Get, integrationKey, connectionId, "calendar/v3/users/me/calendarList");
         var response = await httpClientFactory.CreateClient().SendAsync(request, cancellationToken);
         await EnsureSuccessAsync(response, cancellationToken);
         var json = await response.Content.ReadFromJsonAsync<JsonElement>(cancellationToken);
@@ -85,7 +86,7 @@ public sealed class NangoClient(IHttpClientFactory httpClientFactory) : INangoCl
 
     public async Task<NangoCalendarEvent> CreateCalendarEventAsync(string integrationKey, string connectionId, NangoCalendarEventRequest request, CancellationToken cancellationToken)
     {
-        var endpoint = $"calendars/{Uri.EscapeDataString(request.CalendarId)}/events?conferenceDataVersion=1&sendUpdates=all";
+        var endpoint = $"calendar/v3/calendars/{Uri.EscapeDataString(request.CalendarId)}/events?conferenceDataVersion=1&sendUpdates=all";
         using var message = CreateProxyRequest(HttpMethod.Post, integrationKey, connectionId, endpoint);
         message.Content = JsonContent.Create(ToGoogleEventPayload(request, includeConferenceData: true));
         var response = await httpClientFactory.CreateClient().SendAsync(message, cancellationToken);
@@ -95,7 +96,7 @@ public sealed class NangoClient(IHttpClientFactory httpClientFactory) : INangoCl
 
     public async Task<NangoCalendarEvent> UpdateCalendarEventAsync(string integrationKey, string connectionId, string calendarId, string eventId, NangoCalendarEventRequest request, CancellationToken cancellationToken)
     {
-        var endpoint = $"calendars/{Uri.EscapeDataString(calendarId)}/events/{Uri.EscapeDataString(eventId)}?conferenceDataVersion=1&sendUpdates=all";
+        var endpoint = $"calendar/v3/calendars/{Uri.EscapeDataString(calendarId)}/events/{Uri.EscapeDataString(eventId)}?conferenceDataVersion=1&sendUpdates=all";
         using var message = CreateProxyRequest(HttpMethod.Patch, integrationKey, connectionId, endpoint);
         message.Content = JsonContent.Create(ToGoogleEventPayload(request, includeConferenceData: false));
         var response = await httpClientFactory.CreateClient().SendAsync(message, cancellationToken);
@@ -105,7 +106,7 @@ public sealed class NangoClient(IHttpClientFactory httpClientFactory) : INangoCl
 
     public async Task DeleteCalendarEventAsync(string integrationKey, string connectionId, string calendarId, string eventId, CancellationToken cancellationToken)
     {
-        var endpoint = $"calendars/{Uri.EscapeDataString(calendarId)}/events/{Uri.EscapeDataString(eventId)}?sendUpdates=all";
+        var endpoint = $"calendar/v3/calendars/{Uri.EscapeDataString(calendarId)}/events/{Uri.EscapeDataString(eventId)}?sendUpdates=all";
         using var request = CreateProxyRequest(HttpMethod.Delete, integrationKey, connectionId, endpoint);
         var response = await httpClientFactory.CreateClient().SendAsync(request, cancellationToken);
         if (response.StatusCode == System.Net.HttpStatusCode.NotFound || response.StatusCode == System.Net.HttpStatusCode.Gone) return;
@@ -219,6 +220,15 @@ public sealed class NangoClient(IHttpClientFactory httpClientFactory) : INangoCl
         return JsonDocument.Parse("[]").RootElement;
     }
 
+    private static string BuildTagsQuery(IReadOnlyDictionary<string, string> tags)
+    {
+        var query = tags
+            .Where(tag => !string.IsNullOrWhiteSpace(tag.Key) && !string.IsNullOrWhiteSpace(tag.Value))
+            .Select(tag => $"tags[{Uri.EscapeDataString(tag.Key)}]={Uri.EscapeDataString(tag.Value)}")
+            .ToArray();
+        return query.Length == 0 ? string.Empty : $"?{string.Join("&", query)}";
+    }
+
     private static string? ReadString(JsonElement json, params string[] names)
     {
         foreach (var name in names)
@@ -230,6 +240,13 @@ public sealed class NangoClient(IHttpClientFactory httpClientFactory) : INangoCl
         }
 
         return null;
+    }
+
+    private static string? ReadNestedString(JsonElement json, string objectName, params string[] names)
+    {
+        return json.TryGetProperty(objectName, out var nested) && nested.ValueKind == JsonValueKind.Object
+            ? ReadString(nested, names)
+            : null;
     }
 
     private static DateTimeOffset? ReadDateTimeOffset(JsonElement json, params string[] names)

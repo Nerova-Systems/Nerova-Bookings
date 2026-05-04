@@ -152,7 +152,7 @@ public sealed class MvpBookingWorkflowTests : EndpointBaseTest<MainDbContext>
             return Task.FromResult(new NangoConnectSession("https://connect.nango.dev/session/test", DateTimeOffset.Parse("2026-05-01T08:30:00Z")));
         }
 
-        public Task<IReadOnlyList<NangoConnection>> ListConnectionsAsync(string integrationKey, CancellationToken cancellationToken)
+        public Task<IReadOnlyList<NangoConnection>> ListConnectionsAsync(string integrationKey, IReadOnlyDictionary<string, string> tags, CancellationToken cancellationToken)
         {
             return Task.FromResult<IReadOnlyList<NangoConnection>>(Connections);
         }
