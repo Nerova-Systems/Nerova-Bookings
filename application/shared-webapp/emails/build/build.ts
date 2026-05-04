@@ -24,9 +24,15 @@ const LOCALES = Object.keys(i18nConfig);
 // through the JSX helpers — typically those that live inside href attributes or Lingui <Trans>
 // strings (see emails.md "Exception — HTML attributes and Trans strings"). Applied only to the
 // preview render output, never to the production .html/.txt artifacts.
+// PublicUrl is left empty in preview output so every URL renders as a root-relative path
+// (`/email/logo.png`, `/legal/privacy`, etc.). The browser resolves them against the host serving
+// the iframe — `app.dev.localhost` in dev, `staging.platformplatform.net` in stage, `app.platform
+// platform.net` in prod — so the preview always loads its assets from the same host as the SPA
+// it's embedded in. SignupUrl and LoginUrl follow the same convention for the same reason.
 const PREVIEW_PLACEHOLDER_VALUES: Record<string, string> = {
-  SignupUrl: "https://app.platformplatform.net/signup",
-  LoginUrl: "https://app.platformplatform.net/login",
+  PublicUrl: "",
+  SignupUrl: "/signup",
+  LoginUrl: "/login",
   TenantName: "Acme Corp"
 };
 

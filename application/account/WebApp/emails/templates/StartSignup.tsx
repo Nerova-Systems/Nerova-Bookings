@@ -13,7 +13,11 @@ type StartSignupProps = {
 
 export default function StartSignup({ locale }: Readonly<StartSignupProps>) {
   return (
-    <TransactionalEmail locale={locale} preview="Confirm your email address">
+    <TransactionalEmail
+      locale={locale}
+      preview="Confirm your email address"
+      otpAutofill={<OtpAutofill code="OneTimePassword" domain="Domain" />}
+    >
       <Subject>
         <Trans>Confirm your email address</Trans>
       </Subject>
@@ -32,7 +36,9 @@ export default function StartSignup({ locale }: Readonly<StartSignupProps>) {
         </Text>
       </Section>
 
-      <OtpAutofill code="OneTimePassword" domain="Domain" />
+      <Text className="email-muted m-[0px] mt-[16px] text-center text-[12px] leading-[20px] text-[#64748b]">
+        <Trans>If you didn't request to sign up, you can safely ignore this email.</Trans>
+      </Text>
     </TransactionalEmail>
   );
 }

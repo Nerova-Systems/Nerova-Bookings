@@ -37,6 +37,10 @@ export default function UnknownUser({ locale }: Readonly<UnknownUserProps>) {
           .
         </Trans>
       </Text>
+
+      <Text className="email-muted m-[0px] mt-[16px] text-center text-[12px] leading-[20px] text-[#64748b]">
+        <Trans>If this wasn't you, no action is needed — no account was created.</Trans>
+      </Text>
     </TransactionalEmail>
   );
 }

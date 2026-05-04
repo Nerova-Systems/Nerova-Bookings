@@ -13,7 +13,11 @@ type StartLoginProps = {
 
 export default function StartLogin({ locale }: Readonly<StartLoginProps>) {
   return (
-    <TransactionalEmail locale={locale} preview="PlatformPlatform login verification code">
+    <TransactionalEmail
+      locale={locale}
+      preview="PlatformPlatform login verification code"
+      otpAutofill={<OtpAutofill code="OneTimePassword" domain="Domain" />}
+    >
       <Subject>
         <Trans>PlatformPlatform login verification code</Trans>
       </Subject>
@@ -32,7 +36,9 @@ export default function StartLogin({ locale }: Readonly<StartLoginProps>) {
         </Text>
       </Section>
 
-      <OtpAutofill code="OneTimePassword" domain="Domain" />
+      <Text className="email-muted m-[0px] mt-[16px] text-center text-[12px] leading-[20px] text-[#64748b]">
+        <Trans>If you didn't try to log in, you can safely ignore this email — your account is secure.</Trans>
+      </Text>
     </TransactionalEmail>
   );
 }

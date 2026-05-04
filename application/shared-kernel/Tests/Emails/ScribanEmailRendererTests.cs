@@ -7,7 +7,7 @@ namespace SharedKernel.Tests.Emails;
 
 public sealed class ScribanEmailRendererTests
 {
-    private readonly ScriptObject _helpers = EmailHelpers.CreateScriptObject();
+    private readonly ScriptObject _helpers = EmailHelpers.CreateScriptObject("https://app.platformplatform.net");
 
     private ScribanEmailRenderer CreateRenderer(string html, string plainText)
     {
@@ -260,6 +260,40 @@ public sealed class ScribanEmailRendererTests
         result.Subject.Should().Be("Code: ABC123");
         result.HtmlBody.Should().Contain("Tenant: Acme, login at https://example.com/login");
         result.PlainTextBody.Should().Be("Code: ABC123 for Acme");
+    }
+
+    [Fact]
+    public void RenderEmail_WhenTemplateReferencesPublicUrl_ShouldUseGlobalFromHelpers()
+    {
+        // Regression guard for the {{ PublicUrl }} global injected by EmailHelpers.CreateScriptObject.
+        // Shared components (e.g., <Footer>) reference this global to construct legal links that resolve
+        // to the deploy's host without each handler having to thread PUBLIC_URL through every model.
+        var html = "<html><head><title>Footer test</title></head><body><a href=\"{{PublicUrl}}/legal/privacy\">Privacy</a></body></html>";
+        var renderer = CreateRenderer(html, "Privacy: {{PublicUrl}}/legal/privacy");
+        var template = new TestTemplate("footer-test", "en-US", new { });
+
+        // Act
+        var result = renderer.RenderEmail(template);
+
+        // Assert
+        result.HtmlBody.Should().Contain("href=\"https://app.platformplatform.net/legal/privacy\"");
+        result.PlainTextBody.Should().Be("Privacy: https://app.platformplatform.net/legal/privacy");
+    }
+
+    [Fact]
+    public void CreateScriptObject_WhenPublicUrlHasTrailingSlash_ShouldTrimIt()
+    {
+        // Regression guard against accidental double-slashes like https://host//legal/privacy when the
+        // PUBLIC_URL env var is configured with a trailing slash.
+        var helpers = EmailHelpers.CreateScriptObject("https://app.platformplatform.net/");
+        var html = "<html><head><title>x</title></head><body>{{PublicUrl}}/legal/terms</body></html>";
+        var renderer = new ScribanEmailRenderer(helpers, new InMemoryEmailTemplateLoader(html, ""));
+        var template = new TestTemplate("trim-test", "en-US", new { });
+
+        var result = renderer.RenderEmail(template);
+
+        result.HtmlBody.Should().Contain("https://app.platformplatform.net/legal/terms");
+        result.HtmlBody.Should().NotContain("//legal/terms");
     }
 
     [Fact]

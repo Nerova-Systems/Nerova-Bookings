@@ -3,6 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
 using Scriban.Runtime;
 using SharedKernel.Configuration;
+using SharedKernel.SinglePageApp;
 
 namespace SharedKernel.Emails;
 
@@ -39,8 +40,9 @@ public static class EmailRenderingConfiguration
         public IServiceCollection AddEmailRendering(string webAppProjectName)
         {
             var emailsDistPath = ResolveEmailsDistPath(webAppProjectName);
+            var publicUrl = Environment.GetEnvironmentVariable(SinglePageAppConfiguration.PublicUrlKey) ?? string.Empty;
 
-            services.AddSingleton<ScriptObject>(_ => EmailHelpers.CreateScriptObject());
+            services.AddSingleton<ScriptObject>(_ => EmailHelpers.CreateScriptObject(publicUrl));
 
             services.AddSingleton<IEmailTemplateLoader>(_ => new FileSystemEmailTemplateLoader(emailsDistPath, !SharedInfrastructureConfiguration.IsRunningInAzure));
             services.AddSingleton<IEmailRenderer, ScribanEmailRenderer>();

@@ -13,7 +13,11 @@ type ResendEmailLoginProps = {
 
 export default function ResendEmailLogin({ locale }: Readonly<ResendEmailLoginProps>) {
   return (
-    <TransactionalEmail locale={locale} preview="Your verification code (resend)">
+    <TransactionalEmail
+      locale={locale}
+      preview="Your verification code (resend)"
+      otpAutofill={<OtpAutofill code="OneTimePassword" domain="Domain" />}
+    >
       <Subject>
         <Trans>Your verification code (resend)</Trans>
       </Subject>
@@ -36,7 +40,9 @@ export default function ResendEmailLogin({ locale }: Readonly<ResendEmailLoginPr
         <Trans>This code will expire in a few minutes.</Trans>
       </Text>
 
-      <OtpAutofill code="OneTimePassword" domain="Domain" />
+      <Text className="email-muted m-[0px] mt-[16px] text-center text-[12px] leading-[20px] text-[#64748b]">
+        <Trans>If you didn't request a new code, you can safely ignore this email.</Trans>
+      </Text>
     </TransactionalEmail>
   );
 }

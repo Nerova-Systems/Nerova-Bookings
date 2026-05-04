@@ -32,6 +32,10 @@ export default function InviteUser({ locale }: Readonly<InviteUserProps>) {
           and login using <Value path="Email" sample="invitee@example.com" />.
         </Trans>
       </Text>
+
+      <Text className="email-muted m-[0px] mt-[16px] text-center text-[12px] leading-[20px] text-[#64748b]">
+        <Trans>If you don't recognize the sender, you can safely ignore this email.</Trans>
+      </Text>
     </TransactionalEmail>
   );
 }

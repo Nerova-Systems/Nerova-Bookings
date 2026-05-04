@@ -13,14 +13,19 @@ namespace SharedKernel.Emails;
 //
 // Scriban performs parameter binding and type coercion based on the C# signatures below — no manual
 // argument unpacking is needed (in contrast to Handlebars.Net's untyped Arguments dictionary).
+//
+// Templates can also reference globals exposed alongside the helpers — currently `{{ PublicUrl }}`,
+// the trimmed PUBLIC_URL of the running deploy, used by shared components like <Footer> to
+// construct environment-correct links (localhost / staging / production all get their own host).
 internal static class EmailHelpers
 {
-    public static ScriptObject CreateScriptObject()
+    public static ScriptObject CreateScriptObject(string publicUrl)
     {
         var scriptObject = new ScriptObject();
         scriptObject.Import("format_currency", FormatCurrency);
         scriptObject.Import("format_date", FormatDate);
         scriptObject.Import("pluralize", Pluralize);
+        scriptObject.SetValue("PublicUrl", publicUrl.TrimEnd('/'), true);
         return scriptObject;
     }
 

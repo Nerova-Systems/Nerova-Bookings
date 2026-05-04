@@ -16,8 +16,14 @@ msgstr ""
 msgid "<0/> invited you to join PlatformPlatform."
 msgstr "<0/> har inviteret dig til at deltage i PlatformPlatform."
 
+msgid "Compliance"
+msgstr "Compliance"
+
 msgid "Confirm your email address"
 msgstr "Bekræft din e-mailadresse"
+
+msgid "DPA"
+msgstr "DPA"
 
 msgid "Enter it in your open browser window. It is only valid for a few minutes."
 msgstr "Indtast den i dit åbne browservindue. Den er kun gyldig i få minutter."
@@ -25,8 +31,29 @@ msgstr "Indtast den i dit åbne browservindue. Den er kun gyldig i få minutter.
 msgid "Here's your new verification code"
 msgstr "Her er din nye bekræftelseskode"
 
+msgid "If this wasn't you, no action is needed — no account was created."
+msgstr "Hvis det ikke var dig, behøver du ikke gøre noget — der blev ikke oprettet en konto."
+
+msgid "If you didn't request a new code, you can safely ignore this email."
+msgstr "Hvis du ikke har anmodet om en ny kode, kan du roligt ignorere denne e-mail."
+
+msgid "If you didn't request to sign up, you can safely ignore this email."
+msgstr "Hvis du ikke har anmodet om at oprette en konto, kan du roligt ignorere denne e-mail."
+
+msgid "If you didn't try to log in, you can safely ignore this email — your account is secure."
+msgstr "Hvis du ikke har forsøgt at logge ind, kan du roligt ignorere denne e-mail — din konto er sikker."
+
+msgid "If you don't recognize the sender, you can safely ignore this email."
+msgstr "Hvis du ikke kender afsenderen, kan du roligt ignorere denne e-mail."
+
 msgid "PlatformPlatform login verification code"
 msgstr "PlatformPlatform-bekræftelseskode til login"
+
+msgid "Privacy"
+msgstr "Privatliv"
+
+msgid "Terms"
+msgstr "Vilkår"
 
 msgid "This code will expire in a few minutes."
 msgstr "Denne kode udløber om få minutter."

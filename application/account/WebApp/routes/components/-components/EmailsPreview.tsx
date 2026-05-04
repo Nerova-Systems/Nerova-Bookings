@@ -1,5 +1,6 @@
 import { Trans } from "@lingui/react/macro";
 import { Button } from "@repo/ui/components/Button";
+import { ExternalLinkIcon } from "lucide-react";
 import { useState } from "react";
 
 const TEMPLATES = ["StartSignup", "StartLogin", "ResendEmailLogin", "UnknownUser", "InviteUser"] as const;
@@ -60,6 +61,22 @@ export function EmailsPreview() {
           className="block h-[40rem] w-full border-0 bg-white"
         />
       </div>
+
+      <p className="text-sm text-muted-foreground">
+        <Trans>
+          Need a new building block? Browse the MIT-licensed recipes at{" "}
+          <a
+            href="https://react.email/components"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1 underline"
+          >
+            react.email/components
+            <ExternalLinkIcon className="size-[0.875rem]" />
+          </a>{" "}
+          and copy the source into <code>application/shared-webapp/emails/components/</code>.
+        </Trans>
+      </p>
     </div>
   );
 }

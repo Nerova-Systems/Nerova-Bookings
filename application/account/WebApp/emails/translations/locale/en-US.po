@@ -16,8 +16,14 @@ msgstr ""
 msgid "<0/> invited you to join PlatformPlatform."
 msgstr "<0/> invited you to join PlatformPlatform."
 
+msgid "Compliance"
+msgstr "Compliance"
+
 msgid "Confirm your email address"
 msgstr "Confirm your email address"
+
+msgid "DPA"
+msgstr "DPA"
 
 msgid "Enter it in your open browser window. It is only valid for a few minutes."
 msgstr "Enter it in your open browser window. It is only valid for a few minutes."
@@ -25,8 +31,29 @@ msgstr "Enter it in your open browser window. It is only valid for a few minutes
 msgid "Here's your new verification code"
 msgstr "Here's your new verification code"
 
+msgid "If this wasn't you, no action is needed — no account was created."
+msgstr "If this wasn't you, no action is needed — no account was created."
+
+msgid "If you didn't request a new code, you can safely ignore this email."
+msgstr "If you didn't request a new code, you can safely ignore this email."
+
+msgid "If you didn't request to sign up, you can safely ignore this email."
+msgstr "If you didn't request to sign up, you can safely ignore this email."
+
+msgid "If you didn't try to log in, you can safely ignore this email — your account is secure."
+msgstr "If you didn't try to log in, you can safely ignore this email — your account is secure."
+
+msgid "If you don't recognize the sender, you can safely ignore this email."
+msgstr "If you don't recognize the sender, you can safely ignore this email."
+
 msgid "PlatformPlatform login verification code"
 msgstr "PlatformPlatform login verification code"
+
+msgid "Privacy"
+msgstr "Privacy"
+
+msgid "Terms"
+msgstr "Terms"
 
 msgid "This code will expire in a few minutes."
 msgstr "This code will expire in a few minutes."

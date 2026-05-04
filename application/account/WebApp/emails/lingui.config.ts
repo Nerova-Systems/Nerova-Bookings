@@ -10,7 +10,15 @@ const config: LinguiConfig = {
   catalogs: [
     {
       path: "<rootDir>/translations/locale/{locale}",
-      include: ["<rootDir>/templates/**/*.tsx", "<rootDir>/templates/**/*.ts"],
+      // Include shared components so user-facing strings inside @repo/emails (e.g. <Footer>) extract
+      // into each system's catalog. The email build only loads one system's catalog at render time,
+      // so each system needs its own copy of any shared translations.
+      include: [
+        "<rootDir>/templates/**/*.tsx",
+        "<rootDir>/templates/**/*.ts",
+        "<rootDir>/../../../shared-webapp/emails/components/**/*.tsx",
+        "<rootDir>/../../../shared-webapp/emails/components/**/*.ts"
+      ],
       exclude: ["**/node_modules/**", "**/dist/**", "**/*.d.ts"]
     }
   ],

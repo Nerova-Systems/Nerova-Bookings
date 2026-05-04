@@ -1,10 +1,17 @@
 import type { ReactNode } from "react";
 
-import { Body, Container, Head, Html, Preview, Tailwind } from "@react-email/components";
+import { Body, Container, Head, Html, Preview, Section, Tailwind } from "@react-email/components";
+
+import { Footer } from "./Footer";
+import { Header } from "./Header";
 
 type TransactionalEmailProps = {
   locale: string;
   preview: string;
+  // Optional render slot for the OTP autofill suffix. Rendered AFTER <Footer /> so the
+  // `@<domain> #<code>` line lands on the very last line of the plaintext output, which is what
+  // Apple Mail's domain-bound autofill scanner reads. Templates without an OTP simply omit this prop.
+  otpAutofill?: ReactNode;
   children: ReactNode;
 };
 
@@ -45,22 +52,24 @@ html { background-color: #f4f4f5; }
   .email-body td { background-color: #1f1f1f !important; color: #e5e5e5 !important; }
   .email-card { background-color: #2a2a2a !important; color: #e5e5e5 !important; }
   .email-card td { background-color: #2a2a2a !important; color: #e5e5e5 !important; }
+  .email-header { background-color: #f6f6f6 !important; }
+  .email-header td { background-color: #f6f6f6 !important; }
   .email-heading { color: #fafafa !important; }
   .email-otp-box { background-color: #171717 !important; }
   .email-otp-box td { background-color: #171717 !important; }
   .email-otp-text { color: #fafafa !important; }
   .email-muted { color: #a3a3a3 !important; }
   .email-link { color: #e5e5e5 !important; }
-  .email-button-default { background-color: #fafafa !important; color: #171717 !important; }
+  .email-button-default { background-color: #f6f6f6 !important; color: #171717 !important; }
   .email-progressbar-track { background-color: #404040 !important; }
-  .email-progressbar-fill { background-color: #fafafa !important; }
+  .email-progressbar-fill { background-color: #f6f6f6 !important; }
   .email-separator { border-top-color: #404040 !important; }
   .email-alert-default { border-color: #404040 !important; background-color: #2a2a2a !important; color: #e5e5e5 !important; }
   .email-avatar { background-color: #404040 !important; color: #d4d4d4 !important; }
 }
 `.trim();
 
-export function TransactionalEmail({ locale, preview, children }: Readonly<TransactionalEmailProps>) {
+export function TransactionalEmail({ locale, preview, otpAutofill, children }: Readonly<TransactionalEmailProps>) {
   return (
     <Tailwind>
       <Html lang={locale}>
@@ -71,9 +80,12 @@ export function TransactionalEmail({ locale, preview, children }: Readonly<Trans
         </Head>
         <Preview>{preview}</Preview>
         <Body style={{ fontFamily: FONT_STACK }} className="email-body m-[0px] bg-[#f4f4f5] p-[0px] text-[#0f172a]">
-          <Container className="email-card mx-auto my-[40px] w-full max-w-[600px] rounded-[12px] bg-white p-[32px]">
-            {children}
+          <Container className="email-card mx-auto mt-[40px] mb-[24px] w-full max-w-[600px] overflow-hidden rounded-[12px] bg-white">
+            <Header />
+            <Section className="px-[32px] py-[32px]">{children}</Section>
           </Container>
+          <Footer />
+          {otpAutofill}
         </Body>
       </Html>
     </Tailwind>
