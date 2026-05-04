@@ -53,39 +53,45 @@ function serializeChildren(children: ReactNode): {
   values: Record<string, unknown>;
   components: Record<string, ReactElement>;
 } {
-  const messageParts: string[] = [];
   const values: Record<string, unknown> = {};
   const components: Record<string, ReactElement> = {};
-  let placeholderIndex = 0;
+  // Single counter shared across recursion depths. Lingui's babel macro assigns placeholder indices
+  // globally across the whole <Trans> tree (so a <strong><Value/></strong> tree extracts as
+  // `<0><1/></0>`, not `<0><0/></0>`). Using a fresh counter per recursion would diverge from the
+  // macro's id-generation algorithm — `generateMessageId` would hash a different string, the catalog
+  // lookup would silently miss for every nested-element template, and components stored at colliding
+  // keys would render swapped content (e.g. <Link> children replaced by the <Value> render).
+  const counter = { next: 0 };
 
-  Children.forEach(children, (child) => {
-    if (typeof child === "string" || typeof child === "number") {
-      messageParts.push(String(child));
-      return;
-    }
-
-    if (isValidElement(child)) {
-      const componentIndex = String(placeholderIndex++);
-      const elementChildren = (child.props as { children?: ReactNode }).children;
-      if (elementChildren === undefined || elementChildren === null) {
-        messageParts.push(`<${componentIndex}/>`);
-      } else {
-        const inner = serializeChildren(elementChildren);
-        messageParts.push(`<${componentIndex}>${inner.message}</${componentIndex}>`);
-        Object.assign(values, inner.values);
-        Object.assign(components, inner.components);
+  function visit(nodes: ReactNode): string {
+    const parts: string[] = [];
+    Children.forEach(nodes, (child) => {
+      if (typeof child === "string" || typeof child === "number") {
+        parts.push(String(child));
+        return;
       }
-      components[componentIndex] = child;
-      return;
-    }
 
-    if (child === null || child === undefined || typeof child === "boolean") return;
+      if (isValidElement(child)) {
+        const componentIndex = String(counter.next++);
+        components[componentIndex] = child;
+        const elementChildren = (child.props as { children?: ReactNode }).children;
+        if (elementChildren === undefined || elementChildren === null) {
+          parts.push(`<${componentIndex}/>`);
+        } else {
+          parts.push(`<${componentIndex}>${visit(elementChildren)}</${componentIndex}>`);
+        }
+        return;
+      }
 
-    // Treat any remaining renderable (objects, arrays) as opaque values via {0}, {1}, ... placeholders.
-    const valueKey = String(placeholderIndex++);
-    values[valueKey] = child;
-    messageParts.push(`{${valueKey}}`);
-  });
+      if (child === null || child === undefined || typeof child === "boolean") return;
 
-  return { message: messageParts.join(""), values, components };
+      // Treat any remaining renderable (objects, arrays) as opaque values via {0}, {1}, ... placeholders.
+      const valueKey = String(counter.next++);
+      values[valueKey] = child;
+      parts.push(`{${valueKey}}`);
+    });
+    return parts.join("");
+  }
+
+  return { message: visit(children), values, components };
 }
