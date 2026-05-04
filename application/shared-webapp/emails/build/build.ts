@@ -52,16 +52,6 @@ type BuildTarget = {
 async function main(): Promise<void> {
   const targets: BuildTarget[] = [];
 
-  // Shared showcase ships alongside this package — always built so the components page can iframe it.
-  if (existsSync(join(sharedEmailsRoot, "showcase"))) {
-    targets.push({
-      label: "shared-webapp/emails/showcase",
-      configRoot: sharedEmailsRoot,
-      templatesDir: join(sharedEmailsRoot, "showcase"),
-      distDir: join(sharedEmailsRoot, "dist")
-    });
-  }
-
   // Per-system templates: only included when the system actually has an emails/templates folder.
   for (const system of SYSTEMS) {
     const systemRoot = join(applicationRoot, system, "WebApp", "emails");

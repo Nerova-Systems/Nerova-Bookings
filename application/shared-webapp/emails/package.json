@@ -14,7 +14,6 @@
   "scripts": {
     "build": "tsx ./build/build.ts",
     "check": "oxfmt --check && oxlint",
-    "dev": "email dev --dir showcase --port 4000",
     "format": "oxfmt && (oxlint --fix || true)",
     "lint": "oxlint --deny-warnings"
   },
