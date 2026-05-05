@@ -41,6 +41,7 @@ var (
     paystackStandardPlanCode,
     paystackPremiumPlanCode) = ConfigurePaystackParameters();
 var (twilioConfigured, twilioAccountSid, twilioAuthToken, twilioVerifyServiceSid) = ConfigureTwilioParameters();
+var nangoIntegrationsDirectory = GetNangoIntegrationsDirectory();
 var (nangoConfigured, nangoToolboxSecretKey, nangoServerUrl) = ConfigureNangoParameters();
 
 var postgresPassword = builder.CreateStablePassword("postgres-password");
@@ -83,6 +84,16 @@ var frontendBuild = builder
     .WithEnvironment("MAIN_STATIC_PORT", ports.MainStatic.ToString())
     .WithEnvironment("ACCOUNT_STATIC_PORT", ports.AccountStatic.ToString())
     .WithEnvironment("BACK_OFFICE_STATIC_PORT", ports.BackOfficeStatic.ToString());
+
+if (nangoConfigured && Directory.Exists(nangoIntegrationsDirectory))
+{
+    builder
+        .AddJavaScriptApp("nango-integrations", "../nango-integrations", "dev")
+        .WithNpm(install: false)
+        .WithEnvironment("NANGO_SECRET_KEY_DEV", nangoToolboxSecretKey)
+        .WithEnvironment("NANGO_SECRET_KEY", nangoToolboxSecretKey)
+        .WithEnvironment("NANGO_SERVER_URL", nangoServerUrl);
+}
 
 var accountDatabase = postgres
     .AddDatabase("account-database", "account");
@@ -443,8 +454,20 @@ return;
     {
         secretFromEnvironment = Environment.GetEnvironmentVariable("NANGO_SECRET_KEY");
     }
+    if (string.IsNullOrWhiteSpace(secretFromEnvironment))
+    {
+        secretFromEnvironment = Environment.GetEnvironmentVariable("NANGO_SECRET_KEY_DEV");
+    }
+    if (string.IsNullOrWhiteSpace(secretFromEnvironment))
+    {
+        secretFromEnvironment = ReadNangoIntegrationsEnvironmentValue("NANGO_SECRET_KEY_DEV");
+    }
 
     var serverUrlFromEnvironment = Environment.GetEnvironmentVariable("NANGO_SERVER_URL");
+    if (string.IsNullOrWhiteSpace(serverUrlFromEnvironment))
+    {
+        serverUrlFromEnvironment = ReadNangoIntegrationsEnvironmentValue("NANGO_SERVER_URL");
+    }
     var configured = builder.Configuration["Parameters:nango-enabled"] == "true" ||
                      !string.IsNullOrWhiteSpace(secretFromEnvironment);
 
@@ -462,7 +485,7 @@ return;
     {
         var toolboxSecretKey = string.IsNullOrWhiteSpace(secretFromEnvironment)
             ? builder.AddParameter("nango-toolbox-secret-key", true)
-                .WithDescription("Nango secret key used to create connect sessions and read connection metadata.", true)
+                .WithDescription("Nango development secret key used by the app and the local `application/nango-integrations` Nango Functions project.", true)
             : builder.CreateResourceBuilder(new ParameterResource("nango-toolbox-secret-key", _ => secretFromEnvironment, true));
 
         return (configured, toolboxSecretKey, serverUrl);
@@ -473,6 +496,39 @@ return;
         builder.CreateResourceBuilder(new ParameterResource("nango-toolbox-secret-key", _ => "not-configured", true)),
         serverUrl
     );
+}
+
+string GetNangoIntegrationsDirectory()
+{
+    return Path.GetFullPath(Path.Combine(builder.AppHostDirectory, "..", "nango-integrations"));
+}
+
+string? ReadNangoIntegrationsEnvironmentValue(string key)
+{
+    var environmentFile = Path.Combine(nangoIntegrationsDirectory, ".env");
+    if (!File.Exists(environmentFile)) return null;
+
+    foreach (var line in File.ReadLines(environmentFile))
+    {
+        var trimmed = line.Trim();
+        if (trimmed.Length == 0 || trimmed.StartsWith('#')) continue;
+
+        var separator = trimmed.IndexOf('=');
+        if (separator <= 0) continue;
+
+        var name = trimmed[..separator].Trim();
+        if (!string.Equals(name, key, StringComparison.Ordinal)) continue;
+
+        var value = trimmed[(separator + 1)..].Trim();
+        if (value.Length >= 2 && value[0] == '"' && value[^1] == '"')
+        {
+            value = value[1..^1];
+        }
+
+        return string.IsNullOrWhiteSpace(value) ? null : value;
+    }
+
+    return null;
 }
 
 void CreateBlobContainer(string containerName)

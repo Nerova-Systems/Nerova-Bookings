@@ -13,29 +13,40 @@ description: Universal gateway for any third-party API or SaaS (Google Calendar,
 
 Resolve values in this order.
 
-### Secret key
+### Functions project keys
 
-1. `NANGO_TOOLBOX_SECRET_KEY` in the process environment
-2. `NANGO_TOOLBOX_SECRET_KEY` in a local `.env`
+For Nango Functions work, use the local Functions project at `application/nango-integrations/`.
 
-If missing, ask the user to:
-- create a Nango account: https://app.nango.dev/signup
-- copy the secret key from Environment settings → Backend
-- set `NANGO_TOOLBOX_SECRET_KEY` in their shell profile (offer to add it)
+- Store keys in `application/nango-integrations/.env`.
+- Use `NANGO_SECRET_KEY_DEV=<dev-secret-key>` for dev.
+- Use `NANGO_SECRET_KEY_PROD=<prod-secret-key>` for prod.
+- Keep `.env` untracked; `application/nango-integrations/.gitignore` must include `.env`.
+- Get keys from Nango Environment Settings > API Keys.
 
-Compatibility: if other instructions refer to `NANGO_SECRET_KEY`, treat it as `NANGO_TOOLBOX_SECRET_KEY`.
+The Nango CLI matches keys by environment name: `NANGO_SECRET_KEY_<ENV_NAME>`.
 
-### Base URL
+### Documentation MCP
 
-1. `NANGO_SERVER_URL` in the process environment
-2. `NANGO_SERVER_URL` in a local `.env`
-3. `https://api.nango.dev`
+Use Nango's docs MCP for current function APIs and examples:
 
-### HTTP headers
+```
+https://nango.dev/docs/mcp
+```
 
-- `Authorization: Bearer <NANGO_TOOLBOX_SECRET_KEY>`
+Do not configure Codex's general Nango MCP server as `https://api.nango.dev/mcp` unless the task is explicitly to expose deployed Nango action functions as MCP tools for one specific provider connection.
+
+### Hosted action MCP
+
+Nango's hosted action MCP is connection-scoped. It is only appropriate after a deployed action exists and the caller has a matching `providerConfigKey` and `connectionId`. Do not use it as the default dashboard/API setup for Functions development.
+
+### Backend API calls
+
+For Nango backend API discovery or connection lookup, read the relevant secret from `nango-integrations/.env` for the target environment and send:
+
+- `Authorization: Bearer <NANGO_SECRET_KEY_DEV or NANGO_SECRET_KEY_PROD>`
 - `Content-Type: application/json`
-- Prefer JSON bodies over query params when both exist.
+
+Prefer JSON bodies over query params when both exist.
 
 ## Discovery (use these first)
 

@@ -51,9 +51,7 @@ startup_timeout_sec = 60
 tool_timeout_sec = 180
 
 [mcp_servers.nango]
-url = "https://api.nango.dev/mcp"
-bearer_token_env_var = "NANGO_TOOLBOX_SECRET_KEY"
-env_http_headers = { "connection-id" = "NANGO_CONNECTION_ID", "provider-config-key" = "NANGO_PROVIDER_CONFIG_KEY" }
+url = "https://nango.dev/docs/mcp"
 tool_timeout_sec = 180
 
 [mcp_servers.stitch]
