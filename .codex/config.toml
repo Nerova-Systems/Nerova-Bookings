@@ -20,13 +20,6 @@ job_max_runtime_seconds = 1800
 url = "https://mcp.linear.app/mcp"
 tool_timeout_sec = 120
 
-[mcp_servers.developer-cli]
-command = "dotnet"
-args = ["run", "--no-build", "--project", "developer-cli", "mcp"]
-cwd = "C:\\Users\\colin\\dev\\NerovaBookings"
-startup_timeout_sec = 30
-tool_timeout_sec = 600
-
 [mcp_servers.aspire]
 command = "aspire"
 args = ["agent", "mcp"]

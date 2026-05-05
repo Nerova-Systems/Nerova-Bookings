@@ -6,6 +6,10 @@ Run `build` first, then `format`, `lint`, `test` in parallel with `--no-build`.
 
 **Slow:** Aspire restart, backend format, backend lint, end-to-end tests. **Fast:** frontend format/lint, backend test.
 
+## MCP Health
+
+Before starting substantive work, verify that expected MCP servers are reachable with safe read-only health checks. If an MCP server is unavailable or misconfigured, report the failure and fix it before implementation when it is relevant to the task.
+
 **Aspire**: The `aspire-restart` skill manages the AppHost - always use it; never `aspire run`, `aspire restart`, or the developer CLI's `run` command. Use the Aspire MCP `list_resources` tool to look up service URLs (or read `.workspace/port.txt` if you only need the base port). In the agentic workflow, only the Guardian agent restarts Aspire. All other agents must notify the Guardian if they need it restarted.
 
 Never commit, amend, or revert without explicit user instruction each time. Commit messages: one descriptive line in imperative form, no description body.
