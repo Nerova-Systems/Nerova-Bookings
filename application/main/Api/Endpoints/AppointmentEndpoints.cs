@@ -29,6 +29,7 @@ public sealed class AppointmentEndpoints : IEndpoints
         app.MapPost("/services/{id}/archive", ArchiveService);
         app.MapPost("/services/{id}/restore", RestoreService);
         app.MapPost("/calendar/blocks", CreateCalendarBlock);
+        app.MapDelete("/calendar/blocks/{id}", DeleteCalendarBlock);
         app.MapPost("/appointments/{id}/participants", AddAppointmentParticipant);
         app.MapPut("/appointments/{id}/location", UpdateAppointmentLocation);
         app.MapPost("/appointments/{id}/reschedule-requests", CreateRescheduleRequest);
@@ -163,10 +164,20 @@ public sealed class AppointmentEndpoints : IEndpoints
             TenantId = tenantId,
             StaffMemberId = string.IsNullOrWhiteSpace(request.StaffMemberId) ? null : request.StaffMemberId,
             Title = title,
-            StartAt = request.StartAt,
-            EndAt = request.EndAt,
+            StartAt = request.StartAt.ToUniversalTime(),
+            EndAt = request.EndAt.ToUniversalTime(),
             CreatedAt = timeProvider.GetUtcNow()
         });
+        await db.SaveChangesAsync(cancellationToken);
+        return Results.Ok(await BuildShellAsync(db, cancellationToken));
+    }
+
+    private static async Task<IResult> DeleteCalendarBlock(string id, MainDbContext db, IExecutionContext executionContext, CancellationToken cancellationToken)
+    {
+        var tenantId = RequireTenant(executionContext);
+        var block = await db.ManualCalendarBlocks.AsTracking().FirstOrDefaultAsync(item => item.Id == id && item.TenantId == tenantId, cancellationToken);
+        if (block is null) return Results.NotFound();
+        db.ManualCalendarBlocks.Remove(block);
         await db.SaveChangesAsync(cancellationToken);
         return Results.Ok(await BuildShellAsync(db, cancellationToken));
     }

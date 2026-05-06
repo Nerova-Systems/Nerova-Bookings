@@ -86,6 +86,21 @@ export function useCreateCalendarBlock() {
   });
 }
 
+export function useDeleteCalendarBlock() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const response = await enhancedFetch(`/api/main/app/calendar/blocks/${id}`, { method: "DELETE" });
+      if (!response.ok) throw new Error(await response.text());
+      return mapShell((await response.json()) as ApiShell);
+    },
+    onSuccess: async (shell) => {
+      queryClient.setQueryData(["appointment-shell"], shell);
+      await queryClient.invalidateQueries({ queryKey: ["availability-slots"] });
+    }
+  });
+}
+
 export function useAddAppointmentParticipant() {
   const queryClient = useQueryClient();
   return useMutation({

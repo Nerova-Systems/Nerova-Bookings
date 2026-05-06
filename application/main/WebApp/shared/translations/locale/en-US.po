@@ -16,14 +16,8 @@ msgstr ""
 msgid "Add a redirect"
 msgstr "Add a redirect"
 
-msgid "Add an override"
-msgstr "Add an override"
-
 msgid "Add client"
 msgstr "Add client"
-
-msgid "Add dates when your availability changes from your daily hours."
-msgstr "Add dates when your availability changes from your daily hours."
 
 msgid "Alerts"
 msgstr "Alerts"
@@ -165,9 +159,6 @@ msgstr "Creates an appointment-linked Paystack terminal payment."
 
 msgid "Daily"
 msgstr "Daily"
-
-msgid "Date overrides"
-msgstr "Date overrides"
 
 msgid "Default"
 msgstr "Default"

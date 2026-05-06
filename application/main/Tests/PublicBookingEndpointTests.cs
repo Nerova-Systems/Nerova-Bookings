@@ -217,6 +217,51 @@ public sealed class PublicBookingEndpointTests : EndpointBaseTest<MainDbContext>
         version.PriceCents.Should().Be(33000);
     }
 
+    [Fact]
+    public async Task PublicSlots_WhenManualCalendarBlockOverlaps_ShouldHideBlockedSlots()
+    {
+        var profile = await ReadPublicProfileAsync();
+        var serviceId = profile["services"]!.AsArray().Single(service => service!["name"]!.GetValue<string>() == "Express session")!["id"]!.GetValue<string>();
+        await AddManualCalendarBlockAsync(
+            "Public maintenance",
+            new DateTimeOffset(2026, 4, 28, 10, 0, 0, TimeSpan.FromHours(2)),
+            new DateTimeOffset(2026, 4, 28, 11, 0, 0, TimeSpan.FromHours(2))
+        );
+
+        var slots = await AnonymousHttpClient.GetFromJsonAsync<JsonArray>(
+            $"/api/main/public-booking/sea-point-studio/slots?serviceId={serviceId}&date=2026-04-28"
+        );
+
+        slots.Should().NotBeNull();
+        slots!.Select(slot => slot!["startAt"]!.GetValue<DateTimeOffset>())
+            .Should()
+            .NotContain(start => start >= new DateTimeOffset(2026, 4, 28, 9, 30, 0, TimeSpan.FromHours(2)) &&
+                                 start < new DateTimeOffset(2026, 4, 28, 11, 0, 0, TimeSpan.FromHours(2)));
+    }
+
+    [Fact]
+    public async Task PublicBooking_WhenManualCalendarBlockOverlapsRequestedTime_ShouldReturnConflict()
+    {
+        TwilioVerifyClient = new FakeTwilioVerifyClient();
+        var phoneVerificationToken = await VerifyPhoneAsync("+27 82 555 0202");
+        var profile = await ReadPublicProfileAsync();
+        var serviceId = profile["services"]!.AsArray().Single(service => service!["name"]!.GetValue<string>() == "Express session")!["id"]!.GetValue<string>();
+        await AddManualCalendarBlockAsync(
+            "Private appointment",
+            new DateTimeOffset(2026, 4, 28, 10, 0, 0, TimeSpan.FromHours(2)),
+            new DateTimeOffset(2026, 4, 28, 11, 0, 0, TimeSpan.FromHours(2))
+        );
+
+        var response = await CreateVerifiedBookingAsync(
+            serviceId,
+            new DateTimeOffset(2026, 4, 28, 10, 0, 0, TimeSpan.FromHours(2)),
+            "+27 82 555 0202",
+            phoneVerificationToken
+        );
+
+        response.StatusCode.Should().Be(HttpStatusCode.Conflict);
+    }
+
     protected override void RegisterMockLoggers(IServiceCollection services)
     {
         services.RemoveAll<ITwilioVerifyClient>();
@@ -295,6 +340,22 @@ public sealed class PublicBookingEndpointTests : EndpointBaseTest<MainDbContext>
             BufferAfterMinutes = service.BufferAfterMinutes,
             Location = service.Location,
             IsActive = service.IsActive,
+            CreatedAt = DateTimeOffset.UtcNow
+        });
+        await db.SaveChangesAsync();
+    }
+
+    private async Task AddManualCalendarBlockAsync(string title, DateTimeOffset startAt, DateTimeOffset endAt)
+    {
+        using var scope = Provider.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<MainDbContext>();
+        var profile = await db.BusinessProfiles.IgnoreQueryFilters().SingleAsync(profile => profile.Slug == "sea-point-studio");
+        db.ManualCalendarBlocks.Add(new ManualCalendarBlock
+        {
+            TenantId = profile.TenantId,
+            Title = title,
+            StartAt = startAt,
+            EndAt = endAt,
             CreatedAt = DateTimeOffset.UtcNow
         });
         await db.SaveChangesAsync();

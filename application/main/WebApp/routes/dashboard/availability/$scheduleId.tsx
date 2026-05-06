@@ -6,11 +6,17 @@ import { Input } from "@repo/ui/components/Input";
 import { Switch } from "@repo/ui/components/Switch";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { ArrowLeftIcon, CopyIcon, PencilIcon, Trash2Icon } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type FormEvent, type ReactNode } from "react";
 import { toast } from "sonner";
 
-import { useAppointmentShell } from "@/shared/lib/appointmentsApi";
-import { useUpdateWeeklyAvailability } from "@/shared/lib/availabilitySettingsApi";
+import {
+  useAppointmentShell,
+  useCreateCalendarBlock,
+  useDeleteCalendarBlock,
+  type BusinessClosure,
+  type CalendarBlock
+} from "@/shared/lib/appointmentsApi";
+import { useCreateClosure, useDeleteClosure, useUpdateWeeklyAvailability } from "@/shared/lib/availabilitySettingsApi";
 
 import { buildInitialDays, updateDay, updateWindow, type DayState } from "../calendar/-components/availabilityState";
 
@@ -99,22 +105,7 @@ function EditAvailabilityPage() {
         </aside>
       </div>
 
-      <section className="mt-7 rounded-xl border border-white/10 bg-[#111] p-7">
-        <h2 className="text-xl font-semibold">
-          <Trans>Date overrides</Trans>
-        </h2>
-        <p className="mt-2 text-base text-white/65">
-          <Trans>Add dates when your availability changes from your daily hours.</Trans>
-        </p>
-        <Button
-          variant="outline"
-          size="sm"
-          className="mt-6 border-white/15 bg-transparent text-white hover:bg-white/[0.08]"
-          onClick={() => navigate({ href: "/user/out-of-office" })}
-        >
-          <Trans>Add an override</Trans>
-        </Button>
-      </section>
+      <DateOverridesSection blocks={shellQuery.data?.calendarBlocks ?? []} closures={shellQuery.data?.closures ?? []} />
 
       <div className="sticky bottom-0 mt-7 flex justify-end border-t border-white/10 bg-[#0f0f0f]/95 py-4">
         <Button isPending={updateAvailability.isPending} onClick={() => saveAvailability(days, updateAvailability)}>
@@ -122,6 +113,220 @@ function EditAvailabilityPage() {
         </Button>
       </div>
     </main>
+  );
+}
+
+function DateOverridesSection({ blocks, closures }: { blocks: CalendarBlock[]; closures: BusinessClosure[] }) {
+  const [blockForm, setBlockForm] = useState({ title: "", date: "", start: "09:00", end: "10:00" });
+  const [closureForm, setClosureForm] = useState({ startDate: "", endDate: "", label: "" });
+  const createCalendarBlock = useCreateCalendarBlock();
+  const deleteCalendarBlock = useDeleteCalendarBlock();
+  const createClosure = useCreateClosure();
+  const deleteClosure = useDeleteClosure();
+  const manualBlocks = useMemo(() => blocks.filter((block) => block.type === "manual"), [blocks]);
+  const manualClosures = useMemo(() => closures.filter((closure) => closure.type === "manual"), [closures]);
+
+  return (
+    <section className="mt-7 rounded-xl border border-white/10 bg-[#111] p-7">
+      <div className="mb-5">
+        <h2 className="text-lg font-semibold">Date overrides</h2>
+        <p className="mt-1 text-sm text-white/55">Block appointment slots or close whole dates for this business.</p>
+      </div>
+
+      <div className="grid gap-5 xl:grid-cols-2">
+        <OverridePanel title="Blocked time" description="Hide appointment slots for a specific time window.">
+          <form
+            className="grid gap-3"
+            onSubmit={(event) => saveBlockedTime(event, blockForm, createCalendarBlock, setBlockForm)}
+          >
+            <LabeledInput
+              label="Block title"
+              value={blockForm.title}
+              placeholder="Staff meeting"
+              onChange={(title) => setBlockForm({ ...blockForm, title })}
+            />
+            <div className="grid gap-3 sm:grid-cols-3">
+              <LabeledInput
+                label="Block date"
+                type="date"
+                value={blockForm.date}
+                required
+                onChange={(date) => setBlockForm({ ...blockForm, date })}
+              />
+              <LabeledInput
+                label="Block start"
+                type="time"
+                value={blockForm.start}
+                required
+                onChange={(start) => setBlockForm({ ...blockForm, start })}
+              />
+              <LabeledInput
+                label="Block end"
+                type="time"
+                value={blockForm.end}
+                required
+                onChange={(end) => setBlockForm({ ...blockForm, end })}
+              />
+            </div>
+            <Button type="submit" className="justify-self-start" isPending={createCalendarBlock.isPending}>
+              Save blocked time
+            </Button>
+          </form>
+          <BlockList blocks={manualBlocks} deleteCalendarBlock={deleteCalendarBlock} />
+        </OverridePanel>
+
+        <OverridePanel title="Closed dates" description="Close booking availability for full business dates.">
+          <form
+            className="grid gap-3"
+            onSubmit={(event) => saveClosure(event, closureForm, createClosure, setClosureForm)}
+          >
+            <LabeledInput
+              label="Closure label"
+              value={closureForm.label}
+              placeholder="Public holiday"
+              onChange={(label) => setClosureForm({ ...closureForm, label })}
+            />
+            <div className="grid gap-3 sm:grid-cols-2">
+              <LabeledInput
+                label="Start date"
+                type="date"
+                value={closureForm.startDate}
+                required
+                onChange={(startDate) => setClosureForm({ ...closureForm, startDate })}
+              />
+              <LabeledInput
+                label="End date"
+                type="date"
+                value={closureForm.endDate}
+                onChange={(endDate) => setClosureForm({ ...closureForm, endDate })}
+              />
+            </div>
+            <Button type="submit" className="justify-self-start" isPending={createClosure.isPending}>
+              Save closed date
+            </Button>
+          </form>
+          <ClosureList closures={manualClosures} deleteClosure={deleteClosure} />
+        </OverridePanel>
+      </div>
+    </section>
+  );
+}
+
+function OverridePanel({ title, description, children }: { title: string; description: string; children: ReactNode }) {
+  return (
+    <div className="rounded-xl border border-white/10 bg-[#171717] p-5">
+      <h3 className="text-base font-semibold">{title}</h3>
+      <p className="mt-1 text-sm text-white/55">{description}</p>
+      <div className="mt-4 grid gap-4">{children}</div>
+    </div>
+  );
+}
+
+function LabeledInput({
+  label,
+  value,
+  type = "text",
+  placeholder,
+  required,
+  onChange
+}: {
+  label: string;
+  value: string;
+  type?: string;
+  placeholder?: string;
+  required?: boolean;
+  onChange: (value: string) => void;
+}) {
+  return (
+    <label className="grid gap-1.5 text-sm font-semibold text-white/80">
+      {label}
+      <Input
+        type={type}
+        value={value}
+        placeholder={placeholder}
+        required={required}
+        onChange={(event) => onChange(event.target.value)}
+        className="border-white/15 bg-[#101010] text-white"
+      />
+    </label>
+  );
+}
+
+function BlockList({
+  blocks,
+  deleteCalendarBlock
+}: {
+  blocks: CalendarBlock[];
+  deleteCalendarBlock: ReturnType<typeof useDeleteCalendarBlock>;
+}) {
+  return (
+    <div className="overflow-hidden rounded-lg border border-white/10">
+      {blocks.length === 0 && <div className="px-3 py-2 text-sm text-white/45">No blocked times.</div>}
+      {blocks.map((block) => (
+        <div key={block.id} className="flex items-center gap-3 border-b border-white/10 px-3 py-2 last:border-b-0">
+          <div className="min-w-0">
+            <div className="truncate text-sm font-semibold">{block.title}</div>
+            <div className="text-xs text-white/50">{formatBlockDateTime(block)}</div>
+          </div>
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon-sm"
+            className="ml-auto text-white/70 hover:bg-white/[0.08] hover:text-white"
+            aria-label={`Delete blocked time ${block.title}`}
+            isPending={deleteCalendarBlock.isPending}
+            onClick={() =>
+              deleteCalendarBlock.mutate(block.id, {
+                onSuccess: () => toast.success("Blocked time removed."),
+                onError: (error) =>
+                  toast.error(error instanceof Error ? error.message : "Could not remove blocked time.")
+              })
+            }
+          >
+            <Trash2Icon className="size-4" />
+          </Button>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function ClosureList({
+  closures,
+  deleteClosure
+}: {
+  closures: BusinessClosure[];
+  deleteClosure: ReturnType<typeof useDeleteClosure>;
+}) {
+  return (
+    <div className="overflow-hidden rounded-lg border border-white/10">
+      {closures.length === 0 && <div className="px-3 py-2 text-sm text-white/45">No closed dates.</div>}
+      {closures.map((closure) => (
+        <div key={closure.id} className="flex items-center gap-3 border-b border-white/10 px-3 py-2 last:border-b-0">
+          <div className="min-w-0">
+            <div className="truncate text-sm font-semibold">{closure.label}</div>
+            <div className="text-xs text-white/50">{formatClosureDateRange(closure)}</div>
+          </div>
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon-sm"
+            className="ml-auto text-white/70 hover:bg-white/[0.08] hover:text-white"
+            aria-label={`Delete closed date ${closure.label}`}
+            isPending={deleteClosure.isPending}
+            onClick={() =>
+              deleteClosure.mutate(closure.id, {
+                onSuccess: () => toast.success("Closed date removed."),
+                onError: (error) =>
+                  toast.error(error instanceof Error ? error.message : "Could not remove closed date.")
+              })
+            }
+          >
+            <Trash2Icon className="size-4" />
+          </Button>
+        </div>
+      ))}
+    </div>
   );
 }
 
@@ -201,6 +406,67 @@ function AvailabilityEditor({ days, setDays }: { days: DayState[]; setDays: (day
   );
 }
 
+function saveBlockedTime(
+  event: FormEvent<HTMLFormElement>,
+  blockForm: { title: string; date: string; start: string; end: string },
+  createCalendarBlock: ReturnType<typeof useCreateCalendarBlock>,
+  setBlockForm: (form: { title: string; date: string; start: string; end: string }) => void
+) {
+  event.preventDefault();
+  if (!blockForm.date) {
+    toast.error("Choose a block date.");
+    return;
+  }
+  if (blockForm.end <= blockForm.start) {
+    toast.error("Block end time must be after start time.");
+    return;
+  }
+
+  createCalendarBlock.mutate(
+    {
+      title: blockForm.title || "Blocked time",
+      startAt: toBusinessDateTimeOffset(blockForm.date, blockForm.start),
+      endAt: toBusinessDateTimeOffset(blockForm.date, blockForm.end)
+    },
+    {
+      onSuccess: () => {
+        toast.success("Blocked time saved.");
+        setBlockForm({ title: "", date: "", start: "09:00", end: "10:00" });
+      },
+      onError: (error) => toast.error(error instanceof Error ? error.message : "Could not save blocked time.")
+    }
+  );
+}
+
+function saveClosure(
+  event: FormEvent<HTMLFormElement>,
+  closureForm: { startDate: string; endDate: string; label: string },
+  createClosure: ReturnType<typeof useCreateClosure>,
+  setClosureForm: (form: { startDate: string; endDate: string; label: string }) => void
+) {
+  event.preventDefault();
+  const endDate = closureForm.endDate || closureForm.startDate;
+  if (!closureForm.startDate) {
+    toast.error("Choose a closure date.");
+    return;
+  }
+  if (endDate < closureForm.startDate) {
+    toast.error("Closure end date must be on or after start date.");
+    return;
+  }
+
+  createClosure.mutate(
+    { startDate: closureForm.startDate, endDate, label: closureForm.label || "Closed" },
+    {
+      onSuccess: () => {
+        toast.success("Closed date saved.");
+        setClosureForm({ startDate: "", endDate: "", label: "" });
+      },
+      onError: (error) => toast.error(error instanceof Error ? error.message : "Could not save closed date.")
+    }
+  );
+}
+
 function summarizeDays(days: DayState[]) {
   const enabled = days.filter((day) => day.enabled);
   if (enabled.length === 0) return "No active hours";
@@ -232,4 +498,25 @@ function saveAvailability(days: DayState[], updateAvailability: ReturnType<typeo
       onError: (error) => toast.error(error instanceof Error ? error.message : "Could not save working hours.")
     }
   );
+}
+
+function toBusinessDateTimeOffset(date: string, time: string) {
+  return `${date}T${time}:00+02:00`;
+}
+
+function formatBlockDateTime(block: CalendarBlock) {
+  return `${formatDateTimeValue(block.startAt)} - ${formatTimeValue(block.endAt)}`;
+}
+
+function formatClosureDateRange(closure: BusinessClosure) {
+  return closure.startDate === closure.endDate ? closure.startDate : `${closure.startDate} to ${closure.endDate}`;
+}
+
+function formatDateTimeValue(value: string) {
+  return `${value.slice(0, 10)} ${formatTimeValue(value)}`;
+}
+
+function formatTimeValue(value: string) {
+  const timeStart = value.indexOf("T") + 1;
+  return value.slice(timeStart, timeStart + 5);
 }

@@ -38,6 +38,27 @@ test.describe("@smoke", () => {
       await expect(ownerPage.getByText("Timezone")).toBeVisible();
     })();
 
+    await step("Create blocked time & verify calendar visibility")(async () => {
+      await ownerPage.getByLabel("Block title").fill("E2E block");
+      await ownerPage.getByLabel("Block date").fill("2026-05-06");
+      await ownerPage.getByLabel("Block start").fill("15:00");
+      await ownerPage.getByLabel("Block end").fill("16:00");
+      await ownerPage.getByRole("button", { name: "Save blocked time" }).click();
+
+      await expect(ownerPage.getByText("E2E block")).toBeVisible();
+      await ownerPage.goto("/dashboard/bookings?view=calendar");
+      await expect(ownerPage.getByText("Blocked - E2E block")).toBeVisible();
+    })();
+
+    await step("Remove blocked time & verify calendar cleanup")(async () => {
+      await ownerPage.goto("/dashboard/availability/default");
+      await ownerPage.getByRole("button", { name: "Delete blocked time E2E block" }).click();
+
+      await expect(ownerPage.getByText("E2E block")).not.toBeVisible();
+      await ownerPage.goto("/dashboard/bookings?view=calendar");
+      await expect(ownerPage.getByText("Blocked - E2E block")).not.toBeVisible();
+    })();
+
     await step("Open Out of office tabs")(async () => {
       await ownerPage.goto("/dashboard/settings/out-of-office");
 

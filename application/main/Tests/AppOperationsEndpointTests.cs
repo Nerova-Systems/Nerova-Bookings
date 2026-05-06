@@ -109,20 +109,83 @@ public sealed class AppOperationsEndpointTests : EndpointBaseTest<MainDbContext>
             new
             {
                 title = "Supply run",
-                startAt = new DateTimeOffset(2026, 4, 27, 10, 0, 0, TimeSpan.FromHours(2)),
-                endAt = new DateTimeOffset(2026, 4, 27, 11, 0, 0, TimeSpan.FromHours(2))
+                startAt = new DateTimeOffset(2026, 4, 28, 10, 0, 0, TimeSpan.FromHours(2)),
+                endAt = new DateTimeOffset(2026, 4, 28, 11, 0, 0, TimeSpan.FromHours(2))
             }
         );
 
         create.StatusCode.Should().Be(HttpStatusCode.OK);
+        var shell = await create.Content.ReadFromJsonAsync<JsonObject>();
+        shell!["calendarBlocks"]!.AsArray()
+            .Single(block => block!["title"]!.GetValue<string>() == "Supply run")!["startAt"]!.GetValue<DateTimeOffset>().Offset
+            .Should().Be(TimeSpan.Zero);
         var slots = await AuthenticatedOwnerHttpClient.GetFromJsonAsync<JsonArray>(
-            $"/api/main/app/availability/slots?serviceId={service.Id}&date=2026-04-27"
+            $"/api/main/app/availability/slots?serviceId={service.Id}&date=2026-04-28"
         );
         slots.Should().NotBeNull();
         slots!.Select(slot => slot!["startAt"]!.GetValue<DateTimeOffset>())
             .Should()
-            .NotContain(start => start >= new DateTimeOffset(2026, 4, 27, 9, 30, 0, TimeSpan.FromHours(2)) &&
-                                 start < new DateTimeOffset(2026, 4, 27, 11, 0, 0, TimeSpan.FromHours(2)));
+            .NotContain(start => start >= new DateTimeOffset(2026, 4, 28, 9, 30, 0, TimeSpan.FromHours(2)) &&
+                                 start < new DateTimeOffset(2026, 4, 28, 11, 0, 0, TimeSpan.FromHours(2)));
+    }
+
+    [Fact]
+    public async Task DeleteCalendarBlock_ShouldRestoreAvailabilitySlotsAndRemoveBlockFromShell()
+    {
+        await SeedShellAsync();
+        var service = await ReadServiceByNameAsync("Express session");
+        var create = await AuthenticatedOwnerHttpClient.PostAsJsonAsync(
+            "/api/main/app/calendar/blocks",
+            new
+            {
+                title = "Inventory check",
+                startAt = new DateTimeOffset(2026, 4, 28, 10, 0, 0, TimeSpan.FromHours(2)),
+                endAt = new DateTimeOffset(2026, 4, 28, 11, 0, 0, TimeSpan.FromHours(2))
+            }
+        );
+        create.StatusCode.Should().Be(HttpStatusCode.OK);
+        var createdShell = await create.Content.ReadFromJsonAsync<JsonObject>();
+        var blockId = createdShell!["calendarBlocks"]!.AsArray()
+            .Single(block => block!["title"]!.GetValue<string>() == "Inventory check")!["id"]!.GetValue<string>();
+
+        var delete = await AuthenticatedOwnerHttpClient.DeleteAsync($"/api/main/app/calendar/blocks/{blockId}");
+
+        delete.StatusCode.Should().Be(HttpStatusCode.OK);
+        var deletedShell = await delete.Content.ReadFromJsonAsync<JsonObject>();
+        deletedShell!["calendarBlocks"]!.AsArray().Should().NotContain(block => block!["id"]!.GetValue<string>() == blockId);
+        var slots = await AuthenticatedOwnerHttpClient.GetFromJsonAsync<JsonArray>(
+            $"/api/main/app/availability/slots?serviceId={service.Id}&date=2026-04-28"
+        );
+        slots.Should().NotBeNull();
+        slots!.Select(slot => slot!["startAt"]!.GetValue<DateTimeOffset>())
+            .Should()
+            .Contain(new DateTimeOffset(2026, 4, 28, 10, 0, 0, TimeSpan.FromHours(2)));
+    }
+
+    [Fact]
+    public async Task DeleteClosure_ShouldRestoreAvailabilitySlotsAndRemoveClosureFromShell()
+    {
+        await SeedShellAsync();
+        var service = await ReadServiceByNameAsync("Express session");
+        var create = await AuthenticatedOwnerHttpClient.PostAsJsonAsync(
+            "/api/main/app/availability/closures",
+            new { startDate = "2026-04-28", endDate = "2026-04-28", label = "Repairs" }
+        );
+        create.StatusCode.Should().Be(HttpStatusCode.OK);
+        var createdShell = await create.Content.ReadFromJsonAsync<JsonObject>();
+        var closureId = createdShell!["closures"]!.AsArray()
+            .Single(closure => closure!["label"]!.GetValue<string>() == "Repairs")!["id"]!.GetValue<string>();
+
+        var delete = await AuthenticatedOwnerHttpClient.DeleteAsync($"/api/main/app/availability/closures/{closureId}");
+
+        delete.StatusCode.Should().Be(HttpStatusCode.OK);
+        var deletedShell = await delete.Content.ReadFromJsonAsync<JsonObject>();
+        deletedShell!["closures"]!.AsArray().Should().NotContain(closure => closure!["id"]!.GetValue<string>() == closureId);
+        var slots = await AuthenticatedOwnerHttpClient.GetFromJsonAsync<JsonArray>(
+            $"/api/main/app/availability/slots?serviceId={service.Id}&date=2026-04-28"
+        );
+        slots.Should().NotBeNull();
+        slots.Should().NotBeEmpty();
     }
 
     [Fact]
