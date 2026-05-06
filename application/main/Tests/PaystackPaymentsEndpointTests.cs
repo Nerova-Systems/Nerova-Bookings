@@ -1,5 +1,6 @@
 using System.Net;
 using System.Net.Http.Json;
+using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json.Nodes;
 using FluentAssertions;
@@ -9,6 +10,7 @@ using Main.Features.Appointments;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using SharedKernel.Domain;
 using Xunit;
 
 namespace Main.Tests;
@@ -17,6 +19,7 @@ public sealed class PaystackPaymentsEndpointTests : EndpointBaseTest<MainDbConte
 {
     private static FakePaystackClient PaystackClient { get; set; } = new();
     private static FakeTwilioVerifyClient TwilioVerifyClient { get; set; } = new();
+    private static FakeWhatsAppClient WhatsAppClient { get; set; } = new();
 
     [Fact]
     public async Task SavePaystackSubaccount_WhenNew_ShouldCreateAndStoreMaskedAccountNumber()
@@ -149,6 +152,153 @@ public sealed class PaystackPaymentsEndpointTests : EndpointBaseTest<MainDbConte
     }
 
     [Fact]
+    public async Task ConfirmPayment_WhenDepositPaymentSucceeds_ShouldUpdateAppointmentAndSendWhatsAppConfirmation()
+    {
+        PaystackClient = new FakePaystackClient();
+        WhatsAppClient = new FakeWhatsAppClient();
+        await SeedShellAsync();
+        await AuthenticatedOwnerHttpClient.PostAsJsonAsync("/api/main/app/payments/paystack/subaccount", NewSubaccountRequest("1234567890"));
+        var appointmentId = await ReadDepositAppointmentIdAsync();
+        var initializeResponse = await AuthenticatedOwnerHttpClient.PostAsJsonAsync("/api/main/app/payments/paystack/initialize", new { appointmentId });
+        var initialized = await initializeResponse.Content.ReadFromJsonAsync<PaystackInitializeResponse>();
+
+        var response = await AuthenticatedOwnerHttpClient.GetAsync($"/api/main/app/payments/paystack/confirm?reference={initialized!.Reference}");
+
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        using var scope = Provider.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<MainDbContext>();
+        var appointment = await db.Appointments.IgnoreQueryFilters().SingleAsync(a => a.Id == appointmentId);
+        appointment.PaymentStatus.Should().Be(AppointmentPaymentStatus.DepositPaid);
+        appointment.Status.Should().Be(AppointmentStatus.Confirmed);
+        WhatsAppClient.Messages.Should().ContainSingle();
+        WhatsAppClient.Messages.Single().Body.Should().Be($"Deposit received. Your booking {appointment.PublicReference} is confirmed.");
+        var flowEvent = await ReadPaymentConfirmationEventAsync(appointmentId, initialized.Reference);
+        flowEvent.Status.Should().Be("Completed");
+    }
+
+    [Fact]
+    public async Task ConfirmPayment_WhenAlreadyConfirmedAndMessageSent_ShouldNotDuplicateWhatsAppConfirmation()
+    {
+        PaystackClient = new FakePaystackClient();
+        WhatsAppClient = new FakeWhatsAppClient();
+        await SeedShellAsync();
+        await AuthenticatedOwnerHttpClient.PostAsJsonAsync("/api/main/app/payments/paystack/subaccount", NewSubaccountRequest("1234567890"));
+        var appointmentId = await ReadDepositAppointmentIdAsync();
+        var initializeResponse = await AuthenticatedOwnerHttpClient.PostAsJsonAsync("/api/main/app/payments/paystack/initialize", new { appointmentId });
+        var initialized = await initializeResponse.Content.ReadFromJsonAsync<PaystackInitializeResponse>();
+        await AuthenticatedOwnerHttpClient.GetAsync($"/api/main/app/payments/paystack/confirm?reference={initialized!.Reference}");
+
+        var response = await AuthenticatedOwnerHttpClient.GetAsync($"/api/main/app/payments/paystack/confirm?reference={initialized.Reference}");
+
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        WhatsAppClient.Messages.Should().ContainSingle();
+    }
+
+    [Fact]
+    public async Task ConfirmPayment_WhenWhatsAppFails_ShouldKeepPaymentCompleteAndRecordFailedConfirmation()
+    {
+        PaystackClient = new FakePaystackClient();
+        WhatsAppClient = new FakeWhatsAppClient { ShouldFail = true };
+        await SeedShellAsync();
+        await AuthenticatedOwnerHttpClient.PostAsJsonAsync("/api/main/app/payments/paystack/subaccount", NewSubaccountRequest("1234567890"));
+        var appointmentId = await ReadDepositAppointmentIdAsync();
+        var initializeResponse = await AuthenticatedOwnerHttpClient.PostAsJsonAsync("/api/main/app/payments/paystack/initialize", new { appointmentId });
+        var initialized = await initializeResponse.Content.ReadFromJsonAsync<PaystackInitializeResponse>();
+
+        var response = await AuthenticatedOwnerHttpClient.GetAsync($"/api/main/app/payments/paystack/confirm?reference={initialized!.Reference}");
+
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        using var scope = Provider.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<MainDbContext>();
+        var appointment = await db.Appointments.IgnoreQueryFilters().SingleAsync(a => a.Id == appointmentId);
+        appointment.PaymentStatus.Should().Be(AppointmentPaymentStatus.DepositPaid);
+        appointment.Status.Should().Be(AppointmentStatus.Confirmed);
+        var flowEvent = await ReadPaymentConfirmationEventAsync(appointmentId, initialized.Reference);
+        flowEvent.Status.Should().Be("Failed");
+        flowEvent.PayloadJson.Should().Contain("Twilio test failure");
+    }
+
+    [Fact]
+    public async Task ConfirmPayment_WhenPreviousConfirmationFailed_ShouldRetryWhatsAppConfirmation()
+    {
+        PaystackClient = new FakePaystackClient();
+        WhatsAppClient = new FakeWhatsAppClient { ShouldFail = true };
+        await SeedShellAsync();
+        await AuthenticatedOwnerHttpClient.PostAsJsonAsync("/api/main/app/payments/paystack/subaccount", NewSubaccountRequest("1234567890"));
+        var appointmentId = await ReadDepositAppointmentIdAsync();
+        var initializeResponse = await AuthenticatedOwnerHttpClient.PostAsJsonAsync("/api/main/app/payments/paystack/initialize", new { appointmentId });
+        var initialized = await initializeResponse.Content.ReadFromJsonAsync<PaystackInitializeResponse>();
+        await AuthenticatedOwnerHttpClient.GetAsync($"/api/main/app/payments/paystack/confirm?reference={initialized!.Reference}");
+        WhatsAppClient.ShouldFail = false;
+
+        var response = await AuthenticatedOwnerHttpClient.GetAsync($"/api/main/app/payments/paystack/confirm?reference={initialized.Reference}");
+
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        WhatsAppClient.Messages.Should().HaveCount(2);
+        using var scope = Provider.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<MainDbContext>();
+        var events = await db.AppointmentFlowEvents.IgnoreQueryFilters()
+            .Where(e => e.AppointmentId == appointmentId && e.Type == "PaymentConfirmation" && e.PayloadJson.Contains(initialized.Reference))
+            .ToListAsync();
+        events.OrderBy(e => e.ScheduledFor).Select(e => e.Status).Should().Equal("Failed", "Completed");
+    }
+
+    [Fact]
+    public async Task PaystackWebhook_WhenVirtualTerminalPaymentSucceeds_ShouldUpdateAppointmentAndSendWhatsAppConfirmation()
+    {
+        PaystackClient = new FakePaystackClient();
+        TwilioVerifyClient = new FakeTwilioVerifyClient();
+        WhatsAppClient = new FakeWhatsAppClient();
+        await SeedShellAsync();
+        await AuthenticatedOwnerHttpClient.PostAsJsonAsync("/api/main/app/payments/paystack/subaccount", NewSubaccountRequest("1234567890"));
+        var service = await UpdateServicePaymentPolicyAsync("Express session", ServicePaymentPolicy.CollectAfterAppointment, 0);
+        var bookingResponse = await AnonymousHttpClient.PostAsJsonAsync("/api/main/public-booking/sea-point-studio/appointments", await VerifiedPublicBookingRequestAsync(service.Id));
+        var booking = await bookingResponse.Content.ReadFromJsonAsync<PublicBookingCreatedResponse>();
+        var appointment = await ReadAppointmentByReferenceAsync(booking!.Reference);
+        var terminalResponse = await AuthenticatedOwnerHttpClient.PostAsJsonAsync($"/api/main/app/appointments/{appointment.Id}/payments/terminal-intent", new { });
+        var terminalIntent = await terminalResponse.Content.ReadFromJsonAsync<TerminalPaymentIntentResponse>();
+        const string secret = "sk_test_webhook";
+        var previousSecret = Environment.GetEnvironmentVariable("PAYSTACK_SECRET_KEY");
+        Environment.SetEnvironmentVariable("PAYSTACK_SECRET_KEY", secret);
+        var webhookBody = $$"""
+            {
+              "event": "charge.success",
+              "data": {
+                "reference": "terminal_provider_reference",
+                "amount": {{terminalIntent!.AmountCents}},
+                "metadata": {
+                  "virtual_terminal": {
+                    "code": "{{terminalIntent.VirtualTerminalCode}}"
+                  }
+                }
+              }
+            }
+            """;
+        using var request = new HttpRequestMessage(HttpMethod.Post, "/api/main/payments/paystack/webhook")
+        {
+            Content = new StringContent(webhookBody, Encoding.UTF8, "application/json")
+        };
+        request.Headers.Add("x-paystack-signature", SignPaystackWebhook(webhookBody, secret));
+
+        try
+        {
+            var response = await AnonymousHttpClient.SendAsync(request);
+
+            response.StatusCode.Should().Be(HttpStatusCode.OK);
+            using var scope = Provider.CreateScope();
+            var db = scope.ServiceProvider.GetRequiredService<MainDbContext>();
+            var paidAppointment = await db.Appointments.IgnoreQueryFilters().SingleAsync(a => a.Id == appointment.Id);
+            paidAppointment.PaymentStatus.Should().Be(AppointmentPaymentStatus.Paid);
+            WhatsAppClient.Messages.Should().ContainSingle();
+            WhatsAppClient.Messages.Single().Body.Should().Be($"Payment received. Your booking {paidAppointment.PublicReference} is confirmed.");
+        }
+        finally
+        {
+            Environment.SetEnvironmentVariable("PAYSTACK_SECRET_KEY", previousSecret);
+        }
+    }
+
+    [Fact]
     public async Task UpdateAppointmentStatus_WhenPaymentStatusProvided_ShouldRejectManualPaymentMutation()
     {
         PaystackClient = new FakePaystackClient();
@@ -202,6 +352,8 @@ public sealed class PaystackPaymentsEndpointTests : EndpointBaseTest<MainDbConte
         services.AddSingleton<IPaystackClient>(_ => PaystackClient);
         services.RemoveAll<ITwilioVerifyClient>();
         services.AddSingleton<ITwilioVerifyClient>(_ => TwilioVerifyClient);
+        services.RemoveAll<ITwilioWhatsAppClient>();
+        services.AddSingleton<ITwilioWhatsAppClient>(_ => WhatsAppClient);
         base.RegisterMockLoggers(services);
     }
 
@@ -303,6 +455,19 @@ public sealed class PaystackPaymentsEndpointTests : EndpointBaseTest<MainDbConte
         using var scope = Provider.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<MainDbContext>();
         return await db.AppointmentPaymentIntents.IgnoreQueryFilters().SingleAsync(i => i.AppointmentId == appointmentId);
+    }
+
+    private async Task<AppointmentFlowEvent> ReadPaymentConfirmationEventAsync(string appointmentId, string reference)
+    {
+        using var scope = Provider.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<MainDbContext>();
+        return await db.AppointmentFlowEvents.IgnoreQueryFilters()
+            .SingleAsync(e => e.AppointmentId == appointmentId && e.Type == "PaymentConfirmation" && e.PayloadJson.Contains(reference));
+    }
+
+    private static string SignPaystackWebhook(string body, string secret)
+    {
+        return Convert.ToHexString(HMACSHA512.HashData(Encoding.UTF8.GetBytes(secret), Encoding.UTF8.GetBytes(body))).ToLowerInvariant();
     }
 
     private static object NewSubaccountRequest(string accountNumber)
@@ -427,6 +592,22 @@ public sealed class PaystackPaymentsEndpointTests : EndpointBaseTest<MainDbConte
         public Task<bool> CheckVerificationAsync(string phone, string code, CancellationToken cancellationToken)
         {
             return Task.FromResult(code == "123456");
+        }
+    }
+
+    private sealed class FakeWhatsAppClient : ITwilioWhatsAppClient
+    {
+        public bool ShouldFail { get; set; }
+        public List<(TenantId TenantId, string To, string Body)> Messages { get; } = [];
+
+        public Task SendAsync(TenantId tenantId, string toPhone, string message, CancellationToken cancellationToken)
+        {
+            Messages.Add((tenantId, toPhone, message));
+            if (ShouldFail)
+            {
+                throw new InvalidOperationException("Twilio test failure");
+            }
+            return Task.CompletedTask;
         }
     }
 

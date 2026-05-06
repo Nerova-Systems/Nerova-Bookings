@@ -780,13 +780,23 @@ public sealed class AppointmentEndpoints : IEndpoints
         return Results.Ok(new TerminalPaymentIntentResponse(intent.Reference, intent.AmountCents, intent.Status, subaccount.VirtualTerminalCode!, BuildVirtualTerminalUrl(subaccount.VirtualTerminalCode!)));
     }
 
-    private static async Task<IResult> ConfirmPaystackPayment(string reference, MainDbContext db, TimeProvider timeProvider, IPaystackClient paystackClient, CancellationToken cancellationToken)
+    private static async Task<IResult> ConfirmPaystackPayment(string reference, MainDbContext db, TimeProvider timeProvider, IPaystackClient paystackClient, ITwilioWhatsAppClient whatsAppClient, CancellationToken cancellationToken)
     {
         var intent = await db.AppointmentPaymentIntents.AsTracking().FirstOrDefaultAsync(p => p.Reference == reference, cancellationToken);
         if (intent is null) return Results.NotFound();
         var appointment = await db.Appointments.IgnoreQueryFilters().AsTracking().FirstAsync(a => a.Id == intent.AppointmentId, cancellationToken);
+        var now = timeProvider.GetUtcNow();
+        var serviceVersion = await GetAppointmentServiceVersionAsync(db, appointment, cancellationToken);
+        var confirmedPaymentStatus = NormalizePaymentPolicy(serviceVersion.PaymentPolicy.ToString(), serviceVersion.DepositCents) == ServicePaymentPolicy.DepositBeforeBooking
+            ? AppointmentPaymentStatus.DepositPaid
+            : AppointmentPaymentStatus.Paid;
         if (intent.Status == "Confirmed")
         {
+            intent.ConfirmedAt ??= now;
+            appointment.PaymentStatus = confirmedPaymentStatus;
+            appointment.Status = AppointmentStatus.Confirmed;
+            await db.SaveChangesAsync(cancellationToken);
+            await SendPaymentConfirmationIfNeededAsync(db, intent, appointment, now, whatsAppClient, cancellationToken);
             return Results.Ok(new PaymentConfirmationResponse(reference, intent.Status, appointment.PublicReference));
         }
         if (!await paystackClient.IsTransactionSuccessfulAsync(reference, intent.AmountCents, cancellationToken))
@@ -794,17 +804,15 @@ public sealed class AppointmentEndpoints : IEndpoints
             return Results.Problem("Paystack has not verified this transaction as successful yet.", statusCode: StatusCodes.Status409Conflict);
         }
         intent.Status = "Confirmed";
-        intent.ConfirmedAt = timeProvider.GetUtcNow();
-        var serviceVersion = await GetAppointmentServiceVersionAsync(db, appointment, cancellationToken);
-        appointment.PaymentStatus = NormalizePaymentPolicy(serviceVersion.PaymentPolicy.ToString(), serviceVersion.DepositCents) == ServicePaymentPolicy.DepositBeforeBooking
-            ? AppointmentPaymentStatus.DepositPaid
-            : AppointmentPaymentStatus.Paid;
+        intent.ConfirmedAt = now;
+        appointment.PaymentStatus = confirmedPaymentStatus;
         appointment.Status = AppointmentStatus.Confirmed;
         await db.SaveChangesAsync(cancellationToken);
+        await SendPaymentConfirmationIfNeededAsync(db, intent, appointment, now, whatsAppClient, cancellationToken);
         return Results.Ok(new PaymentConfirmationResponse(reference, intent.Status, appointment.PublicReference));
     }
 
-    private static async Task<IResult> HandlePaystackWebhook(HttpRequest request, MainDbContext db, TimeProvider timeProvider, IPaystackClient paystackClient, CancellationToken cancellationToken)
+    private static async Task<IResult> HandlePaystackWebhook(HttpRequest request, MainDbContext db, TimeProvider timeProvider, IPaystackClient paystackClient, ITwilioWhatsAppClient whatsAppClient, CancellationToken cancellationToken)
     {
         using var reader = new StreamReader(request.Body);
         var body = await reader.ReadToEndAsync(cancellationToken);
@@ -829,7 +837,7 @@ public sealed class AppointmentEndpoints : IEndpoints
             var intent = await db.AppointmentPaymentIntents.IgnoreQueryFilters().FirstOrDefaultAsync(i => i.Reference == reference, cancellationToken);
             if (intent is not null)
             {
-                await ConfirmPaystackPayment(reference, db, timeProvider, paystackClient, cancellationToken);
+                await ConfirmPaystackPayment(reference, db, timeProvider, paystackClient, whatsAppClient, cancellationToken);
                 return Results.Ok();
             }
         }
@@ -837,9 +845,55 @@ public sealed class AppointmentEndpoints : IEndpoints
         var terminalCode = TryReadVirtualTerminalCode(data);
         if (!string.IsNullOrWhiteSpace(terminalCode))
         {
-            await ConfirmVirtualTerminalPaymentAsync(db, terminalCode, data, timeProvider.GetUtcNow(), cancellationToken);
+            await ConfirmVirtualTerminalPaymentAsync(db, terminalCode, data, timeProvider.GetUtcNow(), whatsAppClient, cancellationToken);
         }
         return Results.Ok();
+    }
+
+    private static async Task SendPaymentConfirmationIfNeededAsync(MainDbContext db, AppointmentPaymentIntent intent, Appointment appointment, DateTimeOffset now, ITwilioWhatsAppClient whatsAppClient, CancellationToken cancellationToken)
+    {
+        var completedConfirmationExists = await db.AppointmentFlowEvents.IgnoreQueryFilters()
+            .AnyAsync(
+                e => e.AppointmentId == appointment.Id &&
+                     e.Type == "PaymentConfirmation" &&
+                     e.Status == "Completed" &&
+                     e.PayloadJson.Contains(intent.Reference),
+                cancellationToken
+            );
+        if (completedConfirmationExists) return;
+
+        var client = await db.Clients.IgnoreQueryFilters().FirstAsync(client => client.Id == appointment.ClientId, cancellationToken);
+        var message = appointment.PaymentStatus == AppointmentPaymentStatus.DepositPaid
+            ? $"Deposit received. Your booking {appointment.PublicReference} is confirmed."
+            : $"Payment received. Your booking {appointment.PublicReference} is confirmed.";
+        try
+        {
+            await whatsAppClient.SendAsync(appointment.TenantId, client.Phone, message, cancellationToken);
+            AddPaymentConfirmationEvent(db, intent, appointment, now, "Completed");
+        }
+        catch (InvalidOperationException exception)
+        {
+            AddPaymentConfirmationEvent(db, intent, appointment, now, "Failed", exception.Message);
+        }
+        await db.SaveChangesAsync(cancellationToken);
+    }
+
+    private static void AddPaymentConfirmationEvent(MainDbContext db, AppointmentPaymentIntent intent, Appointment appointment, DateTimeOffset now, string status, string? failureMessage = null)
+    {
+        db.AppointmentFlowEvents.Add(new AppointmentFlowEvent
+        {
+            TenantId = appointment.TenantId,
+            AppointmentId = appointment.Id,
+            Type = "PaymentConfirmation",
+            Status = status,
+            ScheduledFor = now,
+            PayloadJson = JsonSerializer.Serialize(new
+            {
+                reference = intent.Reference,
+                channel = intent.Channel.ToString(),
+                failureMessage
+            })
+        });
     }
 
     private static async Task<IResult> GetPaymentOverview(MainDbContext db, IExecutionContext executionContext, TimeProvider timeProvider, CancellationToken cancellationToken)
@@ -1645,12 +1699,12 @@ public sealed class AppointmentEndpoints : IEndpoints
         return null;
     }
 
-    private static async Task ConfirmVirtualTerminalPaymentAsync(MainDbContext db, string terminalCode, JsonElement data, DateTimeOffset now, CancellationToken cancellationToken)
+    private static async Task ConfirmVirtualTerminalPaymentAsync(MainDbContext db, string terminalCode, JsonElement data, DateTimeOffset now, ITwilioWhatsAppClient whatsAppClient, CancellationToken cancellationToken)
     {
-        var intent = await db.AppointmentPaymentIntents.IgnoreQueryFilters().AsTracking()
+        var matchingIntents = await db.AppointmentPaymentIntents.IgnoreQueryFilters().AsTracking()
             .Where(i => i.Channel == AppointmentPaymentChannel.VirtualTerminal && i.VirtualTerminalCode == terminalCode && i.Status == "Pending")
-            .OrderByDescending(i => i.CreatedAt)
-            .FirstOrDefaultAsync(cancellationToken);
+            .ToListAsync(cancellationToken);
+        var intent = matchingIntents.OrderByDescending(i => i.CreatedAt).FirstOrDefault();
         if (intent is null) return;
         var amount = data.TryGetProperty("amount", out var amountProperty) ? amountProperty.GetInt32() : 0;
         if (amount != intent.AmountCents) return;
@@ -1658,7 +1712,9 @@ public sealed class AppointmentEndpoints : IEndpoints
         intent.Status = "Confirmed";
         intent.ConfirmedAt = now;
         appointment.PaymentStatus = AppointmentPaymentStatus.Paid;
+        appointment.Status = AppointmentStatus.Confirmed;
         await db.SaveChangesAsync(cancellationToken);
+        await SendPaymentConfirmationIfNeededAsync(db, intent, appointment, now, whatsAppClient, cancellationToken);
     }
 
     private static Task<string?> TryInitializePaystackTransactionAsync(AppointmentPaymentIntent intent, string email, string subaccountCode, IPaystackClient paystackClient, CancellationToken cancellationToken)
