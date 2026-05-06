@@ -18,7 +18,9 @@ namespace Main.Tests;
 public sealed class PaystackPaymentsEndpointTests : EndpointBaseTest<MainDbContext>
 {
     private static FakePaystackClient PaystackClient { get; set; } = new();
+
     private static FakeTwilioVerifyClient TwilioVerifyClient { get; set; } = new();
+
     private static FakeWhatsAppClient WhatsAppClient { get; set; } = new();
 
     [Fact]
@@ -82,7 +84,7 @@ public sealed class PaystackPaymentsEndpointTests : EndpointBaseTest<MainDbConte
     }
 
     [Fact]
-    public async Task CreatePublicAppointment_WhenServiceRequiresFullPaymentBeforeBooking_ShouldInitializeFullPricePayment()
+    public async Task CreatePublicAppointment_WhenServiceRequiresFullPaymentBeforeBooking_ShouldReturnTokenScopedPaymentUrl()
     {
         PaystackClient = new FakePaystackClient();
         TwilioVerifyClient = new FakeTwilioVerifyClient();
@@ -95,8 +97,128 @@ public sealed class PaystackPaymentsEndpointTests : EndpointBaseTest<MainDbConte
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var body = await response.Content.ReadFromJsonAsync<PublicBookingCreatedResponse>();
         body!.PaymentRequired.Should().BeTrue();
-        body.PaymentUrl.Should().Be("https://checkout.paystack.test/reference");
+        body.PaymentUrl.Should().StartWith("/pay/");
+        body.PaymentUrl.Should().NotContain(service.Id);
+        PaystackClient.LastTransactionRequest.Should().BeNull();
+    }
+
+    [Fact]
+    public async Task PublicPaymentDetails_WhenTokenIsValid_ShouldReturnBrandingAndAppointmentPaymentDetails()
+    {
+        PaystackClient = new FakePaystackClient();
+        TwilioVerifyClient = new FakeTwilioVerifyClient();
+        await SeedShellAsync();
+        await AuthenticatedOwnerHttpClient.PostAsJsonAsync("/api/main/app/payments/paystack/subaccount", NewSubaccountRequest("1234567890"));
+        var service = await UpdateServicePaymentPolicyAsync("Express session", ServicePaymentPolicy.FullPaymentBeforeBooking, 0);
+        var bookingResponse = await AnonymousHttpClient.PostAsJsonAsync("/api/main/public-booking/sea-point-studio/appointments", await VerifiedPublicBookingRequestAsync(service.Id));
+        var booking = await bookingResponse.Content.ReadFromJsonAsync<PublicBookingCreatedResponse>();
+        var token = ExtractPaymentToken(booking!.PaymentUrl);
+
+        var response = await AnonymousHttpClient.GetAsync($"/api/main/public/pay/{token}");
+
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        var body = await response.Content.ReadFromJsonAsync<JsonObject>();
+        body.Should().NotBeNull();
+        body!["business"]!["name"]!.GetValue<string>().Should().Be("Sea Point studio");
+        body["business"]!["logoUrl"]!.GetValue<string>().Should().Be("/logos/sea-point-studio.svg");
+        body["business"]!["brandColor"]!.GetValue<string>().Should().NotBeNullOrWhiteSpace();
+        body["appointment"]!["reference"]!.GetValue<string>().Should().Be(booking.Reference);
+        body["appointment"]!["serviceName"]!.GetValue<string>().Should().Be(service.Name);
+        body["payment"]!["amountCents"]!.GetValue<int>().Should().Be(service.PriceCents);
+        body["payment"]!["currency"]!.GetValue<string>().Should().Be("ZAR");
+        body.ToJsonString().Should().NotContain("\"appointmentId\"");
+    }
+
+    [Fact]
+    public async Task PublicPaymentInitialize_WhenTokenIsValid_ShouldCreatePaystackIntentForCorrectAmount()
+    {
+        PaystackClient = new FakePaystackClient();
+        TwilioVerifyClient = new FakeTwilioVerifyClient();
+        await SeedShellAsync();
+        await AuthenticatedOwnerHttpClient.PostAsJsonAsync("/api/main/app/payments/paystack/subaccount", NewSubaccountRequest("1234567890"));
+        var service = await UpdateServicePaymentPolicyAsync("Express session", ServicePaymentPolicy.FullPaymentBeforeBooking, 0);
+        var bookingResponse = await AnonymousHttpClient.PostAsJsonAsync("/api/main/public-booking/sea-point-studio/appointments", await VerifiedPublicBookingRequestAsync(service.Id));
+        var booking = await bookingResponse.Content.ReadFromJsonAsync<PublicBookingCreatedResponse>();
+        var token = ExtractPaymentToken(booking!.PaymentUrl);
+
+        var response = await AnonymousHttpClient.PostAsJsonAsync($"/api/main/public/pay/{token}/initialize", new { });
+
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        var body = await response.Content.ReadFromJsonAsync<JsonObject>();
+        body.Should().NotBeNull();
+        body!["reference"]!.GetValue<string>().Should().StartWith("ps_");
+        body["accessCode"]!.GetValue<string>().Should().Be("access_code_test");
+        body["authorizationUrl"]!.GetValue<string>().Should().Be("https://checkout.paystack.test/reference");
+        body["amountCents"]!.GetValue<int>().Should().Be(service.PriceCents);
         PaystackClient.LastTransactionRequest?.AmountCents.Should().Be(service.PriceCents);
+        PaystackClient.LastTransactionRequest?.SubaccountCode.Should().Be("ACCT_test");
+    }
+
+    [Fact]
+    public async Task PublicPaymentInitialize_WhenCalledTwice_ShouldReusePendingIntent()
+    {
+        PaystackClient = new FakePaystackClient();
+        TwilioVerifyClient = new FakeTwilioVerifyClient();
+        await SeedShellAsync();
+        await AuthenticatedOwnerHttpClient.PostAsJsonAsync("/api/main/app/payments/paystack/subaccount", NewSubaccountRequest("1234567890"));
+        var service = await UpdateServicePaymentPolicyAsync("Express session", ServicePaymentPolicy.FullPaymentBeforeBooking, 0);
+        var bookingResponse = await AnonymousHttpClient.PostAsJsonAsync("/api/main/public-booking/sea-point-studio/appointments", await VerifiedPublicBookingRequestAsync(service.Id));
+        var booking = await bookingResponse.Content.ReadFromJsonAsync<PublicBookingCreatedResponse>();
+        var token = ExtractPaymentToken(booking!.PaymentUrl);
+
+        var first = await AnonymousHttpClient.PostAsJsonAsync($"/api/main/public/pay/{token}/initialize", new { });
+        var second = await AnonymousHttpClient.PostAsJsonAsync($"/api/main/public/pay/{token}/initialize", new { });
+
+        first.StatusCode.Should().Be(HttpStatusCode.OK);
+        second.StatusCode.Should().Be(HttpStatusCode.OK);
+        var firstBody = await first.Content.ReadFromJsonAsync<JsonObject>();
+        var secondBody = await second.Content.ReadFromJsonAsync<JsonObject>();
+        secondBody!["reference"]!.GetValue<string>().Should().Be(firstBody!["reference"]!.GetValue<string>());
+        using var scope = Provider.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<MainDbContext>();
+        var appointment = await db.Appointments.IgnoreQueryFilters().SingleAsync(a => a.PublicReference == booking.Reference);
+        var intents = await db.AppointmentPaymentIntents.IgnoreQueryFilters().Where(intent => intent.AppointmentId == appointment.Id).ToListAsync();
+        intents.Should().ContainSingle();
+    }
+
+    [Fact]
+    public async Task PublicPaymentDetails_WhenTokenIsExpired_ShouldReturnGoneWithoutAppointmentDetails()
+    {
+        PaystackClient = new FakePaystackClient();
+        TwilioVerifyClient = new FakeTwilioVerifyClient();
+        await SeedShellAsync();
+        await AuthenticatedOwnerHttpClient.PostAsJsonAsync("/api/main/app/payments/paystack/subaccount", NewSubaccountRequest("1234567890"));
+        var service = await UpdateServicePaymentPolicyAsync("Express session", ServicePaymentPolicy.FullPaymentBeforeBooking, 0);
+        var bookingResponse = await AnonymousHttpClient.PostAsJsonAsync("/api/main/public-booking/sea-point-studio/appointments", await VerifiedPublicBookingRequestAsync(service.Id));
+        var booking = await bookingResponse.Content.ReadFromJsonAsync<PublicBookingCreatedResponse>();
+        var token = ExtractPaymentToken(booking!.PaymentUrl);
+        await ExpirePaymentTokenAsync(booking.Reference);
+
+        var response = await AnonymousHttpClient.GetAsync($"/api/main/public/pay/{token}");
+
+        response.StatusCode.Should().Be(HttpStatusCode.Gone);
+        var body = await response.Content.ReadAsStringAsync();
+        body.Should().NotContain(booking.Reference);
+        body.Should().NotContain(service.Name);
+    }
+
+    [Fact]
+    public async Task PublicPaymentInitialize_WhenAppointmentIsAlreadyPaid_ShouldReturnConflictWithoutCreatingIntent()
+    {
+        PaystackClient = new FakePaystackClient();
+        TwilioVerifyClient = new FakeTwilioVerifyClient();
+        await SeedShellAsync();
+        await AuthenticatedOwnerHttpClient.PostAsJsonAsync("/api/main/app/payments/paystack/subaccount", NewSubaccountRequest("1234567890"));
+        var service = await UpdateServicePaymentPolicyAsync("Express session", ServicePaymentPolicy.FullPaymentBeforeBooking, 0);
+        var bookingResponse = await AnonymousHttpClient.PostAsJsonAsync("/api/main/public-booking/sea-point-studio/appointments", await VerifiedPublicBookingRequestAsync(service.Id));
+        var booking = await bookingResponse.Content.ReadFromJsonAsync<PublicBookingCreatedResponse>();
+        var token = ExtractPaymentToken(booking!.PaymentUrl);
+        await MarkAppointmentPaidAsync(booking.Reference);
+
+        var response = await AnonymousHttpClient.PostAsJsonAsync($"/api/main/public/pay/{token}/initialize", new { });
+
+        response.StatusCode.Should().Be(HttpStatusCode.Conflict);
+        PaystackClient.LastTransactionRequest.Should().BeNull();
     }
 
     [Fact]
@@ -261,19 +383,19 @@ public sealed class PaystackPaymentsEndpointTests : EndpointBaseTest<MainDbConte
         var previousSecret = Environment.GetEnvironmentVariable("PAYSTACK_SECRET_KEY");
         Environment.SetEnvironmentVariable("PAYSTACK_SECRET_KEY", secret);
         var webhookBody = $$"""
-            {
-              "event": "charge.success",
-              "data": {
-                "reference": "terminal_provider_reference",
-                "amount": {{terminalIntent!.AmountCents}},
-                "metadata": {
-                  "virtual_terminal": {
-                    "code": "{{terminalIntent.VirtualTerminalCode}}"
-                  }
-                }
-              }
-            }
-            """;
+                            {
+                              "event": "charge.success",
+                              "data": {
+                                "reference": "terminal_provider_reference",
+                                "amount": {{terminalIntent!.AmountCents}},
+                                "metadata": {
+                                  "virtual_terminal": {
+                                    "code": "{{terminalIntent.VirtualTerminalCode}}"
+                                  }
+                                }
+                              }
+                            }
+                            """;
         using var request = new HttpRequestMessage(HttpMethod.Post, "/api/main/payments/paystack/webhook")
         {
             Content = new StringContent(webhookBody, Encoding.UTF8, "application/json")
@@ -318,18 +440,18 @@ public sealed class PaystackPaymentsEndpointTests : EndpointBaseTest<MainDbConte
     public async Task IsTransactionSuccessfulAsync_WhenRequestedAmountMatches_ShouldVerifyPayment()
     {
         var responseBody = """
-            {
-              "status": true,
-              "message": "Verification successful",
-              "data": {
-                "status": "success",
-                "reference": "ps_reference",
-                "amount": 40333,
-                "requested_amount": 15000,
-                "currency": "ZAR"
-              }
-            }
-            """;
+                           {
+                             "status": true,
+                             "message": "Verification successful",
+                             "data": {
+                               "status": "success",
+                               "reference": "ps_reference",
+                               "amount": 40333,
+                               "requested_amount": 15000,
+                               "currency": "ZAR"
+                             }
+                           }
+                           """;
         using var httpClient = new HttpClient(new StaticJsonHandler(responseBody));
         var paystackClient = new PaystackClient(new SingleHttpClientFactory(httpClient));
         var previousSecret = Environment.GetEnvironmentVariable("PAYSTACK_SECRET_KEY");
@@ -380,23 +502,6 @@ public sealed class PaystackPaymentsEndpointTests : EndpointBaseTest<MainDbConte
             where service.DepositCents > 0 && appointment.PaymentStatus == AppointmentPaymentStatus.Pending
             select appointment.Id;
         return await query.FirstAsync();
-    }
-
-    private async Task<string> ReadCollectAfterAppointmentIdAsync()
-    {
-        using var scope = Provider.CreateScope();
-        var db = scope.ServiceProvider.GetRequiredService<MainDbContext>();
-        var subaccount = await db.PaystackSubaccounts.IgnoreQueryFilters().SingleAsync();
-        var appointment = await db.Appointments.IgnoreQueryFilters().FirstAsync(a => a.TenantId == subaccount.TenantId);
-        var service = await db.BookableServices.IgnoreQueryFilters().AsTracking().SingleAsync(s => s.Id == appointment.ServiceId);
-        service.PaymentPolicy = ServicePaymentPolicy.CollectAfterAppointment;
-        service.DepositCents = 0;
-        var version = NewServiceVersion(service, await NextVersionNumberAsync(db, service.Id));
-        db.BookableServiceVersions.Add(version);
-        appointment.ServiceVersionId = version.Id;
-        appointment.PaymentStatus = AppointmentPaymentStatus.Pending;
-        await db.SaveChangesAsync();
-        return appointment.Id;
     }
 
     private async Task<BookableService> UpdateServicePaymentPolicyAsync(string serviceName, ServicePaymentPolicy paymentPolicy, int depositCents)
@@ -450,6 +555,25 @@ public sealed class PaystackPaymentsEndpointTests : EndpointBaseTest<MainDbConte
         return await db.Appointments.IgnoreQueryFilters().SingleAsync(a => a.PublicReference == reference);
     }
 
+    private async Task ExpirePaymentTokenAsync(string appointmentReference)
+    {
+        using var scope = Provider.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<MainDbContext>();
+        var appointment = await db.Appointments.IgnoreQueryFilters().SingleAsync(a => a.PublicReference == appointmentReference);
+        var token = await db.AppointmentPaymentTokens.IgnoreQueryFilters().AsTracking().SingleAsync(item => item.AppointmentId == appointment.Id);
+        token.ExpiresAt = DateTimeOffset.UtcNow.AddMinutes(-1);
+        await db.SaveChangesAsync();
+    }
+
+    private async Task MarkAppointmentPaidAsync(string appointmentReference)
+    {
+        using var scope = Provider.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<MainDbContext>();
+        var appointment = await db.Appointments.IgnoreQueryFilters().AsTracking().SingleAsync(a => a.PublicReference == appointmentReference);
+        appointment.PaymentStatus = AppointmentPaymentStatus.Paid;
+        await db.SaveChangesAsync();
+    }
+
     private async Task<AppointmentPaymentIntent> ReadPaymentIntentAsync(string appointmentId)
     {
         using var scope = Provider.CreateScope();
@@ -484,6 +608,14 @@ public sealed class PaystackPaymentsEndpointTests : EndpointBaseTest<MainDbConte
         };
     }
 
+    private static string ExtractPaymentToken(string? paymentUrl)
+    {
+        var url = paymentUrl ?? string.Empty;
+        url.Should().NotBeNullOrWhiteSpace();
+        url.Should().StartWith("/pay/");
+        return url["/pay/".Length..];
+    }
+
     private async Task<object> VerifiedPublicBookingRequestAsync(string serviceId)
     {
         var phone = "+27 82 111 0000";
@@ -514,16 +646,21 @@ public sealed class PaystackPaymentsEndpointTests : EndpointBaseTest<MainDbConte
     private sealed class FakePaystackClient : IPaystackClient
     {
         public int CreateCalls { get; private set; }
+
         public int UpdateCalls { get; private set; }
+
         public int CreateSplitCalls { get; private set; }
+
         public int CreateVirtualTerminalCalls { get; private set; }
+
         public int AssignSplitToVirtualTerminalCalls { get; private set; }
+
         public PaystackTransactionRequest? LastTransactionRequest { get; private set; }
 
-        public Task<string?> InitializeTransactionAsync(PaystackTransactionRequest request, CancellationToken cancellationToken)
+        public Task<PaystackTransactionResult?> InitializeTransactionAsync(PaystackTransactionRequest request, CancellationToken cancellationToken)
         {
             LastTransactionRequest = request;
-            return Task.FromResult<string?>("https://checkout.paystack.test/reference");
+            return Task.FromResult<PaystackTransactionResult?>(new PaystackTransactionResult("https://checkout.paystack.test/reference", "access_code_test", request.Reference));
         }
 
         public Task<bool> IsTransactionSuccessfulAsync(string reference, int amountCents, CancellationToken cancellationToken)
@@ -598,6 +735,7 @@ public sealed class PaystackPaymentsEndpointTests : EndpointBaseTest<MainDbConte
     private sealed class FakeWhatsAppClient : ITwilioWhatsAppClient
     {
         public bool ShouldFail { get; set; }
+
         public List<(TenantId TenantId, string To, string Body)> Messages { get; } = [];
 
         public Task SendAsync(TenantId tenantId, string toPhone, string message, CancellationToken cancellationToken)
@@ -607,6 +745,7 @@ public sealed class PaystackPaymentsEndpointTests : EndpointBaseTest<MainDbConte
             {
                 throw new InvalidOperationException("Twilio test failure");
             }
+
             return Task.CompletedTask;
         }
     }
@@ -624,9 +763,10 @@ public sealed class PaystackPaymentsEndpointTests : EndpointBaseTest<MainDbConte
         protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
             return Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK)
-            {
-                Content = new StringContent(responseBody, Encoding.UTF8, "application/json")
-            });
+                {
+                    Content = new StringContent(responseBody, Encoding.UTF8, "application/json")
+                }
+            );
         }
     }
 }

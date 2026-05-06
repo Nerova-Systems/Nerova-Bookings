@@ -49,6 +49,40 @@ export interface PublicBookingCreated {
   paymentUrl?: string;
 }
 
+export interface PublicPaymentBusiness {
+  name: string;
+  logoUrl?: string;
+  brandColor: string;
+}
+
+export interface PublicPaymentAppointment {
+  reference: string;
+  serviceName: string;
+  startAt: string;
+  endAt: string;
+  location: string;
+}
+
+export interface PublicPaymentAmount {
+  amountCents: number;
+  currency: string;
+  status: string;
+  expiresAt: string;
+}
+
+export interface PublicPaymentDetails {
+  business: PublicPaymentBusiness;
+  appointment: PublicPaymentAppointment;
+  payment: PublicPaymentAmount;
+}
+
+export interface PublicPaymentInitialized {
+  reference: string;
+  accessCode: string;
+  authorizationUrl: string;
+  amountCents: number;
+}
+
 export interface PublicConfirmation {
   id: string;
   publicReference: string;
@@ -150,6 +184,33 @@ export function usePublicConfirmation(reference: string) {
     queryFn: async () => {
       const response = await enhancedFetch(`/api/main/public-booking/confirmation/${reference}`);
       return (await response.json()) as PublicConfirmation;
+    }
+  });
+}
+
+export function usePublicPaymentDetails(token: string) {
+  return useQuery({
+    enabled: Boolean(token),
+    retry: false,
+    queryKey: ["public-payment-details", token],
+    queryFn: async () => {
+      const response = await enhancedFetch(`/api/main/public/pay/${encodeURIComponent(token)}`);
+      if (!response.ok) throw new Error(await response.text());
+      return (await response.json()) as PublicPaymentDetails;
+    }
+  });
+}
+
+export function useInitializePublicPayment(token: string) {
+  return useMutation({
+    mutationFn: async () => {
+      const response = await enhancedFetch(`/api/main/public/pay/${encodeURIComponent(token)}/initialize`, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({})
+      });
+      if (!response.ok) throw new Error(await response.text());
+      return (await response.json()) as PublicPaymentInitialized;
     }
   });
 }

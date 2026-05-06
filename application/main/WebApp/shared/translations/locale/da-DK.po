@@ -22,6 +22,12 @@ msgstr ""
 msgid "Alerts"
 msgstr ""
 
+msgid "Amount"
+msgstr ""
+
+msgid "Amount due"
+msgstr ""
+
 msgid "Analytics"
 msgstr ""
 
@@ -35,6 +41,9 @@ msgid "App store"
 msgstr ""
 
 msgid "App store | Nerova"
+msgstr ""
+
+msgid "Appointment payment"
 msgstr ""
 
 msgid "Appointment payments settle into this business bank account through a Paystack subaccount."
@@ -160,6 +169,9 @@ msgstr ""
 msgid "Daily"
 msgstr ""
 
+msgid "Date and time"
+msgstr ""
+
 msgid "Default"
 msgstr ""
 
@@ -176,6 +188,9 @@ msgid "Flow answers"
 msgstr ""
 
 msgid "Future client rewards, visit milestones, packages, and credit tracking will live here."
+msgstr ""
+
+msgid "If the checkout did not open, continue in the secure checkout window."
 msgstr ""
 
 msgid "Import contacts"
@@ -199,10 +214,16 @@ msgstr ""
 msgid "Lifecycle events"
 msgstr ""
 
+msgid "Link expires"
+msgstr ""
+
 msgid "Loading bookings..."
 msgstr ""
 
 msgid "Loading confirmation..."
+msgstr ""
+
+msgid "Location"
 msgstr ""
 
 msgid "Loyalty"
@@ -247,10 +268,19 @@ msgstr ""
 msgid "No-show"
 msgstr ""
 
+msgid "Open checkout"
+msgstr ""
+
 msgid "Opening terminal..."
 msgstr ""
 
 msgid "Operational metrics · last 30 days"
+msgstr ""
+
+msgid "Pay appointment | Nerova"
+msgstr ""
+
+msgid "Pay securely"
 msgstr ""
 
 msgid "Payment"
@@ -259,7 +289,13 @@ msgstr ""
 msgid "Payment confirmation | Nerova"
 msgstr ""
 
+msgid "Payment link unavailable"
+msgstr ""
+
 msgid "Payment needs review"
+msgstr ""
+
+msgid "Payment received"
 msgstr ""
 
 msgid "Paystack payouts"
@@ -271,10 +307,16 @@ msgstr ""
 msgid "Public booking"
 msgstr ""
 
+msgid "Ready to pay"
+msgstr ""
+
 msgid "Recent appointment payments"
 msgstr ""
 
 msgid "Recent visits"
+msgstr ""
+
+msgid "Reference"
 msgstr ""
 
 msgid "Reject"
@@ -290,6 +332,9 @@ msgid "Reset"
 msgstr ""
 
 msgid "Restore any service to make it bookable again."
+msgstr ""
+
+msgid "Review your booking details before opening the secure checkout."
 msgstr ""
 
 msgid "Save"
@@ -317,6 +362,9 @@ msgid "Search clients…"
 msgstr ""
 
 msgid "Search Liam, overdue payments, Google Calendar, Full consultation..."
+msgstr ""
+
+msgid "Secure payment"
 msgstr ""
 
 msgid "Select a booking on the calendar to view details."
@@ -355,6 +403,12 @@ msgstr ""
 msgid "The payment return is verified server-side before the appointment is marked paid."
 msgstr ""
 
+msgid "This appointment is already marked paid."
+msgstr ""
+
+msgid "This payment link is invalid, expired, or no longer payable."
+msgstr ""
+
 msgid "Timezone"
 msgstr ""
 
@@ -371,6 +425,9 @@ msgid "Verifying payment"
 msgstr ""
 
 msgid "View booking"
+msgstr ""
+
+msgid "View booking confirmation"
 msgstr ""
 
 msgid "View full profile →"
@@ -395,6 +452,9 @@ msgid "Workspace search"
 msgstr ""
 
 msgid "Your appointment request has been saved."
+msgstr ""
+
+msgid "Your checkout is initialized securely by the business before Paystack opens."
 msgstr ""
 
 msgid "Your phone number stays locked to the verified number for this booking."

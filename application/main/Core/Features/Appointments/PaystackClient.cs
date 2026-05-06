@@ -6,21 +6,30 @@ namespace Main.Features.Appointments;
 
 public interface IPaystackClient
 {
-    Task<string?> InitializeTransactionAsync(PaystackTransactionRequest request, CancellationToken cancellationToken);
+    Task<PaystackTransactionResult?> InitializeTransactionAsync(PaystackTransactionRequest request, CancellationToken cancellationToken);
+
     Task<bool> IsTransactionSuccessfulAsync(string reference, int amountCents, CancellationToken cancellationToken);
+
     Task<IReadOnlyList<PaystackBankOption>> ListBanksAsync(CancellationToken cancellationToken);
+
     Task<PaystackResolvedAccount> ResolveAccountAsync(string bankCode, string accountNumber, CancellationToken cancellationToken);
+
     Task<PaystackSubaccountResult> CreateSubaccountAsync(PaystackSubaccountRequest request, CancellationToken cancellationToken);
+
     Task<PaystackSubaccountResult> UpdateSubaccountAsync(string subaccountCode, PaystackSubaccountRequest request, CancellationToken cancellationToken);
+
     Task<IReadOnlyList<PaystackSettlementResult>> ListSettlementsAsync(string subaccountCode, CancellationToken cancellationToken);
+
     Task<PaystackSplitResult> CreateSplitAsync(PaystackSplitRequest request, CancellationToken cancellationToken);
+
     Task<PaystackVirtualTerminalResult> CreateVirtualTerminalAsync(PaystackVirtualTerminalRequest request, CancellationToken cancellationToken);
+
     Task AssignSplitToVirtualTerminalAsync(string terminalCode, string splitCode, CancellationToken cancellationToken);
 }
 
 public sealed class PaystackClient(IHttpClientFactory httpClientFactory) : IPaystackClient
 {
-    public async Task<string?> InitializeTransactionAsync(PaystackTransactionRequest request, CancellationToken cancellationToken)
+    public async Task<PaystackTransactionResult?> InitializeTransactionAsync(PaystackTransactionRequest request, CancellationToken cancellationToken)
     {
         var secret = GetSecretOrNull();
         if (secret is null) return null;
@@ -28,21 +37,27 @@ public sealed class PaystackClient(IHttpClientFactory httpClientFactory) : IPays
         using var message = new HttpRequestMessage(HttpMethod.Post, "https://api.paystack.co/transaction/initialize")
         {
             Content = JsonContent.Create(new
-            {
-                email = request.Email,
-                amount = request.AmountCents,
-                currency = "ZAR",
-                reference = request.Reference,
-                callback_url = request.CallbackUrl,
-                channels = new[] { "card", "bank", "apple_pay", "eft", "capitec_pay" },
-                subaccount = request.SubaccountCode
-            })
+                {
+                    email = request.Email,
+                    amount = request.AmountCents,
+                    currency = "ZAR",
+                    reference = request.Reference,
+                    callback_url = request.CallbackUrl,
+                    channels = new[] { "card", "bank", "apple_pay", "eft", "capitec_pay" },
+                    subaccount = request.SubaccountCode
+                }
+            )
         };
         AddAuthorization(message, secret);
         var response = await httpClientFactory.CreateClient().SendAsync(message, cancellationToken);
         if (!response.IsSuccessStatusCode) return null;
         var json = await response.Content.ReadFromJsonAsync<JsonElement>(cancellationToken);
-        return json.GetProperty("data").GetProperty("authorization_url").GetString();
+        var data = json.GetProperty("data");
+        return new PaystackTransactionResult(
+            data.GetProperty("authorization_url").GetString() ?? string.Empty,
+            data.GetProperty("access_code").GetString() ?? string.Empty,
+            data.GetProperty("reference").GetString() ?? request.Reference
+        );
     }
 
     public async Task<bool> IsTransactionSuccessfulAsync(string reference, int amountCents, CancellationToken cancellationToken)
@@ -75,11 +90,12 @@ public sealed class PaystackClient(IHttpClientFactory httpClientFactory) : IPays
         return json.GetProperty("data")
             .EnumerateArray()
             .Select(bank => new PaystackBankOption(
-                bank.GetProperty("name").GetString() ?? string.Empty,
-                bank.GetProperty("code").GetString() ?? string.Empty,
-                bank.TryGetProperty("currency", out var currency) ? currency.GetString() ?? "ZAR" : "ZAR",
-                bank.TryGetProperty("country", out var country) ? country.GetString() ?? "South Africa" : "South Africa"
-            ))
+                    bank.GetProperty("name").GetString() ?? string.Empty,
+                    bank.GetProperty("code").GetString() ?? string.Empty,
+                    bank.TryGetProperty("currency", out var currency) ? currency.GetString() ?? "ZAR" : "ZAR",
+                    bank.TryGetProperty("country", out var country) ? country.GetString() ?? "South Africa" : "South Africa"
+                )
+            )
             .Where(bank => !string.IsNullOrWhiteSpace(bank.Code))
             .ToList();
     }
@@ -120,13 +136,14 @@ public sealed class PaystackClient(IHttpClientFactory httpClientFactory) : IPays
         return json.GetProperty("data")
             .EnumerateArray()
             .Select(settlement => new PaystackSettlementResult(
-                settlement.GetProperty("id").ToString(),
-                settlement.GetProperty("status").GetString() ?? string.Empty,
-                settlement.TryGetProperty("total_amount", out var total) ? total.GetInt32() : 0,
-                settlement.TryGetProperty("effective_amount", out var effective) ? effective.GetInt32() : 0,
-                settlement.TryGetProperty("total_fees", out var fees) ? fees.GetInt32() : 0,
-                settlement.TryGetProperty("settlement_date", out var date) && DateTimeOffset.TryParse(date.GetString(), out var parsed) ? parsed : null
-            ))
+                    settlement.GetProperty("id").ToString(),
+                    settlement.GetProperty("status").GetString() ?? string.Empty,
+                    settlement.TryGetProperty("total_amount", out var total) ? total.GetInt32() : 0,
+                    settlement.TryGetProperty("effective_amount", out var effective) ? effective.GetInt32() : 0,
+                    settlement.TryGetProperty("total_fees", out var fees) ? fees.GetInt32() : 0,
+                    settlement.TryGetProperty("settlement_date", out var date) && DateTimeOffset.TryParse(date.GetString(), out var parsed) ? parsed : null
+                )
+            )
             .ToList();
     }
 
@@ -136,14 +153,15 @@ public sealed class PaystackClient(IHttpClientFactory httpClientFactory) : IPays
         using var message = new HttpRequestMessage(HttpMethod.Post, "https://api.paystack.co/split")
         {
             Content = JsonContent.Create(new
-            {
-                name = request.Name,
-                type = "percentage",
-                currency = request.Currency,
-                subaccounts = new[] { new { subaccount = request.SubaccountCode, share = 100 } },
-                bearer_type = "subaccount",
-                bearer_subaccount = request.SubaccountCode
-            })
+                {
+                    name = request.Name,
+                    type = "percentage",
+                    currency = request.Currency,
+                    subaccounts = new[] { new { subaccount = request.SubaccountCode, share = 100 } },
+                    bearer_type = "subaccount",
+                    bearer_subaccount = request.SubaccountCode
+                }
+            )
         };
         AddAuthorization(message, secret);
         var response = await httpClientFactory.CreateClient().SendAsync(message, cancellationToken);
@@ -158,12 +176,13 @@ public sealed class PaystackClient(IHttpClientFactory httpClientFactory) : IPays
         using var message = new HttpRequestMessage(HttpMethod.Post, "https://api.paystack.co/virtual_terminal")
         {
             Content = JsonContent.Create(new
-            {
-                name = request.Name,
-                currency = request.Currency,
-                destinations = new[] { new { target = request.DestinationPhone, name = request.DestinationName } },
-                metadata = JsonSerializer.Serialize(new { tenantId = request.TenantReference })
-            })
+                {
+                    name = request.Name,
+                    currency = request.Currency,
+                    destinations = new[] { new { target = request.DestinationPhone, name = request.DestinationName } },
+                    metadata = JsonSerializer.Serialize(new { tenantId = request.TenantReference })
+                }
+            )
         };
         AddAuthorization(message, secret);
         var response = await httpClientFactory.CreateClient().SendAsync(message, cancellationToken);
@@ -196,16 +215,17 @@ public sealed class PaystackClient(IHttpClientFactory httpClientFactory) : IPays
         using var message = new HttpRequestMessage(method, url)
         {
             Content = JsonContent.Create(new
-            {
-                business_name = request.BusinessName,
-                settlement_bank = request.BankCode,
-                account_number = request.AccountNumber,
-                percentage_charge = 0,
-                description = request.Description,
-                primary_contact_name = request.PrimaryContactName,
-                primary_contact_email = request.PrimaryContactEmail,
-                primary_contact_phone = request.PrimaryContactPhone
-            })
+                {
+                    business_name = request.BusinessName,
+                    settlement_bank = request.BankCode,
+                    account_number = request.AccountNumber,
+                    percentage_charge = 0,
+                    description = request.Description,
+                    primary_contact_name = request.PrimaryContactName,
+                    primary_contact_email = request.PrimaryContactEmail,
+                    primary_contact_phone = request.PrimaryContactPhone
+                }
+            )
         };
         AddAuthorization(message, secret);
         var response = await httpClientFactory.CreateClient().SendAsync(message, cancellationToken);
@@ -221,7 +241,7 @@ public sealed class PaystackClient(IHttpClientFactory httpClientFactory) : IPays
             data.TryGetProperty("account_name", out var accountName) ? accountName.GetString() ?? request.AccountName : request.AccountName,
             data.TryGetProperty("account_number", out var accountNumber) ? accountNumber.GetString() ?? request.AccountNumber : request.AccountNumber,
             data.TryGetProperty("currency", out var currency) ? currency.GetString() ?? "ZAR" : "ZAR",
-            data.TryGetProperty("active", out var active) && (active.ValueKind switch { JsonValueKind.True => true, JsonValueKind.Number => active.GetInt32() == 1, _ => false }),
+            data.TryGetProperty("active", out var active) && active.ValueKind switch { JsonValueKind.True => true, JsonValueKind.Number => active.GetInt32() == 1, _ => false },
             data.TryGetProperty("is_verified", out var verified) && verified.ValueKind == JsonValueKind.True,
             data.TryGetProperty("settlement_schedule", out var schedule) ? schedule.GetString() ?? "auto" : "auto"
         );
@@ -262,6 +282,7 @@ public sealed class PaystackClient(IHttpClientFactory httpClientFactory) : IPays
         {
             return requestedAmount == amountCents;
         }
+
         return TryReadInt32(data, "amount", out var amount) && amount == amountCents;
     }
 
@@ -275,12 +296,52 @@ public sealed class PaystackClient(IHttpClientFactory httpClientFactory) : IPays
 }
 
 public sealed record PaystackTransactionRequest(string Reference, string Email, int AmountCents, string CallbackUrl, string SubaccountCode);
+
+public sealed record PaystackTransactionResult(string AuthorizationUrl, string AccessCode, string Reference);
+
 public sealed record PaystackBankOption(string Name, string Code, string Currency, string Country);
+
 public sealed record PaystackResolvedAccount(string AccountNumber, string AccountName);
-public sealed record PaystackSubaccountRequest(string BusinessName, string BankName, string BankCode, string AccountNumber, string AccountName, string Description, string? PrimaryContactName, string? PrimaryContactEmail, string? PrimaryContactPhone);
-public sealed record PaystackSubaccountResult(string SubaccountCode, int? SubaccountId, string BusinessName, string BankName, string BankCode, string AccountName, string AccountNumber, string Currency, bool Active, bool IsVerified, string SettlementSchedule);
-public sealed record PaystackSettlementResult(string Id, string Status, int TotalAmountCents, int EffectiveAmountCents, int FeesCents, DateTimeOffset? SettlementDate);
+
+public sealed record PaystackSubaccountRequest(
+    string BusinessName,
+    string BankName,
+    string BankCode,
+    string AccountNumber,
+    string AccountName,
+    string Description,
+    string? PrimaryContactName,
+    string? PrimaryContactEmail,
+    string? PrimaryContactPhone
+);
+
+public sealed record PaystackSubaccountResult(
+    string SubaccountCode,
+    int? SubaccountId,
+    string BusinessName,
+    string BankName,
+    string BankCode,
+    string AccountName,
+    string AccountNumber,
+    string Currency,
+    bool Active,
+    bool IsVerified,
+    string SettlementSchedule
+);
+
+public sealed record PaystackSettlementResult(
+    string Id,
+    string Status,
+    int TotalAmountCents,
+    int EffectiveAmountCents,
+    int FeesCents,
+    DateTimeOffset? SettlementDate
+);
+
 public sealed record PaystackSplitRequest(string Name, string SubaccountCode, string Currency);
+
 public sealed record PaystackSplitResult(string SplitCode);
+
 public sealed record PaystackVirtualTerminalRequest(string Name, string DestinationPhone, string DestinationName, string Currency, string TenantReference);
+
 public sealed record PaystackVirtualTerminalResult(string Code, string Name, bool Active, string Currency);

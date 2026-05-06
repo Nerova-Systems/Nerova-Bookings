@@ -327,8 +327,29 @@ public sealed class AppointmentPaymentIntentConfiguration : IEntityTypeConfigura
         builder.HasKey(x => x.Id);
         builder.MapStronglyTypedLongId<AppointmentPaymentIntent, TenantId>(x => x.TenantId);
         builder.HasIndex(x => x.Reference).IsUnique();
+        builder.HasIndex(x => x.PaymentTokenId);
+        builder.Property(x => x.AppointmentId).HasMaxLength(64);
+        builder.Property(x => x.PaymentTokenId).HasMaxLength(64);
+        builder.Property(x => x.Provider).HasMaxLength(40);
         builder.Property(x => x.Channel).HasConversion<string>().HasMaxLength(40);
+        builder.Property(x => x.Status).HasMaxLength(40);
+        builder.Property(x => x.ProviderAccessCode).HasMaxLength(160);
         builder.Property(x => x.VirtualTerminalCode).HasMaxLength(80);
+    }
+}
+
+public sealed class AppointmentPaymentTokenConfiguration : IEntityTypeConfiguration<AppointmentPaymentToken>
+{
+    public void Configure(EntityTypeBuilder<AppointmentPaymentToken> builder)
+    {
+        builder.HasKey(x => x.Id);
+        builder.MapStronglyTypedLongId<AppointmentPaymentToken, TenantId>(x => x.TenantId);
+        builder.HasIndex(x => x.TokenHash).IsUnique();
+        builder.HasIndex(x => new { x.TenantId, x.AppointmentId, x.Status });
+        builder.Property(x => x.AppointmentId).HasMaxLength(64);
+        builder.Property(x => x.TokenHash).HasMaxLength(128);
+        builder.Property(x => x.PaymentIntentId).HasMaxLength(64);
+        builder.Property(x => x.Status).HasMaxLength(40);
     }
 }
 

@@ -1,20 +1,28 @@
+using System.Net;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
-using System.Net.Http.Headers;
-using System.Net.Http.Json;
 using Main.Database;
 using Main.Features.Appointments;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.EntityFrameworkCore;
 using SharedKernel.Domain;
 using SharedKernel.Endpoints;
 using SharedKernel.ExecutionContext;
 using SharedKernel.Integrations.Email;
+using SharedKernel.SinglePageApp;
 
 namespace Main.Api.Endpoints;
 
 public sealed class AppointmentEndpoints : IEndpoints
 {
+    private const string PaymentTokenPrefix = "pt_";
+    private const string ActivePaymentTokenStatus = "Active";
+    private const string UsedPaymentTokenStatus = "Used";
+    private const string RevokedPaymentTokenStatus = "Revoked";
+    private const string DefaultBrandColor = "#111827";
+    private static readonly TimeSpan PaymentTokenValidity = TimeSpan.FromHours(24);
+
     public void MapEndpoints(IEndpointRouteBuilder routes)
     {
         var app = routes.MapGroup("/api/main/app").RequireAuthorization().WithTags("Nerova App");
@@ -58,6 +66,10 @@ public sealed class AppointmentEndpoints : IEndpoints
         booking.MapPost("/approvals/{token}/reject", RejectRescheduleRequest).DisableAntiforgery();
         booking.MapGet("/confirmation/{reference}", GetPublicConfirmation);
 
+        var publicPayment = routes.MapGroup("/api/main/public/pay").WithTags("Public payment");
+        publicPayment.MapGet("/{token}", GetPublicPaymentDetails);
+        publicPayment.MapPost("/{token}/initialize", InitializePublicPayment).DisableAntiforgery();
+
         routes.MapPost("/api/main/payments/paystack/webhook", HandlePaystackWebhook).WithTags("Paystack").DisableAntiforgery();
         routes.MapGet("/api/main/payments/paystack/confirm", ConfirmPaystackPayment).WithTags("Paystack");
     }
@@ -80,6 +92,7 @@ public sealed class AppointmentEndpoints : IEndpoints
             category = new ServiceCategory { TenantId = tenantId, Name = request.CategoryName, SortOrder = 100 };
             db.ServiceCategories.Add(category);
         }
+
         var service = new BookableService
         {
             TenantId = tenantId,
@@ -112,12 +125,14 @@ public sealed class AppointmentEndpoints : IEndpoints
         {
             service.LocationId = (await EnsureDefaultLocationAsync(db, tenantId, cancellationToken)).Id;
         }
+
         var category = await db.ServiceCategories.AsTracking().FirstOrDefaultAsync(c => c.Name == request.CategoryName, cancellationToken);
         if (category is null)
         {
             category = new ServiceCategory { TenantId = tenantId, Name = request.CategoryName, SortOrder = 100 };
             db.ServiceCategories.Add(category);
         }
+
         service.CategoryId = category.Id;
         service.Name = request.Name;
         service.Description = request.Description ?? string.Empty;
@@ -160,14 +175,15 @@ public sealed class AppointmentEndpoints : IEndpoints
         if (request.EndAt <= request.StartAt) return Results.BadRequest("Block end time must be after start time.");
         var title = string.IsNullOrWhiteSpace(request.Title) ? "Blocked time" : request.Title.Trim();
         db.ManualCalendarBlocks.Add(new ManualCalendarBlock
-        {
-            TenantId = tenantId,
-            StaffMemberId = string.IsNullOrWhiteSpace(request.StaffMemberId) ? null : request.StaffMemberId,
-            Title = title,
-            StartAt = request.StartAt.ToUniversalTime(),
-            EndAt = request.EndAt.ToUniversalTime(),
-            CreatedAt = timeProvider.GetUtcNow()
-        });
+            {
+                TenantId = tenantId,
+                StaffMemberId = string.IsNullOrWhiteSpace(request.StaffMemberId) ? null : request.StaffMemberId,
+                Title = title,
+                StartAt = request.StartAt.ToUniversalTime(),
+                EndAt = request.EndAt.ToUniversalTime(),
+                CreatedAt = timeProvider.GetUtcNow()
+            }
+        );
         await db.SaveChangesAsync(cancellationToken);
         return Results.Ok(await BuildShellAsync(db, cancellationToken));
     }
@@ -195,7 +211,8 @@ public sealed class AppointmentEndpoints : IEndpoints
         var candidates = await db.Clients.AsTracking().Where(client => client.TenantId == tenantId).ToListAsync(cancellationToken);
         var client = candidates.FirstOrDefault(client =>
             (!string.IsNullOrWhiteSpace(email) && string.Equals(client.Email, email, StringComparison.OrdinalIgnoreCase)) ||
-            (!string.IsNullOrWhiteSpace(normalizedPhone) && NormalizePhone(client.Phone) == normalizedPhone));
+            (!string.IsNullOrWhiteSpace(normalizedPhone) && NormalizePhone(client.Phone) == normalizedPhone)
+        );
         if (client is null)
         {
             client = new Client
@@ -212,12 +229,13 @@ public sealed class AppointmentEndpoints : IEndpoints
         if (!await db.AppointmentParticipants.AnyAsync(participant => participant.AppointmentId == id && participant.ClientId == client.Id, cancellationToken))
         {
             db.AppointmentParticipants.Add(new AppointmentParticipant
-            {
-                TenantId = tenantId,
-                AppointmentId = id,
-                ClientId = client.Id,
-                CreatedAt = timeProvider.GetUtcNow()
-            });
+                {
+                    TenantId = tenantId,
+                    AppointmentId = id,
+                    ClientId = client.Id,
+                    CreatedAt = timeProvider.GetUtcNow()
+                }
+            );
         }
 
         await db.SaveChangesAsync(cancellationToken);
@@ -258,26 +276,28 @@ public sealed class AppointmentEndpoints : IEndpoints
         var now = timeProvider.GetUtcNow();
         var token = CreateApprovalToken();
         db.AppointmentRescheduleRequests.Add(new AppointmentRescheduleRequest
-        {
-            TenantId = appointment.TenantId,
-            AppointmentId = appointment.Id,
-            TokenHash = HashApprovalToken(token),
-            ProposedStartAt = proposedStart,
-            ProposedEndAt = proposedEnd,
-            Note = request.Note?.Trim() ?? string.Empty,
-            Status = "Pending",
-            ExpiresAt = now.AddDays(7),
-            CreatedAt = now
-        });
+            {
+                TenantId = appointment.TenantId,
+                AppointmentId = appointment.Id,
+                TokenHash = HashApprovalToken(token),
+                ProposedStartAt = proposedStart,
+                ProposedEndAt = proposedEnd,
+                Note = request.Note?.Trim() ?? string.Empty,
+                Status = "Pending",
+                ExpiresAt = now.AddDays(7),
+                CreatedAt = now
+            }
+        );
         db.AppointmentFlowEvents.Add(new AppointmentFlowEvent
-        {
-            TenantId = appointment.TenantId,
-            AppointmentId = appointment.Id,
-            Type = "RescheduleRequested",
-            Status = "Pending",
-            ScheduledFor = now,
-            PayloadJson = JsonSerializer.Serialize(new { proposedStartAt = proposedStart, proposedEndAt = proposedEnd })
-        });
+            {
+                TenantId = appointment.TenantId,
+                AppointmentId = appointment.Id,
+                Type = "RescheduleRequested",
+                Status = "Pending",
+                ScheduledFor = now,
+                PayloadJson = JsonSerializer.Serialize(new { proposedStartAt = proposedStart, proposedEndAt = proposedEnd })
+            }
+        );
         await db.SaveChangesAsync(cancellationToken);
 
         var approvalUrl = BuildPublicUrl($"/book/approval/{token}");
@@ -291,6 +311,7 @@ public sealed class AppointmentEndpoints : IEndpoints
         {
             return Results.Problem($"Reschedule request was saved, but WhatsApp could not be sent: {exception.Message}", statusCode: StatusCodes.Status502BadGateway);
         }
+
         await SendEmailIfAvailableAsync(client.Email, "Booking reschedule approval", message, emailClient, cancellationToken);
         return Results.Ok(new RescheduleRequestResponse(approvalUrl, token, "Pending"));
     }
@@ -315,12 +336,15 @@ public sealed class AppointmentEndpoints : IEndpoints
                 {
                     return Results.BadRequest("Availability windows must use HH:mm times.");
                 }
+
                 if (endTime <= startTime)
                 {
                     return Results.BadRequest("Availability window end time must be after start time.");
                 }
+
                 dayWindows.Add((startTime, endTime));
             }
+
             windowsByDay[dayOfWeek] = dayWindows;
         }
 
@@ -336,12 +360,14 @@ public sealed class AppointmentEndpoints : IEndpoints
             }
 
             rules.AddRange(ordered.Select(window => new AvailabilityRule
-            {
-                TenantId = tenantId,
-                DayOfWeek = entry.Key,
-                StartTime = window.Start,
-                EndTime = window.End
-            }));
+                    {
+                        TenantId = tenantId,
+                        DayOfWeek = entry.Key,
+                        StartTime = window.Start,
+                        EndTime = window.End
+                    }
+                )
+            );
         }
 
         var existing = await db.AvailabilityRules.AsTracking().Where(rule => rule.TenantId == tenantId).ToListAsync(cancellationToken);
@@ -376,14 +402,15 @@ public sealed class AppointmentEndpoints : IEndpoints
         if (request.EndDate < request.StartDate) return Results.BadRequest("Closure end date must be on or after start date.");
         var label = string.IsNullOrWhiteSpace(request.Label) ? "Closed" : request.Label.Trim();
         db.BusinessClosures.Add(new BusinessClosure
-        {
-            TenantId = tenantId,
-            StartDate = request.StartDate,
-            EndDate = request.EndDate,
-            Label = label,
-            Type = "manual",
-            CreatedAt = timeProvider.GetUtcNow()
-        });
+            {
+                TenantId = tenantId,
+                StartDate = request.StartDate,
+                EndDate = request.EndDate,
+                Label = label,
+                Type = "manual",
+                CreatedAt = timeProvider.GetUtcNow()
+            }
+        );
         await db.SaveChangesAsync(cancellationToken);
         return Results.Ok(await BuildShellAsync(db, cancellationToken));
     }
@@ -417,17 +444,19 @@ public sealed class AppointmentEndpoints : IEndpoints
         {
             return Results.BadRequest("Unsupported appointment status.");
         }
+
         appointment.Status = status;
         if (!string.IsNullOrWhiteSpace(request.PaymentStatus)) return Results.BadRequest("Payment status is controlled by verified Paystack events.");
         db.AppointmentFlowEvents.Add(new AppointmentFlowEvent
-        {
-            TenantId = appointment.TenantId,
-            AppointmentId = appointment.Id,
-            Type = $"Status:{status}",
-            Status = "Completed",
-            ScheduledFor = timeProvider.GetUtcNow(),
-            PayloadJson = "{}"
-        });
+            {
+                TenantId = appointment.TenantId,
+                AppointmentId = appointment.Id,
+                Type = $"Status:{status}",
+                Status = "Completed",
+                ScheduledFor = timeProvider.GetUtcNow(),
+                PayloadJson = "{}"
+            }
+        );
         await db.SaveChangesAsync(cancellationToken);
         if (status == AppointmentStatus.Cancelled)
         {
@@ -438,6 +467,7 @@ public sealed class AppointmentEndpoints : IEndpoints
         {
             await SyncGoogleCalendarEventIfConnectedAsync(db, appointment, nangoClient, timeProvider.GetUtcNow(), cancellationToken);
         }
+
         return Results.Ok(await BuildShellAsync(db, cancellationToken));
     }
 
@@ -504,6 +534,7 @@ public sealed class AppointmentEndpoints : IEndpoints
         {
             return Results.BadRequest(ToPublicTwilioError(exception));
         }
+
         var verification = new PublicPhoneVerification
         {
             TenantId = profile.TenantId,
@@ -548,6 +579,7 @@ public sealed class AppointmentEndpoints : IEndpoints
         {
             return Results.BadRequest(ToPublicTwilioError(exception));
         }
+
         if (!approved) return Results.BadRequest("Invalid verification code.");
 
         var token = CreatePhoneVerificationToken();
@@ -574,7 +606,7 @@ public sealed class AppointmentEndpoints : IEndpoints
         return Results.Ok(slots);
     }
 
-    private static async Task<IResult> CreatePublicAppointment(string businessSlug, PublicBookingRequest request, MainDbContext db, TimeProvider timeProvider, IPaystackClient paystackClient, CancellationToken cancellationToken)
+    private static async Task<IResult> CreatePublicAppointment(string businessSlug, PublicBookingRequest request, MainDbContext db, TimeProvider timeProvider, IDataProtectionProvider dataProtectionProvider, CancellationToken cancellationToken)
     {
         await SeedPublicDemoTenantAsync(db, timeProvider.GetUtcNow(), cancellationToken);
         var profile = await db.BusinessProfiles.IgnoreQueryFilters().FirstOrDefaultAsync(p => p.Slug == businessSlug && p.PublicBookingEnabled, cancellationToken);
@@ -591,6 +623,7 @@ public sealed class AppointmentEndpoints : IEndpoints
         {
             return Results.Conflict("Selected slot is no longer available.");
         }
+
         var existingAppointments = await db.Appointments.IgnoreQueryFilters()
             .Where(a => a.TenantId == profile.TenantId && a.Status != AppointmentStatus.Cancelled)
             .ToListAsync(cancellationToken);
@@ -640,12 +673,9 @@ public sealed class AppointmentEndpoints : IEndpoints
         string? paymentUrl = null;
         if (requiresHostedPayment)
         {
-            var subaccountCode = await GetActivePaystackSubaccountCodeAsync(db, profile.TenantId, true, cancellationToken);
-            if (subaccountCode is null) return Results.BadRequest("Connect Paystack payouts before accepting appointment payments.");
-            var intent = CreatePaymentIntent(profile.TenantId, appointment.Id, GetPaymentAmountCents(serviceVersion), AppointmentPaymentChannel.HostedCheckout, timeProvider.GetUtcNow());
-            intent.AuthorizationUrl = await TryInitializePaystackTransactionAsync(intent, request.Email, subaccountCode, paystackClient, cancellationToken);
-            paymentUrl = intent.AuthorizationUrl;
-            db.AppointmentPaymentIntents.Add(intent);
+            var paymentToken = CreateAppointmentPaymentToken(profile.TenantId, appointment.Id, timeProvider.GetUtcNow(), dataProtectionProvider);
+            db.AppointmentPaymentTokens.Add(paymentToken.Entity);
+            paymentUrl = $"/pay/{paymentToken.RawToken}";
         }
 
         await db.SaveChangesAsync(cancellationToken);
@@ -657,6 +687,83 @@ public sealed class AppointmentEndpoints : IEndpoints
         var appointment = await db.Appointments.IgnoreQueryFilters().FirstOrDefaultAsync(a => a.PublicReference == reference, cancellationToken);
         if (appointment is null) return Results.NotFound();
         return Results.Ok(await ToAppointmentDetailAsync(db, appointment, cancellationToken));
+    }
+
+    private static async Task<IResult> GetPublicPaymentDetails(string token, MainDbContext db, TimeProvider timeProvider, IDataProtectionProvider dataProtectionProvider, CancellationToken cancellationToken)
+    {
+        var tokenResult = await FindPaymentTokenAsync(token, db, dataProtectionProvider, timeProvider.GetUtcNow(), false, cancellationToken);
+        if (tokenResult.Token is null) return Results.NotFound();
+        if (tokenResult.IsExpired) return Results.Problem("Payment link expired.", statusCode: StatusCodes.Status410Gone);
+
+        var appointment = await db.Appointments.IgnoreQueryFilters().FirstOrDefaultAsync(a => a.Id == tokenResult.Token.AppointmentId && a.TenantId == tokenResult.Token.TenantId, cancellationToken);
+        if (appointment is null) return Results.NotFound();
+        var profile = await db.BusinessProfiles.IgnoreQueryFilters().FirstAsync(profile => profile.TenantId == appointment.TenantId, cancellationToken);
+        var serviceVersion = await GetAppointmentServiceVersionAsync(db, appointment, cancellationToken);
+        var amountCents = GetPaymentAmountCents(serviceVersion);
+
+        return Results.Ok(new PublicPaymentDetailsResponse(
+                new PublicPaymentBusinessResponse(profile.Name, profile.LogoUrl, DefaultBrandColor),
+                new PublicPaymentAppointmentResponse(appointment.PublicReference, serviceVersion.Name, appointment.StartAt, appointment.EndAt, serviceVersion.Location),
+                new PublicPaymentAmountResponse(amountCents, profile.Currency, appointment.PaymentStatus.ToString(), tokenResult.Token.ExpiresAt)
+            )
+        );
+    }
+
+    private static async Task<IResult> InitializePublicPayment(string token, MainDbContext db, TimeProvider timeProvider, IDataProtectionProvider dataProtectionProvider, IPaystackClient paystackClient, CancellationToken cancellationToken)
+    {
+        var now = timeProvider.GetUtcNow();
+        var tokenResult = await FindPaymentTokenAsync(token, db, dataProtectionProvider, now, true, cancellationToken);
+        if (tokenResult.Token is null) return Results.NotFound();
+        if (tokenResult.IsExpired) return Results.Problem("Payment link expired.", statusCode: StatusCodes.Status410Gone);
+
+        var appointment = await db.Appointments.IgnoreQueryFilters().AsTracking().FirstOrDefaultAsync(a => a.Id == tokenResult.Token.AppointmentId && a.TenantId == tokenResult.Token.TenantId, cancellationToken);
+        if (appointment is null) return Results.NotFound();
+        if (appointment.PaymentStatus is AppointmentPaymentStatus.Paid or AppointmentPaymentStatus.DepositPaid or AppointmentPaymentStatus.NotRequired)
+        {
+            return Results.Conflict("This appointment does not have an outstanding payment.");
+        }
+
+        if (!string.IsNullOrWhiteSpace(tokenResult.Token.PaymentIntentId))
+        {
+            var existingIntent = await db.AppointmentPaymentIntents.IgnoreQueryFilters().FirstOrDefaultAsync(intent => intent.Id == tokenResult.Token.PaymentIntentId && intent.TenantId == tokenResult.Token.TenantId, cancellationToken);
+            if (existingIntent is not null && existingIntent.Status == "Pending" && !string.IsNullOrWhiteSpace(existingIntent.ProviderAccessCode))
+            {
+                return Results.Ok(new PublicPaymentInitializeResponse(existingIntent.Reference, existingIntent.ProviderAccessCode, existingIntent.AuthorizationUrl, existingIntent.AmountCents));
+            }
+
+            return Results.Conflict("This payment link has already been used.");
+        }
+
+        var serviceVersion = await GetAppointmentServiceVersionAsync(db, appointment, cancellationToken);
+        var paymentPolicy = NormalizePaymentPolicy(serviceVersion.PaymentPolicy.ToString(), serviceVersion.DepositCents);
+        if (paymentPolicy is not (ServicePaymentPolicy.DepositBeforeBooking or ServicePaymentPolicy.FullPaymentBeforeBooking))
+        {
+            return Results.BadRequest("This appointment is not configured for hosted payment.");
+        }
+
+        var subaccountCode = await GetActivePaystackSubaccountCodeAsync(db, appointment.TenantId, true, cancellationToken);
+        if (subaccountCode is null) return Results.BadRequest("Connect Paystack payouts before accepting appointment payments.");
+
+        var client = await db.Clients.IgnoreQueryFilters().FirstAsync(client => client.Id == appointment.ClientId, cancellationToken);
+        var intent = CreatePaymentIntent(appointment.TenantId, appointment.Id, GetPaymentAmountCents(serviceVersion), AppointmentPaymentChannel.HostedCheckout, now);
+        intent.PaymentTokenId = tokenResult.Token.Id;
+        var initialization = await TryInitializePaystackTransactionAsync(intent, client.Email, subaccountCode, paystackClient, cancellationToken);
+        if (initialization is null || string.IsNullOrWhiteSpace(initialization.AccessCode) || string.IsNullOrWhiteSpace(initialization.AuthorizationUrl))
+        {
+            return Results.Problem("Payment provider initialization failed.", statusCode: StatusCodes.Status502BadGateway);
+        }
+
+        intent.Reference = initialization.Reference;
+        intent.AuthorizationUrl = initialization.AuthorizationUrl;
+        intent.ProviderAccessCode = initialization.AccessCode;
+        tokenResult.Token.PaymentIntentId = intent.Id;
+        tokenResult.Token.Status = UsedPaymentTokenStatus;
+        tokenResult.Token.UsedAt = now;
+        appointment.PaymentStatus = AppointmentPaymentStatus.Pending;
+        db.AppointmentPaymentIntents.Add(intent);
+        await db.SaveChangesAsync(cancellationToken);
+
+        return Results.Ok(new PublicPaymentInitializeResponse(intent.Reference, intent.ProviderAccessCode, intent.AuthorizationUrl, intent.AmountCents));
     }
 
     private static async Task<IResult> GetRescheduleApproval(string token, MainDbContext db, TimeProvider timeProvider, CancellationToken cancellationToken)
@@ -684,14 +791,15 @@ public sealed class AppointmentEndpoints : IEndpoints
         request.Status = "Approved";
         request.RespondedAt = timeProvider.GetUtcNow();
         db.AppointmentFlowEvents.Add(new AppointmentFlowEvent
-        {
-            TenantId = appointment.TenantId,
-            AppointmentId = appointment.Id,
-            Type = "RescheduleApproved",
-            Status = "Completed",
-            ScheduledFor = timeProvider.GetUtcNow(),
-            PayloadJson = "{}"
-        });
+            {
+                TenantId = appointment.TenantId,
+                AppointmentId = appointment.Id,
+                Type = "RescheduleApproved",
+                Status = "Completed",
+                ScheduledFor = timeProvider.GetUtcNow(),
+                PayloadJson = "{}"
+            }
+        );
         await db.SaveChangesAsync(cancellationToken);
         await SyncGoogleCalendarEventIfConnectedAsync(db, appointment, nangoClient, timeProvider.GetUtcNow(), cancellationToken);
         await NotifyClientAsync(db, appointment, "Booking rescheduled", "Your booking reschedule has been approved.", emailClient, cancellationToken);
@@ -706,14 +814,15 @@ public sealed class AppointmentEndpoints : IEndpoints
         request.Status = "Rejected";
         request.RespondedAt = timeProvider.GetUtcNow();
         db.AppointmentFlowEvents.Add(new AppointmentFlowEvent
-        {
-            TenantId = appointment.TenantId,
-            AppointmentId = appointment.Id,
-            Type = "RescheduleRejected",
-            Status = "Completed",
-            ScheduledFor = timeProvider.GetUtcNow(),
-            PayloadJson = "{}"
-        });
+            {
+                TenantId = appointment.TenantId,
+                AppointmentId = appointment.Id,
+                Type = "RescheduleRejected",
+                Status = "Completed",
+                ScheduledFor = timeProvider.GetUtcNow(),
+                PayloadJson = "{}"
+            }
+        );
         await db.SaveChangesAsync(cancellationToken);
         await NotifyClientAsync(db, appointment, "Booking reschedule rejected", "Your original booking time is unchanged.", emailClient, cancellationToken);
         return Results.Ok(new PublicApprovalResultResponse(appointment.PublicReference, "Rejected"));
@@ -731,9 +840,17 @@ public sealed class AppointmentEndpoints : IEndpoints
         {
             return Results.BadRequest("Use the virtual terminal to collect after-appointment payments.");
         }
+
         var intent = CreatePaymentIntent(appointment.TenantId, appointment.Id, GetPaymentAmountCents(serviceVersion), AppointmentPaymentChannel.HostedCheckout, timeProvider.GetUtcNow());
         var client = await db.Clients.FirstAsync(c => c.Id == appointment.ClientId, cancellationToken);
-        intent.AuthorizationUrl = await TryInitializePaystackTransactionAsync(intent, client.Email, subaccountCode, paystackClient, cancellationToken);
+        var initialization = await TryInitializePaystackTransactionAsync(intent, client.Email, subaccountCode, paystackClient, cancellationToken);
+        if (initialization is not null)
+        {
+            intent.Reference = initialization.Reference;
+            intent.AuthorizationUrl = initialization.AuthorizationUrl;
+            intent.ProviderAccessCode = initialization.AccessCode;
+        }
+
         db.AppointmentPaymentIntents.Add(intent);
         appointment.PaymentStatus = AppointmentPaymentStatus.Pending;
         await db.SaveChangesAsync(cancellationToken);
@@ -749,10 +866,12 @@ public sealed class AppointmentEndpoints : IEndpoints
         {
             return Results.BadRequest("This service is not configured for virtual terminal collection.");
         }
+
         if (appointment.PaymentStatus is AppointmentPaymentStatus.Paid or AppointmentPaymentStatus.DepositPaid or AppointmentPaymentStatus.NotRequired)
         {
             return Results.BadRequest("This appointment does not have an outstanding payment.");
         }
+
         PaystackSubaccount? subaccount;
         try
         {
@@ -762,6 +881,7 @@ public sealed class AppointmentEndpoints : IEndpoints
         {
             return Results.Problem(exception.Message, statusCode: StatusCodes.Status502BadGateway);
         }
+
         if (subaccount is null) return Results.BadRequest("Connect Paystack payouts before collecting appointment payments.");
 
         var pendingTerminalIntents = await db.AppointmentPaymentIntents.AsTracking()
@@ -799,10 +919,12 @@ public sealed class AppointmentEndpoints : IEndpoints
             await SendPaymentConfirmationIfNeededAsync(db, intent, appointment, now, whatsAppClient, cancellationToken);
             return Results.Ok(new PaymentConfirmationResponse(reference, intent.Status, appointment.PublicReference));
         }
+
         if (!await paystackClient.IsTransactionSuccessfulAsync(reference, intent.AmountCents, cancellationToken))
         {
             return Results.Problem("Paystack has not verified this transaction as successful yet.", statusCode: StatusCodes.Status409Conflict);
         }
+
         intent.Status = "Confirmed";
         intent.ConfirmedAt = now;
         appointment.PaymentStatus = confirmedPaymentStatus;
@@ -821,8 +943,9 @@ public sealed class AppointmentEndpoints : IEndpoints
         {
             return Results.Unauthorized();
         }
+
         var signature = request.Headers["x-paystack-signature"].ToString();
-        var expected = Convert.ToHexString(HMACSHA512.HashData(Encoding.UTF8.GetBytes(secret), Encoding.UTF8.GetBytes(body))).ToLowerInvariant();
+        var expected = Convert.ToHexString(HMACSHA512.HashData(Encoding.UTF8.GetBytes(secret!), Encoding.UTF8.GetBytes(body))).ToLowerInvariant();
         if (!CryptographicOperations.FixedTimeEquals(Encoding.UTF8.GetBytes(signature), Encoding.UTF8.GetBytes(expected)))
         {
             return Results.Unauthorized();
@@ -847,6 +970,7 @@ public sealed class AppointmentEndpoints : IEndpoints
         {
             await ConfirmVirtualTerminalPaymentAsync(db, terminalCode, data, timeProvider.GetUtcNow(), whatsAppClient, cancellationToken);
         }
+
         return Results.Ok();
     }
 
@@ -875,25 +999,28 @@ public sealed class AppointmentEndpoints : IEndpoints
         {
             AddPaymentConfirmationEvent(db, intent, appointment, now, "Failed", exception.Message);
         }
+
         await db.SaveChangesAsync(cancellationToken);
     }
 
     private static void AddPaymentConfirmationEvent(MainDbContext db, AppointmentPaymentIntent intent, Appointment appointment, DateTimeOffset now, string status, string? failureMessage = null)
     {
         db.AppointmentFlowEvents.Add(new AppointmentFlowEvent
-        {
-            TenantId = appointment.TenantId,
-            AppointmentId = appointment.Id,
-            Type = "PaymentConfirmation",
-            Status = status,
-            ScheduledFor = now,
-            PayloadJson = JsonSerializer.Serialize(new
             {
-                reference = intent.Reference,
-                channel = intent.Channel.ToString(),
-                failureMessage
-            })
-        });
+                TenantId = appointment.TenantId,
+                AppointmentId = appointment.Id,
+                Type = "PaymentConfirmation",
+                Status = status,
+                ScheduledFor = now,
+                PayloadJson = JsonSerializer.Serialize(new
+                    {
+                        reference = intent.Reference,
+                        channel = intent.Channel.ToString(),
+                        failureMessage
+                    }
+                )
+            }
+        );
     }
 
     private static async Task<IResult> GetPaymentOverview(MainDbContext db, IExecutionContext executionContext, TimeProvider timeProvider, CancellationToken cancellationToken)
@@ -907,10 +1034,11 @@ public sealed class AppointmentEndpoints : IEndpoints
         var serviceVersions = await db.BookableServiceVersions.ToListAsync(cancellationToken);
         var intents = (await db.AppointmentPaymentIntents.ToListAsync(cancellationToken)).OrderByDescending(i => i.CreatedAt).Take(25).ToList();
         return Results.Ok(new PaymentOverviewResponse(
-            BuildPaymentStats(appointments, services, serviceVersions),
-            subaccount is null ? null : ToPaystackSubaccountDto(subaccount),
-            intents.Select(intent => ToPaymentIntentDto(intent, appointments, clients, services, serviceVersions))
-        ));
+                BuildPaymentStats(appointments, services, serviceVersions),
+                subaccount is null ? null : ToPaystackSubaccountDto(subaccount),
+                intents.Select(intent => ToPaymentIntentDto(intent, appointments, clients, services, serviceVersions))
+            )
+        );
     }
 
     private static async Task<IResult> GetPaystackBanks(IPaystackClient paystackClient, CancellationToken cancellationToken)
@@ -931,6 +1059,7 @@ public sealed class AppointmentEndpoints : IEndpoints
         {
             return Results.BadRequest("Bank and account number are required.");
         }
+
         try
         {
             var resolved = await paystackClient.ResolveAccountAsync(request.BankCode, request.AccountNumber, cancellationToken);
@@ -956,6 +1085,7 @@ public sealed class AppointmentEndpoints : IEndpoints
             var profile = await db.BusinessProfiles.FirstOrDefaultAsync(cancellationToken);
             businessName = profile?.Name;
         }
+
         if (string.IsNullOrWhiteSpace(businessName))
         {
             return Results.BadRequest("Tenant name must be set before setting up Paystack payouts.");
@@ -1389,12 +1519,14 @@ public sealed class AppointmentEndpoints : IEndpoints
             );
             subaccount.SplitCode = split.SplitCode;
         }
+
         if (string.IsNullOrWhiteSpace(subaccount.VirtualTerminalCode))
         {
             if (string.IsNullOrWhiteSpace(subaccount.PrimaryContactPhone))
             {
                 throw new InvalidOperationException("Paystack virtual terminal setup requires a WhatsApp-enabled contact phone on the payout account.");
             }
+
             var terminal = await paystackClient.CreateVirtualTerminalAsync(
                 new PaystackVirtualTerminalRequest(
                     $"{subaccount.BusinessName} appointment terminal",
@@ -1407,6 +1539,7 @@ public sealed class AppointmentEndpoints : IEndpoints
             );
             subaccount.VirtualTerminalCode = terminal.Code;
         }
+
         await paystackClient.AssignSplitToVirtualTerminalAsync(subaccount.VirtualTerminalCode!, subaccount.SplitCode!, cancellationToken);
         subaccount.LastSyncedAt = now;
         return subaccount;
@@ -1424,6 +1557,7 @@ public sealed class AppointmentEndpoints : IEndpoints
         {
             return [];
         }
+
         var tenantAppointments = await db.Appointments.IgnoreQueryFilters()
             .Where(a => a.TenantId == tenantId && a.Status != AppointmentStatus.Cancelled)
             .ToListAsync(cancellationToken);
@@ -1446,7 +1580,8 @@ public sealed class AppointmentEndpoints : IEndpoints
                 .Where(reservation => reservation.TenantId == tenantId &&
                                       requiredResourceIds.Contains(reservation.ResourceId) &&
                                       reservation.StartAt < dayEnd &&
-                                      reservation.EndAt > dayStart)
+                                      reservation.EndAt > dayStart
+                )
                 .ToListAsync(cancellationToken);
         var slots = new List<SlotDto>();
         foreach (var rule in rules)
@@ -1465,9 +1600,11 @@ public sealed class AppointmentEndpoints : IEndpoints
                 {
                     slots.Add(new SlotDto(start, slotEnd));
                 }
+
                 cursor = cursor.AddMinutes(30);
             }
         }
+
         return slots;
     }
 
@@ -1490,11 +1627,13 @@ public sealed class AppointmentEndpoints : IEndpoints
         {
             return true;
         }
+
         if (int.TryParse(dayOfWeek, out var numeric) && numeric >= 0 && numeric <= 6)
         {
             parsed = (DayOfWeek)numeric;
             return true;
         }
+
         return false;
     }
 
@@ -1613,6 +1752,7 @@ public sealed class AppointmentEndpoints : IEndpoints
         {
             date = date.AddDays(1);
         }
+
         return date.AddDays((occurrence - 1) * 7);
     }
 
@@ -1623,6 +1763,7 @@ public sealed class AppointmentEndpoints : IEndpoints
         {
             date = date.AddDays(-1);
         }
+
         return date;
     }
 
@@ -1641,7 +1782,7 @@ public sealed class AppointmentEndpoints : IEndpoints
         var l = (32 + 2 * e + 2 * i - h - k) % 7;
         var m = (a + 11 * h + 22 * l) / 451;
         var month = (h + l - 7 * m + 114) / 31;
-        var day = ((h + l - 7 * m + 114) % 31) + 1;
+        var day = (h + l - 7 * m + 114) % 31 + 1;
         return new DateOnly(year, month, day);
     }
 
@@ -1658,13 +1799,6 @@ public sealed class AppointmentEndpoints : IEndpoints
         };
     }
 
-    private static int GetPaymentAmountCents(BookableService service)
-    {
-        return NormalizePaymentPolicy(service.PaymentPolicy.ToString(), service.DepositCents) == ServicePaymentPolicy.DepositBeforeBooking
-            ? service.DepositCents
-            : service.PriceCents;
-    }
-
     private static int GetPaymentAmountCents(BookableServiceVersion serviceVersion)
     {
         return NormalizePaymentPolicy(serviceVersion.PaymentPolicy.ToString(), serviceVersion.DepositCents) == ServicePaymentPolicy.DepositBeforeBooking
@@ -1678,6 +1812,7 @@ public sealed class AppointmentEndpoints : IEndpoints
         {
             return parsed;
         }
+
         return depositCents > 0 ? ServicePaymentPolicy.DepositBeforeBooking : ServicePaymentPolicy.NoPaymentRequired;
     }
 
@@ -1696,6 +1831,7 @@ public sealed class AppointmentEndpoints : IEndpoints
         {
             return code.GetString();
         }
+
         return null;
     }
 
@@ -1717,7 +1853,7 @@ public sealed class AppointmentEndpoints : IEndpoints
         await SendPaymentConfirmationIfNeededAsync(db, intent, appointment, now, whatsAppClient, cancellationToken);
     }
 
-    private static Task<string?> TryInitializePaystackTransactionAsync(AppointmentPaymentIntent intent, string email, string subaccountCode, IPaystackClient paystackClient, CancellationToken cancellationToken)
+    private static Task<PaystackTransactionResult?> TryInitializePaystackTransactionAsync(AppointmentPaymentIntent intent, string email, string subaccountCode, IPaystackClient paystackClient, CancellationToken cancellationToken)
     {
         return paystackClient.InitializeTransactionAsync(
             new PaystackTransactionRequest(intent.Reference, email, intent.AmountCents, BuildPaystackCallbackUrl(intent.Reference), subaccountCode),
@@ -1732,6 +1868,7 @@ public sealed class AppointmentEndpoints : IEndpoints
         {
             return $"https://localhost:9000/book/payment/callback?reference={reference}";
         }
+
         var separator = callbackUrl.Contains('?') ? '&' : '?';
         return $"{callbackUrl}{separator}reference={reference}";
     }
@@ -1739,6 +1876,67 @@ public sealed class AppointmentEndpoints : IEndpoints
     private static bool IsConfiguredPaystackSecret(string? secret)
     {
         return !string.IsNullOrWhiteSpace(secret) && secret.StartsWith("sk_", StringComparison.Ordinal);
+    }
+
+    private static PaymentTokenCreation CreateAppointmentPaymentToken(TenantId tenantId, string appointmentId, DateTimeOffset now, IDataProtectionProvider dataProtectionProvider)
+    {
+        var randomValue = Base64UrlEncode(RandomNumberGenerator.GetBytes(32));
+        var protectedValue = dataProtectionProvider.CreateProtector("AppointmentPaymentToken").Protect(randomValue);
+        var rawToken = $"{PaymentTokenPrefix}{Base64UrlEncode(Encoding.UTF8.GetBytes(protectedValue))}";
+        return new PaymentTokenCreation(
+            rawToken,
+            new AppointmentPaymentToken
+            {
+                TenantId = tenantId,
+                AppointmentId = appointmentId,
+                TokenHash = HashPaymentToken(rawToken),
+                Status = ActivePaymentTokenStatus,
+                ExpiresAt = now.Add(PaymentTokenValidity),
+                CreatedAt = now
+            }
+        );
+    }
+
+    private static async Task<PaymentTokenLookup> FindPaymentTokenAsync(string rawToken, MainDbContext db, IDataProtectionProvider dataProtectionProvider, DateTimeOffset now, bool tracking, CancellationToken cancellationToken)
+    {
+        if (!IsValidPaymentToken(rawToken, dataProtectionProvider)) return new PaymentTokenLookup(null, false);
+
+        var tokenHash = HashPaymentToken(rawToken);
+        var query = db.AppointmentPaymentTokens.IgnoreQueryFilters().Where(token => token.TokenHash == tokenHash);
+        var paymentToken = tracking
+            ? await query.AsTracking().FirstOrDefaultAsync(cancellationToken)
+            : await query.FirstOrDefaultAsync(cancellationToken);
+        if (paymentToken is null) return new PaymentTokenLookup(null, false);
+        if (paymentToken.Status == RevokedPaymentTokenStatus) return new PaymentTokenLookup(null, false);
+        if (paymentToken.ExpiresAt <= now) return new PaymentTokenLookup(paymentToken, true);
+        if (paymentToken.Status is not ActivePaymentTokenStatus and not UsedPaymentTokenStatus) return new PaymentTokenLookup(null, false);
+        return new PaymentTokenLookup(paymentToken, false);
+    }
+
+    private static bool IsValidPaymentToken(string rawToken, IDataProtectionProvider dataProtectionProvider)
+    {
+        if (string.IsNullOrWhiteSpace(rawToken) || !rawToken.StartsWith(PaymentTokenPrefix, StringComparison.Ordinal)) return false;
+
+        try
+        {
+            var protectedBytes = Base64UrlDecode(rawToken[PaymentTokenPrefix.Length..]);
+            var protectedValue = Encoding.UTF8.GetString(protectedBytes);
+            var randomValue = dataProtectionProvider.CreateProtector("AppointmentPaymentToken").Unprotect(protectedValue);
+            return !string.IsNullOrWhiteSpace(randomValue);
+        }
+        catch (CryptographicException)
+        {
+            return false;
+        }
+        catch (FormatException)
+        {
+            return false;
+        }
+    }
+
+    private static string HashPaymentToken(string token)
+    {
+        return Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(token)));
     }
 
     private static async Task<PublicPhoneVerification?> ConsumePhoneVerificationAsync(MainDbContext db, TenantId tenantId, string normalizedPhone, string? token, DateTimeOffset now, CancellationToken cancellationToken)
@@ -1775,6 +1973,18 @@ public sealed class AppointmentEndpoints : IEndpoints
         return Convert.ToBase64String(bytes).TrimEnd('=').Replace('+', '-').Replace('/', '_');
     }
 
+    private static byte[] Base64UrlDecode(string value)
+    {
+        var base64 = value.Replace('-', '+').Replace('_', '/');
+        var padding = base64.Length % 4;
+        if (padding > 0)
+        {
+            base64 = base64.PadRight(base64.Length + 4 - padding, '=');
+        }
+
+        return Convert.FromBase64String(base64);
+    }
+
     private static string NormalizePhone(string phone)
     {
         if (string.IsNullOrWhiteSpace(phone)) return string.Empty;
@@ -1788,6 +1998,7 @@ public sealed class AppointmentEndpoints : IEndpoints
                 builder.Append(character);
             }
         }
+
         var digits = builder.ToString();
         if (digits.Length == 0) return string.Empty;
         if (hasLeadingPlus) return $"+{digits}";
@@ -1813,6 +2024,7 @@ public sealed class AppointmentEndpoints : IEndpoints
         {
             return "SMS verification is not authenticated. Check that TWILIO_ACCOUNT_SID and TWILIO_AUTH_TOKEN belong to the account that owns TWILIO_VERIFY_SERVICE_SID.";
         }
+
         return "SMS verification is temporarily unavailable. Please try again later.";
     }
 
@@ -1907,13 +2119,15 @@ public sealed class AppointmentEndpoints : IEndpoints
                                         connection.Capability == "Calendar" &&
                                         connection.OwnerType == ConnectorOwnerType.StaffMember &&
                                         connection.OwnerId == appointment.StaffMemberId &&
-                                        connection.Status == "Connected")
+                                        connection.Status == "Connected"
+                   )
                    .FirstOrDefaultAsync(cancellationToken)
                ?? await db.IntegrationConnections.IgnoreQueryFilters().AsTracking()
                    .Where(connection => connection.TenantId == appointment.TenantId &&
                                         connection.Provider == "Google" &&
                                         connection.Capability == "Calendar" &&
-                                        connection.Status == "Connected")
+                                        connection.Status == "Connected"
+                   )
                    .FirstOrDefaultAsync(cancellationToken);
     }
 
@@ -1966,7 +2180,7 @@ public sealed class AppointmentEndpoints : IEndpoints
     private static async Task SendEmailIfAvailableAsync(string? email, string subject, string body, IEmailClient emailClient, CancellationToken cancellationToken)
     {
         if (string.IsNullOrWhiteSpace(email)) return;
-        await emailClient.SendAsync(email.Trim(), subject, $"<p>{System.Net.WebUtility.HtmlEncode(body)}</p>", cancellationToken);
+        await emailClient.SendAsync(email.Trim(), subject, $"<p>{WebUtility.HtmlEncode(body)}</p>", cancellationToken);
     }
 
     private static async Task<AppointmentRescheduleRequest?> FindPendingApprovalAsync(MainDbContext db, string token, DateTimeOffset now, CancellationToken cancellationToken)
@@ -1990,11 +2204,12 @@ public sealed class AppointmentEndpoints : IEndpoints
 
     private static string BuildPublicUrl(string path)
     {
-        var publicUrl = Environment.GetEnvironmentVariable(SharedKernel.SinglePageApp.SinglePageAppConfiguration.PublicUrlKey);
+        var publicUrl = Environment.GetEnvironmentVariable(SinglePageAppConfiguration.PublicUrlKey);
         if (string.IsNullOrWhiteSpace(publicUrl) || publicUrl == "not-configured")
         {
             publicUrl = "https://localhost:9000";
         }
+
         return $"{publicUrl.TrimEnd('/')}/{path.TrimStart('/')}";
     }
 
@@ -2100,15 +2315,17 @@ public sealed class AppointmentEndpoints : IEndpoints
         foreach (var capability in new[] { "Calendar", "Contacts", "Email" })
         {
             db.IntegrationConnections.Add(new IntegrationConnection
-            {
-                TenantId = tenantId,
-                Provider = provider,
-                Capability = capability,
-                OwnerType = ConnectorOwnerType.Tenant,
-                OwnerId = tenantId.ToString(),
-                Status = "PriorityOne"
-            });
+                {
+                    TenantId = tenantId,
+                    Provider = provider,
+                    Capability = capability,
+                    OwnerType = ConnectorOwnerType.Tenant,
+                    OwnerId = tenantId.ToString(),
+                    Status = "PriorityOne"
+                }
+            );
         }
+
         await db.SaveChangesAsync(cancellationToken);
     }
 
@@ -2132,6 +2349,7 @@ public sealed class AppointmentEndpoints : IEndpoints
         {
             db.AvailabilityRules.Add(new AvailabilityRule { TenantId = tenantId, StaffMemberId = staff.Id, DayOfWeek = day, StartTime = new TimeOnly(9, 0), EndTime = new TimeOnly(17, 0) });
         }
+
         await SeedAppointmentsAsync(db, tenantId, staff, [full, express, follow, workshop], serviceVersions, now);
         await EnsureIntegrationRowsAsync(db, tenantId, cancellationToken);
         await db.SaveChangesAsync(cancellationToken);
@@ -2209,58 +2427,283 @@ public sealed class AppointmentEndpoints : IEndpoints
             db.Appointments.Add(appointment);
             AddFlowEvents(db, appointment, now);
         }
+
         return Task.CompletedTask;
     }
+
+    private sealed record PaymentTokenCreation(string RawToken, AppointmentPaymentToken Entity);
+
+    private sealed record PaymentTokenLookup(AppointmentPaymentToken? Token, bool IsExpired);
 }
 
-public sealed record AppShellResponse(BusinessProfileDto Profile, IEnumerable<AppointmentDto> Appointments, IEnumerable<ServiceDto> Services, IEnumerable<ServiceCategoryDto> Categories, IEnumerable<ClientDto> Clients, AnalyticsDto Analytics, IEnumerable<IntegrationConnectionDto> Integrations, IEnumerable<AvailabilityRuleDto> AvailabilityRules, HolidaySettingsDto HolidaySettings, IEnumerable<ClosureDto> Closures, IEnumerable<CalendarBlockDto> CalendarBlocks);
+public sealed record AppShellResponse(
+    BusinessProfileDto Profile,
+    IEnumerable<AppointmentDto> Appointments,
+    IEnumerable<ServiceDto> Services,
+    IEnumerable<ServiceCategoryDto> Categories,
+    IEnumerable<ClientDto> Clients,
+    AnalyticsDto Analytics,
+    IEnumerable<IntegrationConnectionDto> Integrations,
+    IEnumerable<AvailabilityRuleDto> AvailabilityRules,
+    HolidaySettingsDto HolidaySettings,
+    IEnumerable<ClosureDto> Closures,
+    IEnumerable<CalendarBlockDto> CalendarBlocks
+);
+
 public sealed record BusinessProfileDto(string Name, string Slug, string TimeZone, string Address, bool PublicBookingEnabled);
-public sealed record AppointmentDto(string Id, string PublicReference, string ClientId, string ServiceId, string ServiceVersionId, int ServiceVersionNumber, DateTimeOffset StartAt, DateTimeOffset EndAt, string ClientName, string ClientPhone, string ClientEmail, string ServiceName, int DurationMinutes, int PriceCents, int DepositCents, string PaymentPolicy, string Status, string PaymentStatus, string Source, string Location, string AnswersJson, string ClientStatus, string? ClientAlert, string? ClientInternalNote, string? MeetUrl);
-public sealed record ServiceDto(string Id, string CategoryId, string Name, string Mode, int DurationMinutes, int PriceCents, int DepositCents, string PaymentPolicy, string Location, bool IsActive, int LatestVersionNumber);
+
+public sealed record AppointmentDto(
+    string Id,
+    string PublicReference,
+    string ClientId,
+    string ServiceId,
+    string ServiceVersionId,
+    int ServiceVersionNumber,
+    DateTimeOffset StartAt,
+    DateTimeOffset EndAt,
+    string ClientName,
+    string ClientPhone,
+    string ClientEmail,
+    string ServiceName,
+    int DurationMinutes,
+    int PriceCents,
+    int DepositCents,
+    string PaymentPolicy,
+    string Status,
+    string PaymentStatus,
+    string Source,
+    string Location,
+    string AnswersJson,
+    string ClientStatus,
+    string? ClientAlert,
+    string? ClientInternalNote,
+    string? MeetUrl
+);
+
+public sealed record ServiceDto(
+    string Id,
+    string CategoryId,
+    string Name,
+    string Mode,
+    int DurationMinutes,
+    int PriceCents,
+    int DepositCents,
+    string PaymentPolicy,
+    string Location,
+    bool IsActive,
+    int LatestVersionNumber
+);
+
 public sealed record ServiceCategoryDto(string Id, string Name);
-public sealed record ClientDto(string Id, string Name, string Phone, string Email, string Status, string? Alert, string? InternalNote, int VisitCount, int LifetimeSpendCents, int NoShowCount, DateTimeOffset? LastVisitAt, IEnumerable<ClientAppointmentHistoryDto> AppointmentHistory);
-public sealed record ClientAppointmentHistoryDto(string Id, string PublicReference, DateTimeOffset StartAt, DateTimeOffset EndAt, string ServiceName, int PriceCents, int DepositCents, string PaymentPolicy, string Status, string PaymentStatus, string Source, string Location);
+
+public sealed record ClientDto(
+    string Id,
+    string Name,
+    string Phone,
+    string Email,
+    string Status,
+    string? Alert,
+    string? InternalNote,
+    int VisitCount,
+    int LifetimeSpendCents,
+    int NoShowCount,
+    DateTimeOffset? LastVisitAt,
+    IEnumerable<ClientAppointmentHistoryDto> AppointmentHistory
+);
+
+public sealed record ClientAppointmentHistoryDto(
+    string Id,
+    string PublicReference,
+    DateTimeOffset StartAt,
+    DateTimeOffset EndAt,
+    string ServiceName,
+    int PriceCents,
+    int DepositCents,
+    string PaymentPolicy,
+    string Status,
+    string PaymentStatus,
+    string Source,
+    string Location
+);
+
 public sealed record AnalyticsDto(int Bookings, int RevenueCents, int ClientsServed, int AverageBookingValueCents, decimal NoShowRate);
-public sealed record IntegrationConnectionDto(string Provider, string Capability, string Status, DateTimeOffset? LastSyncedAt, string OwnerType, string OwnerId, string? ExternalConnectionId);
+
+public sealed record IntegrationConnectionDto(
+    string Provider,
+    string Capability,
+    string Status,
+    DateTimeOffset? LastSyncedAt,
+    string OwnerType,
+    string OwnerId,
+    string? ExternalConnectionId
+);
+
 public sealed record AvailabilityRuleDto(string Id, string DayOfWeek, string StartTime, string EndTime);
+
 public sealed record HolidaySettingsDto(string CountryCode, IEnumerable<HolidayCountryDto> Countries, IEnumerable<PublicHolidayDto> Holidays);
+
 public sealed record HolidayCountryDto(string Code, string Name);
+
 public sealed record PublicHolidayDto(string Id, string CountryCode, DateOnly Date, string Label, bool IsOpen);
+
 public sealed record ClosureDto(string Id, DateOnly StartDate, DateOnly EndDate, string Label, string Type);
+
 public sealed record CalendarBlockDto(string Id, string Title, DateTimeOffset StartAt, DateTimeOffset EndAt, string Type);
+
 public sealed record SlotDto(DateTimeOffset StartAt, DateTimeOffset EndAt);
-public sealed record PublicBookingProfileResponse(string Name, string Slug, string TimeZone, string Address, string? LogoUrl, IEnumerable<ServiceDto> Services);
+
+public sealed record PublicBookingProfileResponse(
+    string Name,
+    string Slug,
+    string TimeZone,
+    string Address,
+    string? LogoUrl,
+    IEnumerable<ServiceDto> Services
+);
+
 public sealed record PublicClientPrefillResponse(string Name, string Email);
+
 public sealed record StartPhoneVerificationRequest(string Phone);
+
 public sealed record StartPhoneVerificationResponse(string MaskedPhone, DateTimeOffset ExpiresAt, int ResendAfterSeconds);
+
 public sealed record CheckPhoneVerificationRequest(string Phone, string Code);
+
 public sealed record CheckPhoneVerificationResponse(string PhoneVerificationToken, string MaskedPhone, string Name, string Email);
-public sealed record PublicBookingRequest(string ServiceId, DateTimeOffset StartAt, string Name, string Phone, string Email, string? PhoneVerificationToken, Dictionary<string, string> Answers);
+
+public sealed record PublicBookingRequest(
+    string ServiceId,
+    DateTimeOffset StartAt,
+    string Name,
+    string Phone,
+    string Email,
+    string? PhoneVerificationToken,
+    Dictionary<string, string> Answers
+);
+
 public sealed record PublicBookingCreatedResponse(string Reference, bool PaymentRequired, string? PaymentUrl);
-public sealed record CreateServiceRequest(string Name, string CategoryName, string? Description, string Mode, int DurationMinutes, int PriceCents, int DepositCents, string? PaymentPolicy, int BufferBeforeMinutes, int BufferAfterMinutes, string Location);
+
+public sealed record PublicPaymentDetailsResponse(PublicPaymentBusinessResponse Business, PublicPaymentAppointmentResponse Appointment, PublicPaymentAmountResponse Payment);
+
+public sealed record PublicPaymentBusinessResponse(string Name, string? LogoUrl, string BrandColor);
+
+public sealed record PublicPaymentAppointmentResponse(string Reference, string ServiceName, DateTimeOffset StartAt, DateTimeOffset EndAt, string Location);
+
+public sealed record PublicPaymentAmountResponse(int AmountCents, string Currency, string Status, DateTimeOffset ExpiresAt);
+
+public sealed record PublicPaymentInitializeResponse(string Reference, string AccessCode, string? AuthorizationUrl, int AmountCents);
+
+public sealed record CreateServiceRequest(
+    string Name,
+    string CategoryName,
+    string? Description,
+    string Mode,
+    int DurationMinutes,
+    int PriceCents,
+    int DepositCents,
+    string? PaymentPolicy,
+    int BufferBeforeMinutes,
+    int BufferAfterMinutes,
+    string Location
+);
+
 public sealed record CreateCalendarBlockRequest(string Title, DateTimeOffset StartAt, DateTimeOffset EndAt, string? StaffMemberId);
+
 public sealed record WeeklyAvailabilityRequest(IEnumerable<AvailabilityDayRequest>? Days);
+
 public sealed record AvailabilityDayRequest(string DayOfWeek, IEnumerable<AvailabilityWindowRequest>? Windows);
+
 public sealed record AvailabilityWindowRequest(string StartTime, string EndTime);
+
 public sealed record HolidaySettingsRequest(string CountryCode, IEnumerable<string>? OpenHolidayIds);
+
 public sealed record CreateClosureRequest(DateOnly StartDate, DateOnly EndDate, string Label);
+
 public sealed record AppointmentParticipantRequest(string Name, string? Phone, string? Email);
+
 public sealed record UpdateAppointmentLocationRequest(string Location);
+
 public sealed record CreateRescheduleRequest(DateTimeOffset ProposedStartAt, string? Note);
+
 public sealed record RescheduleRequestResponse(string ApprovalUrl, string ApprovalToken, string Status);
+
 public sealed record RescheduleApprovalResponse(AppointmentDto Appointment, DateTimeOffset ProposedStartAt, DateTimeOffset ProposedEndAt, string Note, string Status);
+
 public sealed record PublicApprovalResultResponse(string AppointmentReference, string Status);
+
 public sealed record UpdateAppointmentStatusRequest(string Status, string? PaymentStatus);
-public sealed record UpdateClientRequest(string Name, string Phone, string Email, string Status, string? Alert, string? InternalNote);
+
+public sealed record UpdateClientRequest(
+    string Name,
+    string Phone,
+    string Email,
+    string Status,
+    string? Alert,
+    string? InternalNote
+);
+
 public sealed record PaystackInitializeRequest(string AppointmentId);
+
 public sealed record PaystackInitializeResponse(string Reference, string? AuthorizationUrl, int AmountCents);
+
 public sealed record TerminalPaymentIntentResponse(string Reference, int AmountCents, string Status, string VirtualTerminalCode, string TerminalUrl);
+
 public sealed record PaymentConfirmationResponse(string Reference, string Status, string AppointmentReference);
+
 public sealed record PaymentOverviewResponse(PaymentStatsDto Stats, PaystackSubaccountDto? Subaccount, IEnumerable<PaymentIntentDto> RecentPayments);
-public sealed record PaymentStatsDto(int TotalTracked, int PaidOrConfirmed, int NeedsAction, int Overdue, int AmountPendingCents, int AmountPaidCents);
-public sealed record PaymentIntentDto(string Reference, int AmountCents, string Status, string? AuthorizationUrl, DateTimeOffset CreatedAt, DateTimeOffset? ConfirmedAt, string AppointmentReference, string ClientName, string ServiceName);
-public sealed record PaystackSubaccountDto(string SubaccountCode, string? SplitCode, string? VirtualTerminalCode, string BusinessName, string SettlementBankName, string SettlementBankCode, string AccountName, string MaskedAccountNumber, string Currency, string? PrimaryContactName, string? PrimaryContactEmail, string? PrimaryContactPhone, bool IsActive, bool IsVerified, string SettlementSchedule, DateTimeOffset LastSyncedAt);
+
+public sealed record PaymentStatsDto(
+    int TotalTracked,
+    int PaidOrConfirmed,
+    int NeedsAction,
+    int Overdue,
+    int AmountPendingCents,
+    int AmountPaidCents
+);
+
+public sealed record PaymentIntentDto(
+    string Reference,
+    int AmountCents,
+    string Status,
+    string? AuthorizationUrl,
+    DateTimeOffset CreatedAt,
+    DateTimeOffset? ConfirmedAt,
+    string AppointmentReference,
+    string ClientName,
+    string ServiceName
+);
+
+public sealed record PaystackSubaccountDto(
+    string SubaccountCode,
+    string? SplitCode,
+    string? VirtualTerminalCode,
+    string BusinessName,
+    string SettlementBankName,
+    string SettlementBankCode,
+    string AccountName,
+    string MaskedAccountNumber,
+    string Currency,
+    string? PrimaryContactName,
+    string? PrimaryContactEmail,
+    string? PrimaryContactPhone,
+    bool IsActive,
+    bool IsVerified,
+    string SettlementSchedule,
+    DateTimeOffset LastSyncedAt
+);
+
 public sealed record ResolvePaystackAccountRequest(string BankCode, string AccountNumber);
+
 public sealed record ResolvePaystackAccountResponse(string BankCode, string MaskedAccountNumber, string AccountName);
-public sealed record SavePaystackSubaccountRequest(string BankName, string BankCode, string AccountNumber, string AccountName, string? PrimaryContactName, string? PrimaryContactEmail, string? PrimaryContactPhone);
+
+public sealed record SavePaystackSubaccountRequest(
+    string BankName,
+    string BankCode,
+    string AccountNumber,
+    string AccountName,
+    string? PrimaryContactName,
+    string? PrimaryContactEmail,
+    string? PrimaryContactPhone
+);
+
 public sealed record PaystackSettlementsResponse(IEnumerable<PaystackSettlementResult> Settlements);
