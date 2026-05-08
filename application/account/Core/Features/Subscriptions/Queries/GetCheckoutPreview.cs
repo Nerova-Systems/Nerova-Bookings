@@ -1,6 +1,6 @@
 using Account.Features.Subscriptions.Domain;
 using Account.Features.Users.Domain;
-using Account.Integrations.Stripe;
+using Account.Integrations.Paystack;
 using FluentValidation;
 using JetBrains.Annotations;
 using SharedKernel.Cqrs;
@@ -22,7 +22,7 @@ public sealed class GetCheckoutPreviewValidator : AbstractValidator<GetCheckoutP
     }
 }
 
-public sealed class GetCheckoutPreviewHandler(ISubscriptionRepository subscriptionRepository, StripeClientFactory stripeClientFactory, IExecutionContext executionContext)
+public sealed class GetCheckoutPreviewHandler(ISubscriptionRepository subscriptionRepository, PaystackClientFactory paystackClientFactory, IExecutionContext executionContext)
     : IRequestHandler<GetCheckoutPreviewQuery, Result<CheckoutPreviewResponse>>
 {
     public async Task<Result<CheckoutPreviewResponse>> Handle(GetCheckoutPreviewQuery query, CancellationToken cancellationToken)
@@ -34,16 +34,16 @@ public sealed class GetCheckoutPreviewHandler(ISubscriptionRepository subscripti
 
         var subscription = await subscriptionRepository.GetCurrentAsync(cancellationToken);
 
-        if (subscription.StripeCustomerId is null)
+        if (subscription.PaystackCustomerId is null)
         {
             return Result<CheckoutPreviewResponse>.BadRequest("Billing information must be saved before previewing checkout.");
         }
 
-        var stripeClient = stripeClientFactory.GetClient();
-        var preview = await stripeClient.GetCheckoutPreviewAsync(subscription.StripeCustomerId, query.Plan, cancellationToken);
+        var paystackClient = paystackClientFactory.GetClient();
+        var preview = await paystackClient.GetCheckoutPreviewAsync(subscription.PaystackCustomerId, query.Plan, cancellationToken);
         if (preview is null)
         {
-            return Result<CheckoutPreviewResponse>.BadRequest("Failed to get checkout preview from Stripe.");
+            return Result<CheckoutPreviewResponse>.BadRequest("Failed to get checkout preview from Paystack.");
         }
 
         return new CheckoutPreviewResponse(preview.TotalAmount, preview.Currency, preview.TaxAmount);

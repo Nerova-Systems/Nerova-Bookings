@@ -17,8 +17,8 @@ public sealed class GetCurrentSubscriptionTests : EndpointBaseTest<AccountDbCont
         // Arrange
         Connection.Update("subscriptions", "tenant_id", DatabaseSeeder.Tenant1.Id.Value, [
                 ("plan", nameof(SubscriptionPlan.Standard)),
-                ("stripe_customer_id", "cus_test_123"),
-                ("stripe_subscription_id", "sub_test_123"),
+                ("paystack_customer_code", "cus_test_123"),
+                ("paystack_authorization_code", "sub_test_123"),
                 ("current_price_amount", 29.99),
                 ("current_price_currency", "USD"),
                 ("current_period_end", TimeProvider.GetUtcNow().AddDays(30))
@@ -32,7 +32,7 @@ public sealed class GetCurrentSubscriptionTests : EndpointBaseTest<AccountDbCont
         response.ShouldBeSuccessfulGetRequest();
         var result = await response.Content.ReadFromJsonAsync<SubscriptionResponse>();
         result!.Plan.Should().Be(SubscriptionPlan.Standard);
-        result.HasStripeSubscription.Should().BeTrue();
+        result.HasPaystackSubscription.Should().BeTrue();
         result.CancelAtPeriodEnd.Should().BeFalse();
         result.CurrentPriceAmount.Should().Be(29.99m);
         result.CurrentPriceCurrency.Should().Be("USD");

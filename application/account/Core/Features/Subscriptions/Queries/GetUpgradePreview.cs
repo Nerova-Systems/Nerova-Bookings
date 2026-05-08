@@ -1,7 +1,7 @@
 using Account.Features.Subscriptions.Domain;
 using Account.Features.Subscriptions.Shared;
 using Account.Features.Users.Domain;
-using Account.Integrations.Stripe;
+using Account.Integrations.Paystack;
 using JetBrains.Annotations;
 using SharedKernel.Cqrs;
 using SharedKernel.ExecutionContext;
@@ -17,7 +17,7 @@ public sealed record UpgradePreviewResponse(decimal TotalAmount, string Currency
 [PublicAPI]
 public sealed record UpgradePreviewLineItemResponse(string Description, decimal Amount, string Currency, bool IsProration, bool IsTax);
 
-public sealed class GetUpgradePreviewHandler(ISubscriptionRepository subscriptionRepository, StripeClientFactory stripeClientFactory, IExecutionContext executionContext)
+public sealed class GetUpgradePreviewHandler(ISubscriptionRepository subscriptionRepository, PaystackClientFactory paystackClientFactory, IExecutionContext executionContext)
     : IRequestHandler<GetUpgradePreviewQuery, Result<UpgradePreviewResponse>>
 {
     public async Task<Result<UpgradePreviewResponse>> Handle(GetUpgradePreviewQuery query, CancellationToken cancellationToken)
@@ -29,9 +29,9 @@ public sealed class GetUpgradePreviewHandler(ISubscriptionRepository subscriptio
 
         var subscription = await subscriptionRepository.GetCurrentAsync(cancellationToken);
 
-        if (subscription.StripeSubscriptionId is null)
+        if (subscription.PaystackSubscriptionId is null)
         {
-            return Result<UpgradePreviewResponse>.BadRequest("No active Stripe subscription found.");
+            return Result<UpgradePreviewResponse>.BadRequest("No active Paystack subscription found.");
         }
 
         if (!query.NewPlan.IsUpgradeFrom(subscription.Plan))
@@ -39,11 +39,11 @@ public sealed class GetUpgradePreviewHandler(ISubscriptionRepository subscriptio
             return Result<UpgradePreviewResponse>.BadRequest($"Cannot upgrade from '{subscription.Plan}' to '{query.NewPlan}'. Target plan must be higher.");
         }
 
-        var stripeClient = stripeClientFactory.GetClient();
-        var preview = await stripeClient.GetUpgradePreviewAsync(subscription.StripeSubscriptionId, query.NewPlan, cancellationToken);
+        var paystackClient = paystackClientFactory.GetClient();
+        var preview = await paystackClient.GetUpgradePreviewAsync(subscription.PaystackSubscriptionId, query.NewPlan, cancellationToken);
         if (preview is null)
         {
-            return Result<UpgradePreviewResponse>.BadRequest("Failed to get upgrade preview from Stripe.");
+            return Result<UpgradePreviewResponse>.BadRequest("Failed to get upgrade preview from Paystack.");
         }
 
         var lineItems = preview.LineItems

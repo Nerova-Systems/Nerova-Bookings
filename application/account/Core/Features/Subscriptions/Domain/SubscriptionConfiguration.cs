@@ -18,8 +18,10 @@ public sealed class SubscriptionConfiguration : IEntityTypeConfiguration<Subscri
         builder.MapStronglyTypedUuid<Subscription, SubscriptionId>(s => s.Id);
         builder.MapStronglyTypedLongId<Subscription, TenantId>(s => s.TenantId);
         builder.HasOne<Tenant>().WithMany().HasForeignKey(s => s.TenantId);
-        builder.MapStronglyTypedNullableId<Subscription, StripeCustomerId, string>(s => s.StripeCustomerId);
-        builder.MapStronglyTypedNullableId<Subscription, StripeSubscriptionId, string>(s => s.StripeSubscriptionId);
+        builder.MapStronglyTypedNullableId<Subscription, PaystackCustomerId, string>(s => s.PaystackCustomerId);
+        builder.MapStronglyTypedNullableId<Subscription, PaystackSubscriptionId, string>(s => s.PaystackSubscriptionId);
+        builder.Property(s => s.PaystackCustomerId).HasColumnName("paystack_customer_code");
+        builder.Property(s => s.PaystackSubscriptionId).HasColumnName("paystack_authorization_code");
 
         builder.Property(s => s.CurrentPriceAmount).HasPrecision(18, 2);
 

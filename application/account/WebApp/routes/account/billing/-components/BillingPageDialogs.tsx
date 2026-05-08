@@ -47,10 +47,6 @@ interface BillingPageDialogsProps {
   isCheckoutDialogOpen: boolean;
   setIsCheckoutDialogOpen: (open: boolean) => void;
   checkoutPlan: SubscriptionPlan;
-  reactivateClientSecret: string | undefined;
-  reactivatePublishableKey: string | undefined;
-  setReactivateClientSecret: (value: string | undefined) => void;
-  setReactivatePublishableKey: (value: string | undefined) => void;
 }
 
 export function BillingPageDialogs({
@@ -81,11 +77,7 @@ export function BillingPageDialogs({
   retryInvoiceCurrency,
   isCheckoutDialogOpen,
   setIsCheckoutDialogOpen,
-  checkoutPlan,
-  reactivateClientSecret,
-  reactivatePublishableKey,
-  setReactivateClientSecret,
-  setReactivatePublishableKey
+  checkoutPlan
 }: Readonly<BillingPageDialogsProps>) {
   return (
     <>
@@ -136,19 +128,7 @@ export function BillingPageDialogs({
         />
       )}
 
-      <CheckoutDialog
-        isOpen={isCheckoutDialogOpen}
-        onOpenChange={(open) => {
-          setIsCheckoutDialogOpen(open);
-          if (!open) {
-            setReactivateClientSecret(undefined);
-            setReactivatePublishableKey(undefined);
-          }
-        }}
-        plan={checkoutPlan}
-        prefetchedClientSecret={reactivateClientSecret}
-        prefetchedPublishableKey={reactivatePublishableKey}
-      />
+      <CheckoutDialog isOpen={isCheckoutDialogOpen} onOpenChange={setIsCheckoutDialogOpen} plan={checkoutPlan} />
     </>
   );
 }

@@ -271,7 +271,7 @@ public sealed class StopCommand : Command
     }
 
     // Returns the project-specific volume prefix (e.g. "vilo", "platform-platform-9100") read from
-    // the container's mount label. Empty for containers without a data volume (mailpit, stripe-cli).
+    // the container's mount label. Empty for containers without a data volume (mailpit, paystack-cli).
     private static string? ExtractVolumePrefix(string containerName)
     {
         var mountsLabel = ProcessHelper.StartProcess(

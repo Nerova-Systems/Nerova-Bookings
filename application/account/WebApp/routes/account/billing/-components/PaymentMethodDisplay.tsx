@@ -23,7 +23,7 @@ export function PaymentMethodDisplay({ paymentMethod }: Readonly<PaymentMethodDi
       <div className="flex items-center gap-2 text-sm">
         <CreditCardIcon className="size-4 text-muted-foreground" />
         <span>
-          <Trans>Stripe Link</Trans>
+          <Trans>Saved card</Trans>
         </span>
       </div>
     );

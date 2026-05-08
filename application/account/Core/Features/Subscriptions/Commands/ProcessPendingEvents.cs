@@ -8,19 +8,19 @@ namespace Account.Features.Subscriptions.Commands;
 [PublicAPI]
 public sealed record ProcessPendingEventsCommand : ICommand, IRequest<Result>;
 
-public sealed class ProcessPendingEventsHandler(ISubscriptionRepository subscriptionRepository, ProcessPendingStripeEvents processPendingStripeEvents)
+public sealed class ProcessPendingEventsHandler(ISubscriptionRepository subscriptionRepository, ProcessPendingPaystackEvents processPendingPaystackEvents)
     : IRequestHandler<ProcessPendingEventsCommand, Result>
 {
     public async Task<Result> Handle(ProcessPendingEventsCommand command, CancellationToken cancellationToken)
     {
         var subscription = await subscriptionRepository.GetCurrentAsync(cancellationToken);
 
-        if (subscription.StripeCustomerId is null)
+        if (subscription.PaystackCustomerId is null)
         {
-            return Result.BadRequest("No Stripe customer found for this subscription.");
+            return Result.BadRequest("No Paystack customer found for this subscription.");
         }
 
-        await processPendingStripeEvents.ExecuteAsync(subscription.StripeCustomerId, cancellationToken);
+        await processPendingPaystackEvents.ExecuteAsync(subscription.PaystackCustomerId, cancellationToken);
 
         return Result.Success();
     }

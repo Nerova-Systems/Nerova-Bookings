@@ -1,7 +1,7 @@
 using Account.Features.Subscriptions.Domain;
 using Account.Features.Subscriptions.Shared;
 using Account.Features.Users.Domain;
-using Account.Integrations.Stripe;
+using Account.Integrations.Paystack;
 using JetBrains.Annotations;
 using SharedKernel.Cqrs;
 using SharedKernel.ExecutionContext;
@@ -12,11 +12,18 @@ namespace Account.Features.Subscriptions.Commands;
 public sealed record UpgradeSubscriptionCommand(SubscriptionPlan NewPlan) : ICommand, IRequest<Result<UpgradeSubscriptionResponse>>;
 
 [PublicAPI]
-public sealed record UpgradeSubscriptionResponse(string? ClientSecret, string? PublishableKey);
+public sealed record UpgradeSubscriptionResponse(
+    string? AccessCode,
+    string? Reference,
+    string? PublicKey,
+    decimal? Amount,
+    string? Currency,
+    string OperationPurpose
+);
 
 public sealed class UpgradeSubscriptionHandler(
     ISubscriptionRepository subscriptionRepository,
-    StripeClientFactory stripeClientFactory,
+    PaystackClientFactory paystackClientFactory,
     IExecutionContext executionContext,
     ILogger<UpgradeSubscriptionHandler> logger
 ) : IRequestHandler<UpgradeSubscriptionCommand, Result<UpgradeSubscriptionResponse>>
@@ -30,22 +37,34 @@ public sealed class UpgradeSubscriptionHandler(
 
         var subscription = await subscriptionRepository.GetCurrentAsync(cancellationToken);
 
-        if (subscription.StripeSubscriptionId is null)
-        {
-            logger.LogWarning("No Stripe subscription found for subscription '{SubscriptionId}'", subscription.Id);
-            return Result<UpgradeSubscriptionResponse>.BadRequest("No active Stripe subscription found.");
-        }
-
         if (!command.NewPlan.IsUpgradeFrom(subscription.Plan))
         {
             return Result<UpgradeSubscriptionResponse>.BadRequest($"Cannot upgrade from '{subscription.Plan}' to '{command.NewPlan}'. Target plan must be higher.");
         }
 
-        var stripeClient = stripeClientFactory.GetClient();
-        var upgradeResult = await stripeClient.UpgradeSubscriptionAsync(subscription.StripeSubscriptionId, command.NewPlan, cancellationToken);
+        if (subscription.PaystackCustomerId is null)
+        {
+            logger.LogWarning("No Paystack customer found for subscription '{SubscriptionId}'", subscription.Id);
+            return Result<UpgradeSubscriptionResponse>.BadRequest("No Paystack customer found.");
+        }
+
+        if (subscription.PaystackSubscriptionId is null)
+        {
+            logger.LogWarning("No Paystack subscription found for subscription '{SubscriptionId}'", subscription.Id);
+            return Result<UpgradeSubscriptionResponse>.BadRequest("No active Paystack subscription found.");
+        }
+
+        var billingEmail = subscription.PaystackAuthorizationEmail ?? subscription.BillingInfo?.Email;
+        if (billingEmail is null)
+        {
+            return Result<UpgradeSubscriptionResponse>.BadRequest("Billing information must include an email before upgrading.");
+        }
+
+        var paystackClient = paystackClientFactory.GetClient();
+        var upgradeResult = await paystackClient.UpgradeSubscriptionAsync(subscription.PaystackCustomerId, subscription.PaystackSubscriptionId, billingEmail, command.NewPlan, cancellationToken);
         if (upgradeResult is null)
         {
-            return Result<UpgradeSubscriptionResponse>.BadRequest("Failed to upgrade subscription in Stripe.");
+            return Result<UpgradeSubscriptionResponse>.BadRequest("Failed to upgrade subscription in Paystack.");
         }
 
         if (upgradeResult.ErrorMessage is not null)
@@ -53,9 +72,9 @@ public sealed class UpgradeSubscriptionHandler(
             return Result<UpgradeSubscriptionResponse>.BadRequest(upgradeResult.ErrorMessage);
         }
 
-        // Subscription is updated and telemetry is collected in ProcessPendingStripeEvents when Stripe confirms the state change via webhook
+        // Subscription is updated and telemetry is collected when Paystack confirms the transaction.
 
-        var publishableKey = upgradeResult.ClientSecret is not null ? stripeClientFactory.GetPublishableKey() : null;
-        return new UpgradeSubscriptionResponse(upgradeResult.ClientSecret, publishableKey);
+        var publicKey = upgradeResult.AccessCode is not null ? paystackClientFactory.GetPublicKey() : null;
+        return new UpgradeSubscriptionResponse(upgradeResult.AccessCode, upgradeResult.Reference, publicKey, upgradeResult.Amount, upgradeResult.Currency, nameof(PaystackPaymentPurpose.Upgrade));
     }
 }

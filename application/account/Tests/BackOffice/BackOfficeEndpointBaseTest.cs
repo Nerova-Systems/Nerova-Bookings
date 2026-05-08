@@ -41,8 +41,8 @@ public abstract class BackOfficeEndpointBaseTest : IDisposable
             "APPLICATIONINSIGHTS_CONNECTION_STRING",
             "InstrumentationKey=00000000-0000-0000-0000-000000000000;IngestionEndpoint=https://localhost;LiveEndpoint=https://localhost"
         );
-        Environment.SetEnvironmentVariable("Stripe__AllowMockProvider", "true");
-        Environment.SetEnvironmentVariable("Stripe__PublishableKey", "pk_test_mock_publishable_key");
+        Environment.SetEnvironmentVariable("Paystack__AllowMockProvider", "true");
+        Environment.SetEnvironmentVariable("Paystack__PublicKey", "pk_test_mock_public_key");
 
         EnsureBackOfficeSpaShell();
 

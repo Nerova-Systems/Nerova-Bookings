@@ -18,8 +18,8 @@ public sealed class ConfirmPaymentMethodSetupTests : EndpointBaseTest<AccountDbC
         // Arrange
         Connection.Update("subscriptions", "tenant_id", DatabaseSeeder.Tenant1.Id.Value, [
                 ("plan", nameof(SubscriptionPlan.Standard)),
-                ("stripe_customer_id", "cus_test_123"),
-                ("stripe_subscription_id", "sub_test_123"),
+                ("paystack_customer_code", "cus_test_123"),
+                ("paystack_authorization_code", "sub_test_123"),
                 ("current_period_end", TimeProvider.GetUtcNow().AddDays(30))
             ]
         );
@@ -50,7 +50,7 @@ public sealed class ConfirmPaymentMethodSetupTests : EndpointBaseTest<AccountDbC
     }
 
     [Fact]
-    public async Task ConfirmPaymentMethodSetup_WhenNoStripeCustomer_ShouldReturnBadRequest()
+    public async Task ConfirmPaymentMethodSetup_WhenNoPaystackCustomer_ShouldReturnBadRequest()
     {
         // Arrange
         var command = new ConfirmPaymentMethodSetupCommand("seti_mock_12345");
@@ -59,15 +59,15 @@ public sealed class ConfirmPaymentMethodSetupTests : EndpointBaseTest<AccountDbC
         var response = await AuthenticatedOwnerHttpClient.PostAsJsonAsync("/api/account/billing/confirm-payment-method", command);
 
         // Assert
-        await response.ShouldHaveErrorStatusCode(HttpStatusCode.BadRequest, "No Stripe customer found. A subscription must be created first.");
+        await response.ShouldHaveErrorStatusCode(HttpStatusCode.BadRequest, "No Paystack customer found. A subscription must be created first.");
     }
 
     [Fact]
-    public async Task ConfirmPaymentMethodSetup_WhenNoStripeSubscription_ShouldSetCustomerDefault()
+    public async Task ConfirmPaymentMethodSetup_WhenNoPaystackSubscription_ShouldSetCustomerDefault()
     {
         // Arrange
         Connection.Update("subscriptions", "tenant_id", DatabaseSeeder.Tenant1.Id.Value, [
-                ("stripe_customer_id", "cus_test_123")
+                ("paystack_customer_code", "cus_test_123")
             ]
         );
         var command = new ConfirmPaymentMethodSetupCommand("seti_mock_12345");

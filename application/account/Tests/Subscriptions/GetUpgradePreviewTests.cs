@@ -18,8 +18,8 @@ public sealed class GetUpgradePreviewTests : EndpointBaseTest<AccountDbContext>
         // Arrange
         Connection.Update("subscriptions", "tenant_id", DatabaseSeeder.Tenant1.Id.Value, [
                 ("plan", nameof(SubscriptionPlan.Standard)),
-                ("stripe_customer_id", "cus_test_123"),
-                ("stripe_subscription_id", "sub_test_123"),
+                ("paystack_customer_code", "cus_test_123"),
+                ("paystack_authorization_code", "sub_test_123"),
                 ("current_period_end", TimeProvider.GetUtcNow().AddDays(30))
             ]
         );
@@ -35,7 +35,7 @@ public sealed class GetUpgradePreviewTests : EndpointBaseTest<AccountDbContext>
         result.LineItems.Should().NotBeEmpty();
         result.LineItems.Sum(i => i.Amount).Should().Be(result.TotalAmount);
         var taxItem = result.LineItems.Should().ContainSingle(i => i.Description == "Tax").Which;
-        taxItem.Amount.Should().BeGreaterThan(0);
+        taxItem.Amount.Should().Be(0);
         taxItem.IsProration.Should().BeFalse();
         result.LineItems.Where(i => i.IsProration).Should().AllSatisfy(item =>
             {
@@ -51,8 +51,8 @@ public sealed class GetUpgradePreviewTests : EndpointBaseTest<AccountDbContext>
         // Arrange
         Connection.Update("subscriptions", "tenant_id", DatabaseSeeder.Tenant1.Id.Value, [
                 ("plan", nameof(SubscriptionPlan.Premium)),
-                ("stripe_customer_id", "cus_test_123"),
-                ("stripe_subscription_id", "sub_test_123"),
+                ("paystack_customer_code", "cus_test_123"),
+                ("paystack_authorization_code", "sub_test_123"),
                 ("current_period_end", TimeProvider.GetUtcNow().AddDays(30))
             ]
         );
@@ -70,8 +70,8 @@ public sealed class GetUpgradePreviewTests : EndpointBaseTest<AccountDbContext>
         // Arrange
         Connection.Update("subscriptions", "tenant_id", DatabaseSeeder.Tenant1.Id.Value, [
                 ("plan", nameof(SubscriptionPlan.Standard)),
-                ("stripe_customer_id", "cus_test_123"),
-                ("stripe_subscription_id", "sub_test_123"),
+                ("paystack_customer_code", "cus_test_123"),
+                ("paystack_authorization_code", "sub_test_123"),
                 ("current_period_end", TimeProvider.GetUtcNow().AddDays(30))
             ]
         );
@@ -84,12 +84,12 @@ public sealed class GetUpgradePreviewTests : EndpointBaseTest<AccountDbContext>
     }
 
     [Fact]
-    public async Task GetUpgradePreview_WhenNoStripeSubscription_ShouldReturnBadRequest()
+    public async Task GetUpgradePreview_WhenNoPaystackSubscription_ShouldReturnBadRequest()
     {
         // Arrange
         Connection.Update("subscriptions", "tenant_id", DatabaseSeeder.Tenant1.Id.Value, [
                 ("plan", nameof(SubscriptionPlan.Standard)),
-                ("stripe_customer_id", "cus_test_123")
+                ("paystack_customer_code", "cus_test_123")
             ]
         );
 
@@ -97,6 +97,6 @@ public sealed class GetUpgradePreviewTests : EndpointBaseTest<AccountDbContext>
         var response = await AuthenticatedOwnerHttpClient.GetAsync("/api/account/subscriptions/upgrade-preview?NewPlan=Premium");
 
         // Assert
-        await response.ShouldHaveErrorStatusCode(HttpStatusCode.BadRequest, "No active Stripe subscription found.");
+        await response.ShouldHaveErrorStatusCode(HttpStatusCode.BadRequest, "No active Paystack subscription found.");
     }
 }

@@ -11,11 +11,11 @@ public interface ISubscriptionRepository : ICrudRepository<Subscription, Subscri
     Task<Subscription> GetCurrentAsync(CancellationToken cancellationToken);
 
     /// <summary>
-    ///     Retrieves a subscription by Stripe customer ID with pessimistic locking (FOR UPDATE).
+    ///     Retrieves a subscription by Paystack customer ID with pessimistic locking (FOR UPDATE).
     ///     This method should only be used in webhook processing to serialize with user-action commands.
     ///     This method bypasses tenant query filters since webhooks have no tenant context.
     /// </summary>
-    Task<Subscription?> GetByStripeCustomerIdWithLockUnfilteredAsync(StripeCustomerId stripeCustomerId, CancellationToken cancellationToken);
+    Task<Subscription?> GetByPaystackCustomerIdWithLockUnfilteredAsync(PaystackCustomerId paystackCustomerId, CancellationToken cancellationToken);
 
     /// <summary>
     ///     Retrieves a subscription by tenant ID without applying tenant query filters.
@@ -34,19 +34,19 @@ internal sealed class SubscriptionRepository(AccountDbContext accountDbContext, 
     }
 
     /// <summary>
-    ///     Retrieves a subscription by Stripe customer ID with pessimistic locking (FOR UPDATE).
+    ///     Retrieves a subscription by Paystack customer ID with pessimistic locking (FOR UPDATE).
     ///     This method should only be used in webhook processing to serialize with user-action commands.
     ///     This method bypasses tenant query filters since webhooks have no tenant context.
     /// </summary>
-    public async Task<Subscription?> GetByStripeCustomerIdWithLockUnfilteredAsync(StripeCustomerId stripeCustomerId, CancellationToken cancellationToken)
+    public async Task<Subscription?> GetByPaystackCustomerIdWithLockUnfilteredAsync(PaystackCustomerId paystackCustomerId, CancellationToken cancellationToken)
     {
         if (accountDbContext.Database.ProviderName is "Microsoft.EntityFrameworkCore.Sqlite")
         {
-            return await DbSet.IgnoreQueryFilters().SingleOrDefaultAsync(s => s.StripeCustomerId == stripeCustomerId, cancellationToken);
+            return await DbSet.IgnoreQueryFilters().SingleOrDefaultAsync(s => s.PaystackCustomerId == paystackCustomerId, cancellationToken);
         }
 
         return await DbSet
-            .FromSqlInterpolated($"SELECT * FROM subscriptions WHERE stripe_customer_id = {stripeCustomerId.Value} FOR UPDATE")
+            .FromSqlInterpolated($"SELECT * FROM subscriptions WHERE paystack_customer_code = {paystackCustomerId.Value} FOR UPDATE")
             .IgnoreQueryFilters()
             .SingleOrDefaultAsync(cancellationToken);
     }

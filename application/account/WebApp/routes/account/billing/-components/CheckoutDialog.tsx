@@ -1,6 +1,3 @@
-import type { Stripe } from "@stripe/stripe-js";
-
-import { i18n } from "@lingui/core";
 import { t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
 import { Button } from "@repo/ui/components/Button";
@@ -15,16 +12,13 @@ import {
   DialogTitle
 } from "@repo/ui/components/Dialog";
 import { Skeleton } from "@repo/ui/components/Skeleton";
-import { CheckoutElementsProvider } from "@stripe/react-stripe-js/checkout";
-import { loadStripe } from "@stripe/stripe-js/pure";
 import { LoaderCircleIcon } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
-import { api, type SubscriptionPlan as SubscriptionPlanType } from "@/shared/lib/api/client";
+import { api, PaystackPaymentPurpose, type SubscriptionPlan as SubscriptionPlanType } from "@/shared/lib/api/client";
 
-import { CheckoutForm } from "./CheckoutForm";
-import { getStripeAppearance } from "./stripeAppearance";
+import { CheckoutForm, type PaystackCheckoutPayment } from "./CheckoutForm";
 
 const ActivationPollingIntervalMs = 1000;
 const ActivationTimeoutMs = 15_000;
@@ -33,19 +27,11 @@ interface CheckoutDialogProps {
   isOpen: boolean;
   onOpenChange: (isOpen: boolean) => void;
   plan: SubscriptionPlanType;
-  prefetchedClientSecret?: string;
-  prefetchedPublishableKey?: string;
+  prefetchedPayment?: PaystackCheckoutPayment;
 }
 
-export function CheckoutDialog({
-  isOpen,
-  onOpenChange,
-  plan,
-  prefetchedClientSecret,
-  prefetchedPublishableKey
-}: Readonly<CheckoutDialogProps>) {
-  const [stripePromise, setStripePromise] = useState<Promise<Stripe | null> | null>(null);
-  const [clientSecret, setClientSecret] = useState<string | null>(null);
+export function CheckoutDialog({ isOpen, onOpenChange, plan, prefetchedPayment }: Readonly<CheckoutDialogProps>) {
+  const [payment, setPayment] = useState<PaystackCheckoutPayment | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [paymentError, setPaymentError] = useState<string | null>(null);
   const [isWaitingForActivation, setIsWaitingForActivation] = useState(false);
@@ -57,14 +43,34 @@ export function CheckoutDialog({
     { refetchInterval: isWaitingForActivation ? ActivationPollingIntervalMs : false }
   );
 
+  const confirmMutation = api.useMutation("post", "/api/account/subscriptions/confirm-payment", {
+    onSuccess: () => {
+      setIsLoading(false);
+      setIsWaitingForActivation(true);
+    },
+    onError: () => {
+      setIsLoading(false);
+    }
+  });
+
+  const confirmPayment = (reference: string, purpose: PaystackPaymentPurpose) => {
+    confirmMutation.mutate({
+      body: {
+        reference,
+        plan,
+        purpose
+      }
+    });
+  };
+
   useEffect(() => {
-    if (!isWaitingForActivation || !subscription?.hasStripeSubscription) {
+    if (!isWaitingForActivation || !subscription?.hasPaystackSubscription) {
       return;
     }
     setIsWaitingForActivation(false);
     toast.success(t`Your subscription has been activated.`);
     onOpenChange(false);
-  }, [isWaitingForActivation, subscription?.hasStripeSubscription, onOpenChange]);
+  }, [isWaitingForActivation, subscription?.hasPaystackSubscription, onOpenChange]);
 
   useEffect(() => {
     if (!isWaitingForActivation) {
@@ -80,11 +86,13 @@ export function CheckoutDialog({
 
   const checkoutMutation = api.useMutation("post", "/api/account/subscriptions/start-checkout", {
     onSuccess: (data) => {
-      setClientSecret(data.clientSecret ?? null);
-      if (data.publishableKey) {
-        setStripePromise(loadStripe(data.publishableKey, { locale: i18n.locale as "auto" }));
+      const response = data as PaystackCheckoutPayment & { usedExistingPaymentMethod?: boolean };
+      setPayment(response);
+      if (response.usedExistingPaymentMethod && response.reference) {
+        confirmPayment(response.reference, response.operationPurpose);
+      } else {
+        setIsLoading(false);
       }
-      setIsLoading(false);
     },
     onError: () => {
       setIsLoading(false);
@@ -95,44 +103,29 @@ export function CheckoutDialog({
   useEffect(() => {
     if (isOpen) {
       setPaymentError(null);
-      if (prefetchedClientSecret && prefetchedPublishableKey) {
-        setClientSecret(prefetchedClientSecret);
-        setStripePromise(loadStripe(prefetchedPublishableKey, { locale: i18n.locale as "auto" }));
+      if (prefetchedPayment) {
+        setPayment(prefetchedPayment);
         setIsLoading(false);
       } else {
         setIsLoading(true);
-        setClientSecret(null);
-        setStripePromise(null);
+        setPayment(null);
         startCheckout({
           body: { plan }
         });
       }
     } else {
-      setClientSecret(null);
-      setStripePromise(null);
+      setPayment(null);
       setIsLoading(false);
       setPaymentError(null);
       setIsWaitingForActivation(false);
     }
-  }, [isOpen, prefetchedClientSecret, prefetchedPublishableKey, plan, startCheckout]);
+  }, [isOpen, prefetchedPayment, plan, startCheckout]);
 
-  const handleConfirmed = () => {
-    setIsWaitingForActivation(true);
+  const handlePaymentCompleted = (reference: string) => {
+    confirmPayment(reference, payment?.operationPurpose ?? PaystackPaymentPurpose.Subscribe);
   };
 
-  const checkoutOptions = useMemo(() => {
-    if (!clientSecret) {
-      return undefined;
-    }
-    return {
-      clientSecret,
-      elementsOptions: {
-        appearance: getStripeAppearance()
-      }
-    };
-  }, [clientSecret]);
-
-  const isReady = stripePromise && checkoutOptions;
+  const isReady = Boolean(payment?.accessCode);
 
   return (
     <Dialog
@@ -166,10 +159,13 @@ export function CheckoutDialog({
             <>
               {isLoading && <CheckoutSkeleton />}
               {paymentError && <div className="text-sm text-destructive">{paymentError}</div>}
-              {isReady && (
-                <CheckoutElementsProvider stripe={stripePromise} options={checkoutOptions}>
-                  <CheckoutForm plan={plan} onConfirmed={handleConfirmed} onError={setPaymentError} />
-                </CheckoutElementsProvider>
+              {isReady && payment && (
+                <CheckoutForm
+                  plan={plan}
+                  payment={payment}
+                  onPaymentCompleted={handlePaymentCompleted}
+                  onError={setPaymentError}
+                />
               )}
             </>
           )}

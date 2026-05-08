@@ -18,12 +18,12 @@ public sealed class RetryPendingInvoicePaymentTests : EndpointBaseTest<AccountDb
         // Arrange
         Connection.Update("subscriptions", "tenant_id", DatabaseSeeder.Tenant1.Id.Value, [
                 ("plan", nameof(SubscriptionPlan.Standard)),
-                ("stripe_customer_id", "cus_test_123"),
-                ("stripe_subscription_id", "sub_test_123"),
+                ("paystack_customer_code", "cus_test_123"),
+                ("paystack_authorization_code", "sub_test_123"),
                 ("current_period_end", TimeProvider.GetUtcNow().AddDays(30))
             ]
         );
-        StripeState.SimulateOpenInvoice = true;
+        PaystackState.SimulateOpenInvoice = true;
 
         // Act
         var response = await AuthenticatedOwnerHttpClient.PostAsync("/api/account/billing/retry-pending-invoice", null);
@@ -32,8 +32,9 @@ public sealed class RetryPendingInvoicePaymentTests : EndpointBaseTest<AccountDb
         response.EnsureSuccessStatusCode();
         var result = await response.Content.ReadFromJsonAsync<RetryPendingInvoicePaymentResponse>();
         result!.Paid.Should().BeTrue();
-        result.ClientSecret.Should().BeNull();
-        result.PublishableKey.Should().BeNull();
+        result.Reference.Should().NotBeNullOrEmpty();
+        result.AccessCode.Should().BeNull();
+        result.OperationPurpose.Should().Be("Retry");
         TelemetryEventsCollectorSpy.CollectedEvents.Count.Should().Be(1);
         TelemetryEventsCollectorSpy.CollectedEvents[0].GetType().Name.Should().Be("PendingInvoicePaymentRetried");
     }
@@ -44,8 +45,8 @@ public sealed class RetryPendingInvoicePaymentTests : EndpointBaseTest<AccountDb
         // Arrange
         Connection.Update("subscriptions", "tenant_id", DatabaseSeeder.Tenant1.Id.Value, [
                 ("plan", nameof(SubscriptionPlan.Standard)),
-                ("stripe_customer_id", "cus_test_123"),
-                ("stripe_subscription_id", "sub_test_123"),
+                ("paystack_customer_code", "cus_test_123"),
+                ("paystack_authorization_code", "sub_test_123"),
                 ("current_period_end", TimeProvider.GetUtcNow().AddDays(30))
             ]
         );
@@ -68,11 +69,11 @@ public sealed class RetryPendingInvoicePaymentTests : EndpointBaseTest<AccountDb
     }
 
     [Fact]
-    public async Task RetryPendingInvoicePayment_WhenNoStripeSubscription_ShouldReturnBadRequest()
+    public async Task RetryPendingInvoicePayment_WhenNoPaystackSubscription_ShouldReturnBadRequest()
     {
         // Arrange
         Connection.Update("subscriptions", "tenant_id", DatabaseSeeder.Tenant1.Id.Value, [
-                ("stripe_customer_id", "cus_test_123")
+                ("paystack_customer_code", "cus_test_123")
             ]
         );
 
@@ -80,6 +81,6 @@ public sealed class RetryPendingInvoicePaymentTests : EndpointBaseTest<AccountDb
         var response = await AuthenticatedOwnerHttpClient.PostAsync("/api/account/billing/retry-pending-invoice", null);
 
         // Assert
-        await response.ShouldHaveErrorStatusCode(HttpStatusCode.BadRequest, "No active Stripe subscription found.");
+        await response.ShouldHaveErrorStatusCode(HttpStatusCode.BadRequest, "No active Paystack subscription found.");
     }
 }

@@ -1,6 +1,6 @@
 using Account.Features.Subscriptions.Domain;
 using Account.Features.Users.Domain;
-using Account.Integrations.Stripe;
+using Account.Integrations.Paystack;
 using FluentValidation;
 using JetBrains.Annotations;
 using SharedKernel.Cqrs;
@@ -39,7 +39,7 @@ public sealed class UpdateBillingInfoValidator : AbstractValidator<UpdateBilling
 
 public sealed class UpdateBillingInfoHandler(
     ISubscriptionRepository subscriptionRepository,
-    StripeClientFactory stripeClientFactory,
+    PaystackClientFactory paystackClientFactory,
     IExecutionContext executionContext
 ) : IRequestHandler<UpdateBillingInfoCommand, Result>
 {
@@ -52,22 +52,22 @@ public sealed class UpdateBillingInfoHandler(
 
         var subscription = await subscriptionRepository.GetCurrentAsync(cancellationToken);
 
-        var stripeClient = stripeClientFactory.GetClient();
+        var paystackClient = paystackClientFactory.GetClient();
 
-        if (subscription.StripeCustomerId is null)
+        if (subscription.PaystackCustomerId is null)
         {
             if (executionContext.UserInfo.Email is null)
             {
-                return Result.BadRequest("User email is required to create a Stripe customer.");
+                return Result.BadRequest("User email is required to create a Paystack customer.");
             }
 
-            var customerId = await stripeClient.CreateCustomerAsync(command.Name, executionContext.UserInfo.Email, subscription.TenantId.Value, cancellationToken);
+            var customerId = await paystackClient.CreateCustomerAsync(command.Name, executionContext.UserInfo.Email, subscription.TenantId.Value, cancellationToken);
             if (customerId is null)
             {
-                return Result.BadRequest("Failed to create Stripe customer.");
+                return Result.BadRequest("Failed to create Paystack customer.");
             }
 
-            subscription.SetStripeCustomerId(customerId);
+            subscription.SetPaystackCustomerId(customerId);
             subscriptionRepository.Update(subscription);
         }
 
@@ -82,22 +82,22 @@ public sealed class UpdateBillingInfoHandler(
             command.TaxId
         );
 
-        var success = await stripeClient.UpdateCustomerBillingInfoAsync(subscription.StripeCustomerId!, billingInfo, executionContext.UserInfo.Locale, cancellationToken);
+        var success = await paystackClient.UpdateCustomerBillingInfoAsync(subscription.PaystackCustomerId!, billingInfo, executionContext.UserInfo.Locale, cancellationToken);
         if (!success)
         {
-            return Result.BadRequest("Failed to update billing information in Stripe.");
+            return Result.BadRequest("Failed to update billing information in Paystack.");
         }
 
         if (command.TaxId != subscription.BillingInfo?.TaxId)
         {
-            var taxIdSynced = await stripeClient.SyncCustomerTaxIdAsync(subscription.StripeCustomerId!, command.TaxId, cancellationToken);
+            var taxIdSynced = await paystackClient.SyncCustomerTaxIdAsync(subscription.PaystackCustomerId!, command.TaxId, cancellationToken);
             if (!taxIdSynced)
             {
                 return Result.BadRequest("TaxId", "The provided Tax ID is not valid.");
             }
         }
 
-        // Subscription is updated and telemetry is collected in ProcessPendingStripeEvents when Stripe confirms the state change via webhook
+        // Subscription is updated and telemetry is collected in ProcessPendingPaystackEvents when Paystack confirms the state change via webhook
 
         return Result.Success();
     }

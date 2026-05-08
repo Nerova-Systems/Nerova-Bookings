@@ -5,17 +5,30 @@ import { DialogClose, DialogFooter } from "@repo/ui/components/Dialog";
 import { Separator } from "@repo/ui/components/Separator";
 import { Skeleton } from "@repo/ui/components/Skeleton";
 import { formatCurrency } from "@repo/utils/currency/formatCurrency";
-import { PaymentElement, useCheckout } from "@stripe/react-stripe-js/checkout";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { toast } from "sonner";
 
-import { api, type SubscriptionPlan as SubscriptionPlanType } from "@/shared/lib/api/client";
+import {
+  api,
+  type PaystackPaymentPurpose,
+  type SubscriptionPlan as SubscriptionPlanType
+} from "@/shared/lib/api/client";
 
+import { resumePaystackTransaction } from "./paystackInline";
 import { getPlanDetails } from "./planUtils";
+
+export interface PaystackCheckoutPayment {
+  accessCode: string | null;
+  reference: string | null;
+  amount: number | null;
+  currency: string | null;
+  operationPurpose: PaystackPaymentPurpose;
+}
 
 interface CheckoutFormProps {
   plan: SubscriptionPlanType;
-  onConfirmed: () => void;
+  payment: PaystackCheckoutPayment;
+  onPaymentCompleted: (reference: string) => void;
   onError: (error: string) => void;
 }
 
@@ -26,71 +39,48 @@ function getDisplayError(message: string | undefined): string {
   return message;
 }
 
-export function CheckoutForm({ plan, onConfirmed, onError }: Readonly<CheckoutFormProps>) {
-  const checkoutResult = useCheckout();
-  const [isConfirming, setIsConfirming] = useState(false);
-  const [isPaymentReady, setIsPaymentReady] = useState(false);
+export function CheckoutForm({ plan, payment, onPaymentCompleted, onError }: Readonly<CheckoutFormProps>) {
+  const [isPaystackOpen, setIsPaystackOpen] = useState(false);
 
-  const { data: subscription } = api.useQuery("get", "/api/account/subscriptions/current");
   const { data: preview } = api.useQuery("get", "/api/account/subscriptions/checkout-preview", {
     params: { query: { Plan: plan } }
   });
 
   const planDetails = getPlanDetails(plan);
-  const checkoutError = checkoutResult.type === "error" ? checkoutResult.error : null;
-
-  useEffect(() => {
-    if (checkoutError) {
-      console.error("[Checkout] useCheckout() error:", checkoutError);
-      const errorMessage = getDisplayError(checkoutError.message);
-      onError(errorMessage);
-      toast.error(errorMessage);
-    }
-  }, [checkoutError, onError]);
 
   const handleSubmit = async () => {
-    if (checkoutResult.type !== "success") {
+    if (!payment.accessCode) {
       return;
     }
 
-    setIsConfirming(true);
+    setIsPaystackOpen(true);
     onError("");
 
-    const billingInfo = subscription?.billingInfo;
-    const billingContact = {
-      name: billingInfo?.name,
-      address: {
-        country: billingInfo?.address?.country ?? "",
-        line1: billingInfo?.address?.line1,
-        line2: billingInfo?.address?.line2 ?? null,
-        city: billingInfo?.address?.city,
-        postal_code: billingInfo?.address?.postalCode,
-        state: billingInfo?.address?.state ?? null
-      }
-    };
-
     try {
-      await checkoutResult.checkout.updateBillingAddress(billingContact);
-
-      const result = await checkoutResult.checkout.confirm({
-        redirect: "if_required",
-        returnUrl: window.location.href
+      await resumePaystackTransaction(payment.accessCode, {
+        onSuccess: (transaction) => {
+          const reference = transaction.reference ?? transaction.trxref ?? payment.reference;
+          setIsPaystackOpen(false);
+          if (!reference) {
+            const errorMessage = t`Payment completed but no Paystack reference was returned.`;
+            onError(errorMessage);
+            toast.error(errorMessage);
+            return;
+          }
+          onPaymentCompleted(reference);
+        },
+        onCancel: () => {
+          setIsPaystackOpen(false);
+        },
+        onError: (error) => {
+          setIsPaystackOpen(false);
+          const errorMessage = getDisplayError(error.message);
+          onError(errorMessage);
+          toast.error(errorMessage);
+        }
       });
-
-      if (result.type === "error") {
-        setIsConfirming(false);
-        console.error("[Checkout] confirm() error:", result.error);
-        const errorMessage = getDisplayError(result.error.message);
-        onError(errorMessage);
-        toast.error(errorMessage);
-        return;
-      }
-
-      setIsConfirming(false);
-      onConfirmed();
     } catch (error) {
-      setIsConfirming(false);
-      console.error("[Checkout] confirm() exception:", error);
+      setIsPaystackOpen(false);
       const message = error instanceof Error ? error.message : undefined;
       const errorMessage = getDisplayError(message);
       onError(errorMessage);
@@ -98,88 +88,72 @@ export function CheckoutForm({ plan, onConfirmed, onError }: Readonly<CheckoutFo
     }
   };
 
-  const isCheckoutReady = checkoutResult.type === "success";
-
   return (
     <>
-      <CheckoutSummary preview={preview} planName={planDetails.name} />
-      {checkoutError ? (
-        <DialogFooter>
-          <DialogClose render={<Button type="reset" variant="secondary" />}>
-            <Trans>Close</Trans>
-          </DialogClose>
-        </DialogFooter>
-      ) : (
-        <>
-          <PaymentElement
-            options={{ fields: { billingDetails: { name: "never" } } }}
-            onReady={() => setIsPaymentReady(true)}
-          />
-          {isPaymentReady && (
-            <>
-              <p className="text-xs text-muted-foreground">
-                <Trans>
-                  By subscribing, you agree to our{" "}
-                  <a href="/legal/terms" className="underline" target="_blank" rel="noopener noreferrer">
-                    terms of service
-                  </a>{" "}
-                  and{" "}
-                  <a href="/legal/privacy" className="underline" target="_blank" rel="noopener noreferrer">
-                    privacy policy
-                  </a>
-                  .
-                </Trans>
-              </p>
-              <DialogFooter>
-                <DialogClose render={<Button type="reset" variant="secondary" disabled={isConfirming} />}>
-                  <Trans>Cancel</Trans>
-                </DialogClose>
-                <Button onClick={handleSubmit} disabled={isConfirming || !isCheckoutReady || !preview}>
-                  {isConfirming ? <Trans>Processing payment...</Trans> : <Trans>Pay and subscribe</Trans>}
-                </Button>
-              </DialogFooter>
-            </>
-          )}
-        </>
-      )}
+      <CheckoutSummary preview={preview} payment={payment} planName={planDetails.name} />
+      <p className="text-xs text-muted-foreground">
+        <Trans>
+          By subscribing, you agree to our{" "}
+          <a href="/legal/terms" className="underline" target="_blank" rel="noopener noreferrer">
+            terms of service
+          </a>{" "}
+          and{" "}
+          <a href="/legal/privacy" className="underline" target="_blank" rel="noopener noreferrer">
+            privacy policy
+          </a>
+          .
+        </Trans>
+      </p>
+      <DialogFooter>
+        <DialogClose render={<Button type="reset" variant="secondary" disabled={isPaystackOpen} />}>
+          <Trans>Cancel</Trans>
+        </DialogClose>
+        <Button onClick={handleSubmit} disabled={isPaystackOpen || !preview || !payment.accessCode}>
+          {isPaystackOpen ? <Trans>Processing payment...</Trans> : <Trans>Pay and subscribe</Trans>}
+        </Button>
+      </DialogFooter>
     </>
   );
 }
 
 function CheckoutSummary({
   preview,
+  payment,
   planName
 }: Readonly<{
   preview: { totalAmount: number; taxAmount: number; currency: string } | undefined;
+  payment: PaystackCheckoutPayment;
   planName: string;
 }>) {
+  const totalAmount = preview?.totalAmount ?? payment.amount ?? 0;
+  const taxAmount = preview?.taxAmount ?? 0;
+  const currency = preview?.currency ?? payment.currency ?? "USD";
+
   return (
     <div className="mb-2 flex flex-col gap-2">
-      {preview ? (
+      {preview || payment.amount != null ? (
         <>
           <div className="flex items-baseline justify-between gap-4 text-sm">
             <span className="text-muted-foreground">{planName}</span>
             <span className="shrink-0 whitespace-nowrap text-muted-foreground tabular-nums">
-              {formatCurrency(preview.totalAmount - preview.taxAmount, preview.currency)}
+              {formatCurrency(totalAmount - taxAmount, currency)}
             </span>
           </div>
-          {preview.taxAmount > 0 && (
-            <div className="flex items-baseline justify-between gap-4 text-sm">
-              <span className="text-muted-foreground">
-                <Trans>Tax</Trans>
-              </span>
-              <span className="shrink-0 whitespace-nowrap text-muted-foreground tabular-nums">
-                {formatCurrency(preview.taxAmount, preview.currency)}
-              </span>
-            </div>
-          )}
+          <div className="flex items-baseline justify-between gap-4 text-sm">
+            <span className="text-muted-foreground">
+              <Trans>Tax</Trans>
+            </span>
+            <span className="shrink-0 whitespace-nowrap text-muted-foreground tabular-nums">
+              {formatCurrency(taxAmount, currency)}
+            </span>
+          </div>
           <Separator />
           <div className="flex items-baseline justify-between gap-4 font-medium">
             <span>
               <Trans>Total</Trans>
             </span>
             <span className="shrink-0 text-lg whitespace-nowrap tabular-nums">
-              {formatCurrency(preview.totalAmount, preview.currency)}
+              {formatCurrency(totalAmount, currency)}
             </span>
           </div>
         </>

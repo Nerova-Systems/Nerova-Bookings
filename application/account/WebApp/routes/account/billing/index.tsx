@@ -42,8 +42,6 @@ function BillingPage() {
   const [isCheckoutDialogOpen, setIsCheckoutDialogOpen] = useState(false);
   const [checkoutPlan, setCheckoutPlan] = useState<SubscriptionPlan>(SubscriptionPlan.Basis);
   const [pendingCheckoutPlan, setPendingCheckoutPlan] = useState<SubscriptionPlan | null>(null);
-  const [reactivateClientSecret, setReactivateClientSecret] = useState<string | undefined>();
-  const [reactivatePublishableKey, setReactivatePublishableKey] = useState<string | undefined>();
 
   const { data: tenant } = api.useQuery("get", "/api/account/tenants/current");
   const { data: pricingCatalog } = api.useQuery("get", "/api/account/subscriptions/pricing-catalog");
@@ -51,20 +49,15 @@ function BillingPage() {
 
   const { reactivateMutation, cancelDowngradeMutation } = useBillingPageMutations({
     startPolling,
-    currentPlan,
     setIsReactivateDialogOpen,
-    setReactivateClientSecret,
-    setReactivatePublishableKey,
-    setPendingCheckoutPlan,
-    setIsEditBillingInfoOpen,
     setIsCancelDowngradeDialogOpen
   });
 
-  const isStripeConfigured = (pricingCatalog?.plans?.length ?? 0) > 0;
+  const isPaystackConfigured = (pricingCatalog?.plans?.length ?? 0) > 0;
   const cancelAtPeriodEnd = subscription?.cancelAtPeriodEnd ?? false;
   const scheduledPlan = subscription?.scheduledPlan ?? null;
   const currentPeriodEnd = subscription?.currentPeriodEnd ?? null;
-  const hasStripeCustomer = subscription?.hasStripeCustomer ?? false;
+  const hasPaystackCustomer = subscription?.hasPaystackCustomer ?? false;
   const formattedPeriodEndLong = formatLongDate(currentPeriodEnd);
 
   const handleBillingInfoSuccess = () => {
@@ -84,7 +77,7 @@ function BillingPage() {
 
   return (
     <>
-      {hasStripeCustomer ? (
+      {hasPaystackCustomer ? (
         <AppLayout
           variant="center"
           maxWidth="64rem"
@@ -117,12 +110,12 @@ function BillingPage() {
           />
           <PaymentMethodSection
             paymentMethod={subscription?.paymentMethod}
-            isStripeConfigured={isStripeConfigured}
+            isPaystackConfigured={isPaystackConfigured}
             onUpdateClick={() => setIsUpdatePaymentMethodOpen(true)}
           />
           <BillingInfoSection
             billingInfo={subscription?.billingInfo}
-            isStripeConfigured={isStripeConfigured}
+            isPaystackConfigured={isPaystackConfigured}
             onEditClick={() => setIsEditBillingInfoOpen(true)}
           />
           <div className="mt-8 flex flex-col gap-4">
@@ -137,7 +130,7 @@ function BillingPage() {
         <InitialPlanSelection
           plans={pricingCatalog?.plans}
           currentPlan={currentPlan}
-          isStripeConfigured={isStripeConfigured}
+          isPaystackConfigured={isPaystackConfigured}
           onSubscribe={(plan) => {
             setPendingCheckoutPlan(plan);
             setIsEditBillingInfoOpen(true);
@@ -176,10 +169,6 @@ function BillingPage() {
         isCheckoutDialogOpen={isCheckoutDialogOpen}
         setIsCheckoutDialogOpen={setIsCheckoutDialogOpen}
         checkoutPlan={checkoutPlan}
-        reactivateClientSecret={reactivateClientSecret}
-        reactivatePublishableKey={reactivatePublishableKey}
-        setReactivateClientSecret={setReactivateClientSecret}
-        setReactivatePublishableKey={setReactivatePublishableKey}
       />
     </>
   );

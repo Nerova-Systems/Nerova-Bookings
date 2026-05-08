@@ -1148,9 +1148,6 @@ msgstr "Ekstra lille"
 msgid "Failed"
 msgstr "Mislykket"
 
-msgid "Failed to load payment processor."
-msgstr "Kunne ikke indlæse betalingsprocessor."
-
 msgid "Features"
 msgstr "Funktioner"
 
@@ -1841,6 +1838,9 @@ msgstr "Betal og opgrader"
 msgid "Payment authentication failed."
 msgstr "Betalingsgodkendelse mislykkedes."
 
+msgid "Payment completed but no Paystack reference was returned."
+msgstr "Betalingen blev gennemført, men der blev ikke returneret en Paystack-reference."
+
 msgid "Payment could not be processed. Please try again later."
 msgstr "Betalingen kunne ikke gennemføres. Prøv igen senere."
 
@@ -2213,6 +2213,9 @@ msgstr "Gem note"
 msgid "Save page as..."
 msgstr "Gem side som..."
 
+msgid "Saved card"
+msgstr "Gemt kort"
+
 msgid "Saved recipes"
 msgstr "Gemte opskrifter"
 
@@ -2497,9 +2500,6 @@ msgstr "Vejnavn"
 
 msgid "Strict separation prevents production data from leaking to other environments"
 msgstr "Streng adskillelse forhindrer produktionsdata i at lække til andre miljøer"
-
-msgid "Stripe Link"
-msgstr "Stripe Link"
 
 msgid "Subscribe"
 msgstr "Abonner"

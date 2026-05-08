@@ -38,6 +38,10 @@ public sealed class SubscriptionEndpoints : IEndpoints
             => await mediator.Send(command)
         ).Produces<StartSubscriptionCheckoutResponse>();
 
+        group.MapPost("/confirm-payment", async Task<ApiResult<ConfirmPaystackPaymentResponse>> (ConfirmPaystackPaymentCommand command, IMediator mediator)
+            => await mediator.Send(command)
+        ).Produces<ConfirmPaystackPaymentResponse>();
+
         group.MapPost("/upgrade", async Task<ApiResult<UpgradeSubscriptionResponse>> (UpgradeSubscriptionCommand command, IMediator mediator)
             => await mediator.Send(command)
         ).Produces<UpgradeSubscriptionResponse>();

@@ -8,7 +8,7 @@ import { SubscriptionPlan } from "@/shared/lib/api/client";
 
 import { BillingTabNavigation } from "../-components/BillingTabNavigation";
 import { PlanCardGrid } from "../-components/PlanCardGrid";
-import { CancellationBanner, DowngradeBanner, StripeNotConfiguredBanner } from "../-components/SubscriptionBanner";
+import { CancellationBanner, DowngradeBanner, PaystackNotConfiguredBanner } from "../-components/SubscriptionBanner";
 import { SubscriptionDialogs } from "../-components/SubscriptionDialogs";
 import { usePlansPageState } from "../-components/usePlansPageState";
 
@@ -29,7 +29,7 @@ function PlansPage() {
   const scheduledPlan = state.subscription?.scheduledPlan ?? null;
   const currentPeriodEnd = state.subscription?.currentPeriodEnd ?? null;
   const formattedPeriodEnd = formatLongDate(currentPeriodEnd);
-  const isStripeConfigured = (state.pricingCatalog?.plans?.length ?? 0) > 0;
+  const isPaystackConfigured = (state.pricingCatalog?.plans?.length ?? 0) > 0;
 
   const handleSubscribe = (plan: SubscriptionPlan) => {
     if (state.subscription?.billingInfo && state.subscription?.paymentMethod) {
@@ -60,13 +60,13 @@ function PlansPage() {
         {scheduledPlan && !cancelAtPeriodEnd && (
           <DowngradeBanner scheduledPlan={scheduledPlan} formattedPeriodEnd={formattedPeriodEnd} />
         )}
-        {!isStripeConfigured && <StripeNotConfiguredBanner />}
+        {!isPaystackConfigured && <PaystackNotConfiguredBanner />}
         <PlanCardGrid
           plans={state.pricingCatalog?.plans}
           currentPlan={state.currentPlan}
           cancelAtPeriodEnd={cancelAtPeriodEnd}
           scheduledPlan={scheduledPlan}
-          isStripeConfigured={isStripeConfigured}
+          isPaystackConfigured={isPaystackConfigured}
           onSubscribe={handleSubscribe}
           onUpgrade={(plan) => {
             state.setUpgradeTarget(plan);
@@ -122,10 +122,6 @@ function PlansPage() {
         isCheckoutDialogOpen={state.isCheckoutDialogOpen}
         setIsCheckoutDialogOpen={state.setIsCheckoutDialogOpen}
         checkoutPlan={state.checkoutPlan}
-        reactivateClientSecret={state.reactivateClientSecret}
-        reactivatePublishableKey={state.reactivatePublishableKey}
-        setReactivateClientSecret={state.setReactivateClientSecret}
-        setReactivatePublishableKey={state.setReactivatePublishableKey}
       />
     </>
   );

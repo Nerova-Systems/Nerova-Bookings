@@ -1,6 +1,6 @@
 using Account.Features.Subscriptions.Domain;
 using Account.Features.Users.Domain;
-using Account.Integrations.Stripe;
+using Account.Integrations.Paystack;
 using FluentValidation;
 using JetBrains.Annotations;
 using SharedKernel.Cqrs;
@@ -29,7 +29,7 @@ public sealed class CancelSubscriptionValidator : AbstractValidator<CancelSubscr
 
 public sealed class CancelSubscriptionHandler(
     ISubscriptionRepository subscriptionRepository,
-    StripeClientFactory stripeClientFactory,
+    PaystackClientFactory paystackClientFactory,
     IExecutionContext executionContext,
     ILogger<CancelSubscriptionHandler> logger
 ) : IRequestHandler<CancelSubscriptionCommand, Result>
@@ -48,10 +48,10 @@ public sealed class CancelSubscriptionHandler(
             return Result.BadRequest("Cannot cancel a Basis subscription.");
         }
 
-        if (subscription.StripeSubscriptionId is null)
+        if (subscription.PaystackSubscriptionId is null)
         {
-            logger.LogWarning("No Stripe subscription found for subscription '{SubscriptionId}'", subscription.Id);
-            return Result.BadRequest("No active Stripe subscription found.");
+            logger.LogWarning("No Paystack subscription found for subscription '{SubscriptionId}'", subscription.Id);
+            return Result.BadRequest("No active Paystack subscription found.");
         }
 
         if (subscription.CancelAtPeriodEnd)
@@ -59,14 +59,14 @@ public sealed class CancelSubscriptionHandler(
             return Result.BadRequest("Subscription is already scheduled for cancellation.");
         }
 
-        var stripeClient = stripeClientFactory.GetClient();
-        var success = await stripeClient.CancelSubscriptionAtPeriodEndAsync(subscription.StripeSubscriptionId, command.Reason, command.Feedback, cancellationToken);
+        var paystackClient = paystackClientFactory.GetClient();
+        var success = await paystackClient.CancelSubscriptionAtPeriodEndAsync(subscription.PaystackSubscriptionId, command.Reason, command.Feedback, cancellationToken);
         if (!success)
         {
-            return Result.BadRequest("Failed to cancel subscription in Stripe.");
+            return Result.BadRequest("Failed to cancel subscription in Paystack.");
         }
 
-        // Subscription is updated and telemetry is collected in ProcessPendingStripeEvents when Stripe confirms the state change via webhook
+        // Subscription is updated and telemetry is collected in ProcessPendingPaystackEvents when Paystack confirms the state change via webhook
 
         return Result.Success();
     }

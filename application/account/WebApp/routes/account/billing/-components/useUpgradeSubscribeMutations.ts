@@ -1,9 +1,6 @@
-import { i18n } from "@lingui/core";
 import { t } from "@lingui/core/macro";
-import { loadStripe } from "@stripe/stripe-js/pure";
-import { toast } from "sonner";
 
-import { api } from "@/shared/lib/api/client";
+import { api, PaystackPaymentPurpose } from "@/shared/lib/api/client";
 
 import type { useSubscriptionPolling } from "./useSubscriptionPolling";
 
@@ -14,85 +11,70 @@ interface UseUpgradeSubscribeMutationsOptions {
   setIsConfirmingPayment: (value: boolean) => void;
 }
 
+type PaystackPaymentResponse = {
+  reference?: string | null;
+  operationPurpose?: PaystackPaymentPurpose | null;
+};
+
 export function useUpgradeSubscribeMutations({
   startPolling,
   setIsUpgradeDialogOpen,
   setIsSubscribeDialogOpen,
   setIsConfirmingPayment
 }: UseUpgradeSubscribeMutationsOptions) {
+  const confirmPaymentMutation = api.useMutation("post", "/api/account/subscriptions/confirm-payment");
+
   const upgradeMutation = api.useMutation("post", "/api/account/subscriptions/upgrade", {
     onSuccess: async (data, variables) => {
       const targetPlan = variables.body?.newPlan;
-      if (data.clientSecret && data.publishableKey) {
+      const payment = data as PaystackPaymentResponse;
+      if (payment.reference && targetPlan) {
         setIsConfirmingPayment(true);
-        const stripe = await loadStripe(data.publishableKey, { locale: i18n.locale as "auto" });
-        if (!stripe) {
+        try {
+          await confirmPaymentMutation.mutateAsync({
+            body: {
+              reference: payment.reference,
+              plan: targetPlan,
+              purpose: payment.operationPurpose ?? PaystackPaymentPurpose.Upgrade
+            }
+          });
+        } finally {
           setIsConfirmingPayment(false);
-          toast.error(t`Failed to load payment processor.`);
-          return;
         }
-        const result = await stripe.confirmPayment({
-          clientSecret: data.clientSecret,
-          confirmParams: {
-            return_url: window.location.href
-          },
-          redirect: "if_required"
-        });
-        setIsConfirmingPayment(false);
-        if (result.error) {
-          toast.error(result.error.message ?? t`Payment authentication failed.`);
-          return;
-        }
-        startPolling({
-          check: (subscription) => subscription.plan === targetPlan,
-          successMessage: t`Your plan has been upgraded.`,
-          onComplete: () => setIsUpgradeDialogOpen(false)
-        });
-      } else {
-        startPolling({
-          check: (subscription) => subscription.plan === targetPlan,
-          successMessage: t`Your plan has been upgraded.`,
-          onComplete: () => setIsUpgradeDialogOpen(false)
-        });
       }
+
+      startPolling({
+        check: (subscription) => subscription.plan === targetPlan,
+        successMessage: t`Your plan has been upgraded.`,
+        onComplete: () => setIsUpgradeDialogOpen(false)
+      });
     }
   });
 
   const subscribeMutation = api.useMutation("post", "/api/account/subscriptions/start-checkout", {
     onSuccess: async (data, variables) => {
       const targetPlan = variables.body?.plan;
-      if (data.clientSecret && data.publishableKey) {
+      const payment = data as PaystackPaymentResponse;
+      if (payment.reference && targetPlan) {
         setIsConfirmingPayment(true);
-        const stripe = await loadStripe(data.publishableKey, { locale: i18n.locale as "auto" });
-        if (!stripe) {
+        try {
+          await confirmPaymentMutation.mutateAsync({
+            body: {
+              reference: payment.reference,
+              plan: targetPlan,
+              purpose: payment.operationPurpose ?? PaystackPaymentPurpose.Subscribe
+            }
+          });
+        } finally {
           setIsConfirmingPayment(false);
-          toast.error(t`Failed to load payment processor.`);
-          return;
         }
-        const result = await stripe.confirmPayment({
-          clientSecret: data.clientSecret,
-          confirmParams: {
-            return_url: window.location.href
-          },
-          redirect: "if_required"
-        });
-        setIsConfirmingPayment(false);
-        if (result.error) {
-          toast.error(result.error.message ?? t`Payment authentication failed.`);
-          return;
-        }
-        startPolling({
-          check: (sub) => sub.plan === targetPlan,
-          successMessage: t`Your subscription has been activated.`,
-          onComplete: () => setIsSubscribeDialogOpen(false)
-        });
-      } else {
-        startPolling({
-          check: (sub) => sub.plan === targetPlan,
-          successMessage: t`Your subscription has been activated.`,
-          onComplete: () => setIsSubscribeDialogOpen(false)
-        });
       }
+
+      startPolling({
+        check: (sub) => sub.plan === targetPlan,
+        successMessage: t`Your subscription has been activated.`,
+        onComplete: () => setIsSubscribeDialogOpen(false)
+      });
     }
   });
 

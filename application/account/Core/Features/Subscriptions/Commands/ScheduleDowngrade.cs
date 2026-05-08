@@ -1,7 +1,7 @@
 using Account.Features.Subscriptions.Domain;
 using Account.Features.Subscriptions.Shared;
 using Account.Features.Users.Domain;
-using Account.Integrations.Stripe;
+using Account.Integrations.Paystack;
 using JetBrains.Annotations;
 using SharedKernel.Cqrs;
 using SharedKernel.ExecutionContext;
@@ -13,7 +13,7 @@ public sealed record ScheduleDowngradeCommand(SubscriptionPlan NewPlan) : IComma
 
 public sealed class ScheduleDowngradeHandler(
     ISubscriptionRepository subscriptionRepository,
-    StripeClientFactory stripeClientFactory,
+    PaystackClientFactory paystackClientFactory,
     IExecutionContext executionContext,
     ILogger<ScheduleDowngradeHandler> logger
 ) : IRequestHandler<ScheduleDowngradeCommand, Result>
@@ -27,10 +27,10 @@ public sealed class ScheduleDowngradeHandler(
 
         var subscription = await subscriptionRepository.GetCurrentAsync(cancellationToken);
 
-        if (subscription.StripeSubscriptionId is null)
+        if (subscription.PaystackSubscriptionId is null)
         {
-            logger.LogWarning("No Stripe subscription found for subscription '{SubscriptionId}'", subscription.Id);
-            return Result.BadRequest("No active Stripe subscription found.");
+            logger.LogWarning("No Paystack subscription found for subscription '{SubscriptionId}'", subscription.Id);
+            return Result.BadRequest("No active Paystack subscription found.");
         }
 
         if (!command.NewPlan.IsDowngradeFrom(subscription.Plan))
@@ -43,14 +43,14 @@ public sealed class ScheduleDowngradeHandler(
             return Result.BadRequest("Cannot downgrade to the Basis plan.");
         }
 
-        var stripeClient = stripeClientFactory.GetClient();
-        var success = await stripeClient.ScheduleDowngradeAsync(subscription.StripeSubscriptionId, command.NewPlan, cancellationToken);
+        var paystackClient = paystackClientFactory.GetClient();
+        var success = await paystackClient.ScheduleDowngradeAsync(subscription.PaystackSubscriptionId, command.NewPlan, cancellationToken);
         if (!success)
         {
-            return Result.BadRequest("Failed to schedule downgrade in Stripe.");
+            return Result.BadRequest("Failed to schedule downgrade in Paystack.");
         }
 
-        // Subscription is updated and telemetry is collected in ProcessPendingStripeEvents when Stripe confirms the state change via webhook
+        // Subscription is updated and telemetry is collected in ProcessPendingPaystackEvents when Paystack confirms the state change via webhook
 
         return Result.Success();
     }

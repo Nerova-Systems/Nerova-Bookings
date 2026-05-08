@@ -147,8 +147,10 @@ public sealed class Initial : Migration
                 modified_at = table.Column<DateTimeOffset>("timestamptz", nullable: true),
                 plan = table.Column<string>("text", nullable: false),
                 scheduled_plan = table.Column<string>("text", nullable: true),
-                stripe_customer_id = table.Column<string>("text", nullable: true),
-                stripe_subscription_id = table.Column<string>("text", nullable: true),
+                paystack_customer_code = table.Column<string>("text", nullable: true),
+                paystack_authorization_code = table.Column<string>("text", nullable: true),
+                paystack_authorization_email = table.Column<string>("text", nullable: true),
+                paystack_authorization_signature = table.Column<string>("text", nullable: true),
                 current_price_amount = table.Column<decimal>("numeric(18,2)", nullable: true),
                 current_price_currency = table.Column<string>("text", nullable: true),
                 current_period_end = table.Column<DateTimeOffset>("timestamptz", nullable: true),
@@ -168,10 +170,10 @@ public sealed class Initial : Migration
         );
 
         migrationBuilder.CreateIndex("ix_subscriptions_tenant_id", "subscriptions", "tenant_id", unique: true);
-        migrationBuilder.CreateIndex("ix_subscriptions_stripe_customer_id", "subscriptions", "stripe_customer_id", unique: true, filter: "stripe_customer_id IS NOT NULL");
+        migrationBuilder.CreateIndex("ix_subscriptions_paystack_customer_code", "subscriptions", "paystack_customer_code", unique: true, filter: "paystack_customer_code IS NOT NULL");
 
         migrationBuilder.CreateTable(
-            "stripe_events",
+            "paystack_events",
             table => new
             {
                 tenant_id = table.Column<long>("bigint", nullable: true),
@@ -181,15 +183,16 @@ public sealed class Initial : Migration
                 event_type = table.Column<string>("text", nullable: false),
                 status = table.Column<string>("text", nullable: false),
                 processed_at = table.Column<DateTimeOffset>("timestamptz", nullable: true),
-                stripe_customer_id = table.Column<string>("text", nullable: true),
-                stripe_subscription_id = table.Column<string>("text", nullable: true),
+                paystack_customer_code = table.Column<string>("text", nullable: true),
+                paystack_authorization_code = table.Column<string>("text", nullable: true),
+                paystack_reference = table.Column<string>("text", nullable: true),
                 payload = table.Column<string>("jsonb", nullable: true),
                 error = table.Column<string>("text", nullable: true)
             },
-            constraints: table => { table.PrimaryKey("pk_stripe_events", x => x.id); }
+            constraints: table => { table.PrimaryKey("pk_paystack_events", x => x.id); }
         );
 
-        migrationBuilder.CreateIndex("ix_stripe_events_tenant_id", "stripe_events", "tenant_id");
-        migrationBuilder.CreateIndex("ix_stripe_events_stripe_customer_id_status", "stripe_events", ["stripe_customer_id", "status"]);
+        migrationBuilder.CreateIndex("ix_paystack_events_tenant_id", "paystack_events", "tenant_id");
+        migrationBuilder.CreateIndex("ix_paystack_events_paystack_customer_code_status", "paystack_events", ["paystack_customer_code", "status"]);
     }
 }

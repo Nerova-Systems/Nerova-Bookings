@@ -62,10 +62,6 @@ interface SubscriptionDialogsProps {
   isCheckoutDialogOpen: boolean;
   setIsCheckoutDialogOpen: (open: boolean) => void;
   checkoutPlan: SubscriptionPlan;
-  reactivateClientSecret: string | undefined;
-  reactivatePublishableKey: string | undefined;
-  setReactivateClientSecret: (value: string | undefined) => void;
-  setReactivatePublishableKey: (value: string | undefined) => void;
 }
 
 export function SubscriptionDialogs({
@@ -107,11 +103,7 @@ export function SubscriptionDialogs({
   onBillingInfoSuccess,
   isCheckoutDialogOpen,
   setIsCheckoutDialogOpen,
-  checkoutPlan,
-  reactivateClientSecret,
-  reactivatePublishableKey,
-  setReactivateClientSecret,
-  setReactivatePublishableKey
+  checkoutPlan
 }: Readonly<SubscriptionDialogsProps>) {
   return (
     <>
@@ -182,19 +174,7 @@ export function SubscriptionDialogs({
         pendingLabel={t`Saving...`}
       />
 
-      <CheckoutDialog
-        isOpen={isCheckoutDialogOpen}
-        onOpenChange={(open) => {
-          setIsCheckoutDialogOpen(open);
-          if (!open) {
-            setReactivateClientSecret(undefined);
-            setReactivatePublishableKey(undefined);
-          }
-        }}
-        plan={checkoutPlan}
-        prefetchedClientSecret={reactivateClientSecret}
-        prefetchedPublishableKey={reactivatePublishableKey}
-      />
+      <CheckoutDialog isOpen={isCheckoutDialogOpen} onOpenChange={setIsCheckoutDialogOpen} plan={checkoutPlan} />
     </>
   );
 }

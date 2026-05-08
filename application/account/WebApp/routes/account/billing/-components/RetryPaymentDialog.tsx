@@ -1,4 +1,3 @@
-import { i18n } from "@lingui/core";
 import { t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
 import { Button } from "@repo/ui/components/Button";
@@ -13,7 +12,6 @@ import {
 } from "@repo/ui/components/Dialog";
 import { Separator } from "@repo/ui/components/Separator";
 import { formatCurrency } from "@repo/utils/currency/formatCurrency";
-import { loadStripe } from "@stripe/stripe-js/pure";
 import { useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -24,6 +22,7 @@ import { api } from "@/shared/lib/api/client";
 
 import { BillingInfoDisplay } from "./BillingInfoDisplay";
 import { PaymentMethodDisplay } from "./PaymentMethodDisplay";
+import { resumePaystackTransaction } from "./paystackInline";
 
 type BillingInfo = components["schemas"]["BillingInfo"];
 type PaymentMethod = components["schemas"]["PaymentMethod"];
@@ -50,29 +49,23 @@ export function RetryPaymentDialog({
 
   const retryMutation = api.useMutation("post", "/api/account/billing/retry-pending-invoice", {
     onSuccess: async (data) => {
-      if (data.clientSecret && data.publishableKey) {
+      const response = data as { accessCode?: string | null; paid?: boolean };
+      if (response.accessCode) {
         setIsConfirmingPayment(true);
-        const paymentStripe = await loadStripe(data.publishableKey, { locale: i18n.locale as "auto" });
-        if (!paymentStripe) {
-          setIsConfirmingPayment(false);
-          toast.error(t`Failed to load payment processor.`);
-          return;
-        }
-        const result = await paymentStripe.confirmPayment({
-          clientSecret: data.clientSecret,
-          confirmParams: {
-            return_url: window.location.href
+        await resumePaystackTransaction(response.accessCode, {
+          onSuccess: () => {
+            queryClient.invalidateQueries();
+            toast.success(t`Pending payment completed`);
+            onOpenChange(false);
           },
-          redirect: "if_required"
+          onCancel: () => setIsConfirmingPayment(false),
+          onError: (error) => {
+            setIsConfirmingPayment(false);
+            toast.error(error.message ?? t`Payment authentication failed.`);
+          }
         });
-        setIsConfirmingPayment(false);
-        if (result.error) {
-          toast.error(result.error.message ?? t`Payment authentication failed.`);
-          return;
-        }
-        queryClient.invalidateQueries();
-        toast.success(t`Pending payment completed`);
-      } else if (data.paid) {
+        return;
+      } else if (response.paid) {
         queryClient.invalidateQueries();
         toast.success(t`Pending payment completed`);
       } else {

@@ -18,7 +18,7 @@ public sealed class StartSubscriptionCheckoutTests : EndpointBaseTest<AccountDbC
     {
         // Arrange
         Connection.Update("subscriptions", "tenant_id", DatabaseSeeder.Tenant1.Id.Value, [
-                ("stripe_customer_id", "cus_test_123"),
+                ("paystack_customer_code", "CUS_test_123"),
                 ("billing_info", """{"Name":"Test Organization","Address":{"Line1":"Vestergade 12","PostalCode":"1456","City":"Copenhagen","Country":"DK"},"Email":"billing@example.com"}""")
             ]
         );
@@ -31,8 +31,12 @@ public sealed class StartSubscriptionCheckoutTests : EndpointBaseTest<AccountDbC
         // Assert
         response.EnsureSuccessStatusCode();
         var result = await response.Content.ReadFromJsonAsync<StartSubscriptionCheckoutResponse>();
-        result!.ClientSecret.Should().NotBeNullOrEmpty();
-        result.PublishableKey.Should().NotBeNullOrEmpty();
+        result!.AccessCode.Should().NotBeNullOrEmpty();
+        result.Reference.Should().NotBeNullOrEmpty();
+        result.PublicKey.Should().NotBeNullOrEmpty();
+        result.Amount.Should().BeGreaterThan(0);
+        result.Currency.Should().NotBeNullOrEmpty();
+        result.OperationPurpose.Should().Be("Subscribe");
         result.UsedExistingPaymentMethod.Should().BeFalse();
 
         TelemetryEventsCollectorSpy.CollectedEvents.Count.Should().Be(1);
@@ -45,7 +49,10 @@ public sealed class StartSubscriptionCheckoutTests : EndpointBaseTest<AccountDbC
     {
         // Arrange
         Connection.Update("subscriptions", "tenant_id", DatabaseSeeder.Tenant1.Id.Value, [
-                ("stripe_customer_id", "cus_test_123"),
+                ("paystack_customer_code", "CUS_test_123"),
+                ("paystack_authorization_code", "AUTH_test_123"),
+                ("paystack_authorization_email", "billing@example.com"),
+                ("paystack_authorization_signature", "SIG_test_123"),
                 ("payment_method", """{"Brand":"visa","Last4":"4242","ExpMonth":12,"ExpYear":2026}"""),
                 ("billing_info", """{"Name":"Test Organization","Address":{"Line1":"Vestergade 12","PostalCode":"1456","City":"Copenhagen","Country":"DK"},"Email":"billing@example.com"}""")
             ]
@@ -59,7 +66,10 @@ public sealed class StartSubscriptionCheckoutTests : EndpointBaseTest<AccountDbC
         // Assert
         response.EnsureSuccessStatusCode();
         var result = await response.Content.ReadFromJsonAsync<StartSubscriptionCheckoutResponse>();
-        result!.UsedExistingPaymentMethod.Should().BeTrue();
+        result!.AccessCode.Should().BeNull();
+        result.Reference.Should().NotBeNullOrEmpty();
+        result.OperationPurpose.Should().Be("Subscribe");
+        result.UsedExistingPaymentMethod.Should().BeTrue();
 
         TelemetryEventsCollectorSpy.CollectedEvents.Count.Should().Be(1);
         TelemetryEventsCollectorSpy.CollectedEvents[0].GetType().Name.Should().Be("SubscriptionCheckoutStarted");
@@ -72,8 +82,10 @@ public sealed class StartSubscriptionCheckoutTests : EndpointBaseTest<AccountDbC
         // Arrange
         Connection.Update("subscriptions", "tenant_id", DatabaseSeeder.Tenant1.Id.Value, [
                 ("plan", nameof(SubscriptionPlan.Standard)),
-                ("stripe_customer_id", "cus_test_123"),
-                ("stripe_subscription_id", "sub_test_123"),
+                ("paystack_customer_code", "CUS_test_123"),
+                ("paystack_authorization_code", "AUTH_test_123"),
+                ("paystack_authorization_email", "billing@example.com"),
+                ("paystack_authorization_signature", "SIG_test_123"),
                 ("current_period_end", TimeProvider.GetUtcNow().AddDays(30))
             ]
         );

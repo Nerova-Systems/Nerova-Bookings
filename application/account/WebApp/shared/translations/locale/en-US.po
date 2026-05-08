@@ -1150,9 +1150,6 @@ msgstr "Extra small"
 msgid "Failed"
 msgstr "Failed"
 
-msgid "Failed to load payment processor."
-msgstr "Failed to load payment processor."
-
 msgid "Features"
 msgstr "Features"
 
@@ -1843,6 +1840,9 @@ msgstr "Pay and upgrade"
 msgid "Payment authentication failed."
 msgstr "Payment authentication failed."
 
+msgid "Payment completed but no Paystack reference was returned."
+msgstr "Payment completed but no Paystack reference was returned."
+
 msgid "Payment could not be processed. Please try again later."
 msgstr "Payment could not be processed. Please try again later."
 
@@ -2215,6 +2215,9 @@ msgstr "Save note"
 msgid "Save page as..."
 msgstr "Save page as..."
 
+msgid "Saved card"
+msgstr "Saved card"
+
 msgid "Saved recipes"
 msgstr "Saved recipes"
 
@@ -2499,9 +2502,6 @@ msgstr "Street address"
 
 msgid "Strict separation prevents production data from leaking to other environments"
 msgstr "Strict separation prevents production data from leaking to other environments"
-
-msgid "Stripe Link"
-msgstr "Stripe Link"
 
 msgid "Subscribe"
 msgstr "Subscribe"

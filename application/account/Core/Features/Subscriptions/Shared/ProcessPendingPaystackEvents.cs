@@ -2,7 +2,7 @@ using System.Data;
 using Account.Database;
 using Account.Features.Subscriptions.Domain;
 using Account.Features.Tenants.Domain;
-using Account.Integrations.Stripe;
+using Account.Integrations.Paystack;
 using Microsoft.ApplicationInsights;
 using Microsoft.EntityFrameworkCore;
 using SharedKernel.Telemetry;
@@ -11,22 +11,22 @@ namespace Account.Features.Subscriptions.Shared;
 
 /// <summary>
 ///     Phase 2 of two-phase webhook processing. Acquires a pessimistic lock on the subscription row
-///     to serialize concurrent webhook processing, syncs current state from Stripe, then applies
+///     to serialize concurrent webhook processing, syncs current state from Paystack, then applies
 ///     side effects (tenant state changes) based on state diffs between local and synced data.
 /// </summary>
-public sealed class ProcessPendingStripeEvents(
+public sealed class ProcessPendingPaystackEvents(
     AccountDbContext dbContext,
     ISubscriptionRepository subscriptionRepository,
-    IStripeEventRepository stripeEventRepository,
+    IPaystackEventRepository paystackEventRepository,
     ITenantRepository tenantRepository,
-    StripeClientFactory stripeClientFactory,
+    PaystackClientFactory paystackClientFactory,
     TimeProvider timeProvider,
     ITelemetryEventsCollector events,
     TelemetryClient telemetryClient,
-    ILogger<ProcessPendingStripeEvents> logger
+    ILogger<ProcessPendingPaystackEvents> logger
 )
 {
-    public async Task ExecuteAsync(StripeCustomerId stripeCustomerId, CancellationToken cancellationToken)
+    public async Task ExecuteAsync(PaystackCustomerId paystackCustomerId, CancellationToken cancellationToken)
     {
         // Pessimistic lock serializes concurrent webhook processing for the same customer
         var isSqlite = dbContext.Database.ProviderName == "Microsoft.EntityFrameworkCore.Sqlite";
@@ -34,20 +34,20 @@ public sealed class ProcessPendingStripeEvents(
             ? await dbContext.Database.BeginTransactionAsync(cancellationToken)
             : await dbContext.Database.BeginTransactionAsync(IsolationLevel.ReadCommitted, cancellationToken);
 
-        var subscription = await subscriptionRepository.GetByStripeCustomerIdWithLockUnfilteredAsync(stripeCustomerId, cancellationToken);
+        var subscription = await subscriptionRepository.GetByPaystackCustomerIdWithLockUnfilteredAsync(paystackCustomerId, cancellationToken);
         if (subscription is null)
         {
-            logger.LogWarning("Subscription not found for Stripe customer '{StripeCustomerId}', events will be retried on next webhook", stripeCustomerId);
+            logger.LogWarning("Subscription not found for Paystack customer '{PaystackCustomerId}', events will be retried on next webhook", paystackCustomerId);
             await transaction.RollbackAsync(cancellationToken);
             return;
         }
 
         var tenant = (await tenantRepository.GetByIdUnfilteredAsync(subscription.TenantId, cancellationToken))!;
-        var pendingEvents = await stripeEventRepository.GetPendingByStripeCustomerIdAsync(stripeCustomerId, cancellationToken);
+        var pendingEvents = await paystackEventRepository.GetPendingByPaystackCustomerIdAsync(paystackCustomerId, cancellationToken);
 
         if (pendingEvents.Length > 0)
         {
-            await SyncStateFromStripe(tenant, subscription, cancellationToken);
+            await SyncStateFromPaystack(tenant, subscription, cancellationToken);
 
             MarkAllEventsAsProcessed(pendingEvents, subscription);
         }
@@ -58,11 +58,11 @@ public sealed class ProcessPendingStripeEvents(
         SendTelemetryEvents(tenant, subscription);
     }
 
-    private async Task SyncStateFromStripe(Tenant tenant, Subscription subscription, CancellationToken cancellationToken)
+    private async Task SyncStateFromPaystack(Tenant tenant, Subscription subscription, CancellationToken cancellationToken)
     {
-        // Fetch current state from Stripe
-        var stripeClient = stripeClientFactory.GetClient();
-        var customerResult = await stripeClient.GetCustomerBillingInfoAsync(subscription.StripeCustomerId!, cancellationToken);
+        // Fetch current state from Paystack
+        var paystackClient = paystackClientFactory.GetClient();
+        var customerResult = await paystackClient.GetCustomerBillingInfoAsync(subscription.PaystackCustomerId!, cancellationToken);
 
         var previousPlan = subscription.Plan;
         var previousPriceAmount = subscription.CurrentPriceAmount;
@@ -70,7 +70,7 @@ public sealed class ProcessPendingStripeEvents(
 
         if (customerResult is null)
         {
-            logger.LogError("Failed to fetch billing info for Stripe customer '{StripeCustomerId}'", subscription.StripeCustomerId);
+            logger.LogError("Failed to fetch billing info for Paystack customer '{PaystackCustomerId}'", subscription.PaystackCustomerId);
             return;
         }
 
@@ -85,39 +85,39 @@ public sealed class ProcessPendingStripeEvents(
             return;
         }
 
-        var stripeState = await stripeClient.SyncSubscriptionStateAsync(subscription.StripeCustomerId!, cancellationToken);
+        var paystackState = await paystackClient.SyncSubscriptionStateAsync(subscription.PaystackCustomerId!, cancellationToken);
 
         // Detect state transitions in lifecycle order (variables and if-blocks below follow the same order)
         var billingInfoAdded = subscription.BillingInfo is null && customerResult.BillingInfo is not null;
         var billingInfoUpdated = subscription.BillingInfo is not null && customerResult.BillingInfo is not null && customerResult.BillingInfo != subscription.BillingInfo;
-        var latestPaymentMethod = stripeState?.PaymentMethod ?? customerResult.PaymentMethod;
+        var latestPaymentMethod = paystackState?.PaymentMethod ?? customerResult.PaymentMethod;
         var paymentMethodUpdated = latestPaymentMethod != subscription.PaymentMethod;
-        var subscriptionCreated = subscription.StripeSubscriptionId is null && stripeState?.StripeSubscriptionId is not null;
-        var subscriptionRenewed = subscription.CurrentPeriodEnd is not null && stripeState?.CurrentPeriodEnd is not null && stripeState.CurrentPeriodEnd > subscription.CurrentPeriodEnd;
-        var subscriptionUpgraded = !subscriptionCreated && stripeState is not null && stripeState.Plan != subscription.Plan && stripeState.Plan.IsUpgradeFrom(subscription.Plan);
-        var downgradeScheduled = subscription.ScheduledPlan is null && stripeState?.ScheduledPlan is not null;
-        var downgradeCancelled = subscription.ScheduledPlan is not null && stripeState?.ScheduledPlan is null && stripeState is not null && stripeState.Plan == subscription.Plan;
-        var subscriptionDowngraded = subscription.ScheduledPlan is not null && stripeState?.ScheduledPlan is null && stripeState is not null && stripeState.Plan != subscription.Plan && subscription.Plan.IsUpgradeFrom(stripeState.Plan);
-        var subscriptionCancelled = !subscription.CancelAtPeriodEnd && stripeState?.CancelAtPeriodEnd == true;
-        var subscriptionReactivated = subscription.CancelAtPeriodEnd && stripeState?.CancelAtPeriodEnd == false;
-        var subscriptionExpired = subscription.StripeSubscriptionId is not null && stripeState is null && subscription is { CancelAtPeriodEnd: true, FirstPaymentFailedAt: null };
-        var subscriptionImmediatelyCancelled = subscription.StripeSubscriptionId is not null && stripeState is null && subscription is { CancelAtPeriodEnd: false, FirstPaymentFailedAt: null };
-        var subscriptionSuspended = subscription.StripeSubscriptionId is not null && stripeState is null && subscription.FirstPaymentFailedAt is not null;
-        var paymentFailed = stripeState?.SubscriptionStatus is StripeSubscriptionStatus.PastDue or StripeSubscriptionStatus.Incomplete && subscription.FirstPaymentFailedAt is null;
-        var paymentRecovered = stripeState?.SubscriptionStatus == StripeSubscriptionStatus.Active && subscription.FirstPaymentFailedAt is not null;
+        var subscriptionCreated = subscription.PaystackSubscriptionId is null && paystackState?.PaystackSubscriptionId is not null;
+        var subscriptionRenewed = subscription.CurrentPeriodEnd is not null && paystackState?.CurrentPeriodEnd is not null && paystackState.CurrentPeriodEnd > subscription.CurrentPeriodEnd;
+        var subscriptionUpgraded = !subscriptionCreated && paystackState is not null && paystackState.Plan != subscription.Plan && paystackState.Plan.IsUpgradeFrom(subscription.Plan);
+        var downgradeScheduled = subscription.ScheduledPlan is null && paystackState?.ScheduledPlan is not null;
+        var downgradeCancelled = subscription.ScheduledPlan is not null && paystackState?.ScheduledPlan is null && paystackState is not null && paystackState.Plan == subscription.Plan;
+        var subscriptionDowngraded = subscription.ScheduledPlan is not null && paystackState?.ScheduledPlan is null && paystackState is not null && paystackState.Plan != subscription.Plan && subscription.Plan.IsUpgradeFrom(paystackState.Plan);
+        var subscriptionCancelled = !subscription.CancelAtPeriodEnd && paystackState?.CancelAtPeriodEnd == true;
+        var subscriptionReactivated = subscription.CancelAtPeriodEnd && paystackState?.CancelAtPeriodEnd == false;
+        var subscriptionExpired = subscription.PaystackSubscriptionId is not null && paystackState is null && subscription is { CancelAtPeriodEnd: true, FirstPaymentFailedAt: null };
+        var subscriptionImmediatelyCancelled = subscription.PaystackSubscriptionId is not null && paystackState is null && subscription is { CancelAtPeriodEnd: false, FirstPaymentFailedAt: null };
+        var subscriptionSuspended = subscription.PaystackSubscriptionId is not null && paystackState is null && subscription.FirstPaymentFailedAt is not null;
+        var paymentFailed = paystackState?.SubscriptionStatus is PaystackSubscriptionStatus.PastDue or PaystackSubscriptionStatus.Incomplete && subscription.FirstPaymentFailedAt is null;
+        var paymentRecovered = paystackState?.SubscriptionStatus == PaystackSubscriptionStatus.Active && subscription.FirstPaymentFailedAt is not null;
         var previousRefundCount = subscription.PaymentTransactions.Count(t => t.Status == PaymentTransactionStatus.Refunded);
         var now = timeProvider.GetUtcNow();
         var daysOnCurrentPlan = (int)(now - (subscription.ModifiedAt ?? subscription.CreatedAt)).TotalDays;
 
-        // Apply Stripe state to aggregate (after detection, before side effects)
-        if (stripeState is not null)
+        // Apply Paystack state to aggregate (after detection, before side effects)
+        if (paystackState is not null)
         {
-            subscription.SetStripeSubscription(stripeState.StripeSubscriptionId, stripeState.Plan, stripeState.CurrentPriceAmount, stripeState.CurrentPriceCurrency, stripeState.CurrentPeriodEnd, stripeState.PaymentMethod);
-            tenant.UpdatePlan(stripeState.Plan);
+            subscription.SetPaystackSubscription(paystackState.PaystackSubscriptionId, paystackState.Plan, paystackState.CurrentPriceAmount, paystackState.CurrentPriceCurrency, paystackState.CurrentPeriodEnd, paystackState.PaymentMethod);
+            tenant.UpdatePlan(paystackState.Plan);
         }
 
-        // Always sync payment transactions from Stripe (via subscription when active, via invoices when cancelled)
-        var syncedTransactions = stripeState?.PaymentTransactions ?? await stripeClient.SyncPaymentTransactionsAsync(subscription.StripeCustomerId!, cancellationToken);
+        // Always sync payment transactions from Paystack (via subscription when active, via invoices when cancelled)
+        var syncedTransactions = paystackState?.PaymentTransactions ?? await paystackClient.SyncPaymentTransactionsAsync(subscription.PaystackCustomerId!, cancellationToken);
         if (syncedTransactions is not null)
         {
             subscription.SetPaymentTransactions([.. syncedTransactions]);
@@ -161,9 +161,9 @@ public sealed class ProcessPendingStripeEvents(
 
         if (downgradeScheduled)
         {
-            subscription.SetScheduledPlan(stripeState!.ScheduledPlan);
+            subscription.SetScheduledPlan(paystackState!.ScheduledPlan);
             var daysUntilDowngrade = subscription.CurrentPeriodEnd is not null ? (int)(subscription.CurrentPeriodEnd.Value - now).TotalDays : (int?)null;
-            var priceCatalog = await stripeClient.GetPriceCatalogAsync(cancellationToken);
+            var priceCatalog = await paystackClient.GetPriceCatalogAsync(cancellationToken);
             var scheduledPlanPrice = priceCatalog.Single(p => p.Plan == subscription.ScheduledPlan!.Value).UnitAmount;
             events.CollectEvent(new SubscriptionDowngradeScheduled(subscription.Id, subscription.Plan, subscription.ScheduledPlan!.Value, daysUntilDowngrade, subscription.CurrentPriceAmount!.Value, scheduledPlanPrice - subscription.CurrentPriceAmount!.Value, subscription.CurrentPriceCurrency!));
         }
@@ -172,22 +172,22 @@ public sealed class ProcessPendingStripeEvents(
         {
             var previousScheduledPlan = subscription.ScheduledPlan;
             var daysSinceDowngradeScheduled = (int)(now - (subscription.ModifiedAt ?? subscription.CreatedAt)).TotalDays;
-            subscription.SetScheduledPlan(stripeState!.ScheduledPlan);
+            subscription.SetScheduledPlan(paystackState!.ScheduledPlan);
             var daysUntilDowngrade = subscription.CurrentPeriodEnd is not null ? (int)(subscription.CurrentPeriodEnd.Value - now).TotalDays : (int?)null;
-            var priceCatalog = await stripeClient.GetPriceCatalogAsync(cancellationToken);
+            var priceCatalog = await paystackClient.GetPriceCatalogAsync(cancellationToken);
             var scheduledPlanPrice = priceCatalog.Single(p => p.Plan == previousScheduledPlan!.Value).UnitAmount;
             events.CollectEvent(new SubscriptionDowngradeCancelled(subscription.Id, subscription.Plan, previousScheduledPlan!.Value, daysUntilDowngrade, daysSinceDowngradeScheduled, subscription.CurrentPriceAmount!.Value, subscription.CurrentPriceAmount!.Value - scheduledPlanPrice, subscription.CurrentPriceCurrency!));
         }
 
         if (subscriptionDowngraded)
         {
-            subscription.SetScheduledPlan(stripeState!.ScheduledPlan);
+            subscription.SetScheduledPlan(paystackState!.ScheduledPlan);
             events.CollectEvent(new SubscriptionDowngraded(subscription.Id, previousPlan, subscription.Plan, daysOnCurrentPlan, previousPriceAmount!.Value, subscription.CurrentPriceAmount!.Value, subscription.CurrentPriceAmount!.Value - previousPriceAmount.Value, subscription.CurrentPriceCurrency!));
         }
 
         if (subscriptionCancelled)
         {
-            subscription.SetCancellation(stripeState!.CancelAtPeriodEnd, stripeState.CancellationReason, stripeState.CancellationFeedback);
+            subscription.SetCancellation(paystackState!.CancelAtPeriodEnd, paystackState.CancellationReason, paystackState.CancellationFeedback);
             var daysUntilExpiry = subscription.CurrentPeriodEnd is not null ? (int)(subscription.CurrentPeriodEnd.Value - now).TotalDays : (int?)null;
             events.CollectEvent(new SubscriptionCancelled(subscription.Id, subscription.Plan, subscription.CancellationReason ?? CancellationReason.CancelledByAdmin, daysUntilExpiry, daysOnCurrentPlan, subscription.CurrentPriceAmount!.Value, -subscription.CurrentPriceAmount!.Value, subscription.CurrentPriceCurrency!));
         }
@@ -195,7 +195,7 @@ public sealed class ProcessPendingStripeEvents(
         if (subscriptionReactivated)
         {
             var daysSinceCancelled = (int)(now - (subscription.ModifiedAt ?? subscription.CreatedAt)).TotalDays;
-            subscription.SetCancellation(stripeState!.CancelAtPeriodEnd, stripeState.CancellationReason, stripeState.CancellationFeedback);
+            subscription.SetCancellation(paystackState!.CancelAtPeriodEnd, paystackState.CancellationReason, paystackState.CancellationFeedback);
             var daysUntilExpiry = subscription.CurrentPeriodEnd is not null ? (int)(subscription.CurrentPeriodEnd.Value - now).TotalDays : (int?)null;
             events.CollectEvent(new SubscriptionReactivated(subscription.Id, subscription.Plan, daysUntilExpiry, daysSinceCancelled, subscription.CurrentPriceAmount!.Value, subscription.CurrentPriceAmount!.Value, subscription.CurrentPriceCurrency!));
         }
@@ -240,12 +240,12 @@ public sealed class ProcessPendingStripeEvents(
             var refundedTransactions = subscription.PaymentTransactions.Where(t => t.Status == PaymentTransactionStatus.Refunded).ToArray();
             var refundCount = refundedTransactions.Length - previousRefundCount;
             var latestRefund = refundedTransactions[^1];
-            var plan = stripeState is not null ? subscription.Plan : previousPlan;
+            var plan = paystackState is not null ? subscription.Plan : previousPlan;
             events.CollectEvent(new PaymentRefunded(subscription.Id, plan, refundCount, latestRefund.Amount, latestRefund.Currency));
         }
 
         // Persist all aggregate mutations and mark pending events as processed
-        var tenantChanged = stripeState is not null || subscriptionCreated || subscriptionExpired || subscriptionImmediatelyCancelled || subscriptionSuspended;
+        var tenantChanged = paystackState is not null || subscriptionCreated || subscriptionExpired || subscriptionImmediatelyCancelled || subscriptionSuspended;
         if (tenantChanged)
         {
             tenantRepository.Update(tenant);
@@ -254,16 +254,16 @@ public sealed class ProcessPendingStripeEvents(
         subscriptionRepository.Update(subscription);
     }
 
-    private void MarkAllEventsAsProcessed(StripeEvent[] pendingEvents, Subscription subscription)
+    private void MarkAllEventsAsProcessed(PaystackEvent[] pendingEvents, Subscription subscription)
     {
         var now = timeProvider.GetUtcNow();
 
         foreach (var pendingEvent in pendingEvents)
         {
             pendingEvent.MarkProcessed(now);
-            pendingEvent.SetStripeSubscriptionId(subscription.StripeSubscriptionId);
+            pendingEvent.SetPaystackSubscriptionId(subscription.PaystackSubscriptionId);
             pendingEvent.SetTenantId(subscription.TenantId);
-            stripeEventRepository.Update(pendingEvent);
+            paystackEventRepository.Update(pendingEvent);
         }
     }
 

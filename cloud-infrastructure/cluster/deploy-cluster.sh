@@ -51,9 +51,11 @@ export BACK_OFFICE_ADMINS_GROUP_ID
 export POSTGRES_ADMIN_OBJECT_ID
 export GOOGLE_OAUTH_CLIENT_ID
 export GOOGLE_OAUTH_CLIENT_SECRET
-export STRIPE_PUBLISHABLE_KEY
-export STRIPE_API_KEY
-export STRIPE_WEBHOOK_SECRET
+export PAYSTACK_PUBLIC_KEY
+export PAYSTACK_SECRET_KEY
+export PAYSTACK_STANDARD_PLAN_CODE
+export PAYSTACK_PREMIUM_PLAN_CODE
+export PAYSTACK_CARD_AUTHORIZATION_AMOUNT_SUBUNIT
 # Set to "true" by the deploy workflow's "Detect Email Custom Domain Verification" step once it
 # observes the CustomerManaged email domain (eTLD+1 of DOMAIN_NAME) as fully verified. When true,
 # Bicep links the domain to the CommunicationServices resource and the SENDER_EMAIL_ADDRESS env var

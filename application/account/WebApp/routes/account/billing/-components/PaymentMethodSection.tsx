@@ -14,13 +14,13 @@ type PaymentMethod = components["schemas"]["PaymentMethod"];
 
 interface PaymentMethodSectionProps {
   paymentMethod: PaymentMethod | null | undefined;
-  isStripeConfigured: boolean;
+  isPaystackConfigured: boolean;
   onUpdateClick: () => void;
 }
 
 export function PaymentMethodSection({
   paymentMethod,
-  isStripeConfigured,
+  isPaystackConfigured,
   onUpdateClick
 }: Readonly<PaymentMethodSectionProps>) {
   return (
@@ -43,7 +43,7 @@ export function PaymentMethodSection({
                   className="shrink-0 gap-1.5"
                   aria-label={t`Update payment method`}
                   onClick={onUpdateClick}
-                  disabled={!isStripeConfigured}
+                  disabled={!isPaystackConfigured}
                 >
                   <PencilIcon className="size-4" />
                   <span className="hidden sm:inline" aria-hidden="true">

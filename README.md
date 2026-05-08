@@ -276,7 +276,7 @@ dotnet run
 
 Alternatively, open the [PlatformPlatform](./application/PlatformPlatform.slnx) solution in Rider or Visual Studio and run the [Aspire AppHost](./application/AppHost/AppHost.csproj) project.
 
-On first startup, Aspire will prompt for `stripe-enabled` -- enter `true` to configure Stripe integration (see the optional Stripe setup section below) or `false` to skip.
+On first startup, Aspire will prompt for `paystack-enabled` -- enter `true` to configure Paystack integration (see the optional Paystack setup section below) or `false` to skip.
 
 Once the Aspire dashboard fully loads, click to the WebApp and sign up for a new account (https://app.dev.localhost:9000/signup). A one-time password (OTP) will be sent to the development mail server, but for local development, you can always use the code `UNLOCK` instead of checking the mail server.
 
@@ -311,43 +311,28 @@ PlatformPlatform supports authentication via Google OAuth using OpenID Connect w
 
 All values are stored securely in .NET user secrets and persist across restarts.
 
-### 3.2 (Optional) Set up Stripe sandbox for localhost
+### 3.2 (Optional) Set up Paystack sandbox for localhost
 
-PlatformPlatform includes a comprehensive Stripe integration for subscription management and payments: embedded Stripe checkout and payment elements, prorated plan upgrades and downgrades, tax management, localized UI and invoice text, refund overview in billing history, telemetry events for the subscription lifecycle, grandfather pricing for existing subscribers, dunning and failed payment recovery, and full sync between Stripe and the local database via webhooks. The Stripe Dashboard must be set up and configured according to the Stripe Dashboard setup guide below before enabling Stripe in Aspire.
+PlatformPlatform includes a Paystack integration for subscription management and payments: Paystack popup checkout launched from the local billing dialog, reusable card authorizations, Paystack plan-based pricing, local subscription lifecycle ownership, payment retries, refunds for card authorization charges, telemetry events for the subscription lifecycle, failed renewal recovery, and webhook event acknowledgement. The Paystack Dashboard must be set up before enabling Paystack in Aspire.
 
 <details>
 
-<summary>Stripe Dashboard setup</summary>
+<summary>Paystack Dashboard setup</summary>
 
-Each developer needs their own Stripe sandbox. The local database stays in sync with Stripe via webhook events -- when payments, subscriptions, or billing details change in Stripe, webhook events update the local database with matching customer and subscription IDs. If developers share a sandbox, webhook events from one developer's actions would corrupt another developer's local database.
+Each developer should use their own Paystack test account. The app owns subscription lifecycle state locally, while Paystack provides customers, plans, card transactions, reusable authorizations, verification, webhooks, and refunds.
 
-1. **Create a sandbox**: Go to [Stripe Dashboard](https://dashboard.stripe.com) and create an account. Click the **account picker** (top-left) > **Sandboxes** > **Create**. Name it `dev-yourname` and open it. All subsequent steps are performed inside your sandbox.
-2. **Create products**: Navigate to **Product catalog** > **+ Create product**. Create a `Standard` product with **Recurring** / **Monthly** pricing (e.g., 19 EUR), then a `Premium` product (e.g., 39 EUR). Important: Click **More pricing options** and add `standard_monthly` and `premium_monthly` respectively in the **Lookup key** field.
-3. **Disable non-card payment methods**: Go to **Settings** (gear icon) > **Payments** > **Payment methods**. Turn off every payment method except **Cards** (and **Cartes Bancaires** which cannot be disabled)
-4. **Limit to 1 subscription**: Go to **Settings** > **Payments** > **Checkout and Payment Links**, scroll to **Subscriptions**, and enable **Limit customers to 1 subscription**. Add link to `https://app.dev.localhost:9000/account/billing`
-5. **Configure failed payment recovery**: Go to **Settings** > **Billing** > **Subscriptions and emails** > **Manage failed payments**, and configure desired retry behavior
-6. **Configure email notifications**: Go to **Settings** > **Billing** > **Subscriptions and emails** > **Email notifications and customer management**, and enable all settings as you see fit. Set "Use your own custom link" to `https://app.dev.localhost:9000/account/billing`
-7. **Enable 3D Secure**: Go to **Settings** > **Billing** > **Subscriptions and emails** > **Manage payments that require confirmation**, and check off **Enable 3D Secure**. The embedded Stripe components support showing e.g. Visa and Danish MitID multi-factor confirmation dialogs
-8. **Set invoice prefix**: Go to **Settings** > **Billing** > **Invoices**. In the **Invoice numbering** section, change the **Invoice prefix** to something meaningful for your organization, and optionally reset the **Invoice sequence** if needed
-9. **Disable payment link in invoice emails**: Go to **Settings** > **Billing** > **Invoices** and uncheck **Include a link to a payment page in the invoice email**
-10. **Set up Tax**: Go to **More** > **Tax** > **Locations** > **+ Add test registration** and follow the guide. Below is an example for a Danish company (adapt based on your business):
-    - Fill out the "Add head office address" side pane with your company address. Click **Continue**
-    - In "Add Tax registration" select your country (e.g., **Denmark**) and **I'm already registered**. Click **Continue**
-    - Select **Domestic** (e.g., "registered in Denmark"). Click **Continue**
-    - Select **No** to "Do you want to collect VAT on cross-border sales...". Click **Continue**
-    - Select **Yes** to "Have your sales of goods or digital services... been less than EUR 10,000". Click **Continue**
-    - Select **Start collecting immediately** in "Schedule tax collection". Click **Continue**
-    - Select **Software as a service (SaaS) - business use** in "Confirm your tax rates" (should show 25% for Denmark). Click **Start collecting**
-11. **Get API keys**: Navigate to **Developers** > **API keys**. Note the **Publishable key** (`pk_test_...`) and **Secret key** (`sk_test_...`). These will be needed for the Aspire configuration below.
+1. **Create or open a Paystack test account**: Go to [Paystack Dashboard](https://dashboard.paystack.com) and use test mode for local development.
+2. **Create plans**: Create monthly `Standard` and `Premium` plans. Note each Paystack `plan_code`; these become `PAYSTACK_STANDARD_PLAN_CODE` and `PAYSTACK_PREMIUM_PLAN_CODE`.
+3. **Use card-only checkout**: The application initializes transactions with `channels: ["card"]` and accepts only reusable card authorizations for subscription billing.
+4. **Get API keys**: Navigate to **Settings** > **API Keys & Webhooks**. Note the **Public key** (`pk_test_...`) and **Secret key** (`sk_test_...`).
+5. **Configure local webhooks when needed**: Paystack must reach your local machine through a tunnel such as ngrok or Cloudflare Tunnel. Point the webhook URL to `https://<your-tunnel>/api/account/subscriptions/paystack-webhook`. Backend tests use `MockPaystackClient` and do not need a tunnel.
 
 </details>
 
 **Aspire parameter configuration** (two restarts required):
 
-1. **First restart**: Aspire prompts for the **Publishable key** and **Secret key** (API key). Once entered, the Stripe CLI container starts and connects to Stripe. Find the generated webhook signing secret in either:
-   - The **Stripe Dashboard** under **Developers** > **Workbench** > **Webhooks** -- click the three-dot menu on the event destination to reveal the signing secret
-   - The **stripe-cli** container logs in the Aspire dashboard (look for "Your webhook signing secret is whsec_...")
-2. **Second restart**: Aspire prompts for the **Webhook secret**. Enter the `whsec_` value from the previous step.
+1. **First restart**: Aspire prompts whether to enable Paystack. Enter `true` to enable or `false` to skip. Once entered, restart Aspire.
+2. **Second restart**: Aspire prompts for the **Public key**, **Secret key**, **Standard plan code**, **Premium plan code**, and **card authorization amount in subunits**. Enter the values from the Paystack Dashboard, then restart Aspire to apply the configuration.
 
 All values are stored securely in .NET user secrets and persist across restarts.
 
@@ -386,25 +371,23 @@ Remember to add redirect URIs for each environment in your Google Cloud Console 
 - `https://app.yourproduct.com/api/account/authentication/Google/login/callback`
 - `https://app.yourproduct.com/api/account/authentication/Google/signup/callback`
 
-### (Optional) Configure Stripe for staging and production
+### (Optional) Configure Paystack for staging and production
 
-Create a separate Stripe account (or sandbox) for each environment. For production, use a live Stripe account instead of a sandbox. Follow the Stripe Dashboard setup steps in [section 3.2](#32-optional-set-up-stripe-sandbox-for-localhost) to configure products, payment methods, tax, invoices, and other settings.
+Use a separate Paystack account or environment for each deployment environment. Follow the Paystack setup steps in [section 3.2](#32-optional-set-up-paystack-sandbox-for-localhost) to configure plans and keys.
 
-On localhost, the Stripe CLI container automatically forwards webhook events. On staging and production, you need to configure a webhook endpoint manually in the Stripe Dashboard:
+Configure the Paystack webhook endpoint for each environment:
 
-1. Go to **Developers** > **Webhooks** > **Add destination**
-2. Keep **Your account** selected. Under events, select the **Charge**, **Checkout**, **Credit Note**, **Customer**, **Invoice**, **Payment Intent**, **Payment Method**, **Price**, **Product**, **Refund**, **Setup Intent**, and **Subscription Schedule** categories (roughly 91 events as of March 2026, though Stripe may add or remove events over time). Do not use **Select all** as it includes v2 thin-payload events the handler does not support. Click **Continue**
-3. Select **Webhook endpoint** as the destination type
-4. Set the **Destination name** to the environment (e.g., `Staging` or `Production`), set the **Endpoint URL** to `https://app.yourproduct.com/api/account/subscriptions/stripe-webhook` (replace with your actual domain), and click **Continue**
-5. On the destination detail page, click **Reveal** under **Signing secret** to get the webhook secret (`whsec_...`)
+1. Go to **Settings** > **API Keys & Webhooks** in the Paystack Dashboard
+2. Set the webhook URL to `https://app.yourproduct.com/api/account/subscriptions/paystack-webhook` (replace with your actual domain)
+3. Ensure card transactions are available for the currencies and countries you intend to support
 
-Use the Developer CLI to store Stripe credentials as GitHub secrets for deployment to Azure Key Vault:
+Use the Developer CLI to store Paystack credentials as GitHub secrets and variables for deployment to Azure Key Vault:
 
 ```bash
 pp github-config
 ```
 
-Select the **Stripe** group and enter the **Publishable Key**, **API Key** (Secret key), and **Webhook Secret** (the signing secret from the webhook endpoint). The subscription feature is automatically enabled on Azure when all three secrets are present in Key Vault.
+Select the **Paystack** group and enter the **Public Key**, **Secret Key**, **Standard Plan Code**, **Premium Plan Code**, and **Card Authorization Amount Subunit**. The subscription feature is automatically enabled on Azure when the Paystack keys and plan codes are present in Key Vault.
 
 ### Back-office access
 

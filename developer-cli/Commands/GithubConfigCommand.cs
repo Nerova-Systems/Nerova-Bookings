@@ -21,23 +21,35 @@ public sealed class GithubConfigCommand : Command
             "GOCSPX-xxxxxxxxxxxxxxxxxxxxxxxxxx",
             "Google OAuth"
         ),
-        ["STRIPE_PUBLISHABLE_KEY"] = new GithubConfig(
-            "Stripe Publishable Key from the Stripe Dashboard API keys page",
+        ["PAYSTACK_PUBLIC_KEY"] = new GithubConfig(
+            "Paystack Public Key from the Paystack Dashboard developer settings",
             GithubType.Variable,
             "pk_test_xxx or pk_live_xxx",
-            "Stripe"
+            "Paystack"
         ),
-        ["STRIPE_API_KEY"] = new GithubConfig(
-            "Stripe Secret Key from the Stripe Dashboard API keys page",
+        ["PAYSTACK_SECRET_KEY"] = new GithubConfig(
+            "Paystack Secret Key from the Paystack Dashboard developer settings",
             GithubType.Secret,
             "sk_test_xxx or sk_live_xxx",
-            "Stripe"
+            "Paystack"
         ),
-        ["STRIPE_WEBHOOK_SECRET"] = new GithubConfig(
-            "Stripe Webhook Signing Secret from the Stripe Dashboard Webhooks page",
-            GithubType.Secret,
-            "whsec_your_secret_here",
-            "Stripe"
+        ["PAYSTACK_STANDARD_PLAN_CODE"] = new GithubConfig(
+            "Paystack plan code for Nerova Standard",
+            GithubType.Variable,
+            "PLN_xxxxxxxxxx",
+            "Paystack"
+        ),
+        ["PAYSTACK_PREMIUM_PLAN_CODE"] = new GithubConfig(
+            "Paystack plan code for Nerova Premium",
+            GithubType.Variable,
+            "PLN_xxxxxxxxxx",
+            "Paystack"
+        ),
+        ["PAYSTACK_CARD_AUTHORIZATION_AMOUNT_SUBUNIT"] = new GithubConfig(
+            "Small card authorization amount in Paystack subunits",
+            GithubType.Variable,
+            "100",
+            "Paystack"
         )
     };
 

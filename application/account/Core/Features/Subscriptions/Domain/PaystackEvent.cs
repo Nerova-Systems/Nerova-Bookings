@@ -6,8 +6,8 @@ namespace Account.Features.Subscriptions.Domain;
 
 [PublicAPI]
 [IdPrefix("evt")]
-[JsonConverter(typeof(StronglyTypedIdJsonConverter<string, StripeEventId>))]
-public sealed record StripeEventId(string Value) : StronglyTypedString<StripeEventId>(Value)
+[JsonConverter(typeof(StronglyTypedIdJsonConverter<string, PaystackEventId>))]
+public sealed record PaystackEventId(string Value) : StronglyTypedString<PaystackEventId>(Value)
 {
     public override string ToString()
     {
@@ -15,23 +15,25 @@ public sealed record StripeEventId(string Value) : StronglyTypedString<StripeEve
     }
 }
 
-public sealed class StripeEvent : AggregateRoot<StripeEventId>
+public sealed class PaystackEvent : AggregateRoot<PaystackEventId>
 {
-    private StripeEvent(StripeEventId id) : base(id)
+    private PaystackEvent(PaystackEventId id) : base(id)
     {
         EventType = string.Empty;
-        Status = StripeEventStatus.Pending;
+        Status = PaystackEventStatus.Pending;
     }
 
     public string EventType { get; private set; }
 
-    public StripeEventStatus Status { get; private set; }
+    public PaystackEventStatus Status { get; private set; }
 
     public DateTimeOffset? ProcessedAt { get; private set; }
 
-    public StripeCustomerId? StripeCustomerId { get; private set; }
+    public PaystackCustomerId? PaystackCustomerId { get; private set; }
 
-    public StripeSubscriptionId? StripeSubscriptionId { get; private set; }
+    public PaystackSubscriptionId? PaystackSubscriptionId { get; private set; }
+
+    public string? PaystackReference { get; private set; }
 
     public TenantId? TenantId { get; private set; }
 
@@ -41,15 +43,16 @@ public sealed class StripeEvent : AggregateRoot<StripeEventId>
 
     /// <summary>
     ///     Factory method for phase 1 webhook acknowledgment. Creates a Pending event that will be
-    ///     batch-processed in phase 2. TenantId and StripeSubscriptionId are backfilled by phase 2
-    ///     via SetTenantId() and SetStripeSubscriptionId().
+    ///     batch-processed in phase 2. TenantId and PaystackSubscriptionId are backfilled by phase 2
+    ///     via SetTenantId() and SetPaystackSubscriptionId().
     /// </summary>
-    public static StripeEvent Create(string stripeEventId, string eventType, StripeCustomerId? stripeCustomerId, string? payload)
+    public static PaystackEvent Create(string paystackEventId, string eventType, PaystackCustomerId? paystackCustomerId, string? payload, string? paystackReference = null)
     {
-        return new StripeEvent(StripeEventId.NewId(stripeEventId))
+        return new PaystackEvent(PaystackEventId.NewId(paystackEventId))
         {
             EventType = eventType,
-            StripeCustomerId = stripeCustomerId,
+            PaystackCustomerId = paystackCustomerId,
+            PaystackReference = paystackReference,
             Payload = payload
         };
     }
@@ -59,7 +62,7 @@ public sealed class StripeEvent : AggregateRoot<StripeEventId>
     /// </summary>
     public void MarkProcessed(DateTimeOffset processedAt)
     {
-        Status = StripeEventStatus.Processed;
+        Status = PaystackEventStatus.Processed;
         ProcessedAt = processedAt;
     }
 
@@ -68,7 +71,7 @@ public sealed class StripeEvent : AggregateRoot<StripeEventId>
     /// </summary>
     public void MarkIgnored(DateTimeOffset processedAt)
     {
-        Status = StripeEventStatus.Ignored;
+        Status = PaystackEventStatus.Ignored;
         ProcessedAt = processedAt;
     }
 
@@ -77,14 +80,14 @@ public sealed class StripeEvent : AggregateRoot<StripeEventId>
     /// </summary>
     public void MarkFailed(DateTimeOffset failedAt, string error)
     {
-        Status = StripeEventStatus.Failed;
+        Status = PaystackEventStatus.Failed;
         ProcessedAt = failedAt;
         Error = error;
     }
 
-    public void SetStripeSubscriptionId(StripeSubscriptionId? stripeSubscriptionId)
+    public void SetPaystackSubscriptionId(PaystackSubscriptionId? paystackSubscriptionId)
     {
-        StripeSubscriptionId = stripeSubscriptionId;
+        PaystackSubscriptionId = paystackSubscriptionId;
     }
 
     public void SetTenantId(TenantId? tenantId)

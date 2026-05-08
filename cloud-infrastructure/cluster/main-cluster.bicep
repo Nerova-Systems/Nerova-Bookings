@@ -27,11 +27,14 @@ param googleOAuthClientId string
 param googleOAuthClientSecret string
 
 @secure()
-param stripePublishableKey string
+param paystackPublicKey string
 @secure()
-param stripeApiKey string
+param paystackSecretKey string
 @secure()
-param stripeWebhookSecret string
+param paystackStandardPlanCode string
+@secure()
+param paystackPremiumPlanCode string
+param paystackCardAuthorizationAmountSubunit string = '100'
 
 var storageAccountUniquePrefix = replace(clusterResourceGroupName, '-', '')
 var tags = { environment: environment, 'managed-by': 'bicep' }
@@ -123,15 +126,17 @@ module googleOAuthSecrets '../modules/key-vault-secrets.bicep' = if (!empty(goog
   }
 }
 
-module stripeSecrets '../modules/key-vault-secrets.bicep' = if (!empty(stripeApiKey) && !empty(stripeWebhookSecret) && !empty(stripePublishableKey)) {
+module paystackSecrets '../modules/key-vault-secrets.bicep' = if (!empty(paystackSecretKey) && !empty(paystackPublicKey) && !empty(paystackStandardPlanCode) && !empty(paystackPremiumPlanCode)) {
   scope: clusterResourceGroup
-  name: '${clusterResourceGroupName}-stripe-secrets'
+  name: '${clusterResourceGroupName}-paystack-secrets'
   params: {
     keyVaultName: keyVault.outputs.name
     secrets: {
-      'Stripe--ApiKey': stripeApiKey
-      'Stripe--WebhookSecret': stripeWebhookSecret
-      'Stripe--PublishableKey': stripePublishableKey
+      'Paystack--PublicKey': paystackPublicKey
+      'Paystack--SecretKey': paystackSecretKey
+      'Paystack--StandardPlanCode': paystackStandardPlanCode
+      'Paystack--PremiumPlanCode': paystackPremiumPlanCode
+      'Paystack--CardAuthorizationAmountSubunit': paystackCardAuthorizationAmountSubunit
     }
   }
 }
@@ -276,11 +281,11 @@ var accountEnvironmentVariables = [
     value: 'no-reply@${communicationService.outputs.fromSenderDomain}'
   }
   {
-    name: 'Stripe__SubscriptionEnabled'
-    value: !empty(stripeApiKey) && !empty(stripeWebhookSecret) && !empty(stripePublishableKey) ? 'true' : 'false'
+    name: 'Paystack__SubscriptionEnabled'
+    value: !empty(paystackSecretKey) && !empty(paystackPublicKey) && !empty(paystackStandardPlanCode) && !empty(paystackPremiumPlanCode) ? 'true' : 'false'
   }
   {
-    name: 'Stripe__AllowMockProvider'
+    name: 'Paystack__AllowMockProvider'
     value: 'false'
   }
 ]
@@ -479,7 +484,7 @@ var mainEnvironmentVariables = [
   }
   {
     name: 'PUBLIC_SUBSCRIPTION_ENABLED'
-    value: !empty(stripeApiKey) && !empty(stripeWebhookSecret) && !empty(stripePublishableKey) ? 'true' : 'false'
+    value: !empty(paystackSecretKey) && !empty(paystackPublicKey) && !empty(paystackStandardPlanCode) && !empty(paystackPremiumPlanCode) ? 'true' : 'false'
   }
 ]
 

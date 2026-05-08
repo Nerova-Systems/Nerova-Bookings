@@ -40,9 +40,13 @@ public sealed class Subscription : AggregateRoot<SubscriptionId>, ITenantScopedE
 
     public SubscriptionPlan? ScheduledPlan { get; private set; }
 
-    public StripeCustomerId? StripeCustomerId { get; private set; }
+    public PaystackCustomerId? PaystackCustomerId { get; private set; }
 
-    public StripeSubscriptionId? StripeSubscriptionId { get; private set; }
+    public PaystackSubscriptionId? PaystackSubscriptionId { get; private set; }
+
+    public string? PaystackAuthorizationEmail { get; private set; }
+
+    public string? PaystackAuthorizationSignature { get; private set; }
 
     public decimal? CurrentPriceAmount { get; private set; }
 
@@ -71,9 +75,17 @@ public sealed class Subscription : AggregateRoot<SubscriptionId>, ITenantScopedE
         return new Subscription(tenantId);
     }
 
-    public void SetStripeCustomerId(StripeCustomerId stripeCustomerId)
+    public void SetPaystackCustomerId(PaystackCustomerId paystackCustomerId)
     {
-        StripeCustomerId = stripeCustomerId;
+        PaystackCustomerId = paystackCustomerId;
+    }
+
+    public void SetPaystackAuthorization(PaystackSubscriptionId authorizationCode, string? email, string? signature, PaymentMethod? paymentMethod)
+    {
+        PaystackSubscriptionId = authorizationCode;
+        PaystackAuthorizationEmail = email;
+        PaystackAuthorizationSignature = signature;
+        PaymentMethod = paymentMethod;
     }
 
     public void SetBillingInfo(BillingInfo? billingInfo)
@@ -81,9 +93,9 @@ public sealed class Subscription : AggregateRoot<SubscriptionId>, ITenantScopedE
         BillingInfo = billingInfo;
     }
 
-    public void SetStripeSubscription(StripeSubscriptionId? stripeSubscriptionId, SubscriptionPlan plan, decimal? currentPriceAmount, string? currentPriceCurrency, DateTimeOffset? currentPeriodEnd, PaymentMethod? paymentMethod)
+    public void SetPaystackSubscription(PaystackSubscriptionId? paystackSubscriptionId, SubscriptionPlan plan, decimal? currentPriceAmount, string? currentPriceCurrency, DateTimeOffset? currentPeriodEnd, PaymentMethod? paymentMethod)
     {
-        StripeSubscriptionId = stripeSubscriptionId;
+        PaystackSubscriptionId = paystackSubscriptionId;
         Plan = plan;
         CurrentPriceAmount = currentPriceAmount;
         CurrentPriceCurrency = currentPriceCurrency;
@@ -127,7 +139,9 @@ public sealed class Subscription : AggregateRoot<SubscriptionId>, ITenantScopedE
     {
         Plan = SubscriptionPlan.Basis;
         ScheduledPlan = null;
-        StripeSubscriptionId = null;
+        PaystackSubscriptionId = null;
+        PaystackAuthorizationEmail = null;
+        PaystackAuthorizationSignature = null;
         CurrentPriceAmount = null;
         CurrentPriceCurrency = null;
         CurrentPeriodEnd = null;
@@ -137,9 +151,9 @@ public sealed class Subscription : AggregateRoot<SubscriptionId>, ITenantScopedE
         CancellationFeedback = null;
     }
 
-    public bool HasActiveStripeSubscription()
+    public bool HasActivePaystackSubscription()
     {
-        return StripeSubscriptionId is not null && Plan != SubscriptionPlan.Basis && !CancelAtPeriodEnd;
+        return PaystackSubscriptionId is not null && Plan != SubscriptionPlan.Basis && !CancelAtPeriodEnd;
     }
 }
 

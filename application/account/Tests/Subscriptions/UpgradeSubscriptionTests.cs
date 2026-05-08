@@ -18,9 +18,11 @@ public sealed class UpgradeSubscriptionTests : EndpointBaseTest<AccountDbContext
         // Arrange
         Connection.Update("subscriptions", "tenant_id", DatabaseSeeder.Tenant1.Id.Value, [
                 ("plan", nameof(SubscriptionPlan.Standard)),
-                ("stripe_customer_id", "cus_test_123"),
-                ("stripe_subscription_id", "sub_test_123"),
-                ("current_period_end", TimeProvider.GetUtcNow().AddDays(30))
+                ("paystack_customer_code", "cus_test_123"),
+                ("paystack_authorization_code", "sub_test_123"),
+                ("paystack_authorization_email", "billing@example.com"),
+                ("current_period_end", TimeProvider.GetUtcNow().AddDays(30)),
+                ("billing_info", """{"Name":"Test Organization","Address":{"Line1":"Vestergade 12","PostalCode":"1456","City":"Copenhagen","Country":"DK"},"Email":"billing@example.com"}""")
             ]
         );
         var command = new UpgradeSubscriptionCommand(SubscriptionPlan.Premium);
@@ -32,8 +34,9 @@ public sealed class UpgradeSubscriptionTests : EndpointBaseTest<AccountDbContext
         // Assert
         response.EnsureSuccessStatusCode();
         var result = await response.Content.ReadFromJsonAsync<UpgradeSubscriptionResponse>();
-        result!.ClientSecret.Should().BeNull();
-        result.PublishableKey.Should().BeNull();
+        result!.Reference.Should().NotBeNullOrEmpty();
+        result.AccessCode.Should().BeNull();
+        result.OperationPurpose.Should().Be("Upgrade");
 
         TelemetryEventsCollectorSpy.CollectedEvents.Should().BeEmpty();
     }
@@ -44,8 +47,8 @@ public sealed class UpgradeSubscriptionTests : EndpointBaseTest<AccountDbContext
         // Arrange
         Connection.Update("subscriptions", "tenant_id", DatabaseSeeder.Tenant1.Id.Value, [
                 ("plan", nameof(SubscriptionPlan.Premium)),
-                ("stripe_customer_id", "cus_test_123"),
-                ("stripe_subscription_id", "sub_test_123"),
+                ("paystack_customer_code", "cus_test_123"),
+                ("paystack_authorization_code", "sub_test_123"),
                 ("current_period_end", TimeProvider.GetUtcNow().AddDays(30))
             ]
         );
@@ -67,8 +70,8 @@ public sealed class UpgradeSubscriptionTests : EndpointBaseTest<AccountDbContext
         // Arrange
         Connection.Update("subscriptions", "tenant_id", DatabaseSeeder.Tenant1.Id.Value, [
                 ("plan", nameof(SubscriptionPlan.Standard)),
-                ("stripe_customer_id", "cus_test_123"),
-                ("stripe_subscription_id", "sub_test_123"),
+                ("paystack_customer_code", "cus_test_123"),
+                ("paystack_authorization_code", "sub_test_123"),
                 ("current_period_end", TimeProvider.GetUtcNow().AddDays(30))
             ]
         );

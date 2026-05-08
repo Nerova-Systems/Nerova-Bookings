@@ -7,26 +7,26 @@ import type { SubscriptionPlan } from "@/shared/lib/api/client";
 import { SubscriptionPlan as Plans } from "@/shared/lib/api/client";
 
 import { getFormattedPrice, PlanCard } from "./PlanCard";
-import { StripeNotConfiguredBanner } from "./SubscriptionBanner";
+import { PaystackNotConfiguredBanner } from "./SubscriptionBanner";
 
 type PlanPriceItem = components["schemas"]["PlanPriceItem"];
 
 interface InitialPlanSelectionProps {
   plans: PlanPriceItem[] | undefined;
   currentPlan: SubscriptionPlan;
-  isStripeConfigured: boolean;
+  isPaystackConfigured: boolean;
   onSubscribe: (plan: SubscriptionPlan) => void;
 }
 
 export function InitialPlanSelection({
   plans,
   currentPlan,
-  isStripeConfigured,
+  isPaystackConfigured,
   onSubscribe
 }: Readonly<InitialPlanSelectionProps>) {
   return (
     <AppLayout variant="center" maxWidth="64rem" title={t`Billing`} subtitle={t`Choose a plan to get started.`}>
-      {!isStripeConfigured && <StripeNotConfiguredBanner />}
+      {!isPaystackConfigured && <PaystackNotConfiguredBanner />}
       <div className="grid gap-4 lg:grid-cols-3">
         {[Plans.Basis, Plans.Standard, Plans.Premium].map((plan) => (
           <PlanCard
@@ -36,7 +36,7 @@ export function InitialPlanSelection({
             currentPlan={currentPlan}
             cancelAtPeriodEnd={false}
             scheduledPlan={null}
-            isStripeConfigured={isStripeConfigured}
+            isPaystackConfigured={isPaystackConfigured}
             onSubscribe={onSubscribe}
             onUpgrade={() => {}}
             onDowngrade={() => {}}

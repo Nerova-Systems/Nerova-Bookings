@@ -8,7 +8,7 @@ using Account.Integrations.Gravatar;
 using Account.Integrations.OAuth;
 using Account.Integrations.OAuth.Google;
 using Account.Integrations.OAuth.Mock;
-using Account.Integrations.Stripe;
+using Account.Integrations.Paystack;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using SharedKernel.Configuration;
@@ -56,11 +56,11 @@ public static class Configuration
             services.AddEmailRendering("WebApp");
 
             services.AddMemoryCache();
-            services.AddSingleton<MockStripeState>();
-            services.AddKeyedScoped<IStripeClient, StripeClient>("stripe");
-            services.AddKeyedScoped<IStripeClient, MockStripeClient>("mock-stripe");
-            services.AddKeyedScoped<IStripeClient, UnconfiguredStripeClient>("unconfigured-stripe");
-            services.AddScoped<StripeClientFactory>();
+            services.AddSingleton<MockPaystackState>();
+            services.AddKeyedScoped<IPaystackClient, PaystackClient>("paystack");
+            services.AddKeyedScoped<IPaystackClient, MockPaystackClient>("mock-paystack");
+            services.AddKeyedScoped<IPaystackClient, UnconfiguredPaystackClient>("unconfigured-paystack");
+            services.AddScoped<PaystackClientFactory>();
 
             return services
                 .AddSharedServices<AccountDbContext>([Assembly])
@@ -68,7 +68,7 @@ public static class Configuration
                 .AddScoped<CompleteEmailConfirmation>()
                 .AddScoped<AvatarUpdater>()
                 .AddScoped<UserInfoFactory>()
-                .AddScoped<ProcessPendingStripeEvents>()
+                .AddScoped<ProcessPendingPaystackEvents>()
                 .AddScoped<ExternalAuthenticationService>()
                 .AddScoped<ExternalAuthenticationHelper>();
         }

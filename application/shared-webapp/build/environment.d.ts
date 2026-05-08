@@ -42,7 +42,7 @@ export declare global {
      **/
     PUBLIC_GOOGLE_OAUTH_ENABLED: string;
     /**
-     * Whether subscription/billing is enabled (Stripe configured)
+     * Whether subscription/billing is enabled (payment provider configured)
      **/
     PUBLIC_SUBSCRIPTION_ENABLED: string;
   }
