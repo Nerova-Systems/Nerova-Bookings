@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using Account.Features.Subscriptions.Domain;
 using Microsoft.Extensions.Configuration;
 
@@ -5,6 +6,8 @@ namespace Account.Integrations.Paystack;
 
 public sealed class MockPaystackState
 {
+    public ConcurrentDictionary<string, VerifiedPaystackTransactionResult> VerifiedTransactions { get; } = new();
+
     public string? OverrideSubscriptionStatus { get; set; }
 
     public bool SimulateSubscriptionDeleted { get; set; }
@@ -37,7 +40,9 @@ public sealed class MockPaystackClient(IConfiguration configuration, TimeProvide
     {
         EnsureEnabled();
         var amount = plan == SubscriptionPlan.Premium ? 99.00m : 29.00m;
-        return Task.FromResult<CheckoutSessionResult?>(new CheckoutSessionResult($"{MockReference}_{Guid.NewGuid():N}", MockAccessCode, amount, "USD", purpose));
+        var reference = $"{MockReference}_{Guid.NewGuid():N}";
+        state.VerifiedTransactions[reference] = CreateVerifiedTransaction(reference, amount, "USD", purpose);
+        return Task.FromResult<CheckoutSessionResult?>(new CheckoutSessionResult(reference, MockAccessCode, amount, "USD", purpose));
     }
 
     public Task<SubscriptionSyncResult?> SyncSubscriptionStateAsync(PaystackCustomerId paystackCustomerId, CancellationToken cancellationToken)
@@ -91,9 +96,11 @@ public sealed class MockPaystackClient(IConfiguration configuration, TimeProvide
     public Task<UpgradeSubscriptionResult?> UpgradeSubscriptionAsync(PaystackCustomerId paystackCustomerId, PaystackSubscriptionId authorizationCode, string email, SubscriptionPlan newPlan, CancellationToken cancellationToken)
     {
         EnsureEnabled();
-        var amount = newPlan == SubscriptionPlan.Premium ? 70.00m : 0m;
+        var amount = newPlan == SubscriptionPlan.Premium ? 15.50m : 0m;
+        var reference = $"{MockReference}_upgrade_{Guid.NewGuid():N}";
+        state.VerifiedTransactions[reference] = CreateVerifiedTransaction(reference, amount, "USD", PaystackPaymentPurpose.Upgrade);
         return Task.FromResult<UpgradeSubscriptionResult?>(new UpgradeSubscriptionResult(
-                Reference: $"{MockReference}_upgrade_{Guid.NewGuid():N}",
+                Reference: reference,
                 Amount: amount,
                 Currency: "USD"
             )
@@ -160,18 +167,18 @@ public sealed class MockPaystackClient(IConfiguration configuration, TimeProvide
     public Task<VerifiedPaystackTransactionResult?> VerifyTransactionAsync(string reference, PaystackPaymentPurpose purpose, CancellationToken cancellationToken)
     {
         EnsureEnabled();
-        var amount = purpose == PaystackPaymentPurpose.Upgrade ? 70.00m : 29.00m;
-        return Task.FromResult<VerifiedPaystackTransactionResult?>(new VerifiedPaystackTransactionResult(
-                reference,
-                amount,
-                "USD",
-                true,
-                purpose,
-                PaystackCustomerId.NewId(MockCustomerId),
-                new PaystackAuthorization(PaystackSubscriptionId.NewId(MockAuthorizationCode), "billing@example.com", "SIG_mock_12345"),
-                new PaymentMethod("visa", "4242", 12, 2026)
-            )
-        );
+        if (state.VerifiedTransactions.TryGetValue(reference, out var verifiedTransaction))
+        {
+            return Task.FromResult<VerifiedPaystackTransactionResult?>(verifiedTransaction);
+        }
+
+        var amount = purpose switch
+        {
+            PaystackPaymentPurpose.Upgrade => 15.50m,
+            PaystackPaymentPurpose.PaymentMethodAuthorization => 1.00m,
+            _ => 29.00m
+        };
+        return Task.FromResult<VerifiedPaystackTransactionResult?>(CreateVerifiedTransaction(reference, amount, "USD", purpose));
     }
 
     public Task<CustomerBillingResult?> GetCustomerBillingInfoAsync(PaystackCustomerId paystackCustomerId, CancellationToken cancellationToken)
@@ -203,7 +210,9 @@ public sealed class MockPaystackClient(IConfiguration configuration, TimeProvide
     public Task<CheckoutSessionResult?> CreateSetupIntentAsync(PaystackCustomerId paystackCustomerId, string email, CancellationToken cancellationToken)
     {
         EnsureEnabled();
-        return Task.FromResult<CheckoutSessionResult?>(new CheckoutSessionResult($"{MockReference}_auth_{Guid.NewGuid():N}", MockAccessCode, 1.00m, "USD", PaystackPaymentPurpose.PaymentMethodAuthorization));
+        var reference = $"{MockReference}_auth_{Guid.NewGuid():N}";
+        state.VerifiedTransactions[reference] = CreateVerifiedTransaction(reference, 1.00m, "USD", PaystackPaymentPurpose.PaymentMethodAuthorization);
+        return Task.FromResult<CheckoutSessionResult?>(new CheckoutSessionResult(reference, MockAccessCode, 1.00m, "USD", PaystackPaymentPurpose.PaymentMethodAuthorization));
     }
 
     public Task<VerifiedPaystackTransactionResult?> GetSetupIntentPaymentMethodAsync(string setupIntentId, CancellationToken cancellationToken)
@@ -268,7 +277,9 @@ public sealed class MockPaystackClient(IConfiguration configuration, TimeProvide
     {
         EnsureEnabled();
         var amount = plan == SubscriptionPlan.Premium ? 99.00m : 29.00m;
-        return Task.FromResult<SubscribeResult?>(new SubscribeResult($"{MockReference}_saved_{Guid.NewGuid():N}", amount, "USD", true, new PaymentMethod("visa", "4242", 12, 2026)));
+        var reference = $"{MockReference}_saved_{Guid.NewGuid():N}";
+        state.VerifiedTransactions[reference] = CreateVerifiedTransaction(reference, amount, "USD", PaystackPaymentPurpose.Subscribe);
+        return Task.FromResult<SubscribeResult?>(new SubscribeResult(reference, amount, "USD", true, new PaymentMethod("visa", "4242", 12, 2026)));
     }
 
     public Task<PaymentTransaction[]?> SyncPaymentTransactionsAsync(PaystackCustomerId paystackCustomerId, CancellationToken cancellationToken)
@@ -287,5 +298,19 @@ public sealed class MockPaystackClient(IConfiguration configuration, TimeProvide
         {
             throw new InvalidOperationException("Mock Paystack provider is not enabled.");
         }
+    }
+
+    private static VerifiedPaystackTransactionResult CreateVerifiedTransaction(string reference, decimal amount, string currency, PaystackPaymentPurpose purpose)
+    {
+        return new VerifiedPaystackTransactionResult(
+            reference,
+            amount,
+            currency,
+            true,
+            purpose,
+            PaystackCustomerId.NewId(MockCustomerId),
+            new PaystackAuthorization(PaystackSubscriptionId.NewId(MockAuthorizationCode), "billing@example.com", "SIG_mock_12345"),
+            new PaymentMethod("visa", "4242", 12, 2026)
+        );
     }
 }

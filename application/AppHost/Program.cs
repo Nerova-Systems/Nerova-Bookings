@@ -255,8 +255,10 @@ return;
             .WithDescription("Paystack plan code for the Standard subscription plan.", true);
         var premiumPlanCode = builder.AddParameter("paystack-premium-plan-code", true)
             .WithDescription("Paystack plan code for the Premium subscription plan.", true);
-        var cardAuthorizationAmountSubunit = builder.AddParameter("paystack-card-authorization-amount-subunit", true)
-            .WithDescription("Small card authorization charge amount in Paystack subunits, for example `100` for 1.00 in a two-decimal currency.", true);
+        var cardAuthorizationAmountSubunit = builder.Configuration["Parameters:paystack-card-authorization-amount-subunit"] is not null
+            ? builder.AddParameter("paystack-card-authorization-amount-subunit", true)
+                .WithDescription("Small card authorization charge amount in Paystack subunits, for example `100` for 1.00 in a two-decimal currency.", true)
+            : builder.CreateResourceBuilder(new ParameterResource("paystack-card-authorization-amount-subunit", _ => "100", true));
 
         return (configured, publicKey, secretKey, standardPlanCode, premiumPlanCode, cardAuthorizationAmountSubunit);
     }

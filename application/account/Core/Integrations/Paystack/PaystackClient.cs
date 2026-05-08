@@ -201,17 +201,19 @@ public sealed class PaystackClient(IConfiguration configuration, IHttpClientFact
         var email = GetString(root, "data", "customer", "email") ?? GetString(root, "data", "authorization", "email");
         var signature = GetString(root, "data", "authorization", "signature");
         var customerCode = GetString(root, "data", "customer", "customer_code");
+        var verifiedReference = GetString(root, "data", "reference") ?? reference;
+        var verifiedPurpose = GetPaymentPurpose(root) ?? purpose;
         var amountSubunit = GetLong(root, "data", "amount") ?? 0;
         var currency = GetString(root, "data", "currency")?.ToUpperInvariant() ?? "USD";
 
         if (paid && !string.Equals(channel, "card", StringComparison.OrdinalIgnoreCase))
         {
-            return new VerifiedPaystackTransactionResult(reference, FromSubunit(amountSubunit), currency, false, purpose, null, null, null, "Only card payments are accepted.");
+            return new VerifiedPaystackTransactionResult(verifiedReference, FromSubunit(amountSubunit), currency, false, verifiedPurpose, null, null, null, "Only card payments are accepted.");
         }
 
         if (paid && !reusable)
         {
-            return new VerifiedPaystackTransactionResult(reference, FromSubunit(amountSubunit), currency, false, purpose, null, null, null, "The card authorization is not reusable.");
+            return new VerifiedPaystackTransactionResult(verifiedReference, FromSubunit(amountSubunit), currency, false, verifiedPurpose, null, null, null, "The card authorization is not reusable.");
         }
 
         PaystackCustomerId.TryParse(customerCode, out var customerId);
@@ -220,7 +222,7 @@ public sealed class PaystackClient(IConfiguration configuration, IHttpClientFact
             : null;
         var paymentMethod = CreatePaymentMethod(root);
 
-        return new VerifiedPaystackTransactionResult(reference, FromSubunit(amountSubunit), currency, paid, purpose, customerId, authorization, paymentMethod);
+        return new VerifiedPaystackTransactionResult(verifiedReference, FromSubunit(amountSubunit), currency, paid, verifiedPurpose, customerId, authorization, paymentMethod);
     }
 
     public async Task<CustomerBillingResult?> GetCustomerBillingInfoAsync(PaystackCustomerId paystackCustomerId, CancellationToken cancellationToken)
@@ -450,6 +452,12 @@ public sealed class PaystackClient(IConfiguration configuration, IHttpClientFact
         return brand is not null && last4 is not null && int.TryParse(expMonthText, out var expMonth) && int.TryParse(expYearText, out var expYear)
             ? new PaymentMethod(brand, last4, expMonth, expYear)
             : null;
+    }
+
+    private static PaystackPaymentPurpose? GetPaymentPurpose(JsonElement root)
+    {
+        var purposeText = GetString(root, "data", "metadata", "purpose");
+        return Enum.TryParse<PaystackPaymentPurpose>(purposeText, true, out var purpose) ? purpose : null;
     }
 
     private static string? GetString(JsonElement element, params string[] path)

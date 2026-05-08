@@ -44,10 +44,26 @@ public sealed class ConfirmPaystackPaymentHandler(
             return Result<ConfirmPaystackPaymentResponse>.BadRequest("Billing information must be saved before payment confirmation.");
         }
 
-        var verified = await paystackClientFactory.GetClient().VerifyTransactionAsync(command.Reference, command.Purpose, cancellationToken);
+        if (command.Purpose is not PaystackPaymentPurpose.Subscribe and not PaystackPaymentPurpose.Upgrade)
+        {
+            return Result<ConfirmPaystackPaymentResponse>.BadRequest("Only subscription Paystack payments can be confirmed here.");
+        }
+
+        var paystackClient = paystackClientFactory.GetClient();
+        var verified = await paystackClient.VerifyTransactionAsync(command.Reference, command.Purpose, cancellationToken);
         if (verified?.Paid != true)
         {
             return Result<ConfirmPaystackPaymentResponse>.BadRequest(verified?.ErrorMessage ?? "Paystack payment could not be verified.");
+        }
+
+        if (!string.Equals(verified.Reference, command.Reference, StringComparison.Ordinal))
+        {
+            return Result<ConfirmPaystackPaymentResponse>.BadRequest("Paystack payment reference does not match the requested confirmation reference.");
+        }
+
+        if (verified.Purpose != command.Purpose)
+        {
+            return Result<ConfirmPaystackPaymentResponse>.BadRequest("Paystack payment purpose does not match the requested confirmation purpose.");
         }
 
         if (verified.CustomerId is not null && verified.CustomerId != subscription.PaystackCustomerId)
@@ -58,6 +74,17 @@ public sealed class ConfirmPaystackPaymentHandler(
         if (verified.Authorization is null)
         {
             return Result<ConfirmPaystackPaymentResponse>.BadRequest("Paystack payment did not return a reusable card authorization.");
+        }
+
+        var expectedPayment = await GetExpectedPaymentAsync(paystackClient, subscription, command, cancellationToken);
+        if (expectedPayment is null)
+        {
+            return Result<ConfirmPaystackPaymentResponse>.BadRequest("Could not load expected Paystack subscription amount.");
+        }
+
+        if (!AmountsMatch(verified.Amount, expectedPayment.Amount) || !CurrenciesMatch(verified.Currency, expectedPayment.Currency))
+        {
+            return Result<ConfirmPaystackPaymentResponse>.BadRequest("Paystack payment amount does not match the expected subscription amount.");
         }
 
         var previousPlan = subscription.Plan;
@@ -92,4 +119,33 @@ public sealed class ConfirmPaystackPaymentHandler(
 
         return new ConfirmPaystackPaymentResponse(true);
     }
+
+    private static async Task<ExpectedPaystackPayment?> GetExpectedPaymentAsync(IPaystackClient paystackClient, Subscription subscription, ConfirmPaystackPaymentCommand command, CancellationToken cancellationToken)
+    {
+        if (command.Purpose == PaystackPaymentPurpose.Subscribe)
+        {
+            var preview = await paystackClient.GetCheckoutPreviewAsync(subscription.PaystackCustomerId!, command.Plan, cancellationToken);
+            return preview is null ? null : new ExpectedPaystackPayment(preview.TotalAmount, preview.Currency);
+        }
+
+        if (subscription.PaystackSubscriptionId is null)
+        {
+            return null;
+        }
+
+        var upgradePreview = await paystackClient.GetUpgradePreviewAsync(subscription.PaystackSubscriptionId, command.Plan, cancellationToken);
+        return upgradePreview is null ? null : new ExpectedPaystackPayment(upgradePreview.TotalAmount, upgradePreview.Currency);
+    }
+
+    private static bool AmountsMatch(decimal actual, decimal expected)
+    {
+        return decimal.Round(actual, 2, MidpointRounding.AwayFromZero) == decimal.Round(expected, 2, MidpointRounding.AwayFromZero);
+    }
+
+    private static bool CurrenciesMatch(string actual, string expected)
+    {
+        return string.Equals(actual, expected, StringComparison.OrdinalIgnoreCase);
+    }
+
+    private sealed record ExpectedPaystackPayment(decimal Amount, string Currency);
 }

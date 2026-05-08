@@ -2,6 +2,7 @@ using Account.Features.Subscriptions.Domain;
 using Account.Features.Users.Domain;
 using Account.Integrations.Paystack;
 using JetBrains.Annotations;
+using Microsoft.Extensions.Configuration;
 using SharedKernel.Cqrs;
 using SharedKernel.ExecutionContext;
 
@@ -17,6 +18,7 @@ public sealed class ConfirmPaymentMethodSetupHandler(
     ISubscriptionRepository subscriptionRepository,
     PaystackClientFactory paystackClientFactory,
     IExecutionContext executionContext,
+    IConfiguration configuration,
     ILogger<ConfirmPaymentMethodSetupHandler> logger
 ) : IRequestHandler<ConfirmPaymentMethodSetupCommand, Result<ConfirmPaymentMethodSetupResponse>>
 {
@@ -40,6 +42,26 @@ public sealed class ConfirmPaymentMethodSetupHandler(
         if (verifiedTransaction?.Paid != true || verifiedTransaction.Authorization is null)
         {
             return Result<ConfirmPaymentMethodSetupResponse>.BadRequest(verifiedTransaction?.ErrorMessage ?? "Failed to verify Paystack payment method authorization.");
+        }
+
+        if (!string.Equals(verifiedTransaction.Reference, command.Reference, StringComparison.Ordinal))
+        {
+            return Result<ConfirmPaymentMethodSetupResponse>.BadRequest("Paystack payment method authorization reference does not match the requested setup reference.");
+        }
+
+        if (verifiedTransaction.Purpose != PaystackPaymentPurpose.PaymentMethodAuthorization)
+        {
+            return Result<ConfirmPaymentMethodSetupResponse>.BadRequest("Only Paystack payment method authorizations can be confirmed here.");
+        }
+
+        if (verifiedTransaction.CustomerId is not null && verifiedTransaction.CustomerId != subscription.PaystackCustomerId)
+        {
+            return Result<ConfirmPaymentMethodSetupResponse>.BadRequest("Paystack payment method authorization customer does not match this subscription.");
+        }
+
+        if (!AmountsMatch(verifiedTransaction.Amount, GetExpectedAuthorizationAmount()) || !CurrenciesMatch(verifiedTransaction.Currency, GetExpectedAuthorizationCurrency()))
+        {
+            return Result<ConfirmPaymentMethodSetupResponse>.BadRequest("Paystack payment method authorization amount does not match the expected setup amount.");
         }
 
         OpenInvoiceResult? openInvoice = null;
@@ -67,5 +89,26 @@ public sealed class ConfirmPaymentMethodSetupHandler(
         // Subscription is updated and telemetry is collected in ProcessPendingPaystackEvents when Paystack confirms the state change via webhook
 
         return new ConfirmPaymentMethodSetupResponse(openInvoice is not null, openInvoice?.AmountDue, openInvoice?.Currency);
+    }
+
+    private decimal GetExpectedAuthorizationAmount()
+    {
+        var amountSubunit = configuration.GetValue<long?>("Paystack:CardAuthorizationAmountSubunit") ?? 100;
+        return decimal.Round(amountSubunit / 100m, 2, MidpointRounding.AwayFromZero);
+    }
+
+    private string GetExpectedAuthorizationCurrency()
+    {
+        return (configuration["Paystack:CardAuthorizationCurrency"] ?? "USD").ToUpperInvariant();
+    }
+
+    private static bool AmountsMatch(decimal actual, decimal expected)
+    {
+        return decimal.Round(actual, 2, MidpointRounding.AwayFromZero) == decimal.Round(expected, 2, MidpointRounding.AwayFromZero);
+    }
+
+    private static bool CurrenciesMatch(string actual, string expected)
+    {
+        return string.Equals(actual, expected, StringComparison.OrdinalIgnoreCase);
     }
 }
