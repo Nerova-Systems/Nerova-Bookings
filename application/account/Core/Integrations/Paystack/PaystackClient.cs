@@ -76,7 +76,7 @@ public sealed class PaystackClient(IConfiguration configuration, IHttpClientFact
 
     public async Task<AuthorizationChargeResult?> ChargeAuthorizationAsync(
         PaystackCustomerId paystackCustomerId,
-        PaystackSubscriptionId authorizationCode,
+        PaystackAuthorizationCode authorizationCode,
         string email,
         PaystackPaymentPurpose purpose,
         SubscriptionPlan plan,
@@ -187,7 +187,7 @@ public sealed class PaystackClient(IConfiguration configuration, IHttpClientFact
 
         PaystackCustomerId.TryParse(customerCode, out var customerId);
         var authorization = authorizationCode is not null && email is not null && signature is not null
-            ? new PaystackAuthorization(PaystackSubscriptionId.NewId(authorizationCode), email, signature)
+            ? new PaystackAuthorization(PaystackAuthorizationCode.NewId(authorizationCode), email, signature)
             : null;
         var paymentMethod = CreatePaymentMethod(root);
 
@@ -337,7 +337,7 @@ public sealed class PaystackClient(IConfiguration configuration, IHttpClientFact
             var content = await response.Content.ReadAsStringAsync(cancellationToken);
             if (!response.IsSuccessStatusCode)
             {
-                logger.LogWarning("Paystack API request to '{Path}' failed with status {StatusCode}: {Content}", path, response.StatusCode, content);
+                logger.LogWarning("Paystack API request to '{Path}' failed with status {StatusCode}", path, response.StatusCode);
                 return null;
             }
 

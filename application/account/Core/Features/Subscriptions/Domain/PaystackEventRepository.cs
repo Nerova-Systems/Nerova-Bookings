@@ -13,6 +13,8 @@ public interface IPaystackEventRepository : IAppendRepository<PaystackEvent, Pay
 
     Task<PaystackEvent[]> GetPendingByPaystackCustomerIdAsync(PaystackCustomerId paystackCustomerId, CancellationToken cancellationToken);
 
+    Task<PaystackEvent[]> GetPendingByPaystackCustomerIdWithLockAsync(PaystackCustomerId paystackCustomerId, CancellationToken cancellationToken);
+
     /// <summary>
     ///     Checks if any pending events exist for a Paystack customer without locking.
     ///     Used by the frontend to poll for webhook processing completion.
@@ -33,6 +35,18 @@ internal sealed class PaystackEventRepository(AccountDbContext accountDbContext)
     {
         return await DbSet
             .Where(e => e.PaystackCustomerId == paystackCustomerId && e.Status == PaystackEventStatus.Pending)
+            .ToArrayAsync(cancellationToken);
+    }
+
+    public async Task<PaystackEvent[]> GetPendingByPaystackCustomerIdWithLockAsync(PaystackCustomerId paystackCustomerId, CancellationToken cancellationToken)
+    {
+        if (accountDbContext.Database.ProviderName is "Microsoft.EntityFrameworkCore.Sqlite")
+        {
+            return await GetPendingByPaystackCustomerIdAsync(paystackCustomerId, cancellationToken);
+        }
+
+        return await DbSet
+            .FromSqlInterpolated($"SELECT * FROM paystack_events WHERE paystack_customer_code = {paystackCustomerId.Value} AND status = 'Pending' FOR UPDATE SKIP LOCKED")
             .ToArrayAsync(cancellationToken);
     }
 

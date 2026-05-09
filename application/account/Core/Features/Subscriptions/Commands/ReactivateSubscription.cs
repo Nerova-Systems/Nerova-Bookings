@@ -32,7 +32,7 @@ public sealed class ReactivateSubscriptionHandler(
             return Result<ReactivateSubscriptionResponse>.BadRequest("Subscription is not cancelled. Nothing to reactivate.");
         }
 
-        if (subscription.PaystackSubscriptionId is null)
+        if (subscription.PaystackAuthorizationCode is null)
         {
             logger.LogWarning("No Paystack authorization found for subscription '{SubscriptionId}'", subscription.Id);
             return Result<ReactivateSubscriptionResponse>.BadRequest("No active Paystack authorization found.");

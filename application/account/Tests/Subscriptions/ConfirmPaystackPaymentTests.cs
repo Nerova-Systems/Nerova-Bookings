@@ -1,6 +1,7 @@
 using System.Globalization;
 using System.Net;
 using System.Net.Http.Json;
+using System.Text.Json;
 using Account.Database;
 using Account.Features.Subscriptions.Commands;
 using Account.Features.Subscriptions.Domain;
@@ -41,6 +42,30 @@ public sealed class ConfirmPaystackPaymentTests : EndpointBaseTest<AccountDbCont
         TelemetryEventsCollectorSpy.CollectedEvents.Count.Should().Be(1);
         TelemetryEventsCollectorSpy.CollectedEvents[0].GetType().Name.Should().Be("SubscriptionCreated");
         TelemetryEventsCollectorSpy.AreAllEventsDispatched.Should().BeTrue();
+    }
+
+    [Fact]
+    public async Task ConfirmPaystackPayment_WhenConfirmationIsRepeated_ShouldReturnPaidWithoutDuplicateTransaction()
+    {
+        // Arrange
+        SaveBillingInfo();
+        var checkoutResponse = await AuthenticatedOwnerHttpClient.PostAsJsonAsync("/api/account/subscriptions/start-checkout", new StartSubscriptionCheckoutCommand(SubscriptionPlan.Standard));
+        checkoutResponse.EnsureSuccessStatusCode();
+        var checkout = await checkoutResponse.Content.ReadFromJsonAsync<StartSubscriptionCheckoutResponse>();
+        var command = new ConfirmPaystackPaymentCommand(checkout!.Reference!, SubscriptionPlan.Standard, PaystackPaymentPurpose.Subscribe);
+        (await AuthenticatedOwnerHttpClient.PostAsJsonAsync("/api/account/subscriptions/confirm-payment", command)).EnsureSuccessStatusCode();
+        TelemetryEventsCollectorSpy.Reset();
+
+        // Act
+        var response = await AuthenticatedOwnerHttpClient.PostAsJsonAsync("/api/account/subscriptions/confirm-payment", command);
+
+        // Assert
+        response.EnsureSuccessStatusCode();
+        var result = await response.Content.ReadFromJsonAsync<ConfirmPaystackPaymentResponse>();
+        result!.Paid.Should().BeTrue();
+        var transactions = Connection.ExecuteScalar<string>("SELECT payment_transactions FROM subscriptions WHERE tenant_id = @tenantId", [new { tenantId = DatabaseSeeder.Tenant1.Id.Value }]);
+        JsonDocument.Parse(transactions).RootElement.GetArrayLength().Should().Be(1);
+        TelemetryEventsCollectorSpy.CollectedEvents.Should().BeEmpty();
     }
 
     [Fact]

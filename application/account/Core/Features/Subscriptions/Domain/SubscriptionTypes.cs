@@ -14,8 +14,8 @@ public sealed record PaystackCustomerId(string Value) : StronglyTypedString<Pays
 }
 
 [PublicAPI]
-[JsonConverter(typeof(StronglyTypedIdJsonConverter<string, PaystackSubscriptionId>))]
-public sealed record PaystackSubscriptionId(string Value) : StronglyTypedString<PaystackSubscriptionId>(Value)
+[JsonConverter(typeof(StronglyTypedIdJsonConverter<string, PaystackAuthorizationCode>))]
+public sealed record PaystackAuthorizationCode(string Value) : StronglyTypedString<PaystackAuthorizationCode>(Value)
 {
     public override string ToString()
     {

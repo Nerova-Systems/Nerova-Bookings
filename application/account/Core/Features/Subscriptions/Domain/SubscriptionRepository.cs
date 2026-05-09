@@ -10,6 +10,8 @@ public interface ISubscriptionRepository : ICrudRepository<Subscription, Subscri
 {
     Task<Subscription> GetCurrentAsync(CancellationToken cancellationToken);
 
+    Task<Subscription> GetCurrentWithLockAsync(CancellationToken cancellationToken);
+
     /// <summary>
     ///     Retrieves a subscription by Paystack customer ID with pessimistic locking (FOR UPDATE).
     ///     This method should only be used in webhook processing to serialize with user-action commands.
@@ -37,6 +39,20 @@ internal sealed class SubscriptionRepository(AccountDbContext accountDbContext, 
     {
         ArgumentNullException.ThrowIfNull(executionContext.TenantId);
         return await DbSet.SingleAsync(s => s.TenantId == executionContext.TenantId, cancellationToken);
+    }
+
+    public async Task<Subscription> GetCurrentWithLockAsync(CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(executionContext.TenantId);
+
+        if (accountDbContext.Database.ProviderName is "Microsoft.EntityFrameworkCore.Sqlite")
+        {
+            return await GetCurrentAsync(cancellationToken);
+        }
+
+        return await DbSet
+            .FromSqlInterpolated($"SELECT * FROM subscriptions WHERE tenant_id = {executionContext.TenantId.Value} FOR UPDATE")
+            .SingleAsync(cancellationToken);
     }
 
     /// <summary>
@@ -69,18 +85,23 @@ internal sealed class SubscriptionRepository(AccountDbContext accountDbContext, 
     /// </summary>
     public async Task<Subscription[]> GetDueForBillingUnfilteredAsync(DateTimeOffset dueAt, CancellationToken cancellationToken)
     {
+        var lockingClause = accountDbContext.Database.ProviderName is "Microsoft.EntityFrameworkCore.Sqlite"
+            ? string.Empty
+            : "FOR UPDATE SKIP LOCKED";
+
+        var sql = """
+                  SELECT *
+                  FROM subscriptions
+                  WHERE plan <> 'Basis'
+                    AND paystack_customer_code IS NOT NULL
+                    AND paystack_authorization_code IS NOT NULL
+                    AND next_billing_at IS NOT NULL
+                    AND next_billing_at <= {0}
+                  ORDER BY id
+                  """ + Environment.NewLine + lockingClause;
+
         return await DbSet
-            .FromSqlInterpolated($"""
-                                  SELECT *
-                                  FROM subscriptions
-                                  WHERE plan <> 'Basis'
-                                    AND paystack_customer_code IS NOT NULL
-                                    AND paystack_authorization_code IS NOT NULL
-                                    AND next_billing_at IS NOT NULL
-                                    AND next_billing_at <= {dueAt}
-                                  ORDER BY id
-                                  """
-            )
+            .FromSqlRaw(sql, dueAt)
             .IgnoreQueryFilters()
             .ToArrayAsync(cancellationToken);
     }

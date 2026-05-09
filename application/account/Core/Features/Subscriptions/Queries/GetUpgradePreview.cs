@@ -33,7 +33,7 @@ public sealed class GetUpgradePreviewHandler(ISubscriptionRepository subscriptio
             return Result<UpgradePreviewResponse>.BadRequest($"Cannot upgrade from '{subscription.Plan}' to '{query.NewPlan}'. Target plan must be higher.");
         }
 
-        if (subscription.PaystackSubscriptionId is null)
+        if (subscription.PaystackAuthorizationCode is null)
         {
             return Result<UpgradePreviewResponse>.BadRequest("No active Paystack authorization found.");
         }

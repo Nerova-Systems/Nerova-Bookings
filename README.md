@@ -336,6 +336,12 @@ Each developer should use their own Paystack test account. The app owns subscrip
 
 All values are stored securely in .NET user secrets and persist across restarts.
 
+### 3.3 (Optional) Configure Paystack MCP for agents
+
+The repo-local Codex configuration includes Paystack's official MCP server for safe test-mode Paystack inspection. Set `PAYSTACK_TEST_SECRET_KEY` to a Paystack test secret key that starts with `sk_test_`, then restart your Codex MCP session. Do not use production `sk_live_` keys; the server rejects live keys by design.
+
+Use read-only discovery as the default health check: verify that the MCP server starts and exposes `paystack://operations/list` before making Paystack API calls. Keep mutation calls limited to Paystack test mode.
+
 ## 4. Set up CI/CD with passwordless deployments from GitHub to Azure
 
 Run this command to automate Azure Subscription configuration and set up [GitHub Workflows](https://github.com/platformplatform/PlatformPlatform/actions) for deploying [Azure Infrastructure](./cloud-infrastructure) (using Bicep) and compiling [application code](./application) to Docker images deployed to Azure Container Apps:

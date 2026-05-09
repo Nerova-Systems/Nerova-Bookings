@@ -31,7 +31,7 @@ public sealed class PaystackEvent : AggregateRoot<PaystackEventId>
 
     public PaystackCustomerId? PaystackCustomerId { get; private set; }
 
-    public PaystackSubscriptionId? PaystackSubscriptionId { get; private set; }
+    public PaystackAuthorizationCode? PaystackAuthorizationCode { get; private set; }
 
     public string? PaystackReference { get; private set; }
 
@@ -43,8 +43,8 @@ public sealed class PaystackEvent : AggregateRoot<PaystackEventId>
 
     /// <summary>
     ///     Factory method for phase 1 webhook acknowledgment. Creates a Pending event that will be
-    ///     batch-processed in phase 2. TenantId and PaystackSubscriptionId are backfilled by phase 2
-    ///     via SetTenantId() and SetPaystackSubscriptionId().
+    ///     batch-processed in phase 2. TenantId and PaystackAuthorizationCode are backfilled by phase 2
+    ///     via SetTenantId() and SetPaystackAuthorizationCode().
     /// </summary>
     public static PaystackEvent Create(string paystackEventId, string eventType, PaystackCustomerId? paystackCustomerId, string? payload, string? paystackReference = null)
     {
@@ -85,9 +85,9 @@ public sealed class PaystackEvent : AggregateRoot<PaystackEventId>
         Error = error;
     }
 
-    public void SetPaystackSubscriptionId(PaystackSubscriptionId? paystackSubscriptionId)
+    public void SetPaystackAuthorizationCode(PaystackAuthorizationCode? paystackAuthorizationCode)
     {
-        PaystackSubscriptionId = paystackSubscriptionId;
+        PaystackAuthorizationCode = paystackAuthorizationCode;
     }
 
     public void SetTenantId(TenantId? tenantId)

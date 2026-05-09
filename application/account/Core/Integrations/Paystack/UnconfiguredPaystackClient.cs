@@ -18,7 +18,7 @@ public sealed class UnconfiguredPaystackClient(ILogger<UnconfiguredPaystackClien
 
     public Task<AuthorizationChargeResult?> ChargeAuthorizationAsync(
         PaystackCustomerId paystackCustomerId,
-        PaystackSubscriptionId authorizationCode,
+        PaystackAuthorizationCode authorizationCode,
         string email,
         PaystackPaymentPurpose purpose,
         SubscriptionPlan plan,

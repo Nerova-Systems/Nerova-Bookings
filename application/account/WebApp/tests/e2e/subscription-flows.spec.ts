@@ -147,6 +147,7 @@ test.describe("@smoke", () => {
                 status: "Succeeded",
                 date: "2026-02-24T00:00:00Z",
                 invoiceUrl: "https://mock.paystack.local/receipt/12345",
+                receiptUrl: "https://mock.paystack.local/receipt/12345",
                 creditNoteUrl: null
               }
             ]
@@ -692,6 +693,7 @@ test.describe("@comprehensive", () => {
                 status: "Succeeded",
                 date: "2026-02-24T00:00:00Z",
                 invoiceUrl: "https://mock.paystack.local/receipt/12345",
+                receiptUrl: "https://mock.paystack.local/receipt/12345",
                 creditNoteUrl: null
               },
               {
@@ -701,6 +703,7 @@ test.describe("@comprehensive", () => {
                 status: "Refunded",
                 date: "2026-01-24T00:00:00Z",
                 invoiceUrl: "https://mock.paystack.local/receipt/12346",
+                receiptUrl: "https://mock.paystack.local/receipt/12346",
                 creditNoteUrl: "https://mock.paystack.local/credit-note/67890"
               }
             ]

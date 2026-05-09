@@ -11,6 +11,7 @@ using Account.Integrations.OAuth.Mock;
 using Account.Integrations.Paystack;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Options;
 using SharedKernel.Configuration;
 using SharedKernel.Emails;
 using SharedKernel.OpenIdConnect;
@@ -56,6 +57,11 @@ public static class Configuration
             services.AddEmailRendering("WebApp");
 
             services.AddMemoryCache();
+            services.AddOptions<PaystackOptions>()
+                .BindConfiguration("Paystack")
+                .ValidateOnStart();
+            services.AddSingleton<IValidateOptions<PaystackOptions>, PaystackOptionsValidator>();
+
             services.AddHttpContextAccessor();
             services.AddSingleton<MockPaystackState>();
             services.AddKeyedScoped<IPaystackClient, PaystackClient>("paystack");

@@ -38,6 +38,8 @@ public sealed class GetPaymentHistoryTests : EndpointBaseTest<AccountDbContext>
         result.Transactions[0].Amount.Should().Be(29.99m);
         result.Transactions[0].Currency.Should().Be("usd");
         result.Transactions[0].Status.Should().Be(PaymentTransactionStatus.Succeeded);
+        result.Transactions[0].InvoiceUrl.Should().Be("https://invoice.paystack.com/test");
+        result.Transactions[0].ReceiptUrl.Should().Be("https://invoice.paystack.com/test");
     }
 
     [Fact]

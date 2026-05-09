@@ -10,7 +10,7 @@ public sealed class PaystackClientFactory(IServiceProvider serviceProvider, ICon
     private readonly bool _allowMockProvider = configuration.GetValue<bool>("Paystack:AllowMockProvider");
     private readonly string? _publicKey = configuration["Paystack:PublicKey"];
 
-    public bool IsPaystackSubscriptionEnabled { get; } = configuration["Paystack:SubscriptionEnabled"] == "true";
+    public bool IsPaystackAuthorizationEnabled { get; } = configuration["Paystack:SubscriptionEnabled"] == "true";
 
     public string? GetPublicKey()
     {
@@ -24,7 +24,7 @@ public sealed class PaystackClientFactory(IServiceProvider serviceProvider, ICon
             return serviceProvider.GetRequiredKeyedService<IPaystackClient>("mock-paystack");
         }
 
-        if (IsPaystackSubscriptionEnabled)
+        if (IsPaystackAuthorizationEnabled)
         {
             return serviceProvider.GetRequiredKeyedService<IPaystackClient>("paystack");
         }

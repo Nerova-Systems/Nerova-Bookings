@@ -11,6 +11,8 @@ public sealed class MockPaystackState
     public bool SimulateCustomerDeleted { get; set; }
 
     public bool SimulateAuthorizationChargeFailure { get; set; }
+
+    public bool SimulateRefundFailure { get; set; }
 }
 
 public sealed class MockPaystackClient(IConfiguration configuration, TimeProvider timeProvider, MockPaystackState state) : IPaystackClient
@@ -21,7 +23,7 @@ public sealed class MockPaystackClient(IConfiguration configuration, TimeProvide
     public const string MockAuthorizationCode = MockSubscriptionId;
     public const string MockReference = "nerova_mock_reference_12345";
     public const string MockAccessCode = "access_mock_12345";
-    public const string MockInvoiceUrl = "https://mock.paystack.local/receipt/12345";
+    public const string MockReceiptUrl = "https://mock.paystack.local/receipt/12345";
     public const string MockWebhookEventId = "evt_mock_12345";
 
     private readonly bool _isEnabled = configuration.GetValue<bool>("Paystack:AllowMockProvider");
@@ -43,7 +45,7 @@ public sealed class MockPaystackClient(IConfiguration configuration, TimeProvide
 
     public Task<AuthorizationChargeResult?> ChargeAuthorizationAsync(
         PaystackCustomerId paystackCustomerId,
-        PaystackSubscriptionId authorizationCode,
+        PaystackAuthorizationCode authorizationCode,
         string email,
         PaystackPaymentPurpose purpose,
         SubscriptionPlan plan,
@@ -157,6 +159,11 @@ public sealed class MockPaystackClient(IConfiguration configuration, TimeProvide
     public Task<RefundResult?> CreateRefundAsync(string transactionReference, decimal amount, string currency, CancellationToken cancellationToken)
     {
         EnsureEnabled();
+        if (state.SimulateRefundFailure)
+        {
+            return Task.FromResult<RefundResult?>(null);
+        }
+
         return Task.FromResult<RefundResult?>(new RefundResult($"refund_{Guid.NewGuid():N}", amount, currency.ToUpperInvariant(), "processed"));
     }
 
@@ -198,7 +205,7 @@ public sealed class MockPaystackClient(IConfiguration configuration, TimeProvide
             true,
             purpose,
             customerId ?? PaystackCustomerId.NewId(MockCustomerId),
-            new PaystackAuthorization(PaystackSubscriptionId.NewId(MockAuthorizationCode), "billing@example.com", "SIG_mock_12345"),
+            new PaystackAuthorization(PaystackAuthorizationCode.NewId(MockAuthorizationCode), "billing@example.com", "SIG_mock_12345"),
             new PaymentMethod("visa", "4242", 12, 2026)
         );
     }

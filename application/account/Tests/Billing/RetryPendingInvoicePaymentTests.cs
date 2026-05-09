@@ -11,10 +11,10 @@ using Xunit;
 
 namespace Account.Tests.Billing;
 
-public sealed class RetryPendingInvoicePaymentTests : EndpointBaseTest<AccountDbContext>
+public sealed class RetryRenewalPaymentTests : EndpointBaseTest<AccountDbContext>
 {
     [Fact]
-    public async Task RetryPendingInvoicePayment_WhenAuthorizationChargePaid_ShouldReturnPaid()
+    public async Task RetryRenewalPayment_WhenAuthorizationChargePaid_ShouldReturnPaid()
     {
         // Arrange
         Connection.Update("subscriptions", "tenant_id", DatabaseSeeder.Tenant1.Id.Value, [
@@ -30,11 +30,11 @@ public sealed class RetryPendingInvoicePaymentTests : EndpointBaseTest<AccountDb
         );
 
         // Act
-        var response = await AuthenticatedOwnerHttpClient.PostAsync("/api/account/billing/retry-pending-invoice", null);
+        var response = await AuthenticatedOwnerHttpClient.PostAsync("/api/account/billing/retry-renewal-payment", null);
 
         // Assert
         response.EnsureSuccessStatusCode();
-        var result = await response.Content.ReadFromJsonAsync<RetryPendingInvoicePaymentResponse>();
+        var result = await response.Content.ReadFromJsonAsync<RetryRenewalPaymentResponse>();
         result!.Paid.Should().BeTrue();
         result.Reference.Should().NotBeNullOrEmpty();
         result.AccessCode.Should().BeNull();
@@ -49,7 +49,32 @@ public sealed class RetryPendingInvoicePaymentTests : EndpointBaseTest<AccountDb
     }
 
     [Fact]
-    public async Task RetryPendingInvoicePayment_WhenAuthorizationChargeFails_ShouldReturnBadRequestAndKeepPaymentFailure()
+    public async Task RetryRenewalPayment_WhenUsingCompatibilityInvoiceRoute_ShouldReturnPaid()
+    {
+        // Arrange
+        Connection.Update("subscriptions", "tenant_id", DatabaseSeeder.Tenant1.Id.Value, [
+                ("plan", nameof(SubscriptionPlan.Standard)),
+                ("paystack_customer_code", MockPaystackClient.MockCustomerCode),
+                ("paystack_authorization_code", "AUTH_test_123"),
+                ("paystack_authorization_email", DatabaseSeeder.Tenant1Owner.Email),
+                ("current_price_amount", 29.99m),
+                ("current_price_currency", "USD"),
+                ("first_payment_failed_at", TimeProvider.GetUtcNow().AddDays(-1)),
+                ("current_period_end", TimeProvider.GetUtcNow().AddDays(30))
+            ]
+        );
+
+        // Act
+        var response = await AuthenticatedOwnerHttpClient.PostAsync("/api/account/billing/retry-pending-invoice", null);
+
+        // Assert
+        response.EnsureSuccessStatusCode();
+        var result = await response.Content.ReadFromJsonAsync<RetryRenewalPaymentResponse>();
+        result!.Paid.Should().BeTrue();
+    }
+
+    [Fact]
+    public async Task RetryRenewalPayment_WhenAuthorizationChargeFails_ShouldReturnBadRequestAndKeepPaymentFailure()
     {
         // Arrange
         Connection.Update("subscriptions", "tenant_id", DatabaseSeeder.Tenant1.Id.Value, [
@@ -66,7 +91,7 @@ public sealed class RetryPendingInvoicePaymentTests : EndpointBaseTest<AccountDb
         PaystackState.SimulateAuthorizationChargeFailure = true;
 
         // Act
-        var response = await AuthenticatedOwnerHttpClient.PostAsync("/api/account/billing/retry-pending-invoice", null);
+        var response = await AuthenticatedOwnerHttpClient.PostAsync("/api/account/billing/retry-renewal-payment", null);
 
         // Assert
         await response.ShouldHaveErrorStatusCode(HttpStatusCode.BadRequest, "Paystack could not charge the saved payment method.");
@@ -75,7 +100,7 @@ public sealed class RetryPendingInvoicePaymentTests : EndpointBaseTest<AccountDb
     }
 
     [Fact]
-    public async Task RetryPendingInvoicePayment_WhenNoPendingRenewalPayment_ShouldReturnBadRequest()
+    public async Task RetryRenewalPayment_WhenNoPendingRenewalPayment_ShouldReturnBadRequest()
     {
         // Arrange
         Connection.Update("subscriptions", "tenant_id", DatabaseSeeder.Tenant1.Id.Value, [
@@ -87,24 +112,24 @@ public sealed class RetryPendingInvoicePaymentTests : EndpointBaseTest<AccountDb
         );
 
         // Act
-        var response = await AuthenticatedOwnerHttpClient.PostAsync("/api/account/billing/retry-pending-invoice", null);
+        var response = await AuthenticatedOwnerHttpClient.PostAsync("/api/account/billing/retry-renewal-payment", null);
 
         // Assert
         await response.ShouldHaveErrorStatusCode(HttpStatusCode.BadRequest, "No pending renewal payment found for this subscription.");
     }
 
     [Fact]
-    public async Task RetryPendingInvoicePayment_WhenNonOwner_ShouldReturnForbidden()
+    public async Task RetryRenewalPayment_WhenNonOwner_ShouldReturnForbidden()
     {
         // Act
-        var response = await AuthenticatedMemberHttpClient.PostAsync("/api/account/billing/retry-pending-invoice", null);
+        var response = await AuthenticatedMemberHttpClient.PostAsync("/api/account/billing/retry-renewal-payment", null);
 
         // Assert
         await response.ShouldHaveErrorStatusCode(HttpStatusCode.Forbidden, "Only owners can manage subscriptions.");
     }
 
     [Fact]
-    public async Task RetryPendingInvoicePayment_WhenNoPaystackSubscription_ShouldReturnBadRequest()
+    public async Task RetryRenewalPayment_WhenNoPaystackAuthorization_ShouldReturnBadRequest()
     {
         // Arrange
         Connection.Update("subscriptions", "tenant_id", DatabaseSeeder.Tenant1.Id.Value, [
@@ -113,7 +138,7 @@ public sealed class RetryPendingInvoicePaymentTests : EndpointBaseTest<AccountDb
         );
 
         // Act
-        var response = await AuthenticatedOwnerHttpClient.PostAsync("/api/account/billing/retry-pending-invoice", null);
+        var response = await AuthenticatedOwnerHttpClient.PostAsync("/api/account/billing/retry-renewal-payment", null);
 
         // Assert
         await response.ShouldHaveErrorStatusCode(HttpStatusCode.BadRequest, "No active Paystack authorization found.");

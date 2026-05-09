@@ -74,7 +74,7 @@ public sealed class ConfirmPaymentMethodSetupTests : EndpointBaseTest<AccountDbC
     }
 
     [Fact]
-    public async Task ConfirmPaymentMethodSetup_WhenNoPaystackSubscription_ShouldSetCustomerDefault()
+    public async Task ConfirmPaymentMethodSetup_WhenNoPaystackAuthorization_ShouldSetCustomerDefault()
     {
         // Arrange
         Connection.Update("subscriptions", "tenant_id", DatabaseSeeder.Tenant1.Id.Value, [
@@ -94,6 +94,36 @@ public sealed class ConfirmPaymentMethodSetupTests : EndpointBaseTest<AccountDbC
         response.EnsureSuccessStatusCode();
         var result = await response.Content.ReadFromJsonAsync<ConfirmPaymentMethodSetupResponse>();
         result!.HasPendingRenewalPayment.Should().BeFalse();
+    }
+
+    [Fact]
+    public async Task ConfirmPaymentMethodSetup_WhenRefundFails_ShouldKeepPreviousAuthorization()
+    {
+        // Arrange
+        const string previousAuthorizationCode = "AUTH_previous_123";
+        Connection.Update("subscriptions", "tenant_id", DatabaseSeeder.Tenant1.Id.Value, [
+                ("plan", nameof(SubscriptionPlan.Standard)),
+                ("paystack_customer_code", MockPaystackClient.MockCustomerCode),
+                ("paystack_authorization_code", previousAuthorizationCode),
+                ("paystack_authorization_email", "previous@example.com"),
+                ("paystack_authorization_signature", "SIG_previous"),
+                ("payment_method", """{"Brand":"visa","Last4":"1111","ExpMonth":12,"ExpYear":2026}"""),
+                ("current_period_end", TimeProvider.GetUtcNow().AddDays(30)),
+                ("billing_info", """{"Name":"Test Organization","Address":{"Line1":"Vestergade 12","PostalCode":"1456","City":"Copenhagen","Country":"DK"},"Email":"billing@example.com"}""")
+            ]
+        );
+        var setupResponse = await AuthenticatedOwnerHttpClient.PostAsync("/api/account/billing/start-payment-method-setup", null);
+        setupResponse.EnsureSuccessStatusCode();
+        var setup = await setupResponse.Content.ReadFromJsonAsync<StartPaymentMethodSetupResponse>();
+        PaystackState.SimulateRefundFailure = true;
+
+        // Act
+        var response = await AuthenticatedOwnerHttpClient.PostAsJsonAsync("/api/account/billing/confirm-payment-method", new ConfirmPaymentMethodSetupCommand(setup!.Reference));
+
+        // Assert
+        await response.ShouldHaveErrorStatusCode(HttpStatusCode.BadRequest, "Failed to refund Paystack payment method authorization charge.");
+        Connection.ExecuteScalar<string>("SELECT paystack_authorization_code FROM subscriptions WHERE tenant_id = @tenantId", [new { tenantId = DatabaseSeeder.Tenant1.Id.Value }]).Should().Be(previousAuthorizationCode);
+        Connection.ExecuteScalar<string>("SELECT status FROM paystack_payment_attempts WHERE paystack_reference = @reference", [new { reference = setup.Reference }]).Should().Be("Failed");
     }
 
     [Fact]

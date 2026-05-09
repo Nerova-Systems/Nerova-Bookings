@@ -46,7 +46,7 @@ public sealed class PaystackPaymentAttempt : AggregateRoot<PaystackPaymentAttemp
 
     public PaystackCustomerId PaystackCustomerId { get; private set; }
 
-    public PaystackSubscriptionId? PaystackAuthorizationCode { get; private set; }
+    public PaystackAuthorizationCode? PaystackAuthorizationCode { get; private set; }
 
     public PaystackPaymentPurpose Purpose { get; }
 
@@ -69,7 +69,7 @@ public sealed class PaystackPaymentAttempt : AggregateRoot<PaystackPaymentAttemp
         SubscriptionId subscriptionId,
         string paystackReference,
         PaystackCustomerId paystackCustomerId,
-        PaystackSubscriptionId? paystackAuthorizationCode,
+        PaystackAuthorizationCode? paystackAuthorizationCode,
         PaystackPaymentPurpose purpose,
         SubscriptionPlan? plan,
         decimal amount,

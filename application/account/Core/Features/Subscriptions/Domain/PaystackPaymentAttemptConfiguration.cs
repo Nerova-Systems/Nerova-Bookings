@@ -14,7 +14,7 @@ public sealed class PaystackPaymentAttemptConfiguration : IEntityTypeConfigurati
         builder.MapStronglyTypedLongId<PaystackPaymentAttempt, TenantId>(a => a.TenantId);
         builder.MapStronglyTypedUuid<PaystackPaymentAttempt, SubscriptionId>(a => a.SubscriptionId);
         builder.MapStronglyTypedId<PaystackPaymentAttempt, PaystackCustomerId, string>(a => a.PaystackCustomerId);
-        builder.MapStronglyTypedNullableId<PaystackPaymentAttempt, PaystackSubscriptionId, string>(a => a.PaystackAuthorizationCode);
+        builder.MapStronglyTypedNullableId<PaystackPaymentAttempt, PaystackAuthorizationCode, string>(a => a.PaystackAuthorizationCode);
 
         builder.HasOne<Subscription>().WithMany().HasForeignKey(a => a.SubscriptionId);
         builder.HasOne<Tenant>().WithMany().HasForeignKey(a => a.TenantId);

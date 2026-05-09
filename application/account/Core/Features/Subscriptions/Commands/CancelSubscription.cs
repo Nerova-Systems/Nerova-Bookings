@@ -46,7 +46,7 @@ public sealed class CancelSubscriptionHandler(
             return Result.BadRequest("Cannot cancel a Basis subscription.");
         }
 
-        if (subscription.PaystackSubscriptionId is null)
+        if (subscription.PaystackAuthorizationCode is null)
         {
             logger.LogWarning("No Paystack authorization found for subscription '{SubscriptionId}'", subscription.Id);
             return Result.BadRequest("No active Paystack authorization found.");

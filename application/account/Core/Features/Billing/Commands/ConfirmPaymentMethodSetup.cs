@@ -1,7 +1,10 @@
+using System.Data;
+using Account.Database;
 using Account.Features.Subscriptions.Domain;
 using Account.Features.Users.Domain;
 using Account.Integrations.Paystack;
 using JetBrains.Annotations;
+using Microsoft.EntityFrameworkCore;
 using SharedKernel.Cqrs;
 using SharedKernel.ExecutionContext;
 
@@ -14,6 +17,7 @@ public sealed record ConfirmPaymentMethodSetupCommand(string Reference) : IComma
 public sealed record ConfirmPaymentMethodSetupResponse(bool HasPendingRenewalPayment, decimal? PendingRenewalPaymentAmount, string? PendingRenewalPaymentCurrency);
 
 public sealed class ConfirmPaymentMethodSetupHandler(
+    AccountDbContext dbContext,
     ISubscriptionRepository subscriptionRepository,
     IPaystackPaymentAttemptRepository paystackPaymentAttemptRepository,
     PaystackClientFactory paystackClientFactory,
@@ -29,7 +33,12 @@ public sealed class ConfirmPaymentMethodSetupHandler(
             return Result<ConfirmPaymentMethodSetupResponse>.Forbidden("Only owners can manage subscriptions.");
         }
 
-        var subscription = await subscriptionRepository.GetCurrentAsync(cancellationToken);
+        var isSqlite = dbContext.Database.ProviderName == "Microsoft.EntityFrameworkCore.Sqlite";
+        await using var transaction = isSqlite
+            ? await dbContext.Database.BeginTransactionAsync(cancellationToken)
+            : await dbContext.Database.BeginTransactionAsync(IsolationLevel.ReadCommitted, cancellationToken);
+
+        var subscription = await subscriptionRepository.GetCurrentWithLockAsync(cancellationToken);
 
         if (subscription.PaystackCustomerId is null)
         {
@@ -38,7 +47,7 @@ public sealed class ConfirmPaymentMethodSetupHandler(
         }
 
         var paystackClient = paystackClientFactory.GetClient();
-        var paymentAttempt = await paystackPaymentAttemptRepository.GetByReferenceAsync(command.Reference, cancellationToken);
+        var paymentAttempt = await paystackPaymentAttemptRepository.GetByReferenceWithLockUnfilteredAsync(command.Reference, cancellationToken);
         if (paymentAttempt is null)
         {
             return Result<ConfirmPaymentMethodSetupResponse>.BadRequest("Paystack payment method authorization attempt was not found.");
@@ -56,6 +65,11 @@ public sealed class ConfirmPaymentMethodSetupHandler(
 
         if (paymentAttempt.Status != PaystackPaymentAttemptStatus.Pending)
         {
+            if (paymentAttempt.Status == PaystackPaymentAttemptStatus.Succeeded)
+            {
+                return new ConfirmPaymentMethodSetupResponse(false, null, null);
+            }
+
             return Result<ConfirmPaymentMethodSetupResponse>.BadRequest("Paystack payment method authorization attempt has already been processed.");
         }
 
@@ -65,6 +79,8 @@ public sealed class ConfirmPaymentMethodSetupHandler(
         {
             paymentAttempt.MarkFailed(now, verifiedTransaction?.ErrorMessage ?? "Failed to verify Paystack payment method authorization.");
             paystackPaymentAttemptRepository.Update(paymentAttempt);
+            await dbContext.SaveChangesAsync(cancellationToken);
+            await transaction.CommitAsync(cancellationToken);
             return Result<ConfirmPaymentMethodSetupResponse>.BadRequest(verifiedTransaction?.ErrorMessage ?? "Failed to verify Paystack payment method authorization.", true);
         }
 
@@ -87,19 +103,22 @@ public sealed class ConfirmPaymentMethodSetupHandler(
         {
             paymentAttempt.MarkFailed(now, "Paystack payment method authorization amount does not match the expected setup amount.");
             paystackPaymentAttemptRepository.Update(paymentAttempt);
+            await dbContext.SaveChangesAsync(cancellationToken);
+            await transaction.CommitAsync(cancellationToken);
             return Result<ConfirmPaymentMethodSetupResponse>.BadRequest("Paystack payment method authorization amount does not match the expected setup amount.", true);
         }
-
-        subscription.SetPaystackAuthorization(verifiedTransaction.Authorization.AuthorizationCode, verifiedTransaction.Authorization.Email, verifiedTransaction.Authorization.Signature, verifiedTransaction.PaymentMethod);
 
         var refund = await paystackClient.CreateRefundAsync(verifiedTransaction.Reference, verifiedTransaction.Amount, verifiedTransaction.Currency, cancellationToken);
         if (refund is null)
         {
             paymentAttempt.MarkFailed(now, "Failed to refund Paystack payment method authorization charge.");
             paystackPaymentAttemptRepository.Update(paymentAttempt);
+            await dbContext.SaveChangesAsync(cancellationToken);
+            await transaction.CommitAsync(cancellationToken);
             return Result<ConfirmPaymentMethodSetupResponse>.BadRequest("Failed to refund Paystack payment method authorization charge.", true);
         }
 
+        subscription.SetPaystackAuthorization(verifiedTransaction.Authorization.AuthorizationCode, verifiedTransaction.Authorization.Email, verifiedTransaction.Authorization.Signature, verifiedTransaction.PaymentMethod);
         subscription.SetPaymentTransactions([
                 .. subscription.PaymentTransactions,
                 new PaymentTransaction(PaymentTransactionId.NewId(), refund.Amount, refund.Currency, PaymentTransactionStatus.Refunded, now, null, null, null)
@@ -109,6 +128,8 @@ public sealed class ConfirmPaymentMethodSetupHandler(
         subscriptionRepository.Update(subscription);
         paymentAttempt.MarkSucceeded(now);
         paystackPaymentAttemptRepository.Update(paymentAttempt);
+        await dbContext.SaveChangesAsync(cancellationToken);
+        await transaction.CommitAsync(cancellationToken);
 
         return new ConfirmPaymentMethodSetupResponse(false, null, null);
     }

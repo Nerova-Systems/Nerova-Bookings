@@ -11,10 +11,10 @@ public sealed class PaystackEventConfiguration : IEntityTypeConfiguration<Paysta
     {
         builder.MapStronglyTypedString(e => e.Id);
         builder.MapStronglyTypedNullableId<PaystackEvent, PaystackCustomerId, string>(e => e.PaystackCustomerId);
-        builder.MapStronglyTypedNullableId<PaystackEvent, PaystackSubscriptionId, string>(e => e.PaystackSubscriptionId);
+        builder.MapStronglyTypedNullableId<PaystackEvent, PaystackAuthorizationCode, string>(e => e.PaystackAuthorizationCode);
         builder.MapStronglyTypedNullableLongId<PaystackEvent, TenantId>(e => e.TenantId);
         builder.Property(e => e.PaystackCustomerId).HasColumnName("paystack_customer_code");
-        builder.Property(e => e.PaystackSubscriptionId).HasColumnName("paystack_authorization_code");
+        builder.Property(e => e.PaystackAuthorizationCode).HasColumnName("paystack_authorization_code");
         builder.Property(e => e.Payload).HasColumnType("jsonb");
     }
 }

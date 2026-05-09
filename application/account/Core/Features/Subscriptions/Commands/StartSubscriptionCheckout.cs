@@ -67,7 +67,7 @@ public sealed class StartSubscriptionCheckoutHandler(
 
         if (subscription.PaymentMethod is not null)
         {
-            if (subscription.HasActivePaystackSubscription())
+            if (subscription.HasActivePaystackAuthorization())
             {
                 return Result<StartSubscriptionCheckoutResponse>.BadRequest("A subscription already exists. Please complete any pending payment or use upgrade instead.");
             }
@@ -78,7 +78,7 @@ public sealed class StartSubscriptionCheckoutHandler(
             }
 
             var billingEmail = subscription.PaystackAuthorizationEmail ?? subscription.BillingInfo.Email;
-            if (subscription.PaystackSubscriptionId is null || billingEmail is null)
+            if (subscription.PaystackAuthorizationCode is null || billingEmail is null)
             {
                 return Result<StartSubscriptionCheckoutResponse>.BadRequest("A reusable card authorization is required before subscribing with a saved payment method.");
             }
@@ -91,7 +91,7 @@ public sealed class StartSubscriptionCheckoutHandler(
 
             var charge = await paystackClient.ChargeAuthorizationAsync(
                 subscription.PaystackCustomerId,
-                subscription.PaystackSubscriptionId,
+                subscription.PaystackAuthorizationCode,
                 billingEmail,
                 PaystackPaymentPurpose.Subscribe,
                 command.Plan,
@@ -109,7 +109,7 @@ public sealed class StartSubscriptionCheckoutHandler(
                 subscription.Id,
                 charge.Reference,
                 subscription.PaystackCustomerId,
-                subscription.PaystackSubscriptionId,
+                subscription.PaystackAuthorizationCode,
                 PaystackPaymentPurpose.Subscribe,
                 command.Plan,
                 charge.Amount,
@@ -129,7 +129,7 @@ public sealed class StartSubscriptionCheckoutHandler(
             return new StartSubscriptionCheckoutResponse(null, charge.Reference, null, charge.Amount, charge.Currency, nameof(PaystackPaymentPurpose.Subscribe), true);
         }
 
-        if (subscription.HasActivePaystackSubscription())
+        if (subscription.HasActivePaystackAuthorization())
         {
             return Result<StartSubscriptionCheckoutResponse>.BadRequest("An active subscription already exists. Cannot create a new checkout session.");
         }

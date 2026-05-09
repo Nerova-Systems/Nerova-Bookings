@@ -1,7 +1,10 @@
+using System.Data;
+using Account.Database;
 using Account.Features.Subscriptions.Domain;
 using Account.Features.Users.Domain;
 using Account.Integrations.Paystack;
 using JetBrains.Annotations;
+using Microsoft.EntityFrameworkCore;
 using SharedKernel.Cqrs;
 using SharedKernel.ExecutionContext;
 using SharedKernel.Telemetry;
@@ -15,6 +18,7 @@ public sealed record ConfirmRetryPaymentCommand(string Reference) : ICommand, IR
 public sealed record ConfirmRetryPaymentResponse(bool Paid);
 
 public sealed class ConfirmRetryPaymentHandler(
+    AccountDbContext dbContext,
     ISubscriptionRepository subscriptionRepository,
     IPaystackPaymentAttemptRepository paystackPaymentAttemptRepository,
     PaystackClientFactory paystackClientFactory,
@@ -30,13 +34,18 @@ public sealed class ConfirmRetryPaymentHandler(
             return Result<ConfirmRetryPaymentResponse>.Forbidden("Only owners can manage subscriptions.");
         }
 
-        var subscription = await subscriptionRepository.GetCurrentAsync(cancellationToken);
+        var isSqlite = dbContext.Database.ProviderName == "Microsoft.EntityFrameworkCore.Sqlite";
+        await using var transaction = isSqlite
+            ? await dbContext.Database.BeginTransactionAsync(cancellationToken)
+            : await dbContext.Database.BeginTransactionAsync(IsolationLevel.ReadCommitted, cancellationToken);
+
+        var subscription = await subscriptionRepository.GetCurrentWithLockAsync(cancellationToken);
         if (subscription.PaystackCustomerId is null)
         {
             return Result<ConfirmRetryPaymentResponse>.BadRequest("No Paystack customer found.");
         }
 
-        var paymentAttempt = await paystackPaymentAttemptRepository.GetByReferenceAsync(command.Reference, cancellationToken);
+        var paymentAttempt = await paystackPaymentAttemptRepository.GetByReferenceWithLockUnfilteredAsync(command.Reference, cancellationToken);
         if (paymentAttempt is null)
         {
             return Result<ConfirmRetryPaymentResponse>.BadRequest("Paystack retry payment attempt was not found.");
@@ -51,6 +60,11 @@ public sealed class ConfirmRetryPaymentHandler(
 
         if (paymentAttempt.Status != PaystackPaymentAttemptStatus.Pending)
         {
+            if (paymentAttempt.Status == PaystackPaymentAttemptStatus.Succeeded)
+            {
+                return new ConfirmRetryPaymentResponse(true);
+            }
+
             return Result<ConfirmRetryPaymentResponse>.BadRequest("Paystack retry payment attempt has already been processed.");
         }
 
@@ -61,6 +75,8 @@ public sealed class ConfirmRetryPaymentHandler(
         {
             paymentAttempt.MarkFailed(now, verified?.ErrorMessage ?? "Paystack retry payment could not be verified.");
             paystackPaymentAttemptRepository.Update(paymentAttempt);
+            await dbContext.SaveChangesAsync(cancellationToken);
+            await transaction.CommitAsync(cancellationToken);
             return Result<ConfirmRetryPaymentResponse>.BadRequest(verified?.ErrorMessage ?? "Paystack retry payment could not be verified.", true);
         }
 
@@ -83,10 +99,14 @@ public sealed class ConfirmRetryPaymentHandler(
         {
             paymentAttempt.MarkFailed(now, "Paystack retry payment amount does not match the expected renewal payment amount.");
             paystackPaymentAttemptRepository.Update(paymentAttempt);
+            await dbContext.SaveChangesAsync(cancellationToken);
+            await transaction.CommitAsync(cancellationToken);
             return Result<ConfirmRetryPaymentResponse>.BadRequest("Paystack retry payment amount does not match the expected renewal payment amount.", true);
         }
 
+        var nextBillingAt = now.AddMonths(1);
         subscription.ClearPaymentFailure();
+        subscription.StartBillingPeriod(subscription.Plan, verified.Amount, verified.Currency, now, nextBillingAt, verified.PaymentMethod);
         subscription.SetPaymentTransactions([
                 .. subscription.PaymentTransactions,
                 new PaymentTransaction(PaymentTransactionId.NewId(), verified.Amount, verified.Currency, PaymentTransactionStatus.Succeeded, now, null, null, null)
@@ -97,6 +117,8 @@ public sealed class ConfirmRetryPaymentHandler(
         paymentAttempt.MarkSucceeded(now);
         paystackPaymentAttemptRepository.Update(paymentAttempt);
         events.CollectEvent(new RenewalPaymentRetried(subscription.Id));
+        await dbContext.SaveChangesAsync(cancellationToken);
+        await transaction.CommitAsync(cancellationToken);
 
         return new ConfirmRetryPaymentResponse(true);
     }

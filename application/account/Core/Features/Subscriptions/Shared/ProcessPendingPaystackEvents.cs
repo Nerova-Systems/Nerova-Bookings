@@ -43,7 +43,7 @@ public sealed class ProcessPendingPaystackEvents(
         }
 
         var tenant = (await tenantRepository.GetByIdUnfilteredAsync(subscription.TenantId, cancellationToken))!;
-        var pendingEvents = await paystackEventRepository.GetPendingByPaystackCustomerIdAsync(paystackCustomerId, cancellationToken);
+        var pendingEvents = await paystackEventRepository.GetPendingByPaystackCustomerIdWithLockAsync(paystackCustomerId, cancellationToken);
 
         if (pendingEvents.Length > 0)
         {
@@ -64,7 +64,7 @@ public sealed class ProcessPendingPaystackEvents(
     {
         var now = timeProvider.GetUtcNow();
         pendingEvent.SetTenantId(subscription.TenantId);
-        pendingEvent.SetPaystackSubscriptionId(subscription.PaystackSubscriptionId);
+        pendingEvent.SetPaystackAuthorizationCode(subscription.PaystackAuthorizationCode);
 
         if (pendingEvent.PaystackReference is null)
         {
@@ -72,7 +72,7 @@ public sealed class ProcessPendingPaystackEvents(
             return;
         }
 
-        var paymentAttempt = await paystackPaymentAttemptRepository.GetByReferenceUnfilteredAsync(pendingEvent.PaystackReference, cancellationToken);
+        var paymentAttempt = await paystackPaymentAttemptRepository.GetByReferenceWithLockUnfilteredAsync(pendingEvent.PaystackReference, cancellationToken);
         if (paymentAttempt is null)
         {
             MarkEventFailed(pendingEvent, now, "Paystack payment attempt was not found.");
@@ -179,7 +179,7 @@ public sealed class ProcessPendingPaystackEvents(
         var nextBillingAt = now.AddMonths(1);
 
         subscription.SetPaystackAuthorization(verified.Authorization!.AuthorizationCode, verified.Authorization.Email, verified.Authorization.Signature, verified.PaymentMethod);
-        subscription.SetPaystackSubscription(verified.Authorization.AuthorizationCode, plan, verified.Amount, verified.Currency, now, nextBillingAt, nextBillingAt, verified.PaymentMethod);
+        subscription.SetPaystackBillingState(verified.Authorization.AuthorizationCode, plan, verified.Amount, verified.Currency, now, nextBillingAt, nextBillingAt, verified.PaymentMethod);
         subscription.ClearPaymentFailure();
         subscription.SetPaymentTransactions([
                 .. subscription.PaymentTransactions,
@@ -264,7 +264,7 @@ public sealed class ProcessPendingPaystackEvents(
 
     private void MarkEventProcessed(PaystackEvent pendingEvent, Subscription subscription, DateTimeOffset now)
     {
-        pendingEvent.SetPaystackSubscriptionId(subscription.PaystackSubscriptionId);
+        pendingEvent.SetPaystackAuthorizationCode(subscription.PaystackAuthorizationCode);
         pendingEvent.SetTenantId(subscription.TenantId);
         pendingEvent.MarkProcessed(now);
         paystackEventRepository.Update(pendingEvent);

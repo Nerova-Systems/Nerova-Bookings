@@ -19,9 +19,9 @@ public sealed class SubscriptionConfiguration : IEntityTypeConfiguration<Subscri
         builder.MapStronglyTypedLongId<Subscription, TenantId>(s => s.TenantId);
         builder.HasOne<Tenant>().WithMany().HasForeignKey(s => s.TenantId);
         builder.MapStronglyTypedNullableId<Subscription, PaystackCustomerId, string>(s => s.PaystackCustomerId);
-        builder.MapStronglyTypedNullableId<Subscription, PaystackSubscriptionId, string>(s => s.PaystackSubscriptionId);
+        builder.MapStronglyTypedNullableId<Subscription, PaystackAuthorizationCode, string>(s => s.PaystackAuthorizationCode);
         builder.Property(s => s.PaystackCustomerId).HasColumnName("paystack_customer_code");
-        builder.Property(s => s.PaystackSubscriptionId).HasColumnName("paystack_authorization_code");
+        builder.Property(s => s.PaystackAuthorizationCode).HasColumnName("paystack_authorization_code");
 
         builder.Property(s => s.CurrentPriceAmount).HasPrecision(18, 2);
 

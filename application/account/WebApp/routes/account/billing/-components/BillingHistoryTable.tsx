@@ -75,7 +75,9 @@ export function BillingHistoryTable() {
         </TableRow>
       </TableHeader>
       <TableBody>
-        {transactions.map((transaction) => (
+        {transactions.map((transaction) => {
+          const receiptUrl = transaction.receiptUrl ?? transaction.invoiceUrl;
+          return (
           <TableRow key={transaction.id}>
             <TableCell>{formatDate(transaction.date)}</TableCell>
             <TableCell>
@@ -89,12 +91,12 @@ export function BillingHistoryTable() {
             </TableCell>
             <TableCell className="text-right">
               <div className="flex justify-end gap-1">
-                {transaction.invoiceUrl && (
+                {receiptUrl && (
                   <Tooltip>
                     <TooltipTrigger
                       render={
                         <a
-                          href={transaction.invoiceUrl}
+                          href={receiptUrl}
                           target="_blank"
                           rel="noreferrer"
                           className={buttonVariants({ variant: "ghost", size: "sm" })}
@@ -140,7 +142,8 @@ export function BillingHistoryTable() {
               </div>
             </TableCell>
           </TableRow>
-        ))}
+          );
+        })}
       </TableBody>
     </Table>
   );

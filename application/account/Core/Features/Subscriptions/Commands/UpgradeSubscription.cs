@@ -54,7 +54,7 @@ public sealed class UpgradeSubscriptionHandler(
             return Result<UpgradeSubscriptionResponse>.BadRequest("No Paystack customer found.");
         }
 
-        if (subscription.PaystackSubscriptionId is null)
+        if (subscription.PaystackAuthorizationCode is null)
         {
             logger.LogWarning("No Paystack authorization found for subscription '{SubscriptionId}'", subscription.Id);
             return Result<UpgradeSubscriptionResponse>.BadRequest("No active Paystack authorization found.");
@@ -85,7 +85,7 @@ public sealed class UpgradeSubscriptionHandler(
 
         var charge = await paystackClient.ChargeAuthorizationAsync(
             subscription.PaystackCustomerId,
-            subscription.PaystackSubscriptionId,
+            subscription.PaystackAuthorizationCode,
             billingEmail,
             PaystackPaymentPurpose.Upgrade,
             command.NewPlan,
@@ -103,7 +103,7 @@ public sealed class UpgradeSubscriptionHandler(
             subscription.Id,
             charge.Reference,
             subscription.PaystackCustomerId,
-            subscription.PaystackSubscriptionId,
+            subscription.PaystackAuthorizationCode,
             PaystackPaymentPurpose.Upgrade,
             command.NewPlan,
             charge.Amount,

@@ -25,7 +25,7 @@ public sealed class ScheduleDowngradeHandler(
 
         var subscription = await subscriptionRepository.GetCurrentAsync(cancellationToken);
 
-        if (subscription.PaystackSubscriptionId is null)
+        if (subscription.PaystackAuthorizationCode is null)
         {
             logger.LogWarning("No Paystack authorization found for subscription '{SubscriptionId}'", subscription.Id);
             return Result.BadRequest("No active Paystack authorization found.");

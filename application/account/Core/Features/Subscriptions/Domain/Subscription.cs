@@ -42,7 +42,7 @@ public sealed class Subscription : AggregateRoot<SubscriptionId>, ITenantScopedE
 
     public PaystackCustomerId? PaystackCustomerId { get; private set; }
 
-    public PaystackSubscriptionId? PaystackSubscriptionId { get; private set; }
+    public PaystackAuthorizationCode? PaystackAuthorizationCode { get; private set; }
 
     public string? PaystackAuthorizationEmail { get; private set; }
 
@@ -84,9 +84,9 @@ public sealed class Subscription : AggregateRoot<SubscriptionId>, ITenantScopedE
         PaystackCustomerId = paystackCustomerId;
     }
 
-    public void SetPaystackAuthorization(PaystackSubscriptionId authorizationCode, string? email, string? signature, PaymentMethod? paymentMethod)
+    public void SetPaystackAuthorization(PaystackAuthorizationCode authorizationCode, string? email, string? signature, PaymentMethod? paymentMethod)
     {
-        PaystackSubscriptionId = authorizationCode;
+        PaystackAuthorizationCode = authorizationCode;
         PaystackAuthorizationEmail = email;
         PaystackAuthorizationSignature = signature;
         PaymentMethod = paymentMethod;
@@ -97,13 +97,13 @@ public sealed class Subscription : AggregateRoot<SubscriptionId>, ITenantScopedE
         BillingInfo = billingInfo;
     }
 
-    public void SetPaystackSubscription(PaystackSubscriptionId? paystackSubscriptionId, SubscriptionPlan plan, decimal? currentPriceAmount, string? currentPriceCurrency, DateTimeOffset? currentPeriodEnd, PaymentMethod? paymentMethod)
+    public void SetPaystackBillingState(PaystackAuthorizationCode? paystackAuthorizationCode, SubscriptionPlan plan, decimal? currentPriceAmount, string? currentPriceCurrency, DateTimeOffset? currentPeriodEnd, PaymentMethod? paymentMethod)
     {
-        SetPaystackSubscription(paystackSubscriptionId, plan, currentPriceAmount, currentPriceCurrency, CurrentPeriodStart ?? CreatedAt, currentPeriodEnd, currentPeriodEnd, paymentMethod);
+        SetPaystackBillingState(paystackAuthorizationCode, plan, currentPriceAmount, currentPriceCurrency, CurrentPeriodStart ?? CreatedAt, currentPeriodEnd, currentPeriodEnd, paymentMethod);
     }
 
-    public void SetPaystackSubscription(
-        PaystackSubscriptionId? paystackSubscriptionId,
+    public void SetPaystackBillingState(
+        PaystackAuthorizationCode? paystackAuthorizationCode,
         SubscriptionPlan plan,
         decimal? currentPriceAmount,
         string? currentPriceCurrency,
@@ -113,7 +113,7 @@ public sealed class Subscription : AggregateRoot<SubscriptionId>, ITenantScopedE
         PaymentMethod? paymentMethod
     )
     {
-        PaystackSubscriptionId = paystackSubscriptionId;
+        PaystackAuthorizationCode = paystackAuthorizationCode;
         Plan = plan;
         CurrentPriceAmount = currentPriceAmount;
         CurrentPriceCurrency = currentPriceCurrency;
@@ -174,7 +174,7 @@ public sealed class Subscription : AggregateRoot<SubscriptionId>, ITenantScopedE
     {
         Plan = SubscriptionPlan.Basis;
         ScheduledPlan = null;
-        PaystackSubscriptionId = null;
+        PaystackAuthorizationCode = null;
         PaystackAuthorizationEmail = null;
         PaystackAuthorizationSignature = null;
         CurrentPriceAmount = null;
@@ -188,9 +188,9 @@ public sealed class Subscription : AggregateRoot<SubscriptionId>, ITenantScopedE
         CancellationFeedback = null;
     }
 
-    public bool HasActivePaystackSubscription()
+    public bool HasActivePaystackAuthorization()
     {
-        return PaystackSubscriptionId is not null && Plan != SubscriptionPlan.Basis && !CancelAtPeriodEnd;
+        return PaystackAuthorizationCode is not null && Plan != SubscriptionPlan.Basis && !CancelAtPeriodEnd;
     }
 }
 

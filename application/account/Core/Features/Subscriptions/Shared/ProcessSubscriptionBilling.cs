@@ -1,7 +1,9 @@
+using System.Data;
 using Account.Database;
 using Account.Features.Subscriptions.Domain;
 using Account.Features.Tenants.Domain;
 using Account.Integrations.Paystack;
+using Microsoft.EntityFrameworkCore;
 using SharedKernel.Telemetry;
 
 namespace Account.Features.Subscriptions.Shared;
@@ -22,14 +24,19 @@ public sealed class ProcessSubscriptionBilling(
     public async Task ExecuteAsync(CancellationToken cancellationToken)
     {
         var now = timeProvider.GetUtcNow();
+        var paystackClient = paystackClientFactory.GetClient();
+        var priceCatalog = await paystackClient.GetPriceCatalogAsync(cancellationToken);
+
+        var isSqlite = dbContext.Database.ProviderName == "Microsoft.EntityFrameworkCore.Sqlite";
+        await using var transaction = isSqlite
+            ? await dbContext.Database.BeginTransactionAsync(cancellationToken)
+            : await dbContext.Database.BeginTransactionAsync(IsolationLevel.ReadCommitted, cancellationToken);
+
         var dueSubscriptions = await subscriptionRepository.GetDueForBillingUnfilteredAsync(now, cancellationToken);
         if (dueSubscriptions.Length == 0)
         {
             return;
         }
-
-        var paystackClient = paystackClientFactory.GetClient();
-        var priceCatalog = await paystackClient.GetPriceCatalogAsync(cancellationToken);
 
         foreach (var subscription in dueSubscriptions)
         {
@@ -37,6 +44,7 @@ public sealed class ProcessSubscriptionBilling(
         }
 
         await dbContext.SaveChangesAsync(cancellationToken);
+        await transaction.CommitAsync(cancellationToken);
     }
 
     private async Task ProcessDueSubscriptionAsync(Subscription subscription, PriceCatalogItem[] priceCatalog, IPaystackClient paystackClient, DateTimeOffset now, CancellationToken cancellationToken)
@@ -81,7 +89,7 @@ public sealed class ProcessSubscriptionBilling(
 
         var charge = await paystackClient.ChargeAuthorizationAsync(
             subscription.PaystackCustomerId!,
-            subscription.PaystackSubscriptionId!,
+            subscription.PaystackAuthorizationCode!,
             billingEmail,
             PaystackPaymentPurpose.Renewal,
             renewalPlan,
@@ -101,7 +109,7 @@ public sealed class ProcessSubscriptionBilling(
             subscription.Id,
             charge.Reference,
             subscription.PaystackCustomerId!,
-            subscription.PaystackSubscriptionId,
+            subscription.PaystackAuthorizationCode,
             PaystackPaymentPurpose.Renewal,
             renewalPlan,
             charge.Amount,

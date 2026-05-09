@@ -11,7 +11,7 @@ public interface IPaystackClient
 
     Task<AuthorizationChargeResult?> ChargeAuthorizationAsync(
         PaystackCustomerId paystackCustomerId,
-        PaystackSubscriptionId authorizationCode,
+        PaystackAuthorizationCode authorizationCode,
         string email,
         PaystackPaymentPurpose purpose,
         SubscriptionPlan plan,
@@ -71,7 +71,7 @@ public sealed record VerifiedPaystackTransactionResult(
 );
 
 public sealed record PaystackAuthorization(
-    PaystackSubscriptionId AuthorizationCode,
+    PaystackAuthorizationCode AuthorizationCode,
     string Email,
     string Signature
 );

@@ -48,7 +48,7 @@ export function RetryPaymentDialog({
   const [isConfirmingPayment, setIsConfirmingPayment] = useState(false);
   const confirmRetryMutation = api.useMutation("post", "/api/account/billing/confirm-retry-payment");
 
-  const retryMutation = api.useMutation("post", "/api/account/billing/retry-pending-invoice", {
+  const retryMutation = api.useMutation("post", "/api/account/billing/retry-renewal-payment", {
     onSuccess: async (data) => {
       const response = data as { accessCode?: string | null; paid?: boolean; reference?: string | null };
       if (response.accessCode) {

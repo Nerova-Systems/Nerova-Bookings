@@ -39,7 +39,7 @@ public sealed class GetCurrentSubscriptionHandler(ISubscriptionRepository subscr
             subscription.Plan,
             subscription.ScheduledPlan,
             subscription.PaystackCustomerId is not null,
-            subscription.PaystackSubscriptionId is not null,
+            subscription.PaystackAuthorizationCode is not null,
             subscription.CurrentPriceAmount,
             subscription.CurrentPriceCurrency,
             subscription.CurrentPeriodEnd,
