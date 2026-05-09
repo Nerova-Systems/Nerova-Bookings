@@ -34,6 +34,7 @@ public sealed class StartSubscriptionCheckoutValidator : AbstractValidator<Start
 
 public sealed class StartSubscriptionCheckoutHandler(
     ISubscriptionRepository subscriptionRepository,
+    IPaystackPaymentAttemptRepository paystackPaymentAttemptRepository,
     PaystackClientFactory paystackClientFactory,
     IExecutionContext executionContext,
     ITelemetryEventsCollector events,
@@ -86,6 +87,21 @@ public sealed class StartSubscriptionCheckoutHandler(
                 return Result<StartSubscriptionCheckoutResponse>.BadRequest("Failed to charge saved payment method.");
             }
 
+            await paystackPaymentAttemptRepository.AddAsync(
+                PaystackPaymentAttempt.Create(
+                    subscription.TenantId,
+                    subscription.Id,
+                    subscribeResult.Reference,
+                    subscription.PaystackCustomerId,
+                    subscription.PaystackSubscriptionId,
+                    PaystackPaymentPurpose.Subscribe,
+                    command.Plan,
+                    subscribeResult.Amount,
+                    subscribeResult.Currency
+                ),
+                cancellationToken
+            );
+
             events.CollectEvent(new SubscriptionCheckoutStarted(subscription.Id, command.Plan, true));
 
             return new StartSubscriptionCheckoutResponse(null, subscribeResult.Reference, null, subscribeResult.Amount, subscribeResult.Currency, nameof(PaystackPaymentPurpose.Subscribe), true);
@@ -106,6 +122,21 @@ public sealed class StartSubscriptionCheckoutHandler(
         {
             return Result<StartSubscriptionCheckoutResponse>.BadRequest("Failed to initialize Paystack checkout.");
         }
+
+        await paystackPaymentAttemptRepository.AddAsync(
+            PaystackPaymentAttempt.Create(
+                subscription.TenantId,
+                subscription.Id,
+                result.Reference,
+                subscription.PaystackCustomerId,
+                null,
+                PaystackPaymentPurpose.Subscribe,
+                command.Plan,
+                result.Amount,
+                result.Currency
+            ),
+            cancellationToken
+        );
 
         events.CollectEvent(new SubscriptionCheckoutStarted(subscription.Id, command.Plan, false));
 

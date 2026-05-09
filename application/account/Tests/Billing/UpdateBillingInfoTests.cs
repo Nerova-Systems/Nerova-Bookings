@@ -3,6 +3,7 @@ using System.Net.Http.Json;
 using Account.Database;
 using Account.Features.Billing.Commands;
 using Account.Features.Subscriptions.Domain;
+using Account.Integrations.Paystack;
 using FluentAssertions;
 using SharedKernel.Tests;
 using SharedKernel.Tests.Persistence;
@@ -31,6 +32,10 @@ public sealed class UpdateBillingInfoTests : EndpointBaseTest<AccountDbContext>
 
         // Assert
         response.ShouldHaveEmptyHeaderAndLocationOnSuccess();
+        var billingInfo = Connection.ExecuteScalar<string>("SELECT billing_info FROM subscriptions WHERE tenant_id = @tenantId", [new { tenantId = DatabaseSeeder.Tenant1.Id.Value }]);
+        billingInfo.Should().Contain("Test Organization");
+        billingInfo.Should().Contain("Vestergade 12");
+        billingInfo.Should().Contain("billing@example.com");
     }
 
     [Fact]
@@ -51,6 +56,9 @@ public sealed class UpdateBillingInfoTests : EndpointBaseTest<AccountDbContext>
 
         // Assert
         response.ShouldHaveEmptyHeaderAndLocationOnSuccess();
+        var billingInfo = Connection.ExecuteScalar<string>("SELECT billing_info FROM subscriptions WHERE tenant_id = @tenantId", [new { tenantId = DatabaseSeeder.Tenant1.Id.Value }]);
+        billingInfo.Should().Contain("Vestergade 12");
+        billingInfo.Should().Contain("Floor 3");
     }
 
     [Fact]
@@ -64,6 +72,9 @@ public sealed class UpdateBillingInfoTests : EndpointBaseTest<AccountDbContext>
 
         // Assert
         response.ShouldHaveEmptyHeaderAndLocationOnSuccess();
+        Connection.ExecuteScalar<string>("SELECT paystack_customer_code FROM subscriptions WHERE tenant_id = @tenantId", [new { tenantId = DatabaseSeeder.Tenant1.Id.Value }]).Should().Be(MockPaystackClient.MockCustomerCode);
+        var billingInfo = Connection.ExecuteScalar<string>("SELECT billing_info FROM subscriptions WHERE tenant_id = @tenantId", [new { tenantId = DatabaseSeeder.Tenant1.Id.Value }]);
+        billingInfo.Should().Contain("Test Organization");
     }
 
     [Fact]

@@ -23,6 +23,7 @@ public sealed record StartPaymentMethodSetupResponse(
 
 public sealed class StartPaymentMethodSetupHandler(
     ISubscriptionRepository subscriptionRepository,
+    IPaystackPaymentAttemptRepository paystackPaymentAttemptRepository,
     PaystackClientFactory paystackClientFactory,
     IExecutionContext executionContext,
     ITelemetryEventsCollector events,
@@ -57,11 +58,26 @@ public sealed class StartPaymentMethodSetupHandler(
         }
 
         var paystackClient = paystackClientFactory.GetClient();
-        var initialization = await paystackClient.CreateSetupIntentAsync(subscription.PaystackCustomerId, subscription.BillingInfo.Email, cancellationToken);
+        var initialization = await paystackClient.CreatePaymentMethodAuthorizationAsync(subscription.PaystackCustomerId, subscription.BillingInfo.Email, cancellationToken);
         if (initialization is null)
         {
             return Result<StartPaymentMethodSetupResponse>.BadRequest("Failed to initialize payment method authorization.");
         }
+
+        await paystackPaymentAttemptRepository.AddAsync(
+            PaystackPaymentAttempt.Create(
+                subscription.TenantId,
+                subscription.Id,
+                initialization.Reference,
+                subscription.PaystackCustomerId,
+                null,
+                PaystackPaymentPurpose.PaymentMethodAuthorization,
+                null,
+                initialization.Amount,
+                initialization.Currency
+            ),
+            cancellationToken
+        );
 
         events.CollectEvent(new PaymentMethodSetupStarted(subscription.Id));
 

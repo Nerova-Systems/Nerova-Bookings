@@ -2,6 +2,7 @@ import { type Browser, type BrowserContext, test as base, expect, type Page } fr
 import { createAuthStateManager } from "@shared/e2e/auth/auth-state-manager";
 import { getSelfContainedSystemPrefix, getWorkerTenant } from "@shared/e2e/fixtures/worker-auth";
 import type { Tenant, User, UserRole } from "@shared/e2e/types/auth";
+import { getBaseUrl, isLocalhost } from "@shared/e2e/utils/constants";
 import { assertNoUnexpectedErrors, createTestContext, type TestContext } from "@shared/e2e/utils/test-assertions";
 import { completeSignupFlow } from "@shared/e2e/utils/test-data";
 
@@ -11,6 +12,8 @@ declare global {
     testTenant: Tenant;
   }
 }
+
+const MOCK_PROVIDER_COOKIE = "__Test_Use_Mock_Provider";
 
 /**
  * Role-specific page fixtures for authenticated testing
@@ -50,6 +53,20 @@ function autoAcceptBeforeUnloadDialogs(page: Page) {
   });
 }
 
+async function enableLocalMockProvider(context: BrowserContext): Promise<void> {
+  if (!isLocalhost()) {
+    return;
+  }
+
+  await context.addCookies([
+    {
+      name: MOCK_PROVIDER_COOKIE,
+      value: "true",
+      url: getBaseUrl()
+    }
+  ]);
+}
+
 /**
  * Perform fresh authentication by going through signup/login flow
  */
@@ -66,6 +83,7 @@ async function performFreshAuthentication(
   // Create a new page for authentication
   const page = await browserContext.newPage();
   autoAcceptBeforeUnloadDialogs(page);
+  await enableLocalMockProvider(browserContext);
 
   // Get the user for this role
   const user = getUserForRole(tenant, role);
@@ -129,6 +147,7 @@ async function createAuthenticatedContextAndPage(
     context = await browser.newContext({
       storageState: authManager.getStateFilePath(role)
     });
+    await enableLocalMockProvider(context);
     page = await context.newPage();
     autoAcceptBeforeUnloadDialogs(page);
 
@@ -141,11 +160,13 @@ async function createAuthenticatedContextAndPage(
 
       // Create fresh context and perform authentication
       context = await browser.newContext();
+      await enableLocalMockProvider(context);
       page = await performFreshAuthentication(context, role, tenant, authManager);
     }
   } else {
     // Create fresh context and perform authentication
     context = await browser.newContext();
+    await enableLocalMockProvider(context);
     page = await performFreshAuthentication(context, role, tenant, authManager);
   }
 
@@ -246,6 +267,7 @@ export const test = base.extend<PageAuthFixtures>({
 
     // Create a fresh, unauthenticated context and page
     const context = await browser.newContext();
+    await enableLocalMockProvider(context);
     const page = await context.newPage();
     autoAcceptBeforeUnloadDialogs(page);
 

@@ -24,9 +24,11 @@ public sealed record RetryPendingInvoicePaymentResponse(
 
 public sealed class RetryPendingInvoicePaymentHandler(
     ISubscriptionRepository subscriptionRepository,
+    IPaystackPaymentAttemptRepository paystackPaymentAttemptRepository,
     PaystackClientFactory paystackClientFactory,
     IExecutionContext executionContext,
     ITelemetryEventsCollector events,
+    TimeProvider timeProvider,
     ILogger<RetryPendingInvoicePaymentHandler> logger
 ) : IRequestHandler<RetryPendingInvoicePaymentCommand, Result<RetryPendingInvoicePaymentResponse>>
 {
@@ -41,35 +43,70 @@ public sealed class RetryPendingInvoicePaymentHandler(
 
         if (subscription.PaystackSubscriptionId is null)
         {
-            logger.LogWarning("No Paystack subscription found for subscription '{SubscriptionId}'", subscription.Id);
-            return Result<RetryPendingInvoicePaymentResponse>.BadRequest("No active Paystack subscription found.");
+            logger.LogWarning("No Paystack authorization found for subscription '{SubscriptionId}'", subscription.Id);
+            return Result<RetryPendingInvoicePaymentResponse>.BadRequest("No active Paystack authorization found.");
+        }
+
+        if (subscription.FirstPaymentFailedAt is null || subscription.CurrentPriceAmount is null || subscription.CurrentPriceCurrency is null)
+        {
+            return Result<RetryPendingInvoicePaymentResponse>.BadRequest("No pending renewal payment found for this subscription.");
+        }
+
+        var billingEmail = subscription.PaystackAuthorizationEmail ?? subscription.BillingInfo?.Email;
+        if (billingEmail is null)
+        {
+            return Result<RetryPendingInvoicePaymentResponse>.BadRequest("Billing information must include an email before retrying payment.");
         }
 
         var paystackClient = paystackClientFactory.GetClient();
-
-        var openInvoice = await paystackClient.GetOpenInvoiceAsync(subscription.PaystackSubscriptionId, cancellationToken);
-        if (openInvoice is null)
+        var charge = await paystackClient.ChargeAuthorizationAsync(
+            subscription.PaystackCustomerId!,
+            subscription.PaystackSubscriptionId,
+            billingEmail,
+            PaystackPaymentPurpose.Retry,
+            subscription.Plan,
+            subscription.CurrentPriceAmount.Value,
+            subscription.CurrentPriceCurrency,
+            cancellationToken
+        );
+        if (charge is null)
         {
-            return Result<RetryPendingInvoicePaymentResponse>.BadRequest("No pending invoice found for this subscription.");
+            return Result<RetryPendingInvoicePaymentResponse>.BadRequest("Failed to retry renewal payment.");
         }
 
-        var invoiceRetryResult = await paystackClient.RetryOpenInvoicePaymentAsync(subscription.PaystackSubscriptionId, null, cancellationToken);
-        if (invoiceRetryResult is null)
+        var paymentAttempt = PaystackPaymentAttempt.Create(
+            subscription.TenantId,
+            subscription.Id,
+            charge.Reference,
+            subscription.PaystackCustomerId!,
+            subscription.PaystackSubscriptionId,
+            PaystackPaymentPurpose.Retry,
+            subscription.Plan,
+            charge.Amount,
+            charge.Currency
+        );
+
+        var now = timeProvider.GetUtcNow();
+        if (!charge.Paid)
         {
-            return Result<RetryPendingInvoicePaymentResponse>.BadRequest("Failed to retry invoice payment.");
+            paymentAttempt.MarkFailed(now, charge.ErrorMessage ?? "Paystack could not charge the saved payment method.");
+            await paystackPaymentAttemptRepository.AddAsync(paymentAttempt, cancellationToken);
+            return Result<RetryPendingInvoicePaymentResponse>.BadRequest(charge.ErrorMessage ?? "Paystack could not charge the saved payment method.");
         }
 
-        if (invoiceRetryResult is { Paid: false, AccessCode: null, ErrorMessage: not null })
-        {
-            return Result<RetryPendingInvoicePaymentResponse>.BadRequest(invoiceRetryResult.ErrorMessage);
-        }
+        var nextBillingAt = now.AddMonths(1);
+        paymentAttempt.MarkSucceeded(now);
+        subscription.ClearPaymentFailure();
+        subscription.StartBillingPeriod(subscription.Plan, charge.Amount, charge.Currency, now, nextBillingAt, charge.PaymentMethod);
+        subscription.SetPaymentTransactions([
+                .. subscription.PaymentTransactions,
+                new PaymentTransaction(PaymentTransactionId.NewId(), charge.Amount, charge.Currency, PaymentTransactionStatus.Succeeded, now, null, null, null)
+            ]
+        );
+        subscriptionRepository.Update(subscription);
+        await paystackPaymentAttemptRepository.AddAsync(paymentAttempt, cancellationToken);
+        events.CollectEvent(new PendingInvoicePaymentRetried(subscription.Id));
 
-        if (invoiceRetryResult.Paid)
-        {
-            events.CollectEvent(new PendingInvoicePaymentRetried(subscription.Id));
-        }
-
-        var publicKey = invoiceRetryResult.AccessCode is not null ? paystackClientFactory.GetPublicKey() : null;
-        return new RetryPendingInvoicePaymentResponse(invoiceRetryResult.Paid, invoiceRetryResult.AccessCode, invoiceRetryResult.Reference, publicKey, invoiceRetryResult.Amount, invoiceRetryResult.Currency, nameof(PaystackPaymentPurpose.Retry));
+        return new RetryPendingInvoicePaymentResponse(true, null, charge.Reference, null, charge.Amount, charge.Currency, nameof(PaystackPaymentPurpose.Retry));
     }
 }

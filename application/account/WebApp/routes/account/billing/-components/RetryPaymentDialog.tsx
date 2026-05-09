@@ -46,17 +46,30 @@ export function RetryPaymentDialog({
 }: Readonly<RetryPaymentDialogProps>) {
   const queryClient = useQueryClient();
   const [isConfirmingPayment, setIsConfirmingPayment] = useState(false);
+  const confirmRetryMutation = api.useMutation("post", "/api/account/billing/confirm-retry-payment");
 
   const retryMutation = api.useMutation("post", "/api/account/billing/retry-pending-invoice", {
     onSuccess: async (data) => {
-      const response = data as { accessCode?: string | null; paid?: boolean };
+      const response = data as { accessCode?: string | null; paid?: boolean; reference?: string | null };
       if (response.accessCode) {
         setIsConfirmingPayment(true);
         await resumePaystackTransaction(response.accessCode, {
-          onSuccess: () => {
-            queryClient.invalidateQueries();
-            toast.success(t`Pending payment completed`);
-            onOpenChange(false);
+          onSuccess: async (transaction) => {
+            const reference = transaction.reference ?? transaction.trxref ?? response.reference;
+            if (!reference) {
+              setIsConfirmingPayment(false);
+              toast.error(t`Payment completed but no Paystack reference was returned.`);
+              return;
+            }
+
+            try {
+              await confirmRetryMutation.mutateAsync({ body: { reference } });
+              queryClient.invalidateQueries();
+              toast.success(t`Pending payment completed`);
+              onOpenChange(false);
+            } finally {
+              setIsConfirmingPayment(false);
+            }
           },
           onCancel: () => setIsConfirmingPayment(false),
           onError: (error) => {
@@ -76,7 +89,7 @@ export function RetryPaymentDialog({
     }
   });
 
-  const isPending = retryMutation.isPending || isConfirmingPayment;
+  const isPending = retryMutation.isPending || confirmRetryMutation.isPending || isConfirmingPayment;
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange} disablePointerDismissal={true} trackingTitle="Retry payment">

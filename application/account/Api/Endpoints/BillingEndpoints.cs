@@ -33,5 +33,9 @@ public sealed class BillingEndpoints : IEndpoints
         group.MapPost("/retry-pending-invoice", async Task<ApiResult<RetryPendingInvoicePaymentResponse>> (IMediator mediator)
             => await mediator.Send(new RetryPendingInvoicePaymentCommand())
         ).Produces<RetryPendingInvoicePaymentResponse>();
+
+        group.MapPost("/confirm-retry-payment", async Task<ApiResult<ConfirmRetryPaymentResponse>> (ConfirmRetryPaymentCommand command, IMediator mediator)
+            => await mediator.Send(command)
+        ).Produces<ConfirmRetryPaymentResponse>();
     }
 }

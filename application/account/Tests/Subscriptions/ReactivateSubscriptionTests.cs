@@ -32,6 +32,9 @@ public sealed class ReactivateSubscriptionTests : EndpointBaseTest<AccountDbCont
 
         // Assert
         response.EnsureSuccessStatusCode();
+        Connection.ExecuteScalar<long>("SELECT cancel_at_period_end FROM subscriptions WHERE tenant_id = @tenantId", [new { tenantId = DatabaseSeeder.Tenant1.Id.Value }]).Should().Be(0);
+        Connection.ExecuteScalar<string?>("SELECT cancellation_reason FROM subscriptions WHERE tenant_id = @tenantId", [new { tenantId = DatabaseSeeder.Tenant1.Id.Value }]).Should().BeNull();
+        Connection.ExecuteScalar<string?>("SELECT cancellation_feedback FROM subscriptions WHERE tenant_id = @tenantId", [new { tenantId = DatabaseSeeder.Tenant1.Id.Value }]).Should().BeNull();
         TelemetryEventsCollectorSpy.CollectedEvents.Should().BeEmpty();
     }
 

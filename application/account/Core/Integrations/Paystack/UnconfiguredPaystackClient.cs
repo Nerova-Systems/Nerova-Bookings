@@ -22,40 +22,25 @@ public sealed class UnconfiguredPaystackClient(ILogger<UnconfiguredPaystackClien
         return Task.FromResult<SubscriptionSyncResult?>(null);
     }
 
-    public Task<PaystackSubscriptionId?> GetCheckoutSessionSubscriptionIdAsync(string sessionId, CancellationToken cancellationToken)
-    {
-        logger.LogWarning("Paystack is not configured. Cannot get payment '{Reference}'", sessionId);
-        return Task.FromResult<PaystackSubscriptionId?>(null);
-    }
-
     public Task<UpgradeSubscriptionResult?> UpgradeSubscriptionAsync(PaystackCustomerId paystackCustomerId, PaystackSubscriptionId authorizationCode, string email, SubscriptionPlan newPlan, CancellationToken cancellationToken)
     {
         logger.LogWarning("Paystack is not configured. Cannot charge authorization '{AuthorizationCode}' for upgrade", authorizationCode);
         return Task.FromResult<UpgradeSubscriptionResult?>(null);
     }
 
-    public Task<bool> ScheduleDowngradeAsync(PaystackSubscriptionId paystackSubscriptionId, SubscriptionPlan newPlan, CancellationToken cancellationToken)
+    public Task<AuthorizationChargeResult?> ChargeAuthorizationAsync(
+        PaystackCustomerId paystackCustomerId,
+        PaystackSubscriptionId authorizationCode,
+        string email,
+        PaystackPaymentPurpose purpose,
+        SubscriptionPlan plan,
+        decimal amount,
+        string currency,
+        CancellationToken cancellationToken
+    )
     {
-        logger.LogWarning("Paystack is not configured. Cannot schedule local downgrade for authorization '{AuthorizationCode}'", paystackSubscriptionId);
-        return Task.FromResult(false);
-    }
-
-    public Task<bool> CancelScheduledDowngradeAsync(PaystackSubscriptionId paystackSubscriptionId, CancellationToken cancellationToken)
-    {
-        logger.LogWarning("Paystack is not configured. Cannot cancel local scheduled downgrade for authorization '{AuthorizationCode}'", paystackSubscriptionId);
-        return Task.FromResult(false);
-    }
-
-    public Task<bool> CancelSubscriptionAtPeriodEndAsync(PaystackSubscriptionId paystackSubscriptionId, CancellationReason reason, string? feedback, CancellationToken cancellationToken)
-    {
-        logger.LogWarning("Paystack is not configured. Cannot cancel local subscription for authorization '{AuthorizationCode}'", paystackSubscriptionId);
-        return Task.FromResult(false);
-    }
-
-    public Task<bool> ReactivateSubscriptionAsync(PaystackSubscriptionId paystackSubscriptionId, CancellationToken cancellationToken)
-    {
-        logger.LogWarning("Paystack is not configured. Cannot reactivate local subscription for authorization '{AuthorizationCode}'", paystackSubscriptionId);
-        return Task.FromResult(false);
+        logger.LogWarning("Paystack is not configured. Cannot charge authorization '{AuthorizationCode}' for purpose '{Purpose}'", authorizationCode, purpose);
+        return Task.FromResult<AuthorizationChargeResult?>(null);
     }
 
     public Task<PriceCatalogItem[]> GetPriceCatalogAsync(CancellationToken cancellationToken)
@@ -93,16 +78,22 @@ public sealed class UnconfiguredPaystackClient(ILogger<UnconfiguredPaystackClien
         return Task.FromResult(true);
     }
 
-    public Task<CheckoutSessionResult?> CreateSetupIntentAsync(PaystackCustomerId paystackCustomerId, string email, CancellationToken cancellationToken)
+    public Task<CheckoutSessionResult?> CreatePaymentMethodAuthorizationAsync(PaystackCustomerId paystackCustomerId, string email, CancellationToken cancellationToken)
     {
         logger.LogWarning("Paystack is not configured. Cannot initialize card authorization for customer '{CustomerId}'", paystackCustomerId);
         return Task.FromResult<CheckoutSessionResult?>(null);
     }
 
-    public Task<VerifiedPaystackTransactionResult?> GetSetupIntentPaymentMethodAsync(string setupIntentId, CancellationToken cancellationToken)
+    public Task<VerifiedPaystackTransactionResult?> VerifyPaymentMethodAuthorizationAsync(string reference, CancellationToken cancellationToken)
     {
-        logger.LogWarning("Paystack is not configured. Cannot verify authorization payment '{Reference}'", setupIntentId);
+        logger.LogWarning("Paystack is not configured. Cannot verify authorization payment '{Reference}'", reference);
         return Task.FromResult<VerifiedPaystackTransactionResult?>(null);
+    }
+
+    public Task<RefundResult?> CreateRefundAsync(string transactionReference, decimal amount, string currency, CancellationToken cancellationToken)
+    {
+        logger.LogWarning("Paystack is not configured. Cannot refund transaction '{Reference}'", transactionReference);
+        return Task.FromResult<RefundResult?>(null);
     }
 
     public Task<bool> SetSubscriptionDefaultPaymentMethodAsync(PaystackSubscriptionId paystackSubscriptionId, string paymentMethodId, CancellationToken cancellationToken)

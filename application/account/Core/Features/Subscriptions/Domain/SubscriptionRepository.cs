@@ -22,6 +22,12 @@ public interface ISubscriptionRepository : ICrudRepository<Subscription, Subscri
     ///     This method is used when tenant context is not available (e.g., during signup token creation).
     /// </summary>
     Task<Subscription?> GetByTenantIdUnfilteredAsync(TenantId tenantId, CancellationToken cancellationToken);
+
+    /// <summary>
+    ///     Retrieves due paid subscriptions without applying tenant query filters.
+    ///     This method is used by the background billing lifecycle processor where tenant context is not established.
+    /// </summary>
+    Task<Subscription[]> GetDueForBillingUnfilteredAsync(DateTimeOffset dueAt, CancellationToken cancellationToken);
 }
 
 internal sealed class SubscriptionRepository(AccountDbContext accountDbContext, IExecutionContext executionContext)
@@ -55,5 +61,22 @@ internal sealed class SubscriptionRepository(AccountDbContext accountDbContext, 
     {
         return DbSet.Local.SingleOrDefault(s => s.TenantId == tenantId)
                ?? await DbSet.IgnoreQueryFilters().SingleOrDefaultAsync(s => s.TenantId == tenantId, cancellationToken);
+    }
+
+    /// <summary>
+    ///     Retrieves due paid subscriptions without applying tenant query filters.
+    ///     This method is used by the background billing lifecycle processor where tenant context is not established.
+    /// </summary>
+    public async Task<Subscription[]> GetDueForBillingUnfilteredAsync(DateTimeOffset dueAt, CancellationToken cancellationToken)
+    {
+        return await DbSet
+            .IgnoreQueryFilters()
+            .Where(s => s.Plan != SubscriptionPlan.Basis
+                        && s.PaystackCustomerId != null
+                        && s.PaystackSubscriptionId != null
+                        && s.NextBillingAt != null
+                        && s.NextBillingAt <= dueAt)
+            .OrderBy(s => s.Id)
+            .ToArrayAsync(cancellationToken);
     }
 }

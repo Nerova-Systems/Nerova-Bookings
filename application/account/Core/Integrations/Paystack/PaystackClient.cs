@@ -80,28 +80,54 @@ public sealed class PaystackClient(IConfiguration configuration, IHttpClientFact
         return Task.FromResult<SubscriptionSyncResult?>(null);
     }
 
-    public Task<PaystackSubscriptionId?> GetCheckoutSessionSubscriptionIdAsync(string sessionId, CancellationToken cancellationToken)
-    {
-        return Task.FromResult<PaystackSubscriptionId?>(null);
-    }
-
     public async Task<UpgradeSubscriptionResult?> UpgradeSubscriptionAsync(PaystackCustomerId paystackCustomerId, PaystackSubscriptionId authorizationCode, string email, SubscriptionPlan newPlan, CancellationToken cancellationToken)
     {
         var catalogItem = await GetCatalogItemAsync(newPlan, cancellationToken);
         if (catalogItem is null) return null;
 
-        var reference = CreateReference(PaystackPaymentPurpose.Upgrade);
+        var charge = await ChargeAuthorizationAsync(paystackCustomerId, authorizationCode, email, PaystackPaymentPurpose.Upgrade, newPlan, catalogItem.UnitAmount, catalogItem.Currency, cancellationToken);
+        if (charge is null) return null;
+        if (!charge.Paid)
+        {
+            return new UpgradeSubscriptionResult(
+                charge.ErrorMessage ?? "Paystack could not charge the saved payment method.",
+                Reference: charge.Reference,
+                Amount: charge.Amount,
+                Currency: charge.Currency
+            );
+        }
+
+        return new UpgradeSubscriptionResult(
+            Reference: charge.Reference,
+            Amount: charge.Amount,
+            Currency: charge.Currency
+        );
+    }
+
+    public async Task<AuthorizationChargeResult?> ChargeAuthorizationAsync(
+        PaystackCustomerId paystackCustomerId,
+        PaystackSubscriptionId authorizationCode,
+        string email,
+        PaystackPaymentPurpose purpose,
+        SubscriptionPlan plan,
+        decimal amount,
+        string currency,
+        CancellationToken cancellationToken
+    )
+    {
+        var normalizedCurrency = currency.ToUpperInvariant();
+        var reference = CreateReference(purpose);
         var payload = new
         {
             authorization_code = authorizationCode.Value,
             email,
-            amount = ToSubunit(catalogItem.UnitAmount),
-            currency = catalogItem.Currency.ToUpperInvariant(),
+            amount = ToSubunit(amount),
+            currency = normalizedCurrency,
             reference,
             metadata = new
             {
-                purpose = nameof(PaystackPaymentPurpose.Upgrade),
-                plan = newPlan.ToString(),
+                purpose = purpose.ToString(),
+                plan = plan.ToString(),
                 paystack_customer_code = paystackCustomerId.Value
             }
         };
@@ -110,41 +136,14 @@ public sealed class PaystackClient(IConfiguration configuration, IHttpClientFact
         if (response is null) return null;
 
         var paid = string.Equals(GetString(response.RootElement, "data", "status"), "success", StringComparison.OrdinalIgnoreCase);
+        var paymentMethod = CreatePaymentMethod(response.RootElement);
         if (!paid)
         {
-            return new UpgradeSubscriptionResult(
-                "Paystack could not charge the saved payment method.",
-                Reference: reference,
-                Amount: catalogItem.UnitAmount,
-                Currency: catalogItem.Currency.ToUpperInvariant()
-            );
+            var gatewayResponse = GetString(response.RootElement, "data", "gateway_response");
+            return new AuthorizationChargeResult(false, reference, amount, normalizedCurrency, paymentMethod, gatewayResponse ?? "Paystack could not charge the saved payment method.");
         }
 
-        return new UpgradeSubscriptionResult(
-            Reference: reference,
-            Amount: catalogItem.UnitAmount,
-            Currency: catalogItem.Currency.ToUpperInvariant()
-        );
-    }
-
-    public Task<bool> ScheduleDowngradeAsync(PaystackSubscriptionId paystackSubscriptionId, SubscriptionPlan newPlan, CancellationToken cancellationToken)
-    {
-        return Task.FromResult(true);
-    }
-
-    public Task<bool> CancelScheduledDowngradeAsync(PaystackSubscriptionId paystackSubscriptionId, CancellationToken cancellationToken)
-    {
-        return Task.FromResult(true);
-    }
-
-    public Task<bool> CancelSubscriptionAtPeriodEndAsync(PaystackSubscriptionId paystackSubscriptionId, CancellationReason reason, string? feedback, CancellationToken cancellationToken)
-    {
-        return Task.FromResult(true);
-    }
-
-    public Task<bool> ReactivateSubscriptionAsync(PaystackSubscriptionId paystackSubscriptionId, CancellationToken cancellationToken)
-    {
-        return Task.FromResult(true);
+        return new AuthorizationChargeResult(true, reference, amount, normalizedCurrency, paymentMethod);
     }
 
     public async Task<PriceCatalogItem[]> GetPriceCatalogAsync(CancellationToken cancellationToken)
@@ -256,7 +255,7 @@ public sealed class PaystackClient(IConfiguration configuration, IHttpClientFact
         return Task.FromResult(true);
     }
 
-    public async Task<CheckoutSessionResult?> CreateSetupIntentAsync(PaystackCustomerId paystackCustomerId, string email, CancellationToken cancellationToken)
+    public async Task<CheckoutSessionResult?> CreatePaymentMethodAuthorizationAsync(PaystackCustomerId paystackCustomerId, string email, CancellationToken cancellationToken)
     {
         var reference = CreateReference(PaystackPaymentPurpose.PaymentMethodAuthorization);
         var payload = new
@@ -282,9 +281,30 @@ public sealed class PaystackClient(IConfiguration configuration, IHttpClientFact
         return new CheckoutSessionResult(reference, accessCode, FromSubunit(_cardAuthorizationAmountSubunit), payload.currency, PaystackPaymentPurpose.PaymentMethodAuthorization);
     }
 
-    public Task<VerifiedPaystackTransactionResult?> GetSetupIntentPaymentMethodAsync(string setupIntentId, CancellationToken cancellationToken)
+    public Task<VerifiedPaystackTransactionResult?> VerifyPaymentMethodAuthorizationAsync(string reference, CancellationToken cancellationToken)
     {
-        return VerifyTransactionAsync(setupIntentId, PaystackPaymentPurpose.PaymentMethodAuthorization, cancellationToken);
+        return VerifyTransactionAsync(reference, PaystackPaymentPurpose.PaymentMethodAuthorization, cancellationToken);
+    }
+
+    public async Task<RefundResult?> CreateRefundAsync(string transactionReference, decimal amount, string currency, CancellationToken cancellationToken)
+    {
+        var normalizedCurrency = currency.ToUpperInvariant();
+        var payload = new
+        {
+            transaction = transactionReference,
+            amount = ToSubunit(amount),
+            currency = normalizedCurrency,
+            merchant_note = "Refund payment method authorization charge"
+        };
+
+        var response = await SendAsync(HttpMethod.Post, "/refund", payload, cancellationToken);
+        if (response is null) return null;
+
+        var refundId = GetString(response.RootElement, "data", "id");
+        var refundedAmount = FromSubunit(GetLong(response.RootElement, "data", "amount") ?? payload.amount);
+        var refundedCurrency = GetString(response.RootElement, "data", "currency")?.ToUpperInvariant() ?? normalizedCurrency;
+        var status = GetString(response.RootElement, "data", "status") ?? "pending";
+        return new RefundResult(refundId, refundedAmount, refundedCurrency, status);
     }
 
     public Task<bool> SetSubscriptionDefaultPaymentMethodAsync(PaystackSubscriptionId paystackSubscriptionId, string paymentMethodId, CancellationToken cancellationToken)
@@ -329,26 +349,8 @@ public sealed class PaystackClient(IConfiguration configuration, IHttpClientFact
         var catalogItem = await GetCatalogItemAsync(plan, cancellationToken);
         if (catalogItem is null) return null;
 
-        var reference = CreateReference(PaystackPaymentPurpose.Subscribe);
-        var payload = new
-        {
-            authorization_code = authorizationCode.Value,
-            email,
-            amount = ToSubunit(catalogItem.UnitAmount),
-            currency = catalogItem.Currency.ToUpperInvariant(),
-            reference,
-            metadata = new
-            {
-                purpose = nameof(PaystackPaymentPurpose.Subscribe),
-                plan = plan.ToString(),
-                paystack_customer_code = paystackCustomerId.Value
-            }
-        };
-
-        var response = await SendAsync(HttpMethod.Post, "/transaction/charge_authorization", payload, cancellationToken);
-        if (response is null) return null;
-        var paid = string.Equals(GetString(response.RootElement, "data", "status"), "success", StringComparison.OrdinalIgnoreCase);
-        return new SubscribeResult(reference, catalogItem.UnitAmount, catalogItem.Currency.ToUpperInvariant(), paid, CreatePaymentMethod(response.RootElement));
+        var charge = await ChargeAuthorizationAsync(paystackCustomerId, authorizationCode, email, PaystackPaymentPurpose.Subscribe, plan, catalogItem.UnitAmount, catalogItem.Currency, cancellationToken);
+        return charge is null ? null : new SubscribeResult(charge.Reference, charge.Amount, charge.Currency, charge.Paid, charge.PaymentMethod);
     }
 
     public Task<PaymentTransaction[]?> SyncPaymentTransactionsAsync(PaystackCustomerId paystackCustomerId, CancellationToken cancellationToken)

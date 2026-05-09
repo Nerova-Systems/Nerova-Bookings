@@ -1,10 +1,12 @@
 using Account.Features.Subscriptions.Domain;
 using Account.Features.Subscriptions.Shared;
+using Account.Features.Tenants.Domain;
 using Account.Features.Users.Domain;
 using Account.Integrations.Paystack;
 using JetBrains.Annotations;
 using SharedKernel.Cqrs;
 using SharedKernel.ExecutionContext;
+using SharedKernel.Telemetry;
 
 namespace Account.Features.Subscriptions.Commands;
 
@@ -23,8 +25,12 @@ public sealed record UpgradeSubscriptionResponse(
 
 public sealed class UpgradeSubscriptionHandler(
     ISubscriptionRepository subscriptionRepository,
+    IPaystackPaymentAttemptRepository paystackPaymentAttemptRepository,
+    ITenantRepository tenantRepository,
     PaystackClientFactory paystackClientFactory,
     IExecutionContext executionContext,
+    TimeProvider timeProvider,
+    ITelemetryEventsCollector events,
     ILogger<UpgradeSubscriptionHandler> logger
 ) : IRequestHandler<UpgradeSubscriptionCommand, Result<UpgradeSubscriptionResponse>>
 {
@@ -50,8 +56,8 @@ public sealed class UpgradeSubscriptionHandler(
 
         if (subscription.PaystackSubscriptionId is null)
         {
-            logger.LogWarning("No Paystack subscription found for subscription '{SubscriptionId}'", subscription.Id);
-            return Result<UpgradeSubscriptionResponse>.BadRequest("No active Paystack subscription found.");
+            logger.LogWarning("No Paystack authorization found for subscription '{SubscriptionId}'", subscription.Id);
+            return Result<UpgradeSubscriptionResponse>.BadRequest("No active Paystack authorization found.");
         }
 
         var billingEmail = subscription.PaystackAuthorizationEmail ?? subscription.BillingInfo?.Email;
@@ -61,20 +67,80 @@ public sealed class UpgradeSubscriptionHandler(
         }
 
         var paystackClient = paystackClientFactory.GetClient();
-        var upgradeResult = await paystackClient.UpgradeSubscriptionAsync(subscription.PaystackCustomerId, subscription.PaystackSubscriptionId, billingEmail, command.NewPlan, cancellationToken);
-        if (upgradeResult is null)
+        var priceCatalog = await paystackClient.GetPriceCatalogAsync(cancellationToken);
+        var targetPlanPrice = priceCatalog.SingleOrDefault(p => p.Plan == command.NewPlan);
+        if (targetPlanPrice is null)
+        {
+            return Result<UpgradeSubscriptionResponse>.BadRequest("Could not retrieve upgrade price.");
+        }
+
+        var now = timeProvider.GetUtcNow();
+        var proratedAmount = SubscriptionBillingCalculator.CalculateProratedUpgradeAmount(
+            subscription.CurrentPriceAmount ?? 0m,
+            targetPlanPrice.UnitAmount,
+            subscription.CurrentPeriodStart,
+            subscription.CurrentPeriodEnd,
+            now
+        );
+
+        var charge = await paystackClient.ChargeAuthorizationAsync(
+            subscription.PaystackCustomerId,
+            subscription.PaystackSubscriptionId,
+            billingEmail,
+            PaystackPaymentPurpose.Upgrade,
+            command.NewPlan,
+            proratedAmount,
+            targetPlanPrice.Currency,
+            cancellationToken
+        );
+        if (charge is null)
         {
             return Result<UpgradeSubscriptionResponse>.BadRequest("Failed to upgrade subscription in Paystack.");
         }
 
-        if (upgradeResult.ErrorMessage is not null)
+        var paymentAttempt = PaystackPaymentAttempt.Create(
+            subscription.TenantId,
+            subscription.Id,
+            charge.Reference,
+            subscription.PaystackCustomerId,
+            subscription.PaystackSubscriptionId,
+            PaystackPaymentPurpose.Upgrade,
+            command.NewPlan,
+            charge.Amount,
+            charge.Currency
+        );
+
+        if (!charge.Paid)
         {
-            return Result<UpgradeSubscriptionResponse>.BadRequest(upgradeResult.ErrorMessage);
+            paymentAttempt.MarkFailed(now, charge.ErrorMessage ?? "Paystack could not charge the saved payment method.");
+            await paystackPaymentAttemptRepository.AddAsync(paymentAttempt, cancellationToken);
+            return Result<UpgradeSubscriptionResponse>.BadRequest(charge.ErrorMessage ?? "Paystack could not charge the saved payment method.");
         }
 
-        // Subscription is updated and telemetry is collected when Paystack confirms the transaction.
+        var previousPlan = subscription.Plan;
+        var previousPriceAmount = subscription.CurrentPriceAmount ?? 0m;
+        var currentPeriodStart = subscription.CurrentPeriodStart ?? now;
+        var currentPeriodEnd = subscription.CurrentPeriodEnd ?? now.AddMonths(1);
+        subscription.StartBillingPeriod(command.NewPlan, targetPlanPrice.UnitAmount, charge.Currency, currentPeriodStart, currentPeriodEnd, charge.PaymentMethod);
+        subscription.SetPaymentTransactions([
+                .. subscription.PaymentTransactions,
+                new PaymentTransaction(PaymentTransactionId.NewId(), charge.Amount, charge.Currency, PaymentTransactionStatus.Succeeded, now, null, null, null)
+            ]
+        );
 
-        var publicKey = upgradeResult.AccessCode is not null ? paystackClientFactory.GetPublicKey() : null;
-        return new UpgradeSubscriptionResponse(upgradeResult.AccessCode, upgradeResult.Reference, publicKey, upgradeResult.Amount, upgradeResult.Currency, nameof(PaystackPaymentPurpose.Upgrade));
+        var tenant = await tenantRepository.GetByIdUnfilteredAsync(subscription.TenantId, cancellationToken);
+        if (tenant is not null)
+        {
+            tenant.UpdatePlan(command.NewPlan);
+            tenant.Activate();
+            tenantRepository.Update(tenant);
+        }
+
+        subscriptionRepository.Update(subscription);
+        paymentAttempt.MarkSucceeded(now);
+        await paystackPaymentAttemptRepository.AddAsync(paymentAttempt, cancellationToken);
+        events.CollectEvent(new SubscriptionUpgraded(subscription.Id, previousPlan, command.NewPlan, 0, previousPriceAmount, targetPlanPrice.UnitAmount, targetPlanPrice.UnitAmount - previousPriceAmount, charge.Currency));
+
+        return new UpgradeSubscriptionResponse(null, null, null, charge.Amount, charge.Currency, nameof(PaystackPaymentPurpose.Upgrade));
     }
 }

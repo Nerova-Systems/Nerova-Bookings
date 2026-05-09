@@ -52,7 +52,11 @@ public sealed class Subscription : AggregateRoot<SubscriptionId>, ITenantScopedE
 
     public string? CurrentPriceCurrency { get; private set; }
 
+    public DateTimeOffset? CurrentPeriodStart { get; private set; }
+
     public DateTimeOffset? CurrentPeriodEnd { get; private set; }
+
+    public DateTimeOffset? NextBillingAt { get; private set; }
 
     public bool CancelAtPeriodEnd { get; private set; }
 
@@ -95,12 +99,43 @@ public sealed class Subscription : AggregateRoot<SubscriptionId>, ITenantScopedE
 
     public void SetPaystackSubscription(PaystackSubscriptionId? paystackSubscriptionId, SubscriptionPlan plan, decimal? currentPriceAmount, string? currentPriceCurrency, DateTimeOffset? currentPeriodEnd, PaymentMethod? paymentMethod)
     {
+        SetPaystackSubscription(paystackSubscriptionId, plan, currentPriceAmount, currentPriceCurrency, CurrentPeriodStart ?? CreatedAt, currentPeriodEnd, currentPeriodEnd, paymentMethod);
+    }
+
+    public void SetPaystackSubscription(
+        PaystackSubscriptionId? paystackSubscriptionId,
+        SubscriptionPlan plan,
+        decimal? currentPriceAmount,
+        string? currentPriceCurrency,
+        DateTimeOffset? currentPeriodStart,
+        DateTimeOffset? currentPeriodEnd,
+        DateTimeOffset? nextBillingAt,
+        PaymentMethod? paymentMethod
+    )
+    {
         PaystackSubscriptionId = paystackSubscriptionId;
         Plan = plan;
         CurrentPriceAmount = currentPriceAmount;
         CurrentPriceCurrency = currentPriceCurrency;
+        CurrentPeriodStart = currentPeriodStart;
         CurrentPeriodEnd = currentPeriodEnd;
+        NextBillingAt = nextBillingAt;
         PaymentMethod = paymentMethod;
+    }
+
+    public void StartBillingPeriod(SubscriptionPlan plan, decimal currentPriceAmount, string currentPriceCurrency, DateTimeOffset periodStart, DateTimeOffset periodEnd, PaymentMethod? paymentMethod)
+    {
+        Plan = plan;
+        ScheduledPlan = null;
+        CurrentPriceAmount = currentPriceAmount;
+        CurrentPriceCurrency = currentPriceCurrency;
+        CurrentPeriodStart = periodStart;
+        CurrentPeriodEnd = periodEnd;
+        NextBillingAt = periodEnd;
+        PaymentMethod = paymentMethod ?? PaymentMethod;
+        CancelAtPeriodEnd = false;
+        CancellationReason = null;
+        CancellationFeedback = null;
     }
 
     public void SetCancellation(bool cancelAtPeriodEnd, CancellationReason? cancellationReason, string? cancellationFeedback)
@@ -144,7 +179,9 @@ public sealed class Subscription : AggregateRoot<SubscriptionId>, ITenantScopedE
         PaystackAuthorizationSignature = null;
         CurrentPriceAmount = null;
         CurrentPriceCurrency = null;
+        CurrentPeriodStart = null;
         CurrentPeriodEnd = null;
+        NextBillingAt = null;
         CancelAtPeriodEnd = false;
         FirstPaymentFailedAt = null;
         CancellationReason = null;

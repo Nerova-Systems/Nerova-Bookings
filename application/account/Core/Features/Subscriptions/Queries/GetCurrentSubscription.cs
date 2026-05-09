@@ -13,7 +13,7 @@ public sealed record SubscriptionResponse(
     SubscriptionPlan Plan,
     SubscriptionPlan? ScheduledPlan,
     bool HasPaystackCustomer,
-    bool HasPaystackSubscription,
+    bool HasPaystackAuthorization,
     decimal? CurrentPriceAmount,
     string? CurrentPriceCurrency,
     DateTimeOffset? CurrentPeriodEnd,

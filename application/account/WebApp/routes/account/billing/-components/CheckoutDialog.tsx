@@ -64,13 +64,13 @@ export function CheckoutDialog({ isOpen, onOpenChange, plan, prefetchedPayment }
   };
 
   useEffect(() => {
-    if (!isWaitingForActivation || !subscription?.hasPaystackSubscription) {
+    if (!isWaitingForActivation || !subscription?.hasPaystackAuthorization) {
       return;
     }
     setIsWaitingForActivation(false);
     toast.success(t`Your subscription has been activated.`);
     onOpenChange(false);
-  }, [isWaitingForActivation, subscription?.hasPaystackSubscription, onOpenChange]);
+  }, [isWaitingForActivation, subscription?.hasPaystackAuthorization, onOpenChange]);
 
   useEffect(() => {
     if (!isWaitingForActivation) {

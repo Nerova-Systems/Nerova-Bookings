@@ -56,6 +56,7 @@ public static class Configuration
             services.AddEmailRendering("WebApp");
 
             services.AddMemoryCache();
+            services.AddHttpContextAccessor();
             services.AddSingleton<MockPaystackState>();
             services.AddKeyedScoped<IPaystackClient, PaystackClient>("paystack");
             services.AddKeyedScoped<IPaystackClient, MockPaystackClient>("mock-paystack");
@@ -69,6 +70,7 @@ public static class Configuration
                 .AddScoped<AvatarUpdater>()
                 .AddScoped<UserInfoFactory>()
                 .AddScoped<ProcessPendingPaystackEvents>()
+                .AddScoped<ProcessSubscriptionBilling>()
                 .AddScoped<ExternalAuthenticationService>()
                 .AddScoped<ExternalAuthenticationHelper>();
         }

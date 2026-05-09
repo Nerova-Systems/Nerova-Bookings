@@ -15,6 +15,10 @@ public sealed class MockPaystackState
     public bool SimulateCustomerDeleted { get; set; }
 
     public bool SimulateOpenInvoice { get; set; }
+
+    public bool SimulateRetryAuthenticationRequired { get; set; }
+
+    public bool SimulateAuthorizationChargeFailure { get; set; }
 }
 
 public sealed class MockPaystackClient(IConfiguration configuration, TimeProvider timeProvider, MockPaystackState state) : IPaystackClient
@@ -87,19 +91,18 @@ public sealed class MockPaystackClient(IConfiguration configuration, TimeProvide
         return Task.FromResult<SubscriptionSyncResult?>(result);
     }
 
-    public Task<PaystackSubscriptionId?> GetCheckoutSessionSubscriptionIdAsync(string sessionId, CancellationToken cancellationToken)
-    {
-        EnsureEnabled();
-        return Task.FromResult<PaystackSubscriptionId?>(PaystackSubscriptionId.NewId(MockAuthorizationCode));
-    }
-
     public Task<UpgradeSubscriptionResult?> UpgradeSubscriptionAsync(PaystackCustomerId paystackCustomerId, PaystackSubscriptionId authorizationCode, string email, SubscriptionPlan newPlan, CancellationToken cancellationToken)
     {
         EnsureEnabled();
         var amount = newPlan == SubscriptionPlan.Premium ? 15.50m : 0m;
         var reference = $"{MockReference}_upgrade_{Guid.NewGuid():N}";
-        state.VerifiedTransactions[reference] = CreateVerifiedTransaction(reference, amount, "USD", PaystackPaymentPurpose.Upgrade);
+        if (!state.SimulateAuthorizationChargeFailure)
+        {
+            state.VerifiedTransactions[reference] = CreateVerifiedTransaction(reference, amount, "USD", PaystackPaymentPurpose.Upgrade);
+        }
+
         return Task.FromResult<UpgradeSubscriptionResult?>(new UpgradeSubscriptionResult(
+                ErrorMessage: state.SimulateAuthorizationChargeFailure ? "Paystack could not charge the saved payment method." : null,
                 Reference: reference,
                 Amount: amount,
                 Currency: "USD"
@@ -107,28 +110,27 @@ public sealed class MockPaystackClient(IConfiguration configuration, TimeProvide
         );
     }
 
-    public Task<bool> ScheduleDowngradeAsync(PaystackSubscriptionId paystackSubscriptionId, SubscriptionPlan newPlan, CancellationToken cancellationToken)
+    public Task<AuthorizationChargeResult?> ChargeAuthorizationAsync(
+        PaystackCustomerId paystackCustomerId,
+        PaystackSubscriptionId authorizationCode,
+        string email,
+        PaystackPaymentPurpose purpose,
+        SubscriptionPlan plan,
+        decimal amount,
+        string currency,
+        CancellationToken cancellationToken
+    )
     {
         EnsureEnabled();
-        return Task.FromResult(true);
-    }
+        var reference = $"{MockReference}_{purpose.ToString().ToLowerInvariant()}_{Guid.NewGuid():N}";
+        var normalizedCurrency = currency.ToUpperInvariant();
+        if (state.SimulateAuthorizationChargeFailure)
+        {
+            return Task.FromResult<AuthorizationChargeResult?>(new AuthorizationChargeResult(false, reference, amount, normalizedCurrency, ErrorMessage: "Paystack could not charge the saved payment method."));
+        }
 
-    public Task<bool> CancelScheduledDowngradeAsync(PaystackSubscriptionId paystackSubscriptionId, CancellationToken cancellationToken)
-    {
-        EnsureEnabled();
-        return Task.FromResult(true);
-    }
-
-    public Task<bool> CancelSubscriptionAtPeriodEndAsync(PaystackSubscriptionId paystackSubscriptionId, CancellationReason reason, string? feedback, CancellationToken cancellationToken)
-    {
-        EnsureEnabled();
-        return Task.FromResult(true);
-    }
-
-    public Task<bool> ReactivateSubscriptionAsync(PaystackSubscriptionId paystackSubscriptionId, CancellationToken cancellationToken)
-    {
-        EnsureEnabled();
-        return Task.FromResult(true);
+        state.VerifiedTransactions[reference] = CreateVerifiedTransaction(reference, amount, normalizedCurrency, purpose);
+        return Task.FromResult<AuthorizationChargeResult?>(new AuthorizationChargeResult(true, reference, amount, normalizedCurrency, new PaymentMethod("visa", "4242", 12, 2026)));
     }
 
     public Task<PriceCatalogItem[]> GetPriceCatalogAsync(CancellationToken cancellationToken)
@@ -207,7 +209,7 @@ public sealed class MockPaystackClient(IConfiguration configuration, TimeProvide
         return Task.FromResult(taxId != "INVALID");
     }
 
-    public Task<CheckoutSessionResult?> CreateSetupIntentAsync(PaystackCustomerId paystackCustomerId, string email, CancellationToken cancellationToken)
+    public Task<CheckoutSessionResult?> CreatePaymentMethodAuthorizationAsync(PaystackCustomerId paystackCustomerId, string email, CancellationToken cancellationToken)
     {
         EnsureEnabled();
         var reference = $"{MockReference}_auth_{Guid.NewGuid():N}";
@@ -215,10 +217,16 @@ public sealed class MockPaystackClient(IConfiguration configuration, TimeProvide
         return Task.FromResult<CheckoutSessionResult?>(new CheckoutSessionResult(reference, MockAccessCode, 1.00m, "USD", PaystackPaymentPurpose.PaymentMethodAuthorization));
     }
 
-    public Task<VerifiedPaystackTransactionResult?> GetSetupIntentPaymentMethodAsync(string setupIntentId, CancellationToken cancellationToken)
+    public Task<VerifiedPaystackTransactionResult?> VerifyPaymentMethodAuthorizationAsync(string reference, CancellationToken cancellationToken)
     {
         EnsureEnabled();
-        return VerifyTransactionAsync(setupIntentId, PaystackPaymentPurpose.PaymentMethodAuthorization, cancellationToken);
+        return VerifyTransactionAsync(reference, PaystackPaymentPurpose.PaymentMethodAuthorization, cancellationToken);
+    }
+
+    public Task<RefundResult?> CreateRefundAsync(string transactionReference, decimal amount, string currency, CancellationToken cancellationToken)
+    {
+        EnsureEnabled();
+        return Task.FromResult<RefundResult?>(new RefundResult($"refund_{Guid.NewGuid():N}", amount, currency.ToUpperInvariant(), "processed"));
     }
 
     public Task<bool> SetSubscriptionDefaultPaymentMethodAsync(PaystackSubscriptionId paystackSubscriptionId, string paymentMethodId, CancellationToken cancellationToken)
@@ -242,16 +250,18 @@ public sealed class MockPaystackClient(IConfiguration configuration, TimeProvide
     public Task<InvoiceRetryResult?> RetryOpenInvoicePaymentAsync(PaystackSubscriptionId paystackSubscriptionId, string? paymentMethodId, CancellationToken cancellationToken)
     {
         EnsureEnabled();
-        var result = state.SimulateOpenInvoice
-            ? new InvoiceRetryResult(
-                true,
-                Reference: $"{MockReference}_retry_{Guid.NewGuid():N}",
-                Amount: 29.99m,
-                Currency: "USD"
-            )
-            : null;
+        if (!state.SimulateOpenInvoice)
+        {
+            return Task.FromResult<InvoiceRetryResult?>(null);
+        }
 
-        return Task.FromResult(result);
+        var reference = $"{MockReference}_retry_{Guid.NewGuid():N}";
+        state.VerifiedTransactions[reference] = CreateVerifiedTransaction(reference, 29.99m, "USD", PaystackPaymentPurpose.Retry);
+        var result = state.SimulateRetryAuthenticationRequired
+            ? new InvoiceRetryResult(false, AccessCode: MockAccessCode, Reference: reference, Amount: 29.99m, Currency: "USD")
+            : new InvoiceRetryResult(true, Reference: reference, Amount: 29.99m, Currency: "USD");
+
+        return Task.FromResult<InvoiceRetryResult?>(result);
     }
 
     public Task<UpgradePreviewResult?> GetUpgradePreviewAsync(PaystackSubscriptionId paystackSubscriptionId, SubscriptionPlan newPlan, CancellationToken cancellationToken)

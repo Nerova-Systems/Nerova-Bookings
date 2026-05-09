@@ -32,6 +32,7 @@ public sealed class ScheduleDowngradeTests : EndpointBaseTest<AccountDbContext>
         // Assert
         response.EnsureSuccessStatusCode();
 
+        Connection.ExecuteScalar<string>("SELECT scheduled_plan FROM subscriptions WHERE tenant_id = @tenantId", [new { tenantId = DatabaseSeeder.Tenant1.Id.Value }]).Should().Be(nameof(SubscriptionPlan.Standard));
         TelemetryEventsCollectorSpy.CollectedEvents.Should().BeEmpty();
     }
 

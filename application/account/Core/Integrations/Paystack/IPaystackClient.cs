@@ -11,17 +11,18 @@ public interface IPaystackClient
 
     Task<SubscriptionSyncResult?> SyncSubscriptionStateAsync(PaystackCustomerId paystackCustomerId, CancellationToken cancellationToken);
 
-    Task<PaystackSubscriptionId?> GetCheckoutSessionSubscriptionIdAsync(string sessionId, CancellationToken cancellationToken);
-
     Task<UpgradeSubscriptionResult?> UpgradeSubscriptionAsync(PaystackCustomerId paystackCustomerId, PaystackSubscriptionId authorizationCode, string email, SubscriptionPlan newPlan, CancellationToken cancellationToken);
 
-    Task<bool> ScheduleDowngradeAsync(PaystackSubscriptionId paystackSubscriptionId, SubscriptionPlan newPlan, CancellationToken cancellationToken);
-
-    Task<bool> CancelScheduledDowngradeAsync(PaystackSubscriptionId paystackSubscriptionId, CancellationToken cancellationToken);
-
-    Task<bool> CancelSubscriptionAtPeriodEndAsync(PaystackSubscriptionId paystackSubscriptionId, CancellationReason reason, string? feedback, CancellationToken cancellationToken);
-
-    Task<bool> ReactivateSubscriptionAsync(PaystackSubscriptionId paystackSubscriptionId, CancellationToken cancellationToken);
+    Task<AuthorizationChargeResult?> ChargeAuthorizationAsync(
+        PaystackCustomerId paystackCustomerId,
+        PaystackSubscriptionId authorizationCode,
+        string email,
+        PaystackPaymentPurpose purpose,
+        SubscriptionPlan plan,
+        decimal amount,
+        string currency,
+        CancellationToken cancellationToken
+    );
 
     Task<PriceCatalogItem[]> GetPriceCatalogAsync(CancellationToken cancellationToken);
 
@@ -35,9 +36,11 @@ public interface IPaystackClient
 
     Task<bool> SyncCustomerTaxIdAsync(PaystackCustomerId paystackCustomerId, string? taxId, CancellationToken cancellationToken);
 
-    Task<CheckoutSessionResult?> CreateSetupIntentAsync(PaystackCustomerId paystackCustomerId, string email, CancellationToken cancellationToken);
+    Task<CheckoutSessionResult?> CreatePaymentMethodAuthorizationAsync(PaystackCustomerId paystackCustomerId, string email, CancellationToken cancellationToken);
 
-    Task<VerifiedPaystackTransactionResult?> GetSetupIntentPaymentMethodAsync(string setupIntentId, CancellationToken cancellationToken);
+    Task<VerifiedPaystackTransactionResult?> VerifyPaymentMethodAuthorizationAsync(string reference, CancellationToken cancellationToken);
+
+    Task<RefundResult?> CreateRefundAsync(string transactionReference, decimal amount, string currency, CancellationToken cancellationToken);
 
     Task<bool> SetSubscriptionDefaultPaymentMethodAsync(PaystackSubscriptionId paystackSubscriptionId, string paymentMethodId, CancellationToken cancellationToken);
 
@@ -89,6 +92,8 @@ public sealed record PaystackAuthorization(
     string Signature
 );
 
+public sealed record RefundResult(string? RefundId, decimal Amount, string Currency, string Status);
+
 public sealed record SubscriptionSyncResult(
     SubscriptionPlan Plan,
     SubscriptionPlan? ScheduledPlan,
@@ -115,6 +120,15 @@ public sealed record InvoiceRetryResult(
     string? Reference = null,
     decimal? Amount = null,
     string? Currency = null
+);
+
+public sealed record AuthorizationChargeResult(
+    bool Paid,
+    string Reference,
+    decimal Amount,
+    string Currency,
+    PaymentMethod? PaymentMethod = null,
+    string? ErrorMessage = null
 );
 
 public sealed record UpgradeSubscriptionResult(string? ErrorMessage = null, string? AccessCode = null, string? Reference = null, decimal? Amount = null, string? Currency = null);
@@ -150,5 +164,6 @@ public enum PaystackPaymentPurpose
     Subscribe,
     Upgrade,
     Retry,
+    Renewal,
     PaymentMethodAuthorization
 }

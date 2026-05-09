@@ -3,6 +3,7 @@ using System.Net.Http.Json;
 using Account.Database;
 using Account.Features.Billing.Commands;
 using Account.Features.Subscriptions.Domain;
+using Account.Integrations.Paystack;
 using FluentAssertions;
 using SharedKernel.Tests;
 using SharedKernel.Tests.Persistence;
@@ -18,8 +19,11 @@ public sealed class RetryPendingInvoicePaymentTests : EndpointBaseTest<AccountDb
         // Arrange
         Connection.Update("subscriptions", "tenant_id", DatabaseSeeder.Tenant1.Id.Value, [
                 ("plan", nameof(SubscriptionPlan.Standard)),
-                ("paystack_customer_code", "cus_test_123"),
+                ("paystack_customer_code", MockPaystackClient.MockCustomerCode),
                 ("paystack_authorization_code", "sub_test_123"),
+                ("current_price_amount", 29.99m),
+                ("current_price_currency", "USD"),
+                ("first_payment_failed_at", TimeProvider.GetUtcNow().AddDays(-1)),
                 ("current_period_end", TimeProvider.GetUtcNow().AddDays(30))
             ]
         );
@@ -35,12 +39,42 @@ public sealed class RetryPendingInvoicePaymentTests : EndpointBaseTest<AccountDb
         result.Reference.Should().NotBeNullOrEmpty();
         result.AccessCode.Should().BeNull();
         result.OperationPurpose.Should().Be("Retry");
+        Connection.ExecuteScalar<string>("SELECT first_payment_failed_at FROM subscriptions WHERE tenant_id = @tenantId", [new { tenantId = DatabaseSeeder.Tenant1.Id.Value }]).Should().BeNull();
+        Connection.ExecuteScalar<string>("SELECT status FROM paystack_payment_attempts WHERE paystack_reference = @reference", [new { reference = result.Reference }]).Should().Be("Succeeded");
+        var transactions = Connection.ExecuteScalar<string>("SELECT payment_transactions FROM subscriptions WHERE tenant_id = @tenantId", [new { tenantId = DatabaseSeeder.Tenant1.Id.Value }]);
+        transactions.Should().Contain("\"Amount\":29.99");
+        transactions.Should().Contain("\"Status\":\"Succeeded\"");
         TelemetryEventsCollectorSpy.CollectedEvents.Count.Should().Be(1);
         TelemetryEventsCollectorSpy.CollectedEvents[0].GetType().Name.Should().Be("PendingInvoicePaymentRetried");
     }
 
     [Fact]
-    public async Task RetryPendingInvoicePayment_WhenNoOpenInvoice_ShouldReturnBadRequest()
+    public async Task RetryPendingInvoicePayment_WhenAuthorizationChargeFails_ShouldReturnBadRequestAndKeepPaymentFailure()
+    {
+        // Arrange
+        Connection.Update("subscriptions", "tenant_id", DatabaseSeeder.Tenant1.Id.Value, [
+                ("plan", nameof(SubscriptionPlan.Standard)),
+                ("paystack_customer_code", MockPaystackClient.MockCustomerCode),
+                ("paystack_authorization_code", "sub_test_123"),
+                ("current_price_amount", 29.99m),
+                ("current_price_currency", "USD"),
+                ("first_payment_failed_at", TimeProvider.GetUtcNow().AddDays(-1)),
+                ("current_period_end", TimeProvider.GetUtcNow().AddDays(30))
+            ]
+        );
+        PaystackState.SimulateAuthorizationChargeFailure = true;
+
+        // Act
+        var response = await AuthenticatedOwnerHttpClient.PostAsync("/api/account/billing/retry-pending-invoice", null);
+
+        // Assert
+        await response.ShouldHaveErrorStatusCode(HttpStatusCode.BadRequest, "Paystack could not charge the saved payment method.");
+        Connection.ExecuteScalar<string?>("SELECT first_payment_failed_at FROM subscriptions WHERE tenant_id = @tenantId", [new { tenantId = DatabaseSeeder.Tenant1.Id.Value }]).Should().NotBeNull();
+        Connection.ExecuteScalar<string>("SELECT status FROM paystack_payment_attempts WHERE purpose = @purpose", [new { purpose = nameof(PaystackPaymentPurpose.Retry) }]).Should().Be("Failed");
+    }
+
+    [Fact]
+    public async Task RetryPendingInvoicePayment_WhenNoPendingRenewalPayment_ShouldReturnBadRequest()
     {
         // Arrange
         Connection.Update("subscriptions", "tenant_id", DatabaseSeeder.Tenant1.Id.Value, [
@@ -55,7 +89,7 @@ public sealed class RetryPendingInvoicePaymentTests : EndpointBaseTest<AccountDb
         var response = await AuthenticatedOwnerHttpClient.PostAsync("/api/account/billing/retry-pending-invoice", null);
 
         // Assert
-        await response.ShouldHaveErrorStatusCode(HttpStatusCode.BadRequest, "No pending invoice found for this subscription.");
+        await response.ShouldHaveErrorStatusCode(HttpStatusCode.BadRequest, "No pending renewal payment found for this subscription.");
     }
 
     [Fact]
@@ -81,6 +115,6 @@ public sealed class RetryPendingInvoicePaymentTests : EndpointBaseTest<AccountDb
         var response = await AuthenticatedOwnerHttpClient.PostAsync("/api/account/billing/retry-pending-invoice", null);
 
         // Assert
-        await response.ShouldHaveErrorStatusCode(HttpStatusCode.BadRequest, "No active Paystack subscription found.");
+        await response.ShouldHaveErrorStatusCode(HttpStatusCode.BadRequest, "No active Paystack authorization found.");
     }
 }

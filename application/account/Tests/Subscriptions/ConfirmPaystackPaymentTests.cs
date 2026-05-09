@@ -19,7 +19,10 @@ public sealed class ConfirmPaystackPaymentTests : EndpointBaseTest<AccountDbCont
     {
         // Arrange
         SaveBillingInfo();
-        var command = new ConfirmPaystackPaymentCommand(MockPaystackClient.MockReference, SubscriptionPlan.Standard, PaystackPaymentPurpose.Subscribe);
+        var checkoutResponse = await AuthenticatedOwnerHttpClient.PostAsJsonAsync("/api/account/subscriptions/start-checkout", new StartSubscriptionCheckoutCommand(SubscriptionPlan.Standard));
+        checkoutResponse.EnsureSuccessStatusCode();
+        var checkout = await checkoutResponse.Content.ReadFromJsonAsync<StartSubscriptionCheckoutResponse>();
+        var command = new ConfirmPaystackPaymentCommand(checkout!.Reference!, SubscriptionPlan.Standard, PaystackPaymentPurpose.Subscribe);
         TelemetryEventsCollectorSpy.Reset();
 
         // Act
@@ -33,6 +36,7 @@ public sealed class ConfirmPaystackPaymentTests : EndpointBaseTest<AccountDbCont
         Connection.ExecuteScalar<string>("SELECT paystack_authorization_code FROM subscriptions WHERE tenant_id = @tenantId", [new { tenantId = DatabaseSeeder.Tenant1.Id.Value }]).Should().Be(MockPaystackClient.MockAuthorizationCode);
         decimal.Parse(Connection.ExecuteScalar<string>("SELECT current_price_amount FROM subscriptions WHERE tenant_id = @tenantId", [new { tenantId = DatabaseSeeder.Tenant1.Id.Value }]), CultureInfo.InvariantCulture).Should().Be(29.00m);
         Connection.ExecuteScalar<string>("SELECT current_price_currency FROM subscriptions WHERE tenant_id = @tenantId", [new { tenantId = DatabaseSeeder.Tenant1.Id.Value }]).Should().Be("USD");
+        Connection.ExecuteScalar<string>("SELECT status FROM paystack_payment_attempts WHERE paystack_reference = @reference", [new { reference = checkout.Reference }]).Should().Be("Succeeded");
 
         TelemetryEventsCollectorSpy.CollectedEvents.Count.Should().Be(1);
         TelemetryEventsCollectorSpy.CollectedEvents[0].GetType().Name.Should().Be("SubscriptionCreated");
@@ -59,6 +63,7 @@ public sealed class ConfirmPaystackPaymentTests : EndpointBaseTest<AccountDbCont
         result!.Paid.Should().BeTrue();
         Connection.ExecuteScalar<string>("SELECT plan FROM subscriptions WHERE tenant_id = @tenantId", [new { tenantId = DatabaseSeeder.Tenant1.Id.Value }]).Should().Be(nameof(SubscriptionPlan.Premium));
         decimal.Parse(Connection.ExecuteScalar<string>("SELECT current_price_amount FROM subscriptions WHERE tenant_id = @tenantId", [new { tenantId = DatabaseSeeder.Tenant1.Id.Value }]), CultureInfo.InvariantCulture).Should().Be(99.00m);
+        Connection.ExecuteScalar<string>("SELECT status FROM paystack_payment_attempts WHERE paystack_reference = @reference", [new { reference = checkout.Reference }]).Should().Be("Succeeded");
     }
 
     [Fact]
@@ -80,19 +85,41 @@ public sealed class ConfirmPaystackPaymentTests : EndpointBaseTest<AccountDbCont
     }
 
     [Fact]
-    public async Task ConfirmPaystackPayment_WhenVerifiedAmountDoesNotMatchPlan_ShouldReturnBadRequest()
+    public async Task ConfirmPaystackPayment_WhenNoPaymentAttemptExists_ShouldReturnBadRequest()
     {
         // Arrange
         SaveBillingInfo();
-        var command = new ConfirmPaystackPaymentCommand(MockPaystackClient.MockReference, SubscriptionPlan.Premium, PaystackPaymentPurpose.Subscribe);
+        var command = new ConfirmPaystackPaymentCommand(MockPaystackClient.MockReference, SubscriptionPlan.Standard, PaystackPaymentPurpose.Subscribe);
         TelemetryEventsCollectorSpy.Reset();
 
         // Act
         var response = await AuthenticatedOwnerHttpClient.PostAsJsonAsync("/api/account/subscriptions/confirm-payment", command);
 
         // Assert
-        await response.ShouldHaveErrorStatusCode(HttpStatusCode.BadRequest, "Paystack payment amount does not match the expected subscription amount.");
+        await response.ShouldHaveErrorStatusCode(HttpStatusCode.BadRequest, "Paystack payment attempt was not found.");
         Connection.ExecuteScalar<string>("SELECT plan FROM subscriptions WHERE tenant_id = @tenantId", [new { tenantId = DatabaseSeeder.Tenant1.Id.Value }]).Should().Be(nameof(SubscriptionPlan.Basis));
+
+        TelemetryEventsCollectorSpy.AreAllEventsDispatched.Should().BeFalse();
+    }
+
+    [Fact]
+    public async Task ConfirmPaystackPayment_WhenPaymentAttemptDoesNotMatchCommand_ShouldReturnBadRequest()
+    {
+        // Arrange
+        SaveBillingInfo();
+        var checkoutResponse = await AuthenticatedOwnerHttpClient.PostAsJsonAsync("/api/account/subscriptions/start-checkout", new StartSubscriptionCheckoutCommand(SubscriptionPlan.Standard));
+        checkoutResponse.EnsureSuccessStatusCode();
+        var checkout = await checkoutResponse.Content.ReadFromJsonAsync<StartSubscriptionCheckoutResponse>();
+        var command = new ConfirmPaystackPaymentCommand(checkout!.Reference!, SubscriptionPlan.Premium, PaystackPaymentPurpose.Subscribe);
+        TelemetryEventsCollectorSpy.Reset();
+
+        // Act
+        var response = await AuthenticatedOwnerHttpClient.PostAsJsonAsync("/api/account/subscriptions/confirm-payment", command);
+
+        // Assert
+        await response.ShouldHaveErrorStatusCode(HttpStatusCode.BadRequest, "Paystack payment attempt does not match the requested confirmation.");
+        Connection.ExecuteScalar<string>("SELECT plan FROM subscriptions WHERE tenant_id = @tenantId", [new { tenantId = DatabaseSeeder.Tenant1.Id.Value }]).Should().Be(nameof(SubscriptionPlan.Basis));
+        Connection.ExecuteScalar<string>("SELECT status FROM paystack_payment_attempts WHERE paystack_reference = @reference", [new { reference = checkout.Reference }]).Should().Be("Pending");
 
         TelemetryEventsCollectorSpy.AreAllEventsDispatched.Should().BeFalse();
     }

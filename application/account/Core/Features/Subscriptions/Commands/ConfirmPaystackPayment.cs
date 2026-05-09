@@ -19,6 +19,7 @@ public sealed record ConfirmPaystackPaymentResponse(bool Paid);
 
 public sealed class ConfirmPaystackPaymentHandler(
     ISubscriptionRepository subscriptionRepository,
+    IPaystackPaymentAttemptRepository paystackPaymentAttemptRepository,
     ITenantRepository tenantRepository,
     PaystackClientFactory paystackClientFactory,
     IExecutionContext executionContext,
@@ -49,10 +50,31 @@ public sealed class ConfirmPaystackPaymentHandler(
             return Result<ConfirmPaystackPaymentResponse>.BadRequest("Only subscription Paystack payments can be confirmed here.");
         }
 
+        var paymentAttempt = await paystackPaymentAttemptRepository.GetByReferenceAsync(command.Reference, cancellationToken);
+        if (paymentAttempt is null)
+        {
+            return Result<ConfirmPaystackPaymentResponse>.BadRequest("Paystack payment attempt was not found.");
+        }
+
+        if (paymentAttempt.SubscriptionId != subscription.Id
+            || paymentAttempt.PaystackCustomerId != subscription.PaystackCustomerId
+            || !paymentAttempt.Matches(command.Purpose, command.Plan))
+        {
+            return Result<ConfirmPaystackPaymentResponse>.BadRequest("Paystack payment attempt does not match the requested confirmation.");
+        }
+
+        if (paymentAttempt.Status != PaystackPaymentAttemptStatus.Pending)
+        {
+            return Result<ConfirmPaystackPaymentResponse>.BadRequest("Paystack payment attempt has already been processed.");
+        }
+
         var paystackClient = paystackClientFactory.GetClient();
         var verified = await paystackClient.VerifyTransactionAsync(command.Reference, command.Purpose, cancellationToken);
+        var now = timeProvider.GetUtcNow();
         if (verified?.Paid != true)
         {
+            paymentAttempt.MarkFailed(now, verified?.ErrorMessage ?? "Paystack payment could not be verified.");
+            paystackPaymentAttemptRepository.Update(paymentAttempt);
             return Result<ConfirmPaystackPaymentResponse>.BadRequest(verified?.ErrorMessage ?? "Paystack payment could not be verified.");
         }
 
@@ -76,21 +98,18 @@ public sealed class ConfirmPaystackPaymentHandler(
             return Result<ConfirmPaystackPaymentResponse>.BadRequest("Paystack payment did not return a reusable card authorization.");
         }
 
-        var expectedPayment = await GetExpectedPaymentAsync(paystackClient, subscription, command, cancellationToken);
-        if (expectedPayment is null)
+        if (!paymentAttempt.MatchesAmount(verified.Amount, verified.Currency))
         {
-            return Result<ConfirmPaystackPaymentResponse>.BadRequest("Could not load expected Paystack subscription amount.");
-        }
-
-        if (!AmountsMatch(verified.Amount, expectedPayment.Amount) || !CurrenciesMatch(verified.Currency, expectedPayment.Currency))
-        {
+            paymentAttempt.MarkFailed(now, "Paystack payment amount does not match the expected subscription amount.");
+            paystackPaymentAttemptRepository.Update(paymentAttempt);
             return Result<ConfirmPaystackPaymentResponse>.BadRequest("Paystack payment amount does not match the expected subscription amount.");
         }
 
         var previousPlan = subscription.Plan;
-        var now = timeProvider.GetUtcNow();
+        var previousPriceAmount = subscription.CurrentPriceAmount;
         subscription.SetPaystackAuthorization(verified.Authorization.AuthorizationCode, verified.Authorization.Email, verified.Authorization.Signature, verified.PaymentMethod);
-        subscription.SetPaystackSubscription(verified.Authorization.AuthorizationCode, command.Plan, verified.Amount, verified.Currency, now.AddMonths(1), verified.PaymentMethod);
+        var nextBillingAt = now.AddMonths(1);
+        subscription.SetPaystackSubscription(verified.Authorization.AuthorizationCode, command.Plan, verified.Amount, verified.Currency, now, nextBillingAt, nextBillingAt, verified.PaymentMethod);
         subscription.ClearPaymentFailure();
         subscription.SetPaymentTransactions([
                 .. subscription.PaymentTransactions,
@@ -107,6 +126,8 @@ public sealed class ConfirmPaystackPaymentHandler(
         }
 
         subscriptionRepository.Update(subscription);
+        paymentAttempt.MarkSucceeded(now);
+        paystackPaymentAttemptRepository.Update(paymentAttempt);
 
         if (previousPlan == SubscriptionPlan.Basis)
         {
@@ -114,38 +135,9 @@ public sealed class ConfirmPaystackPaymentHandler(
         }
         else if (command.Plan.IsUpgradeFrom(previousPlan))
         {
-            events.CollectEvent(new SubscriptionUpgraded(subscription.Id, previousPlan, command.Plan, 0, subscription.CurrentPriceAmount ?? verified.Amount, verified.Amount, verified.Amount - (subscription.CurrentPriceAmount ?? 0m), verified.Currency));
+            events.CollectEvent(new SubscriptionUpgraded(subscription.Id, previousPlan, command.Plan, 0, previousPriceAmount ?? 0m, verified.Amount, verified.Amount - (previousPriceAmount ?? 0m), verified.Currency));
         }
 
         return new ConfirmPaystackPaymentResponse(true);
     }
-
-    private static async Task<ExpectedPaystackPayment?> GetExpectedPaymentAsync(IPaystackClient paystackClient, Subscription subscription, ConfirmPaystackPaymentCommand command, CancellationToken cancellationToken)
-    {
-        if (command.Purpose == PaystackPaymentPurpose.Subscribe)
-        {
-            var preview = await paystackClient.GetCheckoutPreviewAsync(subscription.PaystackCustomerId!, command.Plan, cancellationToken);
-            return preview is null ? null : new ExpectedPaystackPayment(preview.TotalAmount, preview.Currency);
-        }
-
-        if (subscription.PaystackSubscriptionId is null)
-        {
-            return null;
-        }
-
-        var upgradePreview = await paystackClient.GetUpgradePreviewAsync(subscription.PaystackSubscriptionId, command.Plan, cancellationToken);
-        return upgradePreview is null ? null : new ExpectedPaystackPayment(upgradePreview.TotalAmount, upgradePreview.Currency);
-    }
-
-    private static bool AmountsMatch(decimal actual, decimal expected)
-    {
-        return decimal.Round(actual, 2, MidpointRounding.AwayFromZero) == decimal.Round(expected, 2, MidpointRounding.AwayFromZero);
-    }
-
-    private static bool CurrenciesMatch(string actual, string expected)
-    {
-        return string.Equals(actual, expected, StringComparison.OrdinalIgnoreCase);
-    }
-
-    private sealed record ExpectedPaystackPayment(decimal Amount, string Currency);
 }

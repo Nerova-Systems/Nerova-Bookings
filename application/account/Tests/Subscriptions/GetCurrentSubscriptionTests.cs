@@ -32,7 +32,7 @@ public sealed class GetCurrentSubscriptionTests : EndpointBaseTest<AccountDbCont
         response.ShouldBeSuccessfulGetRequest();
         var result = await response.Content.ReadFromJsonAsync<SubscriptionResponse>();
         result!.Plan.Should().Be(SubscriptionPlan.Standard);
-        result.HasPaystackSubscription.Should().BeTrue();
+        result.HasPaystackAuthorization.Should().BeTrue();
         result.CancelAtPeriodEnd.Should().BeFalse();
         result.CurrentPriceAmount.Should().Be(29.99m);
         result.CurrentPriceCurrency.Should().Be("USD");

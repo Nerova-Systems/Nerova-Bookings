@@ -38,6 +38,34 @@ public sealed class StartSubscriptionCheckoutTests : EndpointBaseTest<AccountDbC
         result.Currency.Should().NotBeNullOrEmpty();
         result.OperationPurpose.Should().Be("Subscribe");
         result.UsedExistingPaymentMethod.Should().BeFalse();
+        Connection.ExecuteScalar<long>(
+            """
+            SELECT COUNT(*)
+            FROM paystack_payment_attempts
+            WHERE tenant_id = @tenantId
+              AND subscription_id = (SELECT id FROM subscriptions WHERE tenant_id = @tenantId)
+              AND paystack_reference = @reference
+              AND paystack_customer_code = @customerCode
+              AND purpose = @purpose
+              AND plan = @plan
+              AND status = @status
+              AND amount = @amount
+              AND currency = @currency
+            """,
+            [
+                new
+                {
+                    tenantId = DatabaseSeeder.Tenant1.Id.Value,
+                    reference = result.Reference,
+                    customerCode = "CUS_test_123",
+                    purpose = "Subscribe",
+                    plan = nameof(SubscriptionPlan.Standard),
+                    status = "Pending",
+                    amount = result.Amount!.Value,
+                    currency = result.Currency
+                }
+            ]
+        ).Should().Be(1);
 
         TelemetryEventsCollectorSpy.CollectedEvents.Count.Should().Be(1);
         TelemetryEventsCollectorSpy.CollectedEvents[0].GetType().Name.Should().Be("SubscriptionCheckoutStarted");
@@ -70,6 +98,35 @@ public sealed class StartSubscriptionCheckoutTests : EndpointBaseTest<AccountDbC
         result.Reference.Should().NotBeNullOrEmpty();
         result.OperationPurpose.Should().Be("Subscribe");
         result.UsedExistingPaymentMethod.Should().BeTrue();
+        Connection.ExecuteScalar<long>(
+            """
+            SELECT COUNT(*)
+            FROM paystack_payment_attempts
+            WHERE tenant_id = @tenantId
+              AND paystack_reference = @reference
+              AND paystack_customer_code = @customerCode
+              AND paystack_authorization_code = @authorizationCode
+              AND purpose = @purpose
+              AND plan = @plan
+              AND status = @status
+              AND amount = @amount
+              AND currency = @currency
+            """,
+            [
+                new
+                {
+                    tenantId = DatabaseSeeder.Tenant1.Id.Value,
+                    reference = result.Reference,
+                    customerCode = "CUS_test_123",
+                    authorizationCode = "AUTH_test_123",
+                    purpose = "Subscribe",
+                    plan = nameof(SubscriptionPlan.Standard),
+                    status = "Pending",
+                    amount = result.Amount!.Value,
+                    currency = result.Currency
+                }
+            ]
+        ).Should().Be(1);
 
         TelemetryEventsCollectorSpy.CollectedEvents.Count.Should().Be(1);
         TelemetryEventsCollectorSpy.CollectedEvents[0].GetType().Name.Should().Be("SubscriptionCheckoutStarted");

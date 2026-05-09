@@ -1,6 +1,5 @@
 using Account.Features.Subscriptions.Domain;
 using Account.Features.Users.Domain;
-using Account.Integrations.Paystack;
 using JetBrains.Annotations;
 using SharedKernel.Cqrs;
 using SharedKernel.ExecutionContext;
@@ -15,7 +14,6 @@ public sealed record ReactivateSubscriptionResponse;
 
 public sealed class ReactivateSubscriptionHandler(
     ISubscriptionRepository subscriptionRepository,
-    PaystackClientFactory paystackClientFactory,
     IExecutionContext executionContext,
     ILogger<ReactivateSubscriptionHandler> logger
 ) : IRequestHandler<ReactivateSubscriptionCommand, Result<ReactivateSubscriptionResponse>>
@@ -36,18 +34,12 @@ public sealed class ReactivateSubscriptionHandler(
 
         if (subscription.PaystackSubscriptionId is null)
         {
-            logger.LogWarning("No Paystack subscription found for subscription '{SubscriptionId}'", subscription.Id);
-            return Result<ReactivateSubscriptionResponse>.BadRequest("No active Paystack subscription found.");
+            logger.LogWarning("No Paystack authorization found for subscription '{SubscriptionId}'", subscription.Id);
+            return Result<ReactivateSubscriptionResponse>.BadRequest("No active Paystack authorization found.");
         }
 
-        var paystackClient = paystackClientFactory.GetClient();
-        var reactivateSuccess = await paystackClient.ReactivateSubscriptionAsync(subscription.PaystackSubscriptionId, cancellationToken);
-        if (!reactivateSuccess)
-        {
-            return Result<ReactivateSubscriptionResponse>.BadRequest("Failed to reactivate subscription in Paystack.");
-        }
-
-        // Subscription is updated and telemetry is collected in ProcessPendingPaystackEvents when Paystack confirms the state change via webhook
+        subscription.SetCancellation(false, null, null);
+        subscriptionRepository.Update(subscription);
 
         return new ReactivateSubscriptionResponse();
     }

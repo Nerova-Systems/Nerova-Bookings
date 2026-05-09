@@ -55,5 +55,6 @@ export function getBackOfficeBaseUrl(): string {
  * Check if we're running against localhost
  */
 export function isLocalhost(): boolean {
-  return getBaseUrl() === DEFAULT_BASE_URL;
+  const hostname = new URL(getBaseUrl()).hostname;
+  return hostname === "localhost" || hostname === "127.0.0.1" || hostname.endsWith(".localhost");
 }

@@ -1,6 +1,5 @@
 using Account.Features.Subscriptions.Domain;
 using Account.Features.Users.Domain;
-using Account.Integrations.Paystack;
 using FluentValidation;
 using JetBrains.Annotations;
 using SharedKernel.Cqrs;
@@ -29,7 +28,6 @@ public sealed class CancelSubscriptionValidator : AbstractValidator<CancelSubscr
 
 public sealed class CancelSubscriptionHandler(
     ISubscriptionRepository subscriptionRepository,
-    PaystackClientFactory paystackClientFactory,
     IExecutionContext executionContext,
     ILogger<CancelSubscriptionHandler> logger
 ) : IRequestHandler<CancelSubscriptionCommand, Result>
@@ -50,8 +48,8 @@ public sealed class CancelSubscriptionHandler(
 
         if (subscription.PaystackSubscriptionId is null)
         {
-            logger.LogWarning("No Paystack subscription found for subscription '{SubscriptionId}'", subscription.Id);
-            return Result.BadRequest("No active Paystack subscription found.");
+            logger.LogWarning("No Paystack authorization found for subscription '{SubscriptionId}'", subscription.Id);
+            return Result.BadRequest("No active Paystack authorization found.");
         }
 
         if (subscription.CancelAtPeriodEnd)
@@ -59,14 +57,8 @@ public sealed class CancelSubscriptionHandler(
             return Result.BadRequest("Subscription is already scheduled for cancellation.");
         }
 
-        var paystackClient = paystackClientFactory.GetClient();
-        var success = await paystackClient.CancelSubscriptionAtPeriodEndAsync(subscription.PaystackSubscriptionId, command.Reason, command.Feedback, cancellationToken);
-        if (!success)
-        {
-            return Result.BadRequest("Failed to cancel subscription in Paystack.");
-        }
-
-        // Subscription is updated and telemetry is collected in ProcessPendingPaystackEvents when Paystack confirms the state change via webhook
+        subscription.SetCancellation(true, command.Reason, command.Feedback);
+        subscriptionRepository.Update(subscription);
 
         return Result.Success();
     }

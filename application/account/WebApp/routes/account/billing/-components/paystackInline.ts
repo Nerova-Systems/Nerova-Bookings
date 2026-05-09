@@ -5,7 +5,7 @@ type PaystackTransaction = {
 };
 
 type PaystackCallbacks = {
-  onSuccess: (transaction: PaystackTransaction) => void;
+  onSuccess: (transaction: PaystackTransaction) => void | Promise<void>;
   onCancel: () => void;
   onError: (error: { message?: string }) => void;
 };
