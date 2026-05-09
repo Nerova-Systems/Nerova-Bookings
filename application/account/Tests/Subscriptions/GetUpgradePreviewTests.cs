@@ -18,7 +18,7 @@ public sealed class GetUpgradePreviewTests : EndpointBaseTest<AccountDbContext>
     {
         // Arrange
         var now = TimeProvider.GetUtcNow();
-        SaveActiveSubscription(SubscriptionPlan.Standard, 29.00m, currentPeriodStart: now.AddDays(-15), currentPeriodEnd: now.AddDays(15));
+        SaveActiveSubscription(SubscriptionPlan.Standard, 29.00m, now.AddDays(-15), now.AddDays(15));
 
         // Act
         var response = await AuthenticatedOwnerHttpClient.GetAsync("/api/account/subscriptions/upgrade-preview?NewPlan=Premium");
@@ -37,7 +37,7 @@ public sealed class GetUpgradePreviewTests : EndpointBaseTest<AccountDbContext>
     {
         // Arrange
         var now = TimeProvider.GetUtcNow();
-        SaveActiveSubscription(SubscriptionPlan.Premium, 99.00m, currentPeriodStart: now.AddDays(-15), currentPeriodEnd: now.AddDays(15));
+        SaveActiveSubscription(SubscriptionPlan.Premium, 99.00m, now.AddDays(-15), now.AddDays(15));
 
         // Act
         var response = await AuthenticatedOwnerHttpClient.GetAsync("/api/account/subscriptions/upgrade-preview?NewPlan=Standard");

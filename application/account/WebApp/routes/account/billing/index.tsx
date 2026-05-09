@@ -17,7 +17,7 @@ import { BillingTabNavigation } from "./-components/BillingTabNavigation";
 import { CurrentPlanSection } from "./-components/CurrentPlanSection";
 import { InitialPlanSelection } from "./-components/InitialPlanSelection";
 import { PaymentMethodSection } from "./-components/PaymentMethodSection";
-import { CancellationBanner, DowngradeBanner } from "./-components/SubscriptionBanner";
+import { CancellationBanner, DowngradeBanner, PaymentFailedBillingBanner } from "./-components/SubscriptionBanner";
 import { useBillingPageMutations } from "./-components/useBillingPageMutations";
 import { useSubscriptionPolling } from "./-components/useSubscriptionPolling";
 
@@ -38,7 +38,6 @@ function BillingPage() {
   const [isEditBillingInfoOpen, setIsEditBillingInfoOpen] = useState(false);
   const [isUpdatePaymentMethodOpen, setIsUpdatePaymentMethodOpen] = useState(false);
   const [isRetryPaymentOpen, setIsRetryPaymentOpen] = useState(false);
-  const [retryInvoice, setRetryInvoice] = useState({ amount: 0, currency: "" });
   const [isCheckoutDialogOpen, setIsCheckoutDialogOpen] = useState(false);
   const [checkoutPlan, setCheckoutPlan] = useState<SubscriptionPlan>(SubscriptionPlan.Basis);
   const [pendingCheckoutPlan, setPendingCheckoutPlan] = useState<SubscriptionPlan | null>(null);
@@ -58,6 +57,13 @@ function BillingPage() {
   const scheduledPlan = subscription?.scheduledPlan ?? null;
   const currentPeriodEnd = subscription?.currentPeriodEnd ?? null;
   const hasPaystackCustomer = subscription?.hasPaystackCustomer ?? false;
+  const isPaymentFailed = subscription?.isPaymentFailed ?? false;
+  const retryPaymentAmount = subscription?.currentPriceAmount ?? 0;
+  const retryPaymentCurrency = subscription?.currentPriceCurrency ?? "";
+  const canRetryPayment =
+    subscription?.hasPaystackAuthorization === true &&
+    subscription?.currentPriceAmount != null &&
+    subscription.currentPriceCurrency != null;
   const formattedPeriodEndLong = formatLongDate(currentPeriodEnd);
 
   const handleBillingInfoSuccess = () => {
@@ -85,6 +91,13 @@ function BillingPage() {
           subtitle={t`Manage your payment methods and billing information.`}
         >
           <BillingTabNavigation activeTab="billing" />
+          {isPaymentFailed && (
+            <PaymentFailedBillingBanner
+              canRetryPayment={canRetryPayment}
+              onRetryPayment={() => setIsRetryPaymentOpen(true)}
+              onUpdatePaymentMethod={() => setIsUpdatePaymentMethodOpen(true)}
+            />
+          )}
           {cancelAtPeriodEnd && (
             <CancellationBanner
               currentPlan={currentPlan}
@@ -157,15 +170,11 @@ function BillingPage() {
         pendingCheckoutPlan={pendingCheckoutPlan}
         isUpdatePaymentMethodOpen={isUpdatePaymentMethodOpen}
         setIsUpdatePaymentMethodOpen={setIsUpdatePaymentMethodOpen}
-        onHasOpenInvoice={(invoice) => {
-          setRetryInvoice(invoice);
-          setIsRetryPaymentOpen(true);
-        }}
         isRetryPaymentOpen={isRetryPaymentOpen}
         setIsRetryPaymentOpen={setIsRetryPaymentOpen}
         paymentMethod={subscription?.paymentMethod}
-        retryInvoiceAmount={retryInvoice.amount}
-        retryInvoiceCurrency={retryInvoice.currency}
+        retryPaymentAmount={retryPaymentAmount}
+        retryPaymentCurrency={retryPaymentCurrency}
         isCheckoutDialogOpen={isCheckoutDialogOpen}
         setIsCheckoutDialogOpen={setIsCheckoutDialogOpen}
         checkoutPlan={checkoutPlan}

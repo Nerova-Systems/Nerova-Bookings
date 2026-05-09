@@ -16,18 +16,6 @@ public sealed class UnconfiguredPaystackClient(ILogger<UnconfiguredPaystackClien
         return Task.FromResult<CheckoutSessionResult?>(null);
     }
 
-    public Task<SubscriptionSyncResult?> SyncSubscriptionStateAsync(PaystackCustomerId paystackCustomerId, CancellationToken cancellationToken)
-    {
-        logger.LogWarning("Paystack is not configured. Cannot sync payment state for customer '{CustomerId}'", paystackCustomerId);
-        return Task.FromResult<SubscriptionSyncResult?>(null);
-    }
-
-    public Task<UpgradeSubscriptionResult?> UpgradeSubscriptionAsync(PaystackCustomerId paystackCustomerId, PaystackSubscriptionId authorizationCode, string email, SubscriptionPlan newPlan, CancellationToken cancellationToken)
-    {
-        logger.LogWarning("Paystack is not configured. Cannot charge authorization '{AuthorizationCode}' for upgrade", authorizationCode);
-        return Task.FromResult<UpgradeSubscriptionResult?>(null);
-    }
-
     public Task<AuthorizationChargeResult?> ChargeAuthorizationAsync(
         PaystackCustomerId paystackCustomerId,
         PaystackSubscriptionId authorizationCode,
@@ -96,39 +84,9 @@ public sealed class UnconfiguredPaystackClient(ILogger<UnconfiguredPaystackClien
         return Task.FromResult<RefundResult?>(null);
     }
 
-    public Task<bool> SetSubscriptionDefaultPaymentMethodAsync(PaystackSubscriptionId paystackSubscriptionId, string paymentMethodId, CancellationToken cancellationToken)
-    {
-        return Task.FromResult(false);
-    }
-
-    public Task<bool> SetCustomerDefaultPaymentMethodAsync(PaystackCustomerId paystackCustomerId, string paymentMethodId, CancellationToken cancellationToken)
-    {
-        return Task.FromResult(false);
-    }
-
-    public Task<OpenInvoiceResult?> GetOpenInvoiceAsync(PaystackSubscriptionId paystackSubscriptionId, CancellationToken cancellationToken)
-    {
-        return Task.FromResult<OpenInvoiceResult?>(null);
-    }
-
-    public Task<InvoiceRetryResult?> RetryOpenInvoicePaymentAsync(PaystackSubscriptionId paystackSubscriptionId, string? paymentMethodId, CancellationToken cancellationToken)
-    {
-        return Task.FromResult<InvoiceRetryResult?>(null);
-    }
-
-    public Task<UpgradePreviewResult?> GetUpgradePreviewAsync(PaystackSubscriptionId paystackSubscriptionId, SubscriptionPlan newPlan, CancellationToken cancellationToken)
-    {
-        return Task.FromResult<UpgradePreviewResult?>(null);
-    }
-
     public Task<CheckoutPreviewResult?> GetCheckoutPreviewAsync(PaystackCustomerId paystackCustomerId, SubscriptionPlan plan, CancellationToken cancellationToken)
     {
         return Task.FromResult<CheckoutPreviewResult?>(null);
-    }
-
-    public Task<SubscribeResult?> CreateSubscriptionWithSavedPaymentMethodAsync(PaystackCustomerId paystackCustomerId, PaystackSubscriptionId authorizationCode, string email, SubscriptionPlan plan, CancellationToken cancellationToken)
-    {
-        return Task.FromResult<SubscribeResult?>(null);
     }
 
     public Task<PaymentTransaction[]?> SyncPaymentTransactionsAsync(PaystackCustomerId paystackCustomerId, CancellationToken cancellationToken)

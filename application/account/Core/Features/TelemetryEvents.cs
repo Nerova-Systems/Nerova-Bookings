@@ -82,7 +82,7 @@ public sealed class PaymentRecovered(SubscriptionId subscriptionId, Subscription
 public sealed class PaymentRefunded(SubscriptionId subscriptionId, SubscriptionPlan plan, int refundCount, decimal priceAmount, string currency)
     : TelemetryEvent(("subscription_id", subscriptionId), ("plan", plan), ("refund_count", refundCount), ("price_amount", priceAmount), ("currency", currency));
 
-public sealed class PendingInvoicePaymentRetried(SubscriptionId subscriptionId)
+public sealed class RenewalPaymentRetried(SubscriptionId subscriptionId)
     : TelemetryEvent(("subscription_id", subscriptionId));
 
 public sealed class SessionCreated(SessionId sessionId)

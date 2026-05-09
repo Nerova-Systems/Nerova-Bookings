@@ -70,13 +70,18 @@ internal sealed class SubscriptionRepository(AccountDbContext accountDbContext, 
     public async Task<Subscription[]> GetDueForBillingUnfilteredAsync(DateTimeOffset dueAt, CancellationToken cancellationToken)
     {
         return await DbSet
+            .FromSqlInterpolated($"""
+                                  SELECT *
+                                  FROM subscriptions
+                                  WHERE plan <> 'Basis'
+                                    AND paystack_customer_code IS NOT NULL
+                                    AND paystack_authorization_code IS NOT NULL
+                                    AND next_billing_at IS NOT NULL
+                                    AND next_billing_at <= {dueAt}
+                                  ORDER BY id
+                                  """
+            )
             .IgnoreQueryFilters()
-            .Where(s => s.Plan != SubscriptionPlan.Basis
-                        && s.PaystackCustomerId != null
-                        && s.PaystackSubscriptionId != null
-                        && s.NextBillingAt != null
-                        && s.NextBillingAt <= dueAt)
-            .OrderBy(s => s.Id)
             .ToArrayAsync(cancellationToken);
     }
 }

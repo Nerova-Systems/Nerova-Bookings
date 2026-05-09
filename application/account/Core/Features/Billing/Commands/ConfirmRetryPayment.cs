@@ -61,7 +61,7 @@ public sealed class ConfirmRetryPaymentHandler(
         {
             paymentAttempt.MarkFailed(now, verified?.ErrorMessage ?? "Paystack retry payment could not be verified.");
             paystackPaymentAttemptRepository.Update(paymentAttempt);
-            return Result<ConfirmRetryPaymentResponse>.BadRequest(verified?.ErrorMessage ?? "Paystack retry payment could not be verified.");
+            return Result<ConfirmRetryPaymentResponse>.BadRequest(verified?.ErrorMessage ?? "Paystack retry payment could not be verified.", true);
         }
 
         if (!string.Equals(verified.Reference, command.Reference, StringComparison.Ordinal))
@@ -81,9 +81,9 @@ public sealed class ConfirmRetryPaymentHandler(
 
         if (!paymentAttempt.MatchesAmount(verified.Amount, verified.Currency))
         {
-            paymentAttempt.MarkFailed(now, "Paystack retry payment amount does not match the expected pending invoice amount.");
+            paymentAttempt.MarkFailed(now, "Paystack retry payment amount does not match the expected renewal payment amount.");
             paystackPaymentAttemptRepository.Update(paymentAttempt);
-            return Result<ConfirmRetryPaymentResponse>.BadRequest("Paystack retry payment amount does not match the expected pending invoice amount.");
+            return Result<ConfirmRetryPaymentResponse>.BadRequest("Paystack retry payment amount does not match the expected renewal payment amount.", true);
         }
 
         subscription.ClearPaymentFailure();
@@ -96,7 +96,7 @@ public sealed class ConfirmRetryPaymentHandler(
 
         paymentAttempt.MarkSucceeded(now);
         paystackPaymentAttemptRepository.Update(paymentAttempt);
-        events.CollectEvent(new PendingInvoicePaymentRetried(subscription.Id));
+        events.CollectEvent(new RenewalPaymentRetried(subscription.Id));
 
         return new ConfirmRetryPaymentResponse(true);
     }

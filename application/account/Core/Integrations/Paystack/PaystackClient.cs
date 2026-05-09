@@ -74,36 +74,6 @@ public sealed class PaystackClient(IConfiguration configuration, IHttpClientFact
         return new CheckoutSessionResult(responseReference, accessCode, catalogItem.UnitAmount, catalogItem.Currency.ToUpperInvariant(), purpose);
     }
 
-    public Task<SubscriptionSyncResult?> SyncSubscriptionStateAsync(PaystackCustomerId paystackCustomerId, CancellationToken cancellationToken)
-    {
-        // Nerova owns the subscription lifecycle. Paystack does not provide a subscription state to sync.
-        return Task.FromResult<SubscriptionSyncResult?>(null);
-    }
-
-    public async Task<UpgradeSubscriptionResult?> UpgradeSubscriptionAsync(PaystackCustomerId paystackCustomerId, PaystackSubscriptionId authorizationCode, string email, SubscriptionPlan newPlan, CancellationToken cancellationToken)
-    {
-        var catalogItem = await GetCatalogItemAsync(newPlan, cancellationToken);
-        if (catalogItem is null) return null;
-
-        var charge = await ChargeAuthorizationAsync(paystackCustomerId, authorizationCode, email, PaystackPaymentPurpose.Upgrade, newPlan, catalogItem.UnitAmount, catalogItem.Currency, cancellationToken);
-        if (charge is null) return null;
-        if (!charge.Paid)
-        {
-            return new UpgradeSubscriptionResult(
-                charge.ErrorMessage ?? "Paystack could not charge the saved payment method.",
-                Reference: charge.Reference,
-                Amount: charge.Amount,
-                Currency: charge.Currency
-            );
-        }
-
-        return new UpgradeSubscriptionResult(
-            Reference: charge.Reference,
-            Amount: charge.Amount,
-            Currency: charge.Currency
-        );
-    }
-
     public async Task<AuthorizationChargeResult?> ChargeAuthorizationAsync(
         PaystackCustomerId paystackCustomerId,
         PaystackSubscriptionId authorizationCode,
@@ -307,50 +277,10 @@ public sealed class PaystackClient(IConfiguration configuration, IHttpClientFact
         return new RefundResult(refundId, refundedAmount, refundedCurrency, status);
     }
 
-    public Task<bool> SetSubscriptionDefaultPaymentMethodAsync(PaystackSubscriptionId paystackSubscriptionId, string paymentMethodId, CancellationToken cancellationToken)
-    {
-        return Task.FromResult(true);
-    }
-
-    public Task<bool> SetCustomerDefaultPaymentMethodAsync(PaystackCustomerId paystackCustomerId, string paymentMethodId, CancellationToken cancellationToken)
-    {
-        return Task.FromResult(true);
-    }
-
-    public Task<OpenInvoiceResult?> GetOpenInvoiceAsync(PaystackSubscriptionId paystackSubscriptionId, CancellationToken cancellationToken)
-    {
-        return Task.FromResult<OpenInvoiceResult?>(null);
-    }
-
-    public Task<InvoiceRetryResult?> RetryOpenInvoicePaymentAsync(PaystackSubscriptionId paystackSubscriptionId, string? paymentMethodId, CancellationToken cancellationToken)
-    {
-        return Task.FromResult<InvoiceRetryResult?>(null);
-    }
-
-    public async Task<UpgradePreviewResult?> GetUpgradePreviewAsync(PaystackSubscriptionId paystackSubscriptionId, SubscriptionPlan newPlan, CancellationToken cancellationToken)
-    {
-        var catalogItem = await GetCatalogItemAsync(newPlan, cancellationToken);
-        if (catalogItem is null) return null;
-        return new UpgradePreviewResult(catalogItem.UnitAmount, catalogItem.Currency.ToUpperInvariant(), [
-                new UpgradePreviewLineItem($"{newPlan} plan", catalogItem.UnitAmount, catalogItem.Currency.ToUpperInvariant(), true, false),
-                new UpgradePreviewLineItem("Tax", 0m, catalogItem.Currency.ToUpperInvariant(), false, true)
-            ]
-        );
-    }
-
     public async Task<CheckoutPreviewResult?> GetCheckoutPreviewAsync(PaystackCustomerId paystackCustomerId, SubscriptionPlan plan, CancellationToken cancellationToken)
     {
         var catalogItem = await GetCatalogItemAsync(plan, cancellationToken);
         return catalogItem is null ? null : new CheckoutPreviewResult(catalogItem.UnitAmount, catalogItem.Currency.ToUpperInvariant(), 0m);
-    }
-
-    public async Task<SubscribeResult?> CreateSubscriptionWithSavedPaymentMethodAsync(PaystackCustomerId paystackCustomerId, PaystackSubscriptionId authorizationCode, string email, SubscriptionPlan plan, CancellationToken cancellationToken)
-    {
-        var catalogItem = await GetCatalogItemAsync(plan, cancellationToken);
-        if (catalogItem is null) return null;
-
-        var charge = await ChargeAuthorizationAsync(paystackCustomerId, authorizationCode, email, PaystackPaymentPurpose.Subscribe, plan, catalogItem.UnitAmount, catalogItem.Currency, cancellationToken);
-        return charge is null ? null : new SubscribeResult(charge.Reference, charge.Amount, charge.Currency, charge.Paid, charge.PaymentMethod);
     }
 
     public Task<PaymentTransaction[]?> SyncPaymentTransactionsAsync(PaystackCustomerId paystackCustomerId, CancellationToken cancellationToken)

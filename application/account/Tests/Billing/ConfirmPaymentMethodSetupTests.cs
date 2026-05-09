@@ -37,9 +37,9 @@ public sealed class ConfirmPaymentMethodSetupTests : EndpointBaseTest<AccountDbC
         // Assert
         response.EnsureSuccessStatusCode();
         var result = await response.Content.ReadFromJsonAsync<ConfirmPaymentMethodSetupResponse>();
-        result!.HasOpenInvoice.Should().BeFalse();
-        result.OpenInvoiceAmount.Should().BeNull();
-        result.OpenInvoiceCurrency.Should().BeNull();
+        result!.HasPendingRenewalPayment.Should().BeFalse();
+        result.PendingRenewalPaymentAmount.Should().BeNull();
+        result.PendingRenewalPaymentCurrency.Should().BeNull();
         Connection.ExecuteScalar<string>("SELECT status FROM paystack_payment_attempts WHERE paystack_reference = @reference", [new { reference = setup.Reference }]).Should().Be("Succeeded");
         Connection.ExecuteScalar<string>("SELECT paystack_authorization_code FROM subscriptions WHERE tenant_id = @tenantId", [new { tenantId = DatabaseSeeder.Tenant1.Id.Value }]).Should().Be(MockPaystackClient.MockAuthorizationCode);
         var transactions = Connection.ExecuteScalar<string>("SELECT payment_transactions FROM subscriptions WHERE tenant_id = @tenantId", [new { tenantId = DatabaseSeeder.Tenant1.Id.Value }]);
@@ -93,7 +93,7 @@ public sealed class ConfirmPaymentMethodSetupTests : EndpointBaseTest<AccountDbC
         // Assert
         response.EnsureSuccessStatusCode();
         var result = await response.Content.ReadFromJsonAsync<ConfirmPaymentMethodSetupResponse>();
-        result!.HasOpenInvoice.Should().BeFalse();
+        result!.HasPendingRenewalPayment.Should().BeFalse();
     }
 
     [Fact]

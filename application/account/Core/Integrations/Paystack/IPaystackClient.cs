@@ -9,10 +9,6 @@ public interface IPaystackClient
 
     Task<CheckoutSessionResult?> CreateCheckoutSessionAsync(PaystackCustomerId paystackCustomerId, string email, SubscriptionPlan plan, PaystackPaymentPurpose purpose, CancellationToken cancellationToken);
 
-    Task<SubscriptionSyncResult?> SyncSubscriptionStateAsync(PaystackCustomerId paystackCustomerId, CancellationToken cancellationToken);
-
-    Task<UpgradeSubscriptionResult?> UpgradeSubscriptionAsync(PaystackCustomerId paystackCustomerId, PaystackSubscriptionId authorizationCode, string email, SubscriptionPlan newPlan, CancellationToken cancellationToken);
-
     Task<AuthorizationChargeResult?> ChargeAuthorizationAsync(
         PaystackCustomerId paystackCustomerId,
         PaystackSubscriptionId authorizationCode,
@@ -42,19 +38,7 @@ public interface IPaystackClient
 
     Task<RefundResult?> CreateRefundAsync(string transactionReference, decimal amount, string currency, CancellationToken cancellationToken);
 
-    Task<bool> SetSubscriptionDefaultPaymentMethodAsync(PaystackSubscriptionId paystackSubscriptionId, string paymentMethodId, CancellationToken cancellationToken);
-
-    Task<bool> SetCustomerDefaultPaymentMethodAsync(PaystackCustomerId paystackCustomerId, string paymentMethodId, CancellationToken cancellationToken);
-
-    Task<OpenInvoiceResult?> GetOpenInvoiceAsync(PaystackSubscriptionId paystackSubscriptionId, CancellationToken cancellationToken);
-
-    Task<InvoiceRetryResult?> RetryOpenInvoicePaymentAsync(PaystackSubscriptionId paystackSubscriptionId, string? paymentMethodId, CancellationToken cancellationToken);
-
-    Task<UpgradePreviewResult?> GetUpgradePreviewAsync(PaystackSubscriptionId paystackSubscriptionId, SubscriptionPlan newPlan, CancellationToken cancellationToken);
-
     Task<CheckoutPreviewResult?> GetCheckoutPreviewAsync(PaystackCustomerId paystackCustomerId, SubscriptionPlan plan, CancellationToken cancellationToken);
-
-    Task<SubscribeResult?> CreateSubscriptionWithSavedPaymentMethodAsync(PaystackCustomerId paystackCustomerId, PaystackSubscriptionId authorizationCode, string email, SubscriptionPlan plan, CancellationToken cancellationToken);
 
     Task<PaymentTransaction[]?> SyncPaymentTransactionsAsync(PaystackCustomerId paystackCustomerId, CancellationToken cancellationToken);
 }
@@ -94,33 +78,7 @@ public sealed record PaystackAuthorization(
 
 public sealed record RefundResult(string? RefundId, decimal Amount, string Currency, string Status);
 
-public sealed record SubscriptionSyncResult(
-    SubscriptionPlan Plan,
-    SubscriptionPlan? ScheduledPlan,
-    PaystackSubscriptionId? PaystackSubscriptionId,
-    decimal? CurrentPriceAmount,
-    string? CurrentPriceCurrency,
-    DateTimeOffset? CurrentPeriodEnd,
-    bool CancelAtPeriodEnd,
-    CancellationReason? CancellationReason,
-    string? CancellationFeedback,
-    PaymentTransaction[]? PaymentTransactions,
-    PaymentMethod? PaymentMethod,
-    string? SubscriptionStatus
-);
-
 public sealed record CustomerBillingResult(BillingInfo? BillingInfo, bool IsCustomerDeleted, PaymentMethod? PaymentMethod = null);
-
-public sealed record OpenInvoiceResult(decimal AmountDue, string Currency);
-
-public sealed record InvoiceRetryResult(
-    bool Paid,
-    string? ErrorMessage = null,
-    string? AccessCode = null,
-    string? Reference = null,
-    decimal? Amount = null,
-    string? Currency = null
-);
 
 public sealed record AuthorizationChargeResult(
     bool Paid,
@@ -130,14 +88,6 @@ public sealed record AuthorizationChargeResult(
     PaymentMethod? PaymentMethod = null,
     string? ErrorMessage = null
 );
-
-public sealed record UpgradeSubscriptionResult(string? ErrorMessage = null, string? AccessCode = null, string? Reference = null, decimal? Amount = null, string? Currency = null);
-
-public sealed record SubscribeResult(string Reference, decimal Amount, string Currency, bool Paid, PaymentMethod? PaymentMethod = null);
-
-public sealed record UpgradePreviewResult(decimal TotalAmount, string Currency, UpgradePreviewLineItem[] LineItems);
-
-public sealed record UpgradePreviewLineItem(string Description, decimal Amount, string Currency, bool IsProration, bool IsTax);
 
 public sealed record CheckoutPreviewResult(decimal TotalAmount, string Currency, decimal TaxAmount);
 
@@ -149,13 +99,6 @@ public sealed record PriceCatalogItem(
     int IntervalCount,
     bool TaxInclusive
 );
-
-public static class PaystackSubscriptionStatus
-{
-    public const string Active = "active";
-    public const string Incomplete = "incomplete";
-    public const string PastDue = "past_due";
-}
 
 [PublicAPI]
 [JsonConverter(typeof(JsonStringEnumConverter))]

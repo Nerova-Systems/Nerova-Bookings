@@ -11,7 +11,7 @@ namespace Account.Features.Billing.Commands;
 public sealed record ConfirmPaymentMethodSetupCommand(string Reference) : ICommand, IRequest<Result<ConfirmPaymentMethodSetupResponse>>;
 
 [PublicAPI]
-public sealed record ConfirmPaymentMethodSetupResponse(bool HasOpenInvoice, decimal? OpenInvoiceAmount, string? OpenInvoiceCurrency);
+public sealed record ConfirmPaymentMethodSetupResponse(bool HasPendingRenewalPayment, decimal? PendingRenewalPaymentAmount, string? PendingRenewalPaymentCurrency);
 
 public sealed class ConfirmPaymentMethodSetupHandler(
     ISubscriptionRepository subscriptionRepository,
@@ -65,7 +65,7 @@ public sealed class ConfirmPaymentMethodSetupHandler(
         {
             paymentAttempt.MarkFailed(now, verifiedTransaction?.ErrorMessage ?? "Failed to verify Paystack payment method authorization.");
             paystackPaymentAttemptRepository.Update(paymentAttempt);
-            return Result<ConfirmPaymentMethodSetupResponse>.BadRequest(verifiedTransaction?.ErrorMessage ?? "Failed to verify Paystack payment method authorization.");
+            return Result<ConfirmPaymentMethodSetupResponse>.BadRequest(verifiedTransaction?.ErrorMessage ?? "Failed to verify Paystack payment method authorization.", true);
         }
 
         if (!string.Equals(verifiedTransaction.Reference, command.Reference, StringComparison.Ordinal))
@@ -87,41 +87,17 @@ public sealed class ConfirmPaymentMethodSetupHandler(
         {
             paymentAttempt.MarkFailed(now, "Paystack payment method authorization amount does not match the expected setup amount.");
             paystackPaymentAttemptRepository.Update(paymentAttempt);
-            return Result<ConfirmPaymentMethodSetupResponse>.BadRequest("Paystack payment method authorization amount does not match the expected setup amount.");
+            return Result<ConfirmPaymentMethodSetupResponse>.BadRequest("Paystack payment method authorization amount does not match the expected setup amount.", true);
         }
 
-        OpenInvoiceResult? openInvoice = null;
         subscription.SetPaystackAuthorization(verifiedTransaction.Authorization.AuthorizationCode, verifiedTransaction.Authorization.Email, verifiedTransaction.Authorization.Signature, verifiedTransaction.PaymentMethod);
-
-        if (subscription.HasActivePaystackSubscription())
-        {
-            var success = await paystackClient.SetSubscriptionDefaultPaymentMethodAsync(verifiedTransaction.Authorization.AuthorizationCode, verifiedTransaction.Authorization.AuthorizationCode.Value, cancellationToken);
-            if (!success)
-            {
-                paymentAttempt.MarkFailed(now, "Failed to update subscription payment method.");
-                paystackPaymentAttemptRepository.Update(paymentAttempt);
-                return Result<ConfirmPaymentMethodSetupResponse>.BadRequest("Failed to update subscription payment method.");
-            }
-
-            openInvoice = await paystackClient.GetOpenInvoiceAsync(verifiedTransaction.Authorization.AuthorizationCode, cancellationToken);
-        }
-        else
-        {
-            var success = await paystackClient.SetCustomerDefaultPaymentMethodAsync(subscription.PaystackCustomerId, verifiedTransaction.Authorization.AuthorizationCode.Value, cancellationToken);
-            if (!success)
-            {
-                paymentAttempt.MarkFailed(now, "Failed to update customer payment method.");
-                paystackPaymentAttemptRepository.Update(paymentAttempt);
-                return Result<ConfirmPaymentMethodSetupResponse>.BadRequest("Failed to update customer payment method.");
-            }
-        }
 
         var refund = await paystackClient.CreateRefundAsync(verifiedTransaction.Reference, verifiedTransaction.Amount, verifiedTransaction.Currency, cancellationToken);
         if (refund is null)
         {
             paymentAttempt.MarkFailed(now, "Failed to refund Paystack payment method authorization charge.");
             paystackPaymentAttemptRepository.Update(paymentAttempt);
-            return Result<ConfirmPaymentMethodSetupResponse>.BadRequest("Failed to refund Paystack payment method authorization charge.");
+            return Result<ConfirmPaymentMethodSetupResponse>.BadRequest("Failed to refund Paystack payment method authorization charge.", true);
         }
 
         subscription.SetPaymentTransactions([
@@ -134,6 +110,6 @@ public sealed class ConfirmPaymentMethodSetupHandler(
         paymentAttempt.MarkSucceeded(now);
         paystackPaymentAttemptRepository.Update(paymentAttempt);
 
-        return new ConfirmPaymentMethodSetupResponse(openInvoice is not null, openInvoice?.AmountDue, openInvoice?.Currency);
+        return new ConfirmPaymentMethodSetupResponse(false, null, null);
     }
 }

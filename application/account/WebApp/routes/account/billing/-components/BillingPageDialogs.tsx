@@ -36,13 +36,12 @@ interface BillingPageDialogsProps {
 
   isUpdatePaymentMethodOpen: boolean;
   setIsUpdatePaymentMethodOpen: (open: boolean) => void;
-  onHasOpenInvoice: (invoice: { amount: number; currency: string }) => void;
 
   isRetryPaymentOpen: boolean;
   setIsRetryPaymentOpen: (open: boolean) => void;
   paymentMethod: PaymentMethod | null | undefined;
-  retryInvoiceAmount: number;
-  retryInvoiceCurrency: string;
+  retryPaymentAmount: number;
+  retryPaymentCurrency: string;
 
   isCheckoutDialogOpen: boolean;
   setIsCheckoutDialogOpen: (open: boolean) => void;
@@ -69,12 +68,11 @@ export function BillingPageDialogs({
   pendingCheckoutPlan,
   isUpdatePaymentMethodOpen,
   setIsUpdatePaymentMethodOpen,
-  onHasOpenInvoice,
   isRetryPaymentOpen,
   setIsRetryPaymentOpen,
   paymentMethod,
-  retryInvoiceAmount,
-  retryInvoiceCurrency,
+  retryPaymentAmount,
+  retryPaymentCurrency,
   isCheckoutDialogOpen,
   setIsCheckoutDialogOpen,
   checkoutPlan
@@ -111,11 +109,7 @@ export function BillingPageDialogs({
         pendingLabel={pendingCheckoutPlan != null ? t`Saving...` : undefined}
       />
 
-      <UpdatePaymentMethodDialog
-        isOpen={isUpdatePaymentMethodOpen}
-        onOpenChange={setIsUpdatePaymentMethodOpen}
-        onHasOpenInvoice={onHasOpenInvoice}
-      />
+      <UpdatePaymentMethodDialog isOpen={isUpdatePaymentMethodOpen} onOpenChange={setIsUpdatePaymentMethodOpen} />
 
       {isRetryPaymentOpen && (
         <RetryPaymentDialog
@@ -123,8 +117,8 @@ export function BillingPageDialogs({
           onOpenChange={setIsRetryPaymentOpen}
           billingInfo={billingInfo}
           paymentMethod={paymentMethod}
-          amount={retryInvoiceAmount}
-          currency={retryInvoiceCurrency}
+          amount={retryPaymentAmount}
+          currency={retryPaymentCurrency}
         />
       )}
 

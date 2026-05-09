@@ -89,4 +89,52 @@ public sealed class AcknowledgePaystackWebhookTests : EndpointBaseTest<AccountDb
         var eventStatus = Connection.ExecuteScalar<string>("SELECT status FROM paystack_events WHERE paystack_customer_code = @customerCode", [new { customerCode = MockPaystackClient.MockCustomerCode }]);
         eventStatus.Should().Be(nameof(PaystackEventStatus.Pending));
     }
+
+    [Fact]
+    public async Task AcknowledgePaystackWebhook_WhenPendingSubscribeAttemptPaid_ShouldActivateSubscriptionAndProcessEvent()
+    {
+        // Arrange
+        Connection.Update("subscriptions", "tenant_id", DatabaseSeeder.Tenant1.Id.Value, [
+                ("paystack_customer_code", MockPaystackClient.MockCustomerCode)
+            ]
+        );
+        var subscriptionId = Connection.ExecuteScalar<string>("SELECT id FROM subscriptions WHERE tenant_id = @tenantId", [new { tenantId = DatabaseSeeder.Tenant1.Id.Value }]);
+        Connection.Insert("paystack_payment_attempts", [
+                ("tenant_id", DatabaseSeeder.Tenant1.Id.Value),
+                ("id", PaystackPaymentAttemptId.NewId().ToString()),
+                ("subscription_id", subscriptionId),
+                ("created_at", TimeProvider.GetUtcNow()),
+                ("modified_at", null),
+                ("paystack_reference", MockPaystackClient.MockReference),
+                ("paystack_customer_code", MockPaystackClient.MockCustomerCode),
+                ("paystack_authorization_code", null),
+                ("purpose", nameof(PaystackPaymentPurpose.Subscribe)),
+                ("plan", nameof(SubscriptionPlan.Standard)),
+                ("amount", 29.00m),
+                ("currency", "USD"),
+                ("status", nameof(PaystackPaymentAttemptStatus.Pending)),
+                ("completed_at", null),
+                ("failure_reason", null)
+            ]
+        );
+
+        // Act
+        var request = new HttpRequestMessage(HttpMethod.Post, WebhookUrl)
+        {
+            Content = new StringContent($"customer:{MockPaystackClient.MockCustomerCode}", Encoding.UTF8, "application/json")
+        };
+        request.Headers.Add("x-paystack-signature", "event_type:charge.success");
+        var response = await AnonymousHttpClient.SendAsync(request);
+
+        // Assert
+        response.EnsureSuccessStatusCode();
+        Connection.ExecuteScalar<string>("SELECT status FROM paystack_events WHERE paystack_reference = @reference", [new { reference = MockPaystackClient.MockReference }]).Should().Be(nameof(PaystackEventStatus.Processed));
+        Connection.ExecuteScalar<string>("SELECT status FROM paystack_payment_attempts WHERE paystack_reference = @reference", [new { reference = MockPaystackClient.MockReference }]).Should().Be(nameof(PaystackPaymentAttemptStatus.Succeeded));
+        Connection.ExecuteScalar<string>("SELECT plan FROM subscriptions WHERE tenant_id = @tenantId", [new { tenantId = DatabaseSeeder.Tenant1.Id.Value }]).Should().Be(nameof(SubscriptionPlan.Standard));
+        Connection.ExecuteScalar<string>("SELECT paystack_authorization_code FROM subscriptions WHERE tenant_id = @tenantId", [new { tenantId = DatabaseSeeder.Tenant1.Id.Value }]).Should().Be(MockPaystackClient.MockAuthorizationCode);
+        Connection.ExecuteScalar<string>("SELECT plan FROM tenants WHERE id = @tenantId", [new { tenantId = DatabaseSeeder.Tenant1.Id.Value }]).Should().Be(nameof(SubscriptionPlan.Standard));
+        var transactions = Connection.ExecuteScalar<string>("SELECT payment_transactions FROM subscriptions WHERE tenant_id = @tenantId", [new { tenantId = DatabaseSeeder.Tenant1.Id.Value }]);
+        transactions.Should().Contain("\"Amount\":29");
+        transactions.Should().Contain("\"Status\":\"Succeeded\"");
+    }
 }

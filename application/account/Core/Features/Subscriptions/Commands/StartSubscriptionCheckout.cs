@@ -38,6 +38,7 @@ public sealed class StartSubscriptionCheckoutHandler(
     PaystackClientFactory paystackClientFactory,
     IExecutionContext executionContext,
     ITelemetryEventsCollector events,
+    TimeProvider timeProvider,
     ILogger<StartSubscriptionCheckoutHandler> logger
 ) : IRequestHandler<StartSubscriptionCheckoutCommand, Result<StartSubscriptionCheckoutResponse>>
 {
@@ -76,35 +77,56 @@ public sealed class StartSubscriptionCheckoutHandler(
                 return Result<StartSubscriptionCheckoutResponse>.BadRequest("Billing information must be saved before subscribing.");
             }
 
-            if (subscription.PaystackSubscriptionId is null || subscription.BillingInfo.Email is null)
+            var billingEmail = subscription.PaystackAuthorizationEmail ?? subscription.BillingInfo.Email;
+            if (subscription.PaystackSubscriptionId is null || billingEmail is null)
             {
                 return Result<StartSubscriptionCheckoutResponse>.BadRequest("A reusable card authorization is required before subscribing with a saved payment method.");
             }
 
-            var subscribeResult = await paystackClient.CreateSubscriptionWithSavedPaymentMethodAsync(subscription.PaystackCustomerId, subscription.PaystackSubscriptionId, subscription.BillingInfo.Email, command.Plan, cancellationToken);
-            if (subscribeResult is null)
+            var catalogItem = (await paystackClient.GetPriceCatalogAsync(cancellationToken)).SingleOrDefault(p => p.Plan == command.Plan);
+            if (catalogItem is null)
+            {
+                return Result<StartSubscriptionCheckoutResponse>.BadRequest("Could not retrieve subscription price.");
+            }
+
+            var charge = await paystackClient.ChargeAuthorizationAsync(
+                subscription.PaystackCustomerId,
+                subscription.PaystackSubscriptionId,
+                billingEmail,
+                PaystackPaymentPurpose.Subscribe,
+                command.Plan,
+                catalogItem.UnitAmount,
+                catalogItem.Currency,
+                cancellationToken
+            );
+            if (charge is null)
             {
                 return Result<StartSubscriptionCheckoutResponse>.BadRequest("Failed to charge saved payment method.");
             }
 
-            await paystackPaymentAttemptRepository.AddAsync(
-                PaystackPaymentAttempt.Create(
-                    subscription.TenantId,
-                    subscription.Id,
-                    subscribeResult.Reference,
-                    subscription.PaystackCustomerId,
-                    subscription.PaystackSubscriptionId,
-                    PaystackPaymentPurpose.Subscribe,
-                    command.Plan,
-                    subscribeResult.Amount,
-                    subscribeResult.Currency
-                ),
-                cancellationToken
+            var paymentAttempt = PaystackPaymentAttempt.Create(
+                subscription.TenantId,
+                subscription.Id,
+                charge.Reference,
+                subscription.PaystackCustomerId,
+                subscription.PaystackSubscriptionId,
+                PaystackPaymentPurpose.Subscribe,
+                command.Plan,
+                charge.Amount,
+                charge.Currency
             );
+            if (!charge.Paid)
+            {
+                paymentAttempt.MarkFailed(timeProvider.GetUtcNow(), charge.ErrorMessage ?? "Paystack could not charge the saved payment method.");
+                await paystackPaymentAttemptRepository.AddAsync(paymentAttempt, cancellationToken);
+                return Result<StartSubscriptionCheckoutResponse>.BadRequest(charge.ErrorMessage ?? "Paystack could not charge the saved payment method.", true);
+            }
+
+            await paystackPaymentAttemptRepository.AddAsync(paymentAttempt, cancellationToken);
 
             events.CollectEvent(new SubscriptionCheckoutStarted(subscription.Id, command.Plan, true));
 
-            return new StartSubscriptionCheckoutResponse(null, subscribeResult.Reference, null, subscribeResult.Amount, subscribeResult.Currency, nameof(PaystackPaymentPurpose.Subscribe), true);
+            return new StartSubscriptionCheckoutResponse(null, charge.Reference, null, charge.Amount, charge.Currency, nameof(PaystackPaymentPurpose.Subscribe), true);
         }
 
         if (subscription.HasActivePaystackSubscription())

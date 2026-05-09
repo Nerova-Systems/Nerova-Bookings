@@ -32,7 +32,7 @@ export function TabsPreview() {
         </TabsContent>
         <TabsContent value="billing">
           <p className="text-sm text-muted-foreground">
-            <Trans>View invoices and manage your payment method.</Trans>
+            <Trans>View payments and manage your payment method.</Trans>
           </p>
         </TabsContent>
       </Tabs>

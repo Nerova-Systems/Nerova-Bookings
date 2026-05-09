@@ -114,7 +114,7 @@ public sealed class UpgradeSubscriptionHandler(
         {
             paymentAttempt.MarkFailed(now, charge.ErrorMessage ?? "Paystack could not charge the saved payment method.");
             await paystackPaymentAttemptRepository.AddAsync(paymentAttempt, cancellationToken);
-            return Result<UpgradeSubscriptionResponse>.BadRequest(charge.ErrorMessage ?? "Paystack could not charge the saved payment method.");
+            return Result<UpgradeSubscriptionResponse>.BadRequest(charge.ErrorMessage ?? "Paystack could not charge the saved payment method.", true);
         }
 
         var previousPlan = subscription.Plan;

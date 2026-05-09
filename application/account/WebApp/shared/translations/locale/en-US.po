@@ -447,6 +447,9 @@ msgstr "Billing information updated"
 msgid "Billing is not configured. Please contact support to enable payment processing."
 msgstr "Billing is not configured. Please contact support to enable payment processing."
 
+msgid "Billing name"
+msgstr "Billing name"
+
 msgid "Billing tabs"
 msgstr "Billing tabs"
 
@@ -1321,9 +1324,6 @@ msgstr "Invite user"
 msgid "Invited users"
 msgstr "Invited users"
 
-msgid "Invoice"
-msgstr "Invoice"
-
 msgid "IP address"
 msgstr "IP address"
 
@@ -1645,9 +1645,6 @@ msgstr "Muted"
 msgid "Name"
 msgstr "Name"
 
-msgid "Name as it appears on invoices"
-msgstr "Name as it appears on invoices"
-
 msgid "Narrow bottom drawer"
 msgstr "Narrow bottom drawer"
 
@@ -1848,6 +1845,9 @@ msgstr "Payment could not be processed. Please try again later."
 
 msgid "Payment failed"
 msgstr "Payment failed"
+
+msgid "Payment failed. Retry payment or update your payment method to keep your subscription active."
+msgstr "Payment failed. Retry payment or update your payment method to keep your subscription active."
 
 msgid "Payment failed. Your subscription will be suspended soon."
 msgstr "Payment failed. Your subscription will be suspended soon."
@@ -2057,6 +2057,9 @@ msgstr "Ready to publish?"
 msgid "Rebase and merge"
 msgstr "Rebase and merge"
 
+msgid "Receipt"
+msgstr "Receipt"
+
 msgid "Recipe"
 msgstr "Recipe"
 
@@ -2157,6 +2160,9 @@ msgstr "Restore user"
 
 msgid "Restoring..."
 msgstr "Restoring..."
+
+msgid "Retry payment"
+msgstr "Retry payment"
 
 msgid "Retry pending payment"
 msgstr "Retry pending payment"
@@ -2916,8 +2922,8 @@ msgstr "View invitation"
 msgid "View invited users"
 msgstr "View invited users"
 
-msgid "View invoices and manage your payment method."
-msgstr "View invoices and manage your payment method."
+msgid "View payments and manage your payment method."
+msgstr "View payments and manage your payment method."
 
 msgid "View profile"
 msgstr "View profile"

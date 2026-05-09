@@ -20,15 +20,9 @@ import { api } from "@/shared/lib/api/client";
 
 import { resumePaystackTransaction } from "./paystackInline";
 
-interface OpenInvoiceInfo {
-  amount: number;
-  currency: string;
-}
-
 interface UpdatePaymentMethodDialogProps {
   isOpen: boolean;
   onOpenChange: (isOpen: boolean) => void;
-  onHasOpenInvoice?: (invoice: OpenInvoiceInfo) => void;
 }
 
 type PaystackPaymentMethodSetup = {
@@ -36,11 +30,7 @@ type PaystackPaymentMethodSetup = {
   reference: string;
 };
 
-export function UpdatePaymentMethodDialog({
-  isOpen,
-  onOpenChange,
-  onHasOpenInvoice
-}: Readonly<UpdatePaymentMethodDialogProps>) {
+export function UpdatePaymentMethodDialog({ isOpen, onOpenChange }: Readonly<UpdatePaymentMethodDialogProps>) {
   const queryClient = useQueryClient();
   const [setup, setSetup] = useState<PaystackPaymentMethodSetup | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -48,17 +38,10 @@ export function UpdatePaymentMethodDialog({
   const [setupError, setSetupError] = useState<string | null>(null);
 
   const confirmMutation = api.useMutation("post", "/api/account/billing/confirm-payment-method", {
-    onSuccess: (data) => {
+    onSuccess: () => {
       queryClient.invalidateQueries();
       toast.success(t`Payment method updated`);
-      const openInvoice =
-        data.hasOpenInvoice && data.openInvoiceAmount != null && data.openInvoiceCurrency != null
-          ? { amount: data.openInvoiceAmount, currency: data.openInvoiceCurrency }
-          : null;
       onOpenChange(false);
-      if (openInvoice) {
-        onHasOpenInvoice?.(openInvoice);
-      }
     }
   });
 

@@ -14,20 +14,20 @@ namespace Account.Tests.Billing;
 public sealed class RetryPendingInvoicePaymentTests : EndpointBaseTest<AccountDbContext>
 {
     [Fact]
-    public async Task RetryPendingInvoicePayment_WhenOpenInvoicePaid_ShouldReturnPaid()
+    public async Task RetryPendingInvoicePayment_WhenAuthorizationChargePaid_ShouldReturnPaid()
     {
         // Arrange
         Connection.Update("subscriptions", "tenant_id", DatabaseSeeder.Tenant1.Id.Value, [
                 ("plan", nameof(SubscriptionPlan.Standard)),
                 ("paystack_customer_code", MockPaystackClient.MockCustomerCode),
                 ("paystack_authorization_code", "sub_test_123"),
+                ("paystack_authorization_email", DatabaseSeeder.Tenant1Owner.Email),
                 ("current_price_amount", 29.99m),
                 ("current_price_currency", "USD"),
                 ("first_payment_failed_at", TimeProvider.GetUtcNow().AddDays(-1)),
                 ("current_period_end", TimeProvider.GetUtcNow().AddDays(30))
             ]
         );
-        PaystackState.SimulateOpenInvoice = true;
 
         // Act
         var response = await AuthenticatedOwnerHttpClient.PostAsync("/api/account/billing/retry-pending-invoice", null);
@@ -45,7 +45,7 @@ public sealed class RetryPendingInvoicePaymentTests : EndpointBaseTest<AccountDb
         transactions.Should().Contain("\"Amount\":29.99");
         transactions.Should().Contain("\"Status\":\"Succeeded\"");
         TelemetryEventsCollectorSpy.CollectedEvents.Count.Should().Be(1);
-        TelemetryEventsCollectorSpy.CollectedEvents[0].GetType().Name.Should().Be("PendingInvoicePaymentRetried");
+        TelemetryEventsCollectorSpy.CollectedEvents[0].GetType().Name.Should().Be("RenewalPaymentRetried");
     }
 
     [Fact]
@@ -56,6 +56,7 @@ public sealed class RetryPendingInvoicePaymentTests : EndpointBaseTest<AccountDb
                 ("plan", nameof(SubscriptionPlan.Standard)),
                 ("paystack_customer_code", MockPaystackClient.MockCustomerCode),
                 ("paystack_authorization_code", "sub_test_123"),
+                ("paystack_authorization_email", DatabaseSeeder.Tenant1Owner.Email),
                 ("current_price_amount", 29.99m),
                 ("current_price_currency", "USD"),
                 ("first_payment_failed_at", TimeProvider.GetUtcNow().AddDays(-1)),

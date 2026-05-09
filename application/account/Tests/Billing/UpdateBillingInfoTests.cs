@@ -72,7 +72,7 @@ public sealed class UpdateBillingInfoTests : EndpointBaseTest<AccountDbContext>
 
         // Assert
         response.ShouldHaveEmptyHeaderAndLocationOnSuccess();
-        Connection.ExecuteScalar<string>("SELECT paystack_customer_code FROM subscriptions WHERE tenant_id = @tenantId", [new { tenantId = DatabaseSeeder.Tenant1.Id.Value }]).Should().Be(MockPaystackClient.MockCustomerCode);
+        Connection.ExecuteScalar<string>("SELECT paystack_customer_code FROM subscriptions WHERE tenant_id = @tenantId", [new { tenantId = DatabaseSeeder.Tenant1.Id.Value }]).Should().Be(MockPaystackClient.GetMockCustomerCode(DatabaseSeeder.Tenant1.Id.Value));
         var billingInfo = Connection.ExecuteScalar<string>("SELECT billing_info FROM subscriptions WHERE tenant_id = @tenantId", [new { tenantId = DatabaseSeeder.Tenant1.Id.Value }]);
         billingInfo.Should().Contain("Test Organization");
     }

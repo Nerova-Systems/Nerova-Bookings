@@ -20,7 +20,7 @@ public sealed class ProcessSubscriptionBillingTests : EndpointBaseTest<AccountDb
     {
         // Arrange
         var now = TimeProvider.GetUtcNow();
-        SaveActiveSubscription(SubscriptionPlan.Standard, 29.00m, currentPeriodStart: now.AddMonths(-1), currentPeriodEnd: now.AddDays(-1), nextBillingAt: now.AddDays(-1));
+        SaveActiveSubscription(SubscriptionPlan.Standard, 29.00m, now.AddMonths(-1), now.AddDays(-1), now.AddDays(-1));
 
         // Act
         await ProcessBillingAsync();
@@ -39,7 +39,7 @@ public sealed class ProcessSubscriptionBillingTests : EndpointBaseTest<AccountDb
     {
         // Arrange
         var now = TimeProvider.GetUtcNow();
-        SaveActiveSubscription(SubscriptionPlan.Standard, 29.00m, currentPeriodStart: now.AddMonths(-1), currentPeriodEnd: now.AddDays(-1), nextBillingAt: now.AddDays(-1));
+        SaveActiveSubscription(SubscriptionPlan.Standard, 29.00m, now.AddMonths(-1), now.AddDays(-1), now.AddDays(-1));
 
         // Act
         await ProcessBillingAsync(state => state.SimulateAuthorizationChargeFailure = true);
@@ -59,9 +59,9 @@ public sealed class ProcessSubscriptionBillingTests : EndpointBaseTest<AccountDb
         SaveActiveSubscription(
             SubscriptionPlan.Standard,
             29.00m,
-            currentPeriodStart: now.AddMonths(-1).AddDays(-8),
-            currentPeriodEnd: now.AddDays(-8),
-            nextBillingAt: now.AddDays(-8),
+            now.AddMonths(-1).AddDays(-8),
+            now.AddDays(-8),
+            now.AddDays(-8),
             firstPaymentFailedAt: now.AddDays(-8)
         );
 
@@ -83,9 +83,9 @@ public sealed class ProcessSubscriptionBillingTests : EndpointBaseTest<AccountDb
         SaveActiveSubscription(
             SubscriptionPlan.Standard,
             29.00m,
-            currentPeriodStart: now.AddMonths(-1),
-            currentPeriodEnd: now.AddDays(-1),
-            nextBillingAt: now.AddDays(-1),
+            now.AddMonths(-1),
+            now.AddDays(-1),
+            now.AddDays(-1),
             cancelAtPeriodEnd: true
         );
 
@@ -107,10 +107,10 @@ public sealed class ProcessSubscriptionBillingTests : EndpointBaseTest<AccountDb
         SaveActiveSubscription(
             SubscriptionPlan.Premium,
             99.00m,
-            currentPeriodStart: now.AddMonths(-1),
-            currentPeriodEnd: now.AddDays(-1),
-            nextBillingAt: now.AddDays(-1),
-            scheduledPlan: SubscriptionPlan.Standard
+            now.AddMonths(-1),
+            now.AddDays(-1),
+            now.AddDays(-1),
+            SubscriptionPlan.Standard
         );
 
         // Act
@@ -156,7 +156,7 @@ public sealed class ProcessSubscriptionBillingTests : EndpointBaseTest<AccountDb
         );
 
         Connection.Update("subscriptions", "tenant_id", DatabaseSeeder.Tenant1.Id.Value, [
-                ("plan", nameof(plan)),
+                ("plan", plan.ToString()),
                 ("scheduled_plan", scheduledPlan?.ToString()),
                 ("paystack_customer_code", MockPaystackClient.MockCustomerCode),
                 ("paystack_authorization_code", MockPaystackClient.MockAuthorizationCode),

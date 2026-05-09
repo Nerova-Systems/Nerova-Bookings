@@ -3,6 +3,7 @@ using System.Net.Http.Json;
 using Account.Database;
 using Account.Features.Subscriptions.Commands;
 using Account.Features.Subscriptions.Domain;
+using Account.Integrations.Paystack;
 using FluentAssertions;
 using SharedKernel.Tests;
 using SharedKernel.Tests.Persistence;
@@ -131,6 +132,32 @@ public sealed class StartSubscriptionCheckoutTests : EndpointBaseTest<AccountDbC
         TelemetryEventsCollectorSpy.CollectedEvents.Count.Should().Be(1);
         TelemetryEventsCollectorSpy.CollectedEvents[0].GetType().Name.Should().Be("SubscriptionCheckoutStarted");
         TelemetryEventsCollectorSpy.AreAllEventsDispatched.Should().BeTrue();
+    }
+
+    [Fact]
+    public async Task StartSubscriptionCheckout_WhenSavedPaymentMethodChargeFails_ShouldPersistFailedAttemptAndReturnBadRequest()
+    {
+        // Arrange
+        Connection.Update("subscriptions", "tenant_id", DatabaseSeeder.Tenant1.Id.Value, [
+                ("paystack_customer_code", "CUS_test_123"),
+                ("paystack_authorization_code", "AUTH_test_123"),
+                ("paystack_authorization_email", "billing@example.com"),
+                ("paystack_authorization_signature", "SIG_test_123"),
+                ("payment_method", """{"Brand":"visa","Last4":"4242","ExpMonth":12,"ExpYear":2026}"""),
+                ("billing_info", """{"Name":"Test Organization","Address":{"Line1":"Vestergade 12","PostalCode":"1456","City":"Copenhagen","Country":"DK"},"Email":"billing@example.com"}""")
+            ]
+        );
+        PaystackState.SimulateAuthorizationChargeFailure = true;
+        var command = new StartSubscriptionCheckoutCommand(SubscriptionPlan.Standard);
+        TelemetryEventsCollectorSpy.Reset();
+
+        // Act
+        var response = await AuthenticatedOwnerHttpClient.PostAsJsonAsync("/api/account/subscriptions/start-checkout", command);
+
+        // Assert
+        await response.ShouldHaveErrorStatusCode(HttpStatusCode.BadRequest, "Paystack could not charge the saved payment method.");
+        Connection.ExecuteScalar<string>("SELECT status FROM paystack_payment_attempts WHERE purpose = @purpose", [new { purpose = nameof(PaystackPaymentPurpose.Subscribe) }]).Should().Be(nameof(PaystackPaymentAttemptStatus.Failed));
+        TelemetryEventsCollectorSpy.AreAllEventsDispatched.Should().BeFalse();
     }
 
     [Fact]

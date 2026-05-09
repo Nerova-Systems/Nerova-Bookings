@@ -75,7 +75,7 @@ public sealed class ConfirmPaystackPaymentHandler(
         {
             paymentAttempt.MarkFailed(now, verified?.ErrorMessage ?? "Paystack payment could not be verified.");
             paystackPaymentAttemptRepository.Update(paymentAttempt);
-            return Result<ConfirmPaystackPaymentResponse>.BadRequest(verified?.ErrorMessage ?? "Paystack payment could not be verified.");
+            return Result<ConfirmPaystackPaymentResponse>.BadRequest(verified?.ErrorMessage ?? "Paystack payment could not be verified.", true);
         }
 
         if (!string.Equals(verified.Reference, command.Reference, StringComparison.Ordinal))
@@ -102,7 +102,7 @@ public sealed class ConfirmPaystackPaymentHandler(
         {
             paymentAttempt.MarkFailed(now, "Paystack payment amount does not match the expected subscription amount.");
             paystackPaymentAttemptRepository.Update(paymentAttempt);
-            return Result<ConfirmPaystackPaymentResponse>.BadRequest("Paystack payment amount does not match the expected subscription amount.");
+            return Result<ConfirmPaystackPaymentResponse>.BadRequest("Paystack payment amount does not match the expected subscription amount.", true);
         }
 
         var previousPlan = subscription.Plan;

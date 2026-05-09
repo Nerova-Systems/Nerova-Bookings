@@ -54,6 +54,17 @@ public abstract class EndpointBaseTest<TContext> : IDisposable where TContext : 
         TimeProvider = TimeProvider.System;
 
         Services.AddLogging();
+        Services.AddSingleton<IConfiguration>(
+            new ConfigurationBuilder()
+                .AddInMemoryCollection(new Dictionary<string, string?>
+                    {
+                        ["Paystack:AllowMockProvider"] = "true",
+                        ["Paystack:PublicKey"] = "pk_test_mock_public_key",
+                        ["Paystack:SubscriptionEnabled"] = "true"
+                    }
+                )
+                .Build()
+        );
         Services.AddTransient<DatabaseSeeder>();
 
         // Create connection using shared cache mode so isolated connections can access the same in-memory database

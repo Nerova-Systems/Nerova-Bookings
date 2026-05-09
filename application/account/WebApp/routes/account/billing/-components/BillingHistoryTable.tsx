@@ -98,18 +98,18 @@ export function BillingHistoryTable() {
                           target="_blank"
                           rel="noreferrer"
                           className={buttonVariants({ variant: "ghost", size: "sm" })}
-                          aria-label={t`Invoice`}
-                          onClick={() => trackInteraction("Billing history", "interaction", "Download invoice")}
+                          aria-label={t`Receipt`}
+                          onClick={() => trackInteraction("Billing history", "interaction", "Download receipt")}
                         />
                       }
                     >
                       <DownloadIcon className="size-4" />
                       <span className="hidden sm:inline" aria-hidden="true">
-                        <Trans>Invoice</Trans>
+                        <Trans>Receipt</Trans>
                       </span>
                     </TooltipTrigger>
                     <TooltipContent className="sm:hidden">
-                      <Trans>Invoice</Trans>
+                      <Trans>Receipt</Trans>
                     </TooltipContent>
                   </Tooltip>
                 )}

@@ -91,7 +91,7 @@ public sealed class RetryPendingInvoicePaymentHandler(
         {
             paymentAttempt.MarkFailed(now, charge.ErrorMessage ?? "Paystack could not charge the saved payment method.");
             await paystackPaymentAttemptRepository.AddAsync(paymentAttempt, cancellationToken);
-            return Result<RetryPendingInvoicePaymentResponse>.BadRequest(charge.ErrorMessage ?? "Paystack could not charge the saved payment method.");
+            return Result<RetryPendingInvoicePaymentResponse>.BadRequest(charge.ErrorMessage ?? "Paystack could not charge the saved payment method.", true);
         }
 
         var nextBillingAt = now.AddMonths(1);
@@ -105,7 +105,7 @@ public sealed class RetryPendingInvoicePaymentHandler(
         );
         subscriptionRepository.Update(subscription);
         await paystackPaymentAttemptRepository.AddAsync(paymentAttempt, cancellationToken);
-        events.CollectEvent(new PendingInvoicePaymentRetried(subscription.Id));
+        events.CollectEvent(new RenewalPaymentRetried(subscription.Id));
 
         return new RetryPendingInvoicePaymentResponse(true, null, charge.Reference, null, charge.Amount, charge.Currency, nameof(PaystackPaymentPurpose.Retry));
     }

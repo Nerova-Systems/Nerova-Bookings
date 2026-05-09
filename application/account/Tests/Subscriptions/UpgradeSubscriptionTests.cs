@@ -20,7 +20,7 @@ public sealed class UpgradeSubscriptionTests : EndpointBaseTest<AccountDbContext
     {
         // Arrange
         var now = TimeProvider.GetUtcNow();
-        SaveActiveSubscription(SubscriptionPlan.Standard, 29.00m, currentPeriodStart: now.AddDays(-15), currentPeriodEnd: now.AddDays(15));
+        SaveActiveSubscription(SubscriptionPlan.Standard, 29.00m, now.AddDays(-15), now.AddDays(15));
         var command = new UpgradeSubscriptionCommand(SubscriptionPlan.Premium);
 
         // Act
@@ -46,7 +46,7 @@ public sealed class UpgradeSubscriptionTests : EndpointBaseTest<AccountDbContext
     {
         // Arrange
         var now = TimeProvider.GetUtcNow();
-        SaveActiveSubscription(SubscriptionPlan.Premium, 99.00m, currentPeriodStart: now.AddDays(-15), currentPeriodEnd: now.AddDays(15));
+        SaveActiveSubscription(SubscriptionPlan.Premium, 99.00m, now.AddDays(-15), now.AddDays(15));
         var command = new UpgradeSubscriptionCommand(SubscriptionPlan.Standard);
 
         // Act

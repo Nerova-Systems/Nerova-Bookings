@@ -445,6 +445,9 @@ msgstr "Faktureringsoplysninger opdateret"
 msgid "Billing is not configured. Please contact support to enable payment processing."
 msgstr "Betaling er ikke konfigureret. Kontakt support for at aktivere betalingsbehandling."
 
+msgid "Billing name"
+msgstr "Faktureringsnavn"
+
 msgid "Billing tabs"
 msgstr "Faktureringsfaner"
 
@@ -1319,9 +1322,6 @@ msgstr "Inviter bruger"
 msgid "Invited users"
 msgstr "Inviterede brugere"
 
-msgid "Invoice"
-msgstr "Faktura"
-
 msgid "IP address"
 msgstr "IP-adresse"
 
@@ -1643,9 +1643,6 @@ msgstr ""
 msgid "Name"
 msgstr "Navn"
 
-msgid "Name as it appears on invoices"
-msgstr "Navn som det fremgår på fakturaer"
-
 msgid "Narrow bottom drawer"
 msgstr "Smal bunddrawer"
 
@@ -1846,6 +1843,9 @@ msgstr "Betalingen kunne ikke gennemføres. Prøv igen senere."
 
 msgid "Payment failed"
 msgstr "Betaling mislykkedes"
+
+msgid "Payment failed. Retry payment or update your payment method to keep your subscription active."
+msgstr "Betaling mislykkedes. Prøv betalingen igen, eller opdater din betalingsmetode for at holde dit abonnement aktivt."
 
 msgid "Payment failed. Your subscription will be suspended soon."
 msgstr "Betaling mislykkedes. Dit abonnement vil blive suspenderet snart."
@@ -2055,6 +2055,9 @@ msgstr "Klar til at udgive?"
 msgid "Rebase and merge"
 msgstr "Rebase og flet"
 
+msgid "Receipt"
+msgstr "Kvittering"
+
 msgid "Recipe"
 msgstr "Opskrift"
 
@@ -2155,6 +2158,9 @@ msgstr "Gendan bruger"
 
 msgid "Restoring..."
 msgstr "Gendanner..."
+
+msgid "Retry payment"
+msgstr "Prøv betaling igen"
 
 msgid "Retry pending payment"
 msgstr "Prøv afventende betaling igen"
@@ -2914,8 +2920,8 @@ msgstr "Se invitation"
 msgid "View invited users"
 msgstr "Se inviterede brugere"
 
-msgid "View invoices and manage your payment method."
-msgstr "Se fakturaer og administrer din betalingsmetode."
+msgid "View payments and manage your payment method."
+msgstr "Se betalinger, og administrer din betalingsmetode."
 
 msgid "View profile"
 msgstr "Se profil"

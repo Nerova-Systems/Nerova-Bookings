@@ -24,7 +24,7 @@ test.describe("@smoke", () => {
    * - Schedule downgrade from Premium to Standard (subscription page with mocked state)
    * - Downgrade to Basis (free plan) with cancellation reason selection (subscription page)
    * - Cancelling state with reactivation banner and confirmation dialog
-   * - Payment history table with invoice links
+   * - Payment history table with receipt links
    * - Payment failed warning banner display
    * - Suspension error page (Owner vs Member view)
    * - Paystack unconfigured state handling
@@ -146,7 +146,7 @@ test.describe("@smoke", () => {
                 currency: "USD",
                 status: "Succeeded",
                 date: "2026-02-24T00:00:00Z",
-                invoiceUrl: "https://mock.paystack.local/invoice/12345",
+                invoiceUrl: "https://mock.paystack.local/receipt/12345",
                 creditNoteUrl: null
               }
             ]
@@ -171,7 +171,7 @@ test.describe("@smoke", () => {
       await expect(ownerPage.getByRole("columnheader", { name: "Amount" })).toBeVisible();
       await expect(ownerPage.getByRole("columnheader", { name: "Status" })).toBeVisible();
       await expect(ownerPage.getByText("Succeeded")).toBeVisible();
-      await expect(ownerPage.getByRole("link", { name: "Invoice" })).toBeVisible();
+      await expect(ownerPage.getByRole("link", { name: "Receipt" })).toBeVisible();
 
       await ownerPage.unroute("**/api/account/subscriptions/current");
       await ownerPage.unroute("**/api/account/billing/payment-history**");
@@ -424,6 +424,12 @@ test.describe("@smoke", () => {
 
       await ownerPage.goto("/account/billing");
       await expect(ownerPage.getByText("Payment failed. Your subscription will be suspended soon.")).toBeVisible();
+      await expect(
+        ownerPage.getByText(
+          "Payment failed. Retry payment or update your payment method to keep your subscription active."
+        )
+      ).toBeVisible();
+      await expect(ownerPage.getByRole("button", { name: "Retry payment" })).toBeVisible();
       await expect(ownerPage.getByRole("button", { name: "Update payment method" }).first()).toBeVisible();
 
       await ownerPage.unroute("**/api/account/subscriptions/current");
@@ -685,7 +691,7 @@ test.describe("@comprehensive", () => {
                 currency: "USD",
                 status: "Succeeded",
                 date: "2026-02-24T00:00:00Z",
-                invoiceUrl: "https://mock.paystack.local/invoice/12345",
+                invoiceUrl: "https://mock.paystack.local/receipt/12345",
                 creditNoteUrl: null
               },
               {
@@ -694,7 +700,7 @@ test.describe("@comprehensive", () => {
                 currency: "USD",
                 status: "Refunded",
                 date: "2026-01-24T00:00:00Z",
-                invoiceUrl: "https://mock.paystack.local/invoice/12346",
+                invoiceUrl: "https://mock.paystack.local/receipt/12346",
                 creditNoteUrl: "https://mock.paystack.local/credit-note/67890"
               }
             ]
@@ -707,8 +713,8 @@ test.describe("@comprehensive", () => {
       await expect(ownerPage.getByText("Succeeded")).toBeVisible();
       await expect(ownerPage.getByText("Refunded")).toBeVisible();
 
-      const invoiceLinks = ownerPage.getByRole("link", { name: "Invoice" });
-      await expect(invoiceLinks.first()).toBeVisible();
+      const receiptLinks = ownerPage.getByRole("link", { name: "Receipt" });
+      await expect(receiptLinks.first()).toBeVisible();
       await expect(ownerPage.getByRole("link", { name: "Credit note" })).toBeVisible();
 
       await ownerPage.unroute("**/api/account/billing/payment-history**");
