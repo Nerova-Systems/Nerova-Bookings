@@ -357,6 +357,12 @@ msgstr "Inactive"
 msgid "Invoice"
 msgstr "Invoice"
 
+msgid "Invoice actions"
+msgstr "Invoice actions"
+
+msgid "Invoice refunded"
+msgstr "Invoice refunded"
+
 msgid "Invoice view"
 msgstr "Invoice view"
 
@@ -729,8 +735,20 @@ msgstr "Records will appear here as accounts subscribe and Stripe webhooks are p
 msgid "Recovered {0} payment attempts and appended {1} new billing events. Last reconciled at {2}."
 msgstr "Recovered {0} payment attempts and appended {1} new billing events. Last reconciled at {2}."
 
+msgid "Refund"
+msgstr "Refund"
+
+msgid "Refund invoice"
+msgstr "Refund invoice"
+
+msgid "Refund invoice?"
+msgstr "Refund invoice?"
+
 msgid "Refunded"
 msgstr "Refunded"
+
+msgid "Refunding..."
+msgstr "Refunding..."
 
 msgid "Refunds and credit notes"
 msgstr "Refunds and credit notes"
@@ -879,6 +897,9 @@ msgstr "this period"
 
 msgid "This rebuilds the billing event ledger from this tenant's archived Stripe payloads. It is a best-effort recovery that may produce incorrect subscription state or billing event rows. Only run it when standard Reconcile with Stripe has been tried and did not clear the drift."
 msgstr "This rebuilds the billing event ledger from this tenant's archived Stripe payloads. It is a best-effort recovery that may produce incorrect subscription state or billing event rows. Only run it when standard Reconcile with Stripe has been tried and did not clear the drift."
+
+msgid "This refunds the Paystack payment and records a refund row. Subscription MRR stays unchanged."
+msgstr "This refunds the Paystack payment and records a refund row. Subscription MRR stays unchanged."
 
 msgid "This user has no recorded sessions."
 msgstr "This user has no recorded sessions."

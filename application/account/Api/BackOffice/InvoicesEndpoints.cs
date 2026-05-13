@@ -30,6 +30,6 @@ public sealed class InvoicesEndpoints : IEndpoints
 
         group.MapPost("/{id}/refund", async Task<ApiResult> (PaymentTransactionId id, IMediator mediator)
             => await mediator.Send(new RefundBackOfficeInvoiceCommand(id))
-        );
+        ).RequireAuthorization(BackOfficeIdentityDefaults.AdminPolicyName);
     }
 }

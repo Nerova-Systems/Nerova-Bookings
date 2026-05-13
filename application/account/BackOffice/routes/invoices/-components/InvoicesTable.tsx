@@ -7,7 +7,8 @@ import { useCallback } from "react";
 
 import type { components, SortableBackOfficeInvoiceProperties } from "@/shared/lib/api/client";
 
-import { SortOrder } from "@/shared/lib/api/client";
+import { useMe } from "@/shared/hooks/useMe";
+import { queryClient, SortOrder } from "@/shared/lib/api/client";
 
 import type { InvoicesView } from "./InvoicesToolbar";
 
@@ -34,6 +35,7 @@ export function InvoicesTable({
   sortOrder
 }: Readonly<InvoicesTableProps>) {
   const navigate = useNavigate();
+  const { data: me } = useMe();
 
   const handlePageChange = useCallback(
     (page: number) => {
@@ -79,6 +81,10 @@ export function InvoicesTable({
     [navigate]
   );
 
+  const handleRefunded = useCallback(async () => {
+    await queryClient.invalidateQueries({ queryKey: ["get", "/api/back-office/invoices"] });
+  }, []);
+
   if (isLoading && invoices.length === 0) {
     return (
       <div className="flex flex-1 flex-col gap-2 p-2">
@@ -106,7 +112,9 @@ export function InvoicesTable({
               <InvoicesTableRow
                 key={`${invoice.id}-${invoice.rowKind}`}
                 invoice={invoice}
+                isAdmin={me?.isAdmin === true}
                 onRowClick={handleRowClick}
+                onRefunded={handleRefunded}
               />
             ))}
           </TableBody>

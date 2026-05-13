@@ -99,7 +99,7 @@ msgstr "Kontovækst"
 #. placeholder {0}: result.driftDiscrepancyCount
 #. placeholder {1}: formatDate(result.reconciledAt)
 msgid "Account has {0} drift discrepancies. Last reconciled at {1}."
-msgstr ""
+msgstr "Kontoen har {0} afvigelser. Sidst afstemt den {1}."
 
 msgid "Account preview"
 msgstr "Kontoforhåndsvisning"
@@ -356,6 +356,12 @@ msgstr "Inaktive"
 
 msgid "Invoice"
 msgstr "Faktura"
+
+msgid "Invoice actions"
+msgstr "Fakturahandlinger"
+
+msgid "Invoice refunded"
+msgstr "Faktura refunderet"
 
 msgid "Invoice view"
 msgstr "Fakturavisning"
@@ -727,10 +733,22 @@ msgstr "Posteringer vises her, når konti abonnerer, og Stripe-webhooks behandle
 #. placeholder {1}: result.billingEventsAppended
 #. placeholder {2}: formatDate(result.reconciledAt)
 msgid "Recovered {0} payment attempts and appended {1} new billing events. Last reconciled at {2}."
-msgstr ""
+msgstr "Gendannede {0} betalingsforsøg og tilføjede {1} nye faktureringshændelser. Sidst afstemt den {2}."
+
+msgid "Refund"
+msgstr "Refusion"
+
+msgid "Refund invoice"
+msgstr "Refunder faktura"
+
+msgid "Refund invoice?"
+msgstr "Refunder faktura?"
 
 msgid "Refunded"
 msgstr "Refunderet"
+
+msgid "Refunding..."
+msgstr "Refunderer..."
 
 msgid "Refunds and credit notes"
 msgstr "Refunderinger og kreditnotaer"
@@ -879,6 +897,9 @@ msgstr "denne periode"
 
 msgid "This rebuilds the billing event ledger from this tenant's archived Stripe payloads. It is a best-effort recovery that may produce incorrect subscription state or billing event rows. Only run it when standard Reconcile with Stripe has been tried and did not clear the drift."
 msgstr "Dette genopbygger faktureringshændelsesloggen fra denne kontos arkiverede Stripe-payloads. Det er en bedst muligt-gendannelse, der kan producere forkerte abonnementstilstande eller faktureringshændelser. Kør kun denne handling, når standard Afstem med Stripe er forsøgt og ikke ryddede afvigelserne."
+
+msgid "This refunds the Paystack payment and records a refund row. Subscription MRR stays unchanged."
+msgstr "Dette refunderer Paystack-betalingen og registrerer en refusionsrække. Abonnementets MRR forbliver uændret."
 
 msgid "This user has no recorded sessions."
 msgstr "Denne bruger har ingen registrerede sessioner."

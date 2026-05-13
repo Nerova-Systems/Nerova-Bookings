@@ -36,27 +36,27 @@ public sealed class RefundBackOfficeInvoiceTests : BackOfficeEndpointBaseTest
                 ("current_price_amount", 29.00m),
                 ("current_price_currency", MockPaystackClient.MockStandardCurrency),
                 ("payment_transactions", $$"""
-                                          [
-                                            {
-                                              "Id": "{{transactionId}}",
-                                              "Amount": 29.00,
-                                              "AmountExcludingTax": 29.00,
-                                              "TaxAmount": 0.00,
-                                              "Currency": "{{MockPaystackClient.MockStandardCurrency}}",
-                                              "Status": "Succeeded",
-                                              "Date": "{{paidAt:O}}",
-                                              "FailureReason": null,
-                                              "InvoiceUrl": "https://paystack.test/invoice/{{paystackReference}}",
-                                              "CreditNoteUrl": null,
-                                              "Plan": "Standard",
-                                              "RefundedAt": null,
-                                              "InvoiceTotal": 29.00,
-                                              "AmountFromCredit": 0.00,
-                                              "CreditNotedAt": null,
-                                              "PaystackReference": "{{paystackReference}}"
-                                            }
-                                          ]
-                                          """)
+                                           [
+                                             {
+                                               "Id": "{{transactionId}}",
+                                               "Amount": 29.00,
+                                               "AmountExcludingTax": 29.00,
+                                               "TaxAmount": 0.00,
+                                               "Currency": "{{MockPaystackClient.MockStandardCurrency}}",
+                                               "Status": "Succeeded",
+                                               "Date": "{{paidAt:O}}",
+                                               "FailureReason": null,
+                                               "InvoiceUrl": "https://paystack.test/invoice/{{paystackReference}}",
+                                               "CreditNoteUrl": null,
+                                               "Plan": "Standard",
+                                               "RefundedAt": null,
+                                               "InvoiceTotal": 29.00,
+                                               "AmountFromCredit": 0.00,
+                                               "CreditNotedAt": null,
+                                               "PaystackReference": "{{paystackReference}}"
+                                             }
+                                           ]
+                                           """)
             ]
         );
 
@@ -94,27 +94,27 @@ public sealed class RefundBackOfficeInvoiceTests : BackOfficeEndpointBaseTest
         var transactionId = PaymentTransactionId.NewId();
         Connection.Update("subscriptions", "tenant_id", DatabaseSeeder.Tenant1.Id.Value, [
                 ("payment_transactions", $$"""
-                                          [
-                                            {
-                                              "Id": "{{transactionId}}",
-                                              "Amount": 29.00,
-                                              "AmountExcludingTax": 29.00,
-                                              "TaxAmount": 0.00,
-                                              "Currency": "{{MockPaystackClient.MockStandardCurrency}}",
-                                              "Status": "Refunded",
-                                              "Date": "{{DateTimeOffset.UtcNow.AddDays(-2):O}}",
-                                              "FailureReason": null,
-                                              "InvoiceUrl": null,
-                                              "CreditNoteUrl": null,
-                                              "Plan": "Standard",
-                                              "RefundedAt": "{{DateTimeOffset.UtcNow.AddDays(-1):O}}",
-                                              "InvoiceTotal": 29.00,
-                                              "AmountFromCredit": 0.00,
-                                              "CreditNotedAt": null,
-                                              "PaystackReference": "nerova_already_refunded"
-                                            }
-                                          ]
-                                          """)
+                                           [
+                                             {
+                                               "Id": "{{transactionId}}",
+                                               "Amount": 29.00,
+                                               "AmountExcludingTax": 29.00,
+                                               "TaxAmount": 0.00,
+                                               "Currency": "{{MockPaystackClient.MockStandardCurrency}}",
+                                               "Status": "Refunded",
+                                               "Date": "{{DateTimeOffset.UtcNow.AddDays(-2):O}}",
+                                               "FailureReason": null,
+                                               "InvoiceUrl": null,
+                                               "CreditNoteUrl": null,
+                                               "Plan": "Standard",
+                                               "RefundedAt": "{{DateTimeOffset.UtcNow.AddDays(-1):O}}",
+                                               "InvoiceTotal": 29.00,
+                                               "AmountFromCredit": 0.00,
+                                               "CreditNotedAt": null,
+                                               "PaystackReference": "nerova_already_refunded"
+                                             }
+                                           ]
+                                           """)
             ]
         );
 
@@ -129,5 +129,20 @@ public sealed class RefundBackOfficeInvoiceTests : BackOfficeEndpointBaseTest
         // Assert
         await response.ShouldHaveErrorStatusCode(HttpStatusCode.BadRequest, "Invoice is already refunded.");
         TelemetryEventsCollectorSpy.AreAllEventsDispatched.Should().BeFalse();
+    }
+
+    [Fact]
+    public async Task RefundBackOfficeInvoice_WhenCalledByNonAdmin_ShouldReturnForbidden()
+    {
+        // Arrange
+        var transactionId = PaymentTransactionId.NewId();
+        var identity = MockEasyAuthIdentities.Default.Single(i => i.Id == "user");
+        using var client = CreateBackOfficeClientForIdentity(identity);
+
+        // Act
+        var response = await client.PostAsync($"/api/back-office/invoices/{transactionId}/refund", null);
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
     }
 }
