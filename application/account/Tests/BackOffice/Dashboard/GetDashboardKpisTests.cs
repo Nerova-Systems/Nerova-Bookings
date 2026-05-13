@@ -52,7 +52,7 @@ public sealed class GetDashboardKpisTests : BackOfficeEndpointBaseTest
         payload.TrialTenants.Should().Be(2);
         payload.CanceledTenants.Should().Be(1);
         payload.BlendedMonthlyRecurringRevenue.Should().Be(49.99m);
-        payload.Currency.Should().Be(MockPaystackClient.MockStandardCurrency);
+        payload.Currency.Should().Be("ZAR");
         payload.Period.Should().Be(DashboardTrendPeriod.Last30Days);
     }
 

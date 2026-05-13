@@ -119,6 +119,66 @@ public sealed class GetTenantDetailTests : BackOfficeEndpointBaseTest
     }
 
     [Fact]
+    public async Task GetTenantDetail_WhenSubscribedSinceMissing_ShouldReturnEarliestSuccessfulPaymentDate()
+    {
+        // Arrange
+        var tenantId = TenantId.NewId();
+        Connection.Insert("tenants", [
+                ("id", tenantId.Value),
+                ("created_at", DateTimeOffset.UtcNow.AddDays(-10)),
+                ("modified_at", null),
+                ("name", "Legacy Paystack Co"),
+                ("state", nameof(TenantState.Active)),
+                ("plan", nameof(SubscriptionPlan.Standard)),
+                ("logo", """{"Url":null,"Version":1}""")
+            ]
+        );
+
+        var firstPaymentAt = DateTimeOffset.Parse("2025-01-01T00:00:00Z");
+        var transactions = ImmutableArray.Create(
+            new PaymentTransaction(PaymentTransactionId.NewId(), 29.00m, 29.00m, 0m, MockPaystackClient.MockStandardCurrency, PaymentTransactionStatus.Succeeded, firstPaymentAt, null, null, null, SubscriptionPlan.Standard),
+            new PaymentTransaction(PaymentTransactionId.NewId(), 29.00m, 29.00m, 0m, MockPaystackClient.MockStandardCurrency, PaymentTransactionStatus.Succeeded, firstPaymentAt.AddMonths(1), null, null, null, SubscriptionPlan.Standard)
+        );
+        Connection.Insert("subscriptions", [
+                ("tenant_id", tenantId.Value),
+                ("id", SubscriptionId.NewId().ToString()),
+                ("created_at", DateTimeOffset.UtcNow.AddDays(-10)),
+                ("modified_at", null),
+                ("plan", nameof(SubscriptionPlan.Standard)),
+                ("scheduled_plan", null),
+                ("paystack_customer_code", "cus_legacy"),
+                ("paystack_authorization_code", "auth_legacy"),
+                ("current_price_amount", 29.00),
+                ("current_price_currency", MockPaystackClient.MockStandardCurrency),
+                ("current_period_end", DateTimeOffset.UtcNow.AddDays(20)),
+                ("cancel_at_period_end", false),
+                ("first_payment_failed_at", null),
+                ("cancellation_reason", null),
+                ("cancellation_feedback", null),
+                ("payment_transactions", JsonSerializer.Serialize(transactions.ToArray())),
+                ("payment_method", null),
+                ("billing_info", null),
+                ("subscribed_since", null),
+                ("has_drift_detected", false),
+                ("drift_checked_at", null),
+                ("drift_discrepancies", "[]")
+            ]
+        );
+
+        var identity = MockEasyAuthIdentities.Default.Single(i => i.Id == "user");
+        using var client = CreateBackOfficeClientForIdentity(identity);
+
+        // Act
+        var response = await client.GetAsync($"/api/back-office/tenants/{tenantId}");
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        var payload = await response.Content.ReadFromJsonAsync<TenantDetailResponse>();
+        payload.Should().NotBeNull();
+        payload.SubscribedSince.Should().Be(firstPaymentAt);
+    }
+
+    [Fact]
     public async Task GetTenantDetail_WhenSubscriptionHasRefundedTransaction_ShouldExcludeRefundFromLifetimeValue()
     {
         // Arrange

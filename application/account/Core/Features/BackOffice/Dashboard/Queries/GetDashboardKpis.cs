@@ -116,8 +116,8 @@ public sealed class GetDashboardKpisHandler(
         var eventsBySubscription = DashboardMrrCalculator.GroupByOccurredAt(billingEvents);
         var today = DateOnly.FromDateTime(now.UtcDateTime);
         var startOfWindow = today.AddDays(-(days - 1));
-        var endMrr = DashboardMrrCalculator.ComputeMrrOnDate(eventsBySubscription, today);
-        var startMrr = DashboardMrrCalculator.ComputeMrrOnDate(eventsBySubscription, startOfWindow);
+        var endMrr = DashboardMrrCalculator.ComputeMrrOnDate(eventsBySubscription, paidSubscriptions, today);
+        var startMrr = DashboardMrrCalculator.ComputeMrrOnDate(eventsBySubscription, paidSubscriptions, startOfWindow);
         var mrrDeltaPercent = startMrr == 0m
             ? (decimal?)null
             : Math.Round((endMrr - startMrr) / startMrr * 100m, 1);

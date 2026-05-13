@@ -27,7 +27,7 @@ public sealed class GetUpgradePreviewTests : EndpointBaseTest<AccountDbContext>
         response.EnsureSuccessStatusCode();
         var result = await response.Content.ReadFromJsonAsync<UpgradePreviewResponse>();
         result!.TotalAmount.Should().BeApproximately(35.00m, 0.01m);
-        result.Currency.Should().Be("USD");
+        result.Currency.Should().Be(MockPaystackClient.MockStandardCurrency);
         result.LineItems.Should().Contain(i => i.Description == "Premium prorated upgrade" && i.IsProration);
         result.LineItems.Should().Contain(i => i.Description == "Tax" && i.IsTax);
     }
@@ -71,7 +71,7 @@ public sealed class GetUpgradePreviewTests : EndpointBaseTest<AccountDbContext>
                 ("paystack_authorization_code", MockPaystackClient.MockAuthorizationCode),
                 ("paystack_authorization_email", "billing@example.com"),
                 ("current_price_amount", currentPriceAmount),
-                ("current_price_currency", "USD"),
+                ("current_price_currency", MockPaystackClient.MockStandardCurrency),
                 ("current_period_start", currentPeriodStart),
                 ("current_period_end", currentPeriodEnd),
                 ("next_billing_at", currentPeriodEnd)

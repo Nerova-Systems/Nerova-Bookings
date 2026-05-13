@@ -31,7 +31,7 @@ public sealed class StartPaymentMethodSetupTests : EndpointBaseTest<AccountDbCon
         result.Reference.Should().NotBeNullOrEmpty();
         result.PublicKey.Should().NotBeNullOrEmpty();
         result.Amount.Should().Be(1.00m);
-        result.Currency.Should().Be("USD");
+        result.Currency.Should().Be(MockPaystackClient.MockStandardCurrency);
         result.OperationPurpose.Should().Be(nameof(PaystackPaymentPurpose.PaymentMethodAuthorization));
         Connection.ExecuteScalar<long>(
             """

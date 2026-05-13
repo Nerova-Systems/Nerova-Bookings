@@ -74,6 +74,13 @@ public sealed class GetTenantDetailHandler(ITenantRepository tenantRepository, I
         var hasEverSubscribed = subscription?.PaymentTransactions
             .Any(t => t.Status is PaymentTransactionStatus.Succeeded or PaymentTransactionStatus.Refunded) == true;
 
+        var subscribedSince = subscription?.SubscribedSince
+                              ?? subscription?.PaymentTransactions
+                                  .Where(t => t.Status is PaymentTransactionStatus.Succeeded or PaymentTransactionStatus.Refunded)
+                                  .OrderBy(t => t.Date)
+                                  .Select(t => (DateTimeOffset?)t.Date)
+                                  .FirstOrDefault();
+
         var billingAddress = subscription?.BillingInfo?.Address is { } address
             ? new BillingAddressResponse(address.Line1, address.Line2, address.PostalCode, address.City, address.State, address.Country)
             : null;
@@ -92,7 +99,7 @@ public sealed class GetTenantDetailHandler(ITenantRepository tenantRepository, I
             subscription?.CurrentPriceAmount,
             subscription?.CurrentPriceCurrency,
             subscription?.CurrentPeriodEnd,
-            subscription?.SubscribedSince,
+            subscribedSince,
             hasEverSubscribed,
             subscription?.BillingInfo?.Name,
             subscription?.BillingInfo?.TaxId,

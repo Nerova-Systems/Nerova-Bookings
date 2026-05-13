@@ -111,7 +111,7 @@ public sealed class AcknowledgePaystackWebhookTests : EndpointBaseTest<AccountDb
                 ("purpose", nameof(PaystackPaymentPurpose.Subscribe)),
                 ("plan", nameof(SubscriptionPlan.Standard)),
                 ("amount", 29.00m),
-                ("currency", "USD"),
+                ("currency", MockPaystackClient.MockStandardCurrency),
                 ("status", nameof(PaystackPaymentAttemptStatus.Pending)),
                 ("completed_at", null),
                 ("failure_reason", null)

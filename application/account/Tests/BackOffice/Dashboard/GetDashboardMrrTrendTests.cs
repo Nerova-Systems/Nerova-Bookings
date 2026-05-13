@@ -78,6 +78,32 @@ public sealed class GetDashboardMrrTrendTests : BackOfficeEndpointBaseTest
     }
 
     [Fact]
+    public async Task GetDashboardMrrTrend_WhenPaystackSubscriptionHasNoBillingEvent_ShouldUseSubscriptionSnapshot()
+    {
+        // Paystack is app-owned in this branch and can have active subscriptions before a BillingEvent
+        // row exists. The dashboard trend must still line up with the KPI instead of showing zero.
+        // Arrange
+        var now = DateTimeOffset.UtcNow;
+        var subscribedSince = now.AddDays(-5);
+        var paidTenant = SeedTenant("Paystack Snapshot Co");
+        var subscriptionId = SubscriptionId.NewId();
+        SeedActiveSubscription(paidTenant, subscriptionId, 149.00m, subscribedSince);
+
+        var identity = MockEasyAuthIdentities.Default.Single(i => i.Id == "user");
+        using var client = CreateBackOfficeClientForIdentity(identity);
+
+        // Act
+        var response = await client.GetAsync("/api/back-office/dashboard/mrr-trend?Period=Last7Days");
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        var payload = await response.Content.ReadFromJsonAsync<BackOfficeDashboardMrrTrendResponse>();
+        payload.Should().NotBeNull();
+        payload.Points.Should().Contain(p => p.MonthlyRecurringRevenue == 149.00m);
+        payload.Points.Last().MonthlyRecurringRevenue.Should().Be(149.00m);
+    }
+
+    [Fact]
     public async Task GetDashboardMrrTrend_WhenCalledWithInvalidPeriod_ShouldReturnBadRequest()
     {
         // Arrange

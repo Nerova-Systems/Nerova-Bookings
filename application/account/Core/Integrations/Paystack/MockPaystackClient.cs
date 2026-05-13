@@ -25,7 +25,7 @@ public sealed class MockPaystackClient(IConfiguration configuration, TimeProvide
     public const string MockAccessCode = "access_mock_12345";
     public const string MockReceiptUrl = "https://mock.paystack.local/receipt/12345";
     public const string MockWebhookEventId = "evt_mock_12345";
-    public const string MockStandardCurrency = "USD";
+    public const string MockStandardCurrency = "ZAR";
     public const decimal StandardAmountExcludingTax = 29.00m;
     public const decimal PremiumAmountExcludingTax = 99.00m;
 
@@ -42,8 +42,8 @@ public sealed class MockPaystackClient(IConfiguration configuration, TimeProvide
         EnsureEnabled();
         var amount = plan == SubscriptionPlan.Premium ? 99.00m : 29.00m;
         var reference = $"{MockReference}_{Guid.NewGuid():N}";
-        state.VerifiedTransactions[reference] = CreateVerifiedTransaction(reference, amount, "USD", purpose, paystackCustomerId);
-        return Task.FromResult<CheckoutSessionResult?>(new CheckoutSessionResult(reference, MockAccessCode, amount, "USD", purpose));
+        state.VerifiedTransactions[reference] = CreateVerifiedTransaction(reference, amount, MockStandardCurrency, purpose, paystackCustomerId);
+        return Task.FromResult<CheckoutSessionResult?>(new CheckoutSessionResult(reference, MockAccessCode, amount, MockStandardCurrency, purpose));
     }
 
     public Task<AuthorizationChargeResult?> ChargeAuthorizationAsync(
@@ -73,8 +73,8 @@ public sealed class MockPaystackClient(IConfiguration configuration, TimeProvide
     {
         EnsureEnabled();
         return Task.FromResult<PriceCatalogItem[]>([
-                new PriceCatalogItem(SubscriptionPlan.Standard, 29.00m, "USD", "month", 1, false),
-                new PriceCatalogItem(SubscriptionPlan.Premium, 99.00m, "USD", "month", 1, false)
+                new PriceCatalogItem(SubscriptionPlan.Standard, 29.00m, MockStandardCurrency, "month", 1, false),
+                new PriceCatalogItem(SubscriptionPlan.Premium, 99.00m, MockStandardCurrency, "month", 1, false)
             ]
         );
     }
@@ -116,7 +116,7 @@ public sealed class MockPaystackClient(IConfiguration configuration, TimeProvide
             PaystackPaymentPurpose.PaymentMethodAuthorization => 1.00m,
             _ => 29.00m
         };
-        return Task.FromResult<VerifiedPaystackTransactionResult?>(CreateVerifiedTransaction(reference, amount, "USD", purpose));
+        return Task.FromResult<VerifiedPaystackTransactionResult?>(CreateVerifiedTransaction(reference, amount, MockStandardCurrency, purpose));
     }
 
     public Task<CustomerBillingResult?> GetCustomerBillingInfoAsync(PaystackCustomerId paystackCustomerId, CancellationToken cancellationToken)
@@ -149,8 +149,8 @@ public sealed class MockPaystackClient(IConfiguration configuration, TimeProvide
     {
         EnsureEnabled();
         var reference = $"{MockReference}_auth_{Guid.NewGuid():N}";
-        state.VerifiedTransactions[reference] = CreateVerifiedTransaction(reference, 1.00m, "USD", PaystackPaymentPurpose.PaymentMethodAuthorization, paystackCustomerId);
-        return Task.FromResult<CheckoutSessionResult?>(new CheckoutSessionResult(reference, MockAccessCode, 1.00m, "USD", PaystackPaymentPurpose.PaymentMethodAuthorization));
+        state.VerifiedTransactions[reference] = CreateVerifiedTransaction(reference, 1.00m, MockStandardCurrency, PaystackPaymentPurpose.PaymentMethodAuthorization, paystackCustomerId);
+        return Task.FromResult<CheckoutSessionResult?>(new CheckoutSessionResult(reference, MockAccessCode, 1.00m, MockStandardCurrency, PaystackPaymentPurpose.PaymentMethodAuthorization));
     }
 
     public Task<VerifiedPaystackTransactionResult?> VerifyPaymentMethodAuthorizationAsync(string reference, CancellationToken cancellationToken)
@@ -173,7 +173,7 @@ public sealed class MockPaystackClient(IConfiguration configuration, TimeProvide
     public Task<CheckoutPreviewResult?> GetCheckoutPreviewAsync(PaystackCustomerId paystackCustomerId, SubscriptionPlan plan, CancellationToken cancellationToken)
     {
         EnsureEnabled();
-        return Task.FromResult<CheckoutPreviewResult?>(new CheckoutPreviewResult(plan == SubscriptionPlan.Premium ? 99.00m : 29.00m, "USD", 0m));
+        return Task.FromResult<CheckoutPreviewResult?>(new CheckoutPreviewResult(plan == SubscriptionPlan.Premium ? 99.00m : 29.00m, MockStandardCurrency, 0m));
     }
 
     public Task<PaymentTransaction[]?> SyncPaymentTransactionsAsync(PaystackCustomerId paystackCustomerId, CancellationToken cancellationToken)
@@ -181,7 +181,7 @@ public sealed class MockPaystackClient(IConfiguration configuration, TimeProvide
         EnsureEnabled();
         var now = timeProvider.GetUtcNow();
         return Task.FromResult<PaymentTransaction[]?>([
-                new PaymentTransaction(PaymentTransactionId.NewId(), 29.99m, 29.99m, 0m, "USD", PaymentTransactionStatus.Succeeded, now, null, null, null)
+                new PaymentTransaction(PaymentTransactionId.NewId(), 29.99m, 29.99m, 0m, MockStandardCurrency, PaymentTransactionStatus.Succeeded, now, null, null, null)
             ]
         );
     }

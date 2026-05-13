@@ -38,7 +38,12 @@ public sealed class GetDashboardMrrTrendQueryValidator : AbstractValidator<GetDa
 ///     given subscription change, so the <c>MrrMismatchBanner</c> may fire transiently during catalog edits
 ///     or while a Stripe event is in-flight. That is expected and self-heals once events are processed.
 /// </summary>
-public sealed class GetDashboardMrrTrendHandler(IBillingEventRepository billingEventRepository, IPlatformCurrencyProvider platformCurrencyProvider, TimeProvider timeProvider)
+public sealed class GetDashboardMrrTrendHandler(
+    IBillingEventRepository billingEventRepository,
+    ISubscriptionRepository subscriptionRepository,
+    IPlatformCurrencyProvider platformCurrencyProvider,
+    TimeProvider timeProvider
+)
     : IRequestHandler<GetDashboardMrrTrendQuery, Result<BackOfficeDashboardMrrTrendResponse>>
 {
     // Soft-delete semantic: every historical point sums the MRR from every subscription active at that time,
@@ -53,10 +58,12 @@ public sealed class GetDashboardMrrTrendHandler(IBillingEventRepository billingE
         var startDate = today.AddDays(-(days - 1));
         var priorStartDate = startDate.AddDays(-days);
 
-        // Reconstruct historical MRR from the BillingEvent log: for each subscription, the most recent
-        // event with NewAmount set (and OccurredAt before end-of-day) is its committed MRR for that day.
+        // Reconstruct historical MRR from the BillingEvent log. Paystack-owned subscriptions can exist
+        // before an MRR BillingEvent row has been appended, so subscriptions with no event history fall
+        // back to the live snapshot to keep the trend aligned with the KPI tile.
         var events = await billingEventRepository.GetMrrChangeEventsUnfilteredAsync(cancellationToken);
         var eventsBySubscription = DashboardMrrCalculator.GroupByOccurredAt(events);
+        var activeSubscriptions = await subscriptionRepository.GetAllActiveUnfilteredAsync(cancellationToken);
 
         var points = new BackOfficeDashboardMrrTrendPoint[days];
         var priorPoints = new BackOfficeDashboardMrrTrendPoint[days];
@@ -64,8 +71,8 @@ public sealed class GetDashboardMrrTrendHandler(IBillingEventRepository billingE
         {
             var currentDate = startDate.AddDays(index);
             var priorDate = priorStartDate.AddDays(index);
-            points[index] = new BackOfficeDashboardMrrTrendPoint(currentDate, DashboardMrrCalculator.ComputeMrrOnDate(eventsBySubscription, currentDate));
-            priorPoints[index] = new BackOfficeDashboardMrrTrendPoint(priorDate, DashboardMrrCalculator.ComputeMrrOnDate(eventsBySubscription, priorDate));
+            points[index] = new BackOfficeDashboardMrrTrendPoint(currentDate, DashboardMrrCalculator.ComputeMrrOnDate(eventsBySubscription, activeSubscriptions, currentDate));
+            priorPoints[index] = new BackOfficeDashboardMrrTrendPoint(priorDate, DashboardMrrCalculator.ComputeMrrOnDate(eventsBySubscription, activeSubscriptions, priorDate));
         }
 
         return new BackOfficeDashboardMrrTrendResponse(query.Period, platformCurrencyProvider.Currency, points, priorPoints);

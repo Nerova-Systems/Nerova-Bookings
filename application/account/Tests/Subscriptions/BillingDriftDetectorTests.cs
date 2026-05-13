@@ -82,7 +82,7 @@ public sealed class BillingDriftDetectorTests
     {
         // Arrange
         var localSnapshot = new StripeSyncSnapshot(SubscriptionPlan.Standard, false, 49.00m, MockPaystackClient.MockStandardCurrency);
-        var stripeSnapshot = new StripeSyncSnapshot(SubscriptionPlan.Premium, false, 99.00m, "ZAR");
+        var stripeSnapshot = new StripeSyncSnapshot(SubscriptionPlan.Premium, false, 99.00m, "USD");
 
         // Act
         var discrepancies = BillingDriftDetector.Detect(localSnapshot, stripeSnapshot, 0, 0);

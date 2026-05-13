@@ -28,11 +28,17 @@ public sealed class GetDashboardMrrConsistencySummaryHandler(ISubscriptionReposi
         var paidSubscriptions = await subscriptionRepository.GetAllActiveUnfilteredAsync(cancellationToken);
         var kpiMrr = paidSubscriptions.Sum(MrrCalculator.ForwardMrr);
 
-        // Trend-latest MRR — mirrors GetDashboardMrrTrendHandler: per subscription, take the latest event's NewAmount.
+        // Trend-latest MRR mirrors GetDashboardMrrTrendHandler: per subscription, take the latest event's
+        // NewAmount. Paystack subscriptions with no MRR event rows yet fall back to their live snapshot.
         var events = await billingEventRepository.GetMrrChangeEventsUnfilteredAsync(cancellationToken);
-        var trendLatestMrr = events
+        var eventSubscriptionIds = events.Select(e => e.SubscriptionId).ToHashSet();
+        var latestEventMrr = events
             .GroupBy(e => e.SubscriptionId)
             .Sum(g => g.OrderByDescending(e => e.OccurredAt).First().NewAmount ?? 0m);
+        var eventlessSnapshotMrr = paidSubscriptions
+            .Where(s => !eventSubscriptionIds.Contains(s.Id))
+            .Sum(MrrCalculator.ForwardMrr);
+        var trendLatestMrr = latestEventMrr + eventlessSnapshotMrr;
 
         if (Math.Abs(kpiMrr - trendLatestMrr) < ToleranceAmount)
         {
