@@ -13,8 +13,8 @@ public sealed class BillingDriftDetectorTests
     public void Detect_WhenSubscriptionMatchesStripe_ShouldReturnEmpty()
     {
         // Arrange
-        var localSnapshot = new StripeSyncSnapshot(SubscriptionPlan.Premium, false, 99.00m, MockPaystackClient.MockStandardCurrency);
-        var stripeSnapshot = new StripeSyncSnapshot(SubscriptionPlan.Premium, false, 99.00m, MockPaystackClient.MockStandardCurrency);
+        var localSnapshot = new ProviderBillingSnapshot(SubscriptionPlan.Premium, false, 99.00m, MockPaystackClient.MockStandardCurrency);
+        var stripeSnapshot = new ProviderBillingSnapshot(SubscriptionPlan.Premium, false, 99.00m, MockPaystackClient.MockStandardCurrency);
 
         // Act
         var discrepancies = BillingDriftDetector.Detect(localSnapshot, stripeSnapshot, 0, 0);
@@ -27,8 +27,8 @@ public sealed class BillingDriftDetectorTests
     public void Detect_WhenPlanDiffers_ShouldReturnCriticalDiscrepancy()
     {
         // Arrange
-        var localSnapshot = new StripeSyncSnapshot(SubscriptionPlan.Standard, false, 49.00m, MockPaystackClient.MockStandardCurrency);
-        var stripeSnapshot = new StripeSyncSnapshot(SubscriptionPlan.Premium, false, 49.00m, MockPaystackClient.MockStandardCurrency);
+        var localSnapshot = new ProviderBillingSnapshot(SubscriptionPlan.Standard, false, 49.00m, MockPaystackClient.MockStandardCurrency);
+        var stripeSnapshot = new ProviderBillingSnapshot(SubscriptionPlan.Premium, false, 49.00m, MockPaystackClient.MockStandardCurrency);
 
         // Act
         var discrepancies = BillingDriftDetector.Detect(localSnapshot, stripeSnapshot, 0, 0);
@@ -46,8 +46,8 @@ public sealed class BillingDriftDetectorTests
     {
         // Regression: snapshot used to be built from the just-mutated subscription, making mismatch unreachable.
         // Arrange
-        var localSnapshot = new StripeSyncSnapshot(SubscriptionPlan.Standard, false, 49.00m, MockPaystackClient.MockStandardCurrency);
-        var stripeSnapshot = new StripeSyncSnapshot(SubscriptionPlan.Premium, false, 99.00m, MockPaystackClient.MockStandardCurrency);
+        var localSnapshot = new ProviderBillingSnapshot(SubscriptionPlan.Standard, false, 49.00m, MockPaystackClient.MockStandardCurrency);
+        var stripeSnapshot = new ProviderBillingSnapshot(SubscriptionPlan.Premium, false, 99.00m, MockPaystackClient.MockStandardCurrency);
 
         // Act
         var discrepancies = BillingDriftDetector.Detect(localSnapshot, stripeSnapshot, 0, 0);
@@ -56,17 +56,17 @@ public sealed class BillingDriftDetectorTests
         discrepancies.Should().HaveCount(2);
         discrepancies.Select(d => d.Kind).Should().AllBeEquivalentTo(DriftDiscrepancyKind.SubscriptionStateMismatch);
         discrepancies.Should().Contain(d =>
-            d.ExpectedValue == nameof(SubscriptionPlan.Premium) && d.ActualValue == nameof(SubscriptionPlan.Standard) && d.Description == "Plan differs between local subscription and Stripe."
+            d.ExpectedValue == nameof(SubscriptionPlan.Premium) && d.ActualValue == nameof(SubscriptionPlan.Standard) && d.Description == "Plan differs between local subscription and payment provider."
         );
-        discrepancies.Should().Contain(d => d.Description == "Current price amount differs between local subscription and Stripe.");
+        discrepancies.Should().Contain(d => d.Description == "Current price amount differs between local subscription and payment provider.");
     }
 
     [Fact]
     public void Detect_WhenCancelAtPeriodEndDiffers_ShouldReturnWarningDiscrepancy()
     {
         // Arrange
-        var localSnapshot = new StripeSyncSnapshot(SubscriptionPlan.Standard, false, 49.00m, MockPaystackClient.MockStandardCurrency);
-        var stripeSnapshot = new StripeSyncSnapshot(SubscriptionPlan.Standard, true, 49.00m, MockPaystackClient.MockStandardCurrency);
+        var localSnapshot = new ProviderBillingSnapshot(SubscriptionPlan.Standard, false, 49.00m, MockPaystackClient.MockStandardCurrency);
+        var stripeSnapshot = new ProviderBillingSnapshot(SubscriptionPlan.Standard, true, 49.00m, MockPaystackClient.MockStandardCurrency);
 
         // Act
         var discrepancies = BillingDriftDetector.Detect(localSnapshot, stripeSnapshot, 0, 0);
@@ -81,8 +81,8 @@ public sealed class BillingDriftDetectorTests
     public void Detect_WhenMultipleFieldsDiffer_ShouldReturnAllDiscrepancies()
     {
         // Arrange
-        var localSnapshot = new StripeSyncSnapshot(SubscriptionPlan.Standard, false, 49.00m, MockPaystackClient.MockStandardCurrency);
-        var stripeSnapshot = new StripeSyncSnapshot(SubscriptionPlan.Premium, false, 99.00m, "USD");
+        var localSnapshot = new ProviderBillingSnapshot(SubscriptionPlan.Standard, false, 49.00m, MockPaystackClient.MockStandardCurrency);
+        var stripeSnapshot = new ProviderBillingSnapshot(SubscriptionPlan.Premium, false, 99.00m, "USD");
 
         // Act
         var discrepancies = BillingDriftDetector.Detect(localSnapshot, stripeSnapshot, 0, 0);
@@ -96,8 +96,8 @@ public sealed class BillingDriftDetectorTests
     public void Detect_WhenPaymentTransactionsExistButNoBillingEvents_ShouldReturnMissingEventDiscrepancy()
     {
         // Arrange
-        var localSnapshot = new StripeSyncSnapshot(SubscriptionPlan.Premium, false, 99.00m, MockPaystackClient.MockStandardCurrency);
-        var stripeSnapshot = new StripeSyncSnapshot(SubscriptionPlan.Premium, false, 99.00m, MockPaystackClient.MockStandardCurrency);
+        var localSnapshot = new ProviderBillingSnapshot(SubscriptionPlan.Premium, false, 99.00m, MockPaystackClient.MockStandardCurrency);
+        var stripeSnapshot = new ProviderBillingSnapshot(SubscriptionPlan.Premium, false, 99.00m, MockPaystackClient.MockStandardCurrency);
 
         // Act
         var discrepancies = BillingDriftDetector.Detect(localSnapshot, stripeSnapshot, 1, 0);
@@ -112,8 +112,8 @@ public sealed class BillingDriftDetectorTests
     public void Detect_WhenPaymentTransactionsAndBillingEventsBothPresent_ShouldNotReturnMissingEventDiscrepancy()
     {
         // Arrange
-        var localSnapshot = new StripeSyncSnapshot(SubscriptionPlan.Premium, false, 99.00m, MockPaystackClient.MockStandardCurrency);
-        var stripeSnapshot = new StripeSyncSnapshot(SubscriptionPlan.Premium, false, 99.00m, MockPaystackClient.MockStandardCurrency);
+        var localSnapshot = new ProviderBillingSnapshot(SubscriptionPlan.Premium, false, 99.00m, MockPaystackClient.MockStandardCurrency);
+        var stripeSnapshot = new ProviderBillingSnapshot(SubscriptionPlan.Premium, false, 99.00m, MockPaystackClient.MockStandardCurrency);
 
         // Act
         var discrepancies = BillingDriftDetector.Detect(localSnapshot, stripeSnapshot, 1, 1);
@@ -123,7 +123,7 @@ public sealed class BillingDriftDetectorTests
     }
 
     [Fact]
-    public void StripeSyncSnapshot_FromSubscription_ShouldCaptureCurrentLocalState()
+    public void ProviderBillingSnapshot_FromSubscription_ShouldCaptureCurrentLocalState()
     {
         // Arrange
         var subscription = Subscription.Create(TenantId.NewId());
@@ -131,7 +131,7 @@ public sealed class BillingDriftDetectorTests
         subscription.SetCancellation(true, null, null);
 
         // Act
-        var snapshot = StripeSyncSnapshot.FromSubscription(subscription);
+        var snapshot = ProviderBillingSnapshot.FromSubscription(subscription);
 
         // Assert
         snapshot.Plan.Should().Be(SubscriptionPlan.Premium);
@@ -148,8 +148,8 @@ public sealed class BillingDriftDetectorTests
         // higher current price). The cancel-then-reschedule pair in a single sync window left scheduled_price
         // _amount NULL, motivating this check.
         // Arrange
-        var localSnapshot = new StripeSyncSnapshot(SubscriptionPlan.Premium, false, 99.00m, MockPaystackClient.MockStandardCurrency, SubscriptionPlan.Standard);
-        var stripeSnapshot = new StripeSyncSnapshot(SubscriptionPlan.Premium, false, 99.00m, MockPaystackClient.MockStandardCurrency);
+        var localSnapshot = new ProviderBillingSnapshot(SubscriptionPlan.Premium, false, 99.00m, MockPaystackClient.MockStandardCurrency, SubscriptionPlan.Standard);
+        var stripeSnapshot = new ProviderBillingSnapshot(SubscriptionPlan.Premium, false, 99.00m, MockPaystackClient.MockStandardCurrency);
 
         // Act
         var discrepancies = BillingDriftDetector.Detect(localSnapshot, stripeSnapshot, 0, 0);
@@ -166,8 +166,8 @@ public sealed class BillingDriftDetectorTests
     {
         // Happy path: scheduled plan and price are both set.
         // Arrange
-        var localSnapshot = new StripeSyncSnapshot(SubscriptionPlan.Premium, false, 99.00m, MockPaystackClient.MockStandardCurrency, SubscriptionPlan.Standard, 29.00m);
-        var stripeSnapshot = new StripeSyncSnapshot(SubscriptionPlan.Premium, false, 99.00m, MockPaystackClient.MockStandardCurrency);
+        var localSnapshot = new ProviderBillingSnapshot(SubscriptionPlan.Premium, false, 99.00m, MockPaystackClient.MockStandardCurrency, SubscriptionPlan.Standard, 29.00m);
+        var stripeSnapshot = new ProviderBillingSnapshot(SubscriptionPlan.Premium, false, 99.00m, MockPaystackClient.MockStandardCurrency);
 
         // Act
         var discrepancies = BillingDriftDetector.Detect(localSnapshot, stripeSnapshot, 0, 0);

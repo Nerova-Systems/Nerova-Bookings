@@ -98,8 +98,8 @@ msgstr "Kontovækst"
 
 #. placeholder {0}: result.driftDiscrepancyCount
 #. placeholder {1}: formatDate(result.reconciledAt)
-msgid "Account has {0} drift discrepancies. Last reconciled at {1}. If standard reconcile cannot clear the drift, disaster recovery from archived Stripe events is available as a last resort."
-msgstr "Kontoen har {0} afvigelser. Sidst afstemt {1}. Hvis standard-afstemning ikke kan rydde afvigelserne, er katastrofegendannelse fra arkiverede Stripe-events tilgængelig som sidste udvej."
+msgid "Account has {0} drift discrepancies. Last reconciled at {1}."
+msgstr ""
 
 msgid "Account preview"
 msgstr "Kontoforhåndsvisning"
@@ -151,11 +151,6 @@ msgstr "Beløb"
 
 msgid "An unexpected error occurred while processing your request."
 msgstr "Der opstod en uventet fejl ved behandlingen."
-
-#. placeholder {0}: result.billingEventsAppended
-#. placeholder {1}: formatDate(result.reconciledAt)
-msgid "Appended {0} new billing events. Last reconciled at {1}."
-msgstr "Tilføjede {0} nye faktureringshændelser. Sidst afstemt {1}."
 
 msgid "Authoritative log of subscription, payment, and billing transitions across all accounts."
 msgstr "Autoritativ log over abonnements-, betalings- og faktureringsændringer på tværs af alle konti."
@@ -515,8 +510,8 @@ msgstr "Ingen login-historik"
 msgid "No matching users"
 msgstr "Ingen matchende brugere"
 
-msgid "No new billing events were appended. Account state matches Stripe."
-msgstr "Ingen nye faktureringshændelser blev tilføjet. Kontotilstand matcher Stripe."
+msgid "No new billing events were appended. Account state matches Paystack."
+msgstr "Ingen nye faktureringshændelser blev tilføjet. Kontotilstand matcher Paystack."
 
 msgid "No owners"
 msgstr "Ingen ejere"
@@ -713,20 +708,26 @@ msgstr "Afstemning fuldført med afvigelser fundet"
 msgid "Reconcile found {0} archived events older than Stripe's 30-day window, from {1} to {2}. This is a best-effort recovery from locally stored payloads and may produce incorrect rows. Only run it when standard Reconcile with Stripe has been tried and did not clear the drift."
 msgstr "Afstemning fandt {0} arkiverede events ældre end Stripes 30-dages vindue, fra {1} til {2}. Dette er en bedst muligt-gendannelse fra lokalt gemte payloads og kan producere forkerte rækker. Kør kun denne handling, når standard Afstem med Stripe er forsøgt og ikke ryddede afvigelserne."
 
-msgid "Reconcile rebuilds this tenant's subscription and billing events from Stripe directly using the events.list API (the last 30 days). If the drift is not cleared afterwards, disaster recovery from the locally archived Stripe payloads is available as a last resort."
-msgstr "Afstemning genopbygger denne kontos abonnement og faktureringshændelser direkte fra Stripe via events.list-API'et (de seneste 30 dage). Hvis afvigelserne ikke er ryddet bagefter, er katastrofegendannelse fra de lokalt arkiverede Stripe-payloads tilgængelig som sidste udvej."
+msgid "Reconcile verifies this tenant's pending Paystack payment attempts, processes missed webhook outcomes, and appends any missing billing events."
+msgstr "Afstemning verificerer denne kontos afventende Paystack-betalingsforsøg, behandler manglende webhook-resultater og tilføjer manglende faktureringshændelser."
 
-msgid "Reconcile with Stripe"
-msgstr "Afstem med Stripe"
+msgid "Reconcile with Paystack"
+msgstr "Afstem med Paystack"
 
-msgid "Reconcile with Stripe?"
-msgstr "Afstem med Stripe?"
+msgid "Reconcile with Paystack?"
+msgstr "Afstem med Paystack?"
 
 msgid "Reconciling..."
 msgstr "Afstemmer..."
 
 msgid "Records will appear here as accounts subscribe and Stripe webhooks are processed."
 msgstr "Posteringer vises her, når konti abonnerer, og Stripe-webhooks behandles."
+
+#. placeholder {0}: result.recoveredPaymentAttempts
+#. placeholder {1}: result.billingEventsAppended
+#. placeholder {2}: formatDate(result.reconciledAt)
+msgid "Recovered {0} payment attempts and appended {1} new billing events. Last reconciled at {2}."
+msgstr ""
 
 msgid "Refunded"
 msgstr "Refunderet"

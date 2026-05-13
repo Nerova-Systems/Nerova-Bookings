@@ -4,23 +4,23 @@ using Account.Features.Subscriptions.Domain;
 namespace Account.Features.Subscriptions.Shared;
 
 /// <summary>
-///     Pure function that detects drift between the local subscription state and Stripe's authoritative state.
-///     Runs inline at the end of every Stripe sync (per-customer) so drift is surfaced immediately on the next
+///     Pure function that detects drift between the local subscription state and the provider-visible state.
+///     Runs inline at the end of provider sync/reconcile checks so drift is surfaced immediately on the next
 ///     webhook for that account, with no scheduled job required.
 ///     The detector covers <see cref="DriftDiscrepancyKind.SubscriptionStateMismatch" /> — comparing
 ///     `Plan`, `CancelAtPeriodEnd`, `CurrentPriceAmount`, `CurrentPriceCurrency` between the local snapshot
-///     captured before sync mutations and the Stripe snapshot captured from Stripe's response. These fields
+///     captured before sync mutations and the provider snapshot captured from the payment provider response. These fields
 ///     drive customer access and are operationally the most important to keep aligned. It also flags a coarse
 ///     <see cref="DriftDiscrepancyKind.MissingEvent" /> when there are stored PaymentTransactions but zero
 ///     BillingEvent rows for the subscription — invoices made it to the local PaymentTransactions array
 ///     without a corresponding event row, indicating a bug in the event-emission pipeline. Per-event
 ///     comparison (<see cref="DriftDiscrepancyKind.ExtraEvent" /> / <see cref="DriftDiscrepancyKind.FieldDisagree" />)
-///     requires a deterministic `ComputeExpectedEvents(StripeSyncSnapshot)` helper that consumes full Stripe
+///     requires a deterministic `ComputeExpectedEvents(ProviderBillingSnapshot)` helper that consumes full provider
 ///     history; this is a follow-up extension that plugs into the same return type.
 /// </summary>
 public static class BillingDriftDetector
 {
-    public static ImmutableArray<DriftDiscrepancy> Detect(StripeSyncSnapshot localSnapshot, StripeSyncSnapshot stripeSnapshot, int paymentTransactionCount, int billingEventCount)
+    public static ImmutableArray<DriftDiscrepancy> Detect(ProviderBillingSnapshot localSnapshot, ProviderBillingSnapshot providerSnapshot, int paymentTransactionCount, int billingEventCount)
     {
         var discrepancies = ImmutableArray.CreateBuilder<DriftDiscrepancy>();
 
@@ -38,49 +38,49 @@ public static class BillingDriftDetector
             );
         }
 
-        if (localSnapshot.Plan != stripeSnapshot.Plan)
+        if (localSnapshot.Plan != providerSnapshot.Plan)
         {
             discrepancies.Add(new DriftDiscrepancy(
                     DriftDiscrepancyKind.SubscriptionStateMismatch,
-                    "Plan differs between local subscription and Stripe.",
+                    "Plan differs between local subscription and payment provider.",
                     DriftSeverity.Critical,
-                    ExpectedValue: stripeSnapshot.Plan.ToString(),
+                    ExpectedValue: providerSnapshot.Plan.ToString(),
                     ActualValue: localSnapshot.Plan.ToString()
                 )
             );
         }
 
-        if (localSnapshot.CancelAtPeriodEnd != stripeSnapshot.CancelAtPeriodEnd)
+        if (localSnapshot.CancelAtPeriodEnd != providerSnapshot.CancelAtPeriodEnd)
         {
             discrepancies.Add(new DriftDiscrepancy(
                     DriftDiscrepancyKind.SubscriptionStateMismatch,
-                    "Cancel-at-period-end differs between local subscription and Stripe.",
+                    "Cancel-at-period-end differs between local subscription and payment provider.",
                     DriftSeverity.Warning,
-                    ExpectedValue: stripeSnapshot.CancelAtPeriodEnd.ToString(),
+                    ExpectedValue: providerSnapshot.CancelAtPeriodEnd.ToString(),
                     ActualValue: localSnapshot.CancelAtPeriodEnd.ToString()
                 )
             );
         }
 
-        if (localSnapshot.CurrentPriceAmount != stripeSnapshot.CurrentPriceAmount)
+        if (localSnapshot.CurrentPriceAmount != providerSnapshot.CurrentPriceAmount)
         {
             discrepancies.Add(new DriftDiscrepancy(
                     DriftDiscrepancyKind.SubscriptionStateMismatch,
-                    "Current price amount differs between local subscription and Stripe.",
+                    "Current price amount differs between local subscription and payment provider.",
                     DriftSeverity.Critical,
-                    ExpectedValue: stripeSnapshot.CurrentPriceAmount?.ToString(),
+                    ExpectedValue: providerSnapshot.CurrentPriceAmount?.ToString(),
                     ActualValue: localSnapshot.CurrentPriceAmount?.ToString()
                 )
             );
         }
 
-        if (localSnapshot.CurrentPriceCurrency != stripeSnapshot.CurrentPriceCurrency)
+        if (localSnapshot.CurrentPriceCurrency != providerSnapshot.CurrentPriceCurrency)
         {
             discrepancies.Add(new DriftDiscrepancy(
                     DriftDiscrepancyKind.SubscriptionStateMismatch,
-                    "Current price currency differs between local subscription and Stripe.",
+                    "Current price currency differs between local subscription and payment provider.",
                     DriftSeverity.Warning,
-                    ExpectedValue: stripeSnapshot.CurrentPriceCurrency,
+                    ExpectedValue: providerSnapshot.CurrentPriceCurrency,
                     ActualValue: localSnapshot.CurrentPriceCurrency
                 )
             );
@@ -107,13 +107,12 @@ public static class BillingDriftDetector
 
 /// <summary>
 ///     Snapshot of subscription state captured at a point in time. Used twice during drift detection: once for
-///     the local subscription state captured before any sync mutations are applied, and once for Stripe's
-///     authoritative view captured from the SubscriptionSyncResult returned by the Stripe client. Comparing
-///     the two surfaces real drift even though the local subscription is mutated to match Stripe later in the
-///     same sync. The shape is also the seam where additional Stripe data (full invoice history, charge
+///     the local subscription state captured before any sync mutations are applied, and once for the payment
+///     provider's authoritative view captured from the provider client. Comparing the two surfaces real drift.
+///     The shape is also the seam where additional provider data (full invoice history, charge
 ///     history with refunds, scheduled-phase data) plugs in for the BillingEvent-comparison extension.
 /// </summary>
-public sealed record StripeSyncSnapshot(
+public sealed record ProviderBillingSnapshot(
     SubscriptionPlan Plan,
     bool CancelAtPeriodEnd,
     decimal? CurrentPriceAmount,
@@ -122,9 +121,9 @@ public sealed record StripeSyncSnapshot(
     decimal? ScheduledPriceAmount = null
 )
 {
-    public static StripeSyncSnapshot FromSubscription(Subscription subscription)
+    public static ProviderBillingSnapshot FromSubscription(Subscription subscription)
     {
-        return new StripeSyncSnapshot(
+        return new ProviderBillingSnapshot(
             subscription.Plan,
             subscription.CancelAtPeriodEnd,
             subscription.CurrentPriceAmount,

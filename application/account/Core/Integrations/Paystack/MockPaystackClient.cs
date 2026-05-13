@@ -180,10 +180,11 @@ public sealed class MockPaystackClient(IConfiguration configuration, TimeProvide
     {
         EnsureEnabled();
         var now = timeProvider.GetUtcNow();
-        return Task.FromResult<PaymentTransaction[]?>([
-                new PaymentTransaction(PaymentTransactionId.NewId(), 29.99m, 29.99m, 0m, MockStandardCurrency, PaymentTransactionStatus.Succeeded, now, null, null, null)
-            ]
-        );
+        var transactions = state.VerifiedTransactions.Values
+            .Where(t => t is { Paid: true, CustomerId: not null } && t.CustomerId == paystackCustomerId)
+            .Select(t => new PaymentTransaction(PaymentTransactionId.NewId(), t.Amount, t.Amount, 0m, t.Currency, PaymentTransactionStatus.Succeeded, now, null, null, null))
+            .ToArray();
+        return Task.FromResult<PaymentTransaction[]?>(transactions);
     }
 
     public static string GetMockCustomerCode(long tenantId)

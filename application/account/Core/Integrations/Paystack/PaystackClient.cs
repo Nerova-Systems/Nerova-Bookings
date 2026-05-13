@@ -283,9 +283,36 @@ public sealed class PaystackClient(IConfiguration configuration, IHttpClientFact
         return catalogItem is null ? null : new CheckoutPreviewResult(catalogItem.UnitAmount, catalogItem.Currency.ToUpperInvariant(), 0m);
     }
 
-    public Task<PaymentTransaction[]?> SyncPaymentTransactionsAsync(PaystackCustomerId paystackCustomerId, CancellationToken cancellationToken)
+    public async Task<PaymentTransaction[]?> SyncPaymentTransactionsAsync(PaystackCustomerId paystackCustomerId, CancellationToken cancellationToken)
     {
-        return Task.FromResult<PaymentTransaction[]?>([]);
+        var response = await SendAsync(HttpMethod.Get, $"/transaction?customer={Uri.EscapeDataString(paystackCustomerId.Value)}&perPage=100", null, cancellationToken);
+        if (response is null) return null;
+
+        if (!TryGet(response.RootElement, ["data"], out var data) || data.ValueKind != JsonValueKind.Array)
+        {
+            logger.LogWarning("Paystack transaction list response did not include a data array for customer '{CustomerId}'", paystackCustomerId);
+            return null;
+        }
+
+        var transactions = new List<PaymentTransaction>();
+        foreach (var transaction in data.EnumerateArray())
+        {
+            var customerCode = GetString(transaction, "customer", "customer_code");
+            if (!string.Equals(customerCode, paystackCustomerId.Value, StringComparison.OrdinalIgnoreCase)) continue;
+
+            var status = GetString(transaction, "status");
+            if (!string.Equals(status, "success", StringComparison.OrdinalIgnoreCase)) continue;
+
+            var amount = FromSubunit(GetLong(transaction, "amount") ?? 0);
+            var currency = GetString(transaction, "currency")?.ToUpperInvariant() ?? "USD";
+            var paidAtText = GetString(transaction, "paid_at") ?? GetString(transaction, "created_at");
+            var paidAt = DateTimeOffset.TryParse(paidAtText, CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal | DateTimeStyles.AdjustToUniversal, out var parsedPaidAt)
+                ? parsedPaidAt
+                : DateTimeOffset.UtcNow;
+            transactions.Add(new PaymentTransaction(PaymentTransactionId.NewId(), amount, amount, 0m, currency, PaymentTransactionStatus.Succeeded, paidAt, null, null, null));
+        }
+
+        return [.. transactions];
     }
 
     private async Task<PriceCatalogItem?> GetCatalogItemAsync(SubscriptionPlan plan, CancellationToken cancellationToken)

@@ -48,9 +48,13 @@ public sealed class TenantsEndpoints : IEndpoints
             => await mediator.Send(query with { Id = id })
         ).Produces<TenantPaymentHistoryResponse>();
 
-        group.MapPost("/{id}/reconcile-with-stripe", async Task<ApiResult<ReconcileTenantWithStripeResponse>> (TenantId id, IMediator mediator)
-            => await mediator.Send(new ReconcileTenantWithStripeCommand { TenantId = id })
-        ).Produces<ReconcileTenantWithStripeResponse>().RequireAuthorization(BackOfficeIdentityDefaults.AdminPolicyName);
+        group.MapPost("/{id}/reconcile-with-paystack", async Task<ApiResult<ReconcileTenantWithPaystackResponse>> (TenantId id, IMediator mediator)
+            => await mediator.Send(new ReconcileTenantWithPaystackCommand { TenantId = id })
+        ).Produces<ReconcileTenantWithPaystackResponse>().RequireAuthorization(BackOfficeIdentityDefaults.AdminPolicyName);
+
+        group.MapPost("/{id}/reconcile-with-stripe", async Task<ApiResult<ReconcileTenantWithPaystackResponse>> (TenantId id, IMediator mediator)
+            => await mediator.Send(new ReconcileTenantWithPaystackCommand { TenantId = id })
+        ).Produces<ReconcileTenantWithPaystackResponse>().RequireAuthorization(BackOfficeIdentityDefaults.AdminPolicyName);
 
         group.MapPost("/{id}/replay-archived-stripe-events", async Task<ApiResult<ReplayArchivedTenantStripeEventsResponse>> (TenantId id, IMediator mediator)
             => await mediator.Send(new ReplayArchivedTenantStripeEventsCommand { TenantId = id })

@@ -19,6 +19,7 @@ public sealed class ProcessPendingPaystackEvents(
     ISubscriptionRepository subscriptionRepository,
     IPaystackEventRepository paystackEventRepository,
     IPaystackPaymentAttemptRepository paystackPaymentAttemptRepository,
+    IBillingEventRepository billingEventRepository,
     ITenantRepository tenantRepository,
     PaystackClientFactory paystackClientFactory,
     TimeProvider timeProvider,
@@ -27,7 +28,7 @@ public sealed class ProcessPendingPaystackEvents(
     ILogger<ProcessPendingPaystackEvents> logger
 )
 {
-    public async Task ExecuteAsync(PaystackCustomerId paystackCustomerId, CancellationToken cancellationToken)
+    public async Task<PaystackReconciliationResult> ExecuteAsync(PaystackCustomerId paystackCustomerId, CancellationToken cancellationToken)
     {
         var isSqlite = dbContext.Database.ProviderName == "Microsoft.EntityFrameworkCore.Sqlite";
         await using var transaction = isSqlite
@@ -39,28 +40,78 @@ public sealed class ProcessPendingPaystackEvents(
         {
             logger.LogWarning("Subscription not found for Paystack customer '{PaystackCustomerId}', events will be retried on next webhook", paystackCustomerId);
             await transaction.RollbackAsync(cancellationToken);
-            return;
+            return PaystackReconciliationResult.Empty;
         }
 
         var tenant = (await tenantRepository.GetByIdUnfilteredAsync(subscription.TenantId, cancellationToken))!;
         var pendingEvents = await paystackEventRepository.GetPendingByPaystackCustomerIdWithLockAsync(paystackCustomerId, cancellationToken);
+        var existingBillingEventIds = await billingEventRepository.GetExistingStripeEventIdsUnfilteredAsync(subscription.Id, cancellationToken);
+        var processedReferences = new HashSet<string>(StringComparer.Ordinal);
+        var billingEventsAppended = 0;
+        var recoveredPaymentAttempts = 0;
+        var paystackClient = paystackClientFactory.GetClient();
 
-        if (pendingEvents.Length > 0)
+        foreach (var pendingEvent in pendingEvents)
         {
-            var paystackClient = paystackClientFactory.GetClient();
-            foreach (var pendingEvent in pendingEvents)
+            var result = await ProcessPendingEventAsync(tenant, subscription, pendingEvent, paystackClient, existingBillingEventIds, cancellationToken);
+            if (result.Reference is not null)
             {
-                await ProcessPendingEventAsync(tenant, subscription, pendingEvent, paystackClient, cancellationToken);
+                processedReferences.Add(result.Reference);
             }
+
+            billingEventsAppended += result.BillingEventsAppended;
+        }
+
+        var pendingAttempts = await paystackPaymentAttemptRepository.GetPendingBySubscriptionIdWithLockUnfilteredAsync(subscription.Id, cancellationToken);
+        foreach (var pendingAttempt in pendingAttempts.Where(a => a.PaystackCustomerId == paystackCustomerId && !processedReferences.Contains(a.PaystackReference)))
+        {
+            var result = await ProcessPendingAttemptAsync(tenant, subscription, pendingAttempt, paystackClient, existingBillingEventIds, cancellationToken);
+            billingEventsAppended += result.BillingEventsAppended;
+            recoveredPaymentAttempts += result.PaymentAttemptRecovered ? 1 : 0;
         }
 
         await dbContext.SaveChangesAsync(cancellationToken);
         await transaction.CommitAsync(cancellationToken);
 
         SendTelemetryEvents(tenant, subscription);
+        return new PaystackReconciliationResult(billingEventsAppended, recoveredPaymentAttempts);
     }
 
-    private async Task ProcessPendingEventAsync(Tenant tenant, Subscription subscription, PaystackEvent pendingEvent, IPaystackClient paystackClient, CancellationToken cancellationToken)
+    public async Task<bool> DetectAsync(PaystackCustomerId paystackCustomerId, CancellationToken cancellationToken)
+    {
+        var subscription = await subscriptionRepository.GetByPaystackCustomerIdUnfilteredAsync(paystackCustomerId, cancellationToken);
+        if (subscription is null)
+        {
+            logger.LogWarning("Subscription not found for Paystack customer '{PaystackCustomerId}' during drift detection", paystackCustomerId);
+            return false;
+        }
+
+        var paystackClient = paystackClientFactory.GetClient();
+        var customerBilling = await paystackClient.GetCustomerBillingInfoAsync(paystackCustomerId, cancellationToken);
+        if (customerBilling is null)
+        {
+            logger.LogWarning("Paystack customer view unavailable for customer '{PaystackCustomerId}' during drift detection", paystackCustomerId);
+            return false;
+        }
+
+        var localSnapshot = ProviderBillingSnapshot.FromSubscription(subscription);
+        var providerSnapshot = customerBilling.IsCustomerDeleted
+            ? new ProviderBillingSnapshot(SubscriptionPlan.Basis, false, null, null)
+            : localSnapshot;
+        var billingEvents = await billingEventRepository.GetBySubscriptionIdUnfilteredAsync(subscription.Id, cancellationToken);
+        var discrepancies = BillingDriftDetector.Detect(localSnapshot, providerSnapshot, subscription.PaymentTransactions.Length, billingEvents.Length);
+        await subscriptionRepository.UpdateDriftStatusAsync(subscription.Id, !discrepancies.IsDefaultOrEmpty, timeProvider.GetUtcNow(), discrepancies, cancellationToken);
+        return true;
+    }
+
+    private async Task<PaystackAttemptProcessingResult> ProcessPendingEventAsync(
+        Tenant tenant,
+        Subscription subscription,
+        PaystackEvent pendingEvent,
+        IPaystackClient paystackClient,
+        HashSet<string> existingBillingEventIds,
+        CancellationToken cancellationToken
+    )
     {
         var now = timeProvider.GetUtcNow();
         pendingEvent.SetTenantId(subscription.TenantId);
@@ -69,46 +120,73 @@ public sealed class ProcessPendingPaystackEvents(
         if (pendingEvent.PaystackReference is null)
         {
             MarkEventFailed(pendingEvent, now, "Paystack webhook did not include a transaction reference.");
-            return;
+            return PaystackAttemptProcessingResult.Empty;
         }
 
         var paymentAttempt = await paystackPaymentAttemptRepository.GetByReferenceWithLockUnfilteredAsync(pendingEvent.PaystackReference, cancellationToken);
         if (paymentAttempt is null)
         {
             MarkEventFailed(pendingEvent, now, "Paystack payment attempt was not found.");
-            return;
+            return new PaystackAttemptProcessingResult(pendingEvent.PaystackReference, 0, false);
         }
 
         if (paymentAttempt.SubscriptionId != subscription.Id || paymentAttempt.PaystackCustomerId != subscription.PaystackCustomerId)
         {
             MarkEventFailed(pendingEvent, now, "Paystack payment attempt does not match this subscription.");
-            return;
+            return new PaystackAttemptProcessingResult(paymentAttempt.PaystackReference, 0, false);
         }
 
         if (paymentAttempt.Status != PaystackPaymentAttemptStatus.Pending)
         {
             MarkEventProcessed(pendingEvent, subscription, now);
-            return;
+            return new PaystackAttemptProcessingResult(paymentAttempt.PaystackReference, 0, false);
         }
+
+        var result = await ProcessPendingAttemptAsync(tenant, subscription, paymentAttempt, paystackClient, existingBillingEventIds, cancellationToken);
+        if (result.PaymentAttemptRecovered)
+        {
+            MarkEventProcessed(pendingEvent, subscription, now);
+        }
+        else
+        {
+            MarkEventFailed(pendingEvent, now, paymentAttempt.FailureReason ?? "Paystack payment could not be reconciled.");
+        }
+
+        return result with { PaymentAttemptRecovered = false };
+    }
+
+    private async Task<PaystackAttemptProcessingResult> ProcessPendingAttemptAsync(
+        Tenant tenant,
+        Subscription subscription,
+        PaystackPaymentAttempt paymentAttempt,
+        IPaystackClient paystackClient,
+        HashSet<string> existingBillingEventIds,
+        CancellationToken cancellationToken
+    )
+    {
+        var now = timeProvider.GetUtcNow();
+        var previousPlan = subscription.Plan;
+        var previousPriceAmount = subscription.CurrentPriceAmount;
 
         var verified = await paystackClient.VerifyTransactionAsync(paymentAttempt.PaystackReference, paymentAttempt.Purpose, cancellationToken);
         var validationError = ValidateVerifiedTransaction(subscription, paymentAttempt, verified);
         if (validationError is not null)
         {
-            MarkPaymentAttemptFailed(paymentAttempt, pendingEvent, now, validationError);
-            return;
+            MarkPaymentAttemptFailed(paymentAttempt, now, validationError);
+            return new PaystackAttemptProcessingResult(paymentAttempt.PaystackReference, 0, false);
         }
 
         var processingError = await ApplySuccessfulPaymentAsync(tenant, subscription, paymentAttempt, verified!, paystackClient, now, cancellationToken);
         if (processingError is not null)
         {
-            MarkPaymentAttemptFailed(paymentAttempt, pendingEvent, now, processingError);
-            return;
+            MarkPaymentAttemptFailed(paymentAttempt, now, processingError);
+            return new PaystackAttemptProcessingResult(paymentAttempt.PaystackReference, 0, false);
         }
 
         paymentAttempt.MarkSucceeded(now);
         paystackPaymentAttemptRepository.Update(paymentAttempt);
-        MarkEventProcessed(pendingEvent, subscription, now);
+        var billingEventsAppended = await AppendBillingEventAsync(subscription, paymentAttempt, verified!, previousPlan, previousPriceAmount, now, existingBillingEventIds, cancellationToken);
+        return new PaystackAttemptProcessingResult(paymentAttempt.PaystackReference, billingEventsAppended, true);
     }
 
     private static string? ValidateVerifiedTransaction(Subscription subscription, PaystackPaymentAttempt paymentAttempt, VerifiedPaystackTransactionResult? verified)
@@ -166,6 +244,7 @@ public sealed class ProcessPendingPaystackEvents(
         {
             PaystackPaymentPurpose.Subscribe or PaystackPaymentPurpose.Upgrade => ApplySuccessfulSubscriptionPayment(tenant, subscription, paymentAttempt, verified, now),
             PaystackPaymentPurpose.Retry => ApplySuccessfulRetryPayment(tenant, subscription, verified, now),
+            PaystackPaymentPurpose.Renewal => ApplySuccessfulRenewalPayment(tenant, subscription, paymentAttempt, verified, now),
             PaystackPaymentPurpose.PaymentMethodAuthorization => await ApplySuccessfulPaymentMethodAuthorizationAsync(subscription, verified, paystackClient, now, cancellationToken),
             _ => "Unsupported Paystack payment purpose."
         };
@@ -201,6 +280,26 @@ public sealed class ProcessPendingPaystackEvents(
             events.CollectEvent(new SubscriptionUpgraded(subscription.Id, previousPlan, plan, 0, previousPriceAmount ?? 0m, verified.Amount, verified.Amount - (previousPriceAmount ?? 0m), verified.Currency));
         }
 
+        return null;
+    }
+
+    private string? ApplySuccessfulRenewalPayment(Tenant tenant, Subscription subscription, PaystackPaymentAttempt paymentAttempt, VerifiedPaystackTransactionResult verified, DateTimeOffset now)
+    {
+        var nextBillingAt = now.AddMonths(1);
+        var renewalPlan = paymentAttempt.Plan ?? subscription.Plan;
+        subscription.StartBillingPeriod(renewalPlan, verified.Amount, verified.Currency, now, nextBillingAt, verified.PaymentMethod);
+        subscription.ClearPaymentFailure();
+        subscription.SetPaymentTransactions([
+                .. subscription.PaymentTransactions,
+                new PaymentTransaction(PaymentTransactionId.NewId(), verified.Amount, verified.Amount, 0m, verified.Currency, PaymentTransactionStatus.Succeeded, now, null, null, null)
+            ]
+        );
+
+        tenant.UpdatePlan(renewalPlan);
+        tenant.Activate();
+        tenantRepository.Update(tenant);
+        subscriptionRepository.Update(subscription);
+        events.CollectEvent(new SubscriptionRenewed(subscription.Id, renewalPlan, verified.Amount, verified.Amount, verified.Currency));
         return null;
     }
 
@@ -249,11 +348,72 @@ public sealed class ProcessPendingPaystackEvents(
         return null;
     }
 
-    private void MarkPaymentAttemptFailed(PaystackPaymentAttempt paymentAttempt, PaystackEvent pendingEvent, DateTimeOffset now, string error)
+    private async Task<int> AppendBillingEventAsync(
+        Subscription subscription,
+        PaystackPaymentAttempt paymentAttempt,
+        VerifiedPaystackTransactionResult verified,
+        SubscriptionPlan previousPlan,
+        decimal? previousPriceAmount,
+        DateTimeOffset now,
+        HashSet<string> existingBillingEventIds,
+        CancellationToken cancellationToken
+    )
+    {
+        var providerEventId = $"paystack:{paymentAttempt.PaystackReference}:{paymentAttempt.Purpose}";
+        if (existingBillingEventIds.Contains(providerEventId)) return 0;
+
+        var eventType = GetBillingEventType(paymentAttempt.Purpose, previousPlan, paymentAttempt.Plan);
+        var previousAmount = eventType is BillingEventType.SubscriptionCreated ? null : previousPriceAmount;
+        var newAmount = eventType is BillingEventType.PaymentMethodUpdated or BillingEventType.PaymentRecovered ? null : subscription.CurrentPriceAmount;
+        decimal? amountDelta = previousAmount is not null && newAmount is not null
+            ? newAmount.Value - previousAmount.Value
+            : eventType is BillingEventType.SubscriptionCreated
+                ? verified.Amount
+                : null;
+        var committedMrr = subscription.CancelAtPeriodEnd ? 0m : subscription.CurrentPriceAmount ?? 0m;
+        var billingEvent = BillingEvent.Create(
+            subscription.TenantId,
+            subscription.Id,
+            providerEventId,
+            eventType,
+            now,
+            committedMrr,
+            eventType is BillingEventType.SubscriptionCreated ? null : previousPlan,
+            paymentAttempt.Plan,
+            previousAmount,
+            newAmount,
+            amountDelta,
+            subscription.CurrentPriceCurrency ?? verified.Currency
+        );
+
+        await billingEventRepository.AddAsync(billingEvent, cancellationToken);
+        existingBillingEventIds.Add(providerEventId);
+        if (eventType is BillingEventType.SubscriptionCreated)
+        {
+            subscription.AdvanceSubscribedSinceBackwardFromBillingEvent(now);
+            subscriptionRepository.Update(subscription);
+        }
+
+        return 1;
+    }
+
+    private static BillingEventType GetBillingEventType(PaystackPaymentPurpose purpose, SubscriptionPlan previousPlan, SubscriptionPlan? plan)
+    {
+        return purpose switch
+        {
+            PaystackPaymentPurpose.Subscribe when previousPlan == SubscriptionPlan.Basis => BillingEventType.SubscriptionCreated,
+            PaystackPaymentPurpose.Upgrade when plan is not null && plan.Value.IsUpgradeFrom(previousPlan) => BillingEventType.SubscriptionUpgraded,
+            PaystackPaymentPurpose.Renewal => BillingEventType.SubscriptionRenewed,
+            PaystackPaymentPurpose.Retry => BillingEventType.PaymentRecovered,
+            PaystackPaymentPurpose.PaymentMethodAuthorization => BillingEventType.PaymentMethodUpdated,
+            _ => BillingEventType.NoOp
+        };
+    }
+
+    private void MarkPaymentAttemptFailed(PaystackPaymentAttempt paymentAttempt, DateTimeOffset now, string error)
     {
         paymentAttempt.MarkFailed(now, error);
         paystackPaymentAttemptRepository.Update(paymentAttempt);
-        MarkEventFailed(pendingEvent, now, error);
     }
 
     private void MarkEventFailed(PaystackEvent pendingEvent, DateTimeOffset now, string error)
@@ -281,4 +441,14 @@ public sealed class ProcessPendingPaystackEvents(
             logger.LogInformation("Telemetry: {EventName} {EventProperties}", telemetryEvent.GetType().Name, string.Join(", ", telemetryEvent.Properties.Select(p => $"{p.Key}={p.Value}")));
         }
     }
+}
+
+public sealed record PaystackReconciliationResult(int BillingEventsAppended, int RecoveredPaymentAttempts)
+{
+    public static PaystackReconciliationResult Empty { get; } = new(0, 0);
+}
+
+internal sealed record PaystackAttemptProcessingResult(string? Reference, int BillingEventsAppended, bool PaymentAttemptRecovered)
+{
+    public static PaystackAttemptProcessingResult Empty { get; } = new(null, 0, false);
 }

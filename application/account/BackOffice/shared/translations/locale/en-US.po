@@ -98,8 +98,8 @@ msgstr "Account growth"
 
 #. placeholder {0}: result.driftDiscrepancyCount
 #. placeholder {1}: formatDate(result.reconciledAt)
-msgid "Account has {0} drift discrepancies. Last reconciled at {1}. If standard reconcile cannot clear the drift, disaster recovery from archived Stripe events is available as a last resort."
-msgstr "Account has {0} drift discrepancies. Last reconciled at {1}. If standard reconcile cannot clear the drift, disaster recovery from archived Stripe events is available as a last resort."
+msgid "Account has {0} drift discrepancies. Last reconciled at {1}."
+msgstr "Account has {0} drift discrepancies. Last reconciled at {1}."
 
 msgid "Account preview"
 msgstr "Account preview"
@@ -151,11 +151,6 @@ msgstr "Amount"
 
 msgid "An unexpected error occurred while processing your request."
 msgstr "An unexpected error occurred while processing your request."
-
-#. placeholder {0}: result.billingEventsAppended
-#. placeholder {1}: formatDate(result.reconciledAt)
-msgid "Appended {0} new billing events. Last reconciled at {1}."
-msgstr "Appended {0} new billing events. Last reconciled at {1}."
 
 msgid "Authoritative log of subscription, payment, and billing transitions across all accounts."
 msgstr "Authoritative log of subscription, payment, and billing transitions across all accounts."
@@ -515,8 +510,8 @@ msgstr "No login history"
 msgid "No matching users"
 msgstr "No matching users"
 
-msgid "No new billing events were appended. Account state matches Stripe."
-msgstr "No new billing events were appended. Account state matches Stripe."
+msgid "No new billing events were appended. Account state matches Paystack."
+msgstr "No new billing events were appended. Account state matches Paystack."
 
 msgid "No owners"
 msgstr "No owners"
@@ -713,20 +708,26 @@ msgstr "Reconcile complete with drift detected"
 msgid "Reconcile found {0} archived events older than Stripe's 30-day window, from {1} to {2}. This is a best-effort recovery from locally stored payloads and may produce incorrect rows. Only run it when standard Reconcile with Stripe has been tried and did not clear the drift."
 msgstr "Reconcile found {0} archived events older than Stripe's 30-day window, from {1} to {2}. This is a best-effort recovery from locally stored payloads and may produce incorrect rows. Only run it when standard Reconcile with Stripe has been tried and did not clear the drift."
 
-msgid "Reconcile rebuilds this tenant's subscription and billing events from Stripe directly using the events.list API (the last 30 days). If the drift is not cleared afterwards, disaster recovery from the locally archived Stripe payloads is available as a last resort."
-msgstr "Reconcile rebuilds this tenant's subscription and billing events from Stripe directly using the events.list API (the last 30 days). If the drift is not cleared afterwards, disaster recovery from the locally archived Stripe payloads is available as a last resort."
+msgid "Reconcile verifies this tenant's pending Paystack payment attempts, processes missed webhook outcomes, and appends any missing billing events."
+msgstr "Reconcile verifies this tenant's pending Paystack payment attempts, processes missed webhook outcomes, and appends any missing billing events."
 
-msgid "Reconcile with Stripe"
-msgstr "Reconcile with Stripe"
+msgid "Reconcile with Paystack"
+msgstr "Reconcile with Paystack"
 
-msgid "Reconcile with Stripe?"
-msgstr "Reconcile with Stripe?"
+msgid "Reconcile with Paystack?"
+msgstr "Reconcile with Paystack?"
 
 msgid "Reconciling..."
 msgstr "Reconciling..."
 
 msgid "Records will appear here as accounts subscribe and Stripe webhooks are processed."
 msgstr "Records will appear here as accounts subscribe and Stripe webhooks are processed."
+
+#. placeholder {0}: result.recoveredPaymentAttempts
+#. placeholder {1}: result.billingEventsAppended
+#. placeholder {2}: formatDate(result.reconciledAt)
+msgid "Recovered {0} payment attempts and appended {1} new billing events. Last reconciled at {2}."
+msgstr "Recovered {0} payment attempts and appended {1} new billing events. Last reconciled at {2}."
 
 msgid "Refunded"
 msgstr "Refunded"
