@@ -44,7 +44,8 @@ public sealed class ReconcileTenantWithPaystackHandler(
         if (subscription.PaystackCustomerId is null) return Result<ReconcileTenantWithPaystackResponse>.BadRequest("Subscription does not have a Paystack customer.");
 
         var result = await processPendingPaystackEvents.ExecuteAsync(subscription.PaystackCustomerId, cancellationToken);
-        var reloadedSubscription = await subscriptionRepository.GetByTenantIdUnfilteredAsync(command.TenantId, cancellationToken);
+        await processPendingPaystackEvents.DetectAsync(subscription.PaystackCustomerId, cancellationToken);
+        var reloadedSubscription = await subscriptionRepository.GetByPaystackCustomerIdUnfilteredAsync(subscription.PaystackCustomerId, cancellationToken);
         if (reloadedSubscription is null) return Result<ReconcileTenantWithPaystackResponse>.NotFound($"Subscription for tenant '{command.TenantId}' not found.");
 
         return new ReconcileTenantWithPaystackResponse(

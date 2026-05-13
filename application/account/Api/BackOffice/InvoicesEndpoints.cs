@@ -1,4 +1,6 @@
+using Account.Features.BackOffice.Invoices.Commands;
 using Account.Features.BackOffice.Invoices.Queries;
+using Account.Features.Subscriptions.Domain;
 using Microsoft.Extensions.Options;
 using SharedKernel.ApiResults;
 using SharedKernel.Authentication.BackOfficeIdentity;
@@ -25,5 +27,9 @@ public sealed class InvoicesEndpoints : IEndpoints
         group.MapGet("/", async Task<ApiResult<BackOfficeInvoicesResponse>> ([AsParameters] GetBackOfficeInvoicesQuery query, IMediator mediator)
             => await mediator.Send(query)
         ).Produces<BackOfficeInvoicesResponse>();
+
+        group.MapPost("/{id}/refund", async Task<ApiResult> (PaymentTransactionId id, IMediator mediator)
+            => await mediator.Send(new RefundBackOfficeInvoiceCommand(id))
+        );
     }
 }

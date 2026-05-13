@@ -1,6 +1,9 @@
+using System.Globalization;
 using System.Net;
 using System.Net.Http.Json;
+using System.Text.Json;
 using Account.Features.Subscriptions.Domain;
+using Account.Features.Tenants.Domain;
 using Account.Integrations.OAuth;
 using Account.Integrations.Paystack;
 using FluentAssertions;
@@ -54,7 +57,7 @@ public sealed class ReconcileTenantWithPaystackTests : BackOfficeEndpointBaseTes
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var payload = await response.Content.ReadFromJsonAsync<ReconcileTenantWithPaystackResponse>();
         payload.Should().NotBeNull();
-        payload!.BillingEventsAppended.Should().Be(1);
+        payload.BillingEventsAppended.Should().Be(1);
         payload.RecoveredPaymentAttempts.Should().Be(1);
         payload.ArchivedEventsAwaitingConfirmation.Should().BeNull();
         payload.ReconciledAt.Should().BeAfter(DateTimeOffset.UtcNow.AddMinutes(-1));
@@ -68,6 +71,228 @@ public sealed class ReconcileTenantWithPaystackTests : BackOfficeEndpointBaseTes
         var subscribedSince = Connection.ExecuteScalar<string>("SELECT subscribed_since FROM subscriptions WHERE tenant_id = @tenantId", [new { tenantId = DatabaseSeeder.Tenant1.Id.Value }]);
         subscribedSince.Should().NotBeNullOrWhiteSpace();
         TelemetryEventsCollectorSpy.CollectedEvents.Should().ContainSingle(e => e.GetType().Name == "SubscriptionCreated");
+    }
+
+    [Fact]
+    public async Task ReconcileTenantWithPaystack_WhenSucceededSubscribeAttemptHasNoBillingEvent_ShouldBackfillLedgerAndClearDrift()
+    {
+        // Arrange
+        var completedAt = DateTimeOffset.UtcNow.AddDays(-3);
+        var reference = $"nerova_reconcile_backfill_{Guid.NewGuid():N}";
+        var transactions = new[]
+        {
+            new PaymentTransaction(
+                PaymentTransactionId.NewId(),
+                29.00m,
+                29.00m,
+                0m,
+                MockPaystackClient.MockStandardCurrency,
+                PaymentTransactionStatus.Succeeded,
+                completedAt,
+                null,
+                null,
+                null,
+                SubscriptionPlan.Standard
+            )
+        };
+
+        Connection.Update("tenants", "id", DatabaseSeeder.Tenant1.Id.Value, [
+                ("state", nameof(TenantState.Active)),
+                ("plan", nameof(SubscriptionPlan.Standard))
+            ]
+        );
+        Connection.Update("subscriptions", "tenant_id", DatabaseSeeder.Tenant1.Id.Value, [
+                ("plan", nameof(SubscriptionPlan.Standard)),
+                ("paystack_customer_code", MockPaystackClient.MockCustomerCode),
+                ("paystack_authorization_code", "AUTH_backfill"),
+                ("current_price_amount", 29.00m),
+                ("current_price_currency", MockPaystackClient.MockStandardCurrency),
+                ("current_period_end", completedAt.AddMonths(1)),
+                ("next_billing_at", completedAt.AddMonths(1)),
+                ("payment_transactions", JsonSerializer.Serialize(transactions)),
+                ("subscribed_since", null),
+                ("has_drift_detected", true),
+                ("drift_checked_at", DateTimeOffset.UtcNow.AddMinutes(-5)),
+                ("drift_discrepancies", "[]")
+            ]
+        );
+        var subscriptionId = Connection.ExecuteScalar<string>("SELECT id FROM subscriptions WHERE tenant_id = @tenantId", [new { tenantId = DatabaseSeeder.Tenant1.Id.Value }]);
+        Connection.Insert("paystack_payment_attempts", [
+                ("tenant_id", DatabaseSeeder.Tenant1.Id.Value),
+                ("id", PaystackPaymentAttemptId.NewId().ToString()),
+                ("subscription_id", subscriptionId),
+                ("created_at", completedAt.AddMinutes(-5)),
+                ("modified_at", null),
+                ("paystack_reference", reference),
+                ("paystack_customer_code", MockPaystackClient.MockCustomerCode),
+                ("paystack_authorization_code", "AUTH_backfill"),
+                ("purpose", nameof(PaystackPaymentPurpose.Subscribe)),
+                ("plan", nameof(SubscriptionPlan.Standard)),
+                ("amount", 29.00m),
+                ("currency", MockPaystackClient.MockStandardCurrency),
+                ("status", nameof(PaystackPaymentAttemptStatus.Succeeded)),
+                ("completed_at", completedAt),
+                ("failure_reason", null)
+            ]
+        );
+
+        var identity = MockEasyAuthIdentities.Default.Single(i => i.Id == "admin");
+        using var client = CreateBackOfficeClientForIdentity(identity);
+        client.DefaultRequestHeaders.Add("Cookie", $"{OAuthProviderFactory.UseMockProviderCookieName}=true");
+
+        // Act
+        var response = await client.PostAsync($"/api/back-office/tenants/{DatabaseSeeder.Tenant1.Id}/reconcile-with-paystack", null);
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        var payload = await response.Content.ReadFromJsonAsync<ReconcileTenantWithPaystackResponse>();
+        payload.Should().NotBeNull();
+        payload.BillingEventsAppended.Should().Be(1);
+        payload.RecoveredPaymentAttempts.Should().Be(1);
+        payload.HasDriftDetected.Should().BeFalse();
+        payload.DriftDiscrepancyCount.Should().Be(0);
+
+        var stripeEventId = $"paystack:{reference}:Subscribe";
+        Connection.ExecuteScalar<string>("SELECT event_type FROM billing_events WHERE stripe_event_id = @stripeEventId", [new { stripeEventId }])
+            .Should().Be(nameof(BillingEventType.SubscriptionCreated));
+        decimal.Parse(Connection.ExecuteScalar<string>("SELECT committed_mrr FROM billing_events WHERE stripe_event_id = @stripeEventId", [new { stripeEventId }]), CultureInfo.InvariantCulture)
+            .Should().Be(29.00m);
+        Connection.ExecuteScalar<string>("SELECT currency FROM billing_events WHERE stripe_event_id = @stripeEventId", [new { stripeEventId }])
+            .Should().Be(MockPaystackClient.MockStandardCurrency);
+        DateTimeOffset.Parse(Connection.ExecuteScalar<string>("SELECT occurred_at FROM billing_events WHERE stripe_event_id = @stripeEventId", [new { stripeEventId }]), CultureInfo.InvariantCulture)
+            .Should().BeCloseTo(completedAt, TimeSpan.FromSeconds(1));
+
+        var subscribedSince = DateTimeOffset.Parse(Connection.ExecuteScalar<string>("SELECT subscribed_since FROM subscriptions WHERE tenant_id = @tenantId", [new { tenantId = DatabaseSeeder.Tenant1.Id.Value }]), CultureInfo.InvariantCulture);
+        subscribedSince.Should().BeCloseTo(completedAt, TimeSpan.FromSeconds(1));
+    }
+
+    [Fact]
+    public async Task ReconcileTenantWithPaystack_WhenSucceededUpgradeAttemptHasNoBillingEvent_ShouldBackfillMrrDeltaFromPreviousLedgerEvent()
+    {
+        // Arrange
+        var subscribedAt = DateTimeOffset.UtcNow.AddHours(-5);
+        var upgradedAt = DateTimeOffset.UtcNow.AddHours(-1);
+        var subscribeReference = $"nerova_reconcile_subscribe_{Guid.NewGuid():N}";
+        var upgradeReference = $"nerova_reconcile_upgrade_{Guid.NewGuid():N}";
+        var subscriptionId = Connection.ExecuteScalar<string>("SELECT id FROM subscriptions WHERE tenant_id = @tenantId", [new { tenantId = DatabaseSeeder.Tenant1.Id.Value }]);
+        var transactions = new[]
+        {
+            new PaymentTransaction(
+                PaymentTransactionId.NewId(),
+                800.00m,
+                800.00m,
+                0m,
+                MockPaystackClient.MockStandardCurrency,
+                PaymentTransactionStatus.Succeeded,
+                subscribedAt,
+                null,
+                null,
+                null,
+                SubscriptionPlan.Standard
+            ),
+            new PaymentTransaction(
+                PaymentTransactionId.NewId(),
+                397.60m,
+                397.60m,
+                0m,
+                MockPaystackClient.MockStandardCurrency,
+                PaymentTransactionStatus.Succeeded,
+                upgradedAt,
+                null,
+                null,
+                null,
+                SubscriptionPlan.Premium
+            )
+        };
+
+        Connection.Update("tenants", "id", DatabaseSeeder.Tenant1.Id.Value, [
+                ("state", nameof(TenantState.Active)),
+                ("plan", nameof(SubscriptionPlan.Premium))
+            ]
+        );
+        Connection.Update("subscriptions", "tenant_id", DatabaseSeeder.Tenant1.Id.Value, [
+                ("plan", nameof(SubscriptionPlan.Premium)),
+                ("paystack_customer_code", MockPaystackClient.MockCustomerCode),
+                ("paystack_authorization_code", "AUTH_upgrade_backfill"),
+                ("current_price_amount", 1200.00m),
+                ("current_price_currency", MockPaystackClient.MockStandardCurrency),
+                ("current_period_end", upgradedAt.AddMonths(1)),
+                ("next_billing_at", upgradedAt.AddMonths(1)),
+                ("payment_transactions", JsonSerializer.Serialize(transactions)),
+                ("subscribed_since", subscribedAt),
+                ("has_drift_detected", true),
+                ("drift_checked_at", DateTimeOffset.UtcNow.AddMinutes(-5)),
+                ("drift_discrepancies", "[]")
+            ]
+        );
+        Connection.Insert("billing_events", [
+                ("tenant_id", DatabaseSeeder.Tenant1.Id.Value),
+                ("id", BillingEventId.NewId().Value),
+                ("subscription_id", subscriptionId),
+                ("created_at", DateTimeOffset.UtcNow),
+                ("modified_at", null),
+                ("stripe_event_id", $"paystack:{subscribeReference}:Subscribe"),
+                ("event_type", nameof(BillingEventType.SubscriptionCreated)),
+                ("from_plan", null),
+                ("to_plan", nameof(SubscriptionPlan.Standard)),
+                ("previous_amount", null),
+                ("new_amount", 800.00m),
+                ("amount_delta", 800.00m),
+                ("committed_mrr", 800.00m),
+                ("currency", MockPaystackClient.MockStandardCurrency),
+                ("occurred_at", subscribedAt),
+                ("cancellation_reason", null),
+                ("suspension_reason", null)
+            ]
+        );
+        Connection.Insert("paystack_payment_attempts", [
+                ("tenant_id", DatabaseSeeder.Tenant1.Id.Value),
+                ("id", PaystackPaymentAttemptId.NewId().ToString()),
+                ("subscription_id", subscriptionId),
+                ("created_at", upgradedAt.AddMinutes(-5)),
+                ("modified_at", null),
+                ("paystack_reference", upgradeReference),
+                ("paystack_customer_code", MockPaystackClient.MockCustomerCode),
+                ("paystack_authorization_code", "AUTH_upgrade_backfill"),
+                ("purpose", nameof(PaystackPaymentPurpose.Upgrade)),
+                ("plan", nameof(SubscriptionPlan.Premium)),
+                ("amount", 397.60m),
+                ("currency", MockPaystackClient.MockStandardCurrency),
+                ("status", nameof(PaystackPaymentAttemptStatus.Succeeded)),
+                ("completed_at", upgradedAt),
+                ("failure_reason", null)
+            ]
+        );
+
+        var identity = MockEasyAuthIdentities.Default.Single(i => i.Id == "admin");
+        using var client = CreateBackOfficeClientForIdentity(identity);
+        client.DefaultRequestHeaders.Add("Cookie", $"{OAuthProviderFactory.UseMockProviderCookieName}=true");
+
+        // Act
+        var response = await client.PostAsync($"/api/back-office/tenants/{DatabaseSeeder.Tenant1.Id}/reconcile-with-paystack", null);
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        var payload = await response.Content.ReadFromJsonAsync<ReconcileTenantWithPaystackResponse>();
+        payload.Should().NotBeNull();
+        payload.BillingEventsAppended.Should().Be(1);
+        payload.RecoveredPaymentAttempts.Should().Be(1);
+
+        var stripeEventId = $"paystack:{upgradeReference}:Upgrade";
+        Connection.ExecuteScalar<string>("SELECT event_type FROM billing_events WHERE stripe_event_id = @stripeEventId", [new { stripeEventId }])
+            .Should().Be(nameof(BillingEventType.SubscriptionUpgraded));
+        Connection.ExecuteScalar<string>("SELECT from_plan FROM billing_events WHERE stripe_event_id = @stripeEventId", [new { stripeEventId }])
+            .Should().Be(nameof(SubscriptionPlan.Standard));
+        Connection.ExecuteScalar<string>("SELECT to_plan FROM billing_events WHERE stripe_event_id = @stripeEventId", [new { stripeEventId }])
+            .Should().Be(nameof(SubscriptionPlan.Premium));
+        decimal.Parse(Connection.ExecuteScalar<string>("SELECT previous_amount FROM billing_events WHERE stripe_event_id = @stripeEventId", [new { stripeEventId }]), CultureInfo.InvariantCulture)
+            .Should().Be(800.00m);
+        decimal.Parse(Connection.ExecuteScalar<string>("SELECT new_amount FROM billing_events WHERE stripe_event_id = @stripeEventId", [new { stripeEventId }]), CultureInfo.InvariantCulture)
+            .Should().Be(1200.00m);
+        decimal.Parse(Connection.ExecuteScalar<string>("SELECT amount_delta FROM billing_events WHERE stripe_event_id = @stripeEventId", [new { stripeEventId }]), CultureInfo.InvariantCulture)
+            .Should().Be(400.00m);
+        decimal.Parse(Connection.ExecuteScalar<string>("SELECT committed_mrr FROM billing_events WHERE stripe_event_id = @stripeEventId", [new { stripeEventId }]), CultureInfo.InvariantCulture)
+            .Should().Be(1200.00m);
     }
 
     [Fact]

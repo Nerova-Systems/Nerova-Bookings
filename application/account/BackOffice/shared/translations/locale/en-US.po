@@ -835,8 +835,8 @@ msgstr "Subscribed since"
 msgid "Subscription state"
 msgstr "Subscription state"
 
-msgid "Subscription, payment, and billing transitions will appear here as Stripe webhooks are processed."
-msgstr "Subscription, payment, and billing transitions will appear here as Stripe webhooks are processed."
+msgid "Subscription, payment, and billing transitions will appear here as Paystack payments are processed."
+msgstr "Subscription, payment, and billing transitions will appear here as Paystack payments are processed."
 
 msgid "Subscription, payment, and billing transitions will appear here."
 msgstr "Subscription, payment, and billing transitions will appear here."

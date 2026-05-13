@@ -330,7 +330,8 @@ public sealed record PaymentTransaction(
     // note exists, or for legacy rows where the producer didn't yet capture it. Surfaces on the
     // back-office invoices UI so refunded rows show the actual credit-note date, not just the
     // original invoice date.
-    DateTimeOffset? CreditNotedAt = null
+    DateTimeOffset? CreditNotedAt = null,
+    string? PaystackReference = null
 );
 
 [PublicAPI]

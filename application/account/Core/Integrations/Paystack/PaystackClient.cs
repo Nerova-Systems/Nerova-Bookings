@@ -305,11 +305,12 @@ public sealed class PaystackClient(IConfiguration configuration, IHttpClientFact
 
             var amount = FromSubunit(GetLong(transaction, "amount") ?? 0);
             var currency = GetString(transaction, "currency")?.ToUpperInvariant() ?? "USD";
+            var reference = GetString(transaction, "reference");
             var paidAtText = GetString(transaction, "paid_at") ?? GetString(transaction, "created_at");
             var paidAt = DateTimeOffset.TryParse(paidAtText, CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal | DateTimeStyles.AdjustToUniversal, out var parsedPaidAt)
                 ? parsedPaidAt
                 : DateTimeOffset.UtcNow;
-            transactions.Add(new PaymentTransaction(PaymentTransactionId.NewId(), amount, amount, 0m, currency, PaymentTransactionStatus.Succeeded, paidAt, null, null, null));
+            transactions.Add(new PaymentTransaction(PaymentTransactionId.NewId(), amount, amount, 0m, currency, PaymentTransactionStatus.Succeeded, paidAt, null, null, null, PaystackReference: reference));
         }
 
         return [.. transactions];

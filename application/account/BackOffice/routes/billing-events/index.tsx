@@ -105,7 +105,8 @@ function BillingEventsListPage() {
                     <Trans>Try clearing the search or filters to see more results.</Trans>
                   ) : (
                     <Trans>
-                      Subscription, payment, and billing transitions will appear here as Stripe webhooks are processed.
+                      Subscription, payment, and billing transitions will appear here as Paystack payments are
+                      processed.
                     </Trans>
                   )}
                 </EmptyDescription>

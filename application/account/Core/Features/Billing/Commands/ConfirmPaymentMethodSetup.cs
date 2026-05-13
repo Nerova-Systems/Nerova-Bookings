@@ -121,7 +121,7 @@ public sealed class ConfirmPaymentMethodSetupHandler(
         subscription.SetPaystackAuthorization(verifiedTransaction.Authorization.AuthorizationCode, verifiedTransaction.Authorization.Email, verifiedTransaction.Authorization.Signature, verifiedTransaction.PaymentMethod);
         subscription.SetPaymentTransactions([
                 .. subscription.PaymentTransactions,
-                new PaymentTransaction(PaymentTransactionId.NewId(), refund.Amount, refund.Amount, 0m, refund.Currency, PaymentTransactionStatus.Refunded, now, null, null, null)
+                new PaymentTransaction(PaymentTransactionId.NewId(), refund.Amount, refund.Amount, 0m, refund.Currency, PaymentTransactionStatus.Refunded, now, null, null, null, PaystackReference: verifiedTransaction.Reference)
             ]
         );
 

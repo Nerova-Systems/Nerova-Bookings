@@ -131,7 +131,7 @@ public sealed class ConfirmPaystackPaymentHandler(
         subscription.ClearPaymentFailure();
         subscription.SetPaymentTransactions([
                 .. subscription.PaymentTransactions,
-                new PaymentTransaction(PaymentTransactionId.NewId(), verified.Amount, verified.Amount, 0m, verified.Currency, PaymentTransactionStatus.Succeeded, now, null, null, null)
+                new PaymentTransaction(PaymentTransactionId.NewId(), verified.Amount, verified.Amount, 0m, verified.Currency, PaymentTransactionStatus.Succeeded, now, null, null, null, PaystackReference: verified.Reference)
             ]
         );
 

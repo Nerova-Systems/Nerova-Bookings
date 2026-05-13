@@ -28,13 +28,25 @@ public sealed class GetDashboardMrrConsistencySummaryHandler(ISubscriptionReposi
         var paidSubscriptions = await subscriptionRepository.GetAllActiveUnfilteredAsync(cancellationToken);
         var kpiMrr = paidSubscriptions.Sum(MrrCalculator.ForwardMrr);
 
-        // Trend-latest MRR mirrors GetDashboardMrrTrendHandler: per subscription, take the latest event's
-        // NewAmount. Paystack subscriptions with no MRR event rows yet fall back to their live snapshot.
+        // Trend-latest MRR mirrors the current dashboard trend fallback: per subscription, take the latest
+        // event's NewAmount, but Paystack-owned subscriptions fall back to their live snapshot when the
+        // locally-owned subscription state has moved forward and the event ledger is still catching up.
         var events = await billingEventRepository.GetMrrChangeEventsUnfilteredAsync(cancellationToken);
+        var paidSubscriptionsById = paidSubscriptions.ToDictionary(s => s.Id);
         var eventSubscriptionIds = events.Select(e => e.SubscriptionId).ToHashSet();
         var latestEventMrr = events
             .GroupBy(e => e.SubscriptionId)
-            .Sum(g => g.OrderByDescending(e => e.OccurredAt).First().NewAmount ?? 0m);
+            .Sum(g =>
+                {
+                    var latestEventMrr = g.OrderByDescending(e => e.OccurredAt).First().NewAmount ?? 0m;
+                    if (!paidSubscriptionsById.TryGetValue(g.Key, out var subscription)) return latestEventMrr;
+
+                    var liveMrr = MrrCalculator.ForwardMrr(subscription);
+                    return ShouldUsePaystackLiveSnapshot(subscription, liveMrr, latestEventMrr)
+                        ? liveMrr
+                        : latestEventMrr;
+                }
+            );
         var eventlessSnapshotMrr = paidSubscriptions
             .Where(s => !eventSubscriptionIds.Contains(s.Id))
             .Sum(MrrCalculator.ForwardMrr);
@@ -46,5 +58,12 @@ public sealed class GetDashboardMrrConsistencySummaryHandler(ISubscriptionReposi
         }
 
         return new DashboardMrrConsistencySummaryResponse(kpiMrr, trendLatestMrr, platformCurrencyProvider.Currency);
+    }
+
+    private static bool ShouldUsePaystackLiveSnapshot(Subscription subscription, decimal liveMrr, decimal latestEventMrr)
+    {
+        return subscription.PaystackCustomerId is not null
+               && !subscription.CancelAtPeriodEnd
+               && liveMrr > latestEventMrr;
     }
 }

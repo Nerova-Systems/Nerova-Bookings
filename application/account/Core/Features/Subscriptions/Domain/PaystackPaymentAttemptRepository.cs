@@ -14,6 +14,8 @@ public interface IPaystackPaymentAttemptRepository : ICrudRepository<PaystackPay
     Task<PaystackPaymentAttempt?> GetByReferenceWithLockUnfilteredAsync(string paystackReference, CancellationToken cancellationToken);
 
     Task<PaystackPaymentAttempt[]> GetPendingBySubscriptionIdWithLockUnfilteredAsync(SubscriptionId subscriptionId, CancellationToken cancellationToken);
+
+    Task<PaystackPaymentAttempt[]> GetSucceededBySubscriptionIdUnfilteredAsync(SubscriptionId subscriptionId, CancellationToken cancellationToken);
 }
 
 internal sealed class PaystackPaymentAttemptRepository(AccountDbContext accountDbContext)
@@ -59,5 +61,15 @@ internal sealed class PaystackPaymentAttemptRepository(AccountDbContext accountD
             .FromSqlInterpolated($"SELECT * FROM paystack_payment_attempts WHERE subscription_id = {subscriptionId.Value} AND status = 'Pending' ORDER BY created_at FOR UPDATE")
             .IgnoreQueryFilters()
             .ToArrayAsync(cancellationToken);
+    }
+
+    public async Task<PaystackPaymentAttempt[]> GetSucceededBySubscriptionIdUnfilteredAsync(SubscriptionId subscriptionId, CancellationToken cancellationToken)
+    {
+        var attempts = await DbSet
+            .IgnoreQueryFilters()
+            .Where(a => a.SubscriptionId == subscriptionId && a.Status == PaystackPaymentAttemptStatus.Succeeded)
+            .ToArrayAsync(cancellationToken);
+
+        return [.. attempts.OrderBy(a => a.CompletedAt ?? a.CreatedAt)];
     }
 }

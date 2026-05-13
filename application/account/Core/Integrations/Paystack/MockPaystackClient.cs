@@ -182,7 +182,7 @@ public sealed class MockPaystackClient(IConfiguration configuration, TimeProvide
         var now = timeProvider.GetUtcNow();
         var transactions = state.VerifiedTransactions.Values
             .Where(t => t is { Paid: true, CustomerId: not null } && t.CustomerId == paystackCustomerId)
-            .Select(t => new PaymentTransaction(PaymentTransactionId.NewId(), t.Amount, t.Amount, 0m, t.Currency, PaymentTransactionStatus.Succeeded, now, null, null, null))
+            .Select(t => new PaymentTransaction(PaymentTransactionId.NewId(), t.Amount, t.Amount, 0m, t.Currency, PaymentTransactionStatus.Succeeded, now, null, null, null, PaystackReference: t.Reference))
             .ToArray();
         return Task.FromResult<PaymentTransaction[]?>(transactions);
     }

@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Net;
 using System.Net.Http.Json;
 using Account.Database;
@@ -20,6 +21,9 @@ public sealed class CancelSubscriptionTests : EndpointBaseTest<AccountDbContext>
                 ("plan", nameof(SubscriptionPlan.Standard)),
                 ("paystack_customer_code", "cus_test_123"),
                 ("paystack_authorization_code", "sub_test_123"),
+                ("current_price_amount", 29.00m),
+                ("current_price_currency", "ZAR"),
+                ("current_period_start", TimeProvider.GetUtcNow().AddDays(-15)),
                 ("current_period_end", TimeProvider.GetUtcNow().AddDays(30))
             ]
         );
@@ -35,7 +39,10 @@ public sealed class CancelSubscriptionTests : EndpointBaseTest<AccountDbContext>
         Connection.ExecuteScalar<long>("SELECT cancel_at_period_end FROM subscriptions WHERE tenant_id = @tenantId", [new { tenantId = DatabaseSeeder.Tenant1.Id.Value }]).Should().Be(1);
         Connection.ExecuteScalar<string>("SELECT cancellation_reason FROM subscriptions WHERE tenant_id = @tenantId", [new { tenantId = DatabaseSeeder.Tenant1.Id.Value }]).Should().Be(nameof(CancellationReason.TooExpensive));
         Connection.ExecuteScalar<string>("SELECT cancellation_feedback FROM subscriptions WHERE tenant_id = @tenantId", [new { tenantId = DatabaseSeeder.Tenant1.Id.Value }]).Should().Be("The price doubled last month.");
-        TelemetryEventsCollectorSpy.CollectedEvents.Should().BeEmpty();
+        Connection.ExecuteScalar<string>("SELECT event_type FROM billing_events WHERE tenant_id = @tenantId", [new { tenantId = DatabaseSeeder.Tenant1.Id.Value }]).Should().Be(nameof(BillingEventType.SubscriptionCancelled));
+        decimal.Parse(Connection.ExecuteScalar<string>("SELECT amount_delta FROM billing_events WHERE tenant_id = @tenantId", [new { tenantId = DatabaseSeeder.Tenant1.Id.Value }]), CultureInfo.InvariantCulture).Should().Be(-29.00m);
+        decimal.Parse(Connection.ExecuteScalar<string>("SELECT committed_mrr FROM billing_events WHERE tenant_id = @tenantId", [new { tenantId = DatabaseSeeder.Tenant1.Id.Value }]), CultureInfo.InvariantCulture).Should().Be(0m);
+        TelemetryEventsCollectorSpy.CollectedEvents.Should().ContainSingle(e => e.GetType().Name == "SubscriptionCancelled");
     }
 
     [Fact]

@@ -111,7 +111,7 @@ public sealed class RetryRenewalPaymentHandler(
         subscription.StartBillingPeriod(subscription.Plan, charge.Amount, charge.Currency, now, nextBillingAt, charge.PaymentMethod);
         subscription.SetPaymentTransactions([
                 .. subscription.PaymentTransactions,
-                new PaymentTransaction(PaymentTransactionId.NewId(), charge.Amount, charge.Amount, 0m, charge.Currency, PaymentTransactionStatus.Succeeded, now, null, null, null)
+                new PaymentTransaction(PaymentTransactionId.NewId(), charge.Amount, charge.Amount, 0m, charge.Currency, PaymentTransactionStatus.Succeeded, now, null, null, null, PaystackReference: charge.Reference)
             ]
         );
         subscriptionRepository.Update(subscription);

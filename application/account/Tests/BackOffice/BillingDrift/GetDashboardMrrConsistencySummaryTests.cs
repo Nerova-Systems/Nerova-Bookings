@@ -114,6 +114,29 @@ public sealed class GetDashboardMrrConsistencySummaryTests : BackOfficeEndpointB
     }
 
     [Fact]
+    public async Task GetDashboardMrrConsistencySummary_WhenPaystackEventMrrLagsBehindLiveSubscription_ShouldUseLiveSnapshot()
+    {
+        // Arrange
+        var tenantId = SeedTenant("Paystack Upgraded Co");
+        var subscriptionId = SubscriptionId.NewId();
+        SeedPaidSubscription(tenantId, subscriptionId, 1200m, false, null);
+        SeedSubscriptionCreatedEvent(tenantId, subscriptionId, 800m);
+
+        var identity = MockEasyAuthIdentities.Default.Single(i => i.Id == "user");
+        using var client = CreateBackOfficeClientForIdentity(identity);
+
+        // Act
+        var response = await client.GetAsync("/api/back-office/billing-drift/mrr-consistency-summary");
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        var payload = await response.Content.ReadFromJsonAsync<DashboardMrrConsistencySummaryResponse>();
+        payload.Should().NotBeNull();
+        payload.KpiMonthlyRecurringRevenue.Should().Be(1200m);
+        payload.TrendLatestMonthlyRecurringRevenue.Should().Be(1200m);
+    }
+
+    [Fact]
     public async Task GetDashboardMrrConsistencySummary_WhenCalledWithoutAuthentication_ShouldReturnUnauthorized()
     {
         // Arrange

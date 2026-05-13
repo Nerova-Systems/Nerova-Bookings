@@ -142,7 +142,7 @@ public sealed class ProcessSubscriptionBilling(
         subscription.ClearPaymentFailure();
         subscription.SetPaymentTransactions([
                 .. subscription.PaymentTransactions,
-                new PaymentTransaction(PaymentTransactionId.NewId(), charge.Amount, charge.Amount, 0m, charge.Currency, PaymentTransactionStatus.Succeeded, now, null, null, null)
+                new PaymentTransaction(PaymentTransactionId.NewId(), charge.Amount, charge.Amount, 0m, charge.Currency, PaymentTransactionStatus.Succeeded, now, null, null, null, PaystackReference: charge.Reference)
             ]
         );
 
@@ -160,7 +160,7 @@ public sealed class ProcessSubscriptionBilling(
         subscription.SetPaymentFailed(now);
         subscription.SetPaymentTransactions([
                 .. subscription.PaymentTransactions,
-                new PaymentTransaction(PaymentTransactionId.NewId(), charge.Amount, charge.Amount, 0m, charge.Currency, PaymentTransactionStatus.Failed, now, charge.ErrorMessage, null, null)
+                new PaymentTransaction(PaymentTransactionId.NewId(), charge.Amount, charge.Amount, 0m, charge.Currency, PaymentTransactionStatus.Failed, now, charge.ErrorMessage, null, null, PaystackReference: charge.Reference)
             ]
         );
 

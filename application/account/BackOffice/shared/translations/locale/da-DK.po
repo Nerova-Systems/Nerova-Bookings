@@ -835,8 +835,8 @@ msgstr "Abonneret siden"
 msgid "Subscription state"
 msgstr "Abonnementstilstand"
 
-msgid "Subscription, payment, and billing transitions will appear here as Stripe webhooks are processed."
-msgstr "Abonnements-, betalings- og faktureringsændringer vises her, når Stripe-webhooks behandles."
+msgid "Subscription, payment, and billing transitions will appear here as Paystack payments are processed."
+msgstr "Abonnements-, betalings- og faktureringsændringer vises her, når Paystack-betalinger behandles."
 
 msgid "Subscription, payment, and billing transitions will appear here."
 msgstr "Abonnements-, betalings- og faktureringsændringer vises her."

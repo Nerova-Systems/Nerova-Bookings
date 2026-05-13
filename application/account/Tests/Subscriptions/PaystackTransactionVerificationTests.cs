@@ -88,7 +88,7 @@ public sealed class PaystackTransactionVerificationTests
 
         // Assert
         transactions.Should().ContainSingle();
-        transactions![0].Amount.Should().Be(29.00m);
+        transactions[0].Amount.Should().Be(29.00m);
         transactions[0].AmountExcludingTax.Should().Be(29.00m);
         transactions[0].Currency.Should().Be("ZAR");
         transactions[0].Status.Should().Be(PaymentTransactionStatus.Succeeded);

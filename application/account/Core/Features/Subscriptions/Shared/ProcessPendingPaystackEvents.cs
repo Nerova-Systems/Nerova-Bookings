@@ -70,6 +70,10 @@ public sealed class ProcessPendingPaystackEvents(
             recoveredPaymentAttempts += result.PaymentAttemptRecovered ? 1 : 0;
         }
 
+        var backfilledPaymentAttempts = await BackfillSucceededPaymentAttemptBillingEventsAsync(subscription, paystackClient, existingBillingEventIds, cancellationToken);
+        billingEventsAppended += backfilledPaymentAttempts;
+        recoveredPaymentAttempts += backfilledPaymentAttempts;
+
         await dbContext.SaveChangesAsync(cancellationToken);
         await transaction.CommitAsync(cancellationToken);
 
@@ -102,6 +106,127 @@ public sealed class ProcessPendingPaystackEvents(
         var discrepancies = BillingDriftDetector.Detect(localSnapshot, providerSnapshot, subscription.PaymentTransactions.Length, billingEvents.Length);
         await subscriptionRepository.UpdateDriftStatusAsync(subscription.Id, !discrepancies.IsDefaultOrEmpty, timeProvider.GetUtcNow(), discrepancies, cancellationToken);
         return true;
+    }
+
+    private async Task<int> BackfillSucceededPaymentAttemptBillingEventsAsync(
+        Subscription subscription,
+        IPaystackClient paystackClient,
+        HashSet<string> existingBillingEventIds,
+        CancellationToken cancellationToken
+    )
+    {
+        var succeededAttempts = await paystackPaymentAttemptRepository.GetSucceededBySubscriptionIdUnfilteredAsync(subscription.Id, cancellationToken);
+        var priceCatalog = await paystackClient.GetPriceCatalogAsync(cancellationToken);
+        var billingEventHistory = (await billingEventRepository.GetBySubscriptionIdUnfilteredAsync(subscription.Id, cancellationToken))
+            .OrderBy(e => e.OccurredAt)
+            .ThenBy(e => e.Id.Value, StringComparer.Ordinal)
+            .ToList();
+        var appended = 0;
+
+        foreach (var paymentAttempt in succeededAttempts
+                     .Where(a => a.PaystackCustomerId == subscription.PaystackCustomerId)
+                     .OrderBy(a => a.CompletedAt ?? a.CreatedAt))
+        {
+            appended += await AppendBackfilledBillingEventAsync(subscription, paymentAttempt, priceCatalog, billingEventHistory, existingBillingEventIds, cancellationToken);
+        }
+
+        return appended;
+    }
+
+    private async Task<int> AppendBackfilledBillingEventAsync(
+        Subscription subscription,
+        PaystackPaymentAttempt paymentAttempt,
+        PriceCatalogItem[] priceCatalog,
+        List<BillingEvent> billingEventHistory,
+        HashSet<string> existingBillingEventIds,
+        CancellationToken cancellationToken
+    )
+    {
+        var providerEventId = $"paystack:{paymentAttempt.PaystackReference}:{paymentAttempt.Purpose}";
+        if (existingBillingEventIds.Contains(providerEventId)) return 0;
+
+        var eventType = GetBackfillBillingEventType(paymentAttempt.Purpose);
+        if (eventType is BillingEventType.NoOp) return 0;
+
+        var occurredAt = paymentAttempt.CompletedAt ?? paymentAttempt.CreatedAt;
+        var previousMrrEvent = FindPreviousMrrEvent(billingEventHistory, occurredAt, providerEventId);
+        var carriesRecurringAmount = eventType is not BillingEventType.PaymentMethodUpdated and not BillingEventType.PaymentRecovered;
+        var fromPlan = eventType is BillingEventType.SubscriptionCreated ? null : previousMrrEvent?.ToPlan ?? previousMrrEvent?.FromPlan;
+        SubscriptionPlan? toPlan = carriesRecurringAmount
+            ? paymentAttempt.Plan ?? subscription.Plan
+            : null;
+        var previousAmount = eventType is BillingEventType.SubscriptionCreated ? null : previousMrrEvent?.NewAmount;
+        var recurringAmount = carriesRecurringAmount ? ResolveBackfilledRecurringAmount(subscription, paymentAttempt, priceCatalog, eventType) : null;
+        var newAmount = carriesRecurringAmount ? recurringAmount : null;
+        decimal? amountDelta = previousAmount is not null && newAmount is not null
+            ? newAmount.Value - previousAmount.Value
+            : eventType is BillingEventType.SubscriptionCreated
+                ? paymentAttempt.Amount
+                : null;
+        var committedMrr = subscription.CancelAtPeriodEnd
+            ? 0m
+            : carriesRecurringAmount
+                ? recurringAmount ?? paymentAttempt.Amount
+                : previousMrrEvent?.CommittedMrr ?? subscription.CurrentPriceAmount ?? 0m;
+
+        var billingEvent = BillingEvent.Create(
+            subscription.TenantId,
+            subscription.Id,
+            providerEventId,
+            eventType,
+            occurredAt,
+            committedMrr,
+            fromPlan,
+            toPlan,
+            previousAmount,
+            newAmount,
+            amountDelta,
+            subscription.CurrentPriceCurrency ?? paymentAttempt.Currency
+        );
+
+        await billingEventRepository.AddAsync(billingEvent, cancellationToken);
+        existingBillingEventIds.Add(providerEventId);
+        billingEventHistory.Add(billingEvent);
+        if (eventType is BillingEventType.SubscriptionCreated)
+        {
+            subscription.AdvanceSubscribedSinceBackwardFromBillingEvent(occurredAt);
+            subscriptionRepository.Update(subscription);
+        }
+
+        return 1;
+    }
+
+    private static BillingEvent? FindPreviousMrrEvent(IReadOnlyCollection<BillingEvent> billingEventHistory, DateTimeOffset occurredAt, string providerEventId)
+    {
+        return billingEventHistory
+            .Where(e => e.StripeEventId != providerEventId && e.OccurredAt <= occurredAt && e.NewAmount is not null)
+            .OrderBy(e => e.OccurredAt)
+            .ThenBy(e => e.Id.Value, StringComparer.Ordinal)
+            .LastOrDefault();
+    }
+
+    private static decimal? ResolveBackfilledRecurringAmount(
+        Subscription subscription,
+        PaystackPaymentAttempt paymentAttempt,
+        IReadOnlyCollection<PriceCatalogItem> priceCatalog,
+        BillingEventType eventType
+    )
+    {
+        if (eventType is BillingEventType.SubscriptionUpgraded && paymentAttempt.Plan == subscription.Plan && subscription.CurrentPriceAmount is not null)
+        {
+            return subscription.CurrentPriceAmount;
+        }
+
+        if (paymentAttempt.Plan is not null)
+        {
+            var catalogItem = priceCatalog.SingleOrDefault(p => p.Plan == paymentAttempt.Plan.Value);
+            if (catalogItem is not null)
+            {
+                return catalogItem.UnitAmount;
+            }
+        }
+
+        return paymentAttempt.Amount;
     }
 
     private async Task<PaystackAttemptProcessingResult> ProcessPendingEventAsync(
@@ -262,7 +387,7 @@ public sealed class ProcessPendingPaystackEvents(
         subscription.ClearPaymentFailure();
         subscription.SetPaymentTransactions([
                 .. subscription.PaymentTransactions,
-                new PaymentTransaction(PaymentTransactionId.NewId(), verified.Amount, verified.Amount, 0m, verified.Currency, PaymentTransactionStatus.Succeeded, now, null, null, null)
+                new PaymentTransaction(PaymentTransactionId.NewId(), verified.Amount, verified.Amount, 0m, verified.Currency, PaymentTransactionStatus.Succeeded, now, null, null, null, PaystackReference: verified.Reference)
             ]
         );
 
@@ -291,7 +416,7 @@ public sealed class ProcessPendingPaystackEvents(
         subscription.ClearPaymentFailure();
         subscription.SetPaymentTransactions([
                 .. subscription.PaymentTransactions,
-                new PaymentTransaction(PaymentTransactionId.NewId(), verified.Amount, verified.Amount, 0m, verified.Currency, PaymentTransactionStatus.Succeeded, now, null, null, null)
+                new PaymentTransaction(PaymentTransactionId.NewId(), verified.Amount, verified.Amount, 0m, verified.Currency, PaymentTransactionStatus.Succeeded, now, null, null, null, PaystackReference: verified.Reference)
             ]
         );
 
@@ -310,7 +435,7 @@ public sealed class ProcessPendingPaystackEvents(
         subscription.StartBillingPeriod(subscription.Plan, verified.Amount, verified.Currency, now, nextBillingAt, verified.PaymentMethod);
         subscription.SetPaymentTransactions([
                 .. subscription.PaymentTransactions,
-                new PaymentTransaction(PaymentTransactionId.NewId(), verified.Amount, verified.Amount, 0m, verified.Currency, PaymentTransactionStatus.Succeeded, now, null, null, null)
+                new PaymentTransaction(PaymentTransactionId.NewId(), verified.Amount, verified.Amount, 0m, verified.Currency, PaymentTransactionStatus.Succeeded, now, null, null, null, PaystackReference: verified.Reference)
             ]
         );
 
@@ -339,7 +464,7 @@ public sealed class ProcessPendingPaystackEvents(
         subscription.SetPaystackAuthorization(verified.Authorization!.AuthorizationCode, verified.Authorization.Email, verified.Authorization.Signature, verified.PaymentMethod);
         subscription.SetPaymentTransactions([
                 .. subscription.PaymentTransactions,
-                new PaymentTransaction(PaymentTransactionId.NewId(), refund.Amount, refund.Amount, 0m, refund.Currency, PaymentTransactionStatus.Refunded, now, null, null, null)
+                new PaymentTransaction(PaymentTransactionId.NewId(), refund.Amount, refund.Amount, 0m, refund.Currency, PaymentTransactionStatus.Refunded, now, null, null, null, PaystackReference: verified.Reference)
             ]
         );
 
@@ -403,6 +528,19 @@ public sealed class ProcessPendingPaystackEvents(
         {
             PaystackPaymentPurpose.Subscribe when previousPlan == SubscriptionPlan.Basis => BillingEventType.SubscriptionCreated,
             PaystackPaymentPurpose.Upgrade when plan is not null && plan.Value.IsUpgradeFrom(previousPlan) => BillingEventType.SubscriptionUpgraded,
+            PaystackPaymentPurpose.Renewal => BillingEventType.SubscriptionRenewed,
+            PaystackPaymentPurpose.Retry => BillingEventType.PaymentRecovered,
+            PaystackPaymentPurpose.PaymentMethodAuthorization => BillingEventType.PaymentMethodUpdated,
+            _ => BillingEventType.NoOp
+        };
+    }
+
+    private static BillingEventType GetBackfillBillingEventType(PaystackPaymentPurpose purpose)
+    {
+        return purpose switch
+        {
+            PaystackPaymentPurpose.Subscribe => BillingEventType.SubscriptionCreated,
+            PaystackPaymentPurpose.Upgrade => BillingEventType.SubscriptionUpgraded,
             PaystackPaymentPurpose.Renewal => BillingEventType.SubscriptionRenewed,
             PaystackPaymentPurpose.Retry => BillingEventType.PaymentRecovered,
             PaystackPaymentPurpose.PaymentMethodAuthorization => BillingEventType.PaymentMethodUpdated,
