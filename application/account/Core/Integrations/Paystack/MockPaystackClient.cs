@@ -25,6 +25,9 @@ public sealed class MockPaystackClient(IConfiguration configuration, TimeProvide
     public const string MockAccessCode = "access_mock_12345";
     public const string MockReceiptUrl = "https://mock.paystack.local/receipt/12345";
     public const string MockWebhookEventId = "evt_mock_12345";
+    public const string MockStandardCurrency = "USD";
+    public const decimal StandardAmountExcludingTax = 29.00m;
+    public const decimal PremiumAmountExcludingTax = 99.00m;
 
     private readonly bool _isEnabled = configuration.GetValue<bool>("Paystack:AllowMockProvider");
 
@@ -178,7 +181,7 @@ public sealed class MockPaystackClient(IConfiguration configuration, TimeProvide
         EnsureEnabled();
         var now = timeProvider.GetUtcNow();
         return Task.FromResult<PaymentTransaction[]?>([
-                new PaymentTransaction(PaymentTransactionId.NewId(), 29.99m, "USD", PaymentTransactionStatus.Succeeded, now, null, null, null)
+                new PaymentTransaction(PaymentTransactionId.NewId(), 29.99m, 29.99m, 0m, "USD", PaymentTransactionStatus.Succeeded, now, null, null, null)
             ]
         );
     }

@@ -2,7 +2,6 @@ using System.Net;
 using Account.Integrations.Paystack;
 using FluentAssertions;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging;
 using NSubstitute;
 using Xunit;
 
@@ -14,28 +13,28 @@ public sealed class PaystackTransactionVerificationTests
     public async Task VerifyTransaction_WhenApiStatusSucceedsButTransactionStatusFails_ShouldReturnUnpaid()
     {
         // Arrange
-        var client = CreateClient(CreateVerificationPayload("failed", "card", reusable: true));
+        var client = CreateClient(CreateVerificationPayload("failed", "card", true));
 
         // Act
         var result = await client.VerifyTransactionAsync("ref_123", PaystackPaymentPurpose.Subscribe, CancellationToken.None);
 
         // Assert
         result.Should().NotBeNull();
-        result!.Paid.Should().BeFalse();
+        result.Paid.Should().BeFalse();
     }
 
     [Fact]
     public async Task VerifyTransaction_WhenChannelIsNotCard_ShouldRejectPayment()
     {
         // Arrange
-        var client = CreateClient(CreateVerificationPayload("success", "bank", reusable: true));
+        var client = CreateClient(CreateVerificationPayload("success", "bank", true));
 
         // Act
         var result = await client.VerifyTransactionAsync("ref_123", PaystackPaymentPurpose.Subscribe, CancellationToken.None);
 
         // Assert
         result.Should().NotBeNull();
-        result!.Paid.Should().BeFalse();
+        result.Paid.Should().BeFalse();
         result.ErrorMessage.Should().Be("Only card payments are accepted.");
     }
 
@@ -43,14 +42,14 @@ public sealed class PaystackTransactionVerificationTests
     public async Task VerifyTransaction_WhenAuthorizationIsNotReusable_ShouldRejectPayment()
     {
         // Arrange
-        var client = CreateClient(CreateVerificationPayload("success", "card", reusable: false));
+        var client = CreateClient(CreateVerificationPayload("success", "card", false));
 
         // Act
         var result = await client.VerifyTransactionAsync("ref_123", PaystackPaymentPurpose.Subscribe, CancellationToken.None);
 
         // Assert
         result.Should().NotBeNull();
-        result!.Paid.Should().BeFalse();
+        result.Paid.Should().BeFalse();
         result.ErrorMessage.Should().Be("The card authorization is not reusable.");
     }
 

@@ -35,7 +35,7 @@ public sealed class CancelScheduledDowngradeHandler(
             return Result.BadRequest("No scheduled downgrade to cancel.");
         }
 
-        subscription.SetScheduledPlan(null);
+        subscription.SetScheduledPlan(null, null);
         subscriptionRepository.Update(subscription);
 
         return Result.Success();

@@ -11,10 +11,11 @@ public sealed class SinglePageAppConfigurationTests
     {
         // Arrange & Act
         var configuration = new SinglePageAppConfiguration(
-            isDevelopment: true,
-            environmentVariables: null,
-            publicUrlOverride: "https://app.dev.localhost:9000",
-            cdnUrlOverride: "https://app.dev.localhost:9000/account"
+            true,
+            null,
+            Path.Combine("account", "WebApp"),
+            "https://app.dev.localhost:9000",
+            "https://app.dev.localhost:9000/account"
         );
 
         // Assert

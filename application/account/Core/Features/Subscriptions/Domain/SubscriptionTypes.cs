@@ -50,7 +50,8 @@ public enum PaymentTransactionStatus
     Succeeded,
     Failed,
     Pending,
-    Refunded
+    Refunded,
+    Cancelled
 }
 
 [PublicAPI]

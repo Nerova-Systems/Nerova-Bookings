@@ -48,6 +48,7 @@ public abstract class EndpointBaseTest<TContext> : IDisposable where TContext : 
             "InstrumentationKey=00000000-0000-0000-0000-000000000000;IngestionEndpoint=https://localhost;LiveEndpoint=https://localhost"
         );
         Environment.SetEnvironmentVariable("Paystack__AllowMockProvider", "true");
+        Environment.SetEnvironmentVariable("Paystack__AllowMockProviderOutsideDevelopment", "true");
         Environment.SetEnvironmentVariable("Paystack__PublicKey", "pk_test_mock_public_key");
 
         Services = new ServiceCollection();
@@ -59,6 +60,7 @@ public abstract class EndpointBaseTest<TContext> : IDisposable where TContext : 
                 .AddInMemoryCollection(new Dictionary<string, string?>
                     {
                         ["Paystack:AllowMockProvider"] = "true",
+                        ["Paystack:AllowMockProviderOutsideDevelopment"] = "true",
                         ["Paystack:PublicKey"] = "pk_test_mock_public_key",
                         ["Paystack:SubscriptionEnabled"] = "true"
                     }
@@ -195,6 +197,8 @@ public abstract class EndpointBaseTest<TContext> : IDisposable where TContext : 
     protected HttpClient AuthenticatedMemberHttpClient { get; }
 
     protected MockPaystackState PaystackState => _webApplicationFactory.Services.GetRequiredService<MockPaystackState>();
+
+    protected IServiceProvider WebApplicationServices => _webApplicationFactory.Services;
 
     public void Dispose()
     {

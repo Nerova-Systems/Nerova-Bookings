@@ -142,7 +142,7 @@ test.describe("@smoke", () => {
             transactions: [
               {
                 id: "txn_mock_1",
-                amount: 29.0,
+                amount: 149.0,
                 currency: "USD",
                 status: "Succeeded",
                 date: "2026-02-24T00:00:00Z",
@@ -171,7 +171,7 @@ test.describe("@smoke", () => {
       await expect(ownerPage.getByRole("columnheader", { name: "Date" })).toBeVisible();
       await expect(ownerPage.getByRole("columnheader", { name: "Amount" })).toBeVisible();
       await expect(ownerPage.getByRole("columnheader", { name: "Status" })).toBeVisible();
-      await expect(ownerPage.getByText("Succeeded")).toBeVisible();
+      await expect(ownerPage.getByText("Paid")).toBeVisible();
       await expect(ownerPage.getByRole("link", { name: "Receipt" })).toBeVisible();
 
       await ownerPage.unroute("**/api/account/subscriptions/current");
@@ -647,8 +647,8 @@ test.describe("@comprehensive", () => {
     })();
 
     // === EMPTY PAYMENT HISTORY ===
-    await step("Scroll to billing history & verify empty state message")(async () => {
-      await expect(ownerPage.getByRole("heading", { name: "Billing history" })).toBeVisible();
+    await step("Scroll to invoices section & verify empty state message")(async () => {
+      await expect(ownerPage.getByRole("heading", { name: "Invoices" })).toBeVisible();
       await expect(ownerPage.getByText("No payment history available.")).toBeVisible();
 
       await ownerPage.unroute("**/api/account/billing/payment-history**");
@@ -688,7 +688,7 @@ test.describe("@comprehensive", () => {
             transactions: [
               {
                 id: "txn_mock_1",
-                amount: 29.0,
+                amount: 149.0,
                 currency: "USD",
                 status: "Succeeded",
                 date: "2026-02-24T00:00:00Z",
@@ -698,7 +698,7 @@ test.describe("@comprehensive", () => {
               },
               {
                 id: "txn_mock_2",
-                amount: 29.0,
+                amount: 149.0,
                 currency: "USD",
                 status: "Refunded",
                 date: "2026-01-24T00:00:00Z",
@@ -713,7 +713,7 @@ test.describe("@comprehensive", () => {
 
       await ownerPage.goto("/account/billing");
 
-      await expect(ownerPage.getByText("Succeeded")).toBeVisible();
+      await expect(ownerPage.getByText("Paid")).toBeVisible();
       await expect(ownerPage.getByText("Refunded")).toBeVisible();
 
       const receiptLinks = ownerPage.getByRole("link", { name: "Receipt" });

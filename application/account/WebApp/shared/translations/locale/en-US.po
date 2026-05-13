@@ -435,9 +435,6 @@ msgstr "Billing"
 msgid "Billing email"
 msgstr "Billing email"
 
-msgid "Billing history"
-msgstr "Billing history"
-
 msgid "Billing information"
 msgstr "Billing information"
 
@@ -560,6 +557,9 @@ msgstr "Cancel subscription"
 
 msgid "Cancellation reason"
 msgstr "Cancellation reason"
+
+msgid "Cancelled"
+msgstr "Cancelled"
 
 msgid "Cancelling"
 msgstr "Cancelling"
@@ -1324,6 +1324,9 @@ msgstr "Invite user"
 msgid "Invited users"
 msgstr "Invited users"
 
+msgid "Invoices"
+msgstr "Invoices"
+
 msgid "IP address"
 msgstr "IP address"
 
@@ -1819,6 +1822,9 @@ msgstr "Page not found"
 msgid "Page Views"
 msgstr "Page Views"
 
+msgid "Paid"
+msgstr "Paid"
+
 msgid "Palak paneer"
 msgstr "Palak paneer"
 
@@ -1933,9 +1939,6 @@ msgstr "Please log in again to continue."
 
 msgid "Please select a JPEG, PNG, GIF, or WebP image."
 msgstr "Please select a JPEG, PNG, GIF, or WebP image."
-
-msgid "Please select a JPEG, PNG, GIF, WebP, or SVG image."
-msgstr "Please select a JPEG, PNG, GIF, WebP, or SVG image."
 
 msgid "Please try again or return to the home page."
 msgstr "Please try again or return to the home page."
@@ -2525,9 +2528,6 @@ msgstr "Subscription"
 msgid "Subtle background for grouped rows inside a panel."
 msgstr "Subtle background for grouped rows inside a panel."
 
-msgid "Succeeded"
-msgstr "Succeeded"
-
 msgid "Suggestions"
 msgstr "Suggestions"
 
@@ -2840,6 +2840,9 @@ msgstr "User data updated"
 
 msgid "User deleted successfully: {userDisplayName}"
 msgstr "User deleted successfully: {userDisplayName}"
+
+msgid "User ID"
+msgstr "User ID"
 
 msgid "User invited successfully"
 msgstr "User invited successfully"

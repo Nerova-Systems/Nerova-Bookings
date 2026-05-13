@@ -86,6 +86,15 @@ var accountWorkers = builder
     .WithEnvironment("KESTREL_PORT", ports.AccountWorkers.ToString())
     .WithReference(accountDatabase)
     .WithReference(azureStorage)
+    // The BillingDriftWorker resolves PaystackClientFactory which reads these. Without them the worker
+    // process sees UnconfiguredPaystackClient even when Paystack is configured at the API level.
+    .WithEnvironment("Paystack__SubscriptionEnabled", paystackFullyConfigured ? "true" : "false")
+    .WithEnvironment("Paystack__PublicKey", paystackPublicKey)
+    .WithEnvironment("Paystack__SecretKey", paystackSecretKey)
+    .WithEnvironment("Paystack__StandardPlanCode", paystackStandardPlanCode)
+    .WithEnvironment("Paystack__PremiumPlanCode", paystackPremiumPlanCode)
+    .WithEnvironment("Paystack__CardAuthorizationAmountSubunit", paystackCardAuthorizationAmountSubunit)
+    .WithEnvironment("Paystack__AllowMockProvider", "true")
     .WaitFor(accountDatabase);
 
 var accountApi = builder
@@ -120,6 +129,10 @@ var accountApi = builder
     .WithEnvironment("Paystack__PremiumPlanCode", paystackPremiumPlanCode)
     .WithEnvironment("Paystack__CardAuthorizationAmountSubunit", paystackCardAuthorizationAmountSubunit)
     .WithEnvironment("Paystack__AllowMockProvider", "true")
+    .WithEnvironment("PUBLIC_GOOGLE_OAUTH_ENABLED", googleOAuthConfigured ? "true" : "false")
+    // Force-on so newcomers see the back-office billing UI without Paystack configured. Set to "false" (or
+    // change back to `paystackFullyConfigured ? "true" : "false"`) to hide all billing/revenue/Paystack data.
+    .WithEnvironment("PUBLIC_SUBSCRIPTION_ENABLED", "true")
     .WaitFor(accountWorkers);
 
 var mainDatabase = postgres

@@ -64,6 +64,9 @@ public static class Configuration
 
             services.AddHttpContextAccessor();
             services.AddSingleton<MockPaystackState>();
+            services.AddSingleton<PlatformCurrencyProvider>();
+            services.AddSingleton<IPlatformCurrencyProvider>(sp => sp.GetRequiredService<PlatformCurrencyProvider>());
+            services.AddHostedService<PlatformCurrencyStartupResolver>();
             services.AddKeyedScoped<IPaystackClient, PaystackClient>("paystack");
             services.AddKeyedScoped<IPaystackClient, MockPaystackClient>("mock-paystack");
             services.AddKeyedScoped<IPaystackClient, UnconfiguredPaystackClient>("unconfigured-paystack");

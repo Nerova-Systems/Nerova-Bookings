@@ -124,7 +124,7 @@ public sealed class UpgradeSubscriptionHandler(
         subscription.StartBillingPeriod(command.NewPlan, targetPlanPrice.UnitAmount, charge.Currency, currentPeriodStart, currentPeriodEnd, charge.PaymentMethod);
         subscription.SetPaymentTransactions([
                 .. subscription.PaymentTransactions,
-                new PaymentTransaction(PaymentTransactionId.NewId(), charge.Amount, charge.Currency, PaymentTransactionStatus.Succeeded, now, null, null, null)
+                new PaymentTransaction(PaymentTransactionId.NewId(), charge.Amount, charge.Amount, 0m, charge.Currency, PaymentTransactionStatus.Succeeded, now, null, null, null)
             ]
         );
 

@@ -17,7 +17,7 @@ public sealed class GetPaymentHistoryTests : EndpointBaseTest<AccountDbContext>
     {
         // Arrange
         var transactionId = PaymentTransactionId.NewId().ToString();
-        var transactionsJson = $$"""[{"Id":"{{transactionId}}","Amount":29.99,"Currency":"usd","Status":"Succeeded","Date":"2026-01-01T00:00:00+00:00","FailureReason":null,"InvoiceUrl":"https://invoice.paystack.com/test"}]""";
+        var transactionsJson = $$"""[{"Id":"{{transactionId}}","Amount":29.99,"AmountExcludingTax":29.99,"TaxAmount":0.00,"Currency":"usd","Status":"Succeeded","Date":"2026-01-01T00:00:00+00:00","FailureReason":null,"InvoiceUrl":"https://invoice.paystack.com/test"}]""";
         Connection.Update("subscriptions", "tenant_id", DatabaseSeeder.Tenant1.Id.Value, [
                 ("plan", nameof(SubscriptionPlan.Standard)),
                 ("paystack_customer_code", "cus_test_123"),

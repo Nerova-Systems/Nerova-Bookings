@@ -1,6 +1,7 @@
 using Account.Features.Subscriptions.Domain;
 using Account.Features.Subscriptions.Shared;
 using Account.Features.Users.Domain;
+using Account.Integrations.Paystack;
 using JetBrains.Annotations;
 using SharedKernel.Cqrs;
 using SharedKernel.ExecutionContext;
@@ -12,6 +13,7 @@ public sealed record ScheduleDowngradeCommand(SubscriptionPlan NewPlan) : IComma
 
 public sealed class ScheduleDowngradeHandler(
     ISubscriptionRepository subscriptionRepository,
+    PaystackClientFactory paystackClientFactory,
     IExecutionContext executionContext,
     ILogger<ScheduleDowngradeHandler> logger
 ) : IRequestHandler<ScheduleDowngradeCommand, Result>
@@ -41,7 +43,14 @@ public sealed class ScheduleDowngradeHandler(
             return Result.BadRequest("Cannot downgrade to the Basis plan.");
         }
 
-        subscription.SetScheduledPlan(command.NewPlan);
+        var priceCatalog = await paystackClientFactory.GetClient().GetPriceCatalogAsync(cancellationToken);
+        var scheduledPriceAmount = priceCatalog.SingleOrDefault(p => p.Plan == command.NewPlan)?.UnitAmount;
+        if (scheduledPriceAmount is null)
+        {
+            return Result.BadRequest($"No Paystack price is configured for '{command.NewPlan}'.");
+        }
+
+        subscription.SetScheduledPlan(command.NewPlan, scheduledPriceAmount);
         subscriptionRepository.Update(subscription);
 
         return Result.Success();

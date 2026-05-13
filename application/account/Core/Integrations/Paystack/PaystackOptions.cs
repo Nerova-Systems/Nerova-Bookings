@@ -48,7 +48,7 @@ public sealed class PaystackOptionsValidator(IHostEnvironment hostEnvironment) :
             failures.Add("Paystack:AllowMockProvider cannot be enabled outside development/test unless Paystack:AllowMockProviderOutsideDevelopment is explicitly enabled.");
         }
 
-        if (options.SubscriptionEnabled && !options.AllowMockProvider)
+        if (options is { SubscriptionEnabled: true, AllowMockProvider: false })
         {
             if (string.IsNullOrWhiteSpace(options.PublicKey)) failures.Add("Paystack:PublicKey is required when Paystack subscriptions are enabled.");
             if (string.IsNullOrWhiteSpace(options.SecretKey)) failures.Add("Paystack:SecretKey is required when Paystack subscriptions are enabled.");

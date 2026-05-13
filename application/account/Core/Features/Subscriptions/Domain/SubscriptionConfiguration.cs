@@ -24,6 +24,7 @@ public sealed class SubscriptionConfiguration : IEntityTypeConfiguration<Subscri
         builder.Property(s => s.PaystackAuthorizationCode).HasColumnName("paystack_authorization_code");
 
         builder.Property(s => s.CurrentPriceAmount).HasPrecision(18, 2);
+        builder.Property(s => s.ScheduledPriceAmount).HasPrecision(18, 2);
 
         builder.Property(s => s.PaymentTransactions)
             .HasColumnType("jsonb")
@@ -45,6 +46,19 @@ public sealed class SubscriptionConfiguration : IEntityTypeConfiguration<Subscri
             .HasConversion(
                 v => v == null ? null : JsonSerializer.Serialize(v, JsonSerializerOptions),
                 v => v == null ? null : JsonSerializer.Deserialize<BillingInfo>(v, JsonSerializerOptions)
+            );
+
+        builder.Property(s => s.DriftDiscrepancies)
+            .HasColumnType("jsonb")
+            .HasConversion(
+                v => JsonSerializer.Serialize(v.ToArray(), JsonSerializerOptions),
+                v => JsonSerializer.Deserialize<ImmutableArray<DriftDiscrepancy>>(v, JsonSerializerOptions)
+            )
+            .Metadata.SetValueComparer(new ValueComparer<ImmutableArray<DriftDiscrepancy>>(
+                    (c1, c2) => c1.SequenceEqual(c2),
+                    c => c.Aggregate(0, (a, v) => HashCode.Combine(a, v.GetHashCode())),
+                    c => c
+                )
             );
     }
 }

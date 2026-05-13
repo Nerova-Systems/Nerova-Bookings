@@ -4,7 +4,6 @@ using Account.Features.Subscriptions.Domain;
 using Account.Integrations.Paystack;
 using FluentAssertions;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging;
 using NSubstitute;
 using Xunit;
 
@@ -37,7 +36,7 @@ public sealed class PaystackWebhookSignatureTests
 
         // Assert
         result.Should().NotBeNull();
-        result!.EventId.Should().Be("evt_123");
+        result.EventId.Should().Be("evt_123");
         result.EventType.Should().Be("charge.success");
         result.Reference.Should().Be("nerova_subscribe_123");
         result.CustomerId.Should().Be(PaystackCustomerId.NewId("CUS_123"));

@@ -15,6 +15,10 @@ public sealed record PaystackEventId(string Value) : StronglyTypedString<Paystac
     }
 }
 
+/// <summary>
+///     Durable Paystack webhook inbox row. Rows are inserted during webhook acknowledgement and then
+///     transitioned by the Paystack processing phase once the matching payment attempt can be verified.
+/// </summary>
 public sealed class PaystackEvent : AggregateRoot<PaystackEventId>
 {
     private PaystackEvent(PaystackEventId id) : base(id)
@@ -44,7 +48,7 @@ public sealed class PaystackEvent : AggregateRoot<PaystackEventId>
     /// <summary>
     ///     Factory method for phase 1 webhook acknowledgment. Creates a Pending event that will be
     ///     batch-processed in phase 2. TenantId and PaystackAuthorizationCode are backfilled by phase 2
-    ///     via SetTenantId() and SetPaystackAuthorizationCode().
+    ///     via <see cref="SetTenantId" /> and <see cref="SetPaystackAuthorizationCode" />.
     /// </summary>
     public static PaystackEvent Create(string paystackEventId, string eventType, PaystackCustomerId? paystackCustomerId, string? payload, string? paystackReference = null)
     {
@@ -62,6 +66,7 @@ public sealed class PaystackEvent : AggregateRoot<PaystackEventId>
     /// </summary>
     public void MarkProcessed(DateTimeOffset processedAt)
     {
+        EnsurePending();
         Status = PaystackEventStatus.Processed;
         ProcessedAt = processedAt;
     }
@@ -71,6 +76,7 @@ public sealed class PaystackEvent : AggregateRoot<PaystackEventId>
     /// </summary>
     public void MarkIgnored(DateTimeOffset processedAt)
     {
+        EnsurePending();
         Status = PaystackEventStatus.Ignored;
         ProcessedAt = processedAt;
     }
@@ -80,6 +86,7 @@ public sealed class PaystackEvent : AggregateRoot<PaystackEventId>
     /// </summary>
     public void MarkFailed(DateTimeOffset failedAt, string error)
     {
+        EnsurePending();
         Status = PaystackEventStatus.Failed;
         ProcessedAt = failedAt;
         Error = error;
@@ -93,5 +100,13 @@ public sealed class PaystackEvent : AggregateRoot<PaystackEventId>
     public void SetTenantId(TenantId? tenantId)
     {
         TenantId = tenantId;
+    }
+
+    private void EnsurePending()
+    {
+        if (Status is not PaystackEventStatus.Pending)
+        {
+            throw new InvalidOperationException($"PaystackEvent '{Id.Value}' is no longer Pending (status: {Status}); refusing to mutate.");
+        }
     }
 }
