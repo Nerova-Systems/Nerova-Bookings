@@ -18,8 +18,8 @@ public sealed class ReactivateSubscriptionTests : EndpointBaseTest<AccountDbCont
         // Arrange
         Connection.Update("subscriptions", "tenant_id", DatabaseSeeder.Tenant1.Id.Value, [
                 ("plan", nameof(SubscriptionPlan.Standard)),
-                ("stripe_customer_id", "cus_test_123"),
-                ("stripe_subscription_id", "sub_test_123"),
+                ("paystack_customer_code", "cus_test_123"),
+                ("paystack_authorization_code", "sub_test_123"),
                 ("current_period_end", TimeProvider.GetUtcNow().AddDays(30)),
                 ("cancel_at_period_end", true)
             ]
@@ -32,9 +32,9 @@ public sealed class ReactivateSubscriptionTests : EndpointBaseTest<AccountDbCont
 
         // Assert
         response.EnsureSuccessStatusCode();
-        var result = await response.Content.ReadFromJsonAsync<ReactivateSubscriptionResponse>();
-        result!.ClientSecret.Should().BeNull();
-
+        Connection.ExecuteScalar<long>("SELECT cancel_at_period_end FROM subscriptions WHERE tenant_id = @tenantId", [new { tenantId = DatabaseSeeder.Tenant1.Id.Value }]).Should().Be(0);
+        Connection.ExecuteScalar<string?>("SELECT cancellation_reason FROM subscriptions WHERE tenant_id = @tenantId", [new { tenantId = DatabaseSeeder.Tenant1.Id.Value }]).Should().BeNull();
+        Connection.ExecuteScalar<string?>("SELECT cancellation_feedback FROM subscriptions WHERE tenant_id = @tenantId", [new { tenantId = DatabaseSeeder.Tenant1.Id.Value }]).Should().BeNull();
         TelemetryEventsCollectorSpy.CollectedEvents.Should().BeEmpty();
     }
 
@@ -44,8 +44,8 @@ public sealed class ReactivateSubscriptionTests : EndpointBaseTest<AccountDbCont
         // Arrange
         Connection.Update("subscriptions", "tenant_id", DatabaseSeeder.Tenant1.Id.Value, [
                 ("plan", nameof(SubscriptionPlan.Standard)),
-                ("stripe_customer_id", "cus_test_123"),
-                ("stripe_subscription_id", "sub_test_123"),
+                ("paystack_customer_code", "cus_test_123"),
+                ("paystack_authorization_code", "sub_test_123"),
                 ("current_period_end", TimeProvider.GetUtcNow().AddDays(30))
             ]
         );
@@ -67,8 +67,8 @@ public sealed class ReactivateSubscriptionTests : EndpointBaseTest<AccountDbCont
         // Arrange
         Connection.Update("subscriptions", "tenant_id", DatabaseSeeder.Tenant1.Id.Value, [
                 ("plan", nameof(SubscriptionPlan.Standard)),
-                ("stripe_customer_id", "cus_test_123"),
-                ("stripe_subscription_id", "sub_test_123"),
+                ("paystack_customer_code", "cus_test_123"),
+                ("paystack_authorization_code", "sub_test_123"),
                 ("current_period_end", TimeProvider.GetUtcNow().AddDays(30)),
                 ("cancel_at_period_end", true)
             ]

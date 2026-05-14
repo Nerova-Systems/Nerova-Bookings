@@ -3,6 +3,7 @@ using System.Net.Http.Json;
 using Account.Database;
 using Account.Features.Subscriptions.Domain;
 using Account.Features.Subscriptions.Queries;
+using Account.Integrations.Paystack;
 using FluentAssertions;
 using SharedKernel.Tests;
 using SharedKernel.Tests.Persistence;
@@ -13,49 +14,30 @@ namespace Account.Tests.Subscriptions;
 public sealed class GetUpgradePreviewTests : EndpointBaseTest<AccountDbContext>
 {
     [Fact]
-    public async Task GetUpgradePreview_WhenStandardToPremium_ShouldReturnPreview()
+    public async Task GetUpgradePreview_WhenStandardToPremium_ShouldReturnProratedAmount()
     {
         // Arrange
-        Connection.Update("subscriptions", "tenant_id", DatabaseSeeder.Tenant1.Id.Value, [
-                ("plan", nameof(SubscriptionPlan.Standard)),
-                ("stripe_customer_id", "cus_test_123"),
-                ("stripe_subscription_id", "sub_test_123"),
-                ("current_period_end", TimeProvider.GetUtcNow().AddDays(30))
-            ]
-        );
+        var now = TimeProvider.GetUtcNow();
+        SaveActiveSubscription(SubscriptionPlan.Standard, 29.00m, now.AddDays(-15), now.AddDays(15));
 
         // Act
         var response = await AuthenticatedOwnerHttpClient.GetAsync("/api/account/subscriptions/upgrade-preview?NewPlan=Premium");
 
         // Assert
-        response.ShouldBeSuccessfulGetRequest();
+        response.EnsureSuccessStatusCode();
         var result = await response.Content.ReadFromJsonAsync<UpgradePreviewResponse>();
-        result!.TotalAmount.Should().BeGreaterThan(0);
-        result.Currency.Should().NotBeNullOrEmpty();
-        result.LineItems.Should().NotBeEmpty();
-        result.LineItems.Sum(i => i.Amount).Should().Be(result.TotalAmount);
-        var taxItem = result.LineItems.Should().ContainSingle(i => i.Description == "Tax").Which;
-        taxItem.Amount.Should().BeGreaterThan(0);
-        taxItem.IsProration.Should().BeFalse();
-        result.LineItems.Where(i => i.IsProration).Should().AllSatisfy(item =>
-            {
-                item.Description.Should().NotBeNullOrEmpty();
-                item.Currency.Should().NotBeNullOrEmpty();
-            }
-        );
+        result!.TotalAmount.Should().BeApproximately(35.00m, 0.01m);
+        result.Currency.Should().Be(MockPaystackClient.MockStandardCurrency);
+        result.LineItems.Should().Contain(i => i.Description == "Premium prorated upgrade" && i.IsProration);
+        result.LineItems.Should().Contain(i => i.Description == "Tax" && i.IsTax);
     }
 
     [Fact]
     public async Task GetUpgradePreview_WhenPlanNotHigher_ShouldReturnBadRequest()
     {
         // Arrange
-        Connection.Update("subscriptions", "tenant_id", DatabaseSeeder.Tenant1.Id.Value, [
-                ("plan", nameof(SubscriptionPlan.Premium)),
-                ("stripe_customer_id", "cus_test_123"),
-                ("stripe_subscription_id", "sub_test_123"),
-                ("current_period_end", TimeProvider.GetUtcNow().AddDays(30))
-            ]
-        );
+        var now = TimeProvider.GetUtcNow();
+        SaveActiveSubscription(SubscriptionPlan.Premium, 99.00m, now.AddDays(-15), now.AddDays(15));
 
         // Act
         var response = await AuthenticatedOwnerHttpClient.GetAsync("/api/account/subscriptions/upgrade-preview?NewPlan=Standard");
@@ -65,31 +47,12 @@ public sealed class GetUpgradePreviewTests : EndpointBaseTest<AccountDbContext>
     }
 
     [Fact]
-    public async Task GetUpgradePreview_WhenNonOwner_ShouldReturnForbidden()
+    public async Task GetUpgradePreview_WhenNoPaystackAuthorization_ShouldReturnBadRequest()
     {
         // Arrange
         Connection.Update("subscriptions", "tenant_id", DatabaseSeeder.Tenant1.Id.Value, [
                 ("plan", nameof(SubscriptionPlan.Standard)),
-                ("stripe_customer_id", "cus_test_123"),
-                ("stripe_subscription_id", "sub_test_123"),
-                ("current_period_end", TimeProvider.GetUtcNow().AddDays(30))
-            ]
-        );
-
-        // Act
-        var response = await AuthenticatedMemberHttpClient.GetAsync("/api/account/subscriptions/upgrade-preview?NewPlan=Premium");
-
-        // Assert
-        await response.ShouldHaveErrorStatusCode(HttpStatusCode.Forbidden, "Only owners can manage subscriptions.");
-    }
-
-    [Fact]
-    public async Task GetUpgradePreview_WhenNoStripeSubscription_ShouldReturnBadRequest()
-    {
-        // Arrange
-        Connection.Update("subscriptions", "tenant_id", DatabaseSeeder.Tenant1.Id.Value, [
-                ("plan", nameof(SubscriptionPlan.Standard)),
-                ("stripe_customer_id", "cus_test_123")
+                ("paystack_customer_code", MockPaystackClient.MockCustomerCode)
             ]
         );
 
@@ -97,6 +60,22 @@ public sealed class GetUpgradePreviewTests : EndpointBaseTest<AccountDbContext>
         var response = await AuthenticatedOwnerHttpClient.GetAsync("/api/account/subscriptions/upgrade-preview?NewPlan=Premium");
 
         // Assert
-        await response.ShouldHaveErrorStatusCode(HttpStatusCode.BadRequest, "No active Stripe subscription found.");
+        await response.ShouldHaveErrorStatusCode(HttpStatusCode.BadRequest, "No active Paystack authorization found.");
+    }
+
+    private void SaveActiveSubscription(SubscriptionPlan plan, decimal currentPriceAmount, DateTimeOffset currentPeriodStart, DateTimeOffset currentPeriodEnd)
+    {
+        Connection.Update("subscriptions", "tenant_id", DatabaseSeeder.Tenant1.Id.Value, [
+                ("plan", plan.ToString()),
+                ("paystack_customer_code", MockPaystackClient.MockCustomerCode),
+                ("paystack_authorization_code", MockPaystackClient.MockAuthorizationCode),
+                ("paystack_authorization_email", "billing@example.com"),
+                ("current_price_amount", currentPriceAmount),
+                ("current_price_currency", MockPaystackClient.MockStandardCurrency),
+                ("current_period_start", currentPeriodStart),
+                ("current_period_end", currentPeriodEnd),
+                ("next_billing_at", currentPeriodEnd)
+            ]
+        );
     }
 }

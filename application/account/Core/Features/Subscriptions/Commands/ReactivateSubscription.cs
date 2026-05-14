@@ -1,6 +1,5 @@
 using Account.Features.Subscriptions.Domain;
 using Account.Features.Users.Domain;
-using Account.Integrations.Stripe;
 using JetBrains.Annotations;
 using SharedKernel.Cqrs;
 using SharedKernel.ExecutionContext;
@@ -11,11 +10,10 @@ namespace Account.Features.Subscriptions.Commands;
 public sealed record ReactivateSubscriptionCommand : ICommand, IRequest<Result<ReactivateSubscriptionResponse>>;
 
 [PublicAPI]
-public sealed record ReactivateSubscriptionResponse(string? ClientSecret, string? PublishableKey);
+public sealed record ReactivateSubscriptionResponse;
 
 public sealed class ReactivateSubscriptionHandler(
     ISubscriptionRepository subscriptionRepository,
-    StripeClientFactory stripeClientFactory,
     IExecutionContext executionContext,
     ILogger<ReactivateSubscriptionHandler> logger
 ) : IRequestHandler<ReactivateSubscriptionCommand, Result<ReactivateSubscriptionResponse>>
@@ -34,21 +32,15 @@ public sealed class ReactivateSubscriptionHandler(
             return Result<ReactivateSubscriptionResponse>.BadRequest("Subscription is not cancelled. Nothing to reactivate.");
         }
 
-        if (subscription.StripeSubscriptionId is null)
+        if (subscription.PaystackAuthorizationCode is null)
         {
-            logger.LogWarning("No Stripe subscription found for subscription '{SubscriptionId}'", subscription.Id);
-            return Result<ReactivateSubscriptionResponse>.BadRequest("No active Stripe subscription found.");
+            logger.LogWarning("No Paystack authorization found for subscription '{SubscriptionId}'", subscription.Id);
+            return Result<ReactivateSubscriptionResponse>.BadRequest("No active Paystack authorization found.");
         }
 
-        var stripeClient = stripeClientFactory.GetClient();
-        var reactivateSuccess = await stripeClient.ReactivateSubscriptionAsync(subscription.StripeSubscriptionId, cancellationToken);
-        if (!reactivateSuccess)
-        {
-            return Result<ReactivateSubscriptionResponse>.BadRequest("Failed to reactivate subscription in Stripe.");
-        }
+        subscription.SetCancellation(false, null, null);
+        subscriptionRepository.Update(subscription);
 
-        // Subscription is updated and telemetry is collected in ProcessPendingStripeEvents when Stripe confirms the state change via webhook
-
-        return new ReactivateSubscriptionResponse(null, null);
+        return new ReactivateSubscriptionResponse();
     }
 }

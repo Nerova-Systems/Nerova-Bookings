@@ -69,11 +69,6 @@ msgstr "© {currentYear} PlatformPlatform. Alle rettigheder forbeholdes."
 msgid "+39 06 555 0000"
 msgstr "+39 06 555 0000"
 
-msgid ""
-"1 Infinite Loop\n"
-"Cupertino, CA 95014"
-msgstr ""
-
 msgid "1 TB storage"
 msgstr "1 TB lagerplads"
 
@@ -91,6 +86,13 @@ msgstr "100 GB lagerplads"
 
 msgid "100% Security Score"
 msgstr "100% sikkerhedsscore"
+
+msgid ""
+"123 Example Street\n"
+"Anytown, AA 12345"
+msgstr ""
+"123 Example Street\n"
+"Anytown, AA 12345"
 
 msgid "14 h 30 min logged"
 msgstr "14 t 30 min logget"
@@ -156,7 +158,7 @@ msgid "Account deleted"
 msgstr "Konto slettet"
 
 msgid "Account ID"
-msgstr "Konto-ID"
+msgstr "Konto-id"
 
 msgid "Account logo"
 msgstr "Kontologo"
@@ -186,7 +188,7 @@ msgid "Achieved in Microsoft Defender for Cloud following Azure best practices"
 msgstr "Opnået i Microsoft Defender for Cloud ved at følge Azures bedste praksis"
 
 msgid "Action"
-msgstr ""
+msgstr "Handling"
 
 msgid "Activating subscription"
 msgstr "Aktiverer abonnement"
@@ -204,7 +206,7 @@ msgid "Active users in the past 30 days"
 msgstr "Aktive brugere i de sidste 30 dage"
 
 msgid "Add an extra layer of security to your account."
-msgstr ""
+msgstr "Tilføj et ekstra sikkerhedslag til din konto."
 
 msgid "Add billing information"
 msgstr "Tilføj faktureringsoplysninger"
@@ -433,9 +435,6 @@ msgstr "Fakturering"
 msgid "Billing email"
 msgstr "Faktureringsmail"
 
-msgid "Billing history"
-msgstr "Betalingshistorik"
-
 msgid "Billing information"
 msgstr "Faktureringsoplysninger"
 
@@ -444,6 +443,9 @@ msgstr "Faktureringsoplysninger opdateret"
 
 msgid "Billing is not configured. Please contact support to enable payment processing."
 msgstr "Betaling er ikke konfigureret. Kontakt support for at aktivere betalingsbehandling."
+
+msgid "Billing name"
+msgstr "Faktureringsnavn"
 
 msgid "Billing tabs"
 msgstr "Faktureringsfaner"
@@ -461,7 +463,7 @@ msgid "Bold"
 msgstr "Fed"
 
 msgid "Bordered row for stand-alone settings or list items."
-msgstr ""
+msgstr "Række med kant til selvstændige indstillinger eller listeelementer."
 
 msgid "Bottom"
 msgstr "Bund"
@@ -555,6 +557,9 @@ msgstr "Opsig abonnement"
 
 msgid "Cancellation reason"
 msgstr "Opsigelsesgrund"
+
+msgid "Cancelled"
+msgstr "Annulleret"
 
 msgid "Cancelling"
 msgstr "Annullerer"
@@ -1059,7 +1064,7 @@ msgid "Email address"
 msgstr "E-mailadresse"
 
 msgid "Email me when a new device signs in."
-msgstr ""
+msgstr "Send mig en e-mail, når en ny enhed logger ind."
 
 msgid "Email support"
 msgstr "E-mail-support"
@@ -1137,7 +1142,7 @@ msgid "Export as PDF"
 msgstr "Eksporter som PDF"
 
 msgid "External"
-msgstr ""
+msgstr "Ekstern"
 
 msgid "Extra large"
 msgstr "Ekstra stor"
@@ -1147,9 +1152,6 @@ msgstr "Ekstra lille"
 
 msgid "Failed"
 msgstr "Mislykket"
-
-msgid "Failed to load payment processor."
-msgstr "Kunne ikke indlæse betalingsprocessor."
 
 msgid "Features"
 msgstr "Funktioner"
@@ -1290,7 +1292,7 @@ msgid "Indeterminate"
 msgstr "Ubestemt"
 
 msgid "Indeterminate loading indicator. Use Progress when you can show how much work remains; reach for Spinner when you can't."
-msgstr ""
+msgstr "Ubestemt indlæsningsindikator. Brug Progress, når du kan vise, hvor meget arbejde der er tilbage; vælg Spinner, når du ikke kan."
 
 msgid "Indian"
 msgstr "Indisk"
@@ -1322,8 +1324,8 @@ msgstr "Inviter bruger"
 msgid "Invited users"
 msgstr "Inviterede brugere"
 
-msgid "Invoice"
-msgstr "Faktura"
+msgid "Invoices"
+msgstr "Fakturaer"
 
 msgid "IP address"
 msgstr "IP-adresse"
@@ -1344,13 +1346,13 @@ msgid "Italic"
 msgstr "Kursiv"
 
 msgid "Item — clickable row"
-msgstr ""
+msgstr "Element — klikbar række"
 
 msgid "Item — image media"
-msgstr ""
+msgstr "Element — billede"
 
 msgid "Item — variants"
-msgstr ""
+msgstr "Element — varianter"
 
 msgid "Item archived"
 msgstr "Element arkiveret"
@@ -1359,7 +1361,7 @@ msgid "Item deleted"
 msgstr "Element slettet"
 
 msgid "ItemGroup — settings list"
-msgstr ""
+msgstr "ItemGroup — indstillingsliste"
 
 msgid "January - June 2024"
 msgstr "Januar - juni 2024"
@@ -1472,6 +1474,9 @@ msgstr "Lineær fremskridtsbjælke til determinerede, forgrundsopgaver som uploa
 msgid "Link"
 msgstr "Link"
 
+msgid "Link card"
+msgstr "Linkkort"
+
 msgid "Link sizes"
 msgstr "Linkstørrelser"
 
@@ -1506,7 +1511,7 @@ msgid "Logged out"
 msgstr "Logget ud"
 
 msgid "Login alerts"
-msgstr ""
+msgstr "Login-advarsler"
 
 msgid "Login method"
 msgstr "Login-metode"
@@ -1533,7 +1538,7 @@ msgid "Main navigation"
 msgstr "Hovednavigation"
 
 msgid "Manage"
-msgstr ""
+msgstr "Administrer"
 
 msgid "Manage subscription"
 msgstr "Administrer abonnement"
@@ -1641,13 +1646,10 @@ msgid "Multi-select summary side pane"
 msgstr "Oversigtspanel for flervalg"
 
 msgid "Muted"
-msgstr ""
+msgstr "Dæmpet"
 
 msgid "Name"
 msgstr "Navn"
-
-msgid "Name as it appears on invoices"
-msgstr "Navn som det fremgår på fakturaer"
 
 msgid "Narrow bottom drawer"
 msgstr "Smal bunddrawer"
@@ -1740,7 +1742,7 @@ msgid "Number (integer)"
 msgstr "Tal (heltal)"
 
 msgid "Off"
-msgstr ""
+msgstr "Fra"
 
 msgid "OK"
 msgstr "OK"
@@ -1749,7 +1751,7 @@ msgid "Okonomiyaki"
 msgstr "Okonomiyaki"
 
 msgid "On"
-msgstr ""
+msgstr "Til"
 
 msgid "One-time code"
 msgstr "Engangskode"
@@ -1820,11 +1822,14 @@ msgstr "Siden blev ikke fundet"
 msgid "Page Views"
 msgstr "Sidevisninger"
 
+msgid "Paid"
+msgstr "Betalt"
+
 msgid "Palak paneer"
 msgstr "Palak paneer"
 
 msgid "Passkeys"
-msgstr ""
+msgstr "Passkeys"
 
 msgid "Passwordless deployments"
 msgstr "Adgangskodeløse implementeringer"
@@ -1841,11 +1846,17 @@ msgstr "Betal og opgrader"
 msgid "Payment authentication failed."
 msgstr "Betalingsgodkendelse mislykkedes."
 
+msgid "Payment completed but no Paystack reference was returned."
+msgstr "Betalingen blev gennemført, men der blev ikke returneret en Paystack-reference."
+
 msgid "Payment could not be processed. Please try again later."
 msgstr "Betalingen kunne ikke gennemføres. Prøv igen senere."
 
 msgid "Payment failed"
 msgstr "Betaling mislykkedes"
+
+msgid "Payment failed. Retry payment or update your payment method to keep your subscription active."
+msgstr "Betaling mislykkedes. Prøv betalingen igen, eller opdater din betalingsmetode for at holde dit abonnement aktivt."
 
 msgid "Payment failed. Your subscription will be suspended soon."
 msgstr "Betaling mislykkedes. Dit abonnement vil blive suspenderet snart."
@@ -1928,9 +1939,6 @@ msgstr "Log venligst ind igen for at fortsætte."
 
 msgid "Please select a JPEG, PNG, GIF, or WebP image."
 msgstr "Vælg et JPEG-, PNG-, GIF- eller WebP-billede."
-
-msgid "Please select a JPEG, PNG, GIF, WebP, or SVG image."
-msgstr "Vælg et JPEG-, PNG-, GIF-, WebP- eller SVG-billede."
 
 msgid "Please try again or return to the home page."
 msgstr "Prøv venligst igen eller vend tilbage til forsiden."
@@ -2055,6 +2063,9 @@ msgstr "Klar til at udgive?"
 msgid "Rebase and merge"
 msgstr "Rebase og flet"
 
+msgid "Receipt"
+msgstr "Kvittering"
+
 msgid "Recipe"
 msgstr "Opskrift"
 
@@ -2156,6 +2167,9 @@ msgstr "Gendan bruger"
 msgid "Restoring..."
 msgstr "Gendanner..."
 
+msgid "Retry payment"
+msgstr "Prøv betaling igen"
+
 msgid "Retry pending payment"
 msgstr "Prøv afventende betaling igen"
 
@@ -2212,6 +2226,9 @@ msgstr "Gem note"
 
 msgid "Save page as..."
 msgstr "Gem side som..."
+
+msgid "Saved card"
+msgstr "Gemt kort"
 
 msgid "Saved recipes"
 msgstr "Gemte opskrifter"
@@ -2388,7 +2405,7 @@ msgid "Sidebar footer"
 msgstr "Sidemenu-sidefod"
 
 msgid "Sign in without a password using your device."
-msgstr ""
+msgstr "Log ind uden adgangskode ved hjælp af din enhed."
 
 msgid "Sign up"
 msgstr "Tilmeld dig"
@@ -2421,10 +2438,10 @@ msgid "SLA"
 msgstr "SLA"
 
 msgid "Slider (range)"
-msgstr ""
+msgstr "Slider (interval)"
 
 msgid "Slider with steps"
-msgstr ""
+msgstr "Slider med trin"
 
 msgid "Slow-cooked classics"
 msgstr "Langtidsstegte klassikere"
@@ -2463,7 +2480,7 @@ msgid "Spaghetti carbonara"
 msgstr "Spaghetti carbonara"
 
 msgid "Spinner"
-msgstr ""
+msgstr "Spinner"
 
 msgid "Split buttons"
 msgstr "Delte knapper"
@@ -2498,9 +2515,6 @@ msgstr "Vejnavn"
 msgid "Strict separation prevents production data from leaking to other environments"
 msgstr "Streng adskillelse forhindrer produktionsdata i at lække til andre miljøer"
 
-msgid "Stripe Link"
-msgstr "Stripe Link"
-
 msgid "Subscribe"
 msgstr "Abonner"
 
@@ -2512,10 +2526,7 @@ msgid "Subscription"
 msgstr "Abonnement"
 
 msgid "Subtle background for grouped rows inside a panel."
-msgstr ""
-
-msgid "Succeeded"
-msgstr "Gennemført"
+msgstr "Diskret baggrund til grupperede rækker i et panel."
 
 msgid "Suggestions"
 msgstr "Forslag"
@@ -2542,7 +2553,7 @@ msgid "Tablet"
 msgstr "Tablet"
 
 msgid "Tabs"
-msgstr ""
+msgstr "Faner"
 
 msgid "Tacos al pastor"
 msgstr "Tacos al pastor"
@@ -2731,7 +2742,7 @@ msgid "Try again"
 msgstr "Prøv igen"
 
 msgid "Two-factor authentication"
-msgstr ""
+msgstr "Tofaktor-godkendelse"
 
 msgid "Type a command or search..."
 msgstr "Skriv en kommando eller søg..."
@@ -2830,6 +2841,9 @@ msgstr "Brugerdata opdateret"
 msgid "User deleted successfully: {userDisplayName}"
 msgstr "Bruger slettet succesfuldt: {userDisplayName}"
 
+msgid "User ID"
+msgstr "Bruger-id"
+
 msgid "User invited successfully"
 msgstr "Bruger inviteret succesfuldt"
 
@@ -2914,20 +2928,23 @@ msgstr "Se invitation"
 msgid "View invited users"
 msgstr "Se inviterede brugere"
 
-msgid "View invoices and manage your payment method."
-msgstr "Se fakturaer og administrer din betalingsmetode."
+msgid "View payments and manage your payment method."
+msgstr "Se betalinger, og administrer din betalingsmetode."
 
 msgid "View profile"
 msgstr "Se profil"
 
 msgid "View profile verification"
-msgstr ""
+msgstr "Vis profilbekræftelse"
 
 msgid "View users"
 msgstr "Se brugere"
 
 msgid "Visitors"
 msgstr "Besøgende"
+
+msgid "Warning"
+msgstr "Advarsel"
 
 msgid "Warning alert"
 msgstr "Advarselsbesked"
@@ -3038,7 +3055,7 @@ msgid "Your plan will be downgraded to {planName} at the end of your current bil
 msgstr "Din plan vil blive nedgraderet til {planName} ved udgangen af din nuværende faktureringsperiode. Du beholder dine nuværende planfunktioner indtil da."
 
 msgid "Your profile has been verified"
-msgstr ""
+msgstr "Din profil er blevet bekræftet"
 
 msgid "Your scheduled downgrade has been cancelled."
 msgstr "Din planlagte nedgradering er blevet afbrudt."

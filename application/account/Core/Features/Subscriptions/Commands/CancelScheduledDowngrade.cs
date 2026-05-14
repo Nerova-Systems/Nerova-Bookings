@@ -1,6 +1,5 @@
 using Account.Features.Subscriptions.Domain;
 using Account.Features.Users.Domain;
-using Account.Integrations.Stripe;
 using JetBrains.Annotations;
 using SharedKernel.Cqrs;
 using SharedKernel.ExecutionContext;
@@ -12,7 +11,6 @@ public sealed record CancelScheduledDowngradeCommand : ICommand, IRequest<Result
 
 public sealed class CancelScheduledDowngradeHandler(
     ISubscriptionRepository subscriptionRepository,
-    StripeClientFactory stripeClientFactory,
     IExecutionContext executionContext,
     ILogger<CancelScheduledDowngradeHandler> logger
 ) : IRequestHandler<CancelScheduledDowngradeCommand, Result>
@@ -26,10 +24,10 @@ public sealed class CancelScheduledDowngradeHandler(
 
         var subscription = await subscriptionRepository.GetCurrentAsync(cancellationToken);
 
-        if (subscription.StripeSubscriptionId is null)
+        if (subscription.PaystackAuthorizationCode is null)
         {
-            logger.LogWarning("No Stripe subscription found for subscription '{SubscriptionId}'", subscription.Id);
-            return Result.BadRequest("No active Stripe subscription found.");
+            logger.LogWarning("No Paystack authorization found for subscription '{SubscriptionId}'", subscription.Id);
+            return Result.BadRequest("No active Paystack authorization found.");
         }
 
         if (subscription.ScheduledPlan is null)
@@ -37,14 +35,8 @@ public sealed class CancelScheduledDowngradeHandler(
             return Result.BadRequest("No scheduled downgrade to cancel.");
         }
 
-        var stripeClient = stripeClientFactory.GetClient();
-        var success = await stripeClient.CancelScheduledDowngradeAsync(subscription.StripeSubscriptionId, cancellationToken);
-        if (!success)
-        {
-            return Result.BadRequest("Failed to cancel scheduled downgrade in Stripe.");
-        }
-
-        // Subscription is updated and telemetry is collected in ProcessPendingStripeEvents when Stripe confirms the state change via webhook
+        subscription.SetScheduledPlan(null, null);
+        subscriptionRepository.Update(subscription);
 
         return Result.Success();
     }

@@ -17,7 +17,7 @@ public sealed class GetCheckoutPreviewTests : EndpointBaseTest<AccountDbContext>
     {
         // Arrange
         Connection.Update("subscriptions", "tenant_id", DatabaseSeeder.Tenant1.Id.Value, [
-                ("stripe_customer_id", "cus_test_123")
+                ("paystack_customer_code", "cus_test_123")
             ]
         );
 
@@ -48,7 +48,7 @@ public sealed class GetCheckoutPreviewTests : EndpointBaseTest<AccountDbContext>
     {
         // Arrange
         Connection.Update("subscriptions", "tenant_id", DatabaseSeeder.Tenant1.Id.Value, [
-                ("stripe_customer_id", "cus_test_123")
+                ("paystack_customer_code", "cus_test_123")
             ]
         );
 
@@ -60,7 +60,7 @@ public sealed class GetCheckoutPreviewTests : EndpointBaseTest<AccountDbContext>
     }
 
     [Fact]
-    public async Task GetCheckoutPreview_WhenNoStripeCustomer_ShouldReturnBadRequest()
+    public async Task GetCheckoutPreview_WhenNoPaystackCustomer_ShouldReturnBadRequest()
     {
         // Act
         var response = await AuthenticatedOwnerHttpClient.GetAsync("/api/account/subscriptions/checkout-preview?Plan=Standard");

@@ -1,6 +1,3 @@
-import type { Stripe } from "@stripe/stripe-js";
-
-import { i18n } from "@lingui/core";
 import { t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
 import { Button } from "@repo/ui/components/Button";
@@ -15,41 +12,43 @@ import {
   DialogTitle
 } from "@repo/ui/components/Dialog";
 import { Skeleton } from "@repo/ui/components/Skeleton";
-import { Elements, PaymentElement, useElements, useStripe } from "@stripe/react-stripe-js";
-import { loadStripe } from "@stripe/stripe-js/pure";
 import { useQueryClient } from "@tanstack/react-query";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 import { api } from "@/shared/lib/api/client";
 
-import { getStripeAppearance } from "./stripeAppearance";
-
-interface OpenInvoiceInfo {
-  amount: number;
-  currency: string;
-}
+import { resumePaystackTransaction } from "./paystackInline";
 
 interface UpdatePaymentMethodDialogProps {
   isOpen: boolean;
   onOpenChange: (isOpen: boolean) => void;
-  onHasOpenInvoice?: (invoice: OpenInvoiceInfo) => void;
 }
 
-export function UpdatePaymentMethodDialog({
-  isOpen,
-  onOpenChange,
-  onHasOpenInvoice
-}: Readonly<UpdatePaymentMethodDialogProps>) {
-  const [stripePromise, setStripePromise] = useState<Promise<Stripe | null> | null>(null);
-  const [clientSecret, setClientSecret] = useState<string | null>(null);
+type PaystackPaymentMethodSetup = {
+  accessCode: string;
+  reference: string;
+};
+
+export function UpdatePaymentMethodDialog({ isOpen, onOpenChange }: Readonly<UpdatePaymentMethodDialogProps>) {
+  const queryClient = useQueryClient();
+  const [setup, setSetup] = useState<PaystackPaymentMethodSetup | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [isPaystackOpen, setIsPaystackOpen] = useState(false);
   const [setupError, setSetupError] = useState<string | null>(null);
+
+  const confirmMutation = api.useMutation("post", "/api/account/billing/confirm-payment-method", {
+    onSuccess: () => {
+      queryClient.invalidateQueries();
+      toast.success(t`Payment method updated`);
+      onOpenChange(false);
+    }
+  });
 
   const setupMutation = api.useMutation("post", "/api/account/billing/start-payment-method-setup", {
     onSuccess: (data) => {
-      setClientSecret(data.clientSecret);
-      setStripePromise(loadStripe(data.publishableKey, { locale: i18n.locale as "auto" }));
+      const response = data as PaystackPaymentMethodSetup;
+      setSetup(response);
       setIsLoading(false);
     },
     onError: () => {
@@ -62,35 +61,47 @@ export function UpdatePaymentMethodDialog({
     if (isOpen) {
       setIsLoading(true);
       setSetupError(null);
-      setClientSecret(null);
-      setStripePromise(null);
+      setSetup(null);
       startSetup({});
     } else {
-      setClientSecret(null);
-      setStripePromise(null);
+      setSetup(null);
       setSetupError(null);
       setIsLoading(false);
+      setIsPaystackOpen(false);
     }
   }, [isOpen, startSetup]);
 
-  const elementsOptions = useMemo(() => {
-    if (!clientSecret) {
-      return undefined;
+  const handleSubmit = async () => {
+    if (!setup?.accessCode) {
+      return;
     }
-    return {
-      clientSecret,
-      appearance: getStripeAppearance()
-    };
-  }, [clientSecret]);
 
-  const isReady = stripePromise && elementsOptions;
+    setIsPaystackOpen(true);
+    setSetupError(null);
 
-  const handlePaymentFormSuccess = (openInvoice: OpenInvoiceInfo | null) => {
-    onOpenChange(false);
-    if (openInvoice) {
-      onHasOpenInvoice?.(openInvoice);
+    try {
+      await resumePaystackTransaction(setup.accessCode, {
+        onSuccess: (transaction) => {
+          setIsPaystackOpen(false);
+          confirmMutation.mutate({
+            body: { reference: transaction.reference ?? transaction.trxref ?? setup.reference }
+          });
+        },
+        onCancel: () => {
+          setIsPaystackOpen(false);
+        },
+        onError: (error) => {
+          setIsPaystackOpen(false);
+          setSetupError(error.message ?? t`An error occurred while updating your payment method.`);
+        }
+      });
+    } catch (error) {
+      setIsPaystackOpen(false);
+      setSetupError(error instanceof Error ? error.message : t`An error occurred while updating your payment method.`);
     }
   };
+
+  const isPending = isPaystackOpen || confirmMutation.isPending;
 
   return (
     <Dialog
@@ -111,19 +122,15 @@ export function UpdatePaymentMethodDialog({
         <DialogBody>
           {isLoading && <PaymentFormSkeleton />}
           {setupError && <div className="text-sm text-destructive">{setupError}</div>}
-          {isReady && (
-            <Elements stripe={stripePromise} options={elementsOptions}>
-              <PaymentForm onSuccess={handlePaymentFormSuccess} onError={setSetupError} />
-            </Elements>
-          )}
         </DialogBody>
-        {!isReady && (
-          <DialogFooter>
-            <DialogClose render={<Button type="reset" variant="secondary" />}>
-              <Trans>Cancel</Trans>
-            </DialogClose>
-          </DialogFooter>
-        )}
+        <DialogFooter>
+          <DialogClose render={<Button type="reset" variant="secondary" disabled={isPending} />}>
+            <Trans>Cancel</Trans>
+          </DialogClose>
+          <Button onClick={handleSubmit} isPending={isPending} disabled={!setup || isPending}>
+            {isPending ? <Trans>Updating...</Trans> : <Trans>Update payment method</Trans>}
+          </Button>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );
@@ -136,79 +143,5 @@ function PaymentFormSkeleton() {
       <Skeleton className="h-[2.75rem] w-full" />
       <Skeleton className="h-[2.75rem] w-full" />
     </div>
-  );
-}
-
-interface PaymentFormProps {
-  onSuccess: (openInvoice: OpenInvoiceInfo | null) => void;
-  onError: (error: string) => void;
-}
-
-function PaymentForm({ onSuccess, onError }: Readonly<PaymentFormProps>) {
-  const stripe = useStripe();
-  const elements = useElements();
-  const queryClient = useQueryClient();
-  const [isConfirming, setIsConfirming] = useState(false);
-  const [isPaymentReady, setIsPaymentReady] = useState(false);
-
-  const confirmMutation = api.useMutation("post", "/api/account/billing/confirm-payment-method", {
-    onSuccess: (data) => {
-      queryClient.invalidateQueries();
-      toast.success(t`Payment method updated`);
-      const openInvoice =
-        data.hasOpenInvoice && data.openInvoiceAmount != null && data.openInvoiceCurrency != null
-          ? { amount: data.openInvoiceAmount, currency: data.openInvoiceCurrency }
-          : null;
-      onSuccess(openInvoice);
-    }
-  });
-
-  const isPending = isConfirming || confirmMutation.isPending;
-
-  const handleSubmit = async () => {
-    if (!stripe || !elements) {
-      return;
-    }
-
-    setIsConfirming(true);
-    onError("");
-
-    const result = await stripe.confirmSetup({
-      elements,
-      confirmParams: {
-        return_url: window.location.href
-      },
-      redirect: "if_required"
-    });
-
-    if (result.error) {
-      setIsConfirming(false);
-      onError(result.error.message ?? t`An error occurred while updating your payment method.`);
-      return;
-    }
-
-    setIsConfirming(false);
-
-    if (result.setupIntent) {
-      confirmMutation.mutate({
-        body: { setupIntentId: result.setupIntent.id }
-      });
-    }
-  };
-
-  return (
-    <>
-      <PaymentElement onReady={() => setIsPaymentReady(true)} />
-      {isPaymentReady && (
-        <DialogFooter>
-          <DialogClose render={<Button type="reset" variant="secondary" disabled={isPending} />}>
-            <Trans>Cancel</Trans>
-          </DialogClose>
-          <Button onClick={handleSubmit} isPending={isPending} disabled={!stripe || !elements}>
-            {isPending ? <Trans>Updating...</Trans> : <Trans>Update payment method</Trans>}
-          </Button>
-        </DialogFooter>
-      )}
-    </>
   );
 }

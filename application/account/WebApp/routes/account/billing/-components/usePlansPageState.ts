@@ -19,8 +19,6 @@ export function usePlansPageState() {
   const [isEditBillingInfoOpen, setIsEditBillingInfoOpen] = useState(false);
   const [checkoutPlan, setCheckoutPlan] = useState<SubscriptionPlan>(SubscriptionPlan.Standard);
   const [pendingCheckoutPlan, setPendingCheckoutPlan] = useState<SubscriptionPlan | null>(null);
-  const [reactivateClientSecret, setReactivateClientSecret] = useState<string | undefined>();
-  const [reactivatePublishableKey, setReactivatePublishableKey] = useState<string | undefined>();
   const [isConfirmingPayment, setIsConfirmingPayment] = useState(false);
   const [isSubscribeDialogOpen, setIsSubscribeDialogOpen] = useState(false);
   const [subscribeTarget, setSubscribeTarget] = useState<SubscriptionPlan>(SubscriptionPlan.Standard);
@@ -39,16 +37,11 @@ export function usePlansPageState() {
   const { downgradeMutation, cancelMutation, cancelDowngradeMutation, reactivateMutation } =
     useSubscriptionLifecycleMutations({
       startPolling,
-      currentPlan,
       downgradeTarget,
       setIsDowngradeDialogOpen,
       setIsCancelDialogOpen,
       setIsCancelDowngradeDialogOpen,
-      setIsReactivateDialogOpen,
-      setIsEditBillingInfoOpen,
-      setReactivateClientSecret,
-      setReactivatePublishableKey,
-      setPendingCheckoutPlan
+      setIsReactivateDialogOpen
     });
 
   const isPending =
@@ -107,10 +100,6 @@ export function usePlansPageState() {
     checkoutPlan,
     pendingCheckoutPlan,
     setPendingCheckoutPlan,
-    reactivateClientSecret,
-    reactivatePublishableKey,
-    setReactivateClientSecret,
-    setReactivatePublishableKey,
     isSubscribeDialogOpen,
     setIsSubscribeDialogOpen,
     subscribeTarget,

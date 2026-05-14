@@ -1,10 +1,10 @@
 using Account.Features.Subscriptions.Domain;
 using Account.Features.Users.Domain;
-using Account.Integrations.Stripe;
 using FluentValidation;
 using JetBrains.Annotations;
 using SharedKernel.Cqrs;
 using SharedKernel.ExecutionContext;
+using SharedKernel.Telemetry;
 
 namespace Account.Features.Subscriptions.Commands;
 
@@ -29,8 +29,10 @@ public sealed class CancelSubscriptionValidator : AbstractValidator<CancelSubscr
 
 public sealed class CancelSubscriptionHandler(
     ISubscriptionRepository subscriptionRepository,
-    StripeClientFactory stripeClientFactory,
+    IBillingEventRepository billingEventRepository,
     IExecutionContext executionContext,
+    ITelemetryEventsCollector events,
+    TimeProvider timeProvider,
     ILogger<CancelSubscriptionHandler> logger
 ) : IRequestHandler<CancelSubscriptionCommand, Result>
 {
@@ -48,10 +50,10 @@ public sealed class CancelSubscriptionHandler(
             return Result.BadRequest("Cannot cancel a Basis subscription.");
         }
 
-        if (subscription.StripeSubscriptionId is null)
+        if (subscription.PaystackAuthorizationCode is null)
         {
-            logger.LogWarning("No Stripe subscription found for subscription '{SubscriptionId}'", subscription.Id);
-            return Result.BadRequest("No active Stripe subscription found.");
+            logger.LogWarning("No Paystack authorization found for subscription '{SubscriptionId}'", subscription.Id);
+            return Result.BadRequest("No active Paystack authorization found.");
         }
 
         if (subscription.CancelAtPeriodEnd)
@@ -59,14 +61,32 @@ public sealed class CancelSubscriptionHandler(
             return Result.BadRequest("Subscription is already scheduled for cancellation.");
         }
 
-        var stripeClient = stripeClientFactory.GetClient();
-        var success = await stripeClient.CancelSubscriptionAtPeriodEndAsync(subscription.StripeSubscriptionId, command.Reason, command.Feedback, cancellationToken);
-        if (!success)
-        {
-            return Result.BadRequest("Failed to cancel subscription in Stripe.");
-        }
+        subscription.SetCancellation(true, command.Reason, command.Feedback);
+        subscriptionRepository.Update(subscription);
 
-        // Subscription is updated and telemetry is collected in ProcessPendingStripeEvents when Stripe confirms the state change via webhook
+        var now = timeProvider.GetUtcNow();
+        var priceAmount = subscription.CurrentPriceAmount ?? 0m;
+        var currency = subscription.CurrentPriceCurrency;
+        var billingEvent = BillingEvent.Create(
+            subscription.TenantId,
+            subscription.Id,
+            $"paystack:{subscription.Id}:cancel:{now.ToUnixTimeMilliseconds()}",
+            BillingEventType.SubscriptionCancelled,
+            now,
+            0m,
+            subscription.Plan,
+            subscription.Plan,
+            priceAmount,
+            0m,
+            -priceAmount,
+            currency,
+            command.Reason
+        );
+        await billingEventRepository.AddAsync(billingEvent, cancellationToken);
+
+        int? daysUntilExpiry = subscription.CurrentPeriodEnd is null ? null : Math.Max(0, (subscription.CurrentPeriodEnd.Value - now).Days);
+        var daysOnCurrentPlan = subscription.CurrentPeriodStart is null ? 0 : Math.Max(0, (now - subscription.CurrentPeriodStart.Value).Days);
+        events.CollectEvent(new SubscriptionCancelled(subscription.Id, subscription.Plan, command.Reason, daysUntilExpiry, daysOnCurrentPlan, priceAmount, -priceAmount, currency ?? "unknown"));
 
         return Result.Success();
     }

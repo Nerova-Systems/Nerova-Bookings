@@ -1,22 +1,28 @@
+using System.Data;
+using Account.Database;
 using Account.Features.Subscriptions.Domain;
 using Account.Features.Users.Domain;
-using Account.Integrations.Stripe;
+using Account.Integrations.Paystack;
 using JetBrains.Annotations;
+using Microsoft.EntityFrameworkCore;
 using SharedKernel.Cqrs;
 using SharedKernel.ExecutionContext;
 
 namespace Account.Features.Billing.Commands;
 
 [PublicAPI]
-public sealed record ConfirmPaymentMethodSetupCommand(string SetupIntentId) : ICommand, IRequest<Result<ConfirmPaymentMethodSetupResponse>>;
+public sealed record ConfirmPaymentMethodSetupCommand(string Reference) : ICommand, IRequest<Result<ConfirmPaymentMethodSetupResponse>>;
 
 [PublicAPI]
-public sealed record ConfirmPaymentMethodSetupResponse(bool HasOpenInvoice, decimal? OpenInvoiceAmount, string? OpenInvoiceCurrency);
+public sealed record ConfirmPaymentMethodSetupResponse(bool HasPendingRenewalPayment, decimal? PendingRenewalPaymentAmount, string? PendingRenewalPaymentCurrency);
 
 public sealed class ConfirmPaymentMethodSetupHandler(
+    AccountDbContext dbContext,
     ISubscriptionRepository subscriptionRepository,
-    StripeClientFactory stripeClientFactory,
+    IPaystackPaymentAttemptRepository paystackPaymentAttemptRepository,
+    PaystackClientFactory paystackClientFactory,
     IExecutionContext executionContext,
+    TimeProvider timeProvider,
     ILogger<ConfirmPaymentMethodSetupHandler> logger
 ) : IRequestHandler<ConfirmPaymentMethodSetupCommand, Result<ConfirmPaymentMethodSetupResponse>>
 {
@@ -27,43 +33,104 @@ public sealed class ConfirmPaymentMethodSetupHandler(
             return Result<ConfirmPaymentMethodSetupResponse>.Forbidden("Only owners can manage subscriptions.");
         }
 
-        var subscription = await subscriptionRepository.GetCurrentAsync(cancellationToken);
+        var isSqlite = dbContext.Database.ProviderName == "Microsoft.EntityFrameworkCore.Sqlite";
+        await using var transaction = isSqlite
+            ? await dbContext.Database.BeginTransactionAsync(cancellationToken)
+            : await dbContext.Database.BeginTransactionAsync(IsolationLevel.ReadCommitted, cancellationToken);
 
-        if (subscription.StripeCustomerId is null)
+        var subscription = await subscriptionRepository.GetCurrentWithLockAsync(cancellationToken);
+
+        if (subscription.PaystackCustomerId is null)
         {
-            logger.LogWarning("No Stripe customer found for subscription '{SubscriptionId}'", subscription.Id);
-            return Result<ConfirmPaymentMethodSetupResponse>.BadRequest("No Stripe customer found. A subscription must be created first.");
+            logger.LogWarning("No Paystack customer found for subscription '{SubscriptionId}'", subscription.Id);
+            return Result<ConfirmPaymentMethodSetupResponse>.BadRequest("No Paystack customer found. A subscription must be created first.");
         }
 
-        var stripeClient = stripeClientFactory.GetClient();
-        var paymentMethodId = await stripeClient.GetSetupIntentPaymentMethodAsync(command.SetupIntentId, cancellationToken);
-        if (paymentMethodId is null)
+        var paystackClient = paystackClientFactory.GetClient();
+        var paymentAttempt = await paystackPaymentAttemptRepository.GetByReferenceWithLockUnfilteredAsync(command.Reference, cancellationToken);
+        if (paymentAttempt is null)
         {
-            return Result<ConfirmPaymentMethodSetupResponse>.BadRequest("Failed to retrieve payment method from setup intent.");
+            return Result<ConfirmPaymentMethodSetupResponse>.BadRequest("Paystack payment method authorization attempt was not found.");
         }
 
-        OpenInvoiceResult? openInvoice = null;
-        if (subscription.StripeSubscriptionId is not null)
+        if (paymentAttempt.Purpose != PaystackPaymentPurpose.PaymentMethodAuthorization || paymentAttempt.Plan is not null)
         {
-            var success = await stripeClient.SetSubscriptionDefaultPaymentMethodAsync(subscription.StripeSubscriptionId, paymentMethodId, cancellationToken);
-            if (!success)
+            return Result<ConfirmPaymentMethodSetupResponse>.BadRequest("Only Paystack payment method authorizations can be confirmed here.");
+        }
+
+        if (paymentAttempt.SubscriptionId != subscription.Id || paymentAttempt.PaystackCustomerId != subscription.PaystackCustomerId)
+        {
+            return Result<ConfirmPaymentMethodSetupResponse>.BadRequest("Paystack payment method authorization attempt does not match this subscription.");
+        }
+
+        if (paymentAttempt.Status != PaystackPaymentAttemptStatus.Pending)
+        {
+            if (paymentAttempt.Status == PaystackPaymentAttemptStatus.Succeeded)
             {
-                return Result<ConfirmPaymentMethodSetupResponse>.BadRequest("Failed to update subscription payment method.");
+                return new ConfirmPaymentMethodSetupResponse(false, null, null);
             }
 
-            openInvoice = await stripeClient.GetOpenInvoiceAsync(subscription.StripeSubscriptionId, cancellationToken);
+            return Result<ConfirmPaymentMethodSetupResponse>.BadRequest("Paystack payment method authorization attempt has already been processed.");
         }
-        else
+
+        var verifiedTransaction = await paystackClient.VerifyPaymentMethodAuthorizationAsync(command.Reference, cancellationToken);
+        var now = timeProvider.GetUtcNow();
+        if (verifiedTransaction?.Paid != true || verifiedTransaction.Authorization is null)
         {
-            var success = await stripeClient.SetCustomerDefaultPaymentMethodAsync(subscription.StripeCustomerId, paymentMethodId, cancellationToken);
-            if (!success)
-            {
-                return Result<ConfirmPaymentMethodSetupResponse>.BadRequest("Failed to update customer payment method.");
-            }
+            paymentAttempt.MarkFailed(now, verifiedTransaction?.ErrorMessage ?? "Failed to verify Paystack payment method authorization.");
+            paystackPaymentAttemptRepository.Update(paymentAttempt);
+            await dbContext.SaveChangesAsync(cancellationToken);
+            await transaction.CommitAsync(cancellationToken);
+            return Result<ConfirmPaymentMethodSetupResponse>.BadRequest(verifiedTransaction?.ErrorMessage ?? "Failed to verify Paystack payment method authorization.", true);
         }
 
-        // Subscription is updated and telemetry is collected in ProcessPendingStripeEvents when Stripe confirms the state change via webhook
+        if (!string.Equals(verifiedTransaction.Reference, command.Reference, StringComparison.Ordinal))
+        {
+            return Result<ConfirmPaymentMethodSetupResponse>.BadRequest("Paystack payment method authorization reference does not match the requested setup reference.");
+        }
 
-        return new ConfirmPaymentMethodSetupResponse(openInvoice is not null, openInvoice?.AmountDue, openInvoice?.Currency);
+        if (verifiedTransaction.Purpose != PaystackPaymentPurpose.PaymentMethodAuthorization)
+        {
+            return Result<ConfirmPaymentMethodSetupResponse>.BadRequest("Only Paystack payment method authorizations can be confirmed here.");
+        }
+
+        if (verifiedTransaction.CustomerId is not null && verifiedTransaction.CustomerId != subscription.PaystackCustomerId)
+        {
+            return Result<ConfirmPaymentMethodSetupResponse>.BadRequest("Paystack payment method authorization customer does not match this subscription.");
+        }
+
+        if (!paymentAttempt.MatchesAmount(verifiedTransaction.Amount, verifiedTransaction.Currency))
+        {
+            paymentAttempt.MarkFailed(now, "Paystack payment method authorization amount does not match the expected setup amount.");
+            paystackPaymentAttemptRepository.Update(paymentAttempt);
+            await dbContext.SaveChangesAsync(cancellationToken);
+            await transaction.CommitAsync(cancellationToken);
+            return Result<ConfirmPaymentMethodSetupResponse>.BadRequest("Paystack payment method authorization amount does not match the expected setup amount.", true);
+        }
+
+        var refund = await paystackClient.CreateRefundAsync(verifiedTransaction.Reference, verifiedTransaction.Amount, verifiedTransaction.Currency, cancellationToken);
+        if (refund is null)
+        {
+            paymentAttempt.MarkFailed(now, "Failed to refund Paystack payment method authorization charge.");
+            paystackPaymentAttemptRepository.Update(paymentAttempt);
+            await dbContext.SaveChangesAsync(cancellationToken);
+            await transaction.CommitAsync(cancellationToken);
+            return Result<ConfirmPaymentMethodSetupResponse>.BadRequest("Failed to refund Paystack payment method authorization charge.", true);
+        }
+
+        subscription.SetPaystackAuthorization(verifiedTransaction.Authorization.AuthorizationCode, verifiedTransaction.Authorization.Email, verifiedTransaction.Authorization.Signature, verifiedTransaction.PaymentMethod);
+        subscription.SetPaymentTransactions([
+                .. subscription.PaymentTransactions,
+                new PaymentTransaction(PaymentTransactionId.NewId(), refund.Amount, refund.Amount, 0m, refund.Currency, PaymentTransactionStatus.Refunded, now, null, null, null, PaystackReference: verifiedTransaction.Reference)
+            ]
+        );
+
+        subscriptionRepository.Update(subscription);
+        paymentAttempt.MarkSucceeded(now);
+        paystackPaymentAttemptRepository.Update(paymentAttempt);
+        await dbContext.SaveChangesAsync(cancellationToken);
+        await transaction.CommitAsync(cancellationToken);
+
+        return new ConfirmPaymentMethodSetupResponse(false, null, null);
     }
 }

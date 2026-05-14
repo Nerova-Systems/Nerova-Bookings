@@ -12,8 +12,8 @@ public sealed record SubscriptionResponse(
     SubscriptionId Id,
     SubscriptionPlan Plan,
     SubscriptionPlan? ScheduledPlan,
-    bool HasStripeCustomer,
-    bool HasStripeSubscription,
+    bool HasPaystackCustomer,
+    bool HasPaystackAuthorization,
     decimal? CurrentPriceAmount,
     string? CurrentPriceCurrency,
     DateTimeOffset? CurrentPeriodEnd,
@@ -21,25 +21,25 @@ public sealed record SubscriptionResponse(
     bool IsPaymentFailed,
     PaymentMethod? PaymentMethod,
     BillingInfo? BillingInfo,
-    bool HasPendingStripeEvents
+    bool HasPendingPaystackEvents
 );
 
-public sealed class GetCurrentSubscriptionHandler(ISubscriptionRepository subscriptionRepository, IStripeEventRepository stripeEventRepository)
+public sealed class GetCurrentSubscriptionHandler(ISubscriptionRepository subscriptionRepository, IPaystackEventRepository paystackEventRepository)
     : IRequestHandler<GetCurrentSubscriptionQuery, Result<SubscriptionResponse>>
 {
     public async Task<Result<SubscriptionResponse>> Handle(GetCurrentSubscriptionQuery query, CancellationToken cancellationToken)
     {
         var subscription = await subscriptionRepository.GetCurrentAsync(cancellationToken);
 
-        var hasPendingStripeEvents = subscription.StripeCustomerId is not null
-                                     && await stripeEventRepository.HasPendingByStripeCustomerIdAsync(subscription.StripeCustomerId, cancellationToken);
+        var hasPendingPaystackEvents = subscription.PaystackCustomerId is not null
+                                       && await paystackEventRepository.HasPendingByPaystackCustomerIdAsync(subscription.PaystackCustomerId, cancellationToken);
 
         return new SubscriptionResponse(
             subscription.Id,
             subscription.Plan,
             subscription.ScheduledPlan,
-            subscription.StripeCustomerId is not null,
-            subscription.StripeSubscriptionId is not null,
+            subscription.PaystackCustomerId is not null,
+            subscription.PaystackAuthorizationCode is not null,
             subscription.CurrentPriceAmount,
             subscription.CurrentPriceCurrency,
             subscription.CurrentPeriodEnd,
@@ -47,7 +47,7 @@ public sealed class GetCurrentSubscriptionHandler(ISubscriptionRepository subscr
             subscription.FirstPaymentFailedAt is not null,
             subscription.PaymentMethod,
             subscription.BillingInfo,
-            hasPendingStripeEvents
+            hasPendingPaystackEvents
         );
     }
 }

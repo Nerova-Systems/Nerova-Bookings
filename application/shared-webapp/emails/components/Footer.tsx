@@ -12,7 +12,7 @@ import { Hr, Link, Section, Text } from "@react-email/components";
 //      Scriban global so localhost dev, staging, and production all link to their own host.
 //
 // TransactionalEmail renders this OUTSIDE the white card so it visually appears as a separate
-// footer band (Stripe / Linear / Notion convention).
+// footer band (common SaaS convention).
 export function Footer() {
   return (
     <Section className="email-footer mx-auto mb-[40px] w-full max-w-[600px] text-center">

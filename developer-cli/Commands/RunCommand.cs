@@ -176,7 +176,7 @@ public class RunCommand : Command
             {
                 var processedPids = new HashSet<string>();
 
-                foreach (var line in netstatOutput.Split('\n', StringSplitOptions.RemoveEmptyEntries))
+                foreach (var line in netstatOutput.Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
                 {
                     var parts = line.Split(' ', StringSplitOptions.RemoveEmptyEntries);
                     if (parts.Length < 5) continue;
@@ -187,10 +187,12 @@ public class RunCommand : Command
 
                     if (!int.TryParse(address[(portIndex + 1)..], out var port) || !allPorts.Contains(port)) continue;
 
-                    var pid = parts[^1];
+                    var pid = parts[^1].Trim();
+                    if (string.IsNullOrWhiteSpace(pid)) continue;
+                    if (!int.TryParse(pid, out _)) continue;
                     if (!processedPids.Add(pid)) continue;
 
-                    var processName = ProcessHelper.StartProcess($"""wmic process where ProcessId={pid} get Name /format:list""", redirectOutput: true, exitOnError: false);
+                    var processName = ProcessHelper.StartProcess($"""powershell -Command "(Get-Process -Id {pid} -ErrorAction SilentlyContinue).Name" """, redirectOutput: true, exitOnError: false);
 
                     if (processName.Contains("dotnet", StringComparison.OrdinalIgnoreCase) ||
                         processName.Contains("rsbuild-node", StringComparison.OrdinalIgnoreCase))
@@ -205,6 +207,11 @@ public class RunCommand : Command
             foreach (var processName in processesToKill)
             {
                 ProcessHelper.StartProcess($"taskkill /F /IM {processName}.exe", redirectOutput: true, exitOnError: false);
+            }
+
+            foreach (var processId in FindAppHostProcesses(sourceCodeFolder))
+            {
+                KillProcessTree(processId);
             }
         }
         else
@@ -225,6 +232,15 @@ public class RunCommand : Command
 
     private static string[] FindAppHostProcesses(string sourceCodeFolder)
     {
+        if (Configuration.IsWindows)
+        {
+            var escapedSourceCodeFolder = sourceCodeFolder.Replace("'", "''");
+            var windowsOutput = ProcessHelper.StartProcess($"""powershell -Command "Get-CimInstance Win32_Process -Filter 'Name = ''dotnet.exe''' | Where-Object CommandLine -like '*AppHost.csproj*' | Where-Object CommandLine -like '*{escapedSourceCodeFolder}*' | Select-Object -ExpandProperty ProcessId" """, redirectOutput: true, exitOnError: false);
+            if (string.IsNullOrWhiteSpace(windowsOutput)) return [];
+
+            return windowsOutput.Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+        }
+
         var output = ProcessHelper.StartProcess("pgrep -f dotnet.*AppHost", redirectOutput: true, exitOnError: false);
         if (string.IsNullOrWhiteSpace(output)) return [];
 

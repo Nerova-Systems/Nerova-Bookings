@@ -419,8 +419,8 @@ public sealed class CompleteExternalLoginTests : ExternalAuthenticationTestBase
                 ("modified_at", null),
                 ("plan", nameof(SubscriptionPlan.Basis)),
                 ("scheduled_plan", null),
-                ("stripe_customer_id", null),
-                ("stripe_subscription_id", null),
+                ("paystack_customer_code", null),
+                ("paystack_authorization_code", null),
                 ("current_price_amount", null),
                 ("current_price_currency", null),
                 ("current_period_end", null),
@@ -430,7 +430,10 @@ public sealed class CompleteExternalLoginTests : ExternalAuthenticationTestBase
                 ("cancellation_feedback", null),
                 ("payment_transactions", "[]"),
                 ("payment_method", null),
-                ("billing_info", null)
+                ("billing_info", null),
+                ("has_drift_detected", false),
+                ("drift_checked_at", null),
+                ("drift_discrepancies", "[]")
             ]
         );
 

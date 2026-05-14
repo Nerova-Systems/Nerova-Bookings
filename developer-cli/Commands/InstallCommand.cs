@@ -68,6 +68,7 @@ public class InstallCommand : Command
         {
             AnsiConsole.WriteLine();
             RegisterAlias();
+            GitHooksSync.Sync(true);
         }
 
         AnsiConsole.MarkupLine(

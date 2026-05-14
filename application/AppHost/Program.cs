@@ -30,8 +30,12 @@ SecretManagerHelper.GenerateAuthenticationTokenSigningKey("authentication-token-
 
 var (googleOAuthConfigured, googleOAuthClientId, googleOAuthClientSecret) = ConfigureGoogleOAuthParameters();
 
-var (stripeConfigured, stripePublishableKey, stripeApiKey, stripeWebhookSecret) = ConfigureStripeParameters();
-var stripeFullyConfigured = stripeConfigured && builder.Configuration["Parameters:stripe-webhook-secret"] is not null and not "not-configured";
+var (paystackConfigured, paystackPublicKey, paystackSecretKey, paystackStandardPlanCode, paystackPremiumPlanCode, paystackCardAuthorizationAmountSubunit) = ConfigurePaystackParameters();
+var paystackFullyConfigured = paystackConfigured
+                              && builder.Configuration["Parameters:paystack-public-key"] is not null and not "not-configured"
+                              && builder.Configuration["Parameters:paystack-secret-key"] is not null and not "not-configured"
+                              && builder.Configuration["Parameters:paystack-standard-plan-code"] is not null and not "not-configured"
+                              && builder.Configuration["Parameters:paystack-premium-plan-code"] is not null and not "not-configured";
 
 var postgresPassword = builder.CreateStablePassword("postgres-password");
 var postgres = builder.AddPostgres("postgres", password: postgresPassword, port: ports.Postgres)
@@ -82,6 +86,15 @@ var accountWorkers = builder
     .WithEnvironment("KESTREL_PORT", ports.AccountWorkers.ToString())
     .WithReference(accountDatabase)
     .WithReference(azureStorage)
+    // The BillingDriftWorker resolves PaystackClientFactory which reads these. Without them the worker
+    // process sees UnconfiguredPaystackClient even when Paystack is configured at the API level.
+    .WithEnvironment("Paystack__SubscriptionEnabled", paystackFullyConfigured ? "true" : "false")
+    .WithEnvironment("Paystack__PublicKey", paystackPublicKey)
+    .WithEnvironment("Paystack__SecretKey", paystackSecretKey)
+    .WithEnvironment("Paystack__StandardPlanCode", paystackStandardPlanCode)
+    .WithEnvironment("Paystack__PremiumPlanCode", paystackPremiumPlanCode)
+    .WithEnvironment("Paystack__CardAuthorizationAmountSubunit", paystackCardAuthorizationAmountSubunit)
+    .WithEnvironment("Paystack__AllowMockProvider", "true")
     .WaitFor(accountDatabase);
 
 var accountApi = builder
@@ -109,11 +122,17 @@ var accountApi = builder
     .WithEnvironment("OAuth__Google__ClientId", googleOAuthClientId)
     .WithEnvironment("OAuth__Google__ClientSecret", googleOAuthClientSecret)
     .WithEnvironment("OAuth__AllowMockProvider", "true")
-    .WithEnvironment("Stripe__SubscriptionEnabled", stripeFullyConfigured ? "true" : "false")
-    .WithEnvironment("Stripe__ApiKey", stripeApiKey)
-    .WithEnvironment("Stripe__WebhookSecret", stripeWebhookSecret)
-    .WithEnvironment("Stripe__PublishableKey", stripePublishableKey)
-    .WithEnvironment("Stripe__AllowMockProvider", "true")
+    .WithEnvironment("Paystack__SubscriptionEnabled", paystackFullyConfigured ? "true" : "false")
+    .WithEnvironment("Paystack__PublicKey", paystackPublicKey)
+    .WithEnvironment("Paystack__SecretKey", paystackSecretKey)
+    .WithEnvironment("Paystack__StandardPlanCode", paystackStandardPlanCode)
+    .WithEnvironment("Paystack__PremiumPlanCode", paystackPremiumPlanCode)
+    .WithEnvironment("Paystack__CardAuthorizationAmountSubunit", paystackCardAuthorizationAmountSubunit)
+    .WithEnvironment("Paystack__AllowMockProvider", "true")
+    .WithEnvironment("PUBLIC_GOOGLE_OAUTH_ENABLED", googleOAuthConfigured ? "true" : "false")
+    // Force-on so newcomers see the back-office billing UI without Paystack configured. Set to "false" (or
+    // change back to `paystackFullyConfigured ? "true" : "false"`) to hide all billing/revenue/Paystack data.
+    .WithEnvironment("PUBLIC_SUBSCRIPTION_ENABLED", "true")
     .WaitFor(accountWorkers);
 
 var mainDatabase = postgres
@@ -133,7 +152,7 @@ var mainApi = builder
     .WithReference(mainDatabase)
     .WithReference(azureStorage)
     .WithEnvironment("PUBLIC_GOOGLE_OAUTH_ENABLED", googleOAuthConfigured ? "true" : "false")
-    .WithEnvironment("PUBLIC_SUBSCRIPTION_ENABLED", stripeFullyConfigured ? "true" : "false")
+    .WithEnvironment("PUBLIC_SUBSCRIPTION_ENABLED", paystackFullyConfigured ? "true" : "false")
     .WaitFor(mainWorkers);
 
 builder
@@ -156,24 +175,9 @@ builder
         }
     );
 
-AddStripeCliContainer();
-
 await builder.Build().RunAsync();
 
 return;
-
-void AddStripeCliContainer()
-{
-    if (stripeConfigured)
-    {
-        builder
-            .AddContainer("stripe-cli", "stripe/stripe-cli:latest")
-            .WithContainerRuntimeArgs("--add-host", $"{appHostname}:host-gateway")
-            .WithArgs("listen", "--forward-to", $"{appBaseUrl}/api/account/subscriptions/stripe-webhook", "--skip-verify")
-            .WithEnvironment("STRIPE_API_KEY", stripeApiKey)
-            .WithLifetime(ContainerLifetime.Persistent);
-    }
-}
 
 (bool Configured, IResourceBuilder<ParameterResource> ClientId, IResourceBuilder<ParameterResource> ClientSecret) ConfigureGoogleOAuthParameters()
 {
@@ -223,58 +227,62 @@ void AddStripeCliContainer()
     );
 }
 
-(bool Configured, IResourceBuilder<ParameterResource> PublishableKey, IResourceBuilder<ParameterResource> ApiKey, IResourceBuilder<ParameterResource> WebhookSecret) ConfigureStripeParameters()
+(bool Configured, IResourceBuilder<ParameterResource> PublicKey, IResourceBuilder<ParameterResource> SecretKey, IResourceBuilder<ParameterResource> StandardPlanCode, IResourceBuilder<ParameterResource> PremiumPlanCode, IResourceBuilder<ParameterResource> CardAuthorizationAmountSubunit) ConfigurePaystackParameters()
 {
-    _ = builder.AddParameter("stripe-enabled")
+    _ = builder.AddParameter("paystack-enabled")
         .WithDescription("""
-                         **Stripe Integration** -- Enables embedded checkout, prorated plan upgrades, automatic tax management, localized invoices, billing history with refunds, and more.
+                         **Paystack Integration** -- Enables Paystack popup checkout, reusable card authorizations, app-owned subscription billing, plan pricing, retries, and refunds.
 
-                         **Important**: Set up a [Stripe sandbox environment](https://dashboard.stripe.com) and configure it according to the guide in README.md **before** enabling this.
+                         **Important**: Set up a [Paystack sandbox environment](https://dashboard.paystack.com) and configure it according to the guide in README.md **before** enabling this.
 
-                         - Enter `true` to enable Stripe, or `false` to skip. This can be changed later.
-                         - Setup requires **2 restarts** after enabling: first for API keys, then for the webhook secret from the stripe-cli container.
+                         - Enter `true` to enable Paystack, or `false` to skip. This can be changed later.
+                         - Setup requires the public key, secret key, Standard plan code, Premium plan code, and small card authorization charge amount in subunits.
 
                          See **README.md** for full setup instructions.
                          """, true
         );
 
-    var configured = builder.Configuration["Parameters:stripe-enabled"] == "true";
+    var configured = builder.Configuration["Parameters:paystack-enabled"] == "true";
 
     if (configured)
     {
-        var publishableKey = builder.AddParameter("stripe-publishable-key", true)
+        var publicKey = builder.AddParameter("paystack-public-key", true)
             .WithDescription("""
-                             Stripe Publishable Key from the [Stripe Dashboard](https://dashboard.stripe.com/apikeys). Starts with `pk_test_` or `pk_live_`.
+                             Paystack Public Key from the [Paystack Dashboard](https://dashboard.paystack.com/#/settings/developer). Starts with `pk_test_` or `pk_live_`.
 
-                             **After entering this and the Secret Key, restart Aspire.** The stripe-cli container will start and generate a webhook secret, which you will enter on the next restart.
+                             **After entering this and the Secret Key, restart Aspire.**
 
                              See **README.md** for full setup instructions.
                              """, true
             );
-        var apiKey = builder.AddParameter("stripe-api-key", true)
+        var secretKey = builder.AddParameter("paystack-secret-key", true)
             .WithDescription("""
-                             Stripe Secret Key from the [Stripe Dashboard](https://dashboard.stripe.com/apikeys). Starts with `sk_test_` or `sk_live_`.
+                             Paystack Secret Key from the [Paystack Dashboard](https://dashboard.paystack.com/#/settings/developer). Starts with `sk_test_` or `sk_live_`.
 
-                             **After entering this and the Publishable Key, restart Aspire.** The stripe-cli container will start and generate a webhook secret, which you will enter on the next restart.
+                             Used for Paystack REST APIs and official HMAC SHA512 webhook verification.
 
                              See **README.md** for full setup instructions.
                              """, true
             );
+        var standardPlanCode = builder.AddParameter("paystack-standard-plan-code", true)
+            .WithDescription("Paystack plan code for the Standard subscription plan.", true);
+        var premiumPlanCode = builder.AddParameter("paystack-premium-plan-code", true)
+            .WithDescription("Paystack plan code for the Premium subscription plan.", true);
+        var cardAuthorizationAmountSubunit = builder.Configuration["Parameters:paystack-card-authorization-amount-subunit"] is not null
+            ? builder.AddParameter("paystack-card-authorization-amount-subunit", true)
+                .WithDescription("Small card authorization charge amount in Paystack subunits, for example `100` for 1.00 in a two-decimal currency.", true)
+            : builder.CreateResourceBuilder(new ParameterResource("paystack-card-authorization-amount-subunit", _ => "100", true));
 
-        var apiKeyConfigured = builder.Configuration["Parameters:stripe-api-key"] is not null;
-        var webhookSecret = apiKeyConfigured
-            ? builder.AddParameter("stripe-webhook-secret", true)
-                .WithDescription("Webhook signing secret. Find it in the [Stripe Dashboard Workbench](https://dashboard.stripe.com/test/workbench/webhooks) or in the stripe-cli container logs after the previous restart. Starts with `whsec_`.", true)
-            : builder.CreateResourceBuilder(new ParameterResource("stripe-webhook-secret", _ => "not-configured", true));
-
-        return (configured, publishableKey, apiKey, webhookSecret);
+        return (configured, publicKey, secretKey, standardPlanCode, premiumPlanCode, cardAuthorizationAmountSubunit);
     }
 
     return (
         configured,
-        builder.CreateResourceBuilder(new ParameterResource("stripe-publishable-key", _ => "not-configured", true)),
-        builder.CreateResourceBuilder(new ParameterResource("stripe-api-key", _ => "not-configured", true)),
-        builder.CreateResourceBuilder(new ParameterResource("stripe-webhook-secret", _ => "not-configured", true))
+        builder.CreateResourceBuilder(new ParameterResource("paystack-public-key", _ => "not-configured", true)),
+        builder.CreateResourceBuilder(new ParameterResource("paystack-secret-key", _ => "not-configured", true)),
+        builder.CreateResourceBuilder(new ParameterResource("paystack-standard-plan-code", _ => "not-configured", true)),
+        builder.CreateResourceBuilder(new ParameterResource("paystack-premium-plan-code", _ => "not-configured", true)),
+        builder.CreateResourceBuilder(new ParameterResource("paystack-card-authorization-amount-subunit", _ => "100", true))
     );
 }
 

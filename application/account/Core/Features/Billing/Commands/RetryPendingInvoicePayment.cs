@@ -1,7 +1,10 @@
+using System.Data;
+using Account.Database;
 using Account.Features.Subscriptions.Domain;
 using Account.Features.Users.Domain;
-using Account.Integrations.Stripe;
+using Account.Integrations.Paystack;
 using JetBrains.Annotations;
+using Microsoft.EntityFrameworkCore;
 using SharedKernel.Cqrs;
 using SharedKernel.ExecutionContext;
 using SharedKernel.Telemetry;
@@ -9,59 +12,114 @@ using SharedKernel.Telemetry;
 namespace Account.Features.Billing.Commands;
 
 [PublicAPI]
-public sealed record RetryPendingInvoicePaymentCommand : ICommand, IRequest<Result<RetryPendingInvoicePaymentResponse>>;
+public sealed record RetryRenewalPaymentCommand : ICommand, IRequest<Result<RetryRenewalPaymentResponse>>;
 
 [PublicAPI]
-public sealed record RetryPendingInvoicePaymentResponse(bool Paid, string? ClientSecret, string? PublishableKey);
+public sealed record RetryRenewalPaymentResponse(
+    bool Paid,
+    string? AccessCode,
+    string? Reference,
+    string? PublicKey,
+    decimal? Amount,
+    string? Currency,
+    string OperationPurpose
+);
 
-public sealed class RetryPendingInvoicePaymentHandler(
+public sealed class RetryRenewalPaymentHandler(
+    AccountDbContext dbContext,
     ISubscriptionRepository subscriptionRepository,
-    StripeClientFactory stripeClientFactory,
+    IPaystackPaymentAttemptRepository paystackPaymentAttemptRepository,
+    PaystackClientFactory paystackClientFactory,
     IExecutionContext executionContext,
     ITelemetryEventsCollector events,
-    ILogger<RetryPendingInvoicePaymentHandler> logger
-) : IRequestHandler<RetryPendingInvoicePaymentCommand, Result<RetryPendingInvoicePaymentResponse>>
+    TimeProvider timeProvider,
+    ILogger<RetryRenewalPaymentHandler> logger
+) : IRequestHandler<RetryRenewalPaymentCommand, Result<RetryRenewalPaymentResponse>>
 {
-    public async Task<Result<RetryPendingInvoicePaymentResponse>> Handle(RetryPendingInvoicePaymentCommand command, CancellationToken cancellationToken)
+    public async Task<Result<RetryRenewalPaymentResponse>> Handle(RetryRenewalPaymentCommand command, CancellationToken cancellationToken)
     {
         if (executionContext.UserInfo.Role != nameof(UserRole.Owner))
         {
-            return Result<RetryPendingInvoicePaymentResponse>.Forbidden("Only owners can manage subscriptions.");
+            return Result<RetryRenewalPaymentResponse>.Forbidden("Only owners can manage subscriptions.");
         }
 
-        var subscription = await subscriptionRepository.GetCurrentAsync(cancellationToken);
+        var isSqlite = dbContext.Database.ProviderName == "Microsoft.EntityFrameworkCore.Sqlite";
+        await using var transaction = isSqlite
+            ? await dbContext.Database.BeginTransactionAsync(cancellationToken)
+            : await dbContext.Database.BeginTransactionAsync(IsolationLevel.ReadCommitted, cancellationToken);
 
-        if (subscription.StripeSubscriptionId is null)
+        var subscription = await subscriptionRepository.GetCurrentWithLockAsync(cancellationToken);
+
+        if (subscription.PaystackAuthorizationCode is null)
         {
-            logger.LogWarning("No Stripe subscription found for subscription '{SubscriptionId}'", subscription.Id);
-            return Result<RetryPendingInvoicePaymentResponse>.BadRequest("No active Stripe subscription found.");
+            logger.LogWarning("No Paystack authorization found for subscription '{SubscriptionId}'", subscription.Id);
+            return Result<RetryRenewalPaymentResponse>.BadRequest("No active Paystack authorization found.");
         }
 
-        var stripeClient = stripeClientFactory.GetClient();
-
-        var openInvoice = await stripeClient.GetOpenInvoiceAsync(subscription.StripeSubscriptionId, cancellationToken);
-        if (openInvoice is null)
+        if (subscription.FirstPaymentFailedAt is null || subscription.CurrentPriceAmount is null || subscription.CurrentPriceCurrency is null)
         {
-            return Result<RetryPendingInvoicePaymentResponse>.BadRequest("No pending invoice found for this subscription.");
+            return Result<RetryRenewalPaymentResponse>.BadRequest("No pending renewal payment found for this subscription.");
         }
 
-        var invoiceRetryResult = await stripeClient.RetryOpenInvoicePaymentAsync(subscription.StripeSubscriptionId, null, cancellationToken);
-        if (invoiceRetryResult is null)
+        var billingEmail = subscription.PaystackAuthorizationEmail ?? subscription.BillingInfo?.Email;
+        if (billingEmail is null)
         {
-            return Result<RetryPendingInvoicePaymentResponse>.BadRequest("Failed to retry invoice payment.");
+            return Result<RetryRenewalPaymentResponse>.BadRequest("Billing information must include an email before retrying payment.");
         }
 
-        if (invoiceRetryResult is { Paid: false, ClientSecret: null, ErrorMessage: not null })
+        var paystackClient = paystackClientFactory.GetClient();
+        var charge = await paystackClient.ChargeAuthorizationAsync(
+            subscription.PaystackCustomerId!,
+            subscription.PaystackAuthorizationCode,
+            billingEmail,
+            PaystackPaymentPurpose.Retry,
+            subscription.Plan,
+            subscription.CurrentPriceAmount.Value,
+            subscription.CurrentPriceCurrency,
+            cancellationToken
+        );
+        if (charge is null)
         {
-            return Result<RetryPendingInvoicePaymentResponse>.BadRequest(invoiceRetryResult.ErrorMessage);
+            return Result<RetryRenewalPaymentResponse>.BadRequest("Failed to retry renewal payment.");
         }
 
-        if (invoiceRetryResult.Paid)
+        var paymentAttempt = PaystackPaymentAttempt.Create(
+            subscription.TenantId,
+            subscription.Id,
+            charge.Reference,
+            subscription.PaystackCustomerId!,
+            subscription.PaystackAuthorizationCode,
+            PaystackPaymentPurpose.Retry,
+            subscription.Plan,
+            charge.Amount,
+            charge.Currency
+        );
+
+        var now = timeProvider.GetUtcNow();
+        if (!charge.Paid)
         {
-            events.CollectEvent(new PendingInvoicePaymentRetried(subscription.Id));
+            paymentAttempt.MarkFailed(now, charge.ErrorMessage ?? "Paystack could not charge the saved payment method.");
+            await paystackPaymentAttemptRepository.AddAsync(paymentAttempt, cancellationToken);
+            await dbContext.SaveChangesAsync(cancellationToken);
+            await transaction.CommitAsync(cancellationToken);
+            return Result<RetryRenewalPaymentResponse>.BadRequest(charge.ErrorMessage ?? "Paystack could not charge the saved payment method.", true);
         }
 
-        var publishableKey = invoiceRetryResult.ClientSecret is not null ? stripeClientFactory.GetPublishableKey() : null;
-        return new RetryPendingInvoicePaymentResponse(invoiceRetryResult.Paid, invoiceRetryResult.ClientSecret, publishableKey);
+        var nextBillingAt = now.AddMonths(1);
+        paymentAttempt.MarkSucceeded(now);
+        subscription.ClearPaymentFailure();
+        subscription.StartBillingPeriod(subscription.Plan, charge.Amount, charge.Currency, now, nextBillingAt, charge.PaymentMethod);
+        subscription.SetPaymentTransactions([
+                .. subscription.PaymentTransactions,
+                new PaymentTransaction(PaymentTransactionId.NewId(), charge.Amount, charge.Amount, 0m, charge.Currency, PaymentTransactionStatus.Succeeded, now, null, null, null, PaystackReference: charge.Reference)
+            ]
+        );
+        subscriptionRepository.Update(subscription);
+        await paystackPaymentAttemptRepository.AddAsync(paymentAttempt, cancellationToken);
+        events.CollectEvent(new RenewalPaymentRetried(subscription.Id));
+        await dbContext.SaveChangesAsync(cancellationToken);
+        await transaction.CommitAsync(cancellationToken);
+
+        return new RetryRenewalPaymentResponse(true, null, charge.Reference, null, charge.Amount, charge.Currency, nameof(PaystackPaymentPurpose.Retry));
     }
 }

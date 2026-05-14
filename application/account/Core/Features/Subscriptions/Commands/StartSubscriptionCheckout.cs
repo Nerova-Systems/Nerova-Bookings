@@ -1,6 +1,6 @@
 using Account.Features.Subscriptions.Domain;
 using Account.Features.Users.Domain;
-using Account.Integrations.Stripe;
+using Account.Integrations.Paystack;
 using FluentValidation;
 using JetBrains.Annotations;
 using SharedKernel.Cqrs;
@@ -14,7 +14,15 @@ public sealed record StartSubscriptionCheckoutCommand(SubscriptionPlan Plan)
     : ICommand, IRequest<Result<StartSubscriptionCheckoutResponse>>;
 
 [PublicAPI]
-public sealed record StartSubscriptionCheckoutResponse(string? ClientSecret, string? PublishableKey, bool UsedExistingPaymentMethod);
+public sealed record StartSubscriptionCheckoutResponse(
+    string? AccessCode,
+    string? Reference,
+    string? PublicKey,
+    decimal? Amount,
+    string? Currency,
+    string OperationPurpose,
+    bool UsedExistingPaymentMethod
+);
 
 public sealed class StartSubscriptionCheckoutValidator : AbstractValidator<StartSubscriptionCheckoutCommand>
 {
@@ -26,9 +34,11 @@ public sealed class StartSubscriptionCheckoutValidator : AbstractValidator<Start
 
 public sealed class StartSubscriptionCheckoutHandler(
     ISubscriptionRepository subscriptionRepository,
-    StripeClientFactory stripeClientFactory,
+    IPaystackPaymentAttemptRepository paystackPaymentAttemptRepository,
+    PaystackClientFactory paystackClientFactory,
     IExecutionContext executionContext,
     ITelemetryEventsCollector events,
+    TimeProvider timeProvider,
     ILogger<StartSubscriptionCheckoutHandler> logger
 ) : IRequestHandler<StartSubscriptionCheckoutCommand, Result<StartSubscriptionCheckoutResponse>>
 {
@@ -41,23 +51,23 @@ public sealed class StartSubscriptionCheckoutHandler(
 
         var subscription = await subscriptionRepository.GetCurrentAsync(cancellationToken);
 
-        if (subscription.StripeCustomerId is null)
+        if (subscription.PaystackCustomerId is null)
         {
             return Result<StartSubscriptionCheckoutResponse>.BadRequest("Billing information must be saved before checkout.");
         }
 
-        var publishableKey = stripeClientFactory.GetPublishableKey();
-        if (publishableKey is null)
+        var publicKey = paystackClientFactory.GetPublicKey();
+        if (publicKey is null)
         {
-            logger.LogWarning("Stripe publishable key is not configured");
-            return Result<StartSubscriptionCheckoutResponse>.BadRequest("Stripe is not configured for checkout.");
+            logger.LogWarning("Paystack public key is not configured");
+            return Result<StartSubscriptionCheckoutResponse>.BadRequest("Paystack is not configured for checkout.");
         }
 
-        var stripeClient = stripeClientFactory.GetClient();
+        var paystackClient = paystackClientFactory.GetClient();
 
         if (subscription.PaymentMethod is not null)
         {
-            if (subscription.StripeSubscriptionId is not null)
+            if (subscription.HasActivePaystackAuthorization())
             {
                 return Result<StartSubscriptionCheckoutResponse>.BadRequest("A subscription already exists. Please complete any pending payment or use upgrade instead.");
             }
@@ -67,31 +77,91 @@ public sealed class StartSubscriptionCheckoutHandler(
                 return Result<StartSubscriptionCheckoutResponse>.BadRequest("Billing information must be saved before subscribing.");
             }
 
-            var subscribeResult = await stripeClient.CreateSubscriptionWithSavedPaymentMethodAsync(subscription.StripeCustomerId, command.Plan, cancellationToken);
-            if (subscribeResult is null)
+            var billingEmail = subscription.PaystackAuthorizationEmail ?? subscription.BillingInfo.Email;
+            if (subscription.PaystackAuthorizationCode is null || billingEmail is null)
             {
-                return Result<StartSubscriptionCheckoutResponse>.BadRequest("Failed to create subscription in Stripe.");
+                return Result<StartSubscriptionCheckoutResponse>.BadRequest("A reusable card authorization is required before subscribing with a saved payment method.");
             }
+
+            var catalogItem = (await paystackClient.GetPriceCatalogAsync(cancellationToken)).SingleOrDefault(p => p.Plan == command.Plan);
+            if (catalogItem is null)
+            {
+                return Result<StartSubscriptionCheckoutResponse>.BadRequest("Could not retrieve subscription price.");
+            }
+
+            var charge = await paystackClient.ChargeAuthorizationAsync(
+                subscription.PaystackCustomerId,
+                subscription.PaystackAuthorizationCode,
+                billingEmail,
+                PaystackPaymentPurpose.Subscribe,
+                command.Plan,
+                catalogItem.UnitAmount,
+                catalogItem.Currency,
+                cancellationToken
+            );
+            if (charge is null)
+            {
+                return Result<StartSubscriptionCheckoutResponse>.BadRequest("Failed to charge saved payment method.");
+            }
+
+            var paymentAttempt = PaystackPaymentAttempt.Create(
+                subscription.TenantId,
+                subscription.Id,
+                charge.Reference,
+                subscription.PaystackCustomerId,
+                subscription.PaystackAuthorizationCode,
+                PaystackPaymentPurpose.Subscribe,
+                command.Plan,
+                charge.Amount,
+                charge.Currency
+            );
+            if (!charge.Paid)
+            {
+                paymentAttempt.MarkFailed(timeProvider.GetUtcNow(), charge.ErrorMessage ?? "Paystack could not charge the saved payment method.");
+                await paystackPaymentAttemptRepository.AddAsync(paymentAttempt, cancellationToken);
+                return Result<StartSubscriptionCheckoutResponse>.BadRequest(charge.ErrorMessage ?? "Paystack could not charge the saved payment method.", true);
+            }
+
+            await paystackPaymentAttemptRepository.AddAsync(paymentAttempt, cancellationToken);
 
             events.CollectEvent(new SubscriptionCheckoutStarted(subscription.Id, command.Plan, true));
 
-            var savedPublishableKey = subscribeResult.ClientSecret is not null ? publishableKey : null;
-            return new StartSubscriptionCheckoutResponse(subscribeResult.ClientSecret, savedPublishableKey, true);
+            return new StartSubscriptionCheckoutResponse(null, charge.Reference, null, charge.Amount, charge.Currency, nameof(PaystackPaymentPurpose.Subscribe), true);
         }
 
-        if (subscription.HasActiveStripeSubscription())
+        if (subscription.HasActivePaystackAuthorization())
         {
             return Result<StartSubscriptionCheckoutResponse>.BadRequest("An active subscription already exists. Cannot create a new checkout session.");
         }
 
-        var result = await stripeClient.CreateCheckoutSessionAsync(subscription.StripeCustomerId!, command.Plan, executionContext.UserInfo.Locale, cancellationToken);
+        if (subscription.BillingInfo?.Email is null)
+        {
+            return Result<StartSubscriptionCheckoutResponse>.BadRequest("Billing information must include an email before checkout.");
+        }
+
+        var result = await paystackClient.CreateCheckoutSessionAsync(subscription.PaystackCustomerId!, subscription.BillingInfo.Email, command.Plan, PaystackPaymentPurpose.Subscribe, cancellationToken);
         if (result is null)
         {
-            return Result<StartSubscriptionCheckoutResponse>.BadRequest("Failed to create checkout session.");
+            return Result<StartSubscriptionCheckoutResponse>.BadRequest("Failed to initialize Paystack checkout.");
         }
+
+        await paystackPaymentAttemptRepository.AddAsync(
+            PaystackPaymentAttempt.Create(
+                subscription.TenantId,
+                subscription.Id,
+                result.Reference,
+                subscription.PaystackCustomerId,
+                null,
+                PaystackPaymentPurpose.Subscribe,
+                command.Plan,
+                result.Amount,
+                result.Currency
+            ),
+            cancellationToken
+        );
 
         events.CollectEvent(new SubscriptionCheckoutStarted(subscription.Id, command.Plan, false));
 
-        return new StartSubscriptionCheckoutResponse(result.ClientSecret, publishableKey, false);
+        return new StartSubscriptionCheckoutResponse(result.AccessCode, result.Reference, publicKey, result.Amount, result.Currency, result.Purpose.ToString(), false);
     }
 }

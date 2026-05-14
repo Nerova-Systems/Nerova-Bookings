@@ -104,9 +104,24 @@ async function buildTarget(target: BuildTarget): Promise<void> {
 }
 
 function runLingui(target: BuildTarget, args: string[]): void {
-  const result = spawnSync("npx", ["lingui", ...args], { cwd: target.configRoot, stdio: "inherit" });
+  const linguiBinary = join(
+    applicationRoot,
+    "node_modules",
+    ".bin",
+    process.platform === "win32" ? "lingui.cmd" : "lingui"
+  );
+  const result = spawnSync(linguiBinary, args, {
+    cwd: target.configRoot,
+    shell: process.platform === "win32",
+    stdio: "inherit"
+  });
+  if (result.error) {
+    throw result.error;
+  }
   if (result.status !== 0) {
-    throw new Error(`lingui ${args[0]} failed for ${target.label} with exit code ${result.status}.`);
+    throw new Error(
+      `lingui ${args[0]} failed for ${target.label} with exit code ${result.status} and signal ${result.signal}.`
+    );
   }
 }
 

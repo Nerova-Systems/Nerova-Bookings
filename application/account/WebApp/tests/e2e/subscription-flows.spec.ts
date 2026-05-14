@@ -10,24 +10,24 @@ test.beforeEach(async ({ ownerPage }) => {
     const runtimeEnv = JSON.parse(meta?.getAttribute("content") ?? "{}");
     return runtimeEnv.PUBLIC_SUBSCRIPTION_ENABLED === "true";
   });
-  test.skip(!isSubscriptionEnabled, "Subscriptions are not enabled (Stripe not configured)");
+  test.skip(!isSubscriptionEnabled, "Subscriptions are not enabled (Paystack not configured)");
 });
 
 test.describe("@smoke", () => {
   /**
    * SUBSCRIPTION MANAGEMENT E2E TEST
    *
-   * Tests the complete subscription lifecycle using MockStripeClient responses:
+   * Tests the complete subscription lifecycle using MockPaystackClient responses:
    * - Basis plan display with plan comparison cards (no-subscription view)
    * - Subscribe flow with billing info gate and mock checkout session callback
    * - Upgrade from Standard to Premium (subscription page)
    * - Schedule downgrade from Premium to Standard (subscription page with mocked state)
    * - Downgrade to Basis (free plan) with cancellation reason selection (subscription page)
    * - Cancelling state with reactivation banner and confirmation dialog
-   * - Payment history table with invoice links
+   * - Payment history table with receipt links
    * - Payment failed warning banner display
    * - Suspension error page (Owner vs Member view)
-   * - Stripe unconfigured state handling
+   * - Paystack unconfigured state handling
    * - Access denied for non-Owner users
    */
   test("should handle complete subscription lifecycle with plan changes and billing states", async ({ ownerPage }) => {
@@ -82,7 +82,7 @@ test.describe("@smoke", () => {
       await expect(ownerPage.getByRole("button", { name: "Cancel" })).toBeVisible();
     })();
 
-    await step("Submit billing info & verify Stripe checkout dialog initializes successfully")(async () => {
+    await step("Submit billing info & verify Paystack checkout dialog initializes successfully")(async () => {
       await ownerPage.getByLabel("Billing email").fill("billing@example.com");
       await selectOption(ownerPage.getByLabel("Country"), ownerPage, "Denmark");
       await ownerPage.getByLabel("Name").fill("Test Organization");
@@ -90,20 +90,12 @@ test.describe("@smoke", () => {
       await ownerPage.getByLabel("Postal code").fill("1456");
       await ownerPage.getByLabel("City").fill("Copenhagen");
 
-      // Stripe.js makes a request to api.stripe.com only when the Custom Checkout SDK has
-      // initialised successfully. If the wrong provider/options shape is used (e.g. v9's
-      // CheckoutFormProvider with the legacy elementsOptions shape), Stripe.js fails inside
-      // initCheckoutFormSdk and never reaches its API call. We assert the API call happens
-      // as the deterministic signal that SDK init succeeded.
-      const stripeApiCall = ownerPage.waitForRequest((request) => request.url().includes("api.stripe.com"));
-
       await ownerPage.getByRole("button", { name: "Next" }).click();
 
       const subscribeDialog = ownerPage.getByRole("dialog", { name: "Subscribe" });
       await expect(subscribeDialog).toBeVisible();
       await expect(subscribeDialog.getByText("Total")).toBeVisible();
-
-      await stripeApiCall;
+      await expect(subscribeDialog.getByRole("button", { name: "Pay and subscribe" })).toBeEnabled();
     })();
 
     await step("Mock active Standard subscription & verify subscription overview with payment history")(async () => {
@@ -115,8 +107,8 @@ test.describe("@smoke", () => {
             id: "sub_mock",
             plan: "Standard",
             scheduledPlan: null,
-            hasStripeCustomer: true,
-            hasStripeSubscription: true,
+            hasPaystackCustomer: true,
+            hasPaystackAuthorization: true,
             currentPriceAmount: 29.0,
             currentPriceCurrency: "USD",
             currentPeriodEnd: "2026-03-24T00:00:00Z",
@@ -136,7 +128,7 @@ test.describe("@smoke", () => {
               email: "billing@example.com",
               taxId: null
             },
-            hasPendingStripeEvents: false
+            hasPendingPaystackEvents: false
           }
         });
       });
@@ -150,11 +142,12 @@ test.describe("@smoke", () => {
             transactions: [
               {
                 id: "txn_mock_1",
-                amount: 29.0,
+                amount: 149.0,
                 currency: "USD",
                 status: "Succeeded",
                 date: "2026-02-24T00:00:00Z",
-                invoiceUrl: "https://mock.stripe.local/invoice/12345",
+                invoiceUrl: "https://mock.paystack.local/receipt/12345",
+                receiptUrl: "https://mock.paystack.local/receipt/12345",
                 creditNoteUrl: null
               }
             ]
@@ -178,8 +171,8 @@ test.describe("@smoke", () => {
       await expect(ownerPage.getByRole("columnheader", { name: "Date" })).toBeVisible();
       await expect(ownerPage.getByRole("columnheader", { name: "Amount" })).toBeVisible();
       await expect(ownerPage.getByRole("columnheader", { name: "Status" })).toBeVisible();
-      await expect(ownerPage.getByText("Succeeded")).toBeVisible();
-      await expect(ownerPage.getByRole("link", { name: "Invoice" })).toBeVisible();
+      await expect(ownerPage.getByText("Paid")).toBeVisible();
+      await expect(ownerPage.getByRole("link", { name: "Receipt" })).toBeVisible();
 
       await ownerPage.unroute("**/api/account/subscriptions/current");
       await ownerPage.unroute("**/api/account/billing/payment-history**");
@@ -196,8 +189,8 @@ test.describe("@smoke", () => {
             id: "sub_mock",
             plan: currentPlan,
             scheduledPlan: null,
-            hasStripeCustomer: true,
-            hasStripeSubscription: true,
+            hasPaystackCustomer: true,
+            hasPaystackAuthorization: true,
             currentPriceAmount: 29.0,
             currentPriceCurrency: "USD",
             currentPeriodEnd: "2026-03-24T00:00:00Z",
@@ -205,7 +198,7 @@ test.describe("@smoke", () => {
             isPaymentFailed: false,
             paymentMethod: { brand: "visa", last4: "4242", expMonth: 12, expYear: 2026 },
             billingInfo: null,
-            hasPendingStripeEvents: false
+            hasPendingPaystackEvents: false
           }
         });
       });
@@ -230,7 +223,7 @@ test.describe("@smoke", () => {
         await route.fulfill({
           status: 200,
           contentType: "application/json",
-          json: { clientSecret: null, publishableKey: null }
+          json: { reference: null, accessCode: null, operationPurpose: "Upgrade" }
         });
       });
 
@@ -261,8 +254,8 @@ test.describe("@smoke", () => {
             id: "sub_mock",
             plan: "Premium",
             scheduledPlan,
-            hasStripeCustomer: true,
-            hasStripeSubscription: true,
+            hasPaystackCustomer: true,
+            hasPaystackAuthorization: true,
             currentPriceAmount: 99.0,
             currentPriceCurrency: "USD",
             currentPeriodEnd: "2026-03-24T00:00:00Z",
@@ -270,7 +263,7 @@ test.describe("@smoke", () => {
             isPaymentFailed: false,
             paymentMethod: null,
             billingInfo: null,
-            hasPendingStripeEvents: false
+            hasPendingPaystackEvents: false
           }
         });
       });
@@ -313,8 +306,8 @@ test.describe("@smoke", () => {
               id: "sub_mock",
               plan: "Standard",
               scheduledPlan: null,
-              hasStripeCustomer: true,
-              hasStripeSubscription: true,
+              hasPaystackCustomer: true,
+              hasPaystackAuthorization: true,
               currentPriceAmount: 29.0,
               currentPriceCurrency: "USD",
               currentPeriodEnd: "2026-03-24T00:00:00Z",
@@ -322,7 +315,7 @@ test.describe("@smoke", () => {
               isPaymentFailed: false,
               paymentMethod: null,
               billingInfo: null,
-              hasPendingStripeEvents: false
+              hasPendingPaystackEvents: false
             }
           });
         });
@@ -364,8 +357,8 @@ test.describe("@smoke", () => {
             id: "sub_mock",
             plan: "Standard",
             scheduledPlan: null,
-            hasStripeCustomer: true,
-            hasStripeSubscription: true,
+            hasPaystackCustomer: true,
+            hasPaystackAuthorization: true,
             currentPriceAmount: 29.0,
             currentPriceCurrency: "USD",
             currentPeriodEnd: "2026-03-24T00:00:00Z",
@@ -373,7 +366,7 @@ test.describe("@smoke", () => {
             isPaymentFailed: false,
             paymentMethod: null,
             billingInfo: null,
-            hasPendingStripeEvents: false
+            hasPendingPaystackEvents: false
           }
         });
       });
@@ -388,7 +381,7 @@ test.describe("@smoke", () => {
         await route.fulfill({
           status: 200,
           contentType: "application/json",
-          json: { clientSecret: null, publishableKey: null }
+          json: {}
         });
       });
     })();
@@ -416,8 +409,8 @@ test.describe("@smoke", () => {
             id: "sub_mock",
             plan: "Standard",
             scheduledPlan: null,
-            hasStripeCustomer: true,
-            hasStripeSubscription: true,
+            hasPaystackCustomer: true,
+            hasPaystackAuthorization: true,
             currentPriceAmount: 29.0,
             currentPriceCurrency: "USD",
             currentPeriodEnd: "2026-03-24T00:00:00Z",
@@ -425,13 +418,19 @@ test.describe("@smoke", () => {
             isPaymentFailed: true,
             paymentMethod: null,
             billingInfo: null,
-            hasPendingStripeEvents: false
+            hasPendingPaystackEvents: false
           }
         });
       });
 
       await ownerPage.goto("/account/billing");
       await expect(ownerPage.getByText("Payment failed. Your subscription will be suspended soon.")).toBeVisible();
+      await expect(
+        ownerPage.getByText(
+          "Payment failed. Retry payment or update your payment method to keep your subscription active."
+        )
+      ).toBeVisible();
+      await expect(ownerPage.getByRole("button", { name: "Retry payment" })).toBeVisible();
       await expect(ownerPage.getByRole("button", { name: "Update payment method" }).first()).toBeVisible();
 
       await ownerPage.unroute("**/api/account/subscriptions/current");
@@ -471,7 +470,7 @@ test.describe("@smoke", () => {
       await ownerPage.unroute("**/api/account/tenants/current");
     })();
 
-    // === STRIPE UNCONFIGURED STATE ===
+    // === PAYSTACK UNCONFIGURED STATE ===
     await step("Mock empty pricing catalog & verify warning message on subscription page")(async () => {
       await ownerPage.route("**/api/account/subscriptions/pricing-catalog", async (route) => {
         await route.fulfill({
@@ -578,8 +577,8 @@ test.describe("@comprehensive", () => {
               id: "sub_mock",
               plan: "Standard",
               scheduledPlan: null,
-              hasStripeCustomer: true,
-              hasStripeSubscription: true,
+              hasPaystackCustomer: true,
+              hasPaystackAuthorization: true,
               currentPriceAmount: 29.0,
               currentPriceCurrency: "USD",
               currentPeriodEnd: "2026-03-24T00:00:00Z",
@@ -599,7 +598,7 @@ test.describe("@comprehensive", () => {
                 email: "billing@example.com",
                 taxId: "DK12345678"
               },
-              hasPendingStripeEvents: false
+              hasPendingPaystackEvents: false
             }
           });
         });
@@ -648,8 +647,8 @@ test.describe("@comprehensive", () => {
     })();
 
     // === EMPTY PAYMENT HISTORY ===
-    await step("Scroll to billing history & verify empty state message")(async () => {
-      await expect(ownerPage.getByRole("heading", { name: "Billing history" })).toBeVisible();
+    await step("Scroll to invoices section & verify empty state message")(async () => {
+      await expect(ownerPage.getByRole("heading", { name: "Invoices" })).toBeVisible();
       await expect(ownerPage.getByText("No payment history available.")).toBeVisible();
 
       await ownerPage.unroute("**/api/account/billing/payment-history**");
@@ -666,8 +665,8 @@ test.describe("@comprehensive", () => {
             id: "sub_mock",
             plan: "Standard",
             scheduledPlan: null,
-            hasStripeCustomer: true,
-            hasStripeSubscription: true,
+            hasPaystackCustomer: true,
+            hasPaystackAuthorization: true,
             currentPriceAmount: 29.0,
             currentPriceCurrency: "USD",
             currentPeriodEnd: "2026-03-24T00:00:00Z",
@@ -675,7 +674,7 @@ test.describe("@comprehensive", () => {
             isPaymentFailed: false,
             paymentMethod: null,
             billingInfo: null,
-            hasPendingStripeEvents: false
+            hasPendingPaystackEvents: false
           }
         });
       });
@@ -689,21 +688,23 @@ test.describe("@comprehensive", () => {
             transactions: [
               {
                 id: "txn_mock_1",
-                amount: 29.0,
+                amount: 149.0,
                 currency: "USD",
                 status: "Succeeded",
                 date: "2026-02-24T00:00:00Z",
-                invoiceUrl: "https://mock.stripe.local/invoice/12345",
+                invoiceUrl: "https://mock.paystack.local/receipt/12345",
+                receiptUrl: "https://mock.paystack.local/receipt/12345",
                 creditNoteUrl: null
               },
               {
                 id: "txn_mock_2",
-                amount: 29.0,
+                amount: 149.0,
                 currency: "USD",
                 status: "Refunded",
                 date: "2026-01-24T00:00:00Z",
-                invoiceUrl: "https://mock.stripe.local/invoice/12346",
-                creditNoteUrl: "https://mock.stripe.local/credit-note/67890"
+                invoiceUrl: "https://mock.paystack.local/receipt/12346",
+                receiptUrl: "https://mock.paystack.local/receipt/12346",
+                creditNoteUrl: "https://mock.paystack.local/credit-note/67890"
               }
             ]
           }
@@ -712,11 +713,11 @@ test.describe("@comprehensive", () => {
 
       await ownerPage.goto("/account/billing");
 
-      await expect(ownerPage.getByText("Succeeded")).toBeVisible();
+      await expect(ownerPage.getByText("Paid")).toBeVisible();
       await expect(ownerPage.getByText("Refunded")).toBeVisible();
 
-      const invoiceLinks = ownerPage.getByRole("link", { name: "Invoice" });
-      await expect(invoiceLinks.first()).toBeVisible();
+      const receiptLinks = ownerPage.getByRole("link", { name: "Receipt" });
+      await expect(receiptLinks.first()).toBeVisible();
       await expect(ownerPage.getByRole("link", { name: "Credit note" })).toBeVisible();
 
       await ownerPage.unroute("**/api/account/billing/payment-history**");
@@ -734,8 +735,8 @@ test.describe("@comprehensive", () => {
             id: "sub_mock",
             plan: "Premium",
             scheduledPlan,
-            hasStripeCustomer: true,
-            hasStripeSubscription: true,
+            hasPaystackCustomer: true,
+            hasPaystackAuthorization: true,
             currentPriceAmount: 99.0,
             currentPriceCurrency: "USD",
             currentPeriodEnd: "2026-03-24T00:00:00Z",
@@ -743,7 +744,7 @@ test.describe("@comprehensive", () => {
             isPaymentFailed: false,
             paymentMethod: null,
             billingInfo: null,
-            hasPendingStripeEvents: false
+            hasPendingPaystackEvents: false
           }
         });
       });

@@ -17,11 +17,11 @@ public sealed class GetPaymentHistoryTests : EndpointBaseTest<AccountDbContext>
     {
         // Arrange
         var transactionId = PaymentTransactionId.NewId().ToString();
-        var transactionsJson = $$"""[{"Id":"{{transactionId}}","Amount":29.99,"Currency":"usd","Status":"Succeeded","Date":"2026-01-01T00:00:00+00:00","FailureReason":null,"InvoiceUrl":"https://invoice.stripe.com/test"}]""";
+        var transactionsJson = $$"""[{"Id":"{{transactionId}}","Amount":29.99,"AmountExcludingTax":29.99,"TaxAmount":0.00,"Currency":"usd","Status":"Succeeded","Date":"2026-01-01T00:00:00+00:00","FailureReason":null,"InvoiceUrl":"https://invoice.paystack.com/test"}]""";
         Connection.Update("subscriptions", "tenant_id", DatabaseSeeder.Tenant1.Id.Value, [
                 ("plan", nameof(SubscriptionPlan.Standard)),
-                ("stripe_customer_id", "cus_test_123"),
-                ("stripe_subscription_id", "sub_test_123"),
+                ("paystack_customer_code", "cus_test_123"),
+                ("paystack_authorization_code", "sub_test_123"),
                 ("current_period_end", TimeProvider.GetUtcNow().AddDays(30)),
                 ("payment_transactions", transactionsJson)
             ]
@@ -38,6 +38,8 @@ public sealed class GetPaymentHistoryTests : EndpointBaseTest<AccountDbContext>
         result.Transactions[0].Amount.Should().Be(29.99m);
         result.Transactions[0].Currency.Should().Be("usd");
         result.Transactions[0].Status.Should().Be(PaymentTransactionStatus.Succeeded);
+        result.Transactions[0].InvoiceUrl.Should().Be("https://invoice.paystack.com/test");
+        result.Transactions[0].ReceiptUrl.Should().Be("https://invoice.paystack.com/test");
     }
 
     [Fact]

@@ -3,6 +3,7 @@ using System.Net.Http.Json;
 using Account.Database;
 using Account.Features.Billing.Commands;
 using Account.Features.Subscriptions.Domain;
+using Account.Integrations.Paystack;
 using FluentAssertions;
 using SharedKernel.Tests;
 using SharedKernel.Tests.Persistence;
@@ -19,8 +20,8 @@ public sealed class UpdateBillingInfoTests : EndpointBaseTest<AccountDbContext>
         // Arrange
         Connection.Update("subscriptions", "tenant_id", DatabaseSeeder.Tenant1.Id.Value, [
                 ("plan", nameof(SubscriptionPlan.Standard)),
-                ("stripe_customer_id", "cus_test_123"),
-                ("stripe_subscription_id", "sub_test_123"),
+                ("paystack_customer_code", "cus_test_123"),
+                ("paystack_authorization_code", "sub_test_123"),
                 ("current_period_end", TimeProvider.GetUtcNow().AddDays(30))
             ]
         );
@@ -31,6 +32,10 @@ public sealed class UpdateBillingInfoTests : EndpointBaseTest<AccountDbContext>
 
         // Assert
         response.ShouldHaveEmptyHeaderAndLocationOnSuccess();
+        var billingInfo = Connection.ExecuteScalar<string>("SELECT billing_info FROM subscriptions WHERE tenant_id = @tenantId", [new { tenantId = DatabaseSeeder.Tenant1.Id.Value }]);
+        billingInfo.Should().Contain("Test Organization");
+        billingInfo.Should().Contain("Vestergade 12");
+        billingInfo.Should().Contain("billing@example.com");
     }
 
     [Fact]
@@ -39,8 +44,8 @@ public sealed class UpdateBillingInfoTests : EndpointBaseTest<AccountDbContext>
         // Arrange
         Connection.Update("subscriptions", "tenant_id", DatabaseSeeder.Tenant1.Id.Value, [
                 ("plan", nameof(SubscriptionPlan.Standard)),
-                ("stripe_customer_id", "cus_test_123"),
-                ("stripe_subscription_id", "sub_test_123"),
+                ("paystack_customer_code", "cus_test_123"),
+                ("paystack_authorization_code", "sub_test_123"),
                 ("current_period_end", TimeProvider.GetUtcNow().AddDays(30))
             ]
         );
@@ -51,10 +56,13 @@ public sealed class UpdateBillingInfoTests : EndpointBaseTest<AccountDbContext>
 
         // Assert
         response.ShouldHaveEmptyHeaderAndLocationOnSuccess();
+        var billingInfo = Connection.ExecuteScalar<string>("SELECT billing_info FROM subscriptions WHERE tenant_id = @tenantId", [new { tenantId = DatabaseSeeder.Tenant1.Id.Value }]);
+        billingInfo.Should().Contain("Vestergade 12");
+        billingInfo.Should().Contain("Floor 3");
     }
 
     [Fact]
-    public async Task UpdateBillingInfo_WhenNoStripeCustomer_ShouldCreateCustomerAndSucceed()
+    public async Task UpdateBillingInfo_WhenNoPaystackCustomer_ShouldCreateCustomerAndSucceed()
     {
         // Arrange
         var command = new UpdateBillingInfoCommand("Test Organization", "Vestergade 12", "1456", "Copenhagen", null, "DK", "billing@example.com", null);
@@ -64,6 +72,9 @@ public sealed class UpdateBillingInfoTests : EndpointBaseTest<AccountDbContext>
 
         // Assert
         response.ShouldHaveEmptyHeaderAndLocationOnSuccess();
+        Connection.ExecuteScalar<string>("SELECT paystack_customer_code FROM subscriptions WHERE tenant_id = @tenantId", [new { tenantId = DatabaseSeeder.Tenant1.Id.Value }]).Should().Be(MockPaystackClient.GetMockCustomerCode(DatabaseSeeder.Tenant1.Id.Value));
+        var billingInfo = Connection.ExecuteScalar<string>("SELECT billing_info FROM subscriptions WHERE tenant_id = @tenantId", [new { tenantId = DatabaseSeeder.Tenant1.Id.Value }]);
+        billingInfo.Should().Contain("Test Organization");
     }
 
     [Fact]
@@ -72,8 +83,8 @@ public sealed class UpdateBillingInfoTests : EndpointBaseTest<AccountDbContext>
         // Arrange
         Connection.Update("subscriptions", "tenant_id", DatabaseSeeder.Tenant1.Id.Value, [
                 ("plan", nameof(SubscriptionPlan.Standard)),
-                ("stripe_customer_id", "cus_test_123"),
-                ("stripe_subscription_id", "sub_test_123"),
+                ("paystack_customer_code", "cus_test_123"),
+                ("paystack_authorization_code", "sub_test_123"),
                 ("current_period_end", TimeProvider.GetUtcNow().AddDays(30))
             ]
         );
@@ -93,8 +104,8 @@ public sealed class UpdateBillingInfoTests : EndpointBaseTest<AccountDbContext>
         // Arrange
         Connection.Update("subscriptions", "tenant_id", DatabaseSeeder.Tenant1.Id.Value, [
                 ("plan", nameof(SubscriptionPlan.Standard)),
-                ("stripe_customer_id", "cus_test_123"),
-                ("stripe_subscription_id", "sub_test_123"),
+                ("paystack_customer_code", "cus_test_123"),
+                ("paystack_authorization_code", "sub_test_123"),
                 ("current_period_end", TimeProvider.GetUtcNow().AddDays(30))
             ]
         );

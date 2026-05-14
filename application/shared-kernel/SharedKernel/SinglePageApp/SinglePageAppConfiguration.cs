@@ -16,11 +16,6 @@ public class SinglePageAppConfiguration
     private const string ApplicationVersionKey = "APPLICATION_VERSION";
     public static readonly string[] SupportedLocalizations = ["en-US", "da-DK"];
 
-    // Default bundle directory for callers that host a single SPA (the original layout). Multi-SPA
-    // hosts (e.g. consolidated account-api hosting both account/WebApp and account/BackOffice)
-    // construct one SinglePageAppConfiguration per SPA via the WebAppProjectName parameter.
-    public static readonly string BuildRootPath = GetWebAppDistRoot(DefaultWebAppProjectName, "dist");
-
     public static readonly JsonSerializerOptions JsonHtmlEncodingOptions =
         new(SharedDependencyConfiguration.DefaultJsonSerializerOptions)
         {
@@ -40,6 +35,17 @@ public class SinglePageAppConfiguration
         string webAppProjectName = DefaultWebAppProjectName,
         string? publicUrlOverride = null,
         string? cdnUrlOverride = null
+    ) : this(isDevelopment, environmentVariables, webAppProjectName, publicUrlOverride, cdnUrlOverride, null)
+    {
+    }
+
+    internal SinglePageAppConfiguration(
+        bool isDevelopment,
+        Dictionary<string, string>? environmentVariables,
+        string webAppProjectName,
+        string? publicUrlOverride,
+        string? cdnUrlOverride,
+        bool? isRunningInAzure
     )
     {
         // Per-host overrides win over the process-wide env vars so a single process can host multiple SPAs
@@ -77,13 +83,37 @@ public class SinglePageAppConfiguration
 
         _isDevelopment = isDevelopment;
         BundleDirectory = webAppProjectName == DefaultWebAppProjectName ? BuildRootPath : GetWebAppDistRoot(webAppProjectName, "dist");
+        // Null in Azure: published images only ship ./dist/, so the upward walk would throw.
+        PublicDirectory = isRunningInAzure ?? SharedInfrastructureConfiguration.IsRunningInAzure
+            ? null
+            : GetWebAppDistRoot(webAppProjectName, "public");
         _htmlTemplatePath = Path.Combine(BundleDirectory, "index.html");
         _remoteEntryJsPath = Path.Combine(BundleDirectory, "remoteEntry.js");
         PermissionPolicies = GetPermissionsPolicies();
         ContentSecurityPolicies = GetContentSecurityPolicies();
     }
 
+    // Default bundle directory for callers that host a single SPA (the original layout). Multi-SPA
+    // hosts (e.g. consolidated account-api hosting both account/WebApp and account/BackOffice)
+    // construct one SinglePageAppConfiguration per SPA via the WebAppProjectName parameter.
+    public static string BuildRootPath => GetWebAppDistRoot(DefaultWebAppProjectName, "dist");
+
+    // Source directory for SPA static assets that rsbuild copies into BuildRootPath at build time.
+    // Used by UseSinglePageAppFallback to layer public/ assets over the bundle in local dev where
+    // rsbuild's dev server holds them. Null in Azure: published images only contain ./dist/, so the
+    // upward walk for the public/ marker would terminate at the filesystem root and throw.
+    public static string? PublicRootPath => SharedInfrastructureConfiguration.IsRunningInAzure
+        ? null
+        : GetWebAppDistRoot(DefaultWebAppProjectName, "public");
+
     public string BundleDirectory { get; }
+
+    // Source directory for SPA static assets that rsbuild copies into BundleDirectory at build time
+    // (manifest.json, favicon.ico, apple-touch-icon.png, etc.). In Azure these assets live alongside
+    // the bundle, but in local dev rsbuild's dev server holds them and they never reach BundleDirectory.
+    // Layering this directory under the bundle file provider closes that gap without per-asset rules.
+    // Null in Azure (see constructor).
+    public string? PublicDirectory { get; }
 
     private string CdnUrl { get; }
 
@@ -165,7 +195,7 @@ public class SinglePageAppConfiguration
             { "camera", [] },
             { "picture-in-picture", [] },
             { "display-capture", [] },
-            { "fullscreen", [] },
+            { "fullscreen", ["self"] },
             { "web-share", [] },
             { "identity-credentials-get", [] }
         };
@@ -186,12 +216,12 @@ public class SinglePageAppConfiguration
         var contentSecurityPolicies = new[]
         {
             $"script-src {trustedHosts} 'nonce-{{NONCE_PLACEHOLDER}}' 'strict-dynamic' https:",
-            $"script-src-elem {trustedHosts} https://js.stripe.com 'nonce-{{NONCE_PLACEHOLDER}}'",
+            $"script-src-elem {trustedHosts} https://js.paystack.co 'nonce-{{NONCE_PLACEHOLDER}}'",
             $"style-src {trustedHosts} 'nonce-{{NONCE_PLACEHOLDER}}'",
             $"style-src-elem {trustedHosts} 'nonce-{{NONCE_PLACEHOLDER}}'",
             $"default-src {trustedHosts}",
-            $"connect-src {trustedHosts} https://js.stripe.com https://api.stripe.com data:",
-            $"frame-src {trustedHosts} https://js.stripe.com",
+            $"connect-src {trustedHosts} https://js.paystack.co https://api.paystack.co https://checkout.paystack.com data:",
+            $"frame-src {trustedHosts} https://js.paystack.co https://checkout.paystack.com",
             $"img-src {trustedHosts} data: blob:",
             "object-src 'none'",
             "base-uri 'none'"

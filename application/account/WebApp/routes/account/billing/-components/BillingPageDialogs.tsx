@@ -36,21 +36,16 @@ interface BillingPageDialogsProps {
 
   isUpdatePaymentMethodOpen: boolean;
   setIsUpdatePaymentMethodOpen: (open: boolean) => void;
-  onHasOpenInvoice: (invoice: { amount: number; currency: string }) => void;
 
   isRetryPaymentOpen: boolean;
   setIsRetryPaymentOpen: (open: boolean) => void;
   paymentMethod: PaymentMethod | null | undefined;
-  retryInvoiceAmount: number;
-  retryInvoiceCurrency: string;
+  retryPaymentAmount: number;
+  retryPaymentCurrency: string;
 
   isCheckoutDialogOpen: boolean;
   setIsCheckoutDialogOpen: (open: boolean) => void;
   checkoutPlan: SubscriptionPlan;
-  reactivateClientSecret: string | undefined;
-  reactivatePublishableKey: string | undefined;
-  setReactivateClientSecret: (value: string | undefined) => void;
-  setReactivatePublishableKey: (value: string | undefined) => void;
 }
 
 export function BillingPageDialogs({
@@ -73,19 +68,14 @@ export function BillingPageDialogs({
   pendingCheckoutPlan,
   isUpdatePaymentMethodOpen,
   setIsUpdatePaymentMethodOpen,
-  onHasOpenInvoice,
   isRetryPaymentOpen,
   setIsRetryPaymentOpen,
   paymentMethod,
-  retryInvoiceAmount,
-  retryInvoiceCurrency,
+  retryPaymentAmount,
+  retryPaymentCurrency,
   isCheckoutDialogOpen,
   setIsCheckoutDialogOpen,
-  checkoutPlan,
-  reactivateClientSecret,
-  reactivatePublishableKey,
-  setReactivateClientSecret,
-  setReactivatePublishableKey
+  checkoutPlan
 }: Readonly<BillingPageDialogsProps>) {
   return (
     <>
@@ -119,11 +109,7 @@ export function BillingPageDialogs({
         pendingLabel={pendingCheckoutPlan != null ? t`Saving...` : undefined}
       />
 
-      <UpdatePaymentMethodDialog
-        isOpen={isUpdatePaymentMethodOpen}
-        onOpenChange={setIsUpdatePaymentMethodOpen}
-        onHasOpenInvoice={onHasOpenInvoice}
-      />
+      <UpdatePaymentMethodDialog isOpen={isUpdatePaymentMethodOpen} onOpenChange={setIsUpdatePaymentMethodOpen} />
 
       {isRetryPaymentOpen && (
         <RetryPaymentDialog
@@ -131,24 +117,12 @@ export function BillingPageDialogs({
           onOpenChange={setIsRetryPaymentOpen}
           billingInfo={billingInfo}
           paymentMethod={paymentMethod}
-          amount={retryInvoiceAmount}
-          currency={retryInvoiceCurrency}
+          amount={retryPaymentAmount}
+          currency={retryPaymentCurrency}
         />
       )}
 
-      <CheckoutDialog
-        isOpen={isCheckoutDialogOpen}
-        onOpenChange={(open) => {
-          setIsCheckoutDialogOpen(open);
-          if (!open) {
-            setReactivateClientSecret(undefined);
-            setReactivatePublishableKey(undefined);
-          }
-        }}
-        plan={checkoutPlan}
-        prefetchedClientSecret={reactivateClientSecret}
-        prefetchedPublishableKey={reactivatePublishableKey}
-      />
+      <CheckoutDialog isOpen={isCheckoutDialogOpen} onOpenChange={setIsCheckoutDialogOpen} plan={checkoutPlan} />
     </>
   );
 }

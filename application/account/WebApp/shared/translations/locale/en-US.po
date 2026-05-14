@@ -69,13 +69,6 @@ msgstr "© {currentYear} PlatformPlatform. All rights reserved."
 msgid "+39 06 555 0000"
 msgstr "+39 06 555 0000"
 
-msgid ""
-"1 Infinite Loop\n"
-"Cupertino, CA 95014"
-msgstr ""
-"1 Infinite Loop\n"
-"Cupertino, CA 95014"
-
 msgid "1 TB storage"
 msgstr "1 TB storage"
 
@@ -93,6 +86,13 @@ msgstr "100 GB storage"
 
 msgid "100% Security Score"
 msgstr "100% Security Score"
+
+msgid ""
+"123 Example Street\n"
+"Anytown, AA 12345"
+msgstr ""
+"123 Example Street\n"
+"Anytown, AA 12345"
 
 msgid "14 h 30 min logged"
 msgstr "14 h 30 min logged"
@@ -435,9 +435,6 @@ msgstr "Billing"
 msgid "Billing email"
 msgstr "Billing email"
 
-msgid "Billing history"
-msgstr "Billing history"
-
 msgid "Billing information"
 msgstr "Billing information"
 
@@ -446,6 +443,9 @@ msgstr "Billing information updated"
 
 msgid "Billing is not configured. Please contact support to enable payment processing."
 msgstr "Billing is not configured. Please contact support to enable payment processing."
+
+msgid "Billing name"
+msgstr "Billing name"
 
 msgid "Billing tabs"
 msgstr "Billing tabs"
@@ -557,6 +557,9 @@ msgstr "Cancel subscription"
 
 msgid "Cancellation reason"
 msgstr "Cancellation reason"
+
+msgid "Cancelled"
+msgstr "Cancelled"
 
 msgid "Cancelling"
 msgstr "Cancelling"
@@ -1150,9 +1153,6 @@ msgstr "Extra small"
 msgid "Failed"
 msgstr "Failed"
 
-msgid "Failed to load payment processor."
-msgstr "Failed to load payment processor."
-
 msgid "Features"
 msgstr "Features"
 
@@ -1324,8 +1324,8 @@ msgstr "Invite user"
 msgid "Invited users"
 msgstr "Invited users"
 
-msgid "Invoice"
-msgstr "Invoice"
+msgid "Invoices"
+msgstr "Invoices"
 
 msgid "IP address"
 msgstr "IP address"
@@ -1473,6 +1473,9 @@ msgstr "Linear progress bar for determinate, foreground tasks like uploads or on
 
 msgid "Link"
 msgstr "Link"
+
+msgid "Link card"
+msgstr "Link card"
 
 msgid "Link sizes"
 msgstr "Link sizes"
@@ -1648,9 +1651,6 @@ msgstr "Muted"
 msgid "Name"
 msgstr "Name"
 
-msgid "Name as it appears on invoices"
-msgstr "Name as it appears on invoices"
-
 msgid "Narrow bottom drawer"
 msgstr "Narrow bottom drawer"
 
@@ -1822,6 +1822,9 @@ msgstr "Page not found"
 msgid "Page Views"
 msgstr "Page Views"
 
+msgid "Paid"
+msgstr "Paid"
+
 msgid "Palak paneer"
 msgstr "Palak paneer"
 
@@ -1843,11 +1846,17 @@ msgstr "Pay and upgrade"
 msgid "Payment authentication failed."
 msgstr "Payment authentication failed."
 
+msgid "Payment completed but no Paystack reference was returned."
+msgstr "Payment completed but no Paystack reference was returned."
+
 msgid "Payment could not be processed. Please try again later."
 msgstr "Payment could not be processed. Please try again later."
 
 msgid "Payment failed"
 msgstr "Payment failed"
+
+msgid "Payment failed. Retry payment or update your payment method to keep your subscription active."
+msgstr "Payment failed. Retry payment or update your payment method to keep your subscription active."
 
 msgid "Payment failed. Your subscription will be suspended soon."
 msgstr "Payment failed. Your subscription will be suspended soon."
@@ -1930,9 +1939,6 @@ msgstr "Please log in again to continue."
 
 msgid "Please select a JPEG, PNG, GIF, or WebP image."
 msgstr "Please select a JPEG, PNG, GIF, or WebP image."
-
-msgid "Please select a JPEG, PNG, GIF, WebP, or SVG image."
-msgstr "Please select a JPEG, PNG, GIF, WebP, or SVG image."
 
 msgid "Please try again or return to the home page."
 msgstr "Please try again or return to the home page."
@@ -2057,6 +2063,9 @@ msgstr "Ready to publish?"
 msgid "Rebase and merge"
 msgstr "Rebase and merge"
 
+msgid "Receipt"
+msgstr "Receipt"
+
 msgid "Recipe"
 msgstr "Recipe"
 
@@ -2158,6 +2167,9 @@ msgstr "Restore user"
 msgid "Restoring..."
 msgstr "Restoring..."
 
+msgid "Retry payment"
+msgstr "Retry payment"
+
 msgid "Retry pending payment"
 msgstr "Retry pending payment"
 
@@ -2214,6 +2226,9 @@ msgstr "Save note"
 
 msgid "Save page as..."
 msgstr "Save page as..."
+
+msgid "Saved card"
+msgstr "Saved card"
 
 msgid "Saved recipes"
 msgstr "Saved recipes"
@@ -2500,9 +2515,6 @@ msgstr "Street address"
 msgid "Strict separation prevents production data from leaking to other environments"
 msgstr "Strict separation prevents production data from leaking to other environments"
 
-msgid "Stripe Link"
-msgstr "Stripe Link"
-
 msgid "Subscribe"
 msgstr "Subscribe"
 
@@ -2515,9 +2527,6 @@ msgstr "Subscription"
 
 msgid "Subtle background for grouped rows inside a panel."
 msgstr "Subtle background for grouped rows inside a panel."
-
-msgid "Succeeded"
-msgstr "Succeeded"
 
 msgid "Suggestions"
 msgstr "Suggestions"
@@ -2832,6 +2841,9 @@ msgstr "User data updated"
 msgid "User deleted successfully: {userDisplayName}"
 msgstr "User deleted successfully: {userDisplayName}"
 
+msgid "User ID"
+msgstr "User ID"
+
 msgid "User invited successfully"
 msgstr "User invited successfully"
 
@@ -2916,8 +2928,8 @@ msgstr "View invitation"
 msgid "View invited users"
 msgstr "View invited users"
 
-msgid "View invoices and manage your payment method."
-msgstr "View invoices and manage your payment method."
+msgid "View payments and manage your payment method."
+msgstr "View payments and manage your payment method."
 
 msgid "View profile"
 msgstr "View profile"
@@ -2930,6 +2942,9 @@ msgstr "View users"
 
 msgid "Visitors"
 msgstr "Visitors"
+
+msgid "Warning"
+msgstr "Warning"
 
 msgid "Warning alert"
 msgstr "Warning alert"

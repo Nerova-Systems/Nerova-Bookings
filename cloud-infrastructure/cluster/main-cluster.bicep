@@ -27,11 +27,14 @@ param googleOAuthClientId string
 param googleOAuthClientSecret string
 
 @secure()
-param stripePublishableKey string
+param paystackPublicKey string
 @secure()
-param stripeApiKey string
+param paystackSecretKey string
 @secure()
-param stripeWebhookSecret string
+param paystackStandardPlanCode string
+@secure()
+param paystackPremiumPlanCode string
+param paystackCardAuthorizationAmountSubunit string = '100'
 
 var storageAccountUniquePrefix = replace(clusterResourceGroupName, '-', '')
 var tags = { environment: environment, 'managed-by': 'bicep' }
@@ -123,15 +126,17 @@ module googleOAuthSecrets '../modules/key-vault-secrets.bicep' = if (!empty(goog
   }
 }
 
-module stripeSecrets '../modules/key-vault-secrets.bicep' = if (!empty(stripeApiKey) && !empty(stripeWebhookSecret) && !empty(stripePublishableKey)) {
+module paystackSecrets '../modules/key-vault-secrets.bicep' = if (!empty(paystackSecretKey) && !empty(paystackPublicKey) && !empty(paystackStandardPlanCode) && !empty(paystackPremiumPlanCode)) {
   scope: clusterResourceGroup
-  name: '${clusterResourceGroupName}-stripe-secrets'
+  name: '${clusterResourceGroupName}-paystack-secrets'
   params: {
     keyVaultName: keyVault.outputs.name
     secrets: {
-      'Stripe--ApiKey': stripeApiKey
-      'Stripe--WebhookSecret': stripeWebhookSecret
-      'Stripe--PublishableKey': stripePublishableKey
+      'Paystack--PublicKey': paystackPublicKey
+      'Paystack--SecretKey': paystackSecretKey
+      'Paystack--StandardPlanCode': paystackStandardPlanCode
+      'Paystack--PremiumPlanCode': paystackPremiumPlanCode
+      'Paystack--CardAuthorizationAmountSubunit': paystackCardAuthorizationAmountSubunit
     }
   }
 }
@@ -276,16 +281,13 @@ var accountEnvironmentVariables = [
     value: 'no-reply@${communicationService.outputs.fromSenderDomain}'
   }
   {
-    name: 'Stripe__SubscriptionEnabled'
-    value: !empty(stripeApiKey) && !empty(stripeWebhookSecret) && !empty(stripePublishableKey) ? 'true' : 'false'
+    name: 'Paystack__SubscriptionEnabled'
+    value: !empty(paystackSecretKey) && !empty(paystackPublicKey) && !empty(paystackStandardPlanCode) && !empty(paystackPremiumPlanCode) ? 'true' : 'false'
   }
   {
-    name: 'Stripe__AllowMockProvider'
+    name: 'Paystack__AllowMockProvider'
     value: 'false'
   }
-]
-
-var accountApiEnvironmentVariables = concat(accountEnvironmentVariables, [
   {
     name: 'Hostnames__App'
     value: domainName
@@ -298,7 +300,15 @@ var accountApiEnvironmentVariables = concat(accountEnvironmentVariables, [
     name: 'BackOffice__AdminsGroupId'
     value: backOfficeAdminsGroupId
   }
-])
+  {
+    name: 'PUBLIC_GOOGLE_OAUTH_ENABLED'
+    value: !empty(googleOAuthClientId) && !empty(googleOAuthClientSecret) ? 'true' : 'false'
+  }
+  {
+    name: 'PUBLIC_SUBSCRIPTION_ENABLED'
+    value: !empty(stripeApiKey) && !empty(stripeWebhookSecret) && !empty(stripePublishableKey) ? 'true' : 'false'
+  }
+]
 
 module accountWorkers '../modules/container-app.bicep' = {
   name: '${clusterResourceGroupName}-account-workers-container-app'
@@ -347,7 +357,7 @@ module accountApi '../modules/container-app.bicep' = {
     hasProbesEndpoint: true
     external: false
     revisionSuffix: revisionSuffix
-    environmentVariables: accountApiEnvironmentVariables
+    environmentVariables: accountEnvironmentVariables
   }
   dependsOn: [accountWorkers]
 }
@@ -378,7 +388,7 @@ module backOffice '../modules/container-app.bicep' = {
     external: true
     revisionSuffix: revisionSuffix
     // The back-office container runs the same image as account-api; this flag tells Program.cs to register the BackOffice SPA fallback instead of the user-facing one.
-    environmentVariables: concat(accountApiEnvironmentVariables, [
+    environmentVariables: concat(accountEnvironmentVariables, [
       {
         name: 'BackOffice__IsBackOfficeContainer'
         value: 'true'
@@ -479,7 +489,7 @@ var mainEnvironmentVariables = [
   }
   {
     name: 'PUBLIC_SUBSCRIPTION_ENABLED'
-    value: !empty(stripeApiKey) && !empty(stripeWebhookSecret) && !empty(stripePublishableKey) ? 'true' : 'false'
+    value: !empty(paystackSecretKey) && !empty(paystackPublicKey) && !empty(paystackStandardPlanCode) && !empty(paystackPremiumPlanCode) ? 'true' : 'false'
   }
 ]
 

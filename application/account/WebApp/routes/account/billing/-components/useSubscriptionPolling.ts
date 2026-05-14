@@ -38,11 +38,11 @@ export function useSubscriptionPolling() {
   const { mutate: processPendingEvents } = processPendingEventsMutation;
 
   useEffect(() => {
-    if (subscription?.hasPendingStripeEvents && !isProcessingPendingEvents.current) {
+    if (subscription?.hasPendingPaystackEvents && !isProcessingPendingEvents.current) {
       isProcessingPendingEvents.current = true;
       processPendingEvents({});
     }
-  }, [subscription?.hasPendingStripeEvents, processPendingEvents]);
+  }, [subscription?.hasPendingPaystackEvents, processPendingEvents]);
 
   function startPolling(options: {
     check: (subscription: SubscriptionData) => boolean;

@@ -1,0 +1,134 @@
+extern alias workers;
+using System.Globalization;
+using Account.Database;
+using Account.Features.Subscriptions.Domain;
+using Account.Integrations.OAuth;
+using Account.Integrations.Paystack;
+using FluentAssertions;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using SharedKernel.Tests.Persistence;
+using Xunit;
+using BillingDriftWorker = workers::Account.Workers.BillingDriftWorker;
+
+namespace Account.Tests.Workers;
+
+public sealed class BillingDriftWorkerTests : EndpointBaseTest<AccountDbContext>
+{
+    [Fact]
+    public async Task ExecuteAsync_RunsOnePassThenExits_WithoutPeriodicTimer()
+    {
+        // Arrange
+        Connection.Update("subscriptions", "tenant_id", DatabaseSeeder.Tenant1.Id.Value, [
+                ("paystack_customer_code", null),
+                ("drift_checked_at", null)
+            ]
+        );
+
+        var worker = CreateWorker();
+
+        // Act
+        using var workerCancellationTokenSource = new CancellationTokenSource(TimeSpan.FromSeconds(30));
+        await worker.StartAsync(workerCancellationTokenSource.Token);
+        await worker.ExecuteTask!;
+
+        // Assert
+        worker.ExecuteTask.IsCompletedSuccessfully.Should().BeTrue("the worker must finish its single pass and complete without throwing");
+    }
+
+    [Fact]
+    public async Task ExecuteAsync_WhenSubscriptionIsDueForDriftCheck_AdvancesDriftCheckedAt()
+    {
+        // Arrange
+        SetUseMockPaystackCookieOnAmbientHttpContext();
+        var beforeWorkerStart = TimeProvider.GetUtcNow();
+        Connection.Update("subscriptions", "tenant_id", DatabaseSeeder.Tenant1.Id.Value, [
+                ("plan", nameof(SubscriptionPlan.Standard)),
+                ("paystack_customer_code", MockPaystackClient.MockCustomerCode),
+                ("current_price_amount", MockPaystackClient.StandardAmountExcludingTax),
+                ("current_price_currency", MockPaystackClient.MockStandardCurrency),
+                ("current_period_end", TimeProvider.GetUtcNow().AddDays(30)),
+                ("payment_transactions", "[]"),
+                ("drift_checked_at", null)
+            ]
+        );
+
+        var worker = CreateWorker();
+
+        // Act
+        using var workerCancellationTokenSource = new CancellationTokenSource(TimeSpan.FromSeconds(30));
+        await worker.StartAsync(workerCancellationTokenSource.Token);
+        await worker.ExecuteTask!;
+
+        // Assert
+        ReadDriftCheckedAt(DatabaseSeeder.Tenant1.Id.Value).Should()
+            .BeOnOrAfter(beforeWorkerStart.AddSeconds(-1), "a subscription with no prior drift check must be picked up by the worker and visited via Detect mode");
+    }
+
+    [Fact]
+    public async Task ExecuteAsync_WhenSubscriptionWasCheckedRecently_DoesNotAdvanceDriftCheckedAt()
+    {
+        // Arrange
+        SetUseMockPaystackCookieOnAmbientHttpContext();
+        var recentDriftCheckedAt = TimeProvider.GetUtcNow().AddHours(-1);
+        Connection.Update("subscriptions", "tenant_id", DatabaseSeeder.Tenant1.Id.Value, [
+                ("plan", nameof(SubscriptionPlan.Standard)),
+                ("paystack_customer_code", MockPaystackClient.MockCustomerCode),
+                ("current_price_amount", MockPaystackClient.StandardAmountExcludingTax),
+                ("current_price_currency", MockPaystackClient.MockStandardCurrency),
+                ("current_period_end", TimeProvider.GetUtcNow().AddDays(30)),
+                ("payment_transactions", "[]"),
+                ("drift_checked_at", recentDriftCheckedAt)
+            ]
+        );
+
+        var worker = CreateWorker();
+
+        // Act
+        using var workerCancellationTokenSource = new CancellationTokenSource(TimeSpan.FromSeconds(30));
+        await worker.StartAsync(workerCancellationTokenSource.Token);
+        await worker.ExecuteTask!;
+
+        // Assert
+        ReadDriftCheckedAt(DatabaseSeeder.Tenant1.Id.Value).Should()
+            .Be(recentDriftCheckedAt, "fresh rows must be excluded by the repository's staleness filter so the worker never visits them");
+    }
+
+    [Fact]
+    public void BillingDriftWorker_InheritsFromBackgroundService_AndHasNoPeriodicTimerField()
+    {
+        // Assert
+        typeof(BillingDriftWorker).BaseType.Should().Be(typeof(BackgroundService));
+
+        var fields = typeof(BillingDriftWorker).GetFields(BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
+        fields.Should().NotContain(f => f.FieldType == typeof(PeriodicTimer), "introducing a PeriodicTimer would re-enable a periodic loop");
+    }
+
+    private BillingDriftWorker CreateWorker()
+    {
+        var configuration = new ConfigurationBuilder().Build();
+        var logger = WebApplicationServices.GetRequiredService<ILogger<BillingDriftWorker>>();
+        return new BillingDriftWorker(WebApplicationServices, configuration, TimeProvider, logger);
+    }
+
+    private void SetUseMockPaystackCookieOnAmbientHttpContext()
+    {
+        var httpContextAccessor = WebApplicationServices.GetRequiredService<IHttpContextAccessor>();
+        var httpContext = new DefaultHttpContext();
+        httpContext.Request.Headers.Append("Cookie", $"{OAuthProviderFactory.UseMockProviderCookieName}=true");
+        httpContextAccessor.HttpContext = httpContext;
+    }
+
+    private DateTimeOffset? ReadDriftCheckedAt(long tenantId)
+    {
+        var value = Connection.ExecuteScalar<string>(
+            "SELECT drift_checked_at FROM subscriptions WHERE tenant_id = @tenantId",
+            [new { tenantId }]
+        );
+        return string.IsNullOrEmpty(value)
+            ? null
+            : DateTimeOffset.Parse(value, CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal | DateTimeStyles.AdjustToUniversal);
+    }
+}

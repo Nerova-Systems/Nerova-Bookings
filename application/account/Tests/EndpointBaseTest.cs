@@ -1,7 +1,7 @@
 using System.Net.Http.Headers;
 using Account.Features.Users.Domain;
 using Account.Integrations.OAuth;
-using Account.Integrations.Stripe;
+using Account.Integrations.Paystack;
 using Bogus;
 using JetBrains.Annotations;
 using Microsoft.ApplicationInsights;
@@ -47,13 +47,26 @@ public abstract class EndpointBaseTest<TContext> : IDisposable where TContext : 
             "APPLICATIONINSIGHTS_CONNECTION_STRING",
             "InstrumentationKey=00000000-0000-0000-0000-000000000000;IngestionEndpoint=https://localhost;LiveEndpoint=https://localhost"
         );
-        Environment.SetEnvironmentVariable("Stripe__AllowMockProvider", "true");
-        Environment.SetEnvironmentVariable("Stripe__PublishableKey", "pk_test_mock_publishable_key");
+        Environment.SetEnvironmentVariable("Paystack__AllowMockProvider", "true");
+        Environment.SetEnvironmentVariable("Paystack__AllowMockProviderOutsideDevelopment", "true");
+        Environment.SetEnvironmentVariable("Paystack__PublicKey", "pk_test_mock_public_key");
 
         Services = new ServiceCollection();
         TimeProvider = TimeProvider.System;
 
         Services.AddLogging();
+        Services.AddSingleton<IConfiguration>(
+            new ConfigurationBuilder()
+                .AddInMemoryCollection(new Dictionary<string, string?>
+                    {
+                        ["Paystack:AllowMockProvider"] = "true",
+                        ["Paystack:AllowMockProviderOutsideDevelopment"] = "true",
+                        ["Paystack:PublicKey"] = "pk_test_mock_public_key",
+                        ["Paystack:SubscriptionEnabled"] = "true"
+                    }
+                )
+                .Build()
+        );
         Services.AddTransient<DatabaseSeeder>();
 
         // Create connection using shared cache mode so isolated connections can access the same in-memory database
@@ -183,7 +196,9 @@ public abstract class EndpointBaseTest<TContext> : IDisposable where TContext : 
 
     protected HttpClient AuthenticatedMemberHttpClient { get; }
 
-    protected MockStripeState StripeState => _webApplicationFactory.Services.GetRequiredService<MockStripeState>();
+    protected MockPaystackState PaystackState => _webApplicationFactory.Services.GetRequiredService<MockPaystackState>();
+
+    protected IServiceProvider WebApplicationServices => _webApplicationFactory.Services;
 
     public void Dispose()
     {

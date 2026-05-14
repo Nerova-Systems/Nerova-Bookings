@@ -14,13 +14,13 @@ type BillingInfo = components["schemas"]["BillingInfo"];
 
 interface BillingInfoSectionProps {
   billingInfo: BillingInfo | null | undefined;
-  isStripeConfigured: boolean;
+  isPaystackConfigured: boolean;
   onEditClick: () => void;
 }
 
 export function BillingInfoSection({
   billingInfo,
-  isStripeConfigured,
+  isPaystackConfigured,
   onEditClick
 }: Readonly<BillingInfoSectionProps>) {
   return (
@@ -43,7 +43,7 @@ export function BillingInfoSection({
                   className="shrink-0 gap-1.5"
                   aria-label={t`Edit billing information`}
                   onClick={onEditClick}
-                  disabled={!isStripeConfigured}
+                  disabled={!isPaystackConfigured}
                 >
                   <PencilIcon className="size-4" />
                   <span className="hidden sm:inline" aria-hidden="true">

@@ -353,7 +353,8 @@ public sealed class SwitchTenantTests : EndpointBaseTest<AccountDbContext>
         await response1.ShouldBeSuccessfulPostRequest(hasLocation: false);
         TelemetryEventsCollectorSpy.Reset();
 
-        // Act - Attempt to switch again with the same (now revoked) session
+        // Attempt to switch again with the same (now revoked) session
+        // Act
         var response2 = await AuthenticatedMemberHttpClient.PostAsJsonAsync(
             "/api/account/authentication/switch-tenant", new SwitchTenantCommand(DatabaseSeeder.Tenant1.Id)
         );
@@ -372,8 +373,8 @@ public sealed class SwitchTenantTests : EndpointBaseTest<AccountDbContext>
                 ("modified_at", null),
                 ("plan", nameof(SubscriptionPlan.Basis)),
                 ("scheduled_plan", null),
-                ("stripe_customer_id", null),
-                ("stripe_subscription_id", null),
+                ("paystack_customer_code", null),
+                ("paystack_authorization_code", null),
                 ("current_price_amount", null),
                 ("current_price_currency", null),
                 ("current_period_end", null),
@@ -383,7 +384,10 @@ public sealed class SwitchTenantTests : EndpointBaseTest<AccountDbContext>
                 ("cancellation_feedback", null),
                 ("payment_transactions", "[]"),
                 ("payment_method", null),
-                ("billing_info", null)
+                ("billing_info", null),
+                ("has_drift_detected", false),
+                ("drift_checked_at", null),
+                ("drift_discrepancies", "[]")
             ]
         );
     }

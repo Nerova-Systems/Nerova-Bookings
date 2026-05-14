@@ -1,6 +1,6 @@
 using Account.Features.Subscriptions.Domain;
 using Account.Features.Users.Domain;
-using Account.Integrations.Stripe;
+using Account.Integrations.Paystack;
 using FluentValidation;
 using JetBrains.Annotations;
 using SharedKernel.Cqrs;
@@ -22,7 +22,7 @@ public sealed class GetSubscribePreviewValidator : AbstractValidator<GetSubscrib
     }
 }
 
-public sealed class GetSubscribePreviewHandler(ISubscriptionRepository subscriptionRepository, StripeClientFactory stripeClientFactory, IExecutionContext executionContext)
+public sealed class GetSubscribePreviewHandler(ISubscriptionRepository subscriptionRepository, PaystackClientFactory paystackClientFactory, IExecutionContext executionContext)
     : IRequestHandler<GetSubscribePreviewQuery, Result<SubscribePreviewResponse>>
 {
     public async Task<Result<SubscribePreviewResponse>> Handle(GetSubscribePreviewQuery query, CancellationToken cancellationToken)
@@ -34,16 +34,16 @@ public sealed class GetSubscribePreviewHandler(ISubscriptionRepository subscript
 
         var subscription = await subscriptionRepository.GetCurrentAsync(cancellationToken);
 
-        if (subscription.StripeCustomerId is null)
+        if (subscription.PaystackCustomerId is null)
         {
             return Result<SubscribePreviewResponse>.BadRequest("Billing information must be saved before previewing subscription.");
         }
 
-        var stripeClient = stripeClientFactory.GetClient();
-        var preview = await stripeClient.GetCheckoutPreviewAsync(subscription.StripeCustomerId, query.Plan, cancellationToken);
+        var paystackClient = paystackClientFactory.GetClient();
+        var preview = await paystackClient.GetCheckoutPreviewAsync(subscription.PaystackCustomerId, query.Plan, cancellationToken);
         if (preview is null)
         {
-            return Result<SubscribePreviewResponse>.BadRequest("Failed to get subscription preview from Stripe.");
+            return Result<SubscribePreviewResponse>.BadRequest("Failed to get subscription preview from Paystack.");
         }
 
         return new SubscribePreviewResponse(preview.TotalAmount, preview.Currency, preview.TaxAmount);

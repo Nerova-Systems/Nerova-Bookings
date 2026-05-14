@@ -1,5 +1,6 @@
 using Account;
 using Account.Database;
+using Account.Workers;
 using SharedKernel.Configuration;
 using SharedKernel.Database;
 
@@ -16,8 +17,11 @@ builder.Services
     .AddWorkerServices()
     .AddAccountServices();
 
+builder.Services.AddHostedService<SubscriptionBillingWorker>();
 builder.Services.AddTransient<DatabaseMigrationService<AccountDbContext>>();
 builder.Services.AddTransient<DataMigrationRunner<AccountDbContext>>();
+
+builder.Services.AddHostedService<BillingDriftWorker>();
 
 var host = builder.Build();
 

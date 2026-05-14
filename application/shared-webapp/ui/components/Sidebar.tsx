@@ -128,8 +128,8 @@ function SidebarProvider({
     if (typeof window === "undefined") {
       return persistedOpenRef.current;
     }
-    // On initial load below `lg`, force-collapsed regardless of stored preference.
-    return window.matchMedia(MEDIA_QUERIES.lg).matches ? persistedOpenRef.current : false;
+    // On initial load below `xl`, force-collapsed regardless of stored preference.
+    return window.matchMedia(MEDIA_QUERIES.xl).matches ? persistedOpenRef.current : false;
   });
   const open = openProp ?? internalOpen;
   const setOpen = React.useCallback(
@@ -140,9 +140,9 @@ function SidebarProvider({
       } else {
         setInternalOpen(openState);
       }
-      // Only persist user choices made at `lg+`. Toggles below `lg` are overlay-mode
+      // Only persist user choices made at `xl+`. Toggles below `xl` are overlay-mode
       // interactions — transient, never written to localStorage.
-      if (typeof window !== "undefined" && window.matchMedia(MEDIA_QUERIES.lg).matches) {
+      if (typeof window !== "undefined" && window.matchMedia(MEDIA_QUERIES.xl).matches) {
         persistedOpenRef.current = openState;
         localStorage.setItem(SIDEBAR_STORAGE_KEY_COLLAPSED, String(!openState));
       }
@@ -175,14 +175,14 @@ function SidebarProvider({
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [toggleSidebar]);
 
-  // Auto-collapse when the viewport drops below `lg`, restore user preference when it grows back.
-  // Below `lg` the sidebar overlays content (rarely desirable on narrow screens). Transitions
+  // Auto-collapse when the viewport drops below `xl`, restore user preference when it grows back.
+  // Below `xl` the sidebar overlays content (rarely desirable on narrow screens). Transitions
   // use setInternalOpen directly so they do NOT touch the persisted preference.
   React.useEffect(() => {
     if (typeof window === "undefined") {
       return;
     }
-    const mediaQuery = window.matchMedia(MEDIA_QUERIES.lg);
+    const mediaQuery = window.matchMedia(MEDIA_QUERIES.xl);
     const handleChange = (event: MediaQueryListEvent) => {
       setInternalOpen(event.matches ? persistedOpenRef.current : false);
     };
@@ -236,7 +236,11 @@ function SidebarProvider({
                 } as React.CSSProperties
               }
               className={cn(
-                "group/sidebar-wrapper flex min-h-svh w-full has-data-[variant=inset]:bg-sidebar",
+                // Subtract --banner-offset so the wrapper fits inside the viewport's content area when a banner
+                // pushes body content down via padding-top. Without this, the wrapper overflows the viewport bottom
+                // by --banner-offset, and any descendant pinned to the wrapper's bottom (e.g., a SidePane footer)
+                // ends up below the visible frame.
+                "group/sidebar-wrapper flex min-h-[calc(100svh-var(--banner-offset,0rem))] w-full has-data-[variant=inset]:bg-sidebar",
                 className
               )}
               {...props}
@@ -295,7 +299,10 @@ function Sidebar({
     return (
       <>
         {!openMobile && (
-          <div className="fixed right-3 bottom-3 z-20 supports-[bottom:max(0px)]:bottom-[max(0.5rem,calc(env(safe-area-inset-bottom)-0.5rem))] sm:hidden">
+          <div
+            data-slot="sidebar"
+            className="fixed right-3 bottom-3 z-20 supports-[bottom:max(0px)]:bottom-[max(0.5rem,calc(env(safe-area-inset-bottom)-0.5rem))] sm:hidden"
+          >
             <Button
               variant="ghost"
               size="icon"
@@ -344,8 +351,8 @@ function Sidebar({
       data-side={side}
       data-slot="sidebar"
     >
-      {/* Backdrop: dims content behind the expanded sidebar in overlay mode (below `lg`).
-          Hidden at `lg+` where the sidebar pushes content instead of overlaying. Click to collapse.
+      {/* Backdrop: dims content behind the expanded sidebar in overlay mode (below `xl`).
+          Hidden at `xl+` where the sidebar pushes content instead of overlaying. Click to collapse.
           Starts below any banner strip so banners (which push all top-positioned UI down) stay visible. */}
       <button
         type="button"
@@ -353,19 +360,19 @@ function Sidebar({
         tabIndex={-1}
         onClick={() => setOpen(false)}
         className={cn(
-          "pointer-events-none fixed top-(--banner-offset,0rem) right-0 bottom-0 left-0 z-[35] bg-black/50 opacity-0 transition-opacity duration-100 ease-linear lg:hidden",
+          "pointer-events-none fixed top-(--banner-offset,0rem) right-0 bottom-0 left-0 z-[35] bg-black/50 opacity-0 transition-opacity duration-100 ease-linear xl:hidden",
           "group-data-[state=expanded]:pointer-events-auto group-data-[state=expanded]:opacity-100"
         )}
       />
       {/* Placeholder width:
-          - Below `lg`: stays at icon-rail width so the expanded sidebar OVERLAYS content.
-          - At `lg`+: follows sidebar width so main content pushes right (no overlay).
+          - Below `xl`: stays at icon-rail width so the expanded sidebar OVERLAYS content.
+          - At `xl`+: follows sidebar width so main content pushes right (no overlay).
           Transitions disabled during drag via `[data-resizing]` on the wrapper. */}
       <div
         data-slot="sidebar-gap"
         className={cn(
           "relative w-(--sidebar-width-icon) bg-transparent transition-[width] duration-100 ease-linear",
-          "lg:w-(--sidebar-width) lg:group-data-[collapsible=icon]:w-(--sidebar-width-icon)",
+          "xl:w-(--sidebar-width) xl:group-data-[collapsible=icon]:w-(--sidebar-width-icon)",
           "group-data-[collapsible=offcanvas]:w-0",
           "group-data-[side=right]:rotate-180",
           "group-data-[resizing=true]/sidebar-wrapper:transition-none"
@@ -789,6 +796,7 @@ function SidebarMenuButton({
       data-sidebar="menu-button"
       data-size={size}
       data-active={isActive}
+      aria-current={isActive ? "page" : undefined}
       className={cn(sidebarMenuButtonVariants({ variant, size }), className)}
       {...props}
     />
@@ -1076,6 +1084,7 @@ function SidebarMenuSubButton({
       data-sidebar="menu-sub-button"
       data-size={size}
       data-active={isActive}
+      aria-current={isActive ? "page" : undefined}
       className={cn(
         // Matches the top-level menu button height for consistency (38px desktop / 44px mobile per Apple HIG).
         // Dim by default (muted), brighten on hover/active — mirrors SidebarMenuButton styling.

@@ -4,9 +4,8 @@ using SharedKernel.StronglyTypedIds;
 namespace Account.Features.Subscriptions.Domain;
 
 [PublicAPI]
-[IdPrefix("cus")]
-[JsonConverter(typeof(StronglyTypedIdJsonConverter<string, StripeCustomerId>))]
-public sealed record StripeCustomerId(string Value) : StronglyTypedString<StripeCustomerId>(Value)
+[JsonConverter(typeof(StronglyTypedIdJsonConverter<string, PaystackCustomerId>))]
+public sealed record PaystackCustomerId(string Value) : StronglyTypedString<PaystackCustomerId>(Value)
 {
     public override string ToString()
     {
@@ -15,9 +14,8 @@ public sealed record StripeCustomerId(string Value) : StronglyTypedString<Stripe
 }
 
 [PublicAPI]
-[IdPrefix("sub")]
-[JsonConverter(typeof(StronglyTypedIdJsonConverter<string, StripeSubscriptionId>))]
-public sealed record StripeSubscriptionId(string Value) : StronglyTypedString<StripeSubscriptionId>(Value)
+[JsonConverter(typeof(StronglyTypedIdJsonConverter<string, PaystackAuthorizationCode>))]
+public sealed record PaystackAuthorizationCode(string Value) : StronglyTypedString<PaystackAuthorizationCode>(Value)
 {
     public override string ToString()
     {
@@ -52,12 +50,13 @@ public enum PaymentTransactionStatus
     Succeeded,
     Failed,
     Pending,
-    Refunded
+    Refunded,
+    Cancelled
 }
 
 [PublicAPI]
 [JsonConverter(typeof(JsonStringEnumConverter))]
-public enum StripeEventStatus
+public enum PaystackEventStatus
 {
     Pending,
     Processed,

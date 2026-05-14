@@ -51,7 +51,7 @@ export function BillingInfoFormFields({
         name="name"
         label={t`Name`}
         defaultValue={billingInfo?.name ?? tenantName}
-        placeholder={t`Name as it appears on invoices`}
+        placeholder={t`Billing name`}
         className="sm:col-span-2"
         onChange={onFieldChange}
       />

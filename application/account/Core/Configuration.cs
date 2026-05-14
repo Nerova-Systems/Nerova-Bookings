@@ -8,9 +8,10 @@ using Account.Integrations.Gravatar;
 using Account.Integrations.OAuth;
 using Account.Integrations.OAuth.Google;
 using Account.Integrations.OAuth.Mock;
-using Account.Integrations.Stripe;
+using Account.Integrations.Paystack;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Options;
 using SharedKernel.Configuration;
 using SharedKernel.Emails;
 using SharedKernel.OpenIdConnect;
@@ -56,11 +57,20 @@ public static class Configuration
             services.AddEmailRendering("WebApp");
 
             services.AddMemoryCache();
-            services.AddSingleton<MockStripeState>();
-            services.AddKeyedScoped<IStripeClient, StripeClient>("stripe");
-            services.AddKeyedScoped<IStripeClient, MockStripeClient>("mock-stripe");
-            services.AddKeyedScoped<IStripeClient, UnconfiguredStripeClient>("unconfigured-stripe");
-            services.AddScoped<StripeClientFactory>();
+            services.AddOptions<PaystackOptions>()
+                .BindConfiguration("Paystack")
+                .ValidateOnStart();
+            services.AddSingleton<IValidateOptions<PaystackOptions>, PaystackOptionsValidator>();
+
+            services.AddHttpContextAccessor();
+            services.AddSingleton<MockPaystackState>();
+            services.AddSingleton<PlatformCurrencyProvider>();
+            services.AddSingleton<IPlatformCurrencyProvider>(sp => sp.GetRequiredService<PlatformCurrencyProvider>());
+            services.AddHostedService<PlatformCurrencyStartupResolver>();
+            services.AddKeyedScoped<IPaystackClient, PaystackClient>("paystack");
+            services.AddKeyedScoped<IPaystackClient, MockPaystackClient>("mock-paystack");
+            services.AddKeyedScoped<IPaystackClient, UnconfiguredPaystackClient>("unconfigured-paystack");
+            services.AddScoped<PaystackClientFactory>();
 
             return services
                 .AddSharedServices<AccountDbContext>([Assembly])
@@ -68,7 +78,8 @@ public static class Configuration
                 .AddScoped<CompleteEmailConfirmation>()
                 .AddScoped<AvatarUpdater>()
                 .AddScoped<UserInfoFactory>()
-                .AddScoped<ProcessPendingStripeEvents>()
+                .AddScoped<ProcessPendingPaystackEvents>()
+                .AddScoped<ProcessSubscriptionBilling>()
                 .AddScoped<ExternalAuthenticationService>()
                 .AddScoped<ExternalAuthenticationHelper>();
         }

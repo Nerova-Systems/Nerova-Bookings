@@ -11,7 +11,7 @@ interface PlanCardGridProps {
   currentPlan: SubscriptionPlan;
   cancelAtPeriodEnd: boolean;
   scheduledPlan: SubscriptionPlan | null;
-  isStripeConfigured: boolean;
+  isPaystackConfigured: boolean;
   onSubscribe: (plan: SubscriptionPlan) => void;
   onUpgrade: (plan: SubscriptionPlan) => void;
   onDowngrade: (plan: SubscriptionPlan) => void;
@@ -29,7 +29,7 @@ export function PlanCardGrid({
   currentPlan,
   cancelAtPeriodEnd,
   scheduledPlan,
-  isStripeConfigured,
+  isPaystackConfigured,
   onSubscribe,
   onUpgrade,
   onDowngrade,
@@ -54,7 +54,7 @@ export function PlanCardGrid({
             currentPlan={currentPlan}
             cancelAtPeriodEnd={cancelAtPeriodEnd}
             scheduledPlan={scheduledPlan}
-            isStripeConfigured={isStripeConfigured}
+            isPaystackConfigured={isPaystackConfigured}
             onSubscribe={onSubscribe}
             onUpgrade={onUpgrade}
             onDowngrade={onDowngrade}
