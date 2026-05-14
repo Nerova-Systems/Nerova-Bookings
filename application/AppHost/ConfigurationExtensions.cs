@@ -6,7 +6,10 @@ public static class ConfigurationExtensions
     {
         public IResourceBuilder<TDestination> WithUrlConfiguration(string hostname, int gatewayPort, string applicationBasePath)
         {
-            var baseUrl = $"https://{hostname}:{gatewayPort}";
+            var configuredPublicUrl = Environment.GetEnvironmentVariable("PUBLIC_URL");
+            var baseUrl = string.IsNullOrWhiteSpace(configuredPublicUrl)
+                ? $"https://{hostname}:{gatewayPort}"
+                : configuredPublicUrl.TrimEnd('/');
             applicationBasePath = applicationBasePath.TrimEnd('/');
 
             return builder
