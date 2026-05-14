@@ -1,16 +1,5 @@
 import { t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogMedia,
-  AlertDialogTitle
-} from "@repo/ui/components/AlertDialog";
 import { Button } from "@repo/ui/components/Button";
 import {
   DropdownMenu,
@@ -19,24 +8,56 @@ import {
   DropdownMenuTrigger
 } from "@repo/ui/components/DropdownMenu";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@repo/ui/components/Tooltip";
-import { AlertTriangleIcon, ExternalLinkIcon, MoreVerticalIcon, RefreshCwIcon } from "lucide-react";
-import { useState } from "react";
+import { formatCurrency } from "@repo/utils/currency/formatCurrency";
+import { ExternalLinkIcon, MoreVerticalIcon, RefreshCwIcon, RotateCcwIcon, XCircleIcon } from "lucide-react";
+import { useMemo, useState } from "react";
+import { toast } from "sonner";
+
+import type { components } from "@/shared/lib/api/client";
 
 import { useMe } from "@/shared/hooks/useMe";
-import { api } from "@/shared/lib/api/client";
+import {
+  api,
+  BackOfficeInvoiceRowKind,
+  PaymentTransactionStatus,
+  queryClient,
+  SubscriptionPlan
+} from "@/shared/lib/api/client";
 
+import {
+  CancelSubscriptionConfirmDialog,
+  ReconcileConfirmDialog,
+  RefundInvoiceConfirmDialog
+} from "./AccountActionDialogs";
 import { ReconcileResultDialog, type ReconcileResult } from "./ReconcileResultDialog";
 
+type TenantDetailResponse = components["schemas"]["TenantDetailResponse"];
+
 interface AccountActionsMenuProps {
+  tenant: TenantDetailResponse | undefined;
   tenantId: string;
   stripeCustomerUrl: string | null | undefined;
 }
 
-export function AccountActionsMenu({ tenantId, stripeCustomerUrl }: Readonly<AccountActionsMenuProps>) {
+export function AccountActionsMenu({ tenant, tenantId, stripeCustomerUrl }: Readonly<AccountActionsMenuProps>) {
   const { data: me } = useMe();
   const [result, setResult] = useState<ReconcileResult | null>(null);
   const [isResultOpen, setIsResultOpen] = useState(false);
-  const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+  const [isReconcileConfirmOpen, setIsReconcileConfirmOpen] = useState(false);
+  const [isRefundConfirmOpen, setIsRefundConfirmOpen] = useState(false);
+  const [isCancelConfirmOpen, setIsCancelConfirmOpen] = useState(false);
+
+  const paymentsQuery = api.useQuery(
+    "get",
+    "/api/back-office/tenants/{id}/payment-history",
+    {
+      params: {
+        path: { id: tenantId },
+        query: { PageSize: 100 }
+      }
+    },
+    { enabled: me?.isAdmin === true }
+  );
 
   const reconcileMutation = api.useMutation("post", "/api/back-office/tenants/{id}/reconcile-with-paystack", {
     onSuccess: (data) => {
@@ -45,6 +66,34 @@ export function AccountActionsMenu({ tenantId, stripeCustomerUrl }: Readonly<Acc
     }
   });
 
+  const refundMutation = api.useMutation("post", "/api/back-office/invoices/{id}/refund", {
+    onSuccess: async () => {
+      toast.success(t`Invoice refunded`);
+      setIsRefundConfirmOpen(false);
+      await queryClient.invalidateQueries();
+    }
+  });
+
+  const cancelMutation = api.useMutation("post", "/api/back-office/tenants/{id}/cancel-subscription", {
+    onSuccess: async () => {
+      toast.success(t`Subscription cancelled`);
+      setIsCancelConfirmOpen(false);
+      await queryClient.invalidateQueries();
+    }
+  });
+
+  const refundableTransaction = useMemo(
+    () =>
+      paymentsQuery.data?.transactions.find(
+        (transaction) =>
+          transaction.rowKind === BackOfficeInvoiceRowKind.Invoice &&
+          transaction.status === PaymentTransactionStatus.Succeeded &&
+          transaction.refundedAt == null &&
+          transaction.creditNoteUrl == null
+      ),
+    [paymentsQuery.data?.transactions]
+  );
+
   // Reconcile with Paystack is admin-only on the server (TenantsEndpoints.cs). Hide the trigger for
   // non-admins so the UI matches the policy.
   if (!me?.isAdmin) {
@@ -52,11 +101,25 @@ export function AccountActionsMenu({ tenantId, stripeCustomerUrl }: Readonly<Acc
   }
 
   const handleConfirmReconcile = () => {
-    setIsConfirmOpen(false);
+    setIsReconcileConfirmOpen(false);
     reconcileMutation.mutate({ params: { path: { id: tenantId } } });
   };
 
-  const isWorking = reconcileMutation.isPending;
+  const handleConfirmRefund = () => {
+    if (!refundableTransaction) return;
+    refundMutation.mutate({ params: { path: { id: refundableTransaction.id } } });
+  };
+
+  const handleConfirmCancel = () => {
+    cancelMutation.mutate({ params: { path: { id: tenantId } } });
+  };
+
+  const canRefund = refundableTransaction != null;
+  const canCancel = tenant != null && tenant.plan !== SubscriptionPlan.Basis && !tenant.cancelAtPeriodEnd;
+  const isWorking = reconcileMutation.isPending || refundMutation.isPending || cancelMutation.isPending;
+  const refundAmountLabel = refundableTransaction
+    ? formatCurrency(refundableTransaction.amount, refundableTransaction.currency)
+    : null;
 
   return (
     <>
@@ -78,11 +141,29 @@ export function AccountActionsMenu({ tenantId, stripeCustomerUrl }: Readonly<Acc
         <DropdownMenuContent align="end">
           <DropdownMenuItem
             trackingLabel="Reconcile with Paystack"
-            onClick={() => setIsConfirmOpen(true)}
+            onClick={() => setIsReconcileConfirmOpen(true)}
             disabled={isWorking}
           >
             <RefreshCwIcon className="size-4" />
             {reconcileMutation.isPending ? <Trans>Reconciling...</Trans> : <Trans>Reconcile with Paystack</Trans>}
+          </DropdownMenuItem>
+          <DropdownMenuItem
+            trackingLabel="Refund latest invoice"
+            variant="destructive"
+            onClick={() => setIsRefundConfirmOpen(true)}
+            disabled={isWorking || paymentsQuery.isLoading || !canRefund}
+          >
+            <RotateCcwIcon className="size-4" />
+            {refundMutation.isPending ? <Trans>Refunding...</Trans> : <Trans>Refund latest invoice</Trans>}
+          </DropdownMenuItem>
+          <DropdownMenuItem
+            trackingLabel="Cancel subscription"
+            variant="destructive"
+            onClick={() => setIsCancelConfirmOpen(true)}
+            disabled={isWorking || !canCancel}
+          >
+            <XCircleIcon className="size-4" />
+            {cancelMutation.isPending ? <Trans>Canceling...</Trans> : <Trans>Cancel subscription</Trans>}
           </DropdownMenuItem>
           {stripeCustomerUrl && (
             <DropdownMenuItem
@@ -96,33 +177,24 @@ export function AccountActionsMenu({ tenantId, stripeCustomerUrl }: Readonly<Acc
         </DropdownMenuContent>
       </DropdownMenu>
 
-      <AlertDialog open={isConfirmOpen} onOpenChange={setIsConfirmOpen} trackingTitle="Reconcile with Paystack confirm">
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogMedia className="bg-amber-100">
-              <AlertTriangleIcon className="text-amber-600" />
-            </AlertDialogMedia>
-            <AlertDialogTitle>
-              <Trans>Reconcile with Paystack?</Trans>
-            </AlertDialogTitle>
-            <AlertDialogDescription>
-              <Trans>
-                Reconcile verifies this tenant's pending Paystack payment attempts, processes missed webhook outcomes,
-                and appends any missing billing events.
-              </Trans>
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel variant="secondary">
-              <Trans>Cancel</Trans>
-            </AlertDialogCancel>
-            <AlertDialogAction onClick={handleConfirmReconcile}>
-              <Trans>Reconcile</Trans>
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-
+      <ReconcileConfirmDialog
+        isOpen={isReconcileConfirmOpen}
+        onOpenChange={setIsReconcileConfirmOpen}
+        onConfirm={handleConfirmReconcile}
+      />
+      <RefundInvoiceConfirmDialog
+        isOpen={isRefundConfirmOpen}
+        isPending={refundMutation.isPending}
+        onOpenChange={setIsRefundConfirmOpen}
+        onConfirm={handleConfirmRefund}
+        refundAmountLabel={refundAmountLabel}
+      />
+      <CancelSubscriptionConfirmDialog
+        isOpen={isCancelConfirmOpen}
+        isPending={cancelMutation.isPending}
+        onOpenChange={setIsCancelConfirmOpen}
+        onConfirm={handleConfirmCancel}
+      />
       <ReconcileResultDialog isOpen={isResultOpen} onOpenChange={setIsResultOpen} result={result} />
     </>
   );

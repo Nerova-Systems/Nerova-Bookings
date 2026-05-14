@@ -52,6 +52,10 @@ public sealed class TenantsEndpoints : IEndpoints
             => await mediator.Send(new ReconcileTenantWithPaystackCommand { TenantId = id })
         ).Produces<ReconcileTenantWithPaystackResponse>().RequireAuthorization(BackOfficeIdentityDefaults.AdminPolicyName);
 
+        group.MapPost("/{id}/cancel-subscription", async Task<ApiResult> (TenantId id, IMediator mediator)
+            => await mediator.Send(new CancelBackOfficeSubscriptionCommand { TenantId = id })
+        ).RequireAuthorization(BackOfficeIdentityDefaults.AdminPolicyName);
+
         group.MapPost("/{id}/reconcile-with-stripe", async Task<ApiResult<ReconcileTenantWithPaystackResponse>> (TenantId id, IMediator mediator)
             => await mediator.Send(new ReconcileTenantWithPaystackCommand { TenantId = id })
         ).Produces<ReconcileTenantWithPaystackResponse>().RequireAuthorization(BackOfficeIdentityDefaults.AdminPolicyName);

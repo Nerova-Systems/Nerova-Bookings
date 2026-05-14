@@ -11,20 +11,14 @@ import { SmartDateTime } from "@/shared/components/SmartDateTime";
 import { BackOfficeInvoiceRowKind, PaymentTransactionStatus } from "@/shared/lib/api/client";
 import { getPaymentStatusLabel, getSubscriptionPlanLabel } from "@/shared/lib/api/labels";
 
-import { InvoiceActions } from "./InvoiceActions";
-
 type Invoice = components["schemas"]["BackOfficeInvoiceSummary"];
 
 export function InvoicesTableRow({
   invoice,
-  isAdmin,
-  onRowClick,
-  onRefunded
+  onRowClick
 }: Readonly<{
   invoice: Invoice;
-  isAdmin: boolean;
   onRowClick: (tenantId: string) => void;
-  onRefunded: () => Promise<void>;
 }>) {
   const formatDate = useFormatDate();
   // Strikethrough only on reversal rows (CreditNote, Refund). The Invoice row always carries the
@@ -71,9 +65,6 @@ export function InvoicesTableRow({
       </TableCell>
       <TableCell>
         <RowKindBadge rowKind={invoice.rowKind} status={invoice.status} failureReason={invoice.failureReason} />
-      </TableCell>
-      <TableCell className="text-right">
-        <InvoiceActions invoice={invoice} isAdmin={isAdmin} onRefunded={onRefunded} />
       </TableCell>
     </TableRow>
   );

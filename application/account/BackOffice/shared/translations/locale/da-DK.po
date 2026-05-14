@@ -194,11 +194,20 @@ msgstr "Browser"
 msgid "Cancel"
 msgstr "Annuller"
 
+msgid "Cancel subscription"
+msgstr ""
+
+msgid "Cancel subscription?"
+msgstr ""
+
 msgid "Canceled"
 msgstr "Opsagt"
 
 msgid "Canceling"
 msgstr "Opsiges"
+
+msgid "Canceling..."
+msgstr ""
 
 msgid "Cancellation"
 msgstr "Opsigelse"
@@ -356,9 +365,6 @@ msgstr "Inaktive"
 
 msgid "Invoice"
 msgstr "Faktura"
-
-msgid "Invoice actions"
-msgstr "Fakturahandlinger"
 
 msgid "Invoice refunded"
 msgstr "Faktura refunderet"
@@ -738,11 +744,11 @@ msgstr "Gendannede {0} betalingsforsøg og tilføjede {1} nye faktureringshænde
 msgid "Refund"
 msgstr "Refusion"
 
-msgid "Refund invoice"
-msgstr "Refunder faktura"
+msgid "Refund latest invoice"
+msgstr ""
 
-msgid "Refund invoice?"
-msgstr "Refunder faktura?"
+msgid "Refund latest invoice?"
+msgstr ""
 
 msgid "Refunded"
 msgstr "Refunderet"
@@ -850,6 +856,9 @@ msgstr "Tilmeldt"
 msgid "Subscribed since"
 msgstr "Abonneret siden"
 
+msgid "Subscription cancelled"
+msgstr ""
+
 msgid "Subscription state"
 msgstr "Abonnementstilstand"
 
@@ -898,8 +907,12 @@ msgstr "denne periode"
 msgid "This rebuilds the billing event ledger from this tenant's archived Stripe payloads. It is a best-effort recovery that may produce incorrect subscription state or billing event rows. Only run it when standard Reconcile with Stripe has been tried and did not clear the drift."
 msgstr "Dette genopbygger faktureringshændelsesloggen fra denne kontos arkiverede Stripe-payloads. Det er en bedst muligt-gendannelse, der kan producere forkerte abonnementstilstande eller faktureringshændelser. Kør kun denne handling, når standard Afstem med Stripe er forsøgt og ikke ryddede afvigelserne."
 
-msgid "This refunds the Paystack payment and records a refund row. Subscription MRR stays unchanged."
-msgstr "Dette refunderer Paystack-betalingen og registrerer en refusionsrække. Abonnementets MRR forbliver uændret."
+#. placeholder {0}: refundAmountLabel ? ` for ${refundAmountLabel}` : ""
+msgid "This refunds the latest paid Paystack invoice{0} and records a refund row. Subscription MRR stays unchanged."
+msgstr ""
+
+msgid "This schedules the subscription to cancel at period end and stops future renewal charges. Current access remains active until the renewal date."
+msgstr ""
 
 msgid "This user has no recorded sessions."
 msgstr "Denne bruger har ingen registrerede sessioner."

@@ -83,7 +83,7 @@ export function AccountDetailHeader({ tenant, tenantId, isLoading }: Readonly<Ac
           </>
         )}
       </div>
-      <AccountActionsMenu tenantId={tenantId} stripeCustomerUrl={tenant?.stripeCustomerUrl} />
+      <AccountActionsMenu tenant={tenant} tenantId={tenantId} stripeCustomerUrl={tenant?.stripeCustomerUrl} />
     </div>
   );
 }

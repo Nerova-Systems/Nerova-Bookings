@@ -194,11 +194,20 @@ msgstr "Browser"
 msgid "Cancel"
 msgstr "Cancel"
 
+msgid "Cancel subscription"
+msgstr "Cancel subscription"
+
+msgid "Cancel subscription?"
+msgstr "Cancel subscription?"
+
 msgid "Canceled"
 msgstr "Canceled"
 
 msgid "Canceling"
 msgstr "Canceling"
+
+msgid "Canceling..."
+msgstr "Canceling..."
 
 msgid "Cancellation"
 msgstr "Cancellation"
@@ -356,9 +365,6 @@ msgstr "Inactive"
 
 msgid "Invoice"
 msgstr "Invoice"
-
-msgid "Invoice actions"
-msgstr "Invoice actions"
 
 msgid "Invoice refunded"
 msgstr "Invoice refunded"
@@ -738,11 +744,11 @@ msgstr "Recovered {0} payment attempts and appended {1} new billing events. Last
 msgid "Refund"
 msgstr "Refund"
 
-msgid "Refund invoice"
-msgstr "Refund invoice"
+msgid "Refund latest invoice"
+msgstr "Refund latest invoice"
 
-msgid "Refund invoice?"
-msgstr "Refund invoice?"
+msgid "Refund latest invoice?"
+msgstr "Refund latest invoice?"
 
 msgid "Refunded"
 msgstr "Refunded"
@@ -850,6 +856,9 @@ msgstr "Subscribed"
 msgid "Subscribed since"
 msgstr "Subscribed since"
 
+msgid "Subscription cancelled"
+msgstr "Subscription cancelled"
+
 msgid "Subscription state"
 msgstr "Subscription state"
 
@@ -898,8 +907,12 @@ msgstr "this period"
 msgid "This rebuilds the billing event ledger from this tenant's archived Stripe payloads. It is a best-effort recovery that may produce incorrect subscription state or billing event rows. Only run it when standard Reconcile with Stripe has been tried and did not clear the drift."
 msgstr "This rebuilds the billing event ledger from this tenant's archived Stripe payloads. It is a best-effort recovery that may produce incorrect subscription state or billing event rows. Only run it when standard Reconcile with Stripe has been tried and did not clear the drift."
 
-msgid "This refunds the Paystack payment and records a refund row. Subscription MRR stays unchanged."
-msgstr "This refunds the Paystack payment and records a refund row. Subscription MRR stays unchanged."
+#. placeholder {0}: refundAmountLabel ? ` for ${refundAmountLabel}` : ""
+msgid "This refunds the latest paid Paystack invoice{0} and records a refund row. Subscription MRR stays unchanged."
+msgstr "This refunds the latest paid Paystack invoice{0} and records a refund row. Subscription MRR stays unchanged."
+
+msgid "This schedules the subscription to cancel at period end and stops future renewal charges. Current access remains active until the renewal date."
+msgstr "This schedules the subscription to cancel at period end and stops future renewal charges. Current access remains active until the renewal date."
 
 msgid "This user has no recorded sessions."
 msgstr "This user has no recorded sessions."
