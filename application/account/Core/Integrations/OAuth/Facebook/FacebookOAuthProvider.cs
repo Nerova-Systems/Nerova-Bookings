@@ -6,7 +6,7 @@ using Microsoft.Extensions.Configuration;
 
 namespace Account.Integrations.OAuth.Facebook;
 
-internal sealed record FacebookOAuthConfiguration(string ClientId, string ClientSecret, string? GraphApiVersion);
+internal sealed record FacebookOAuthConfiguration(string ClientId, string ClientSecret, string? GraphApiVersion = null);
 
 public sealed class FacebookOAuthProvider(HttpClient httpClient, IConfiguration configuration, ILogger<FacebookOAuthProvider> logger) : IOAuthProvider
 {
