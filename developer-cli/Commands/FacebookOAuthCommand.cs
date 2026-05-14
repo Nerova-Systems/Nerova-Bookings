@@ -6,7 +6,7 @@ namespace DeveloperCli.Commands;
 
 public sealed class FacebookOAuthCommand : Command
 {
-    public FacebookOAuthCommand() : base("facebook-oauth", "Show the exact Meta dashboard and local Aspire settings for Facebook OAuth")
+    public FacebookOAuthCommand() : base("facebook-oauth", "Show the exact Meta dashboard and local Aspire settings for Facebook Login for Business")
     {
         Subcommands.Add(new FacebookOAuthSetupCommand());
     }
@@ -14,27 +14,30 @@ public sealed class FacebookOAuthCommand : Command
     private sealed class FacebookOAuthSetupCommand : Command
     {
         private readonly Option<string?> _appIdOption = new("--app-id") { Description = "Facebook App ID from Meta for Developers" };
+        private readonly Option<string?> _configIdOption = new("--config-id") { Description = "Facebook Login for Business configuration ID from Meta for Developers" };
         private readonly Option<string?> _publicUrlOption = new("--public-url") { Description = "Public URL used for Facebook OAuth callbacks" };
 
-        public FacebookOAuthSetupCommand() : base("setup", "Print the Facebook OAuth setup checklist")
+        public FacebookOAuthSetupCommand() : base("setup", "Print the Facebook Login for Business setup checklist")
         {
             Options.Add(_appIdOption);
+            Options.Add(_configIdOption);
             Options.Add(_publicUrlOption);
 
             SetAction(parseResult => Execute(
                 parseResult.GetValue(_appIdOption),
+                parseResult.GetValue(_configIdOption),
                 parseResult.GetValue(_publicUrlOption)
             ));
         }
 
-        private static void Execute(string? appId, string? publicUrl)
+        private static void Execute(string? appId, string? configId, string? publicUrl)
         {
-            var setup = FacebookOAuthSetup.Create(appId, publicUrl);
+            var setup = FacebookOAuthSetup.Create(appId, configId, publicUrl);
 
-            AnsiConsole.MarkupLine("[bold blue]Facebook OAuth setup[/]");
+            AnsiConsole.MarkupLine("[bold blue]Facebook Login for Business setup[/]");
             AnsiConsole.WriteLine();
-            AnsiConsole.MarkupLine("[yellow]Use this only for account login, signup, and identity linking.[/]");
-            AnsiConsole.MarkupLine("[grey]Meta Business, Instagram, Messenger, WhatsApp Business, and WhatsApp Flows will use a separate app installation flow later.[/]");
+            AnsiConsole.MarkupLine("[yellow]Use this for Meta business login, not consumer social login.[/]");
+            AnsiConsole.MarkupLine("[grey]Requested permissions are controlled by the Meta business login configuration, not by OAuth scope parameters.[/]");
             AnsiConsole.WriteLine();
 
             WriteMetaDashboardPanel(setup);
@@ -59,10 +62,12 @@ public sealed class FacebookOAuthCommand : Command
         private static void WriteAspirePanel(FacebookOAuthSetup setup)
         {
             var appId = string.IsNullOrWhiteSpace(setup.AppId) ? "<your Meta App ID>" : setup.AppId;
+            var configId = string.IsNullOrWhiteSpace(setup.ConfigId) ? "<your Meta business login configuration ID>" : setup.ConfigId;
             var localSettings = $"""
                                  facebook-oauth-enabled = true
                                  facebook-oauth-client-id = {appId}
                                  facebook-oauth-client-secret = <your Meta App Secret>
+                                 OAUTH_FACEBOOK_LOGIN_CONFIGURATION_ID = {configId}
                                  """;
 
             if (!setup.UsesDefaultPublicUrl)
@@ -94,6 +99,7 @@ public sealed class FacebookOAuthCommand : Command
 
 internal sealed record FacebookOAuthSetup(
     string? AppId,
+    string? ConfigId,
     string PublicUrl,
     string AppDomain,
     string LoginCallbackUrl,
@@ -102,7 +108,7 @@ internal sealed record FacebookOAuthSetup(
     bool UsesDefaultPublicUrl
 )
 {
-    public static FacebookOAuthSetup Create(string? appId, string? publicUrl)
+    public static FacebookOAuthSetup Create(string? appId, string? configId, string? publicUrl)
     {
         var defaultPublicUrl = $"https://localhost:{PortAllocation.Load().AppGateway}";
         var resolvedPublicUrl = string.IsNullOrWhiteSpace(publicUrl) ? defaultPublicUrl : publicUrl.Trim();
@@ -111,6 +117,7 @@ internal sealed record FacebookOAuthSetup(
 
         return new FacebookOAuthSetup(
             appId,
+            configId,
             resolvedPublicUrl,
             appDomain,
             BuildCallbackUrl(resolvedPublicUrl, "login"),
@@ -125,7 +132,7 @@ internal sealed record FacebookOAuthSetup(
         if (!Uri.TryCreate(publicUrl, UriKind.Absolute, out var uri) || string.IsNullOrWhiteSpace(uri.Host))
         {
             var escapedPublicUrl = Markup.Escape(publicUrl);
-            AnsiConsole.MarkupLine($"[red]Error:[/] --public-url must be an absolute URL. Received: [yellow]{escapedPublicUrl}[/]");
+            AnsiConsole.MarkupLine("[red]Error:[/] --public-url must be an absolute URL. Received: [yellow]" + escapedPublicUrl + "[/]");
             Environment.Exit(1);
         }
 

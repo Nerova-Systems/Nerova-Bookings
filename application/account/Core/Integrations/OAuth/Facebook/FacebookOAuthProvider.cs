@@ -10,17 +10,14 @@ internal sealed record FacebookOAuthConfiguration(
     string ClientId,
     string ClientSecret,
     string? GraphApiVersion = null,
-    string? LoginConfigurationId = null,
-    string? Scope = null
+    string? LoginConfigurationId = null
 );
 
 public sealed class FacebookOAuthProvider(HttpClient httpClient, IConfiguration configuration, ILogger<FacebookOAuthProvider> logger) : IOAuthProvider
 {
     private const string DefaultGraphApiVersion = "v23.0";
-    private const string DefaultScope = "email,public_profile";
 
-    private readonly FacebookOAuthConfiguration _configuration = configuration.GetSection("OAuth:Facebook").Get<FacebookOAuthConfiguration>()
-                                                                 ?? throw new InvalidOperationException("OAuth:Facebook configuration is missing.");
+    private readonly FacebookOAuthConfiguration _configuration = GetConfiguration(configuration);
 
     private string GraphApiVersion => string.IsNullOrWhiteSpace(_configuration.GraphApiVersion) ? DefaultGraphApiVersion : _configuration.GraphApiVersion;
 
@@ -34,18 +31,10 @@ public sealed class FacebookOAuthProvider(HttpClient httpClient, IConfiguration 
             ["redirect_uri"] = redirectUri,
             ["response_type"] = "code",
             ["state"] = stateToken,
-            ["auth_type"] = "rerequest"
+            ["auth_type"] = "rerequest",
+            ["config_id"] = _configuration.LoginConfigurationId!,
+            ["override_default_response_type"] = "true"
         };
-
-        if (string.IsNullOrWhiteSpace(_configuration.LoginConfigurationId))
-        {
-            parameters["scope"] = string.IsNullOrWhiteSpace(_configuration.Scope) ? DefaultScope : _configuration.Scope;
-        }
-        else
-        {
-            parameters["config_id"] = _configuration.LoginConfigurationId;
-            parameters["override_default_response_type"] = "true";
-        }
 
         var queryString = string.Join("&", parameters.Select(p => $"{p.Key}={Uri.EscapeDataString(p.Value)}"));
         return $"https://www.facebook.com/{GraphApiVersion}/dialog/oauth?{queryString}";
@@ -121,6 +110,19 @@ public sealed class FacebookOAuthProvider(HttpClient httpClient, IConfiguration 
         {
             return null;
         }
+    }
+
+    private static FacebookOAuthConfiguration GetConfiguration(IConfiguration configuration)
+    {
+        var facebookConfiguration = configuration.GetSection("OAuth:Facebook").Get<FacebookOAuthConfiguration>()
+                                    ?? throw new InvalidOperationException("OAuth:Facebook configuration is missing.");
+
+        if (string.IsNullOrWhiteSpace(facebookConfiguration.LoginConfigurationId))
+        {
+            throw new InvalidOperationException("OAuth:Facebook:LoginConfigurationId is required for Facebook Login for Business.");
+        }
+
+        return facebookConfiguration;
     }
 
     private async Task LogTokenExchangeError(HttpResponseMessage response, CancellationToken cancellationToken)

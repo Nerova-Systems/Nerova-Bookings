@@ -18,7 +18,8 @@ public sealed class FacebookOAuthProviderTests
             .AddInMemoryCollection(new Dictionary<string, string?>
                 {
                     ["OAuth:Facebook:ClientId"] = "facebook-client-id",
-                    ["OAuth:Facebook:ClientSecret"] = "facebook-client-secret"
+                    ["OAuth:Facebook:ClientSecret"] = "facebook-client-secret",
+                    ["OAuth:Facebook:LoginConfigurationId"] = "business-login-configuration-id"
                 }
             )
             .Build();
@@ -59,28 +60,28 @@ public sealed class FacebookOAuthProviderTests
     }
 
     [Fact]
-    public void BuildAuthorizationUrl_WhenLoginConfigurationIdMissing_ShouldRequestConfiguredScope()
+    public void BuildAuthorizationUrl_WhenLoginConfigurationIdMissing_ShouldThrowConfigurationError()
     {
         // Arrange
         var configuration = new ConfigurationBuilder()
             .AddInMemoryCollection(new Dictionary<string, string?>
                 {
                     ["OAuth:Facebook:ClientId"] = "facebook-client-id",
-                    ["OAuth:Facebook:ClientSecret"] = "facebook-client-secret",
-                    ["OAuth:Facebook:Scope"] = "public_profile"
+                    ["OAuth:Facebook:ClientSecret"] = "facebook-client-secret"
                 }
             )
             .Build();
-        using var httpClient = new HttpClient(new StubHttpMessageHandler());
-        var provider = new FacebookOAuthProvider(httpClient, configuration, NullLogger<FacebookOAuthProvider>.Instance);
 
         // Act
-        var authorizationUrl = provider.BuildAuthorizationUrl("state-token", "code-challenge", "nonce", "https://localhost/callback");
+        var act = () =>
+        {
+            using var httpClient = new HttpClient(new StubHttpMessageHandler());
+            _ = new FacebookOAuthProvider(httpClient, configuration, NullLogger<FacebookOAuthProvider>.Instance);
+        };
 
         // Assert
-        var query = HttpUtility.ParseQueryString(new Uri(authorizationUrl).Query);
-        query["scope"].Should().Be("public_profile");
-        query["config_id"].Should().BeNull();
+        act.Should().Throw<InvalidOperationException>()
+            .WithMessage("OAuth:Facebook:LoginConfigurationId is required for Facebook Login for Business.");
     }
 
     private sealed class StubHttpMessageHandler : HttpMessageHandler
