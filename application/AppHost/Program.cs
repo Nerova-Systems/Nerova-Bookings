@@ -124,6 +124,7 @@ var accountApi = builder
     .WithEnvironment("OAuth__Google__ClientSecret", googleOAuthClientSecret)
     .WithEnvironment("OAuth__Facebook__ClientId", facebookOAuthClientId)
     .WithEnvironment("OAuth__Facebook__ClientSecret", facebookOAuthClientSecret)
+    .WithEnvironment("OAuth__Facebook__PublicUrl", builder.Configuration["OAuth:Facebook:PublicUrl"] ?? builder.Configuration["OAUTH_FACEBOOK_PUBLIC_URL"] ?? "https://localhost:" + ports.AppGateway)
     .WithEnvironment("OAuth__AllowMockProvider", "true")
     .WithEnvironment("Paystack__SubscriptionEnabled", paystackFullyConfigured ? "true" : "false")
     .WithEnvironment("Paystack__PublicKey", paystackPublicKey)

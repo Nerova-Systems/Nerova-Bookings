@@ -237,7 +237,12 @@ public class LintCommand : Command
         {
             if (!quiet) AnsiConsole.MarkupLine("[blue]Running developer-cli code linting...[/]");
             ProcessHelper.Run("dotnet tool restore", solutionFile.Directory!.FullName, "Tool restore", quiet);
-            ProcessHelper.Run($"dotnet build {solutionFile.Name}", solutionFile.Directory!.FullName, "Build", quiet);
+            ProcessHelper.Run(
+                $"dotnet build {solutionFile.Name} /p:UseAppHost=false /p:BaseOutputPath=artifacts/bin/DeveloperCliVerify/ /p:BaseIntermediateOutputPath=artifacts/obj/DeveloperCliVerify/",
+                solutionFile.Directory!.FullName,
+                "Build",
+                quiet
+            );
         }
 
         // Delete existing result.json to prevent reading stale results

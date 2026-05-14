@@ -17,10 +17,9 @@ public sealed class ExternalAuthenticationService(IHttpContextAccessor httpConte
     private const string DataProtectionPurpose = "ExternalLogin";
     private const string ExternalLoginCookieName = "__Host-external-login";
     private const string LocaleCookieName = "__Host-external-login-locale";
-
-    private static readonly string PublicUrl = Environment.GetEnvironmentVariable("OAUTH_PUBLIC_URL")
-                                               ?? Environment.GetEnvironmentVariable(SinglePageAppConfiguration.PublicUrlKey)
-                                               ?? throw new InvalidOperationException($"'{SinglePageAppConfiguration.PublicUrlKey}' environment variable is not configured.");
+    private const string OAuthPublicUrlKey = "OAUTH_PUBLIC_URL";
+    private const string FacebookOAuthPublicUrlKey = "OAuth__Facebook__PublicUrl";
+    private const string GoogleOAuthPublicUrlKey = "OAuth__Google__PublicUrl";
 
     private readonly IDataProtector _dataProtector = dataProtectionProvider.CreateProtector(DataProtectionPurpose);
 
@@ -167,7 +166,24 @@ public sealed class ExternalAuthenticationService(IHttpContextAccessor httpConte
             ExternalLoginType.Link => "link",
             _ => throw new UnreachableException()
         };
-        return $"{PublicUrl}/api/account/authentication/{providerType}/{loginTypeSegment}/callback";
+        var publicUrl = GetPublicUrl(providerType);
+        return $"{publicUrl}/api/account/authentication/{providerType}/{loginTypeSegment}/callback";
+    }
+
+    private static string GetPublicUrl(ExternalProviderType providerType)
+    {
+        var providerPublicUrl = providerType switch
+        {
+            ExternalProviderType.Facebook => Environment.GetEnvironmentVariable(FacebookOAuthPublicUrlKey),
+            ExternalProviderType.Google => Environment.GetEnvironmentVariable(GoogleOAuthPublicUrlKey),
+            _ => null
+        };
+        var publicUrl = providerPublicUrl
+                        ?? Environment.GetEnvironmentVariable(OAuthPublicUrlKey)
+                        ?? Environment.GetEnvironmentVariable(SinglePageAppConfiguration.PublicUrlKey)
+                        ?? throw new InvalidOperationException($"'{SinglePageAppConfiguration.PublicUrlKey}' environment variable is not configured.");
+
+        return publicUrl.TrimEnd('/');
     }
 
     public static LoginMethod GetLoginMethod(ExternalProviderType providerType)

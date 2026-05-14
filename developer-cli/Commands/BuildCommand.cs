@@ -208,7 +208,12 @@ public class BuildCommand : Command
     private static void RunDeveloperCliBuild(bool quiet)
     {
         var solutionFile = new FileInfo(Path.Combine(Configuration.CliFolder, "DeveloperCli.slnx"));
-        ProcessHelper.Run($"dotnet build {solutionFile.Name}", solutionFile.Directory?.FullName, "Build", quiet);
+        ProcessHelper.Run(
+            $"dotnet build {solutionFile.Name} /p:UseAppHost=false /p:BaseOutputPath=artifacts/bin/DeveloperCliVerify/ /p:BaseIntermediateOutputPath=artifacts/obj/DeveloperCliVerify/",
+            solutionFile.Directory?.FullName,
+            "Build",
+            quiet
+        );
     }
 
     private static void RunEmailsBuild(bool quiet)

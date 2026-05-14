@@ -39,6 +39,54 @@ public sealed class ExternalAuthenticationServiceTests
     }
 
     [Fact]
+    public void GetRedirectUri_WhenFacebookPublicUrlConfigured_ShouldUseFacebookPublicUrl()
+    {
+        // Arrange
+        var originalFacebookPublicUrl = Environment.GetEnvironmentVariable("OAuth__Facebook__PublicUrl");
+        var originalOAuthPublicUrl = Environment.GetEnvironmentVariable("OAUTH_PUBLIC_URL");
+        Environment.SetEnvironmentVariable("OAuth__Facebook__PublicUrl", "https://facebook-oauth.example.test/");
+        Environment.SetEnvironmentVariable("OAUTH_PUBLIC_URL", "https://default-oauth.example.test");
+
+        try
+        {
+            // Act
+            var redirectUri = ExternalAuthenticationService.GetRedirectUri(ExternalProviderType.Facebook, ExternalLoginType.Login);
+
+            // Assert
+            redirectUri.Should().Be("https://facebook-oauth.example.test/api/account/authentication/Facebook/login/callback");
+        }
+        finally
+        {
+            Environment.SetEnvironmentVariable("OAuth__Facebook__PublicUrl", originalFacebookPublicUrl);
+            Environment.SetEnvironmentVariable("OAUTH_PUBLIC_URL", originalOAuthPublicUrl);
+        }
+    }
+
+    [Fact]
+    public void GetRedirectUri_WhenGooglePublicUrlNotConfigured_ShouldUseDefaultOAuthPublicUrl()
+    {
+        // Arrange
+        var originalGooglePublicUrl = Environment.GetEnvironmentVariable("OAuth__Google__PublicUrl");
+        var originalOAuthPublicUrl = Environment.GetEnvironmentVariable("OAUTH_PUBLIC_URL");
+        Environment.SetEnvironmentVariable("OAuth__Google__PublicUrl", null);
+        Environment.SetEnvironmentVariable("OAUTH_PUBLIC_URL", "https://default-oauth.example.test");
+
+        try
+        {
+            // Act
+            var redirectUri = ExternalAuthenticationService.GetRedirectUri(ExternalProviderType.Google, ExternalLoginType.Login);
+
+            // Assert
+            redirectUri.Should().Be("https://default-oauth.example.test/api/account/authentication/Google/login/callback");
+        }
+        finally
+        {
+            Environment.SetEnvironmentVariable("OAuth__Google__PublicUrl", originalGooglePublicUrl);
+            Environment.SetEnvironmentVariable("OAUTH_PUBLIC_URL", originalOAuthPublicUrl);
+        }
+    }
+
+    [Fact]
     public void GenerateBrowserFingerprintHash_ShouldReturnSha256OfUserAgentAndAcceptLanguage()
     {
         // Arrange
