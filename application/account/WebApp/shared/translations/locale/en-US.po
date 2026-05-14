@@ -732,6 +732,15 @@ msgstr "Confirm action"
 msgid "Confirm downgrade"
 msgstr "Confirm downgrade"
 
+msgid "Connect"
+msgstr "Connect"
+
+msgid "Connect identity providers for sign-in and future integrations."
+msgstr "Connect identity providers for sign-in and future integrations."
+
+msgid "Connected"
+msgstr "Connected"
+
 msgid "Contact support"
 msgstr "Contact support"
 
@@ -1150,6 +1159,9 @@ msgstr "Extra large"
 msgid "Extra small"
 msgstr "Extra small"
 
+msgid "Facebook"
+msgstr "Facebook"
+
 msgid "Failed"
 msgstr "Failed"
 
@@ -1486,6 +1498,9 @@ msgstr "Link underline"
 msgid "Link variants"
 msgstr "Link variants"
 
+msgid "Linked accounts"
+msgstr "Linked accounts"
+
 msgid "LinkedIn"
 msgstr "LinkedIn"
 
@@ -1500,6 +1515,9 @@ msgstr "Log in"
 
 msgid "Log in with email"
 msgstr "Log in with email"
+
+msgid "Log in with Facebook"
+msgstr "Log in with Facebook"
 
 msgid "Log in with Google"
 msgstr "Log in with Google"
@@ -1725,6 +1743,9 @@ msgstr "No users found"
 
 msgid "None"
 msgstr "None"
+
+msgid "Not connected"
+msgstr "Not connected"
 
 msgid "Not yet"
 msgstr "Not yet"
@@ -2415,6 +2436,9 @@ msgstr "Sign up in seconds to start building on PlatformPlatform – just like t
 
 msgid "Sign up with email"
 msgstr "Sign up with email"
+
+msgid "Sign up with Facebook"
+msgstr "Sign up with Facebook"
 
 msgid "Sign up with Google"
 msgstr "Sign up with Google"

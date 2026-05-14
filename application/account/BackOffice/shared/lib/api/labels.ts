@@ -97,6 +97,8 @@ export function getLoginMethodLabel(method: LoginMethod): string {
       return t`One-time password`;
     case LoginMethod.Google:
       return t`Google`;
+    case LoginMethod.Facebook:
+      return t`Facebook`;
     default:
       return String(method);
   }

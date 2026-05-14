@@ -125,6 +125,7 @@ public sealed class GetBackOfficeUserLoginHistoryHandler(
         return providerType switch
         {
             ExternalProviderType.Google => LoginMethod.Google,
+            ExternalProviderType.Facebook => LoginMethod.Facebook,
             _ => throw new UnreachableException($"Unknown external provider type '{providerType}'.")
         };
     }

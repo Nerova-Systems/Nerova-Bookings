@@ -6,6 +6,7 @@ using Account.Features.Subscriptions.Shared;
 using Account.Features.Users.Shared;
 using Account.Integrations.Gravatar;
 using Account.Integrations.OAuth;
+using Account.Integrations.OAuth.Facebook;
 using Account.Integrations.OAuth.Google;
 using Account.Integrations.OAuth.Mock;
 using Account.Integrations.Paystack;
@@ -50,8 +51,11 @@ public static class Configuration
             services.AddHttpClient<ExternalAvatarClient>(client => { client.Timeout = TimeSpan.FromSeconds(10); });
 
             services.AddHttpClient<GoogleOAuthProvider>(client => { client.Timeout = TimeSpan.FromSeconds(10); });
+            services.AddHttpClient<FacebookOAuthProvider>(client => { client.Timeout = TimeSpan.FromSeconds(10); });
             services.AddKeyedScoped<IOAuthProvider, GoogleOAuthProvider>("google");
+            services.AddKeyedScoped<IOAuthProvider, FacebookOAuthProvider>("facebook");
             services.AddKeyedScoped<IOAuthProvider, MockOAuthProvider>("mock-google");
+            services.AddKeyedScoped<IOAuthProvider, MockOAuthProvider>("mock-facebook");
             services.AddScoped<OAuthProviderFactory>();
 
             services.AddEmailRendering("WebApp");

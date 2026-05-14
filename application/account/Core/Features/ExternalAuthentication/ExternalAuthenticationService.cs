@@ -160,7 +160,13 @@ public sealed class ExternalAuthenticationService(IHttpContextAccessor httpConte
 
     public static string GetRedirectUri(ExternalProviderType providerType, ExternalLoginType loginType)
     {
-        var loginTypeSegment = loginType == ExternalLoginType.Login ? "login" : "signup";
+        var loginTypeSegment = loginType switch
+        {
+            ExternalLoginType.Login => "login",
+            ExternalLoginType.Signup => "signup",
+            ExternalLoginType.Link => "link",
+            _ => throw new UnreachableException()
+        };
         return $"{PublicUrl}/api/account/authentication/{providerType}/{loginTypeSegment}/callback";
     }
 
@@ -169,6 +175,7 @@ public sealed class ExternalAuthenticationService(IHttpContextAccessor httpConte
         return providerType switch
         {
             ExternalProviderType.Google => LoginMethod.Google,
+            ExternalProviderType.Facebook => LoginMethod.Facebook,
             _ => throw new UnreachableException()
         };
     }

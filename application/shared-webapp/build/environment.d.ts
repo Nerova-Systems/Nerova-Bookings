@@ -42,6 +42,10 @@ export declare global {
      **/
     PUBLIC_GOOGLE_OAUTH_ENABLED: string;
     /**
+     * Facebook OAuth enabled
+     **/
+    PUBLIC_FACEBOOK_OAUTH_ENABLED: string;
+    /**
      * Whether subscription/billing is enabled (payment provider configured)
      **/
     PUBLIC_SUBSCRIPTION_ENABLED: string;

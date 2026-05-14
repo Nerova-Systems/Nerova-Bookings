@@ -140,7 +140,7 @@ public sealed class ExternalAuthenticationHelper(
             return FailedRedirect(externalLogin, externalLoginCookie, ExternalLoginResult.CodeExchangeFailed, loginType);
         }
 
-        if (userProfile.Nonce != externalLogin.Nonce)
+        if (userProfile.Nonce is not null && userProfile.Nonce != externalLogin.Nonce)
         {
             logger.LogWarning("Nonce mismatch for external login '{ExternalLoginId}'", externalLogin.Id);
             return FailedRedirect(externalLogin, externalLoginCookie, ExternalLoginResult.NonceMismatch, loginType);
@@ -204,6 +204,10 @@ public sealed class ExternalAuthenticationHelper(
         if (loginType == ExternalLoginType.Login)
         {
             events.CollectEvent(new ExternalLoginFailed(externalLogin?.Id, loginResult, timeInSeconds, oauthError));
+        }
+        else if (loginType == ExternalLoginType.Link)
+        {
+            events.CollectEvent(new ExternalAccountLinkFailed(externalLogin?.Id, loginResult, timeInSeconds, oauthError));
         }
         else
         {

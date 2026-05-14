@@ -345,6 +345,9 @@ msgstr "Expired"
 msgid "Expires"
 msgstr "Expires"
 
+msgid "Facebook"
+msgstr "Facebook"
+
 msgid "Failed"
 msgstr "Failed"
 

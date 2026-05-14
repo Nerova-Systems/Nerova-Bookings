@@ -1,7 +1,6 @@
 import { t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
 import { loginPath } from "@repo/infrastructure/auth/constants";
-import { preferredLocaleKey } from "@repo/infrastructure/translations/constants";
 import { Button } from "@repo/ui/components/Button";
 import { Field, FieldDescription, FieldLabel } from "@repo/ui/components/Field";
 import { Form } from "@repo/ui/components/Form";
@@ -16,13 +15,13 @@ import { useEffect, useState } from "react";
 
 import ErrorPage from "@/federated-modules/errorPages/ErrorPage";
 import { useMainNavigation } from "@/shared/hooks/useMainNavigation";
-import googleIconUrl from "@/shared/images/google-icon.svg";
 import logoMarkUrl from "@/shared/images/logo-mark.svg";
 import logoWrapUrl from "@/shared/images/logo-wrap.svg";
 import { HorizontalHeroLayout } from "@/shared/layouts/HorizontalHeroLayout";
 import { api } from "@/shared/lib/api/client";
 
 import { getLoginState } from "../login/-shared/loginState";
+import { ExternalSignupButtons } from "./-components/ExternalSignupButtons";
 import { clearSignupState, getSignupState, setSignupState } from "./-shared/signupState";
 
 export const Route = createFileRoute("/signup/")({
@@ -58,17 +57,7 @@ export function StartSignupForm() {
 
   const startSignupMutation = api.useMutation("post", "/api/account/authentication/email/signup/start");
   const [isGoogleSignupPending, setIsGoogleSignupPending] = useState(false);
-
-  const handleGoogleSignup = () => {
-    setIsGoogleSignupPending(true);
-    const locale = localStorage.getItem(preferredLocaleKey);
-    const params = new URLSearchParams();
-    if (locale) {
-      params.set("Locale", locale);
-    }
-    const queryString = params.toString();
-    window.location.href = `/api/account/authentication/Google/signup/start${queryString ? `?${queryString}` : ""}`;
-  };
+  const [isFacebookSignupPending, setIsFacebookSignupPending] = useState(false);
 
   if (startSignupMutation.isSuccess) {
     const { emailLoginId, validForSeconds } = startSignupMutation.data;
@@ -83,7 +72,9 @@ export function StartSignupForm() {
     return <Navigate to="/signup/verify" />;
   }
 
-  const isPending = startSignupMutation.isPending || isGoogleSignupPending;
+  const isGoogleOAuthEnabled = import.meta.runtime_env.PUBLIC_GOOGLE_OAUTH_ENABLED === "true";
+  const isFacebookOAuthEnabled = import.meta.runtime_env.PUBLIC_FACEBOOK_OAUTH_ENABLED === "true";
+  const isPending = startSignupMutation.isPending || isGoogleSignupPending || isFacebookSignupPending;
 
   return (
     <Form
@@ -147,28 +138,15 @@ export function StartSignupForm() {
           <Trans>Sign up with email</Trans>
         )}
       </Button>
-      {import.meta.runtime_env.PUBLIC_GOOGLE_OAUTH_ENABLED === "true" && (
-        <>
-          <div className="flex w-full items-center gap-4">
-            <div className="h-px flex-1 bg-border" />
-            <span className="text-sm text-muted-foreground">
-              <Trans>or</Trans>
-            </span>
-            <div className="h-px flex-1 bg-border" />
-          </div>
-          <Button
-            type="button"
-            variant="outline"
-            className="w-full"
-            onClick={handleGoogleSignup}
-            isPending={isGoogleSignupPending}
-            disabled={isPending}
-          >
-            {!isGoogleSignupPending && <img src={googleIconUrl} alt="" aria-hidden="true" className="size-5" />}
-            {isGoogleSignupPending ? <Trans>Redirecting...</Trans> : <Trans>Sign up with Google</Trans>}
-          </Button>
-        </>
-      )}
+      <ExternalSignupButtons
+        isGoogleOAuthEnabled={isGoogleOAuthEnabled}
+        isFacebookOAuthEnabled={isFacebookOAuthEnabled}
+        isPending={isPending}
+        isGoogleSignupPending={isGoogleSignupPending}
+        isFacebookSignupPending={isFacebookSignupPending}
+        setIsGoogleSignupPending={setIsGoogleSignupPending}
+        setIsFacebookSignupPending={setIsFacebookSignupPending}
+      />
       <p className="text-sm text-muted-foreground">
         <Trans>Do you already have an account?</Trans>{" "}
         <Link href={loginPath}>

@@ -51,6 +51,7 @@ var backOfficeCdnUrl = Environment.GetEnvironmentVariable("BACK_OFFICE_CDN_URL")
 var runtimeEnvironment = new Dictionary<string, string>
 {
     ["PUBLIC_GOOGLE_OAUTH_ENABLED"] = Environment.GetEnvironmentVariable("PUBLIC_GOOGLE_OAUTH_ENABLED") ?? "false",
+    ["PUBLIC_FACEBOOK_OAUTH_ENABLED"] = Environment.GetEnvironmentVariable("PUBLIC_FACEBOOK_OAUTH_ENABLED") ?? "false",
     ["PUBLIC_SUBSCRIPTION_ENABLED"] = Environment.GetEnvironmentVariable("PUBLIC_SUBSCRIPTION_ENABLED") ?? "false"
 };
 

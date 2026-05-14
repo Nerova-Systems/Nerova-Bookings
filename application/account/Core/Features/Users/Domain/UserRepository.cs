@@ -1,4 +1,5 @@
 using Account.Database;
+using Account.Features.ExternalAuthentication.Domain;
 using Account.Features.Tenants.Domain;
 using Account.Features.Users.BackOffice.Queries;
 using JetBrains.Annotations;
@@ -17,6 +18,8 @@ public interface IUserRepository : ICrudRepository<User, UserId>, IBulkRemoveRep
     Task<User> GetLoggedInUserAsync(CancellationToken cancellationToken);
 
     Task<User?> GetUserByEmailUnfilteredAsync(string email, CancellationToken cancellationToken);
+
+    Task<User?> GetByExternalIdentityUnfilteredAsync(ExternalProviderType providerType, string providerUserId, CancellationToken cancellationToken);
 
     Task<User?> GetDeletedUserByEmailAsync(string email, CancellationToken cancellationToken);
 
@@ -138,6 +141,12 @@ public sealed class UserRepository(AccountDbContext accountDbContext, IExecution
         return await DbSet
             .IgnoreQueryFilters([QueryFilterNames.Tenant])
             .FirstOrDefaultAsync(u => u.Email == email.ToLowerInvariant(), cancellationToken);
+    }
+
+    public async Task<User?> GetByExternalIdentityUnfilteredAsync(ExternalProviderType providerType, string providerUserId, CancellationToken cancellationToken)
+    {
+        var users = await DbSet.IgnoreQueryFilters([QueryFilterNames.Tenant]).ToArrayAsync(cancellationToken);
+        return users.SingleOrDefault(u => u.ExternalIdentities.Any(e => e.Provider == providerType && e.ProviderUserId == providerUserId));
     }
 
     public async Task<User?> GetDeletedUserByEmailAsync(string email, CancellationToken cancellationToken)

@@ -732,6 +732,15 @@ msgstr "Bekræft handling"
 msgid "Confirm downgrade"
 msgstr "Bekræft nedgradering"
 
+msgid "Connect"
+msgstr ""
+
+msgid "Connect identity providers for sign-in and future integrations."
+msgstr ""
+
+msgid "Connected"
+msgstr ""
+
 msgid "Contact support"
 msgstr "Kontakt support"
 
@@ -1150,6 +1159,9 @@ msgstr "Ekstra stor"
 msgid "Extra small"
 msgstr "Ekstra lille"
 
+msgid "Facebook"
+msgstr ""
+
 msgid "Failed"
 msgstr "Mislykket"
 
@@ -1486,6 +1498,9 @@ msgstr "Linkunderstregning"
 msgid "Link variants"
 msgstr "Linkvarianter"
 
+msgid "Linked accounts"
+msgstr ""
+
 msgid "LinkedIn"
 msgstr "LinkedIn"
 
@@ -1500,6 +1515,9 @@ msgstr "Log ind"
 
 msgid "Log in with email"
 msgstr "Log ind med e-mail"
+
+msgid "Log in with Facebook"
+msgstr ""
 
 msgid "Log in with Google"
 msgstr "Log ind med Google"
@@ -1725,6 +1743,9 @@ msgstr "Ingen brugere fundet"
 
 msgid "None"
 msgstr "Ingen"
+
+msgid "Not connected"
+msgstr ""
 
 msgid "Not yet"
 msgstr "Ikke endnu"
@@ -2415,6 +2436,9 @@ msgstr "Tilmeld dig på sekunder og begynd at bygge på PlatformPlatform – lig
 
 msgid "Sign up with email"
 msgstr "Tilmeld dig med e-mail"
+
+msgid "Sign up with Facebook"
+msgstr ""
 
 msgid "Sign up with Google"
 msgstr "Tilmeld dig med Google"

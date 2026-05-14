@@ -1,9 +1,13 @@
 import { t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
 import { AppLayout } from "@repo/ui/components/AppLayout";
+import { Badge } from "@repo/ui/components/Badge";
+import { Button } from "@repo/ui/components/Button";
 import { ToggleGroup, ToggleGroupItem } from "@repo/ui/components/ToggleGroup";
 import { createFileRoute } from "@tanstack/react-router";
-import { MoonIcon, SunIcon } from "lucide-react";
+import { LinkIcon, MoonIcon, SunIcon } from "lucide-react";
+
+import { api, ExternalProviderType } from "@/shared/lib/api/client";
 
 import { ThemeMode, locales, usePreferences } from "./-components/usePreferences";
 
@@ -23,6 +27,7 @@ function PreferencesPage() {
     handleThemeChange,
     getSystemThemeIcon
   } = usePreferences();
+  const { data: user, isLoading: isLoadingUser } = api.useQuery("get", "/api/account/users/me");
 
   return (
     <AppLayout
@@ -33,6 +38,35 @@ function PreferencesPage() {
       subtitle={t`Customize your theme, language, and zoom settings.`}
     >
       <div className="flex flex-col gap-8 pt-8">
+        <section>
+          <h3 className="mb-1">
+            <Trans>Linked accounts</Trans>
+          </h3>
+          <p className="mb-4 text-sm text-muted-foreground">
+            <Trans>Connect identity providers for sign-in and future integrations.</Trans>
+          </p>
+          {isLoadingUser ? (
+            <div className="text-sm text-muted-foreground">
+              <Trans>Loading...</Trans>
+            </div>
+          ) : (
+            <div className="grid gap-3 sm:grid-cols-2">
+              <LinkedAccountProvider
+                provider={ExternalProviderType.Google}
+                label={t`Google`}
+                enabled={import.meta.runtime_env.PUBLIC_GOOGLE_OAUTH_ENABLED === "true"}
+                linked={user?.linkedExternalProviders?.includes(ExternalProviderType.Google) ?? false}
+              />
+              <LinkedAccountProvider
+                provider={ExternalProviderType.Facebook}
+                label={t`Facebook`}
+                enabled={import.meta.runtime_env.PUBLIC_FACEBOOK_OAUTH_ENABLED === "true"}
+                linked={user?.linkedExternalProviders?.includes(ExternalProviderType.Facebook) ?? false}
+              />
+            </div>
+          )}
+        </section>
+
         <section>
           <h3 className="mb-1">
             <Trans>Theme</Trans>
@@ -121,5 +155,45 @@ function PreferencesPage() {
         </section>
       </div>
     </AppLayout>
+  );
+}
+
+function LinkedAccountProvider({
+  provider,
+  label,
+  enabled,
+  linked
+}: Readonly<{
+  provider: ExternalProviderType;
+  label: string;
+  enabled: boolean;
+  linked: boolean;
+}>) {
+  const startLink = () => {
+    const params = new URLSearchParams({ ReturnPath: "/user/preferences" });
+    window.location.href = `/api/account/authentication/${provider}/link/start?${params.toString()}`;
+  };
+
+  return (
+    <div className="flex min-h-24 items-center justify-between gap-3 rounded-lg border border-border p-4">
+      <div className="min-w-0">
+        <div className="font-medium">{label}</div>
+        <div className="mt-1">
+          {linked ? (
+            <Badge variant="outline" className="border-emerald-500/30 text-emerald-600">
+              <Trans>Connected</Trans>
+            </Badge>
+          ) : (
+            <Badge variant="outline" className="text-muted-foreground">
+              <Trans>Not connected</Trans>
+            </Badge>
+          )}
+        </div>
+      </div>
+      <Button type="button" variant="outline" onClick={startLink} disabled={!enabled || linked} className="shrink-0">
+        <LinkIcon className="size-4" aria-hidden={true} />
+        {linked ? <Trans>Connected</Trans> : <Trans>Connect</Trans>}
+      </Button>
+    </div>
   );
 }

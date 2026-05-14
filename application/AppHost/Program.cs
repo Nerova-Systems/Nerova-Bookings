@@ -29,6 +29,7 @@ var certificatePassword = await builder.CreateSslCertificateIfNotExists();
 SecretManagerHelper.GenerateAuthenticationTokenSigningKey("authentication-token-signing-key");
 
 var (googleOAuthConfigured, googleOAuthClientId, googleOAuthClientSecret) = ConfigureGoogleOAuthParameters();
+var (facebookOAuthConfigured, facebookOAuthClientId, facebookOAuthClientSecret) = ConfigureFacebookOAuthParameters();
 
 var (paystackConfigured, paystackPublicKey, paystackSecretKey, paystackStandardPlanCode, paystackPremiumPlanCode, paystackCardAuthorizationAmountSubunit) = ConfigurePaystackParameters();
 var paystackFullyConfigured = paystackConfigured
@@ -121,6 +122,8 @@ var accountApi = builder
     .WithReference(azureStorage)
     .WithEnvironment("OAuth__Google__ClientId", googleOAuthClientId)
     .WithEnvironment("OAuth__Google__ClientSecret", googleOAuthClientSecret)
+    .WithEnvironment("OAuth__Facebook__ClientId", facebookOAuthClientId)
+    .WithEnvironment("OAuth__Facebook__ClientSecret", facebookOAuthClientSecret)
     .WithEnvironment("OAuth__AllowMockProvider", "true")
     .WithEnvironment("Paystack__SubscriptionEnabled", paystackFullyConfigured ? "true" : "false")
     .WithEnvironment("Paystack__PublicKey", paystackPublicKey)
@@ -130,6 +133,7 @@ var accountApi = builder
     .WithEnvironment("Paystack__CardAuthorizationAmountSubunit", paystackCardAuthorizationAmountSubunit)
     .WithEnvironment("Paystack__AllowMockProvider", "true")
     .WithEnvironment("PUBLIC_GOOGLE_OAUTH_ENABLED", googleOAuthConfigured ? "true" : "false")
+    .WithEnvironment("PUBLIC_FACEBOOK_OAUTH_ENABLED", facebookOAuthConfigured ? "true" : "false")
     // Force-on so newcomers see the back-office billing UI without Paystack configured. Set to "false" (or
     // change back to `paystackFullyConfigured ? "true" : "false"`) to hide all billing/revenue/Paystack data.
     .WithEnvironment("PUBLIC_SUBSCRIPTION_ENABLED", "true")
@@ -152,6 +156,7 @@ var mainApi = builder
     .WithReference(mainDatabase)
     .WithReference(azureStorage)
     .WithEnvironment("PUBLIC_GOOGLE_OAUTH_ENABLED", googleOAuthConfigured ? "true" : "false")
+    .WithEnvironment("PUBLIC_FACEBOOK_OAUTH_ENABLED", facebookOAuthConfigured ? "true" : "false")
     .WithEnvironment("PUBLIC_SUBSCRIPTION_ENABLED", paystackFullyConfigured ? "true" : "false")
     .WaitFor(mainWorkers);
 
@@ -224,6 +229,48 @@ return;
         configured,
         builder.CreateResourceBuilder(new ParameterResource("google-oauth-client-id", _ => "not-configured", true)),
         builder.CreateResourceBuilder(new ParameterResource("google-oauth-client-secret", _ => "not-configured", true))
+    );
+}
+
+(bool Configured, IResourceBuilder<ParameterResource> ClientId, IResourceBuilder<ParameterResource> ClientSecret) ConfigureFacebookOAuthParameters()
+{
+    _ = builder.AddParameter("facebook-oauth-enabled")
+        .WithDescription("""
+                         **Facebook OAuth** -- Enables "Continue with Facebook" for account login, signup, and identity linking.
+
+                         **Important**: This is identity login only. Meta Business, Instagram, Messenger, WhatsApp Business, and WhatsApp Flows permissions are connected later through dedicated app installation flows.
+
+                         - Enter `true` to enable Facebook OAuth, or `false` to skip. This can be changed later.
+                         - After enabling, **restart Aspire** to be prompted for the App ID and App Secret.
+                         """, true
+        );
+
+    var configured = builder.Configuration["Parameters:facebook-oauth-enabled"] == "true";
+
+    if (configured)
+    {
+        var clientId = builder.AddParameter("facebook-oauth-client-id", true)
+            .WithDescription("""
+                             Facebook App ID from Meta for Developers.
+
+                             **After entering this and the App Secret, restart Aspire** to apply the configuration.
+                             """, true
+            );
+        var clientSecret = builder.AddParameter("facebook-oauth-client-secret", true)
+            .WithDescription("""
+                             Facebook App Secret from Meta for Developers.
+
+                             **After entering this and the App ID, restart Aspire** to apply the configuration.
+                             """, true
+            );
+
+        return (configured, clientId, clientSecret);
+    }
+
+    return (
+        configured,
+        builder.CreateResourceBuilder(new ParameterResource("facebook-oauth-client-id", _ => "not-configured", true)),
+        builder.CreateResourceBuilder(new ParameterResource("facebook-oauth-client-secret", _ => "not-configured", true))
     );
 }
 

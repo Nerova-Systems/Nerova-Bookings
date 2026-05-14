@@ -12,13 +12,13 @@ import { useEffect, useState } from "react";
 
 import ErrorPage from "@/federated-modules/errorPages/ErrorPage";
 import { useMainNavigation } from "@/shared/hooks/useMainNavigation";
-import googleIconUrl from "@/shared/images/google-icon.svg";
 import logoMarkUrl from "@/shared/images/logo-mark.svg";
 import logoWrapUrl from "@/shared/images/logo-wrap.svg";
 import { HorizontalHeroLayout } from "@/shared/layouts/HorizontalHeroLayout";
 import { api } from "@/shared/lib/api/client";
 
 import { getSignupState } from "../signup/-shared/signupState";
+import { ExternalLoginButtons } from "./-components/ExternalLoginButtons";
 import { clearLoginState, getLoginState, setLoginState } from "./-shared/loginState";
 
 export const Route = createFileRoute("/login/")({
@@ -61,24 +61,7 @@ export function LoginForm() {
 
   const startLoginMutation = api.useMutation("post", "/api/account/authentication/email/login/start");
   const [isGoogleLoginPending, setIsGoogleLoginPending] = useState(false);
-
-  const handleGoogleLogin = () => {
-    setIsGoogleLoginPending(true);
-    const params = new URLSearchParams();
-    if (returnPath) {
-      params.set("ReturnPath", returnPath);
-    }
-    try {
-      const preferredTenantId = localStorage.getItem("preferred-tenant");
-      if (preferredTenantId) {
-        params.set("PreferredTenantId", preferredTenantId);
-      }
-    } catch {
-      // Ignore localStorage errors
-    }
-    const queryString = params.toString();
-    window.location.href = `/api/account/authentication/Google/login/start${queryString ? `?${queryString}` : ""}`;
-  };
+  const [isFacebookLoginPending, setIsFacebookLoginPending] = useState(false);
 
   if (startLoginMutation.isSuccess) {
     const { emailLoginId, validForSeconds } = startLoginMutation.data;
@@ -93,7 +76,9 @@ export function LoginForm() {
     return <Navigate to="/login/verify" search={{ returnPath }} />;
   }
 
-  const isPending = startLoginMutation.isPending || isGoogleLoginPending;
+  const isGoogleOAuthEnabled = import.meta.runtime_env.PUBLIC_GOOGLE_OAUTH_ENABLED === "true";
+  const isFacebookOAuthEnabled = import.meta.runtime_env.PUBLIC_FACEBOOK_OAUTH_ENABLED === "true";
+  const isPending = startLoginMutation.isPending || isGoogleLoginPending || isFacebookLoginPending;
 
   return (
     <Form
@@ -132,28 +117,16 @@ export function LoginForm() {
       >
         {startLoginMutation.isPending ? <Trans>Sending verification code...</Trans> : <Trans>Log in with email</Trans>}
       </Button>
-      {import.meta.runtime_env.PUBLIC_GOOGLE_OAUTH_ENABLED === "true" && (
-        <>
-          <div className="flex w-full items-center gap-4">
-            <div className="h-px flex-1 bg-border" />
-            <span className="text-sm text-muted-foreground">
-              <Trans>or</Trans>
-            </span>
-            <div className="h-px flex-1 bg-border" />
-          </div>
-          <Button
-            type="button"
-            variant="outline"
-            className="w-full"
-            onClick={handleGoogleLogin}
-            isPending={isGoogleLoginPending}
-            disabled={isPending}
-          >
-            {!isGoogleLoginPending && <img src={googleIconUrl} alt="" aria-hidden="true" className="size-5" />}
-            {isGoogleLoginPending ? <Trans>Redirecting...</Trans> : <Trans>Log in with Google</Trans>}
-          </Button>
-        </>
-      )}
+      <ExternalLoginButtons
+        returnPath={returnPath}
+        isGoogleOAuthEnabled={isGoogleOAuthEnabled}
+        isFacebookOAuthEnabled={isFacebookOAuthEnabled}
+        isPending={isPending}
+        isGoogleLoginPending={isGoogleLoginPending}
+        isFacebookLoginPending={isFacebookLoginPending}
+        setIsGoogleLoginPending={setIsGoogleLoginPending}
+        setIsFacebookLoginPending={setIsFacebookLoginPending}
+      />
       <p className="text-sm text-muted-foreground">
         <Trans>
           Don't have an account?{" "}

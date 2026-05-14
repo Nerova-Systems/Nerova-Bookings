@@ -1,7 +1,9 @@
 using Account.Database;
+using Account.Features.ExternalAuthentication.Domain;
 using FluentAssertions;
 using NJsonSchema;
 using SharedKernel.Tests;
+using SharedKernel.Tests.Persistence;
 using Xunit;
 
 namespace Account.Tests.Users;
@@ -32,8 +34,12 @@ public sealed class GetCurrentUserTests : EndpointBaseTest<AccountDbContext>
                     'role': {'type': 'string', 'minLength': 1, 'maxLength': 20},
                     'emailConfirmed': {'type': 'boolean'},
                     'avatarUrl': {'type': ['null', 'string'], 'maxLength': 100},
+                    'linkedExternalProviders': {
+                        'type': 'array',
+                        'items': {'type': 'string', 'minLength': 1, 'maxLength': 20}
+                    }
                 },
-                'required': ['id', 'createdAt', 'modifiedAt', 'email', 'role'],
+                'required': ['id', 'createdAt', 'modifiedAt', 'email', 'role', 'linkedExternalProviders'],
                 'additionalProperties': false
             }
             """
@@ -41,5 +47,29 @@ public sealed class GetCurrentUserTests : EndpointBaseTest<AccountDbContext>
 
         var responseBody = await response.Content.ReadAsStringAsync();
         schema.Validate(responseBody).Should().BeEmpty();
+    }
+
+    [Fact]
+    public async Task GetLoggedInUser_WhenExternalIdentitiesExist_ShouldReturnLinkedProviders()
+    {
+        // Arrange
+        Connection.Update("users", "id", DatabaseSeeder.Tenant1Owner.Id.ToString(), [
+                ("external_identities", $$"""
+                                          [
+                                            {"Provider":"{{nameof(ExternalProviderType.Google)}}","ProviderUserId":"google-id"},
+                                            {"Provider":"{{nameof(ExternalProviderType.Facebook)}}","ProviderUserId":"facebook-id"}
+                                          ]
+                                          """)
+            ]
+        );
+
+        // Act
+        var response = await AuthenticatedOwnerHttpClient.GetAsync("/api/account/users/me");
+
+        // Assert
+        response.ShouldBeSuccessfulGetRequest();
+        var responseBody = await response.Content.ReadAsStringAsync();
+        responseBody.Should().Contain(nameof(ExternalProviderType.Google));
+        responseBody.Should().Contain(nameof(ExternalProviderType.Facebook));
     }
 }

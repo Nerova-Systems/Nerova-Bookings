@@ -1,4 +1,5 @@
 using System.Net;
+using System.Net.Http.Headers;
 using System.Text.Json;
 using System.Web;
 using Account.Database;
@@ -21,6 +22,8 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using NSubstitute;
+using SharedKernel.Authentication;
+using SharedKernel.Authentication.TokenGeneration;
 using SharedKernel.Domain;
 using SharedKernel.ExecutionContext;
 using SharedKernel.Integrations.Email;
@@ -89,6 +92,7 @@ public abstract class ExternalAuthenticationTestBase : IDisposable
         using var serviceScope = serviceProvider.CreateScope();
         serviceScope.ServiceProvider.GetRequiredService<AccountDbContext>().Database.EnsureCreated();
         DatabaseSeeder = serviceScope.ServiceProvider.GetRequiredService<DatabaseSeeder>();
+        var accessTokenGenerator = serviceScope.ServiceProvider.GetRequiredService<AccessTokenGenerator>();
 
         _webApplicationFactory = new WebApplicationFactory<Program>().WithWebHostBuilder(builder =>
             {
@@ -125,6 +129,14 @@ public abstract class ExternalAuthenticationTestBase : IDisposable
         NoRedirectHttpClient.DefaultRequestHeaders.Add("User-Agent", "TestBrowser/1.0");
         NoRedirectHttpClient.DefaultRequestHeaders.Add("Accept-Language", "en-US");
         NoRedirectHttpClient.DefaultRequestHeaders.Add("Cookie", $"{OAuthProviderFactory.UseMockProviderCookieName}=true");
+
+        var ownerUserInfo = CreateUserInfo(DatabaseSeeder.Tenant1Owner, DatabaseSeeder.Tenant1OwnerSession.Id);
+        var ownerAccessToken = accessTokenGenerator.Generate(ownerUserInfo);
+        AuthenticatedOwnerNoRedirectHttpClient = _webApplicationFactory.CreateClient(new WebApplicationFactoryClientOptions { AllowAutoRedirect = false });
+        AuthenticatedOwnerNoRedirectHttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", ownerAccessToken);
+        AuthenticatedOwnerNoRedirectHttpClient.DefaultRequestHeaders.Add("User-Agent", "TestBrowser/1.0");
+        AuthenticatedOwnerNoRedirectHttpClient.DefaultRequestHeaders.Add("Accept-Language", "en-US");
+        AuthenticatedOwnerNoRedirectHttpClient.DefaultRequestHeaders.Add("Cookie", $"{OAuthProviderFactory.UseMockProviderCookieName}=true");
     }
 
     protected SqliteConnection Connection { get; }
@@ -132,6 +144,8 @@ public abstract class ExternalAuthenticationTestBase : IDisposable
     protected DatabaseSeeder DatabaseSeeder { get; }
 
     protected HttpClient NoRedirectHttpClient { get; }
+
+    protected HttpClient AuthenticatedOwnerNoRedirectHttpClient { get; }
 
     public void Dispose()
     {
@@ -155,6 +169,14 @@ public abstract class ExternalAuthenticationTestBase : IDisposable
         return (response.Headers.Location!.ToString(), ExtractSetCookieHeaders(response));
     }
 
+    protected async Task<(string CallbackUrl, string[] Cookies)> StartLinkFlow(ExternalProviderType providerType = ExternalProviderType.Google, string? returnPath = null)
+    {
+        var url = BuildStartUrl("link", returnPath, null, null, providerType);
+        var response = await AuthenticatedOwnerNoRedirectHttpClient.GetAsync(url);
+        response.StatusCode.Should().Be(HttpStatusCode.Redirect);
+        return (response.Headers.Location!.ToString(), ExtractSetCookieHeaders(response));
+    }
+
     protected async Task<HttpResponseMessage> CallCallback(string callbackUrl, IEnumerable<string> cookies, string flowType = "login")
     {
         var uri = ToAbsoluteUri(callbackUrl);
@@ -164,6 +186,17 @@ public abstract class ExternalAuthenticationTestBase : IDisposable
         var request = CreateRequestWithCookies(HttpMethod.Get, requestUrl, cookies);
 
         return await NoRedirectHttpClient.SendAsync(request);
+    }
+
+    protected async Task<HttpResponseMessage> CallAuthenticatedCallback(string callbackUrl, IEnumerable<string> cookies)
+    {
+        var uri = ToAbsoluteUri(callbackUrl);
+        var queryParams = HttpUtility.ParseQueryString(uri.Query);
+
+        var requestUrl = $"{uri.AbsolutePath}?code={Uri.EscapeDataString(queryParams["code"]!)}&state={Uri.EscapeDataString(queryParams["state"]!)}";
+        var request = CreateRequestWithCookies(HttpMethod.Get, requestUrl, cookies);
+
+        return await AuthenticatedOwnerNoRedirectHttpClient.SendAsync(request);
     }
 
     protected async Task<HttpResponseMessage> CallCallbackWithError(string callbackUrl, IEnumerable<string> cookies, string error, string? errorDescription = null)
@@ -248,9 +281,9 @@ public abstract class ExternalAuthenticationTestBase : IDisposable
         _webApplicationFactory.Dispose();
     }
 
-    private static string BuildStartUrl(string flowType, string? returnPath, string? locale, TenantId? preferredTenantId = null)
+    private static string BuildStartUrl(string flowType, string? returnPath, string? locale, TenantId? preferredTenantId = null, ExternalProviderType providerType = ExternalProviderType.Google)
     {
-        var url = $"/api/account/authentication/Google/{flowType}/start";
+        var url = $"/api/account/authentication/{providerType}/{flowType}/start";
         var queryParams = new List<string>();
         if (returnPath is not null) queryParams.Add($"returnPath={Uri.EscapeDataString(returnPath)}");
         if (locale is not null) queryParams.Add($"locale={locale}");
@@ -313,5 +346,23 @@ public abstract class ExternalAuthenticationTestBase : IDisposable
 
         request.Headers.TryAddWithoutValidation("Cookie", $"{OAuthProviderFactory.UseMockProviderCookieName}=true");
         return request;
+    }
+
+    private static UserInfo CreateUserInfo(User user, SessionId sessionId)
+    {
+        return new UserInfo
+        {
+            IsAuthenticated = true,
+            Id = user.Id,
+            TenantId = user.TenantId,
+            SessionId = sessionId,
+            Role = user.Role.ToString(),
+            Email = user.Email,
+            FirstName = user.FirstName,
+            LastName = user.LastName,
+            Title = user.Title,
+            AvatarUrl = user.Avatar.Url,
+            Locale = user.Locale
+        };
     }
 }

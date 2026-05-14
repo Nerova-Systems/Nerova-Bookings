@@ -75,6 +75,8 @@ export function getLoginMethodLabel(loginMethod: UserSessionInfo["loginMethod"])
       return t`One-time password`;
     case LoginMethod.Google:
       return t`Google`;
+    case LoginMethod.Facebook:
+      return t`Facebook`;
     default:
       return t`Unknown`;
   }

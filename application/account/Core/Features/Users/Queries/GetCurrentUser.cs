@@ -1,6 +1,6 @@
+using Account.Features.ExternalAuthentication.Domain;
 using Account.Features.Users.Domain;
 using JetBrains.Annotations;
-using Mapster;
 using SharedKernel.Cqrs;
 using SharedKernel.Domain;
 
@@ -16,10 +16,12 @@ public sealed record CurrentUserResponse(
     DateTimeOffset? ModifiedAt,
     string Email,
     UserRole Role,
-    string FirstName,
-    string LastName,
-    string Title,
-    string? AvatarUrl
+    bool EmailConfirmed,
+    string? FirstName,
+    string? LastName,
+    string? Title,
+    string? AvatarUrl,
+    ExternalProviderType[] LinkedExternalProviders
 );
 
 public sealed class GetUserHandler(IUserRepository userRepository)
@@ -28,6 +30,18 @@ public sealed class GetUserHandler(IUserRepository userRepository)
     public async Task<Result<CurrentUserResponse>> Handle(GetUserQuery query, CancellationToken cancellationToken)
     {
         var user = await userRepository.GetLoggedInUserAsync(cancellationToken);
-        return user.Adapt<CurrentUserResponse>();
+        return new CurrentUserResponse(
+            user.Id,
+            user.CreatedAt,
+            user.ModifiedAt,
+            user.Email,
+            user.Role,
+            user.EmailConfirmed,
+            user.FirstName,
+            user.LastName,
+            user.Title,
+            user.Avatar.Url,
+            user.ExternalIdentities.Select(identity => identity.Provider).ToArray()
+        );
     }
 }

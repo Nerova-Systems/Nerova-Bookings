@@ -30,5 +30,13 @@ public sealed class ExternalAuthenticationEndpoints : IEndpoints
         group.MapGet("/{provider}/signup/callback", async Task<ApiResult<string>> (ExternalProviderType provider, string? code, string? state, string? error, [FromQuery(Name = "error_description")] string? errorDescription, IMediator mediator)
             => await mediator.Send(new CompleteExternalSignupCommand(code, state, error, errorDescription) { Provider = provider.ToString() })
         ).AllowAnonymous();
+
+        group.MapGet("/{provider}/link/start", async Task<ApiResult<string>> (ExternalProviderType provider, IMediator mediator)
+            => await mediator.Send(new StartExternalLinkCommand { ProviderType = provider })
+        );
+
+        group.MapGet("/{provider}/link/callback", async Task<ApiResult<string>> (ExternalProviderType provider, string? code, string? state, string? error, [FromQuery(Name = "error_description")] string? errorDescription, IMediator mediator)
+            => await mediator.Send(new CompleteExternalLinkCommand(code, state, error, errorDescription) { Provider = provider.ToString() })
+        );
     }
 }

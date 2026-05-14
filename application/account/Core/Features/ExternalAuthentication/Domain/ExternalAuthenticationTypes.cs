@@ -6,7 +6,8 @@ namespace Account.Features.ExternalAuthentication.Domain;
 [JsonConverter(typeof(JsonStringEnumConverter))]
 public enum ExternalProviderType
 {
-    Google
+    Google,
+    Facebook
 }
 
 [PublicAPI]
@@ -14,7 +15,8 @@ public enum ExternalProviderType
 public enum ExternalLoginType
 {
     Login,
-    Signup
+    Signup,
+    Link
 }
 
 [PublicAPI]

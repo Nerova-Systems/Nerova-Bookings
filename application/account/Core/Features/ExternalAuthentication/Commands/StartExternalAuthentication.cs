@@ -57,6 +57,30 @@ public sealed class StartExternalSignupHandler(
     }
 }
 
+[PublicAPI]
+public sealed record StartExternalLinkCommand : ICommand, IRequest<Result<string>>
+{
+    [JsonIgnore]
+    public ExternalProviderType ProviderType { get; init; }
+}
+
+public sealed class StartExternalLinkHandler(
+    IExternalLoginRepository externalLoginRepository,
+    OAuthProviderFactory oauthProviderFactory,
+    ExternalAuthenticationService externalAuthenticationService,
+    IHttpContextAccessor httpContextAccessor,
+    ITelemetryEventsCollector events
+) : IRequestHandler<StartExternalLinkCommand, Result<string>>
+{
+    public async Task<Result<string>> Handle(StartExternalLinkCommand command, CancellationToken cancellationToken)
+    {
+        return await StartExternalAuthenticationHelper.StartFlow(
+            command.ProviderType, ExternalLoginType.Link, null,
+            externalLoginRepository, oauthProviderFactory, externalAuthenticationService, httpContextAccessor, events, cancellationToken
+        );
+    }
+}
+
 internal static class StartExternalAuthenticationHelper
 {
     public static async Task<Result<string>> StartFlow(
@@ -107,9 +131,13 @@ internal static class StartExternalAuthenticationHelper
         var redirectUri = ExternalAuthenticationService.GetRedirectUri(providerType, loginType);
         var authorizationUrl = oauthProvider.BuildAuthorizationUrl(stateToken, codeChallenge, nonce, redirectUri);
 
-        TelemetryEvent telemetryEvent = loginType == ExternalLoginType.Login
-            ? new ExternalLoginStarted(providerType)
-            : new ExternalSignupStarted(providerType);
+        TelemetryEvent telemetryEvent = loginType switch
+        {
+            ExternalLoginType.Login => new ExternalLoginStarted(providerType),
+            ExternalLoginType.Signup => new ExternalSignupStarted(providerType),
+            ExternalLoginType.Link => new ExternalAccountLinkStarted(providerType),
+            _ => throw new UnreachableException()
+        };
         events.CollectEvent(telemetryEvent);
 
         return Result<string>.Redirect(authorizationUrl);

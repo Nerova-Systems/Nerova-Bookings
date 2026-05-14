@@ -345,6 +345,9 @@ msgstr "Udløbet"
 msgid "Expires"
 msgstr "Udløber"
 
+msgid "Facebook"
+msgstr ""
+
 msgid "Failed"
 msgstr "Mislykket"
 

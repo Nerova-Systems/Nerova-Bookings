@@ -55,6 +55,15 @@ public sealed class ExternalLoginFailed(ExternalLoginId? externalLoginId, Extern
 public sealed class ExternalLoginStarted(ExternalProviderType providerType)
     : TelemetryEvent(("provider_type", providerType));
 
+public sealed class ExternalAccountLinked(UserId userId, ExternalProviderType providerType, int linkTimeInSeconds)
+    : TelemetryEvent(("user_id", userId), ("provider_type", providerType), ("link_time_in_seconds", linkTimeInSeconds));
+
+public sealed class ExternalAccountLinkFailed(ExternalLoginId? externalLoginId, ExternalLoginResult loginResult, int timeInSeconds, string? oauthError = null)
+    : TelemetryEvent(("external_login_id", externalLoginId as object ?? "unknown"), ("login_result", loginResult), ("time_in_seconds", timeInSeconds), ("oauth_error", oauthError as object ?? "none"));
+
+public sealed class ExternalAccountLinkStarted(ExternalProviderType providerType)
+    : TelemetryEvent(("provider_type", providerType));
+
 public sealed class ExternalSignupCompleted(TenantId tenantId, ExternalProviderType providerType, int signupTimeInSeconds)
     : TelemetryEvent(("tenant_id", tenantId), ("provider_type", providerType), ("signup_time_in_seconds", signupTimeInSeconds));
 
