@@ -16,24 +16,12 @@ max_threads = 6
 max_depth = 1
 job_max_runtime_seconds = 1800
 
-[mcp_servers.linear]
-url = "https://mcp.linear.app/mcp"
-tool_timeout_sec = 120
-
 [mcp_servers.aspire]
 command = "aspire"
 args = ["agent", "mcp"]
 cwd = "C:\\Users\\colin\\dev\\NerovaBookings"
 startup_timeout_sec = 30
 tool_timeout_sec = 120
-
-[mcp_servers.paystack]
-command = "npx"
-args = ["-y", "@paystack/mcp-server"]
-cwd = "C:\\Users\\colin\\dev\\NerovaBookings"
-env_vars = ["PAYSTACK_TEST_SECRET_KEY"]
-startup_timeout_sec = 60
-tool_timeout_sec = 180
 
 [mcp_servers.shadcn]
 command = "npx"
@@ -56,13 +44,4 @@ args = ["-NoProfile", "-ExecutionPolicy", "Bypass", "-Command", "$env:AZURE_SUBS
 cwd = "C:\\Users\\colin\\dev\\NerovaBookings"
 env_vars = ["AZURE_TENANT_ID", "AZURE_SUBSCRIPTION_ID_PRODUCTION"]
 startup_timeout_sec = 60
-tool_timeout_sec = 180
-
-[mcp_servers.nango]
-url = "https://nango.dev/docs/mcp"
-tool_timeout_sec = 180
-
-[mcp_servers.stitch]
-url = "https://stitch.googleapis.com/mcp"
-env_http_headers = { "X-Goog-Api-Key" = "STITCH_API_KEY" }
 tool_timeout_sec = 180

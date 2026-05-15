@@ -4,14 +4,20 @@ The copied Claude rule docs under `.codex/rules/**/*.md` are Codex reference gui
 
 Before working in an area, read the relevant reference docs:
 
+- AI rules: `.codex/rules/ai-rules/ai-rules.md`
 - Backend: `.codex/rules/backend/backend.md`
 - Backend commands: `.codex/rules/backend/commands.md`
 - Backend queries: `.codex/rules/backend/queries.md`
 - Backend repositories: `.codex/rules/backend/repositories.md`
+- Domain modeling: `.codex/rules/backend/domain-modeling.md`
+- External integrations: `.codex/rules/backend/external-integrations.md`
+- Strongly typed IDs: `.codex/rules/backend/strongly-typed-ids.md`
+- Telemetry events: `.codex/rules/backend/telemetry-events.md`
 - Database migrations: `.codex/rules/backend/database-migrations.md`
 - API endpoints: `.codex/rules/backend/api-endpoints.md`
 - API tests: `.codex/rules/backend/api-tests.md`
 - Frontend: `.codex/rules/frontend/frontend.md`
+- Emails: `.codex/rules/frontend/emails.md`
 - Forms: `.codex/rules/frontend/form-with-validation.md`
 - TanStack Query: `.codex/rules/frontend/tanstack-query-api-integration.md`
 - Translations: `.codex/rules/frontend/translations.md`
