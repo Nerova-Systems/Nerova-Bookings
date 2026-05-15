@@ -285,10 +285,17 @@ public class RunCommand : Command
         var mode = watch ? "watch" : "run";
         AnsiConsole.MarkupLine($"[blue]Starting Aspire AppHost in {mode} mode ({(attach ? "attached" : "detached")})...[/]");
 
+        var localPublicUrl = $"https://app.dev.localhost:{Ports.AppGateway}";
+        var effectivePublicUrl = publicUrl ?? localPublicUrl;
         if (publicUrl is not null)
         {
             AnsiConsole.MarkupLine($"[blue]Using PUBLIC_URL: {publicUrl}[/]");
             AnsiConsole.MarkupLine("[yellow]PUBLIC_URL changes the SPA origin, CSP, asset URLs, and HMR origin. Use --facebook-oauth-public-url auto for OAuth-only tunneling.[/]");
+        }
+        else if (Environment.GetEnvironmentVariable("PUBLIC_URL") is { Length: > 0 } inheritedPublicUrl &&
+                 !string.Equals(inheritedPublicUrl.TrimEnd('/'), localPublicUrl, StringComparison.OrdinalIgnoreCase))
+        {
+            AnsiConsole.MarkupLine($"[yellow]Ignoring inherited PUBLIC_URL={Markup.Escape(inheritedPublicUrl)}. Using local app origin {localPublicUrl}.[/]");
         }
 
         var resolvedFacebookOAuthPublicUrl = ResolveFacebookOAuthPublicUrl(facebookOAuthPublicUrl);
@@ -300,8 +307,7 @@ public class RunCommand : Command
 
         // AppHost reads .workspace/port.txt itself and overrides the Aspire dashboard env vars
         // before CreateBuilder. These env vars are forwarded only for the new AppHost process.
-        var envVars = new List<(string Name, string Value)>();
-        if (publicUrl is not null) envVars.Add(("PUBLIC_URL", publicUrl));
+        var envVars = new List<(string Name, string Value)> { ("PUBLIC_URL", effectivePublicUrl) };
         if (resolvedFacebookOAuthPublicUrl is not null) envVars.Add(("OAUTH_FACEBOOK_PUBLIC_URL", resolvedFacebookOAuthPublicUrl));
 
         if (attach)
