@@ -2,36 +2,25 @@ import { Trans } from "@lingui/react/macro";
 import { preferredLocaleKey } from "@repo/infrastructure/translations/constants";
 import { Button } from "@repo/ui/components/Button";
 
-import facebookIconUrl from "@/shared/images/facebook-icon.svg";
 import googleIconUrl from "@/shared/images/google-icon.svg";
 
 interface ExternalSignupButtonsProps {
   isGoogleOAuthEnabled: boolean;
-  isFacebookOAuthEnabled: boolean;
   isPending: boolean;
   isGoogleSignupPending: boolean;
-  isFacebookSignupPending: boolean;
   setIsGoogleSignupPending: (pending: boolean) => void;
-  setIsFacebookSignupPending: (pending: boolean) => void;
 }
 
 export function ExternalSignupButtons({
   isGoogleOAuthEnabled,
-  isFacebookOAuthEnabled,
   isPending,
   isGoogleSignupPending,
-  isFacebookSignupPending,
-  setIsGoogleSignupPending,
-  setIsFacebookSignupPending
+  setIsGoogleSignupPending
 }: Readonly<ExternalSignupButtonsProps>) {
-  if (!isGoogleOAuthEnabled && !isFacebookOAuthEnabled) return null;
+  if (!isGoogleOAuthEnabled) return null;
 
-  const handleExternalSignup = (provider: "Google" | "Facebook") => {
-    if (provider === "Google") {
-      setIsGoogleSignupPending(true);
-    } else {
-      setIsFacebookSignupPending(true);
-    }
+  const handleExternalSignup = () => {
+    setIsGoogleSignupPending(true);
 
     const locale = localStorage.getItem(preferredLocaleKey);
     const params = new URLSearchParams();
@@ -39,7 +28,7 @@ export function ExternalSignupButtons({
       params.set("Locale", locale);
     }
     const queryString = params.toString();
-    window.location.href = `/api/account/authentication/${provider}/signup/start${queryString ? `?${queryString}` : ""}`;
+    window.location.href = `/api/account/authentication/Google/signup/start${queryString ? `?${queryString}` : ""}`;
   };
 
   return (
@@ -56,25 +45,12 @@ export function ExternalSignupButtons({
           type="button"
           variant="outline"
           className="w-full"
-          onClick={() => handleExternalSignup("Google")}
+          onClick={handleExternalSignup}
           isPending={isGoogleSignupPending}
           disabled={isPending}
         >
           {!isGoogleSignupPending && <img src={googleIconUrl} alt="" aria-hidden="true" className="size-5" />}
           {isGoogleSignupPending ? <Trans>Redirecting...</Trans> : <Trans>Sign up with Google</Trans>}
-        </Button>
-      )}
-      {isFacebookOAuthEnabled && (
-        <Button
-          type="button"
-          variant="outline"
-          className="w-full"
-          onClick={() => handleExternalSignup("Facebook")}
-          isPending={isFacebookSignupPending}
-          disabled={isPending}
-        >
-          {!isFacebookSignupPending && <img src={facebookIconUrl} alt="" aria-hidden="true" className="size-5" />}
-          {isFacebookSignupPending ? <Trans>Redirecting...</Trans> : <Trans>Sign up with Facebook</Trans>}
         </Button>
       )}
     </>

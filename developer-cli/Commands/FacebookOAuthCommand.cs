@@ -87,7 +87,7 @@ public sealed class FacebookOAuthCommand : Command
             AnsiConsole.Write(new Panel(
                     """
                     After updating Meta and Aspire values, restart Aspire.
-                    If Meta rejects localhost, use a public HTTPS URL such as ngrok and pass it with --public-url.
+                    If Meta rejects localhost, use `restart --facebook-oauth-public-url auto` so only the Meta callback URL uses ngrok.
                     """
                 )
                 .Header("Next step")

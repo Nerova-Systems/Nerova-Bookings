@@ -29,11 +29,10 @@ var certificatePassword = await builder.CreateSslCertificateIfNotExists();
 SecretManagerHelper.GenerateAuthenticationTokenSigningKey("authentication-token-signing-key");
 
 var (googleOAuthConfigured, googleOAuthClientId, googleOAuthClientSecret) = ConfigureGoogleOAuthParameters();
-var (facebookOAuthConfigured, facebookOAuthClientId, facebookOAuthClientSecret) = ConfigureFacebookOAuthParameters();
+var (_, facebookOAuthClientId, facebookOAuthClientSecret) = ConfigureFacebookOAuthParameters();
 var facebookLoginConfigurationId = builder.Configuration["OAuth:Facebook:LoginConfigurationId"]
                                    ?? builder.Configuration["OAUTH_FACEBOOK_LOGIN_CONFIGURATION_ID"]
                                    ?? "";
-var facebookBusinessLoginConfigured = facebookOAuthConfigured && !string.IsNullOrWhiteSpace(facebookLoginConfigurationId);
 
 var (paystackConfigured, paystackPublicKey, paystackSecretKey, paystackStandardPlanCode, paystackPremiumPlanCode, paystackCardAuthorizationAmountSubunit) = ConfigurePaystackParameters();
 var paystackFullyConfigured = paystackConfigured
@@ -139,7 +138,7 @@ var accountApi = builder
     .WithEnvironment("Paystack__CardAuthorizationAmountSubunit", paystackCardAuthorizationAmountSubunit)
     .WithEnvironment("Paystack__AllowMockProvider", "true")
     .WithEnvironment("PUBLIC_GOOGLE_OAUTH_ENABLED", googleOAuthConfigured ? "true" : "false")
-    .WithEnvironment("PUBLIC_FACEBOOK_OAUTH_ENABLED", facebookBusinessLoginConfigured ? "true" : "false")
+    .WithEnvironment("PUBLIC_FACEBOOK_OAUTH_ENABLED", "false")
     // Force-on so newcomers see the back-office billing UI without Paystack configured. Set to "false" (or
     // change back to `paystackFullyConfigured ? "true" : "false"`) to hide all billing/revenue/Paystack data.
     .WithEnvironment("PUBLIC_SUBSCRIPTION_ENABLED", "true")
@@ -162,7 +161,7 @@ var mainApi = builder
     .WithReference(mainDatabase)
     .WithReference(azureStorage)
     .WithEnvironment("PUBLIC_GOOGLE_OAUTH_ENABLED", googleOAuthConfigured ? "true" : "false")
-    .WithEnvironment("PUBLIC_FACEBOOK_OAUTH_ENABLED", facebookBusinessLoginConfigured ? "true" : "false")
+    .WithEnvironment("PUBLIC_FACEBOOK_OAUTH_ENABLED", "false")
     .WithEnvironment("PUBLIC_SUBSCRIPTION_ENABLED", paystackFullyConfigured ? "true" : "false")
     .WaitFor(mainWorkers);
 
@@ -242,12 +241,12 @@ return;
 {
     _ = builder.AddParameter("facebook-oauth-enabled")
         .WithDescription("""
-                         **Facebook Login for Business** -- Enables Meta business login for account login, signup, and identity linking.
+                         **Facebook Login for Business** -- Configures Meta business authorization for WhatsApp Embedded Signup.
 
                          **Important**: This is business login, not consumer social login. Meta Business, Instagram, Messenger,
                          WhatsApp Business, and WhatsApp Flows permissions are controlled by the Meta business login configuration.
 
-                         - Enter `true` to enable Facebook Login for Business, or `false` to skip. This can be changed later.
+                         - Enter `true` to configure Meta business authorization, or `false` to skip. This can be changed later.
                          - After enabling, **restart Aspire** to be prompted for the App ID and App Secret.
                          - Set `OAUTH_FACEBOOK_LOGIN_CONFIGURATION_ID` to the Meta business login configuration ID.
                          """, true

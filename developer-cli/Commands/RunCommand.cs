@@ -1,4 +1,6 @@
 using System.CommandLine;
+using System.Diagnostics;
+using System.Text.Json;
 using DeveloperCli.Installation;
 using DeveloperCli.Utilities;
 using SharedKernel.Configuration;
@@ -15,16 +17,19 @@ public class RunCommand : Command
     {
         var watchOption = new Option<bool>("--watch", "-w") { Description = "Enable watch mode for hot reload" };
         var attachOption = new Option<bool>("--attach", "-a") { Description = "Keep the CLI process attached to the Aspire process (detached is the default)" };
-        var publicUrlOption = new Option<string?>("--public-url") { Description = "Set the PUBLIC_URL environment variable for the app (e.g., https://example.ngrok-free.app)" };
+        var publicUrlOption = new Option<string?>("--public-url") { Description = "Set the PUBLIC_URL environment variable and serve the whole app from that origin (e.g., https://example.ngrok-free.app)" };
+        var facebookOAuthPublicUrlOption = new Option<string?>("--facebook-oauth-public-url") { Description = "Set the Facebook/Meta OAuth callback URL. Use 'auto' to start or reuse a free ngrok tunnel without changing PUBLIC_URL." };
 
         Options.Add(watchOption);
         Options.Add(attachOption);
         Options.Add(publicUrlOption);
+        Options.Add(facebookOAuthPublicUrlOption);
 
         SetAction(parseResult => Execute(
                 parseResult.GetValue(watchOption),
                 parseResult.GetValue(attachOption),
-                parseResult.GetValue(publicUrlOption)
+                parseResult.GetValue(publicUrlOption),
+                parseResult.GetValue(facebookOAuthPublicUrlOption)
             )
         );
     }
@@ -39,7 +44,7 @@ public class RunCommand : Command
 
     internal static int ResourceServicePort => Ports.ResourceService;
 
-    private static void Execute(bool watch, bool attach, string? publicUrl)
+    private static void Execute(bool watch, bool attach, string? publicUrl, string? facebookOAuthPublicUrl)
     {
         Prerequisite.Ensure(Prerequisite.Dotnet, Prerequisite.Node, Prerequisite.Docker);
 
@@ -54,7 +59,7 @@ public class RunCommand : Command
 
         CheckForPortConflicts();
 
-        StartAspireAppHost(watch, attach, publicUrl);
+        StartAspireAppHost(watch, attach, publicUrl, facebookOAuthPublicUrl);
     }
 
     internal static bool IsAspireRunning()
@@ -275,7 +280,7 @@ public class RunCommand : Command
         ProcessHelper.StartProcess($"kill -9 {processId}", redirectOutput: true, exitOnError: false);
     }
 
-    internal static void StartAspireAppHost(bool watch, bool attach, string? publicUrl)
+    internal static void StartAspireAppHost(bool watch, bool attach, string? publicUrl, string? facebookOAuthPublicUrl = null)
     {
         var mode = watch ? "watch" : "run";
         AnsiConsole.MarkupLine($"[blue]Starting Aspire AppHost in {mode} mode ({(attach ? "attached" : "detached")})...[/]");
@@ -283,14 +288,10 @@ public class RunCommand : Command
         if (publicUrl is not null)
         {
             AnsiConsole.MarkupLine($"[blue]Using PUBLIC_URL: {publicUrl}[/]");
-
-            // Check if this is an ngrok URL and start ngrok if needed
-            if (publicUrl.Contains(".ngrok-free.app", StringComparison.OrdinalIgnoreCase) ||
-                publicUrl.Contains(".ngrok.io", StringComparison.OrdinalIgnoreCase))
-            {
-                StartNgrokIfNeeded(publicUrl);
-            }
+            AnsiConsole.MarkupLine("[yellow]PUBLIC_URL changes the SPA origin, CSP, asset URLs, and HMR origin. Use --facebook-oauth-public-url auto for OAuth-only tunneling.[/]");
         }
+
+        var resolvedFacebookOAuthPublicUrl = ResolveFacebookOAuthPublicUrl(facebookOAuthPublicUrl);
 
         var appHostProjectPath = Path.Combine(Configuration.ApplicationFolder, "AppHost", "AppHost.csproj");
         var command = watch
@@ -298,14 +299,14 @@ public class RunCommand : Command
             : $"dotnet run --project {appHostProjectPath}";
 
         // AppHost reads .workspace/port.txt itself and overrides the Aspire dashboard env vars
-        // before CreateBuilder. PUBLIC_URL is the only env var the CLI needs to forward.
-        var envVars = publicUrl is not null
-            ? new[] { ("PUBLIC_URL", publicUrl) }
-            : Array.Empty<(string Name, string Value)>();
+        // before CreateBuilder. These env vars are forwarded only for the new AppHost process.
+        var envVars = new List<(string Name, string Value)>();
+        if (publicUrl is not null) envVars.Add(("PUBLIC_URL", publicUrl));
+        if (resolvedFacebookOAuthPublicUrl is not null) envVars.Add(("OAUTH_FACEBOOK_PUBLIC_URL", resolvedFacebookOAuthPublicUrl));
 
         if (attach)
         {
-            ProcessHelper.StartProcess(command, Configuration.ApplicationFolder, waitForExit: true, environmentVariables: envVars);
+            ProcessHelper.StartProcess(command, Configuration.ApplicationFolder, waitForExit: true, environmentVariables: envVars.ToArray());
             return;
         }
 
@@ -319,7 +320,7 @@ public class RunCommand : Command
                 ? $"sh -c \"script -q -t 0 '{logPath}' {command} > /dev/null 2>&1 &\""
                 : $"sh -c \"script -q -f -c '{command}' '{logPath}' > /dev/null 2>&1 &\"";
 
-        ProcessHelper.StartProcess(detachedCommand, Configuration.ApplicationFolder, waitForExit: false, environmentVariables: envVars);
+        ProcessHelper.StartProcess(detachedCommand, Configuration.ApplicationFolder, waitForExit: false, environmentVariables: envVars.ToArray());
 
         TailLogUntilReady(logPath);
     }
@@ -366,52 +367,167 @@ public class RunCommand : Command
         AnsiConsole.MarkupLine($"[yellow]Aspire did not report ready within 60s. Check {logPath}[/]");
     }
 
-    private static void StartNgrokIfNeeded(string publicUrl)
+    private static string? ResolveFacebookOAuthPublicUrl(string? facebookOAuthPublicUrl)
     {
-        // First check if ngrok is installed
+        if (string.IsNullOrWhiteSpace(facebookOAuthPublicUrl)) return null;
+
+        var resolvedPublicUrl = string.Equals(facebookOAuthPublicUrl, "auto", StringComparison.OrdinalIgnoreCase)
+            ? StartOrReuseNgrokTunnel()
+            : StartOrReuseConcreteNgrokTunnel(facebookOAuthPublicUrl.TrimEnd('/'));
+
+        AnsiConsole.MarkupLine($"[blue]Using OAUTH_FACEBOOK_PUBLIC_URL: {resolvedPublicUrl}[/]");
+        PrintFacebookOAuthDashboardValues(resolvedPublicUrl);
+        return resolvedPublicUrl;
+    }
+
+    private static string StartOrReuseNgrokTunnel()
+    {
+        EnsureNgrokInstalled();
+
+        var existingTunnel = TryGetNgrokTunnelUrl();
+        if (existingTunnel is not null)
+        {
+            AnsiConsole.MarkupLine($"[yellow]Reusing existing ngrok tunnel: {existingTunnel}[/]");
+            return existingTunnel;
+        }
+
+        AnsiConsole.MarkupLine("[blue]Starting free ngrok tunnel for Facebook/Meta OAuth callbacks...[/]");
+        StartNgrokProcess(null);
+        return WaitForNgrokTunnelUrl();
+    }
+
+    private static string StartOrReuseConcreteNgrokTunnel(string publicUrl)
+    {
+        if (!Uri.TryCreate(publicUrl, UriKind.Absolute, out var uri) || string.IsNullOrWhiteSpace(uri.Host))
+        {
+            AnsiConsole.MarkupLine($"[red]--facebook-oauth-public-url must be 'auto' or an absolute URL. Received: {Markup.Escape(publicUrl)}[/]");
+            Environment.Exit(1);
+        }
+
+        if (!uri.Host.Contains(".ngrok-free.app", StringComparison.OrdinalIgnoreCase) &&
+            !uri.Host.Contains(".ngrok.io", StringComparison.OrdinalIgnoreCase))
+        {
+            return publicUrl;
+        }
+
+        EnsureNgrokInstalled();
+
+        var existingTunnel = TryGetNgrokTunnelUrl();
+        if (string.Equals(existingTunnel, publicUrl, StringComparison.OrdinalIgnoreCase))
+        {
+            AnsiConsole.MarkupLine($"[yellow]Reusing existing ngrok tunnel: {existingTunnel}[/]");
+            return publicUrl;
+        }
+
+        if (existingTunnel is not null)
+        {
+            AnsiConsole.MarkupLine($"[red]Ngrok is already running with a different URL: {existingTunnel}[/]");
+            AnsiConsole.MarkupLine("[red]Stop ngrok or use --facebook-oauth-public-url auto to use the active free tunnel.[/]");
+            Environment.Exit(1);
+        }
+
+        AnsiConsole.MarkupLine($"[blue]Starting ngrok tunnel for {publicUrl}...[/]");
+        StartNgrokProcess(uri.Host);
+
+        var actualUrl = WaitForNgrokTunnelUrl();
+        if (!string.Equals(actualUrl, publicUrl, StringComparison.OrdinalIgnoreCase))
+        {
+            AnsiConsole.MarkupLine($"[red]Ngrok started with '{actualUrl}' instead of requested '{publicUrl}'.[/]");
+            AnsiConsole.MarkupLine("[red]Free ngrok accounts cannot recreate arbitrary/reserved URLs. Use --facebook-oauth-public-url auto and update Meta with the printed URL.[/]");
+            Environment.Exit(1);
+        }
+
+        return publicUrl;
+    }
+
+    private static void EnsureNgrokInstalled()
+    {
         var ngrokVersion = ProcessHelper.StartProcess("ngrok version", redirectOutput: true, exitOnError: false);
         if (!ngrokVersion.Contains("ngrok version", StringComparison.OrdinalIgnoreCase))
         {
-            AnsiConsole.MarkupLine("[yellow]Ngrok is not installed. Please install ngrok from https://ngrok.com/download[/]");
-            AnsiConsole.MarkupLine("[yellow]Continuing without ngrok tunnel...[/]");
-            return;
+            AnsiConsole.MarkupLine("[red]Ngrok is not installed. Install ngrok from https://ngrok.com/download, then rerun with --facebook-oauth-public-url auto.[/]");
+            Environment.Exit(1);
         }
+    }
 
-        // Extract the subdomain from the URL
-        var uri = new Uri(publicUrl);
-        var subdomain = uri.Host.Split('.')[0];
+    private static void StartNgrokProcess(string? hostname)
+    {
+        var arguments = hostname is null
+            ? $"http https://localhost:{Ports.AppGateway} --host-header app.dev.localhost:{Ports.AppGateway}"
+            : $"http --url={hostname} https://localhost:{Ports.AppGateway} --host-header app.dev.localhost:{Ports.AppGateway}";
 
-        // Check if ngrok is already running
-        bool isNgrokRunning;
+        var processStartInfo = new ProcessStartInfo
+        {
+            FileName = "ngrok",
+            Arguments = arguments,
+            UseShellExecute = false,
+            CreateNoWindow = true
+        };
 
         if (Configuration.IsWindows)
         {
-            var ngrokProcesses = ProcessHelper.StartProcess("""tasklist /FI "IMAGENAME eq ngrok.exe" """, redirectOutput: true, exitOnError: false);
-            isNgrokRunning = ngrokProcesses.Contains("ngrok.exe");
+            processStartInfo.WindowStyle = ProcessWindowStyle.Hidden;
         }
-        else
+
+        ProcessHelper.StartProcess(processStartInfo, waitForExit: false, exitOnError: false);
+    }
+
+    private static string WaitForNgrokTunnelUrl()
+    {
+        var deadline = DateTime.UtcNow.AddSeconds(15);
+        while (DateTime.UtcNow < deadline)
         {
-            var ngrokProcesses = ProcessHelper.StartProcess("pgrep -f ngrok", redirectOutput: true, exitOnError: false);
-            isNgrokRunning = !string.IsNullOrEmpty(ngrokProcesses);
+            var tunnelUrl = TryGetNgrokTunnelUrl();
+            if (tunnelUrl is not null) return tunnelUrl;
+
+            Thread.Sleep(500);
         }
 
-        if (isNgrokRunning)
+        AnsiConsole.MarkupLine("[red]Ngrok did not expose a tunnel at http://127.0.0.1:4040/api/tunnels within 15 seconds.[/]");
+        AnsiConsole.MarkupLine("[red]Run 'ngrok http https://localhost:9000 --host-header app.dev.localhost:9000' manually, then rerun with --facebook-oauth-public-url auto.[/]");
+        Environment.Exit(1);
+        return string.Empty;
+    }
+
+    private static string? TryGetNgrokTunnelUrl()
+    {
+        try
         {
-            AnsiConsole.MarkupLine("[yellow]Ngrok is already running.[/]");
-            return;
+            using var httpClient = new HttpClient { Timeout = TimeSpan.FromSeconds(2) };
+            var json = httpClient.GetStringAsync("http://127.0.0.1:4040/api/tunnels").GetAwaiter().GetResult();
+            using var document = JsonDocument.Parse(json);
+            var tunnels = document.RootElement.GetProperty("tunnels");
+
+            foreach (var tunnel in tunnels.EnumerateArray())
+            {
+                if (!tunnel.TryGetProperty("public_url", out var publicUrlElement)) continue;
+                var publicUrl = publicUrlElement.GetString();
+                if (string.IsNullOrWhiteSpace(publicUrl) || !publicUrl.StartsWith("https://", StringComparison.OrdinalIgnoreCase)) continue;
+                return publicUrl.TrimEnd('/');
+            }
+        }
+        catch
+        {
+            return null;
         }
 
-        AnsiConsole.MarkupLine("[blue]Starting ngrok tunnel...[/]");
+        return null;
+    }
 
-        // Start ngrok in detached mode
-        var ngrokCommand = $"ngrok http --url={subdomain}.ngrok-free.app https://app.dev.localhost:{Ports.AppGateway}";
+    private static void PrintFacebookOAuthDashboardValues(string publicUrl)
+    {
+        var callbackBase = $"{publicUrl}/api/account/authentication/Facebook";
+        AnsiConsole.Write(new Panel(Markup.Escape($"""
+                                                   App Domain:
+                                                   {new Uri(publicUrl).Host}
 
-        // Use shell to handle backgrounding properly on macOS/Linux
-        ProcessHelper.StartProcess(
-            Configuration.IsWindows ? $"start /B {ngrokCommand}" : $"sh -c \"{ngrokCommand} > /dev/null 2>&1 &\"",
-            waitForExit: false
+                                                   Valid OAuth Redirect URIs:
+                                                   {callbackBase}/login/callback
+                                                   {callbackBase}/signup/callback
+                                                   {callbackBase}/link/callback
+                                                   """))
+            .Header("Meta dashboard values")
+            .Expand()
         );
-
-        AnsiConsole.MarkupLine("[green]Ngrok tunnel started successfully.[/]");
     }
 }

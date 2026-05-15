@@ -57,12 +57,6 @@ function PreferencesPage() {
                 enabled={import.meta.runtime_env.PUBLIC_GOOGLE_OAUTH_ENABLED === "true"}
                 linked={user?.linkedExternalProviders?.includes(ExternalProviderType.Google) ?? false}
               />
-              <LinkedAccountProvider
-                provider={ExternalProviderType.Facebook}
-                label={t`Facebook`}
-                enabled={import.meta.runtime_env.PUBLIC_FACEBOOK_OAUTH_ENABLED === "true"}
-                linked={user?.linkedExternalProviders?.includes(ExternalProviderType.Facebook) ?? false}
-              />
             </div>
           )}
         </section>

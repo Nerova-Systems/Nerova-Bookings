@@ -1516,9 +1516,6 @@ msgstr "Log ind"
 msgid "Log in with email"
 msgstr "Log ind med e-mail"
 
-msgid "Log in with Facebook"
-msgstr ""
-
 msgid "Log in with Google"
 msgstr "Log ind med Google"
 
@@ -2436,9 +2433,6 @@ msgstr "Tilmeld dig på sekunder og begynd at bygge på PlatformPlatform – lig
 
 msgid "Sign up with email"
 msgstr "Tilmeld dig med e-mail"
-
-msgid "Sign up with Facebook"
-msgstr ""
 
 msgid "Sign up with Google"
 msgstr "Tilmeld dig med Google"

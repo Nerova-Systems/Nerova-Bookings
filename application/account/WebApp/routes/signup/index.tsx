@@ -57,7 +57,6 @@ export function StartSignupForm() {
 
   const startSignupMutation = api.useMutation("post", "/api/account/authentication/email/signup/start");
   const [isGoogleSignupPending, setIsGoogleSignupPending] = useState(false);
-  const [isFacebookSignupPending, setIsFacebookSignupPending] = useState(false);
 
   if (startSignupMutation.isSuccess) {
     const { emailLoginId, validForSeconds } = startSignupMutation.data;
@@ -73,8 +72,7 @@ export function StartSignupForm() {
   }
 
   const isGoogleOAuthEnabled = import.meta.runtime_env.PUBLIC_GOOGLE_OAUTH_ENABLED === "true";
-  const isFacebookOAuthEnabled = import.meta.runtime_env.PUBLIC_FACEBOOK_OAUTH_ENABLED === "true";
-  const isPending = startSignupMutation.isPending || isGoogleSignupPending || isFacebookSignupPending;
+  const isPending = startSignupMutation.isPending || isGoogleSignupPending;
 
   return (
     <Form
@@ -140,12 +138,9 @@ export function StartSignupForm() {
       </Button>
       <ExternalSignupButtons
         isGoogleOAuthEnabled={isGoogleOAuthEnabled}
-        isFacebookOAuthEnabled={isFacebookOAuthEnabled}
         isPending={isPending}
         isGoogleSignupPending={isGoogleSignupPending}
-        isFacebookSignupPending={isFacebookSignupPending}
         setIsGoogleSignupPending={setIsGoogleSignupPending}
-        setIsFacebookSignupPending={setIsFacebookSignupPending}
       />
       <p className="text-sm text-muted-foreground">
         <Trans>Do you already have an account?</Trans>{" "}

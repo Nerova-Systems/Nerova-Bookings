@@ -61,7 +61,6 @@ export function LoginForm() {
 
   const startLoginMutation = api.useMutation("post", "/api/account/authentication/email/login/start");
   const [isGoogleLoginPending, setIsGoogleLoginPending] = useState(false);
-  const [isFacebookLoginPending, setIsFacebookLoginPending] = useState(false);
 
   if (startLoginMutation.isSuccess) {
     const { emailLoginId, validForSeconds } = startLoginMutation.data;
@@ -77,8 +76,7 @@ export function LoginForm() {
   }
 
   const isGoogleOAuthEnabled = import.meta.runtime_env.PUBLIC_GOOGLE_OAUTH_ENABLED === "true";
-  const isFacebookOAuthEnabled = import.meta.runtime_env.PUBLIC_FACEBOOK_OAUTH_ENABLED === "true";
-  const isPending = startLoginMutation.isPending || isGoogleLoginPending || isFacebookLoginPending;
+  const isPending = startLoginMutation.isPending || isGoogleLoginPending;
 
   return (
     <Form
@@ -120,12 +118,9 @@ export function LoginForm() {
       <ExternalLoginButtons
         returnPath={returnPath}
         isGoogleOAuthEnabled={isGoogleOAuthEnabled}
-        isFacebookOAuthEnabled={isFacebookOAuthEnabled}
         isPending={isPending}
         isGoogleLoginPending={isGoogleLoginPending}
-        isFacebookLoginPending={isFacebookLoginPending}
         setIsGoogleLoginPending={setIsGoogleLoginPending}
-        setIsFacebookLoginPending={setIsFacebookLoginPending}
       />
       <p className="text-sm text-muted-foreground">
         <Trans>
