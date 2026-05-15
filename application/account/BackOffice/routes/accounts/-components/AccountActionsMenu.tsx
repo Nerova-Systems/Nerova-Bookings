@@ -19,24 +19,30 @@ import {
   DropdownMenuTrigger
 } from "@repo/ui/components/DropdownMenu";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@repo/ui/components/Tooltip";
-import { AlertTriangleIcon, ExternalLinkIcon, MoreVerticalIcon, RefreshCwIcon } from "lucide-react";
+import { AlertTriangleIcon, MoreVerticalIcon, RefreshCwIcon } from "lucide-react";
 import { useState } from "react";
+
+import type { AbInclusionPin } from "@/shared/lib/api/client";
 
 import { useMe } from "@/shared/hooks/useMe";
 import { api } from "@/shared/lib/api/client";
 
+import { AbInclusionPinMenuItems } from "../../-shared/AbInclusionPinMenuItems";
+import { SetAbInclusionPinDialog } from "../../-shared/SetAbInclusionPinDialog";
 import { ReconcileResultDialog, type ReconcileResult } from "./ReconcileResultDialog";
 
 interface AccountActionsMenuProps {
   tenantId: string;
-  stripeCustomerUrl: string | null | undefined;
+  tenantName: string | undefined;
+  abInclusionPin: AbInclusionPin | null | undefined;
 }
 
-export function AccountActionsMenu({ tenantId, stripeCustomerUrl }: Readonly<AccountActionsMenuProps>) {
+export function AccountActionsMenu({ tenantId, tenantName, abInclusionPin }: Readonly<AccountActionsMenuProps>) {
   const { data: me } = useMe();
   const [result, setResult] = useState<ReconcileResult | null>(null);
   const [isResultOpen, setIsResultOpen] = useState(false);
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+  const [isPinDialogOpen, setIsPinDialogOpen] = useState(false);
 
   const reconcileMutation = api.useMutation("post", "/api/back-office/tenants/{id}/reconcile-with-paystack", {
     onSuccess: (data) => {
@@ -84,15 +90,7 @@ export function AccountActionsMenu({ tenantId, stripeCustomerUrl }: Readonly<Acc
             <RefreshCwIcon className="size-4" />
             {reconcileMutation.isPending ? <Trans>Reconciling...</Trans> : <Trans>Reconcile with Paystack</Trans>}
           </DropdownMenuItem>
-          {stripeCustomerUrl && (
-            <DropdownMenuItem
-              trackingLabel="Open in Stripe"
-              onClick={() => window.open(stripeCustomerUrl, "_blank", "noopener,noreferrer")}
-            >
-              <ExternalLinkIcon className="size-4" />
-              <Trans>Open in Stripe</Trans>
-            </DropdownMenuItem>
-          )}
+          <AbInclusionPinMenuItems withLeadingSeparator={true} onSelect={() => setIsPinDialogOpen(true)} />
         </DropdownMenuContent>
       </DropdownMenu>
 
@@ -124,6 +122,15 @@ export function AccountActionsMenu({ tenantId, stripeCustomerUrl }: Readonly<Acc
       </AlertDialog>
 
       <ReconcileResultDialog isOpen={isResultOpen} onOpenChange={setIsResultOpen} result={result} />
+
+      <SetAbInclusionPinDialog
+        entity="tenant"
+        entityId={tenantId}
+        entityLabel={tenantName ?? t`This account`}
+        currentPin={abInclusionPin ?? null}
+        isOpen={isPinDialogOpen}
+        onOpenChange={setIsPinDialogOpen}
+      />
     </>
   );
 }

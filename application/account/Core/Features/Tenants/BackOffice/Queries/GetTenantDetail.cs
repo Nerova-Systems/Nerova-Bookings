@@ -3,6 +3,7 @@ using Account.Features.Tenants.Domain;
 using JetBrains.Annotations;
 using SharedKernel.Cqrs;
 using SharedKernel.Domain;
+using SharedKernel.FeatureFlags;
 
 namespace Account.Features.Tenants.BackOffice.Queries;
 
@@ -36,7 +37,8 @@ public sealed record TenantDetailResponse(
     bool HasDriftDetected,
     DateTimeOffset? DriftCheckedAt,
     DriftDiscrepancy[] DriftDiscrepancies,
-    string? StripeCustomerUrl
+    string? StripeCustomerUrl,
+    AbInclusionPin? AbInclusionPin
 );
 
 [PublicAPI]
@@ -115,7 +117,8 @@ public sealed class GetTenantDetailHandler(ITenantRepository tenantRepository, I
             subscription?.HasDriftDetected ?? false,
             subscription?.DriftCheckedAt,
             subscription?.DriftDiscrepancies.ToArray() ?? [],
-            null
+            null,
+            tenant.AbInclusionPin
         );
     }
 }

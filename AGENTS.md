@@ -22,7 +22,7 @@ Run `build` first, then `format`, `lint`, `test` in parallel with `--no-build`.
 
 Before starting substantive work, verify that expected MCP servers are reachable with safe read-only health checks. If an MCP server is unavailable or misconfigured, report the failure and fix it before implementation when it is relevant to the task.
 
-**Aspire**: The `aspire-restart` skill manages the AppHost - always use it; never `aspire run`, `aspire restart`, or the developer CLI's `run` command. Use the Aspire MCP `list_resources` tool to look up service URLs (or read `.workspace/port.txt` if you only need the base port). In the agentic workflow, only the Guardian agent restarts Aspire. All other agents must notify the Guardian if they need it restarted.
+**Aspire**: The `aspire-restart` skill manages the AppHost - always use it; never `aspire run`, `aspire restart`, or the developer CLI's `run` command. Port = `.workspace/port.txt` base + 2. Never trust Aspire MCP for the port - a common critical failure that silently runs SQL on another worktree's database. If you need other Aspire MCP data, call `mcp__aspire__select_apphost` with the cwd path first. In the agentic workflow, only the Guardian agent restarts Aspire. All other agents must notify the Guardian if they need it restarted.
 
 Never commit, amend, or revert without explicit user instruction each time. Commit messages: one descriptive line in imperative form, no description body.
 
@@ -65,9 +65,12 @@ The copied Claude rule docs under `.codex/rules/**/*.md` are reference guidance,
 - Backend queries: `.codex/rules/backend/queries.md`
 - Backend repositories: `.codex/rules/backend/repositories.md`
 - Database migrations: `.codex/rules/backend/database-migrations.md`
+- Backend feature flags: `.codex/rules/backend/feature-flags.md`
 - API endpoints: `.codex/rules/backend/api-endpoints.md`
 - API tests: `.codex/rules/backend/api-tests.md`
 - Frontend: `.codex/rules/frontend/frontend.md`
+- Frontend feature flags: `.codex/rules/frontend/feature-flags.md`
+- Emails: `.codex/rules/frontend/emails.md`
 - Forms: `.codex/rules/frontend/form-with-validation.md`
 - TanStack Query: `.codex/rules/frontend/tanstack-query-api-integration.md`
 - Translations: `.codex/rules/frontend/translations.md`

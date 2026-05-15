@@ -306,7 +306,7 @@ var accountEnvironmentVariables = [
   }
   {
     name: 'PUBLIC_SUBSCRIPTION_ENABLED'
-    value: !empty(stripeApiKey) && !empty(stripeWebhookSecret) && !empty(stripePublishableKey) ? 'true' : 'false'
+    value: !empty(paystackSecretKey) && !empty(paystackPublicKey) && !empty(paystackStandardPlanCode) && !empty(paystackPremiumPlanCode) ? 'true' : 'false'
   }
 ]
 
