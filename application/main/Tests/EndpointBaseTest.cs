@@ -166,7 +166,7 @@ public abstract class EndpointBaseTest<TContext> : IDisposable where TContext : 
         GC.SuppressFinalize(this);
     }
 
-    protected virtual void RegisterMockLoggers(IServiceCollection services)
+    protected void RegisterMockLoggers(IServiceCollection services)
     {
     }
 
