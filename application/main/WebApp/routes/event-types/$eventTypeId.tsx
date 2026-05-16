@@ -8,6 +8,7 @@ import { toast } from "sonner";
 
 import { api } from "@/shared/lib/api/client";
 
+import { GeneralApiErrors } from "../-scheduling/ApiErrors";
 import { EventTypeForm } from "../-scheduling/EventTypeForm";
 import { SchedulingPageShell } from "../-scheduling/SchedulingPageShell";
 import { eventTypeToPayload, type EventTypePayload } from "../-scheduling/schedulingTypes";
@@ -62,6 +63,7 @@ function EventTypeDetailsPage() {
           <Trans>Delete</Trans>
         </Button>
       </div>
+      <GeneralApiErrors error={deleteEventTypeMutation.error} />
       {!isLoading && draft && (
         <EventTypeForm
           value={draft}

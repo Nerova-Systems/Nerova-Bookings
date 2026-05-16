@@ -13,6 +13,7 @@ import { SaveIcon } from "lucide-react";
 import type { ApiValidationError, EventTypePayload, Schedule } from "./schedulingTypes";
 
 import { GeneralApiErrors } from "./ApiErrors";
+import { LocationTypeSelect } from "./LocationTypeSelect";
 import { isEventTypePayloadSubmittable, slugify } from "./schedulingTypes";
 
 function ScheduleSelect({
@@ -27,7 +28,7 @@ function ScheduleSelect({
       name="scheduleId"
       label={t`Schedule`}
       items={scheduleItems}
-      value={value || undefined}
+      value={value}
       onValueChange={(scheduleId) => onChange(scheduleId ?? "")}
     >
       <SelectTrigger>
@@ -163,11 +164,9 @@ export function EventTypeForm({
         />
       </div>
       <div className="grid gap-4 md:grid-cols-2">
-        <TextField
-          name="locationType"
-          label={t`Location type`}
+        <LocationTypeSelect
           value={value.locationType ?? ""}
-          onChange={(locationType) => onChange({ ...value, locationType: locationType || null })}
+          onChange={(locationType) => onChange({ ...value, locationType })}
         />
         <TextField
           name="locationValue"

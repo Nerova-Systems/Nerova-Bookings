@@ -8,6 +8,7 @@ import { toast } from "sonner";
 
 import { api } from "@/shared/lib/api/client";
 
+import { GeneralApiErrors } from "../-scheduling/ApiErrors";
 import { ScheduleForm } from "../-scheduling/ScheduleForm";
 import { SchedulingPageShell } from "../-scheduling/SchedulingPageShell";
 import { scheduleToPayload, type SchedulePayload } from "../-scheduling/schedulingTypes";
@@ -23,7 +24,22 @@ function AvailabilityDetailsPage() {
   const { data: schedule, isLoading } = api.useQuery("get", "/api/schedules/{id}", {
     params: { path: { id: scheduleId } }
   });
+  const { data: schedulesData } = api.useQuery("get", "/api/schedules");
+  const { data: eventTypesData } = api.useQuery("get", "/api/event-types");
+  const schedules = schedulesData?.schedules ?? [];
+  const eventTypes = eventTypesData?.eventTypes ?? [];
   const [draft, setDraft] = useState<SchedulePayload | null>(null);
+  const isOnlySchedule = schedules.length <= 1;
+  const isReferencedByEventType = eventTypes.some((eventType) => eventType.scheduleId === scheduleId);
+  const canUnsetDefault =
+    !schedule?.isDefault || schedules.some((candidate) => candidate.id !== scheduleId && candidate.isDefault);
+  const deleteBlockedReason = isOnlySchedule
+    ? t`Create another schedule before deleting this one.`
+    : schedule?.isDefault
+      ? t`Make another schedule default before deleting this one.`
+      : isReferencedByEventType
+        ? t`Move event types to another schedule before deleting this one.`
+        : null;
 
   useEffect(() => {
     if (schedule) setDraft(scheduleToPayload(schedule));
@@ -55,11 +71,18 @@ function AvailabilityDetailsPage() {
           variant="destructive"
           onClick={() => deleteScheduleMutation.mutate({ params: { path: { id: scheduleId } } })}
           isPending={deleteScheduleMutation.isPending}
+          disabled={deleteBlockedReason !== null}
         >
           <Trash2Icon />
           <Trans>Delete</Trans>
         </Button>
       </div>
+      {deleteBlockedReason && (
+        <div className="mb-6 rounded-md border border-dashed p-4 text-sm text-muted-foreground">
+          {deleteBlockedReason}
+        </div>
+      )}
+      <GeneralApiErrors error={deleteScheduleMutation.error} />
       {!isLoading && draft && (
         <ScheduleForm
           value={draft}
@@ -70,6 +93,7 @@ function AvailabilityDetailsPage() {
           error={updateScheduleMutation.error}
           isPending={updateScheduleMutation.isPending}
           submitLabel={t`Save schedule`}
+          canUnsetDefault={canUnsetDefault}
         />
       )}
     </SchedulingPageShell>

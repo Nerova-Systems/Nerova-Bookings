@@ -2,15 +2,13 @@ import { t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
 import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@repo/ui/components/Empty";
 import { Link as RouterLink, createFileRoute } from "@tanstack/react-router";
-import { CalendarDaysIcon, PlusIcon } from "lucide-react";
-import { useEffect, useState } from "react";
-import { toast } from "sonner";
+import { CalendarDaysIcon } from "lucide-react";
 
 import { api } from "@/shared/lib/api/client";
 
-import { ScheduleForm } from "../-scheduling/ScheduleForm";
+import { CreateScheduleDialog } from "../-scheduling/CreateScheduleDialog";
 import { SchedulingPageShell } from "../-scheduling/SchedulingPageShell";
-import { newSchedulePayload, type SchedulePayload } from "../-scheduling/schedulingTypes";
+import { formatAvailabilityWindows } from "../-scheduling/schedulingTypes";
 
 export const Route = createFileRoute("/availability/")({
   staticData: { trackingTitle: "Availability" },
@@ -18,55 +16,51 @@ export const Route = createFileRoute("/availability/")({
 });
 
 function AvailabilityPage() {
-  const [draft, setDraft] = useState<SchedulePayload>(() => newSchedulePayload(true));
-  const { data, isLoading, refetch } = api.useQuery("get", "/api/schedules");
-  const createScheduleMutation = api.useMutation("post", "/api/schedules", {
-    onSuccess: async () => {
-      toast.success(t`Schedule created`);
-      setDraft(newSchedulePayload());
-      await refetch();
-    }
-  });
-
+  const { data, isLoading } = api.useQuery("get", "/api/schedules");
   const schedules = data?.schedules ?? [];
-
-  useEffect(() => {
-    if (isLoading) return;
-
-    const isFirstSchedule = schedules.length === 0;
-    setDraft((current) => {
-      if (current.isDefault === isFirstSchedule) return current;
-
-      const isUntouchedDefaultName = current.name === "Default schedule" || current.name === "Working hours";
-      return isUntouchedDefaultName ? newSchedulePayload(isFirstSchedule) : { ...current, isDefault: isFirstSchedule };
-    });
-  }, [isLoading, schedules.length]);
+  const weekdayLabels = {
+    0: t`Sunday`,
+    1: t`Monday`,
+    2: t`Tuesday`,
+    3: t`Wednesday`,
+    4: t`Thursday`,
+    5: t`Friday`,
+    6: t`Saturday`
+  };
 
   return (
-    <SchedulingPageShell title={t`Availability`} subtitle={t`Manage weekly schedules for booking availability.`}>
-      <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_24rem]">
-        <section className="flex min-w-0 flex-col gap-3">
-          {isLoading ? null : schedules.length === 0 ? (
-            <Empty className="min-h-48 border">
-              <EmptyHeader>
-                <EmptyMedia variant="icon">
-                  <CalendarDaysIcon />
-                </EmptyMedia>
-                <EmptyTitle>
-                  <Trans>No schedules yet</Trans>
-                </EmptyTitle>
-                <EmptyDescription>
-                  <Trans>Create a weekly schedule before publishing event types.</Trans>
-                </EmptyDescription>
-              </EmptyHeader>
-            </Empty>
-          ) : (
-            schedules.map((schedule) => (
+    <SchedulingPageShell
+      title={t`Availability`}
+      subtitle={t`Manage weekly schedules for booking availability.`}
+      actions={<CreateScheduleDialog isFirstSchedule={schedules.length === 0} />}
+    >
+      <section className="flex min-w-0 flex-col">
+        {isLoading ? (
+          <div className="rounded-md border p-4 text-sm text-muted-foreground">
+            <Trans>Loading schedules...</Trans>
+          </div>
+        ) : schedules.length === 0 ? (
+          <Empty className="min-h-48 border">
+            <EmptyHeader>
+              <EmptyMedia variant="icon">
+                <CalendarDaysIcon />
+              </EmptyMedia>
+              <EmptyTitle>
+                <Trans>No schedules yet</Trans>
+              </EmptyTitle>
+              <EmptyDescription>
+                <Trans>Create a weekly schedule before publishing event types.</Trans>
+              </EmptyDescription>
+            </EmptyHeader>
+          </Empty>
+        ) : (
+          <div className="overflow-hidden rounded-md border">
+            {schedules.map((schedule) => (
               <RouterLink
                 key={schedule.id}
                 to="/availability/$scheduleId"
                 params={{ scheduleId: schedule.id }}
-                className="grid gap-2 rounded-md border p-4 transition-colors hover:bg-muted/60 md:grid-cols-[1fr_auto]"
+                className="grid gap-2 border-b p-4 transition-colors last:border-b-0 hover:bg-muted/60 md:grid-cols-[1fr_auto]"
               >
                 <div className="min-w-0">
                   <div className="flex flex-wrap items-center gap-2">
@@ -77,32 +71,25 @@ function AvailabilityPage() {
                       </span>
                     )}
                   </div>
-                  <p className="text-sm text-muted-foreground">{schedule.timeZone}</p>
+                  <div className="mt-1 flex flex-wrap gap-x-4 gap-y-1 text-sm text-muted-foreground">
+                    <span>{schedule.timeZone}</span>
+                    <span>
+                      {formatAvailabilityWindows(
+                        schedule.availabilityWindows,
+                        weekdayLabels,
+                        t`No availability windows`
+                      )}
+                    </span>
+                  </div>
                 </div>
                 <div className="text-sm text-muted-foreground">
                   <Trans>{schedule.availabilityWindows.length} windows</Trans>
                 </div>
               </RouterLink>
-            ))
-          )}
-        </section>
-        <aside className="flex flex-col gap-4">
-          <div className="flex items-center gap-2">
-            <PlusIcon className="size-4" />
-            <h2 className="text-base font-medium">
-              <Trans>New schedule</Trans>
-            </h2>
+            ))}
           </div>
-          <ScheduleForm
-            value={draft}
-            onChange={setDraft}
-            onSubmit={(body) => createScheduleMutation.mutate({ body })}
-            error={createScheduleMutation.error}
-            isPending={createScheduleMutation.isPending}
-            submitLabel={t`Create schedule`}
-          />
-        </aside>
-      </div>
+        )}
+      </section>
     </SchedulingPageShell>
   );
 }

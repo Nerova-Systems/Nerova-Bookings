@@ -11,7 +11,12 @@ import { ClockIcon, PlusIcon, SaveIcon, Trash2Icon } from "lucide-react";
 import type { ApiValidationError, AvailabilityWindow, SchedulePayload } from "./schedulingTypes";
 
 import { GeneralApiErrors } from "./ApiErrors";
-import { formatMinutes, isSchedulePayloadSubmittable, parseTime } from "./schedulingTypes";
+import {
+  formatMinutes,
+  getOverlappingAvailabilityWindowIndexes,
+  isSchedulePayloadSubmittable,
+  parseTime
+} from "./schedulingTypes";
 
 function WindowEditor({
   windows,
@@ -30,6 +35,7 @@ function WindowEditor({
   const updateWindow = (index: number, next: AvailabilityWindow) => {
     onChange(windows.map((window, currentIndex) => (currentIndex === index ? next : window)));
   };
+  const overlappingIndexes = getOverlappingAvailabilityWindowIndexes(windows);
 
   return (
     <div className="flex flex-col gap-3">
@@ -47,53 +53,72 @@ function WindowEditor({
           <Trans>Add window</Trans>
         </Button>
       </div>
-      {windows.map((window, index) => (
-        <div key={index} className="grid gap-3 rounded-md border p-3 md:grid-cols-[1fr_9rem_9rem_auto]">
-          <div className="grid grid-cols-2 gap-x-4 gap-y-1 sm:grid-cols-4">
-            {weekDays.map((day) => (
-              <CheckboxField
-                key={day.value}
-                name={`availabilityWindows.${index}.days`}
-                label={day.label}
-                checked={window.days.includes(day.value)}
-                onCheckedChange={(checked) => {
-                  const days = checked
-                    ? [...window.days, day.value].sort()
-                    : window.days.filter((value) => value !== day.value);
-                  updateWindow(index, { ...window, days });
-                }}
+      {windows.map((window, index) => {
+        const errors = [
+          window.days.length === 0 ? t`Select at least one day.` : null,
+          window.startMinute >= window.endMinute ? t`End time must be after start time.` : null,
+          overlappingIndexes.has(index) ? t`This window overlaps another window on the same day.` : null
+        ].filter((message): message is string => Boolean(message));
+
+        return (
+          <div key={index} className="rounded-md border p-3">
+            <div className="grid gap-3 md:grid-cols-[1fr_9rem_9rem_auto]">
+              <div className="grid grid-cols-2 gap-x-4 gap-y-1 sm:grid-cols-4">
+                {weekDays.map((day) => (
+                  <CheckboxField
+                    key={day.value}
+                    name={`availabilityWindows.${index}.days`}
+                    label={day.label}
+                    checked={window.days.includes(day.value)}
+                    onCheckedChange={(checked) => {
+                      const days = checked
+                        ? [...window.days, day.value].sort()
+                        : window.days.filter((value) => value !== day.value);
+                      updateWindow(index, { ...window, days });
+                    }}
+                  />
+                ))}
+              </div>
+              <TextField
+                name={`availabilityWindows.${index}.startMinute`}
+                label={t`Start`}
+                value={formatMinutes(window.startMinute)}
+                startIcon={<ClockIcon />}
+                onChange={(value) =>
+                  updateWindow(index, { ...window, startMinute: parseTime(value, window.startMinute) })
+                }
               />
-            ))}
+              <TextField
+                name={`availabilityWindows.${index}.endMinute`}
+                label={t`End`}
+                value={formatMinutes(window.endMinute)}
+                startIcon={<ClockIcon />}
+                onChange={(value) => updateWindow(index, { ...window, endMinute: parseTime(value, window.endMinute) })}
+              />
+              <div className="flex items-end">
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => onChange(windows.filter((_, currentIndex) => currentIndex !== index))}
+                  disabled={windows.length === 1}
+                  aria-label={t`Remove window`}
+                >
+                  <Trash2Icon />
+                  <Trans>Remove</Trans>
+                </Button>
+              </div>
+            </div>
+            {errors.length > 0 && (
+              <div className="mt-3 flex flex-col gap-1 text-sm text-destructive">
+                {errors.map((message) => (
+                  <div key={message}>{message}</div>
+                ))}
+              </div>
+            )}
           </div>
-          <TextField
-            name={`availabilityWindows.${index}.startMinute`}
-            label={t`Start`}
-            value={formatMinutes(window.startMinute)}
-            startIcon={<ClockIcon />}
-            onChange={(value) => updateWindow(index, { ...window, startMinute: parseTime(value, window.startMinute) })}
-          />
-          <TextField
-            name={`availabilityWindows.${index}.endMinute`}
-            label={t`End`}
-            value={formatMinutes(window.endMinute)}
-            startIcon={<ClockIcon />}
-            onChange={(value) => updateWindow(index, { ...window, endMinute: parseTime(value, window.endMinute) })}
-          />
-          <div className="flex items-end">
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              onClick={() => onChange(windows.filter((_, currentIndex) => currentIndex !== index))}
-              disabled={windows.length === 1}
-              aria-label={t`Remove window`}
-            >
-              <Trash2Icon />
-              <Trans>Remove</Trans>
-            </Button>
-          </div>
-        </div>
-      ))}
+        );
+      })}
     </div>
   );
 }
@@ -104,7 +129,8 @@ export function ScheduleForm({
   onSubmit,
   error,
   isPending,
-  submitLabel
+  submitLabel,
+  canUnsetDefault = true
 }: Readonly<{
   value: SchedulePayload;
   onChange: (value: SchedulePayload) => void;
@@ -112,6 +138,7 @@ export function ScheduleForm({
   error?: ApiValidationError;
   isPending?: boolean;
   submitLabel: string;
+  canUnsetDefault?: boolean;
 }>) {
   const canSubmit = isSchedulePayloadSubmittable(value);
 
@@ -146,6 +173,7 @@ export function ScheduleForm({
         name="isDefault"
         label={t`Default schedule`}
         checked={value.isDefault}
+        disabled={value.isDefault && !canUnsetDefault}
         onCheckedChange={(isDefault) => onChange({ ...value, isDefault })}
       />
       <WindowEditor
