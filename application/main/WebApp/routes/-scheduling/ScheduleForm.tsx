@@ -1,124 +1,45 @@
 import { t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
 import { Button } from "@repo/ui/components/Button";
-import { CheckboxField } from "@repo/ui/components/CheckboxField";
 import { Form } from "@repo/ui/components/Form";
-import { SwitchField } from "@repo/ui/components/SwitchField";
 import { TextField } from "@repo/ui/components/TextField";
-import { TimeZonePicker } from "@repo/ui/components/TimeZonePicker";
-import { ClockIcon, PlusIcon, SaveIcon, Trash2Icon } from "lucide-react";
+import { SaveIcon } from "lucide-react";
 
-import type { ApiValidationError, AvailabilityWindow, SchedulePayload } from "./schedulingTypes";
+import type { ApiValidationError, SchedulePayload } from "./schedulingTypes";
 
 import { GeneralApiErrors } from "./ApiErrors";
-import {
-  formatMinutes,
-  getOverlappingAvailabilityWindowIndexes,
-  isSchedulePayloadSubmittable,
-  parseTime
-} from "./schedulingTypes";
+import { WindowEditor } from "./AvailabilityEditor";
+import { AvailabilitySidePanel, DateOverridesCard } from "./AvailabilitySidePanel";
+import { isSchedulePayloadSubmittable } from "./schedulingTypes";
 
-function WindowEditor({
-  windows,
+function ScheduleNameField({
+  value,
   onChange
-}: Readonly<{ windows: AvailabilityWindow[]; onChange: (windows: AvailabilityWindow[]) => void }>) {
-  const weekDays = [
-    { value: 0, label: t`Sunday` },
-    { value: 1, label: t`Monday` },
-    { value: 2, label: t`Tuesday` },
-    { value: 3, label: t`Wednesday` },
-    { value: 4, label: t`Thursday` },
-    { value: 5, label: t`Friday` },
-    { value: 6, label: t`Saturday` }
-  ];
-
-  const updateWindow = (index: number, next: AvailabilityWindow) => {
-    onChange(windows.map((window, currentIndex) => (currentIndex === index ? next : window)));
-  };
-  const overlappingIndexes = getOverlappingAvailabilityWindowIndexes(windows);
-
+}: Readonly<{ value: SchedulePayload; onChange: (value: SchedulePayload) => void }>) {
   return (
-    <div className="flex flex-col gap-3">
-      <div className="flex items-center justify-between gap-3">
-        <h3 className="text-base font-medium">
-          <Trans>Weekly availability</Trans>
-        </h3>
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          onClick={() => onChange([...windows, { days: [1], startMinute: 540, endMinute: 1020 }])}
-        >
-          <PlusIcon />
-          <Trans>Add window</Trans>
-        </Button>
-      </div>
-      {windows.map((window, index) => {
-        const errors = [
-          window.days.length === 0 ? t`Select at least one day.` : null,
-          window.startMinute >= window.endMinute ? t`End time must be after start time.` : null,
-          overlappingIndexes.has(index) ? t`This window overlaps another window on the same day.` : null
-        ].filter((message): message is string => Boolean(message));
+    <div className="sr-only">
+      <TextField
+        name="name"
+        label={t`Name`}
+        required={true}
+        value={value.name}
+        onChange={(name) => onChange({ ...value, name })}
+      />
+    </div>
+  );
+}
 
-        return (
-          <div key={index} className="rounded-md border p-3">
-            <div className="grid gap-3 md:grid-cols-[1fr_9rem_9rem_auto]">
-              <div className="grid grid-cols-2 gap-x-4 gap-y-1 sm:grid-cols-4">
-                {weekDays.map((day) => (
-                  <CheckboxField
-                    key={day.value}
-                    name={`availabilityWindows.${index}.days`}
-                    label={day.label}
-                    checked={window.days.includes(day.value)}
-                    onCheckedChange={(checked) => {
-                      const days = checked
-                        ? [...window.days, day.value].sort()
-                        : window.days.filter((value) => value !== day.value);
-                      updateWindow(index, { ...window, days });
-                    }}
-                  />
-                ))}
-              </div>
-              <TextField
-                name={`availabilityWindows.${index}.startMinute`}
-                label={t`Start`}
-                value={formatMinutes(window.startMinute)}
-                startIcon={<ClockIcon />}
-                onChange={(value) =>
-                  updateWindow(index, { ...window, startMinute: parseTime(value, window.startMinute) })
-                }
-              />
-              <TextField
-                name={`availabilityWindows.${index}.endMinute`}
-                label={t`End`}
-                value={formatMinutes(window.endMinute)}
-                startIcon={<ClockIcon />}
-                onChange={(value) => updateWindow(index, { ...window, endMinute: parseTime(value, window.endMinute) })}
-              />
-              <div className="flex items-end">
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => onChange(windows.filter((_, currentIndex) => currentIndex !== index))}
-                  disabled={windows.length === 1}
-                  aria-label={t`Remove window`}
-                >
-                  <Trash2Icon />
-                  <Trans>Remove</Trans>
-                </Button>
-              </div>
-            </div>
-            {errors.length > 0 && (
-              <div className="mt-3 flex flex-col gap-1 text-sm text-destructive">
-                {errors.map((message) => (
-                  <div key={message}>{message}</div>
-                ))}
-              </div>
-            )}
-          </div>
-        );
-      })}
+function SubmitButton({
+  isPending,
+  canSubmit,
+  submitLabel
+}: Readonly<{ isPending?: boolean; canSubmit: boolean; submitLabel: string }>) {
+  return (
+    <div className="flex justify-end">
+      <Button type="submit" isPending={isPending} disabled={!canSubmit}>
+        <SaveIcon />
+        {isPending ? <Trans>Saving...</Trans> : submitLabel}
+      </Button>
     </div>
   );
 }
@@ -130,7 +51,8 @@ export function ScheduleForm({
   error,
   isPending,
   submitLabel,
-  canUnsetDefault = true
+  canUnsetDefault = true,
+  showSubmit = true
 }: Readonly<{
   value: SchedulePayload;
   onChange: (value: SchedulePayload) => void;
@@ -139,14 +61,16 @@ export function ScheduleForm({
   isPending?: boolean;
   submitLabel: string;
   canUnsetDefault?: boolean;
+  showSubmit?: boolean;
 }>) {
   const canSubmit = isSchedulePayloadSubmittable(value);
 
   return (
     <Form
+      id="availability-form"
       validationBehavior="aria"
       validationErrors={error?.errors}
-      className="gap-5"
+      className="gap-6"
       onSubmit={(event) => {
         event.preventDefault();
         if (!canSubmit) return;
@@ -154,38 +78,20 @@ export function ScheduleForm({
       }}
     >
       <GeneralApiErrors error={error} />
-      <div className="grid gap-4 md:grid-cols-2">
-        <TextField
-          name="name"
-          label={t`Name`}
-          required={true}
-          value={value.name}
-          onChange={(name) => onChange({ ...value, name })}
-        />
-        <TimeZonePicker
-          name="timeZone"
-          label={t`Time zone`}
-          value={value.timeZone}
-          onValueChange={(timeZone) => onChange({ ...value, timeZone: timeZone ?? "UTC" })}
-        />
+      <ScheduleNameField value={value} onChange={onChange} />
+      <div className="grid gap-8 xl:grid-cols-[minmax(0,1fr)_22rem]">
+        <div className="flex min-w-0 flex-col gap-6">
+          <WindowEditor
+            windows={value.availabilityWindows}
+            onChange={(availabilityWindows) => onChange({ ...value, availabilityWindows })}
+          />
+          <DateOverridesCard />
+          {showSubmit && <SubmitButton isPending={isPending} canSubmit={canSubmit} submitLabel={submitLabel} />}
+        </div>
+        <AvailabilitySidePanel value={value} onChange={onChange} />
       </div>
-      <SwitchField
-        name="isDefault"
-        label={t`Default schedule`}
-        checked={value.isDefault}
-        disabled={value.isDefault && !canUnsetDefault}
-        onCheckedChange={(isDefault) => onChange({ ...value, isDefault })}
-      />
-      <WindowEditor
-        windows={value.availabilityWindows}
-        onChange={(availabilityWindows) => onChange({ ...value, availabilityWindows })}
-      />
-      <div className="flex justify-end">
-        <Button type="submit" isPending={isPending} disabled={!canSubmit}>
-          <SaveIcon />
-          {isPending ? <Trans>Saving...</Trans> : submitLabel}
-        </Button>
-      </div>
+      <input type="hidden" name="isDefault" value={String(value.isDefault)} />
+      {!canUnsetDefault && <input type="hidden" name="defaultLocked" value="true" />}
     </Form>
   );
 }

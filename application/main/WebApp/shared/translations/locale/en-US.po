@@ -21,14 +21,20 @@ msgstr "{0} minutes"
 msgid "{0} windows"
 msgstr "{0} windows"
 
+msgid "Add an override"
+msgstr "Add an override"
+
+msgid "Add dates when your availability changes from your daily hours."
+msgstr "Add dates when your availability changes from your daily hours."
+
 msgid "Add new event type"
 msgstr "Add new event type"
 
 msgid "Add new schedule"
 msgstr "Add new schedule"
 
-msgid "Add window"
-msgstr "Add window"
+msgid "Add time"
+msgstr "Add time"
 
 msgid "After buffer"
 msgstr "After buffer"
@@ -56,6 +62,9 @@ msgstr "Configure the appointment types clients can book."
 
 msgid "Continue"
 msgstr "Continue"
+
+msgid "Copy times"
+msgstr "Copy times"
 
 msgid "Create a private setup event type before opening public booking."
 msgstr "Create a private setup event type before opening public booking."
@@ -87,14 +96,17 @@ msgstr "Create the booking page basics now, then finish setup on the next screen
 msgid "Dashboard"
 msgstr "Dashboard"
 
+msgid "Date overrides"
+msgstr "Date overrides"
+
 msgid "Default"
 msgstr "Default"
 
-msgid "Default schedule"
-msgstr "Default schedule"
-
 msgid "Delete"
 msgstr "Delete"
+
+msgid "Delete schedule"
+msgstr "Delete schedule"
 
 msgid "Description"
 msgstr "Description"
@@ -104,9 +116,6 @@ msgstr "Duration"
 
 msgid "Edit booking setup for this appointment type."
 msgstr "Edit booking setup for this appointment type."
-
-msgid "Edit the weekly windows attached to this schedule."
-msgstr "Edit the weekly windows attached to this schedule."
 
 msgid "End"
 msgstr "End"
@@ -128,6 +137,9 @@ msgstr "Event type updated"
 
 msgid "Event types"
 msgstr "Event types"
+
+msgid "Fri"
+msgstr "Fri"
 
 msgid "Friday"
 msgstr "Friday"
@@ -165,6 +177,9 @@ msgstr "Hidden"
 msgid "In person"
 msgstr "In person"
 
+msgid "Launch troubleshooter"
+msgstr "Launch troubleshooter"
+
 msgid "Link"
 msgstr "Link"
 
@@ -191,6 +206,9 @@ msgstr "Make another schedule default before deleting this one."
 
 msgid "Manage weekly schedules for booking availability."
 msgstr "Manage weekly schedules for booking availability."
+
+msgid "Mon"
+msgstr "Mon"
 
 msgid "Monday"
 msgstr "Monday"
@@ -219,23 +237,29 @@ msgstr "No event types yet"
 msgid "No schedules yet"
 msgstr "No schedules yet"
 
+msgid "No weekly hours"
+msgstr "No weekly hours"
+
 msgid "Notice"
 msgstr "Notice"
 
 msgid "Phone"
 msgstr "Phone"
 
-msgid "Remove"
-msgstr "Remove"
-
-msgid "Remove window"
-msgstr "Remove window"
+msgid "Remove time"
+msgstr "Remove time"
 
 msgid "Replace this sample page with your own product information and branding."
 msgstr "Replace this sample page with your own product information and branding."
 
+msgid "Sat"
+msgstr "Sat"
+
 msgid "Saturday"
 msgstr "Saturday"
+
+msgid "Save"
+msgstr "Save"
 
 msgid "Save event type"
 msgstr "Save event type"
@@ -255,17 +279,20 @@ msgstr "Schedule created"
 msgid "Schedule deleted"
 msgstr "Schedule deleted"
 
+msgid "Schedule name"
+msgstr "Schedule name"
+
 msgid "Schedule unavailable"
 msgstr "Schedule unavailable"
 
 msgid "Schedule updated"
 msgstr "Schedule updated"
 
-msgid "Select at least one day."
-msgstr "Select at least one day."
-
 msgid "Select schedule"
 msgstr "Select schedule"
+
+msgid "Set as default"
+msgstr "Set as default"
 
 msgid "Slot interval"
 msgstr "Slot interval"
@@ -273,11 +300,17 @@ msgstr "Slot interval"
 msgid "Slug"
 msgstr "Slug"
 
+msgid "Something doesn't look right?"
+msgstr "Something doesn't look right?"
+
 msgid "Start"
 msgstr "Start"
 
 msgid "Start with a weekly schedule, then refine availability on the next screen."
 msgstr "Start with a weekly schedule, then refine availability on the next screen."
+
+msgid "Sun"
+msgstr "Sun"
 
 msgid "Sunday"
 msgstr "Sunday"
@@ -288,14 +321,20 @@ msgstr "This is where your personalized dashboard content will appear. Stay tune
 msgid "This window overlaps another window on the same day."
 msgstr "This window overlaps another window on the same day."
 
+msgid "Thu"
+msgstr "Thu"
+
 msgid "Thursday"
 msgstr "Thursday"
 
-msgid "Time zone"
-msgstr "Time zone"
+msgid "Timezone"
+msgstr "Timezone"
 
 msgid "Title"
 msgstr "Title"
+
+msgid "Tue"
+msgstr "Tue"
 
 msgid "Tuesday"
 msgstr "Tuesday"
@@ -303,11 +342,11 @@ msgstr "Tuesday"
 msgid "Visible"
 msgstr "Visible"
 
+msgid "Wed"
+msgstr "Wed"
+
 msgid "Wednesday"
 msgstr "Wednesday"
-
-msgid "Weekly availability"
-msgstr "Weekly availability"
 
 msgid "Welcome to PlatformPlatform"
 msgstr "Welcome to PlatformPlatform"

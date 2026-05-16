@@ -21,14 +21,20 @@ msgstr "{0} minutter"
 msgid "{0} windows"
 msgstr "{0} vinduer"
 
+msgid "Add an override"
+msgstr "Tilføj en undtagelse"
+
+msgid "Add dates when your availability changes from your daily hours."
+msgstr "Tilføj datoer, hvor din tilgængelighed afviger fra dine daglige timer."
+
 msgid "Add new event type"
 msgstr "Tilføj ny aftaletype"
 
 msgid "Add new schedule"
 msgstr "Tilføj ny tidsplan"
 
-msgid "Add window"
-msgstr "Tilføj vindue"
+msgid "Add time"
+msgstr "Tilføj tid"
 
 msgid "After buffer"
 msgstr "Buffer efter"
@@ -56,6 +62,9 @@ msgstr "Konfigurer de aftaletyper, kunder kan booke."
 
 msgid "Continue"
 msgstr "Fortsæt"
+
+msgid "Copy times"
+msgstr "Kopier tider"
 
 msgid "Create a private setup event type before opening public booking."
 msgstr "Opret en privat opsætningsaftaletype, før offentlig booking åbnes."
@@ -87,14 +96,17 @@ msgstr "Opret de grundlæggende bookingoplysninger nu, og færdiggør opsætning
 msgid "Dashboard"
 msgstr "Dashboard"
 
+msgid "Date overrides"
+msgstr "Datoundtagelser"
+
 msgid "Default"
 msgstr "Standard"
 
-msgid "Default schedule"
-msgstr "Standardtidsplan"
-
 msgid "Delete"
 msgstr "Slet"
+
+msgid "Delete schedule"
+msgstr "Slet tidsplan"
 
 msgid "Description"
 msgstr "Beskrivelse"
@@ -104,9 +116,6 @@ msgstr "Varighed"
 
 msgid "Edit booking setup for this appointment type."
 msgstr "Rediger bookingopsætningen for denne aftaletype."
-
-msgid "Edit the weekly windows attached to this schedule."
-msgstr "Rediger de ugentlige vinduer for denne tidsplan."
 
 msgid "End"
 msgstr "Slut"
@@ -128,6 +137,9 @@ msgstr "Aftaletype opdateret"
 
 msgid "Event types"
 msgstr "Aftaletyper"
+
+msgid "Fri"
+msgstr "Fre"
 
 msgid "Friday"
 msgstr "Fredag"
@@ -165,6 +177,9 @@ msgstr "Skjult"
 msgid "In person"
 msgstr "Fysisk"
 
+msgid "Launch troubleshooter"
+msgstr "Start fejlfinding"
+
 msgid "Link"
 msgstr "Link"
 
@@ -191,6 +206,9 @@ msgstr "Gør en anden tidsplan til standard, før du sletter denne."
 
 msgid "Manage weekly schedules for booking availability."
 msgstr "Administrer ugentlige tidsplaner for bookingtilgængelighed."
+
+msgid "Mon"
+msgstr "Man"
 
 msgid "Monday"
 msgstr "Mandag"
@@ -219,23 +237,29 @@ msgstr "Ingen aftaletyper endnu"
 msgid "No schedules yet"
 msgstr "Ingen tidsplaner endnu"
 
+msgid "No weekly hours"
+msgstr "Ingen ugentlige timer"
+
 msgid "Notice"
 msgstr "Varsel"
 
 msgid "Phone"
 msgstr "Telefon"
 
-msgid "Remove"
-msgstr "Fjern"
-
-msgid "Remove window"
-msgstr "Fjern vindue"
+msgid "Remove time"
+msgstr "Fjern tid"
 
 msgid "Replace this sample page with your own product information and branding."
 msgstr "Erstat denne eksempelside med dine egne produktinformationer og branding."
 
+msgid "Sat"
+msgstr "Lør"
+
 msgid "Saturday"
 msgstr "Lørdag"
+
+msgid "Save"
+msgstr "Gem"
 
 msgid "Save event type"
 msgstr "Gem aftaletype"
@@ -255,17 +279,20 @@ msgstr "Tidsplan oprettet"
 msgid "Schedule deleted"
 msgstr "Tidsplan slettet"
 
+msgid "Schedule name"
+msgstr "Tidsplannavn"
+
 msgid "Schedule unavailable"
 msgstr "Tidsplan utilgængelig"
 
 msgid "Schedule updated"
 msgstr "Tidsplan opdateret"
 
-msgid "Select at least one day."
-msgstr "Vælg mindst én dag."
-
 msgid "Select schedule"
 msgstr "Vælg tidsplan"
+
+msgid "Set as default"
+msgstr "Angiv som standard"
 
 msgid "Slot interval"
 msgstr "Slotinterval"
@@ -273,11 +300,17 @@ msgstr "Slotinterval"
 msgid "Slug"
 msgstr "Slug"
 
+msgid "Something doesn't look right?"
+msgstr "Ser noget forkert ud?"
+
 msgid "Start"
 msgstr "Start"
 
 msgid "Start with a weekly schedule, then refine availability on the next screen."
 msgstr "Start med en ugentlig tidsplan, og finjuster tilgængeligheden på næste skærm."
+
+msgid "Sun"
+msgstr "Søn"
 
 msgid "Sunday"
 msgstr "Søndag"
@@ -288,14 +321,20 @@ msgstr "Her vil dit personlige dashboard-indhold blive vist. Hold dig opdateret.
 msgid "This window overlaps another window on the same day."
 msgstr "Dette vindue overlapper et andet vindue på samme dag."
 
+msgid "Thu"
+msgstr "Tor"
+
 msgid "Thursday"
 msgstr "Torsdag"
 
-msgid "Time zone"
+msgid "Timezone"
 msgstr "Tidszone"
 
 msgid "Title"
 msgstr "Titel"
+
+msgid "Tue"
+msgstr "Tir"
 
 msgid "Tuesday"
 msgstr "Tirsdag"
@@ -303,11 +342,11 @@ msgstr "Tirsdag"
 msgid "Visible"
 msgstr "Synlig"
 
+msgid "Wed"
+msgstr "Ons"
+
 msgid "Wednesday"
 msgstr "Onsdag"
-
-msgid "Weekly availability"
-msgstr "Ugentlig tilgængelighed"
 
 msgid "Welcome to PlatformPlatform"
 msgstr "Velkommen til PlatformPlatform"
