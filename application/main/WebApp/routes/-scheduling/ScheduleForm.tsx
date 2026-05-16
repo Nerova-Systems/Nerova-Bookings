@@ -11,22 +11,22 @@ import { ClockIcon, PlusIcon, SaveIcon, Trash2Icon } from "lucide-react";
 import type { ApiValidationError, AvailabilityWindow, SchedulePayload } from "./schedulingTypes";
 
 import { GeneralApiErrors } from "./ApiErrors";
-import { formatMinutes, parseTime } from "./schedulingTypes";
-
-const weekDays = [
-  { value: 0, label: t`Sunday` },
-  { value: 1, label: t`Monday` },
-  { value: 2, label: t`Tuesday` },
-  { value: 3, label: t`Wednesday` },
-  { value: 4, label: t`Thursday` },
-  { value: 5, label: t`Friday` },
-  { value: 6, label: t`Saturday` }
-];
+import { formatMinutes, isSchedulePayloadSubmittable, parseTime } from "./schedulingTypes";
 
 function WindowEditor({
   windows,
   onChange
 }: Readonly<{ windows: AvailabilityWindow[]; onChange: (windows: AvailabilityWindow[]) => void }>) {
+  const weekDays = [
+    { value: 0, label: t`Sunday` },
+    { value: 1, label: t`Monday` },
+    { value: 2, label: t`Tuesday` },
+    { value: 3, label: t`Wednesday` },
+    { value: 4, label: t`Thursday` },
+    { value: 5, label: t`Friday` },
+    { value: 6, label: t`Saturday` }
+  ];
+
   const updateWindow = (index: number, next: AvailabilityWindow) => {
     onChange(windows.map((window, currentIndex) => (currentIndex === index ? next : window)));
   };
@@ -83,11 +83,13 @@ function WindowEditor({
             <Button
               type="button"
               variant="ghost"
-              size="icon"
+              size="sm"
               onClick={() => onChange(windows.filter((_, currentIndex) => currentIndex !== index))}
+              disabled={windows.length === 1}
               aria-label={t`Remove window`}
             >
               <Trash2Icon />
+              <Trans>Remove</Trans>
             </Button>
           </div>
         </div>
@@ -111,6 +113,8 @@ export function ScheduleForm({
   isPending?: boolean;
   submitLabel: string;
 }>) {
+  const canSubmit = isSchedulePayloadSubmittable(value);
+
   return (
     <Form
       validationBehavior="aria"
@@ -118,6 +122,7 @@ export function ScheduleForm({
       className="gap-5"
       onSubmit={(event) => {
         event.preventDefault();
+        if (!canSubmit) return;
         onSubmit(value);
       }}
     >
@@ -148,7 +153,7 @@ export function ScheduleForm({
         onChange={(availabilityWindows) => onChange({ ...value, availabilityWindows })}
       />
       <div className="flex justify-end">
-        <Button type="submit" isPending={isPending}>
+        <Button type="submit" isPending={isPending} disabled={!canSubmit}>
           <SaveIcon />
           {isPending ? <Trans>Saving...</Trans> : submitLabel}
         </Button>

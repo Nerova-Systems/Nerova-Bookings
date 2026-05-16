@@ -1,8 +1,9 @@
 import { t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
+import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@repo/ui/components/Empty";
 import { Link as RouterLink, createFileRoute } from "@tanstack/react-router";
 import { CalendarDaysIcon, PlusIcon } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 import { api } from "@/shared/lib/api/client";
@@ -17,7 +18,7 @@ export const Route = createFileRoute("/availability/")({
 });
 
 function AvailabilityPage() {
-  const [draft, setDraft] = useState<SchedulePayload>(() => newSchedulePayload());
+  const [draft, setDraft] = useState<SchedulePayload>(() => newSchedulePayload(true));
   const { data, isLoading, refetch } = api.useQuery("get", "/api/schedules");
   const createScheduleMutation = api.useMutation("post", "/api/schedules", {
     onSuccess: async () => {
@@ -29,22 +30,36 @@ function AvailabilityPage() {
 
   const schedules = data?.schedules ?? [];
 
+  useEffect(() => {
+    if (isLoading) return;
+
+    const isFirstSchedule = schedules.length === 0;
+    setDraft((current) => {
+      if (current.isDefault === isFirstSchedule) return current;
+
+      const isUntouchedDefaultName = current.name === "Default schedule" || current.name === "Working hours";
+      return isUntouchedDefaultName ? newSchedulePayload(isFirstSchedule) : { ...current, isDefault: isFirstSchedule };
+    });
+  }, [isLoading, schedules.length]);
+
   return (
     <SchedulingPageShell title={t`Availability`} subtitle={t`Manage weekly schedules for booking availability.`}>
       <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_24rem]">
         <section className="flex min-w-0 flex-col gap-3">
           {isLoading ? null : schedules.length === 0 ? (
-            <div className="flex min-h-48 flex-col items-center justify-center gap-3 rounded-md border border-dashed text-center">
-              <CalendarDaysIcon className="size-8 text-muted-foreground" />
-              <div>
-                <h2 className="text-base font-medium">
+            <Empty className="min-h-48 border">
+              <EmptyHeader>
+                <EmptyMedia variant="icon">
+                  <CalendarDaysIcon />
+                </EmptyMedia>
+                <EmptyTitle>
                   <Trans>No schedules yet</Trans>
-                </h2>
-                <p className="text-sm text-muted-foreground">
+                </EmptyTitle>
+                <EmptyDescription>
                   <Trans>Create a weekly schedule before publishing event types.</Trans>
-                </p>
-              </div>
-            </div>
+                </EmptyDescription>
+              </EmptyHeader>
+            </Empty>
           ) : (
             schedules.map((schedule) => (
               <RouterLink

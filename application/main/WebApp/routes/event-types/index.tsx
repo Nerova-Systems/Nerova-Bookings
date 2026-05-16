@@ -1,5 +1,6 @@
 import { t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
+import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@repo/ui/components/Empty";
 import { Link as RouterLink, createFileRoute } from "@tanstack/react-router";
 import { EyeOffIcon, PlusIcon, TimerIcon } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -44,17 +45,19 @@ function EventTypesPage() {
       <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_26rem]">
         <section className="flex min-w-0 flex-col gap-3">
           {isLoading ? null : eventTypes.length === 0 ? (
-            <div className="flex min-h-48 flex-col items-center justify-center gap-3 rounded-md border border-dashed text-center">
-              <TimerIcon className="size-8 text-muted-foreground" />
-              <div>
-                <h2 className="text-base font-medium">
+            <Empty className="min-h-48 border">
+              <EmptyHeader>
+                <EmptyMedia variant="icon">
+                  <TimerIcon />
+                </EmptyMedia>
+                <EmptyTitle>
                   <Trans>No event types yet</Trans>
-                </h2>
-                <p className="text-sm text-muted-foreground">
+                </EmptyTitle>
+                <EmptyDescription>
                   <Trans>Create a private setup event type before opening public booking.</Trans>
-                </p>
-              </div>
-            </div>
+                </EmptyDescription>
+              </EmptyHeader>
+            </Empty>
           ) : (
             eventTypes.map((eventType) => (
               <RouterLink

@@ -43,8 +43,8 @@
     "check": "oxfmt --check && oxlint",
     "dev": "tsc -p . -w",
     "dev:setup": "tsc -p .",
-    "format": "oxfmt && (oxlint --fix || true)",
-    "lint": "oxlint --deny-warnings"
+    "format": "oxfmt && (oxlint --fix --threads=1 || node -e \"process.exit(0)\")",
+    "lint": "oxlint --deny-warnings --threads=1"
   },
   "devDependencies": {
     "@repo/build": "*",

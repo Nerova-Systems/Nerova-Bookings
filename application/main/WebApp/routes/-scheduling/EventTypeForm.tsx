@@ -3,6 +3,8 @@ import { Trans } from "@lingui/react/macro";
 import { Button } from "@repo/ui/components/Button";
 import { Form } from "@repo/ui/components/Form";
 import { NumberField } from "@repo/ui/components/NumberField";
+import { SelectContent, SelectItem, SelectTrigger, SelectValue } from "@repo/ui/components/Select";
+import { SelectField } from "@repo/ui/components/SelectField";
 import { SwitchField } from "@repo/ui/components/SwitchField";
 import { TextAreaField } from "@repo/ui/components/TextAreaField";
 import { TextField } from "@repo/ui/components/TextField";
@@ -11,7 +13,38 @@ import { SaveIcon } from "lucide-react";
 import type { ApiValidationError, EventTypePayload, Schedule } from "./schedulingTypes";
 
 import { GeneralApiErrors } from "./ApiErrors";
-import { slugify } from "./schedulingTypes";
+import { isEventTypePayloadSubmittable, slugify } from "./schedulingTypes";
+
+function ScheduleSelect({
+  value,
+  schedules,
+  onChange
+}: Readonly<{ value: string; schedules: Schedule[]; onChange: (scheduleId: string) => void }>) {
+  const scheduleItems = schedules.map((schedule) => ({ value: schedule.id, label: schedule.name }));
+
+  return (
+    <SelectField
+      name="scheduleId"
+      label={t`Schedule`}
+      items={scheduleItems}
+      value={value || undefined}
+      onValueChange={(scheduleId) => onChange(scheduleId ?? "")}
+    >
+      <SelectTrigger>
+        <SelectValue placeholder={t`Select schedule`}>
+          {(scheduleId: string) => schedules.find((schedule) => schedule.id === scheduleId)?.name ?? t`Select schedule`}
+        </SelectValue>
+      </SelectTrigger>
+      <SelectContent>
+        {schedules.map((schedule) => (
+          <SelectItem key={schedule.id} value={schedule.id}>
+            {schedule.name}
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </SelectField>
+  );
+}
 
 export function EventTypeForm({
   value,
@@ -30,6 +63,8 @@ export function EventTypeForm({
   isPending?: boolean;
   submitLabel: string;
 }>) {
+  const canSubmit = schedules.length > 0 && isEventTypePayloadSubmittable(value);
+
   return (
     <Form
       validationBehavior="aria"
@@ -37,6 +72,7 @@ export function EventTypeForm({
       className="gap-5"
       onSubmit={(event) => {
         event.preventDefault();
+        if (!canSubmit) return;
         onSubmit(value);
       }}
     >
@@ -100,41 +136,31 @@ export function EventTypeForm({
         />
       </div>
       <div className="grid gap-4 md:grid-cols-3">
-        <TextField
+        <NumberField
           name="beforeEventBufferMinutes"
           label={t`Before buffer`}
-          type="number"
-          value={String(value.beforeEventBufferMinutes)}
+          minValue={0}
+          maxValue={1440}
+          value={value.beforeEventBufferMinutes}
           onChange={(beforeEventBufferMinutes) =>
-            onChange({ ...value, beforeEventBufferMinutes: Number(beforeEventBufferMinutes) || 0 })
+            onChange({ ...value, beforeEventBufferMinutes: beforeEventBufferMinutes ?? 0 })
           }
         />
-        <TextField
+        <NumberField
           name="afterEventBufferMinutes"
           label={t`After buffer`}
-          type="number"
-          value={String(value.afterEventBufferMinutes)}
+          minValue={0}
+          maxValue={1440}
+          value={value.afterEventBufferMinutes}
           onChange={(afterEventBufferMinutes) =>
-            onChange({ ...value, afterEventBufferMinutes: Number(afterEventBufferMinutes) || 0 })
+            onChange({ ...value, afterEventBufferMinutes: afterEventBufferMinutes ?? 0 })
           }
         />
-        <label className="flex flex-col gap-2 text-sm font-medium">
-          <span>
-            <Trans>Schedule</Trans>
-          </span>
-          <select
-            name="scheduleId"
-            value={value.scheduleId}
-            onChange={(event) => onChange({ ...value, scheduleId: event.target.value })}
-            className="h-[var(--control-height)] rounded-md border border-input bg-input/30 px-3 text-sm"
-          >
-            {schedules.map((schedule) => (
-              <option key={schedule.id} value={schedule.id}>
-                {schedule.name}
-              </option>
-            ))}
-          </select>
-        </label>
+        <ScheduleSelect
+          value={value.scheduleId}
+          schedules={schedules}
+          onChange={(scheduleId) => onChange({ ...value, scheduleId })}
+        />
       </div>
       <div className="grid gap-4 md:grid-cols-2">
         <TextField
@@ -151,7 +177,7 @@ export function EventTypeForm({
         />
       </div>
       <div className="flex justify-end">
-        <Button type="submit" isPending={isPending} disabled={schedules.length === 0}>
+        <Button type="submit" isPending={isPending} disabled={!canSubmit}>
           <SaveIcon />
           {isPending ? <Trans>Saving...</Trans> : submitLabel}
         </Button>

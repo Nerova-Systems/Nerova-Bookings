@@ -16,8 +16,8 @@
     "dev": "turbo dev",
     "build": "turbo build",
     "test": "turbo test",
-    "format": "turbo format --continue",
-    "lint": "turbo lint --continue",
+    "format": "turbo format --continue --concurrency=1",
+    "lint": "turbo lint --continue --concurrency=1",
     "check": "turbo check --continue"
   },
   "dependencies": {

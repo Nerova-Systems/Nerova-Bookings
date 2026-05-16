@@ -102,7 +102,9 @@ export function DevelopmentServerPlugin(options: DevelopmentServerPluginOptions)
           },
           dev: {
             client: {
-              port: options.port
+              host: "localhost",
+              port: options.port,
+              protocol: "wss"
             },
             liveReload: options.liveReload ?? true,
             // Set publicPath to auto to enable the server to serve the files

@@ -16,8 +16,8 @@
     "check": "oxfmt --check && oxlint",
     "dev": "tsc -b . environment -w",
     "dev:setup": "tsc -b . environment",
-    "format": "oxfmt && (oxlint --fix || true)",
-    "lint": "oxlint --deny-warnings"
+    "format": "oxfmt && (oxlint --fix --threads=1 || node -e \"process.exit(0)\")",
+    "lint": "oxlint --deny-warnings --threads=1"
   },
   "devDependencies": {
     "@repo/config": "*"

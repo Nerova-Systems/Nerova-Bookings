@@ -23,4 +23,21 @@ public sealed class SinglePageAppConfigurationTests
         configuration.ContentSecurityPolicies.Should().Contain("https://api.paystack.co");
         configuration.ContentSecurityPolicies.Should().Contain("https://checkout.paystack.com");
     }
+
+    [Fact]
+    public void ContentSecurityPolicies_WhenDevelopment_ShouldAllowLocalhostDevServerConnections()
+    {
+        // Arrange & Act
+        var configuration = new SinglePageAppConfiguration(
+            true,
+            null,
+            Path.Combine("account", "WebApp"),
+            "https://app.dev.localhost:9000",
+            "https://app.dev.localhost:9000/account"
+        );
+
+        // Assert
+        configuration.ContentSecurityPolicies.Should().Contain("wss://localhost:*");
+        configuration.ContentSecurityPolicies.Should().Contain("https://localhost:*");
+    }
 }

@@ -14,8 +14,8 @@
   "scripts": {
     "build": "tsx ./build/build.ts",
     "check": "oxfmt --check && oxlint",
-    "format": "oxfmt && (oxlint --fix || true)",
-    "lint": "oxlint --deny-warnings"
+    "format": "oxfmt && (oxlint --fix --threads=1 || node -e \"process.exit(0)\")",
+    "lint": "oxlint --deny-warnings --threads=1"
   },
   "dependencies": {
     "@react-email/components": "1.0.12",

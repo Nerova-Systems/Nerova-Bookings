@@ -41,8 +41,8 @@
     "copyImages": "node ./copyImages.js",
     "dev": "tsc -p . -w",
     "dev:setup": "rimraf ./dist && npm run copyImages && tsc -p .",
-    "format": "oxfmt && (oxlint --fix || true)",
-    "lint": "oxlint --deny-warnings",
+    "format": "oxfmt && (oxlint --fix --threads=1 || node -e \"process.exit(0)\")",
+    "lint": "oxlint --deny-warnings --threads=1",
     "update-translations": "lingui extract --clean && lingui compile --typescript"
   },
   "dependencies": {

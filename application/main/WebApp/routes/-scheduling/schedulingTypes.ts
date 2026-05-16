@@ -7,11 +7,11 @@ export type EventType = Schemas["EventTypeResponse"];
 export type EventTypePayload = Schemas["CreateEventTypeCommand"];
 export type ApiValidationError = Schemas["HttpValidationProblemDetails"] | null | undefined;
 
-export function newSchedulePayload(): SchedulePayload {
+export function newSchedulePayload(isDefault = false): SchedulePayload {
   return {
-    name: "",
+    name: isDefault ? "Default schedule" : "Working hours",
     timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC",
-    isDefault: false,
+    isDefault,
     availabilityWindows: [{ days: [1, 2, 3, 4, 5], startMinute: 540, endMinute: 1020 }]
   };
 }
@@ -44,6 +44,35 @@ export function newEventTypePayload(scheduleId: string): EventTypePayload {
     locationType: "link",
     locationValue: ""
   };
+}
+
+export function isSchedulePayloadSubmittable(value: SchedulePayload) {
+  return (
+    value.name.trim().length > 0 &&
+    value.timeZone.trim().length > 0 &&
+    value.availabilityWindows.length > 0 &&
+    value.availabilityWindows.every(
+      (window) =>
+        window.days.length > 0 &&
+        window.days.every((day) => day >= 0 && day <= 6) &&
+        window.startMinute >= 0 &&
+        window.endMinute <= 1440 &&
+        window.startMinute < window.endMinute
+    )
+  );
+}
+
+export function isEventTypePayloadSubmittable(value: EventTypePayload) {
+  return (
+    value.title.trim().length > 0 &&
+    value.slug.trim().length > 0 &&
+    value.scheduleId.trim().length > 0 &&
+    value.durationMinutes >= 5 &&
+    value.slotIntervalMinutes >= 5 &&
+    value.minimumBookingNoticeMinutes >= 0 &&
+    value.beforeEventBufferMinutes >= 0 &&
+    value.afterEventBufferMinutes >= 0
+  );
 }
 
 export function eventTypeToPayload(eventType: EventType): EventTypePayload {
