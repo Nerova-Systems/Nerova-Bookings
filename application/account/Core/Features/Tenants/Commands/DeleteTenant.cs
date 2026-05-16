@@ -31,7 +31,7 @@ public sealed class DeleteTenantHandler(
 
         // Cascade-delete tenant-scoped feature flag rows so soft-deleted tenants don't leak orphaned
         // override / plan-source rows in feature_flags. The reconciler does not sweep these rows, and
-        // re-creating a tenant with the same Stripe customer ID would otherwise inherit stale state.
+        // re-creating a tenant with the same Paystack customer ID would otherwise inherit stale state.
         var tenantFlagRows = await featureFlagRepository.GetRowsByTenantAsync(command.Id, cancellationToken);
         foreach (var row in tenantFlagRows)
         {

@@ -347,8 +347,8 @@ msgstr "Deaktiveret"
 msgid "Disaster recovery complete"
 msgstr "Katastrofegendannelse fuldført"
 
-msgid "Disaster recovery from archived Stripe events?"
-msgstr "Katastrofegendannelse fra arkiverede Stripe-events?"
+msgid "Disaster recovery from archived Paystack events?"
+msgstr "Katastrofegendannelse fra arkiverede Paystack-events?"
 
 msgid "Downgrade cancelled"
 msgstr "Nedgradering annulleret"
@@ -494,8 +494,8 @@ msgstr "Fakturavisning"
 msgid "Invoices"
 msgstr "Fakturaer"
 
-msgid "Invoices will appear here as accounts subscribe and Stripe webhooks are processed."
-msgstr "Fakturaer vises her efterhånden som konti abonnerer, og Stripe-webhooks behandles."
+msgid "Invoices will appear here as accounts subscribe and Paystack webhooks are processed."
+msgstr "Fakturaer vises her efterhånden som konti abonnerer, og Paystack-webhooks behandles."
 
 msgid "IP address"
 msgstr "IP-adresse"
@@ -909,8 +909,8 @@ msgstr "Afstemning gennemført med afvigelser fundet"
 #. placeholder {0}: archivedAwaiting.count
 #. placeholder {1}: formatDate(archivedAwaiting.oldestOccurredAt)
 #. placeholder {2}: formatDate(archivedAwaiting.newestOccurredAt)
-msgid "Reconcile found {0} archived events older than Stripe's 30-day window, from {1} to {2}. This is a best-effort recovery from locally stored payloads and may produce incorrect rows. Only run it when standard Reconcile with Stripe has been tried and did not clear the drift."
-msgstr "Afstemning fandt {0} arkiverede events ældre end Stripes 30-dages vindue, fra {1} til {2}. Dette er en bedst muligt-gendannelse fra lokalt gemte payloads og kan producere forkerte rækker. Kør kun denne handling, når standard Afstem med Stripe er forsøgt og ikke ryddede afvigelserne."
+msgid "Reconcile found {0} archived events older than Paystack's 30-day window, from {1} to {2}. This is a best-effort recovery from locally stored payloads and may produce incorrect rows. Only run it when standard Reconcile with Paystack has been tried and did not clear the drift."
+msgstr "Afstemning fandt {0} arkiverede events ældre end Paystacks 30-dages vindue, fra {1} til {2}. Dette er en bedst muligt-gendannelse fra lokalt gemte payloads og kan producere forkerte rækker. Kør kun denne handling, når standard Afstem med Paystack er forsøgt og ikke ryddede afvigelserne."
 
 msgid "Reconcile verifies this tenant's pending Paystack payment attempts, processes missed webhook outcomes, and appends any missing billing events."
 msgstr "Afstemning verificerer denne kontos afventende Paystack-betalingsforsøg, behandler manglende webhook-resultater og tilføjer manglende faktureringshændelser."
@@ -924,8 +924,8 @@ msgstr "Afstem med Paystack?"
 msgid "Reconciling..."
 msgstr "Afstemmer..."
 
-msgid "Records will appear here as accounts subscribe and Stripe webhooks are processed."
-msgstr "Posteringer vises her, når konti abonnerer, og Stripe-webhooks behandles."
+msgid "Records will appear here as accounts subscribe and Paystack webhooks are processed."
+msgstr "Posteringer vises her, når konti abonnerer, og Paystack-webhooks behandles."
 
 #. placeholder {0}: result.recoveredPaymentAttempts
 #. placeholder {1}: result.billingEventsAppended
@@ -1153,8 +1153,8 @@ msgstr "Dette er et stabilt modul. Det er altid aktiveret og kan ikke slås fra.
 msgid "this period"
 msgstr "denne periode"
 
-msgid "This rebuilds the billing event ledger from this tenant's archived Stripe payloads. It is a best-effort recovery that may produce incorrect subscription state or billing event rows. Only run it when standard Reconcile with Stripe has been tried and did not clear the drift."
-msgstr "Dette genopbygger faktureringshændelsesloggen fra denne kontos arkiverede Stripe-payloads. Det er en bedst muligt-gendannelse, der kan producere forkerte abonnementstilstande eller faktureringshændelser. Kør kun denne handling, når standard Afstem med Stripe er forsøgt og ikke ryddede afvigelserne."
+msgid "This rebuilds the billing event ledger from this tenant's archived Paystack payloads. It is a best-effort recovery that may produce incorrect subscription state or billing event rows. Only run it when standard Reconcile with Paystack has been tried and did not clear the drift."
+msgstr "Dette genopbygger faktureringshændelsesloggen fra denne kontos arkiverede Paystack-payloads. Det er en bedst muligt-gendannelse, der kan producere forkerte abonnementstilstande eller faktureringshændelser. Kør kun denne handling, når standard Afstem med Paystack er forsøgt og ikke ryddede afvigelserne."
 
 msgid "This refunds the Paystack payment and records a refund row. Subscription MRR stays unchanged."
 msgstr "Dette refunderer Paystack-betalingen og registrerer en refusionsrække. Abonnementets MRR forbliver uændret."

@@ -110,7 +110,7 @@ function InvoicesListPage() {
                   {hasSearch ? (
                     <Trans>Try clearing the search to see more results.</Trans>
                   ) : (
-                    <Trans>Records will appear here as accounts subscribe and Stripe webhooks are processed.</Trans>
+                    <Trans>Records will appear here as accounts subscribe and Paystack webhooks are processed.</Trans>
                   )}
                 </EmptyDescription>
               </EmptyHeader>

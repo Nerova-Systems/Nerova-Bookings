@@ -17,17 +17,17 @@ public sealed record BillingEventId(string Value) : StronglyTypedUlid<BillingEve
 }
 
 /// <summary>
-///     A durable, append-only record of one subscription-relevant Stripe event.
-///     The invariant is strict 1:1: every recognized Stripe event for a subscription produces exactly
+///     A durable, append-only record of one subscription-relevant Paystack event.
+///     The invariant is strict 1:1: every recognized Paystack event for a subscription produces exactly
 ///     one row. Events that don't move state we care about are written as <see cref="BillingEventType.NoOp" />.
-///     Events whose Stripe payload combines multiple changes that don't decompose into one of our domain
+///     Events whose Paystack payload combines multiple changes that don't decompose into one of our domain
 ///     transitions (e.g. a subscription update that toggles cancel-at-period-end *and* changes price in
 ///     the same payload) are written as <see cref="BillingEventType.Unclassified" /> and flip the
 ///     subscription's drift flag for admin review.
-///     Idempotent on <see cref="StripeEventId" /> (unique index): redelivered webhooks and re-pulls from
-///     the Stripe events API are no-ops.
-///     Source of truth: the local <c>stripe_events</c> archive, NOT Stripe's events.list API. Stripe only
-///     retains events for 30 days (see https://docs.stripe.com/api/events) — anything older must come from
+///     Idempotent on <see cref="ProviderEventId" /> (unique index): redelivered webhooks and re-pulls from
+///     the Paystack events API are no-ops.
+///     Source of truth: the local <c>paystack_events</c> archive, NOT Paystack's events.list API. Paystack only
+///     retains events for 30 days (see https://docs.paystack.com/api/events) — anything older must come from
 ///     our local archive. The events.list API is used only as a reconciliation source for detecting
 ///     webhooks that never reached us within the retention window.
 ///     Hard rule: rows in this table are never deleted, never updated. Schema changes use ALTER TABLE
@@ -35,19 +35,19 @@ public sealed record BillingEventId(string Value) : StronglyTypedUlid<BillingEve
 /// </summary>
 public sealed class BillingEvent : AggregateRoot<BillingEventId>, ITenantScopedEntity
 {
-    private BillingEvent(TenantId tenantId, SubscriptionId subscriptionId, string stripeEventId)
+    private BillingEvent(TenantId tenantId, SubscriptionId subscriptionId, string providerEventId)
         : base(BillingEventId.NewId())
     {
         TenantId = tenantId;
         SubscriptionId = subscriptionId;
-        StripeEventId = stripeEventId;
+        ProviderEventId = providerEventId;
         EventType = default;
         OccurredAt = default;
     }
 
     public SubscriptionId SubscriptionId { get; private set; }
 
-    public string StripeEventId { get; private set; }
+    public string ProviderEventId { get; private set; }
 
     public BillingEventType EventType { get; private set; }
 
@@ -66,7 +66,7 @@ public sealed class BillingEvent : AggregateRoot<BillingEventId>, ITenantScopedE
     /// <summary>
     ///     The ex-VAT recurring price after this event applied. ALWAYS ex-VAT: MRR is revenue
     ///     accounting, VAT is collected on behalf of tax authorities and never our revenue, so every
-    ///     amount column on this aggregate is net-of-tax. Sourced either from the Stripe event payload's
+    ///     amount column on this aggregate is net-of-tax. Sourced either from the Paystack event payload's
     ///     <c>unit_amount</c> (normalized to ex-VAT when the underlying price's <c>tax_behavior</c> is
     ///     <c>inclusive</c>) or from the ex-VAT catalog fallback. Null for event types that don't
     ///     carry a new price.
@@ -104,7 +104,7 @@ public sealed class BillingEvent : AggregateRoot<BillingEventId>, ITenantScopedE
     public static BillingEvent Create(
         TenantId tenantId,
         SubscriptionId subscriptionId,
-        string stripeEventId,
+        string providerEventId,
         BillingEventType eventType,
         DateTimeOffset occurredAt,
         decimal committedMrr,
@@ -120,16 +120,16 @@ public sealed class BillingEvent : AggregateRoot<BillingEventId>, ITenantScopedE
     {
         if (committedMrr < 0m)
         {
-            throw new UnreachableException($"BillingEvent.committedMrr must be non-negative; got {committedMrr} for event '{stripeEventId}'.");
+            throw new UnreachableException($"BillingEvent.committedMrr must be non-negative; got {committedMrr} for event '{providerEventId}'.");
         }
 
         if (previousAmount is not null && newAmount is not null && amountDelta is not null
             && Math.Abs(newAmount.Value - previousAmount.Value - amountDelta.Value) > 0.005m)
         {
-            throw new UnreachableException($"BillingEvent.amountDelta inconsistency on event '{stripeEventId}': previousAmount={previousAmount}, newAmount={newAmount}, amountDelta={amountDelta}.");
+            throw new UnreachableException($"BillingEvent.amountDelta inconsistency on event '{providerEventId}': previousAmount={previousAmount}, newAmount={newAmount}, amountDelta={amountDelta}.");
         }
 
-        return new BillingEvent(tenantId, subscriptionId, stripeEventId)
+        return new BillingEvent(tenantId, subscriptionId, providerEventId)
         {
             EventType = eventType,
             OccurredAt = occurredAt,
@@ -147,7 +147,7 @@ public sealed class BillingEvent : AggregateRoot<BillingEventId>, ITenantScopedE
 }
 
 /// <summary>
-///     The type of subscription-relevant Stripe event recorded by the BillingEvent log.
+///     The type of subscription-relevant Paystack event recorded by the BillingEvent log.
 ///     IMPORTANT: when adding a new value, also add it to the multi-select on /billing-events
 ///     (see <c>application/account/BackOffice/routes/billing-events/-components/BillingEventsToolbar.tsx</c>,
 ///     constant <c>ALL_EVENT_TYPES</c>). The toolbar is hand-maintained and does not enumerate the
@@ -170,7 +170,7 @@ public enum BillingEventType
     SubscriptionSuspended,
 
     /// <summary>
-    ///     Stripe transitioned the subscription's status from active to past_due (a payment failed).
+    ///     Paystack transitioned the subscription's status from active to past_due (a payment failed).
     ///     Fires alongside <see cref="PaymentFailed" /> from the corresponding invoice.payment_failed event;
     ///     pairs with <see cref="SubscriptionReactivated" /> when payment recovers and status returns to active.
     ///     Carries forward CommittedMrr unchanged and AmountDelta=null — the customer is still on the plan,
@@ -185,7 +185,7 @@ public enum BillingEventType
     PaymentMethodUpdated,
 
     /// <summary>
-    ///     A recognized subscription-relevant Stripe event that doesn't move state we care about (e.g.
+    ///     A recognized subscription-relevant Paystack event that doesn't move state we care about (e.g.
     ///     a subscription_schedule.updated arriving with status=canceled after a cancellation, where
     ///     phases haven't changed). Hidden from the timeline UI; carries forward CommittedMrr unchanged
     ///     and AmountDelta=null so it's invisible to MRR trend computation.
@@ -193,10 +193,10 @@ public enum BillingEventType
     NoOp,
 
     /// <summary>
-    ///     A Stripe event whose payload combines multiple state changes that the writer can't decompose
+    ///     A Paystack event whose payload combines multiple state changes that the writer can't decompose
     ///     into a single domain transition (e.g. a customer.subscription.updated whose previous_attributes
     ///     contain both a cancel_at_period_end toggle and a price change). Triggers the drift banner so
-    ///     an admin can investigate in Stripe Dashboard.
+    ///     an admin can investigate in Paystack Dashboard.
     /// </summary>
     Unclassified
 }

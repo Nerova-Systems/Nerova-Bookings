@@ -14,7 +14,7 @@ using Xunit;
 
 namespace Account.Tests.Tenants.BackOffice;
 
-public sealed class GetTenantPaymentHistoryTests : BackOfficeEndpointBaseTest
+public sealed class GetTenantPaymentHistoryTests(BackOfficeWebApplicationFactory factory) : BackOfficeEndpointBaseTest(factory), IClassFixture<BackOfficeWebApplicationFactory>
 {
     [Fact]
     public async Task GetTenantPaymentHistory_WhenSubscriptionHasTransactions_ShouldReturnPagedTransactions()
@@ -22,8 +22,8 @@ public sealed class GetTenantPaymentHistoryTests : BackOfficeEndpointBaseTest
         // Arrange — three transactions, none with credit notes, so each projects to a single Invoice row.
         var tenant = DatabaseSeeder.Tenant1;
         var transactions = ImmutableArray.Create(
-            new PaymentTransaction(PaymentTransactionId.NewId(), 29.00m, 29.00m, 0m, "USD", PaymentTransactionStatus.Succeeded, DateTimeOffset.Parse("2025-01-01T00:00:00Z"), null, "https://stripe.test/inv1", null, SubscriptionPlan.Standard),
-            new PaymentTransaction(PaymentTransactionId.NewId(), 29.00m, 29.00m, 0m, "USD", PaymentTransactionStatus.Succeeded, DateTimeOffset.Parse("2025-02-01T00:00:00Z"), null, "https://stripe.test/inv2", null, SubscriptionPlan.Standard),
+            new PaymentTransaction(PaymentTransactionId.NewId(), 29.00m, 29.00m, 0m, "USD", PaymentTransactionStatus.Succeeded, DateTimeOffset.Parse("2025-01-01T00:00:00Z"), null, "https://paystack.test/inv1", null, SubscriptionPlan.Standard),
+            new PaymentTransaction(PaymentTransactionId.NewId(), 29.00m, 29.00m, 0m, "USD", PaymentTransactionStatus.Succeeded, DateTimeOffset.Parse("2025-02-01T00:00:00Z"), null, "https://paystack.test/inv2", null, SubscriptionPlan.Standard),
             new PaymentTransaction(PaymentTransactionId.NewId(), 29.00m, 29.00m, 0m, "USD", PaymentTransactionStatus.Failed, DateTimeOffset.Parse("2025-03-01T00:00:00Z"), "Card declined.", null, null, SubscriptionPlan.Standard)
         );
         Connection.Update("subscriptions", "tenant_id", tenant.Id.Value, [
@@ -59,7 +59,7 @@ public sealed class GetTenantPaymentHistoryTests : BackOfficeEndpointBaseTest
         var transactions = ImmutableArray.Create(
             new PaymentTransaction(
                 PaymentTransactionId.NewId(), 29.00m, 29.00m, 0m, "USD", PaymentTransactionStatus.Refunded,
-                invoiceDate, null, "https://stripe.test/inv-cn", "https://stripe.test/cn-pdf",
+                invoiceDate, null, "https://paystack.test/inv-cn", "https://paystack.test/cn-pdf",
                 SubscriptionPlan.Standard, creditNoteDate, CreditNotedAt: creditNoteDate
             )
         );
@@ -83,7 +83,7 @@ public sealed class GetTenantPaymentHistoryTests : BackOfficeEndpointBaseTest
         payload.Transactions[0].RowKind.Should().Be(BackOfficeInvoiceRowKind.CreditNote);
         payload.Transactions[0].Date.Should().Be(creditNoteDate);
         payload.Transactions[0].Status.Should().Be(PaymentTransactionStatus.Refunded);
-        payload.Transactions[0].CreditNoteUrl.Should().Be("https://stripe.test/cn-pdf");
+        payload.Transactions[0].CreditNoteUrl.Should().Be("https://paystack.test/cn-pdf");
         payload.Transactions[1].RowKind.Should().Be(BackOfficeInvoiceRowKind.Invoice);
         payload.Transactions[1].Date.Should().Be(invoiceDate);
         payload.Transactions[1].Status.Should().Be(PaymentTransactionStatus.Succeeded);
@@ -93,14 +93,14 @@ public sealed class GetTenantPaymentHistoryTests : BackOfficeEndpointBaseTest
     [Fact]
     public async Task GetTenantPaymentHistory_WhenRefundWithoutCreditNote_ShouldEmitInvoiceAndRefundRows()
     {
-        // Arrange — Stripe pro-rated refund edge case (Symphonic-style): refund without a credit note.
+        // Arrange — Paystack pro-rated refund edge case (Symphonic-style): refund without a credit note.
         var tenant = DatabaseSeeder.Tenant1;
         var invoiceDate = DateTimeOffset.Parse("2025-04-01T00:00:00Z");
         var refundDate = DateTimeOffset.Parse("2025-04-05T00:00:00Z");
         var transactions = ImmutableArray.Create(
             new PaymentTransaction(
                 PaymentTransactionId.NewId(), 29.00m, 29.00m, 0m, "USD", PaymentTransactionStatus.Refunded,
-                invoiceDate, null, "https://stripe.test/inv-refund-only", null,
+                invoiceDate, null, "https://paystack.test/inv-refund-only", null,
                 SubscriptionPlan.Standard, refundDate
             )
         );

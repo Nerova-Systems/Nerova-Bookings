@@ -9,7 +9,7 @@ using Xunit;
 
 namespace Account.Tests.Subscriptions;
 
-public sealed class CancelScheduledDowngradeTests : EndpointBaseTest<AccountDbContext>
+public sealed class CancelScheduledDowngradeTests(AccountWebApplicationFactory factory) : EndpointBaseTest<AccountDbContext>(factory), IClassFixture<AccountWebApplicationFactory>
 {
     [Fact]
     public async Task CancelScheduledDowngrade_WhenDowngradeScheduled_ShouldClearScheduledPlan()

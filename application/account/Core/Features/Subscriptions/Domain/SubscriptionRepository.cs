@@ -57,8 +57,8 @@ public interface ISubscriptionRepository : ICrudRepository<Subscription, Subscri
 
     /// <summary>
     ///     Retrieves every subscription whose drift check is stale, regardless of plan, without applying tenant
-    ///     query filters. A subscription is "stale" when (a) it has a Stripe customer id (we need one to compare
-    ///     against Stripe at all), and (b) DriftCheckedAt is either NULL or older than the supplied cutoff.
+    ///     query filters. A subscription is "stale" when (a) it has a Paystack customer id (we need one to compare
+    ///     against Paystack at all), and (b) DriftCheckedAt is either NULL or older than the supplied cutoff.
     /// </summary>
     Task<Subscription[]> GetSubscriptionsDueForDriftCheckUnfilteredAsync(DateTimeOffset cutoff, CancellationToken cancellationToken);
 

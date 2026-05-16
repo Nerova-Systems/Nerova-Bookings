@@ -19,9 +19,9 @@ import { BILLING_EVENT_VARIANT } from "@/shared/lib/billingEventStyle";
 
 import { DashboardCardShell } from "./DashboardCardShell";
 
-export function DashboardRecentStripeEventsCard() {
+export function DashboardRecentPaystackEventsCard() {
   const navigate = useNavigate();
-  const { data, isLoading } = api.useQuery("get", "/api/back-office/dashboard/recent-stripe-events", {
+  const { data, isLoading } = api.useQuery("get", "/api/back-office/dashboard/recent-paystack-events", {
     params: { query: { Limit: 6 } }
   });
 

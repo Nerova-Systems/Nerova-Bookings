@@ -8,8 +8,8 @@ import { DashboardMrrTrendCard } from "./DashboardMrrTrendCard";
 import { DashboardPlanDistributionCard } from "./DashboardPlanDistributionCard";
 import { DashboardRecentLoginsCard } from "./DashboardRecentLoginsCard";
 import { DashboardRecentPaymentsCard } from "./DashboardRecentPaymentsCard";
+import { DashboardRecentPaystackEventsCard } from "./DashboardRecentPaystackEventsCard";
 import { DashboardRecentSignupsCard } from "./DashboardRecentSignupsCard";
-import { DashboardRecentStripeEventsCard } from "./DashboardRecentStripeEventsCard";
 import { DashboardRevenueTrendCard } from "./DashboardRevenueTrendCard";
 import { DashboardTenantGrowthCard } from "./DashboardTenantGrowthCard";
 import { DashboardUserLoginsCard } from "./DashboardUserLoginsCard";
@@ -41,7 +41,7 @@ export function DashboardSections() {
       {isSubscriptionEnabled && (
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
           <DashboardRecentPaymentsCard />
-          <DashboardRecentStripeEventsCard />
+          <DashboardRecentPaystackEventsCard />
         </div>
       )}
     </div>

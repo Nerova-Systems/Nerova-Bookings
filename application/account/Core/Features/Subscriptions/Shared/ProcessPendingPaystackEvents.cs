@@ -45,7 +45,7 @@ public sealed class ProcessPendingPaystackEvents(
 
         var tenant = (await tenantRepository.GetByIdUnfilteredAsync(subscription.TenantId, cancellationToken))!;
         var pendingEvents = await paystackEventRepository.GetPendingByPaystackCustomerIdWithLockAsync(paystackCustomerId, cancellationToken);
-        var existingBillingEventIds = await billingEventRepository.GetExistingStripeEventIdsUnfilteredAsync(subscription.Id, cancellationToken);
+        var existingBillingEventIds = await billingEventRepository.GetExistingProviderEventIdsUnfilteredAsync(subscription.Id, cancellationToken);
         var processedReferences = new HashSet<string>(StringComparer.Ordinal);
         var billingEventsAppended = 0;
         var recoveredPaymentAttempts = 0;
@@ -199,7 +199,7 @@ public sealed class ProcessPendingPaystackEvents(
     private static BillingEvent? FindPreviousMrrEvent(IReadOnlyCollection<BillingEvent> billingEventHistory, DateTimeOffset occurredAt, string providerEventId)
     {
         return billingEventHistory
-            .Where(e => e.StripeEventId != providerEventId && e.OccurredAt <= occurredAt && e.NewAmount is not null)
+            .Where(e => e.ProviderEventId != providerEventId && e.OccurredAt <= occurredAt && e.NewAmount is not null)
             .OrderBy(e => e.OccurredAt)
             .ThenBy(e => e.Id.Value, StringComparer.Ordinal)
             .LastOrDefault();

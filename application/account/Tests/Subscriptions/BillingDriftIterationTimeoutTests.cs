@@ -9,7 +9,7 @@ public sealed class BillingDriftIterationTimeoutTests
     [Fact]
     public void Value_ShouldBe30Seconds()
     {
-        // A slow Stripe call must release the row-level FOR UPDATE lock well under the app-level 45s
+        // A slow Paystack call must release the row-level FOR UPDATE lock well under the app-level 45s
         // resilience timeout. 30s leaves enough headroom that no other caller waiting on the same row
         // will also time out.
         // Assert

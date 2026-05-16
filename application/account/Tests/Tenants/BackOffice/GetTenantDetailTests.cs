@@ -15,7 +15,7 @@ using Xunit;
 
 namespace Account.Tests.Tenants.BackOffice;
 
-public sealed class GetTenantDetailTests : BackOfficeEndpointBaseTest
+public sealed class GetTenantDetailTests(BackOfficeWebApplicationFactory factory) : BackOfficeEndpointBaseTest(factory), IClassFixture<BackOfficeWebApplicationFactory>
 {
     [Fact]
     public async Task GetTenantDetail_WhenTenantExists_ShouldReturnFullDetail()
@@ -206,7 +206,7 @@ public sealed class GetTenantDetailTests : BackOfficeEndpointBaseTest
             // Plain paid → counts
             new PaymentTransaction(PaymentTransactionId.NewId(), 100.00m, 80.00m, 20.00m, MockPaystackClient.MockStandardCurrency, PaymentTransactionStatus.Succeeded, DateTimeOffset.Parse("2025-03-01T00:00:00Z"), null, null, null, SubscriptionPlan.Premium, null, 100.00m),
             // Paid+credit-noted (Succeeded but later reversed by credit note) → excluded
-            new PaymentTransaction(PaymentTransactionId.NewId(), 100.00m, 80.00m, 20.00m, MockPaystackClient.MockStandardCurrency, PaymentTransactionStatus.Succeeded, DateTimeOffset.Parse("2025-04-01T00:00:00Z"), null, null, "https://stripe.com/credit_note/test", SubscriptionPlan.Premium, null, 100.00m),
+            new PaymentTransaction(PaymentTransactionId.NewId(), 100.00m, 80.00m, 20.00m, MockPaystackClient.MockStandardCurrency, PaymentTransactionStatus.Succeeded, DateTimeOffset.Parse("2025-04-01T00:00:00Z"), null, null, "https://paystack.com/credit_note/test", SubscriptionPlan.Premium, null, 100.00m),
             // Paid+refunded-via-flag (Succeeded but RefundedAt set, no credit note) → excluded
             new PaymentTransaction(PaymentTransactionId.NewId(), 100.00m, 80.00m, 20.00m, MockPaystackClient.MockStandardCurrency, PaymentTransactionStatus.Succeeded, DateTimeOffset.Parse("2025-05-01T00:00:00Z"), null, null, null, SubscriptionPlan.Premium, DateTimeOffset.Parse("2025-05-15T00:00:00Z"), 100.00m)
         );

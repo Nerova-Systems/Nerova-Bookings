@@ -2,6 +2,7 @@ extern alias workers;
 using System.Globalization;
 using Account.Database;
 using Account.Features.Subscriptions.Domain;
+using Account.Features.Subscriptions.Shared;
 using Account.Integrations.OAuth;
 using Account.Integrations.Paystack;
 using FluentAssertions;
@@ -15,7 +16,16 @@ using BillingDriftWorker = workers::Account.Workers.BillingDriftWorker;
 
 namespace Account.Tests.Workers;
 
-public sealed class BillingDriftWorkerTests : EndpointBaseTest<AccountDbContext>
+/// <summary>
+///     End-to-end coverage for the <see cref="BillingDriftWorker" /> lifecycle. The handler logic
+///     <c>ProcessPendingPaystackEvents</c> uses in Detect mode is covered by
+///     <c>ProcessPendingPaystackEventsDetectModeTests</c>; this file pins the worker's loop semantics:
+///     a single pass on <see cref="BackgroundService.ExecuteAsync" />, eligibility filtering via
+///     <see cref="ISubscriptionRepository.GetSubscriptionsDueForDriftCheckUnfilteredAsync" />, the
+///     iteration-token linkage to <see cref="BillingDriftIterationTimeout" /> (M13), and
+///     resilience-on-per-subscription-failure so one bad row cannot kill the entire pass.
+/// </summary>
+public sealed class BillingDriftWorkerTests(AccountWebApplicationFactory factory) : EndpointBaseTest<AccountDbContext>(factory), IClassFixture<AccountWebApplicationFactory>
 {
     [Fact]
     public async Task ExecuteAsync_RunsOnePassThenExits_WithoutPeriodicTimer()

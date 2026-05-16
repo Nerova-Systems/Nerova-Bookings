@@ -10,7 +10,7 @@ namespace Account.Features.Subscriptions.Shared;
 public sealed record PendingWebhookEvent(
     string EventId,
     string EventType,
-    DateTimeOffset StripeCreatedAt,
+    DateTimeOffset PaystackCreatedAt,
     string Payload,
     string ApiVersion
 );

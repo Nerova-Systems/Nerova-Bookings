@@ -70,8 +70,8 @@ public sealed class EndpointMetadataTests : IDisposable
         "DELETE:/api/back-office/feature-flags/{flagKey}/tenant-override",
         "PUT:/api/back-office/feature-flags/{flagKey}/user-override",
         "DELETE:/api/back-office/feature-flags/{flagKey}/user-override",
-        "POST:/api/back-office/tenants/{id}/reconcile-with-stripe",
-        "POST:/api/back-office/tenants/{id}/replay-archived-stripe-events",
+        "POST:/api/back-office/tenants/{id}/reconcile-with-paystack",
+        "POST:/api/back-office/tenants/{id}/replay-archived-paystack-events",
         "POST:/api/back-office/tenants/{id}/drift/acknowledge",
         "PUT:/api/back-office/tenants/{id}/ab-inclusion-pin",
         "PUT:/api/back-office/users/{id}/ab-inclusion-pin"

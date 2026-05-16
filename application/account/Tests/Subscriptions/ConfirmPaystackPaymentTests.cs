@@ -13,7 +13,7 @@ using Xunit;
 
 namespace Account.Tests.Subscriptions;
 
-public sealed class ConfirmPaystackPaymentTests : EndpointBaseTest<AccountDbContext>
+public sealed class ConfirmPaystackPaymentTests(AccountWebApplicationFactory factory) : EndpointBaseTest<AccountDbContext>(factory), IClassFixture<AccountWebApplicationFactory>
 {
     [Fact]
     public async Task ConfirmPaystackPayment_WhenStandardSubscribePaymentVerified_ShouldActivateSubscription()

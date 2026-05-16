@@ -61,7 +61,7 @@ export function DashboardRecentPaymentsCard() {
               <Trans>No recent payments</Trans>
             </EmptyTitle>
             <EmptyDescription>
-              <Trans>Invoices will appear here as accounts subscribe and Stripe webhooks are processed.</Trans>
+              <Trans>Invoices will appear here as accounts subscribe and Paystack webhooks are processed.</Trans>
             </EmptyDescription>
           </EmptyHeader>
         </Empty>

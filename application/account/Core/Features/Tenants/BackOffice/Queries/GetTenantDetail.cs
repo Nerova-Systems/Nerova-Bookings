@@ -37,7 +37,7 @@ public sealed record TenantDetailResponse(
     bool HasDriftDetected,
     DateTimeOffset? DriftCheckedAt,
     DriftDiscrepancy[] DriftDiscrepancies,
-    string? StripeCustomerUrl,
+    string? PaystackCustomerUrl,
     AbInclusionPin? AbInclusionPin
 );
 

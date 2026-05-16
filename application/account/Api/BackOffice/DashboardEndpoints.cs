@@ -46,9 +46,9 @@ public sealed class DashboardEndpoints : IEndpoints
             => await mediator.Send(query)
         ).Produces<BackOfficeDashboardRecentSignupsResponse>();
 
-        group.MapGet("/recent-stripe-events", async Task<ApiResult<BackOfficeDashboardRecentStripeEventsResponse>> ([AsParameters] GetDashboardRecentStripeEventsQuery query, IMediator mediator)
+        group.MapGet("/recent-paystack-events", async Task<ApiResult<BackOfficeDashboardRecentPaystackEventsResponse>> ([AsParameters] GetDashboardRecentPaystackEventsQuery query, IMediator mediator)
             => await mediator.Send(query)
-        ).Produces<BackOfficeDashboardRecentStripeEventsResponse>();
+        ).Produces<BackOfficeDashboardRecentPaystackEventsResponse>();
 
         group.MapGet("/recent-payments", async Task<ApiResult<BackOfficeDashboardRecentPaymentsResponse>> ([AsParameters] GetDashboardRecentPaymentsQuery query, IMediator mediator)
             => await mediator.Send(query)

@@ -14,7 +14,7 @@ using Xunit;
 
 namespace Account.Tests.BackOffice;
 
-public sealed class RefundBackOfficeInvoiceTests : BackOfficeEndpointBaseTest
+public sealed class RefundBackOfficeInvoiceTests(BackOfficeWebApplicationFactory factory) : BackOfficeEndpointBaseTest(factory), IClassFixture<BackOfficeWebApplicationFactory>
 {
     [Fact]
     public async Task RefundBackOfficeInvoice_WhenPaidInvoiceHasPaystackReference_ShouldRefundAndKeepMrrUnchanged()

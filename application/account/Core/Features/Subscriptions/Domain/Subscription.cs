@@ -46,7 +46,7 @@ public sealed class Subscription : AggregateRoot<SubscriptionId>, ITenantScopedE
     ///     <see cref="CurrentPeriodEnd" />. ALWAYS ex-VAT: MRR is revenue accounting, VAT is collected
     ///     on behalf of tax authorities and never our revenue, so every internal recurring-revenue
     ///     number is net-of-tax. Sourced from the price catalog at sync time; the catalog itself
-    ///     normalizes from Stripe's inc-VAT listed amount when <c>tax_behavior=inclusive</c>. Null
+    ///     normalizes from Paystack's inc-VAT listed amount when <c>tax_behavior=inclusive</c>. Null
     ///     when no downgrade is scheduled. The inc-VAT customer-facing amount only appears in
     ///     <see cref="PaymentTransaction" /> for invoice display.
     /// </summary>
@@ -63,7 +63,7 @@ public sealed class Subscription : AggregateRoot<SubscriptionId>, ITenantScopedE
     /// <summary>
     ///     The ex-VAT price the subscription currently charges per <see cref="CurrentPeriodEnd" />.
     ///     ALWAYS ex-VAT: MRR is revenue accounting, VAT is collected on behalf of tax authorities and
-    ///     never our revenue, so every internal recurring-revenue number is net-of-tax. The real Stripe
+    ///     never our revenue, so every internal recurring-revenue number is net-of-tax. The real Paystack
     ///     client normalizes from <c>price.unit_amount</c> based on <c>price.tax_behavior</c> — for
     ///     <c>inclusive</c> prices it subtracts the VAT component before persisting; for
     ///     <c>exclusive</c> it stores the listed amount unchanged. Null on Basis plans and brand-new
@@ -93,20 +93,10 @@ public sealed class Subscription : AggregateRoot<SubscriptionId>, ITenantScopedE
     ///     for this tenant. The BillingEvent log is the source of truth; this column exists so paginated reads
     ///     don't have to walk history. Mutated only via <see cref="AdvanceSubscribedSinceBackwardFromBillingEvent" />,
     ///     which is monotonic-backward — a late-arriving recovered event can rewind it earlier, but lifecycle
-    ///     transitions (cancel, expire, reactivate on a brand-new Stripe subscription) never move it forward.
+    ///     transitions (cancel, expire, reactivate on a brand-new Paystack subscription) never move it forward.
     ///     Null when no <c>SubscriptionCreated</c> event has yet been emitted for the tenant.
     /// </summary>
     public DateTimeOffset? SubscribedSince { get; private set; }
-
-    /// <summary>
-    ///     The <c>Event.Created</c> of the most recent Stripe event applied to this subscription via the
-    ///     events.list-driven hot path. Used as the <c>created.gte</c> anchor on the next sync so we only
-    ///     fetch events Stripe has produced since we were last in sync. Stripe retains events for 30 days
-    ///     (see https://docs.stripe.com/api/events); the background sweeper re-syncs every active customer
-    ///     well within that window so this anchor never falls out of range. Null on subscriptions that
-    ///     have never been synced (e.g. fresh tenants on Basis).
-    /// </summary>
-    public DateTimeOffset? LastSyncedStripeEventCreatedAt { get; private set; }
 
     public ImmutableArray<PaymentTransaction> PaymentTransactions { get; private set; }
 
@@ -191,26 +181,13 @@ public sealed class Subscription : AggregateRoot<SubscriptionId>, ITenantScopedE
     ///     Denormalized cache of <c>MIN(occurred_at)</c> across every <c>SubscriptionCreated</c> BillingEvent
     ///     for this tenant. Monotonic backward: only assigns when the incoming event is older than the current
     ///     value, so a late-arriving recovered event can rewind the date earlier but lifecycle transitions
-    ///     (cancel, expire, reactivate on a brand-new Stripe subscription) never move it forward. Idempotent.
+    ///     (cancel, expire, reactivate on a brand-new Paystack subscription) never move it forward. Idempotent.
     /// </summary>
     public void AdvanceSubscribedSinceBackwardFromBillingEvent(DateTimeOffset eventOccurredAt)
     {
         if (SubscribedSince is null || eventOccurredAt < SubscribedSince.Value)
         {
             SubscribedSince = eventOccurredAt;
-        }
-    }
-
-    /// <summary>
-    ///     Advances the events.list anchor to the <c>Event.Created</c> of the most recent event applied in
-    ///     this sync. Monotonic: only advances forward so a late-arriving older event recovered via
-    ///     reconcile cannot rewind the anchor below an already-applied event.
-    /// </summary>
-    public void AdvanceLastSyncedStripeEventCreatedAt(DateTimeOffset eventCreatedAt)
-    {
-        if (LastSyncedStripeEventCreatedAt is null || eventCreatedAt > LastSyncedStripeEventCreatedAt.Value)
-        {
-            LastSyncedStripeEventCreatedAt = eventCreatedAt;
         }
     }
 
@@ -238,8 +215,8 @@ public sealed class Subscription : AggregateRoot<SubscriptionId>, ITenantScopedE
     }
 
     // ENTITLEMENT POLICY: Failed payments do NOT immediately revoke plan-tier entitlements.
-    // Stripe Smart Retries handle recovery during the dunning window (typically ~3 weeks).
-    // If all retries fail, Stripe cancels the subscription server-side and subscriptionSuspended
+    // Paystack Smart Retries handle recovery during the dunning window (typically ~3 weeks).
+    // If all retries fail, Paystack cancels the subscription server-side and subscriptionSuspended
     // flips Plan to Basis. During the retry window the customer keeps premium features by design.
     public void SetPaymentFailed(DateTimeOffset failedAt)
     {
@@ -322,15 +299,15 @@ public sealed record PaymentTransaction(
     string? CreditNoteUrl,
     SubscriptionPlan? Plan = null,
     DateTimeOffset? RefundedAt = null,
-    // InvoiceTotal is the gross amount Stripe billed for this invoice (= AmountExcludingTax + TaxAmount).
+    // InvoiceTotal is the gross amount Paystack billed for this invoice (= AmountExcludingTax + TaxAmount).
     // Amount is what the customer actually paid from card; AmountFromCredit is the portion absorbed by
-    // their Stripe credit balance (e.g. from a prior credit note). The invariant
+    // their Paystack credit balance (e.g. from a prior credit note). The invariant
     // `Amount + AmountFromCredit == InvoiceTotal` lets LTV math count credit-absorbed invoices
     // without conflating them with cash-paid ones. Defaults to 0 so existing JSONB rows backfilled
     // by migration deserialize cleanly.
     decimal InvoiceTotal = 0m,
     decimal AmountFromCredit = 0m,
-    // Stripe's timestamp for when a credit note was issued against this invoice. Null when no credit
+    // Paystack's timestamp for when a credit note was issued against this invoice. Null when no credit
     // note exists, or for legacy rows where the producer didn't yet capture it. Surfaces on the
     // back-office invoices UI so refunded rows show the actual credit-note date, not just the
     // original invoice date.
@@ -359,29 +336,29 @@ public enum DriftDiscrepancyKind
     SubscriptionStateMismatch,
 
     /// <summary>
-    ///     A Stripe event arrived whose payload combined multiple state changes that the writer couldn't
+    ///     A Paystack event arrived whose payload combined multiple state changes that the writer couldn't
     ///     decompose into a single domain transition (e.g. a customer.subscription.updated whose
     ///     previous_attributes contain both a cancel_at_period_end toggle and a price change). The
     ///     event is recorded as <c>BillingEventType.Unclassified</c>; this discrepancy surfaces it on
-    ///     the drift banner so an admin can investigate in Stripe Dashboard.
+    ///     the drift banner so an admin can investigate in Paystack Dashboard.
     /// </summary>
-    UnclassifiedStripeEvent,
+    UnclassifiedPaystackEvent,
 
     /// <summary>
-    ///     Stripe sent an event whose <c>api_version</c> doesn't have a matching
-    ///     <c>IStripeEventPayloadResolver</c>. The event is preserved unchanged in
-    ///     <c>stripe_events</c>; the replayer skips it and surfaces this discrepancy so the
+    ///     Paystack sent an event whose <c>api_version</c> doesn't have a matching
+    ///     <c>IPaystackEventPayloadResolver</c>. The event is preserved unchanged in
+    ///     <c>paystack_events</c>; the replayer skips it and surfaces this discrepancy so the
     ///     resolver-per-version mapping can be extended.
     /// </summary>
-    UnsupportedStripeApiVersion,
+    UnsupportedPaystackApiVersion,
 
     /// <summary>
-    ///     The same Stripe event id was observed twice with different payloads (SHA-256 hash
+    ///     The same Paystack event id was observed twice with different payloads (SHA-256 hash
     ///     mismatch on the second arrival). The original row is preserved; the divergence is
-    ///     surfaced for forensic review. Either Stripe redelivered an event with mutated content
+    ///     surfaced for forensic review. Either Paystack redelivered an event with mutated content
     ///     (their bug to investigate) or our hashing is broken (our bug to investigate).
     /// </summary>
-    StripeEventPayloadDivergence,
+    PaystackEventPayloadDivergence,
 
     /// <summary>
     ///     A persisted BillingEvent row's denormalized fields (CommittedMrr, AmountDelta, PreviousAmount, NewAmount)
@@ -392,19 +369,19 @@ public enum DriftDiscrepancyKind
     BillingEventDenormalizationStale,
 
     /// <summary>
-    ///     Stripe returned a payment with <c>total_taxes</c> greater than the display amount, which would
+    ///     Paystack returned a payment with <c>total_taxes</c> greater than the display amount, which would
     ///     otherwise produce a negative <c>AmountExcludingTax</c>. The value is clamped at zero so the DB
-    ///     CHECK does not reject the row (which would 500 the webhook and trigger infinite Stripe retries),
-    ///     but the LTV totals silently undercount until the underlying Stripe anomaly is investigated.
+    ///     CHECK does not reject the row (which would 500 the webhook and trigger infinite Paystack retries),
+    ///     but the LTV totals silently undercount until the underlying Paystack anomaly is investigated.
     /// </summary>
     AmountExcludingTaxClamped,
 
     /// <summary>
     ///     The subscription has a <c>ScheduledPlan</c> set but <c>ScheduledPriceAmount</c> is null. The
     ///     MRR KPI falls back to the current (higher) price in this state, silently distorting BLENDED MRR.
-    ///     Originates from edge cases in <c>SyncStateFromStripe</c> where a cancel-then-reschedule pair
+    ///     Originates from edge cases in <c>SyncStateFromPaystack</c> where a cancel-then-reschedule pair
     ///     landed in the same sync window and the diff-based transition detector did not fire; the
-    ///     unconditional reconciliation in <c>SyncStateFromStripe</c> now prevents this, and this drift
+    ///     unconditional reconciliation in <c>SyncStateFromPaystack</c> now prevents this, and this drift
     ///     check stands as defence-in-depth so any future regression surfaces on the next sync.
     /// </summary>
     ScheduledPriceMissing

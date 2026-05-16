@@ -39,7 +39,7 @@ export function AccountBillingTab({
   const showEvents = variant === "compact-both" || variant === "events-full";
 
   // Compact (Overview) shows date only. Full views (Invoices, Billing events) include the clock
-  // time so support can correlate Stripe webhooks with billing-event ordering. The mobile span
+  // time so support can correlate Paystack webhooks with billing-event ordering. The mobile span
   // hides the year so the date column stays narrow on phones.
   const renderRowDate = useCallback(
     (input: string | null | undefined): ReactNode => (

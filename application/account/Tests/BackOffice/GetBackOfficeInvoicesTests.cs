@@ -11,7 +11,7 @@ using Xunit;
 
 namespace Account.Tests.BackOffice;
 
-public sealed class GetBackOfficeInvoicesTests : BackOfficeEndpointBaseTest
+public sealed class GetBackOfficeInvoicesTests(BackOfficeWebApplicationFactory factory) : BackOfficeEndpointBaseTest(factory), IClassFixture<BackOfficeWebApplicationFactory>
 {
     [Fact]
     public async Task GetBackOfficeInvoices_WithoutStatusFilter_ShouldReturnInvoiceAndCreditNoteRowsForEveryTransaction()
@@ -119,7 +119,7 @@ public sealed class GetBackOfficeInvoicesTests : BackOfficeEndpointBaseTest
     [Fact]
     public async Task GetBackOfficeInvoices_WhenRefundWithoutCreditNote_ShouldEmitRefundRow()
     {
-        // Arrange — Stripe pro-rated refund edge case: a refund without an accompanying credit note.
+        // Arrange — Paystack pro-rated refund edge case: a refund without an accompanying credit note.
         SeedTransactions(RefundedWithoutCreditNote("inv_refund_only", "2025-04-01T00:00:00Z", "2025-04-05T00:00:00Z"));
 
         var identity = MockEasyAuthIdentities.Default.Single(i => i.Id == "user");
@@ -249,7 +249,7 @@ public sealed class GetBackOfficeInvoicesTests : BackOfficeEndpointBaseTest
         return new PaymentTransaction(
             PaymentTransactionId.NewId(), 29.00m, 29.00m, 0m, "USD",
             PaymentTransactionStatus.Succeeded, DateTimeOffset.Parse(isoDate),
-            null, $"https://stripe.test/{invoiceMarker}", null,
+            null, $"https://paystack.test/{invoiceMarker}", null,
             SubscriptionPlan.Standard
         );
     }
@@ -259,7 +259,7 @@ public sealed class GetBackOfficeInvoicesTests : BackOfficeEndpointBaseTest
         return new PaymentTransaction(
             PaymentTransactionId.NewId(), 29.00m, 29.00m, 0m, "USD",
             PaymentTransactionStatus.Succeeded, DateTimeOffset.Parse(isoDate),
-            null, $"https://stripe.test/{invoiceMarker}", $"https://stripe.test/{invoiceMarker}-cn",
+            null, $"https://paystack.test/{invoiceMarker}", $"https://paystack.test/{invoiceMarker}-cn",
             SubscriptionPlan.Standard, CreditNotedAt: DateTimeOffset.Parse(creditNoteIsoDate)
         );
     }
@@ -270,7 +270,7 @@ public sealed class GetBackOfficeInvoicesTests : BackOfficeEndpointBaseTest
         return new PaymentTransaction(
             PaymentTransactionId.NewId(), 29.00m, 29.00m, 0m, "USD",
             PaymentTransactionStatus.Refunded, date,
-            null, $"https://stripe.test/{invoiceMarker}", $"https://stripe.test/{invoiceMarker}-cn",
+            null, $"https://paystack.test/{invoiceMarker}", $"https://paystack.test/{invoiceMarker}-cn",
             SubscriptionPlan.Standard, date.AddDays(3), CreditNotedAt: date.AddDays(3)
         );
     }
@@ -282,19 +282,19 @@ public sealed class GetBackOfficeInvoicesTests : BackOfficeEndpointBaseTest
         return new PaymentTransaction(
             PaymentTransactionId.NewId(), 29.00m, 29.00m, 0m, "USD",
             PaymentTransactionStatus.Refunded, DateTimeOffset.Parse(isoDate),
-            null, $"https://stripe.test/{invoiceMarker}", $"https://stripe.test/{invoiceMarker}-cn",
+            null, $"https://paystack.test/{invoiceMarker}", $"https://paystack.test/{invoiceMarker}-cn",
             SubscriptionPlan.Standard
         );
     }
 
     private static PaymentTransaction RefundedWithoutCreditNote(string invoiceMarker, string isoDate, string refundIsoDate)
     {
-        // Stripe pro-rated refund edge case: a refund happens without an accompanying credit note.
+        // Paystack pro-rated refund edge case: a refund happens without an accompanying credit note.
         // Used to verify the projection emits a standalone Refund row.
         return new PaymentTransaction(
             PaymentTransactionId.NewId(), 29.00m, 29.00m, 0m, "USD",
             PaymentTransactionStatus.Refunded, DateTimeOffset.Parse(isoDate),
-            null, $"https://stripe.test/{invoiceMarker}", null,
+            null, $"https://paystack.test/{invoiceMarker}", null,
             SubscriptionPlan.Standard, DateTimeOffset.Parse(refundIsoDate)
         );
     }

@@ -18,7 +18,7 @@ public sealed class BillingEventConfiguration : IEntityTypeConfiguration<Billing
         builder.Property(e => e.AmountDelta).HasPrecision(18, 2);
         builder.Property(e => e.CommittedMrr).HasPrecision(18, 2);
 
-        builder.HasIndex(e => e.StripeEventId).IsUnique();
+        builder.HasIndex(e => e.ProviderEventId).IsUnique();
         builder.HasIndex(e => new { e.TenantId, e.OccurredAt }).IsDescending(false, true);
         builder.HasIndex(e => e.OccurredAt).IsDescending();
         builder.HasIndex(e => e.SubscriptionId);

@@ -8,7 +8,7 @@ using Xunit;
 
 namespace Account.Tests.Billing;
 
-public sealed class StartPaymentMethodSetupTests : EndpointBaseTest<AccountDbContext>
+public sealed class StartPaymentMethodSetupTests(AccountWebApplicationFactory factory) : EndpointBaseTest<AccountDbContext>(factory), IClassFixture<AccountWebApplicationFactory>
 {
     [Fact]
     public async Task StartPaymentMethodSetup_WhenValid_ShouldReturnSetupAndPersistPaymentAttempt()

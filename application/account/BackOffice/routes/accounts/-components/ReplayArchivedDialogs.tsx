@@ -48,21 +48,21 @@ export function ReplayArchivedConfirmDialog({
             <ShieldAlertIcon className="text-red-600" />
           </AlertDialogMedia>
           <AlertDialogTitle>
-            <Trans>Disaster recovery from archived Stripe events?</Trans>
+            <Trans>Disaster recovery from archived Paystack events?</Trans>
           </AlertDialogTitle>
           <AlertDialogDescription>
             {archivedAwaiting === null ? (
               <Trans>
-                This rebuilds the billing event ledger from this tenant's archived Stripe payloads. It is a best-effort
-                recovery that may produce incorrect subscription state or billing event rows. Only run it when standard
-                Reconcile with Stripe has been tried and did not clear the drift.
+                This rebuilds the billing event ledger from this tenant's archived Paystack payloads. It is a
+                best-effort recovery that may produce incorrect subscription state or billing event rows. Only run it
+                when standard Reconcile with Paystack has been tried and did not clear the drift.
               </Trans>
             ) : (
               <Trans>
-                Reconcile found {archivedAwaiting.count} archived events older than Stripe's 30-day window, from{" "}
+                Reconcile found {archivedAwaiting.count} archived events older than Paystack's 30-day window, from{" "}
                 {formatDate(archivedAwaiting.oldestOccurredAt)} to {formatDate(archivedAwaiting.newestOccurredAt)}. This
                 is a best-effort recovery from locally stored payloads and may produce incorrect rows. Only run it when
-                standard Reconcile with Stripe has been tried and did not clear the drift.
+                standard Reconcile with Paystack has been tried and did not clear the drift.
               </Trans>
             )}
           </AlertDialogDescription>

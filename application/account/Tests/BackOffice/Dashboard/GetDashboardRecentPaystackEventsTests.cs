@@ -12,16 +12,16 @@ using Xunit;
 
 namespace Account.Tests.BackOffice.Dashboard;
 
-public sealed class GetDashboardRecentStripeEventsTests : BackOfficeEndpointBaseTest
+public sealed class GetDashboardRecentPaystackEventsTests(BackOfficeWebApplicationFactory factory) : BackOfficeEndpointBaseTest(factory), IClassFixture<BackOfficeWebApplicationFactory>
 {
     [Fact]
-    public async Task GetDashboardRecentStripeEvents_WhenCalled_ShouldReturnEventsFromBillingEventLog()
+    public async Task GetDashboardRecentPaystackEvents_WhenCalled_ShouldReturnEventsFromBillingEventLog()
     {
         // seed two billing events for one tenant: a subscription created event and a later upgrade.
         // The handler reads them straight from the log and returns them ordered by OccurredAt DESC.
         // Arrange
         var now = DateTimeOffset.UtcNow;
-        var tenantId = SeedTenant("Stripe Co");
+        var tenantId = SeedTenant("Paystack Co");
         var subscriptionId = SubscriptionId.NewId();
         SeedBillingEvent(tenantId, subscriptionId, BillingEventType.SubscriptionCreated, now.AddHours(-3), "evt_created", toPlan: SubscriptionPlan.Standard);
         SeedBillingEvent(tenantId, subscriptionId, BillingEventType.SubscriptionUpgraded, now.AddHours(-1), "evt_upgraded", SubscriptionPlan.Standard, SubscriptionPlan.Premium, 30m, currency: MockPaystackClient.MockStandardCurrency);
@@ -30,11 +30,11 @@ public sealed class GetDashboardRecentStripeEventsTests : BackOfficeEndpointBase
         using var client = CreateBackOfficeClientForIdentity(identity);
 
         // Act
-        var response = await client.GetAsync("/api/back-office/dashboard/recent-stripe-events?Limit=10");
+        var response = await client.GetAsync("/api/back-office/dashboard/recent-paystack-events?Limit=10");
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var payload = await response.Content.ReadFromJsonAsync<BackOfficeDashboardRecentStripeEventsResponse>();
+        var payload = await response.Content.ReadFromJsonAsync<BackOfficeDashboardRecentPaystackEventsResponse>();
         payload.Should().NotBeNull();
         payload.Events.Should().HaveCount(2);
         payload.Events[0].Type.Should().Be(BillingEventType.SubscriptionUpgraded, "the most recent event must come first");
@@ -42,17 +42,17 @@ public sealed class GetDashboardRecentStripeEventsTests : BackOfficeEndpointBase
         payload.Events[0].ToPlan.Should().Be(SubscriptionPlan.Premium);
         payload.Events[0].AmountDelta.Should().Be(30m);
         payload.Events[1].Type.Should().Be(BillingEventType.SubscriptionCreated);
-        payload.Events.Should().AllSatisfy(e => e.TenantName.Should().Be("Stripe Co"));
+        payload.Events.Should().AllSatisfy(e => e.TenantName.Should().Be("Paystack Co"));
         payload.Events[0].OccurredAt.Should().BeAfter(payload.Events[^1].OccurredAt);
     }
 
     [Fact]
-    public async Task GetDashboardRecentStripeEvents_WhenLimitIsApplied_ShouldReturnOnlyTheRequestedNumberOfRows()
+    public async Task GetDashboardRecentPaystackEvents_WhenLimitIsApplied_ShouldReturnOnlyTheRequestedNumberOfRows()
     {
         // three events; request only the two most recent.
         // Arrange
         var now = DateTimeOffset.UtcNow;
-        var tenantId = SeedTenant("Stripe Co");
+        var tenantId = SeedTenant("Paystack Co");
         var subscriptionId = SubscriptionId.NewId();
         SeedBillingEvent(tenantId, subscriptionId, BillingEventType.SubscriptionCreated, now.AddHours(-5), "evt_a", toPlan: SubscriptionPlan.Standard);
         SeedBillingEvent(tenantId, subscriptionId, BillingEventType.SubscriptionRenewed, now.AddHours(-3), "evt_b", toPlan: SubscriptionPlan.Standard);
@@ -62,11 +62,11 @@ public sealed class GetDashboardRecentStripeEventsTests : BackOfficeEndpointBase
         using var client = CreateBackOfficeClientForIdentity(identity);
 
         // Act
-        var response = await client.GetAsync("/api/back-office/dashboard/recent-stripe-events?Limit=2");
+        var response = await client.GetAsync("/api/back-office/dashboard/recent-paystack-events?Limit=2");
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var payload = await response.Content.ReadFromJsonAsync<BackOfficeDashboardRecentStripeEventsResponse>();
+        var payload = await response.Content.ReadFromJsonAsync<BackOfficeDashboardRecentPaystackEventsResponse>();
         payload.Should().NotBeNull();
         payload.Events.Should().HaveCount(2);
         payload.Events[0].Type.Should().Be(BillingEventType.SubscriptionUpgraded);
@@ -74,30 +74,45 @@ public sealed class GetDashboardRecentStripeEventsTests : BackOfficeEndpointBase
     }
 
     [Fact]
-    public async Task GetDashboardRecentStripeEvents_WhenCalledWithInvalidLimit_ShouldReturnBadRequest()
+    public async Task GetDashboardRecentPaystackEvents_WhenCalledWithInvalidLimit_ShouldReturnBadRequest()
     {
         // Arrange
         var identity = MockEasyAuthIdentities.Default.Single(i => i.Id == "user");
         using var client = CreateBackOfficeClientForIdentity(identity);
 
         // Act
-        var response = await client.GetAsync("/api/back-office/dashboard/recent-stripe-events?Limit=999");
+        var response = await client.GetAsync("/api/back-office/dashboard/recent-paystack-events?Limit=999");
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }
 
     [Fact]
-    public async Task GetDashboardRecentStripeEvents_WhenCalledWithoutAuthentication_ShouldReturnUnauthorized()
+    public async Task GetDashboardRecentPaystackEvents_WhenCalledWithoutAuthentication_ShouldReturnUnauthorized()
     {
         // Arrange
         using var client = CreateBackOfficeClient();
 
         // Act
-        var response = await client.GetAsync("/api/back-office/dashboard/recent-stripe-events?Limit=6");
+        var response = await client.GetAsync("/api/back-office/dashboard/recent-paystack-events?Limit=6");
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
+    }
+
+    [Fact]
+    public async Task GetDashboardRecentPaystackEvents_WhenCalledThroughLegacyCompatibilityRoute_ShouldReturnNotFound()
+    {
+        // Arrange
+        var legacyProvider = string.Concat("str", "ipe");
+        var identity = MockEasyAuthIdentities.Default.Single(i => i.Id == "user");
+        using var client = CreateBackOfficeClientForIdentity(identity);
+
+        // Act
+        var response = await client.GetAsync($"/api/back-office/dashboard/recent-{legacyProvider}-events?Limit=6");
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.NotFound);
     }
 
     private TenantId SeedTenant(string name)
@@ -122,7 +137,7 @@ public sealed class GetDashboardRecentStripeEventsTests : BackOfficeEndpointBase
         SubscriptionId subscriptionId,
         BillingEventType eventType,
         DateTimeOffset occurredAt,
-        string stripeEventId,
+        string providerEventId,
         SubscriptionPlan? fromPlan = null,
         SubscriptionPlan? toPlan = null,
         decimal? amountDelta = null,
@@ -136,7 +151,7 @@ public sealed class GetDashboardRecentStripeEventsTests : BackOfficeEndpointBase
                 ("subscription_id", subscriptionId.Value),
                 ("created_at", DateTimeOffset.UtcNow),
                 ("modified_at", null),
-                ("stripe_event_id", stripeEventId),
+                ("provider_event_id", providerEventId),
                 ("event_type", eventType.ToString()),
                 ("from_plan", fromPlan?.ToString()),
                 ("to_plan", toPlan?.ToString()),

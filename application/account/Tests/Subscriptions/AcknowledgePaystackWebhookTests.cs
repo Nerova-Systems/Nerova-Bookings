@@ -10,7 +10,7 @@ using Xunit;
 
 namespace Account.Tests.Subscriptions;
 
-public sealed class AcknowledgePaystackWebhookTests : EndpointBaseTest<AccountDbContext>
+public sealed class AcknowledgePaystackWebhookTests(AccountWebApplicationFactory factory) : EndpointBaseTest<AccountDbContext>(factory), IClassFixture<AccountWebApplicationFactory>
 {
     private const string WebhookUrl = "/api/account/subscriptions/paystack-webhook";
 

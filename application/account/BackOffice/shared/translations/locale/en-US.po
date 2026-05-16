@@ -347,8 +347,8 @@ msgstr "Disabled"
 msgid "Disaster recovery complete"
 msgstr "Disaster recovery complete"
 
-msgid "Disaster recovery from archived Stripe events?"
-msgstr "Disaster recovery from archived Stripe events?"
+msgid "Disaster recovery from archived Paystack events?"
+msgstr "Disaster recovery from archived Paystack events?"
 
 msgid "Downgrade cancelled"
 msgstr "Downgrade cancelled"
@@ -494,8 +494,8 @@ msgstr "Invoice view"
 msgid "Invoices"
 msgstr "Invoices"
 
-msgid "Invoices will appear here as accounts subscribe and Stripe webhooks are processed."
-msgstr "Invoices will appear here as accounts subscribe and Stripe webhooks are processed."
+msgid "Invoices will appear here as accounts subscribe and Paystack webhooks are processed."
+msgstr "Invoices will appear here as accounts subscribe and Paystack webhooks are processed."
 
 msgid "IP address"
 msgstr "IP address"
@@ -909,8 +909,8 @@ msgstr "Reconcile complete with drift detected"
 #. placeholder {0}: archivedAwaiting.count
 #. placeholder {1}: formatDate(archivedAwaiting.oldestOccurredAt)
 #. placeholder {2}: formatDate(archivedAwaiting.newestOccurredAt)
-msgid "Reconcile found {0} archived events older than Stripe's 30-day window, from {1} to {2}. This is a best-effort recovery from locally stored payloads and may produce incorrect rows. Only run it when standard Reconcile with Stripe has been tried and did not clear the drift."
-msgstr "Reconcile found {0} archived events older than Stripe's 30-day window, from {1} to {2}. This is a best-effort recovery from locally stored payloads and may produce incorrect rows. Only run it when standard Reconcile with Stripe has been tried and did not clear the drift."
+msgid "Reconcile found {0} archived events older than Paystack's 30-day window, from {1} to {2}. This is a best-effort recovery from locally stored payloads and may produce incorrect rows. Only run it when standard Reconcile with Paystack has been tried and did not clear the drift."
+msgstr "Reconcile found {0} archived events older than Paystack's 30-day window, from {1} to {2}. This is a best-effort recovery from locally stored payloads and may produce incorrect rows. Only run it when standard Reconcile with Paystack has been tried and did not clear the drift."
 
 msgid "Reconcile verifies this tenant's pending Paystack payment attempts, processes missed webhook outcomes, and appends any missing billing events."
 msgstr "Reconcile verifies this tenant's pending Paystack payment attempts, processes missed webhook outcomes, and appends any missing billing events."
@@ -924,8 +924,8 @@ msgstr "Reconcile with Paystack?"
 msgid "Reconciling..."
 msgstr "Reconciling..."
 
-msgid "Records will appear here as accounts subscribe and Stripe webhooks are processed."
-msgstr "Records will appear here as accounts subscribe and Stripe webhooks are processed."
+msgid "Records will appear here as accounts subscribe and Paystack webhooks are processed."
+msgstr "Records will appear here as accounts subscribe and Paystack webhooks are processed."
 
 #. placeholder {0}: result.recoveredPaymentAttempts
 #. placeholder {1}: result.billingEventsAppended
@@ -1153,8 +1153,8 @@ msgstr "This is a stable module. It is always on and cannot be deactivated."
 msgid "this period"
 msgstr "this period"
 
-msgid "This rebuilds the billing event ledger from this tenant's archived Stripe payloads. It is a best-effort recovery that may produce incorrect subscription state or billing event rows. Only run it when standard Reconcile with Stripe has been tried and did not clear the drift."
-msgstr "This rebuilds the billing event ledger from this tenant's archived Stripe payloads. It is a best-effort recovery that may produce incorrect subscription state or billing event rows. Only run it when standard Reconcile with Stripe has been tried and did not clear the drift."
+msgid "This rebuilds the billing event ledger from this tenant's archived Paystack payloads. It is a best-effort recovery that may produce incorrect subscription state or billing event rows. Only run it when standard Reconcile with Paystack has been tried and did not clear the drift."
+msgstr "This rebuilds the billing event ledger from this tenant's archived Paystack payloads. It is a best-effort recovery that may produce incorrect subscription state or billing event rows. Only run it when standard Reconcile with Paystack has been tried and did not clear the drift."
 
 msgid "This refunds the Paystack payment and records a refund row. Subscription MRR stays unchanged."
 msgstr "This refunds the Paystack payment and records a refund row. Subscription MRR stays unchanged."

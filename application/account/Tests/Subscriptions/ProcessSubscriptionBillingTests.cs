@@ -13,7 +13,7 @@ using Xunit;
 
 namespace Account.Tests.Subscriptions;
 
-public sealed class ProcessSubscriptionBillingTests : EndpointBaseTest<AccountDbContext>
+public sealed class ProcessSubscriptionBillingTests(AccountWebApplicationFactory factory) : EndpointBaseTest<AccountDbContext>(factory), IClassFixture<AccountWebApplicationFactory>
 {
     [Fact]
     public async Task ProcessSubscriptionBilling_WhenRenewalDue_ShouldChargeAuthorizationAndAdvancePeriod()

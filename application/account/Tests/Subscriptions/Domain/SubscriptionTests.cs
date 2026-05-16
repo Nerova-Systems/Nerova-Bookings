@@ -43,7 +43,7 @@ public sealed class SubscriptionTests
     [Fact]
     public void AdvanceSubscribedSinceBackwardFromBillingEvent_WhenSameTenantStartsNewSubscriptionLater_ShouldPreserveOriginal()
     {
-        // tenant cancels original subscription, then starts a brand-new Stripe subscription on the
+        // tenant cancels original subscription, then starts a brand-new Paystack subscription on the
         // same tenant. The new SubscriptionCreated event at T2 > T0 must not move SubscribedSince forward.
         // Arrange
         var subscription = Subscription.Create(TenantId.NewId());
@@ -87,7 +87,7 @@ public sealed class SubscriptionTests
         subscription.SetPaystackBillingState(new PaystackAuthorizationCode("sub_test"), SubscriptionPlan.Standard, 149.00m, MockPaystackClient.MockStandardCurrency, now.AddDays(30), null);
 
         // SubscribedSince is sourced exclusively from SubscriptionCreated BillingEvents, never from
-        // the live Stripe state mutation. The cache stays null until the matching BillingEvent is appended.
+        // the live Paystack state mutation. The cache stays null until the matching BillingEvent is appended.
         // Assert
         subscription.SubscribedSince.Should().BeNull();
     }

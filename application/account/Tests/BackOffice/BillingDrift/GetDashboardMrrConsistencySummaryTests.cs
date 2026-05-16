@@ -13,7 +13,7 @@ using Xunit;
 
 namespace Account.Tests.BackOffice.BillingDrift;
 
-public sealed class GetDashboardMrrConsistencySummaryTests : BackOfficeEndpointBaseTest
+public sealed class GetDashboardMrrConsistencySummaryTests(BackOfficeWebApplicationFactory factory) : BackOfficeEndpointBaseTest(factory), IClassFixture<BackOfficeWebApplicationFactory>
 {
     [Fact]
     public async Task GetDashboardMrrConsistencySummary_WhenSubscriptionsAndEventsAgree_ShouldReturnEqualValues()
@@ -205,7 +205,7 @@ public sealed class GetDashboardMrrConsistencySummaryTests : BackOfficeEndpointB
                 ("subscription_id", subscriptionId.ToString()),
                 ("created_at", occurredAt),
                 ("modified_at", null),
-                ("stripe_event_id", "evt_test"),
+                ("provider_event_id", "evt_test"),
                 ("event_type", nameof(BillingEventType.SubscriptionCreated)),
                 ("from_plan", null),
                 ("to_plan", nameof(SubscriptionPlan.Premium)),

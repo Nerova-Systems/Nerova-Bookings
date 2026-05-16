@@ -57,13 +57,9 @@ public sealed class TenantsEndpoints : IEndpoints
             => await mediator.Send(new ReconcileTenantWithPaystackCommand { TenantId = id })
         ).Produces<ReconcileTenantWithPaystackResponse>().RequireAuthorization(BackOfficeIdentityDefaults.AdminPolicyName);
 
-        group.MapPost("/{id}/reconcile-with-stripe", async Task<ApiResult<ReconcileTenantWithPaystackResponse>> (TenantId id, IMediator mediator)
-            => await mediator.Send(new ReconcileTenantWithPaystackCommand { TenantId = id })
-        ).Produces<ReconcileTenantWithPaystackResponse>().RequireAuthorization(BackOfficeIdentityDefaults.AdminPolicyName);
-
-        group.MapPost("/{id}/replay-archived-stripe-events", async Task<ApiResult<ReplayArchivedTenantStripeEventsResponse>> (TenantId id, IMediator mediator)
-            => await mediator.Send(new ReplayArchivedTenantStripeEventsCommand { TenantId = id })
-        ).Produces<ReplayArchivedTenantStripeEventsResponse>().RequireAuthorization(BackOfficeIdentityDefaults.AdminPolicyName);
+        group.MapPost("/{id}/replay-archived-paystack-events", async Task<ApiResult<ReplayArchivedTenantPaystackEventsResponse>> (TenantId id, IMediator mediator)
+            => await mediator.Send(new ReplayArchivedTenantPaystackEventsCommand { TenantId = id })
+        ).Produces<ReplayArchivedTenantPaystackEventsResponse>().RequireAuthorization(BackOfficeIdentityDefaults.AdminPolicyName);
 
         group.MapPost("/{id}/drift/acknowledge", async Task<ApiResult> (TenantId id, IMediator mediator)
             => await mediator.Send(new AcknowledgeBillingDriftCommand { TenantId = id })

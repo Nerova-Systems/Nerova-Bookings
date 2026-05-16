@@ -88,7 +88,7 @@ public static class BillingDriftDetector
 
         // ScheduledPlan without ScheduledPriceAmount distorts the BLENDED MRR KPI: MrrCalculator.ForwardMrr
         // falls back from the missing scheduled price to the current (higher) price, overstating forward MRR.
-        // The unconditional reconciliation pass in SyncStateFromStripe prevents this from being written;
+        // The unconditional reconciliation pass in SyncStateFromPaystack prevents this from being written;
         // this check stands as defence-in-depth so any future regression surfaces on the next sync.
         if (localSnapshot.ScheduledPlan is not null && localSnapshot.ScheduledPriceAmount is null)
         {

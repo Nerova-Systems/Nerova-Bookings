@@ -13,7 +13,7 @@ using Xunit;
 
 namespace Account.Tests.Subscriptions;
 
-public sealed class UpgradeSubscriptionTests : EndpointBaseTest<AccountDbContext>
+public sealed class UpgradeSubscriptionTests(AccountWebApplicationFactory factory) : EndpointBaseTest<AccountDbContext>(factory), IClassFixture<AccountWebApplicationFactory>
 {
     [Fact]
     public async Task UpgradeSubscription_WhenStandardToPremium_ShouldChargeProratedAmountAndUpgradeImmediately()

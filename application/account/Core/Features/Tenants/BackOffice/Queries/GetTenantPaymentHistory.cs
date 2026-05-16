@@ -90,7 +90,7 @@ public sealed class GetTenantPaymentHistoryHandler(ITenantRepository tenantRepos
 
         if (transaction.CreditNoteUrl is not null)
         {
-            // CreditNote row: emitted whenever a Stripe credit note exists. Date falls through
+            // CreditNote row: emitted whenever a Paystack credit note exists. Date falls through
             // CreditNotedAt → RefundedAt → original Date so legacy rows whose timestamps were never
             // backfilled still surface as their own reversal row.
             yield return new TenantPaymentTransaction(
@@ -102,7 +102,7 @@ public sealed class GetTenantPaymentHistoryHandler(ITenantRepository tenantRepos
         }
         else if (transaction.Status == PaymentTransactionStatus.Refunded || transaction.RefundedAt is not null)
         {
-            // Refund row (edge case): Stripe pro-rated refunds don't always create a credit note —
+            // Refund row (edge case): Paystack pro-rated refunds don't always create a credit note —
             // when one happens the refund is the standalone reversal. Skip when a CreditNote sibling
             // already exists (the credit note encompasses the refund).
             yield return new TenantPaymentTransaction(

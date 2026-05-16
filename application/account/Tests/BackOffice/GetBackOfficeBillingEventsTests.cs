@@ -12,7 +12,7 @@ using Xunit;
 
 namespace Account.Tests.BackOffice;
 
-public sealed class GetBackOfficeBillingEventsTests : BackOfficeEndpointBaseTest
+public sealed class GetBackOfficeBillingEventsTests(BackOfficeWebApplicationFactory factory) : BackOfficeEndpointBaseTest(factory), IClassFixture<BackOfficeWebApplicationFactory>
 {
     [Fact]
     public async Task GetBackOfficeBillingEvents_WhenCalled_ShouldReturnAllEventsOrderedByOccurredAtDescending()
@@ -263,7 +263,7 @@ public sealed class GetBackOfficeBillingEventsTests : BackOfficeEndpointBaseTest
         SubscriptionId subscriptionId,
         BillingEventType eventType,
         DateTimeOffset occurredAt,
-        string stripeReference,
+        string paystackReference,
         SubscriptionPlan? fromPlan = null,
         SubscriptionPlan? toPlan = null,
         decimal? amountDelta = null,
@@ -276,7 +276,7 @@ public sealed class GetBackOfficeBillingEventsTests : BackOfficeEndpointBaseTest
                 ("subscription_id", subscriptionId.Value),
                 ("created_at", DateTimeOffset.UtcNow),
                 ("modified_at", null),
-                ("stripe_event_id", stripeReference),
+                ("provider_event_id", paystackReference),
                 ("event_type", eventType.ToString()),
                 ("from_plan", fromPlan?.ToString()),
                 ("to_plan", toPlan?.ToString()),

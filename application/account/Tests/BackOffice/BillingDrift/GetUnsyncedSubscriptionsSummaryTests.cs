@@ -13,7 +13,7 @@ using Xunit;
 
 namespace Account.Tests.BackOffice.BillingDrift;
 
-public sealed class GetUnsyncedSubscriptionsSummaryTests : BackOfficeEndpointBaseTest
+public sealed class GetUnsyncedSubscriptionsSummaryTests(BackOfficeWebApplicationFactory factory) : BackOfficeEndpointBaseTest(factory), IClassFixture<BackOfficeWebApplicationFactory>
 {
     [Fact]
     public async Task GetUnsyncedSubscriptionsSummary_WhenCalled_ShouldReturnPaidSubscriptionsWithoutBillingEvents()
@@ -110,7 +110,7 @@ public sealed class GetUnsyncedSubscriptionsSummaryTests : BackOfficeEndpointBas
                 ("subscription_id", subscriptionId.ToString()),
                 ("created_at", occurredAt),
                 ("modified_at", null),
-                ("stripe_event_id", "evt_test"),
+                ("provider_event_id", "evt_test"),
                 ("event_type", nameof(BillingEventType.SubscriptionCreated)),
                 ("from_plan", null),
                 ("to_plan", nameof(SubscriptionPlan.Premium)),

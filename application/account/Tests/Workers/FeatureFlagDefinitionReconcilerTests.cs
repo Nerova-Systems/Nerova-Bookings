@@ -20,12 +20,12 @@ namespace Account.Tests.Workers;
 ///     <c>SharedKernel.FeatureFlags.FeatureFlags</c>. These tests exercise the reconciler against the
 ///     production code path that the existing test harness's hand-built fixtures do not cover.
 /// </summary>
-public sealed class FeatureFlagDefinitionReconcilerTests : EndpointBaseTest<AccountDbContext>
+public sealed class FeatureFlagDefinitionReconcilerTests(AccountWebApplicationFactory factory) : EndpointBaseTest<AccountDbContext>(factory), IClassFixture<AccountWebApplicationFactory>
 {
     [Fact]
     public async Task Reconciler_WhenPremiumTenantWithPlanOverride_ShouldEnableSsoInUserInfo()
     {
-        // Arrange - simulate the production state after a Premium subscription: ProcessPendingStripeEvents
+        // Arrange - simulate the production state after a Premium subscription: ProcessPendingPaystackEvents
         // would have committed a Source=Plan tenant override via MediatR UnitOfWork. We pre-insert that row
         // here to verify that when the override row exists in the DB, the resulting UserInfo carries sso.
         // The reconciler's contract (C1 fix) is that the base row's IsActive state is owned by admins, not

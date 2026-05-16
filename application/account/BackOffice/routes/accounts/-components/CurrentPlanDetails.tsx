@@ -155,8 +155,8 @@ export function CurrentPlanDetails({ tenant }: Readonly<{ tenant: TenantDetailRe
   );
 }
 
-// Renders the brand panel for every payment method. Stripe Link is funded by an underlying card that
-// the pinned Stripe.NET SDK does not expose, so the backend emits a ("link", "****", 0, 0) sentinel;
+// Renders the brand panel for every payment method. Paystack Link is funded by an underlying card that
+// the pinned Paystack.NET SDK does not expose, so the backend emits a ("link", "****", 0, 0) sentinel;
 // rendering the bullet line and expiry for "link" would surface placeholder data, so we suppress them.
 function PaymentMethodBlock({ paymentMethod }: Readonly<{ paymentMethod: PaymentMethodResponse }>) {
   const isLink = paymentMethod.brand.toLowerCase() === "link";

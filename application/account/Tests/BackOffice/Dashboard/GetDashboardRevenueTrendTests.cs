@@ -13,7 +13,7 @@ using Xunit;
 
 namespace Account.Tests.BackOffice.Dashboard;
 
-public sealed class GetDashboardRevenueTrendTests : BackOfficeEndpointBaseTest
+public sealed class GetDashboardRevenueTrendTests(BackOfficeWebApplicationFactory factory) : BackOfficeEndpointBaseTest(factory), IClassFixture<BackOfficeWebApplicationFactory>
 {
     [Fact]
     public async Task GetDashboardRevenueTrend_WhenPaymentsAcrossMultipleDays_ShouldAccumulateRevenueInPeriod()
@@ -102,7 +102,7 @@ public sealed class GetDashboardRevenueTrendTests : BackOfficeEndpointBaseTest
         var tenant = SeedTenant("Credit Noted Co");
         var subscriptionId = SubscriptionId.NewId();
         SeedSubscriptionWithTransactions(tenant, subscriptionId,
-            (149m, paidOn, PaymentTransactionStatus.Succeeded, null, "https://stripe.com/credit_note/test")
+            (149m, paidOn, PaymentTransactionStatus.Succeeded, null, "https://paystack.com/credit_note/test")
         );
 
         var identity = MockEasyAuthIdentities.Default.Single(i => i.Id == "user");
@@ -132,7 +132,7 @@ public sealed class GetDashboardRevenueTrendTests : BackOfficeEndpointBaseTest
         var tenant = SeedTenant("Refund Only Credit Note Co");
         var subscriptionId = SubscriptionId.NewId();
         SeedSubscriptionWithTransactions(tenant, subscriptionId,
-            (149m, paidOn, PaymentTransactionStatus.Succeeded, refundedOn, "https://stripe.com/credit_note/test"),
+            (149m, paidOn, PaymentTransactionStatus.Succeeded, refundedOn, "https://paystack.com/credit_note/test"),
             (149m, paidOn, PaymentTransactionStatus.Succeeded, null, null)
         );
 

@@ -18,7 +18,7 @@ namespace Account.Features;
 /// This particular includes the naming of the telemetry events (which should be in past tense) and the properties that
 /// are collected with each telemetry event. Since missing or bad data cannot be fixed, it is important to have a good
 /// data quality from the start.
-public sealed class BillingDriftSkippedDueToStripeUnavailable(SubscriptionId subscriptionId)
+public sealed class BillingDriftSkippedDueToPaystackUnavailable(SubscriptionId subscriptionId)
     : TelemetryEvent(("subscription_id", subscriptionId));
 
 public sealed class BillingInfoAdded(SubscriptionId subscriptionId, string? country, string? postalCode, string? city)
@@ -156,13 +156,13 @@ public sealed class SignupCompleted(TenantId tenantId, int signupTimeInSeconds)
 public sealed class SignupStarted
     : TelemetryEvent;
 
-public sealed class StripeEventPayloadMismatch(string eventId, string eventType, string existingHash, string newHash)
+public sealed class PaystackEventPayloadMismatch(string eventId, string eventType, string existingHash, string newHash)
     : TelemetryEvent(("event_id", eventId), ("event_type", eventType), ("existing_hash", existingHash), ("new_hash", newHash));
 
-public sealed class StripeSubscriptionCurrencyMismatchRejected(string stripeSubscriptionId, string observedCurrency, string platformCurrency)
-    : TelemetryEvent(("stripe_subscription_id", stripeSubscriptionId), ("observed_currency", observedCurrency), ("platform_currency", platformCurrency));
+public sealed class PaystackSubscriptionCurrencyMismatchRejected(string paystackSubscriptionId, string observedCurrency, string platformCurrency)
+    : TelemetryEvent(("paystack_subscription_id", paystackSubscriptionId), ("observed_currency", observedCurrency), ("platform_currency", platformCurrency));
 
-public sealed class StripePriceCatalogLookupMissed(SubscriptionId subscriptionId, SubscriptionPlan scheduledPlan)
+public sealed class PaystackPriceCatalogLookupMissed(SubscriptionId subscriptionId, SubscriptionPlan scheduledPlan)
     : TelemetryEvent(("subscription_id", subscriptionId), ("scheduled_plan", scheduledPlan));
 
 public sealed class SubscriptionCancelled(
@@ -282,10 +282,10 @@ public sealed class TenantLogoRemoved
 public sealed class TenantLogoUpdated(string contentType, long size)
     : TelemetryEvent(("content_type", contentType), ("size", size));
 
-public sealed class TenantReconciledWithStripe(SubscriptionId subscriptionId, int billingEventsAppended)
+public sealed class TenantReconciledWithPaystack(SubscriptionId subscriptionId, int billingEventsAppended)
     : TelemetryEvent(("subscription_id", subscriptionId), ("billing_events_appended", billingEventsAppended));
 
-public sealed class TenantStripeArchiveReplayed(int count)
+public sealed class TenantPaystackArchiveReplayed(int count)
     : TelemetryEvent(("count", count));
 
 public sealed class TenantSwitched(TenantId fromTenantId, TenantId toTenantId, UserId userId)

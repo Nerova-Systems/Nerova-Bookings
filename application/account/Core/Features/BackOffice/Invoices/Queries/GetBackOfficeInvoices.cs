@@ -49,7 +49,7 @@ public sealed record BackOfficeInvoiceSummary(
 
 /// <summary>
 ///     Each PaymentTransaction projects to one Invoice row (always) plus an optional reversal row —
-///     either CreditNote (when Stripe issued a credit note) or Refund (the edge case where a Stripe
+///     either CreditNote (when Paystack issued a credit note) or Refund (the edge case where a Paystack
 ///     pro-rated refund happened without a credit note). The Invoice row always carries the original
 ///     payment outcome (Paid / Pending / Failed); the reversal row carries the later state change.
 /// </summary>
@@ -187,7 +187,7 @@ public sealed class GetBackOfficeInvoicesHandler(ISubscriptionRepository subscri
 
         if (transaction.CreditNoteUrl is not null)
         {
-            // CreditNote row: emitted whenever a Stripe credit note exists. Date falls through
+            // CreditNote row: emitted whenever a Paystack credit note exists. Date falls through
             // CreditNotedAt → RefundedAt → original Date so legacy rows whose timestamps were never
             // backfilled still surface as their own row at the only timestamp we have. The producer
             // populates the precise dates on fresh Reconcile passes.
@@ -213,7 +213,7 @@ public sealed class GetBackOfficeInvoicesHandler(ISubscriptionRepository subscri
         }
         else if (transaction.Status == PaymentTransactionStatus.Refunded || transaction.RefundedAt is not null)
         {
-            // Refund row (edge case): Stripe pro-rated refunds don't always create a credit note —
+            // Refund row (edge case): Paystack pro-rated refunds don't always create a credit note —
             // when one happens the refund is the standalone reversal. Skip when a CreditNote sibling
             // already exists (per the user model: the credit note encompasses the refund).
             yield return new BackOfficeInvoiceSummary(

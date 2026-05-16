@@ -8,14 +8,14 @@ using SharedKernel.Domain;
 namespace Account.Features.BackOffice.Dashboard.Queries;
 
 [PublicAPI]
-public sealed record GetDashboardRecentStripeEventsQuery(int Limit = 6)
-    : IRequest<Result<BackOfficeDashboardRecentStripeEventsResponse>>;
+public sealed record GetDashboardRecentPaystackEventsQuery(int Limit = 6)
+    : IRequest<Result<BackOfficeDashboardRecentPaystackEventsResponse>>;
 
 [PublicAPI]
-public sealed record BackOfficeDashboardRecentStripeEventsResponse(BackOfficeDashboardStripeEvent[] Events);
+public sealed record BackOfficeDashboardRecentPaystackEventsResponse(BackOfficeDashboardPaystackEvent[] Events);
 
 [PublicAPI]
-public sealed record BackOfficeDashboardStripeEvent(
+public sealed record BackOfficeDashboardPaystackEvent(
     BillingEventId Id,
     TenantId TenantId,
     string TenantName,
@@ -28,21 +28,21 @@ public sealed record BackOfficeDashboardStripeEvent(
     DateTimeOffset OccurredAt
 );
 
-public sealed class GetDashboardRecentStripeEventsQueryValidator : AbstractValidator<GetDashboardRecentStripeEventsQuery>
+public sealed class GetDashboardRecentPaystackEventsQueryValidator : AbstractValidator<GetDashboardRecentPaystackEventsQuery>
 {
-    public GetDashboardRecentStripeEventsQueryValidator()
+    public GetDashboardRecentPaystackEventsQueryValidator()
     {
         RuleFor(x => x.Limit).InclusiveBetween(1, 50).WithMessage("Limit must be between 1 and 50.");
     }
 }
 
-public sealed class GetDashboardRecentStripeEventsHandler(IBillingEventRepository billingEventRepository, ITenantRepository tenantRepository)
-    : IRequestHandler<GetDashboardRecentStripeEventsQuery, Result<BackOfficeDashboardRecentStripeEventsResponse>>
+public sealed class GetDashboardRecentPaystackEventsHandler(IBillingEventRepository billingEventRepository, ITenantRepository tenantRepository)
+    : IRequestHandler<GetDashboardRecentPaystackEventsQuery, Result<BackOfficeDashboardRecentPaystackEventsResponse>>
 {
-    public async Task<Result<BackOfficeDashboardRecentStripeEventsResponse>> Handle(GetDashboardRecentStripeEventsQuery query, CancellationToken cancellationToken)
+    public async Task<Result<BackOfficeDashboardRecentPaystackEventsResponse>> Handle(GetDashboardRecentPaystackEventsQuery query, CancellationToken cancellationToken)
     {
         var billingEvents = await billingEventRepository.GetRecentUnfilteredAsync(query.Limit, cancellationToken);
-        if (billingEvents.Length == 0) return new BackOfficeDashboardRecentStripeEventsResponse([]);
+        if (billingEvents.Length == 0) return new BackOfficeDashboardRecentPaystackEventsResponse([]);
 
         var tenantIds = billingEvents.Select(e => e.TenantId).Distinct().ToArray();
         var tenants = await tenantRepository.GetByIdsUnfilteredAsync(tenantIds, cancellationToken);
@@ -53,7 +53,7 @@ public sealed class GetDashboardRecentStripeEventsHandler(IBillingEventRepositor
             .Select(e =>
                 {
                     var tenant = tenantsById[e.TenantId];
-                    return new BackOfficeDashboardStripeEvent(
+                    return new BackOfficeDashboardPaystackEvent(
                         e.Id,
                         tenant.Id,
                         tenant.Name,
@@ -69,6 +69,6 @@ public sealed class GetDashboardRecentStripeEventsHandler(IBillingEventRepositor
             )
             .ToArray();
 
-        return new BackOfficeDashboardRecentStripeEventsResponse(events);
+        return new BackOfficeDashboardRecentPaystackEventsResponse(events);
     }
 }

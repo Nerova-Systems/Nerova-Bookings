@@ -17,7 +17,7 @@ public sealed class SubscriptionConfigurationTests
         // Arrange
         var discrepancies = ImmutableArray.Create(new DriftDiscrepancy(
                 DriftDiscrepancyKind.SubscriptionStateMismatch,
-                "Plan mismatch between Stripe and local subscription.",
+                "Plan mismatch between Paystack and local subscription.",
                 DriftSeverity.Critical
             )
         );

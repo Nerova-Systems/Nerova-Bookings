@@ -12,7 +12,7 @@ namespace Account.Tests.Subscriptions;
 ///     dashboard KPI sum and the KPI/trend consistency check, so any regression in the cancel /
 ///     scheduled-downgrade / no-schedule branches silently distorts BLENDED MRR. The ScheduledPlan-set-but-
 ///     ScheduledPriceAmount-null case mirrors the cancel-then-reschedule edge that motivated the unconditional
-///     reconciliation in <c>SyncStateFromStripe</c> and the <c>ScheduledPriceMissing</c> drift discrepancy.
+///     reconciliation in <c>SyncStateFromPaystack</c> and the <c>ScheduledPriceMissing</c> drift discrepancy.
 /// </summary>
 public sealed class MrrCalculatorTests
 {
@@ -66,7 +66,7 @@ public sealed class MrrCalculatorTests
         // Edge case from the cancel-then-reschedule pair landing in a single sync window: ScheduledPlan is set
         // but ScheduledPriceAmount stayed null from an earlier transition. The calculator must not throw; it
         // falls back to the current price. <c>BillingDriftDetector</c> separately surfaces this state via the
-        // <c>ScheduledPriceMissing</c> discrepancy, and <c>SyncStateFromStripe</c>'s unconditional
+        // <c>ScheduledPriceMissing</c> discrepancy, and <c>SyncStateFromPaystack</c>'s unconditional
         // reconciliation now prevents the state from persisting beyond a single sync.
         // Arrange
         var subscription = Subscription.Create(TenantId.NewId());
@@ -83,7 +83,7 @@ public sealed class MrrCalculatorTests
     [Fact]
     public void ForwardMrr_WhenPlanIsBasisAndNoPaystackCustomerId_ShouldReturnZero()
     {
-        // A brand-new tenant on the free plan has never been associated with a Stripe customer. CurrentPriceAmount
+        // A brand-new tenant on the free plan has never been associated with a Paystack customer. CurrentPriceAmount
         // is null, so the calculator short-circuits before the cancel / scheduled-downgrade branches.
         // Arrange
         var subscription = Subscription.Create(TenantId.NewId());
@@ -94,6 +94,6 @@ public sealed class MrrCalculatorTests
         // Assert
         subscription.Plan.Should().Be(SubscriptionPlan.Basis);
         subscription.PaystackCustomerId.Should().BeNull();
-        forwardMrr.Should().Be(0m, "a Basis-plan subscription with no Stripe customer contributes zero to forward MRR");
+        forwardMrr.Should().Be(0m, "a Basis-plan subscription with no Paystack customer contributes zero to forward MRR");
     }
 }

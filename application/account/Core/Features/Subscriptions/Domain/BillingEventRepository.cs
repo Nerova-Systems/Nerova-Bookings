@@ -16,12 +16,12 @@ public interface IBillingEventRepository : IAppendRepository<BillingEvent, Billi
     Task<BillingEvent[]> GetBySubscriptionIdUnfilteredAsync(SubscriptionId subscriptionId, CancellationToken cancellationToken);
 
     /// <summary>
-    ///     Returns the set of Stripe event ids already recorded for a subscription. Used to enforce the
-    ///     1:1 invariant idempotently — a redelivered webhook or a re-pull from the Stripe events API
+    ///     Returns the set of Paystack event ids already recorded for a subscription. Used to enforce the
+    ///     1:1 invariant idempotently — a redelivered webhook or a re-pull from the Paystack events API
     ///     skips events whose ids are already in this set. Bypasses the tenant query filter because the
     ///     webhook pipeline runs without an authenticated tenant context.
     /// </summary>
-    Task<HashSet<string>> GetExistingStripeEventIdsUnfilteredAsync(SubscriptionId subscriptionId, CancellationToken cancellationToken);
+    Task<HashSet<string>> GetExistingProviderEventIdsUnfilteredAsync(SubscriptionId subscriptionId, CancellationToken cancellationToken);
 
     /// <summary>
     ///     Returns the most recent billing events across all tenants. Bypasses the tenant query filter
@@ -65,12 +65,12 @@ public sealed class BillingEventRepository(AccountDbContext accountDbContext)
             .ToArrayAsync(cancellationToken);
     }
 
-    public async Task<HashSet<string>> GetExistingStripeEventIdsUnfilteredAsync(SubscriptionId subscriptionId, CancellationToken cancellationToken)
+    public async Task<HashSet<string>> GetExistingProviderEventIdsUnfilteredAsync(SubscriptionId subscriptionId, CancellationToken cancellationToken)
     {
         var ids = await DbSet
             .IgnoreQueryFilters([QueryFilterNames.Tenant])
             .Where(e => e.SubscriptionId == subscriptionId)
-            .Select(e => e.StripeEventId)
+            .Select(e => e.ProviderEventId)
             .ToArrayAsync(cancellationToken);
         return [.. ids];
     }

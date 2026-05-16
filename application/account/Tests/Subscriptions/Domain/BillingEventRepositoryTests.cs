@@ -16,7 +16,7 @@ namespace Account.Tests.Subscriptions.Domain;
 ///     soft-deleted, and must not exclude the row from cross-tenant back-office reads. Without this guarantee
 ///     the historical MRR trend silently rewrites itself every time a tenant churns.
 /// </summary>
-public sealed class BillingEventRepositoryTests : EndpointBaseTest<AccountDbContext>
+public sealed class BillingEventRepositoryTests(AccountWebApplicationFactory factory) : EndpointBaseTest<AccountDbContext>(factory), IClassFixture<AccountWebApplicationFactory>
 {
     [Fact]
     public async Task WhenTenantIsSoftDeleted_BillingEventRowsRemainQueryable()
@@ -71,7 +71,7 @@ public sealed class BillingEventRepositoryTests : EndpointBaseTest<AccountDbCont
                 ("subscription_id", subscriptionId.Value),
                 ("created_at", occurredAt),
                 ("modified_at", null),
-                ("stripe_event_id", $"evt_test_{Guid.NewGuid():N}"),
+                ("provider_event_id", $"evt_test_{Guid.NewGuid():N}"),
                 ("event_type", nameof(BillingEventType.SubscriptionCreated)),
                 ("from_plan", null),
                 ("to_plan", nameof(SubscriptionPlan.Premium)),

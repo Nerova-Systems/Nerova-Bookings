@@ -5,7 +5,7 @@ import discoverLogo from "@/shared/images/card-brands/discover.svg";
 import mastercardLogo from "@/shared/images/card-brands/mastercard.svg";
 import visaLogo from "@/shared/images/card-brands/visa.svg";
 
-// Stripe returns lowercase brand identifiers (visa, mastercard, amex, discover, diners, jcb, unionpay,
+// Paystack returns lowercase brand identifiers (visa, mastercard, amex, discover, diners, jcb, unionpay,
 // unknown, link). Render known brands with their wordmarks; fall back to a generic icon plus capitalized
 // brand for everything else.
 const brandLogos: Record<string, { src: string; alt: string }> = {

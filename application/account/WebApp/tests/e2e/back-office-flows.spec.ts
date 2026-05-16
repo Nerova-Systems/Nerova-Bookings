@@ -66,7 +66,7 @@ test.describe("@smoke", () => {
 test.describe("@comprehensive", () => {
   /**
    * Broader back-office surface coverage: drift banner appears when the summary endpoint reports drift,
-   * the reconcile-with-Stripe admin action is wired on the account detail header, navigation across the
+   * the reconcile-with-Paystack admin action is wired on the account detail header, navigation across the
    * Overview/Users tabs swaps tab panels, the accounts list search filter and column-sort toggle update
    * the URL, and host-scoped auth boundaries reject cross-host requests (security spot-check folded in
    * to keep the file at the one-smoke-plus-one-comprehensive convention).
@@ -157,11 +157,11 @@ test.describe("@comprehensive", () => {
       await expect(usersPanel.getByRole("row").nth(1)).toBeVisible();
     })();
 
-    await step("Open account actions menu & verify Reconcile with Stripe action is present")(async () => {
+    await step("Open account actions menu & verify Reconcile with Paystack action is present")(async () => {
       await page.getByRole("button", { name: "Account actions" }).click();
       const menu = page.getByRole("menu");
       await expect(menu).toBeVisible();
-      await expect(menu.getByRole("menuitem", { name: "Reconcile with Stripe" })).toBeVisible();
+      await expect(menu.getByRole("menuitem", { name: "Reconcile with Paystack" })).toBeVisible();
 
       await page.keyboard.press("Escape");
     })();

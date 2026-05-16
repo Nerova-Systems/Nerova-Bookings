@@ -13,7 +13,7 @@ using Xunit;
 
 namespace Account.Tests.BackOffice.Dashboard;
 
-public sealed class GetDashboardMrrTrendTests : BackOfficeEndpointBaseTest
+public sealed class GetDashboardMrrTrendTests(BackOfficeWebApplicationFactory factory) : BackOfficeEndpointBaseTest(factory), IClassFixture<BackOfficeWebApplicationFactory>
 {
     [Fact]
     public async Task GetDashboardMrrTrend_WhenCalled_ShouldReturnDailyMrrSeriesForPeriod()
@@ -191,7 +191,7 @@ public sealed class GetDashboardMrrTrendTests : BackOfficeEndpointBaseTest
                 ("subscription_id", subscriptionId.ToString()),
                 ("created_at", occurredAt),
                 ("modified_at", null),
-                ("stripe_event_id", $"evt_test_{Guid.NewGuid():N}"),
+                ("provider_event_id", $"evt_test_{Guid.NewGuid():N}"),
                 ("event_type", nameof(BillingEventType.SubscriptionCreated)),
                 ("from_plan", null),
                 ("to_plan", nameof(SubscriptionPlan.Standard)),

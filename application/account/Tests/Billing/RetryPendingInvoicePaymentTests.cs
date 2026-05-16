@@ -11,7 +11,7 @@ using Xunit;
 
 namespace Account.Tests.Billing;
 
-public sealed class RetryRenewalPaymentTests : EndpointBaseTest<AccountDbContext>
+public sealed class RetryPendingInvoicePaymentTests(AccountWebApplicationFactory factory) : EndpointBaseTest<AccountDbContext>(factory), IClassFixture<AccountWebApplicationFactory>
 {
     [Fact]
     public async Task RetryRenewalPayment_WhenAuthorizationChargePaid_ShouldReturnPaid()
