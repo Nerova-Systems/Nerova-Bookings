@@ -1,4 +1,5 @@
 using JetBrains.Annotations;
+using Main.Features.EventTypes.Domain;
 using Main.Features.Schedules.Domain;
 using Main.Features.Scheduling.Shared;
 using SharedKernel.Cqrs;
@@ -12,6 +13,7 @@ public sealed record DeleteScheduleCommand(ScheduleId Id) : ICommand, IRequest<R
 
 public sealed class DeleteScheduleHandler(
     IScheduleRepository scheduleRepository,
+    IEventTypeRepository eventTypeRepository,
     IExecutionContext executionContext,
     ITelemetryEventsCollector events
 ) : IRequestHandler<DeleteScheduleCommand, Result>
@@ -33,6 +35,22 @@ public sealed class DeleteScheduleHandler(
         if (schedule is null || schedule.OwnerUserId != ownerUserId)
         {
             return Result.NotFound($"Schedule '{command.Id}' was not found.");
+        }
+
+        var schedules = await scheduleRepository.GetForOwnerAsync(ownerUserId, cancellationToken);
+        if (schedules.Length == 1)
+        {
+            return Result.BadRequest("At least one schedule is required.");
+        }
+
+        if (schedule.IsDefault)
+        {
+            return Result.BadRequest("Default schedule cannot be deleted. Make another schedule default before deleting it.");
+        }
+
+        if (await eventTypeRepository.ExistsForScheduleAsync(ownerUserId, schedule.Id, cancellationToken))
+        {
+            return Result.BadRequest($"Schedule '{schedule.Id}' cannot be deleted because it is used by one or more event types.");
         }
 
         scheduleRepository.Remove(schedule);

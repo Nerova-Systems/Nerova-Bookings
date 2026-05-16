@@ -61,6 +61,15 @@ public sealed class UpdateScheduleHandler(
             return Result<ScheduleResponse>.NotFound($"Schedule '{command.Id}' was not found.");
         }
 
+        if (!command.IsDefault && schedule.IsDefault)
+        {
+            var defaultSchedules = await scheduleRepository.GetDefaultCandidatesForOwnerAsync(ownerUserId, schedule.Id, cancellationToken);
+            if (defaultSchedules.Length == 0)
+            {
+                return Result<ScheduleResponse>.BadRequest("At least one default schedule is required.");
+            }
+        }
+
         if (command.IsDefault)
         {
             var defaultSchedules = await scheduleRepository.GetDefaultCandidatesForOwnerAsync(ownerUserId, schedule.Id, cancellationToken);

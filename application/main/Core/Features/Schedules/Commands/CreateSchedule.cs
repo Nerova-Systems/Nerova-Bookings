@@ -56,12 +56,15 @@ public sealed class CreateScheduleHandler(
             return Result<ScheduleResponse>.Unauthorized("Authentication is required.");
         }
 
+        var existingSchedules = await scheduleRepository.GetForOwnerAsync(ownerUserId, cancellationToken);
+        var isDefault = command.IsDefault || existingSchedules.Length == 0;
+
         var schedule = Schedule.Create(
             tenantId,
             ownerUserId,
             command.Name,
             command.TimeZone,
-            command.IsDefault,
+            isDefault,
             command.AvailabilityWindows.Select(window => window.ToAvailabilityWindow()).ToArray()
         );
 

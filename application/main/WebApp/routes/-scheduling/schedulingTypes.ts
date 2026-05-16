@@ -51,6 +51,7 @@ export function isSchedulePayloadSubmittable(value: SchedulePayload) {
     value.name.trim().length > 0 &&
     value.timeZone.trim().length > 0 &&
     value.availabilityWindows.length > 0 &&
+    getOverlappingAvailabilityWindowIndexes(value.availabilityWindows).size === 0 &&
     value.availabilityWindows.every(
       (window) =>
         window.days.length > 0 &&
@@ -104,6 +105,63 @@ export function formatMinutes(totalMinutes: number) {
   const hours = Math.floor(totalMinutes / 60);
   const minutes = totalMinutes % 60;
   return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}`;
+}
+
+export function formatAvailabilityWindows(
+  windows: AvailabilityWindow[],
+  weekdayLabels: Record<number, string>,
+  emptyLabel: string
+) {
+  if (windows.length === 0) return emptyLabel;
+
+  return windows
+    .map((window) => {
+      const days = formatWeekdayRanges(window.days, weekdayLabels);
+      return `${days}: ${formatMinutes(window.startMinute)}-${formatMinutes(window.endMinute)}`;
+    })
+    .join("; ");
+}
+
+function formatWeekdayRanges(days: number[], weekdayLabels: Record<number, string>) {
+  const sortedDays = [...new Set(days)].sort((left, right) => left - right);
+  const ranges: string[] = [];
+
+  for (let index = 0; index < sortedDays.length; index++) {
+    const rangeStart = sortedDays[index];
+    let rangeEnd = rangeStart;
+
+    while (sortedDays[index + 1] === rangeEnd + 1) {
+      rangeEnd = sortedDays[index + 1];
+      index++;
+    }
+
+    ranges.push(
+      rangeStart === rangeEnd ? weekdayLabels[rangeStart] : `${weekdayLabels[rangeStart]}-${weekdayLabels[rangeEnd]}`
+    );
+  }
+
+  return ranges.join(", ");
+}
+
+export function getOverlappingAvailabilityWindowIndexes(windows: AvailabilityWindow[]) {
+  const overlappingIndexes = new Set<number>();
+
+  windows.forEach((window, index) => {
+    window.days.forEach((day) => {
+      windows.forEach((comparisonWindow, comparisonIndex) => {
+        if (comparisonIndex <= index || !comparisonWindow.days.includes(day)) return;
+
+        const overlaps =
+          window.startMinute < comparisonWindow.endMinute && comparisonWindow.startMinute < window.endMinute;
+        if (overlaps) {
+          overlappingIndexes.add(index);
+          overlappingIndexes.add(comparisonIndex);
+        }
+      });
+    });
+  });
+
+  return overlappingIndexes;
 }
 
 export function parseTime(value: string, fallback: number) {
