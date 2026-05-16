@@ -43,6 +43,32 @@ public sealed class ScheduleEndpointsTests : EndpointBaseTest<MainDbContext>
     }
 
     [Fact]
+    public async Task CreateSchedule_WhenOwnerCreatesFirstScheduleAsNonDefault_ShouldPersistItAsDefaultSchedule()
+    {
+        var command = new
+        {
+            name = "Working hours",
+            timeZone = "Africa/Johannesburg",
+            isDefault = false,
+            availabilityWindows = new[]
+            {
+                new { days = new[] { 1, 2, 3, 4, 5 }, startMinute = 540, endMinute = 1020 }
+            }
+        };
+
+        var createResponse = await AuthenticatedOwnerHttpClient.PostAsJsonAsync("/api/schedules", command);
+        createResponse.EnsureSuccessStatusCode();
+        var created = await createResponse.DeserializeResponse<ScheduleResponse>();
+
+        created!.IsDefault.Should().BeTrue();
+
+        var defaultResponse = await AuthenticatedOwnerHttpClient.GetAsync("/api/schedules/default");
+        defaultResponse.ShouldBeSuccessfulGetRequest();
+        var defaultSchedule = await defaultResponse.DeserializeResponse<ScheduleResponse>();
+        defaultSchedule!.Id.Should().Be(created.Id);
+    }
+
+    [Fact]
     public async Task CreateSchedule_WhenMemberCreatesSchedule_ShouldReturnForbidden()
     {
         var command = new
@@ -127,12 +153,82 @@ public sealed class ScheduleEndpointsTests : EndpointBaseTest<MainDbContext>
     }
 
     [Fact]
-    public async Task DeleteSchedule_WhenScheduleExists_ShouldRemoveSchedule()
+    public async Task UpdateSchedule_WhenOnlyDefaultScheduleIsUnset_ShouldReturnBadRequest()
     {
+        var schedule = await CreateScheduleAsync("Working hours", true);
+        var command = new
+        {
+            name = schedule.Name,
+            timeZone = schedule.TimeZone,
+            isDefault = false,
+            availabilityWindows = new[]
+            {
+                new { days = new[] { 1, 2, 3, 4, 5 }, startMinute = 540, endMinute = 1020 }
+            }
+        };
+
+        var response = await AuthenticatedOwnerHttpClient.PutAsJsonAsync($"/api/schedules/{schedule.Id}", command);
+
+        await response.ShouldHaveErrorStatusCode(HttpStatusCode.BadRequest, "At least one default schedule is required.");
+    }
+
+    [Fact]
+    public async Task DeleteSchedule_WhenScheduleIsOnlySchedule_ShouldReturnBadRequest()
+    {
+        var schedule = await CreateScheduleAsync("Temporary schedule", true);
+
+        var response = await AuthenticatedOwnerHttpClient.DeleteAsync($"/api/schedules/{schedule.Id}");
+
+        await response.ShouldHaveErrorStatusCode(HttpStatusCode.BadRequest, "At least one schedule is required.");
+    }
+
+    [Fact]
+    public async Task DeleteSchedule_WhenScheduleIsDefaultSchedule_ShouldReturnBadRequest()
+    {
+        var defaultSchedule = await CreateScheduleAsync("Default schedule", true);
+        await CreateScheduleAsync("Project hours", false);
+
+        var response = await AuthenticatedOwnerHttpClient.DeleteAsync($"/api/schedules/{defaultSchedule.Id}");
+
+        await response.ShouldHaveErrorStatusCode(HttpStatusCode.BadRequest, "Default schedule cannot be deleted. Make another schedule default before deleting it.");
+    }
+
+    [Fact]
+    public async Task DeleteSchedule_WhenScheduleIsReferencedByEventType_ShouldReturnBadRequest()
+    {
+        await CreateScheduleAsync("Default schedule", true);
+        var schedule = await CreateScheduleAsync("Project hours", false);
+        var eventType = new
+        {
+            title = "Intro call",
+            slug = "intro-call",
+            description = "A short consultation",
+            durationMinutes = 30,
+            hidden = false,
+            scheduleId = schedule.Id,
+            beforeEventBufferMinutes = 0,
+            afterEventBufferMinutes = 0,
+            slotIntervalMinutes = 30,
+            minimumBookingNoticeMinutes = 60,
+            locationType = "link",
+            locationValue = "https://example.com/meet"
+        };
+        var createEventTypeResponse = await AuthenticatedOwnerHttpClient.PostAsJsonAsync("/api/event-types", eventType);
+        createEventTypeResponse.EnsureSuccessStatusCode();
+
+        var response = await AuthenticatedOwnerHttpClient.DeleteAsync($"/api/schedules/{schedule.Id}");
+
+        await response.ShouldHaveErrorStatusCode(HttpStatusCode.BadRequest, $"Schedule '{schedule.Id}' cannot be deleted because it is used by one or more event types.");
+    }
+
+    [Fact]
+    public async Task DeleteSchedule_WhenScheduleIsNotDefaultOrReferenced_ShouldRemoveSchedule()
+    {
+        await CreateScheduleAsync("Default schedule", true);
         var schedule = await CreateScheduleAsync("Temporary schedule", false);
 
-        var deleteResponse = await AuthenticatedOwnerHttpClient.DeleteAsync($"/api/schedules/{schedule.Id}");
-        deleteResponse.ShouldHaveEmptyHeaderAndLocationOnSuccess();
+        var response = await AuthenticatedOwnerHttpClient.DeleteAsync($"/api/schedules/{schedule.Id}");
+        response.ShouldHaveEmptyHeaderAndLocationOnSuccess();
 
         var getResponse = await AuthenticatedOwnerHttpClient.GetAsync($"/api/schedules/{schedule.Id}");
         await getResponse.ShouldHaveErrorStatusCode(HttpStatusCode.NotFound, $"Schedule '{schedule.Id}' was not found.");

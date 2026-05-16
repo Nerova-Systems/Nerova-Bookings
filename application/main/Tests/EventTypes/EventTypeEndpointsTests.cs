@@ -104,6 +104,31 @@ public sealed class EventTypeEndpointsTests : EndpointBaseTest<MainDbContext>
     }
 
     [Fact]
+    public async Task UpdateEventType_WhenScheduleDoesNotExist_ShouldReturnBadRequest()
+    {
+        var schedule = await CreateScheduleAsync();
+        var eventType = await CreateEventTypeAsync(schedule.Id, "Intro call", "intro-call");
+        var command = NewEventTypeRequest("sch_01ARZ3NDEKTSV4RRFFQ69G5FAV", "Intro call", "intro-call");
+
+        var response = await AuthenticatedOwnerHttpClient.PutAsJsonAsync($"/api/event-types/{eventType.Id}", command);
+
+        await response.ShouldHaveErrorStatusCode(HttpStatusCode.BadRequest, "Schedule 'sch_01ARZ3NDEKTSV4RRFFQ69G5FAV' was not found.");
+    }
+
+    [Fact]
+    public async Task UpdateEventType_WhenSlugAlreadyExistsForOwner_ShouldReturnBadRequest()
+    {
+        var schedule = await CreateScheduleAsync();
+        var existing = await CreateEventTypeAsync(schedule.Id, "Intro call", "intro-call");
+        var eventType = await CreateEventTypeAsync(schedule.Id, "Deep dive", "deep-dive");
+        var command = NewEventTypeRequest(schedule.Id, eventType.Title, existing.Slug);
+
+        var response = await AuthenticatedOwnerHttpClient.PutAsJsonAsync($"/api/event-types/{eventType.Id}", command);
+
+        await response.ShouldHaveErrorStatusCode(HttpStatusCode.BadRequest, "An event type with slug 'intro-call' already exists.");
+    }
+
+    [Fact]
     public async Task DeleteEventType_WhenOwnerDeletesEventType_ShouldRemoveEventType()
     {
         var schedule = await CreateScheduleAsync();
