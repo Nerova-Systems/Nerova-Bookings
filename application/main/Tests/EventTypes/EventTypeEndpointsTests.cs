@@ -1,6 +1,7 @@
 using System.Net;
 using System.Net.Http.Json;
 using FluentAssertions;
+using JetBrains.Annotations;
 using Main.Database;
 using SharedKernel.Tests;
 using Xunit;
@@ -20,7 +21,7 @@ public sealed class EventTypeEndpointsTests : EndpointBaseTest<MainDbContext>
         var created = await createResponse.DeserializeResponse<EventTypeResponse>();
 
         created.Should().NotBeNull();
-        created!.Title.Should().Be("Intro call");
+        created.Title.Should().Be("Intro call");
         created.Slug.Should().Be("intro-call");
         created.DurationMinutes.Should().Be(30);
         created.ScheduleId.Should().Be(schedule.Id);
@@ -70,18 +71,20 @@ public sealed class EventTypeEndpointsTests : EndpointBaseTest<MainDbContext>
     {
         var schedule = await CreateScheduleAsync();
         var eventType = await CreateEventTypeAsync(schedule.Id, "Intro call", "intro-call");
-        var command = NewEventTypeRequest(schedule.Id, "Deep dive", "deep-dive") with
-        {
-            description = "Updated description",
-            durationMinutes = 45,
-            hidden = true,
-            beforeEventBufferMinutes = 10,
-            afterEventBufferMinutes = 15,
-            slotIntervalMinutes = 15,
-            minimumBookingNoticeMinutes = 120,
-            locationType = "phone",
-            locationValue = "+27110000000"
-        };
+        var command = NewEventTypeRequest(
+            schedule.Id,
+            "Deep dive",
+            "deep-dive",
+            "Updated description",
+            45,
+            true,
+            10,
+            15,
+            15,
+            120,
+            "phone",
+            "+27110000000"
+        );
 
         var response = await AuthenticatedOwnerHttpClient.PutAsJsonAsync($"/api/event-types/{eventType.Id}", command);
         response.EnsureSuccessStatusCode();
@@ -124,7 +127,7 @@ public sealed class EventTypeEndpointsTests : EndpointBaseTest<MainDbContext>
         response.ShouldBeSuccessfulGetRequest();
         var eventTypes = await response.DeserializeResponse<EventTypesResponse>();
 
-        eventTypes!.EventTypes.Select(e => e.Id).Should().Equal([earlier.Id, later.Id]);
+        eventTypes!.EventTypes.Select(e => e.Id).Should().Equal(earlier.Id, later.Id);
     }
 
     private async Task<ScheduleResponse> CreateScheduleAsync()
@@ -152,41 +155,42 @@ public sealed class EventTypeEndpointsTests : EndpointBaseTest<MainDbContext>
         return (await response.DeserializeResponse<EventTypeResponse>())!;
     }
 
-    private static EventTypeRequest NewEventTypeRequest(string scheduleId, string title, string slug)
-    {
-        return new EventTypeRequest(
-            title,
-            slug,
-            "A short consultation",
-            30,
-            false,
-            scheduleId,
-            0,
-            0,
-            30,
-            60,
-            "link",
-            "https://example.com/meet"
-        );
-    }
-
-    private sealed record EventTypeRequest(
+    private static object NewEventTypeRequest(
+        string scheduleId,
         string title,
         string slug,
-        string? description,
-        int durationMinutes,
-        bool hidden,
-        string scheduleId,
-        int beforeEventBufferMinutes,
-        int afterEventBufferMinutes,
-        int slotIntervalMinutes,
-        int minimumBookingNoticeMinutes,
-        string? locationType,
-        string? locationValue
-    );
+        string? description = "A short consultation",
+        int durationMinutes = 30,
+        bool hidden = false,
+        int beforeEventBufferMinutes = 0,
+        int afterEventBufferMinutes = 0,
+        int slotIntervalMinutes = 30,
+        int minimumBookingNoticeMinutes = 60,
+        string? locationType = "link",
+        string? locationValue = "https://example.com/meet"
+    )
+    {
+        return new
+        {
+            title,
+            slug,
+            description,
+            durationMinutes,
+            hidden,
+            scheduleId,
+            beforeEventBufferMinutes,
+            afterEventBufferMinutes,
+            slotIntervalMinutes,
+            minimumBookingNoticeMinutes,
+            locationType,
+            locationValue
+        };
+    }
 
+    [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
     private sealed record EventTypesResponse(EventTypeResponse[] EventTypes);
 
+    [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
     private sealed record EventTypeResponse(
         string Id,
         string Title,
@@ -203,5 +207,6 @@ public sealed class EventTypeEndpointsTests : EndpointBaseTest<MainDbContext>
         string? LocationValue
     );
 
+    [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
     private sealed record ScheduleResponse(string Id);
 }

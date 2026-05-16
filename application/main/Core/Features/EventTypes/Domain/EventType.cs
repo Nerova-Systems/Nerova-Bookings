@@ -1,3 +1,4 @@
+using JetBrains.Annotations;
 using Main.Features.Schedules.Domain;
 using SharedKernel.Domain;
 using SharedKernel.StronglyTypedIds;
@@ -16,6 +17,7 @@ public sealed record EventTypeId(string Value) : StronglyTypedUlid<EventTypeId>(
 
 public sealed class EventType : SoftDeletableAggregateRoot<EventTypeId>, ITenantScopedEntity
 {
+    [UsedImplicitly]
     private EventType() : base(EventTypeId.NewId())
     {
         OwnerUserId = new UserId(string.Empty);
@@ -46,8 +48,6 @@ public sealed class EventType : SoftDeletableAggregateRoot<EventTypeId>, ITenant
         Update(title, slug, description, durationMinutes, hidden, scheduleId, beforeEventBufferMinutes, afterEventBufferMinutes, slotIntervalMinutes, minimumBookingNoticeMinutes, locationType, locationValue);
     }
 
-    public TenantId TenantId { get; private set; } = new(0);
-
     public UserId OwnerUserId { get; private set; }
 
     public string Title { get; private set; } = string.Empty;
@@ -73,6 +73,8 @@ public sealed class EventType : SoftDeletableAggregateRoot<EventTypeId>, ITenant
     public string? LocationType { get; private set; }
 
     public string? LocationValue { get; private set; }
+
+    public TenantId TenantId { get; } = new(0);
 
     public static EventType Create(
         TenantId tenantId,

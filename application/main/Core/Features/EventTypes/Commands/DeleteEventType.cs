@@ -1,5 +1,4 @@
 using JetBrains.Annotations;
-using Main.Features;
 using Main.Features.EventTypes.Domain;
 using Main.Features.Scheduling.Shared;
 using SharedKernel.Cqrs;
