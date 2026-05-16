@@ -24,6 +24,9 @@ msgstr "{0} windows"
 msgid "Add an override"
 msgstr "Add an override"
 
+msgid "Add date override"
+msgstr "Add date override"
+
 msgid "Add dates when your availability changes from your daily hours."
 msgstr "Add dates when your availability changes from your daily hours."
 
@@ -33,17 +36,29 @@ msgstr "Add new event type"
 msgid "Add new schedule"
 msgstr "Add new schedule"
 
+msgid "Add override"
+msgstr "Add override"
+
 msgid "Add time"
 msgstr "Add time"
 
 msgid "After buffer"
 msgstr "After buffer"
 
+msgid "At least one schedule exists"
+msgstr "At least one schedule exists"
+
 msgid "Availability"
 msgstr "Availability"
 
+msgid "Availability troubleshoot"
+msgstr "Availability troubleshoot"
+
 msgid "Back"
 msgstr "Back"
+
+msgid "Back to availability"
+msgstr "Back to availability"
 
 msgid "Before buffer"
 msgstr "Before buffer"
@@ -96,6 +111,9 @@ msgstr "Create the booking page basics now, then finish setup on the next screen
 msgid "Dashboard"
 msgstr "Dashboard"
 
+msgid "Date"
+msgstr "Date"
+
 msgid "Date overrides"
 msgstr "Date overrides"
 
@@ -137,6 +155,12 @@ msgstr "Event type updated"
 
 msgid "Event types"
 msgstr "Event types"
+
+msgid "Every schedule has weekly availability"
+msgstr "Every schedule has weekly availability"
+
+msgid "Exactly one default schedule exists"
+msgstr "Exactly one default schedule exists"
 
 msgid "Fri"
 msgstr "Fri"
@@ -222,6 +246,9 @@ msgstr "Name"
 msgid "Navigation"
 msgstr "Navigation"
 
+msgid "Needs attention"
+msgstr "Needs attention"
+
 msgid "New event type"
 msgstr "New event type"
 
@@ -243,14 +270,23 @@ msgstr "No weekly hours"
 msgid "Notice"
 msgstr "Notice"
 
+msgid "Passed"
+msgstr "Passed"
+
 msgid "Phone"
 msgstr "Phone"
+
+msgid "Remove date override"
+msgstr "Remove date override"
 
 msgid "Remove time"
 msgstr "Remove time"
 
 msgid "Replace this sample page with your own product information and branding."
 msgstr "Replace this sample page with your own product information and branding."
+
+msgid "Review schedule setup issues that can prevent clients from finding bookable times."
+msgstr "Review schedule setup issues that can prevent clients from finding bookable times."
 
 msgid "Sat"
 msgstr "Sat"
@@ -273,6 +309,9 @@ msgstr "Saving..."
 msgid "Schedule"
 msgstr "Schedule"
 
+msgid "Schedule checks"
+msgstr "Schedule checks"
+
 msgid "Schedule created"
 msgstr "Schedule created"
 
@@ -293,6 +332,9 @@ msgstr "Select schedule"
 
 msgid "Set as default"
 msgstr "Set as default"
+
+msgid "Set custom availability for one date."
+msgstr "Set custom availability for one date."
 
 msgid "Slot interval"
 msgstr "Slot interval"
@@ -339,6 +381,9 @@ msgstr "Tue"
 msgid "Tuesday"
 msgstr "Tuesday"
 
+msgid "Unavailable"
+msgstr "Unavailable"
+
 msgid "Visible"
 msgstr "Visible"
 
@@ -359,48 +404,3 @@ msgstr "You successfully installed PlatformPlatform! 🎉"
 
 msgid "Your dashboard is empty"
 msgstr "Your dashboard is empty"
-
-msgid "Add date override"
-msgstr "Add date override"
-
-msgid "Add override"
-msgstr "Add override"
-
-msgid "At least one schedule exists"
-msgstr "At least one schedule exists"
-
-msgid "Availability troubleshoot"
-msgstr "Availability troubleshoot"
-
-msgid "Back to availability"
-msgstr "Back to availability"
-
-msgid "Date"
-msgstr "Date"
-
-msgid "Every schedule has weekly availability"
-msgstr "Every schedule has weekly availability"
-
-msgid "Exactly one default schedule exists"
-msgstr "Exactly one default schedule exists"
-
-msgid "Needs attention"
-msgstr "Needs attention"
-
-msgid "Passed"
-msgstr "Passed"
-
-msgid "Remove date override"
-msgstr "Remove date override"
-
-msgid "Review schedule setup issues that can prevent clients from finding bookable times."
-msgstr "Review schedule setup issues that can prevent clients from finding bookable times."
-
-msgid "Schedule checks"
-msgstr "Schedule checks"
-
-msgid "Set custom availability for one date."
-msgstr "Set custom availability for one date."
-
-msgid "Unavailable"
-msgstr "Unavailable"

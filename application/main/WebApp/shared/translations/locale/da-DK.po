@@ -24,6 +24,9 @@ msgstr "{0} vinduer"
 msgid "Add an override"
 msgstr "Tilføj en undtagelse"
 
+msgid "Add date override"
+msgstr "Tilføj datoundtagelse"
+
 msgid "Add dates when your availability changes from your daily hours."
 msgstr "Tilføj datoer, hvor din tilgængelighed afviger fra dine daglige timer."
 
@@ -33,17 +36,29 @@ msgstr "Tilføj ny aftaletype"
 msgid "Add new schedule"
 msgstr "Tilføj ny tidsplan"
 
+msgid "Add override"
+msgstr "Tilføj undtagelse"
+
 msgid "Add time"
 msgstr "Tilføj tid"
 
 msgid "After buffer"
 msgstr "Buffer efter"
 
+msgid "At least one schedule exists"
+msgstr "Der findes mindst én tidsplan"
+
 msgid "Availability"
 msgstr "Tilgængelighed"
 
+msgid "Availability troubleshoot"
+msgstr "Fejlfinding af tilgængelighed"
+
 msgid "Back"
 msgstr "Tilbage"
+
+msgid "Back to availability"
+msgstr "Tilbage til tilgængelighed"
 
 msgid "Before buffer"
 msgstr "Buffer før"
@@ -96,6 +111,9 @@ msgstr "Opret de grundlæggende bookingoplysninger nu, og færdiggør opsætning
 msgid "Dashboard"
 msgstr "Dashboard"
 
+msgid "Date"
+msgstr "Dato"
+
 msgid "Date overrides"
 msgstr "Datoundtagelser"
 
@@ -137,6 +155,12 @@ msgstr "Aftaletype opdateret"
 
 msgid "Event types"
 msgstr "Aftaletyper"
+
+msgid "Every schedule has weekly availability"
+msgstr "Alle tidsplaner har ugentlig tilgængelighed"
+
+msgid "Exactly one default schedule exists"
+msgstr "Der findes præcis én standardtidsplan"
 
 msgid "Fri"
 msgstr "Fre"
@@ -222,6 +246,9 @@ msgstr "Navn"
 msgid "Navigation"
 msgstr "Navigation"
 
+msgid "Needs attention"
+msgstr "Kræver opmærksomhed"
+
 msgid "New event type"
 msgstr "Ny aftaletype"
 
@@ -243,14 +270,23 @@ msgstr "Ingen ugentlige timer"
 msgid "Notice"
 msgstr "Varsel"
 
+msgid "Passed"
+msgstr "Bestået"
+
 msgid "Phone"
 msgstr "Telefon"
+
+msgid "Remove date override"
+msgstr "Fjern datoundtagelse"
 
 msgid "Remove time"
 msgstr "Fjern tid"
 
 msgid "Replace this sample page with your own product information and branding."
 msgstr "Erstat denne eksempelside med dine egne produktinformationer og branding."
+
+msgid "Review schedule setup issues that can prevent clients from finding bookable times."
+msgstr "Gennemgå problemer i tidsplanopsætningen, der kan forhindre kunder i at finde bookbare tider."
 
 msgid "Sat"
 msgstr "Lør"
@@ -273,6 +309,9 @@ msgstr "Gemmer..."
 msgid "Schedule"
 msgstr "Tidsplan"
 
+msgid "Schedule checks"
+msgstr "Tidsplantjek"
+
 msgid "Schedule created"
 msgstr "Tidsplan oprettet"
 
@@ -293,6 +332,9 @@ msgstr "Vælg tidsplan"
 
 msgid "Set as default"
 msgstr "Angiv som standard"
+
+msgid "Set custom availability for one date."
+msgstr "Angiv tilpasset tilgængelighed for én dato."
 
 msgid "Slot interval"
 msgstr "Slotinterval"
@@ -339,6 +381,9 @@ msgstr "Tir"
 msgid "Tuesday"
 msgstr "Tirsdag"
 
+msgid "Unavailable"
+msgstr "Utilgængelig"
+
 msgid "Visible"
 msgstr "Synlig"
 
@@ -359,48 +404,3 @@ msgstr "Du har installeret PlatformPlatform med succes! 🎉"
 
 msgid "Your dashboard is empty"
 msgstr "Dit dashboard er tomt"
-
-msgid "Add date override"
-msgstr "Tilføj datoundtagelse"
-
-msgid "Add override"
-msgstr "Tilføj undtagelse"
-
-msgid "At least one schedule exists"
-msgstr "Der findes mindst én tidsplan"
-
-msgid "Availability troubleshoot"
-msgstr "Fejlfinding af tilgængelighed"
-
-msgid "Back to availability"
-msgstr "Tilbage til tilgængelighed"
-
-msgid "Date"
-msgstr "Dato"
-
-msgid "Every schedule has weekly availability"
-msgstr "Alle tidsplaner har ugentlig tilgængelighed"
-
-msgid "Exactly one default schedule exists"
-msgstr "Der findes præcis én standardtidsplan"
-
-msgid "Needs attention"
-msgstr "Kræver opmærksomhed"
-
-msgid "Passed"
-msgstr "Bestået"
-
-msgid "Remove date override"
-msgstr "Fjern datoundtagelse"
-
-msgid "Review schedule setup issues that can prevent clients from finding bookable times."
-msgstr "Gennemgå problemer i tidsplanopsætningen, der kan forhindre kunder i at finde bookbare tider."
-
-msgid "Schedule checks"
-msgstr "Tidsplantjek"
-
-msgid "Set custom availability for one date."
-msgstr "Angiv tilpasset tilgængelighed for én dato."
-
-msgid "Unavailable"
-msgstr "Utilgængelig"
