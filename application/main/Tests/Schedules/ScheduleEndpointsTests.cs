@@ -153,6 +153,75 @@ public sealed class ScheduleEndpointsTests : EndpointBaseTest<MainDbContext>
     }
 
     [Fact]
+    public async Task UpdateSchedule_WhenOwnerAddsDateOverride_ShouldPersistDateOverride()
+    {
+        var schedule = await CreateScheduleAsync("Working hours", true);
+        var command = new
+        {
+            name = schedule.Name,
+            timeZone = schedule.TimeZone,
+            isDefault = true,
+            availabilityWindows = new[]
+            {
+                new { days = new[] { 1, 2, 3, 4, 5 }, startMinute = 540, endMinute = 1020 }
+            },
+            dateOverrides = new[]
+            {
+                new
+                {
+                    date = "2026-06-01",
+                    windows = new[] { new { startMinute = 600, endMinute = 720 } }
+                }
+            }
+        };
+
+        var response = await AuthenticatedOwnerHttpClient.PutAsJsonAsync($"/api/schedules/{schedule.Id}", command);
+        response.EnsureSuccessStatusCode();
+        var updated = await response.DeserializeResponse<ScheduleResponse>();
+
+        updated!.DateOverrides.Should().ContainSingle();
+        updated.DateOverrides[0].Date.Should().Be(new DateOnly(2026, 6, 1));
+        updated.DateOverrides[0].Windows.Should().ContainSingle();
+        updated.DateOverrides[0].Windows[0].StartMinute.Should().Be(600);
+        updated.DateOverrides[0].Windows[0].EndMinute.Should().Be(720);
+    }
+
+    [Fact]
+    public async Task UpdateSchedule_WhenDateOverrideWindowsOverlap_ShouldReturnValidationError()
+    {
+        var schedule = await CreateScheduleAsync("Working hours", true);
+        var command = new
+        {
+            name = schedule.Name,
+            timeZone = schedule.TimeZone,
+            isDefault = true,
+            availabilityWindows = new[]
+            {
+                new { days = new[] { 1, 2, 3, 4, 5 }, startMinute = 540, endMinute = 1020 }
+            },
+            dateOverrides = new[]
+            {
+                new
+                {
+                    date = "2026-06-01",
+                    windows = new[]
+                    {
+                        new { startMinute = 600, endMinute = 720 },
+                        new { startMinute = 660, endMinute = 780 }
+                    }
+                }
+            }
+        };
+
+        var response = await AuthenticatedOwnerHttpClient.PutAsJsonAsync($"/api/schedules/{schedule.Id}", command);
+
+        await response.ShouldHaveErrorStatusCode(
+            HttpStatusCode.BadRequest,
+            [new ErrorDetail("dateOverrides", "Availability date override windows cannot overlap on the same date.")]
+        );
+    }
+
+    [Fact]
     public async Task UpdateSchedule_WhenOnlyDefaultScheduleIsUnset_ShouldReturnBadRequest()
     {
         var schedule = await CreateScheduleAsync("Working hours", true);
@@ -256,8 +325,21 @@ public sealed class ScheduleEndpointsTests : EndpointBaseTest<MainDbContext>
     private sealed record SchedulesResponse(ScheduleResponse[] Schedules);
 
     [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
-    private sealed record ScheduleResponse(string Id, string Name, string TimeZone, bool IsDefault, AvailabilityWindowResponse[] AvailabilityWindows);
+    private sealed record ScheduleResponse(
+        string Id,
+        string Name,
+        string TimeZone,
+        bool IsDefault,
+        AvailabilityWindowResponse[] AvailabilityWindows,
+        AvailabilityDateOverrideResponse[] DateOverrides
+    );
 
     [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
     private sealed record AvailabilityWindowResponse(int[] Days, int StartMinute, int EndMinute);
+
+    [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
+    private sealed record AvailabilityDateOverrideResponse(DateOnly Date, AvailabilityOverrideWindowResponse[] Windows);
+
+    [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
+    private sealed record AvailabilityOverrideWindowResponse(int StartMinute, int EndMinute);
 }

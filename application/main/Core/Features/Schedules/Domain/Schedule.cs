@@ -24,9 +24,18 @@ public sealed class Schedule : SoftDeletableAggregateRoot<ScheduleId>, ITenantSc
         TimeZone = string.Empty;
         OwnerUserId = new UserId(string.Empty);
         AvailabilityWindows = [];
+        DateOverrides = [];
     }
 
-    private Schedule(TenantId tenantId, UserId ownerUserId, string name, string timeZone, bool isDefault, AvailabilityWindow[] availabilityWindows)
+    private Schedule(
+        TenantId tenantId,
+        UserId ownerUserId,
+        string name,
+        string timeZone,
+        bool isDefault,
+        AvailabilityWindow[] availabilityWindows,
+        AvailabilityDateOverride[] dateOverrides
+    )
         : base(ScheduleId.NewId())
     {
         TenantId = tenantId;
@@ -35,6 +44,7 @@ public sealed class Schedule : SoftDeletableAggregateRoot<ScheduleId>, ITenantSc
         TimeZone = timeZone.Trim();
         IsDefault = isDefault;
         AvailabilityWindows = [.. availabilityWindows.Select(window => window.Normalize())];
+        DateOverrides = [.. dateOverrides.Select(dateOverride => dateOverride.Normalize()).OrderBy(dateOverride => dateOverride.Date)];
     }
 
     public UserId OwnerUserId { get; private set; }
@@ -47,19 +57,30 @@ public sealed class Schedule : SoftDeletableAggregateRoot<ScheduleId>, ITenantSc
 
     public ImmutableArray<AvailabilityWindow> AvailabilityWindows { get; private set; }
 
+    public ImmutableArray<AvailabilityDateOverride> DateOverrides { get; private set; }
+
     public TenantId TenantId { get; } = new(0);
 
-    public static Schedule Create(TenantId tenantId, UserId ownerUserId, string name, string timeZone, bool isDefault, AvailabilityWindow[] availabilityWindows)
+    public static Schedule Create(
+        TenantId tenantId,
+        UserId ownerUserId,
+        string name,
+        string timeZone,
+        bool isDefault,
+        AvailabilityWindow[] availabilityWindows,
+        AvailabilityDateOverride[] dateOverrides
+    )
     {
-        return new Schedule(tenantId, ownerUserId, name, timeZone, isDefault, availabilityWindows);
+        return new Schedule(tenantId, ownerUserId, name, timeZone, isDefault, availabilityWindows, dateOverrides);
     }
 
-    public void Update(string name, string timeZone, bool isDefault, AvailabilityWindow[] availabilityWindows)
+    public void Update(string name, string timeZone, bool isDefault, AvailabilityWindow[] availabilityWindows, AvailabilityDateOverride[] dateOverrides)
     {
         Name = name.Trim();
         TimeZone = timeZone.Trim();
         IsDefault = isDefault;
         AvailabilityWindows = [.. availabilityWindows.Select(window => window.Normalize())];
+        DateOverrides = [.. dateOverrides.Select(dateOverride => dateOverride.Normalize()).OrderBy(dateOverride => dateOverride.Date)];
     }
 
     public void SetDefault(bool isDefault)

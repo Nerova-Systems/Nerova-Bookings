@@ -32,6 +32,18 @@ public sealed class ScheduleConfiguration : IEntityTypeConfiguration<Schedule>
                     windows => windows
                 )
             );
+        builder.Property(schedule => schedule.DateOverrides)
+            .HasColumnType("jsonb")
+            .HasConversion(
+                value => JsonSerializer.Serialize(value.ToArray(), JsonSerializerOptions),
+                value => ImmutableArray.CreateRange(JsonSerializer.Deserialize<AvailabilityDateOverride[]>(value, JsonSerializerOptions)!)
+            )
+            .Metadata.SetValueComparer(new ValueComparer<ImmutableArray<AvailabilityDateOverride>>(
+                    (left, right) => left.SequenceEqual(right),
+                    dateOverrides => dateOverrides.Aggregate(0, (hash, dateOverride) => HashCode.Combine(hash, dateOverride.GetHashCode())),
+                    dateOverrides => dateOverrides
+                )
+            );
 
         builder.HasIndex(schedule => new { schedule.TenantId, schedule.OwnerUserId, schedule.Name });
         builder.HasIndex(schedule => new { schedule.TenantId, schedule.OwnerUserId, schedule.IsDefault });
