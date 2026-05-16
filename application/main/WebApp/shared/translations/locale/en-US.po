@@ -21,6 +21,12 @@ msgstr "{0} minutes"
 msgid "{0} windows"
 msgstr "{0} windows"
 
+msgid "Add new event type"
+msgstr "Add new event type"
+
+msgid "Add new schedule"
+msgstr "Add new schedule"
+
 msgid "Add window"
 msgstr "Add window"
 
@@ -42,8 +48,14 @@ msgstr "Burning the midnight oil, {firstName}?"
 msgid "Burning the midnight oil?"
 msgstr "Burning the midnight oil?"
 
+msgid "Cancel"
+msgstr "Cancel"
+
 msgid "Configure the appointment types clients can book."
 msgstr "Configure the appointment types clients can book."
+
+msgid "Continue"
+msgstr "Continue"
 
 msgid "Create a private setup event type before opening public booking."
 msgstr "Create a private setup event type before opening public booking."
@@ -57,11 +69,20 @@ msgstr "Create an availability schedule before creating event types."
 msgid "Create another schedule before deleting this one."
 msgstr "Create another schedule before deleting this one."
 
+msgid "Create availability"
+msgstr "Create availability"
+
+msgid "Create availability first"
+msgstr "Create availability first"
+
 msgid "Create event type"
 msgstr "Create event type"
 
 msgid "Create schedule"
 msgstr "Create schedule"
+
+msgid "Create the booking page basics now, then finish setup on the next screen."
+msgstr "Create the booking page basics now, then finish setup on the next screen."
 
 msgid "Dashboard"
 msgstr "Dashboard"
@@ -254,6 +275,9 @@ msgstr "Slug"
 
 msgid "Start"
 msgstr "Start"
+
+msgid "Start with a weekly schedule, then refine availability on the next screen."
+msgstr "Start with a weekly schedule, then refine availability on the next screen."
 
 msgid "Sunday"
 msgstr "Sunday"

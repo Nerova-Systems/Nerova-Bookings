@@ -21,6 +21,12 @@ msgstr "{0} minutter"
 msgid "{0} windows"
 msgstr "{0} vinduer"
 
+msgid "Add new event type"
+msgstr "Tilføj ny aftaletype"
+
+msgid "Add new schedule"
+msgstr "Tilføj ny tidsplan"
+
 msgid "Add window"
 msgstr "Tilføj vindue"
 
@@ -42,8 +48,14 @@ msgstr "Sidder du stadig oppe, {firstName}?"
 msgid "Burning the midnight oil?"
 msgstr "Sidder du stadig oppe?"
 
+msgid "Cancel"
+msgstr "Annuller"
+
 msgid "Configure the appointment types clients can book."
 msgstr "Konfigurer de aftaletyper, kunder kan booke."
+
+msgid "Continue"
+msgstr "Fortsæt"
 
 msgid "Create a private setup event type before opening public booking."
 msgstr "Opret en privat opsætningsaftaletype, før offentlig booking åbnes."
@@ -57,11 +69,20 @@ msgstr "Opret en tilgængelighedsplan, før du opretter aftaletyper."
 msgid "Create another schedule before deleting this one."
 msgstr "Opret en anden tidsplan, før du sletter denne."
 
+msgid "Create availability"
+msgstr "Opret tilgængelighed"
+
+msgid "Create availability first"
+msgstr "Opret tilgængelighed først"
+
 msgid "Create event type"
 msgstr "Opret aftaletype"
 
 msgid "Create schedule"
 msgstr "Opret tidsplan"
+
+msgid "Create the booking page basics now, then finish setup on the next screen."
+msgstr "Opret de grundlæggende bookingoplysninger nu, og færdiggør opsætningen på næste skærm."
 
 msgid "Dashboard"
 msgstr "Dashboard"
@@ -254,6 +275,9 @@ msgstr "Slug"
 
 msgid "Start"
 msgstr "Start"
+
+msgid "Start with a weekly schedule, then refine availability on the next screen."
+msgstr "Start med en ugentlig tidsplan, og finjuster tilgængeligheden på næste skærm."
 
 msgid "Sunday"
 msgstr "Søndag"

@@ -18,7 +18,7 @@ import { TextAreaField } from "@repo/ui/components/TextAreaField";
 import { TextField } from "@repo/ui/components/TextField";
 import { useNavigate } from "@tanstack/react-router";
 import { PlusIcon } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { toast } from "sonner";
 
 import { api } from "@/shared/lib/api/client";
@@ -28,14 +28,11 @@ import { isEventTypePayloadSubmittable, newEventTypePayload, type Schedule, slug
 
 export function CreateEventTypeDialog({ schedules }: Readonly<{ schedules: Schedule[] }>) {
   const navigate = useNavigate();
-  const defaultSchedule = useMemo(
-    () => schedules.find((schedule) => schedule.isDefault) ?? schedules[0],
-    [schedules]
-  );
+  const defaultSchedule = useMemo(() => schedules.find((schedule) => schedule.isDefault) ?? schedules[0], [schedules]);
   const [open, setOpen] = useState(false);
   const [slugWasEdited, setSlugWasEdited] = useState(false);
   const [draft, setDraft] = useState(() => newEventTypePayload(defaultSchedule?.id ?? ""));
-  const createEventTypeMutation = api.useMutation("post", "/api/event-types", {
+  const { error, isPending, mutate, reset } = api.useMutation("post", "/api/event-types", {
     onSuccess: (eventType) => {
       toast.success(t`Event type created`);
       setOpen(false);
@@ -44,26 +41,27 @@ export function CreateEventTypeDialog({ schedules }: Readonly<{ schedules: Sched
   });
   const canSubmit = defaultSchedule !== undefined && isEventTypePayloadSubmittable(draft);
 
-  useEffect(() => {
-    if (open) {
+  const handleOpenChange = (nextOpen: boolean) => {
+    if (nextOpen) {
       setSlugWasEdited(false);
       setDraft(newEventTypePayload(defaultSchedule?.id ?? ""));
-      createEventTypeMutation.reset();
+      reset();
     }
-  }, [createEventTypeMutation, defaultSchedule?.id, open]);
+    setOpen(nextOpen);
+  };
 
   return (
-    <Dialog trackingTitle={t`Create event type`} open={open} onOpenChange={setOpen}>
+    <Dialog trackingTitle={t`Create event type`} open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger render={<Button disabled={!defaultSchedule} />}>
         <PlusIcon />
         <Trans>New event type</Trans>
       </DialogTrigger>
       <DialogContent className="sm:max-w-2xl">
         <DialogForm
-          validationErrors={createEventTypeMutation.error?.errors}
+          validationErrors={error?.errors}
           onSubmit={() => {
             if (!canSubmit) return;
-            createEventTypeMutation.mutate({ body: { ...draft, scheduleId: defaultSchedule.id } });
+            mutate({ body: { ...draft, scheduleId: defaultSchedule.id } });
           }}
         >
           <DialogHeader>
@@ -75,7 +73,7 @@ export function CreateEventTypeDialog({ schedules }: Readonly<{ schedules: Sched
             </DialogDescription>
           </DialogHeader>
           <DialogBody>
-            <GeneralApiErrors error={createEventTypeMutation.error} />
+            <GeneralApiErrors error={error} />
             <div className="grid gap-4 sm:grid-cols-2">
               <TextField
                 name="title"
@@ -120,7 +118,7 @@ export function CreateEventTypeDialog({ schedules }: Readonly<{ schedules: Sched
             <DialogClose render={<Button type="button" variant="outline" />}>
               <Trans>Cancel</Trans>
             </DialogClose>
-            <Button type="submit" disabled={!canSubmit} isPending={createEventTypeMutation.isPending}>
+            <Button type="submit" disabled={!canSubmit} isPending={isPending}>
               <Trans>Continue</Trans>
             </Button>
           </DialogFooter>

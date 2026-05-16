@@ -16,7 +16,7 @@ import {
 import { TextField } from "@repo/ui/components/TextField";
 import { useNavigate } from "@tanstack/react-router";
 import { PlusIcon } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { toast } from "sonner";
 
 import { api } from "@/shared/lib/api/client";
@@ -28,7 +28,7 @@ export function CreateScheduleDialog({ isFirstSchedule }: Readonly<{ isFirstSche
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const [name, setName] = useState(() => newSchedulePayload(isFirstSchedule).name);
-  const createScheduleMutation = api.useMutation("post", "/api/schedules", {
+  const { error, isPending, mutate, reset } = api.useMutation("post", "/api/schedules", {
     onSuccess: (schedule) => {
       toast.success(t`Schedule created`);
       setOpen(false);
@@ -37,25 +37,26 @@ export function CreateScheduleDialog({ isFirstSchedule }: Readonly<{ isFirstSche
   });
   const canSubmit = name.trim().length > 0;
 
-  useEffect(() => {
-    if (open) {
+  const handleOpenChange = (nextOpen: boolean) => {
+    if (nextOpen) {
       setName(newSchedulePayload(isFirstSchedule).name);
-      createScheduleMutation.reset();
+      reset();
     }
-  }, [createScheduleMutation, isFirstSchedule, open]);
+    setOpen(nextOpen);
+  };
 
   return (
-    <Dialog trackingTitle={t`Create schedule`} open={open} onOpenChange={setOpen}>
+    <Dialog trackingTitle={t`Create schedule`} open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger render={<Button />}>
         <PlusIcon />
         <Trans>New schedule</Trans>
       </DialogTrigger>
       <DialogContent className="sm:max-w-lg">
         <DialogForm
-          validationErrors={createScheduleMutation.error?.errors}
+          validationErrors={error?.errors}
           onSubmit={() => {
             if (!canSubmit) return;
-            createScheduleMutation.mutate({
+            mutate({
               body: { ...newSchedulePayload(isFirstSchedule), name: name.trim() }
             });
           }}
@@ -69,21 +70,14 @@ export function CreateScheduleDialog({ isFirstSchedule }: Readonly<{ isFirstSche
             </DialogDescription>
           </DialogHeader>
           <DialogBody>
-            <GeneralApiErrors error={createScheduleMutation.error} />
-            <TextField
-              name="name"
-              label={t`Name`}
-              required={true}
-              autoFocus={true}
-              value={name}
-              onChange={setName}
-            />
+            <GeneralApiErrors error={error} />
+            <TextField name="name" label={t`Name`} required={true} autoFocus={true} value={name} onChange={setName} />
           </DialogBody>
           <DialogFooter>
             <DialogClose render={<Button type="button" variant="outline" />}>
               <Trans>Cancel</Trans>
             </DialogClose>
-            <Button type="submit" disabled={!canSubmit} isPending={createScheduleMutation.isPending}>
+            <Button type="submit" disabled={!canSubmit} isPending={isPending}>
               <Trans>Continue</Trans>
             </Button>
           </DialogFooter>
