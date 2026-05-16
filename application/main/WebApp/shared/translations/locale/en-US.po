@@ -54,6 +54,9 @@ msgstr "Create a weekly schedule before publishing event types."
 msgid "Create an availability schedule before creating event types."
 msgstr "Create an availability schedule before creating event types."
 
+msgid "Create another schedule before deleting this one."
+msgstr "Create another schedule before deleting this one."
+
 msgid "Create event type"
 msgstr "Create event type"
 
@@ -86,6 +89,9 @@ msgstr "Edit the weekly windows attached to this schedule."
 
 msgid "End"
 msgstr "End"
+
+msgid "End time must be after start time."
+msgstr "End time must be after start time."
 
 msgid "Event type"
 msgstr "Event type"
@@ -135,6 +141,18 @@ msgstr "Here's your overview of what's happening."
 msgid "Hidden"
 msgstr "Hidden"
 
+msgid "In person"
+msgstr "In person"
+
+msgid "Link"
+msgstr "Link"
+
+msgid "Loading event types..."
+msgstr "Loading event types..."
+
+msgid "Loading schedules..."
+msgstr "Loading schedules..."
+
 msgid "Location"
 msgstr "Location"
 
@@ -147,11 +165,17 @@ msgstr "Log in"
 msgid "Main navigation"
 msgstr "Main navigation"
 
+msgid "Make another schedule default before deleting this one."
+msgstr "Make another schedule default before deleting this one."
+
 msgid "Manage weekly schedules for booking availability."
 msgstr "Manage weekly schedules for booking availability."
 
 msgid "Monday"
 msgstr "Monday"
+
+msgid "Move event types to another schedule before deleting this one."
+msgstr "Move event types to another schedule before deleting this one."
 
 msgid "Name"
 msgstr "Name"
@@ -165,6 +189,9 @@ msgstr "New event type"
 msgid "New schedule"
 msgstr "New schedule"
 
+msgid "No availability windows"
+msgstr "No availability windows"
+
 msgid "No event types yet"
 msgstr "No event types yet"
 
@@ -173,6 +200,9 @@ msgstr "No schedules yet"
 
 msgid "Notice"
 msgstr "Notice"
+
+msgid "Phone"
+msgstr "Phone"
 
 msgid "Remove"
 msgstr "Remove"
@@ -204,8 +234,14 @@ msgstr "Schedule created"
 msgid "Schedule deleted"
 msgstr "Schedule deleted"
 
+msgid "Schedule unavailable"
+msgstr "Schedule unavailable"
+
 msgid "Schedule updated"
 msgstr "Schedule updated"
+
+msgid "Select at least one day."
+msgstr "Select at least one day."
 
 msgid "Select schedule"
 msgstr "Select schedule"
@@ -225,6 +261,9 @@ msgstr "Sunday"
 msgid "This is where your personalized dashboard content will appear. Stay tuned for updates."
 msgstr "This is where your personalized dashboard content will appear. Stay tuned for updates."
 
+msgid "This window overlaps another window on the same day."
+msgstr "This window overlaps another window on the same day."
+
 msgid "Thursday"
 msgstr "Thursday"
 
@@ -236,6 +275,9 @@ msgstr "Title"
 
 msgid "Tuesday"
 msgstr "Tuesday"
+
+msgid "Visible"
+msgstr "Visible"
 
 msgid "Wednesday"
 msgstr "Wednesday"

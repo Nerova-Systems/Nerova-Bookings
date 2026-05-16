@@ -54,6 +54,9 @@ msgstr "Opret en ugentlig tidsplan, før aftaletyper udgives."
 msgid "Create an availability schedule before creating event types."
 msgstr "Opret en tilgængelighedsplan, før du opretter aftaletyper."
 
+msgid "Create another schedule before deleting this one."
+msgstr "Opret en anden tidsplan, før du sletter denne."
+
 msgid "Create event type"
 msgstr "Opret aftaletype"
 
@@ -86,6 +89,9 @@ msgstr "Rediger de ugentlige vinduer for denne tidsplan."
 
 msgid "End"
 msgstr "Slut"
+
+msgid "End time must be after start time."
+msgstr "Sluttidspunktet skal være efter starttidspunktet."
 
 msgid "Event type"
 msgstr "Aftaletype"
@@ -135,6 +141,18 @@ msgstr "Her er dit overblik over hvad der sker."
 msgid "Hidden"
 msgstr "Skjult"
 
+msgid "In person"
+msgstr "Fysisk"
+
+msgid "Link"
+msgstr "Link"
+
+msgid "Loading event types..."
+msgstr "Indlæser aftaletyper..."
+
+msgid "Loading schedules..."
+msgstr "Indlæser tidsplaner..."
+
 msgid "Location"
 msgstr "Lokation"
 
@@ -147,11 +165,17 @@ msgstr "Log ind"
 msgid "Main navigation"
 msgstr "Hovednavigation"
 
+msgid "Make another schedule default before deleting this one."
+msgstr "Gør en anden tidsplan til standard, før du sletter denne."
+
 msgid "Manage weekly schedules for booking availability."
 msgstr "Administrer ugentlige tidsplaner for bookingtilgængelighed."
 
 msgid "Monday"
 msgstr "Mandag"
+
+msgid "Move event types to another schedule before deleting this one."
+msgstr "Flyt aftaletyper til en anden tidsplan, før du sletter denne."
 
 msgid "Name"
 msgstr "Navn"
@@ -165,6 +189,9 @@ msgstr "Ny aftaletype"
 msgid "New schedule"
 msgstr "Ny tidsplan"
 
+msgid "No availability windows"
+msgstr "Ingen tilgængelighedsvinduer"
+
 msgid "No event types yet"
 msgstr "Ingen aftaletyper endnu"
 
@@ -173,6 +200,9 @@ msgstr "Ingen tidsplaner endnu"
 
 msgid "Notice"
 msgstr "Varsel"
+
+msgid "Phone"
+msgstr "Telefon"
 
 msgid "Remove"
 msgstr "Fjern"
@@ -204,8 +234,14 @@ msgstr "Tidsplan oprettet"
 msgid "Schedule deleted"
 msgstr "Tidsplan slettet"
 
+msgid "Schedule unavailable"
+msgstr "Tidsplan utilgængelig"
+
 msgid "Schedule updated"
 msgstr "Tidsplan opdateret"
+
+msgid "Select at least one day."
+msgstr "Vælg mindst én dag."
 
 msgid "Select schedule"
 msgstr "Vælg tidsplan"
@@ -225,6 +261,9 @@ msgstr "Søndag"
 msgid "This is where your personalized dashboard content will appear. Stay tuned for updates."
 msgstr "Her vil dit personlige dashboard-indhold blive vist. Hold dig opdateret."
 
+msgid "This window overlaps another window on the same day."
+msgstr "Dette vindue overlapper et andet vindue på samme dag."
+
 msgid "Thursday"
 msgstr "Torsdag"
 
@@ -236,6 +275,9 @@ msgstr "Titel"
 
 msgid "Tuesday"
 msgstr "Tirsdag"
+
+msgid "Visible"
+msgstr "Synlig"
 
 msgid "Wednesday"
 msgstr "Onsdag"
