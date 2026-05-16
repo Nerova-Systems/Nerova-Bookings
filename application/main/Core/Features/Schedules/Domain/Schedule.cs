@@ -1,4 +1,5 @@
 using System.Collections.Immutable;
+using JetBrains.Annotations;
 using SharedKernel.Domain;
 using SharedKernel.StronglyTypedIds;
 
@@ -16,6 +17,7 @@ public sealed record ScheduleId(string Value) : StronglyTypedUlid<ScheduleId>(Va
 
 public sealed class Schedule : SoftDeletableAggregateRoot<ScheduleId>, ITenantScopedEntity
 {
+    [UsedImplicitly]
     private Schedule() : base(ScheduleId.NewId())
     {
         Name = string.Empty;
@@ -32,10 +34,8 @@ public sealed class Schedule : SoftDeletableAggregateRoot<ScheduleId>, ITenantSc
         Name = name.Trim();
         TimeZone = timeZone.Trim();
         IsDefault = isDefault;
-        AvailabilityWindows = availabilityWindows.Select(window => window.Normalize()).ToImmutableArray();
+        AvailabilityWindows = [.. availabilityWindows.Select(window => window.Normalize())];
     }
-
-    public TenantId TenantId { get; private set; } = new(0);
 
     public UserId OwnerUserId { get; private set; }
 
@@ -47,6 +47,8 @@ public sealed class Schedule : SoftDeletableAggregateRoot<ScheduleId>, ITenantSc
 
     public ImmutableArray<AvailabilityWindow> AvailabilityWindows { get; private set; }
 
+    public TenantId TenantId { get; } = new(0);
+
     public static Schedule Create(TenantId tenantId, UserId ownerUserId, string name, string timeZone, bool isDefault, AvailabilityWindow[] availabilityWindows)
     {
         return new Schedule(tenantId, ownerUserId, name, timeZone, isDefault, availabilityWindows);
@@ -57,7 +59,7 @@ public sealed class Schedule : SoftDeletableAggregateRoot<ScheduleId>, ITenantSc
         Name = name.Trim();
         TimeZone = timeZone.Trim();
         IsDefault = isDefault;
-        AvailabilityWindows = availabilityWindows.Select(window => window.Normalize()).ToImmutableArray();
+        AvailabilityWindows = [.. availabilityWindows.Select(window => window.Normalize())];
     }
 
     public void SetDefault(bool isDefault)

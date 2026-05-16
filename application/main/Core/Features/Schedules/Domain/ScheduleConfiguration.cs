@@ -24,7 +24,7 @@ public sealed class ScheduleConfiguration : IEntityTypeConfiguration<Schedule>
             .HasColumnType("jsonb")
             .HasConversion(
                 value => JsonSerializer.Serialize(value.ToArray(), JsonSerializerOptions),
-                value => JsonSerializer.Deserialize<AvailabilityWindow[]>(value, JsonSerializerOptions)!.ToImmutableArray()
+                value => ImmutableArray.CreateRange(JsonSerializer.Deserialize<AvailabilityWindow[]>(value, JsonSerializerOptions)!)
             )
             .Metadata.SetValueComparer(new ValueComparer<ImmutableArray<AvailabilityWindow>>(
                     (left, right) => left.SequenceEqual(right),

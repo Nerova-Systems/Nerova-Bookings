@@ -1,6 +1,5 @@
 using FluentValidation;
 using JetBrains.Annotations;
-using Main.Features;
 using Main.Features.Schedules.Domain;
 using Main.Features.Schedules.Shared;
 using Main.Features.Scheduling.Shared;

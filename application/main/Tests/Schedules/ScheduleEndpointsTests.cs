@@ -1,6 +1,7 @@
 using System.Net;
 using System.Net.Http.Json;
 using FluentAssertions;
+using JetBrains.Annotations;
 using Main.Database;
 using SharedKernel.Tests;
 using SharedKernel.Validation;
@@ -29,7 +30,7 @@ public sealed class ScheduleEndpointsTests : EndpointBaseTest<MainDbContext>
         var created = await createResponse.DeserializeResponse<ScheduleResponse>();
 
         created.Should().NotBeNull();
-        created!.Name.Should().Be("Working hours");
+        created.Name.Should().Be("Working hours");
         created.TimeZone.Should().Be("Africa/Johannesburg");
         created.IsDefault.Should().BeTrue();
         created.AvailabilityWindows.Should().ContainSingle();
@@ -155,9 +156,12 @@ public sealed class ScheduleEndpointsTests : EndpointBaseTest<MainDbContext>
         return (await response.DeserializeResponse<ScheduleResponse>())!;
     }
 
+    [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
     private sealed record SchedulesResponse(ScheduleResponse[] Schedules);
 
+    [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
     private sealed record ScheduleResponse(string Id, string Name, string TimeZone, bool IsDefault, AvailabilityWindowResponse[] AvailabilityWindows);
 
+    [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
     private sealed record AvailabilityWindowResponse(int[] Days, int StartMinute, int EndMinute);
 }
