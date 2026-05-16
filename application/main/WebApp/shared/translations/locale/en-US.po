@@ -13,14 +13,97 @@ msgstr ""
 "Language-Team: \n"
 "Plural-Forms: \n"
 
+#. placeholder {0}: eventType.durationMinutes
+msgid "{0} minutes"
+msgstr "{0} minutes"
+
+#. placeholder {0}: schedule.availabilityWindows.length
+msgid "{0} windows"
+msgstr "{0} windows"
+
+msgid "Add window"
+msgstr "Add window"
+
+msgid "After buffer"
+msgstr "After buffer"
+
+msgid "Availability"
+msgstr "Availability"
+
+msgid "Back"
+msgstr "Back"
+
+msgid "Before buffer"
+msgstr "Before buffer"
+
 msgid "Burning the midnight oil, {firstName}?"
 msgstr "Burning the midnight oil, {firstName}?"
 
 msgid "Burning the midnight oil?"
 msgstr "Burning the midnight oil?"
 
+msgid "Configure the appointment types clients can book."
+msgstr "Configure the appointment types clients can book."
+
+msgid "Create a private setup event type before opening public booking."
+msgstr "Create a private setup event type before opening public booking."
+
+msgid "Create a weekly schedule before publishing event types."
+msgstr "Create a weekly schedule before publishing event types."
+
+msgid "Create an availability schedule before creating event types."
+msgstr "Create an availability schedule before creating event types."
+
+msgid "Create event type"
+msgstr "Create event type"
+
+msgid "Create schedule"
+msgstr "Create schedule"
+
 msgid "Dashboard"
 msgstr "Dashboard"
+
+msgid "Default"
+msgstr "Default"
+
+msgid "Default schedule"
+msgstr "Default schedule"
+
+msgid "Delete"
+msgstr "Delete"
+
+msgid "Description"
+msgstr "Description"
+
+msgid "Duration"
+msgstr "Duration"
+
+msgid "Edit booking setup for this appointment type."
+msgstr "Edit booking setup for this appointment type."
+
+msgid "Edit the weekly windows attached to this schedule."
+msgstr "Edit the weekly windows attached to this schedule."
+
+msgid "End"
+msgstr "End"
+
+msgid "Event type"
+msgstr "Event type"
+
+msgid "Event type created"
+msgstr "Event type created"
+
+msgid "Event type deleted"
+msgstr "Event type deleted"
+
+msgid "Event type updated"
+msgstr "Event type updated"
+
+msgid "Event types"
+msgstr "Event types"
+
+msgid "Friday"
+msgstr "Friday"
 
 msgid "Get started"
 msgstr "Get started"
@@ -49,20 +132,110 @@ msgstr "Good morning, {firstName}"
 msgid "Here's your overview of what's happening."
 msgstr "Here's your overview of what's happening."
 
+msgid "Hidden"
+msgstr "Hidden"
+
+msgid "Location"
+msgstr "Location"
+
+msgid "Location type"
+msgstr "Location type"
+
 msgid "Log in"
 msgstr "Log in"
 
 msgid "Main navigation"
 msgstr "Main navigation"
 
+msgid "Manage weekly schedules for booking availability."
+msgstr "Manage weekly schedules for booking availability."
+
+msgid "Monday"
+msgstr "Monday"
+
+msgid "Name"
+msgstr "Name"
+
 msgid "Navigation"
 msgstr "Navigation"
+
+msgid "New event type"
+msgstr "New event type"
+
+msgid "New schedule"
+msgstr "New schedule"
+
+msgid "No event types yet"
+msgstr "No event types yet"
+
+msgid "No schedules yet"
+msgstr "No schedules yet"
+
+msgid "Notice"
+msgstr "Notice"
+
+msgid "Remove window"
+msgstr "Remove window"
 
 msgid "Replace this sample page with your own product information and branding."
 msgstr "Replace this sample page with your own product information and branding."
 
+msgid "Saturday"
+msgstr "Saturday"
+
+msgid "Save event type"
+msgstr "Save event type"
+
+msgid "Save schedule"
+msgstr "Save schedule"
+
+msgid "Saving..."
+msgstr "Saving..."
+
+msgid "Schedule"
+msgstr "Schedule"
+
+msgid "Schedule created"
+msgstr "Schedule created"
+
+msgid "Schedule deleted"
+msgstr "Schedule deleted"
+
+msgid "Schedule updated"
+msgstr "Schedule updated"
+
+msgid "Slot interval"
+msgstr "Slot interval"
+
+msgid "Slug"
+msgstr "Slug"
+
+msgid "Start"
+msgstr "Start"
+
+msgid "Sunday"
+msgstr "Sunday"
+
 msgid "This is where your personalized dashboard content will appear. Stay tuned for updates."
 msgstr "This is where your personalized dashboard content will appear. Stay tuned for updates."
+
+msgid "Thursday"
+msgstr "Thursday"
+
+msgid "Time zone"
+msgstr "Time zone"
+
+msgid "Title"
+msgstr "Title"
+
+msgid "Tuesday"
+msgstr "Tuesday"
+
+msgid "Wednesday"
+msgstr "Wednesday"
+
+msgid "Weekly availability"
+msgstr "Weekly availability"
 
 msgid "Welcome to PlatformPlatform"
 msgstr "Welcome to PlatformPlatform"

@@ -13,14 +13,97 @@ msgstr ""
 "Plural-Forms: \n"
 "X-Generator: @lingui/cli\n"
 
+#. placeholder {0}: eventType.durationMinutes
+msgid "{0} minutes"
+msgstr "{0} minutter"
+
+#. placeholder {0}: schedule.availabilityWindows.length
+msgid "{0} windows"
+msgstr "{0} vinduer"
+
+msgid "Add window"
+msgstr "Tilføj vindue"
+
+msgid "After buffer"
+msgstr "Buffer efter"
+
+msgid "Availability"
+msgstr "Tilgængelighed"
+
+msgid "Back"
+msgstr "Tilbage"
+
+msgid "Before buffer"
+msgstr "Buffer før"
+
 msgid "Burning the midnight oil, {firstName}?"
 msgstr "Sidder du stadig oppe, {firstName}?"
 
 msgid "Burning the midnight oil?"
 msgstr "Sidder du stadig oppe?"
 
+msgid "Configure the appointment types clients can book."
+msgstr "Konfigurer de aftaletyper, kunder kan booke."
+
+msgid "Create a private setup event type before opening public booking."
+msgstr "Opret en privat opsætningsaftaletype, før offentlig booking åbnes."
+
+msgid "Create a weekly schedule before publishing event types."
+msgstr "Opret en ugentlig tidsplan, før aftaletyper udgives."
+
+msgid "Create an availability schedule before creating event types."
+msgstr "Opret en tilgængelighedsplan, før du opretter aftaletyper."
+
+msgid "Create event type"
+msgstr "Opret aftaletype"
+
+msgid "Create schedule"
+msgstr "Opret tidsplan"
+
 msgid "Dashboard"
 msgstr "Dashboard"
+
+msgid "Default"
+msgstr "Standard"
+
+msgid "Default schedule"
+msgstr "Standardtidsplan"
+
+msgid "Delete"
+msgstr "Slet"
+
+msgid "Description"
+msgstr "Beskrivelse"
+
+msgid "Duration"
+msgstr "Varighed"
+
+msgid "Edit booking setup for this appointment type."
+msgstr "Rediger bookingopsætningen for denne aftaletype."
+
+msgid "Edit the weekly windows attached to this schedule."
+msgstr "Rediger de ugentlige vinduer for denne tidsplan."
+
+msgid "End"
+msgstr "Slut"
+
+msgid "Event type"
+msgstr "Aftaletype"
+
+msgid "Event type created"
+msgstr "Aftaletype oprettet"
+
+msgid "Event type deleted"
+msgstr "Aftaletype slettet"
+
+msgid "Event type updated"
+msgstr "Aftaletype opdateret"
+
+msgid "Event types"
+msgstr "Aftaletyper"
+
+msgid "Friday"
+msgstr "Fredag"
 
 msgid "Get started"
 msgstr "Kom i gang"
@@ -49,20 +132,110 @@ msgstr "God morgen, {firstName}"
 msgid "Here's your overview of what's happening."
 msgstr "Her er dit overblik over hvad der sker."
 
+msgid "Hidden"
+msgstr "Skjult"
+
+msgid "Location"
+msgstr "Lokation"
+
+msgid "Location type"
+msgstr "Lokationstype"
+
 msgid "Log in"
 msgstr "Log ind"
 
 msgid "Main navigation"
 msgstr "Hovednavigation"
 
+msgid "Manage weekly schedules for booking availability."
+msgstr "Administrer ugentlige tidsplaner for bookingtilgængelighed."
+
+msgid "Monday"
+msgstr "Mandag"
+
+msgid "Name"
+msgstr "Navn"
+
 msgid "Navigation"
 msgstr "Navigation"
+
+msgid "New event type"
+msgstr "Ny aftaletype"
+
+msgid "New schedule"
+msgstr "Ny tidsplan"
+
+msgid "No event types yet"
+msgstr "Ingen aftaletyper endnu"
+
+msgid "No schedules yet"
+msgstr "Ingen tidsplaner endnu"
+
+msgid "Notice"
+msgstr "Varsel"
+
+msgid "Remove window"
+msgstr "Fjern vindue"
 
 msgid "Replace this sample page with your own product information and branding."
 msgstr "Erstat denne eksempelside med dine egne produktinformationer og branding."
 
+msgid "Saturday"
+msgstr "Lørdag"
+
+msgid "Save event type"
+msgstr "Gem aftaletype"
+
+msgid "Save schedule"
+msgstr "Gem tidsplan"
+
+msgid "Saving..."
+msgstr "Gemmer..."
+
+msgid "Schedule"
+msgstr "Tidsplan"
+
+msgid "Schedule created"
+msgstr "Tidsplan oprettet"
+
+msgid "Schedule deleted"
+msgstr "Tidsplan slettet"
+
+msgid "Schedule updated"
+msgstr "Tidsplan opdateret"
+
+msgid "Slot interval"
+msgstr "Slotinterval"
+
+msgid "Slug"
+msgstr "Slug"
+
+msgid "Start"
+msgstr "Start"
+
+msgid "Sunday"
+msgstr "Søndag"
+
 msgid "This is where your personalized dashboard content will appear. Stay tuned for updates."
 msgstr "Her vil dit personlige dashboard-indhold blive vist. Hold dig opdateret."
+
+msgid "Thursday"
+msgstr "Torsdag"
+
+msgid "Time zone"
+msgstr "Tidszone"
+
+msgid "Title"
+msgstr "Titel"
+
+msgid "Tuesday"
+msgstr "Tirsdag"
+
+msgid "Wednesday"
+msgstr "Onsdag"
+
+msgid "Weekly availability"
+msgstr "Ugentlig tilgængelighed"
 
 msgid "Welcome to PlatformPlatform"
 msgstr "Velkommen til PlatformPlatform"

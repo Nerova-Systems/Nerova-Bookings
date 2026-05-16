@@ -16,7 +16,7 @@ import {
 import { Link as RouterLink, useNavigate, useRouter } from "@tanstack/react-router";
 import MobileMenu from "account/MobileMenu";
 import UserMenu from "account/UserMenu";
-import { LayoutDashboardIcon } from "lucide-react";
+import { CalendarDaysIcon, LayoutDashboardIcon, TimerIcon } from "lucide-react";
 import { use } from "react";
 
 const normalizePath = (path: string): string => path.replace(/\/$/, "") || "/";
@@ -54,6 +54,34 @@ export function MainSideMenu() {
                       <LayoutDashboardIcon />
                       <span>
                         <Trans>Dashboard</Trans>
+                      </span>
+                    </RouterLink>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <SidebarMenuButton
+                    asChild={true}
+                    isActive={currentPath.startsWith("/event-types")}
+                    tooltip={t`Event types`}
+                  >
+                    <RouterLink to="/event-types">
+                      <TimerIcon />
+                      <span>
+                        <Trans>Event types</Trans>
+                      </span>
+                    </RouterLink>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <SidebarMenuButton
+                    asChild={true}
+                    isActive={currentPath.startsWith("/availability")}
+                    tooltip={t`Availability`}
+                  >
+                    <RouterLink to="/availability">
+                      <CalendarDaysIcon />
+                      <span>
+                        <Trans>Availability</Trans>
                       </span>
                     </RouterLink>
                   </SidebarMenuButton>
