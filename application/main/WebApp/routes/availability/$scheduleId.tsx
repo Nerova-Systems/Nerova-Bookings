@@ -163,6 +163,7 @@ function AvailabilityDetailsPage() {
           submitLabel={t`Save schedule`}
           canUnsetDefault={canUnsetDefault}
           showSubmit={false}
+          onTroubleshoot={() => navigate({ to: "/availability/troubleshoot" })}
         />
       )}
     </SchedulingPageShell>

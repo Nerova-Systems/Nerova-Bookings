@@ -52,7 +52,8 @@ export function ScheduleForm({
   isPending,
   submitLabel,
   canUnsetDefault = true,
-  showSubmit = true
+  showSubmit = true,
+  onTroubleshoot
 }: Readonly<{
   value: SchedulePayload;
   onChange: (value: SchedulePayload) => void;
@@ -62,6 +63,7 @@ export function ScheduleForm({
   submitLabel: string;
   canUnsetDefault?: boolean;
   showSubmit?: boolean;
+  onTroubleshoot: () => void;
 }>) {
   const canSubmit = isSchedulePayloadSubmittable(value);
 
@@ -85,10 +87,13 @@ export function ScheduleForm({
             windows={value.availabilityWindows}
             onChange={(availabilityWindows) => onChange({ ...value, availabilityWindows })}
           />
-          <DateOverridesCard />
+          <DateOverridesCard
+            dateOverrides={value.dateOverrides ?? []}
+            onChange={(dateOverrides) => onChange({ ...value, dateOverrides })}
+          />
           {showSubmit && <SubmitButton isPending={isPending} canSubmit={canSubmit} submitLabel={submitLabel} />}
         </div>
-        <AvailabilitySidePanel value={value} onChange={onChange} />
+        <AvailabilitySidePanel value={value} onChange={onChange} onTroubleshoot={onTroubleshoot} />
       </div>
       <input type="hidden" name="isDefault" value={String(value.isDefault)} />
       {!canUnsetDefault && <input type="hidden" name="defaultLocked" value="true" />}

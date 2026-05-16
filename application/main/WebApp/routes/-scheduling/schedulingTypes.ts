@@ -3,6 +3,8 @@ import type { Schemas } from "@/shared/lib/api/client";
 export type Schedule = Schemas["ScheduleResponse"];
 export type SchedulePayload = Schemas["CreateScheduleCommand"];
 export type AvailabilityWindow = Schemas["AvailabilityWindowRequest"];
+export type AvailabilityDateOverride = NonNullable<SchedulePayload["dateOverrides"]>[number];
+export type AvailabilityOverrideWindow = AvailabilityDateOverride["windows"][number];
 export type EventType = Schemas["EventTypeResponse"];
 export type EventTypePayload = Schemas["CreateEventTypeCommand"];
 export type ApiValidationError = Schemas["HttpValidationProblemDetails"] | null | undefined;
@@ -12,7 +14,8 @@ export function newSchedulePayload(isDefault = false): SchedulePayload {
     name: isDefault ? "Default schedule" : "Working hours",
     timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC",
     isDefault,
-    availabilityWindows: [{ days: [1, 2, 3, 4, 5], startMinute: 540, endMinute: 1020 }]
+    availabilityWindows: [{ days: [1, 2, 3, 4, 5], startMinute: 540, endMinute: 1020 }],
+    dateOverrides: []
   };
 }
 
@@ -25,6 +28,10 @@ export function scheduleToPayload(schedule: Schedule): SchedulePayload {
       days: [...window.days],
       startMinute: window.startMinute,
       endMinute: window.endMinute
+    })),
+    dateOverrides: schedule.dateOverrides.map((dateOverride) => ({
+      date: dateOverride.date,
+      windows: dateOverride.windows.map((window) => ({ ...window }))
     }))
   };
 }
@@ -52,6 +59,7 @@ export function isSchedulePayloadSubmittable(value: SchedulePayload) {
     value.timeZone.trim().length > 0 &&
     value.availabilityWindows.length > 0 &&
     getOverlappingAvailabilityWindowIndexes(value.availabilityWindows).size === 0 &&
+    getOverlappingAvailabilityOverrideIndexes(value.dateOverrides ?? []).size === 0 &&
     value.availabilityWindows.every(
       (window) =>
         window.days.length > 0 &&
@@ -59,6 +67,14 @@ export function isSchedulePayloadSubmittable(value: SchedulePayload) {
         window.startMinute >= 0 &&
         window.endMinute <= 1440 &&
         window.startMinute < window.endMinute
+    ) &&
+    (value.dateOverrides ?? []).every((dateOverride) =>
+      dateOverride.windows.every(
+        (window) =>
+          window.startMinute >= 0 &&
+          window.endMinute <= 1440 &&
+          window.startMinute < window.endMinute
+      )
     )
   );
 }
@@ -156,6 +172,27 @@ export function getOverlappingAvailabilityWindowIndexes(windows: AvailabilityWin
         if (overlaps) {
           overlappingIndexes.add(index);
           overlappingIndexes.add(comparisonIndex);
+        }
+      });
+    });
+  });
+
+  return overlappingIndexes;
+}
+
+export function getOverlappingAvailabilityOverrideIndexes(dateOverrides: AvailabilityDateOverride[]) {
+  const overlappingIndexes = new Set<string>();
+
+  dateOverrides.forEach((dateOverride) => {
+    dateOverride.windows.forEach((window, index) => {
+      dateOverride.windows.forEach((comparisonWindow, comparisonIndex) => {
+        if (comparisonIndex <= index) return;
+
+        const overlaps =
+          window.startMinute < comparisonWindow.endMinute && comparisonWindow.startMinute < window.endMinute;
+        if (overlaps) {
+          overlappingIndexes.add(`${dateOverride.date}-${index}`);
+          overlappingIndexes.add(`${dateOverride.date}-${comparisonIndex}`);
         }
       });
     });

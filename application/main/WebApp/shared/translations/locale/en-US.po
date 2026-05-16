@@ -359,3 +359,48 @@ msgstr "You successfully installed PlatformPlatform! 🎉"
 
 msgid "Your dashboard is empty"
 msgstr "Your dashboard is empty"
+
+msgid "Add date override"
+msgstr "Add date override"
+
+msgid "Add override"
+msgstr "Add override"
+
+msgid "At least one schedule exists"
+msgstr "At least one schedule exists"
+
+msgid "Availability troubleshoot"
+msgstr "Availability troubleshoot"
+
+msgid "Back to availability"
+msgstr "Back to availability"
+
+msgid "Date"
+msgstr "Date"
+
+msgid "Every schedule has weekly availability"
+msgstr "Every schedule has weekly availability"
+
+msgid "Exactly one default schedule exists"
+msgstr "Exactly one default schedule exists"
+
+msgid "Needs attention"
+msgstr "Needs attention"
+
+msgid "Passed"
+msgstr "Passed"
+
+msgid "Remove date override"
+msgstr "Remove date override"
+
+msgid "Review schedule setup issues that can prevent clients from finding bookable times."
+msgstr "Review schedule setup issues that can prevent clients from finding bookable times."
+
+msgid "Schedule checks"
+msgstr "Schedule checks"
+
+msgid "Set custom availability for one date."
+msgstr "Set custom availability for one date."
+
+msgid "Unavailable"
+msgstr "Unavailable"

@@ -359,3 +359,48 @@ msgstr "Du har installeret PlatformPlatform med succes! 🎉"
 
 msgid "Your dashboard is empty"
 msgstr "Dit dashboard er tomt"
+
+msgid "Add date override"
+msgstr "Tilføj datoundtagelse"
+
+msgid "Add override"
+msgstr "Tilføj undtagelse"
+
+msgid "At least one schedule exists"
+msgstr "Der findes mindst én tidsplan"
+
+msgid "Availability troubleshoot"
+msgstr "Fejlfinding af tilgængelighed"
+
+msgid "Back to availability"
+msgstr "Tilbage til tilgængelighed"
+
+msgid "Date"
+msgstr "Dato"
+
+msgid "Every schedule has weekly availability"
+msgstr "Alle tidsplaner har ugentlig tilgængelighed"
+
+msgid "Exactly one default schedule exists"
+msgstr "Der findes præcis én standardtidsplan"
+
+msgid "Needs attention"
+msgstr "Kræver opmærksomhed"
+
+msgid "Passed"
+msgstr "Bestået"
+
+msgid "Remove date override"
+msgstr "Fjern datoundtagelse"
+
+msgid "Review schedule setup issues that can prevent clients from finding bookable times."
+msgstr "Gennemgå problemer i tidsplanopsætningen, der kan forhindre kunder i at finde bookbare tider."
+
+msgid "Schedule checks"
+msgstr "Tidsplantjek"
+
+msgid "Set custom availability for one date."
+msgstr "Angiv tilpasset tilgængelighed for én dato."
+
+msgid "Unavailable"
+msgstr "Utilgængelig"

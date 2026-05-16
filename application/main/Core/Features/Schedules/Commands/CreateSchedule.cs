@@ -15,7 +15,8 @@ public sealed record CreateScheduleCommand(
     string Name,
     string TimeZone,
     bool IsDefault,
-    AvailabilityWindowRequest[] AvailabilityWindows
+    AvailabilityWindowRequest[] AvailabilityWindows,
+    AvailabilityDateOverrideRequest[]? DateOverrides
 ) : ICommand, IRequest<Result<ScheduleResponse>>;
 
 public sealed class CreateScheduleValidator : AbstractValidator<CreateScheduleCommand>
@@ -33,6 +34,19 @@ public sealed class CreateScheduleValidator : AbstractValidator<CreateScheduleCo
             }
         );
         AvailabilityWindowValidator.AddAvailabilityWindowRules(RuleFor(command => command.AvailabilityWindows));
+        RuleForEach(command => command.DateOverrides).ChildRules(dateOverride =>
+            {
+                dateOverride.RuleFor(o => o.Windows).NotNull();
+                dateOverride.RuleForEach(o => o.Windows).ChildRules(window =>
+                    {
+                        window.RuleFor(w => w.StartMinute).InclusiveBetween(0, 1439);
+                        window.RuleFor(w => w.EndMinute).InclusiveBetween(1, 1440);
+                        window.RuleFor(w => w).Must(w => w.StartMinute < w.EndMinute).WithMessage("Availability date override end minute must be after start minute.");
+                    }
+                );
+            }
+        );
+        AvailabilityDateOverrideValidator.AddAvailabilityDateOverrideRules(RuleFor(command => command.DateOverrides));
     }
 }
 
@@ -65,7 +79,8 @@ public sealed class CreateScheduleHandler(
             command.Name,
             command.TimeZone,
             isDefault,
-            command.AvailabilityWindows.Select(window => window.ToAvailabilityWindow()).ToArray()
+            command.AvailabilityWindows.Select(window => window.ToAvailabilityWindow()).ToArray(),
+            (command.DateOverrides ?? []).Select(dateOverride => dateOverride.ToAvailabilityDateOverride()).ToArray()
         );
 
         if (schedule.IsDefault)
