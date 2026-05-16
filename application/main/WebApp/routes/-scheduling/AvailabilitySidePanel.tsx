@@ -27,8 +27,12 @@ const today = () => new Date().toISOString().slice(0, 10);
 export function DateOverridesCard({
   dateOverrides,
   onChange
-}: Readonly<{ dateOverrides: AvailabilityDateOverride[]; onChange: (dateOverrides: AvailabilityDateOverride[]) => void }>) {
-  const removeDateOverride = (date: string) => onChange(dateOverrides.filter((dateOverride) => dateOverride.date !== date));
+}: Readonly<{
+  dateOverrides: AvailabilityDateOverride[];
+  onChange: (dateOverrides: AvailabilityDateOverride[]) => void;
+}>) {
+  const removeDateOverride = (date: string) =>
+    onChange(dateOverrides.filter((dateOverride) => dateOverride.date !== date));
 
   return (
     <div className="rounded-md border p-6">
@@ -49,10 +53,18 @@ export function DateOverridesCard({
               <div className="text-sm text-muted-foreground">
                 {dateOverride.windows.length === 0
                   ? t`Unavailable`
-                  : dateOverride.windows.map((window) => `${formatMinutes(window.startMinute)}-${formatMinutes(window.endMinute)}`).join(", ")}
+                  : dateOverride.windows
+                      .map((window) => `${formatMinutes(window.startMinute)}-${formatMinutes(window.endMinute)}`)
+                      .join(", ")}
               </div>
             </div>
-            <Button type="button" variant="ghost" size="icon-sm" aria-label={t`Remove date override`} onClick={() => removeDateOverride(dateOverride.date)}>
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon-sm"
+              aria-label={t`Remove date override`}
+              onClick={() => removeDateOverride(dateOverride.date)}
+            >
               <Trash2Icon />
             </Button>
           </div>
@@ -66,7 +78,10 @@ export function DateOverridesCard({
 function AddDateOverrideDialog({
   dateOverrides,
   onChange
-}: Readonly<{ dateOverrides: AvailabilityDateOverride[]; onChange: (dateOverrides: AvailabilityDateOverride[]) => void }>) {
+}: Readonly<{
+  dateOverrides: AvailabilityDateOverride[];
+  onChange: (dateOverrides: AvailabilityDateOverride[]) => void;
+}>) {
   const [open, setOpen] = useState(false);
   const [date, setDate] = useState(today);
   const [startTime, setStartTime] = useState("09:00");
@@ -92,13 +107,15 @@ function AddDateOverrideDialog({
         <DialogForm
           onSubmit={() => {
             if (!canSubmit) return;
-            onChange([
-              ...dateOverrides.filter((dateOverride) => dateOverride.date !== date),
-              {
-                date,
-                windows: [{ startMinute: parseTime(startTime, 540), endMinute: parseTime(endTime, 1020) }]
-              }
-            ].sort((left, right) => left.date.localeCompare(right.date)));
+            onChange(
+              [
+                ...dateOverrides.filter((dateOverride) => dateOverride.date !== date),
+                {
+                  date,
+                  windows: [{ startMinute: parseTime(startTime, 540), endMinute: parseTime(endTime, 1020) }]
+                }
+              ].sort((left, right) => left.date.localeCompare(right.date))
+            );
             setOpen(false);
           }}
         >

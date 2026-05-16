@@ -49,7 +49,9 @@ function CheckRow({ label, passed }: Readonly<{ label: string; passed: boolean }
   return (
     <div className="flex items-center justify-between gap-4 rounded-md border p-3">
       <span>{label}</span>
-      <span className={passed ? "text-primary" : "text-destructive"}>{passed ? <Trans>Passed</Trans> : <Trans>Needs attention</Trans>}</span>
+      <span className={passed ? "text-primary" : "text-destructive"}>
+        {passed ? <Trans>Passed</Trans> : <Trans>Needs attention</Trans>}
+      </span>
     </div>
   );
 }

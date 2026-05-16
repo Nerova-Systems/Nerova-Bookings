@@ -70,10 +70,7 @@ export function isSchedulePayloadSubmittable(value: SchedulePayload) {
     ) &&
     (value.dateOverrides ?? []).every((dateOverride) =>
       dateOverride.windows.every(
-        (window) =>
-          window.startMinute >= 0 &&
-          window.endMinute <= 1440 &&
-          window.startMinute < window.endMinute
+        (window) => window.startMinute >= 0 && window.endMinute <= 1440 && window.startMinute < window.endMinute
       )
     )
   );

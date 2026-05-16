@@ -24,11 +24,6 @@ public static class AvailabilityDateOverrideValidator
 
         return dateOverrides.All(dateOverride =>
             {
-                if (dateOverride.Windows is null)
-                {
-                    return true;
-                }
-
                 var windows = dateOverride.Windows.OrderBy(window => window.StartMinute).ToArray();
                 return windows.Zip(windows.Skip(1)).All(pair => pair.First.EndMinute <= pair.Second.StartMinute);
             }
