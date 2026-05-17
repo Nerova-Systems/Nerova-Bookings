@@ -1,4 +1,4 @@
-using System.Text.Json.Serialization;
+using FluentValidation;
 
 namespace Main.Features.EventTypes.Domain;
 
@@ -54,13 +54,26 @@ public sealed record EventTypeSettings
             : source.DurationOptions.Distinct().Order().ToArray();
         var locations = source.Locations.Length == 0 && !string.IsNullOrWhiteSpace(locationType)
             ? [new EventTypeLocation(locationType.Trim(), string.IsNullOrWhiteSpace(locationValue) ? null : locationValue.Trim())]
-            : source.Locations;
+            : source.Locations.Select(location => new EventTypeLocation(location.Type.Trim(), string.IsNullOrWhiteSpace(location.Value) ? null : location.Value.Trim())).ToArray();
 
         return source with
         {
             DurationOptions = durationOptions,
             Locations = locations,
-            BookingFields = source.BookingFields,
+            BookingFields = source.BookingFields
+                .Select(field => field with
+                    {
+                        Name = field.Name.Trim(),
+                        Label = field.Label.Trim(),
+                        Type = field.Type.Trim(),
+                        Options = field.Options
+                            .Where(option => !string.IsNullOrWhiteSpace(option))
+                            .Select(option => option.Trim())
+                            .Distinct(StringComparer.OrdinalIgnoreCase)
+                            .ToArray()
+                    }
+                )
+                .ToArray(),
             BookerLayout = string.IsNullOrWhiteSpace(source.BookerLayout) ? "month" : source.BookerLayout.Trim(),
             EventColor = string.IsNullOrWhiteSpace(source.EventColor) ? null : source.EventColor.Trim(),
             BookingWindow = source.BookingWindow,
@@ -81,6 +94,61 @@ public sealed record EventTypeSettings
                 .Where(pair => !string.IsNullOrWhiteSpace(pair.Key))
                 .ToDictionary(pair => pair.Key.Trim(), pair => pair.Value, StringComparer.Ordinal)
         };
+    }
+}
+
+public sealed class EventTypeSettingsValidator : AbstractValidator<EventTypeSettings>
+{
+    public EventTypeSettingsValidator()
+    {
+        RuleFor(settings => settings.DurationOptions)
+            .Must(options => options.All(option => option is >= 5 and <= 1440))
+            .WithMessage("Duration options must be between 5 and 1440 minutes.");
+        RuleForEach(settings => settings.Locations).ChildRules(location =>
+            {
+                location.RuleFor(l => l.Type).Length(1, 80).WithMessage("Location type must be between 1 and 80 characters.");
+                location.RuleFor(l => l.Value).MaximumLength(500).WithMessage("Location value must be at most 500 characters.");
+            }
+        );
+        RuleForEach(settings => settings.BookingFields).ChildRules(field =>
+            {
+                field.RuleFor(f => f.Name).NotEmpty().WithMessage("Booking field name is required.");
+                field.RuleFor(f => f.Label).NotEmpty().WithMessage("Booking field label is required.");
+                field.RuleFor(f => f.Type).NotEmpty().WithMessage("Booking field type is required.");
+            }
+        );
+        RuleFor(settings => settings.BookingWindow)
+            .Must(window => window.FixedStartDate is null || window.FixedEndDate is null || window.FixedStartDate <= window.FixedEndDate)
+            .WithMessage("Fixed booking window start date must be before or equal to end date.");
+        RuleFor(settings => settings.Limits)
+            .Must(limits =>
+                IsNonNegative(limits.MaxBookingsPerDay) &&
+                IsNonNegative(limits.MaxBookingDurationMinutesPerDay) &&
+                IsNonNegative(limits.MaxActiveBookingsPerBooker) &&
+                IsNonNegative(limits.FirstAvailableSlotMinutes) &&
+                IsNonNegative(limits.OffsetStartMinutes)
+            )
+            .WithMessage("Event type limits must be non-negative.");
+        RuleFor(settings => settings.Recurrence!.Interval)
+            .GreaterThan(0)
+            .WithMessage("Recurrence interval must be positive.")
+            .When(settings => settings.Recurrence is not null);
+        RuleFor(settings => settings.Recurrence!.Count)
+            .Must(count => count is null or > 0)
+            .WithMessage("Recurrence count must be positive.")
+            .When(settings => settings.Recurrence is not null);
+        RuleFor(settings => settings.Seats.Capacity)
+            .Must(capacity => capacity is > 0)
+            .WithMessage("Seats capacity must be positive when seats are enabled.")
+            .When(settings => settings.Seats.Enabled);
+        RuleFor(settings => settings)
+            .Must(settings => settings.Recurrence is null || !settings.Seats.Enabled)
+            .WithMessage("Recurring event types cannot use seats.");
+    }
+
+    private static bool IsNonNegative(int? value)
+    {
+        return value is null or >= 0;
     }
 }
 
@@ -161,6 +229,3 @@ public sealed record EventTypeRedirects
 
     public string? CancellationUrl { get; init; }
 }
-
-[JsonSerializable(typeof(EventTypeSettings))]
-internal sealed partial class EventTypeSettingsJsonContext : JsonSerializerContext;

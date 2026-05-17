@@ -2,17 +2,43 @@ import { t } from "@lingui/core/macro";
 
 import type { EventType, EventTypePayload, Schedule } from "../schedulingTypes";
 
-export type EventTypeTabName = "setup" | "availability" | "limits" | "advanced";
+export type EventTypeTabName = "setup" | "availability" | "limits" | "advanced" | "recurring" | "dependencies";
 
-export const eventTypeTabs: { name: EventTypeTabName; label: string }[] = [
-  { name: "setup", label: t`Setup` },
-  { name: "availability", label: t`Availability` },
-  { name: "limits", label: t`Limits` },
-  { name: "advanced", label: t`Advanced` }
+export const eventTypeTabNames: EventTypeTabName[] = [
+  "setup",
+  "availability",
+  "limits",
+  "advanced",
+  "recurring",
+  "dependencies"
 ];
 
+export function getEventTypeTabLabel(tabName: EventTypeTabName) {
+  switch (tabName) {
+    case "setup":
+      return t`Setup`;
+    case "availability":
+      return t`Availability`;
+    case "limits":
+      return t`Limits`;
+    case "advanced":
+      return t`Advanced`;
+    case "recurring":
+      return t`Recurring`;
+    case "dependencies":
+      return t`Dependencies`;
+  }
+}
+
 export function isEventTypeTabName(value: unknown): value is EventTypeTabName {
-  return value === "setup" || value === "availability" || value === "limits" || value === "advanced";
+  return (
+    value === "setup" ||
+    value === "availability" ||
+    value === "limits" ||
+    value === "advanced" ||
+    value === "recurring" ||
+    value === "dependencies"
+  );
 }
 
 export function getScheduleName(scheduleId: string, schedules: Schedule[]) {
@@ -36,6 +62,7 @@ export function eventTypeToDuplicatePayload(eventType: EventType): EventTypePayl
     slotIntervalMinutes: eventType.slotIntervalMinutes,
     minimumBookingNoticeMinutes: eventType.minimumBookingNoticeMinutes,
     locationType: eventType.locationType,
-    locationValue: eventType.locationValue
+    locationValue: eventType.locationValue,
+    settings: eventType.settings
   };
 }

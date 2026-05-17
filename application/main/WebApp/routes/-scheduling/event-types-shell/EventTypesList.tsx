@@ -10,6 +10,7 @@ import { EyeOffIcon, FilesIcon, SearchIcon, TimerIcon, Trash2Icon } from "lucide
 import { useMemo, useState } from "react";
 
 import type { EventType, Schedule } from "../schedulingTypes";
+
 import { CopyEventTypeButton, EventTypeOverflowActions, PreviewEventTypeButton } from "./EventTypeActionButtons";
 import { getEventTypePublicUrl, getScheduleName } from "./eventTypeShellTypes";
 

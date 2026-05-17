@@ -9,17 +9,17 @@ import {
   DialogFooter,
   DialogForm,
   DialogHeader,
-  DialogTitle,
-  DialogTrigger
+  DialogTitle
 } from "@repo/ui/components/Dialog";
 import { DirtyDialog } from "@repo/ui/components/DirtyDialog";
 import { useDialogSetDirty } from "@repo/ui/components/DirtyDialogContext";
+import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@repo/ui/components/Empty";
 import { NumberField } from "@repo/ui/components/NumberField";
-import { TextAreaField } from "@repo/ui/components/TextAreaField";
 import { TextField } from "@repo/ui/components/TextField";
 import { useNavigate } from "@tanstack/react-router";
-import { PlusIcon } from "lucide-react";
+import { CalendarDaysIcon } from "lucide-react";
 import { useMemo, useState } from "react";
+import { flushSync } from "react-dom";
 import { toast } from "sonner";
 
 import { api, queryClient } from "@/shared/lib/api/client";
@@ -30,13 +30,11 @@ import { isEventTypePayloadSubmittable, newEventTypePayload, type Schedule, slug
 export function CreateEventTypeDialog({
   schedules,
   isOpen,
-  onOpenChange,
-  showTrigger = true
+  onOpenChange
 }: Readonly<{
   schedules: Schedule[];
   isOpen?: boolean;
   onOpenChange?: (isOpen: boolean) => void;
-  showTrigger?: boolean;
 }>) {
   const defaultSchedule = useMemo(() => schedules.find((schedule) => schedule.isDefault) ?? schedules[0], [schedules]);
   const [uncontrolledOpen, setUncontrolledOpen] = useState(false);
@@ -49,13 +47,7 @@ export function CreateEventTypeDialog({
 
   return (
     <DirtyDialog trackingTitle={t`Create event type`} open={open} onOpenChange={handleOpenChange}>
-      {showTrigger && (
-        <DialogTrigger render={<Button disabled={!defaultSchedule} />}>
-          <PlusIcon />
-          <Trans>New event type</Trans>
-        </DialogTrigger>
-      )}
-      <DialogContent className="sm:max-w-2xl">
+      <DialogContent className="sm:w-dialog-lg">
         <DialogHeader>
           <DialogTitle>
             <Trans>Add new event type</Trans>
@@ -64,9 +56,53 @@ export function CreateEventTypeDialog({
             <Trans>Create the booking page basics now, then finish setup on the next screen.</Trans>
           </DialogDescription>
         </DialogHeader>
-        {open && <CreateEventTypeDialogBody defaultSchedule={defaultSchedule} onClose={() => handleOpenChange(false)} />}
+        {open &&
+          (defaultSchedule ? (
+            <CreateEventTypeDialogBody defaultSchedule={defaultSchedule} onClose={() => handleOpenChange(false)} />
+          ) : (
+            <CreateEventTypeNoScheduleBody onClose={() => handleOpenChange(false)} />
+          ))}
       </DialogContent>
     </DirtyDialog>
+  );
+}
+
+function CreateEventTypeNoScheduleBody({ onClose }: Readonly<{ onClose: () => void }>) {
+  const navigate = useNavigate();
+
+  return (
+    <>
+      <DialogBody>
+        <Empty className="min-h-48 border">
+          <EmptyHeader>
+            <EmptyMedia variant="icon">
+              <CalendarDaysIcon />
+            </EmptyMedia>
+            <EmptyTitle>
+              <Trans>Create availability first</Trans>
+            </EmptyTitle>
+            <EmptyDescription>
+              <Trans>Create an availability schedule before adding event types.</Trans>
+            </EmptyDescription>
+          </EmptyHeader>
+        </Empty>
+      </DialogBody>
+      <DialogFooter>
+        <DialogClose render={<Button type="reset" variant="outline" />}>
+          <Trans>Cancel</Trans>
+        </DialogClose>
+        <Button
+          type="button"
+          onClick={() => {
+            onClose();
+            navigate({ to: "/availability" });
+          }}
+        >
+          <CalendarDaysIcon />
+          <Trans>Go to availability</Trans>
+        </Button>
+      </DialogFooter>
+    </>
   );
 }
 
@@ -85,8 +121,13 @@ function CreateEventTypeDialogBody({
     onSuccess: (eventType) => {
       toast.success(t`Event type created`);
       void queryClient.invalidateQueries();
+      flushSync(() => setDirty(false));
       onClose();
-      navigate({ to: "/event-types/$eventTypeId", params: { eventTypeId: eventType.id }, search: { tabName: "setup" } });
+      navigate({
+        to: "/event-types/$eventTypeId",
+        params: { eventTypeId: eventType.id },
+        search: { tabName: "setup" }
+      });
     }
   });
   const canSubmit = defaultSchedule !== undefined && isEventTypePayloadSubmittable(draft);
@@ -114,9 +155,7 @@ function CreateEventTypeDialogBody({
             required={true}
             autoFocus={true}
             value={draft.title}
-            onChange={(title) =>
-              updateDraft({ ...draft, title, slug: slugWasEdited ? draft.slug : slugify(title) })
-            }
+            onChange={(title) => updateDraft({ ...draft, title, slug: slugWasEdited ? draft.slug : slugify(title) })}
           />
           <TextField
             name="slug"
@@ -129,13 +168,6 @@ function CreateEventTypeDialogBody({
             }}
           />
         </div>
-        <TextAreaField
-          name="description"
-          label={t`Description`}
-          lines={3}
-          value={draft.description ?? ""}
-          onChange={(description) => updateDraft({ ...draft, description: description || null })}
-        />
         <NumberField
           name="durationMinutes"
           label={t`Duration`}

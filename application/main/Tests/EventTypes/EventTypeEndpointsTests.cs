@@ -4,6 +4,7 @@ using FluentAssertions;
 using JetBrains.Annotations;
 using Main.Database;
 using SharedKernel.Tests;
+using SharedKernel.Validation;
 using Xunit;
 
 namespace Main.Tests.EventTypes;
@@ -32,6 +33,113 @@ public sealed class EventTypeEndpointsTests : EndpointBaseTest<MainDbContext>
         getResponse.ShouldBeSuccessfulGetRequest();
         var fetched = await getResponse.DeserializeResponse<EventTypeResponse>();
         fetched!.Id.Should().Be(created.Id);
+    }
+
+    [Fact]
+    public async Task CreateEventType_WhenSettingsAreProvided_ShouldPersistAndReturnSettings()
+    {
+        var schedule = await CreateScheduleAsync();
+        var command = NewEventTypeRequest(
+            schedule.Id,
+            "Team workshop",
+            "team-workshop",
+            durationMinutes: 60,
+            locationType: "link",
+            locationValue: "https://example.com/workshop",
+            settings: NewSettings()
+        );
+
+        var createResponse = await AuthenticatedOwnerHttpClient.PostAsJsonAsync("/api/event-types", command);
+        createResponse.EnsureSuccessStatusCode();
+        var created = await createResponse.DeserializeResponse<EventTypeResponse>();
+
+        created!.Settings.DurationOptions.Should().Equal(30, 60, 90);
+        created.Settings.Locations.Should().ContainSingle();
+        created.Settings.Locations[0].Type.Should().Be("inPerson");
+        created.Settings.Locations[0].Value.Should().Be("Boardroom");
+        created.Settings.BookingFields.Should().ContainSingle();
+        created.Settings.BookingWindow.FixedStartDate.Should().Be(new DateOnly(2026, 6, 1));
+        created.Settings.BookingWindow.FixedEndDate.Should().Be(new DateOnly(2026, 6, 30));
+        created.Settings.Limits.MaxBookingsPerDay.Should().Be(4);
+        created.Settings.Recurrence!.Interval.Should().Be(2);
+        created.Settings.Seats.Enabled.Should().BeFalse();
+
+        var getResponse = await AuthenticatedOwnerHttpClient.GetAsync($"/api/event-types/{created.Id}");
+        getResponse.ShouldBeSuccessfulGetRequest();
+        var fetched = await getResponse.DeserializeResponse<EventTypeResponse>();
+        fetched!.Settings.Should().BeEquivalentTo(created.Settings);
+    }
+
+    [Fact]
+    public async Task CreateEventType_WhenSettingsOmitDurationsAndLocations_ShouldNormalizeFromSimpleFields()
+    {
+        var schedule = await CreateScheduleAsync();
+        var command = NewEventTypeRequest(
+            schedule.Id,
+            "Phone consult",
+            "phone-consult",
+            durationMinutes: 45,
+            locationType: "phone",
+            locationValue: "+27110000000",
+            settings: new { bookingFields = Array.Empty<object>() }
+        );
+
+        var response = await AuthenticatedOwnerHttpClient.PostAsJsonAsync("/api/event-types", command);
+        response.EnsureSuccessStatusCode();
+        var created = await response.DeserializeResponse<EventTypeResponse>();
+
+        created!.Settings.DurationOptions.Should().Equal(45);
+        created.Settings.Locations.Should().ContainSingle();
+        created.Settings.Locations[0].Type.Should().Be("phone");
+        created.Settings.Locations[0].Value.Should().Be("+27110000000");
+    }
+
+    [Fact]
+    public async Task CreateEventType_WhenSettingsAreInvalid_ShouldReturnValidationErrors()
+    {
+        var schedule = await CreateScheduleAsync();
+        var command = NewEventTypeRequest(
+            schedule.Id,
+            "Invalid settings",
+            "invalid-settings",
+            settings: new
+            {
+                durationOptions = new[] { 4, 30 },
+                locations = new[] { new { type = "", value = new string('x', 501) } },
+                bookingFields = new[] { new { name = "", label = "", type = "", required = true, options = Array.Empty<string>() } },
+                bookingWindow = new { fixedStartDate = "2026-07-01", fixedEndDate = "2026-06-30" },
+                limits = new
+                {
+                    maxBookingsPerDay = -1,
+                    maxBookingDurationMinutesPerDay = -1,
+                    maxActiveBookingsPerBooker = -1,
+                    firstAvailableSlotMinutes = -1,
+                    offsetStartMinutes = -1
+                },
+                recurrence = new { frequency = "weekly", interval = 0, count = 0 },
+                seats = new { enabled = true, capacity = 0, showAttendeeInfo = true }
+            }
+        );
+
+        var response = await AuthenticatedOwnerHttpClient.PostAsJsonAsync("/api/event-types", command);
+
+        await response.ShouldHaveErrorStatusCode(
+            HttpStatusCode.BadRequest,
+            [
+                new ErrorDetail("Settings.DurationOptions", "Duration options must be between 5 and 1440 minutes."),
+                new ErrorDetail("Settings.Locations[0].Type", "Location type must be between 1 and 80 characters."),
+                new ErrorDetail("Settings.Locations[0].Value", "Location value must be at most 500 characters."),
+                new ErrorDetail("Settings.BookingFields[0].Name", "Booking field name is required."),
+                new ErrorDetail("Settings.BookingFields[0].Label", "Booking field label is required."),
+                new ErrorDetail("Settings.BookingFields[0].Type", "Booking field type is required."),
+                new ErrorDetail("Settings.BookingWindow", "Fixed booking window start date must be before or equal to end date."),
+                new ErrorDetail("Settings.Limits", "Event type limits must be non-negative."),
+                new ErrorDetail("Settings.Recurrence.Interval", "Recurrence interval must be positive."),
+                new ErrorDetail("Settings.Recurrence.Count", "Recurrence count must be positive."),
+                new ErrorDetail("Settings.Seats.Capacity", "Seats capacity must be positive when seats are enabled."),
+                new ErrorDetail("Settings", "Recurring event types cannot use seats.")
+            ]
+        );
     }
 
     [Fact]
@@ -192,7 +300,8 @@ public sealed class EventTypeEndpointsTests : EndpointBaseTest<MainDbContext>
         int slotIntervalMinutes = 30,
         int minimumBookingNoticeMinutes = 60,
         string? locationType = "link",
-        string? locationValue = "https://example.com/meet"
+        string? locationValue = "https://example.com/meet",
+        object? settings = null
     )
     {
         return new
@@ -208,7 +317,34 @@ public sealed class EventTypeEndpointsTests : EndpointBaseTest<MainDbContext>
             slotIntervalMinutes,
             minimumBookingNoticeMinutes,
             locationType,
-            locationValue
+            locationValue,
+            settings
+        };
+    }
+
+    private static object NewSettings()
+    {
+        return new
+        {
+            durationOptions = new[] { 90, 30, 60, 60 },
+            locations = new[] { new { type = "inPerson", value = "Boardroom" } },
+            bookingFields = new[]
+            {
+                new { name = "company", label = "Company", type = "text", required = true, options = Array.Empty<string>() }
+            },
+            bookerLayout = "week",
+            eventColor = "#2f6fed",
+            bookingWindow = new { rollingWindowDays = 30, fixedStartDate = "2026-06-01", fixedEndDate = "2026-06-30" },
+            limits = new { maxBookingsPerDay = 4, maxBookingDurationMinutesPerDay = 240, maxActiveBookingsPerBooker = 2, firstAvailableSlotMinutes = 15, offsetStartMinutes = 10 },
+            confirmationPolicy = new { requiresConfirmation = true, requiresBookerEmailVerification = true },
+            recurrence = new { frequency = "weekly", interval = 2, count = 5 },
+            seats = new { enabled = false, capacity = (int?)null, showAttendeeInfo = false },
+            privateLinks = new[] { " vip ", "VIP" },
+            cancellationPolicy = new { allowCancellation = true, minimumNoticeMinutes = 120 },
+            reschedulePolicy = new { allowReschedule = true, minimumNoticeMinutes = 180 },
+            redirects = new { successUrl = "https://example.com/success", cancellationUrl = "https://example.com/cancel" },
+            interfaceLanguage = "en",
+            metadata = new Dictionary<string, string> { ["source"] = "test" }
         };
     }
 
@@ -229,9 +365,60 @@ public sealed class EventTypeEndpointsTests : EndpointBaseTest<MainDbContext>
         int SlotIntervalMinutes,
         int MinimumBookingNoticeMinutes,
         string? LocationType,
-        string? LocationValue
+        string? LocationValue,
+        EventTypeSettingsResponse Settings
     );
 
     [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
     private sealed record ScheduleResponse(string Id);
+
+    [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
+    private sealed record EventTypeSettingsResponse(
+        int[] DurationOptions,
+        EventTypeLocationResponse[] Locations,
+        EventTypeBookingFieldResponse[] BookingFields,
+        string BookerLayout,
+        string? EventColor,
+        EventTypeBookingWindowResponse BookingWindow,
+        EventTypeLimitsResponse Limits,
+        EventTypeConfirmationPolicyResponse ConfirmationPolicy,
+        EventTypeRecurrenceResponse? Recurrence,
+        EventTypeSeatsResponse Seats,
+        string[] PrivateLinks,
+        EventTypeCancellationPolicyResponse CancellationPolicy,
+        EventTypeReschedulePolicyResponse ReschedulePolicy,
+        EventTypeRedirectsResponse Redirects,
+        string? InterfaceLanguage,
+        Dictionary<string, string> Metadata
+    );
+
+    [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
+    private sealed record EventTypeLocationResponse(string Type, string? Value);
+
+    [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
+    private sealed record EventTypeBookingFieldResponse(string Name, string Label, string Type, bool Required, string[] Options);
+
+    [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
+    private sealed record EventTypeBookingWindowResponse(int? RollingWindowDays, DateOnly? FixedStartDate, DateOnly? FixedEndDate);
+
+    [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
+    private sealed record EventTypeLimitsResponse(int? MaxBookingsPerDay, int? MaxBookingDurationMinutesPerDay, int? MaxActiveBookingsPerBooker, int? FirstAvailableSlotMinutes, int? OffsetStartMinutes);
+
+    [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
+    private sealed record EventTypeConfirmationPolicyResponse(bool RequiresConfirmation, bool RequiresBookerEmailVerification);
+
+    [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
+    private sealed record EventTypeRecurrenceResponse(string Frequency, int Interval, int? Count);
+
+    [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
+    private sealed record EventTypeSeatsResponse(bool Enabled, int? Capacity, bool ShowAttendeeInfo);
+
+    [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
+    private sealed record EventTypeCancellationPolicyResponse(bool AllowCancellation, int? MinimumNoticeMinutes);
+
+    [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
+    private sealed record EventTypeReschedulePolicyResponse(bool AllowReschedule, int? MinimumNoticeMinutes);
+
+    [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
+    private sealed record EventTypeRedirectsResponse(string? SuccessUrl, string? CancellationUrl);
 }

@@ -7,6 +7,7 @@ export type AvailabilityDateOverride = NonNullable<SchedulePayload["dateOverride
 export type AvailabilityOverrideWindow = AvailabilityDateOverride["windows"][number];
 export type EventType = Schemas["EventTypeResponse"];
 export type EventTypePayload = Schemas["CreateEventTypeCommand"];
+export type EventTypeUpdatePayload = Schemas["UpdateEventTypeCommand"];
 export type ApiValidationError = Schemas["HttpValidationProblemDetails"] | null | undefined;
 
 export function newSchedulePayload(isDefault = false): SchedulePayload {
@@ -49,7 +50,8 @@ export function newEventTypePayload(scheduleId: string): EventTypePayload {
     slotIntervalMinutes: 30,
     minimumBookingNoticeMinutes: 60,
     locationType: "link",
-    locationValue: ""
+    locationValue: "",
+    settings: null
   };
 }
 
@@ -102,7 +104,18 @@ export function eventTypeToPayload(eventType: EventType): EventTypePayload {
     slotIntervalMinutes: eventType.slotIntervalMinutes,
     minimumBookingNoticeMinutes: eventType.minimumBookingNoticeMinutes,
     locationType: eventType.locationType,
-    locationValue: eventType.locationValue
+    locationValue: eventType.locationValue,
+    settings: eventType.settings
+  };
+}
+
+export function eventTypeToUpdatePayload(
+  eventTypeId: EventType["id"],
+  payload: EventTypePayload
+): EventTypeUpdatePayload {
+  return {
+    ...payload,
+    id: eventTypeId
   };
 }
 

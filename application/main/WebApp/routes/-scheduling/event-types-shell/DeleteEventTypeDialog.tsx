@@ -15,8 +15,9 @@ import { toast } from "sonner";
 
 import { api, queryClient } from "@/shared/lib/api/client";
 
-import { GeneralApiErrors } from "../ApiErrors";
 import type { EventType } from "../schedulingTypes";
+
+import { GeneralApiErrors } from "../ApiErrors";
 
 export function DeleteEventTypeDialog({
   eventType,

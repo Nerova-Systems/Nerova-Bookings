@@ -5,7 +5,6 @@ import { Form } from "@repo/ui/components/Form";
 import { NumberField } from "@repo/ui/components/NumberField";
 import { SelectContent, SelectItem, SelectTrigger, SelectValue } from "@repo/ui/components/Select";
 import { SelectField } from "@repo/ui/components/SelectField";
-import { SwitchField } from "@repo/ui/components/SwitchField";
 import { TextAreaField } from "@repo/ui/components/TextAreaField";
 import { TextField } from "@repo/ui/components/TextField";
 import { SaveIcon } from "lucide-react";
@@ -106,7 +105,7 @@ export function EventTypeForm({
         value={value.description ?? ""}
         onChange={(description) => onChange({ ...value, description: description || null })}
       />
-      <div className="grid gap-4 md:grid-cols-4">
+      <div className="grid gap-4 md:grid-cols-3">
         <NumberField
           name="durationMinutes"
           label={t`Duration`}
@@ -132,13 +131,6 @@ export function EventTypeForm({
           onChange={(minimumBookingNoticeMinutes) =>
             onChange({ ...value, minimumBookingNoticeMinutes: minimumBookingNoticeMinutes ?? 0 })
           }
-        />
-        <SwitchField
-          name="hidden"
-          label={t`Hidden`}
-          alignWithLabel={true}
-          checked={value.hidden}
-          onCheckedChange={(hidden) => onChange({ ...value, hidden })}
         />
       </div>
       <div className="grid gap-4 md:grid-cols-3">

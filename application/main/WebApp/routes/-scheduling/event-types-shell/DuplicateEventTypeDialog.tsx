@@ -18,12 +18,14 @@ import { TextAreaField } from "@repo/ui/components/TextAreaField";
 import { TextField } from "@repo/ui/components/TextField";
 import { useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
+import { flushSync } from "react-dom";
 import { toast } from "sonner";
 
 import { api, queryClient } from "@/shared/lib/api/client";
 
-import { GeneralApiErrors } from "../ApiErrors";
 import type { EventType, EventTypePayload } from "../schedulingTypes";
+
+import { GeneralApiErrors } from "../ApiErrors";
 import { isEventTypePayloadSubmittable, slugify } from "../schedulingTypes";
 import { eventTypeToDuplicatePayload } from "./eventTypeShellTypes";
 
@@ -53,10 +55,7 @@ export function DuplicateEventTypeDialog({
   );
 }
 
-function DuplicateEventTypeDialogBody({
-  eventType,
-  onClose
-}: Readonly<{ eventType: EventType; onClose: () => void }>) {
+function DuplicateEventTypeDialogBody({ eventType, onClose }: Readonly<{ eventType: EventType; onClose: () => void }>) {
   const navigate = useNavigate();
   const setDirty = useDialogSetDirty();
   const [draft, setDraft] = useState<EventTypePayload>(() => eventTypeToDuplicatePayload(eventType));
@@ -64,6 +63,7 @@ function DuplicateEventTypeDialogBody({
     onSuccess: (createdEventType) => {
       toast.success(t`Event type duplicated`);
       void queryClient.invalidateQueries();
+      flushSync(() => setDirty(false));
       onClose();
       navigate({
         to: "/event-types/$eventTypeId",

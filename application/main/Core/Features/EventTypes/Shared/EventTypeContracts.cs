@@ -18,7 +18,8 @@ public sealed record EventTypeResponse(
     int SlotIntervalMinutes,
     int MinimumBookingNoticeMinutes,
     string? LocationType,
-    string? LocationValue
+    string? LocationValue,
+    EventTypeSettings Settings
 )
 {
     public static EventTypeResponse From(EventType eventType)
@@ -36,7 +37,8 @@ public sealed record EventTypeResponse(
             eventType.SlotIntervalMinutes,
             eventType.MinimumBookingNoticeMinutes,
             eventType.LocationType,
-            eventType.LocationValue
+            eventType.LocationValue,
+            eventType.Settings
         );
     }
 }

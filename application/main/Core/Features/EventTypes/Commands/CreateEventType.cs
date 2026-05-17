@@ -23,7 +23,8 @@ public sealed record CreateEventTypeCommand(
     int SlotIntervalMinutes,
     int MinimumBookingNoticeMinutes,
     string? LocationType,
-    string? LocationValue
+    string? LocationValue,
+    EventTypeSettings? Settings = null
 ) : ICommand, IRequest<Result<EventTypeResponse>>;
 
 public sealed class CreateEventTypeValidator : AbstractValidator<CreateEventTypeCommand>
@@ -44,6 +45,15 @@ public sealed class CreateEventTypeValidator : AbstractValidator<CreateEventType
         RuleFor(command => command.MinimumBookingNoticeMinutes).InclusiveBetween(0, 525600);
         RuleFor(command => command.LocationType).MaximumLength(80);
         RuleFor(command => command.LocationValue).MaximumLength(500);
+        RuleFor(command => command.Settings!)
+            .SetValidator(new EventTypeSettingsValidator())
+            .When(command => command.Settings is not null);
+        RuleFor(command => command)
+            .Must(command => command.Settings is null ||
+                             command.Settings.DurationOptions.Length == 0 ||
+                             command.Settings.DurationOptions.Contains(command.DurationMinutes)
+            )
+            .WithMessage("Duration options must include the primary duration.");
     }
 }
 
@@ -94,7 +104,8 @@ public sealed class CreateEventTypeHandler(
             command.SlotIntervalMinutes,
             command.MinimumBookingNoticeMinutes,
             command.LocationType,
-            command.LocationValue
+            command.LocationValue,
+            command.Settings
         );
 
         await eventTypeRepository.AddAsync(eventType, cancellationToken);

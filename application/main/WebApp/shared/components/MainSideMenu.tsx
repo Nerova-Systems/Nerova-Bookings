@@ -64,7 +64,7 @@ export function MainSideMenu() {
                     isActive={currentPath.startsWith("/event-types")}
                     tooltip={t`Event types`}
                   >
-                    <RouterLink to="/event-types">
+                    <RouterLink to="/event-types" search={{ dialog: undefined, duplicateEventTypeId: undefined }}>
                       <TimerIcon />
                       <span>
                         <Trans>Event types</Trans>

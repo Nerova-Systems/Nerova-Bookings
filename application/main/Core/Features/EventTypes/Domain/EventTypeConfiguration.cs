@@ -1,3 +1,4 @@
+using System.Text.Json;
 using Main.Features.Schedules.Domain;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -8,6 +9,8 @@ namespace Main.Features.EventTypes.Domain;
 
 public sealed class EventTypeConfiguration : IEntityTypeConfiguration<EventType>
 {
+    private static readonly JsonSerializerOptions JsonSerializerOptions = JsonSerializerOptions.Default;
+
     public void Configure(EntityTypeBuilder<EventType> builder)
     {
         builder.MapStronglyTypedUuid<EventType, EventTypeId>(eventType => eventType.Id);
@@ -20,6 +23,12 @@ public sealed class EventTypeConfiguration : IEntityTypeConfiguration<EventType>
         builder.Property(eventType => eventType.Description).HasMaxLength(1000);
         builder.Property(eventType => eventType.LocationType).HasMaxLength(80);
         builder.Property(eventType => eventType.LocationValue).HasMaxLength(500);
+        builder.Property(eventType => eventType.Settings)
+            .HasColumnType("jsonb")
+            .HasConversion(
+                settings => JsonSerializer.Serialize(settings, JsonSerializerOptions),
+                value => JsonSerializer.Deserialize<EventTypeSettings>(value, JsonSerializerOptions) ?? new EventTypeSettings()
+            );
 
         builder.HasOne<Schedule>()
             .WithMany()

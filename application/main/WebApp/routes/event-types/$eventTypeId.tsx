@@ -2,7 +2,6 @@ import { t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
 import { Button } from "@repo/ui/components/Button";
 import { Switch } from "@repo/ui/components/Switch";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@repo/ui/components/Tabs";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { ArrowLeftIcon, SaveIcon, Trash2Icon } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
@@ -11,20 +10,17 @@ import { toast } from "sonner";
 import { api, queryClient } from "@/shared/lib/api/client";
 
 import { GeneralApiErrors } from "../-scheduling/ApiErrors";
-import { EventTypeForm } from "../-scheduling/EventTypeForm";
-import { SchedulingPageShell } from "../-scheduling/SchedulingPageShell";
-import { CopyEventTypeButton, PreviewEventTypeButton } from "../-scheduling/event-types-shell/EventTypeActionButtons";
 import { DeleteEventTypeDialog } from "../-scheduling/event-types-shell/DeleteEventTypeDialog";
-import { EventTypePlaceholderTab } from "../-scheduling/event-types-shell/EventTypePlaceholderTabs";
+import { CopyEventTypeButton, PreviewEventTypeButton } from "../-scheduling/event-types-shell/EventTypeActionButtons";
+import { EventTypeEditorTabs, eventTypeFormId } from "../-scheduling/event-types-shell/EventTypeEditorTabs";
+import { getEventTypePublicUrl, isEventTypeTabName } from "../-scheduling/event-types-shell/eventTypeShellTypes";
+import { SchedulingPageShell } from "../-scheduling/SchedulingPageShell";
 import {
-  eventTypeTabs,
-  getEventTypePublicUrl,
-  isEventTypeTabName,
-  type EventTypeTabName
-} from "../-scheduling/event-types-shell/eventTypeShellTypes";
-import { eventTypeToPayload, isEventTypePayloadSubmittable, type EventTypePayload } from "../-scheduling/schedulingTypes";
-
-const eventTypeFormId = "event-type-editor-form";
+  eventTypeToPayload,
+  eventTypeToUpdatePayload,
+  isEventTypePayloadSubmittable,
+  type EventTypePayload
+} from "../-scheduling/schedulingTypes";
 
 export const Route = createFileRoute("/event-types/$eventTypeId")({
   staticData: { trackingTitle: "Event type details" },
@@ -90,14 +86,11 @@ function EventTypeDetailsPage() {
       }
       actions={
         eventType && draft ? (
-          <div className="flex items-center gap-2">
-            <label className="hidden items-center gap-2 text-sm text-muted-foreground md:flex">
-              <Switch
-                checked={!draft.hidden}
-                onCheckedChange={(checked) => handleDraftChange({ ...draft, hidden: !checked })}
-              />
-              <Trans>Show on profile</Trans>
-            </label>
+          <div className="flex flex-wrap items-center justify-end gap-2">
+            <div className="hidden items-center gap-2 text-sm text-muted-foreground md:flex">
+              <Switch checked={draft.hidden} onCheckedChange={(hidden) => handleDraftChange({ ...draft, hidden })} />
+              <Trans>Hidden</Trans>
+            </div>
             <CopyEventTypeButton eventType={eventType} />
             <PreviewEventTypeButton eventType={eventType} />
             <Button type="button" variant="outline" size="sm" onClick={() => setDeleteDialogOpen(true)}>
@@ -127,55 +120,25 @@ function EventTypeDetailsPage() {
         <>
           <div className="mb-4 flex items-center justify-between gap-3 rounded-md border p-3 md:hidden">
             <span className="text-sm font-medium">
-              <Trans>Show on profile</Trans>
+              <Trans>Hidden</Trans>
             </span>
-            <Switch checked={!draft.hidden} onCheckedChange={(checked) => handleDraftChange({ ...draft, hidden: !checked })} />
+            <Switch checked={draft.hidden} onCheckedChange={(hidden) => handleDraftChange({ ...draft, hidden })} />
           </div>
-          <Tabs
-            value={tabName}
-            onValueChange={(nextTabName) =>
-              navigate({
-                to: "/event-types/$eventTypeId",
-                params: { eventTypeId },
-                search: { tabName: nextTabName as EventTypeTabName }
+          <EventTypeEditorTabs
+            eventTypeId={eventTypeId}
+            tabName={tabName}
+            draft={draft}
+            schedules={schedules}
+            canSave={canSave}
+            error={updateEventTypeMutation.error}
+            onChange={handleDraftChange}
+            onSubmit={() =>
+              updateEventTypeMutation.mutate({
+                params: { path: { id: eventTypeId } },
+                body: eventTypeToUpdatePayload(eventTypeId, draft)
               })
             }
-          >
-            <TabsList>
-              {eventTypeTabs.map((tab) => (
-                <TabsTrigger key={tab.name} value={tab.name}>
-                  {tab.label}
-                </TabsTrigger>
-              ))}
-            </TabsList>
-            <TabsContent value="setup">
-              <EventTypeForm
-                formId={eventTypeFormId}
-                value={draft}
-                schedules={schedules}
-                onChange={handleDraftChange}
-                onSubmit={(body) =>
-                  updateEventTypeMutation.mutate({
-                    params: { path: { id: eventTypeId } },
-                    body: { ...body, id: eventTypeId }
-                  })
-                }
-                error={updateEventTypeMutation.error}
-                isPending={updateEventTypeMutation.isPending}
-                submitLabel={t`Save event type`}
-                showSubmit={false}
-              />
-            </TabsContent>
-            <TabsContent value="availability">
-              <EventTypePlaceholderTab name={t`Availability`} />
-            </TabsContent>
-            <TabsContent value="limits">
-              <EventTypePlaceholderTab name={t`Limits`} />
-            </TabsContent>
-            <TabsContent value="advanced">
-              <EventTypePlaceholderTab name={t`Advanced`} />
-            </TabsContent>
-          </Tabs>
+          />
         </>
       )}
       <DeleteEventTypeDialog

@@ -40,12 +40,13 @@ public sealed class EventType : SoftDeletableAggregateRoot<EventTypeId>, ITenant
         int slotIntervalMinutes,
         int minimumBookingNoticeMinutes,
         string? locationType,
-        string? locationValue
+        string? locationValue,
+        EventTypeSettings? settings
     ) : base(EventTypeId.NewId())
     {
         TenantId = tenantId;
         OwnerUserId = ownerUserId;
-        Update(title, slug, description, durationMinutes, hidden, scheduleId, beforeEventBufferMinutes, afterEventBufferMinutes, slotIntervalMinutes, minimumBookingNoticeMinutes, locationType, locationValue);
+        Update(title, slug, description, durationMinutes, hidden, scheduleId, beforeEventBufferMinutes, afterEventBufferMinutes, slotIntervalMinutes, minimumBookingNoticeMinutes, locationType, locationValue, settings);
     }
 
     public UserId OwnerUserId { get; private set; }
@@ -74,6 +75,8 @@ public sealed class EventType : SoftDeletableAggregateRoot<EventTypeId>, ITenant
 
     public string? LocationValue { get; private set; }
 
+    public EventTypeSettings Settings { get; private set; } = new();
+
     public TenantId TenantId { get; } = new(0);
 
     public static EventType Create(
@@ -90,10 +93,11 @@ public sealed class EventType : SoftDeletableAggregateRoot<EventTypeId>, ITenant
         int slotIntervalMinutes,
         int minimumBookingNoticeMinutes,
         string? locationType,
-        string? locationValue
+        string? locationValue,
+        EventTypeSettings? settings
     )
     {
-        return new EventType(tenantId, ownerUserId, title, slug, description, durationMinutes, hidden, scheduleId, beforeEventBufferMinutes, afterEventBufferMinutes, slotIntervalMinutes, minimumBookingNoticeMinutes, locationType, locationValue);
+        return new EventType(tenantId, ownerUserId, title, slug, description, durationMinutes, hidden, scheduleId, beforeEventBufferMinutes, afterEventBufferMinutes, slotIntervalMinutes, minimumBookingNoticeMinutes, locationType, locationValue, settings);
     }
 
     public void Update(
@@ -108,7 +112,8 @@ public sealed class EventType : SoftDeletableAggregateRoot<EventTypeId>, ITenant
         int slotIntervalMinutes,
         int minimumBookingNoticeMinutes,
         string? locationType,
-        string? locationValue
+        string? locationValue,
+        EventTypeSettings? settings
     )
     {
         Title = title.Trim();
@@ -123,5 +128,6 @@ public sealed class EventType : SoftDeletableAggregateRoot<EventTypeId>, ITenant
         MinimumBookingNoticeMinutes = minimumBookingNoticeMinutes;
         LocationType = string.IsNullOrWhiteSpace(locationType) ? null : locationType.Trim();
         LocationValue = string.IsNullOrWhiteSpace(locationValue) ? null : locationValue.Trim();
+        Settings = EventTypeSettings.Normalize(settings, DurationMinutes, LocationType, LocationValue);
     }
 }

@@ -42,6 +42,9 @@ msgstr "Add override"
 msgid "Add time"
 msgstr "Add time"
 
+msgid "Additional settings"
+msgstr "Additional settings"
+
 msgid "Advanced"
 msgstr "Advanced"
 
@@ -66,6 +69,15 @@ msgstr "Back to availability"
 msgid "Before buffer"
 msgstr "Before buffer"
 
+msgid "Blocks other event types"
+msgstr "Blocks other event types"
+
+msgid "Booking limits"
+msgstr "Booking limits"
+
+msgid "Buffers"
+msgstr "Buffers"
+
 msgid "Burning the midnight oil, {firstName}?"
 msgstr "Burning the midnight oil, {firstName}?"
 
@@ -75,11 +87,29 @@ msgstr "Burning the midnight oil?"
 msgid "Cancel"
 msgstr "Cancel"
 
+msgid "Choose how guests will join or where they should arrive."
+msgstr "Choose how guests will join or where they should arrive."
+
+msgid "Choose which schedule controls when this event type can be booked."
+msgstr "Choose which schedule controls when this event type can be booked."
+
 msgid "Configure the appointment types clients can book."
 msgstr "Configure the appointment types clients can book."
 
 msgid "Continue"
 msgstr "Continue"
+
+msgid "Control how soon bookings can be made and how the schedule is divided into slots."
+msgstr "Control how soon bookings can be made and how the schedule is divided into slots."
+
+msgid "Control whether guests can cancel one event or the full series."
+msgstr "Control whether guests can cancel one event or the full series."
+
+msgid "Control whether this booking page is listed publicly."
+msgstr "Control whether this booking page is listed publicly."
+
+msgid "Coordinate event type dependencies without calling unavailable APIs."
+msgstr "Coordinate event type dependencies without calling unavailable APIs."
 
 msgid "Copy link"
 msgstr "Copy link"
@@ -100,14 +130,11 @@ msgstr "Create a private setup event type before opening public booking."
 msgid "Create a weekly schedule before publishing event types."
 msgstr "Create a weekly schedule before publishing event types."
 
-msgid "Create an availability schedule before creating event types."
-msgstr "Create an availability schedule before creating event types."
+msgid "Create an availability schedule before adding event types."
+msgstr "Create an availability schedule before adding event types."
 
 msgid "Create another schedule before deleting this one."
 msgstr "Create another schedule before deleting this one."
-
-msgid "Create availability"
-msgstr "Create availability"
 
 msgid "Create availability first"
 msgstr "Create availability first"
@@ -136,6 +163,9 @@ msgstr "Date overrides"
 msgid "Default"
 msgstr "Default"
 
+msgid "Define the public booking page details people see before they choose a time."
+msgstr "Define the public booking page details people see before they choose a time."
+
 msgid "Delete"
 msgstr "Delete"
 
@@ -147,6 +177,12 @@ msgstr "Delete event type?"
 
 msgid "Delete schedule"
 msgstr "Delete schedule"
+
+msgid "Dependencies"
+msgstr "Dependencies"
+
+msgid "Dependency rules are placeholders until event type relationships are supported."
+msgstr "Dependency rules are placeholders until event type relationships are supported."
 
 msgid "Description"
 msgstr "Description"
@@ -208,6 +244,9 @@ msgstr "Get started"
 msgid "Go to app"
 msgstr "Go to app"
 
+msgid "Go to availability"
+msgstr "Go to availability"
+
 msgid "Good afternoon"
 msgstr "Good afternoon"
 
@@ -232,11 +271,26 @@ msgstr "Here's your overview of what's happening."
 msgid "Hidden"
 msgstr "Hidden"
 
+msgid "Hold new bookings for manual approval before they are confirmed."
+msgstr "Hold new bookings for manual approval before they are confirmed."
+
 msgid "In person"
 msgstr "In person"
 
+msgid "Language"
+msgstr "Language"
+
 msgid "Launch troubleshooter"
 msgstr "Launch troubleshooter"
+
+msgid "Let guests book a series of events from one booking page."
+msgstr "Let guests book a series of events from one booking page."
+
+msgid "Limit booking access to generated private links."
+msgstr "Limit booking access to generated private links."
+
+msgid "Limit how many events can be created in a recurring series."
+msgstr "Limit how many events can be created in a recurring series."
 
 msgid "Limits"
 msgstr "Limits"
@@ -268,8 +322,14 @@ msgstr "Main navigation"
 msgid "Make another schedule default before deleting this one."
 msgstr "Make another schedule default before deleting this one."
 
+msgid "Make this event type available only after a related booking exists."
+msgstr "Make this event type available only after a related booking exists."
+
 msgid "Manage weekly schedules for booking availability."
 msgstr "Manage weekly schedules for booking availability."
+
+msgid "Managed relationship rules"
+msgstr "Managed relationship rules"
 
 msgid "Mon"
 msgstr "Mon"
@@ -307,11 +367,24 @@ msgstr "No event types yet"
 msgid "No schedules yet"
 msgstr "No schedules yet"
 
+msgid "No settings available yet."
+msgstr "No settings available yet."
+
+msgid "No weekly availability"
+msgstr "No weekly availability"
+
 msgid "No weekly hours"
 msgstr "No weekly hours"
 
+msgid "Not available"
+msgstr "Not available"
+
 msgid "Notice"
 msgstr "Notice"
+
+#. placeholder {0}: schedule.dateOverrides.length
+msgid "Overrides: {0}"
+msgstr "Overrides: {0}"
 
 msgid "Passed"
 msgstr "Passed"
@@ -319,14 +392,35 @@ msgstr "Passed"
 msgid "Phone"
 msgstr "Phone"
 
+msgid "Prevent selected event types from being booked when this one is active."
+msgstr "Prevent selected event types from being booked when this one is active."
+
 msgid "Preview"
 msgstr "Preview"
 
 msgid "Preview booking page"
 msgstr "Preview booking page"
 
+msgid "Private links"
+msgstr "Private links"
+
 msgid "Public link copied"
 msgstr "Public link copied"
+
+msgid "Recurring"
+msgstr "Recurring"
+
+msgid "Recurring booking rules are planned but are not connected to backend settings yet."
+msgstr "Recurring booking rules are planned but are not connected to backend settings yet."
+
+msgid "Recurring events"
+msgstr "Recurring events"
+
+msgid "Recurring limits"
+msgstr "Recurring limits"
+
+msgid "Redirect after booking"
+msgstr "Redirect after booking"
 
 msgid "Remove date override"
 msgstr "Remove date override"
@@ -334,14 +428,29 @@ msgstr "Remove date override"
 msgid "Remove time"
 msgstr "Remove time"
 
+msgid "Repeat interval"
+msgstr "Repeat interval"
+
 msgid "Replace this sample page with your own product information and branding."
 msgstr "Replace this sample page with your own product information and branding."
+
+msgid "Requires another booking"
+msgstr "Requires another booking"
+
+msgid "Requires confirmation"
+msgstr "Requires confirmation"
+
+msgid "Reserve time before and after every booking."
+msgstr "Reserve time before and after every booking."
 
 msgid "Review schedule setup issues that can prevent clients from finding bookable times."
 msgstr "Review schedule setup issues that can prevent clients from finding bookable times."
 
 msgid "Review the copied booking basics before creating the duplicate."
 msgstr "Review the copied booking basics before creating the duplicate."
+
+msgid "Review the selected schedule before saving this event type."
+msgstr "Review the selected schedule before saving this event type."
 
 msgid "Sat"
 msgstr "Sat"
@@ -351,9 +460,6 @@ msgstr "Saturday"
 
 msgid "Save"
 msgstr "Save"
-
-msgid "Save event type"
-msgstr "Save event type"
 
 msgid "Save schedule"
 msgstr "Save schedule"
@@ -376,6 +482,9 @@ msgstr "Schedule deleted"
 msgid "Schedule name"
 msgstr "Schedule name"
 
+msgid "Schedule summary"
+msgstr "Schedule summary"
+
 msgid "Schedule unavailable"
 msgstr "Schedule unavailable"
 
@@ -385,8 +494,20 @@ msgstr "Schedule updated"
 msgid "Search event types"
 msgstr "Search event types"
 
+msgid "Select a schedule to see its availability summary."
+msgstr "Select a schedule to see its availability summary."
+
 msgid "Select schedule"
 msgstr "Select schedule"
+
+msgid "Send guests to a custom page after they complete a booking."
+msgstr "Send guests to a custom page after they complete a booking."
+
+msgid "Series cancellation"
+msgstr "Series cancellation"
+
+msgid "Set a specific language for this event type booking page."
+msgstr "Set a specific language for this event type booking page."
 
 msgid "Set as default"
 msgstr "Set as default"
@@ -394,11 +515,11 @@ msgstr "Set as default"
 msgid "Set custom availability for one date."
 msgstr "Set custom availability for one date."
 
+msgid "Set how long this booking reserves on the calendar."
+msgstr "Set how long this booking reserves on the calendar."
+
 msgid "Setup"
 msgstr "Setup"
-
-msgid "Show on profile"
-msgstr "Show on profile"
 
 msgid "Slot interval"
 msgstr "Slot interval"
@@ -421,6 +542,9 @@ msgstr "Sun"
 msgid "Sunday"
 msgstr "Sunday"
 
+msgid "These settings will become editable when backend support is available."
+msgstr "These settings will become editable when backend support is available."
+
 msgid "this event type"
 msgstr "this event type"
 
@@ -429,9 +553,6 @@ msgstr "This is where your personalized dashboard content will appear. Stay tune
 
 msgid "This removes the booking page for {deleteSubject}."
 msgstr "This removes the booking page for {deleteSubject}."
-
-msgid "This tab shell is ready for the dedicated editor component."
-msgstr "This tab shell is ready for the dedicated editor component."
 
 msgid "This window overlaps another window on the same day."
 msgstr "This window overlaps another window on the same day."
@@ -457,11 +578,17 @@ msgstr "Tuesday"
 msgid "Unavailable"
 msgstr "Unavailable"
 
+msgid "Visibility"
+msgstr "Visibility"
+
 msgid "Wed"
 msgstr "Wed"
 
 msgid "Wednesday"
 msgstr "Wednesday"
+
+msgid "Weekly hours"
+msgstr "Weekly hours"
 
 msgid "Welcome to PlatformPlatform"
 msgstr "Welcome to PlatformPlatform"
