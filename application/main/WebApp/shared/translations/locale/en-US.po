@@ -150,6 +150,9 @@ msgstr "Booking cancelled"
 msgid "Booking confirmed"
 msgstr "Booking confirmed"
 
+msgid "Booking details"
+msgstr "Booking details"
+
 msgid "Booking ID"
 msgstr "Booking ID"
 
@@ -475,6 +478,9 @@ msgstr "Interface language"
 msgid "Interval"
 msgstr "Interval"
 
+msgid "Join meeting"
+msgstr "Join meeting"
+
 msgid "Keep booking"
 msgstr "Keep booking"
 
@@ -714,9 +720,6 @@ msgstr "Reschedule notice"
 msgid "Reserve time before and after every booking."
 msgstr "Reserve time before and after every booking."
 
-msgid "Responses"
-msgstr "Responses"
-
 msgid "Review schedule setup issues that can prevent clients from finding bookable times."
 msgstr "Review schedule setup issues that can prevent clients from finding bookable times."
 
@@ -740,6 +743,12 @@ msgstr "Save"
 
 msgid "Save schedule"
 msgstr "Save schedule"
+
+msgid "Saved filters"
+msgstr "Saved filters"
+
+msgid "Saved filters are not implemented yet."
+msgstr "Saved filters are not implemented yet."
 
 msgid "Saving..."
 msgstr "Saving..."
@@ -851,6 +860,9 @@ msgstr "Sun"
 
 msgid "Sunday"
 msgstr "Sunday"
+
+msgid "System"
+msgstr "System"
 
 msgid "These features need more integration before they can be edited here."
 msgstr "These features need more integration before they can be edited here."

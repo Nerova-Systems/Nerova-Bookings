@@ -84,7 +84,7 @@ function BookingsPage() {
   }, [navigate, search, view]);
 
   const updateSearch = (nextSearch: BookingFilterSearch) => {
-    navigate({ search: toRouteSearch({ ...search, ...nextSearch }, view, search.weekStart), replace: true });
+    navigate({ search: toRouteSearch(nextSearch, view, search.weekStart), replace: true });
   };
 
   const updatePageOffset = (pageOffset: number) => {

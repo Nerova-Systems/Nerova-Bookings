@@ -3,13 +3,14 @@ import { Trans } from "@lingui/react/macro";
 import { Button } from "@repo/ui/components/Button";
 import { ButtonGroup } from "@repo/ui/components/ButtonGroup";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@repo/ui/components/Tooltip";
-import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
+import { BookmarkIcon, ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
 import { useState } from "react";
 
 import { api } from "@/shared/lib/api/client";
 
 import type { EventType } from "../-scheduling/schedulingTypes";
 
+import { ActiveBookingFilters } from "./ActiveBookingFilters";
 import { BookingCalendarView } from "./BookingCalendarView";
 import { BookingDetailsSheet } from "./BookingDetailsSheet";
 import { BookingsFilters, type BookingFilterSearch } from "./BookingsFilters";
@@ -76,6 +77,16 @@ export function BookingCalendarContainer({
           <BookingsFilters eventTypes={eventTypes} search={search} onSearchChange={onSearchChange} />
         </div>
         <div className="flex items-center gap-2">
+          <Button
+            type="button"
+            variant="secondary"
+            size="sm"
+            disabled
+            title={t`Saved filters are not implemented yet.`}
+          >
+            <BookmarkIcon />
+            <Trans>Saved filters</Trans>
+          </Button>
           <Button type="button" variant="secondary" size="sm" onClick={() => updateWeekStart(new Date())}>
             <Trans>Today</Trans>
           </Button>
@@ -116,10 +127,12 @@ export function BookingCalendarContainer({
           <BookingViewToggleButton view={view} onViewChange={onViewChange} />
         </div>
       </div>
+      <ActiveBookingFilters eventTypes={eventTypes} search={search} onSearchChange={onSearchChange} />
       <BookingCalendarView
         bookings={data?.bookings ?? []}
         weekStart={weekStart}
         isLoading={isLoading}
+        selectedBookingId={selectedBooking?.id ?? null}
         onSelectBooking={setSelectedBooking}
       />
       <BookingDetailsSheet

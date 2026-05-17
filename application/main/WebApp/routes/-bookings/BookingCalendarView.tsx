@@ -13,11 +13,13 @@ export function BookingCalendarView({
   bookings,
   weekStart,
   isLoading,
+  selectedBookingId,
   onSelectBooking
 }: Readonly<{
   bookings: BookingListItem[];
   weekStart: Date;
   isLoading: boolean;
+  selectedBookingId: string | null;
   onSelectBooking: (booking: BookingListItem) => void;
 }>) {
   const days = getWeekDays(weekStart);
@@ -81,8 +83,10 @@ export function BookingCalendarView({
                   <button
                     key={booking.id}
                     type="button"
+                    data-state={selectedBookingId === booking.id ? "selected" : undefined}
                     className={cn(
                       "absolute right-1 left-1 cursor-pointer overflow-hidden rounded-md border border-primary/30 bg-primary/15 p-2 text-left text-xs shadow-xs outline-primary transition-colors hover:bg-primary/25 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 active:bg-primary/30",
+                      selectedBookingId === booking.id && "border-primary bg-primary/25 shadow-md",
                       booking.status.toLowerCase() === "pending" &&
                         "border-amber-500/40 bg-amber-500/15 hover:bg-amber-500/25",
                       ["cancelled", "rejected"].includes(booking.status.toLowerCase()) &&

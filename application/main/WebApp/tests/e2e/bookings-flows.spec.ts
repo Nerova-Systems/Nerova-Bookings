@@ -87,8 +87,21 @@ test.describe("@smoke", () => {
       await ownerPage.getByRole("button", { name: "Apply filters" }).click();
 
       await expect(ownerPage.getByRole("button", { name: "Filter 1" })).toBeVisible();
-      await expect(ownerPage.getByText(booking.eventTitle)).toBeVisible();
+      await expect(ownerPage.getByTestId("active-booking-filters")).toBeVisible();
+      await expect(ownerPage.getByText(`Search: ${booking.eventTitle}`)).toBeVisible();
+      await expect(ownerPage.getByTestId("booking-item").filter({ hasText: booking.eventTitle }).first()).toBeVisible();
       expect(new URL(ownerPage.url()).searchParams.get("search")).toBe(booking.eventTitle);
+    })();
+
+    await step("Open booking details from list & verify selected row state")(async () => {
+      const bookingRow = ownerPage.getByTestId("booking-item").filter({ hasText: booking.eventTitle }).first();
+      await bookingRow.click();
+
+      await expect(ownerPage.getByRole("dialog", { name: booking.eventTitle })).toBeVisible();
+      await expect(ownerPage.locator('[data-testid="booking-item"][data-state="selected"]')).toContainText(
+        booking.eventTitle
+      );
+      await ownerPage.keyboard.press("Escape");
     })();
 
     await step("Open booking actions without opening details")(async () => {
@@ -128,6 +141,42 @@ test.describe("@smoke", () => {
 
       await ownerPage.goto("/bookings/cancelled?view=list");
       await expect(ownerPage.getByText(booking.eventTitle)).toBeVisible();
+    })();
+  });
+});
+
+test.describe("@comprehensive", () => {
+  /**
+   * Covers responsive Cal-like bookings row behavior:
+   * - Mobile list layout keeps the booking action menu reachable
+   * - Disabled downstream actions keep their reason text visible
+   * - Active filters remain represented outside the filter dialog
+   */
+  test("should keep mobile booking actions and active filters usable", async ({ ownerPage }) => {
+    const context = createTestContext(ownerPage);
+    const booking = await createBookedEvent(ownerPage, context);
+
+    await ownerPage.setViewportSize({ width: 390, height: 844 });
+
+    await step("Apply mobile search filter & verify active filter strip")(async () => {
+      await ownerPage.goto("/bookings/upcoming?view=list");
+      await ownerPage.getByRole("button", { name: "Filter No filters" }).click();
+      await ownerPage.getByRole("textbox", { name: "Search bookings" }).fill(booking.bookerEmail);
+      await ownerPage.getByRole("button", { name: "Apply filters" }).click();
+
+      await expect(ownerPage.getByTestId("active-booking-filters")).toBeVisible();
+      await expect(ownerPage.getByText(`Search: ${booking.bookerEmail}`)).toBeVisible();
+      await expect(ownerPage.getByText(booking.eventTitle)).toBeVisible();
+    })();
+
+    await step("Open mobile booking actions & verify disabled reasons")(async () => {
+      const bookingRow = ownerPage.getByTestId("booking-item").filter({ hasText: booking.eventTitle }).first();
+      await bookingRow.getByTestId("booking-actions-dropdown").click();
+
+      await expect(ownerPage.getByRole("menu")).toBeVisible();
+      await expect(ownerPage.getByText("Edit event")).toBeVisible();
+      await expect(ownerPage.getByText("Request reschedule is not implemented yet.")).toBeVisible();
+      await ownerPage.keyboard.press("Escape");
     })();
   });
 });

@@ -2,6 +2,8 @@
 
 Source policy: Cal.com is the reference implementation. Nerova owns runtime architecture, auth, tenant boundaries, billing, roles, and scheduling ownership rules.
 
+Porting directive: when the user asks to port Cal.com UI, start from Cal's React component topology, layout hierarchy, interaction flow, and visible affordances first. Adapt only the integration seams: imports, routing, data fetching, mutations, translations, generated API types, auth/tenant boundaries, and unavailable downstream systems. Do not simplify Cal UI up front; unsupported subsystems remain visible only when needed for parity, disabled and ledgered.
+
 Status values:
 
 - `implemented`: behavior is represented, editable where relevant, persisted, returned, and tested in Nerova.
@@ -87,7 +89,7 @@ Status values:
 | Public slot preview | `partial` | `GetPublicSlots.cs`, `PublicSlotCalculator.cs` | Add date override E2E, recurrence expansion, booking-limit enforcement | Backend + QA |
 | Solo public booker UI | `partial` | `application/main/WebApp/routes/$handle/$eventSlug.tsx` | E2E and Browser visual parity pass | Frontend + QA |
 | Minimal solo booking creation | `partial` | `Booking.cs`, `CreatePublicBooking.cs`, `/api/public/bookings` | Email, approval, reschedule/cancel, calendar/conferencing side effects later | Booking |
-| Authenticated bookings status views, filters, calendar view, quick actions, and cancel | `partial` | `application/main/Core/Features/Scheduling/**`, `application/main/Api/Endpoints/BookingEndpoints.cs`, `application/main/WebApp/routes/bookings/**`, `routes/-bookings/**`, `application/main/WebApp/tests/e2e/bookings-flows.spec.ts` | Add confirm/reject, reschedule, request reschedule, edit location, guests, report, no-show, recordings/session details, export, team/organization permissions, details audit, external calendar overlays | Booking + Frontend + QA |
+| Authenticated bookings status views, filters, calendar view, quick actions, and cancel | `partial` | `application/main/Core/Features/Scheduling/**`, `application/main/Api/Endpoints/BookingEndpoints.cs`, `application/main/WebApp/routes/bookings/**`, `routes/-bookings/**`, `application/main/WebApp/tests/e2e/bookings-flows.spec.ts` | Cal-topology list rows, active filter strip, calendar block selection, details sections, quick actions, and cancel are implemented for solo bookings. Add confirm/reject, reschedule, request reschedule, edit location, guests, report, no-show, recordings/session details, export, team/organization permissions, details audit, external calendar overlays, and saved filters. | Booking + Frontend + QA |
 | Full public booking lifecycle | `blocked-by-downstream` | minimal booking persistence only | Booking parity slice | Booking |
 | E2E coverage for authenticated event-type setup | `implemented` | `application/main/WebApp/tests/e2e/event-types-flows.spec.ts` | Extend after public handle, slot preview, and dependency subsystems land | QA |
 | Browser visual validation screenshots | `missing` | Browser plugin available | Final validation slice | QA |
@@ -121,7 +123,8 @@ Status values:
   - booking details surface;
   - Cal-like quick action dropdown and backend action availability;
   - implemented cancel action for eligible owner-owned future bookings;
-  - later actions for confirm/reject, reschedule, request reschedule, edit location, guests, report, no-show, recordings/session details, export, external calendar overlays, and audit.
+  - Cal-topology row structure, active filter strip, selected row/calendar state, saved-filter disabled affordance, and details metadata sections;
+  - later actions for confirm/reject, reschedule, request reschedule, edit location, guests, report, no-show, recordings/session details, export, saved filters, external calendar overlays, and audit.
 
 ### Wave 4: Dependency Tabs
 

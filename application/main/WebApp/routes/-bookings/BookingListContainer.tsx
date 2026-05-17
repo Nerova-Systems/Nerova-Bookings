@@ -1,9 +1,12 @@
+import { t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
 import { Button } from "@repo/ui/components/Button";
+import { BookmarkIcon } from "lucide-react";
 import { useState } from "react";
 
 import type { EventType } from "../-scheduling/schedulingTypes";
 
+import { ActiveBookingFilters } from "./ActiveBookingFilters";
 import { BookingDetailsSheet } from "./BookingDetailsSheet";
 import { BookingsFilters, type BookingFilterSearch } from "./BookingsFilters";
 import { BookingsList } from "./BookingsList";
@@ -54,8 +57,13 @@ export function BookingListContainer({
         </div>
         <BookingsFilters eventTypes={eventTypes} search={search} onSearchChange={onSearchChange} />
         <div className="hidden grow md:block" />
+        <Button type="button" variant="secondary" size="sm" disabled title={t`Saved filters are not implemented yet.`}>
+          <BookmarkIcon />
+          <Trans>Saved filters</Trans>
+        </Button>
         <BookingViewToggleButton view={view} onViewChange={onViewChange} />
       </div>
+      <ActiveBookingFilters eventTypes={eventTypes} search={search} onSearchChange={onSearchChange} />
       <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
         <span className="text-sm text-muted-foreground">
           <Trans>
@@ -84,7 +92,13 @@ export function BookingListContainer({
         </div>
       </div>
       <div className="mt-4">
-        <BookingsList bookings={bookings} status={status} isLoading={isLoading} onSelectBooking={setSelectedBooking} />
+        <BookingsList
+          bookings={bookings}
+          status={status}
+          isLoading={isLoading}
+          selectedBookingId={selectedBooking?.id ?? null}
+          onSelectBooking={setSelectedBooking}
+        />
       </div>
       <BookingDetailsSheet
         booking={selectedBooking}

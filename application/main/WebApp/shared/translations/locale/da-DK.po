@@ -150,6 +150,9 @@ msgstr "Booking annulleret"
 msgid "Booking confirmed"
 msgstr "Booking bekræftet"
 
+msgid "Booking details"
+msgstr "Bookingdetaljer"
+
 msgid "Booking ID"
 msgstr "Booking-id"
 
@@ -475,6 +478,9 @@ msgstr "Interface language"
 msgid "Interval"
 msgstr "Interval"
 
+msgid "Join meeting"
+msgstr "Deltag i møde"
+
 msgid "Keep booking"
 msgstr "Behold booking"
 
@@ -714,9 +720,6 @@ msgstr "Reschedule notice"
 msgid "Reserve time before and after every booking."
 msgstr "Reserver tid før og efter hver booking."
 
-msgid "Responses"
-msgstr "Svar"
-
 msgid "Review schedule setup issues that can prevent clients from finding bookable times."
 msgstr "Gennemgå problemer i tidsplanopsætningen, der kan forhindre kunder i at finde bookbare tider."
 
@@ -740,6 +743,12 @@ msgstr "Gem"
 
 msgid "Save schedule"
 msgstr "Gem tidsplan"
+
+msgid "Saved filters"
+msgstr "Gemte filtre"
+
+msgid "Saved filters are not implemented yet."
+msgstr "Gemte filtre er ikke implementeret endnu."
 
 msgid "Saving..."
 msgstr "Gemmer..."
@@ -851,6 +860,9 @@ msgstr "Søn"
 
 msgid "Sunday"
 msgstr "Søndag"
+
+msgid "System"
+msgstr "System"
 
 msgid "These features need more integration before they can be edited here."
 msgstr "These features need more integration before they can be edited here."
