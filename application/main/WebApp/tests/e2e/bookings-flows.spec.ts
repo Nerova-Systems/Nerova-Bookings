@@ -96,7 +96,7 @@ test.describe("@smoke", () => {
       await bookingRow.getByTestId("booking-actions-dropdown").click();
 
       await expect(ownerPage.getByText("Edit event")).toBeVisible();
-      await expect(ownerPage.getByText("Reschedule booking")).toBeVisible();
+      await expect(ownerPage.getByText("Reschedule booking", { exact: true })).toBeVisible();
       await expect(ownerPage.getByText("Reschedule booking is not implemented yet.")).toBeVisible();
       await expect(ownerPage.getByRole("dialog", { name: booking.eventTitle })).not.toBeVisible();
       await ownerPage.keyboard.press("Escape");
@@ -126,7 +126,7 @@ test.describe("@smoke", () => {
       await expectToastMessage(context, "Booking cancelled");
       await expect(bookingDetails).not.toBeVisible();
 
-      await ownerPage.goto("/bookings/cancelled");
+      await ownerPage.goto("/bookings/cancelled?view=list");
       await expect(ownerPage.getByText(booking.eventTitle)).toBeVisible();
     })();
   });

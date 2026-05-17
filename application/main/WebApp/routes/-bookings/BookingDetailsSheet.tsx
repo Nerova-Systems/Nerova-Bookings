@@ -22,7 +22,7 @@ export function BookingDetailsSheet({
       <SheetContent side="right" className="sm:max-w-md">
         {booking && (
           <>
-            <SheetHeader className="border-b">
+            <SheetHeader className="border-b pr-12">
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
                   <SheetTitle>{booking.eventTypeTitle}</SheetTitle>

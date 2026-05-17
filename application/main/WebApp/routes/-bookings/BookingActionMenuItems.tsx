@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 
-import { DropdownMenuItem, DropdownMenuLabel } from "@repo/ui/components/DropdownMenu";
+import { DropdownMenuGroup, DropdownMenuItem, DropdownMenuLabel } from "@repo/ui/components/DropdownMenu";
 
 import type { Schemas } from "@/shared/lib/api/client";
 
@@ -29,7 +29,7 @@ export function BookingActionGroup({
   }
 
   return (
-    <>
+    <DropdownMenuGroup>
       <DropdownMenuLabel>{label}</DropdownMenuLabel>
       {visibleItems.map((item) => (
         <BookingActionItem
@@ -42,7 +42,7 @@ export function BookingActionGroup({
           onSelect={item.onSelect}
         />
       ))}
-    </>
+    </DropdownMenuGroup>
   );
 }
 
