@@ -13,6 +13,11 @@ msgstr ""
 "Language-Team: \n"
 "Plural-Forms: \n"
 
+#. placeholder {0}: getBookingEmptyDescription(status)
+#. placeholder {0}: getBookingStatusLabel(bookingStatus)
+msgid "{0}"
+msgstr "{0}"
+
 #. placeholder {0}: eventType.durationMinutes
 msgid "{0} min"
 msgstr "{0} min"
@@ -20,6 +25,10 @@ msgstr "{0} min"
 #. placeholder {0}: schedule.availabilityWindows.length
 msgid "{0} windows"
 msgstr "{0} windows"
+
+#. placeholder {0}: getBookingStatusLabel(status).toLowerCase()
+msgid "{totalCount} {0} bookings"
+msgstr "{totalCount} {0} bookings"
 
 msgid "A confirmation will be sent to the email address you provided."
 msgstr "A confirmation will be sent to the email address you provided."
@@ -66,6 +75,9 @@ msgstr "AI"
 msgid "AI settings are not connected to this editor yet."
 msgstr "AI settings are not connected to this editor yet."
 
+msgid "All event types"
+msgstr "All event types"
+
 msgid "Allow cancellation"
 msgstr "Allow cancellation"
 
@@ -77,6 +89,15 @@ msgstr "Apps"
 
 msgid "At least one schedule exists"
 msgstr "At least one schedule exists"
+
+msgid "Attendee"
+msgstr "Attendee"
+
+msgid "Attendee email"
+msgstr "Attendee email"
+
+msgid "Attendee name"
+msgstr "Attendee name"
 
 msgid "Automate reminders and follow-up messages for this event type."
 msgstr "Automate reminders and follow-up messages for this event type."
@@ -114,6 +135,9 @@ msgstr "Booker layout"
 msgid "Booking confirmed"
 msgstr "Booking confirmed"
 
+msgid "Booking ID"
+msgstr "Booking ID"
+
 msgid "Booking limits"
 msgstr "Booking limits"
 
@@ -122,6 +146,9 @@ msgstr "Booking page"
 
 msgid "Booking page unavailable"
 msgstr "Booking page unavailable"
+
+msgid "Bookings"
+msgstr "Bookings"
 
 msgid "Bookings per day"
 msgstr "Bookings per day"
@@ -161,6 +188,9 @@ msgstr "Choose where confirmed bookings should be written."
 
 msgid "Choose which schedule controls when this event type can be booked."
 msgstr "Choose which schedule controls when this event type can be booked."
+
+msgid "Clear"
+msgstr "Clear"
 
 msgid "Column"
 msgstr "Column"
@@ -337,6 +367,9 @@ msgstr "Event type updated"
 msgid "Event types"
 msgstr "Event types"
 
+msgid "Event, attendee, email, or booking ID"
+msgstr "Event, attendee, email, or booking ID"
+
 msgid "Every schedule has weekly availability"
 msgstr "Every schedule has weekly availability"
 
@@ -354,6 +387,9 @@ msgstr "Fri"
 
 msgid "Friday"
 msgstr "Friday"
+
+msgid "From"
+msgstr "From"
 
 msgid "Get started"
 msgstr "Get started"
@@ -481,8 +517,18 @@ msgstr "New event type"
 msgid "New schedule"
 msgstr "New schedule"
 
+msgid "Next"
+msgstr "Next"
+
+#. placeholder {0}: getBookingStatusLabel(status).toLowerCase()
+msgid "No {0} bookings yet"
+msgstr "No {0} bookings yet"
+
 msgid "No availability windows"
 msgstr "No availability windows"
+
+msgid "No custom responses were captured."
+msgstr "No custom responses were captured."
 
 msgid "No event types match your search."
 msgstr "No event types match your search."
@@ -551,6 +597,9 @@ msgstr "Preview"
 msgid "Preview booking page"
 msgstr "Preview booking page"
 
+msgid "Previous"
+msgstr "Previous"
+
 msgid "Primary location"
 msgstr "Primary location"
 
@@ -598,6 +647,9 @@ msgstr "Reschedule notice"
 
 msgid "Reserve time before and after every booking."
 msgstr "Reserve time before and after every booking."
+
+msgid "Responses"
+msgstr "Responses"
 
 msgid "Review schedule setup issues that can prevent clients from finding bookable times."
 msgstr "Review schedule setup issues that can prevent clients from finding bookable times."
@@ -649,6 +701,12 @@ msgstr "Schedule unavailable"
 
 msgid "Schedule updated"
 msgstr "Schedule updated"
+
+msgid "Search"
+msgstr "Search"
+
+msgid "Search bookings"
+msgstr "Search bookings"
 
 msgid "Search event types"
 msgstr "Search event types"
@@ -761,6 +819,9 @@ msgstr "Timezone"
 msgid "Title"
 msgstr "Title"
 
+msgid "To"
+msgstr "To"
+
 msgid "Tue"
 msgstr "Tue"
 
@@ -772,6 +833,12 @@ msgstr "Unavailable"
 
 msgid "Video call"
 msgstr "Video call"
+
+msgid "View and manage appointments clients have booked."
+msgstr "View and manage appointments clients have booked."
+
+msgid "View details"
+msgstr "View details"
 
 msgid "Visibility"
 msgstr "Visibility"
@@ -796,6 +863,9 @@ msgstr "Weekly hours"
 
 msgid "Welcome to PlatformPlatform"
 msgstr "Welcome to PlatformPlatform"
+
+msgid "When"
+msgstr "When"
 
 msgid "Workflows"
 msgstr "Workflows"

@@ -13,6 +13,11 @@ msgstr ""
 "Plural-Forms: \n"
 "X-Generator: @lingui/cli\n"
 
+#. placeholder {0}: getBookingEmptyDescription(status)
+#. placeholder {0}: getBookingStatusLabel(bookingStatus)
+msgid "{0}"
+msgstr "{0}"
+
 #. placeholder {0}: eventType.durationMinutes
 msgid "{0} min"
 msgstr "{0} min"
@@ -20,6 +25,10 @@ msgstr "{0} min"
 #. placeholder {0}: schedule.availabilityWindows.length
 msgid "{0} windows"
 msgstr "{0} vinduer"
+
+#. placeholder {0}: getBookingStatusLabel(status).toLowerCase()
+msgid "{totalCount} {0} bookings"
+msgstr "{totalCount} {0} bookinger"
 
 msgid "A confirmation will be sent to the email address you provided."
 msgstr "En bekræftelse sendes til den e-mailadresse, du har angivet."
@@ -66,6 +75,9 @@ msgstr "AI"
 msgid "AI settings are not connected to this editor yet."
 msgstr "AI settings are not connected to this editor yet."
 
+msgid "All event types"
+msgstr "Alle aftaletyper"
+
 msgid "Allow cancellation"
 msgstr "Allow cancellation"
 
@@ -77,6 +89,15 @@ msgstr "Apps"
 
 msgid "At least one schedule exists"
 msgstr "Der findes mindst én tidsplan"
+
+msgid "Attendee"
+msgstr "Deltager"
+
+msgid "Attendee email"
+msgstr "Deltager-e-mail"
+
+msgid "Attendee name"
+msgstr "Deltagernavn"
 
 msgid "Automate reminders and follow-up messages for this event type."
 msgstr "Automate reminders and follow-up messages for this event type."
@@ -114,6 +135,9 @@ msgstr "Booker layout"
 msgid "Booking confirmed"
 msgstr "Booking bekræftet"
 
+msgid "Booking ID"
+msgstr "Booking-id"
+
 msgid "Booking limits"
 msgstr "Bookinggrænser"
 
@@ -122,6 +146,9 @@ msgstr "Booking page"
 
 msgid "Booking page unavailable"
 msgstr "Bookingsiden er ikke tilgængelig"
+
+msgid "Bookings"
+msgstr "Bookinger"
 
 msgid "Bookings per day"
 msgstr "Bookings per day"
@@ -161,6 +188,9 @@ msgstr "Choose where confirmed bookings should be written."
 
 msgid "Choose which schedule controls when this event type can be booked."
 msgstr "Vælg, hvilken tidsplan der styrer, hvornår denne begivenhedstype kan bookes."
+
+msgid "Clear"
+msgstr "Ryd"
 
 msgid "Column"
 msgstr "Column"
@@ -337,6 +367,9 @@ msgstr "Aftaletype opdateret"
 msgid "Event types"
 msgstr "Aftaletyper"
 
+msgid "Event, attendee, email, or booking ID"
+msgstr "Aftale, deltager, e-mail eller booking-id"
+
 msgid "Every schedule has weekly availability"
 msgstr "Alle tidsplaner har ugentlig tilgængelighed"
 
@@ -354,6 +387,9 @@ msgstr "Fre"
 
 msgid "Friday"
 msgstr "Fredag"
+
+msgid "From"
+msgstr "Fra"
 
 msgid "Get started"
 msgstr "Kom i gang"
@@ -481,8 +517,18 @@ msgstr "Ny aftaletype"
 msgid "New schedule"
 msgstr "Ny tidsplan"
 
+msgid "Next"
+msgstr "Næste"
+
+#. placeholder {0}: getBookingStatusLabel(status).toLowerCase()
+msgid "No {0} bookings yet"
+msgstr "Ingen {0} bookinger endnu"
+
 msgid "No availability windows"
 msgstr "Ingen tilgængelighedsvinduer"
+
+msgid "No custom responses were captured."
+msgstr "Ingen brugerdefinerede svar blev registreret."
 
 msgid "No event types match your search."
 msgstr "Ingen begivenhedstyper matcher din søgning."
@@ -551,6 +597,9 @@ msgstr "Forhåndsvisning"
 msgid "Preview booking page"
 msgstr "Forhåndsvis bookingside"
 
+msgid "Previous"
+msgstr "Forrige"
+
 msgid "Primary location"
 msgstr "Primary location"
 
@@ -598,6 +647,9 @@ msgstr "Reschedule notice"
 
 msgid "Reserve time before and after every booking."
 msgstr "Reserver tid før og efter hver booking."
+
+msgid "Responses"
+msgstr "Svar"
 
 msgid "Review schedule setup issues that can prevent clients from finding bookable times."
 msgstr "Gennemgå problemer i tidsplanopsætningen, der kan forhindre kunder i at finde bookbare tider."
@@ -649,6 +701,12 @@ msgstr "Tidsplan utilgængelig"
 
 msgid "Schedule updated"
 msgstr "Tidsplan opdateret"
+
+msgid "Search"
+msgstr "Søg"
+
+msgid "Search bookings"
+msgstr "Søg i bookinger"
 
 msgid "Search event types"
 msgstr "Søg i begivenhedstyper"
@@ -761,6 +819,9 @@ msgstr "Tidszone"
 msgid "Title"
 msgstr "Titel"
 
+msgid "To"
+msgstr "Til"
+
 msgid "Tue"
 msgstr "Tir"
 
@@ -772,6 +833,12 @@ msgstr "Utilgængelig"
 
 msgid "Video call"
 msgstr "Videoopkald"
+
+msgid "View and manage appointments clients have booked."
+msgstr "Se og administrer aftaler, som kunder har booket."
+
+msgid "View details"
+msgstr "Vis detaljer"
 
 msgid "Visibility"
 msgstr "Synlighed"
@@ -796,6 +863,9 @@ msgstr "Ugentlige tider"
 
 msgid "Welcome to PlatformPlatform"
 msgstr "Velkommen til PlatformPlatform"
+
+msgid "When"
+msgstr "Hvornår"
 
 msgid "Workflows"
 msgstr "Workflows"

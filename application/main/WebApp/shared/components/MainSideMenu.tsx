@@ -16,7 +16,7 @@ import {
 import { Link as RouterLink, useNavigate, useRouter } from "@tanstack/react-router";
 import MobileMenu from "account/MobileMenu";
 import UserMenu from "account/UserMenu";
-import { CalendarDaysIcon, LayoutDashboardIcon, TimerIcon } from "lucide-react";
+import { CalendarCheckIcon, CalendarDaysIcon, LayoutDashboardIcon, TimerIcon } from "lucide-react";
 import { use } from "react";
 
 const normalizePath = (path: string): string => path.replace(/\/$/, "") || "/";
@@ -68,6 +68,33 @@ export function MainSideMenu() {
                       <TimerIcon />
                       <span>
                         <Trans>Event types</Trans>
+                      </span>
+                    </RouterLink>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <SidebarMenuButton
+                    asChild={true}
+                    isActive={currentPath.startsWith("/bookings")}
+                    tooltip={t`Bookings`}
+                  >
+                    <RouterLink
+                      to="/bookings/$status"
+                      params={{ status: "upcoming" }}
+                      search={{
+                        search: undefined,
+                        eventTypeId: undefined,
+                        attendeeName: undefined,
+                        attendeeEmail: undefined,
+                        bookingUid: undefined,
+                        dateFrom: undefined,
+                        dateTo: undefined,
+                        pageOffset: 0
+                      }}
+                    >
+                      <CalendarCheckIcon />
+                      <span>
+                        <Trans>Bookings</Trans>
                       </span>
                     </RouterLink>
                   </SidebarMenuButton>
