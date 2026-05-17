@@ -15,9 +15,9 @@ Status values:
 - Audit date: 2026-05-17
 - Cal source root: `cal.com`
 - Nerova target root: `application/main`
-- Current implementation scope: authenticated event-type setup for owner-owned schedules.
+- Current implementation scope: authenticated event-type setup for owner-owned schedules plus solo public booker foundation.
 - Current strongest parity area: basic event-type CRUD with schedule ownership and JSONB-backed settings.
-- Current weakest parity area: dependency-heavy Cal editor tabs still need their owning downstream subsystems, and public handle/slot preview is not implemented yet.
+- Current weakest parity area: dependency-heavy Cal editor tabs still need their owning downstream subsystems, and full booking lifecycle parity is not implemented yet.
 
 ## Cal References
 
@@ -40,6 +40,9 @@ Status values:
 | Instant | `cal.com/apps/web/modules/event-types/components/tabs/instant/EventInstantTab.tsx`, `InstantEventController.tsx` |
 | AI | `cal.com/apps/web/modules/event-types/components/tabs/ai/EventAITab.tsx`, `AIEventController.tsx` |
 | Public event helpers | `cal.com/packages/features/eventtypes/lib/getPublicEvent.ts`, `getEventTypesPublic.ts`, `getEventTypeById.ts`, `getEventTypesByViewer.ts` |
+| Public booking page | `cal.com/apps/web/app/(booking-page-wrapper)/[user]/[type]/page.tsx`, `cal.com/apps/web/server/lib/[user]/[type]/getServerSideProps.ts` |
+| Public booker UI | `cal.com/apps/web/modules/bookings/components/BookerWebWrapper.tsx`, `Booker.tsx`, `EventMeta.tsx`, `DatePicker.tsx`, `AvailableTimeSlots.tsx`, `AvailableTimes.tsx`, `BookEventForm/**` |
+| Slot calculation | `cal.com/apps/web/modules/schedules/hooks/useSchedule.ts`, `useEvent.ts`, `cal.com/packages/trpc/server/routers/viewer/slots/**` |
 
 ## Parity Matrix
 
@@ -58,27 +61,31 @@ Status values:
 | Availability: schedule selector | `implemented` | `EventTypeAvailabilityTab.tsx`, schedules API | E2E and schedule preview polish | Frontend + QA |
 | Availability: restriction schedule and booker timezone | `missing` | event-type settings/API not complete | Availability parity slice | Backend + Frontend |
 | Availability: per-host/team availability | `blocked-by-downstream` | not present | Teams/hosts slice | Teams |
-| Limits: buffers, slot interval, minimum notice | `implemented` | event-type commands, `EventTypeLimitsTab.tsx` | Slot-preview enforcement tests | Backend + QA |
-| Limits: future booking window | `partial` | `EventTypeSettings.BookingWindow` | UI controls and slot-preview enforcement | Backend + Frontend |
-| Limits: booking count/duration limits | `partial` | `EventTypeSettings.Limits` | UI controls now, booking persistence enforcement later | Backend + Booking |
-| Limits: first available slot, offset start, max active per booker | `partial` | `EventTypeSettings.Limits` | UI controls and slot/booking enforcement | Backend + Frontend |
-| Advanced: confirmation and email verification | `partial` | `EventTypeSettings.ConfirmationPolicy` | UI controls now, booking workflow enforcement later | Backend + Frontend + Booking |
-| Advanced: custom booking fields | `partial` | `EventTypeSettings.BookingFields` | Cal-like form builder and booking form enforcement | Frontend + Booking |
+| Limits: buffers, slot interval, minimum notice | `implemented` | event-type commands, `EventTypeLimitsTab.tsx`, `PublicSlotCalculator.cs` | Add E2E coverage | Backend + QA |
+| Limits: future booking window | `partial` | `EventTypeSettings.BookingWindow`, `PublicSlotCalculator.cs` | UI controls and E2E coverage | Backend + Frontend |
+| Limits: booking count/duration limits | `partial` | `EventTypeSettings.Limits` | UI controls now, full booking-limit enforcement later | Backend + Booking |
+| Limits: first available slot, offset start, max active per booker | `partial` | `EventTypeSettings.Limits`, `PublicSlotCalculator.cs` | Max-active-per-booker enforcement after richer booking lifecycle | Backend + Frontend |
+| Advanced: confirmation and email verification | `partial` | `EventTypeSettings.ConfirmationPolicy`, `CreatePublicBooking.cs` | Email verification and approval workflow later | Backend + Frontend + Booking |
+| Advanced: custom booking fields | `partial` | `EventTypeSettings.BookingFields`, `CreatePublicBooking.cs`, public booker form | Cal-like form builder and richer field rendering | Frontend + Booking |
 | Advanced: cancellation/reschedule policy | `partial` | `EventTypeSettings.CancellationPolicy`, `ReschedulePolicy` | UI controls now, booking lifecycle enforcement later | Backend + Frontend + Booking |
-| Advanced: private links | `partial` | `EventTypeSettings.PrivateLinks` | UI controls now, first-class private-link API later | Backend + Frontend |
+| Advanced: private links | `partial` | `EventTypeSettings.PrivateLinks`, `PublicSchedulingResolver.cs` | UI controls and first-class private-link API later | Backend + Frontend |
 | Advanced: redirects, interface language, metadata | `partial` | `EventTypeSettings.Redirects`, `InterfaceLanguage`, `Metadata` | UI controls and semantic validation | Backend + Frontend |
 | Advanced: destination/selected calendars | `blocked-by-downstream` | not present | Calendar sync slice | Calendar |
 | Advanced: disable emails, hide calendar details, timezone lock, event name template | `missing` | not present | Advanced event settings slice | Backend + Frontend |
 | Recurring events | `partial` | `EventTypeSettings.Recurrence` | UI controls now, booking-series enforcement later | Backend + Frontend + Booking |
-| Seats | `partial` | `EventTypeSettings.Seats` | UI controls now, seat booking enforcement later | Backend + Frontend + Booking |
+| Seats | `partial` | `EventTypeSettings.Seats`, `PublicSlotCalculator.cs` | UI controls and richer attendee display later | Backend + Frontend + Booking |
 | Teams/hosts, round-robin, managed events | `blocked-by-downstream` | not present | Teams/hosts parity slice | Teams |
 | Apps/conferencing tab | `blocked-by-downstream` | not present | App-store/conferencing slice | Apps |
 | Workflows tab | `blocked-by-downstream` | not present | Workflow slice | Workflows |
 | Webhooks tab | `blocked-by-downstream` | not present | Webhook slice | Webhooks |
 | Instant event tab | `blocked-by-downstream` | not present | Instant meeting slice | Backend + Frontend |
 | AI tab | `blocked-by-downstream` | not present | AI phone slice | AI |
-| Public handle and event preview URL | `missing` | helper currently returns `/book/{slug}` only | Public scheduling handle/slot-preview slice | Backend + Frontend + QA |
-| Full public booking lifecycle | `blocked-by-downstream` | not present | Booking parity slice | Booking |
+| Public handle and event preview URL | `implemented` | `SchedulingProfile.cs`, `PublicSchedulingEndpoints.cs`, event-type action helpers | Add profile management UI later | Backend + Frontend + QA |
+| Public event resolution | `implemented` | `GetPublicEventType.cs`, `PublicSchedulingResolver.cs` | Add team/profile variants later | Backend |
+| Public slot preview | `partial` | `GetPublicSlots.cs`, `PublicSlotCalculator.cs` | Add date override E2E, recurrence expansion, booking-limit enforcement | Backend + QA |
+| Solo public booker UI | `partial` | `application/main/WebApp/routes/$handle/$eventSlug.tsx` | E2E and Browser visual parity pass | Frontend + QA |
+| Minimal solo booking creation | `partial` | `Booking.cs`, `CreatePublicBooking.cs`, `/api/public/bookings` | Email, approval, reschedule/cancel, calendar/conferencing side effects later | Booking |
+| Full public booking lifecycle | `blocked-by-downstream` | minimal booking persistence only | Booking parity slice | Booking |
 | E2E coverage for authenticated event-type setup | `implemented` | `application/main/WebApp/tests/e2e/event-types-flows.spec.ts` | Extend after public handle, slot preview, and dependency subsystems land | QA |
 | Browser visual validation screenshots | `missing` | Browser plugin available | Final validation slice | QA |
 
@@ -94,9 +101,12 @@ Status values:
 
 ### Wave 2: Public Handle And Slot Preview
 
-- Add owner public scheduling handle.
-- Resolve public event by handle plus event slug.
-- Add slot preview endpoint that honors schedule windows, buffers, slot interval, notice, duration, booking window, hidden/private-link visibility, timezone, and recurrence where implemented.
+- Status: partially implemented on 2026-05-17.
+- Added owner public scheduling handle.
+- Added public event resolution by handle plus event slug.
+- Added slot preview endpoint that honors schedule windows, date overrides, buffers, slot interval, notice, duration, booking window, hidden/private-link visibility, timezone, first available slot, offset start, existing bookings, and seats where representable.
+- Added minimal solo booking creation with slot recheck and required booking field validation.
+- Remaining: full Cal recurrence expansion, booking count/duration limits, email verification, approval workflow, calendar/conferencing side effects, and E2E/browser validation.
 
 ### Wave 3: Booking-Dependent Event Settings
 
@@ -126,6 +136,7 @@ Status values:
 - Base field boundary tests for slug, title, duration, buffers, slot interval, notice, and location lengths.
 - Update settings invalid/round-trip tests.
 - Public handle and slot-preview E2E tests.
+- Browser validation screenshots for the public booker.
 - Browser visual screenshots.
 
 ## Verification Gate
