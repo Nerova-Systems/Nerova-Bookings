@@ -29,6 +29,7 @@ function EventTypesPage() {
   const search = Route.useSearch();
   const { data: eventTypesData, isLoading } = api.useQuery("get", "/api/event-types");
   const { data: schedulesData } = api.useQuery("get", "/api/schedules");
+  const { data: schedulingProfile } = api.useQuery("get", "/api/scheduling/profile");
   const schedules = schedulesData?.schedules ?? [];
   const eventTypes = eventTypesData?.eventTypes ?? [];
   const duplicateEventType =
@@ -54,6 +55,7 @@ function EventTypesPage() {
       <EventTypesList
         eventTypes={eventTypes}
         schedules={schedules}
+        publicHandle={schedulingProfile?.handle}
         isLoading={isLoading}
         onDuplicate={(eventType) =>
           navigate({

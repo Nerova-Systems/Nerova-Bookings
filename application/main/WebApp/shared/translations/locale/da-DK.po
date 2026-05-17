@@ -21,6 +21,9 @@ msgstr "{0} min"
 msgid "{0} windows"
 msgstr "{0} vinduer"
 
+msgid "A confirmation will be sent to the email address you provided."
+msgstr ""
+
 msgid "Access"
 msgstr "Access"
 
@@ -47,6 +50,9 @@ msgstr "Tilføj undtagelse"
 
 msgid "Add time"
 msgstr "Tilføj tid"
+
+msgid "Additional notes"
+msgstr "Yderligere noter"
 
 msgid "Advanced"
 msgstr "Avanceret"
@@ -81,11 +87,17 @@ msgstr "Tilgængelighed"
 msgid "Availability troubleshoot"
 msgstr "Fejlfinding af tilgængelighed"
 
+msgid "Available times"
+msgstr "Tilgængelige tider"
+
 msgid "Back"
 msgstr "Tilbage"
 
 msgid "Back to availability"
 msgstr "Tilbage til tilgængelighed"
+
+msgid "Back to times"
+msgstr "Tilbage til tider"
 
 msgid "Before buffer"
 msgstr "Buffer før"
@@ -99,11 +111,17 @@ msgstr "Booked minutes per day"
 msgid "Booker layout"
 msgstr "Booker layout"
 
+msgid "Booking confirmed"
+msgstr ""
+
 msgid "Booking limits"
 msgstr "Bookinggrænser"
 
 msgid "Booking page"
 msgstr "Booking page"
+
+msgid "Booking page unavailable"
+msgstr "Bookingsiden er ikke tilgængelig"
 
 msgid "Bookings per day"
 msgstr "Bookings per day"
@@ -149,6 +167,9 @@ msgstr "Column"
 
 msgid "Configure the appointment types clients can book."
 msgstr "Konfigurer de aftaletyper, kunder kan booke."
+
+msgid "Confirm booking"
+msgstr "Bekræft booking"
 
 msgid "Confirmation"
 msgstr "Confirmation"
@@ -274,6 +295,9 @@ msgstr "Duration options"
 msgid "Edit booking setup for this appointment type."
 msgstr "Rediger bookingopsætningen for denne aftaletype."
 
+msgid "Email"
+msgstr "E-mail"
+
 msgid "Email verification"
 msgstr "Email verification"
 
@@ -285,6 +309,9 @@ msgstr "Sluttidspunktet skal være efter starttidspunktet."
 
 msgid "English"
 msgstr "English"
+
+msgid "Enter your details"
+msgstr "Indtast dine oplysninger"
 
 msgid "Event color"
 msgstr "Event color"
@@ -469,6 +496,9 @@ msgstr "Ingen tidsplaner endnu"
 msgid "No settings available yet."
 msgstr "Ingen indstillinger er tilgængelige endnu."
 
+msgid "No times available on this date."
+msgstr "Ingen tider er tilgængelige på denne dato."
+
 msgid "No weekly availability"
 msgstr "Ingen ugentlig tilgængelighed"
 
@@ -496,6 +526,9 @@ msgstr "Offer seats"
 msgid "Offset start"
 msgstr "Offset start"
 
+msgid "One-on-one"
+msgstr ""
+
 #. placeholder {0}: schedule.dateOverrides.length
 msgid "Overrides: {0}"
 msgstr "Undtagelser: {0}"
@@ -505,6 +538,9 @@ msgstr "Bestået"
 
 msgid "Phone"
 msgstr "Telefon"
+
+msgid "Phone call"
+msgstr "Telefonopkald"
 
 msgid "Prevent selected event types from being booked when this one is active."
 msgstr "Forhindr valgte begivenhedstyper i at blive booket, når denne er aktiv."
@@ -520,6 +556,9 @@ msgstr "Primary location"
 
 msgid "Private links"
 msgstr "Private links"
+
+msgid "Public booking"
+msgstr "Offentlig booking"
 
 msgid "Public link copied"
 msgstr "Offentligt link kopieret"
@@ -623,6 +662,12 @@ msgstr "Seats"
 msgid "Seats cannot be enabled while recurring events are enabled."
 msgstr "Seats cannot be enabled while recurring events are enabled."
 
+msgid "Select a date and time"
+msgstr "Vælg dato og tid"
+
+msgid "Select a date to view times."
+msgstr "Vælg en dato for at se tider."
+
 msgid "Select a schedule to see its availability summary."
 msgstr "Vælg en tidsplan for at se dens tilgængelighedsoversigt."
 
@@ -686,6 +731,9 @@ msgstr "These features need more integration before they can be edited here."
 msgid "this event type"
 msgstr "denne begivenhedstype"
 
+msgid "This event type is not available for public booking yet."
+msgstr "Denne aftaletype er endnu ikke tilgængelig for offentlig booking."
+
 msgid "This is where your personalized dashboard content will appear. Stay tuned for updates."
 msgstr "Her vil dit personlige dashboard-indhold blive vist. Hold dig opdateret."
 
@@ -701,6 +749,12 @@ msgstr "Tor"
 msgid "Thursday"
 msgstr "Torsdag"
 
+msgid "Time zone"
+msgstr "Tidszone"
+
+msgid "Times are shown in your selected time zone."
+msgstr "Tider vises i din valgte tidszone."
+
 msgid "Timezone"
 msgstr "Tidszone"
 
@@ -715,6 +769,9 @@ msgstr "Tirsdag"
 
 msgid "Unavailable"
 msgstr "Utilgængelig"
+
+msgid "Video call"
+msgstr "Videoopkald"
 
 msgid "Visibility"
 msgstr "Synlighed"
@@ -751,6 +808,9 @@ msgstr "Du har installeret PlatformPlatform med succes! 🎉"
 
 msgid "You successfully installed PlatformPlatform! 🎉"
 msgstr "Du har installeret PlatformPlatform med succes! 🎉"
+
+msgid "Your booking is confirmed."
+msgstr ""
 
 msgid "Your dashboard is empty"
 msgstr "Dit dashboard er tomt"

@@ -21,6 +21,9 @@ msgstr "{0} min"
 msgid "{0} windows"
 msgstr "{0} windows"
 
+msgid "A confirmation will be sent to the email address you provided."
+msgstr "A confirmation will be sent to the email address you provided."
+
 msgid "Access"
 msgstr "Access"
 
@@ -47,6 +50,9 @@ msgstr "Add override"
 
 msgid "Add time"
 msgstr "Add time"
+
+msgid "Additional notes"
+msgstr "Additional notes"
 
 msgid "Advanced"
 msgstr "Advanced"
@@ -81,11 +87,17 @@ msgstr "Availability"
 msgid "Availability troubleshoot"
 msgstr "Availability troubleshoot"
 
+msgid "Available times"
+msgstr "Available times"
+
 msgid "Back"
 msgstr "Back"
 
 msgid "Back to availability"
 msgstr "Back to availability"
+
+msgid "Back to times"
+msgstr "Back to times"
 
 msgid "Before buffer"
 msgstr "Before buffer"
@@ -99,11 +111,17 @@ msgstr "Booked minutes per day"
 msgid "Booker layout"
 msgstr "Booker layout"
 
+msgid "Booking confirmed"
+msgstr "Booking confirmed"
+
 msgid "Booking limits"
 msgstr "Booking limits"
 
 msgid "Booking page"
 msgstr "Booking page"
+
+msgid "Booking page unavailable"
+msgstr "Booking page unavailable"
 
 msgid "Bookings per day"
 msgstr "Bookings per day"
@@ -149,6 +167,9 @@ msgstr "Column"
 
 msgid "Configure the appointment types clients can book."
 msgstr "Configure the appointment types clients can book."
+
+msgid "Confirm booking"
+msgstr "Confirm booking"
 
 msgid "Confirmation"
 msgstr "Confirmation"
@@ -274,6 +295,9 @@ msgstr "Duration options"
 msgid "Edit booking setup for this appointment type."
 msgstr "Edit booking setup for this appointment type."
 
+msgid "Email"
+msgstr "Email"
+
 msgid "Email verification"
 msgstr "Email verification"
 
@@ -285,6 +309,9 @@ msgstr "End time must be after start time."
 
 msgid "English"
 msgstr "English"
+
+msgid "Enter your details"
+msgstr "Enter your details"
 
 msgid "Event color"
 msgstr "Event color"
@@ -469,6 +496,9 @@ msgstr "No schedules yet"
 msgid "No settings available yet."
 msgstr "No settings available yet."
 
+msgid "No times available on this date."
+msgstr "No times available on this date."
+
 msgid "No weekly availability"
 msgstr "No weekly availability"
 
@@ -496,6 +526,9 @@ msgstr "Offer seats"
 msgid "Offset start"
 msgstr "Offset start"
 
+msgid "One-on-one"
+msgstr "One-on-one"
+
 #. placeholder {0}: schedule.dateOverrides.length
 msgid "Overrides: {0}"
 msgstr "Overrides: {0}"
@@ -505,6 +538,9 @@ msgstr "Passed"
 
 msgid "Phone"
 msgstr "Phone"
+
+msgid "Phone call"
+msgstr "Phone call"
 
 msgid "Prevent selected event types from being booked when this one is active."
 msgstr "Prevent selected event types from being booked when this one is active."
@@ -520,6 +556,9 @@ msgstr "Primary location"
 
 msgid "Private links"
 msgstr "Private links"
+
+msgid "Public booking"
+msgstr "Public booking"
 
 msgid "Public link copied"
 msgstr "Public link copied"
@@ -623,6 +662,12 @@ msgstr "Seats"
 msgid "Seats cannot be enabled while recurring events are enabled."
 msgstr "Seats cannot be enabled while recurring events are enabled."
 
+msgid "Select a date and time"
+msgstr "Select a date and time"
+
+msgid "Select a date to view times."
+msgstr "Select a date to view times."
+
 msgid "Select a schedule to see its availability summary."
 msgstr "Select a schedule to see its availability summary."
 
@@ -686,6 +731,9 @@ msgstr "These features need more integration before they can be edited here."
 msgid "this event type"
 msgstr "this event type"
 
+msgid "This event type is not available for public booking yet."
+msgstr "This event type is not available for public booking yet."
+
 msgid "This is where your personalized dashboard content will appear. Stay tuned for updates."
 msgstr "This is where your personalized dashboard content will appear. Stay tuned for updates."
 
@@ -701,6 +749,12 @@ msgstr "Thu"
 msgid "Thursday"
 msgstr "Thursday"
 
+msgid "Time zone"
+msgstr "Time zone"
+
+msgid "Times are shown in your selected time zone."
+msgstr "Times are shown in your selected time zone."
+
 msgid "Timezone"
 msgstr "Timezone"
 
@@ -715,6 +769,9 @@ msgstr "Tuesday"
 
 msgid "Unavailable"
 msgstr "Unavailable"
+
+msgid "Video call"
+msgstr "Video call"
 
 msgid "Visibility"
 msgstr "Visibility"
@@ -751,6 +808,9 @@ msgstr "You successfully deployed PlatformPlatform! 🎉"
 
 msgid "You successfully installed PlatformPlatform! 🎉"
 msgstr "You successfully installed PlatformPlatform! 🎉"
+
+msgid "Your booking is confirmed."
+msgstr "Your booking is confirmed."
 
 msgid "Your dashboard is empty"
 msgstr "Your dashboard is empty"

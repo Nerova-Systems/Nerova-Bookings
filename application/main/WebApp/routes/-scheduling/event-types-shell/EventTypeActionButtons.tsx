@@ -15,22 +15,25 @@ import type { EventType } from "../schedulingTypes";
 
 import { getEventTypePublicUrl } from "./eventTypeShellTypes";
 
-function copyPublicUrl(eventType: EventType) {
-  const url = getEventTypePublicUrl(eventType);
+function copyPublicUrl(eventType: EventType, publicHandle?: string | null) {
+  const url = getEventTypePublicUrl(eventType, publicHandle);
   void navigator.clipboard?.writeText(url);
   toast.success(t`Public link copied`);
 }
 
-function previewPublicUrl(eventType: EventType) {
-  window.open(getEventTypePublicUrl(eventType), "_blank", "noopener,noreferrer");
+function previewPublicUrl(eventType: EventType, publicHandle?: string | null) {
+  window.open(getEventTypePublicUrl(eventType, publicHandle), "_blank", "noopener,noreferrer");
 }
 
-export function CopyEventTypeButton({ eventType }: Readonly<{ eventType: EventType }>) {
+export function CopyEventTypeButton({
+  eventType,
+  publicHandle
+}: Readonly<{ eventType: EventType; publicHandle?: string | null }>) {
   return (
     <Tooltip>
       <TooltipTrigger
         render={
-          <Button type="button" variant="ghost" size="icon-sm" onClick={() => copyPublicUrl(eventType)}>
+          <Button type="button" variant="ghost" size="icon-sm" onClick={() => copyPublicUrl(eventType, publicHandle)}>
             <CopyIcon />
             <span className="sr-only">
               <Trans>Copy public link</Trans>
@@ -45,12 +48,20 @@ export function CopyEventTypeButton({ eventType }: Readonly<{ eventType: EventTy
   );
 }
 
-export function PreviewEventTypeButton({ eventType }: Readonly<{ eventType: EventType }>) {
+export function PreviewEventTypeButton({
+  eventType,
+  publicHandle
+}: Readonly<{ eventType: EventType; publicHandle?: string | null }>) {
   return (
     <Tooltip>
       <TooltipTrigger
         render={
-          <Button type="button" variant="ghost" size="icon-sm" onClick={() => previewPublicUrl(eventType)}>
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon-sm"
+            onClick={() => previewPublicUrl(eventType, publicHandle)}
+          >
             <EyeIcon />
             <span className="sr-only">
               <Trans>Preview booking page</Trans>
@@ -67,10 +78,12 @@ export function PreviewEventTypeButton({ eventType }: Readonly<{ eventType: Even
 
 export function EventTypeOverflowActions({
   eventType,
+  publicHandle,
   onDuplicate,
   onDelete
 }: Readonly<{
   eventType: EventType;
+  publicHandle?: string | null;
   onDuplicate: () => void;
   onDelete: () => void;
 }>) {
@@ -87,11 +100,11 @@ export function EventTypeOverflowActions({
         }
       />
       <DropdownMenuContent align="end">
-        <DropdownMenuItem onClick={() => copyPublicUrl(eventType)} trackingLabel={t`Copy public link`}>
+        <DropdownMenuItem onClick={() => copyPublicUrl(eventType, publicHandle)} trackingLabel={t`Copy public link`}>
           <CopyIcon />
           <Trans>Copy link</Trans>
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => previewPublicUrl(eventType)} trackingLabel={t`Preview booking page`}>
+        <DropdownMenuItem onClick={() => previewPublicUrl(eventType, publicHandle)} trackingLabel={t`Preview booking page`}>
           <EyeIcon />
           <Trans>Preview</Trans>
         </DropdownMenuItem>

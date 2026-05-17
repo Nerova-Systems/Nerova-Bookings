@@ -45,8 +45,9 @@ export function getScheduleName(scheduleId: string, schedules: Schedule[]) {
   return schedules.find((schedule) => schedule.id === scheduleId)?.name ?? t`Schedule unavailable`;
 }
 
-export function getEventTypePublicUrl(eventType: Pick<EventType, "slug">) {
-  return `/book/${eventType.slug}`;
+export function getEventTypePublicUrl(eventType: Pick<EventType, "slug">, publicHandle?: string | null) {
+  const handle = publicHandle?.trim() || "book";
+  return `/${handle}/${eventType.slug}`;
 }
 
 export function eventTypeToDuplicatePayload(eventType: EventType): EventTypePayload {

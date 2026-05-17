@@ -10,6 +10,8 @@ public interface IEventTypeRepository : ICrudRepository<EventType, EventTypeId>,
 {
     Task<EventType[]> GetForOwnerAsync(UserId ownerUserId, CancellationToken cancellationToken);
 
+    Task<EventType?> GetPublicBySlugUnfilteredAsync(TenantId tenantId, UserId ownerUserId, string slug, CancellationToken cancellationToken);
+
     Task<bool> ExistsForScheduleAsync(UserId ownerUserId, ScheduleId scheduleId, CancellationToken cancellationToken);
 
     Task<bool> SlugExistsForOwnerAsync(UserId ownerUserId, string slug, EventTypeId? excludedEventTypeId, CancellationToken cancellationToken);
@@ -25,6 +27,18 @@ public sealed class EventTypeRepository(MainDbContext mainDbContext)
             .OrderBy(eventType => eventType.Title)
             .ThenBy(eventType => eventType.Id)
             .ToArrayAsync(cancellationToken);
+    }
+
+    public async Task<EventType?> GetPublicBySlugUnfilteredAsync(TenantId tenantId, UserId ownerUserId, string slug, CancellationToken cancellationToken)
+    {
+        var normalizedSlug = slug.Trim().ToLowerInvariant();
+        return await DbSet
+            .IgnoreQueryFilters()
+            .Where(eventType => eventType.TenantId == tenantId)
+            .Where(eventType => eventType.OwnerUserId == ownerUserId)
+            .Where(eventType => eventType.DeletedAt == null)
+            .Where(eventType => eventType.Slug == normalizedSlug)
+            .FirstOrDefaultAsync(cancellationToken);
     }
 
     public async Task<bool> ExistsForScheduleAsync(UserId ownerUserId, ScheduleId scheduleId, CancellationToken cancellationToken)

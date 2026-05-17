@@ -1,4 +1,5 @@
 using Main.Database;
+using Main.Features.Scheduling.Shared;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using SharedKernel.Configuration;
@@ -22,7 +23,10 @@ public static class Configuration
     {
         public IServiceCollection AddMainServices()
         {
-            return services.AddSharedServices<MainDbContext>([Assembly]);
+            return services
+                .AddScoped<PublicSchedulingResolver>()
+                .AddScoped<PublicSlotCalculator>()
+                .AddSharedServices<MainDbContext>([Assembly]);
         }
     }
 }

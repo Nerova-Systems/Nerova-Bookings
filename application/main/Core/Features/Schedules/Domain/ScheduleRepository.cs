@@ -9,6 +9,8 @@ public interface IScheduleRepository : ICrudRepository<Schedule, ScheduleId>, IS
 {
     Task<Schedule[]> GetForOwnerAsync(UserId ownerUserId, CancellationToken cancellationToken);
 
+    Task<Schedule?> GetPublicByIdUnfilteredAsync(TenantId tenantId, UserId ownerUserId, ScheduleId scheduleId, CancellationToken cancellationToken);
+
     Task<Schedule?> GetDefaultForOwnerAsync(UserId ownerUserId, CancellationToken cancellationToken);
 
     Task<Schedule[]> GetDefaultCandidatesForOwnerAsync(UserId ownerUserId, ScheduleId? excludedScheduleId, CancellationToken cancellationToken);
@@ -24,6 +26,17 @@ public sealed class ScheduleRepository(MainDbContext mainDbContext)
             .OrderBy(schedule => schedule.Name)
             .ThenBy(schedule => schedule.Id)
             .ToArrayAsync(cancellationToken);
+    }
+
+    public async Task<Schedule?> GetPublicByIdUnfilteredAsync(TenantId tenantId, UserId ownerUserId, ScheduleId scheduleId, CancellationToken cancellationToken)
+    {
+        return await DbSet
+            .IgnoreQueryFilters()
+            .Where(schedule => schedule.TenantId == tenantId)
+            .Where(schedule => schedule.OwnerUserId == ownerUserId)
+            .Where(schedule => schedule.DeletedAt == null)
+            .Where(schedule => schedule.Id == scheduleId)
+            .FirstOrDefaultAsync(cancellationToken);
     }
 
     public async Task<Schedule?> GetDefaultForOwnerAsync(UserId ownerUserId, CancellationToken cancellationToken)

@@ -38,6 +38,7 @@ function EventTypeDetailsPage() {
     params: { path: { id: eventTypeId } }
   });
   const { data: schedulesData } = api.useQuery("get", "/api/schedules");
+  const { data: schedulingProfile } = api.useQuery("get", "/api/scheduling/profile");
   const schedules = schedulesData?.schedules ?? [];
   const [draft, setDraft] = useState<EventTypePayload | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -65,7 +66,11 @@ function EventTypeDetailsPage() {
   return (
     <SchedulingPageShell
       title={eventType?.title ?? t`Event type`}
-      subtitle={eventType ? getEventTypePublicUrl(eventType) : t`Edit booking setup for this appointment type.`}
+      subtitle={
+        eventType
+          ? getEventTypePublicUrl(eventType, schedulingProfile?.handle)
+          : t`Edit booking setup for this appointment type.`
+      }
       maxWidth="80rem"
       titleContent={
         <div className="flex min-w-0 flex-col gap-1">
@@ -91,8 +96,8 @@ function EventTypeDetailsPage() {
               <Switch checked={draft.hidden} onCheckedChange={(hidden) => handleDraftChange({ ...draft, hidden })} />
               <Trans>Hidden</Trans>
             </div>
-            <CopyEventTypeButton eventType={eventType} />
-            <PreviewEventTypeButton eventType={eventType} />
+            <CopyEventTypeButton eventType={eventType} publicHandle={schedulingProfile?.handle} />
+            <PreviewEventTypeButton eventType={eventType} publicHandle={schedulingProfile?.handle} />
             <Button type="button" variant="outline" size="sm" onClick={() => setDeleteDialogOpen(true)}>
               <Trash2Icon />
               <Trans>Delete</Trans>

@@ -17,12 +17,14 @@ import { getEventTypePublicUrl, getScheduleName } from "./eventTypeShellTypes";
 export function EventTypesList({
   eventTypes,
   schedules,
+  publicHandle,
   isLoading,
   onDuplicate,
   onDelete
 }: Readonly<{
   eventTypes: EventType[];
   schedules: Schedule[];
+  publicHandle?: string | null;
   isLoading: boolean;
   onDuplicate: (eventType: EventType) => void;
   onDelete: (eventType: EventType) => void;
@@ -98,7 +100,9 @@ export function EventTypesList({
                     </Badge>
                   )}
                 </div>
-                <p className="mt-1 truncate text-sm text-muted-foreground">{getEventTypePublicUrl(eventType)}</p>
+                <p className="mt-1 truncate text-sm text-muted-foreground">
+                  {getEventTypePublicUrl(eventType, publicHandle)}
+                </p>
                 <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
                   <span>{getScheduleName(eventType.scheduleId, schedules)}</span>
                   <span>/{eventType.slug}</span>
@@ -106,8 +110,8 @@ export function EventTypesList({
               </RouterLink>
               <div className="flex items-center justify-end gap-1">
                 <div className="hidden items-center gap-1 sm:flex">
-                  <CopyEventTypeButton eventType={eventType} />
-                  <PreviewEventTypeButton eventType={eventType} />
+                  <CopyEventTypeButton eventType={eventType} publicHandle={publicHandle} />
+                  <PreviewEventTypeButton eventType={eventType} publicHandle={publicHandle} />
                   <Tooltip>
                     <TooltipTrigger
                       render={
@@ -142,6 +146,7 @@ export function EventTypesList({
                 <div className="sm:hidden">
                   <EventTypeOverflowActions
                     eventType={eventType}
+                    publicHandle={publicHandle}
                     onDuplicate={() => onDuplicate(eventType)}
                     onDelete={() => onDelete(eventType)}
                   />
