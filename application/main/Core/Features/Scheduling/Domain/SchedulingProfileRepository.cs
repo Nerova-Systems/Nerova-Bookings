@@ -51,7 +51,10 @@ public sealed class SchedulingProfileRepository(MainDbContext mainDbContext)
     public async Task<bool> HandleExistsAsync(string handle, UserId? excludedOwnerUserId, CancellationToken cancellationToken)
     {
         var normalizedHandle = SchedulingProfile.NormalizeHandle(handle);
-        var profiles = DbSet.Where(profile => profile.Handle == normalizedHandle);
+        var profiles = DbSet
+            .IgnoreQueryFilters()
+            .Where(profile => profile.DeletedAt == null)
+            .Where(profile => profile.Handle == normalizedHandle);
 
         if (excludedOwnerUserId is not null)
         {

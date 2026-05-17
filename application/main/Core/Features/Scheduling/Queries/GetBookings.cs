@@ -11,6 +11,7 @@ namespace Main.Features.Scheduling.Queries;
 [PublicAPI]
 public sealed record GetBookingsQuery(
     string Status = "upcoming",
+    string[]? Statuses = null,
     string? Search = null,
     EventTypeId? EventTypeId = null,
     string? AttendeeName = null,
@@ -23,9 +24,25 @@ public sealed record GetBookingsQuery(
 ) : IRequest<Result<BookingsResponse>>
 {
     public string Status { get; } = Status.Trim().ToLowerInvariant();
+
+    public string[] Statuses { get; } = NormalizeStatuses(Statuses, Status);
+
     public string? Search { get; } = string.IsNullOrWhiteSpace(Search) ? null : Search.Trim().ToLowerInvariant();
+
     public string? AttendeeName { get; } = string.IsNullOrWhiteSpace(AttendeeName) ? null : AttendeeName.Trim().ToLowerInvariant();
+
     public string? AttendeeEmail { get; } = string.IsNullOrWhiteSpace(AttendeeEmail) ? null : AttendeeEmail.Trim().ToLowerInvariant();
+
+    private static string[] NormalizeStatuses(string[]? statuses, string fallbackStatus)
+    {
+        var normalizedStatuses = statuses?
+            .Where(status => !string.IsNullOrWhiteSpace(status))
+            .Select(status => status.Trim().ToLowerInvariant())
+            .Distinct()
+            .ToArray();
+
+        return normalizedStatuses is { Length: > 0 } ? normalizedStatuses : [fallbackStatus.Trim().ToLowerInvariant()];
+    }
 }
 
 public sealed class GetBookingsQueryValidator : AbstractValidator<GetBookingsQuery>
@@ -35,6 +52,7 @@ public sealed class GetBookingsQueryValidator : AbstractValidator<GetBookingsQue
     public GetBookingsQueryValidator()
     {
         RuleFor(query => query.Status).Must(status => ValidStatuses.Contains(status)).WithMessage("Booking status must be upcoming, recurring, past, cancelled, or unconfirmed.");
+        RuleForEach(query => query.Statuses).Must(status => ValidStatuses.Contains(status)).WithMessage("Booking status must be upcoming, recurring, past, cancelled, or unconfirmed.");
         RuleFor(query => query.Search).MaximumLength(120);
         RuleFor(query => query.AttendeeName).MaximumLength(120);
         RuleFor(query => query.AttendeeEmail).MaximumLength(320);
@@ -83,15 +101,15 @@ public sealed class GetBookingsHandler(IBookingRepository bookingRepository, IEx
         var now = timeProvider.GetUtcNow();
         var bookings = await bookingRepository.GetForOwnerWithEventTypesAsync(tenantId, ownerUserId, cancellationToken);
         var filtered = bookings
-            .Where(booking => MatchesStatus(booking, query.Status, now))
+            .Where(booking => query.Statuses.Any(status => MatchesStatus(booking, status, now)))
             .Where(booking => MatchesFilters(booking, query))
             .ToArray();
 
-        var ordered = OrderByStatus(filtered, query.Status);
+        var ordered = OrderByStatus(filtered, query.Statuses);
         var page = ordered
             .Skip(query.PageOffset)
             .Take(query.PageSize)
-            .Select(booking => ToResponse(booking, query.Status))
+            .Select(booking => ToResponse(booking, ResolveListingStatus(booking, query.Statuses, now)))
             .ToArray();
 
         return new BookingsResponse(filtered.Length, query.PageOffset, query.PageSize, page);
@@ -136,13 +154,18 @@ public sealed class GetBookingsHandler(IBookingRepository bookingRepository, IEx
                booking.Id.Value.Contains(query.Search, StringComparison.OrdinalIgnoreCase);
     }
 
-    private static BookingWithEventType[] OrderByStatus(BookingWithEventType[] bookings, string status)
+    private static BookingWithEventType[] OrderByStatus(BookingWithEventType[] bookings, string[] statuses)
     {
-        var ordered = status is "past" or "cancelled"
+        var ordered = statuses is ["past" or "cancelled"]
             ? bookings.OrderByDescending(booking => booking.Booking.StartTime).ThenBy(booking => booking.Booking.Id)
             : bookings.OrderBy(booking => booking.Booking.StartTime).ThenBy(booking => booking.Booking.Id);
 
         return ordered.ToArray();
+    }
+
+    private static string ResolveListingStatus(BookingWithEventType item, string[] statuses, DateTimeOffset now)
+    {
+        return statuses.First(status => MatchesStatus(item, status, now));
     }
 
     private static BookingListItemResponse ToResponse(BookingWithEventType item, string listingStatus)

@@ -1,6 +1,9 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect } from "react";
 
+import { getWeekStartDate } from "../-bookings/bookingTypes";
+import { formatWeekStartSearchValue } from "../-bookings/WeekPicker";
+
 export const Route = createFileRoute("/bookings/")({
   staticData: { trackingTitle: "Bookings" },
   component: BookingsIndexRedirect
@@ -21,6 +24,8 @@ function BookingsIndexRedirect() {
         bookingUid: undefined,
         dateFrom: undefined,
         dateTo: undefined,
+        view: "list",
+        weekStart: formatWeekStartSearchValue(getWeekStartDate(new Date())),
         pageOffset: 0
       },
       replace: true

@@ -84,6 +84,9 @@ msgstr "Allow cancellation"
 msgid "Allow reschedule"
 msgstr "Allow reschedule"
 
+msgid "Apply filters"
+msgstr "Apply filters"
+
 msgid "Apps"
 msgstr "Apps"
 
@@ -150,6 +153,9 @@ msgstr "Booking page unavailable"
 msgid "Bookings"
 msgstr "Bookings"
 
+msgid "Bookings in the selected week will appear in the calendar view."
+msgstr "Bookings in the selected week will appear in the calendar view."
+
 msgid "Bookings per day"
 msgstr "Bookings per day"
 
@@ -164,6 +170,9 @@ msgstr "Burning the midnight oil, {firstName}?"
 
 msgid "Burning the midnight oil?"
 msgstr "Burning the midnight oil?"
+
+msgid "Calendar view"
+msgstr "Calendar view"
 
 msgid "Cancel"
 msgstr "Cancel"
@@ -376,6 +385,12 @@ msgstr "Every schedule has weekly availability"
 msgid "Exactly one default schedule exists"
 msgstr "Exactly one default schedule exists"
 
+msgid "Filter"
+msgstr "Filter"
+
+msgid "Filter bookings"
+msgstr "Filter bookings"
+
 msgid "First slot only"
 msgstr "First slot only"
 
@@ -447,6 +462,9 @@ msgstr "Limits"
 
 msgid "Link"
 msgstr "Link"
+
+msgid "List view"
+msgstr "List view"
 
 msgid "Loading event type..."
 msgstr "Loading event type..."
@@ -527,6 +545,9 @@ msgstr "No {0} bookings yet"
 msgid "No availability windows"
 msgstr "No availability windows"
 
+msgid "No bookings this week"
+msgstr "No bookings this week"
+
 msgid "No custom responses were captured."
 msgstr "No custom responses were captured."
 
@@ -535,6 +556,9 @@ msgstr "No event types match your search."
 
 msgid "No event types yet"
 msgstr "No event types yet"
+
+msgid "No filters"
+msgstr "No filters"
 
 msgid "No schedules yet"
 msgstr "No schedules yet"
@@ -732,6 +756,9 @@ msgstr "Select a schedule to see its availability summary."
 msgid "Select schedule"
 msgstr "Select schedule"
 
+msgid "Select week"
+msgstr "Select week"
+
 msgid "Send bookers to a custom page after success or cancellation."
 msgstr "Send bookers to a custom page after success or cancellation."
 
@@ -822,6 +849,9 @@ msgstr "Title"
 msgid "To"
 msgstr "To"
 
+msgid "Today"
+msgstr "Today"
+
 msgid "Tue"
 msgstr "Tue"
 
@@ -839,6 +869,12 @@ msgstr "View and manage appointments clients have booked."
 
 msgid "View details"
 msgstr "View details"
+
+msgid "View next week"
+msgstr "View next week"
+
+msgid "View previous week"
+msgstr "View previous week"
 
 msgid "Visibility"
 msgstr "Visibility"

@@ -19,6 +19,9 @@ import UserMenu from "account/UserMenu";
 import { CalendarCheckIcon, CalendarDaysIcon, LayoutDashboardIcon, TimerIcon } from "lucide-react";
 import { use } from "react";
 
+import { getWeekStartDate } from "@/routes/-bookings/bookingTypes";
+import { formatWeekStartSearchValue } from "@/routes/-bookings/WeekPicker";
+
 const normalizePath = (path: string): string => path.replace(/\/$/, "") || "/";
 
 function HeaderUserMenu() {
@@ -89,6 +92,8 @@ export function MainSideMenu() {
                         bookingUid: undefined,
                         dateFrom: undefined,
                         dateTo: undefined,
+                        view: "list",
+                        weekStart: formatWeekStartSearchValue(getWeekStartDate(new Date())),
                         pageOffset: 0
                       }}
                     >

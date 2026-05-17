@@ -3,8 +3,10 @@ using System.Net.Http.Json;
 using FluentAssertions;
 using JetBrains.Annotations;
 using Main.Database;
+using Main.Features.Scheduling.Domain;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using SharedKernel.Domain;
 using SharedKernel.Tests;
 using Xunit;
 
@@ -38,6 +40,34 @@ public sealed class PublicSchedulingEndpointsTests : EndpointBaseTest<MainDbCont
 
         // Assert
         await memberResponse.ShouldHaveErrorStatusCode(HttpStatusCode.BadRequest, "Scheduling handle 'owner' is already taken.");
+    }
+
+    [Fact]
+    public async Task GetSchedulingProfile_WhenDefaultHandleExistsOutsideTenant_ShouldCreateSuffixedHandle()
+    {
+        // Arrange
+        using (var serviceScope = Provider.CreateScope())
+        {
+            var dbContext = serviceScope.ServiceProvider.GetRequiredService<MainDbContext>();
+            dbContext.Set<SchedulingProfile>().Add(
+                SchedulingProfile.Create(
+                    new TenantId(DatabaseSeeder.TenantId.Value + 1),
+                    UserId.NewId(),
+                    "owner",
+                    "External Owner",
+                    null
+                )
+            );
+            await dbContext.SaveChangesAsync();
+        }
+
+        // Act
+        var response = await AuthenticatedOwnerHttpClient.GetAsync("/api/scheduling/profile");
+
+        // Assert
+        response.ShouldBeSuccessfulGetRequest();
+        var profile = await response.DeserializeResponse<SchedulingProfileResponse>();
+        profile!.Handle.Should().Be("owner-2");
     }
 
     [Fact]

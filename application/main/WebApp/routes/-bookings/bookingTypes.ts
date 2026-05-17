@@ -1,13 +1,20 @@
 import type { Schemas } from "@/shared/lib/api/client";
 
 export const bookingStatuses = ["upcoming", "unconfirmed", "recurring", "past", "cancelled"] as const;
+export const calendarBookingStatuses = ["upcoming", "unconfirmed", "recurring", "past"] as const;
+export const bookingViews = ["list", "calendar"] as const;
 
 export type BookingStatusView = (typeof bookingStatuses)[number];
+export type BookingDashboardView = (typeof bookingViews)[number];
 
 export type BookingListItem = Schemas["BookingListItemResponse"];
 
 export function isBookingStatusView(status: string): status is BookingStatusView {
   return bookingStatuses.includes(status as BookingStatusView);
+}
+
+export function isBookingDashboardView(view: string | undefined): view is BookingDashboardView {
+  return view === "list" || view === "calendar";
 }
 
 export function getBookingStatusLabel(status: BookingStatusView) {
@@ -40,6 +47,30 @@ export function getBookingEmptyDescription(status: BookingStatusView) {
   }
 }
 
+export function getActiveBookingFiltersCount(search: BookingFilterState) {
+  return [
+    search.search,
+    search.eventTypeId,
+    search.attendeeName,
+    search.attendeeEmail,
+    search.bookingUid,
+    search.dateFrom,
+    search.dateTo
+  ].filter((value) => value !== undefined && value !== "").length;
+}
+
+export function getWeekStartDate(date: Date, weekStartsOn = 1) {
+  const nextDate = new Date(date);
+  const diff = (nextDate.getDay() - weekStartsOn + 7) % 7;
+  nextDate.setDate(nextDate.getDate() - diff);
+  nextDate.setHours(0, 0, 0, 0);
+  return nextDate;
+}
+
+export function toDateInputValue(date: Date) {
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+}
+
 export function formatBookingDateRange(booking: BookingListItem) {
   const start = new Date(booking.startTime);
   const end = new Date(booking.endTime);
@@ -56,6 +87,16 @@ export function formatBookingDateRange(booking: BookingListItem) {
   });
 
   return `${dateFormatter.format(start)}, ${timeFormatter.format(start)} - ${timeFormatter.format(end)}`;
+}
+
+export interface BookingFilterState {
+  search?: string;
+  eventTypeId?: string;
+  attendeeName?: string;
+  attendeeEmail?: string;
+  bookingUid?: string;
+  dateFrom?: string;
+  dateTo?: string;
 }
 
 export function getStatusVariant(status: string): "default" | "secondary" | "destructive" | "outline" {

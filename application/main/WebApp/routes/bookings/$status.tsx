@@ -1,21 +1,22 @@
 import { t } from "@lingui/core/macro";
-import { Trans } from "@lingui/react/macro";
-import { Button } from "@repo/ui/components/Button";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 
 import { api } from "@/shared/lib/api/client";
 
-import { BookingDetailsSheet } from "../-bookings/BookingDetailsSheet";
-import { BookingsFilters, type BookingFilterSearch } from "../-bookings/BookingsFilters";
-import { BookingsList } from "../-bookings/BookingsList";
-import { BookingStatusTabs, type BookingsRouteSearch } from "../-bookings/BookingStatusTabs";
+import { BookingCalendarContainer } from "../-bookings/BookingCalendarContainer";
+import { BookingListContainer } from "../-bookings/BookingListContainer";
+import { type BookingFilterSearch } from "../-bookings/BookingsFilters";
+import { type BookingsRouteSearch } from "../-bookings/BookingStatusTabs";
 import {
-  type BookingListItem,
+  type BookingDashboardView,
   type BookingStatusView,
-  getBookingStatusLabel,
+  getWeekStartDate,
+  isBookingDashboardView,
   isBookingStatusView
 } from "../-bookings/bookingTypes";
+import { getStoredBookingsView, useBookingsView } from "../-bookings/useBookingsView";
+import { formatWeekStartSearchValue } from "../-bookings/WeekPicker";
 import { SchedulingPageShell } from "../-scheduling/SchedulingPageShell";
 
 const pageSize = 25;
@@ -30,6 +31,8 @@ export const Route = createFileRoute("/bookings/$status")({
     bookingUid: stringValue(search.bookingUid),
     dateFrom: stringValue(search.dateFrom),
     dateTo: stringValue(search.dateTo),
+    view: stringValue(search.view),
+    weekStart: stringValue(search.weekStart),
     pageOffset: numberValue(search.pageOffset) ?? 0
   }),
   component: BookingsPage
@@ -40,24 +43,33 @@ function BookingsPage() {
   const search = Route.useSearch();
   const navigate = useNavigate({ from: Route.fullPath });
   const status: BookingStatusView = isBookingStatusView(rawStatus) ? rawStatus : "upcoming";
-  const [selectedBooking, setSelectedBooking] = useState<BookingListItem | null>(null);
-  const { data: eventTypesData } = api.useQuery("get", "/api/event-types");
-  const { data: bookingsData, isLoading } = api.useQuery("get", "/api/bookings", {
-    params: {
-      query: {
-        Status: status,
-        Search: search.search,
-        EventTypeId: search.eventTypeId,
-        AttendeeName: search.attendeeName,
-        AttendeeEmail: search.attendeeEmail,
-        BookingUid: search.bookingUid,
-        AfterStartDate: toDateTimeOffset(search.dateFrom, false),
-        BeforeEndDate: toDateTimeOffset(search.dateTo, true),
-        PageOffset: search.pageOffset,
-        PageSize: pageSize
-      }
-    }
+  const initialView: BookingDashboardView = isBookingDashboardView(search.view) ? search.view : getStoredBookingsView();
+  const [view, setView] = useBookingsView({
+    view: initialView,
+    onViewChange: (nextView) => navigate({ search: { ...search, view: nextView }, replace: true })
   });
+  const { data: eventTypesData } = api.useQuery("get", "/api/event-types");
+  const { data: bookingsData, isLoading } = api.useQuery(
+    "get",
+    "/api/bookings",
+    {
+      params: {
+        query: {
+          Status: status,
+          Search: search.search,
+          EventTypeId: search.eventTypeId,
+          AttendeeName: search.attendeeName,
+          AttendeeEmail: search.attendeeEmail,
+          BookingUid: search.bookingUid,
+          AfterStartDate: toDateTimeOffset(search.dateFrom, false),
+          BeforeEndDate: toDateTimeOffset(search.dateTo, true),
+          PageOffset: search.pageOffset,
+          PageSize: pageSize
+        }
+      }
+    },
+    { enabled: view === "list" }
+  );
 
   useEffect(() => {
     if (!isBookingStatusView(rawStatus)) {
@@ -65,14 +77,23 @@ function BookingsPage() {
     }
   }, [navigate, rawStatus, search]);
 
+  useEffect(() => {
+    if (!isBookingDashboardView(search.view)) {
+      navigate({ search: { ...search, view }, replace: true });
+    }
+  }, [navigate, search, view]);
+
   const updateSearch = (nextSearch: BookingFilterSearch) => {
-    navigate({ search: toRouteSearch(nextSearch), replace: true });
+    navigate({ search: toRouteSearch({ ...search, ...nextSearch }, view, search.weekStart), replace: true });
   };
 
-  const totalCount = bookingsData?.totalCount ?? 0;
-  const pageOffset = bookingsData?.pageOffset ?? search.pageOffset;
-  const canGoPrevious = pageOffset > 0;
-  const canGoNext = pageOffset + pageSize < totalCount;
+  const updatePageOffset = (pageOffset: number) => {
+    navigate({ search: { ...search, pageOffset }, replace: true });
+  };
+
+  const updateWeekStart = (weekStart: Date) => {
+    navigate({ search: { ...search, weekStart: formatWeekStartSearchValue(weekStart) }, replace: true });
+  };
 
   return (
     <SchedulingPageShell
@@ -80,48 +101,31 @@ function BookingsPage() {
       subtitle={t`View and manage appointments clients have booked.`}
       maxWidth="80rem"
     >
-      <div className="flex flex-col gap-4">
-        <BookingStatusTabs status={status} search={search} />
-        <BookingsFilters eventTypes={eventTypesData?.eventTypes ?? []} search={search} onSearchChange={updateSearch} />
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <span className="text-sm text-muted-foreground">
-            <Trans>
-              {totalCount} {getBookingStatusLabel(status).toLowerCase()} bookings
-            </Trans>
-          </span>
-          <div className="flex items-center gap-2">
-            <Button
-              type="button"
-              variant="secondary"
-              disabled={!canGoPrevious}
-              onClick={() => navigate({ search: { ...search, pageOffset: Math.max(0, pageOffset - pageSize) } })}
-            >
-              <Trans>Previous</Trans>
-            </Button>
-            <Button
-              type="button"
-              variant="secondary"
-              disabled={!canGoNext}
-              onClick={() => navigate({ search: { ...search, pageOffset: pageOffset + pageSize } })}
-            >
-              <Trans>Next</Trans>
-            </Button>
-          </div>
-        </div>
-        <BookingsList
-          bookings={bookingsData?.bookings ?? []}
+      {view === "list" ? (
+        <BookingListContainer
           status={status}
+          search={normalizeSearch(search, view)}
+          eventTypes={eventTypesData?.eventTypes ?? []}
+          bookings={bookingsData?.bookings ?? []}
+          totalCount={bookingsData?.totalCount ?? 0}
+          pageSize={pageSize}
           isLoading={isLoading}
-          onSelectBooking={setSelectedBooking}
+          view={view}
+          onViewChange={setView}
+          onSearchChange={updateSearch}
+          onPageOffsetChange={updatePageOffset}
         />
-      </div>
-      <BookingDetailsSheet
-        booking={selectedBooking}
-        isOpen={selectedBooking !== null}
-        onOpenChange={(isOpen) => {
-          if (!isOpen) setSelectedBooking(null);
-        }}
-      />
+      ) : (
+        <BookingCalendarContainer
+          status={status}
+          search={normalizeSearch(search, view)}
+          eventTypes={eventTypesData?.eventTypes ?? []}
+          view={view}
+          onViewChange={setView}
+          onSearchChange={updateSearch}
+          onWeekStartChange={updateWeekStart}
+        />
+      )}
     </SchedulingPageShell>
   );
 }
@@ -130,7 +134,12 @@ function stringValue(value: unknown) {
   return typeof value === "string" && value.trim().length > 0 ? value.trim() : undefined;
 }
 
-function toRouteSearch(search: BookingFilterSearch, pageOffset = 0): BookingsRouteSearch {
+function toRouteSearch(
+  search: BookingFilterSearch,
+  view: BookingDashboardView,
+  weekStart: string | undefined,
+  pageOffset = 0
+): BookingsRouteSearch {
   return {
     search: search.search,
     eventTypeId: search.eventTypeId,
@@ -139,7 +148,24 @@ function toRouteSearch(search: BookingFilterSearch, pageOffset = 0): BookingsRou
     bookingUid: search.bookingUid,
     dateFrom: search.dateFrom,
     dateTo: search.dateTo,
+    view,
+    weekStart: weekStart ?? formatWeekStartSearchValue(getWeekStartDate(new Date())),
     pageOffset
+  };
+}
+
+function normalizeSearch(search: ReturnType<typeof Route.useSearch>, view: BookingDashboardView): BookingsRouteSearch {
+  return {
+    search: search.search,
+    eventTypeId: search.eventTypeId,
+    attendeeName: search.attendeeName,
+    attendeeEmail: search.attendeeEmail,
+    bookingUid: search.bookingUid,
+    dateFrom: search.dateFrom,
+    dateTo: search.dateTo,
+    view,
+    weekStart: search.weekStart ?? formatWeekStartSearchValue(getWeekStartDate(new Date())),
+    pageOffset: search.pageOffset
   };
 }
 

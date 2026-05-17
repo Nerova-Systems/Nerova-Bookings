@@ -84,6 +84,9 @@ msgstr "Allow cancellation"
 msgid "Allow reschedule"
 msgstr "Allow reschedule"
 
+msgid "Apply filters"
+msgstr "Anvend filtre"
+
 msgid "Apps"
 msgstr "Apps"
 
@@ -150,6 +153,9 @@ msgstr "Bookingsiden er ikke tilgængelig"
 msgid "Bookings"
 msgstr "Bookinger"
 
+msgid "Bookings in the selected week will appear in the calendar view."
+msgstr "Bookinger i den valgte uge vises i kalendervisningen."
+
 msgid "Bookings per day"
 msgstr "Bookings per day"
 
@@ -164,6 +170,9 @@ msgstr "Sidder du stadig oppe, {firstName}?"
 
 msgid "Burning the midnight oil?"
 msgstr "Sidder du stadig oppe?"
+
+msgid "Calendar view"
+msgstr "Kalendervisning"
 
 msgid "Cancel"
 msgstr "Annuller"
@@ -376,6 +385,12 @@ msgstr "Alle tidsplaner har ugentlig tilgængelighed"
 msgid "Exactly one default schedule exists"
 msgstr "Der findes præcis én standardtidsplan"
 
+msgid "Filter"
+msgstr "Filtrer"
+
+msgid "Filter bookings"
+msgstr "Filtrer bookinger"
+
 msgid "First slot only"
 msgstr "First slot only"
 
@@ -447,6 +462,9 @@ msgstr "Grænser"
 
 msgid "Link"
 msgstr "Link"
+
+msgid "List view"
+msgstr "Listevisning"
 
 msgid "Loading event type..."
 msgstr "Indlæser begivenhedstype..."
@@ -527,6 +545,9 @@ msgstr "Ingen {0} bookinger endnu"
 msgid "No availability windows"
 msgstr "Ingen tilgængelighedsvinduer"
 
+msgid "No bookings this week"
+msgstr "Ingen bookinger denne uge"
+
 msgid "No custom responses were captured."
 msgstr "Ingen brugerdefinerede svar blev registreret."
 
@@ -535,6 +556,9 @@ msgstr "Ingen begivenhedstyper matcher din søgning."
 
 msgid "No event types yet"
 msgstr "Ingen aftaletyper endnu"
+
+msgid "No filters"
+msgstr "Ingen filtre"
 
 msgid "No schedules yet"
 msgstr "Ingen tidsplaner endnu"
@@ -732,6 +756,9 @@ msgstr "Vælg en tidsplan for at se dens tilgængelighedsoversigt."
 msgid "Select schedule"
 msgstr "Vælg tidsplan"
 
+msgid "Select week"
+msgstr "Vælg uge"
+
 msgid "Send bookers to a custom page after success or cancellation."
 msgstr "Send bookers to a custom page after success or cancellation."
 
@@ -822,6 +849,9 @@ msgstr "Titel"
 msgid "To"
 msgstr "Til"
 
+msgid "Today"
+msgstr "I dag"
+
 msgid "Tue"
 msgstr "Tir"
 
@@ -839,6 +869,12 @@ msgstr "Se og administrer aftaler, som kunder har booket."
 
 msgid "View details"
 msgstr "Vis detaljer"
+
+msgid "View next week"
+msgstr "Vis næste uge"
+
+msgid "View previous week"
+msgstr "Vis forrige uge"
 
 msgid "Visibility"
 msgstr "Synlighed"

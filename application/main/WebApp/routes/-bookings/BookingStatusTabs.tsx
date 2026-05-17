@@ -38,5 +38,7 @@ export interface BookingsRouteSearch {
   bookingUid: string | undefined;
   dateFrom: string | undefined;
   dateTo: string | undefined;
+  view: "list" | "calendar";
+  weekStart: string;
   pageOffset: number;
 }
