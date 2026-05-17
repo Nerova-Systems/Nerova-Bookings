@@ -15,9 +15,9 @@ import { toast } from "sonner";
 
 import { api, queryClient } from "@/shared/lib/api/client";
 
-import { GeneralApiErrors } from "../-scheduling/ApiErrors";
-
 import type { BookingListItem } from "./bookingTypes";
+
+import { GeneralApiErrors } from "../-scheduling/ApiErrors";
 
 export function CancelBookingDialog({
   booking,

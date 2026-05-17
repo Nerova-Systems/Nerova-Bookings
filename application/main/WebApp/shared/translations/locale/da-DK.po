@@ -48,6 +48,9 @@ msgstr "Tilføj datoundtagelse"
 msgid "Add dates when your availability changes from your daily hours."
 msgstr "Tilføj datoer, hvor din tilgængelighed afviger fra dine daglige timer."
 
+msgid "Add guests"
+msgstr "Tilføj gæster"
+
 msgid "Add new event type"
 msgstr "Tilføj ny aftaletype"
 
@@ -68,6 +71,9 @@ msgstr "Avanceret"
 
 msgid "After buffer"
 msgstr "Buffer efter"
+
+msgid "After event"
+msgstr "Efter begivenhed"
 
 msgid "AI"
 msgstr "AI"
@@ -135,6 +141,12 @@ msgstr "Booked minutes per day"
 msgid "Booker layout"
 msgstr "Booker layout"
 
+msgid "Booking actions"
+msgstr "Bookinghandlinger"
+
+msgid "Booking cancelled"
+msgstr "Booking annulleret"
+
 msgid "Booking confirmed"
 msgstr "Booking bekræftet"
 
@@ -176,6 +188,15 @@ msgstr "Kalendervisning"
 
 msgid "Cancel"
 msgstr "Annuller"
+
+msgid "Cancel booking"
+msgstr "Annuller booking"
+
+msgid "Cancel event"
+msgstr "Annuller begivenhed"
+
+msgid "Cancel event?"
+msgstr "Annuller begivenhed?"
 
 msgid "Cancellation and reschedule"
 msgstr "Cancellation and reschedule"
@@ -334,6 +355,12 @@ msgstr "Duration options"
 msgid "Edit booking setup for this appointment type."
 msgstr "Rediger bookingopsætningen for denne aftaletype."
 
+msgid "Edit event"
+msgstr "Rediger begivenhed"
+
+msgid "Edit location"
+msgstr "Rediger lokation"
+
 msgid "Email"
 msgstr "E-mail"
 
@@ -448,6 +475,9 @@ msgstr "Interface language"
 msgid "Interval"
 msgstr "Interval"
 
+msgid "Keep booking"
+msgstr "Behold booking"
+
 msgid "Launch troubleshooter"
 msgstr "Start fejlfinding"
 
@@ -504,6 +534,9 @@ msgstr "Administrer ugentlige tidsplaner for bookingtilgængelighed."
 
 msgid "Managed relationship rules"
 msgstr "Administrerede relationsregler"
+
+msgid "Mark as no-show"
+msgstr "Marker som udeblevet"
 
 msgid "Mon"
 msgstr "Man"
@@ -660,11 +693,20 @@ msgstr "Fjern tid"
 msgid "Replace this sample page with your own product information and branding."
 msgstr "Erstat denne eksempelside med dine egne produktinformationer og branding."
 
+msgid "Report booking"
+msgstr "Rapporter booking"
+
+msgid "Request reschedule"
+msgstr "Anmod om ny tid"
+
 msgid "Requires another booking"
 msgstr "Kræver en anden booking"
 
 msgid "Requires confirmation"
 msgstr "Kræver bekræftelse"
+
+msgid "Reschedule booking"
+msgstr "Flyt booking"
 
 msgid "Reschedule notice"
 msgstr "Reschedule notice"
@@ -813,6 +855,13 @@ msgstr "Søndag"
 msgid "These features need more integration before they can be edited here."
 msgstr "These features need more integration before they can be edited here."
 
+msgid "this attendee"
+msgstr "denne deltager"
+
+#. placeholder {0}: booking?.bookerName ?? t`this attendee`
+msgid "This cancels the booking with {0}."
+msgstr "Dette annullerer bookingen med {0}."
+
 msgid "this event type"
 msgstr "denne begivenhedstype"
 
@@ -867,14 +916,17 @@ msgstr "Videoopkald"
 msgid "View and manage appointments clients have booked."
 msgstr "Se og administrer aftaler, som kunder har booket."
 
-msgid "View details"
-msgstr "Vis detaljer"
-
 msgid "View next week"
 msgstr "Vis næste uge"
 
 msgid "View previous week"
 msgstr "Vis forrige uge"
+
+msgid "View recordings"
+msgstr "Vis optagelser"
+
+msgid "View session details"
+msgstr "Vis sessionsdetaljer"
 
 msgid "Visibility"
 msgstr "Synlighed"

@@ -43,7 +43,7 @@ Status values:
 | Public booking page | `cal.com/apps/web/app/(booking-page-wrapper)/[user]/[type]/page.tsx`, `cal.com/apps/web/server/lib/[user]/[type]/getServerSideProps.ts` |
 | Public booker UI | `cal.com/apps/web/modules/bookings/components/BookerWebWrapper.tsx`, `Booker.tsx`, `EventMeta.tsx`, `DatePicker.tsx`, `AvailableTimeSlots.tsx`, `AvailableTimes.tsx`, `BookEventForm/**` |
 | Slot calculation | `cal.com/apps/web/modules/schedules/hooks/useSchedule.ts`, `useEvent.ts`, `cal.com/packages/trpc/server/routers/viewer/slots/**` |
-| Authenticated bookings views | `cal.com/apps/web/app/(use-page-wrapper)/(main-nav)/bookings/[status]/page.tsx`, `cal.com/apps/web/modules/bookings/views/bookings-view.tsx`, `BookingListContainer.tsx`, `BookingList.tsx`, `BookingCalendarContainer.tsx`, `BookingCalendarView.tsx`, `LargeCalendar.tsx`, `WeekPicker.tsx`, `ViewToggleButton.tsx`, `cal.com/apps/web/components/booking/BookingListItem.tsx`, `BookingDetailsSheet.tsx` |
+| Authenticated bookings views | `cal.com/apps/web/app/(use-page-wrapper)/(main-nav)/bookings/[status]/page.tsx`, `cal.com/apps/web/modules/bookings/views/bookings-view.tsx`, `BookingListContainer.tsx`, `BookingList.tsx`, `BookingCalendarContainer.tsx`, `BookingCalendarView.tsx`, `LargeCalendar.tsx`, `WeekPicker.tsx`, `ViewToggleButton.tsx`, `cal.com/apps/web/components/booking/BookingListItem.tsx`, `BookingDetailsSheet.tsx`, `cal.com/apps/web/components/booking/actions/BookingActionsDropdown.tsx`, `bookingActions.ts`, `BookingActionsStoreProvider.tsx` |
 | Authenticated bookings API/filtering | `cal.com/packages/trpc/server/routers/viewer/bookings/get.handler.ts`, `get.schema.ts`, `find.handler.ts`, `cal.com/apps/web/modules/bookings/hooks/useBookingStatusTab.ts`, `useBookingFilters.ts`, `useBookingsView.ts`, `useBookingCalendarData.ts` |
 
 ## Parity Matrix
@@ -87,7 +87,7 @@ Status values:
 | Public slot preview | `partial` | `GetPublicSlots.cs`, `PublicSlotCalculator.cs` | Add date override E2E, recurrence expansion, booking-limit enforcement | Backend + QA |
 | Solo public booker UI | `partial` | `application/main/WebApp/routes/$handle/$eventSlug.tsx` | E2E and Browser visual parity pass | Frontend + QA |
 | Minimal solo booking creation | `partial` | `Booking.cs`, `CreatePublicBooking.cs`, `/api/public/bookings` | Email, approval, reschedule/cancel, calendar/conferencing side effects later | Booking |
-| Authenticated bookings status views, filters, and calendar view | `partial` | `application/main/Core/Features/Scheduling/Queries/GetBookings.cs`, `application/main/Api/Endpoints/BookingEndpoints.cs`, `application/main/WebApp/routes/bookings/**`, `routes/-bookings/**`, `application/main/WebApp/tests/e2e/bookings-flows.spec.ts` | Add booking actions, export, team/organization permissions, details audit, reschedule/cancel lifecycle, external calendar overlays | Booking + Frontend + QA |
+| Authenticated bookings status views, filters, calendar view, quick actions, and cancel | `partial` | `application/main/Core/Features/Scheduling/**`, `application/main/Api/Endpoints/BookingEndpoints.cs`, `application/main/WebApp/routes/bookings/**`, `routes/-bookings/**`, `application/main/WebApp/tests/e2e/bookings-flows.spec.ts` | Add confirm/reject, reschedule, request reschedule, edit location, guests, report, no-show, recordings/session details, export, team/organization permissions, details audit, external calendar overlays | Booking + Frontend + QA |
 | Full public booking lifecycle | `blocked-by-downstream` | minimal booking persistence only | Booking parity slice | Booking |
 | E2E coverage for authenticated event-type setup | `implemented` | `application/main/WebApp/tests/e2e/event-types-flows.spec.ts` | Extend after public handle, slot preview, and dependency subsystems land | QA |
 | Browser visual validation screenshots | `missing` | Browser plugin available | Final validation slice | QA |
@@ -119,7 +119,9 @@ Status values:
   - compact filter trigger with active count for event type, attendee name, attendee email, booking ID, and date range;
   - list/calendar view toggle with weekly calendar surface and week navigation;
   - booking details surface;
-  - later actions for confirm/reject, cancel, reschedule, no-show, export, external calendar overlays, and audit.
+  - Cal-like quick action dropdown and backend action availability;
+  - implemented cancel action for eligible owner-owned future bookings;
+  - later actions for confirm/reject, reschedule, request reschedule, edit location, guests, report, no-show, recordings/session details, export, external calendar overlays, and audit.
 
 ### Wave 4: Dependency Tabs
 

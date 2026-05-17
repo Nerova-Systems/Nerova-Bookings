@@ -48,6 +48,9 @@ msgstr "Add date override"
 msgid "Add dates when your availability changes from your daily hours."
 msgstr "Add dates when your availability changes from your daily hours."
 
+msgid "Add guests"
+msgstr "Add guests"
+
 msgid "Add new event type"
 msgstr "Add new event type"
 
@@ -68,6 +71,9 @@ msgstr "Advanced"
 
 msgid "After buffer"
 msgstr "After buffer"
+
+msgid "After event"
+msgstr "After event"
 
 msgid "AI"
 msgstr "AI"
@@ -135,6 +141,12 @@ msgstr "Booked minutes per day"
 msgid "Booker layout"
 msgstr "Booker layout"
 
+msgid "Booking actions"
+msgstr "Booking actions"
+
+msgid "Booking cancelled"
+msgstr "Booking cancelled"
+
 msgid "Booking confirmed"
 msgstr "Booking confirmed"
 
@@ -176,6 +188,15 @@ msgstr "Calendar view"
 
 msgid "Cancel"
 msgstr "Cancel"
+
+msgid "Cancel booking"
+msgstr "Cancel booking"
+
+msgid "Cancel event"
+msgstr "Cancel event"
+
+msgid "Cancel event?"
+msgstr "Cancel event?"
 
 msgid "Cancellation and reschedule"
 msgstr "Cancellation and reschedule"
@@ -334,6 +355,12 @@ msgstr "Duration options"
 msgid "Edit booking setup for this appointment type."
 msgstr "Edit booking setup for this appointment type."
 
+msgid "Edit event"
+msgstr "Edit event"
+
+msgid "Edit location"
+msgstr "Edit location"
+
 msgid "Email"
 msgstr "Email"
 
@@ -448,6 +475,9 @@ msgstr "Interface language"
 msgid "Interval"
 msgstr "Interval"
 
+msgid "Keep booking"
+msgstr "Keep booking"
+
 msgid "Launch troubleshooter"
 msgstr "Launch troubleshooter"
 
@@ -504,6 +534,9 @@ msgstr "Manage weekly schedules for booking availability."
 
 msgid "Managed relationship rules"
 msgstr "Managed relationship rules"
+
+msgid "Mark as no-show"
+msgstr "Mark as no-show"
 
 msgid "Mon"
 msgstr "Mon"
@@ -660,11 +693,20 @@ msgstr "Remove time"
 msgid "Replace this sample page with your own product information and branding."
 msgstr "Replace this sample page with your own product information and branding."
 
+msgid "Report booking"
+msgstr "Report booking"
+
+msgid "Request reschedule"
+msgstr "Request reschedule"
+
 msgid "Requires another booking"
 msgstr "Requires another booking"
 
 msgid "Requires confirmation"
 msgstr "Requires confirmation"
+
+msgid "Reschedule booking"
+msgstr "Reschedule booking"
 
 msgid "Reschedule notice"
 msgstr "Reschedule notice"
@@ -813,6 +855,13 @@ msgstr "Sunday"
 msgid "These features need more integration before they can be edited here."
 msgstr "These features need more integration before they can be edited here."
 
+msgid "this attendee"
+msgstr "this attendee"
+
+#. placeholder {0}: booking?.bookerName ?? t`this attendee`
+msgid "This cancels the booking with {0}."
+msgstr "This cancels the booking with {0}."
+
 msgid "this event type"
 msgstr "this event type"
 
@@ -867,14 +916,17 @@ msgstr "Video call"
 msgid "View and manage appointments clients have booked."
 msgstr "View and manage appointments clients have booked."
 
-msgid "View details"
-msgstr "View details"
-
 msgid "View next week"
 msgstr "View next week"
 
 msgid "View previous week"
 msgstr "View previous week"
+
+msgid "View recordings"
+msgstr "View recordings"
+
+msgid "View session details"
+msgstr "View session details"
 
 msgid "Visibility"
 msgstr "Visibility"

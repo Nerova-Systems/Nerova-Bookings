@@ -1,18 +1,13 @@
-import type { ReactNode } from "react";
-
 import { t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
 import { Button } from "@repo/ui/components/Button";
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger
 } from "@repo/ui/components/DropdownMenu";
 import {
-  CalendarClockIcon,
   CircleXIcon,
   EllipsisIcon,
   FlagIcon,
@@ -26,22 +21,10 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 
-import type { Schemas } from "@/shared/lib/api/client";
-
-import { CancelBookingDialog } from "./CancelBookingDialog";
 import type { BookingListItem } from "./bookingTypes";
 
-type BookingActions = Schemas["BookingActionsResponse"];
-type BookingAction = Schemas["BookingActionResponse"];
-type BookingActionKey = keyof BookingActions;
-
-type BookingActionMenuItem = {
-  key: BookingActionKey;
-  icon: ReactNode;
-  label: ReactNode;
-  variant?: "default" | "destructive";
-  onSelect?: () => void;
-};
+import { BookingActionGroup, BookingActionItem, type BookingActionMenuItem } from "./BookingActionMenuItems";
+import { CancelBookingDialog } from "./CancelBookingDialog";
 
 export function BookingActionsDropdown({
   booking,
@@ -141,75 +124,5 @@ export function BookingActionsDropdown({
         onCancelled={onActionComplete}
       />
     </>
-  );
-}
-
-function BookingActionGroup({
-  label,
-  booking,
-  items
-}: Readonly<{ label: ReactNode; booking: BookingListItem; items: BookingActionMenuItem[] }>) {
-  const visibleItems = items.filter((item) => booking.actions[item.key].visible);
-  if (visibleItems.length === 0) {
-    return null;
-  }
-
-  return (
-    <>
-      <DropdownMenuLabel>{label}</DropdownMenuLabel>
-      {visibleItems.map((item) => (
-        <BookingActionItem
-          key={item.key}
-          action={booking.actions[item.key]}
-          icon={item.icon}
-          label={item.label}
-          trackingLabel={String(item.key)}
-          variant={item.variant}
-          onSelect={item.onSelect}
-        />
-      ))}
-    </>
-  );
-}
-
-function BookingActionItem({
-  action,
-  icon,
-  label,
-  trackingLabel,
-  variant = "default",
-  onSelect
-}: Readonly<{
-  action: BookingAction;
-  icon: ReactNode;
-  label: ReactNode;
-  trackingLabel: string;
-  variant?: "default" | "destructive";
-  onSelect?: () => void;
-}>) {
-  if (!action.visible) {
-    return null;
-  }
-
-  return (
-    <DropdownMenuItem
-      disabled={!action.enabled}
-      variant={variant}
-      title={action.disabledReason ?? undefined}
-      trackingLabel={trackingLabel}
-      onClick={(event) => {
-        event.stopPropagation();
-        if (!action.enabled) return;
-        onSelect?.();
-      }}
-    >
-      {icon}
-      <span className="flex min-w-0 flex-col gap-0.5">
-        <span>{label}</span>
-        {!action.enabled && action.disabledReason && (
-          <span className="text-xs leading-snug text-muted-foreground">{action.disabledReason}</span>
-        )}
-      </span>
-    </DropdownMenuItem>
   );
 }

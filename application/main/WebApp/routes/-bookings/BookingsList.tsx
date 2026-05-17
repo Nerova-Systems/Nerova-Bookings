@@ -1,5 +1,6 @@
 import { Trans } from "@lingui/react/macro";
 import { Badge } from "@repo/ui/components/Badge";
+import { Button } from "@repo/ui/components/Button";
 import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@repo/ui/components/Empty";
 import { Skeleton } from "@repo/ui/components/Skeleton";
 import { CalendarIcon, CalendarXIcon, MailIcon, UserIcon } from "lucide-react";
@@ -63,59 +64,63 @@ export function BookingsList({
         <article
           key={booking.id}
           data-testid="booking-item"
-          className="group grid cursor-pointer gap-3 border-b p-4 transition-colors last:border-b-0 hover:bg-muted/40 active:bg-muted/60 sm:grid-cols-[13rem_1fr_auto] sm:items-center"
-          onClick={() => onSelectBooking(booking)}
-          onKeyDown={(event) => {
-            if (event.key === "Enter") onSelectBooking(booking);
-          }}
-          tabIndex={0}
+          className="group grid border-b transition-colors last:border-b-0 hover:bg-muted/40 sm:grid-cols-[1fr_auto]"
         >
-          <div className="flex min-w-0 flex-col gap-1">
-            <div className="flex items-center gap-2 text-sm font-medium">
-              <CalendarIcon className="size-4 text-muted-foreground" />
-              <span>
-                {new Intl.DateTimeFormat(undefined, { weekday: "short", month: "short", day: "numeric" }).format(
-                  new Date(booking.startTime)
+          <Button
+            type="button"
+            variant="ghost"
+            className="grid h-auto justify-stretch gap-3 rounded-none p-4 text-left active:bg-muted/60 sm:grid-cols-[13rem_1fr]"
+            onClick={() => onSelectBooking(booking)}
+          >
+            <div className="flex min-w-0 flex-col gap-1">
+              <div className="flex items-center gap-2 text-sm font-medium">
+                <CalendarIcon className="size-4 text-muted-foreground" />
+                <span>
+                  {new Intl.DateTimeFormat(undefined, { weekday: "short", month: "short", day: "numeric" }).format(
+                    new Date(booking.startTime)
+                  )}
+                </span>
+              </div>
+              <span className="text-sm text-muted-foreground">
+                {new Intl.DateTimeFormat(undefined, {
+                  hour: "numeric",
+                  minute: "2-digit",
+                  timeZone: booking.timeZone
+                }).format(new Date(booking.startTime))}
+                {" - "}
+                {new Intl.DateTimeFormat(undefined, {
+                  hour: "numeric",
+                  minute: "2-digit",
+                  timeZone: booking.timeZone
+                }).format(new Date(booking.endTime))}
+              </span>
+            </div>
+            <div className="min-w-0">
+              <div className="flex flex-wrap items-center gap-2">
+                <h2 className="truncate text-base font-medium">{booking.eventTypeTitle}</h2>
+                <Badge variant={getStatusVariant(booking.status)}>{booking.status}</Badge>
+                {booking.isRecurring && (
+                  <Badge variant="outline">
+                    <Trans>Recurring</Trans>
+                  </Badge>
                 )}
+              </div>
+              <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-sm text-muted-foreground">
+                <span className="inline-flex items-center gap-1">
+                  <UserIcon className="size-4" />
+                  {booking.bookerName}
+                </span>
+                <span className="inline-flex items-center gap-1">
+                  <MailIcon className="size-4" />
+                  {booking.bookerEmail}
+                </span>
+              </div>
+              <span className="mt-1 block truncate text-xs text-muted-foreground">
+                {formatBookingDateRange(booking)}
               </span>
             </div>
-            <span className="text-sm text-muted-foreground">
-              {new Intl.DateTimeFormat(undefined, {
-                hour: "numeric",
-                minute: "2-digit",
-                timeZone: booking.timeZone
-              }).format(new Date(booking.startTime))}
-              {" - "}
-              {new Intl.DateTimeFormat(undefined, {
-                hour: "numeric",
-                minute: "2-digit",
-                timeZone: booking.timeZone
-              }).format(new Date(booking.endTime))}
-            </span>
-          </div>
-          <div className="min-w-0">
-            <div className="flex flex-wrap items-center gap-2">
-              <h2 className="truncate text-base font-medium">{booking.eventTypeTitle}</h2>
-              <Badge variant={getStatusVariant(booking.status)}>{booking.status}</Badge>
-              {booking.isRecurring && (
-                <Badge variant="outline">
-                  <Trans>Recurring</Trans>
-                </Badge>
-              )}
-            </div>
-            <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-sm text-muted-foreground">
-              <span className="inline-flex items-center gap-1">
-                <UserIcon className="size-4" />
-                {booking.bookerName}
-              </span>
-              <span className="inline-flex items-center gap-1">
-                <MailIcon className="size-4" />
-                {booking.bookerEmail}
-              </span>
-            </div>
-            <span className="mt-1 block truncate text-xs text-muted-foreground">{formatBookingDateRange(booking)}</span>
-          </div>
-          <div className="flex justify-end">
+          </Button>
+          <div className="flex items-center justify-end px-4 pb-4 sm:py-4 sm:pr-4 sm:pl-0">
             <BookingActionsDropdown booking={booking} />
           </div>
         </article>
