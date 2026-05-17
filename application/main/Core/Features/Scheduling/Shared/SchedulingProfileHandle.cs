@@ -43,6 +43,6 @@ public static partial class SchedulingProfileHandle
         return normalized.Trim('-');
     }
 
-    [GeneratedRegex("[^a-z0-9]+", RegexOptions.None, matchTimeoutMilliseconds: 1000)]
+    [GeneratedRegex("[^a-z0-9]+", RegexOptions.None, 1000)]
     private static partial Regex HandleCharacters();
 }

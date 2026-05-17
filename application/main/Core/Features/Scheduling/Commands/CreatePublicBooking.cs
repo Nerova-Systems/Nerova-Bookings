@@ -47,7 +47,7 @@ public sealed class CreatePublicBookingHandler(
         }
 
         var context = contextResult.Value!;
-        if (!context.EventType.Settings.DurationOptions.Contains(command.Duration))
+        if (!context.EventType.DurationOptions.Contains(command.Duration))
         {
             return Result<CreatePublicBookingResponse>.BadRequest("Duration is not available for this event type.");
         }

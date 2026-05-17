@@ -26,6 +26,7 @@ public sealed class Booking : AggregateRoot<BookingId>, ITenantScopedEntity
         BookerName = string.Empty;
         BookerEmail = string.Empty;
         TimeZone = string.Empty;
+        Status = string.Empty;
         ResponsesJson = "{}";
     }
 
@@ -70,15 +71,15 @@ public sealed class Booking : AggregateRoot<BookingId>, ITenantScopedEntity
 
     public int AfterEventBufferMinutes { get; private set; }
 
-    public string BookerName { get; private set; } = string.Empty;
+    public string BookerName { get; private set; }
 
-    public string BookerEmail { get; private set; } = string.Empty;
+    public string BookerEmail { get; private set; }
 
-    public string TimeZone { get; private set; } = string.Empty;
+    public string TimeZone { get; private set; }
 
-    public string Status { get; private set; } = string.Empty;
+    public string Status { get; private set; }
 
-    public string ResponsesJson { get; private set; } = "{}";
+    public string ResponsesJson { get; private set; }
 
     public TenantId TenantId { get; } = new(0);
 

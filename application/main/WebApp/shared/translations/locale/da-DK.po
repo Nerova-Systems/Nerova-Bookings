@@ -22,7 +22,7 @@ msgid "{0} windows"
 msgstr "{0} vinduer"
 
 msgid "A confirmation will be sent to the email address you provided."
-msgstr ""
+msgstr "En bekræftelse sendes til den e-mailadresse, du har angivet."
 
 msgid "Access"
 msgstr "Access"
@@ -112,7 +112,7 @@ msgid "Booker layout"
 msgstr "Booker layout"
 
 msgid "Booking confirmed"
-msgstr ""
+msgstr "Booking bekræftet"
 
 msgid "Booking limits"
 msgstr "Bookinggrænser"
@@ -527,7 +527,7 @@ msgid "Offset start"
 msgstr "Offset start"
 
 msgid "One-on-one"
-msgstr ""
+msgstr "En-til-en"
 
 #. placeholder {0}: schedule.dateOverrides.length
 msgid "Overrides: {0}"
@@ -810,7 +810,7 @@ msgid "You successfully installed PlatformPlatform! 🎉"
 msgstr "Du har installeret PlatformPlatform med succes! 🎉"
 
 msgid "Your booking is confirmed."
-msgstr ""
+msgstr "Din booking er bekræftet."
 
 msgid "Your dashboard is empty"
 msgstr "Dit dashboard er tomt"

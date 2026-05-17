@@ -1,47 +1,7 @@
-import { createFileRoute, useLocation, useNavigate } from "@tanstack/react-router";
-import { lazy, Suspense } from "react";
+import { createFileRoute } from "@tanstack/react-router";
 
-const AccountApp = lazy(() => import("account/AccountApp"));
-const NotFoundPage = lazy(() => import("account/NotFoundPage"));
-
-const ACCOUNT_PREFIXES = [
-  "/account",
-  "/components",
-  "/error",
-  "/legal",
-  "/login",
-  "/profile",
-  "/signup",
-  "/user",
-  "/welcome"
-];
+import { AccountRouteBridge } from "./-account/AccountRouteBridge";
 
 export const Route = createFileRoute("/$")({
-  component: CatchAll
+  component: AccountRouteBridge
 });
-
-function CatchAll() {
-  const location = useLocation();
-  const navigate = useNavigate();
-
-  const isAccountRoute = ACCOUNT_PREFIXES.some((prefix) => location.pathname.startsWith(prefix));
-
-  const handleNavigateToMain = (path: string) => {
-    navigate({ to: path });
-  };
-
-  if (isAccountRoute) {
-    const searchString = location.searchStr || "";
-    return (
-      <Suspense fallback={null}>
-        <AccountApp initialPath={location.pathname + searchString} onNavigateToMain={handleNavigateToMain} />
-      </Suspense>
-    );
-  }
-
-  return (
-    <Suspense fallback={null}>
-      <NotFoundPage />
-    </Suspense>
-  );
-}

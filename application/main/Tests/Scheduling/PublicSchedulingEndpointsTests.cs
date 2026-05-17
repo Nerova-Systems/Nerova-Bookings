@@ -3,6 +3,8 @@ using System.Net.Http.Json;
 using FluentAssertions;
 using JetBrains.Annotations;
 using Main.Database;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using SharedKernel.Tests;
 using Xunit;
 
@@ -65,7 +67,7 @@ public sealed class PublicSchedulingEndpointsTests : EndpointBaseTest<MainDbCont
         // Arrange
         await UpdateSchedulingProfileAsync("owner");
         var schedule = await CreateScheduleAsync();
-        await CreateEventTypeAsync(schedule.Id, "Private call", "private-call", hidden: true, settings: new { privateLinks = new[] { "vip" } });
+        await CreateEventTypeAsync(schedule.Id, "Private call", "private-call", true, new { privateLinks = new[] { "vip" } });
 
         // Act
         var response = await AnonymousHttpClient.GetAsync("/api/public/event-types/owner/private-call");
@@ -80,7 +82,7 @@ public sealed class PublicSchedulingEndpointsTests : EndpointBaseTest<MainDbCont
         // Arrange
         await UpdateSchedulingProfileAsync("owner");
         var schedule = await CreateScheduleAsync();
-        await CreateEventTypeAsync(schedule.Id, "Private call", "private-call", hidden: true, settings: new { privateLinks = new[] { "vip" } });
+        await CreateEventTypeAsync(schedule.Id, "Private call", "private-call", true, new { privateLinks = new[] { "vip" } });
 
         // Act
         var response = await AnonymousHttpClient.GetAsync("/api/public/event-types/owner/private-call?privateLink=vip");
@@ -107,6 +109,24 @@ public sealed class PublicSchedulingEndpointsTests : EndpointBaseTest<MainDbCont
         var slots = await response.DeserializeResponse<PublicSlotsResponse>();
         slots!.Slots["2026-06-01"].Select(slot => slot.Time).Should().Contain(DateTimeOffset.Parse("2026-06-01T07:00:00Z"));
         slots.Slots["2026-06-01"].Select(slot => slot.EndTime).Should().Contain(DateTimeOffset.Parse("2026-06-01T07:30:00Z"));
+    }
+
+    [Fact]
+    public async Task GetPublicSlots_WhenStoredDurationOptionsAreEmpty_ShouldUsePrimaryDuration()
+    {
+        // Arrange
+        await UpdateSchedulingProfileAsync("owner");
+        var schedule = await CreateScheduleAsync();
+        var eventType = await CreateEventTypeAsync(schedule.Id, "Intro call", "intro-call");
+        await ReplaceEventTypeSettingsAsync(eventType.Id, """{"DurationOptions":[]}""");
+
+        // Act
+        var response = await AnonymousHttpClient.GetAsync("/api/public/slots?handle=owner&eventSlug=intro-call&startTime=2026-06-01T00:00:00Z&endTime=2026-06-02T00:00:00Z&timeZone=Africa/Johannesburg&duration=30");
+
+        // Assert
+        response.ShouldBeSuccessfulGetRequest();
+        var slots = await response.DeserializeResponse<PublicSlotsResponse>();
+        slots!.Slots["2026-06-01"].Select(slot => slot.Time).Should().Contain(DateTimeOffset.Parse("2026-06-01T07:00:00Z"));
     }
 
     [Fact]
@@ -189,6 +209,13 @@ public sealed class PublicSchedulingEndpointsTests : EndpointBaseTest<MainDbCont
         );
         response.EnsureSuccessStatusCode();
         return (await response.DeserializeResponse<EventTypeResponse>())!;
+    }
+
+    private async Task ReplaceEventTypeSettingsAsync(string eventTypeId, string settings)
+    {
+        using var serviceScope = Provider.CreateScope();
+        var dbContext = serviceScope.ServiceProvider.GetRequiredService<MainDbContext>();
+        await dbContext.Database.ExecuteSqlRawAsync("UPDATE event_types SET settings = {0} WHERE id = {1}", settings, eventTypeId);
     }
 
     [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]

@@ -37,7 +37,7 @@ public sealed class GetPublicSlotsHandler(
 
         var context = contextResult.Value!;
         var duration = query.Duration ?? context.EventType.DurationMinutes;
-        if (!context.EventType.Settings.DurationOptions.Contains(duration))
+        if (!context.EventType.DurationOptions.Contains(duration))
         {
             return Result<PublicSlotsResponse>.BadRequest("Duration is not available for this event type.");
         }

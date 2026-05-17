@@ -44,7 +44,7 @@ public sealed record PublicEventTypeResponse(
             eventType.Title,
             eventType.Description,
             eventType.DurationMinutes,
-            eventType.Settings.DurationOptions,
+            eventType.DurationOptions,
             eventType.BeforeEventBufferMinutes,
             eventType.AfterEventBufferMinutes,
             eventType.SlotIntervalMinutes,

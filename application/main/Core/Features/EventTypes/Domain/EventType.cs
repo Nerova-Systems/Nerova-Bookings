@@ -77,6 +77,8 @@ public sealed class EventType : SoftDeletableAggregateRoot<EventTypeId>, ITenant
 
     public EventTypeSettings Settings { get; private set; } = new();
 
+    public int[] DurationOptions => Settings.DurationOptions.Length == 0 ? [DurationMinutes] : Settings.DurationOptions;
+
     public TenantId TenantId { get; } = new(0);
 
     public static EventType Create(

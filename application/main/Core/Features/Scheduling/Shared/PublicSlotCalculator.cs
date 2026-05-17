@@ -104,11 +104,12 @@ public sealed class PublicSlotCalculator(TimeProvider timeProvider)
         var candidateConflictEnd = candidateEnd.AddMinutes(eventType.AfterEventBufferMinutes);
 
         return bookings.Any(booking =>
-        {
-            var bookingConflictStart = booking.StartTime.AddMinutes(-booking.BeforeEventBufferMinutes);
-            var bookingConflictEnd = booking.EndTime.AddMinutes(booking.AfterEventBufferMinutes);
-            return candidateConflictStart < bookingConflictEnd && candidateConflictEnd > bookingConflictStart;
-        });
+            {
+                var bookingConflictStart = booking.StartTime.AddMinutes(-booking.BeforeEventBufferMinutes);
+                var bookingConflictEnd = booking.EndTime.AddMinutes(booking.AfterEventBufferMinutes);
+                return candidateConflictStart < bookingConflictEnd && candidateConflictEnd > bookingConflictStart;
+            }
+        );
     }
 
     private sealed class DateOnlyFormatter(TimeZoneInfo timeZone)

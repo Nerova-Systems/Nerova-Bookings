@@ -1,5 +1,5 @@
-using Main.Features.EventTypes.Domain;
 using Main.Database;
+using Main.Features.EventTypes.Domain;
 using Microsoft.EntityFrameworkCore;
 using SharedKernel.Domain;
 using SharedKernel.Persistence;

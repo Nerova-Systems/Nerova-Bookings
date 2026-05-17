@@ -104,7 +104,10 @@ export function EventTypeOverflowActions({
           <CopyIcon />
           <Trans>Copy link</Trans>
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => previewPublicUrl(eventType, publicHandle)} trackingLabel={t`Preview booking page`}>
+        <DropdownMenuItem
+          onClick={() => previewPublicUrl(eventType, publicHandle)}
+          trackingLabel={t`Preview booking page`}
+        >
           <EyeIcon />
           <Trans>Preview</Trans>
         </DropdownMenuItem>
