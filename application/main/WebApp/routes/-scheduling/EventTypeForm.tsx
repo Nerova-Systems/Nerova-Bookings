@@ -54,7 +54,9 @@ export function EventTypeForm({
   onSubmit,
   error,
   isPending,
-  submitLabel
+  submitLabel,
+  formId,
+  showSubmit = true
 }: Readonly<{
   value: EventTypePayload;
   schedules: Schedule[];
@@ -63,11 +65,14 @@ export function EventTypeForm({
   error?: ApiValidationError;
   isPending?: boolean;
   submitLabel: string;
+  formId?: string;
+  showSubmit?: boolean;
 }>) {
   const canSubmit = schedules.length > 0 && isEventTypePayloadSubmittable(value);
 
   return (
     <Form
+      id={formId}
       validationBehavior="aria"
       validationErrors={error?.errors}
       className="gap-5"
@@ -175,12 +180,14 @@ export function EventTypeForm({
           onChange={(locationValue) => onChange({ ...value, locationValue: locationValue || null })}
         />
       </div>
-      <div className="flex justify-end">
-        <Button type="submit" isPending={isPending} disabled={!canSubmit}>
-          <SaveIcon />
-          {isPending ? <Trans>Saving...</Trans> : submitLabel}
-        </Button>
-      </div>
+      {showSubmit && (
+        <div className="flex justify-end">
+          <Button type="submit" isPending={isPending} disabled={!canSubmit}>
+            <SaveIcon />
+            {isPending ? <Trans>Saving...</Trans> : submitLabel}
+          </Button>
+        </div>
+      )}
     </Form>
   );
 }

@@ -14,8 +14,8 @@ msgstr ""
 "X-Generator: @lingui/cli\n"
 
 #. placeholder {0}: eventType.durationMinutes
-msgid "{0} minutes"
-msgstr "{0} minutter"
+msgid "{0} min"
+msgstr ""
 
 #. placeholder {0}: schedule.availabilityWindows.length
 msgid "{0} windows"
@@ -41,6 +41,9 @@ msgstr "Tilføj undtagelse"
 
 msgid "Add time"
 msgstr "Tilføj tid"
+
+msgid "Advanced"
+msgstr ""
 
 msgid "After buffer"
 msgstr "Buffer efter"
@@ -78,6 +81,16 @@ msgstr "Konfigurer de aftaletyper, kunder kan booke."
 msgid "Continue"
 msgstr "Fortsæt"
 
+msgid "Copy link"
+msgstr ""
+
+#. placeholder {0}: eventType.title
+msgid "Copy of {0}"
+msgstr ""
+
+msgid "Copy public link"
+msgstr ""
+
 msgid "Copy times"
 msgstr "Kopier tider"
 
@@ -98,6 +111,9 @@ msgstr "Opret tilgængelighed"
 
 msgid "Create availability first"
 msgstr "Opret tilgængelighed først"
+
+msgid "Create duplicate"
+msgstr ""
 
 msgid "Create event type"
 msgstr "Opret aftaletype"
@@ -123,11 +139,23 @@ msgstr "Standard"
 msgid "Delete"
 msgstr "Slet"
 
+msgid "Delete event type"
+msgstr ""
+
+msgid "Delete event type?"
+msgstr ""
+
 msgid "Delete schedule"
 msgstr "Slet tidsplan"
 
 msgid "Description"
 msgstr "Beskrivelse"
+
+msgid "Duplicate"
+msgstr ""
+
+msgid "Duplicate event type"
+msgstr ""
 
 msgid "Duration"
 msgstr "Varighed"
@@ -144,11 +172,17 @@ msgstr "Sluttidspunktet skal være efter starttidspunktet."
 msgid "Event type"
 msgstr "Aftaletype"
 
+msgid "Event type actions"
+msgstr ""
+
 msgid "Event type created"
 msgstr "Aftaletype oprettet"
 
 msgid "Event type deleted"
 msgstr "Aftaletype slettet"
+
+msgid "Event type duplicated"
+msgstr ""
 
 msgid "Event type updated"
 msgstr "Aftaletype opdateret"
@@ -204,8 +238,14 @@ msgstr "Fysisk"
 msgid "Launch troubleshooter"
 msgstr "Start fejlfinding"
 
+msgid "Limits"
+msgstr ""
+
 msgid "Link"
 msgstr "Link"
+
+msgid "Loading event type..."
+msgstr ""
 
 msgid "Loading event types..."
 msgstr "Indlæser aftaletyper..."
@@ -258,6 +298,9 @@ msgstr "Ny tidsplan"
 msgid "No availability windows"
 msgstr "Ingen tilgængelighedsvinduer"
 
+msgid "No event types match your search."
+msgstr ""
+
 msgid "No event types yet"
 msgstr "Ingen aftaletyper endnu"
 
@@ -276,6 +319,15 @@ msgstr "Bestået"
 msgid "Phone"
 msgstr "Telefon"
 
+msgid "Preview"
+msgstr ""
+
+msgid "Preview booking page"
+msgstr ""
+
+msgid "Public link copied"
+msgstr ""
+
 msgid "Remove date override"
 msgstr "Fjern datoundtagelse"
 
@@ -287,6 +339,9 @@ msgstr "Erstat denne eksempelside med dine egne produktinformationer og branding
 
 msgid "Review schedule setup issues that can prevent clients from finding bookable times."
 msgstr "Gennemgå problemer i tidsplanopsætningen, der kan forhindre kunder i at finde bookbare tider."
+
+msgid "Review the copied booking basics before creating the duplicate."
+msgstr ""
 
 msgid "Sat"
 msgstr "Lør"
@@ -327,6 +382,9 @@ msgstr "Tidsplan utilgængelig"
 msgid "Schedule updated"
 msgstr "Tidsplan opdateret"
 
+msgid "Search event types"
+msgstr ""
+
 msgid "Select schedule"
 msgstr "Vælg tidsplan"
 
@@ -335,6 +393,12 @@ msgstr "Angiv som standard"
 
 msgid "Set custom availability for one date."
 msgstr "Angiv tilpasset tilgængelighed for én dato."
+
+msgid "Setup"
+msgstr ""
+
+msgid "Show on profile"
+msgstr ""
 
 msgid "Slot interval"
 msgstr "Slotinterval"
@@ -357,8 +421,17 @@ msgstr "Søn"
 msgid "Sunday"
 msgstr "Søndag"
 
+msgid "this event type"
+msgstr ""
+
 msgid "This is where your personalized dashboard content will appear. Stay tuned for updates."
 msgstr "Her vil dit personlige dashboard-indhold blive vist. Hold dig opdateret."
+
+msgid "This removes the booking page for {deleteSubject}."
+msgstr ""
+
+msgid "This tab shell is ready for the dedicated editor component."
+msgstr ""
 
 msgid "This window overlaps another window on the same day."
 msgstr "Dette vindue overlapper et andet vindue på samme dag."
@@ -383,9 +456,6 @@ msgstr "Tirsdag"
 
 msgid "Unavailable"
 msgstr "Utilgængelig"
-
-msgid "Visible"
-msgstr "Synlig"
 
 msgid "Wed"
 msgstr "Ons"

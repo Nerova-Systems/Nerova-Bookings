@@ -14,8 +14,8 @@ msgstr ""
 "Plural-Forms: \n"
 
 #. placeholder {0}: eventType.durationMinutes
-msgid "{0} minutes"
-msgstr "{0} minutes"
+msgid "{0} min"
+msgstr "{0} min"
 
 #. placeholder {0}: schedule.availabilityWindows.length
 msgid "{0} windows"
@@ -41,6 +41,9 @@ msgstr "Add override"
 
 msgid "Add time"
 msgstr "Add time"
+
+msgid "Advanced"
+msgstr "Advanced"
 
 msgid "After buffer"
 msgstr "After buffer"
@@ -78,6 +81,16 @@ msgstr "Configure the appointment types clients can book."
 msgid "Continue"
 msgstr "Continue"
 
+msgid "Copy link"
+msgstr "Copy link"
+
+#. placeholder {0}: eventType.title
+msgid "Copy of {0}"
+msgstr "Copy of {0}"
+
+msgid "Copy public link"
+msgstr "Copy public link"
+
 msgid "Copy times"
 msgstr "Copy times"
 
@@ -98,6 +111,9 @@ msgstr "Create availability"
 
 msgid "Create availability first"
 msgstr "Create availability first"
+
+msgid "Create duplicate"
+msgstr "Create duplicate"
 
 msgid "Create event type"
 msgstr "Create event type"
@@ -123,11 +139,23 @@ msgstr "Default"
 msgid "Delete"
 msgstr "Delete"
 
+msgid "Delete event type"
+msgstr "Delete event type"
+
+msgid "Delete event type?"
+msgstr "Delete event type?"
+
 msgid "Delete schedule"
 msgstr "Delete schedule"
 
 msgid "Description"
 msgstr "Description"
+
+msgid "Duplicate"
+msgstr "Duplicate"
+
+msgid "Duplicate event type"
+msgstr "Duplicate event type"
 
 msgid "Duration"
 msgstr "Duration"
@@ -144,11 +172,17 @@ msgstr "End time must be after start time."
 msgid "Event type"
 msgstr "Event type"
 
+msgid "Event type actions"
+msgstr "Event type actions"
+
 msgid "Event type created"
 msgstr "Event type created"
 
 msgid "Event type deleted"
 msgstr "Event type deleted"
+
+msgid "Event type duplicated"
+msgstr "Event type duplicated"
 
 msgid "Event type updated"
 msgstr "Event type updated"
@@ -204,8 +238,14 @@ msgstr "In person"
 msgid "Launch troubleshooter"
 msgstr "Launch troubleshooter"
 
+msgid "Limits"
+msgstr "Limits"
+
 msgid "Link"
 msgstr "Link"
+
+msgid "Loading event type..."
+msgstr "Loading event type..."
 
 msgid "Loading event types..."
 msgstr "Loading event types..."
@@ -258,6 +298,9 @@ msgstr "New schedule"
 msgid "No availability windows"
 msgstr "No availability windows"
 
+msgid "No event types match your search."
+msgstr "No event types match your search."
+
 msgid "No event types yet"
 msgstr "No event types yet"
 
@@ -276,6 +319,15 @@ msgstr "Passed"
 msgid "Phone"
 msgstr "Phone"
 
+msgid "Preview"
+msgstr "Preview"
+
+msgid "Preview booking page"
+msgstr "Preview booking page"
+
+msgid "Public link copied"
+msgstr "Public link copied"
+
 msgid "Remove date override"
 msgstr "Remove date override"
 
@@ -287,6 +339,9 @@ msgstr "Replace this sample page with your own product information and branding.
 
 msgid "Review schedule setup issues that can prevent clients from finding bookable times."
 msgstr "Review schedule setup issues that can prevent clients from finding bookable times."
+
+msgid "Review the copied booking basics before creating the duplicate."
+msgstr "Review the copied booking basics before creating the duplicate."
 
 msgid "Sat"
 msgstr "Sat"
@@ -327,6 +382,9 @@ msgstr "Schedule unavailable"
 msgid "Schedule updated"
 msgstr "Schedule updated"
 
+msgid "Search event types"
+msgstr "Search event types"
+
 msgid "Select schedule"
 msgstr "Select schedule"
 
@@ -335,6 +393,12 @@ msgstr "Set as default"
 
 msgid "Set custom availability for one date."
 msgstr "Set custom availability for one date."
+
+msgid "Setup"
+msgstr "Setup"
+
+msgid "Show on profile"
+msgstr "Show on profile"
 
 msgid "Slot interval"
 msgstr "Slot interval"
@@ -357,8 +421,17 @@ msgstr "Sun"
 msgid "Sunday"
 msgstr "Sunday"
 
+msgid "this event type"
+msgstr "this event type"
+
 msgid "This is where your personalized dashboard content will appear. Stay tuned for updates."
 msgstr "This is where your personalized dashboard content will appear. Stay tuned for updates."
+
+msgid "This removes the booking page for {deleteSubject}."
+msgstr "This removes the booking page for {deleteSubject}."
+
+msgid "This tab shell is ready for the dedicated editor component."
+msgstr "This tab shell is ready for the dedicated editor component."
 
 msgid "This window overlaps another window on the same day."
 msgstr "This window overlaps another window on the same day."
@@ -383,9 +456,6 @@ msgstr "Tuesday"
 
 msgid "Unavailable"
 msgstr "Unavailable"
-
-msgid "Visible"
-msgstr "Visible"
 
 msgid "Wed"
 msgstr "Wed"
