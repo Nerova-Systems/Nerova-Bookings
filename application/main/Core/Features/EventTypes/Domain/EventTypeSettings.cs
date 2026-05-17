@@ -1,3 +1,4 @@
+using System.Text.RegularExpressions;
 using FluentValidation;
 
 namespace Main.Features.EventTypes.Domain;
@@ -99,14 +100,75 @@ public sealed record EventTypeSettings
 
 public sealed class EventTypeSettingsValidator : AbstractValidator<EventTypeSettings>
 {
+    private const int MaximumPrivateLinkLength = 120;
+    private const int MaximumMetadataCount = 50;
+    private const int MaximumMetadataKeyLength = 80;
+    private const int MaximumMetadataValueLength = 500;
+
+    private static readonly string[] SupportedBookerLayouts = ["month", "week", "column"];
+
+    private static readonly string[] SupportedLocationTypes =
+    [
+        "address",
+        "attendeeAddress",
+        "attendeeDefined",
+        "attendeePhone",
+        "attendee-address",
+        "attendee-defined",
+        "attendee-phone",
+        "in-person",
+        "inPerson",
+        "integration",
+        "link",
+        "organizer-default",
+        "organizerDefault",
+        "organizerDefaultApp",
+        "organizersDefaultApp",
+        "phone"
+    ];
+
+    private static readonly string[] SupportedBookingFieldTypes =
+    [
+        "address",
+        "boolean",
+        "checkbox",
+        "email",
+        "guests",
+        "location",
+        "multiemail",
+        "multiselect",
+        "name",
+        "notes",
+        "number",
+        "phone",
+        "radio",
+        "rescheduleReason",
+        "select",
+        "splitName",
+        "text",
+        "textarea",
+        "title",
+        "url"
+    ];
+
+    private static readonly string[] BookingFieldTypesRequiringOptions = ["checkbox", "multiselect", "radio", "select"];
+    private static readonly string[] SupportedRecurrenceFrequencies = ["daily", "weekly", "monthly", "yearly"];
+
     public EventTypeSettingsValidator()
     {
         RuleFor(settings => settings.DurationOptions)
             .Must(options => options.All(option => option is >= 5 and <= 1440))
             .WithMessage("Duration options must be between 5 and 1440 minutes.");
+        RuleFor(settings => settings.BookerLayout)
+            .Must(layout => IsInSet(layout, SupportedBookerLayouts))
+            .WithMessage("Booker layout must be month, week, or column.");
+        RuleFor(settings => settings.EventColor)
+            .Must(color => color is null || IsHexColor(color))
+            .WithMessage("Event color must be a valid hex color.");
         RuleForEach(settings => settings.Locations).ChildRules(location =>
             {
                 location.RuleFor(l => l.Type).Length(1, 80).WithMessage("Location type must be between 1 and 80 characters.");
+                location.RuleFor(l => l.Type).Must(IsSupportedLocationType).WithMessage("Location type is not supported.").When(l => !string.IsNullOrEmpty(l.Type));
                 location.RuleFor(l => l.Value).MaximumLength(500).WithMessage("Location value must be at most 500 characters.");
             }
         );
@@ -115,6 +177,11 @@ public sealed class EventTypeSettingsValidator : AbstractValidator<EventTypeSett
                 field.RuleFor(f => f.Name).NotEmpty().WithMessage("Booking field name is required.");
                 field.RuleFor(f => f.Label).NotEmpty().WithMessage("Booking field label is required.");
                 field.RuleFor(f => f.Type).NotEmpty().WithMessage("Booking field type is required.");
+                field.RuleFor(f => f.Type).Must(type => IsInSet(type, SupportedBookingFieldTypes)).WithMessage("Booking field type is not supported.").When(f => !string.IsNullOrEmpty(f.Type));
+                field.RuleFor(f => f.Options)
+                    .Must(options => options is { Length: > 0 })
+                    .WithMessage("Booking field options are required for this field type.")
+                    .When(bookingField => IsInSet(bookingField.Type, BookingFieldTypesRequiringOptions));
             }
         );
         RuleFor(settings => settings.BookingWindow)
@@ -133,6 +200,10 @@ public sealed class EventTypeSettingsValidator : AbstractValidator<EventTypeSett
             .GreaterThan(0)
             .WithMessage("Recurrence interval must be positive.")
             .When(settings => settings.Recurrence is not null);
+        RuleFor(settings => settings.Recurrence!.Frequency)
+            .Must(frequency => IsInSet(frequency, SupportedRecurrenceFrequencies))
+            .WithMessage("Recurrence frequency must be daily, weekly, monthly, or yearly.")
+            .When(settings => settings.Recurrence is not null);
         RuleFor(settings => settings.Recurrence!.Count)
             .Must(count => count is null or > 0)
             .WithMessage("Recurrence count must be positive.")
@@ -144,11 +215,67 @@ public sealed class EventTypeSettingsValidator : AbstractValidator<EventTypeSett
         RuleFor(settings => settings)
             .Must(settings => settings.Recurrence is null || !settings.Seats.Enabled)
             .WithMessage("Recurring event types cannot use seats.");
+        RuleForEach(settings => settings.PrivateLinks)
+            .Must(privateLink => privateLink.Trim().Length <= MaximumPrivateLinkLength)
+            .WithMessage($"Private link must be at most {MaximumPrivateLinkLength} characters.")
+            .Must(IsPrivateLink)
+            .WithMessage("Private link must contain only letters, numbers, underscores, and hyphens.");
+        RuleFor(settings => settings.Redirects.SuccessUrl)
+            .Must(IsHttpUrl)
+            .WithMessage("Success redirect URL must be an absolute HTTP or HTTPS URL.");
+        RuleFor(settings => settings.Redirects.CancellationUrl)
+            .Must(IsHttpUrl)
+            .WithMessage("Cancellation redirect URL must be an absolute HTTP or HTTPS URL.");
+        RuleFor(settings => settings.InterfaceLanguage)
+            .Must(language => language is null || IsLanguageTag(language))
+            .WithMessage("Interface language must be a valid language tag.");
+        RuleFor(settings => settings.Metadata)
+            .Must(metadata => metadata.Count <= MaximumMetadataCount)
+            .WithMessage($"Metadata must contain at most {MaximumMetadataCount} entries.");
+        RuleFor(settings => settings.Metadata)
+            .Must(metadata =>
+                metadata.All(pair =>
+                    !string.IsNullOrWhiteSpace(pair.Key) &&
+                    pair.Key.Length <= MaximumMetadataKeyLength &&
+                    pair.Value.Length <= MaximumMetadataValueLength
+                )
+            )
+            .WithMessage($"Metadata keys must be at most {MaximumMetadataKeyLength} characters and values must be at most {MaximumMetadataValueLength} characters.");
     }
 
     private static bool IsNonNegative(int? value)
     {
         return value is null or >= 0;
+    }
+
+    private static bool IsInSet(string? value, string[] supportedValues)
+    {
+        return value is not null && supportedValues.Contains(value.Trim(), StringComparer.OrdinalIgnoreCase);
+    }
+
+    private static bool IsHexColor(string color)
+    {
+        return Regex.IsMatch(color.Trim(), "^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})$");
+    }
+
+    private static bool IsSupportedLocationType(string type)
+    {
+        return IsInSet(type, SupportedLocationTypes) || Regex.IsMatch(type, "^[a-z][a-z0-9]*(?:[-_:][a-z0-9]+)+$", RegexOptions.IgnoreCase);
+    }
+
+    private static bool IsPrivateLink(string? privateLink)
+    {
+        return privateLink is not null && Regex.IsMatch(privateLink.Trim(), "^[a-z0-9_-]+$", RegexOptions.IgnoreCase);
+    }
+
+    private static bool IsHttpUrl(string? url)
+    {
+        return url is null || (Uri.TryCreate(url.Trim(), UriKind.Absolute, out var uri) && uri.Scheme is "http" or "https");
+    }
+
+    private static bool IsLanguageTag(string language)
+    {
+        return Regex.IsMatch(language.Trim(), "^[a-z]{2,3}(?:-[a-z0-9]{2,8})*$", RegexOptions.IgnoreCase);
     }
 }
 

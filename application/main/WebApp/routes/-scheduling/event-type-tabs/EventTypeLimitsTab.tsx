@@ -5,9 +5,28 @@ import { NumberField } from "@repo/ui/components/NumberField";
 
 import type { EventTypeTabProps } from "./EventTypeTabTypes";
 
+import { getEventTypeSettings, updateEventTypeSettingsSection } from "../schedulingTypes";
 import { EventTypeTabSection } from "./EventTypeTabSection";
 
 export function EventTypeLimitsTab({ value, onChange, error }: EventTypeTabProps) {
+  const settings = getEventTypeSettings(value);
+  const updateBookingWindow = (bookingWindow: Partial<ReturnType<typeof getEventTypeSettings>["bookingWindow"]>) => {
+    onChange(
+      updateEventTypeSettingsSection(value, "bookingWindow", (currentBookingWindow) => ({
+        ...currentBookingWindow,
+        ...bookingWindow
+      }))
+    );
+  };
+  const updateLimits = (limits: Partial<ReturnType<typeof getEventTypeSettings>["limits"]>) => {
+    onChange(
+      updateEventTypeSettingsSection(value, "limits", (currentLimits) => ({
+        ...currentLimits,
+        ...limits
+      }))
+    );
+  };
+
   return (
     <FormValidationContext.Provider value={error?.errors ?? {}}>
       <div className="grid gap-5">
@@ -33,6 +52,67 @@ export function EventTypeLimitsTab({ value, onChange, error }: EventTypeTabProps
               onChange={(minimumBookingNoticeMinutes) =>
                 onChange({ ...value, minimumBookingNoticeMinutes: minimumBookingNoticeMinutes ?? 0 })
               }
+            />
+            <NumberField
+              name="rollingWindowDays"
+              label={t`Rolling window`}
+              minValue={0}
+              maxValue={3650}
+              allowEmpty={true}
+              value={settings.bookingWindow.rollingWindowDays ?? undefined}
+              onChange={(rollingWindowDays) => updateBookingWindow({ rollingWindowDays })}
+            />
+            <NumberField
+              name="firstAvailableSlotMinutes"
+              label={t`First slot only`}
+              minValue={0}
+              maxValue={525600}
+              allowEmpty={true}
+              value={settings.limits.firstAvailableSlotMinutes ?? undefined}
+              onChange={(firstAvailableSlotMinutes) => updateLimits({ firstAvailableSlotMinutes })}
+            />
+            <NumberField
+              name="offsetStartMinutes"
+              label={t`Offset start`}
+              minValue={0}
+              maxValue={1440}
+              allowEmpty={true}
+              value={settings.limits.offsetStartMinutes ?? undefined}
+              onChange={(offsetStartMinutes) => updateLimits({ offsetStartMinutes })}
+            />
+          </div>
+        </EventTypeTabSection>
+        <EventTypeTabSection
+          title={<Trans>Capacity limits</Trans>}
+          description={<Trans>Limit booking volume across the event type and individual bookers.</Trans>}
+        >
+          <div className="grid gap-4 md:grid-cols-2">
+            <NumberField
+              name="maxBookingsPerDay"
+              label={t`Bookings per day`}
+              minValue={0}
+              maxValue={10000}
+              allowEmpty={true}
+              value={settings.limits.maxBookingsPerDay ?? undefined}
+              onChange={(maxBookingsPerDay) => updateLimits({ maxBookingsPerDay })}
+            />
+            <NumberField
+              name="maxBookingDurationMinutesPerDay"
+              label={t`Booked minutes per day`}
+              minValue={0}
+              maxValue={525600}
+              allowEmpty={true}
+              value={settings.limits.maxBookingDurationMinutesPerDay ?? undefined}
+              onChange={(maxBookingDurationMinutesPerDay) => updateLimits({ maxBookingDurationMinutesPerDay })}
+            />
+            <NumberField
+              name="maxActiveBookingsPerBooker"
+              label={t`Active bookings per booker`}
+              minValue={0}
+              maxValue={10000}
+              allowEmpty={true}
+              value={settings.limits.maxActiveBookingsPerBooker ?? undefined}
+              onChange={(maxActiveBookingsPerBooker) => updateLimits({ maxActiveBookingsPerBooker })}
             />
           </div>
         </EventTypeTabSection>

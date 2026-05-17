@@ -95,6 +95,58 @@ public sealed class EventTypeEndpointsTests : EndpointBaseTest<MainDbContext>
     }
 
     [Fact]
+    public async Task CreateEventType_WhenAnonymous_ShouldReturnUnauthorized()
+    {
+        // Arrange
+        var schedule = await CreateScheduleAsync();
+        var command = NewEventTypeRequest(schedule.Id, "Intro call", "intro-call");
+
+        // Act
+        var response = await AnonymousHttpClient.PostAsJsonAsync("/api/event-types", command);
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
+    }
+
+    [Fact]
+    public async Task CreateEventType_WhenPrimitiveFieldsAreInvalid_ShouldReturnValidationErrors()
+    {
+        // Arrange
+        var schedule = await CreateScheduleAsync();
+        var command = NewEventTypeRequest(
+            schedule.Id,
+            "",
+            "Bad Slug!",
+            durationMinutes: 4,
+            beforeEventBufferMinutes: -1,
+            afterEventBufferMinutes: 1441,
+            slotIntervalMinutes: 4,
+            minimumBookingNoticeMinutes: -1,
+            locationType: new string('t', 81),
+            locationValue: new string('v', 501)
+        );
+
+        // Act
+        var response = await AuthenticatedOwnerHttpClient.PostAsJsonAsync("/api/event-types", command);
+
+        // Assert
+        await response.ShouldHaveErrorStatusCode(
+            HttpStatusCode.BadRequest,
+            [
+                new ErrorDetail("Title", "'Title' must not be empty."),
+                new ErrorDetail("Slug", "Slug must contain lowercase letters, numbers, and hyphens only."),
+                new ErrorDetail("DurationMinutes", "'Duration Minutes' must be between 5 and 1440. You entered 4."),
+                new ErrorDetail("BeforeEventBufferMinutes", "'Before Event Buffer Minutes' must be between 0 and 1440. You entered -1."),
+                new ErrorDetail("AfterEventBufferMinutes", "'After Event Buffer Minutes' must be between 0 and 1440. You entered 1441."),
+                new ErrorDetail("SlotIntervalMinutes", "'Slot Interval Minutes' must be between 5 and 1440. You entered 4."),
+                new ErrorDetail("MinimumBookingNoticeMinutes", "'Minimum Booking Notice Minutes' must be between 0 and 525600. You entered -1."),
+                new ErrorDetail("LocationType", "The length of 'Location Type' must be 80 characters or fewer. You entered 81 characters."),
+                new ErrorDetail("LocationValue", "The length of 'Location Value' must be 500 characters or fewer. You entered 501 characters.")
+            ]
+        );
+    }
+
+    [Fact]
     public async Task CreateEventType_WhenSettingsAreInvalid_ShouldReturnValidationErrors()
     {
         var schedule = await CreateScheduleAsync();
@@ -154,6 +206,32 @@ public sealed class EventTypeEndpointsTests : EndpointBaseTest<MainDbContext>
     }
 
     [Fact]
+    public async Task GetEventTypes_WhenAnonymous_ShouldReturnUnauthorized()
+    {
+        // Act
+        var response = await AnonymousHttpClient.GetAsync("/api/event-types");
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
+    }
+
+    [Fact]
+    public async Task GetEventTypes_WhenMemberRequestsOwnerEventTypes_ShouldNotReturnOwnerEventTypes()
+    {
+        // Arrange
+        var schedule = await CreateScheduleAsync();
+        var ownerEventType = await CreateEventTypeAsync(schedule.Id, "Intro call", "intro-call");
+
+        // Act
+        var response = await AuthenticatedMemberHttpClient.GetAsync("/api/event-types");
+
+        // Assert
+        response.ShouldBeSuccessfulGetRequest();
+        var eventTypes = await response.DeserializeResponse<EventTypesResponse>();
+        eventTypes!.EventTypes.Select(e => e.Id).Should().NotContain(ownerEventType.Id);
+    }
+
+    [Fact]
     public async Task CreateEventType_WhenSlugAlreadyExistsForOwner_ShouldReturnBadRequest()
     {
         var schedule = await CreateScheduleAsync();
@@ -172,6 +250,34 @@ public sealed class EventTypeEndpointsTests : EndpointBaseTest<MainDbContext>
         var response = await AuthenticatedOwnerHttpClient.PostAsJsonAsync("/api/event-types", command);
 
         await response.ShouldHaveErrorStatusCode(HttpStatusCode.BadRequest, "Schedule 'sch_01ARZ3NDEKTSV4RRFFQ69G5FAV' was not found.");
+    }
+
+    [Fact]
+    public async Task GetEventType_WhenAnonymous_ShouldReturnUnauthorized()
+    {
+        // Arrange
+        var schedule = await CreateScheduleAsync();
+        var eventType = await CreateEventTypeAsync(schedule.Id, "Intro call", "intro-call");
+
+        // Act
+        var response = await AnonymousHttpClient.GetAsync($"/api/event-types/{eventType.Id}");
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
+    }
+
+    [Fact]
+    public async Task GetEventType_WhenMemberRequestsOwnerEventType_ShouldReturnNotFound()
+    {
+        // Arrange
+        var schedule = await CreateScheduleAsync();
+        var eventType = await CreateEventTypeAsync(schedule.Id, "Intro call", "intro-call");
+
+        // Act
+        var response = await AuthenticatedMemberHttpClient.GetAsync($"/api/event-types/{eventType.Id}");
+
+        // Assert
+        await response.ShouldHaveErrorStatusCode(HttpStatusCode.NotFound, $"Event type '{eventType.Id}' was not found.");
     }
 
     [Fact]
@@ -212,6 +318,121 @@ public sealed class EventTypeEndpointsTests : EndpointBaseTest<MainDbContext>
     }
 
     [Fact]
+    public async Task UpdateEventType_WhenAnonymous_ShouldReturnUnauthorized()
+    {
+        // Arrange
+        var schedule = await CreateScheduleAsync();
+        var eventType = await CreateEventTypeAsync(schedule.Id, "Intro call", "intro-call");
+        var command = NewEventTypeRequest(schedule.Id, "Deep dive", "deep-dive");
+
+        // Act
+        var response = await AnonymousHttpClient.PutAsJsonAsync($"/api/event-types/{eventType.Id}", command);
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
+    }
+
+    [Fact]
+    public async Task UpdateEventType_WhenMemberUpdatesOwnerEventType_ShouldReturnForbidden()
+    {
+        // Arrange
+        var schedule = await CreateScheduleAsync();
+        var eventType = await CreateEventTypeAsync(schedule.Id, "Intro call", "intro-call");
+        var command = NewEventTypeRequest(schedule.Id, "Deep dive", "deep-dive");
+
+        // Act
+        var response = await AuthenticatedMemberHttpClient.PutAsJsonAsync($"/api/event-types/{eventType.Id}", command);
+
+        // Assert
+        await response.ShouldHaveErrorStatusCode(HttpStatusCode.Forbidden, "Only owners and admins can manage event types.");
+    }
+
+    [Fact]
+    public async Task UpdateEventType_WhenSettingsAreProvided_ShouldPersistAndReturnSettings()
+    {
+        var schedule = await CreateScheduleAsync();
+        var eventType = await CreateEventTypeAsync(schedule.Id, "Intro call", "intro-call");
+        var command = NewEventTypeRequest(
+            schedule.Id,
+            "Team workshop",
+            "team-workshop",
+            durationMinutes: 60,
+            locationType: "link",
+            locationValue: "https://example.com/workshop",
+            settings: NewSettings()
+        );
+
+        var updateResponse = await AuthenticatedOwnerHttpClient.PutAsJsonAsync($"/api/event-types/{eventType.Id}", command);
+        updateResponse.EnsureSuccessStatusCode();
+        var updated = await updateResponse.DeserializeResponse<EventTypeResponse>();
+
+        updated!.Settings.DurationOptions.Should().Equal(30, 60, 90);
+        updated.Settings.Locations.Should().ContainSingle();
+        updated.Settings.Locations[0].Type.Should().Be("inPerson");
+        updated.Settings.BookingFields.Should().ContainSingle();
+        updated.Settings.BookerLayout.Should().Be("week");
+        updated.Settings.EventColor.Should().Be("#2f6fed");
+        updated.Settings.PrivateLinks.Should().Equal("vip");
+        updated.Settings.Redirects.SuccessUrl.Should().Be("https://example.com/success");
+        updated.Settings.InterfaceLanguage.Should().Be("en");
+        updated.Settings.Metadata.Should().Contain("source", "test");
+
+        var getResponse = await AuthenticatedOwnerHttpClient.GetAsync($"/api/event-types/{updated.Id}");
+        getResponse.ShouldBeSuccessfulGetRequest();
+        var fetched = await getResponse.DeserializeResponse<EventTypeResponse>();
+        fetched!.Settings.Should().BeEquivalentTo(updated.Settings);
+    }
+
+    [Fact]
+    public async Task UpdateEventType_WhenSettingsAreSemanticallyInvalid_ShouldReturnValidationErrors()
+    {
+        var schedule = await CreateScheduleAsync();
+        var eventType = await CreateEventTypeAsync(schedule.Id, "Intro call", "intro-call");
+        var command = NewEventTypeRequest(
+            schedule.Id,
+            "Invalid settings",
+            "invalid-settings",
+            settings: new
+            {
+                durationOptions = new[] { 0, 30 },
+                locations = new[] { new { type = "ftp", value = "x" } },
+                bookingFields = new[]
+                {
+                    new { name = "topic", label = "Topic", type = "select", required = true, options = Array.Empty<string>() },
+                    new { name = "legacy", label = "Legacy", type = "script", required = false, options = Array.Empty<string>() }
+                },
+                bookerLayout = "agenda",
+                eventColor = "blue",
+                recurrence = new { frequency = "hourly", interval = 1, count = 1 },
+                privateLinks = new[] { "contains spaces" },
+                redirects = new { successUrl = "ftp://example.com/success", cancellationUrl = "/cancel" },
+                interfaceLanguage = "english!",
+                metadata = new Dictionary<string, string> { [new string('k', 81)] = new('v', 501) }
+            }
+        );
+
+        var response = await AuthenticatedOwnerHttpClient.PutAsJsonAsync($"/api/event-types/{eventType.Id}", command);
+
+        await response.ShouldHaveErrorStatusCode(
+            HttpStatusCode.BadRequest,
+            [
+                new ErrorDetail("Settings.DurationOptions", "Duration options must be between 5 and 1440 minutes."),
+                new ErrorDetail("Settings.Locations[0].Type", "Location type is not supported."),
+                new ErrorDetail("Settings.BookingFields[0].Options", "Booking field options are required for this field type."),
+                new ErrorDetail("Settings.BookingFields[1].Type", "Booking field type is not supported."),
+                new ErrorDetail("Settings.BookerLayout", "Booker layout must be month, week, or column."),
+                new ErrorDetail("Settings.EventColor", "Event color must be a valid hex color."),
+                new ErrorDetail("Settings.Recurrence.Frequency", "Recurrence frequency must be daily, weekly, monthly, or yearly."),
+                new ErrorDetail("Settings.PrivateLinks[0]", "Private link must contain only letters, numbers, underscores, and hyphens."),
+                new ErrorDetail("Settings.Redirects.SuccessUrl", "Success redirect URL must be an absolute HTTP or HTTPS URL."),
+                new ErrorDetail("Settings.Redirects.CancellationUrl", "Cancellation redirect URL must be an absolute HTTP or HTTPS URL."),
+                new ErrorDetail("Settings.InterfaceLanguage", "Interface language must be a valid language tag."),
+                new ErrorDetail("Settings.Metadata", "Metadata keys must be at most 80 characters and values must be at most 500 characters.")
+            ]
+        );
+    }
+
+    [Fact]
     public async Task UpdateEventType_WhenScheduleDoesNotExist_ShouldReturnBadRequest()
     {
         var schedule = await CreateScheduleAsync();
@@ -237,6 +458,45 @@ public sealed class EventTypeEndpointsTests : EndpointBaseTest<MainDbContext>
     }
 
     [Fact]
+    public async Task UpdateEventType_WhenPrimitiveFieldsAreInvalid_ShouldReturnValidationErrors()
+    {
+        // Arrange
+        var schedule = await CreateScheduleAsync();
+        var eventType = await CreateEventTypeAsync(schedule.Id, "Intro call", "intro-call");
+        var command = NewEventTypeRequest(
+            schedule.Id,
+            new string('t', 121),
+            "Bad Slug!",
+            durationMinutes: 1441,
+            beforeEventBufferMinutes: -1,
+            afterEventBufferMinutes: 1441,
+            slotIntervalMinutes: 1441,
+            minimumBookingNoticeMinutes: 525601,
+            locationType: new string('t', 81),
+            locationValue: new string('v', 501)
+        );
+
+        // Act
+        var response = await AuthenticatedOwnerHttpClient.PutAsJsonAsync($"/api/event-types/{eventType.Id}", command);
+
+        // Assert
+        await response.ShouldHaveErrorStatusCode(
+            HttpStatusCode.BadRequest,
+            [
+                new ErrorDetail("Title", "The length of 'Title' must be 120 characters or fewer. You entered 121 characters."),
+                new ErrorDetail("Slug", "Slug must contain lowercase letters, numbers, and hyphens only."),
+                new ErrorDetail("DurationMinutes", "'Duration Minutes' must be between 5 and 1440. You entered 1441."),
+                new ErrorDetail("BeforeEventBufferMinutes", "'Before Event Buffer Minutes' must be between 0 and 1440. You entered -1."),
+                new ErrorDetail("AfterEventBufferMinutes", "'After Event Buffer Minutes' must be between 0 and 1440. You entered 1441."),
+                new ErrorDetail("SlotIntervalMinutes", "'Slot Interval Minutes' must be between 5 and 1440. You entered 1441."),
+                new ErrorDetail("MinimumBookingNoticeMinutes", "'Minimum Booking Notice Minutes' must be between 0 and 525600. You entered 525601."),
+                new ErrorDetail("LocationType", "The length of 'Location Type' must be 80 characters or fewer. You entered 81 characters."),
+                new ErrorDetail("LocationValue", "The length of 'Location Value' must be 500 characters or fewer. You entered 501 characters.")
+            ]
+        );
+    }
+
+    [Fact]
     public async Task DeleteEventType_WhenOwnerDeletesEventType_ShouldRemoveEventType()
     {
         var schedule = await CreateScheduleAsync();
@@ -247,6 +507,34 @@ public sealed class EventTypeEndpointsTests : EndpointBaseTest<MainDbContext>
 
         var getResponse = await AuthenticatedOwnerHttpClient.GetAsync($"/api/event-types/{eventType.Id}");
         await getResponse.ShouldHaveErrorStatusCode(HttpStatusCode.NotFound, $"Event type '{eventType.Id}' was not found.");
+    }
+
+    [Fact]
+    public async Task DeleteEventType_WhenAnonymous_ShouldReturnUnauthorized()
+    {
+        // Arrange
+        var schedule = await CreateScheduleAsync();
+        var eventType = await CreateEventTypeAsync(schedule.Id, "Intro call", "intro-call");
+
+        // Act
+        var response = await AnonymousHttpClient.DeleteAsync($"/api/event-types/{eventType.Id}");
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
+    }
+
+    [Fact]
+    public async Task DeleteEventType_WhenMemberDeletesOwnerEventType_ShouldReturnForbidden()
+    {
+        // Arrange
+        var schedule = await CreateScheduleAsync();
+        var eventType = await CreateEventTypeAsync(schedule.Id, "Intro call", "intro-call");
+
+        // Act
+        var response = await AuthenticatedMemberHttpClient.DeleteAsync($"/api/event-types/{eventType.Id}");
+
+        // Assert
+        await response.ShouldHaveErrorStatusCode(HttpStatusCode.Forbidden, "Only owners and admins can manage event types.");
     }
 
     [Fact]

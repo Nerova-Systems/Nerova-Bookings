@@ -1,3 +1,4 @@
+/* eslint-disable max-lines */
 import type { Schemas } from "@/shared/lib/api/client";
 
 export type Schedule = Schemas["ScheduleResponse"];
@@ -8,6 +9,7 @@ export type AvailabilityOverrideWindow = AvailabilityDateOverride["windows"][num
 export type EventType = Schemas["EventTypeResponse"];
 export type EventTypePayload = Schemas["CreateEventTypeCommand"];
 export type EventTypeUpdatePayload = Schemas["UpdateEventTypeCommand"];
+export type EventTypeSettings = NonNullable<EventTypePayload["settings"]>;
 export type ApiValidationError = Schemas["HttpValidationProblemDetails"] | null | undefined;
 
 export function newSchedulePayload(isDefault = false): SchedulePayload {
@@ -117,6 +119,83 @@ export function eventTypeToUpdatePayload(
     ...payload,
     id: eventTypeId
   };
+}
+
+export function getEventTypeSettings(payload: EventTypePayload): EventTypeSettings {
+  const settings = payload.settings;
+  const primaryLocation = payload.locationType
+    ? [{ type: payload.locationType, value: payload.locationValue?.trim() || null }]
+    : [];
+  const durationOptions =
+    settings?.durationOptions && settings.durationOptions.length > 0
+      ? settings.durationOptions
+      : [payload.durationMinutes];
+
+  return {
+    durationOptions,
+    locations: settings?.locations && settings.locations.length > 0 ? settings.locations : primaryLocation,
+    bookingFields: settings?.bookingFields ?? [],
+    bookerLayout: settings?.bookerLayout?.trim() || "month",
+    eventColor: settings?.eventColor?.trim() || null,
+    bookingWindow: {
+      rollingWindowDays: settings?.bookingWindow?.rollingWindowDays ?? null,
+      fixedStartDate: settings?.bookingWindow?.fixedStartDate ?? null,
+      fixedEndDate: settings?.bookingWindow?.fixedEndDate ?? null
+    },
+    limits: {
+      maxBookingsPerDay: settings?.limits?.maxBookingsPerDay ?? null,
+      maxBookingDurationMinutesPerDay: settings?.limits?.maxBookingDurationMinutesPerDay ?? null,
+      maxActiveBookingsPerBooker: settings?.limits?.maxActiveBookingsPerBooker ?? null,
+      firstAvailableSlotMinutes: settings?.limits?.firstAvailableSlotMinutes ?? null,
+      offsetStartMinutes: settings?.limits?.offsetStartMinutes ?? null
+    },
+    confirmationPolicy: {
+      requiresConfirmation: settings?.confirmationPolicy?.requiresConfirmation ?? false,
+      requiresBookerEmailVerification: settings?.confirmationPolicy?.requiresBookerEmailVerification ?? false
+    },
+    recurrence: settings?.recurrence ?? null,
+    seats: {
+      enabled: settings?.seats?.enabled ?? false,
+      capacity: settings?.seats?.capacity ?? null,
+      showAttendeeInfo: settings?.seats?.showAttendeeInfo ?? false
+    },
+    privateLinks: settings?.privateLinks ?? [],
+    cancellationPolicy: {
+      allowCancellation: settings?.cancellationPolicy?.allowCancellation ?? true,
+      minimumNoticeMinutes: settings?.cancellationPolicy?.minimumNoticeMinutes ?? null
+    },
+    reschedulePolicy: {
+      allowReschedule: settings?.reschedulePolicy?.allowReschedule ?? true,
+      minimumNoticeMinutes: settings?.reschedulePolicy?.minimumNoticeMinutes ?? null
+    },
+    redirects: {
+      successUrl: settings?.redirects?.successUrl ?? null,
+      cancellationUrl: settings?.redirects?.cancellationUrl ?? null
+    },
+    interfaceLanguage: settings?.interfaceLanguage?.trim() || null,
+    metadata: settings?.metadata ?? {}
+  };
+}
+
+export function updateEventTypeSettings(
+  payload: EventTypePayload,
+  updater: (settings: EventTypeSettings) => EventTypeSettings
+): EventTypePayload {
+  return {
+    ...payload,
+    settings: updater(getEventTypeSettings(payload))
+  };
+}
+
+export function updateEventTypeSettingsSection<Key extends keyof EventTypeSettings>(
+  payload: EventTypePayload,
+  key: Key,
+  updater: (section: EventTypeSettings[Key], settings: EventTypeSettings) => EventTypeSettings[Key]
+): EventTypePayload {
+  return updateEventTypeSettings(payload, (settings) => ({
+    ...settings,
+    [key]: updater(settings[key], settings)
+  }));
 }
 
 export function slugify(value: string) {
