@@ -35,6 +35,12 @@ No Cal.com port implementation issue may start until it has exact Cal.com source
 
 ## Session Notes
 
+### 2026-05-17
+
+- Added `event-types-parity.md` as the event-type port ledger and current implementation gate.
+- Completed Wave 0 parallel audits for Cal.com event-type source inventory, Nerova backend parity, Nerova frontend parity, and QA/browser coverage.
+- Recorded event-type parity status by capability with implementation slices and test owners.
+
 ### 2026-05-15
 
 - Verified Aspire MCP for the current workspace AppHost.
