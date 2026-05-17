@@ -8,11 +8,15 @@ namespace Main.Features.Scheduling.Domain;
 
 public interface IBookingRepository : IAppendRepository<Booking, BookingId>
 {
+    void Update(Booking booking);
+
     Task<Booking[]> GetForOwnerRangeUnfilteredAsync(TenantId tenantId, UserId ownerUserId, DateTimeOffset startTime, DateTimeOffset endTime, CancellationToken cancellationToken);
 
     Task<int> CountForEventTypeSlotUnfilteredAsync(TenantId tenantId, EventTypeId eventTypeId, DateTimeOffset startTime, DateTimeOffset endTime, CancellationToken cancellationToken);
 
     Task<BookingWithEventType[]> GetForOwnerWithEventTypesAsync(TenantId tenantId, UserId ownerUserId, CancellationToken cancellationToken);
+
+    Task<BookingWithEventType?> GetForOwnerWithEventTypeAsync(TenantId tenantId, UserId ownerUserId, BookingId bookingId, CancellationToken cancellationToken);
 }
 
 public sealed record BookingWithEventType(Booking Booking, EventType EventType);
@@ -59,5 +63,21 @@ public sealed class BookingRepository(MainDbContext mainDbContext)
                 (booking, eventType) => new BookingWithEventType(booking, eventType)
             )
             .ToArrayAsync(cancellationToken);
+    }
+
+    public async Task<BookingWithEventType?> GetForOwnerWithEventTypeAsync(TenantId tenantId, UserId ownerUserId, BookingId bookingId, CancellationToken cancellationToken)
+    {
+        return await DbSet
+            .AsTracking()
+            .Where(booking => booking.TenantId == tenantId)
+            .Where(booking => booking.OwnerUserId == ownerUserId)
+            .Where(booking => booking.Id == bookingId)
+            .Join(
+                Context.Set<EventType>().IgnoreQueryFilters().AsNoTracking(),
+                booking => booking.EventTypeId,
+                eventType => eventType.Id,
+                (booking, eventType) => new BookingWithEventType(booking, eventType)
+            )
+            .SingleOrDefaultAsync(cancellationToken);
     }
 }

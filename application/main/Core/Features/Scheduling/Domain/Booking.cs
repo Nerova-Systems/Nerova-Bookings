@@ -83,6 +83,11 @@ public sealed class Booking : AggregateRoot<BookingId>, ITenantScopedEntity
 
     public TenantId TenantId { get; } = new(0);
 
+    public void Cancel()
+    {
+        Status = "cancelled";
+    }
+
     public static Booking Create(
         TenantId tenantId,
         UserId ownerUserId,

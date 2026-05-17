@@ -3,6 +3,7 @@ using FluentValidation;
 using JetBrains.Annotations;
 using Main.Features.EventTypes.Domain;
 using Main.Features.Scheduling.Domain;
+using Main.Features.Scheduling.Shared;
 using SharedKernel.Cqrs;
 using SharedKernel.ExecutionContext;
 
@@ -83,7 +84,8 @@ public sealed record BookingListItemResponse(
     string? LocationValue,
     EventTypeLocation[] Locations,
     Dictionary<string, string> Responses,
-    bool IsRecurring
+    bool IsRecurring,
+    BookingActionsResponse Actions
 );
 
 public sealed class GetBookingsHandler(IBookingRepository bookingRepository, IExecutionContext executionContext, TimeProvider timeProvider)
@@ -109,7 +111,7 @@ public sealed class GetBookingsHandler(IBookingRepository bookingRepository, IEx
         var page = ordered
             .Skip(query.PageOffset)
             .Take(query.PageSize)
-            .Select(booking => ToResponse(booking, ResolveListingStatus(booking, query.Statuses, now)))
+            .Select(booking => ToResponse(booking, ResolveListingStatus(booking, query.Statuses, now), now))
             .ToArray();
 
         return new BookingsResponse(filtered.Length, query.PageOffset, query.PageSize, page);
@@ -168,7 +170,7 @@ public sealed class GetBookingsHandler(IBookingRepository bookingRepository, IEx
         return statuses.First(status => MatchesStatus(item, status, now));
     }
 
-    private static BookingListItemResponse ToResponse(BookingWithEventType item, string listingStatus)
+    private static BookingListItemResponse ToResponse(BookingWithEventType item, string listingStatus, DateTimeOffset now)
     {
         var booking = item.Booking;
         var eventType = item.EventType;
@@ -190,7 +192,8 @@ public sealed class GetBookingsHandler(IBookingRepository bookingRepository, IEx
             eventType.LocationValue,
             eventType.Settings.Locations,
             JsonSerializer.Deserialize<Dictionary<string, string>>(booking.ResponsesJson) ?? [],
-            eventType.Settings.Recurrence is not null
+            eventType.Settings.Recurrence is not null,
+            BookingActionAvailability.Resolve(booking, eventType, now)
         );
     }
 }
