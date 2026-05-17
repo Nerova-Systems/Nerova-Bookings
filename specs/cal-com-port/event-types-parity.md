@@ -17,7 +17,7 @@ Status values:
 - Nerova target root: `application/main`
 - Current implementation scope: authenticated event-type setup for owner-owned schedules.
 - Current strongest parity area: basic event-type CRUD with schedule ownership and JSONB-backed settings.
-- Current weakest parity area: visible Cal editor tabs are not fully represented in the Nerova editor and no E2E coverage exists for event-type flows.
+- Current weakest parity area: dependency-heavy Cal editor tabs still need their owning downstream subsystems, and public handle/slot preview is not implemented yet.
 
 ## Cal References
 
@@ -79,7 +79,7 @@ Status values:
 | AI tab | `blocked-by-downstream` | not present | AI phone slice | AI |
 | Public handle and event preview URL | `missing` | helper currently returns `/book/{slug}` only | Public scheduling handle/slot-preview slice | Backend + Frontend + QA |
 | Full public booking lifecycle | `blocked-by-downstream` | not present | Booking parity slice | Booking |
-| E2E coverage for event-type setup | `missing` | `application/main/WebApp/tests/e2e/**` | Event-types E2E slice | QA |
+| E2E coverage for authenticated event-type setup | `implemented` | `application/main/WebApp/tests/e2e/event-types-flows.spec.ts` | Extend after public handle, slot preview, and dependency subsystems land | QA |
 | Browser visual validation screenshots | `missing` | Browser plugin available | Final validation slice | QA |
 
 ## First Closure Waves
@@ -114,7 +114,7 @@ Status values:
 
 ### Wave 5: QA And Visual Parity
 
-- Add E2E for list/create/duplicate/delete, editor tabs, validation, mobile actions, public preview, and slot preview.
+- Add E2E for public preview and slot preview after those APIs exist.
 - Run Browser validation at `https://app.dev.localhost:9000` with `colinswart0@gmail.com` and OTP `UNLOCK`.
 - Capture desktop and mobile screenshots for list, create dialog, each implemented tab, validation errors, duplicate, delete, and save flows.
 
@@ -125,7 +125,7 @@ Status values:
 - Cross-owner and cross-tenant read/update/delete/list tests.
 - Base field boundary tests for slug, title, duration, buffers, slot interval, notice, and location lengths.
 - Update settings invalid/round-trip tests.
-- Event-type E2E tests.
+- Public handle and slot-preview E2E tests.
 - Browser visual screenshots.
 
 ## Verification Gate
