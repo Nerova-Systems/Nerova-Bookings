@@ -64,7 +64,7 @@ test.describe("@smoke", () => {
    * Covers the Cal-like bookings dashboard shell:
    * - Status tabs with filters hidden behind a trigger
    * - Filter application with active count reflected in the toolbar and URL
-   * - List/calendar view toggle, week navigation, calendar booking block, and details sheet
+   * - Quick action menu, disabled downstream actions, cancellation, list/calendar view, and details sheet
    */
   test("should show bookings filters behind a trigger and switch to calendar view", async ({ ownerPage }) => {
     const context = createTestContext(ownerPage);
@@ -91,6 +91,17 @@ test.describe("@smoke", () => {
       expect(new URL(ownerPage.url()).searchParams.get("search")).toBe(booking.eventTitle);
     })();
 
+    await step("Open booking actions without opening details")(async () => {
+      const bookingRow = ownerPage.getByTestId("booking-item").filter({ hasText: booking.eventTitle }).first();
+      await bookingRow.getByTestId("booking-actions-dropdown").click();
+
+      await expect(ownerPage.getByText("Edit event")).toBeVisible();
+      await expect(ownerPage.getByText("Reschedule booking")).toBeVisible();
+      await expect(ownerPage.getByText("Reschedule booking is not implemented yet.")).toBeVisible();
+      await expect(ownerPage.getByRole("dialog", { name: booking.eventTitle })).not.toBeVisible();
+      await ownerPage.keyboard.press("Escape");
+    })();
+
     await step("Switch to calendar and navigate week & verify booking details open")(async () => {
       await ownerPage.getByRole("button", { name: "Calendar view" }).click();
       await expect(ownerPage.getByTestId("bookings-calendar-view")).toBeVisible();
@@ -104,6 +115,19 @@ test.describe("@smoke", () => {
       await expect(bookingDetails).toBeVisible();
       await expect(bookingDetails.getByText(booking.bookerName)).toBeVisible();
       await expect(bookingDetails.getByText(booking.bookerEmail)).toBeVisible();
+    })();
+
+    await step("Cancel booking from details quick action menu")(async () => {
+      const bookingDetails = ownerPage.getByRole("dialog", { name: booking.eventTitle });
+      await bookingDetails.getByTestId("booking-actions-dropdown").click();
+      await ownerPage.getByRole("menuitem", { name: "Cancel event" }).click();
+      await expect(ownerPage.getByRole("alertdialog", { name: "Cancel event?" })).toBeVisible();
+      await ownerPage.getByRole("button", { name: "Cancel event" }).click();
+      await expectToastMessage(context, "Booking cancelled");
+      await expect(bookingDetails).not.toBeVisible();
+
+      await ownerPage.goto("/bookings/cancelled");
+      await expect(ownerPage.getByText(booking.eventTitle)).toBeVisible();
     })();
   });
 });

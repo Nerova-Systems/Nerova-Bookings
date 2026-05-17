@@ -5,6 +5,7 @@ import { Badge } from "@repo/ui/components/Badge";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@repo/ui/components/Sheet";
 import { CalendarClockIcon, LinkIcon, MailIcon, MapPinIcon, UserIcon } from "lucide-react";
 
+import { BookingActionsDropdown } from "./BookingActionsDropdown";
 import { type BookingListItem, formatBookingDateRange, getStatusVariant } from "./bookingTypes";
 
 export function BookingDetailsSheet({
@@ -22,8 +23,13 @@ export function BookingDetailsSheet({
         {booking && (
           <>
             <SheetHeader className="border-b">
-              <SheetTitle>{booking.eventTypeTitle}</SheetTitle>
-              <SheetDescription>{formatBookingDateRange(booking)}</SheetDescription>
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <SheetTitle>{booking.eventTypeTitle}</SheetTitle>
+                  <SheetDescription>{formatBookingDateRange(booking)}</SheetDescription>
+                </div>
+                <BookingActionsDropdown booking={booking} onActionComplete={() => onOpenChange(false)} />
+              </div>
             </SheetHeader>
             <div className="flex flex-col gap-5 overflow-y-auto px-4 pb-4">
               <div className="flex flex-wrap gap-2">

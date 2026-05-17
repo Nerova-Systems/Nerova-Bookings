@@ -1,10 +1,10 @@
 import { Trans } from "@lingui/react/macro";
 import { Badge } from "@repo/ui/components/Badge";
-import { Button } from "@repo/ui/components/Button";
 import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@repo/ui/components/Empty";
 import { Skeleton } from "@repo/ui/components/Skeleton";
 import { CalendarIcon, CalendarXIcon, MailIcon, UserIcon } from "lucide-react";
 
+import { BookingActionsDropdown } from "./BookingActionsDropdown";
 import {
   type BookingListItem,
   type BookingStatusView,
@@ -63,7 +63,12 @@ export function BookingsList({
         <article
           key={booking.id}
           data-testid="booking-item"
-          className="group grid gap-3 border-b p-4 transition-colors last:border-b-0 hover:bg-muted/40 sm:grid-cols-[13rem_1fr_auto] sm:items-center"
+          className="group grid cursor-pointer gap-3 border-b p-4 transition-colors last:border-b-0 hover:bg-muted/40 active:bg-muted/60 sm:grid-cols-[13rem_1fr_auto] sm:items-center"
+          onClick={() => onSelectBooking(booking)}
+          onKeyDown={(event) => {
+            if (event.key === "Enter") onSelectBooking(booking);
+          }}
+          tabIndex={0}
         >
           <div className="flex min-w-0 flex-col gap-1">
             <div className="flex items-center gap-2 text-sm font-medium">
@@ -110,9 +115,9 @@ export function BookingsList({
             </div>
             <span className="mt-1 block truncate text-xs text-muted-foreground">{formatBookingDateRange(booking)}</span>
           </div>
-          <Button type="button" variant="secondary" onClick={() => onSelectBooking(booking)}>
-            <Trans>View details</Trans>
-          </Button>
+          <div className="flex justify-end">
+            <BookingActionsDropdown booking={booking} />
+          </div>
         </article>
       ))}
     </div>
