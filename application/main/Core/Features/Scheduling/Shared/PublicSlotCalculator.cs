@@ -94,22 +94,24 @@ public sealed class PublicSlotCalculator(TimeProvider timeProvider)
 
     private static bool HasConflict(EventType eventType, Booking[] bookings, DateTimeOffset candidateStart, DateTimeOffset candidateEnd)
     {
-        if (eventType.Settings.Seats.Enabled)
-        {
-            var slotBookingCount = bookings.Count(booking => booking.EventTypeId == eventType.Id && booking.StartTime == candidateStart && booking.EndTime == candidateEnd);
-            if (slotBookingCount < eventType.Settings.Seats.Capacity.GetValueOrDefault()) return false;
-        }
-
         var candidateConflictStart = candidateStart.AddMinutes(-eventType.BeforeEventBufferMinutes);
         var candidateConflictEnd = candidateEnd.AddMinutes(eventType.AfterEventBufferMinutes);
+        var overlappingBookings = bookings
+            .Where(booking =>
+                {
+                    var bookingConflictStart = booking.StartTime.AddMinutes(-booking.BeforeEventBufferMinutes);
+                    var bookingConflictEnd = booking.EndTime.AddMinutes(booking.AfterEventBufferMinutes);
+                    return candidateConflictStart < bookingConflictEnd && candidateConflictEnd > bookingConflictStart;
+                }
+            )
+            .ToArray();
 
-        return bookings.Any(booking =>
-            {
-                var bookingConflictStart = booking.StartTime.AddMinutes(-booking.BeforeEventBufferMinutes);
-                var bookingConflictEnd = booking.EndTime.AddMinutes(booking.AfterEventBufferMinutes);
-                return candidateConflictStart < bookingConflictEnd && candidateConflictEnd > bookingConflictStart;
-            }
-        );
+        if (!eventType.Settings.Seats.Enabled) return overlappingBookings.Length > 0;
+
+        var capacity = eventType.Settings.Seats.Capacity.GetValueOrDefault();
+        if (overlappingBookings.Any(booking => booking.EventTypeId != eventType.Id)) return true;
+
+        return overlappingBookings.Count(booking => booking.EventTypeId == eventType.Id) >= capacity;
     }
 
     private sealed class DateOnlyFormatter(TimeZoneInfo timeZone)

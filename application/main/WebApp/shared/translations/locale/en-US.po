@@ -723,6 +723,9 @@ msgstr "Reject booking"
 msgid "Reject booking?"
 msgstr "Reject booking?"
 
+msgid "Rejection"
+msgstr "Rejection"
+
 msgid "Rejection reason"
 msgstr "Rejection reason"
 
@@ -740,6 +743,9 @@ msgstr "Report booking"
 
 msgid "Request reschedule"
 msgstr "Request reschedule"
+
+msgid "Required"
+msgstr "Required"
 
 msgid "Requires another booking"
 msgstr "Requires another booking"
@@ -848,6 +854,12 @@ msgstr "Select a date to view times."
 
 msgid "Select a schedule to see its availability summary."
 msgstr "Select a schedule to see its availability summary."
+
+msgid "Select an option"
+msgstr "Select an option"
+
+msgid "Select options"
+msgstr "Select options"
 
 msgid "Select schedule"
 msgstr "Select schedule"

@@ -1,7 +1,75 @@
-import { expect, type Page } from "@playwright/test";
+import { expect, type Browser, type Page } from "@playwright/test";
 import { test } from "@shared/e2e/fixtures/page-auth";
+import { getBackOfficeBaseUrl } from "@shared/e2e/utils/constants";
 import { blurActiveElement, createTestContext, expectToastMessage } from "@shared/e2e/utils/test-assertions";
+import { logInAsAdmin } from "@shared/e2e/utils/test-data";
 import { step } from "@shared/e2e/utils/test-step-wrapper";
+
+const BACK_OFFICE_BASE_URL = getBackOfficeBaseUrl();
+const CAL_COM_RUNTIME_FLAGS = [
+  "cal-com-core",
+  "cal-com-event-types",
+  "cal-com-availability",
+  "cal-com-public-booking",
+  "cal-com-bookings"
+] as const;
+let bookingSequence = 0;
+
+async function getAntiforgeryHeaders(page: Page): Promise<{ "x-xsrf-token": string }> {
+  const token = await page.evaluate(
+    () => document.head.querySelector('meta[name="antiforgeryToken"]')?.getAttribute("content") ?? ""
+  );
+  return { "x-xsrf-token": token };
+}
+
+async function enableCalComRuntimeFlags(browser: Browser, ownerPage: Page) {
+  const backOfficeContext = await browser.newContext({ baseURL: BACK_OFFICE_BASE_URL, ignoreHTTPSErrors: true });
+  const backOfficePage = await backOfficeContext.newPage();
+
+  try {
+    await backOfficePage.goto(`${BACK_OFFICE_BASE_URL}/feature-flags`);
+    await logInAsAdmin(backOfficePage, `${BACK_OFFICE_BASE_URL}/feature-flags`);
+    const backOfficeHeaders = await getAntiforgeryHeaders(backOfficePage);
+
+    for (const flagKey of CAL_COM_RUNTIME_FLAGS) {
+      const activateResponse = await backOfficePage.request.put(
+        `${BACK_OFFICE_BASE_URL}/api/back-office/feature-flags/${flagKey}/activate`,
+        { headers: backOfficeHeaders }
+      );
+      if (!activateResponse.ok()) {
+        const flag = await getBackOfficeFeatureFlag(backOfficePage, flagKey);
+        expect(flag?.isActive).toBe(true);
+      }
+
+      const rolloutResponse = await backOfficePage.request.put(
+        `${BACK_OFFICE_BASE_URL}/api/back-office/feature-flags/${flagKey}/rollout-percentage`,
+        { data: { rolloutPercentage: 100 }, headers: backOfficeHeaders }
+      );
+      if (!rolloutResponse.ok()) {
+        const flag = await getBackOfficeFeatureFlag(backOfficePage, flagKey);
+        expect(flag?.rolloutPercentage).toBe(100);
+      }
+    }
+  } finally {
+    await backOfficeContext.close();
+  }
+
+  const ownerHeaders = await getAntiforgeryHeaders(ownerPage);
+  const refreshResponse = await ownerPage.request.put("/api/account/feature-flags/compact-view/user-override", {
+    data: { enabled: false },
+    headers: ownerHeaders
+  });
+  expect(refreshResponse.ok()).toBe(true);
+}
+
+async function getBackOfficeFeatureFlag(page: Page, flagKey: string) {
+  const response = await page.request.get(`${BACK_OFFICE_BASE_URL}/api/back-office/feature-flags/`);
+  expect(response.ok()).toBe(true);
+  const body = (await response.json()) as {
+    flags: { key: string; isActive: boolean; rolloutPercentage: number | null }[];
+  };
+  return body.flags.find((flag) => flag.key === flagKey);
+}
 
 async function createSchedule(page: Page, name: string) {
   await page.goto("/availability");
@@ -24,6 +92,56 @@ async function createEventType(page: Page, title: string, slug: string) {
   await expect(page.getByRole("textbox", { name: "Title" })).toHaveValue(title);
 }
 
+async function updateEventTypeSettings(
+  page: Page,
+  slug: string,
+  settings: Partial<{
+    bookingFields: { name: string; label: string; type: string; required: boolean; options: string[] }[];
+  }>
+) {
+  await page.evaluate(
+    async ({ slug: eventSlug, settings: settingsPatch }) => {
+      const token = document.head.querySelector('meta[name="antiforgeryToken"]')?.getAttribute("content") ?? "";
+      type EventType = {
+        id: string;
+        slug: string;
+        title: string;
+        description: string | null;
+        durationMinutes: number;
+        hidden: boolean;
+        scheduleId: string;
+        beforeEventBufferMinutes: number;
+        afterEventBufferMinutes: number;
+        slotIntervalMinutes: number;
+        minimumBookingNoticeMinutes: number;
+        locationType: string | null;
+        locationValue: string | null;
+        settings: Record<string, unknown>;
+      };
+
+      const listResponse = await fetch("/api/event-types/");
+      if (!listResponse.ok) throw new Error(await listResponse.text());
+      const list = (await listResponse.json()) as { eventTypes: EventType[] };
+      const eventType = list.eventTypes.find((item) => item.slug === eventSlug);
+      if (!eventType) throw new Error(`Event type '${eventSlug}' was not found.`);
+
+      const updateResponse = await fetch(`/api/event-types/${eventType.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json", "x-xsrf-token": token },
+        body: JSON.stringify({
+          ...eventType,
+          settings: {
+            ...eventType.settings,
+            ...settingsPatch
+          }
+        })
+      });
+      if (!updateResponse.ok) throw new Error(await updateResponse.text());
+    },
+    { slug, settings }
+  );
+}
+
 async function createBookedEvent(
   page: Page,
   context: ReturnType<typeof createTestContext>,
@@ -36,7 +154,8 @@ async function createBookedEvent(
   const bookerName = `Bookings Booker ${unique}`;
   const bookerEmail = `bookings-booker-${unique}@example.com`;
   const bookingNotes = "Bookings dashboard";
-  const startTime = getNextMondayAtNine();
+  const startTime = addMinutes(getNextMondayAtNine(), bookingSequence * 60);
+  bookingSequence += 1;
 
   await createSchedule(page, scheduleName);
   await expectToastMessage(context, "Schedule created");
@@ -73,6 +192,79 @@ async function createBookedEvent(
 }
 
 test.describe("@smoke", () => {
+  test.beforeEach(async ({ browser, ownerPage }) => {
+    await enableCalComRuntimeFlags(browser, ownerPage);
+  });
+
+  test("should render public booking field types and submit selected responses", async ({ ownerPage }) => {
+    const context = createTestContext(ownerPage);
+    const unique = Date.now();
+    const scheduleName = `Booking fields schedule ${unique}`;
+    const eventTitle = `Booking fields event ${unique}`;
+    const eventSlug = `booking-fields-event-${unique}`;
+    const startTime = getNextMondayAtNine();
+
+    await createSchedule(ownerPage, scheduleName);
+    await expectToastMessage(context, "Schedule created");
+    await createEventType(ownerPage, eventTitle, eventSlug);
+    await expectToastMessage(context, "Event type created");
+    await updateEventTypeSettings(ownerPage, eventSlug, {
+      bookingFields: [
+        { name: "company", label: "Company", type: "text", required: true, options: [] },
+        { name: "department", label: "Department", type: "select", required: true, options: ["Sales", "Support"] },
+        { name: "contact", label: "Contact preference", type: "radio", required: true, options: ["Email", "Phone"] },
+        { name: "topics", label: "Topics", type: "checkbox", required: true, options: ["Onboarding", "Billing"] },
+        { name: "regions", label: "Regions", type: "multiselect", required: false, options: ["North", "South"] },
+        { name: "accepted", label: "Accept terms", type: "boolean", required: true, options: [] }
+      ]
+    });
+
+    const profile = await ownerPage.evaluate(async () => {
+      const response = await fetch("/api/scheduling/profile");
+      if (!response.ok) throw new Error(await response.text());
+      return (await response.json()) as { handle: string };
+    });
+    const publicBookingSearch = new URLSearchParams({
+      date: formatDateOnly(startTime),
+      slot: startTime.toISOString(),
+      duration: "30",
+      timezone: "Africa/Johannesburg"
+    });
+
+    await ownerPage.goto(`/${profile.handle}/${eventSlug}?${publicBookingSearch.toString()}`);
+    await expect(ownerPage.getByTestId("public-booker-form")).toBeVisible();
+    await ownerPage.getByRole("button", { name: "Confirm booking" }).click();
+    await expect(ownerPage.getByRole("heading", { name: "Enter your details" })).toBeVisible();
+
+    await ownerPage.getByRole("textbox", { name: "Name" }).fill(`Fields Booker ${unique}`);
+    await ownerPage.getByRole("textbox", { name: "Email" }).fill(`fields-booker-${unique}@example.com`);
+    await ownerPage.getByRole("textbox", { name: "Company" }).fill("Nerova");
+    await ownerPage.getByRole("combobox", { name: "Department" }).click();
+    await ownerPage.getByRole("option", { name: "Support" }).click();
+    await ownerPage.getByRole("radio", { name: "Phone" }).click();
+    await ownerPage.getByRole("checkbox", { name: "Onboarding" }).click();
+    await ownerPage.getByRole("checkbox", { name: "Billing" }).click();
+    await ownerPage.getByRole("combobox", { name: "Regions" }).click();
+    await ownerPage.getByRole("option", { name: "North" }).click();
+    await ownerPage.getByRole("option", { name: "South" }).click();
+    await ownerPage.keyboard.press("Escape");
+    await ownerPage.getByRole("checkbox", { name: "Accept terms" }).click();
+    await ownerPage.getByRole("button", { name: "Confirm booking" }).click();
+    await expect(ownerPage.getByRole("heading", { name: "Booking confirmed" })).toBeVisible();
+
+    await ownerPage.goto(`/bookings/upcoming?view=list&search=${encodeURIComponent(eventTitle)}`);
+    const bookingRow = ownerPage.getByTestId("booking-item").filter({ hasText: eventTitle }).first();
+    await expect(bookingRow).toBeVisible();
+    await bookingRow.click();
+    const details = ownerPage.getByRole("dialog", { name: eventTitle });
+    await expect(details.getByText("Nerova")).toBeVisible();
+    await expect(details.getByText("Support")).toBeVisible();
+    await expect(details.getByText("Phone")).toBeVisible();
+    await expect(details.getByText("Onboarding,Billing")).toBeVisible();
+    await expect(details.getByText("North,South")).toBeVisible();
+    await expect(details.getByText("true")).toBeVisible();
+  });
+
   /**
    * Covers the Cal-like bookings dashboard shell:
    * - Status tabs with filters hidden behind a trigger
@@ -209,7 +401,9 @@ test.describe("@smoke", () => {
       await expectToastMessage(context, "Reschedule requested");
 
       await ownerPage.goto(`/bookings/cancelled?view=list&search=${encodeURIComponent(rescheduleBooking.eventTitle)}`);
-      await expect(ownerPage.getByText(rescheduleBooking.eventTitle)).toBeVisible();
+      await expect(
+        ownerPage.getByTestId("booking-item").filter({ hasText: rescheduleBooking.eventTitle }).first()
+      ).toBeVisible();
     })();
 
     await step("Confirm and reject pending bookings from the dashboard")(async () => {
@@ -265,8 +459,8 @@ test.describe("@smoke", () => {
 
       const bookingDetails = ownerPage.getByRole("dialog", { name: booking.eventTitle });
       await expect(bookingDetails).toBeVisible();
-      await expect(bookingDetails.getByText(booking.bookerName)).toBeVisible();
-      await expect(bookingDetails.getByText(booking.bookerEmail)).toBeVisible();
+      await expect(bookingDetails.getByText(booking.bookerName, { exact: true })).toBeVisible();
+      await expect(bookingDetails.getByText(booking.bookerEmail, { exact: true })).toBeVisible();
     })();
 
     await step("Cancel booking from details quick action menu")(async () => {
@@ -279,7 +473,7 @@ test.describe("@smoke", () => {
       await expect(bookingDetails).not.toBeVisible();
 
       await ownerPage.goto("/bookings/cancelled?view=list");
-      await expect(ownerPage.getByText(booking.eventTitle)).toBeVisible();
+      await expect(ownerPage.getByTestId("booking-item").filter({ hasText: booking.eventTitle }).first()).toBeVisible();
     })();
   });
 });

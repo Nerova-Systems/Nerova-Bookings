@@ -187,6 +187,153 @@ public sealed class PublicSchedulingEndpointsTests : EndpointBaseTest<MainDbCont
         await response.ShouldHaveErrorStatusCode(HttpStatusCode.Conflict, "The selected slot is no longer available.");
     }
 
+    [Fact]
+    public async Task CreatePublicBooking_WhenMaxActiveBookingsPerBookerReached_ShouldReturnBadRequest()
+    {
+        // Arrange
+        await UpdateSchedulingProfileAsync("owner");
+        var schedule = await CreateScheduleAsync();
+        await CreateEventTypeAsync(schedule.Id, "Intro call", "intro-call", settings: new { limits = new { maxActiveBookingsPerBooker = 1 } });
+        await CreateBookingAsync("intro-call", "2026-06-01T07:00:00Z", "Ada Lovelace", "ada@example.com");
+
+        var command = new
+        {
+            handle = "owner",
+            eventSlug = "intro-call",
+            startTime = "2026-06-01T08:00:00Z",
+            duration = 30,
+            timeZone = "Africa/Johannesburg",
+            bookerName = "Ada Lovelace",
+            bookerEmail = "ada@example.com",
+            responses = new Dictionary<string, string>()
+        };
+
+        // Act
+        var response = await AnonymousHttpClient.PostAsJsonAsync("/api/public/bookings", command);
+
+        // Assert
+        await response.ShouldHaveErrorStatusCode(HttpStatusCode.BadRequest, "You already have the maximum number of active bookings for this event type.");
+    }
+
+    [Fact]
+    public async Task CreatePublicBooking_WhenDailyBookingLimitReached_ShouldReturnBadRequest()
+    {
+        // Arrange
+        await UpdateSchedulingProfileAsync("owner");
+        var schedule = await CreateScheduleAsync();
+        await CreateEventTypeAsync(schedule.Id, "Intro call", "intro-call", settings: new { limits = new { maxBookingsPerDay = 1 } });
+        await CreateBookingAsync("intro-call", "2026-06-01T07:00:00Z", "Ada Lovelace", "ada@example.com");
+
+        var command = new
+        {
+            handle = "owner",
+            eventSlug = "intro-call",
+            startTime = "2026-06-01T08:00:00Z",
+            duration = 30,
+            timeZone = "Africa/Johannesburg",
+            bookerName = "Grace Hopper",
+            bookerEmail = "grace@example.com",
+            responses = new Dictionary<string, string>()
+        };
+
+        // Act
+        var response = await AnonymousHttpClient.PostAsJsonAsync("/api/public/bookings", command);
+
+        // Assert
+        await response.ShouldHaveErrorStatusCode(HttpStatusCode.BadRequest, "This event type has reached its booking limit for the selected day.");
+    }
+
+    [Fact]
+    public async Task CreatePublicBooking_WhenDailyDurationLimitReached_ShouldReturnBadRequest()
+    {
+        // Arrange
+        await UpdateSchedulingProfileAsync("owner");
+        var schedule = await CreateScheduleAsync();
+        await CreateEventTypeAsync(schedule.Id, "Intro call", "intro-call", settings: new { limits = new { maxBookingDurationMinutesPerDay = 45 } });
+        await CreateBookingAsync("intro-call", "2026-06-01T07:00:00Z", "Ada Lovelace", "ada@example.com");
+
+        var command = new
+        {
+            handle = "owner",
+            eventSlug = "intro-call",
+            startTime = "2026-06-01T08:00:00Z",
+            duration = 30,
+            timeZone = "Africa/Johannesburg",
+            bookerName = "Grace Hopper",
+            bookerEmail = "grace@example.com",
+            responses = new Dictionary<string, string>()
+        };
+
+        // Act
+        var response = await AnonymousHttpClient.PostAsJsonAsync("/api/public/bookings", command);
+
+        // Assert
+        await response.ShouldHaveErrorStatusCode(HttpStatusCode.BadRequest, "This event type has reached its booking duration limit for the selected day.");
+    }
+
+    [Fact]
+    public async Task CreatePublicBooking_WhenBookingFieldOptionIsInvalid_ShouldReturnBadRequest()
+    {
+        // Arrange
+        await UpdateSchedulingProfileAsync("owner");
+        var schedule = await CreateScheduleAsync();
+        await CreateEventTypeAsync(
+            schedule.Id,
+            "Intro call",
+            "intro-call",
+            settings: new
+            {
+                bookingFields = new[]
+                {
+                    new { name = "topic", label = "Topic", type = "select", required = true, options = new[] { "Sales", "Support" } }
+                }
+            }
+        );
+
+        var command = new
+        {
+            handle = "owner",
+            eventSlug = "intro-call",
+            startTime = "2026-06-01T07:00:00Z",
+            duration = 30,
+            timeZone = "Africa/Johannesburg",
+            bookerName = "Ada Lovelace",
+            bookerEmail = "ada@example.com",
+            responses = new Dictionary<string, string> { ["topic"] = "Engineering" }
+        };
+
+        // Act
+        var response = await AnonymousHttpClient.PostAsJsonAsync("/api/public/bookings", command);
+
+        // Assert
+        await response.ShouldHaveErrorStatusCode(HttpStatusCode.BadRequest, "Topic is not a valid option.");
+    }
+
+    [Fact]
+    public async Task GetPublicSlots_WhenSeatsAreEnabled_ShouldHideOverlappingSlotsAtCapacity()
+    {
+        // Arrange
+        await UpdateSchedulingProfileAsync("owner");
+        var schedule = await CreateScheduleAsync();
+        await CreateEventTypeAsync(
+            schedule.Id,
+            "Intro call",
+            "intro-call",
+            slotIntervalMinutes: 15,
+            settings: new { seats = new { enabled = true, capacity = 1, showAttendeeInfo = false } }
+        );
+        await CreateBookingAsync("intro-call", "2026-06-01T07:00:00Z", "Ada Lovelace", "ada@example.com");
+
+        // Act
+        var response = await AnonymousHttpClient.GetAsync("/api/public/slots?handle=owner&eventSlug=intro-call&startTime=2026-06-01T00:00:00Z&endTime=2026-06-02T00:00:00Z&timeZone=Africa/Johannesburg&duration=30");
+
+        // Assert
+        response.ShouldBeSuccessfulGetRequest();
+        var slots = await response.DeserializeResponse<PublicSlotsResponse>();
+        slots!.Slots["2026-06-01"].Select(slot => slot.Time).Should().NotContain(DateTimeOffset.Parse("2026-06-01T07:00:00Z"));
+        slots.Slots["2026-06-01"].Select(slot => slot.Time).Should().NotContain(DateTimeOffset.Parse("2026-06-01T07:15:00Z"));
+    }
+
     private async Task<SchedulingProfileResponse> UpdateSchedulingProfileAsync(string handle)
     {
         var response = await AuthenticatedOwnerHttpClient.PutAsJsonAsync(
@@ -216,7 +363,7 @@ public sealed class PublicSchedulingEndpointsTests : EndpointBaseTest<MainDbCont
         return (await response.DeserializeResponse<ScheduleResponse>())!;
     }
 
-    private async Task<EventTypeResponse> CreateEventTypeAsync(string scheduleId, string title, string slug, bool hidden = false, object? settings = null)
+    private async Task<EventTypeResponse> CreateEventTypeAsync(string scheduleId, string title, string slug, bool hidden = false, object? settings = null, int slotIntervalMinutes = 30)
     {
         var response = await AuthenticatedOwnerHttpClient.PostAsJsonAsync(
             "/api/event-types",
@@ -230,7 +377,7 @@ public sealed class PublicSchedulingEndpointsTests : EndpointBaseTest<MainDbCont
                 scheduleId,
                 beforeEventBufferMinutes = 0,
                 afterEventBufferMinutes = 0,
-                slotIntervalMinutes = 30,
+                slotIntervalMinutes,
                 minimumBookingNoticeMinutes = 0,
                 locationType = "link",
                 locationValue = "https://example.com/meet",
@@ -246,6 +393,26 @@ public sealed class PublicSchedulingEndpointsTests : EndpointBaseTest<MainDbCont
         using var serviceScope = Provider.CreateScope();
         var dbContext = serviceScope.ServiceProvider.GetRequiredService<MainDbContext>();
         await dbContext.Database.ExecuteSqlRawAsync("UPDATE event_types SET settings = {0} WHERE id = {1}", settings, eventTypeId);
+    }
+
+    private async Task<CreatePublicBookingResponse> CreateBookingAsync(string eventSlug, string startTime, string bookerName, string bookerEmail)
+    {
+        var response = await AnonymousHttpClient.PostAsJsonAsync(
+            "/api/public/bookings",
+            new
+            {
+                handle = "owner",
+                eventSlug,
+                startTime,
+                duration = 30,
+                timeZone = "Africa/Johannesburg",
+                bookerName,
+                bookerEmail,
+                responses = new Dictionary<string, string>()
+            }
+        );
+        response.EnsureSuccessStatusCode();
+        return (await response.DeserializeResponse<CreatePublicBookingResponse>())!;
     }
 
     [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
@@ -274,4 +441,7 @@ public sealed class PublicSchedulingEndpointsTests : EndpointBaseTest<MainDbCont
 
     [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
     private sealed record PublicSlotResponse(DateTimeOffset Time, DateTimeOffset EndTime);
+
+    [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
+    private sealed record CreatePublicBookingResponse(string Id);
 }

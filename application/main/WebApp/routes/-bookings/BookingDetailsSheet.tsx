@@ -127,6 +127,14 @@ export function BookingDetailsSheet({
                   </div>
                 </section>
               )}
+              {booking.rejectionReason && (
+                <section className="rounded-md border p-4">
+                  <SectionTitle>
+                    <Trans>Rejection</Trans>
+                  </SectionTitle>
+                  <span className="text-sm text-muted-foreground">{booking.rejectionReason}</span>
+                </section>
+              )}
               <section className="rounded-md border p-4">
                 <SectionTitle>
                   <Trans>System</Trans>

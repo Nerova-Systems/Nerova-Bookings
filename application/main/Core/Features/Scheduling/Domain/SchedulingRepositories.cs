@@ -12,6 +12,8 @@ public interface IBookingRepository : IAppendRepository<Booking, BookingId>
 
     Task<Booking[]> GetForOwnerRangeUnfilteredAsync(TenantId tenantId, UserId ownerUserId, DateTimeOffset startTime, DateTimeOffset endTime, CancellationToken cancellationToken);
 
+    Task<Booking[]> GetForEventTypeUnfilteredAsync(TenantId tenantId, EventTypeId eventTypeId, CancellationToken cancellationToken);
+
     Task<int> CountForEventTypeSlotUnfilteredAsync(TenantId tenantId, EventTypeId eventTypeId, DateTimeOffset startTime, DateTimeOffset endTime, CancellationToken cancellationToken);
 
     Task<BookingWithEventType[]> GetForOwnerWithEventTypesAsync(TenantId tenantId, UserId ownerUserId, CancellationToken cancellationToken);
@@ -48,6 +50,20 @@ public sealed class BookingRepository(MainDbContext mainDbContext)
             .ToArrayAsync(cancellationToken);
 
         return bookings.Count(booking => booking.StartTime == startTime && booking.EndTime == endTime);
+    }
+
+    public async Task<Booking[]> GetForEventTypeUnfilteredAsync(TenantId tenantId, EventTypeId eventTypeId, CancellationToken cancellationToken)
+    {
+        var bookings = await DbSet
+            .IgnoreQueryFilters()
+            .Where(booking => booking.TenantId == tenantId)
+            .Where(booking => booking.EventTypeId == eventTypeId)
+            .ToArrayAsync(cancellationToken);
+
+        return bookings
+            .OrderBy(booking => booking.StartTime)
+            .ThenBy(booking => booking.Id)
+            .ToArray();
     }
 
     public async Task<BookingWithEventType[]> GetForOwnerWithEventTypesAsync(TenantId tenantId, UserId ownerUserId, CancellationToken cancellationToken)

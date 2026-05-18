@@ -22,6 +22,7 @@ export function BookEventForm({
   privateLink,
   rescheduleBooking,
   rescheduledBy,
+  onBookingComplete,
   onBack
 }: Readonly<{
   handle: string;
@@ -33,9 +34,12 @@ export function BookEventForm({
   privateLink?: string;
   rescheduleBooking: PublicRescheduleBooking | null;
   rescheduledBy?: string;
+  onBookingComplete?: () => void;
   onBack: () => void;
 }>) {
-  const mutation = api.useMutation("post", "/api/public/bookings");
+  const mutation = api.useMutation("post", "/api/public/bookings", {
+    onSuccess: () => onBookingComplete?.()
+  });
   const isRescheduling = rescheduleBooking !== null;
   return (
     <div
@@ -138,7 +142,7 @@ function BookEventFormFields({
         event.preventDefault();
         const formData = new FormData(event.currentTarget);
         const responses = Object.fromEntries(
-          (eventType.bookingFields ?? []).map((field) => [field.name, String(formData.get(field.name) ?? "")])
+          (eventType.bookingFields ?? []).map((field) => [field.name, getBookingFieldResponse(formData, field.name)])
         );
         const notes = String(formData.get("notes") ?? "").trim();
         if (notes) responses.notes = notes;
@@ -162,4 +166,13 @@ function BookEventFormFields({
       </div>
     </Form>
   );
+}
+
+function getBookingFieldResponse(formData: FormData, fieldName: string) {
+  const values = formData
+    .getAll(fieldName)
+    .map((value) => String(value).trim())
+    .filter(Boolean);
+
+  return values.join(",");
 }

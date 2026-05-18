@@ -109,6 +109,7 @@ function PublicBookerWebWrapper() {
           updateSearch({ slot: slot.value, duration: selectedDuration ?? eventType?.durationMinutes })
         }
         onTimezoneChange={(nextTimezone) => updateSearch({ timezone: nextTimezone ?? undefined, slot: undefined })}
+        onBookingComplete={() => updateSearch({ rescheduleUid: undefined, rescheduledBy: undefined })}
         onBackToTimes={() => updateSearch({ slot: undefined })}
       />
     </main>

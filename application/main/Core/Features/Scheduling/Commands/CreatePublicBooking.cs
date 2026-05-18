@@ -1,7 +1,9 @@
 using FluentValidation;
 using JetBrains.Annotations;
+using Main.Features.EventTypes.Domain;
 using Main.Features.Scheduling.Domain;
 using Main.Features.Scheduling.Shared;
+using Main.Features.Schedules.Domain;
 using SharedKernel.Cqrs;
 
 namespace Main.Features.Scheduling.Commands;
@@ -88,12 +90,16 @@ public sealed class CreatePublicBookingHandler(
             return Result<CreatePublicBookingResponse>.Conflict("The selected slot is no longer available.");
         }
 
-        var requiredMissingField = context.EventType.Settings.BookingFields
-            .Where(field => field.Required)
-            .FirstOrDefault(field => command.Responses?.ContainsKey(field.Name) != true || string.IsNullOrWhiteSpace(command.Responses[field.Name]));
-        if (requiredMissingField is not null)
+        var allEventTypeBookings = await bookingRepository.GetForEventTypeUnfilteredAsync(context.Profile.TenantId, context.EventType.Id, cancellationToken);
+        if (originalBooking is not null)
         {
-            return Result<CreatePublicBookingResponse>.BadRequest($"{requiredMissingField.Label} is required.");
+            allEventTypeBookings = allEventTypeBookings.Where(booking => booking.Id != originalBooking.Id).ToArray();
+        }
+
+        var rulesResult = ValidateBookingRules(command, context.EventType, context.Schedule, allEventTypeBookings, timeProvider.GetUtcNow());
+        if (!rulesResult.IsSuccess)
+        {
+            return Result<CreatePublicBookingResponse>.From(rulesResult);
         }
 
         var status = context.EventType.Settings.ConfirmationPolicy.RequiresConfirmation ? "pending" : "accepted";
@@ -126,6 +132,101 @@ public sealed class CreatePublicBookingHandler(
         await bookingRepository.AddAsync(booking, cancellationToken);
 
         return new CreatePublicBookingResponse(booking.Id, booking.StartTime, booking.EndTime, status);
+    }
+
+    private static Result ValidateBookingRules(
+        CreatePublicBookingCommand command,
+        EventType eventType,
+        Schedule schedule,
+        Booking[] eventTypeBookings,
+        DateTimeOffset now
+    )
+    {
+        var activeBookings = eventTypeBookings
+            .Where(booking => IsActiveBooking(booking, now))
+            .ToArray();
+        var activeBookerLimit = eventType.Settings.Limits.MaxActiveBookingsPerBooker;
+        if (activeBookerLimit is > 0)
+        {
+            var normalizedBookerEmail = command.BookerEmail.Trim().ToLowerInvariant();
+            var activeBookerBookings = activeBookings.Count(booking =>
+                string.Equals(booking.BookerEmail, normalizedBookerEmail, StringComparison.OrdinalIgnoreCase) ||
+                booking.Attendees.Any(attendee => string.Equals(attendee.Email, normalizedBookerEmail, StringComparison.OrdinalIgnoreCase))
+            );
+            if (activeBookerBookings >= activeBookerLimit)
+            {
+                return Result.BadRequest("You already have the maximum number of active bookings for this event type.");
+            }
+        }
+
+        var localDate = DateOnly.FromDateTime(TimeZoneInfo.ConvertTime(command.StartTime, TimeZoneInfo.FindSystemTimeZoneById(schedule.TimeZone)).DateTime);
+        var bookingsOnSelectedDay = activeBookings
+            .Where(booking => DateOnly.FromDateTime(TimeZoneInfo.ConvertTime(booking.StartTime, TimeZoneInfo.FindSystemTimeZoneById(schedule.TimeZone)).DateTime) == localDate)
+            .ToArray();
+        if (eventType.Settings.Limits.MaxBookingsPerDay is > 0 && bookingsOnSelectedDay.Length >= eventType.Settings.Limits.MaxBookingsPerDay)
+        {
+            return Result.BadRequest("This event type has reached its booking limit for the selected day.");
+        }
+
+        if (eventType.Settings.Limits.MaxBookingDurationMinutesPerDay is > 0)
+        {
+            var bookedMinutes = bookingsOnSelectedDay.Sum(booking => (int)(booking.EndTime - booking.StartTime).TotalMinutes);
+            if (bookedMinutes + command.Duration > eventType.Settings.Limits.MaxBookingDurationMinutesPerDay)
+            {
+                return Result.BadRequest("This event type has reached its booking duration limit for the selected day.");
+            }
+        }
+
+        foreach (var field in eventType.Settings.BookingFields)
+        {
+            string? value = null;
+            command.Responses?.TryGetValue(field.Name, out value);
+            if (field.Required && IsMissingRequiredField(field, value))
+            {
+                return Result.BadRequest($"{field.Label} is required.");
+            }
+
+            if (!string.IsNullOrWhiteSpace(value) && !IsValidFieldOption(field, value))
+            {
+                return Result.BadRequest($"{field.Label} is not a valid option.");
+            }
+        }
+
+        return Result.Success();
+    }
+
+    private static bool IsActiveBooking(Booking booking, DateTimeOffset now)
+    {
+        return booking.StartTime >= now && booking.Status.Trim().Equals("accepted", StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static bool IsMissingRequiredField(EventTypeBookingField field, string? value)
+    {
+        if (field.Type.Equals("boolean", StringComparison.OrdinalIgnoreCase))
+        {
+            return !bool.TryParse(value, out var accepted) || !accepted;
+        }
+
+        return string.IsNullOrWhiteSpace(value);
+    }
+
+    private static bool IsValidFieldOption(EventTypeBookingField field, string value)
+    {
+        if (field.Options.Length == 0) return true;
+        if (field.Type.Equals("select", StringComparison.OrdinalIgnoreCase) || field.Type.Equals("radio", StringComparison.OrdinalIgnoreCase))
+        {
+            return field.Options.Contains(value.Trim(), StringComparer.OrdinalIgnoreCase);
+        }
+
+        if (field.Type.Equals("checkbox", StringComparison.OrdinalIgnoreCase) || field.Type.Equals("multiselect", StringComparison.OrdinalIgnoreCase))
+        {
+            var selectedOptions = value
+                .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+            return selectedOptions.Length > 0 &&
+                   selectedOptions.All(option => field.Options.Contains(option, StringComparer.OrdinalIgnoreCase));
+        }
+
+        return true;
     }
 
     private async Task<Result<Booking>> ResolveOriginalRescheduleBookingAsync(CreatePublicBookingCommand command, PublicSchedulingContext context, CancellationToken cancellationToken)

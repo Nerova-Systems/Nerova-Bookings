@@ -33,6 +33,7 @@ export function PublicBooker({
   onMonthChange,
   onSlotChange,
   onTimezoneChange,
+  onBookingComplete,
   onBackToTimes
 }: Readonly<{
   handle: string;
@@ -53,6 +54,7 @@ export function PublicBooker({
   onMonthChange: (date: Date) => void;
   onSlotChange: (slot: AvailableSlot) => void;
   onTimezoneChange: (timezone: string | null) => void;
+  onBookingComplete: () => void;
   onBackToTimes: () => void;
 }>) {
   const slots = getAvailableSlots(slotsByDate, selectedDate);
@@ -96,6 +98,7 @@ export function PublicBooker({
           timezone={timezone}
           privateLink={privateLink}
           rescheduledBy={rescheduledBy}
+          onBookingComplete={onBookingComplete}
           onBack={onBackToTimes}
         />
       )}

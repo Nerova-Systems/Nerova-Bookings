@@ -723,6 +723,9 @@ msgstr "Afvis booking"
 msgid "Reject booking?"
 msgstr "Afvis booking?"
 
+msgid "Rejection"
+msgstr ""
+
 msgid "Rejection reason"
 msgstr "Afvisningsårsag"
 
@@ -740,6 +743,9 @@ msgstr "Rapporter booking"
 
 msgid "Request reschedule"
 msgstr "Anmod om ny tid"
+
+msgid "Required"
+msgstr "Påkrævet"
 
 msgid "Requires another booking"
 msgstr "Kræver en anden booking"
@@ -848,6 +854,12 @@ msgstr "Vælg en dato for at se tider."
 
 msgid "Select a schedule to see its availability summary."
 msgstr "Vælg en tidsplan for at se dens tilgængelighedsoversigt."
+
+msgid "Select an option"
+msgstr "Vælg en mulighed"
+
+msgid "Select options"
+msgstr "Vælg muligheder"
 
 msgid "Select schedule"
 msgstr "Vælg tidsplan"
