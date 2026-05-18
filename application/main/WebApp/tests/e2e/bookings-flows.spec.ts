@@ -24,19 +24,30 @@ async function createEventType(page: Page, title: string, slug: string) {
   await expect(page.getByRole("textbox", { name: "Title" })).toHaveValue(title);
 }
 
-async function createBookedEvent(page: Page, context: ReturnType<typeof createTestContext>) {
+async function createBookedEvent(
+  page: Page,
+  context: ReturnType<typeof createTestContext>,
+  options: { requiresConfirmation?: boolean } = {}
+) {
   const unique = Date.now();
   const scheduleName = `Bookings smoke schedule ${unique}`;
   const eventTitle = `Bookings smoke event ${unique}`;
   const eventSlug = `bookings-smoke-event-${unique}`;
   const bookerName = `Bookings Booker ${unique}`;
   const bookerEmail = `bookings-booker-${unique}@example.com`;
+  const bookingNotes = "Bookings dashboard";
   const startTime = getNextMondayAtNine();
 
   await createSchedule(page, scheduleName);
   await expectToastMessage(context, "Schedule created");
   await createEventType(page, eventTitle, eventSlug);
   await expectToastMessage(context, "Event type created");
+  if (options.requiresConfirmation === true) {
+    await page.getByRole("tab", { name: "Advanced" }).click();
+    await page.getByRole("switch", { name: "Requires confirmation" }).click();
+    await page.getByRole("button", { name: "Save" }).click();
+    await expectToastMessage(context, "Event type updated");
+  }
 
   const profile = await page.evaluate(async () => {
     const response = await fetch("/api/scheduling/profile");
@@ -54,11 +65,11 @@ async function createBookedEvent(page: Page, context: ReturnType<typeof createTe
   await expect(page.getByTestId("public-booker-form")).toBeVisible();
   await page.getByRole("textbox", { name: "Name" }).fill(bookerName);
   await page.getByRole("textbox", { name: "Email" }).fill(bookerEmail);
-  await page.getByRole("textbox", { name: "Additional notes" }).fill("Bookings dashboard");
+  await page.getByRole("textbox", { name: "Additional notes" }).fill(bookingNotes);
   await page.getByRole("button", { name: "Confirm booking" }).click();
   await expect(page.getByRole("heading", { name: "Booking confirmed" })).toBeVisible();
 
-  return { eventTitle, eventSlug, handle: profile.handle, bookerName, bookerEmail, startTime };
+  return { eventTitle, eventSlug, handle: profile.handle, bookerName, bookerEmail, bookingNotes, startTime };
 }
 
 test.describe("@smoke", () => {
@@ -145,13 +156,39 @@ test.describe("@smoke", () => {
       await ownerPage.keyboard.press("Escape");
     })();
 
-    await step("Navigate to direct reschedule from dashboard action")(async () => {
+    await step("Create a replacement booking through direct reschedule")(async () => {
+      const rescheduleReason = "Need a later time from dashboard";
+      const replacementStartTime = addMinutes(booking.startTime, 30);
       const bookingRow = ownerPage.getByTestId("booking-item").filter({ hasText: booking.eventTitle }).first();
       await bookingRow.getByTestId("booking-actions-dropdown").click();
       await ownerPage.getByRole("menuitem", { name: "Reschedule booking" }).click();
 
       await expect(ownerPage).toHaveURL(new RegExp(`/${booking.handle}/${booking.eventSlug}`));
-      expect(new URL(ownerPage.url()).searchParams.get("rescheduleUid")).toBeTruthy();
+      const rescheduleUrl = new URL(ownerPage.url());
+      expect(rescheduleUrl.searchParams.get("rescheduleUid")).toBeTruthy();
+      rescheduleUrl.searchParams.set("date", formatDateOnly(replacementStartTime));
+      rescheduleUrl.searchParams.set("slot", replacementStartTime.toISOString());
+      rescheduleUrl.searchParams.set("duration", "30");
+      rescheduleUrl.searchParams.set("timezone", "Africa/Johannesburg");
+
+      await ownerPage.goto(`${rescheduleUrl.pathname}${rescheduleUrl.search}`);
+      await expect(ownerPage.getByTestId("public-booker-form")).toBeVisible();
+      await expect(ownerPage.getByRole("heading", { name: "Reschedule booking" })).toBeVisible();
+      await expect(ownerPage.getByRole("textbox", { name: "Name" })).toHaveValue(booking.bookerName);
+      await expect(ownerPage.getByRole("textbox", { name: "Email" })).toHaveValue(booking.bookerEmail);
+      await expect(ownerPage.getByRole("textbox", { name: "Additional notes" })).toHaveValue(booking.bookingNotes);
+      await ownerPage.getByRole("textbox", { name: "Reschedule reason" }).fill(rescheduleReason);
+      await ownerPage.getByRole("button", { name: "Reschedule booking" }).click();
+      await expect(ownerPage.getByRole("heading", { name: "Booking confirmed" })).toBeVisible();
+
+      await ownerPage.goto(`/bookings/cancelled?view=list&search=${encodeURIComponent(booking.eventTitle)}`);
+      const cancelledBookingRow = ownerPage.getByTestId("booking-item").filter({ hasText: booking.eventTitle }).first();
+      await expect(cancelledBookingRow).toBeVisible();
+      await cancelledBookingRow.click();
+      const cancelledDetails = ownerPage.getByRole("dialog", { name: booking.eventTitle });
+      await expect(cancelledDetails.getByText("This booking was marked for reschedule.")).toBeVisible();
+      await expect(cancelledDetails.getByText(rescheduleReason)).toBeVisible();
+      await ownerPage.keyboard.press("Escape");
 
       await ownerPage.goto(`/bookings/upcoming?view=list&search=${encodeURIComponent(booking.eventTitle)}`);
       await expect(ownerPage.getByTestId("booking-item").filter({ hasText: booking.eventTitle }).first()).toBeVisible();
@@ -173,6 +210,47 @@ test.describe("@smoke", () => {
 
       await ownerPage.goto(`/bookings/cancelled?view=list&search=${encodeURIComponent(rescheduleBooking.eventTitle)}`);
       await expect(ownerPage.getByText(rescheduleBooking.eventTitle)).toBeVisible();
+    })();
+
+    await step("Confirm and reject pending bookings from the dashboard")(async () => {
+      const confirmBooking = await createBookedEvent(ownerPage, context, { requiresConfirmation: true });
+      await ownerPage.goto(`/bookings/unconfirmed?view=list&search=${encodeURIComponent(confirmBooking.eventTitle)}`);
+      const confirmRow = ownerPage.getByTestId("booking-item").filter({ hasText: confirmBooking.eventTitle }).first();
+      await expect(confirmRow).toBeVisible();
+      await confirmRow.getByTestId("booking-actions-dropdown").click();
+      await ownerPage.getByRole("menuitem", { name: "Confirm booking" }).click();
+      await expect(ownerPage.getByRole("dialog", { name: "Confirm booking" })).toBeVisible();
+      await ownerPage.getByRole("button", { name: "Confirm booking" }).click();
+      await expectToastMessage(context, "Booking confirmed");
+
+      await ownerPage.goto(`/bookings/upcoming?view=list&search=${encodeURIComponent(confirmBooking.eventTitle)}`);
+      await expect(
+        ownerPage.getByTestId("booking-item").filter({ hasText: confirmBooking.eventTitle }).first()
+      ).toBeVisible();
+
+      const rejectBooking = await createBookedEvent(ownerPage, context, { requiresConfirmation: true });
+      const rejectionReason = "The requested time no longer works";
+      await ownerPage.goto(`/bookings/unconfirmed?view=list&search=${encodeURIComponent(rejectBooking.eventTitle)}`);
+      const rejectRow = ownerPage.getByTestId("booking-item").filter({ hasText: rejectBooking.eventTitle }).first();
+      await expect(rejectRow).toBeVisible();
+      await rejectRow.getByTestId("booking-actions-dropdown").click();
+      await ownerPage.getByRole("menuitem", { name: "Reject booking" }).click();
+      await expect(ownerPage.getByRole("dialog", { name: "Reject booking" })).toBeVisible();
+      await ownerPage.getByRole("textbox", { name: "Rejection reason" }).fill(rejectionReason);
+      await ownerPage.getByRole("button", { name: "Reject booking" }).click();
+      await expectToastMessage(context, "Booking rejected");
+
+      await ownerPage.goto(`/bookings/cancelled?view=list&search=${encodeURIComponent(rejectBooking.eventTitle)}`);
+      const rejectedBookingRow = ownerPage
+        .getByTestId("booking-item")
+        .filter({ hasText: rejectBooking.eventTitle })
+        .first();
+      await expect(rejectedBookingRow).toBeVisible();
+      await rejectedBookingRow.click();
+      await expect(
+        ownerPage.getByRole("dialog", { name: rejectBooking.eventTitle }).getByText(rejectionReason)
+      ).toBeVisible();
+      await ownerPage.keyboard.press("Escape");
     })();
 
     await step("Switch to calendar and navigate week & verify booking details open")(async () => {
@@ -250,6 +328,12 @@ function getNextMondayAtNine() {
   date.setDate(date.getDate() + daysUntilMonday);
   date.setHours(9, 0, 0, 0);
   return date;
+}
+
+function addMinutes(date: Date, minutes: number) {
+  const nextDate = new Date(date);
+  nextDate.setMinutes(nextDate.getMinutes() + minutes);
+  return nextDate;
 }
 
 function formatDateOnly(date: Date) {
