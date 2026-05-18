@@ -173,6 +173,7 @@ export function getEventTypeSettings(payload: EventTypePayload): EventTypeSettin
       cancellationUrl: settings?.redirects?.cancellationUrl ?? null
     },
     interfaceLanguage: settings?.interfaceLanguage?.trim() || null,
+    selectedCalendars: settings?.selectedCalendars ?? [],
     metadata: settings?.metadata ?? {}
   };
 }

@@ -143,8 +143,9 @@ public sealed class BookingEndpointsTests : EndpointBaseTest<MainDbContext>
         actionsByBookingId[past.Id].Cancel.Should().Be(new BookingActionResponse(true, false, "Past bookings cannot be cancelled."));
         actionsByBookingId[cancelled.Id].Cancel.Should().Be(new BookingActionResponse(true, false, "Cancelled bookings cannot be cancelled."));
         actionsByBookingId[rejected.Id].Cancel.Should().Be(new BookingActionResponse(true, false, "Rejected bookings cannot be cancelled."));
-        actionsByBookingId[upcoming.Id].Reschedule.Enabled.Should().BeFalse();
-        actionsByBookingId[upcoming.Id].AddGuests.Enabled.Should().BeFalse();
+        actionsByBookingId[upcoming.Id].Reschedule.Enabled.Should().BeTrue();
+        actionsByBookingId[upcoming.Id].RequestReschedule.Enabled.Should().BeTrue();
+        actionsByBookingId[upcoming.Id].AddGuests.Enabled.Should().BeTrue();
         actionsByBookingId[upcoming.Id].Report.Enabled.Should().BeFalse();
     }
 
@@ -225,6 +226,106 @@ public sealed class BookingEndpointsTests : EndpointBaseTest<MainDbContext>
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
         Connection.ExecuteScalar<string>("SELECT status FROM bookings WHERE id = @id", [new { id = booking.Id }]).Should().Be("accepted");
+    }
+
+    [Fact]
+    public async Task ConfirmBooking_WhenBookingIsPending_ShouldAcceptBooking()
+    {
+        // Arrange
+        await UpdateSchedulingProfileAsync("owner");
+        var schedule = await CreateScheduleAsync();
+        await CreateEventTypeAsync(schedule.Id, "Intro call", "intro-call", new { confirmationPolicy = new { requiresConfirmation = true } });
+        var booking = await CreateBookingAsync("intro-call", "2026-06-01T07:00:00Z", "Ada Lovelace", "ada@example.com");
+
+        // Act
+        var response = await AuthenticatedOwnerHttpClient.PostAsync($"/api/bookings/{booking.Id}/confirm", null);
+
+        // Assert
+        response.ShouldBeSuccessfulGetRequest();
+        var lifecycle = await response.DeserializeResponse<BookingLifecycleResponse>();
+        lifecycle!.Status.Should().Be("accepted");
+        Connection.ExecuteScalar<string>("SELECT status FROM bookings WHERE id = @id", [new { id = booking.Id }]).Should().Be("accepted");
+    }
+
+    [Fact]
+    public async Task RejectBooking_WhenBookingIsPending_ShouldRejectBookingWithReason()
+    {
+        // Arrange
+        await UpdateSchedulingProfileAsync("owner");
+        var schedule = await CreateScheduleAsync();
+        await CreateEventTypeAsync(schedule.Id, "Intro call", "intro-call", new { confirmationPolicy = new { requiresConfirmation = true } });
+        var booking = await CreateBookingAsync("intro-call", "2026-06-01T07:00:00Z", "Ada Lovelace", "ada@example.com");
+
+        // Act
+        var response = await AuthenticatedOwnerHttpClient.PostAsJsonAsync($"/api/bookings/{booking.Id}/reject", new { rejectionReason = "Not a fit" });
+
+        // Assert
+        response.ShouldBeSuccessfulGetRequest();
+        var lifecycle = await response.DeserializeResponse<BookingLifecycleResponse>();
+        lifecycle!.Status.Should().Be("rejected");
+        Connection.ExecuteScalar<string>("SELECT status FROM bookings WHERE id = @id", [new { id = booking.Id }]).Should().Be("rejected");
+        Connection.ExecuteScalar<string>("SELECT rejection_reason FROM bookings WHERE id = @id", [new { id = booking.Id }]).Should().Be("Not a fit");
+    }
+
+    [Fact]
+    public async Task RequestReschedule_WhenBookingIsAccepted_ShouldCancelAndRecordRequester()
+    {
+        // Arrange
+        await UpdateSchedulingProfileAsync("owner");
+        var schedule = await CreateScheduleAsync();
+        await CreateEventTypeAsync(schedule.Id, "Intro call", "intro-call");
+        var booking = await CreateBookingAsync("intro-call", "2026-06-01T07:00:00Z", "Ada Lovelace", "ada@example.com");
+
+        // Act
+        var response = await AuthenticatedOwnerHttpClient.PostAsJsonAsync($"/api/bookings/{booking.Id}/request-reschedule", new { rescheduleReason = "Need another time" });
+
+        // Assert
+        response.ShouldBeSuccessfulGetRequest();
+        Connection.ExecuteScalar<string>("SELECT status FROM bookings WHERE id = @id", [new { id = booking.Id }]).Should().Be("cancelled");
+        Connection.ExecuteScalar<long>("SELECT rescheduled FROM bookings WHERE id = @id", [new { id = booking.Id }]).Should().Be(1);
+        Connection.ExecuteScalar<string>("SELECT reschedule_reason FROM bookings WHERE id = @id", [new { id = booking.Id }]).Should().Be("Need another time");
+        Connection.ExecuteScalar<string>("SELECT cancelled_by FROM bookings WHERE id = @id", [new { id = booking.Id }]).Should().Be("owner@tenant-1.com");
+    }
+
+    [Fact]
+    public async Task AddBookingGuests_WhenGuestsAreValid_ShouldPersistAttendees()
+    {
+        // Arrange
+        await UpdateSchedulingProfileAsync("owner");
+        var schedule = await CreateScheduleAsync();
+        await CreateEventTypeAsync(schedule.Id, "Intro call", "intro-call");
+        var booking = await CreateBookingAsync("intro-call", "2026-06-01T07:00:00Z", "Ada Lovelace", "ada@example.com");
+
+        // Act
+        var response = await AuthenticatedOwnerHttpClient.PostAsJsonAsync(
+            $"/api/bookings/{booking.Id}/guests",
+            new { guests = new[] { new { name = "Grace Hopper", email = "Grace@Example.com", timeZone = "UTC" } } }
+        );
+
+        // Assert
+        response.ShouldBeSuccessfulGetRequest();
+        var lifecycle = await response.DeserializeResponse<BookingLifecycleResponse>();
+        lifecycle!.Attendees.Select(attendee => attendee.Email).Should().Equal("ada@example.com", "grace@example.com");
+    }
+
+    [Fact]
+    public async Task EditBookingLocation_WhenBookingIsAccepted_ShouldPersistLocationOverride()
+    {
+        // Arrange
+        await UpdateSchedulingProfileAsync("owner");
+        var schedule = await CreateScheduleAsync();
+        await CreateEventTypeAsync(schedule.Id, "Intro call", "intro-call");
+        var booking = await CreateBookingAsync("intro-call", "2026-06-01T07:00:00Z", "Ada Lovelace", "ada@example.com");
+
+        // Act
+        var response = await AuthenticatedOwnerHttpClient.PutAsJsonAsync($"/api/bookings/{booking.Id}/location", new { locationType = "phone", locationValue = "+27110000000" });
+
+        // Assert
+        response.ShouldBeSuccessfulGetRequest();
+        var lifecycle = await response.DeserializeResponse<BookingLifecycleResponse>();
+        lifecycle!.LocationType.Should().Be("phone");
+        lifecycle.LocationValue.Should().Be("+27110000000");
+        Connection.ExecuteScalar<string>("SELECT location_type FROM bookings WHERE id = @id", [new { id = booking.Id }]).Should().Be("phone");
     }
 
     private async Task UpdateSchedulingProfileAsync(string handle)
@@ -308,6 +409,19 @@ public sealed class BookingEndpointsTests : EndpointBaseTest<MainDbContext>
 
     [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
     private sealed record CreatePublicBookingResponse(string Id);
+
+    [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
+    private sealed record BookingLifecycleResponse(string Id, string Status, BookingAttendeeResponse[] Attendees, string? LocationType, string? LocationValue);
+
+    [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
+    private sealed record BookingAttendeeResponse(
+        string Name,
+        string Email,
+        string TimeZone,
+        string? PhoneNumber,
+        string? Locale,
+        bool NoShow
+    );
 
     [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
     private sealed record BookingsResponse(int TotalCount, BookingResponse[] Bookings);

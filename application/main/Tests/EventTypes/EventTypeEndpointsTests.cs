@@ -63,6 +63,9 @@ public sealed class EventTypeEndpointsTests : EndpointBaseTest<MainDbContext>
         created.Settings.Limits.MaxBookingsPerDay.Should().Be(4);
         created.Settings.Recurrence!.Interval.Should().Be(2);
         created.Settings.Seats.Enabled.Should().BeFalse();
+        created.Settings.SelectedCalendars.Should().ContainSingle();
+        created.Settings.SelectedCalendars[0].Integration.Should().Be("google_calendar");
+        created.Settings.SelectedCalendars[0].ExternalId.Should().Be("primary");
 
         var getResponse = await AuthenticatedOwnerHttpClient.GetAsync($"/api/event-types/{created.Id}");
         getResponse.ShouldBeSuccessfulGetRequest();
@@ -628,6 +631,7 @@ public sealed class EventTypeEndpointsTests : EndpointBaseTest<MainDbContext>
             recurrence = new { frequency = "weekly", interval = 2, count = 5 },
             seats = new { enabled = false, capacity = (int?)null, showAttendeeInfo = false },
             privateLinks = new[] { " vip ", "VIP" },
+            selectedCalendars = new[] { new { integration = " google_calendar ", externalId = " primary ", credentialId = "cred_123" } },
             cancellationPolicy = new { allowCancellation = true, minimumNoticeMinutes = 120 },
             reschedulePolicy = new { allowReschedule = true, minimumNoticeMinutes = 180 },
             redirects = new { successUrl = "https://example.com/success", cancellationUrl = "https://example.com/cancel" },
@@ -673,6 +677,7 @@ public sealed class EventTypeEndpointsTests : EndpointBaseTest<MainDbContext>
         EventTypeRecurrenceResponse? Recurrence,
         EventTypeSeatsResponse Seats,
         string[] PrivateLinks,
+        EventTypeSelectedCalendarResponse[] SelectedCalendars,
         EventTypeCancellationPolicyResponse CancellationPolicy,
         EventTypeReschedulePolicyResponse ReschedulePolicy,
         EventTypeRedirectsResponse Redirects,
@@ -700,6 +705,9 @@ public sealed class EventTypeEndpointsTests : EndpointBaseTest<MainDbContext>
 
     [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
     private sealed record EventTypeSeatsResponse(bool Enabled, int? Capacity, bool ShowAttendeeInfo);
+
+    [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
+    private sealed record EventTypeSelectedCalendarResponse(string Integration, string ExternalId, string? CredentialId);
 
     [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
     private sealed record EventTypeCancellationPolicyResponse(bool AllowCancellation, int? MinimumNoticeMinutes);

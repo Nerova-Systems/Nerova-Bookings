@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json;
 using JetBrains.Annotations;
 using Main.Features.EventTypes.Domain;
@@ -18,16 +19,24 @@ public sealed record BookingId(string Value) : StronglyTypedUlid<BookingId>(Valu
 
 public sealed class Booking : AggregateRoot<BookingId>, ITenantScopedEntity
 {
+    private static readonly JsonSerializerOptions JsonSerializerOptions = JsonSerializerOptions.Default;
+
     [UsedImplicitly]
     private Booking() : base(BookingId.NewId())
     {
         OwnerUserId = new UserId(string.Empty);
         EventTypeId = new EventTypeId(string.Empty);
+        Title = string.Empty;
         BookerName = string.Empty;
         BookerEmail = string.Empty;
         TimeZone = string.Empty;
         Status = string.Empty;
         ResponsesJson = "{}";
+        MetadataJson = "{}";
+        AttendeesJson = "[]";
+        ReferencesJson = "[]";
+        SeatReferencesJson = "[]";
+        FromReschedule = null;
     }
 
     private Booking(
@@ -38,11 +47,16 @@ public sealed class Booking : AggregateRoot<BookingId>, ITenantScopedEntity
         DateTimeOffset endTime,
         int beforeEventBufferMinutes,
         int afterEventBufferMinutes,
+        string title,
+        string? description,
+        string? locationType,
+        string? locationValue,
         string bookerName,
         string bookerEmail,
         string timeZone,
         string status,
-        Dictionary<string, string> responses
+        Dictionary<string, string> responses,
+        Dictionary<string, string>? metadata
     ) : base(BookingId.NewId())
     {
         TenantId = tenantId;
@@ -52,11 +66,23 @@ public sealed class Booking : AggregateRoot<BookingId>, ITenantScopedEntity
         EndTime = endTime;
         BeforeEventBufferMinutes = beforeEventBufferMinutes;
         AfterEventBufferMinutes = afterEventBufferMinutes;
+        Title = title.Trim();
+        Description = string.IsNullOrWhiteSpace(description) ? null : description.Trim();
+        LocationType = string.IsNullOrWhiteSpace(locationType) ? null : locationType.Trim();
+        LocationValue = string.IsNullOrWhiteSpace(locationValue) ? null : locationValue.Trim();
         BookerName = bookerName.Trim();
         BookerEmail = bookerEmail.Trim().ToLowerInvariant();
         TimeZone = timeZone.Trim();
         Status = status.Trim();
-        ResponsesJson = JsonSerializer.Serialize(responses);
+        ResponsesJson = JsonSerializer.Serialize(responses, JsonSerializerOptions);
+        MetadataJson = JsonSerializer.Serialize(metadata ?? new Dictionary<string, string>(StringComparer.Ordinal), JsonSerializerOptions);
+        AttendeesJson = JsonSerializer.Serialize(
+            new[] { new BookingAttendee(BookerName, BookerEmail, TimeZone, null, null, false) },
+            JsonSerializerOptions
+        );
+        ReferencesJson = "[]";
+        SeatReferencesJson = "[]";
+        FromReschedule = null;
     }
 
     public UserId OwnerUserId { get; private set; }
@@ -71,21 +97,115 @@ public sealed class Booking : AggregateRoot<BookingId>, ITenantScopedEntity
 
     public int AfterEventBufferMinutes { get; private set; }
 
-    public string BookerName { get; private set; }
+    public string Title { get; private set; }
 
-    public string BookerEmail { get; private set; }
+    public string? Description { get; private set; }
 
-    public string TimeZone { get; private set; }
+    public string? LocationType { get; private set; }
+
+    public string? LocationValue { get; private set; }
+
+    public string BookerName { get; }
+
+    public string BookerEmail { get; }
+
+    public string TimeZone { get; }
 
     public string Status { get; private set; }
 
     public string ResponsesJson { get; private set; }
 
+    public string MetadataJson { get; }
+
+    public string AttendeesJson { get; private set; }
+
+    public string ReferencesJson { get; }
+
+    public string SeatReferencesJson { get; }
+
+    public string? CancellationReason { get; private set; }
+
+    public string? RejectionReason { get; private set; }
+
+    public string? RescheduleReason { get; private set; }
+
+    public bool Rescheduled { get; private set; }
+
+    public string? FromReschedule { get; }
+
+    public string? CancelledBy { get; private set; }
+
+    public string? RescheduledBy { get; private set; }
+
+    [NotMapped]
+    public BookingAttendee[] Attendees => JsonSerializer.Deserialize<BookingAttendee[]>(AttendeesJson, JsonSerializerOptions) ?? [];
+
+    [NotMapped]
+    public BookingReference[] References => JsonSerializer.Deserialize<BookingReference[]>(ReferencesJson, JsonSerializerOptions) ?? [];
+
+    [NotMapped]
+    public BookingSeatReference[] SeatReferences => JsonSerializer.Deserialize<BookingSeatReference[]>(SeatReferencesJson, JsonSerializerOptions) ?? [];
+
+    [NotMapped]
+    public Dictionary<string, string> Metadata => JsonSerializer.Deserialize<Dictionary<string, string>>(MetadataJson, JsonSerializerOptions) ?? [];
+
     public TenantId TenantId { get; } = new(0);
 
-    public void Cancel()
+    public void Confirm()
+    {
+        Status = "accepted";
+        RejectionReason = null;
+    }
+
+    public void Reject(string? rejectionReason)
+    {
+        Status = "rejected";
+        RejectionReason = string.IsNullOrWhiteSpace(rejectionReason) ? null : rejectionReason.Trim();
+    }
+
+    public void Cancel(string? cancellationReason = null, string? cancelledBy = null)
     {
         Status = "cancelled";
+        CancellationReason = string.IsNullOrWhiteSpace(cancellationReason) ? null : cancellationReason.Trim();
+        CancelledBy = string.IsNullOrWhiteSpace(cancelledBy) ? null : cancelledBy.Trim().ToLowerInvariant();
+    }
+
+    public void RequestReschedule(string? rescheduleReason, string? rescheduledBy)
+    {
+        Status = "cancelled";
+        Rescheduled = true;
+        RescheduleReason = string.IsNullOrWhiteSpace(rescheduleReason) ? null : rescheduleReason.Trim();
+        CancellationReason = RescheduleReason;
+        RescheduledBy = string.IsNullOrWhiteSpace(rescheduledBy) ? null : rescheduledBy.Trim().ToLowerInvariant();
+        CancelledBy = RescheduledBy;
+    }
+
+    public void EditLocation(string? locationType, string? locationValue)
+    {
+        LocationType = string.IsNullOrWhiteSpace(locationType) ? null : locationType.Trim();
+        LocationValue = string.IsNullOrWhiteSpace(locationValue) ? null : locationValue.Trim();
+    }
+
+    public void AddGuests(BookingAttendee[] guests)
+    {
+        var attendees = Attendees.ToList();
+        foreach (var guest in guests)
+        {
+            var normalizedEmail = guest.Email.Trim().ToLowerInvariant();
+            if (string.Equals(normalizedEmail, BookerEmail, StringComparison.OrdinalIgnoreCase)) continue;
+            if (attendees.Any(attendee => string.Equals(attendee.Email, normalizedEmail, StringComparison.OrdinalIgnoreCase))) continue;
+            attendees.Add(guest with
+                {
+                    Name = guest.Name.Trim(),
+                    Email = normalizedEmail,
+                    TimeZone = string.IsNullOrWhiteSpace(guest.TimeZone) ? TimeZone : guest.TimeZone.Trim(),
+                    PhoneNumber = string.IsNullOrWhiteSpace(guest.PhoneNumber) ? null : guest.PhoneNumber.Trim(),
+                    Locale = string.IsNullOrWhiteSpace(guest.Locale) ? null : guest.Locale.Trim()
+                }
+            );
+        }
+
+        AttendeesJson = JsonSerializer.Serialize(attendees, JsonSerializerOptions);
     }
 
     public static Booking Create(
@@ -96,13 +216,39 @@ public sealed class Booking : AggregateRoot<BookingId>, ITenantScopedEntity
         int durationMinutes,
         int beforeEventBufferMinutes,
         int afterEventBufferMinutes,
+        string title,
+        string? description,
+        string? locationType,
+        string? locationValue,
         string bookerName,
         string bookerEmail,
         string timeZone,
         string status,
-        Dictionary<string, string> responses
+        Dictionary<string, string> responses,
+        Dictionary<string, string>? metadata = null
     )
     {
-        return new Booking(tenantId, ownerUserId, eventTypeId, startTime, startTime.AddMinutes(durationMinutes), beforeEventBufferMinutes, afterEventBufferMinutes, bookerName, bookerEmail, timeZone, status, responses);
+        return new Booking(tenantId, ownerUserId, eventTypeId, startTime, startTime.AddMinutes(durationMinutes), beforeEventBufferMinutes, afterEventBufferMinutes, title, description, locationType, locationValue, bookerName, bookerEmail, timeZone, status, responses, metadata);
     }
 }
+
+public sealed record BookingAttendee(
+    string Name,
+    string Email,
+    string TimeZone,
+    string? PhoneNumber,
+    string? Locale,
+    bool NoShow
+);
+
+public sealed record BookingReference(
+    string Type,
+    string Uid,
+    string? MeetingId,
+    string? MeetingPassword,
+    string? MeetingUrl,
+    string? ExternalCalendarId,
+    bool Deleted
+);
+
+public sealed record BookingSeatReference(string Uid, string Name, string Email);

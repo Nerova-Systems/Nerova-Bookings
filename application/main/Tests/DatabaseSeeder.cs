@@ -25,7 +25,15 @@ public sealed class DatabaseSeeder
             IsAuthenticated = true,
             Locale = "en-US",
             Role = "Owner",
-            TenantId = TenantId
+            TenantId = TenantId,
+            FeatureFlags = new HashSet<string>
+            {
+                "cal-com-core",
+                "cal-com-event-types",
+                "cal-com-availability",
+                "cal-com-public-booking",
+                "cal-com-bookings"
+            }
         };
 
         Tenant1Member = new UserInfo
@@ -37,7 +45,15 @@ public sealed class DatabaseSeeder
             IsAuthenticated = true,
             Locale = "en-US",
             Role = "Member",
-            TenantId = TenantId
+            TenantId = TenantId,
+            FeatureFlags = new HashSet<string>
+            {
+                "cal-com-core",
+                "cal-com-event-types",
+                "cal-com-availability",
+                "cal-com-public-booking",
+                "cal-com-bookings"
+            }
         };
 
         mainDbContext.SaveChanges();

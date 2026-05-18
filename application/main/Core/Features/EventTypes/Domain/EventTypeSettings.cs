@@ -27,6 +27,8 @@ public sealed record EventTypeSettings
 
     public string[] PrivateLinks { get; init; } = [];
 
+    public EventTypeSelectedCalendar[] SelectedCalendars { get; init; } = [];
+
     public EventTypeCancellationPolicy CancellationPolicy { get; init; } = new();
 
     public EventTypeReschedulePolicy ReschedulePolicy { get; init; } = new();
@@ -86,6 +88,17 @@ public sealed record EventTypeSettings
                 .Where(link => !string.IsNullOrWhiteSpace(link))
                 .Select(link => link.Trim())
                 .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToArray(),
+            SelectedCalendars = source.SelectedCalendars
+                .Where(calendar => !string.IsNullOrWhiteSpace(calendar.Integration) && !string.IsNullOrWhiteSpace(calendar.ExternalId))
+                .Select(calendar => calendar with
+                    {
+                        Integration = calendar.Integration.Trim(),
+                        ExternalId = calendar.ExternalId.Trim(),
+                        CredentialId = string.IsNullOrWhiteSpace(calendar.CredentialId) ? null : calendar.CredentialId.Trim()
+                    }
+                )
+                .DistinctBy(calendar => $"{calendar.Integration}:{calendar.ExternalId}:{calendar.CredentialId}", StringComparer.OrdinalIgnoreCase)
                 .ToArray(),
             CancellationPolicy = source.CancellationPolicy,
             ReschedulePolicy = source.ReschedulePolicy,
@@ -220,6 +233,13 @@ public sealed class EventTypeSettingsValidator : AbstractValidator<EventTypeSett
             .WithMessage($"Private link must be at most {MaximumPrivateLinkLength} characters.")
             .Must(IsPrivateLink)
             .WithMessage("Private link must contain only letters, numbers, underscores, and hyphens.");
+        RuleForEach(settings => settings.SelectedCalendars).ChildRules(calendar =>
+            {
+                calendar.RuleFor(c => c.Integration).NotEmpty().MaximumLength(120);
+                calendar.RuleFor(c => c.ExternalId).NotEmpty().MaximumLength(500);
+                calendar.RuleFor(c => c.CredentialId).MaximumLength(120);
+            }
+        );
         RuleFor(settings => settings.Redirects.SuccessUrl)
             .Must(IsHttpUrl)
             .WithMessage("Success redirect URL must be an absolute HTTP or HTTPS URL.");
@@ -334,6 +354,15 @@ public sealed record EventTypeSeats
     public int? Capacity { get; init; }
 
     public bool ShowAttendeeInfo { get; init; }
+}
+
+public sealed record EventTypeSelectedCalendar
+{
+    public string Integration { get; init; } = string.Empty;
+
+    public string ExternalId { get; init; } = string.Empty;
+
+    public string? CredentialId { get; init; }
 }
 
 public sealed record EventTypeCancellationPolicy
