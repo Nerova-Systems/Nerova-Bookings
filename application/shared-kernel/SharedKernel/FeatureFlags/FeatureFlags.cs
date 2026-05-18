@@ -78,4 +78,120 @@ public static partial class FeatureFlags
         true,
         true
     );
+
+    public static readonly FeatureFlagDefinition CalComCore = new TenantAbTestFlag(
+        "cal-com-core",
+        "Cal.com core",
+        "Expose the imported Cal.com product layer after parity validation",
+        true,
+        true
+    );
+
+    public static readonly FeatureFlagDefinition CalComEventTypes = new TenantAbTestFlag(
+        "cal-com-event-types",
+        "Cal.com event types",
+        "Expose Cal.com event type setup and management after parity validation",
+        true,
+        true,
+        CalComCore.Key
+    );
+
+    public static readonly FeatureFlagDefinition CalComAvailability = new TenantAbTestFlag(
+        "cal-com-availability",
+        "Cal.com availability",
+        "Expose Cal.com schedules, availability, slots, and busy-time behavior after parity validation",
+        true,
+        true,
+        CalComCore.Key
+    );
+
+    public static readonly FeatureFlagDefinition CalComPublicBooking = new TenantAbTestFlag(
+        "cal-com-public-booking",
+        "Cal.com public booking",
+        "Expose Cal.com public web booking after parity validation",
+        true,
+        true,
+        CalComCore.Key
+    );
+
+    public static readonly FeatureFlagDefinition CalComBookings = new TenantAbTestFlag(
+        "cal-com-bookings",
+        "Cal.com bookings",
+        "Expose Cal.com booking lifecycle and booking management after parity validation",
+        true,
+        true,
+        CalComCore.Key
+    );
+
+    public static readonly FeatureFlagDefinition CalComWorkflows = new TenantAbTestFlag(
+        "cal-com-workflows",
+        "Cal.com workflows",
+        "Expose Cal.com workflow automation after parity validation",
+        true,
+        true,
+        CalComCore.Key
+    );
+
+    public static readonly FeatureFlagDefinition CalComWebhooks = new TenantAbTestFlag(
+        "cal-com-webhooks",
+        "Cal.com webhooks",
+        "Expose Cal.com webhook behavior after parity validation",
+        true,
+        true,
+        CalComCore.Key
+    );
+
+    public static readonly FeatureFlagDefinition CalComAppsConnectors = new TenantAbTestFlag(
+        "cal-com-apps-connectors",
+        "Cal.com apps and connectors",
+        "Expose Cal.com app-store and connector behavior after parity validation",
+        true,
+        true,
+        CalComCore.Key
+    );
+
+    public static readonly FeatureFlagDefinition CalComConferencing = new TenantAbTestFlag(
+        "cal-com-conferencing",
+        "Cal.com conferencing",
+        "Expose Cal.com conferencing integrations after parity validation",
+        true,
+        true,
+        CalComCore.Key
+    );
+
+    public static readonly FeatureFlagDefinition CalComTeamsOrganizations = new TenantAbTestFlag(
+        "cal-com-teams-organizations",
+        "Cal.com teams and organizations",
+        "Expose Cal.com team and organization behavior after parity validation",
+        true,
+        true,
+        CalComCore.Key
+    );
+
+    public static readonly FeatureFlagDefinition CalComEmbeds = new TenantAbTestFlag(
+        "cal-com-embeds",
+        "Cal.com embeds",
+        "Expose Cal.com embed behavior after parity validation",
+        true,
+        true,
+        CalComCore.Key
+    );
+
+    public static readonly FeatureFlagDefinition CalComPayments = new TenantAbTestFlag(
+        "cal-com-payments",
+        "Cal.com payments",
+        "Expose Cal.com payment behavior after parity validation",
+        true,
+        true,
+        CalComCore.Key
+    );
+
+    public static readonly FeatureFlagDefinition CalComApiCompatibility = new TenantAbTestFlag(
+        "cal-com-api-compatibility",
+        "Cal.com API compatibility",
+        "Expose Cal.com API compatibility routes after parity validation",
+        true,
+        true,
+        CalComCore.Key
+    );
 }

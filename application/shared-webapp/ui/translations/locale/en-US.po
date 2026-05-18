@@ -35,6 +35,45 @@ msgstr "Beta features"
 msgid "Breadcrumb"
 msgstr "Breadcrumb"
 
+msgid "Cal.com API compatibility"
+msgstr "Cal.com API compatibility"
+
+msgid "Cal.com apps and connectors"
+msgstr "Cal.com apps and connectors"
+
+msgid "Cal.com availability"
+msgstr "Cal.com availability"
+
+msgid "Cal.com bookings"
+msgstr "Cal.com bookings"
+
+msgid "Cal.com conferencing"
+msgstr "Cal.com conferencing"
+
+msgid "Cal.com core"
+msgstr "Cal.com core"
+
+msgid "Cal.com embeds"
+msgstr "Cal.com embeds"
+
+msgid "Cal.com event types"
+msgstr "Cal.com event types"
+
+msgid "Cal.com payments"
+msgstr "Cal.com payments"
+
+msgid "Cal.com public booking"
+msgstr "Cal.com public booking"
+
+msgid "Cal.com teams and organizations"
+msgstr "Cal.com teams and organizations"
+
+msgid "Cal.com webhooks"
+msgstr "Cal.com webhooks"
+
+msgid "Cal.com workflows"
+msgstr "Cal.com workflows"
+
 msgid "Clear date"
 msgstr "Clear date"
 
@@ -70,6 +109,45 @@ msgstr "Early access to experimental features before general availability"
 
 msgid "Experimental UI"
 msgstr "Experimental UI"
+
+msgid "Expose Cal.com API compatibility routes after parity validation"
+msgstr "Expose Cal.com API compatibility routes after parity validation"
+
+msgid "Expose Cal.com app-store and connector behavior after parity validation"
+msgstr "Expose Cal.com app-store and connector behavior after parity validation"
+
+msgid "Expose Cal.com booking lifecycle and booking management after parity validation"
+msgstr "Expose Cal.com booking lifecycle and booking management after parity validation"
+
+msgid "Expose Cal.com conferencing integrations after parity validation"
+msgstr "Expose Cal.com conferencing integrations after parity validation"
+
+msgid "Expose Cal.com embed behavior after parity validation"
+msgstr "Expose Cal.com embed behavior after parity validation"
+
+msgid "Expose Cal.com event type setup and management after parity validation"
+msgstr "Expose Cal.com event type setup and management after parity validation"
+
+msgid "Expose Cal.com payment behavior after parity validation"
+msgstr "Expose Cal.com payment behavior after parity validation"
+
+msgid "Expose Cal.com public web booking after parity validation"
+msgstr "Expose Cal.com public web booking after parity validation"
+
+msgid "Expose Cal.com schedules, availability, slots, and busy-time behavior after parity validation"
+msgstr "Expose Cal.com schedules, availability, slots, and busy-time behavior after parity validation"
+
+msgid "Expose Cal.com team and organization behavior after parity validation"
+msgstr "Expose Cal.com team and organization behavior after parity validation"
+
+msgid "Expose Cal.com webhook behavior after parity validation"
+msgstr "Expose Cal.com webhook behavior after parity validation"
+
+msgid "Expose Cal.com workflow automation after parity validation"
+msgstr "Expose Cal.com workflow automation after parity validation"
+
+msgid "Expose the imported Cal.com product layer after parity validation"
+msgstr "Expose the imported Cal.com product layer after parity validation"
 
 msgid "Go to next page"
 msgstr "Go to next page"

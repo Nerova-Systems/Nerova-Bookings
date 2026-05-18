@@ -9,7 +9,7 @@
 // `useFeatureFlag(deletedKey)` and `getFeatureFlagLabel(deletedKey)` callsite into a TS compile
 // error after the next backend build regenerates this file.
 
-export type FeatureFlagKey = "google-oauth" | "subscriptions" | "beta-features" | "sso" | "account-overview" | "compact-view" | "experimental-ui";
+export type FeatureFlagKey = "google-oauth" | "subscriptions" | "beta-features" | "sso" | "account-overview" | "compact-view" | "experimental-ui" | "cal-com-core" | "cal-com-event-types" | "cal-com-availability" | "cal-com-public-booking" | "cal-com-bookings" | "cal-com-workflows" | "cal-com-webhooks" | "cal-com-apps-connectors" | "cal-com-conferencing" | "cal-com-teams-organizations" | "cal-com-embeds" | "cal-com-payments" | "cal-com-api-compatibility";
 
 type FeatureFlagScope = "system" | "tenant" | "user";
 type FeatureFlagAdminLevel = "systemAdmin" | "tenantOwner" | "user";
@@ -84,6 +84,97 @@ const featureFlagRegistry: Record<FeatureFlagKey, FeatureFlagDefinition> = {
       adminLevel: "user",
       parentDependency: null,
       description: "Try out experimental user interface components"
+    },
+    "cal-com-core": {
+      key: "cal-com-core",
+      scope: "tenant",
+      adminLevel: "systemAdmin",
+      parentDependency: null,
+      description: "Expose the imported Cal.com product layer after parity validation"
+    },
+    "cal-com-event-types": {
+      key: "cal-com-event-types",
+      scope: "tenant",
+      adminLevel: "systemAdmin",
+      parentDependency: "cal-com-core",
+      description: "Expose Cal.com event type setup and management after parity validation"
+    },
+    "cal-com-availability": {
+      key: "cal-com-availability",
+      scope: "tenant",
+      adminLevel: "systemAdmin",
+      parentDependency: "cal-com-core",
+      description: "Expose Cal.com schedules, availability, slots, and busy-time behavior after parity validation"
+    },
+    "cal-com-public-booking": {
+      key: "cal-com-public-booking",
+      scope: "tenant",
+      adminLevel: "systemAdmin",
+      parentDependency: "cal-com-core",
+      description: "Expose Cal.com public web booking after parity validation"
+    },
+    "cal-com-bookings": {
+      key: "cal-com-bookings",
+      scope: "tenant",
+      adminLevel: "systemAdmin",
+      parentDependency: "cal-com-core",
+      description: "Expose Cal.com booking lifecycle and booking management after parity validation"
+    },
+    "cal-com-workflows": {
+      key: "cal-com-workflows",
+      scope: "tenant",
+      adminLevel: "systemAdmin",
+      parentDependency: "cal-com-core",
+      description: "Expose Cal.com workflow automation after parity validation"
+    },
+    "cal-com-webhooks": {
+      key: "cal-com-webhooks",
+      scope: "tenant",
+      adminLevel: "systemAdmin",
+      parentDependency: "cal-com-core",
+      description: "Expose Cal.com webhook behavior after parity validation"
+    },
+    "cal-com-apps-connectors": {
+      key: "cal-com-apps-connectors",
+      scope: "tenant",
+      adminLevel: "systemAdmin",
+      parentDependency: "cal-com-core",
+      description: "Expose Cal.com app-store and connector behavior after parity validation"
+    },
+    "cal-com-conferencing": {
+      key: "cal-com-conferencing",
+      scope: "tenant",
+      adminLevel: "systemAdmin",
+      parentDependency: "cal-com-core",
+      description: "Expose Cal.com conferencing integrations after parity validation"
+    },
+    "cal-com-teams-organizations": {
+      key: "cal-com-teams-organizations",
+      scope: "tenant",
+      adminLevel: "systemAdmin",
+      parentDependency: "cal-com-core",
+      description: "Expose Cal.com team and organization behavior after parity validation"
+    },
+    "cal-com-embeds": {
+      key: "cal-com-embeds",
+      scope: "tenant",
+      adminLevel: "systemAdmin",
+      parentDependency: "cal-com-core",
+      description: "Expose Cal.com embed behavior after parity validation"
+    },
+    "cal-com-payments": {
+      key: "cal-com-payments",
+      scope: "tenant",
+      adminLevel: "systemAdmin",
+      parentDependency: "cal-com-core",
+      description: "Expose Cal.com payment behavior after parity validation"
+    },
+    "cal-com-api-compatibility": {
+      key: "cal-com-api-compatibility",
+      scope: "tenant",
+      adminLevel: "systemAdmin",
+      parentDependency: "cal-com-core",
+      description: "Expose Cal.com API compatibility routes after parity validation"
     }
 };
 

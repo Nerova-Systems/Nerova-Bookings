@@ -46,6 +46,58 @@ function getKnownFeatureFlagLabels(): Record<string, FeatureFlagLabel> {
     "experimental-ui": {
       name: t`Experimental UI`,
       description: t`Try out experimental user interface components`
+    },
+    "cal-com-core": {
+      name: t`Cal.com core`,
+      description: t`Expose the imported Cal.com product layer after parity validation`
+    },
+    "cal-com-event-types": {
+      name: t`Cal.com event types`,
+      description: t`Expose Cal.com event type setup and management after parity validation`
+    },
+    "cal-com-availability": {
+      name: t`Cal.com availability`,
+      description: t`Expose Cal.com schedules, availability, slots, and busy-time behavior after parity validation`
+    },
+    "cal-com-public-booking": {
+      name: t`Cal.com public booking`,
+      description: t`Expose Cal.com public web booking after parity validation`
+    },
+    "cal-com-bookings": {
+      name: t`Cal.com bookings`,
+      description: t`Expose Cal.com booking lifecycle and booking management after parity validation`
+    },
+    "cal-com-workflows": {
+      name: t`Cal.com workflows`,
+      description: t`Expose Cal.com workflow automation after parity validation`
+    },
+    "cal-com-webhooks": {
+      name: t`Cal.com webhooks`,
+      description: t`Expose Cal.com webhook behavior after parity validation`
+    },
+    "cal-com-apps-connectors": {
+      name: t`Cal.com apps and connectors`,
+      description: t`Expose Cal.com app-store and connector behavior after parity validation`
+    },
+    "cal-com-conferencing": {
+      name: t`Cal.com conferencing`,
+      description: t`Expose Cal.com conferencing integrations after parity validation`
+    },
+    "cal-com-teams-organizations": {
+      name: t`Cal.com teams and organizations`,
+      description: t`Expose Cal.com team and organization behavior after parity validation`
+    },
+    "cal-com-embeds": {
+      name: t`Cal.com embeds`,
+      description: t`Expose Cal.com embed behavior after parity validation`
+    },
+    "cal-com-payments": {
+      name: t`Cal.com payments`,
+      description: t`Expose Cal.com payment behavior after parity validation`
+    },
+    "cal-com-api-compatibility": {
+      name: t`Cal.com API compatibility`,
+      description: t`Expose Cal.com API compatibility routes after parity validation`
     }
   };
 }
