@@ -133,7 +133,8 @@ test.describe("@smoke", () => {
       await ownerPage.getByRole("button", { name: "Add booking field" }).click();
       await ownerPage.getByRole("textbox", { name: "Label" }).last().fill("Topic");
       await ownerPage.getByRole("textbox", { name: "Name" }).last().fill("topic");
-      await selectOption(ownerPage.getByLabel("Type"), ownerPage, "Select");
+      await ownerPage.getByLabel("Type").click();
+      await ownerPage.getByRole("option", { name: "Select", exact: true }).click();
       await ownerPage.getByRole("switch", { name: "Required" }).click();
       await ownerPage.getByRole("button", { name: "Add option" }).click();
       await ownerPage.getByRole("textbox", { name: "Option label" }).fill("Sales");
@@ -142,7 +143,7 @@ test.describe("@smoke", () => {
       await ownerPage.getByRole("textbox", { name: "Option label" }).last().fill("Support");
       await ownerPage.getByRole("textbox", { name: "Option value" }).last().fill("support");
 
-      await expect(ownerPage.getByRole("switch", { name: "Hidden" })).toBeChecked();
+      await expect(ownerPage.getByRole("switch", { name: "Hidden" }).first()).toBeChecked();
       await expect(ownerPage.getByRole("textbox", { name: "Success URL" })).toHaveValue("https://example.com/success");
       await expect(ownerPage.getByRole("textbox", { name: "Private link" })).toHaveValue("vip");
       await expect(ownerPage.getByText("Topic").first()).toBeVisible();

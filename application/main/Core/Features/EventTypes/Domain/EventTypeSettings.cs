@@ -1,6 +1,5 @@
-using System.Text.RegularExpressions;
 using System.Text.Json;
-using System.Text.Json.Serialization;
+using System.Text.RegularExpressions;
 using FluentValidation;
 
 namespace Main.Features.EventTypes.Domain;
@@ -78,16 +77,17 @@ public sealed record EventTypeSettings
                         Editable = string.IsNullOrWhiteSpace(field.Editable) ? "user" : field.Editable.Trim(),
                         ExcludeEmails = string.IsNullOrWhiteSpace(field.ExcludeEmails) ? null : field.ExcludeEmails.Trim(),
                         RequireEmails = string.IsNullOrWhiteSpace(field.RequireEmails) ? null : field.RequireEmails.Trim(),
-                        Options = (field.Options ?? [])
-                            .Where(option => !string.IsNullOrWhiteSpace(option.Label) || !string.IsNullOrWhiteSpace(option.Value))
-                            .Select(option =>
+                        Options = field.Options
+                        .Where(option => !string.IsNullOrWhiteSpace(option.Label) || !string.IsNullOrWhiteSpace(option.Value))
+                        .Select(option =>
                             {
                                 var label = string.IsNullOrWhiteSpace(option.Label) ? option.Value.Trim() : option.Label.Trim();
                                 var value = string.IsNullOrWhiteSpace(option.Value) ? label : option.Value.Trim();
                                 return option with { Label = label, Value = value };
-                            })
-                            .DistinctBy(option => option.Value, StringComparer.OrdinalIgnoreCase)
-                            .ToArray()
+                            }
+                        )
+                        .DistinctBy(option => option.Value, StringComparer.OrdinalIgnoreCase)
+                        .ToArray()
                     }
                 )
                 .ToArray(),

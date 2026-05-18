@@ -8,7 +8,6 @@ import { NumberField } from "@repo/ui/components/NumberField";
 import { SelectContent, SelectItem, SelectTrigger, SelectValue } from "@repo/ui/components/Select";
 import { SelectField } from "@repo/ui/components/SelectField";
 import { SwitchField } from "@repo/ui/components/SwitchField";
-import { TextAreaField } from "@repo/ui/components/TextAreaField";
 import { TextField } from "@repo/ui/components/TextField";
 import { ArrowDownIcon, ArrowUpIcon, PlusIcon, TrashIcon } from "lucide-react";
 
@@ -286,25 +285,11 @@ type BookingField = EventTypeSettings["bookingFields"][number];
 type BookingFieldOption = BookingField["options"][number];
 type PrivateLink = EventTypeSettings["privateLinks"][number];
 
-const bookingFieldTypes = [
-  { value: "text", label: t`Text` },
-  { value: "textarea", label: t`Textarea` },
-  { value: "select", label: t`Select` },
-  { value: "radio", label: t`Radio` },
-  { value: "checkbox", label: t`Checkbox` },
-  { value: "multiselect", label: t`Multi-select` },
-  { value: "boolean", label: t`Boolean` },
-  { value: "email", label: t`Email` },
-  { value: "multiemail", label: t`Multiple emails` },
-  { value: "phone", label: t`Phone` },
-  { value: "url", label: t`URL` },
-  { value: "number", label: t`Number` }
-];
-
 function BookingFieldsEditor({
   value,
   onChange
 }: Readonly<{ value: BookingField[]; onChange: (value: BookingField[]) => void }>) {
+  const bookingFieldTypes = getBookingFieldTypes();
   const updateField = (index: number, patch: Partial<BookingField>) => {
     onChange(value.map((field, fieldIndex) => (fieldIndex === index ? { ...field, ...patch } : field)));
   };
@@ -636,6 +621,23 @@ function newPrivateLink(): PrivateLink {
 
 function fieldTypeUsesOptions(type: string) {
   return type === "select" || type === "radio" || type === "checkbox" || type === "multiselect";
+}
+
+function getBookingFieldTypes() {
+  return [
+    { value: "text", label: t`Text` },
+    { value: "textarea", label: t`Textarea` },
+    { value: "select", label: t`Select` },
+    { value: "radio", label: t`Radio` },
+    { value: "checkbox", label: t`Checkbox` },
+    { value: "multiselect", label: t`Multi-select` },
+    { value: "boolean", label: t`Boolean` },
+    { value: "email", label: t`Email` },
+    { value: "multiemail", label: t`Multiple emails` },
+    { value: "phone", label: t`Phone` },
+    { value: "url", label: t`URL` },
+    { value: "number", label: t`Number` }
+  ];
 }
 
 function slugifyFieldName(value: string) {

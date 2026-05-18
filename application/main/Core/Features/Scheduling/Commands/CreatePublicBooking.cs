@@ -1,9 +1,9 @@
 using FluentValidation;
 using JetBrains.Annotations;
 using Main.Features.EventTypes.Domain;
+using Main.Features.Schedules.Domain;
 using Main.Features.Scheduling.Domain;
 using Main.Features.Scheduling.Shared;
-using Main.Features.Schedules.Domain;
 using SharedKernel.Cqrs;
 
 namespace Main.Features.Scheduling.Commands;

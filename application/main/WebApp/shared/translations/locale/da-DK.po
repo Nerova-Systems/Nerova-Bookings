@@ -46,7 +46,7 @@ msgid "Add another attendee to this booking."
 msgstr "Add another attendee to this booking."
 
 msgid "Add booking field"
-msgstr ""
+msgstr "Tilføj bookingfelt"
 
 msgid "Add date override"
 msgstr "Tilføj datoundtagelse"
@@ -64,13 +64,13 @@ msgid "Add new schedule"
 msgstr "Tilføj ny tidsplan"
 
 msgid "Add option"
-msgstr ""
+msgstr "Tilføj mulighed"
 
 msgid "Add override"
 msgstr "Tilføj undtagelse"
 
 msgid "Add private link"
-msgstr ""
+msgstr "Tilføj privat link"
 
 msgid "Add time"
 msgstr "Tilføj tid"
@@ -169,7 +169,7 @@ msgid "Booking details"
 msgstr "Bookingdetaljer"
 
 msgid "Booking fields"
-msgstr ""
+msgstr "Bookingfelter"
 
 msgid "Booking ID"
 msgstr "Booking-id"
@@ -196,7 +196,7 @@ msgid "Bookings per day"
 msgstr "Bookings per day"
 
 msgid "Boolean"
-msgstr ""
+msgstr "Boolesk"
 
 msgid "Browser default"
 msgstr "Browser default"
@@ -241,7 +241,7 @@ msgid "Capacity limits"
 msgstr "Capacity limits"
 
 msgid "Checkbox"
-msgstr ""
+msgstr "Afkrydsningsfelt"
 
 msgid "Choose the booker layout and accent color for this event type."
 msgstr "Choose the booker layout and accent color for this event type."
@@ -256,7 +256,7 @@ msgid "Clear"
 msgstr "Ryd"
 
 msgid "Collect Cal.com-compatible custom answers from bookers."
-msgstr ""
+msgstr "Indsaml Cal.com-kompatible brugerdefinerede svar fra bookere."
 
 msgid "Column"
 msgstr "Column"
@@ -380,7 +380,7 @@ msgid "Destination calendar"
 msgstr "Destination calendar"
 
 msgid "Disable on prefill"
-msgstr ""
+msgstr "Deaktiver ved forudfyldning"
 
 msgid "Duplicate"
 msgstr "Dupliker"
@@ -455,10 +455,10 @@ msgid "Exactly one default schedule exists"
 msgstr "Der findes præcis én standardtidsplan"
 
 msgid "Exclude emails"
-msgstr ""
+msgstr "Ekskluder e-mails"
 
 msgid "Expires"
-msgstr ""
+msgstr "Udløber"
 
 msgid "Filter"
 msgstr "Filtrer"
@@ -536,7 +536,7 @@ msgid "Keep booking"
 msgstr "Behold booking"
 
 msgid "Label"
-msgstr ""
+msgstr "Etiket"
 
 msgid "Launch troubleshooter"
 msgstr "Start fejlfinding"
@@ -602,13 +602,13 @@ msgid "Mark as no-show"
 msgstr "Marker som udeblevet"
 
 msgid "Max uses"
-msgstr ""
+msgstr "Maks. brug"
 
 msgid "Maximum length"
-msgstr ""
+msgstr "Maksimal længde"
 
 msgid "Minimum length"
-msgstr ""
+msgstr "Minimal længde"
 
 msgid "Mon"
 msgstr "Man"
@@ -626,16 +626,16 @@ msgid "Move event types to another schedule before deleting this one."
 msgstr "Flyt aftaletyper til en anden tidsplan, før du sletter denne."
 
 msgid "Move field down"
-msgstr ""
+msgstr "Flyt felt ned"
 
 msgid "Move field up"
-msgstr ""
+msgstr "Flyt felt op"
 
 msgid "Multi-select"
-msgstr ""
+msgstr "Flervalg"
 
 msgid "Multiple emails"
-msgstr ""
+msgstr "Flere e-mails"
 
 msgid "Name"
 msgstr "Navn"
@@ -666,7 +666,7 @@ msgid "No bookings this week"
 msgstr "Ingen bookinger denne uge"
 
 msgid "No custom booking fields yet."
-msgstr ""
+msgstr "Ingen brugerdefinerede bookingfelter endnu."
 
 msgid "No custom responses were captured."
 msgstr "Ingen brugerdefinerede svar blev registreret."
@@ -681,7 +681,7 @@ msgid "No filters"
 msgstr "Ingen filtre"
 
 msgid "No private links yet."
-msgstr ""
+msgstr "Ingen private links endnu."
 
 msgid "No schedules yet"
 msgstr "Ingen tidsplaner endnu"
@@ -708,7 +708,7 @@ msgid "Notify external systems when bookings change."
 msgstr "Notify external systems when bookings change."
 
 msgid "Number"
-msgstr ""
+msgstr "Tal"
 
 msgid "Occurrences"
 msgstr "Occurrences"
@@ -726,16 +726,16 @@ msgid "One-on-one"
 msgstr "En-til-en"
 
 msgid "Option"
-msgstr ""
+msgstr "Mulighed"
 
 msgid "Option label"
-msgstr ""
+msgstr "Mulighedsetiket"
 
 msgid "Option value"
-msgstr ""
+msgstr "Mulighedsværdi"
 
 msgid "Options"
-msgstr ""
+msgstr "Muligheder"
 
 #. placeholder {0}: schedule.dateOverrides.length
 msgid "Overrides: {0}"
@@ -751,7 +751,7 @@ msgid "Phone call"
 msgstr "Telefonopkald"
 
 msgid "Placeholder"
-msgstr ""
+msgstr "Pladsholder"
 
 msgid "Prevent selected event types from being booked when this one is active."
 msgstr "Forhindr valgte begivenhedstyper i at blive booket, når denne er aktiv."
@@ -766,13 +766,13 @@ msgid "Previous"
 msgstr "Forrige"
 
 msgid "Price"
-msgstr ""
+msgstr "Pris"
 
 msgid "Primary location"
 msgstr "Primary location"
 
 msgid "Private link"
-msgstr ""
+msgstr "Privat link"
 
 msgid "Public booking"
 msgstr "Offentlig booking"
@@ -781,10 +781,10 @@ msgid "Public link copied"
 msgstr "Offentligt link kopieret"
 
 msgid "Question"
-msgstr ""
+msgstr "Spørgsmål"
 
 msgid "Radio"
-msgstr ""
+msgstr "Radioknap"
 
 msgid "Reason"
 msgstr "Årsag"
@@ -811,7 +811,7 @@ msgid "Reject booking?"
 msgstr "Afvis booking?"
 
 msgid "Rejection"
-msgstr ""
+msgstr "Afvisning"
 
 msgid "Rejection reason"
 msgstr "Afvisningsårsag"
@@ -820,13 +820,13 @@ msgid "Remove date override"
 msgstr "Fjern datoundtagelse"
 
 msgid "Remove field"
-msgstr ""
+msgstr "Fjern felt"
 
 msgid "Remove option"
-msgstr ""
+msgstr "Fjern mulighed"
 
 msgid "Remove private link"
-msgstr ""
+msgstr "Fjern privat link"
 
 msgid "Remove time"
 msgstr "Fjern tid"
@@ -841,7 +841,7 @@ msgid "Request reschedule"
 msgstr "Anmod om ny tid"
 
 msgid "Require emails"
-msgstr ""
+msgstr "Kræv e-mails"
 
 msgid "Required"
 msgstr "Påkrævet"
@@ -946,7 +946,7 @@ msgid "Seats cannot be enabled while recurring events are enabled."
 msgstr "Seats cannot be enabled while recurring events are enabled."
 
 msgid "Select"
-msgstr ""
+msgstr "Vælg"
 
 msgid "Select a date and time"
 msgstr "Vælg dato og tid"
@@ -1024,10 +1024,10 @@ msgid "System"
 msgstr "System"
 
 msgid "Text"
-msgstr ""
+msgstr "Tekst"
 
 msgid "Textarea"
-msgstr ""
+msgstr "Tekstområde"
 
 msgid "These features need more integration before they can be edited here."
 msgstr "These features need more integration before they can be edited here."
@@ -1099,22 +1099,22 @@ msgid "Tuesday"
 msgstr "Tirsdag"
 
 msgid "Type"
-msgstr ""
+msgstr "Type"
 
 msgid "Unavailable"
 msgstr "Utilgængelig"
 
 msgid "Untitled field"
-msgstr ""
+msgstr "Felt uden titel"
 
 msgid "Update where this booking takes place."
 msgstr "Opdater hvor denne booking finder sted."
 
 msgid "URL"
-msgstr ""
+msgstr "URL"
 
 msgid "Used"
-msgstr ""
+msgstr "Brugt"
 
 msgid "Video call"
 msgstr "Videoopkald"

@@ -1,17 +1,16 @@
 import { t } from "@lingui/core/macro";
 import { CheckboxField } from "@repo/ui/components/CheckboxField";
-import { Field, FieldDescription, FieldError, FieldLabel } from "@repo/ui/components/Field";
 import { Label } from "@repo/ui/components/Label";
-import { MultiSelect } from "@repo/ui/components/MultiSelect";
 import { RadioGroupItem } from "@repo/ui/components/RadioGroup";
 import { RadioGroupField } from "@repo/ui/components/RadioGroupField";
 import { SelectContent, SelectItem, SelectTrigger, SelectValue } from "@repo/ui/components/Select";
 import { SelectField } from "@repo/ui/components/SelectField";
 import { TextAreaField } from "@repo/ui/components/TextAreaField";
 import { TextField } from "@repo/ui/components/TextField";
-import { useState } from "react";
 
 import type { PublicEventType, PublicRescheduleBooking } from "./publicBookerTypes";
+
+import { CheckboxOptionsField, MultiSelectBookingField, optionLabel, optionValue } from "./PublicBookingChoiceFields";
 
 type BookingField = NonNullable<PublicEventType["bookingFields"]>[number];
 
@@ -52,6 +51,7 @@ export function BookingFields({
 
 function PublicBookingField({ field, defaultValue }: Readonly<{ field: BookingField; defaultValue?: string }>) {
   const options = field.options ?? [];
+  const readOnly = field.disableOnPrefill && hasPrefill(defaultValue);
 
   switch (field.type) {
     case "textarea":
@@ -61,6 +61,7 @@ function PublicBookingField({ field, defaultValue }: Readonly<{ field: BookingFi
           label={field.label}
           required={field.required}
           defaultValue={defaultValue}
+          readOnly={readOnly}
           className="sm:col-span-2"
         />
       );
@@ -72,6 +73,7 @@ function PublicBookingField({ field, defaultValue }: Readonly<{ field: BookingFi
           required={field.required}
           items={options.map((option) => ({ value: optionValue(option), label: optionLabel(option) }))}
           defaultValue={defaultValue}
+          readOnly={readOnly}
         >
           <SelectTrigger className="w-full">
             <SelectValue placeholder={t`Select an option`}>
@@ -89,7 +91,13 @@ function PublicBookingField({ field, defaultValue }: Readonly<{ field: BookingFi
       );
     case "radio":
       return (
-        <RadioGroupField name={field.name} label={field.label} required={field.required} defaultValue={defaultValue}>
+        <RadioGroupField
+          name={field.name}
+          label={field.label}
+          required={field.required}
+          defaultValue={defaultValue}
+          readOnly={readOnly}
+        >
           {options.map((option) => (
             <Label key={optionValue(option)} className="min-h-(--control-height) leading-snug">
               <RadioGroupItem value={optionValue(option)} />
@@ -99,9 +107,9 @@ function PublicBookingField({ field, defaultValue }: Readonly<{ field: BookingFi
         </RadioGroupField>
       );
     case "checkbox":
-      return <CheckboxOptionsField field={field} defaultValue={defaultValue} />;
+      return <CheckboxOptionsField field={field} defaultValue={defaultValue} readOnly={readOnly} />;
     case "multiselect":
-      return <MultiSelectBookingField field={field} defaultValue={defaultValue} />;
+      return <MultiSelectBookingField field={field} defaultValue={defaultValue} readOnly={readOnly} />;
     case "boolean":
       return (
         <CheckboxField
@@ -110,6 +118,7 @@ function PublicBookingField({ field, defaultValue }: Readonly<{ field: BookingFi
           required={field.required}
           value="true"
           defaultChecked={defaultValue === "true"}
+          readOnly={readOnly}
           className="sm:col-span-2"
         />
       );
@@ -122,6 +131,7 @@ function PublicBookingField({ field, defaultValue }: Readonly<{ field: BookingFi
           type="email"
           required={field.required}
           defaultValue={defaultValue}
+          readOnly={readOnly}
         />
       );
     case "phone":
@@ -132,6 +142,7 @@ function PublicBookingField({ field, defaultValue }: Readonly<{ field: BookingFi
           type="tel"
           required={field.required}
           defaultValue={defaultValue}
+          readOnly={readOnly}
         />
       );
     case "url":
@@ -142,6 +153,7 @@ function PublicBookingField({ field, defaultValue }: Readonly<{ field: BookingFi
           type="url"
           required={field.required}
           defaultValue={defaultValue}
+          readOnly={readOnly}
         />
       );
     case "number":
@@ -152,66 +164,22 @@ function PublicBookingField({ field, defaultValue }: Readonly<{ field: BookingFi
           type="number"
           required={field.required}
           defaultValue={defaultValue}
+          readOnly={readOnly}
         />
       );
     default:
-      return <TextField name={field.name} label={field.label} required={field.required} defaultValue={defaultValue} />;
+      return (
+        <TextField
+          name={field.name}
+          label={field.label}
+          required={field.required}
+          defaultValue={defaultValue}
+          readOnly={readOnly}
+        />
+      );
   }
 }
 
-function CheckboxOptionsField({ field, defaultValue }: Readonly<{ field: BookingField; defaultValue?: string }>) {
-  const selectedValues = splitStoredValues(defaultValue);
-
-  return (
-    <Field className="flex flex-col sm:col-span-2">
-      <FieldLabel>{field.label}</FieldLabel>
-      <div className="grid gap-2 sm:grid-cols-2">
-        {(field.options ?? []).map((option) => (
-          <CheckboxField
-            key={optionValue(option)}
-            name={field.name}
-            label={optionLabel(option)}
-            value={optionValue(option)}
-            defaultChecked={selectedValues.includes(optionValue(option))}
-          />
-        ))}
-      </div>
-      {field.required && <FieldDescription>{t`Required`}</FieldDescription>}
-      <FieldError errors={[]} />
-    </Field>
-  );
-}
-
-function MultiSelectBookingField({ field, defaultValue }: Readonly<{ field: BookingField; defaultValue?: string }>) {
-  const [value, setValue] = useState(() => splitStoredValues(defaultValue));
-
-  return (
-    <>
-      <MultiSelect
-        name={`${field.name}-input`}
-        label={field.label}
-        placeholder={t`Select options`}
-        items={(field.options ?? []).map((option) => ({ id: optionValue(option), label: optionLabel(option) }))}
-        value={value}
-        onChange={setValue}
-        className="sm:col-span-2"
-      />
-      <input type="hidden" name={field.name} value={value.join(",")} />
-    </>
-  );
-}
-
-function optionValue(option: BookingField["options"][number]) {
-  return option.value;
-}
-
-function optionLabel(option: BookingField["options"][number]) {
-  return option.label || option.value;
-}
-
-function splitStoredValues(value?: string) {
-  return (value ?? "")
-    .split(",")
-    .map((part) => part.trim())
-    .filter(Boolean);
+function hasPrefill(value?: string) {
+  return (value ?? "").trim().length > 0;
 }
