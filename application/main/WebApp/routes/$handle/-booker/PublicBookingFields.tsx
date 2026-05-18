@@ -70,18 +70,18 @@ function PublicBookingField({ field, defaultValue }: Readonly<{ field: BookingFi
           name={field.name}
           label={field.label}
           required={field.required}
-          items={options.map((option) => ({ value: option, label: option }))}
+          items={options.map((option) => ({ value: optionValue(option), label: optionLabel(option) }))}
           defaultValue={defaultValue}
         >
           <SelectTrigger className="w-full">
             <SelectValue placeholder={t`Select an option`}>
-              {(value: string) => options.find((option) => option === value) ?? value}
+              {(value: string) => options.find((option) => optionValue(option) === value)?.label ?? value}
             </SelectValue>
           </SelectTrigger>
           <SelectContent align="start">
             {options.map((option) => (
-              <SelectItem key={option} value={option}>
-                {option}
+              <SelectItem key={optionValue(option)} value={optionValue(option)}>
+                {optionLabel(option)}
               </SelectItem>
             ))}
           </SelectContent>
@@ -91,9 +91,9 @@ function PublicBookingField({ field, defaultValue }: Readonly<{ field: BookingFi
       return (
         <RadioGroupField name={field.name} label={field.label} required={field.required} defaultValue={defaultValue}>
           {options.map((option) => (
-            <Label key={option} className="min-h-(--control-height) leading-snug">
-              <RadioGroupItem value={option} />
-              {option}
+            <Label key={optionValue(option)} className="min-h-(--control-height) leading-snug">
+              <RadioGroupItem value={optionValue(option)} />
+              {optionLabel(option)}
             </Label>
           ))}
         </RadioGroupField>
@@ -168,11 +168,11 @@ function CheckboxOptionsField({ field, defaultValue }: Readonly<{ field: Booking
       <div className="grid gap-2 sm:grid-cols-2">
         {(field.options ?? []).map((option) => (
           <CheckboxField
-            key={option}
+            key={optionValue(option)}
             name={field.name}
-            label={option}
-            value={option}
-            defaultChecked={selectedValues.includes(option)}
+            label={optionLabel(option)}
+            value={optionValue(option)}
+            defaultChecked={selectedValues.includes(optionValue(option))}
           />
         ))}
       </div>
@@ -191,7 +191,7 @@ function MultiSelectBookingField({ field, defaultValue }: Readonly<{ field: Book
         name={`${field.name}-input`}
         label={field.label}
         placeholder={t`Select options`}
-        items={(field.options ?? []).map((option) => ({ id: option, label: option }))}
+        items={(field.options ?? []).map((option) => ({ id: optionValue(option), label: optionLabel(option) }))}
         value={value}
         onChange={setValue}
         className="sm:col-span-2"
@@ -199,6 +199,14 @@ function MultiSelectBookingField({ field, defaultValue }: Readonly<{ field: Book
       <input type="hidden" name={field.name} value={value.join(",")} />
     </>
   );
+}
+
+function optionValue(option: BookingField["options"][number]) {
+  return option.value;
+}
+
+function optionLabel(option: BookingField["options"][number]) {
+  return option.label || option.value;
 }
 
 function splitStoredValues(value?: string) {

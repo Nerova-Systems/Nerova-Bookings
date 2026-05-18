@@ -42,6 +42,7 @@ public sealed class CreatePublicBookingValidator : AbstractValidator<CreatePubli
 public sealed class CreatePublicBookingHandler(
     PublicSchedulingResolver publicSchedulingResolver,
     IBookingRepository bookingRepository,
+    IEventTypeRepository eventTypeRepository,
     PublicSlotCalculator publicSlotCalculator,
     TimeProvider timeProvider
 ) : IRequestHandler<CreatePublicBookingCommand, Result<CreatePublicBookingResponse>>
@@ -127,6 +128,11 @@ public sealed class CreatePublicBookingHandler(
             originalBooking.RequestReschedule(command.RescheduleReason, command.RescheduledBy);
             booking.MarkAsReplacementFor(originalBooking.Id);
             bookingRepository.Update(originalBooking);
+        }
+
+        if (context.EventType.ConsumePrivateLink(command.PrivateLink))
+        {
+            eventTypeRepository.Update(context.EventType);
         }
 
         await bookingRepository.AddAsync(booking, cancellationToken);
@@ -215,7 +221,7 @@ public sealed class CreatePublicBookingHandler(
         if (field.Options.Length == 0) return true;
         if (field.Type.Equals("select", StringComparison.OrdinalIgnoreCase) || field.Type.Equals("radio", StringComparison.OrdinalIgnoreCase))
         {
-            return field.Options.Contains(value.Trim(), StringComparer.OrdinalIgnoreCase);
+            return field.Options.Any(option => string.Equals(option.Value, value.Trim(), StringComparison.OrdinalIgnoreCase));
         }
 
         if (field.Type.Equals("checkbox", StringComparison.OrdinalIgnoreCase) || field.Type.Equals("multiselect", StringComparison.OrdinalIgnoreCase))
@@ -223,7 +229,7 @@ public sealed class CreatePublicBookingHandler(
             var selectedOptions = value
                 .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
             return selectedOptions.Length > 0 &&
-                   selectedOptions.All(option => field.Options.Contains(option, StringComparer.OrdinalIgnoreCase));
+                   selectedOptions.All(selectedOption => field.Options.Any(option => string.Equals(option.Value, selectedOption, StringComparison.OrdinalIgnoreCase)));
         }
 
         return true;

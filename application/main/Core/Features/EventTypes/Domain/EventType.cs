@@ -132,4 +132,26 @@ public sealed class EventType : SoftDeletableAggregateRoot<EventTypeId>, ITenant
         LocationValue = string.IsNullOrWhiteSpace(locationValue) ? null : locationValue.Trim();
         Settings = EventTypeSettings.Normalize(settings, DurationMinutes, LocationType, LocationValue);
     }
+
+    public bool ConsumePrivateLink(string? privateLink)
+    {
+        if (string.IsNullOrWhiteSpace(privateLink))
+        {
+            return false;
+        }
+
+        var linkIndex = Array.FindIndex(
+            Settings.PrivateLinks,
+            link => string.Equals(link.Link, privateLink.Trim(), StringComparison.OrdinalIgnoreCase)
+        );
+        if (linkIndex < 0 || Settings.PrivateLinks[linkIndex].MaxUsageCount is null)
+        {
+            return false;
+        }
+
+        var privateLinks = Settings.PrivateLinks.ToArray();
+        privateLinks[linkIndex] = privateLinks[linkIndex] with { UsageCount = privateLinks[linkIndex].UsageCount + 1 };
+        Settings = Settings with { PrivateLinks = privateLinks };
+        return true;
+    }
 }

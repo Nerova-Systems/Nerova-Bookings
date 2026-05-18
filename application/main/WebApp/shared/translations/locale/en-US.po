@@ -45,6 +45,9 @@ msgstr "Add an override"
 msgid "Add another attendee to this booking."
 msgstr "Add another attendee to this booking."
 
+msgid "Add booking field"
+msgstr "Add booking field"
+
 msgid "Add date override"
 msgstr "Add date override"
 
@@ -60,8 +63,14 @@ msgstr "Add new event type"
 msgid "Add new schedule"
 msgstr "Add new schedule"
 
+msgid "Add option"
+msgstr "Add option"
+
 msgid "Add override"
 msgstr "Add override"
+
+msgid "Add private link"
+msgstr "Add private link"
 
 msgid "Add time"
 msgstr "Add time"
@@ -159,6 +168,9 @@ msgstr "Booking confirmed"
 msgid "Booking details"
 msgstr "Booking details"
 
+msgid "Booking fields"
+msgstr "Booking fields"
+
 msgid "Booking ID"
 msgstr "Booking ID"
 
@@ -182,6 +194,9 @@ msgstr "Bookings in the selected week will appear in the calendar view."
 
 msgid "Bookings per day"
 msgstr "Bookings per day"
+
+msgid "Boolean"
+msgstr "Boolean"
 
 msgid "Browser default"
 msgstr "Browser default"
@@ -225,6 +240,9 @@ msgstr "Cancellation URL"
 msgid "Capacity limits"
 msgstr "Capacity limits"
 
+msgid "Checkbox"
+msgstr "Checkbox"
+
 msgid "Choose the booker layout and accent color for this event type."
 msgstr "Choose the booker layout and accent color for this event type."
 
@@ -236,6 +254,9 @@ msgstr "Choose which schedule controls when this event type can be booked."
 
 msgid "Clear"
 msgstr "Clear"
+
+msgid "Collect Cal.com-compatible custom answers from bookers."
+msgstr "Collect Cal.com-compatible custom answers from bookers."
 
 msgid "Column"
 msgstr "Column"
@@ -358,6 +379,9 @@ msgstr "Description"
 msgid "Destination calendar"
 msgstr "Destination calendar"
 
+msgid "Disable on prefill"
+msgstr "Disable on prefill"
+
 msgid "Duplicate"
 msgstr "Duplicate"
 
@@ -429,6 +453,12 @@ msgstr "Every schedule has weekly availability"
 
 msgid "Exactly one default schedule exists"
 msgstr "Exactly one default schedule exists"
+
+msgid "Exclude emails"
+msgstr "Exclude emails"
+
+msgid "Expires"
+msgstr "Expires"
 
 msgid "Filter"
 msgstr "Filter"
@@ -505,6 +535,9 @@ msgstr "Join meeting"
 msgid "Keep booking"
 msgstr "Keep booking"
 
+msgid "Label"
+msgstr "Label"
+
 msgid "Launch troubleshooter"
 msgstr "Launch troubleshooter"
 
@@ -568,6 +601,15 @@ msgstr "Managed relationship rules"
 msgid "Mark as no-show"
 msgstr "Mark as no-show"
 
+msgid "Max uses"
+msgstr "Max uses"
+
+msgid "Maximum length"
+msgstr "Maximum length"
+
+msgid "Minimum length"
+msgstr "Minimum length"
+
 msgid "Mon"
 msgstr "Mon"
 
@@ -582,6 +624,18 @@ msgstr "Monthly"
 
 msgid "Move event types to another schedule before deleting this one."
 msgstr "Move event types to another schedule before deleting this one."
+
+msgid "Move field down"
+msgstr "Move field down"
+
+msgid "Move field up"
+msgstr "Move field up"
+
+msgid "Multi-select"
+msgstr "Multi-select"
+
+msgid "Multiple emails"
+msgstr "Multiple emails"
 
 msgid "Name"
 msgstr "Name"
@@ -611,6 +665,9 @@ msgstr "No availability windows"
 msgid "No bookings this week"
 msgstr "No bookings this week"
 
+msgid "No custom booking fields yet."
+msgstr "No custom booking fields yet."
+
 msgid "No custom responses were captured."
 msgstr "No custom responses were captured."
 
@@ -622,6 +679,9 @@ msgstr "No event types yet"
 
 msgid "No filters"
 msgstr "No filters"
+
+msgid "No private links yet."
+msgstr "No private links yet."
 
 msgid "No schedules yet"
 msgstr "No schedules yet"
@@ -647,6 +707,9 @@ msgstr "Notice"
 msgid "Notify external systems when bookings change."
 msgstr "Notify external systems when bookings change."
 
+msgid "Number"
+msgstr "Number"
+
 msgid "Occurrences"
 msgstr "Occurrences"
 
@@ -662,6 +725,18 @@ msgstr "Offset start"
 msgid "One-on-one"
 msgstr "One-on-one"
 
+msgid "Option"
+msgstr "Option"
+
+msgid "Option label"
+msgstr "Option label"
+
+msgid "Option value"
+msgstr "Option value"
+
+msgid "Options"
+msgstr "Options"
+
 #. placeholder {0}: schedule.dateOverrides.length
 msgid "Overrides: {0}"
 msgstr "Overrides: {0}"
@@ -675,6 +750,9 @@ msgstr "Phone"
 msgid "Phone call"
 msgstr "Phone call"
 
+msgid "Placeholder"
+msgstr "Placeholder"
+
 msgid "Prevent selected event types from being booked when this one is active."
 msgstr "Prevent selected event types from being booked when this one is active."
 
@@ -687,17 +765,26 @@ msgstr "Preview booking page"
 msgid "Previous"
 msgstr "Previous"
 
+msgid "Price"
+msgstr "Price"
+
 msgid "Primary location"
 msgstr "Primary location"
 
-msgid "Private links"
-msgstr "Private links"
+msgid "Private link"
+msgstr "Private link"
 
 msgid "Public booking"
 msgstr "Public booking"
 
 msgid "Public link copied"
 msgstr "Public link copied"
+
+msgid "Question"
+msgstr "Question"
+
+msgid "Radio"
+msgstr "Radio"
 
 msgid "Reason"
 msgstr "Reason"
@@ -732,6 +819,15 @@ msgstr "Rejection reason"
 msgid "Remove date override"
 msgstr "Remove date override"
 
+msgid "Remove field"
+msgstr "Remove field"
+
+msgid "Remove option"
+msgstr "Remove option"
+
+msgid "Remove private link"
+msgstr "Remove private link"
+
 msgid "Remove time"
 msgstr "Remove time"
 
@@ -743,6 +839,9 @@ msgstr "Report booking"
 
 msgid "Request reschedule"
 msgstr "Request reschedule"
+
+msgid "Require emails"
+msgstr "Require emails"
 
 msgid "Required"
 msgstr "Required"
@@ -846,6 +945,9 @@ msgstr "Seats"
 msgid "Seats cannot be enabled while recurring events are enabled."
 msgstr "Seats cannot be enabled while recurring events are enabled."
 
+msgid "Select"
+msgstr "Select"
+
 msgid "Select a date and time"
 msgstr "Select a date and time"
 
@@ -921,6 +1023,12 @@ msgstr "Sunday"
 msgid "System"
 msgstr "System"
 
+msgid "Text"
+msgstr "Text"
+
+msgid "Textarea"
+msgstr "Textarea"
+
 msgid "These features need more integration before they can be edited here."
 msgstr "These features need more integration before they can be edited here."
 
@@ -990,11 +1098,23 @@ msgstr "Tue"
 msgid "Tuesday"
 msgstr "Tuesday"
 
+msgid "Type"
+msgstr "Type"
+
 msgid "Unavailable"
 msgstr "Unavailable"
 
+msgid "Untitled field"
+msgstr "Untitled field"
+
 msgid "Update where this booking takes place."
 msgstr "Update where this booking takes place."
+
+msgid "URL"
+msgstr "URL"
+
+msgid "Used"
+msgstr "Used"
 
 msgid "Video call"
 msgstr "Video call"

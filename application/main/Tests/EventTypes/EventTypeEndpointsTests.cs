@@ -58,6 +58,7 @@ public sealed class EventTypeEndpointsTests : EndpointBaseTest<MainDbContext>
         created.Settings.Locations[0].Type.Should().Be("inPerson");
         created.Settings.Locations[0].Value.Should().Be("Boardroom");
         created.Settings.BookingFields.Should().ContainSingle();
+        created.Settings.BookingFields[0].Options.Should().BeEmpty();
         created.Settings.BookingWindow.FixedStartDate.Should().Be(new DateOnly(2026, 6, 1));
         created.Settings.BookingWindow.FixedEndDate.Should().Be(new DateOnly(2026, 6, 30));
         created.Settings.Limits.MaxBookingsPerDay.Should().Be(4);
@@ -375,7 +376,8 @@ public sealed class EventTypeEndpointsTests : EndpointBaseTest<MainDbContext>
         updated.Settings.BookingFields.Should().ContainSingle();
         updated.Settings.BookerLayout.Should().Be("week");
         updated.Settings.EventColor.Should().Be("#2f6fed");
-        updated.Settings.PrivateLinks.Should().Equal("vip");
+        updated.Settings.PrivateLinks.Should().ContainSingle();
+        updated.Settings.PrivateLinks[0].Link.Should().Be("vip");
         updated.Settings.Redirects.SuccessUrl.Should().Be("https://example.com/success");
         updated.Settings.InterfaceLanguage.Should().Be("en");
         updated.Settings.Metadata.Should().Contain("source", "test");
@@ -384,6 +386,101 @@ public sealed class EventTypeEndpointsTests : EndpointBaseTest<MainDbContext>
         getResponse.ShouldBeSuccessfulGetRequest();
         var fetched = await getResponse.DeserializeResponse<EventTypeResponse>();
         fetched!.Settings.Should().BeEquivalentTo(updated.Settings);
+    }
+
+    [Fact]
+    public async Task UpdateEventType_WhenCalCompatibleBookingFieldsAndPrivateLinksAreProvided_ShouldRoundTrip()
+    {
+        var schedule = await CreateScheduleAsync();
+        var eventType = await CreateEventTypeAsync(schedule.Id, "Intro call", "intro-call");
+        var command = NewEventTypeRequest(
+            schedule.Id,
+            "Intro call",
+            "intro-call",
+            settings: new
+            {
+                durationOptions = new[] { 30 },
+                bookingFields = new[]
+                {
+                    new
+                    {
+                        name = "topic",
+                        label = "Topic",
+                        type = "select",
+                        required = true,
+                        placeholder = "Choose a topic",
+                        options = new[]
+                        {
+                            new { label = "Sales", value = "sales", price = (decimal?)100 },
+                            new { label = "Support", value = "support", price = (decimal?)null }
+                        },
+                        hidden = false,
+                        editable = "user",
+                        minLength = 2,
+                        maxLength = 80,
+                        excludeEmails = "blocked@example.com",
+                        requireEmails = "example.com",
+                        disableOnPrefill = true
+                    }
+                },
+                privateLinks = new[]
+                {
+                    new { link = "vip", expiresAt = "2026-06-30T23:59:59Z", maxUsageCount = 3, usageCount = 1 }
+                }
+            }
+        );
+
+        var response = await AuthenticatedOwnerHttpClient.PutAsJsonAsync($"/api/event-types/{eventType.Id}", command);
+        response.EnsureSuccessStatusCode();
+        var updated = await response.DeserializeResponse<EventTypeResponse>();
+
+        updated!.Settings.BookingFields.Should().ContainSingle();
+        var field = updated.Settings.BookingFields[0];
+        field.Name.Should().Be("topic");
+        field.Placeholder.Should().Be("Choose a topic");
+        field.Options.Should().Equal(
+            new EventTypeBookingFieldOptionResponse("Sales", "sales", 100),
+            new EventTypeBookingFieldOptionResponse("Support", "support", null)
+        );
+        field.Hidden.Should().BeFalse();
+        field.Editable.Should().Be("user");
+        field.MinLength.Should().Be(2);
+        field.MaxLength.Should().Be(80);
+        field.ExcludeEmails.Should().Be("blocked@example.com");
+        field.RequireEmails.Should().Be("example.com");
+        field.DisableOnPrefill.Should().BeTrue();
+        updated.Settings.PrivateLinks.Should().Equal(new EventTypePrivateLinkResponse("vip", DateTimeOffset.Parse("2026-06-30T23:59:59Z"), 3, 1));
+    }
+
+    [Fact]
+    public async Task UpdateEventType_WhenLegacyStringOptionsAndPrivateLinksAreProvided_ShouldNormalizeToCalCompatibleObjects()
+    {
+        var schedule = await CreateScheduleAsync();
+        var eventType = await CreateEventTypeAsync(schedule.Id, "Intro call", "intro-call");
+        var command = NewEventTypeRequest(
+            schedule.Id,
+            "Intro call",
+            "intro-call",
+            settings: new
+            {
+                durationOptions = new[] { 30 },
+                bookingFields = new[]
+                {
+                    new { name = "topic", label = "Topic", type = "select", required = true, options = new[] { " Sales ", "sales", "Support" } }
+                },
+                privateLinks = new[] { " vip ", "VIP" }
+            }
+        );
+
+        var response = await AuthenticatedOwnerHttpClient.PutAsJsonAsync($"/api/event-types/{eventType.Id}", command);
+        response.EnsureSuccessStatusCode();
+        var updated = await response.DeserializeResponse<EventTypeResponse>();
+
+        updated!.Settings.BookingFields[0].Options.Should().Equal(
+            new EventTypeBookingFieldOptionResponse("Sales", "Sales", null),
+            new EventTypeBookingFieldOptionResponse("Support", "Support", null)
+        );
+        updated.Settings.PrivateLinks.Should().Equal(new EventTypePrivateLinkResponse("vip", null, null, 0));
     }
 
     [Fact]
@@ -407,7 +504,7 @@ public sealed class EventTypeEndpointsTests : EndpointBaseTest<MainDbContext>
                 bookerLayout = "agenda",
                 eventColor = "blue",
                 recurrence = new { frequency = "hourly", interval = 1, count = 1 },
-                privateLinks = new[] { "contains spaces" },
+                privateLinks = new[] { new { link = "contains spaces", expiresAt = "2026-06-01T00:00:00Z", maxUsageCount = 0, usageCount = -1 } },
                 redirects = new { successUrl = "ftp://example.com/success", cancellationUrl = "/cancel" },
                 interfaceLanguage = "english!",
                 metadata = new Dictionary<string, string> { [new string('k', 81)] = new('v', 501) }
@@ -426,7 +523,9 @@ public sealed class EventTypeEndpointsTests : EndpointBaseTest<MainDbContext>
                 new ErrorDetail("Settings.BookerLayout", "Booker layout must be month, week, or column."),
                 new ErrorDetail("Settings.EventColor", "Event color must be a valid hex color."),
                 new ErrorDetail("Settings.Recurrence.Frequency", "Recurrence frequency must be daily, weekly, monthly, or yearly."),
-                new ErrorDetail("Settings.PrivateLinks[0]", "Private link must contain only letters, numbers, underscores, and hyphens."),
+                new ErrorDetail("Settings.PrivateLinks[0].Link", "Private link must contain only letters, numbers, underscores, and hyphens."),
+                new ErrorDetail("Settings.PrivateLinks[0].MaxUsageCount", "Private link usage limit must be positive when set."),
+                new ErrorDetail("Settings.PrivateLinks[0].UsageCount", "Private link usage count must be non-negative."),
                 new ErrorDetail("Settings.Redirects.SuccessUrl", "Success redirect URL must be an absolute HTTP or HTTPS URL."),
                 new ErrorDetail("Settings.Redirects.CancellationUrl", "Cancellation redirect URL must be an absolute HTTP or HTTPS URL."),
                 new ErrorDetail("Settings.InterfaceLanguage", "Interface language must be a valid language tag."),
@@ -676,7 +775,7 @@ public sealed class EventTypeEndpointsTests : EndpointBaseTest<MainDbContext>
         EventTypeConfirmationPolicyResponse ConfirmationPolicy,
         EventTypeRecurrenceResponse? Recurrence,
         EventTypeSeatsResponse Seats,
-        string[] PrivateLinks,
+        EventTypePrivateLinkResponse[] PrivateLinks,
         EventTypeSelectedCalendarResponse[] SelectedCalendars,
         EventTypeCancellationPolicyResponse CancellationPolicy,
         EventTypeReschedulePolicyResponse ReschedulePolicy,
@@ -689,7 +788,27 @@ public sealed class EventTypeEndpointsTests : EndpointBaseTest<MainDbContext>
     private sealed record EventTypeLocationResponse(string Type, string? Value);
 
     [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
-    private sealed record EventTypeBookingFieldResponse(string Name, string Label, string Type, bool Required, string[] Options);
+    private sealed record EventTypeBookingFieldResponse(
+        string Name,
+        string Label,
+        string Type,
+        bool Required,
+        EventTypeBookingFieldOptionResponse[] Options,
+        string? Placeholder,
+        bool Hidden,
+        string Editable,
+        int? MinLength,
+        int? MaxLength,
+        string? ExcludeEmails,
+        string? RequireEmails,
+        bool DisableOnPrefill
+    );
+
+    [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
+    private sealed record EventTypeBookingFieldOptionResponse(string Label, string Value, decimal? Price);
+
+    [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
+    private sealed record EventTypePrivateLinkResponse(string Link, DateTimeOffset? ExpiresAt, int? MaxUsageCount, int UsageCount);
 
     [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
     private sealed record EventTypeBookingWindowResponse(int? RollingWindowDays, DateOnly? FixedStartDate, DateOnly? FixedEndDate);

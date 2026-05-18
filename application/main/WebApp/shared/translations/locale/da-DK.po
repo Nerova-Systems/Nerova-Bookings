@@ -45,6 +45,9 @@ msgstr "Tilføj en undtagelse"
 msgid "Add another attendee to this booking."
 msgstr "Add another attendee to this booking."
 
+msgid "Add booking field"
+msgstr ""
+
 msgid "Add date override"
 msgstr "Tilføj datoundtagelse"
 
@@ -60,8 +63,14 @@ msgstr "Tilføj ny aftaletype"
 msgid "Add new schedule"
 msgstr "Tilføj ny tidsplan"
 
+msgid "Add option"
+msgstr ""
+
 msgid "Add override"
 msgstr "Tilføj undtagelse"
+
+msgid "Add private link"
+msgstr ""
 
 msgid "Add time"
 msgstr "Tilføj tid"
@@ -159,6 +168,9 @@ msgstr "Booking bekræftet"
 msgid "Booking details"
 msgstr "Bookingdetaljer"
 
+msgid "Booking fields"
+msgstr ""
+
 msgid "Booking ID"
 msgstr "Booking-id"
 
@@ -182,6 +194,9 @@ msgstr "Bookinger i den valgte uge vises i kalendervisningen."
 
 msgid "Bookings per day"
 msgstr "Bookings per day"
+
+msgid "Boolean"
+msgstr ""
 
 msgid "Browser default"
 msgstr "Browser default"
@@ -225,6 +240,9 @@ msgstr "Cancellation URL"
 msgid "Capacity limits"
 msgstr "Capacity limits"
 
+msgid "Checkbox"
+msgstr ""
+
 msgid "Choose the booker layout and accent color for this event type."
 msgstr "Choose the booker layout and accent color for this event type."
 
@@ -236,6 +254,9 @@ msgstr "Vælg, hvilken tidsplan der styrer, hvornår denne begivenhedstype kan b
 
 msgid "Clear"
 msgstr "Ryd"
+
+msgid "Collect Cal.com-compatible custom answers from bookers."
+msgstr ""
 
 msgid "Column"
 msgstr "Column"
@@ -358,6 +379,9 @@ msgstr "Beskrivelse"
 msgid "Destination calendar"
 msgstr "Destination calendar"
 
+msgid "Disable on prefill"
+msgstr ""
+
 msgid "Duplicate"
 msgstr "Dupliker"
 
@@ -429,6 +453,12 @@ msgstr "Alle tidsplaner har ugentlig tilgængelighed"
 
 msgid "Exactly one default schedule exists"
 msgstr "Der findes præcis én standardtidsplan"
+
+msgid "Exclude emails"
+msgstr ""
+
+msgid "Expires"
+msgstr ""
 
 msgid "Filter"
 msgstr "Filtrer"
@@ -505,6 +535,9 @@ msgstr "Deltag i møde"
 msgid "Keep booking"
 msgstr "Behold booking"
 
+msgid "Label"
+msgstr ""
+
 msgid "Launch troubleshooter"
 msgstr "Start fejlfinding"
 
@@ -568,6 +601,15 @@ msgstr "Administrerede relationsregler"
 msgid "Mark as no-show"
 msgstr "Marker som udeblevet"
 
+msgid "Max uses"
+msgstr ""
+
+msgid "Maximum length"
+msgstr ""
+
+msgid "Minimum length"
+msgstr ""
+
 msgid "Mon"
 msgstr "Man"
 
@@ -582,6 +624,18 @@ msgstr "Monthly"
 
 msgid "Move event types to another schedule before deleting this one."
 msgstr "Flyt aftaletyper til en anden tidsplan, før du sletter denne."
+
+msgid "Move field down"
+msgstr ""
+
+msgid "Move field up"
+msgstr ""
+
+msgid "Multi-select"
+msgstr ""
+
+msgid "Multiple emails"
+msgstr ""
 
 msgid "Name"
 msgstr "Navn"
@@ -611,6 +665,9 @@ msgstr "Ingen tilgængelighedsvinduer"
 msgid "No bookings this week"
 msgstr "Ingen bookinger denne uge"
 
+msgid "No custom booking fields yet."
+msgstr ""
+
 msgid "No custom responses were captured."
 msgstr "Ingen brugerdefinerede svar blev registreret."
 
@@ -622,6 +679,9 @@ msgstr "Ingen aftaletyper endnu"
 
 msgid "No filters"
 msgstr "Ingen filtre"
+
+msgid "No private links yet."
+msgstr ""
 
 msgid "No schedules yet"
 msgstr "Ingen tidsplaner endnu"
@@ -647,6 +707,9 @@ msgstr "Varsel"
 msgid "Notify external systems when bookings change."
 msgstr "Notify external systems when bookings change."
 
+msgid "Number"
+msgstr ""
+
 msgid "Occurrences"
 msgstr "Occurrences"
 
@@ -662,6 +725,18 @@ msgstr "Offset start"
 msgid "One-on-one"
 msgstr "En-til-en"
 
+msgid "Option"
+msgstr ""
+
+msgid "Option label"
+msgstr ""
+
+msgid "Option value"
+msgstr ""
+
+msgid "Options"
+msgstr ""
+
 #. placeholder {0}: schedule.dateOverrides.length
 msgid "Overrides: {0}"
 msgstr "Undtagelser: {0}"
@@ -675,6 +750,9 @@ msgstr "Telefon"
 msgid "Phone call"
 msgstr "Telefonopkald"
 
+msgid "Placeholder"
+msgstr ""
+
 msgid "Prevent selected event types from being booked when this one is active."
 msgstr "Forhindr valgte begivenhedstyper i at blive booket, når denne er aktiv."
 
@@ -687,17 +765,26 @@ msgstr "Forhåndsvis bookingside"
 msgid "Previous"
 msgstr "Forrige"
 
+msgid "Price"
+msgstr ""
+
 msgid "Primary location"
 msgstr "Primary location"
 
-msgid "Private links"
-msgstr "Private links"
+msgid "Private link"
+msgstr ""
 
 msgid "Public booking"
 msgstr "Offentlig booking"
 
 msgid "Public link copied"
 msgstr "Offentligt link kopieret"
+
+msgid "Question"
+msgstr ""
+
+msgid "Radio"
+msgstr ""
 
 msgid "Reason"
 msgstr "Årsag"
@@ -732,6 +819,15 @@ msgstr "Afvisningsårsag"
 msgid "Remove date override"
 msgstr "Fjern datoundtagelse"
 
+msgid "Remove field"
+msgstr ""
+
+msgid "Remove option"
+msgstr ""
+
+msgid "Remove private link"
+msgstr ""
+
 msgid "Remove time"
 msgstr "Fjern tid"
 
@@ -743,6 +839,9 @@ msgstr "Rapporter booking"
 
 msgid "Request reschedule"
 msgstr "Anmod om ny tid"
+
+msgid "Require emails"
+msgstr ""
 
 msgid "Required"
 msgstr "Påkrævet"
@@ -846,6 +945,9 @@ msgstr "Seats"
 msgid "Seats cannot be enabled while recurring events are enabled."
 msgstr "Seats cannot be enabled while recurring events are enabled."
 
+msgid "Select"
+msgstr ""
+
 msgid "Select a date and time"
 msgstr "Vælg dato og tid"
 
@@ -921,6 +1023,12 @@ msgstr "Søndag"
 msgid "System"
 msgstr "System"
 
+msgid "Text"
+msgstr ""
+
+msgid "Textarea"
+msgstr ""
+
 msgid "These features need more integration before they can be edited here."
 msgstr "These features need more integration before they can be edited here."
 
@@ -990,11 +1098,23 @@ msgstr "Tir"
 msgid "Tuesday"
 msgstr "Tirsdag"
 
+msgid "Type"
+msgstr ""
+
 msgid "Unavailable"
 msgstr "Utilgængelig"
 
+msgid "Untitled field"
+msgstr ""
+
 msgid "Update where this booking takes place."
 msgstr "Opdater hvor denne booking finder sted."
+
+msgid "URL"
+msgstr ""
+
+msgid "Used"
+msgstr ""
 
 msgid "Video call"
 msgstr "Videoopkald"

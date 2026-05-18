@@ -1,6 +1,8 @@
 /* eslint-disable max-lines, max-lines-per-function */
 import { t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
+import { Button } from "@repo/ui/components/Button";
+import { DateField } from "@repo/ui/components/DateField";
 import { FormValidationContext } from "@repo/ui/components/Form";
 import { NumberField } from "@repo/ui/components/NumberField";
 import { SelectContent, SelectItem, SelectTrigger, SelectValue } from "@repo/ui/components/Select";
@@ -8,6 +10,7 @@ import { SelectField } from "@repo/ui/components/SelectField";
 import { SwitchField } from "@repo/ui/components/SwitchField";
 import { TextAreaField } from "@repo/ui/components/TextAreaField";
 import { TextField } from "@repo/ui/components/TextField";
+import { ArrowDownIcon, ArrowUpIcon, PlusIcon, TrashIcon } from "lucide-react";
 
 import type { EventTypeTabProps } from "./EventTypeTabTypes";
 
@@ -196,17 +199,18 @@ export function EventTypeAdvancedTab({ value, onChange, error }: EventTypeTabPro
               ))}
             </SelectContent>
           </SelectField>
-          <TextAreaField
-            name="privateLinks"
-            label={t`Private links`}
-            lines={3}
-            value={settings.privateLinks.join("\n")}
-            onChange={(privateLinksText) =>
-              updateSettings((nextSettings) => ({
-                ...nextSettings,
-                privateLinks: parseLines(privateLinksText)
-              }))
-            }
+          <PrivateLinksEditor
+            value={settings.privateLinks}
+            onChange={(privateLinks) => updateSettings((nextSettings) => ({ ...nextSettings, privateLinks }))}
+          />
+        </EventTypeTabSection>
+        <EventTypeTabSection
+          title={<Trans>Booking fields</Trans>}
+          description={<Trans>Collect Cal.com-compatible custom answers from bookers.</Trans>}
+        >
+          <BookingFieldsEditor
+            value={settings.bookingFields}
+            onChange={(bookingFields) => updateSettings((nextSettings) => ({ ...nextSettings, bookingFields }))}
           />
         </EventTypeTabSection>
         <EventTypeTabSection
@@ -277,9 +281,387 @@ export function EventTypeAdvancedTab({ value, onChange, error }: EventTypeTabPro
   );
 }
 
-function parseLines(value: string) {
+type EventTypeSettings = ReturnType<typeof getEventTypeSettings>;
+type BookingField = EventTypeSettings["bookingFields"][number];
+type BookingFieldOption = BookingField["options"][number];
+type PrivateLink = EventTypeSettings["privateLinks"][number];
+
+const bookingFieldTypes = [
+  { value: "text", label: t`Text` },
+  { value: "textarea", label: t`Textarea` },
+  { value: "select", label: t`Select` },
+  { value: "radio", label: t`Radio` },
+  { value: "checkbox", label: t`Checkbox` },
+  { value: "multiselect", label: t`Multi-select` },
+  { value: "boolean", label: t`Boolean` },
+  { value: "email", label: t`Email` },
+  { value: "multiemail", label: t`Multiple emails` },
+  { value: "phone", label: t`Phone` },
+  { value: "url", label: t`URL` },
+  { value: "number", label: t`Number` }
+];
+
+function BookingFieldsEditor({
+  value,
+  onChange
+}: Readonly<{ value: BookingField[]; onChange: (value: BookingField[]) => void }>) {
+  const updateField = (index: number, patch: Partial<BookingField>) => {
+    onChange(value.map((field, fieldIndex) => (fieldIndex === index ? { ...field, ...patch } : field)));
+  };
+
+  const moveField = (index: number, offset: -1 | 1) => {
+    const targetIndex = index + offset;
+    if (targetIndex < 0 || targetIndex >= value.length) return;
+    const nextValue = [...value];
+    const [field] = nextValue.splice(index, 1);
+    nextValue.splice(targetIndex, 0, field);
+    onChange(nextValue);
+  };
+
+  const removeField = (index: number) => {
+    onChange(value.filter((_, fieldIndex) => fieldIndex !== index));
+  };
+
+  return (
+    <div className="grid gap-3">
+      {value.length === 0 && (
+        <div className="rounded-md border border-dashed p-4 text-sm text-muted-foreground">
+          <Trans>No custom booking fields yet.</Trans>
+        </div>
+      )}
+      {value.map((field, index) => (
+        <div key={`${field.name}-${index}`} className="grid gap-4 rounded-md border p-4">
+          <div className="flex flex-wrap items-start justify-between gap-2">
+            <div className="min-w-0">
+              <div className="font-medium">{field.label || field.name || t`Untitled field`}</div>
+              <div className="text-sm text-muted-foreground">{field.type}</div>
+            </div>
+            <div className="flex gap-1">
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon-sm"
+                disabled={index === 0}
+                aria-label={t`Move field up`}
+                onClick={() => moveField(index, -1)}
+              >
+                <ArrowUpIcon />
+              </Button>
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon-sm"
+                disabled={index === value.length - 1}
+                aria-label={t`Move field down`}
+                onClick={() => moveField(index, 1)}
+              >
+                <ArrowDownIcon />
+              </Button>
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon-sm"
+                aria-label={t`Remove field`}
+                onClick={() => removeField(index)}
+              >
+                <TrashIcon />
+              </Button>
+            </div>
+          </div>
+          <div className="grid gap-4 md:grid-cols-2">
+            <TextField
+              name={`bookingField-${index}-label`}
+              label={t`Label`}
+              value={field.label}
+              onChange={(label) => updateField(index, { label })}
+            />
+            <TextField
+              name={`bookingField-${index}-name`}
+              label={t`Name`}
+              value={field.name}
+              onChange={(name) => updateField(index, { name: slugifyFieldName(name) })}
+            />
+            <SelectField
+              name={`bookingField-${index}-type`}
+              label={t`Type`}
+              items={bookingFieldTypes}
+              value={field.type}
+              onValueChange={(type) => updateField(index, { type: type ?? "text" })}
+            >
+              <SelectTrigger>
+                <SelectValue>
+                  {(type: string) => bookingFieldTypes.find((item) => item.value === type)?.label}
+                </SelectValue>
+              </SelectTrigger>
+              <SelectContent>
+                {bookingFieldTypes.map((type) => (
+                  <SelectItem key={type.value} value={type.value}>
+                    {type.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </SelectField>
+            <TextField
+              name={`bookingField-${index}-placeholder`}
+              label={t`Placeholder`}
+              value={field.placeholder ?? ""}
+              onChange={(placeholder) => updateField(index, { placeholder: placeholder || null })}
+            />
+            <SwitchField
+              name={`bookingField-${index}-required`}
+              label={t`Required`}
+              checked={field.required}
+              onCheckedChange={(required) => updateField(index, { required })}
+            />
+            <SwitchField
+              name={`bookingField-${index}-hidden`}
+              label={t`Hidden`}
+              checked={field.hidden}
+              onCheckedChange={(hidden) => updateField(index, { hidden })}
+            />
+            <NumberField
+              name={`bookingField-${index}-minLength`}
+              label={t`Minimum length`}
+              minValue={0}
+              maxValue={1000}
+              allowEmpty={true}
+              value={field.minLength ?? undefined}
+              onChange={(minLength) => updateField(index, { minLength })}
+            />
+            <NumberField
+              name={`bookingField-${index}-maxLength`}
+              label={t`Maximum length`}
+              minValue={0}
+              maxValue={1000}
+              allowEmpty={true}
+              value={field.maxLength ?? undefined}
+              onChange={(maxLength) => updateField(index, { maxLength })}
+            />
+            <TextField
+              name={`bookingField-${index}-excludeEmails`}
+              label={t`Exclude emails`}
+              value={field.excludeEmails ?? ""}
+              onChange={(excludeEmails) => updateField(index, { excludeEmails: excludeEmails || null })}
+            />
+            <TextField
+              name={`bookingField-${index}-requireEmails`}
+              label={t`Require emails`}
+              value={field.requireEmails ?? ""}
+              onChange={(requireEmails) => updateField(index, { requireEmails: requireEmails || null })}
+            />
+            <SwitchField
+              name={`bookingField-${index}-disableOnPrefill`}
+              label={t`Disable on prefill`}
+              checked={field.disableOnPrefill}
+              onCheckedChange={(disableOnPrefill) => updateField(index, { disableOnPrefill })}
+            />
+          </div>
+          {fieldTypeUsesOptions(field.type) && (
+            <BookingFieldOptionsEditor
+              fieldIndex={index}
+              value={field.options ?? []}
+              onChange={(options) => updateField(index, { options })}
+            />
+          )}
+        </div>
+      ))}
+      <Button type="button" variant="outline" onClick={() => onChange([...value, newBookingField(value.length)])}>
+        <PlusIcon />
+        <Trans>Add booking field</Trans>
+      </Button>
+    </div>
+  );
+}
+
+function BookingFieldOptionsEditor({
+  fieldIndex,
+  value,
+  onChange
+}: Readonly<{ fieldIndex: number; value: BookingFieldOption[]; onChange: (value: BookingFieldOption[]) => void }>) {
+  const updateOption = (index: number, patch: Partial<BookingFieldOption>) => {
+    onChange(value.map((option, optionIndex) => (optionIndex === index ? { ...option, ...patch } : option)));
+  };
+
+  return (
+    <div className="grid gap-3 rounded-md bg-muted/40 p-3">
+      <div className="text-sm font-medium">
+        <Trans>Options</Trans>
+      </div>
+      {value.map((option, index) => (
+        <div key={`${option.value}-${index}`} className="grid gap-3 md:grid-cols-[1fr_1fr_8rem_auto]">
+          <TextField
+            name={`bookingField-${fieldIndex}-option-${index}-label`}
+            label={t`Option label`}
+            value={option.label}
+            onChange={(label) => updateOption(index, { label })}
+          />
+          <TextField
+            name={`bookingField-${fieldIndex}-option-${index}-value`}
+            label={t`Option value`}
+            value={option.value}
+            onChange={(optionValue) => updateOption(index, { value: optionValue })}
+          />
+          <NumberField
+            name={`bookingField-${fieldIndex}-option-${index}-price`}
+            label={t`Price`}
+            minValue={0}
+            allowEmpty={true}
+            value={option.price ?? undefined}
+            onChange={(price) => updateOption(index, { price: price ?? null })}
+          />
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon-sm"
+            className="self-end"
+            aria-label={t`Remove option`}
+            onClick={() => onChange(value.filter((_, optionIndex) => optionIndex !== index))}
+          >
+            <TrashIcon />
+          </Button>
+        </div>
+      ))}
+      <Button type="button" variant="outline" size="sm" onClick={() => onChange([...value, newBookingFieldOption()])}>
+        <PlusIcon />
+        <Trans>Add option</Trans>
+      </Button>
+    </div>
+  );
+}
+
+function PrivateLinksEditor({
+  value,
+  onChange
+}: Readonly<{ value: PrivateLink[]; onChange: (value: PrivateLink[]) => void }>) {
+  const updatePrivateLink = (index: number, patch: Partial<PrivateLink>) => {
+    onChange(value.map((privateLink, linkIndex) => (linkIndex === index ? { ...privateLink, ...patch } : privateLink)));
+  };
+
+  return (
+    <div className="grid gap-3">
+      {value.length === 0 && (
+        <div className="rounded-md border border-dashed p-4 text-sm text-muted-foreground">
+          <Trans>No private links yet.</Trans>
+        </div>
+      )}
+      {value.map((privateLink, index) => (
+        <div key={`${privateLink.link}-${index}`} className="grid gap-4 rounded-md border p-4">
+          <div className="grid gap-4 md:grid-cols-[1fr_12rem_10rem_8rem_auto]">
+            <TextField
+              name={`privateLink-${index}-link`}
+              label={t`Private link`}
+              value={privateLink.link}
+              onChange={(link) => updatePrivateLink(index, { link: slugifyPrivateLink(link) })}
+            />
+            <DateField
+              name={`privateLink-${index}-expiresAt`}
+              label={t`Expires`}
+              value={toDateInput(privateLink.expiresAt)}
+              onChange={(expiresAt) => updatePrivateLink(index, { expiresAt: fromDateInput(expiresAt) })}
+            />
+            <NumberField
+              name={`privateLink-${index}-maxUsageCount`}
+              label={t`Max uses`}
+              minValue={1}
+              maxValue={100000}
+              allowEmpty={true}
+              value={privateLink.maxUsageCount ?? undefined}
+              onChange={(maxUsageCount) => updatePrivateLink(index, { maxUsageCount })}
+            />
+            <NumberField
+              name={`privateLink-${index}-usageCount`}
+              label={t`Used`}
+              minValue={0}
+              disabled={true}
+              value={privateLink.usageCount}
+              onChange={() => undefined}
+            />
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon-sm"
+              className="self-end"
+              aria-label={t`Remove private link`}
+              onClick={() => onChange(value.filter((_, linkIndex) => linkIndex !== index))}
+            >
+              <TrashIcon />
+            </Button>
+          </div>
+        </div>
+      ))}
+      <Button type="button" variant="outline" onClick={() => onChange([...value, newPrivateLink()])}>
+        <PlusIcon />
+        <Trans>Add private link</Trans>
+      </Button>
+    </div>
+  );
+}
+
+function newBookingField(index: number): BookingField {
+  return {
+    name: `question${index + 1}`,
+    label: t`Question`,
+    type: "text",
+    required: false,
+    options: [],
+    placeholder: null,
+    labelAsSafeHtml: null,
+    defaultLabel: null,
+    defaultPlaceholder: null,
+    minLength: null,
+    maxLength: null,
+    excludeEmails: null,
+    requireEmails: null,
+    price: null,
+    getOptionsAt: null,
+    optionsInputs: {},
+    variant: null,
+    variantsConfig: null,
+    views: [],
+    hideWhenJustOneOption: false,
+    hidden: false,
+    editable: "user",
+    sources: [],
+    disableOnPrefill: false
+  };
+}
+
+function newBookingFieldOption(): BookingFieldOption {
+  return { label: t`Option`, value: "option", price: null };
+}
+
+function newPrivateLink(): PrivateLink {
+  return { link: generatePrivateLink(), expiresAt: null, maxUsageCount: 1, usageCount: 0 };
+}
+
+function fieldTypeUsesOptions(type: string) {
+  return type === "select" || type === "radio" || type === "checkbox" || type === "multiselect";
+}
+
+function slugifyFieldName(value: string) {
   return value
-    .split("\n")
-    .map((line) => line.trim())
-    .filter(Boolean);
+    .trim()
+    .replace(/[^a-zA-Z0-9_-]+/g, "_")
+    .replace(/^_+|_+$/g, "");
+}
+
+function slugifyPrivateLink(value: string) {
+  return value
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9_-]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
+function generatePrivateLink() {
+  const randomPart = globalThis.crypto?.randomUUID?.().slice(0, 8) ?? Math.random().toString(36).slice(2, 10);
+  return `link-${randomPart}`;
+}
+
+function toDateInput(value: string | null) {
+  return value ? value.slice(0, 10) : "";
+}
+
+function fromDateInput(value: string) {
+  return value ? `${value}T23:59:59.999Z` : null;
 }

@@ -124,6 +124,83 @@ public sealed class PublicSchedulingEndpointsTests : EndpointBaseTest<MainDbCont
     }
 
     [Fact]
+    public async Task GetPublicEventType_WhenPrivateLinkIsExpired_ShouldReturnNotFound()
+    {
+        // Arrange
+        await UpdateSchedulingProfileAsync("owner");
+        var schedule = await CreateScheduleAsync();
+        await CreateEventTypeAsync(
+            schedule.Id,
+            "Private call",
+            "private-call",
+            true,
+            new { privateLinks = new[] { new { link = "vip", expiresAt = "2026-05-01T00:00:00Z", maxUsageCount = (int?)null, usageCount = 0 } } }
+        );
+
+        // Act
+        var response = await AnonymousHttpClient.GetAsync("/api/public/event-types/owner/private-call?privateLink=vip");
+
+        // Assert
+        await response.ShouldHaveErrorStatusCode(HttpStatusCode.NotFound, "Public event type 'owner/private-call' was not found.");
+    }
+
+    [Fact]
+    public async Task GetPublicEventType_WhenPrivateLinkUsageLimitIsReached_ShouldReturnNotFound()
+    {
+        // Arrange
+        await UpdateSchedulingProfileAsync("owner");
+        var schedule = await CreateScheduleAsync();
+        await CreateEventTypeAsync(
+            schedule.Id,
+            "Private call",
+            "private-call",
+            true,
+            new { privateLinks = new[] { new { link = "vip", expiresAt = (string?)null, maxUsageCount = 1, usageCount = 1 } } }
+        );
+
+        // Act
+        var response = await AnonymousHttpClient.GetAsync("/api/public/event-types/owner/private-call?privateLink=vip");
+
+        // Assert
+        await response.ShouldHaveErrorStatusCode(HttpStatusCode.NotFound, "Public event type 'owner/private-call' was not found.");
+    }
+
+    [Fact]
+    public async Task CreatePublicBooking_WhenPrivateLinkHasUsageLimit_ShouldConsumePrivateLink()
+    {
+        // Arrange
+        await UpdateSchedulingProfileAsync("owner");
+        var schedule = await CreateScheduleAsync();
+        await CreateEventTypeAsync(
+            schedule.Id,
+            "Private call",
+            "private-call",
+            true,
+            new { privateLinks = new[] { new { link = "vip", expiresAt = "2026-06-30T23:59:59Z", maxUsageCount = 1, usageCount = 0 } } }
+        );
+        var command = new
+        {
+            handle = "owner",
+            eventSlug = "private-call",
+            startTime = "2026-06-01T07:00:00Z",
+            duration = 30,
+            timeZone = "Africa/Johannesburg",
+            bookerName = "Ada Lovelace",
+            bookerEmail = "ada@example.com",
+            privateLink = "vip",
+            responses = new Dictionary<string, string>()
+        };
+
+        // Act
+        var response = await AnonymousHttpClient.PostAsJsonAsync("/api/public/bookings", command);
+
+        // Assert
+        response.EnsureSuccessStatusCode();
+        var lookupResponse = await AnonymousHttpClient.GetAsync("/api/public/event-types/owner/private-call?privateLink=vip");
+        await lookupResponse.ShouldHaveErrorStatusCode(HttpStatusCode.NotFound, "Public event type 'owner/private-call' was not found.");
+    }
+
+    [Fact]
     public async Task GetPublicSlots_WhenScheduleHasAvailability_ShouldReturnSlotsInRequestedTimeZone()
     {
         // Arrange
@@ -307,6 +384,50 @@ public sealed class PublicSchedulingEndpointsTests : EndpointBaseTest<MainDbCont
 
         // Assert
         await response.ShouldHaveErrorStatusCode(HttpStatusCode.BadRequest, "Topic is not a valid option.");
+    }
+
+    [Fact]
+    public async Task CreatePublicBooking_WhenBookingFieldUsesCalCompatibleOptions_ShouldValidateAgainstOptionValues()
+    {
+        // Arrange
+        await UpdateSchedulingProfileAsync("owner");
+        var schedule = await CreateScheduleAsync();
+        await CreateEventTypeAsync(
+            schedule.Id,
+            "Intro call",
+            "intro-call",
+            settings: new
+            {
+                bookingFields = new[]
+                {
+                    new
+                    {
+                        name = "topic",
+                        label = "Topic",
+                        type = "select",
+                        required = true,
+                        options = new[] { new { label = "Sales", value = "sales" }, new { label = "Support", value = "support" } }
+                    }
+                }
+            }
+        );
+        var command = new
+        {
+            handle = "owner",
+            eventSlug = "intro-call",
+            startTime = "2026-06-01T07:00:00Z",
+            duration = 30,
+            timeZone = "Africa/Johannesburg",
+            bookerName = "Ada Lovelace",
+            bookerEmail = "ada@example.com",
+            responses = new Dictionary<string, string> { ["topic"] = "sales" }
+        };
+
+        // Act
+        var response = await AnonymousHttpClient.PostAsJsonAsync("/api/public/bookings", command);
+
+        // Assert
+        response.EnsureSuccessStatusCode();
     }
 
     [Fact]

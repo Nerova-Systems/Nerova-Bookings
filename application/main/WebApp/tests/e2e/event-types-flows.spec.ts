@@ -127,10 +127,25 @@ test.describe("@smoke", () => {
       await ownerPage.getByRole("textbox", { name: "Success URL" }).fill("https://example.com/success");
       await ownerPage.getByRole("textbox", { name: "Cancellation URL" }).fill("https://example.com/cancel");
       await selectOption(ownerPage.getByLabel("Interface language"), ownerPage, "English");
-      await ownerPage.getByRole("textbox", { name: "Private links" }).fill("vip");
+      await ownerPage.getByRole("button", { name: "Add private link" }).click();
+      await ownerPage.getByRole("textbox", { name: "Private link" }).fill("vip");
+      await ownerPage.getByRole("textbox", { name: "Max uses" }).fill("2");
+      await ownerPage.getByRole("button", { name: "Add booking field" }).click();
+      await ownerPage.getByRole("textbox", { name: "Label" }).last().fill("Topic");
+      await ownerPage.getByRole("textbox", { name: "Name" }).last().fill("topic");
+      await selectOption(ownerPage.getByLabel("Type"), ownerPage, "Select");
+      await ownerPage.getByRole("switch", { name: "Required" }).click();
+      await ownerPage.getByRole("button", { name: "Add option" }).click();
+      await ownerPage.getByRole("textbox", { name: "Option label" }).fill("Sales");
+      await ownerPage.getByRole("textbox", { name: "Option value" }).fill("sales");
+      await ownerPage.getByRole("button", { name: "Add option" }).click();
+      await ownerPage.getByRole("textbox", { name: "Option label" }).last().fill("Support");
+      await ownerPage.getByRole("textbox", { name: "Option value" }).last().fill("support");
 
       await expect(ownerPage.getByRole("switch", { name: "Hidden" })).toBeChecked();
       await expect(ownerPage.getByRole("textbox", { name: "Success URL" })).toHaveValue("https://example.com/success");
+      await expect(ownerPage.getByRole("textbox", { name: "Private link" })).toHaveValue("vip");
+      await expect(ownerPage.getByText("Topic").first()).toBeVisible();
     })();
 
     await step("Update recurring fields and save & verify update toast appears")(async () => {
@@ -152,6 +167,9 @@ test.describe("@smoke", () => {
       await expect(ownerPage.getByRole("textbox", { name: "Title" })).toHaveValue(updatedTitle);
       await expect(ownerPage.getByRole("textbox", { name: "Slug" })).toHaveValue(updatedSlug);
       await expect(ownerPage.getByRole("textbox", { name: "Duration", exact: true })).toHaveValue("45");
+      await ownerPage.getByRole("tab", { name: "Advanced" }).click();
+      await expect(ownerPage.getByRole("textbox", { name: "Private link" })).toHaveValue("vip");
+      await expect(ownerPage.getByRole("textbox", { name: "Option value" }).first()).toHaveValue("sales");
       await ownerPage.getByRole("tab", { name: "Limits" }).click();
       await expect(ownerPage.getByRole("textbox", { name: "Slot interval" })).toHaveValue("15");
       await ownerPage.getByRole("tab", { name: "Recurring" }).click();
