@@ -1,4 +1,5 @@
 using Main.Features.Scheduling.Commands;
+using Main.Features.Scheduling.Domain;
 using Main.Features.Scheduling.Queries;
 using Main.Features.Scheduling.Shared;
 using SharedKernel.ApiResults;
@@ -29,6 +30,10 @@ public sealed class PublicSchedulingEndpoints : IEndpoints
         publicGroup.MapGet("/slots", async Task<ApiResult<PublicSlotsResponse>> ([AsParameters] GetPublicSlotsQuery query, IMediator mediator)
             => await mediator.Send(query)
         ).Produces<PublicSlotsResponse>().AllowAnonymous();
+
+        publicGroup.MapGet("/reschedule-bookings/{id}", async Task<ApiResult<PublicRescheduleBookingResponse>> (BookingId id, string handle, string eventSlug, IMediator mediator)
+            => await mediator.Send(new GetPublicRescheduleBookingQuery(id, handle, eventSlug))
+        ).Produces<PublicRescheduleBookingResponse>().AllowAnonymous();
 
         publicGroup.MapPost("/bookings", async Task<ApiResult<CreatePublicBookingResponse>> (CreatePublicBookingCommand command, IMediator mediator)
             => await mediator.Send(command)

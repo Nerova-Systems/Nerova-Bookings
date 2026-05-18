@@ -68,6 +68,7 @@ public sealed record BookingsResponse(int TotalCount, int PageOffset, int PageSi
 [PublicAPI]
 public sealed record BookingListItemResponse(
     BookingId Id,
+    string SchedulingHandle,
     EventTypeId EventTypeId,
     string EventTypeTitle,
     string EventTypeSlug,
@@ -98,7 +99,12 @@ public sealed record BookingListItemResponse(
     BookingActionsResponse Actions
 );
 
-public sealed class GetBookingsHandler(IBookingRepository bookingRepository, IExecutionContext executionContext, TimeProvider timeProvider)
+public sealed class GetBookingsHandler(
+    IBookingRepository bookingRepository,
+    ISchedulingProfileRepository schedulingProfileRepository,
+    IExecutionContext executionContext,
+    TimeProvider timeProvider
+)
     : IRequestHandler<GetBookingsQuery, Result<BookingsResponse>>
 {
     public async Task<Result<BookingsResponse>> Handle(GetBookingsQuery query, CancellationToken cancellationToken)
@@ -111,6 +117,7 @@ public sealed class GetBookingsHandler(IBookingRepository bookingRepository, IEx
         }
 
         var now = timeProvider.GetUtcNow();
+        var profile = await schedulingProfileRepository.GetForOwnerAsync(ownerUserId, cancellationToken);
         var bookings = await bookingRepository.GetForOwnerWithEventTypesAsync(tenantId, ownerUserId, cancellationToken);
         var filtered = bookings
             .Where(booking => query.Statuses.Any(status => MatchesStatus(booking, status, now)))
@@ -121,7 +128,7 @@ public sealed class GetBookingsHandler(IBookingRepository bookingRepository, IEx
         var page = ordered
             .Skip(query.PageOffset)
             .Take(query.PageSize)
-            .Select(booking => ToResponse(booking, ResolveListingStatus(booking, query.Statuses, now), now))
+            .Select(booking => ToResponse(booking, profile?.Handle ?? string.Empty, ResolveListingStatus(booking, query.Statuses, now), now))
             .ToArray();
 
         return new BookingsResponse(filtered.Length, query.PageOffset, query.PageSize, page);
@@ -180,12 +187,13 @@ public sealed class GetBookingsHandler(IBookingRepository bookingRepository, IEx
         return statuses.First(status => MatchesStatus(item, status, now));
     }
 
-    private static BookingListItemResponse ToResponse(BookingWithEventType item, string listingStatus, DateTimeOffset now)
+    private static BookingListItemResponse ToResponse(BookingWithEventType item, string schedulingHandle, string listingStatus, DateTimeOffset now)
     {
         var booking = item.Booking;
         var eventType = item.EventType;
         return new BookingListItemResponse(
             booking.Id,
+            schedulingHandle,
             eventType.Id,
             eventType.Title,
             eventType.Slug,

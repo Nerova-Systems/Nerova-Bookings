@@ -58,7 +58,7 @@ export function BookingDetailsSheet({
               </section>
               <section className="rounded-md border p-4">
                 <SectionTitle>
-                  <Trans>Attendee</Trans>
+                  <Trans>Attendees</Trans>
                 </SectionTitle>
                 <div className="grid gap-4">
                   <DetailRow icon={<UserIcon />} label={<Trans>Name</Trans>}>
@@ -67,6 +67,11 @@ export function BookingDetailsSheet({
                   <DetailRow icon={<MailIcon />} label={<Trans>Email</Trans>}>
                     {booking.bookerEmail}
                   </DetailRow>
+                  {booking.attendees.map((attendee) => (
+                    <DetailRow key={attendee.email} icon={<UserIcon />} label={<Trans>Guest</Trans>}>
+                      {attendee.name} · {attendee.email}
+                    </DetailRow>
+                  ))}
                 </div>
               </section>
               {(booking.description || Object.entries(booking.responses).length > 0) && (
@@ -96,6 +101,30 @@ export function BookingDetailsSheet({
                       ))}
                     </div>
                   )}
+                </section>
+              )}
+              {(booking.rescheduled || booking.rescheduleReason || booking.rescheduledBy) && (
+                <section className="rounded-md border p-4">
+                  <SectionTitle>
+                    <Trans>Reschedule</Trans>
+                  </SectionTitle>
+                  <div className="grid gap-3 text-sm text-muted-foreground">
+                    {booking.rescheduled && (
+                      <span>
+                        <Trans>This booking was marked for reschedule.</Trans>
+                      </span>
+                    )}
+                    {booking.rescheduledBy && (
+                      <span>
+                        <Trans>By</Trans>: {booking.rescheduledBy}
+                      </span>
+                    )}
+                    {booking.rescheduleReason && (
+                      <span>
+                        <Trans>Reason</Trans>: {booking.rescheduleReason}
+                      </span>
+                    )}
+                  </div>
                 </section>
               )}
               <section className="rounded-md border p-4">

@@ -3,6 +3,7 @@ import type { Schemas } from "@/shared/lib/api/client";
 export type BookerState = "loading" | "selecting_date" | "selecting_time" | "booking";
 export type PublicEventType = Schemas["PublicEventTypeResponse"];
 export type PublicSlot = Schemas["PublicSlotResponse"];
+export type PublicRescheduleBooking = Schemas["PublicRescheduleBookingResponse"];
 export type AvailableSlot = PublicSlot & { startsAt: Date; label: string; value: string };
 
 export function getAvailableSlots(

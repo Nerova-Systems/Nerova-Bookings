@@ -3,14 +3,14 @@ import { Trans } from "@lingui/react/macro";
 import { Button } from "@repo/ui/components/Button";
 import { Form } from "@repo/ui/components/Form";
 import { TextAreaField } from "@repo/ui/components/TextAreaField";
-import { TextField } from "@repo/ui/components/TextField";
 import { CheckIcon, XIcon } from "lucide-react";
 
 import { api } from "@/shared/lib/api/client";
 
 import { GeneralApiErrors } from "../../-scheduling/ApiErrors";
 import { formatMinutes } from "../../-scheduling/schedulingTypes";
-import { formatLongDate, formatTime, type PublicEventType } from "./publicBookerTypes";
+import { formatLongDate, formatTime, type PublicEventType, type PublicRescheduleBooking } from "./publicBookerTypes";
+import { BookingFields } from "./PublicBookingFields";
 
 export function BookEventForm({
   handle,
@@ -20,6 +20,8 @@ export function BookEventForm({
   selectedDuration,
   timezone,
   privateLink,
+  rescheduleBooking,
+  rescheduledBy,
   onBack
 }: Readonly<{
   handle: string;
@@ -29,9 +31,12 @@ export function BookEventForm({
   selectedDuration: number;
   timezone: string;
   privateLink?: string;
+  rescheduleBooking: PublicRescheduleBooking | null;
+  rescheduledBy?: string;
   onBack: () => void;
 }>) {
   const mutation = api.useMutation("post", "/api/public/bookings");
+  const isRescheduling = rescheduleBooking !== null;
   return (
     <div
       className="fixed inset-0 z-40 flex bg-background lg:static lg:col-span-2 lg:border-t"
@@ -40,7 +45,15 @@ export function BookEventForm({
       <div className="mx-auto flex w-full max-w-[42rem] flex-col gap-5 overflow-auto p-5 sm:p-6 lg:max-w-none lg:p-6">
         <div className="flex items-start justify-between gap-3">
           <div className="flex flex-col gap-1">
-            <h2>{mutation.isSuccess ? <Trans>Booking confirmed</Trans> : <Trans>Enter your details</Trans>}</h2>
+            <h2>
+              {mutation.isSuccess ? (
+                <Trans>Booking confirmed</Trans>
+              ) : isRescheduling ? (
+                <Trans>Reschedule booking</Trans>
+              ) : (
+                <Trans>Enter your details</Trans>
+              )}
+            </h2>
             <span className="text-sm text-muted-foreground">
               {`${formatLongDate(selectedSlot)} · ${formatTime(selectedSlot)} · ${formatMinutes(selectedDuration)}`}
             </span>
@@ -54,6 +67,7 @@ export function BookEventForm({
         ) : (
           <BookEventFormFields
             eventType={eventType}
+            rescheduleBooking={rescheduleBooking}
             error={mutation.error}
             isPending={mutation.isPending}
             onSubmit={(values) =>
@@ -67,7 +81,10 @@ export function BookEventForm({
                   bookerName: values.bookerName,
                   bookerEmail: values.bookerEmail,
                   responses: values.responses,
-                  privateLink: privateLink ?? null
+                  privateLink: privateLink ?? null,
+                  rescheduleBookingId: rescheduleBooking?.id ?? null,
+                  rescheduleReason: values.rescheduleReason ?? null,
+                  rescheduledBy: rescheduledBy ?? null
                 }
               })
             }
@@ -96,15 +113,23 @@ function BookingConfirmed() {
 
 function BookEventFormFields({
   eventType,
+  rescheduleBooking,
   error,
   isPending,
   onSubmit
 }: Readonly<{
   eventType: PublicEventType;
+  rescheduleBooking: PublicRescheduleBooking | null;
   error: Parameters<typeof GeneralApiErrors>[0]["error"];
   isPending: boolean;
-  onSubmit: (values: { bookerName: string; bookerEmail: string; responses: Record<string, string> }) => void;
+  onSubmit: (values: {
+    bookerName: string;
+    bookerEmail: string;
+    responses: Record<string, string>;
+    rescheduleReason?: string;
+  }) => void;
 }>) {
+  const isRescheduling = rescheduleBooking !== null;
   return (
     <Form
       className="gap-5"
@@ -120,40 +145,21 @@ function BookEventFormFields({
         onSubmit({
           bookerName: String(formData.get("name") ?? ""),
           bookerEmail: String(formData.get("email") ?? ""),
-          responses
+          responses,
+          rescheduleReason: String(formData.get("rescheduleReason") ?? "").trim()
         });
       }}
     >
       <GeneralApiErrors error={error} />
-      <BookingFields eventType={eventType} />
+      <BookingFields eventType={eventType} rescheduleBooking={rescheduleBooking} />
+      {isRescheduling && (
+        <TextAreaField name="rescheduleReason" label={t`Reschedule reason`} required={true} className="sm:col-span-2" />
+      )}
       <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
         <Button type="submit" data-testid="public-booker-submit" isPending={isPending}>
-          <Trans>Confirm booking</Trans>
+          {isRescheduling ? <Trans>Reschedule booking</Trans> : <Trans>Confirm booking</Trans>}
         </Button>
       </div>
     </Form>
-  );
-}
-
-function BookingFields({ eventType }: Readonly<{ eventType: PublicEventType }>) {
-  return (
-    <div className="grid gap-4 sm:grid-cols-2" data-testid="public-booker-booking-fields">
-      <TextField name="name" label={t`Name`} autoComplete="name" required />
-      <TextField name="email" label={t`Email`} type="email" autoComplete="email" required />
-      {(eventType.bookingFields ?? []).map((field) =>
-        field.type === "textarea" ? (
-          <TextAreaField
-            key={field.name}
-            name={field.name}
-            label={field.label}
-            required={field.required}
-            className="sm:col-span-2"
-          />
-        ) : (
-          <TextField key={field.name} name={field.name} label={field.label} required={field.required} />
-        )
-      )}
-      <TextAreaField name="notes" label={t`Additional notes`} className="sm:col-span-2" />
-    </div>
   );
 }

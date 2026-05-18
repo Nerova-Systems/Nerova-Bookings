@@ -328,6 +328,152 @@ public sealed class BookingEndpointsTests : EndpointBaseTest<MainDbContext>
         Connection.ExecuteScalar<string>("SELECT location_type FROM bookings WHERE id = @id", [new { id = booking.Id }]).Should().Be("phone");
     }
 
+    [Fact]
+    public async Task GetPublicRescheduleBooking_WhenBookingMatchesPublicEvent_ShouldReturnLimitedBookingData()
+    {
+        // Arrange
+        await UpdateSchedulingProfileAsync("owner");
+        var schedule = await CreateScheduleAsync();
+        await CreateEventTypeAsync(schedule.Id, "Intro call", "intro-call");
+        var booking = await CreateBookingAsync("intro-call", "2026-06-01T07:00:00Z", "Ada Lovelace", "ada@example.com");
+
+        // Act
+        var response = await AnonymousHttpClient.GetAsync($"/api/public/reschedule-bookings/{booking.Id}?handle=owner&eventSlug=intro-call");
+
+        // Assert
+        response.ShouldBeSuccessfulGetRequest();
+        var rescheduleBooking = await response.DeserializeResponse<PublicRescheduleBookingResponse>();
+        rescheduleBooking!.Id.Should().Be(booking.Id);
+        rescheduleBooking.Handle.Should().Be("owner");
+        rescheduleBooking.EventSlug.Should().Be("intro-call");
+        rescheduleBooking.BookerName.Should().Be("Ada Lovelace");
+        rescheduleBooking.BookerEmail.Should().Be("ada@example.com");
+        rescheduleBooking.TimeZone.Should().Be("Africa/Johannesburg");
+        rescheduleBooking.Responses.Should().ContainKey("topic").WhoseValue.Should().Be("Scheduling");
+        rescheduleBooking.CanReschedule.Should().BeTrue();
+    }
+
+    [Fact]
+    public async Task GetPublicRescheduleBooking_WhenBookingDoesNotMatchEventType_ShouldReturnNotFound()
+    {
+        // Arrange
+        await UpdateSchedulingProfileAsync("owner");
+        var schedule = await CreateScheduleAsync();
+        await CreateEventTypeAsync(schedule.Id, "Intro call", "intro-call");
+        await CreateEventTypeAsync(schedule.Id, "Follow up", "follow-up");
+        var booking = await CreateBookingAsync("intro-call", "2026-06-01T07:00:00Z", "Ada Lovelace", "ada@example.com");
+
+        // Act
+        var response = await AnonymousHttpClient.GetAsync($"/api/public/reschedule-bookings/{booking.Id}?handle=owner&eventSlug=follow-up");
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+    }
+
+    [Fact]
+    public async Task CreatePublicBooking_WhenRescheduling_ShouldCreateReplacementAndMarkOriginalRescheduled()
+    {
+        // Arrange
+        await UpdateSchedulingProfileAsync("owner");
+        var schedule = await CreateScheduleAsync();
+        await CreateEventTypeAsync(schedule.Id, "Intro call", "intro-call");
+        var originalBooking = await CreateBookingAsync("intro-call", "2026-06-01T07:00:00Z", "Ada Lovelace", "ada@example.com");
+
+        // Act
+        var response = await AnonymousHttpClient.PostAsJsonAsync(
+            "/api/public/bookings",
+            new
+            {
+                handle = "owner",
+                eventSlug = "intro-call",
+                startTime = "2026-06-01T08:00:00Z",
+                duration = 30,
+                timeZone = "Africa/Johannesburg",
+                bookerName = "Ada Lovelace",
+                bookerEmail = "ada@example.com",
+                responses = new Dictionary<string, string> { ["topic"] = "Moved" },
+                rescheduleBookingId = originalBooking.Id,
+                rescheduleReason = "Need a later time",
+                rescheduledBy = "owner@tenant-1.com"
+            }
+        );
+
+        // Assert
+        response.EnsureSuccessStatusCode();
+        var replacement = await response.DeserializeResponse<CreatePublicBookingResponse>();
+        replacement!.Id.Should().NotBe(originalBooking.Id);
+        Connection.ExecuteScalar<string>("SELECT status FROM bookings WHERE id = @id", [new { id = originalBooking.Id }]).Should().Be("cancelled");
+        Connection.ExecuteScalar<long>("SELECT rescheduled FROM bookings WHERE id = @id", [new { id = originalBooking.Id }]).Should().Be(1);
+        Connection.ExecuteScalar<string>("SELECT reschedule_reason FROM bookings WHERE id = @id", [new { id = originalBooking.Id }]).Should().Be("Need a later time");
+        Connection.ExecuteScalar<string>("SELECT rescheduled_by FROM bookings WHERE id = @id", [new { id = originalBooking.Id }]).Should().Be("owner@tenant-1.com");
+        Connection.ExecuteScalar<string>("SELECT from_reschedule FROM bookings WHERE id = @id", [new { id = replacement.Id }]).Should().Be(originalBooking.Id);
+    }
+
+    [Fact]
+    public async Task CreatePublicBooking_WhenRescheduleUsesUnavailableSlotExceptOriginal_ShouldAllowSameOriginalSlot()
+    {
+        // Arrange
+        await UpdateSchedulingProfileAsync("owner");
+        var schedule = await CreateScheduleAsync();
+        await CreateEventTypeAsync(schedule.Id, "Intro call", "intro-call");
+        var originalBooking = await CreateBookingAsync("intro-call", "2026-06-01T07:00:00Z", "Ada Lovelace", "ada@example.com");
+
+        // Act
+        var response = await AnonymousHttpClient.PostAsJsonAsync(
+            "/api/public/bookings",
+            new
+            {
+                handle = "owner",
+                eventSlug = "intro-call",
+                startTime = "2026-06-01T07:00:00Z",
+                duration = 30,
+                timeZone = "Africa/Johannesburg",
+                bookerName = "Ada Lovelace",
+                bookerEmail = "ada@example.com",
+                responses = new Dictionary<string, string> { ["topic"] = "Same slot" },
+                rescheduleBookingId = originalBooking.Id,
+                rescheduleReason = "Keeping the same time",
+                rescheduledBy = "owner@tenant-1.com"
+            }
+        );
+
+        // Assert
+        response.EnsureSuccessStatusCode();
+    }
+
+    [Fact]
+    public async Task CreatePublicBooking_WhenOriginalBookingCannotBeRescheduled_ShouldReturnBadRequest()
+    {
+        // Arrange
+        await UpdateSchedulingProfileAsync("owner");
+        var schedule = await CreateScheduleAsync();
+        await CreateEventTypeAsync(schedule.Id, "Intro call", "intro-call", new { reschedulePolicy = new { allowReschedule = false } });
+        var originalBooking = await CreateBookingAsync("intro-call", "2026-06-01T07:00:00Z", "Ada Lovelace", "ada@example.com");
+
+        // Act
+        var response = await AnonymousHttpClient.PostAsJsonAsync(
+            "/api/public/bookings",
+            new
+            {
+                handle = "owner",
+                eventSlug = "intro-call",
+                startTime = "2026-06-01T08:00:00Z",
+                duration = 30,
+                timeZone = "Africa/Johannesburg",
+                bookerName = "Ada Lovelace",
+                bookerEmail = "ada@example.com",
+                responses = new Dictionary<string, string>(),
+                rescheduleBookingId = originalBooking.Id,
+                rescheduleReason = "Need another time",
+                rescheduledBy = "owner@tenant-1.com"
+            }
+        );
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        Connection.ExecuteScalar<string>("SELECT status FROM bookings WHERE id = @id", [new { id = originalBooking.Id }]).Should().Be("accepted");
+    }
+
     private async Task UpdateSchedulingProfileAsync(string handle)
     {
         var response = await AuthenticatedOwnerHttpClient.PutAsJsonAsync(
@@ -409,6 +555,18 @@ public sealed class BookingEndpointsTests : EndpointBaseTest<MainDbContext>
 
     [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
     private sealed record CreatePublicBookingResponse(string Id);
+
+    [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
+    private sealed record PublicRescheduleBookingResponse(
+        string Id,
+        string Handle,
+        string EventSlug,
+        string BookerName,
+        string BookerEmail,
+        string TimeZone,
+        Dictionary<string, string> Responses,
+        bool CanReschedule
+    );
 
     [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
     private sealed record BookingLifecycleResponse(string Id, string Status, BookingAttendeeResponse[] Attendees, string? LocationType, string? LocationValue);

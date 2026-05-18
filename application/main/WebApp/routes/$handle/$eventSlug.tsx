@@ -21,7 +21,9 @@ export const Route = createFileRoute("/$handle/$eventSlug")({
     slot: stringValue(search.slot),
     duration: numberValue(search.duration),
     timezone: stringValue(search.timezone) ?? stringValue(search["cal.tz"]),
-    privateLink: stringValue(search.privateLink)
+    privateLink: stringValue(search.privateLink),
+    rescheduleUid: stringValue(search.rescheduleUid),
+    rescheduledBy: stringValue(search.rescheduledBy)
   }),
   component: PublicBookerWebWrapper
 });
@@ -61,6 +63,21 @@ function PublicBookerWebWrapper() {
     },
     { enabled: eventType !== undefined }
   );
+  const {
+    data: rescheduleBooking,
+    error: rescheduleError,
+    isLoading: rescheduleLoading
+  } = api.useQuery(
+    "get",
+    "/api/public/reschedule-bookings/{id}",
+    {
+      params: {
+        path: { id: search.rescheduleUid ?? "" },
+        query: { handle, eventSlug }
+      }
+    },
+    { enabled: search.rescheduleUid !== undefined }
+  );
 
   const updateSearch = (nextSearch: Partial<typeof search>) => {
     navigate({ search: { ...search, ...nextSearch }, replace: true });
@@ -72,13 +89,19 @@ function PublicBookerWebWrapper() {
         handle={handle}
         eventSlug={eventSlug}
         eventType={eventType ?? null}
+        rescheduleBooking={rescheduleBooking ?? null}
+        rescheduleUnavailable={
+          search.rescheduleUid !== undefined &&
+          ((rescheduleError !== undefined && rescheduleError !== null) || rescheduleBooking?.canReschedule === false)
+        }
         slotsByDate={slotsData?.slots ?? {}}
-        isLoading={eventTypeLoading || slotsLoading}
+        isLoading={eventTypeLoading || slotsLoading || rescheduleLoading}
         selectedDate={selectedDate}
         selectedSlot={search.slot ?? null}
         selectedDuration={selectedDuration}
         timezone={timezone}
         privateLink={search.privateLink}
+        rescheduledBy={search.rescheduledBy}
         monthAnchor={monthAnchor}
         onDateChange={(date) => updateSearch({ date: formatDateOnly(date), slot: undefined, month: formatMonth(date) })}
         onMonthChange={(month) => updateSearch({ month: formatMonth(month), slot: undefined })}

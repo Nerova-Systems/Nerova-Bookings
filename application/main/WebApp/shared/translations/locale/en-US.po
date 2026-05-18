@@ -42,6 +42,9 @@ msgstr "Active bookings per booker"
 msgid "Add an override"
 msgstr "Add an override"
 
+msgid "Add another attendee to this booking."
+msgstr "Add another attendee to this booking."
+
 msgid "Add date override"
 msgstr "Add date override"
 
@@ -93,20 +96,23 @@ msgstr "Allow reschedule"
 msgid "Apply filters"
 msgstr "Apply filters"
 
+msgid "Approval"
+msgstr "Approval"
+
 msgid "Apps"
 msgstr "Apps"
 
 msgid "At least one schedule exists"
 msgstr "At least one schedule exists"
 
-msgid "Attendee"
-msgstr "Attendee"
-
 msgid "Attendee email"
 msgstr "Attendee email"
 
 msgid "Attendee name"
 msgstr "Attendee name"
+
+msgid "Attendees"
+msgstr "Attendees"
 
 msgid "Automate reminders and follow-up messages for this event type."
 msgstr "Automate reminders and follow-up messages for this event type."
@@ -165,6 +171,9 @@ msgstr "Booking page"
 msgid "Booking page unavailable"
 msgstr "Booking page unavailable"
 
+msgid "Booking rejected"
+msgstr "Booking rejected"
+
 msgid "Bookings"
 msgstr "Bookings"
 
@@ -185,6 +194,9 @@ msgstr "Burning the midnight oil, {firstName}?"
 
 msgid "Burning the midnight oil?"
 msgstr "Burning the midnight oil?"
+
+msgid "By"
+msgstr "By"
 
 msgid "Calendar view"
 msgstr "Calendar view"
@@ -233,6 +245,9 @@ msgstr "Configure the appointment types clients can book."
 
 msgid "Confirm booking"
 msgstr "Confirm booking"
+
+msgid "Confirm booking?"
+msgstr "Confirm booking?"
 
 msgid "Confirmation"
 msgstr "Confirmation"
@@ -463,6 +478,12 @@ msgstr "Good morning"
 msgid "Good morning, {firstName}"
 msgstr "Good morning, {firstName}"
 
+msgid "Guest"
+msgstr "Guest"
+
+msgid "Guests added"
+msgstr "Guests added"
+
 msgid "Here's your overview of what's happening."
 msgstr "Here's your overview of what's happening."
 
@@ -519,6 +540,9 @@ msgstr "Location list"
 
 msgid "Location type"
 msgstr "Location type"
+
+msgid "Location updated"
+msgstr "Location updated"
 
 msgid "Locations"
 msgstr "Locations"
@@ -675,6 +699,9 @@ msgstr "Public booking"
 msgid "Public link copied"
 msgstr "Public link copied"
 
+msgid "Reason"
+msgstr "Reason"
+
 msgid "Recurring"
 msgstr "Recurring"
 
@@ -689,6 +716,15 @@ msgstr "Recurring events cannot be enabled while seats are enabled."
 
 msgid "Redirects"
 msgstr "Redirects"
+
+msgid "Reject booking"
+msgstr "Reject booking"
+
+msgid "Reject booking?"
+msgstr "Reject booking?"
+
+msgid "Rejection reason"
+msgstr "Rejection reason"
 
 msgid "Remove date override"
 msgstr "Remove date override"
@@ -711,11 +747,20 @@ msgstr "Requires another booking"
 msgid "Requires confirmation"
 msgstr "Requires confirmation"
 
+msgid "Reschedule"
+msgstr "Reschedule"
+
 msgid "Reschedule booking"
 msgstr "Reschedule booking"
 
 msgid "Reschedule notice"
 msgstr "Reschedule notice"
+
+msgid "Reschedule reason"
+msgstr "Reschedule reason"
+
+msgid "Reschedule requested"
+msgstr "Reschedule requested"
 
 msgid "Reserve time before and after every booking."
 msgstr "Reserve time before and after every booking."
@@ -870,9 +915,16 @@ msgstr "These features need more integration before they can be edited here."
 msgid "this attendee"
 msgstr "this attendee"
 
+msgid "This booking was marked for reschedule."
+msgstr "This booking was marked for reschedule."
+
 #. placeholder {0}: booking?.bookerName ?? t`this attendee`
 msgid "This cancels the booking with {0}."
 msgstr "This cancels the booking with {0}."
+
+#. placeholder {0}: booking?.bookerName ?? t`this attendee`
+msgid "This confirms the booking with {0}."
+msgstr "This confirms the booking with {0}."
 
 msgid "this event type"
 msgstr "this event type"
@@ -882,6 +934,13 @@ msgstr "This event type is not available for public booking yet."
 
 msgid "This is where your personalized dashboard content will appear. Stay tuned for updates."
 msgstr "This is where your personalized dashboard content will appear. Stay tuned for updates."
+
+msgid "This marks the booking as needing a new time."
+msgstr "This marks the booking as needing a new time."
+
+#. placeholder {0}: booking?.bookerName ?? t`this attendee`
+msgid "This rejects the pending booking with {0}."
+msgstr "This rejects the pending booking with {0}."
 
 msgid "This removes the booking page for {deleteSubject}."
 msgstr "This removes the booking page for {deleteSubject}."
@@ -921,6 +980,9 @@ msgstr "Tuesday"
 
 msgid "Unavailable"
 msgstr "Unavailable"
+
+msgid "Update where this booking takes place."
+msgstr "Update where this booking takes place."
 
 msgid "Video call"
 msgstr "Video call"

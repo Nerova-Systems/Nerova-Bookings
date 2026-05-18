@@ -131,7 +131,7 @@ public sealed class Booking : AggregateRoot<BookingId>, ITenantScopedEntity
 
     public bool Rescheduled { get; private set; }
 
-    public string? FromReschedule { get; }
+    public string? FromReschedule { get; private set; }
 
     public string? CancelledBy { get; private set; }
 
@@ -178,6 +178,11 @@ public sealed class Booking : AggregateRoot<BookingId>, ITenantScopedEntity
         CancellationReason = RescheduleReason;
         RescheduledBy = string.IsNullOrWhiteSpace(rescheduledBy) ? null : rescheduledBy.Trim().ToLowerInvariant();
         CancelledBy = RescheduledBy;
+    }
+
+    public void MarkAsReplacementFor(BookingId originalBookingId)
+    {
+        FromReschedule = originalBookingId.Value;
     }
 
     public void EditLocation(string? locationType, string? locationValue)

@@ -4,6 +4,8 @@ using Main.Features.Scheduling.Domain;
 namespace Main.Features.Scheduling.Shared;
 
 public sealed record BookingActionsResponse(
+    BookingActionResponse Confirm,
+    BookingActionResponse Reject,
     BookingActionResponse Cancel,
     BookingActionResponse Reschedule,
     BookingActionResponse RequestReschedule,
@@ -22,6 +24,8 @@ public static class BookingActionAvailability
     public static BookingActionsResponse Resolve(Booking booking, EventType eventType, DateTimeOffset now)
     {
         return new BookingActionsResponse(
+            ResolvePendingBookingAction(booking),
+            ResolvePendingBookingAction(booking),
             ResolveCancel(booking, eventType, now),
             ResolveReschedule(booking, eventType, now),
             ResolveReschedule(booking, eventType, now),
@@ -66,7 +70,7 @@ public static class BookingActionAvailability
         return new BookingActionResponse(true, true, null);
     }
 
-    private static BookingActionResponse ResolveReschedule(Booking booking, EventType eventType, DateTimeOffset now)
+    public static BookingActionResponse ResolveReschedule(Booking booking, EventType eventType, DateTimeOffset now)
     {
         var normalizedStatus = booking.Status.Trim().ToLowerInvariant();
         if (normalizedStatus is "cancelled" or "rejected")
@@ -98,6 +102,13 @@ public static class BookingActionAvailability
         return booking.Status.Trim().ToLowerInvariant() is "cancelled" or "rejected"
             ? Disabled(disabledReason)
             : new BookingActionResponse(true, true, null);
+    }
+
+    private static BookingActionResponse ResolvePendingBookingAction(Booking booking)
+    {
+        return booking.Status.Trim().ToLowerInvariant() == "pending"
+            ? new BookingActionResponse(true, true, null)
+            : new BookingActionResponse(false, false, null);
     }
 
     private static BookingActionResponse Disabled(string reason)

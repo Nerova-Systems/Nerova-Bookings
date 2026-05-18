@@ -42,6 +42,9 @@ msgstr "Active bookings per booker"
 msgid "Add an override"
 msgstr "Tilføj en undtagelse"
 
+msgid "Add another attendee to this booking."
+msgstr "Add another attendee to this booking."
+
 msgid "Add date override"
 msgstr "Tilføj datoundtagelse"
 
@@ -93,20 +96,23 @@ msgstr "Allow reschedule"
 msgid "Apply filters"
 msgstr "Anvend filtre"
 
+msgid "Approval"
+msgstr "Approval"
+
 msgid "Apps"
 msgstr "Apps"
 
 msgid "At least one schedule exists"
 msgstr "Der findes mindst én tidsplan"
 
-msgid "Attendee"
-msgstr "Deltager"
-
 msgid "Attendee email"
 msgstr "Deltager-e-mail"
 
 msgid "Attendee name"
 msgstr "Deltagernavn"
+
+msgid "Attendees"
+msgstr "Deltagere"
 
 msgid "Automate reminders and follow-up messages for this event type."
 msgstr "Automate reminders and follow-up messages for this event type."
@@ -165,6 +171,9 @@ msgstr "Booking page"
 msgid "Booking page unavailable"
 msgstr "Bookingsiden er ikke tilgængelig"
 
+msgid "Booking rejected"
+msgstr "Booking afvist"
+
 msgid "Bookings"
 msgstr "Bookinger"
 
@@ -185,6 +194,9 @@ msgstr "Sidder du stadig oppe, {firstName}?"
 
 msgid "Burning the midnight oil?"
 msgstr "Sidder du stadig oppe?"
+
+msgid "By"
+msgstr "Af"
 
 msgid "Calendar view"
 msgstr "Kalendervisning"
@@ -233,6 +245,9 @@ msgstr "Konfigurer de aftaletyper, kunder kan booke."
 
 msgid "Confirm booking"
 msgstr "Bekræft booking"
+
+msgid "Confirm booking?"
+msgstr "Bekræft booking?"
 
 msgid "Confirmation"
 msgstr "Confirmation"
@@ -463,6 +478,12 @@ msgstr "God morgen"
 msgid "Good morning, {firstName}"
 msgstr "God morgen, {firstName}"
 
+msgid "Guest"
+msgstr "Gæst"
+
+msgid "Guests added"
+msgstr "Gæster tilføjet"
+
 msgid "Here's your overview of what's happening."
 msgstr "Her er dit overblik over hvad der sker."
 
@@ -519,6 +540,9 @@ msgstr "Location list"
 
 msgid "Location type"
 msgstr "Lokationstype"
+
+msgid "Location updated"
+msgstr "Lokation opdateret"
 
 msgid "Locations"
 msgstr "Locations"
@@ -675,6 +699,9 @@ msgstr "Offentlig booking"
 msgid "Public link copied"
 msgstr "Offentligt link kopieret"
 
+msgid "Reason"
+msgstr "Årsag"
+
 msgid "Recurring"
 msgstr "Gentagende"
 
@@ -689,6 +716,15 @@ msgstr "Recurring events cannot be enabled while seats are enabled."
 
 msgid "Redirects"
 msgstr "Redirects"
+
+msgid "Reject booking"
+msgstr "Afvis booking"
+
+msgid "Reject booking?"
+msgstr "Afvis booking?"
+
+msgid "Rejection reason"
+msgstr "Afvisningsårsag"
 
 msgid "Remove date override"
 msgstr "Fjern datoundtagelse"
@@ -711,11 +747,20 @@ msgstr "Kræver en anden booking"
 msgid "Requires confirmation"
 msgstr "Kræver bekræftelse"
 
+msgid "Reschedule"
+msgstr "Flyt booking"
+
 msgid "Reschedule booking"
 msgstr "Flyt booking"
 
 msgid "Reschedule notice"
 msgstr "Reschedule notice"
+
+msgid "Reschedule reason"
+msgstr "Årsag til flytning"
+
+msgid "Reschedule requested"
+msgstr "Ny tid anmodet"
 
 msgid "Reserve time before and after every booking."
 msgstr "Reserver tid før og efter hver booking."
@@ -870,9 +915,16 @@ msgstr "These features need more integration before they can be edited here."
 msgid "this attendee"
 msgstr "denne deltager"
 
+msgid "This booking was marked for reschedule."
+msgstr "Denne booking blev markeret til ny tid."
+
 #. placeholder {0}: booking?.bookerName ?? t`this attendee`
 msgid "This cancels the booking with {0}."
 msgstr "Dette annullerer bookingen med {0}."
+
+#. placeholder {0}: booking?.bookerName ?? t`this attendee`
+msgid "This confirms the booking with {0}."
+msgstr "Dette bekræfter bookingen med {0}."
 
 msgid "this event type"
 msgstr "denne begivenhedstype"
@@ -882,6 +934,13 @@ msgstr "Denne aftaletype er endnu ikke tilgængelig for offentlig booking."
 
 msgid "This is where your personalized dashboard content will appear. Stay tuned for updates."
 msgstr "Her vil dit personlige dashboard-indhold blive vist. Hold dig opdateret."
+
+msgid "This marks the booking as needing a new time."
+msgstr "Dette markerer bookingen som krævende en ny tid."
+
+#. placeholder {0}: booking?.bookerName ?? t`this attendee`
+msgid "This rejects the pending booking with {0}."
+msgstr "Dette afviser den afventende booking med {0}."
 
 msgid "This removes the booking page for {deleteSubject}."
 msgstr "Dette fjerner bookingsiden for {deleteSubject}."
@@ -921,6 +980,9 @@ msgstr "Tirsdag"
 
 msgid "Unavailable"
 msgstr "Utilgængelig"
+
+msgid "Update where this booking takes place."
+msgstr "Opdater hvor denne booking finder sted."
 
 msgid "Video call"
 msgstr "Videoopkald"

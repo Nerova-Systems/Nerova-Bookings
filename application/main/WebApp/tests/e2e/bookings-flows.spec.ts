@@ -38,9 +38,11 @@ async function createBookedEvent(page: Page, context: ReturnType<typeof createTe
   await createEventType(page, eventTitle, eventSlug);
   await expectToastMessage(context, "Event type created");
 
-  const profileResponse = await page.request.get("/api/scheduling/profile");
-  expect(profileResponse.ok(), await profileResponse.text()).toBeTruthy();
-  const profile = (await profileResponse.json()) as { handle: string };
+  const profile = await page.evaluate(async () => {
+    const response = await fetch("/api/scheduling/profile");
+    if (!response.ok) throw new Error(await response.text());
+    return (await response.json()) as { handle: string };
+  });
 
   const publicBookingSearch = new URLSearchParams({
     date: formatDateOnly(startTime),
@@ -56,7 +58,7 @@ async function createBookedEvent(page: Page, context: ReturnType<typeof createTe
   await page.getByRole("button", { name: "Confirm booking" }).click();
   await expect(page.getByRole("heading", { name: "Booking confirmed" })).toBeVisible();
 
-  return { eventTitle, bookerName, bookerEmail };
+  return { eventTitle, eventSlug, handle: profile.handle, bookerName, bookerEmail, startTime };
 }
 
 test.describe("@smoke", () => {
@@ -109,13 +111,72 @@ test.describe("@smoke", () => {
       await bookingRow.getByTestId("booking-actions-dropdown").click();
 
       await expect(ownerPage.getByText("Edit event")).toBeVisible();
-      await expect(ownerPage.getByText("Reschedule booking", { exact: true })).toBeVisible();
-      await expect(ownerPage.getByText("Reschedule booking is not implemented yet.")).toBeVisible();
+      await expect(ownerPage.getByRole("menuitem", { name: "Reschedule booking" })).toBeVisible();
+      await expect(ownerPage.getByRole("menuitem", { name: "Request reschedule" })).toBeVisible();
+      await expect(ownerPage.getByRole("menuitem", { name: "Edit location" })).toBeVisible();
+      await expect(ownerPage.getByRole("menuitem", { name: "Add guests" })).toBeVisible();
       await expect(ownerPage.getByRole("dialog", { name: booking.eventTitle })).not.toBeVisible();
       await ownerPage.keyboard.press("Escape");
     })();
 
+    await step("Edit location and add a guest through dashboard dialogs")(async () => {
+      const bookingRow = ownerPage.getByTestId("booking-item").filter({ hasText: booking.eventTitle }).first();
+
+      await bookingRow.getByTestId("booking-actions-dropdown").click();
+      await ownerPage.getByRole("menuitem", { name: "Edit location" }).click();
+      await expect(ownerPage.getByRole("dialog", { name: "Edit location" })).toBeVisible();
+      await ownerPage.getByRole("textbox", { name: "Location type" }).fill("in-person");
+      await ownerPage.getByRole("textbox", { name: "Location", exact: true }).fill("Suite 5");
+      await ownerPage.getByRole("button", { name: "Save" }).click();
+      await expectToastMessage(context, "Location updated");
+
+      await bookingRow.getByTestId("booking-actions-dropdown").click();
+      await ownerPage.getByRole("menuitem", { name: "Add guests" }).click();
+      await expect(ownerPage.getByRole("dialog", { name: "Add guests" })).toBeVisible();
+      await ownerPage.getByRole("textbox", { name: "Attendee name" }).fill("Guest Booker");
+      await ownerPage.getByRole("textbox", { name: "Attendee email" }).fill("guest-booker@example.com");
+      await ownerPage.getByRole("button", { name: "Add guests" }).click();
+      await expectToastMessage(context, "Guests added");
+
+      await bookingRow.click();
+      const bookingDetails = ownerPage.getByRole("dialog", { name: booking.eventTitle });
+      await expect(bookingDetails.getByText("Suite 5")).toBeVisible();
+      await expect(bookingDetails.getByText("guest-booker@example.com")).toBeVisible();
+      await ownerPage.keyboard.press("Escape");
+    })();
+
+    await step("Navigate to direct reschedule from dashboard action")(async () => {
+      const bookingRow = ownerPage.getByTestId("booking-item").filter({ hasText: booking.eventTitle }).first();
+      await bookingRow.getByTestId("booking-actions-dropdown").click();
+      await ownerPage.getByRole("menuitem", { name: "Reschedule booking" }).click();
+
+      await expect(ownerPage).toHaveURL(new RegExp(`/${booking.handle}/${booking.eventSlug}`));
+      expect(new URL(ownerPage.url()).searchParams.get("rescheduleUid")).toBeTruthy();
+
+      await ownerPage.goto(`/bookings/upcoming?view=list&search=${encodeURIComponent(booking.eventTitle)}`);
+      await expect(ownerPage.getByTestId("booking-item").filter({ hasText: booking.eventTitle }).first()).toBeVisible();
+    })();
+
+    await step("Request reschedule through dashboard dialog")(async () => {
+      const rescheduleBooking = await createBookedEvent(ownerPage, context);
+      await ownerPage.goto(`/bookings/upcoming?view=list&search=${encodeURIComponent(rescheduleBooking.eventTitle)}`);
+      const bookingRow = ownerPage
+        .getByTestId("booking-item")
+        .filter({ hasText: rescheduleBooking.eventTitle })
+        .first();
+      await bookingRow.getByTestId("booking-actions-dropdown").click();
+      await ownerPage.getByRole("menuitem", { name: "Request reschedule" }).click();
+      await expect(ownerPage.getByRole("dialog", { name: "Request reschedule" })).toBeVisible();
+      await ownerPage.getByRole("textbox", { name: "Reschedule reason" }).fill("Need a different time");
+      await ownerPage.getByRole("button", { name: "Request reschedule" }).click();
+      await expectToastMessage(context, "Reschedule requested");
+
+      await ownerPage.goto(`/bookings/cancelled?view=list&search=${encodeURIComponent(rescheduleBooking.eventTitle)}`);
+      await expect(ownerPage.getByText(rescheduleBooking.eventTitle)).toBeVisible();
+    })();
+
     await step("Switch to calendar and navigate week & verify booking details open")(async () => {
+      await ownerPage.goto(`/bookings/upcoming?view=list&search=${encodeURIComponent(booking.eventTitle)}`);
       await ownerPage.getByRole("button", { name: "Calendar view" }).click();
       await expect(ownerPage.getByTestId("bookings-calendar-view")).toBeVisible();
       expect(new URL(ownerPage.url()).searchParams.get("view")).toBe("calendar");
@@ -175,7 +236,9 @@ test.describe("@comprehensive", () => {
 
       await expect(ownerPage.getByRole("menu")).toBeVisible();
       await expect(ownerPage.getByText("Edit event")).toBeVisible();
-      await expect(ownerPage.getByText("Request reschedule is not implemented yet.")).toBeVisible();
+      await expect(ownerPage.getByRole("menuitem", { name: "Request reschedule" })).toBeVisible();
+      await expect(ownerPage.getByRole("menuitem", { name: "Edit location" })).toBeVisible();
+      await expect(ownerPage.getByRole("menuitem", { name: "Add guests" })).toBeVisible();
       await ownerPage.keyboard.press("Escape");
     })();
   });

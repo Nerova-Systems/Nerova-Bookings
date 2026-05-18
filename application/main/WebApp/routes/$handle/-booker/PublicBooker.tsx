@@ -10,6 +10,7 @@ import {
   getAvailableSlots,
   parseSlotValue,
   type PublicEventType,
+  type PublicRescheduleBooking,
   type PublicSlot
 } from "./publicBookerTypes";
 
@@ -17,6 +18,8 @@ export function PublicBooker({
   handle,
   eventSlug,
   eventType,
+  rescheduleBooking,
+  rescheduleUnavailable,
   slotsByDate,
   isLoading,
   selectedDate,
@@ -24,6 +27,7 @@ export function PublicBooker({
   selectedDuration,
   timezone,
   privateLink,
+  rescheduledBy,
   monthAnchor,
   onDateChange,
   onMonthChange,
@@ -34,6 +38,8 @@ export function PublicBooker({
   handle: string;
   eventSlug: string;
   eventType: PublicEventType | null;
+  rescheduleBooking: PublicRescheduleBooking | null;
+  rescheduleUnavailable: boolean;
   slotsByDate: Record<string, PublicSlot[]>;
   isLoading: boolean;
   selectedDate: Date | null;
@@ -41,6 +47,7 @@ export function PublicBooker({
   selectedDuration: number | null;
   timezone: string;
   privateLink?: string;
+  rescheduledBy?: string;
   monthAnchor: Date;
   onDateChange: (date: Date) => void;
   onMonthChange: (date: Date) => void;
@@ -59,7 +66,7 @@ export function PublicBooker({
         : "selecting_date";
 
   if (state === "loading") return <PublicBookerSkeleton />;
-  if (!eventType) return <PublicBookerUnavailable />;
+  if (!eventType || rescheduleUnavailable) return <PublicBookerUnavailable />;
 
   return (
     <div className="mx-auto grid max-w-[70rem] overflow-hidden rounded-lg border bg-background shadow-sm lg:grid-cols-[20rem_1fr]">
@@ -83,10 +90,12 @@ export function PublicBooker({
           handle={handle}
           eventSlug={eventSlug}
           eventType={eventType}
+          rescheduleBooking={rescheduleBooking}
           selectedSlot={selectedSlotDate}
           selectedDuration={selectedDuration ?? eventType.durationMinutes}
           timezone={timezone}
           privateLink={privateLink}
+          rescheduledBy={rescheduledBy}
           onBack={onBackToTimes}
         />
       )}
