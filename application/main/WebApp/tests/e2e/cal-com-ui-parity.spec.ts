@@ -12,6 +12,22 @@ const publicBookerStates = [
 
 const eventTypeEditorStates = ["setup", "availability", "limits", "advanced", "workflows", "webhooks"] as const;
 
+const bookingDashboardStates = [
+  "list-upcoming",
+  "list-unconfirmed",
+  "list-past",
+  "list-cancelled",
+  "list-empty",
+  "list-loading",
+  "list-error",
+  "calendar-week",
+  "calendar-empty",
+  "calendar-selected",
+  "details-info",
+  "details-actions",
+  "details-reschedule"
+] as const;
+
 const viewports = [
   { name: "desktop", width: 1440, height: 900 },
   { name: "tablet", width: 834, height: 1112 },
@@ -53,7 +69,7 @@ for (const viewport of viewports) {
           await expect(page.getByRole("heading", { name: "Booking confirmed" })).toBeVisible();
         }
 
-        await captureScreenshot(page, testInfo, `public-booker-${state}-${viewport.name}.png`);
+        await captureScreenshot(page, testInfo, "wave-1-7", `public-booker-${state}-${viewport.name}.png`);
       });
     }
   });
@@ -72,7 +88,38 @@ for (const viewport of eventTypeEditorViewports) {
         await expect(page.getByTestId("event-type-layout")).toBeVisible();
         await expect(page.getByRole("heading", { name: "Product Consultation" })).toBeVisible();
 
-        await captureScreenshot(page, testInfo, `event-type-editor-${state}-${viewport.name}.png`);
+        await captureScreenshot(page, testInfo, "wave-1-7", `event-type-editor-${state}-${viewport.name}.png`);
+      });
+    }
+  });
+}
+
+for (const viewport of viewports) {
+  test.describe(`@smoke booking dashboard visual parity ${viewport.name}`, () => {
+    test.describe.configure({ mode: "serial" });
+    test.use({ viewport: { width: viewport.width, height: viewport.height } });
+
+    for (const state of bookingDashboardStates) {
+      test(`captures booking dashboard ${state}`, async ({ page }, testInfo) => {
+        await page.goto(`/cal-com-ui-parity?surface=booking-dashboard&state=${state}`);
+        await expect(page.getByTestId("cal-com-ui-parity-fixture")).toBeVisible();
+        await expect(page.getByTestId("booking-dashboard-fixture")).toBeVisible();
+
+        if (state.startsWith("calendar")) {
+          await expect(page.getByTestId("bookings-calendar-view")).toBeVisible();
+        } else if (state.startsWith("details")) {
+          await expect(page.getByText("Product Consultation").first()).toBeVisible();
+          if (state === "details-actions") {
+            await page.getByTestId("booking-actions-dropdown").last().click();
+            await expect(page.getByText("Edit event")).toBeVisible();
+          }
+        } else if (state === "list-error") {
+          await expect(page.getByText("Bookings could not be loaded")).toBeVisible();
+        } else {
+          await expect(page.getByTestId("booking-list-dashboard")).toBeVisible();
+        }
+
+        await captureScreenshot(page, testInfo, "wave-1-8", `booking-dashboard-${state}-${viewport.name}.png`);
       });
     }
   });
@@ -152,8 +199,8 @@ async function mockEventTypeSideEffectApis(page: Page) {
   });
 }
 
-async function captureScreenshot(page: Page, testInfo: TestInfo, name: string) {
-  const screenshotPath = testInfo.outputPath("cal-com-ui-parity", "wave-1-7", name);
+async function captureScreenshot(page: Page, testInfo: TestInfo, wave: string, name: string) {
+  const screenshotPath = testInfo.outputPath("cal-com-ui-parity", wave, name);
   await page.screenshot({ path: screenshotPath, fullPage: false });
   await testInfo.attach(name, { path: screenshotPath, contentType: "image/png" });
 }

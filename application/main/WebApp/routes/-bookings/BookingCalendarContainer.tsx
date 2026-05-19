@@ -67,8 +67,8 @@ export function BookingCalendarContainer({
   const updateWeekStart = (nextWeekStart: Date) => onWeekStartChange(getWeekStartDate(nextWeekStart));
 
   return (
-    <>
-      <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
+    <section data-testid="booking-calendar-dashboard" className="space-y-4">
+      <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="flex flex-wrap items-center gap-2">
           <div className="w-full md:w-auto">
             <BookingStatusTabs status={status} search={search} />
@@ -142,7 +142,7 @@ export function BookingCalendarContainer({
           if (!isOpen) setSelectedBooking(null);
         }}
       />
-    </>
+    </section>
   );
 }
 

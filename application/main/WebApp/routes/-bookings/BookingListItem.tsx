@@ -23,18 +23,19 @@ export function BookingListItem({
   return (
     <article
       data-testid="booking-item"
+      data-booking-list-item
       data-state={isSelected ? "selected" : undefined}
       className={cn(
         "group relative w-full border-b transition-colors last:border-b-0 hover:bg-muted/40",
         isSelected &&
-          "bg-muted/60 shadow-[inset_0.25rem_0_0_var(--primary)] before:absolute before:top-0 before:left-0 before:h-full before:w-1 before:bg-primary"
+          "bg-muted/60 shadow-[inset_0.1875rem_0_0_var(--primary)] before:absolute before:top-0 before:left-0 before:h-full before:w-0.5 before:bg-primary"
       )}
     >
       <div className="flex flex-col sm:flex-row">
         <Button
           type="button"
           variant="ghost"
-          className="hidden h-auto min-w-48 justify-start rounded-none py-4 pr-4 pl-5 text-left active:bg-muted/60 sm:flex"
+          className="hidden h-auto min-w-44 justify-start rounded-none py-4 pr-3 pl-5 text-left active:bg-muted/60 sm:flex"
           onClick={() => onSelectBooking(booking)}
         >
           <div className="flex min-w-0 flex-col gap-1">
@@ -53,7 +54,7 @@ export function BookingListItem({
         <Button
           type="button"
           variant="ghost"
-          className="flex h-auto min-w-0 flex-1 flex-col items-stretch justify-start gap-3 rounded-none p-4 text-left active:bg-muted/60"
+          className="flex h-auto min-w-0 flex-1 flex-col items-stretch justify-start gap-3 rounded-none px-5 py-4 text-left active:bg-muted/60"
           onClick={() => onSelectBooking(booking)}
         >
           <div className="flex w-full items-start justify-between gap-3 sm:hidden">
@@ -68,7 +69,7 @@ export function BookingListItem({
             <div className="flex flex-wrap items-center gap-2">
               <h2
                 className={cn(
-                  "truncate text-base leading-6 font-medium",
+                  "truncate text-sm leading-5 font-medium",
                   isCancelled && "text-muted-foreground line-through"
                 )}
               >
@@ -108,7 +109,7 @@ export function BookingListItem({
             )}
           </div>
         </Button>
-        <div className="flex items-start justify-end px-4 pb-4 sm:py-4 sm:pr-4 sm:pl-0">
+        <div className="flex items-start justify-end px-5 pb-4 sm:py-4 sm:pr-5 sm:pl-0">
           <BookingActionsDropdown booking={booking} />
         </div>
       </div>

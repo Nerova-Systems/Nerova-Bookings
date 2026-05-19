@@ -25,7 +25,7 @@ export function BookingCalendarView({
   const days = getWeekDays(weekStart);
 
   if (isLoading) {
-    return <Skeleton className="h-[36rem] rounded-md border" data-testid="bookings-calendar-view" />;
+    return <Skeleton className="h-[36rem] rounded-2xl border" data-testid="bookings-calendar-view" />;
   }
 
   if (bookings.length === 0) {
@@ -47,7 +47,7 @@ export function BookingCalendarView({
   }
 
   return (
-    <div className="overflow-hidden rounded-md border bg-background" data-testid="bookings-calendar-view">
+    <div className="overflow-hidden rounded-2xl border bg-background" data-testid="bookings-calendar-view">
       <div className="grid grid-cols-[4rem_repeat(7,minmax(8rem,1fr))] border-b bg-muted/40">
         <div className="border-r" />
         {days.map((day) => (
@@ -83,9 +83,10 @@ export function BookingCalendarView({
                   <button
                     key={booking.id}
                     type="button"
+                    data-booking-calendar-event
                     data-state={selectedBookingId === booking.id ? "selected" : undefined}
                     className={cn(
-                      "absolute right-1 left-1 cursor-pointer overflow-hidden rounded-md border border-primary/30 bg-primary/15 p-2 text-left text-xs shadow-xs outline-primary transition-colors hover:bg-primary/25 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 active:bg-primary/30",
+                      "absolute right-1 left-1 cursor-pointer overflow-hidden rounded-lg border border-primary/30 bg-primary/15 p-2 text-left text-xs shadow-xs outline-primary transition-colors hover:bg-primary/25 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 active:bg-primary/30",
                       selectedBookingId === booking.id && "border-primary bg-primary/25 shadow-md",
                       booking.status.toLowerCase() === "pending" &&
                         "border-amber-500/40 bg-amber-500/15 hover:bg-amber-500/25",

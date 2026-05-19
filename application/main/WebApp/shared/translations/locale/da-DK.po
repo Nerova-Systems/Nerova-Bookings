@@ -933,6 +933,9 @@ msgstr "Årsag til flytning"
 msgid "Reschedule requested"
 msgstr "Ny tid anmodet"
 
+msgid "Rescheduled"
+msgstr "Flyttet"
+
 msgid "Reserve time before and after every booking."
 msgstr "Reserver tid før og efter hver booking."
 
@@ -971,6 +974,12 @@ msgstr "Gemte filtre"
 
 msgid "Saved filters are not implemented yet."
 msgstr "Gemte filtre er ikke implementeret endnu."
+
+msgid "Saved segments"
+msgstr "Gemte segmenter"
+
+msgid "Saved segments are not implemented yet."
+msgstr "Gemte segmenter er ikke implementeret endnu."
 
 msgid "Saving..."
 msgstr "Gemmer..."

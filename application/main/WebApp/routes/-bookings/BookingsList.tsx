@@ -26,12 +26,12 @@ export function BookingsList({
 }>) {
   if (isLoading) {
     return (
-      <div className="overflow-hidden rounded-md border bg-background">
+      <div className="mb-6 overflow-hidden rounded-2xl border bg-background" data-testid={`${status}-bookings`}>
         {Array.from({ length: 5 }).map((_, index) => (
-          <div key={index} className="grid gap-4 border-b p-4 last:border-b-0 sm:grid-cols-[12rem_1fr_auto]">
-            <Skeleton className="h-10 w-full" />
-            <Skeleton className="h-14 w-full" />
-            <Skeleton className="h-9 w-28" />
+          <div key={index} className="grid gap-4 border-b px-5 py-4 last:border-b-0 sm:grid-cols-[11rem_1fr_auto]">
+            <Skeleton className="h-9 w-full" />
+            <Skeleton className="h-12 w-full" />
+            <Skeleton className="h-8 w-16" />
           </div>
         ))}
       </div>
@@ -40,7 +40,7 @@ export function BookingsList({
 
   if (bookings.length === 0) {
     return (
-      <Empty className="min-h-64 border">
+      <Empty className="mb-6 min-h-80 rounded-2xl border" data-testid={`${status}-bookings`}>
         <EmptyHeader>
           <EmptyMedia variant="icon">
             <CalendarXIcon />
@@ -57,7 +57,7 @@ export function BookingsList({
   }
 
   return (
-    <div className="overflow-hidden rounded-md border bg-background" data-testid={`${status}-bookings`}>
+    <div className="mb-6 overflow-hidden rounded-2xl border bg-background" data-testid={`${status}-bookings`}>
       {bookings.map((booking) => (
         <BookingListRow
           key={booking.id}
