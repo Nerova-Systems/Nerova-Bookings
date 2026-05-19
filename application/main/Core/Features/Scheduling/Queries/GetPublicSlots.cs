@@ -1,4 +1,5 @@
 using JetBrains.Annotations;
+using Main.Features.Connectors.Domain;
 using Main.Features.Scheduling.Domain;
 using Main.Features.Scheduling.Shared;
 using SharedKernel.Cqrs;
@@ -19,7 +20,8 @@ public sealed record GetPublicSlotsQuery(
 public sealed class GetPublicSlotsHandler(
     PublicSchedulingResolver publicSchedulingResolver,
     IBookingRepository bookingRepository,
-    PublicSlotCalculator publicSlotCalculator
+    PublicSlotCalculator publicSlotCalculator,
+    ICoreConnectorClient coreConnectorClient
 ) : IRequestHandler<GetPublicSlotsQuery, Result<PublicSlotsResponse>>
 {
     public async Task<Result<PublicSlotsResponse>> Handle(GetPublicSlotsQuery query, CancellationToken cancellationToken)
@@ -49,7 +51,13 @@ public sealed class GetPublicSlotsHandler(
             query.EndTime.AddDays(1),
             cancellationToken
         );
-        var slots = publicSlotCalculator.GetSlots(context.EventType, context.Schedule, bookings, query.StartTime, query.EndTime, query.TimeZone, duration);
+        var busyWindows = await coreConnectorClient.GetBusyWindowsAsync(
+            context.EventType.Settings.SelectedCalendars,
+            query.StartTime,
+            query.EndTime,
+            cancellationToken
+        );
+        var slots = publicSlotCalculator.GetSlots(context.EventType, context.Schedule, bookings, busyWindows, query.StartTime, query.EndTime, query.TimeZone, duration);
 
         return new PublicSlotsResponse(slots);
     }

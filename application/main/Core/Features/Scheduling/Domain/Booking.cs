@@ -120,7 +120,7 @@ public sealed class Booking : AggregateRoot<BookingId>, ITenantScopedEntity
 
     public string AttendeesJson { get; private set; }
 
-    public string ReferencesJson { get; }
+    public string ReferencesJson { get; private set; }
 
     public string SeatReferencesJson { get; }
 
@@ -225,6 +225,25 @@ public sealed class Booking : AggregateRoot<BookingId>, ITenantScopedEntity
         RaiseSideEffectEvent(BookingSideEffectConstants.BookingGuestsAdded);
     }
 
+    public void UpsertReference(BookingReference reference)
+    {
+        var references = References
+            .Where(existing => !IsSameReference(existing, reference))
+            .Append(reference)
+            .ToArray();
+
+        ReferencesJson = JsonSerializer.Serialize(references, JsonSerializerOptions);
+    }
+
+    public void MarkReferencesDeleted(string type)
+    {
+        var references = References
+            .Select(reference => reference.Type.Equals(type, StringComparison.OrdinalIgnoreCase) ? reference with { Deleted = true } : reference)
+            .ToArray();
+
+        ReferencesJson = JsonSerializer.Serialize(references, JsonSerializerOptions);
+    }
+
     public static Booking Create(
         TenantId tenantId,
         UserId ownerUserId,
@@ -267,6 +286,17 @@ public sealed class Booking : AggregateRoot<BookingId>, ITenantScopedEntity
                 LocationValue
             )
         );
+    }
+
+    private static bool IsSameReference(BookingReference existing, BookingReference replacement)
+    {
+        if (!existing.Type.Equals(replacement.Type, StringComparison.OrdinalIgnoreCase)) return false;
+        if (!string.IsNullOrWhiteSpace(existing.ExternalCalendarId) || !string.IsNullOrWhiteSpace(replacement.ExternalCalendarId))
+        {
+            return string.Equals(existing.ExternalCalendarId, replacement.ExternalCalendarId, StringComparison.OrdinalIgnoreCase);
+        }
+
+        return string.Equals(existing.Uid, replacement.Uid, StringComparison.OrdinalIgnoreCase);
     }
 }
 

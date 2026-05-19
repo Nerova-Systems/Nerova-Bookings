@@ -1,5 +1,6 @@
 using FluentValidation;
 using JetBrains.Annotations;
+using Main.Features.Connectors.Domain;
 using Main.Features.EventTypes.Domain;
 using Main.Features.Schedules.Domain;
 using Main.Features.Scheduling.Domain;
@@ -44,6 +45,7 @@ public sealed class CreatePublicBookingHandler(
     IBookingRepository bookingRepository,
     IEventTypeRepository eventTypeRepository,
     PublicSlotCalculator publicSlotCalculator,
+    ICoreConnectorClient coreConnectorClient,
     TimeProvider timeProvider
 ) : IRequestHandler<CreatePublicBookingCommand, Result<CreatePublicBookingResponse>>
 {
@@ -86,7 +88,13 @@ public sealed class CreatePublicBookingHandler(
             bookings = bookings.Where(booking => booking.Id != originalBooking.Id).ToArray();
         }
 
-        if (!publicSlotCalculator.IsSlotAvailable(context.EventType, context.Schedule, bookings, command.StartTime, command.Duration, command.TimeZone))
+        var busyWindows = await coreConnectorClient.GetBusyWindowsAsync(
+            context.EventType.Settings.SelectedCalendars,
+            command.StartTime,
+            endTime,
+            cancellationToken
+        );
+        if (!publicSlotCalculator.IsSlotAvailable(context.EventType, context.Schedule, bookings, busyWindows, command.StartTime, command.Duration, command.TimeZone))
         {
             return Result<CreatePublicBookingResponse>.Conflict("The selected slot is no longer available.");
         }

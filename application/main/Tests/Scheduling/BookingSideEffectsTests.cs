@@ -7,6 +7,7 @@ using JetBrains.Annotations;
 using Main.Database;
 using Main.Features.BookingSideEffects.Domain;
 using Main.Features.BookingSideEffects.Workers;
+using Main.Features.Connectors.Domain;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging.Abstractions;
@@ -117,6 +118,45 @@ public sealed class BookingSideEffectsTests : EndpointBaseTest<MainDbContext>
             "SELECT COUNT(DISTINCT dedupe_key) FROM booking_side_effect_deliveries WHERE booking_id = @booking_id",
             [new { booking_id = booking.Id }]
         ).Should().Be(2);
+    }
+
+    [Fact]
+    public async Task CreatePublicBooking_WhenDestinationCalendarAndZoomLocationAreConfigured_ShouldSyncCalendarAndConferenceReferences()
+    {
+        // Arrange
+        await UpdateSchedulingProfileAsync("owner");
+        var schedule = await CreateScheduleAsync();
+        await CreateEventTypeAsync(
+            schedule.Id,
+            "Intro call",
+            "intro-call",
+            new
+            {
+                destinationCalendar = new { integration = "google-calendar", externalId = "primary", credentialId = "fake-google" },
+                defaultConferencing = new { app = "zoom-video", credentialId = "fake-zoom" }
+            },
+            "integration",
+            "zoom-video"
+        );
+        var booking = await CreateBookingAsync("intro-call", "2026-06-01T07:00:00Z", "Ada Lovelace", "ada@example.com");
+
+        using var scope = Provider.CreateScope();
+        var processor = scope.ServiceProvider.GetRequiredService<BookingSideEffectProcessor>();
+
+        // Act
+        var processed = await processor.ProcessPendingAsync(10, CancellationToken.None);
+
+        // Assert
+        processed.Should().Be(2);
+        Connection.ExecuteScalar<long>(
+            "SELECT COUNT(*) FROM booking_side_effect_deliveries WHERE booking_id = @booking_id AND kind IN ('calendar', 'conferencing') AND status = 'sent'",
+            [new { booking_id = booking.Id }]
+        ).Should().Be(2);
+
+        var referencesJson = Connection.ExecuteScalar<string>("SELECT references_json FROM bookings WHERE id = @id", [new { id = booking.Id }]);
+        referencesJson.Should().Contain("google-calendar");
+        referencesJson.Should().Contain("zoom-video");
+        referencesJson.Should().Contain("https://zoom.example.test");
     }
 
     [Fact]
@@ -303,6 +343,7 @@ public sealed class BookingSideEffectsTests : EndpointBaseTest<MainDbContext>
             scope.ServiceProvider.GetRequiredService<MainDbContext>(),
             EmailClient,
             new StaticHttpClientFactory(new HttpClient(httpHandler)),
+            scope.ServiceProvider.GetRequiredService<ICoreConnectorClient>(),
             TimeProvider.System,
             NullLogger<BookingSideEffectProcessor>.Instance
         );
@@ -406,7 +447,14 @@ public sealed class BookingSideEffectsTests : EndpointBaseTest<MainDbContext>
         return (await response.DeserializeResponse<ScheduleResponse>())!;
     }
 
-    private async Task<EventTypeResponse> CreateEventTypeAsync(string scheduleId, string title, string slug, object? settings = null)
+    private async Task<EventTypeResponse> CreateEventTypeAsync(
+        string scheduleId,
+        string title,
+        string slug,
+        object? settings = null,
+        string locationType = "link",
+        string locationValue = "https://example.com/meet"
+    )
     {
         var response = await AuthenticatedOwnerHttpClient.PostAsJsonAsync(
             "/api/event-types",
@@ -422,8 +470,8 @@ public sealed class BookingSideEffectsTests : EndpointBaseTest<MainDbContext>
                 afterEventBufferMinutes = 0,
                 slotIntervalMinutes = 30,
                 minimumBookingNoticeMinutes = 0,
-                locationType = "link",
-                locationValue = "https://example.com/meet",
+                locationType,
+                locationValue,
                 settings
             }
         );

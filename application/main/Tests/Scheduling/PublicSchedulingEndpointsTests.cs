@@ -219,6 +219,40 @@ public sealed class PublicSchedulingEndpointsTests : EndpointBaseTest<MainDbCont
     }
 
     [Fact]
+    public async Task GetPublicSlots_WhenGoogleSelectedCalendarHasBusyWindow_ShouldRemoveBusySlot()
+    {
+        // Arrange
+        await UpdateSchedulingProfileAsync("owner");
+        var schedule = await CreateScheduleAsync();
+        await CreateEventTypeAsync(
+            schedule.Id,
+            "Intro call",
+            "intro-call",
+            settings: new
+            {
+                selectedCalendars = new[]
+                {
+                    new
+                    {
+                        integration = "google-calendar",
+                        externalId = "primary",
+                        credentialId = "fake-busy:2026-06-01T07:00:00Z/2026-06-01T07:30:00Z"
+                    }
+                }
+            }
+        );
+
+        // Act
+        var response = await AnonymousHttpClient.GetAsync("/api/public/slots?handle=owner&eventSlug=intro-call&startTime=2026-06-01T00:00:00Z&endTime=2026-06-02T00:00:00Z&timeZone=Africa/Johannesburg&duration=30");
+
+        // Assert
+        response.ShouldBeSuccessfulGetRequest();
+        var slots = await response.DeserializeResponse<PublicSlotsResponse>();
+        slots!.Slots["2026-06-01"].Select(slot => slot.Time).Should().NotContain(DateTimeOffset.Parse("2026-06-01T07:00:00Z"));
+        slots.Slots["2026-06-01"].Select(slot => slot.Time).Should().Contain(DateTimeOffset.Parse("2026-06-01T07:30:00Z"));
+    }
+
+    [Fact]
     public async Task GetPublicSlots_WhenStoredDurationOptionsAreEmpty_ShouldUsePrimaryDuration()
     {
         // Arrange

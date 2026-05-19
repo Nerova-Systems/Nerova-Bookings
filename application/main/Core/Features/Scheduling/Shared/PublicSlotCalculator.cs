@@ -1,3 +1,4 @@
+using Main.Features.Connectors.Domain;
 using Main.Features.EventTypes.Domain;
 using Main.Features.Schedules.Domain;
 using Main.Features.Scheduling.Domain;
@@ -10,6 +11,7 @@ public sealed class PublicSlotCalculator(TimeProvider timeProvider)
         EventType eventType,
         Schedule schedule,
         Booking[] bookings,
+        CalendarBusyWindow[] busyWindows,
         DateTimeOffset startTime,
         DateTimeOffset endTime,
         string timeZone,
@@ -43,7 +45,7 @@ public sealed class PublicSlotCalculator(TimeProvider timeProvider)
                     var candidateEnd = candidateStart.AddMinutes(duration);
                     if (candidateStart < startTime || candidateEnd > endTime || candidateStart < earliestStart) continue;
                     if (!IsInsideBookingWindow(eventType, candidateStart, requestTimeZone, now)) continue;
-                    if (HasConflict(eventType, bookings, candidateStart, candidateEnd)) continue;
+                    if (HasConflict(eventType, bookings, busyWindows, candidateStart, candidateEnd)) continue;
 
                     slots.Add(new PublicSlotResponse(candidateStart, candidateEnd));
                 }
@@ -62,9 +64,17 @@ public sealed class PublicSlotCalculator(TimeProvider timeProvider)
             );
     }
 
-    public bool IsSlotAvailable(EventType eventType, Schedule schedule, Booking[] bookings, DateTimeOffset startTime, int duration, string timeZone)
+    public bool IsSlotAvailable(
+        EventType eventType,
+        Schedule schedule,
+        Booking[] bookings,
+        CalendarBusyWindow[] busyWindows,
+        DateTimeOffset startTime,
+        int duration,
+        string timeZone
+    )
     {
-        return GetSlots(eventType, schedule, bookings, startTime, startTime.AddMinutes(duration), timeZone, duration)
+        return GetSlots(eventType, schedule, bookings, busyWindows, startTime, startTime.AddMinutes(duration), timeZone, duration)
             .Values
             .SelectMany(slots => slots)
             .Any(slot => slot.Time == startTime);
@@ -92,10 +102,21 @@ public sealed class PublicSlotCalculator(TimeProvider timeProvider)
         return true;
     }
 
-    private static bool HasConflict(EventType eventType, Booking[] bookings, DateTimeOffset candidateStart, DateTimeOffset candidateEnd)
+    private static bool HasConflict(
+        EventType eventType,
+        Booking[] bookings,
+        CalendarBusyWindow[] busyWindows,
+        DateTimeOffset candidateStart,
+        DateTimeOffset candidateEnd
+    )
     {
         var candidateConflictStart = candidateStart.AddMinutes(-eventType.BeforeEventBufferMinutes);
         var candidateConflictEnd = candidateEnd.AddMinutes(eventType.AfterEventBufferMinutes);
+        if (busyWindows.Any(window => candidateConflictStart < window.EndTime && candidateConflictEnd > window.StartTime))
+        {
+            return true;
+        }
+
         var overlappingBookings = bookings
             .Where(booking =>
                 {

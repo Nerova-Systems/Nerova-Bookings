@@ -30,6 +30,10 @@ public sealed record EventTypeSettings
 
     public EventTypeSelectedCalendar[] SelectedCalendars { get; init; } = [];
 
+    public EventTypeDestinationCalendar? DestinationCalendar { get; init; }
+
+    public EventTypeDefaultConferencing? DefaultConferencing { get; init; }
+
     public EventTypeCancellationPolicy CancellationPolicy { get; init; } = new();
 
     public EventTypeReschedulePolicy ReschedulePolicy { get; init; } = new();
@@ -114,6 +118,23 @@ public sealed record EventTypeSettings
                 )
                 .DistinctBy(calendar => $"{calendar.Integration}:{calendar.ExternalId}:{calendar.CredentialId}", StringComparer.OrdinalIgnoreCase)
                 .ToArray(),
+            DestinationCalendar = source.DestinationCalendar is null ||
+                                  string.IsNullOrWhiteSpace(source.DestinationCalendar.Integration) ||
+                                  string.IsNullOrWhiteSpace(source.DestinationCalendar.ExternalId)
+                ? null
+                : source.DestinationCalendar with
+                    {
+                        Integration = source.DestinationCalendar.Integration.Trim(),
+                        ExternalId = source.DestinationCalendar.ExternalId.Trim(),
+                        CredentialId = string.IsNullOrWhiteSpace(source.DestinationCalendar.CredentialId) ? null : source.DestinationCalendar.CredentialId.Trim()
+                    },
+            DefaultConferencing = source.DefaultConferencing is null || string.IsNullOrWhiteSpace(source.DefaultConferencing.App)
+                ? null
+                : source.DefaultConferencing with
+                    {
+                        App = source.DefaultConferencing.App.Trim(),
+                        CredentialId = string.IsNullOrWhiteSpace(source.DefaultConferencing.CredentialId) ? null : source.DefaultConferencing.CredentialId.Trim()
+                    },
             CancellationPolicy = source.CancellationPolicy,
             ReschedulePolicy = source.ReschedulePolicy,
             Redirects = source.Redirects,
@@ -277,6 +298,19 @@ public sealed class EventTypeSettingsValidator : AbstractValidator<EventTypeSett
                 calendar.RuleFor(c => c.CredentialId).MaximumLength(120);
             }
         );
+        RuleFor(settings => settings.DestinationCalendar).ChildRules(calendar =>
+            {
+                calendar.RuleFor(c => c!.Integration).NotEmpty().MaximumLength(120);
+                calendar.RuleFor(c => c!.ExternalId).NotEmpty().MaximumLength(500);
+                calendar.RuleFor(c => c!.CredentialId).MaximumLength(120);
+            }
+        ).When(settings => settings.DestinationCalendar is not null);
+        RuleFor(settings => settings.DefaultConferencing).ChildRules(conferencing =>
+            {
+                conferencing.RuleFor(c => c!.App).NotEmpty().MaximumLength(120);
+                conferencing.RuleFor(c => c!.CredentialId).MaximumLength(120);
+            }
+        ).When(settings => settings.DefaultConferencing is not null);
         RuleFor(settings => settings.Redirects.SuccessUrl)
             .Must(IsHttpUrl)
             .WithMessage("Success redirect URL must be an absolute HTTP or HTTPS URL.");
@@ -473,6 +507,22 @@ public sealed record EventTypeSelectedCalendar
     public string Integration { get; init; } = string.Empty;
 
     public string ExternalId { get; init; } = string.Empty;
+
+    public string? CredentialId { get; init; }
+}
+
+public sealed record EventTypeDestinationCalendar
+{
+    public string Integration { get; init; } = string.Empty;
+
+    public string ExternalId { get; init; } = string.Empty;
+
+    public string? CredentialId { get; init; }
+}
+
+public sealed record EventTypeDefaultConferencing
+{
+    public string App { get; init; } = string.Empty;
 
     public string? CredentialId { get; init; }
 }

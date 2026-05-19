@@ -228,6 +228,9 @@ msgstr "Sidder du stadig oppe?"
 msgid "By"
 msgstr "Af"
 
+msgid "Calendar ID"
+msgstr ""
+
 msgid "Calendar view"
 msgstr "Kalendervisning"
 
@@ -261,8 +264,8 @@ msgstr "Afkrydsningsfelt"
 msgid "Choose the booker layout and accent color for this event type."
 msgstr "Choose the booker layout and accent color for this event type."
 
-msgid "Choose where confirmed bookings should be written."
-msgstr "Choose where confirmed bookings should be written."
+msgid "Choose the core calendar and conferencing apps used by this event type."
+msgstr ""
 
 msgid "Choose which schedule controls when this event type can be booked."
 msgstr "Vælg, hvilken tidsplan der styrer, hvornår denne begivenhedstype kan bookes."
@@ -349,6 +352,9 @@ msgstr "Opret tidsplan"
 msgid "Create the booking page basics now, then finish setup on the next screen."
 msgstr "Opret de grundlæggende bookingoplysninger nu, og færdiggør opsætningen på næste skærm."
 
+msgid "Credential reference"
+msgstr ""
+
 msgid "Daily"
 msgstr "Daily"
 
@@ -366,6 +372,9 @@ msgstr "Datoundtagelser"
 
 msgid "Default"
 msgstr "Standard"
+
+msgid "Default conferencing"
+msgstr ""
 
 msgid "Define the public booking page details people see before they choose a time."
 msgstr "Angiv oplysningerne på den offentlige bookingside, som vises, før folk vælger en tid."
@@ -547,6 +556,12 @@ msgstr "God morgen"
 msgid "Good morning, {firstName}"
 msgstr "God morgen, {firstName}"
 
+msgid "Google Calendar"
+msgstr ""
+
+msgid "Google Meet"
+msgstr ""
+
 msgid "Guest"
 msgstr "Gæst"
 
@@ -722,8 +737,14 @@ msgstr "Ingen brugerdefinerede bookingfelter endnu."
 msgid "No custom responses were captured."
 msgstr "Ingen brugerdefinerede svar blev registreret."
 
+msgid "No default conferencing"
+msgstr ""
+
 msgid "No delivery attempts yet."
 msgstr "Ingen leveringsforsøg endnu."
+
+msgid "No destination calendar"
+msgstr ""
 
 msgid "No event types match your search."
 msgstr "Ingen begivenhedstyper matcher din søgning."
@@ -739,6 +760,9 @@ msgstr "Ingen private links endnu."
 
 msgid "No schedules yet"
 msgstr "Ingen tidsplaner endnu"
+
+msgid "No selected calendars. Availability only uses Nerova bookings."
+msgstr ""
 
 msgid "No settings available yet."
 msgstr "Ingen indstillinger er tilgængelige endnu."
@@ -778,6 +802,12 @@ msgstr "Offer multiple seats for each available time."
 
 msgid "Offer seats"
 msgstr "Offer seats"
+
+msgid "Office 365 Calendar"
+msgstr ""
+
+msgid "Office 365 video"
+msgstr ""
 
 msgid "Offset start"
 msgstr "Offset start"
@@ -1053,6 +1083,9 @@ msgstr "Vælg tidsplan"
 msgid "Select week"
 msgstr "Vælg uge"
 
+msgid "Selected calendars"
+msgstr ""
+
 msgid "Send bookers to a custom page after success or cancellation."
 msgstr "Send bookers to a custom page after success or cancellation."
 
@@ -1133,9 +1166,6 @@ msgstr "Tekst"
 
 msgid "Textarea"
 msgstr "Tekstområde"
-
-msgid "These features need more integration before they can be edited here."
-msgstr "These features need more integration before they can be edited here."
 
 msgid "this attendee"
 msgstr "denne deltager"
@@ -1307,3 +1337,6 @@ msgstr "Din booking er bekræftet."
 
 msgid "Your dashboard is empty"
 msgstr "Dit dashboard er tomt"
+
+msgid "Zoom"
+msgstr ""

@@ -73,6 +73,12 @@ export function EventTypeAdvancedTab({ value, onChange, error }: EventTypeTabPro
       }))
     );
   };
+  const updateDestinationCalendar = (destinationCalendar: EventTypeSettings["destinationCalendar"]) => {
+    updateSettings((nextSettings) => ({ ...nextSettings, destinationCalendar }));
+  };
+  const updateDefaultConferencing = (defaultConferencing: EventTypeSettings["defaultConferencing"]) => {
+    updateSettings((nextSettings) => ({ ...nextSettings, defaultConferencing }));
+  };
 
   return (
     <FormValidationContext.Provider value={error?.errors ?? {}}>
@@ -252,11 +258,12 @@ export function EventTypeAdvancedTab({ value, onChange, error }: EventTypeTabPro
         </EventTypeTabSection>
         <EventTypeTabSection
           title={<Trans>Connected features</Trans>}
-          description={<Trans>These features need more integration before they can be edited here.</Trans>}
+          description={<Trans>Choose the core calendar and conferencing apps used by this event type.</Trans>}
         >
-          <DisabledFeatureRow
-            title={<Trans>Destination calendar</Trans>}
-            description={<Trans>Choose where confirmed bookings should be written.</Trans>}
+          <CoreConnectorSettings
+            settings={settings}
+            onDestinationCalendarChange={updateDestinationCalendar}
+            onDefaultConferencingChange={updateDefaultConferencing}
           />
           <DisabledFeatureRow
             title={<Trans>Workflows</Trans>}
@@ -284,6 +291,144 @@ type EventTypeSettings = ReturnType<typeof getEventTypeSettings>;
 type BookingField = EventTypeSettings["bookingFields"][number];
 type BookingFieldOption = BookingField["options"][number];
 type PrivateLink = EventTypeSettings["privateLinks"][number];
+
+function CoreConnectorSettings({
+  settings,
+  onDestinationCalendarChange,
+  onDefaultConferencingChange
+}: Readonly<{
+  settings: EventTypeSettings;
+  onDestinationCalendarChange: (destinationCalendar: EventTypeSettings["destinationCalendar"]) => void;
+  onDefaultConferencingChange: (defaultConferencing: EventTypeSettings["defaultConferencing"]) => void;
+}>) {
+  const calendarIntegrations = [
+    { value: "none", label: t`No destination calendar` },
+    { value: "google-calendar", label: t`Google Calendar` },
+    { value: "office365-calendar", label: t`Office 365 Calendar` }
+  ];
+  const conferencingApps = [
+    { value: "none", label: t`No default conferencing` },
+    { value: "google-meet", label: t`Google Meet` },
+    { value: "office365-video", label: t`Office 365 video` },
+    { value: "zoom-video", label: t`Zoom` }
+  ];
+  const destinationCalendar = settings.destinationCalendar;
+  const defaultConferencing = settings.defaultConferencing;
+
+  const updateDestination = (patch: Partial<NonNullable<EventTypeSettings["destinationCalendar"]>>) => {
+    const nextDestination = {
+      integration: destinationCalendar?.integration || "google-calendar",
+      externalId: destinationCalendar?.externalId || "primary",
+      credentialId: destinationCalendar?.credentialId ?? null,
+      ...patch
+    };
+    onDestinationCalendarChange(nextDestination);
+  };
+  const updateConferencing = (patch: Partial<NonNullable<EventTypeSettings["defaultConferencing"]>>) => {
+    const nextConferencing = {
+      app: defaultConferencing?.app || "zoom-video",
+      credentialId: defaultConferencing?.credentialId ?? null,
+      ...patch
+    };
+    onDefaultConferencingChange(nextConferencing);
+  };
+
+  return (
+    <div className="grid gap-5">
+      <div className="grid gap-4 rounded-md border p-4">
+        <SelectField
+          name="destinationCalendarIntegration"
+          label={t`Destination calendar`}
+          items={calendarIntegrations}
+          value={destinationCalendar?.integration ?? "none"}
+          onValueChange={(integration) =>
+            !integration || integration === "none" ? onDestinationCalendarChange(null) : updateDestination({ integration })
+          }
+        >
+          <SelectTrigger>
+            <SelectValue>
+              {(integration: string) =>
+                calendarIntegrations.find((item) => item.value === integration)?.label ?? integration
+              }
+            </SelectValue>
+          </SelectTrigger>
+          <SelectContent>
+            {calendarIntegrations.map((integration) => (
+              <SelectItem key={integration.value} value={integration.value}>
+                {integration.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </SelectField>
+        {destinationCalendar && (
+          <div className="grid gap-4 md:grid-cols-2">
+            <TextField
+              name="destinationCalendarExternalId"
+              label={t`Calendar ID`}
+              value={destinationCalendar.externalId}
+              onChange={(externalId) => updateDestination({ externalId })}
+            />
+            <TextField
+              name="destinationCalendarCredentialId"
+              label={t`Credential reference`}
+              value={destinationCalendar.credentialId ?? ""}
+              onChange={(credentialId) => updateDestination({ credentialId: credentialId || null })}
+            />
+          </div>
+        )}
+      </div>
+      <div className="grid gap-4 rounded-md border p-4">
+        <SelectField
+          name="defaultConferencingApp"
+          label={t`Default conferencing`}
+          items={conferencingApps}
+          value={defaultConferencing?.app ?? "none"}
+          onValueChange={(app) => (!app || app === "none" ? onDefaultConferencingChange(null) : updateConferencing({ app }))}
+        >
+          <SelectTrigger>
+            <SelectValue>
+              {(app: string) => conferencingApps.find((item) => item.value === app)?.label ?? app}
+            </SelectValue>
+          </SelectTrigger>
+          <SelectContent>
+            {conferencingApps.map((app) => (
+              <SelectItem key={app.value} value={app.value}>
+                {app.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </SelectField>
+        {defaultConferencing && (
+          <TextField
+            name="defaultConferencingCredentialId"
+            label={t`Credential reference`}
+            value={defaultConferencing.credentialId ?? ""}
+            onChange={(credentialId) => updateConferencing({ credentialId: credentialId || null })}
+          />
+        )}
+      </div>
+      <div className="grid gap-3 rounded-md border p-4">
+        <div className="text-sm font-medium">
+          <Trans>Selected calendars</Trans>
+        </div>
+        {settings.selectedCalendars.length === 0 ? (
+          <div className="text-sm text-muted-foreground">
+            <Trans>No selected calendars. Availability only uses Nerova bookings.</Trans>
+          </div>
+        ) : (
+          <div className="grid gap-2 text-sm">
+            {settings.selectedCalendars.map((calendar) => (
+              <div key={`${calendar.integration}-${calendar.externalId}-${calendar.credentialId ?? ""}`} className="rounded-md bg-muted/40 p-3">
+                <div className="font-medium">{calendar.integration}</div>
+                <div className="text-muted-foreground">{calendar.externalId}</div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
 
 function BookingFieldsEditor({
   value,

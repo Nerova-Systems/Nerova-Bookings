@@ -80,6 +80,27 @@ public sealed class RouteConfigurationTests(AppGatewayApplicationFactory factory
         hostnameKeys.Should().NotContain("BackOffice");
     }
 
+    [Theory]
+    [InlineData("account-static")]
+    [InlineData("main-static")]
+    public void DevelopmentStaticRoutes_ShouldDisableBrowserCaching(string routeId)
+    {
+        // Act
+        var route = GetRoute(routeId);
+
+        // Assert
+        route.Transforms.Should().NotBeNull();
+        route.Transforms!.Any(DisablesBrowserCaching).Should().BeTrue();
+    }
+
+    private static bool DisablesBrowserCaching(IReadOnlyDictionary<string, string> transform)
+    {
+        return transform.TryGetValue("ResponseHeader", out var header) &&
+               header == "Cache-Control" &&
+               transform.TryGetValue("Set", out var value) &&
+               value == "no-cache, no-store, must-revalidate";
+    }
+
     private RouteConfig GetRoute(string routeId)
     {
         using var scope = factory.Services.CreateScope();

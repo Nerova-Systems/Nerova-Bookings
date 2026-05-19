@@ -4,6 +4,9 @@ using System.Text;
 using System.Text.Json;
 using Main.Database;
 using Main.Features.BookingSideEffects.Domain;
+using Main.Features.Connectors.Domain;
+using Main.Features.EventTypes.Domain;
+using Main.Features.Scheduling.Domain;
 using Microsoft.EntityFrameworkCore;
 using SharedKernel.Integrations.Email;
 
@@ -13,6 +16,7 @@ public sealed class BookingSideEffectProcessor(
     MainDbContext mainDbContext,
     IEmailClient emailClient,
     IHttpClientFactory httpClientFactory,
+    ICoreConnectorClient coreConnectorClient,
     TimeProvider timeProvider,
     ILogger<BookingSideEffectProcessor> logger
 )
@@ -54,6 +58,14 @@ public sealed class BookingSideEffectProcessor(
             else if (delivery.Kind.Equals(BookingSideEffectConstants.WebhookKind, StringComparison.OrdinalIgnoreCase))
             {
                 await SendWebhookAsync(delivery, cancellationToken);
+            }
+            else if (delivery.Kind.Equals(BookingSideEffectConstants.CalendarKind, StringComparison.OrdinalIgnoreCase))
+            {
+                await SyncCalendarAsync(delivery, cancellationToken);
+            }
+            else if (delivery.Kind.Equals(BookingSideEffectConstants.ConferencingKind, StringComparison.OrdinalIgnoreCase))
+            {
+                await SyncConferencingAsync(delivery, cancellationToken);
             }
             else
             {
@@ -122,6 +134,57 @@ public sealed class BookingSideEffectProcessor(
 
         using var response = await client.SendAsync(request, cancellationToken);
         response.EnsureSuccessStatusCode();
+    }
+
+    private async Task SyncCalendarAsync(BookingSideEffectDelivery delivery, CancellationToken cancellationToken)
+    {
+        var payload = JsonSerializer.Deserialize<BookingConnectorCalendarDeliveryPayload>(delivery.PayloadJson, JsonSerializerOptions)
+                      ?? throw new JsonException("Calendar connector delivery payload is invalid.");
+        var booking = await LoadBookingAsync(delivery.BookingId, cancellationToken);
+        var destinationCalendar = new EventTypeDestinationCalendar
+        {
+            Integration = payload.Integration,
+            ExternalId = payload.ExternalId,
+            CredentialId = payload.CredentialId
+        };
+
+        if (ShouldDeleteReference(delivery.Trigger))
+        {
+            booking.MarkReferencesDeleted(destinationCalendar.Integration);
+            return;
+        }
+
+        booking.UpsertReference(await coreConnectorClient.CreateCalendarEventAsync(booking, destinationCalendar, cancellationToken));
+    }
+
+    private async Task SyncConferencingAsync(BookingSideEffectDelivery delivery, CancellationToken cancellationToken)
+    {
+        var payload = JsonSerializer.Deserialize<BookingConnectorConferencingDeliveryPayload>(delivery.PayloadJson, JsonSerializerOptions)
+                      ?? throw new JsonException("Conferencing connector delivery payload is invalid.");
+        var booking = await LoadBookingAsync(delivery.BookingId, cancellationToken);
+        var conferencing = new EventTypeDefaultConferencing { App = payload.App, CredentialId = payload.CredentialId };
+
+        if (ShouldDeleteReference(delivery.Trigger))
+        {
+            booking.MarkReferencesDeleted(conferencing.App);
+            return;
+        }
+
+        booking.UpsertReference(await coreConnectorClient.CreateMeetingAsync(booking, conferencing, cancellationToken));
+    }
+
+    private async Task<Booking> LoadBookingAsync(BookingId bookingId, CancellationToken cancellationToken)
+    {
+        return await mainDbContext.Set<Booking>()
+                   .IgnoreQueryFilters()
+                   .AsTracking()
+                   .SingleOrDefaultAsync(booking => booking.Id == bookingId, cancellationToken) ??
+               throw new JsonException($"Booking '{bookingId}' was not found for connector delivery.");
+    }
+
+    private static bool ShouldDeleteReference(string trigger)
+    {
+        return trigger is BookingSideEffectConstants.BookingCancelled or BookingSideEffectConstants.BookingRejected or BookingSideEffectConstants.BookingRescheduled;
     }
 
     private static string DefaultEmailSubject(BookingEmailDeliveryPayload payload)

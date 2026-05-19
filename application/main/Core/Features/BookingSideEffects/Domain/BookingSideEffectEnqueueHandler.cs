@@ -1,10 +1,13 @@
 using System.Text.Json;
+using Main.Features.Connectors.Domain;
+using Main.Features.EventTypes.Domain;
 
 namespace Main.Features.BookingSideEffects.Domain;
 
 public sealed class BookingSideEffectEnqueueHandler(
     IWorkflowRepository workflowRepository,
     IWebhookSubscriptionRepository webhookSubscriptionRepository,
+    IEventTypeRepository eventTypeRepository,
     IBookingSideEffectDeliveryRepository deliveryRepository,
     TimeProvider timeProvider
 ) : INotificationHandler<BookingLifecycleSideEffectEvent>
@@ -23,6 +26,12 @@ public sealed class BookingSideEffectEnqueueHandler(
         foreach (var webhook in webhooks)
         {
             await EnqueueWebhookAsync(notification, webhook, cancellationToken);
+        }
+
+        var eventType = await eventTypeRepository.GetByIdUnfilteredAsync(notification.TenantId, notification.EventTypeId, cancellationToken);
+        if (eventType is not null)
+        {
+            await EnqueueConnectorSyncAsync(notification, eventType, cancellationToken);
         }
     }
 
@@ -109,6 +118,79 @@ public sealed class BookingSideEffectEnqueueHandler(
             cancellationToken
         );
     }
+
+    private async Task EnqueueConnectorSyncAsync(BookingLifecycleSideEffectEvent notification, EventType eventType, CancellationToken cancellationToken)
+    {
+        if (eventType.Settings.DestinationCalendar is { } destinationCalendar &&
+            CoreConnectorConstants.IsCoreCalendar(destinationCalendar.Integration))
+        {
+            await EnqueueDeliveryAsync(
+                notification,
+                BookingSideEffectConstants.CalendarKind,
+                $"calendar:{destinationCalendar.Integration}:{destinationCalendar.ExternalId}",
+                new BookingConnectorCalendarDeliveryPayload(
+                    notification.Trigger,
+                    destinationCalendar.Integration,
+                    destinationCalendar.ExternalId,
+                    destinationCalendar.CredentialId
+                ),
+                cancellationToken
+            );
+        }
+
+        var conferencing = ResolveConferencing(eventType);
+        if (conferencing is not null && CoreConnectorConstants.IsCoreConferencing(conferencing.App))
+        {
+            await EnqueueDeliveryAsync(
+                notification,
+                BookingSideEffectConstants.ConferencingKind,
+                $"conferencing:{conferencing.App}",
+                new BookingConnectorConferencingDeliveryPayload(notification.Trigger, conferencing.App, conferencing.CredentialId),
+                cancellationToken
+            );
+        }
+    }
+
+    private async Task EnqueueDeliveryAsync<TPayload>(
+        BookingLifecycleSideEffectEvent notification,
+        string kind,
+        string scope,
+        TPayload payload,
+        CancellationToken cancellationToken
+    )
+    {
+        var dedupeKey = $"{notification.BookingId}:{notification.Trigger}:{scope}";
+        if (await deliveryRepository.ExistsByDedupeKeyAsync(dedupeKey, cancellationToken)) return;
+
+        await deliveryRepository.AddAsync(
+            BookingSideEffectDelivery.Create(
+                notification.TenantId,
+                notification.BookingId,
+                notification.EventTypeId,
+                notification.Trigger,
+                kind,
+                JsonSerializer.Serialize(payload, JsonSerializerOptions),
+                dedupeKey,
+                timeProvider.GetUtcNow()
+            ),
+            cancellationToken
+        );
+    }
+
+    private static EventTypeDefaultConferencing? ResolveConferencing(EventType eventType)
+    {
+        if (eventType.Settings.DefaultConferencing is { } defaultConferencing)
+        {
+            return defaultConferencing;
+        }
+
+        return eventType.LocationType is not null &&
+               eventType.LocationType.Equals("integration", StringComparison.OrdinalIgnoreCase) &&
+               eventType.LocationValue is not null &&
+               CoreConnectorConstants.IsCoreConferencing(eventType.LocationValue)
+            ? new EventTypeDefaultConferencing { App = eventType.LocationValue }
+            : null;
+    }
 }
 
 public sealed record BookingEmailDeliveryPayload(
@@ -142,4 +224,17 @@ public sealed record BookingWebhookDeliveryPayload(
     string Status,
     string? LocationType,
     string? LocationValue
+);
+
+public sealed record BookingConnectorCalendarDeliveryPayload(
+    string Trigger,
+    string Integration,
+    string ExternalId,
+    string? CredentialId
+);
+
+public sealed record BookingConnectorConferencingDeliveryPayload(
+    string Trigger,
+    string App,
+    string? CredentialId
 );

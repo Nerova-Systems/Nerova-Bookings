@@ -34,7 +34,9 @@ public sealed class DatabaseSeeder
                 "cal-com-public-booking",
                 "cal-com-bookings",
                 "cal-com-workflows",
-                "cal-com-webhooks"
+                "cal-com-webhooks",
+                "cal-com-apps-connectors",
+                "cal-com-conferencing"
             }
         };
 
@@ -56,7 +58,9 @@ public sealed class DatabaseSeeder
                 "cal-com-public-booking",
                 "cal-com-bookings",
                 "cal-com-workflows",
-                "cal-com-webhooks"
+                "cal-com-webhooks",
+                "cal-com-apps-connectors",
+                "cal-com-conferencing"
             }
         };
 

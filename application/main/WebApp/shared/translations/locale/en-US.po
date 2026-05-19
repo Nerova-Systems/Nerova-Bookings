@@ -228,6 +228,9 @@ msgstr "Burning the midnight oil?"
 msgid "By"
 msgstr "By"
 
+msgid "Calendar ID"
+msgstr "Calendar ID"
+
 msgid "Calendar view"
 msgstr "Calendar view"
 
@@ -261,8 +264,8 @@ msgstr "Checkbox"
 msgid "Choose the booker layout and accent color for this event type."
 msgstr "Choose the booker layout and accent color for this event type."
 
-msgid "Choose where confirmed bookings should be written."
-msgstr "Choose where confirmed bookings should be written."
+msgid "Choose the core calendar and conferencing apps used by this event type."
+msgstr "Choose the core calendar and conferencing apps used by this event type."
 
 msgid "Choose which schedule controls when this event type can be booked."
 msgstr "Choose which schedule controls when this event type can be booked."
@@ -349,6 +352,9 @@ msgstr "Create schedule"
 msgid "Create the booking page basics now, then finish setup on the next screen."
 msgstr "Create the booking page basics now, then finish setup on the next screen."
 
+msgid "Credential reference"
+msgstr "Credential reference"
+
 msgid "Daily"
 msgstr "Daily"
 
@@ -366,6 +372,9 @@ msgstr "Date overrides"
 
 msgid "Default"
 msgstr "Default"
+
+msgid "Default conferencing"
+msgstr "Default conferencing"
 
 msgid "Define the public booking page details people see before they choose a time."
 msgstr "Define the public booking page details people see before they choose a time."
@@ -547,6 +556,12 @@ msgstr "Good morning"
 msgid "Good morning, {firstName}"
 msgstr "Good morning, {firstName}"
 
+msgid "Google Calendar"
+msgstr "Google Calendar"
+
+msgid "Google Meet"
+msgstr "Google Meet"
+
 msgid "Guest"
 msgstr "Guest"
 
@@ -722,8 +737,14 @@ msgstr "No custom booking fields yet."
 msgid "No custom responses were captured."
 msgstr "No custom responses were captured."
 
+msgid "No default conferencing"
+msgstr "No default conferencing"
+
 msgid "No delivery attempts yet."
 msgstr "No delivery attempts yet."
+
+msgid "No destination calendar"
+msgstr "No destination calendar"
 
 msgid "No event types match your search."
 msgstr "No event types match your search."
@@ -739,6 +760,9 @@ msgstr "No private links yet."
 
 msgid "No schedules yet"
 msgstr "No schedules yet"
+
+msgid "No selected calendars. Availability only uses Nerova bookings."
+msgstr "No selected calendars. Availability only uses Nerova bookings."
 
 msgid "No settings available yet."
 msgstr "No settings available yet."
@@ -778,6 +802,12 @@ msgstr "Offer multiple seats for each available time."
 
 msgid "Offer seats"
 msgstr "Offer seats"
+
+msgid "Office 365 Calendar"
+msgstr "Office 365 Calendar"
+
+msgid "Office 365 video"
+msgstr "Office 365 video"
 
 msgid "Offset start"
 msgstr "Offset start"
@@ -1053,6 +1083,9 @@ msgstr "Select schedule"
 msgid "Select week"
 msgstr "Select week"
 
+msgid "Selected calendars"
+msgstr "Selected calendars"
+
 msgid "Send bookers to a custom page after success or cancellation."
 msgstr "Send bookers to a custom page after success or cancellation."
 
@@ -1133,9 +1166,6 @@ msgstr "Text"
 
 msgid "Textarea"
 msgstr "Textarea"
-
-msgid "These features need more integration before they can be edited here."
-msgstr "These features need more integration before they can be edited here."
 
 msgid "this attendee"
 msgstr "this attendee"
@@ -1307,3 +1337,6 @@ msgstr "Your booking is confirmed."
 
 msgid "Your dashboard is empty"
 msgstr "Your dashboard is empty"
+
+msgid "Zoom"
+msgstr "Zoom"

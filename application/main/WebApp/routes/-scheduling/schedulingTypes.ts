@@ -9,7 +9,12 @@ export type AvailabilityOverrideWindow = AvailabilityDateOverride["windows"][num
 export type EventType = Schemas["EventTypeResponse"];
 export type EventTypePayload = Schemas["CreateEventTypeCommand"];
 export type EventTypeUpdatePayload = Schemas["UpdateEventTypeCommand"];
-export type EventTypeSettings = NonNullable<EventTypePayload["settings"]>;
+export type CoreConnectorCalendar = { integration: string; externalId: string; credentialId?: string | null };
+export type CoreConnectorConferencing = { app: string; credentialId?: string | null };
+export type EventTypeSettings = NonNullable<EventTypePayload["settings"]> & {
+  destinationCalendar?: CoreConnectorCalendar | null;
+  defaultConferencing?: CoreConnectorConferencing | null;
+};
 export type ApiValidationError = Schemas["HttpValidationProblemDetails"] | null | undefined;
 
 export function newSchedulePayload(isDefault = false): SchedulePayload {
@@ -122,7 +127,7 @@ export function eventTypeToUpdatePayload(
 }
 
 export function getEventTypeSettings(payload: EventTypePayload): EventTypeSettings {
-  const settings = payload.settings;
+  const settings = payload.settings as EventTypeSettings | null | undefined;
   const primaryLocation = payload.locationType
     ? [{ type: payload.locationType, value: payload.locationValue?.trim() || null }]
     : [];
@@ -174,6 +179,8 @@ export function getEventTypeSettings(payload: EventTypePayload): EventTypeSettin
     },
     interfaceLanguage: settings?.interfaceLanguage?.trim() || null,
     selectedCalendars: settings?.selectedCalendars ?? [],
+    destinationCalendar: settings?.destinationCalendar ?? null,
+    defaultConferencing: settings?.defaultConferencing ?? null,
     metadata: settings?.metadata ?? {}
   };
 }

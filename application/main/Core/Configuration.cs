@@ -1,5 +1,6 @@
 using Main.Database;
 using Main.Features.BookingSideEffects.Workers;
+using Main.Features.Connectors.Domain;
 using Main.Features.Scheduling.Shared;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -27,6 +28,7 @@ public static class Configuration
             return services
                 .AddHttpClient()
                 .AddScoped<BookingSideEffectProcessor>()
+                .AddScoped<ICoreConnectorClient, FakeCoreConnectorClient>()
                 .AddScoped<PublicSchedulingResolver>()
                 .AddScoped<PublicSlotCalculator>()
                 .AddSharedServices<MainDbContext>([Assembly]);

@@ -507,6 +507,8 @@ const visualEventTypeSettings = {
   bookingWindow: { fixedEndDate: null, fixedStartDate: null, rollingWindowDays: 30 },
   cancellationPolicy: { allowCancellation: true, minimumNoticeMinutes: 120 },
   confirmationPolicy: { requiresBookerEmailVerification: false, requiresConfirmation: true },
+  defaultConferencing: null,
+  destinationCalendar: null,
   durationOptions: [30, 45, 60],
   eventColor: "#292929",
   interfaceLanguage: "en",

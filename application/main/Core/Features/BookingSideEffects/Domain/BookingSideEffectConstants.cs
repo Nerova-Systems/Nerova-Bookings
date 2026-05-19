@@ -12,6 +12,8 @@ public static class BookingSideEffectConstants
 
     public const string EmailKind = "email";
     public const string WebhookKind = "webhook";
+    public const string CalendarKind = "calendar";
+    public const string ConferencingKind = "conferencing";
 
     public const string PendingStatus = "pending";
     public const string SentStatus = "sent";
