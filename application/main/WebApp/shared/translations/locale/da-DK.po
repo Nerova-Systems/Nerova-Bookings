@@ -556,6 +556,9 @@ msgstr "Her er dit overblik over hvad der sker."
 msgid "Hidden"
 msgstr "Skjult"
 
+msgid "Hide from profile"
+msgstr "Skjul fra profil"
+
 msgid "In person"
 msgstr "Fysisk"
 
@@ -1073,6 +1076,9 @@ msgstr "Opsætning"
 
 msgid "Show attendee info"
 msgstr "Show attendee info"
+
+msgid "Show on profile"
+msgstr "Vis på profil"
 
 msgid "Slot interval"
 msgstr "Slotinterval"

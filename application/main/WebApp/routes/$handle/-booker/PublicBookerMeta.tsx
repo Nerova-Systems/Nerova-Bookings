@@ -18,7 +18,7 @@ export function EventMeta({
   const location = eventType.locations?.[0] ?? { type: eventType.locationType, value: eventType.locationValue };
 
   return (
-    <section className="flex flex-col gap-5 p-6" data-testid="public-booker-event-meta">
+    <section className="flex flex-col gap-5 p-6" data-testid="booker-event-meta">
       <div className="flex items-center gap-3">
         <div className="flex size-12 items-center justify-center rounded-full bg-primary text-primary-foreground">
           <UserIcon className="size-5" />

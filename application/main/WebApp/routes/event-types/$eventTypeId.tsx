@@ -3,7 +3,7 @@ import { Trans } from "@lingui/react/macro";
 import { Button } from "@repo/ui/components/Button";
 import { Switch } from "@repo/ui/components/Switch";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { ArrowLeftIcon, SaveIcon, Trash2Icon } from "lucide-react";
+import { ArrowLeftIcon } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 
@@ -11,8 +11,8 @@ import { api, queryClient } from "@/shared/lib/api/client";
 
 import { GeneralApiErrors } from "../-scheduling/ApiErrors";
 import { DeleteEventTypeDialog } from "../-scheduling/event-types-shell/DeleteEventTypeDialog";
-import { CopyEventTypeButton, PreviewEventTypeButton } from "../-scheduling/event-types-shell/EventTypeActionButtons";
-import { EventTypeEditorTabs, eventTypeFormId } from "../-scheduling/event-types-shell/EventTypeEditorTabs";
+import { EventTypeEditorTabs } from "../-scheduling/event-types-shell/EventTypeEditorTabs";
+import { EventTypeHeaderActions } from "../-scheduling/event-types-shell/EventTypeHeaderActions";
 import { getEventTypePublicUrl, isEventTypeTabName } from "../-scheduling/event-types-shell/eventTypeShellTypes";
 import { SchedulingPageShell } from "../-scheduling/SchedulingPageShell";
 import {
@@ -74,16 +74,16 @@ function EventTypeDetailsPage() {
       maxWidth="80rem"
       titleContent={
         <div className="flex min-w-0 flex-col gap-1">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
             <Button
               variant="ghost"
-              size="sm"
+              size="icon-sm"
+              aria-label={t`Back`}
               onClick={() =>
                 navigate({ to: "/event-types", search: { dialog: undefined, duplicateEventTypeId: undefined } })
               }
             >
               <ArrowLeftIcon />
-              <Trans>Back</Trans>
             </Button>
             <span className="truncate">{eventType?.title ?? t`Event type`}</span>
           </div>
@@ -91,61 +91,50 @@ function EventTypeDetailsPage() {
       }
       actions={
         eventType && draft ? (
-          <div className="flex flex-wrap items-center justify-end gap-2">
-            <div className="hidden items-center gap-2 text-sm text-muted-foreground md:flex">
-              <Switch checked={draft.hidden} onCheckedChange={(hidden) => handleDraftChange({ ...draft, hidden })} />
-              <Trans>Hidden</Trans>
-            </div>
-            <CopyEventTypeButton eventType={eventType} publicHandle={schedulingProfile?.handle} />
-            <PreviewEventTypeButton eventType={eventType} publicHandle={schedulingProfile?.handle} />
-            <Button type="button" variant="outline" size="sm" onClick={() => setDeleteDialogOpen(true)}>
-              <Trash2Icon />
-              <Trans>Delete</Trans>
-            </Button>
-            <Button
-              type="submit"
-              form={eventTypeFormId}
-              size="sm"
-              disabled={!canSave}
-              isPending={updateEventTypeMutation.isPending}
-            >
-              <SaveIcon />
-              {updateEventTypeMutation.isPending ? <Trans>Saving...</Trans> : <Trans>Save</Trans>}
-            </Button>
-          </div>
+          <EventTypeHeaderActions
+            eventType={eventType}
+            draft={draft}
+            publicHandle={schedulingProfile?.handle}
+            canSave={canSave}
+            isSaving={updateEventTypeMutation.isPending}
+            onDraftChange={handleDraftChange}
+            onDelete={() => setDeleteDialogOpen(true)}
+          />
         ) : null
       }
     >
-      <GeneralApiErrors error={updateEventTypeMutation.error} />
-      {isLoading || !draft || !eventType ? (
-        <div className="rounded-md border p-4 text-sm text-muted-foreground">
-          <Trans>Loading event type...</Trans>
-        </div>
-      ) : (
-        <>
-          <div className="mb-4 flex items-center justify-between gap-3 rounded-md border p-3 md:hidden">
-            <span className="text-sm font-medium">
-              <Trans>Hidden</Trans>
-            </span>
-            <Switch checked={draft.hidden} onCheckedChange={(hidden) => handleDraftChange({ ...draft, hidden })} />
+      <div data-testid="event-type-layout" className="flex flex-col gap-4">
+        <GeneralApiErrors error={updateEventTypeMutation.error} />
+        {isLoading || !draft || !eventType ? (
+          <div className="rounded-md border p-4 text-sm text-muted-foreground">
+            <Trans>Loading event type...</Trans>
           </div>
-          <EventTypeEditorTabs
-            eventTypeId={eventTypeId}
-            tabName={tabName}
-            draft={draft}
-            schedules={schedules}
-            canSave={canSave}
-            error={updateEventTypeMutation.error}
-            onChange={handleDraftChange}
-            onSubmit={() =>
-              updateEventTypeMutation.mutate({
-                params: { path: { id: eventTypeId } },
-                body: eventTypeToUpdatePayload(eventTypeId, draft)
-              })
-            }
-          />
-        </>
-      )}
+        ) : (
+          <>
+            <div className="flex items-center justify-between gap-3 rounded-md border p-3 lg:hidden">
+              <span className="text-sm font-medium">
+                <Trans>Hidden</Trans>
+              </span>
+              <Switch checked={draft.hidden} onCheckedChange={(hidden) => handleDraftChange({ ...draft, hidden })} />
+            </div>
+            <EventTypeEditorTabs
+              eventTypeId={eventTypeId}
+              tabName={tabName}
+              draft={draft}
+              schedules={schedules}
+              canSave={canSave}
+              error={updateEventTypeMutation.error}
+              onChange={handleDraftChange}
+              onSubmit={() =>
+                updateEventTypeMutation.mutate({
+                  params: { path: { id: eventTypeId } },
+                  body: eventTypeToUpdatePayload(eventTypeId, draft)
+                })
+              }
+            />
+          </>
+        )}
+      </div>
       <DeleteEventTypeDialog
         eventType={eventType ?? null}
         isOpen={deleteDialogOpen}

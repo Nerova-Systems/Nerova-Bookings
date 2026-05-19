@@ -35,7 +35,10 @@ export function AvailableTimeSlots({
 
   return (
     <>
-      <section className="flex min-w-0 flex-col border-t p-4 sm:p-6 lg:border-t-0 lg:border-l">
+      <section
+        className="flex min-w-0 flex-col border-t p-4 sm:p-6 lg:border-t-0 lg:border-l"
+        data-testid="booker-date-picker"
+      >
         <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex flex-col gap-1">
             <h2>
@@ -63,7 +66,7 @@ export function AvailableTimeSlots({
               onSelect={(date) => date && onDateChange(date)}
             />
           </div>
-          <div className="lg:hidden">
+          <div className="lg:hidden" data-testid="booker-timeslots-mobile">
             <AvailableTimes
               selectedDate={selectedDate}
               selectedSlot={selectedSlot}
@@ -73,7 +76,10 @@ export function AvailableTimeSlots({
           </div>
         </div>
       </section>
-      <aside className="hidden border-t bg-muted/20 p-4 lg:block lg:border-t-0 lg:border-l">
+      <aside
+        className="hidden border-t bg-muted/20 p-4 lg:block lg:border-t-0 lg:border-l"
+        data-testid="booker-timeslots"
+      >
         <AvailableTimes
           selectedDate={selectedDate}
           selectedSlot={selectedSlot}

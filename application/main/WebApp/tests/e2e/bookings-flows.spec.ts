@@ -231,6 +231,17 @@ test.describe("@smoke", () => {
       timezone: "Africa/Johannesburg"
     });
 
+    const publicAvailabilitySearch = new URLSearchParams({
+      date: formatDateOnly(startTime),
+      duration: "30",
+      timezone: "Africa/Johannesburg"
+    });
+    await ownerPage.goto(`/${profile.handle}/${eventSlug}?${publicAvailabilitySearch.toString()}`);
+    await expect(ownerPage.getByTestId("booker-container")).toBeVisible();
+    await expect(ownerPage.getByTestId("booker-event-meta")).toBeVisible();
+    await expect(ownerPage.getByTestId("booker-date-picker")).toBeVisible();
+    await expect(ownerPage.getByTestId("booker-timeslots")).toBeVisible();
+
     await ownerPage.goto(`/${profile.handle}/${eventSlug}?${publicBookingSearch.toString()}`);
     await expect(ownerPage.getByTestId("public-booker-form")).toBeVisible();
     await ownerPage.getByRole("button", { name: "Confirm booking" }).click();

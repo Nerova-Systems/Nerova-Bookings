@@ -209,6 +209,9 @@ test.describe("@smoke", () => {
       await createEventType(ownerPage, originalTitle, originalSlug, "30");
 
       await expectToastMessage(context, "Event type created");
+      await expect(ownerPage.getByTestId("event-type-layout")).toBeVisible();
+      await expect(ownerPage.locator('[data-testid="event-type-action-bar"]:visible')).toBeVisible();
+      await expect(ownerPage.getByTestId("event-type-vertical-tabs")).toBeVisible();
     })();
 
     // === EDIT EVENT TYPE ===

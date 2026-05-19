@@ -556,6 +556,9 @@ msgstr "Here's your overview of what's happening."
 msgid "Hidden"
 msgstr "Hidden"
 
+msgid "Hide from profile"
+msgstr "Hide from profile"
+
 msgid "In person"
 msgstr "In person"
 
@@ -1073,6 +1076,9 @@ msgstr "Setup"
 
 msgid "Show attendee info"
 msgstr "Show attendee info"
+
+msgid "Show on profile"
+msgstr "Show on profile"
 
 msgid "Slot interval"
 msgstr "Slot interval"

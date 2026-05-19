@@ -71,23 +71,28 @@ export function PublicBooker({
   if (!eventType || rescheduleUnavailable) return <PublicBookerUnavailable />;
 
   return (
-    <div className="mx-auto grid max-w-[70rem] overflow-hidden rounded-lg border bg-background shadow-sm lg:grid-cols-[20rem_1fr]">
+    <div
+      data-testid="booker-container"
+      data-booker-state={state}
+      className="mx-auto grid w-full max-w-[70rem] items-start overflow-hidden rounded-md border border-border bg-background shadow-sm transition-[width] duration-300 lg:grid-cols-[20rem_minmax(0,1fr)]"
+    >
       <EventMeta eventType={eventType} handle={handle} eventSlug={eventSlug} timezone={timezone} />
-      <div className="grid min-h-[38rem] lg:grid-cols-[minmax(0,1fr)_18rem]">
-        <AvailableTimeSlots
-          slotsByDate={slotsByDate}
-          monthAnchor={monthAnchor}
-          selectedDate={selectedDate}
-          selectedSlot={selectedSlotDate}
-          slots={slots}
-          timezone={timezone}
-          onDateChange={onDateChange}
-          onMonthChange={onMonthChange}
-          onSlotChange={onSlotChange}
-          onTimezoneChange={onTimezoneChange}
-        />
-      </div>
-      {selectedSlotDate && (
+      {!selectedSlotDate ? (
+        <div className="grid min-h-[38rem] min-w-0 lg:grid-cols-[minmax(0,1fr)_18rem]">
+          <AvailableTimeSlots
+            slotsByDate={slotsByDate}
+            monthAnchor={monthAnchor}
+            selectedDate={selectedDate}
+            selectedSlot={selectedSlotDate}
+            slots={slots}
+            timezone={timezone}
+            onDateChange={onDateChange}
+            onMonthChange={onMonthChange}
+            onSlotChange={onSlotChange}
+            onTimezoneChange={onTimezoneChange}
+          />
+        </div>
+      ) : (
         <BookEventForm
           handle={handle}
           eventSlug={eventSlug}
