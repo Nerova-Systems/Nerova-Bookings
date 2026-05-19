@@ -70,13 +70,7 @@ export function DatePickerSection({
   onTimezoneChange
 }: Pick<
   PublicBookerAvailabilityProps,
-  | "slotsByDate"
-  | "monthAnchor"
-  | "selectedDate"
-  | "timezone"
-  | "onDateChange"
-  | "onMonthChange"
-  | "onTimezoneChange"
+  "slotsByDate" | "monthAnchor" | "selectedDate" | "timezone" | "onDateChange" | "onMonthChange" | "onTimezoneChange"
 >) {
   const availableDates = useMemo(() => new Set(Object.keys(slotsByDate)), [slotsByDate]);
   const disabledDates = (date: Date) => !availableDates.has(formatDateOnly(date));
@@ -142,7 +136,12 @@ export function TimeSlotsSection({
           <XIcon />
         </Button>
       </div>
-      <AvailableTimes selectedDate={selectedDate} selectedSlot={selectedSlot} slots={slots} onSlotChange={onSlotChange} />
+      <AvailableTimes
+        selectedDate={selectedDate}
+        selectedSlot={selectedSlot}
+        slots={slots}
+        onSlotChange={onSlotChange}
+      />
     </aside>
   );
 }

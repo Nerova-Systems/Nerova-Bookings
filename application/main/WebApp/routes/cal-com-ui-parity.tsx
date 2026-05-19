@@ -1,18 +1,9 @@
+import { Button } from "@repo/ui/components/Button";
+/* eslint-disable max-lines */
 import { createFileRoute } from "@tanstack/react-router";
 import { ArrowLeftIcon } from "lucide-react";
 import { useMemo, useState } from "react";
 
-import { Button } from "@repo/ui/components/Button";
-
-import { EventTypeEditorTabs } from "./-scheduling/event-types-shell/EventTypeEditorTabs";
-import { EventTypeHeaderActions } from "./-scheduling/event-types-shell/EventTypeHeaderActions";
-import { isEventTypeTabName, type EventTypeTabName } from "./-scheduling/event-types-shell/eventTypeShellTypes";
-import {
-  eventTypeToPayload,
-  type EventType,
-  type EventTypePayload,
-  type Schedule
-} from "./-scheduling/schedulingTypes";
 import { PublicBooker } from "./$handle/-booker/PublicBooker";
 import {
   formatDateOnly,
@@ -21,6 +12,15 @@ import {
   type PublicRescheduleBooking,
   type PublicSlot
 } from "./$handle/-booker/publicBookerTypes";
+import { EventTypeEditorTabs } from "./-scheduling/event-types-shell/EventTypeEditorTabs";
+import { EventTypeHeaderActions } from "./-scheduling/event-types-shell/EventTypeHeaderActions";
+import { type EventTypeTabName } from "./-scheduling/event-types-shell/eventTypeShellTypes";
+import {
+  eventTypeToPayload,
+  type EventType,
+  type EventTypePayload,
+  type Schedule
+} from "./-scheduling/schedulingTypes";
 
 type PublicBookerVisualState =
   | "unavailable"
@@ -154,17 +154,6 @@ function EventTypeEditorFixture({ state }: Readonly<{ state: EventTypeEditorVisu
           </div>
           <p className="mt-2 pl-11 text-sm text-muted-foreground">/visual/product-consultation</p>
         </div>
-        <EventTypeHeaderActions
-          eventType={visualEditorEventType}
-          draft={draft}
-          publicHandle="visual"
-          canSave={true}
-          isSaving={false}
-          onDraftChange={setDraft}
-          onDelete={() => {}}
-        />
-      </div>
-      <div className="lg:hidden">
         <EventTypeHeaderActions
           eventType={visualEditorEventType}
           draft={draft}
