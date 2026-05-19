@@ -1,5 +1,6 @@
 using Main;
 using Main.Database;
+using Main.Features.BookingSideEffects.Workers;
 using SharedKernel.Configuration;
 using SharedKernel.Database;
 
@@ -18,6 +19,7 @@ builder.Services
 
 builder.Services.AddTransient<DatabaseMigrationService<MainDbContext>>();
 builder.Services.AddTransient<DataMigrationRunner<MainDbContext>>();
+builder.Services.AddHostedService<BookingSideEffectWorker>();
 
 var host = builder.Build();
 

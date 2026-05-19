@@ -36,6 +36,9 @@ msgstr "A confirmation will be sent to the email address you provided."
 msgid "Access"
 msgstr "Access"
 
+msgid "Active"
+msgstr "Active"
+
 msgid "Active bookings per booker"
 msgstr "Active bookings per booker"
 
@@ -74,6 +77,12 @@ msgstr "Add private link"
 
 msgid "Add time"
 msgstr "Add time"
+
+msgid "Add webhook"
+msgstr "Add webhook"
+
+msgid "Add workflow"
+msgstr "Add workflow"
 
 msgid "Additional notes"
 msgstr "Additional notes"
@@ -382,6 +391,9 @@ msgstr "Destination calendar"
 msgid "Disable on prefill"
 msgstr "Disable on prefill"
 
+msgid "Disabled"
+msgstr "Disabled"
+
 msgid "Duplicate"
 msgstr "Duplicate"
 
@@ -394,6 +406,9 @@ msgstr "Duration"
 msgid "Duration options"
 msgstr "Duration options"
 
+msgid "Edit"
+msgstr "Edit"
+
 msgid "Edit booking setup for this appointment type."
 msgstr "Edit booking setup for this appointment type."
 
@@ -403,8 +418,23 @@ msgstr "Edit event"
 msgid "Edit location"
 msgstr "Edit location"
 
+msgid "Edit webhook"
+msgstr "Edit webhook"
+
+msgid "Edit workflow"
+msgstr "Edit workflow"
+
 msgid "Email"
 msgstr "Email"
+
+msgid "Email body"
+msgstr "Email body"
+
+msgid "email step"
+msgstr "email step"
+
+msgid "Email subject"
+msgstr "Email subject"
 
 msgid "Email verification"
 msgstr "Email verification"
@@ -565,6 +595,12 @@ msgstr "Loading event types..."
 msgid "Loading schedules..."
 msgstr "Loading schedules..."
 
+msgid "Loading webhooks..."
+msgstr "Loading webhooks..."
+
+msgid "Loading workflows..."
+msgstr "Loading workflows..."
+
 msgid "Location"
 msgstr "Location"
 
@@ -692,11 +728,17 @@ msgstr "No settings available yet."
 msgid "No times available on this date."
 msgstr "No times available on this date."
 
+msgid "No webhooks configured."
+msgstr "No webhooks configured."
+
 msgid "No weekly availability"
 msgstr "No weekly availability"
 
 msgid "No weekly hours"
 msgstr "No weekly hours"
+
+msgid "No workflows configured."
+msgstr "No workflows configured."
 
 msgid "Not available"
 msgstr "Not available"
@@ -894,6 +936,12 @@ msgstr "Save"
 msgid "Save schedule"
 msgstr "Save schedule"
 
+msgid "Save webhook"
+msgstr "Save webhook"
+
+msgid "Save workflow"
+msgstr "Save workflow"
+
 msgid "Saved filters"
 msgstr "Saved filters"
 
@@ -945,6 +993,9 @@ msgstr "Seats"
 msgid "Seats cannot be enabled while recurring events are enabled."
 msgstr "Seats cannot be enabled while recurring events are enabled."
 
+msgid "Secret"
+msgstr "Secret"
+
 msgid "Select"
 msgstr "Select"
 
@@ -971,6 +1022,12 @@ msgstr "Select week"
 
 msgid "Send bookers to a custom page after success or cancellation."
 msgstr "Send bookers to a custom page after success or cancellation."
+
+msgid "Send Cal.com-compatible booking emails when lifecycle events happen."
+msgstr "Send Cal.com-compatible booking emails when lifecycle events happen."
+
+msgid "Send Cal.com-compatible booking lifecycle payloads to external systems."
+msgstr "Send Cal.com-compatible booking lifecycle payloads to external systems."
 
 msgid "Set as default"
 msgstr "Set as default"
@@ -1011,6 +1068,9 @@ msgstr "Start"
 msgid "Start with a weekly schedule, then refine availability on the next screen."
 msgstr "Start with a weekly schedule, then refine availability on the next screen."
 
+msgid "Subscriber URL"
+msgstr "Subscriber URL"
+
 msgid "Success URL"
 msgstr "Success URL"
 
@@ -1022,6 +1082,12 @@ msgstr "Sunday"
 
 msgid "System"
 msgstr "System"
+
+msgid "Test"
+msgstr "Test"
+
+msgid "Test webhook queued"
+msgstr "Test webhook queued"
 
 msgid "Text"
 msgstr "Text"
@@ -1092,6 +1158,12 @@ msgstr "To"
 msgid "Today"
 msgstr "Today"
 
+msgid "Trigger"
+msgstr "Trigger"
+
+msgid "Triggers"
+msgstr "Triggers"
+
 msgid "Tue"
 msgstr "Tue"
 
@@ -1137,6 +1209,15 @@ msgstr "View session details"
 msgid "Visibility"
 msgstr "Visibility"
 
+msgid "Webhook"
+msgstr "Webhook"
+
+msgid "Webhook deleted"
+msgstr "Webhook deleted"
+
+msgid "Webhook saved"
+msgstr "Webhook saved"
+
 msgid "Webhooks"
 msgstr "Webhooks"
 
@@ -1160,6 +1241,15 @@ msgstr "Welcome to PlatformPlatform"
 
 msgid "When"
 msgstr "When"
+
+msgid "Workflow"
+msgstr "Workflow"
+
+msgid "Workflow deleted"
+msgstr "Workflow deleted"
+
+msgid "Workflow saved"
+msgstr "Workflow saved"
 
 msgid "Workflows"
 msgstr "Workflows"

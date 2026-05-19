@@ -1,6 +1,7 @@
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json;
 using JetBrains.Annotations;
+using Main.Features.BookingSideEffects.Domain;
 using Main.Features.EventTypes.Domain;
 using SharedKernel.Domain;
 using SharedKernel.StronglyTypedIds;
@@ -85,19 +86,19 @@ public sealed class Booking : AggregateRoot<BookingId>, ITenantScopedEntity
         FromReschedule = null;
     }
 
-    public UserId OwnerUserId { get; private set; }
+    public UserId OwnerUserId { get; }
 
-    public EventTypeId EventTypeId { get; private set; }
+    public EventTypeId EventTypeId { get; }
 
-    public DateTimeOffset StartTime { get; private set; }
+    public DateTimeOffset StartTime { get; }
 
-    public DateTimeOffset EndTime { get; private set; }
+    public DateTimeOffset EndTime { get; }
 
     public int BeforeEventBufferMinutes { get; private set; }
 
     public int AfterEventBufferMinutes { get; private set; }
 
-    public string Title { get; private set; }
+    public string Title { get; }
 
     public string? Description { get; private set; }
 
@@ -151,16 +152,23 @@ public sealed class Booking : AggregateRoot<BookingId>, ITenantScopedEntity
 
     public TenantId TenantId { get; } = new(0);
 
+    public void RecordCreated()
+    {
+        RaiseSideEffectEvent(BookingSideEffectConstants.BookingCreated);
+    }
+
     public void Confirm()
     {
         Status = "accepted";
         RejectionReason = null;
+        RaiseSideEffectEvent(BookingSideEffectConstants.BookingConfirmed);
     }
 
     public void Reject(string? rejectionReason)
     {
         Status = "rejected";
         RejectionReason = string.IsNullOrWhiteSpace(rejectionReason) ? null : rejectionReason.Trim();
+        RaiseSideEffectEvent(BookingSideEffectConstants.BookingRejected);
     }
 
     public void Cancel(string? cancellationReason = null, string? cancelledBy = null)
@@ -168,6 +176,7 @@ public sealed class Booking : AggregateRoot<BookingId>, ITenantScopedEntity
         Status = "cancelled";
         CancellationReason = string.IsNullOrWhiteSpace(cancellationReason) ? null : cancellationReason.Trim();
         CancelledBy = string.IsNullOrWhiteSpace(cancelledBy) ? null : cancelledBy.Trim().ToLowerInvariant();
+        RaiseSideEffectEvent(BookingSideEffectConstants.BookingCancelled);
     }
 
     public void RequestReschedule(string? rescheduleReason, string? rescheduledBy)
@@ -178,6 +187,7 @@ public sealed class Booking : AggregateRoot<BookingId>, ITenantScopedEntity
         CancellationReason = RescheduleReason;
         RescheduledBy = string.IsNullOrWhiteSpace(rescheduledBy) ? null : rescheduledBy.Trim().ToLowerInvariant();
         CancelledBy = RescheduledBy;
+        RaiseSideEffectEvent(BookingSideEffectConstants.BookingRescheduled);
     }
 
     public void MarkAsReplacementFor(BookingId originalBookingId)
@@ -189,6 +199,7 @@ public sealed class Booking : AggregateRoot<BookingId>, ITenantScopedEntity
     {
         LocationType = string.IsNullOrWhiteSpace(locationType) ? null : locationType.Trim();
         LocationValue = string.IsNullOrWhiteSpace(locationValue) ? null : locationValue.Trim();
+        RaiseSideEffectEvent(BookingSideEffectConstants.BookingLocationChanged);
     }
 
     public void AddGuests(BookingAttendee[] guests)
@@ -211,6 +222,7 @@ public sealed class Booking : AggregateRoot<BookingId>, ITenantScopedEntity
         }
 
         AttendeesJson = JsonSerializer.Serialize(attendees, JsonSerializerOptions);
+        RaiseSideEffectEvent(BookingSideEffectConstants.BookingGuestsAdded);
     }
 
     public static Booking Create(
@@ -234,6 +246,27 @@ public sealed class Booking : AggregateRoot<BookingId>, ITenantScopedEntity
     )
     {
         return new Booking(tenantId, ownerUserId, eventTypeId, startTime, startTime.AddMinutes(durationMinutes), beforeEventBufferMinutes, afterEventBufferMinutes, title, description, locationType, locationValue, bookerName, bookerEmail, timeZone, status, responses, metadata);
+    }
+
+    private void RaiseSideEffectEvent(string trigger)
+    {
+        AddDomainEvent(
+            new BookingLifecycleSideEffectEvent(
+                TenantId,
+                OwnerUserId,
+                EventTypeId,
+                Id,
+                trigger,
+                Title,
+                BookerName,
+                BookerEmail,
+                StartTime,
+                EndTime,
+                Status,
+                LocationType,
+                LocationValue
+            )
+        );
     }
 }
 

@@ -32,7 +32,9 @@ public sealed class DatabaseSeeder
                 "cal-com-event-types",
                 "cal-com-availability",
                 "cal-com-public-booking",
-                "cal-com-bookings"
+                "cal-com-bookings",
+                "cal-com-workflows",
+                "cal-com-webhooks"
             }
         };
 
@@ -52,7 +54,9 @@ public sealed class DatabaseSeeder
                 "cal-com-event-types",
                 "cal-com-availability",
                 "cal-com-public-booking",
-                "cal-com-bookings"
+                "cal-com-bookings",
+                "cal-com-workflows",
+                "cal-com-webhooks"
             }
         };
 

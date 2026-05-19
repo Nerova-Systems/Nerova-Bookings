@@ -10,6 +10,8 @@ import { EventTypeDependenciesTab } from "../event-type-tabs/EventTypeDependenci
 import { EventTypeLimitsTab } from "../event-type-tabs/EventTypeLimitsTab";
 import { EventTypeRecurringTab } from "../event-type-tabs/EventTypeRecurringTab";
 import { EventTypeSetupTab } from "../event-type-tabs/EventTypeSetupTab";
+import { EventTypeWebhooksTab } from "../event-type-tabs/EventTypeWebhooksTab";
+import { EventTypeWorkflowsTab } from "../event-type-tabs/EventTypeWorkflowsTab";
 import { eventTypeTabNames, getEventTypeTabLabel, type EventTypeTabName } from "./eventTypeShellTypes";
 
 export const eventTypeFormId = "event-type-editor-form";
@@ -78,6 +80,12 @@ export function EventTypeEditorTabs({
         </TabsContent>
         <TabsContent value="advanced" className="min-w-0">
           <EventTypeAdvancedTab {...tabProps} />
+        </TabsContent>
+        <TabsContent value="workflows" className="min-w-0">
+          <EventTypeWorkflowsTab eventTypeId={eventTypeId} />
+        </TabsContent>
+        <TabsContent value="webhooks" className="min-w-0">
+          <EventTypeWebhooksTab eventTypeId={eventTypeId} />
         </TabsContent>
         <TabsContent value="recurring" className="min-w-0">
           <EventTypeRecurringTab {...tabProps} />

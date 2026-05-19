@@ -2,13 +2,23 @@ import { t } from "@lingui/core/macro";
 
 import type { EventType, EventTypePayload, Schedule } from "../schedulingTypes";
 
-export type EventTypeTabName = "setup" | "availability" | "limits" | "advanced" | "recurring" | "dependencies";
+export type EventTypeTabName =
+  | "setup"
+  | "availability"
+  | "limits"
+  | "advanced"
+  | "workflows"
+  | "webhooks"
+  | "recurring"
+  | "dependencies";
 
 export const eventTypeTabNames: EventTypeTabName[] = [
   "setup",
   "availability",
   "limits",
   "advanced",
+  "workflows",
+  "webhooks",
   "recurring",
   "dependencies"
 ];
@@ -23,6 +33,10 @@ export function getEventTypeTabLabel(tabName: EventTypeTabName) {
       return t`Limits`;
     case "advanced":
       return t`Advanced`;
+    case "workflows":
+      return t`Workflows`;
+    case "webhooks":
+      return t`Webhooks`;
     case "recurring":
       return t`Recurring`;
     case "dependencies":
@@ -36,6 +50,8 @@ export function isEventTypeTabName(value: unknown): value is EventTypeTabName {
     value === "availability" ||
     value === "limits" ||
     value === "advanced" ||
+    value === "workflows" ||
+    value === "webhooks" ||
     value === "recurring" ||
     value === "dependencies"
   );

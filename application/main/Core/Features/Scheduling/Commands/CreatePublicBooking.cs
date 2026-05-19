@@ -136,6 +136,7 @@ public sealed class CreatePublicBookingHandler(
         }
 
         await bookingRepository.AddAsync(booking, cancellationToken);
+        booking.RecordCreated();
 
         return new CreatePublicBookingResponse(booking.Id, booking.StartTime, booking.EndTime, status);
     }
