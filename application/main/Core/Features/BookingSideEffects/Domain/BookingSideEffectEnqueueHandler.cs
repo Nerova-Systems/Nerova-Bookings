@@ -121,6 +121,7 @@ public sealed class BookingSideEffectEnqueueHandler(
 
     private async Task EnqueueConnectorSyncAsync(BookingLifecycleSideEffectEvent notification, EventType eventType, CancellationToken cancellationToken)
     {
+        var operation = ResolveConnectorOperation(notification.Trigger);
         if (eventType.Settings.DestinationCalendar is { } destinationCalendar &&
             CoreConnectorConstants.IsCoreCalendar(destinationCalendar.Integration))
         {
@@ -130,6 +131,7 @@ public sealed class BookingSideEffectEnqueueHandler(
                 $"calendar:{destinationCalendar.Integration}:{destinationCalendar.ExternalId}",
                 new BookingConnectorCalendarDeliveryPayload(
                     notification.Trigger,
+                    operation,
                     destinationCalendar.Integration,
                     destinationCalendar.ExternalId,
                     destinationCalendar.CredentialId
@@ -145,7 +147,7 @@ public sealed class BookingSideEffectEnqueueHandler(
                 notification,
                 BookingSideEffectConstants.ConferencingKind,
                 $"conferencing:{conferencing.App}",
-                new BookingConnectorConferencingDeliveryPayload(notification.Trigger, conferencing.App, conferencing.CredentialId),
+                new BookingConnectorConferencingDeliveryPayload(notification.Trigger, operation, conferencing.App, conferencing.CredentialId),
                 cancellationToken
             );
         }
@@ -191,6 +193,21 @@ public sealed class BookingSideEffectEnqueueHandler(
             ? new EventTypeDefaultConferencing { App = eventType.LocationValue }
             : null;
     }
+
+    private static string ResolveConnectorOperation(string trigger)
+    {
+        return trigger switch
+        {
+            BookingSideEffectConstants.BookingCreated => BookingSideEffectConstants.CreateOperation,
+            BookingSideEffectConstants.BookingConfirmed => BookingSideEffectConstants.UpdateOperation,
+            BookingSideEffectConstants.BookingLocationChanged => BookingSideEffectConstants.UpdateOperation,
+            BookingSideEffectConstants.BookingGuestsAdded => BookingSideEffectConstants.UpdateOperation,
+            BookingSideEffectConstants.BookingRejected => BookingSideEffectConstants.DeleteOperation,
+            BookingSideEffectConstants.BookingCancelled => BookingSideEffectConstants.DeleteOperation,
+            BookingSideEffectConstants.BookingRescheduled => BookingSideEffectConstants.DeleteOperation,
+            _ => BookingSideEffectConstants.UpdateOperation
+        };
+    }
 }
 
 public sealed record BookingEmailDeliveryPayload(
@@ -228,6 +245,7 @@ public sealed record BookingWebhookDeliveryPayload(
 
 public sealed record BookingConnectorCalendarDeliveryPayload(
     string Trigger,
+    string Operation,
     string Integration,
     string ExternalId,
     string? CredentialId
@@ -235,6 +253,7 @@ public sealed record BookingConnectorCalendarDeliveryPayload(
 
 public sealed record BookingConnectorConferencingDeliveryPayload(
     string Trigger,
+    string Operation,
     string App,
     string? CredentialId
 );

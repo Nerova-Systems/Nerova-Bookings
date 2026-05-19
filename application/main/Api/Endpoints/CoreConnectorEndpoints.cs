@@ -12,14 +12,18 @@ public sealed class CoreConnectorEndpoints : IEndpoints
 {
     public void MapEndpoints(IEndpointRouteBuilder routes)
     {
-        routes.MapGroup("/api/connectors/core")
+        var connectorGroup = routes.MapGroup("/api/connectors/core")
             .WithTags("CoreConnectors")
             .RequireAuthorization()
-            .ProducesValidationProblem()
-            .MapGet("/accounts", async Task<ApiResult<CoreConnectorAccountsResponse>> (IMediator mediator)
-                => await mediator.Send(new GetCoreConnectorAccountsQuery())
-            )
-            .Produces<CoreConnectorAccountsResponse>();
+            .ProducesValidationProblem();
+
+        connectorGroup.MapGet("/accounts", async Task<ApiResult<CoreConnectorAccountsResponse>> (IMediator mediator)
+            => await mediator.Send(new GetCoreConnectorAccountsQuery())
+        ).Produces<CoreConnectorAccountsResponse>();
+
+        connectorGroup.MapPost("/test-fixtures", async Task<ApiResult<CoreConnectorAccountsResponse>> (EnsureTestCoreConnectorCredentialsRequest request, IMediator mediator)
+            => await mediator.Send(new EnsureTestCoreConnectorCredentialsCommand(request.BusyStartTime, request.BusyEndTime))
+        ).Produces<CoreConnectorAccountsResponse>();
 
         var eventTypeGroup = routes.MapGroup("/api/event-types/{eventTypeId}/connector-settings")
             .WithTags("CoreConnectors")
@@ -39,3 +43,5 @@ public sealed class CoreConnectorEndpoints : IEndpoints
         ).Produces<EventTypeResponse>();
     }
 }
+
+public sealed record EnsureTestCoreConnectorCredentialsRequest(DateTimeOffset BusyStartTime, DateTimeOffset BusyEndTime);

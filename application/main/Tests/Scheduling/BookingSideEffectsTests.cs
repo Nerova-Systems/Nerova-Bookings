@@ -160,6 +160,83 @@ public sealed class BookingSideEffectsTests : EndpointBaseTest<MainDbContext>
     }
 
     [Fact]
+    public async Task ConfirmBooking_WhenConnectorSettingsExist_ShouldEnqueueUpdateOperations()
+    {
+        // Arrange
+        await UpdateSchedulingProfileAsync("owner");
+        var schedule = await CreateScheduleAsync();
+        await CreateEventTypeAsync(
+            schedule.Id,
+            "Intro call",
+            "intro-call",
+            new
+            {
+                confirmationPolicy = new { requiresConfirmation = true },
+                destinationCalendar = new { integration = "google-calendar", externalId = "primary", credentialId = "fake-google" },
+                defaultConferencing = new { app = "zoom-video", credentialId = "fake-zoom" }
+            },
+            "integration",
+            "zoom-video"
+        );
+        var booking = await CreateBookingAsync("intro-call", "2026-06-01T07:00:00Z", "Ada Lovelace", "ada@example.com");
+
+        // Act
+        var response = await AuthenticatedOwnerHttpClient.PostAsync($"/api/bookings/{booking.Id}/confirm", null);
+
+        // Assert
+        response.ShouldBeSuccessfulGetRequest();
+        var deliveriesResponse = await AuthenticatedOwnerHttpClient.GetAsync($"/api/bookings/{booking.Id}/side-effects");
+        deliveriesResponse.ShouldBeSuccessfulGetRequest();
+        var deliveries = await deliveriesResponse.DeserializeResponse<BookingSideEffectDeliveriesResponse>();
+        deliveries!.Deliveries.Should().Contain(delivery => delivery.Trigger == "BOOKING_CREATED" && delivery.Kind == "calendar" && delivery.Operation == "create");
+        deliveries.Deliveries.Should().Contain(delivery => delivery.Trigger == "BOOKING_CREATED" && delivery.Kind == "conferencing" && delivery.Operation == "create");
+        deliveries.Deliveries.Should().Contain(delivery => delivery.Trigger == "BOOKING_CONFIRMED" && delivery.Kind == "calendar" && delivery.Operation == "update");
+        deliveries.Deliveries.Should().Contain(delivery => delivery.Trigger == "BOOKING_CONFIRMED" && delivery.Kind == "conferencing" && delivery.Operation == "update");
+    }
+
+    [Fact]
+    public async Task CancelBooking_WhenConnectorReferencesExist_ShouldDeleteCalendarAndConferencingReferences()
+    {
+        // Arrange
+        await UpdateSchedulingProfileAsync("owner");
+        var schedule = await CreateScheduleAsync();
+        await CreateEventTypeAsync(
+            schedule.Id,
+            "Intro call",
+            "intro-call",
+            new
+            {
+                destinationCalendar = new { integration = "google-calendar", externalId = "primary", credentialId = "fake-google" },
+                defaultConferencing = new { app = "zoom-video", credentialId = "fake-zoom" }
+            },
+            "integration",
+            "zoom-video"
+        );
+        var booking = await CreateBookingAsync("intro-call", "2026-06-01T07:00:00Z", "Ada Lovelace", "ada@example.com");
+
+        using var scope = Provider.CreateScope();
+        var processor = scope.ServiceProvider.GetRequiredService<BookingSideEffectProcessor>();
+        await processor.ProcessPendingAsync(10, CancellationToken.None);
+
+        // Act
+        var response = await AuthenticatedOwnerHttpClient.PostAsync($"/api/bookings/{booking.Id}/cancel", null);
+        var processedDeletes = await processor.ProcessPendingAsync(10, CancellationToken.None);
+
+        // Assert
+        response.EnsureSuccessStatusCode();
+        processedDeletes.Should().Be(2);
+
+        var deliveriesResponse = await AuthenticatedOwnerHttpClient.GetAsync($"/api/bookings/{booking.Id}/side-effects");
+        deliveriesResponse.ShouldBeSuccessfulGetRequest();
+        var deliveries = await deliveriesResponse.DeserializeResponse<BookingSideEffectDeliveriesResponse>();
+        deliveries!.Deliveries.Should().Contain(delivery => delivery.Trigger == "BOOKING_CANCELLED" && delivery.Kind == "calendar" && delivery.Operation == "delete");
+        deliveries.Deliveries.Should().Contain(delivery => delivery.Trigger == "BOOKING_CANCELLED" && delivery.Kind == "conferencing" && delivery.Operation == "delete");
+
+        var referencesJson = Connection.ExecuteScalar<string>("SELECT references_json FROM bookings WHERE id = @id", [new { id = booking.Id }]);
+        referencesJson.Should().Contain("\"Deleted\":true");
+    }
+
+    [Fact]
     public async Task ConfirmBooking_WhenWebhookIsActive_ShouldEnqueueConfirmedWebhook()
     {
         // Arrange
@@ -577,6 +654,7 @@ public sealed class BookingSideEffectsTests : EndpointBaseTest<MainDbContext>
         string Trigger,
         string Kind,
         string Status,
+        string? Operation,
         int Attempts,
         DateTimeOffset? NextRetryAt,
         string? LastError

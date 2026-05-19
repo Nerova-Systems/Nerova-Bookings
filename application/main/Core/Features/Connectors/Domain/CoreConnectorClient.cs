@@ -11,7 +11,15 @@ public interface ICoreConnectorClient
 
     Task<BookingReference> CreateCalendarEventAsync(Booking booking, EventTypeDestinationCalendar destinationCalendar, CancellationToken cancellationToken);
 
+    Task<BookingReference> UpdateCalendarEventAsync(Booking booking, EventTypeDestinationCalendar destinationCalendar, CancellationToken cancellationToken);
+
+    Task DeleteCalendarEventAsync(Booking booking, EventTypeDestinationCalendar destinationCalendar, CancellationToken cancellationToken);
+
     Task<BookingReference> CreateMeetingAsync(Booking booking, EventTypeDefaultConferencing conferencing, CancellationToken cancellationToken);
+
+    Task<BookingReference> UpdateMeetingAsync(Booking booking, EventTypeDefaultConferencing conferencing, CancellationToken cancellationToken);
+
+    Task DeleteMeetingAsync(Booking booking, EventTypeDefaultConferencing conferencing, CancellationToken cancellationToken);
 }
 
 public sealed class FakeCoreConnectorClient : ICoreConnectorClient
@@ -55,6 +63,20 @@ public sealed class FakeCoreConnectorClient : ICoreConnectorClient
         );
     }
 
+    public Task<BookingReference> UpdateCalendarEventAsync(
+        Booking booking,
+        EventTypeDestinationCalendar destinationCalendar,
+        CancellationToken cancellationToken
+    )
+    {
+        return CreateCalendarEventAsync(booking, destinationCalendar, cancellationToken);
+    }
+
+    public Task DeleteCalendarEventAsync(Booking booking, EventTypeDestinationCalendar destinationCalendar, CancellationToken cancellationToken)
+    {
+        return Task.CompletedTask;
+    }
+
     public Task<BookingReference> CreateMeetingAsync(Booking booking, EventTypeDefaultConferencing conferencing, CancellationToken cancellationToken)
     {
         var app = conferencing.App.Trim();
@@ -70,6 +92,16 @@ public sealed class FakeCoreConnectorClient : ICoreConnectorClient
                 false
             )
         );
+    }
+
+    public Task<BookingReference> UpdateMeetingAsync(Booking booking, EventTypeDefaultConferencing conferencing, CancellationToken cancellationToken)
+    {
+        return CreateMeetingAsync(booking, conferencing, cancellationToken);
+    }
+
+    public Task DeleteMeetingAsync(Booking booking, EventTypeDefaultConferencing conferencing, CancellationToken cancellationToken)
+    {
+        return Task.CompletedTask;
     }
 
     private static IEnumerable<CalendarBusyWindow> ParseFakeBusyWindows(string? credentialId)

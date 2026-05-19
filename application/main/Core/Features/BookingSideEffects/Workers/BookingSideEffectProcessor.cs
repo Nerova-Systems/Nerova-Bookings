@@ -44,6 +44,7 @@ public sealed class BookingSideEffectProcessor(
         }
 
         await mainDbContext.SaveChangesAsync(cancellationToken);
+        mainDbContext.ChangeTracker.Clear();
         return deliveries.Length;
     }
 
@@ -147,14 +148,19 @@ public sealed class BookingSideEffectProcessor(
             ExternalId = payload.ExternalId,
             CredentialId = payload.CredentialId
         };
+        var operation = ResolveConnectorOperation(payload.Operation, delivery.Trigger);
 
-        if (ShouldDeleteReference(delivery.Trigger))
+        if (operation.Equals(BookingSideEffectConstants.DeleteOperation, StringComparison.OrdinalIgnoreCase))
         {
+            await coreConnectorClient.DeleteCalendarEventAsync(booking, destinationCalendar, cancellationToken);
             booking.MarkReferencesDeleted(destinationCalendar.Integration);
             return;
         }
 
-        booking.UpsertReference(await coreConnectorClient.CreateCalendarEventAsync(booking, destinationCalendar, cancellationToken));
+        var reference = operation.Equals(BookingSideEffectConstants.UpdateOperation, StringComparison.OrdinalIgnoreCase)
+            ? await coreConnectorClient.UpdateCalendarEventAsync(booking, destinationCalendar, cancellationToken)
+            : await coreConnectorClient.CreateCalendarEventAsync(booking, destinationCalendar, cancellationToken);
+        booking.UpsertReference(reference);
     }
 
     private async Task SyncConferencingAsync(BookingSideEffectDelivery delivery, CancellationToken cancellationToken)
@@ -163,14 +169,19 @@ public sealed class BookingSideEffectProcessor(
                       ?? throw new JsonException("Conferencing connector delivery payload is invalid.");
         var booking = await LoadBookingAsync(delivery.BookingId, cancellationToken);
         var conferencing = new EventTypeDefaultConferencing { App = payload.App, CredentialId = payload.CredentialId };
+        var operation = ResolveConnectorOperation(payload.Operation, delivery.Trigger);
 
-        if (ShouldDeleteReference(delivery.Trigger))
+        if (operation.Equals(BookingSideEffectConstants.DeleteOperation, StringComparison.OrdinalIgnoreCase))
         {
+            await coreConnectorClient.DeleteMeetingAsync(booking, conferencing, cancellationToken);
             booking.MarkReferencesDeleted(conferencing.App);
             return;
         }
 
-        booking.UpsertReference(await coreConnectorClient.CreateMeetingAsync(booking, conferencing, cancellationToken));
+        var reference = operation.Equals(BookingSideEffectConstants.UpdateOperation, StringComparison.OrdinalIgnoreCase)
+            ? await coreConnectorClient.UpdateMeetingAsync(booking, conferencing, cancellationToken)
+            : await coreConnectorClient.CreateMeetingAsync(booking, conferencing, cancellationToken);
+        booking.UpsertReference(reference);
     }
 
     private async Task<Booking> LoadBookingAsync(BookingId bookingId, CancellationToken cancellationToken)
@@ -182,9 +193,24 @@ public sealed class BookingSideEffectProcessor(
                throw new JsonException($"Booking '{bookingId}' was not found for connector delivery.");
     }
 
-    private static bool ShouldDeleteReference(string trigger)
+    private static string ResolveConnectorOperation(string? operation, string trigger)
     {
-        return trigger is BookingSideEffectConstants.BookingCancelled or BookingSideEffectConstants.BookingRejected or BookingSideEffectConstants.BookingRescheduled;
+        if (!string.IsNullOrWhiteSpace(operation))
+        {
+            return operation.Trim().ToLowerInvariant();
+        }
+
+        return trigger switch
+        {
+            BookingSideEffectConstants.BookingCreated => BookingSideEffectConstants.CreateOperation,
+            BookingSideEffectConstants.BookingConfirmed => BookingSideEffectConstants.UpdateOperation,
+            BookingSideEffectConstants.BookingLocationChanged => BookingSideEffectConstants.UpdateOperation,
+            BookingSideEffectConstants.BookingGuestsAdded => BookingSideEffectConstants.UpdateOperation,
+            BookingSideEffectConstants.BookingRejected => BookingSideEffectConstants.DeleteOperation,
+            BookingSideEffectConstants.BookingCancelled => BookingSideEffectConstants.DeleteOperation,
+            BookingSideEffectConstants.BookingRescheduled => BookingSideEffectConstants.DeleteOperation,
+            _ => BookingSideEffectConstants.UpdateOperation
+        };
     }
 
     private static string DefaultEmailSubject(BookingEmailDeliveryPayload payload)

@@ -15,6 +15,10 @@ public static class BookingSideEffectConstants
     public const string CalendarKind = "calendar";
     public const string ConferencingKind = "conferencing";
 
+    public const string CreateOperation = "create";
+    public const string UpdateOperation = "update";
+    public const string DeleteOperation = "delete";
+
     public const string PendingStatus = "pending";
     public const string SentStatus = "sent";
     public const string FailedStatus = "failed";

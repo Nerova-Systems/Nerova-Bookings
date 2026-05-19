@@ -12,7 +12,17 @@ import { logInAsAdmin } from "@shared/e2e/utils/test-data";
 import { step } from "@shared/e2e/utils/test-step-wrapper";
 
 const BACK_OFFICE_BASE_URL = getBackOfficeBaseUrl();
-const SIDE_EFFECT_FLAGS = ["cal-com-core", "cal-com-workflows", "cal-com-webhooks"] as const;
+const SIDE_EFFECT_FLAGS = [
+  "cal-com-core",
+  "cal-com-event-types",
+  "cal-com-availability",
+  "cal-com-public-booking",
+  "cal-com-bookings",
+  "cal-com-workflows",
+  "cal-com-webhooks",
+  "cal-com-apps-connectors",
+  "cal-com-conferencing"
+] as const;
 
 async function getAntiforgeryHeaders(page: Page): Promise<{ "x-xsrf-token": string }> {
   const token = await page.evaluate(
@@ -110,6 +120,25 @@ async function deleteCurrentEventType(page: Page, title: string) {
   await expect(page.getByRole("heading", { name: "Event types" })).toBeVisible();
 }
 
+async function seedCoreConnectorFixtures(page: Page, busyStartTime: Date, busyEndTime: Date) {
+  const response = await page.request.post("/api/connectors/core/test-fixtures", {
+    data: {
+      busyStartTime: busyStartTime.toISOString(),
+      busyEndTime: busyEndTime.toISOString()
+    },
+    headers: await getAntiforgeryHeaders(page)
+  });
+  expect(response.ok()).toBe(true);
+  return (await response.json()) as {
+    accounts: {
+      id: string;
+      integration: string;
+      accountEmail: string;
+      calendars: { externalId: string; name: string; primary: boolean }[];
+    }[];
+  };
+}
+
 test.describe("@smoke", () => {
   test("should manage workflow and webhook side-effect settings", async ({ browser, ownerPage }) => {
     const context = createTestContext(ownerPage);
@@ -187,7 +216,7 @@ test.describe("@smoke", () => {
    * - Reload persisted detail state
    * - Duplicate and delete the duplicate, then clean up the original event type
    */
-  test("should create, edit, persist, duplicate, and delete event types", async ({ ownerPage }) => {
+  test("should create, edit, persist, duplicate, and delete event types", async ({ browser, ownerPage }) => {
     const context = createTestContext(ownerPage);
     const unique = Date.now();
     const scheduleName = `Event Types Smoke ${unique}`;
@@ -197,8 +226,26 @@ test.describe("@smoke", () => {
     const updatedSlug = `smoke-strategy-session-${unique}`;
     const duplicateTitle = `Smoke duplicate ${unique}`;
     const duplicateSlug = `smoke-duplicate-${unique}`;
+    let googleCredentialId = "";
 
     // === SETUP ===
+    await step("Seed core connector fixtures & verify connected accounts")(async () => {
+      await enableSideEffectFlags(browser, ownerPage);
+      const fixtures = await seedCoreConnectorFixtures(
+        ownerPage,
+        new Date("2026-06-01T07:00:00.000Z"),
+        new Date("2026-06-01T07:30:00.000Z")
+      );
+      googleCredentialId = fixtures.accounts.find((account) => account.integration === "google-calendar")?.id ?? "";
+
+      expect(googleCredentialId).toContain("fake-busy:");
+      expect(fixtures.accounts.map((account) => account.integration)).toEqual([
+        "google-calendar",
+        "office365-calendar",
+        "zoom-video"
+      ]);
+    })();
+
     await step("Create availability schedule through dialog & verify schedule detail opens")(async () => {
       await createSchedule(ownerPage, scheduleName);
 
@@ -275,11 +322,20 @@ test.describe("@smoke", () => {
       await ownerPage.getByRole("button", { name: "Add option" }).click();
       await ownerPage.getByRole("textbox", { name: "Option label" }).last().fill("Support");
       await ownerPage.getByRole("textbox", { name: "Option value" }).last().fill("support");
+      await expect(ownerPage.getByText("Primary calendar")).toBeVisible();
+      await ownerPage.getByRole("checkbox", { name: "Primary calendar Google Calendar - owner.google@example.test" }).click();
+      await selectOption(
+        ownerPage.getByLabel("Destination calendar"),
+        ownerPage,
+        "Focus calendar (Google Calendar - owner.google@example.test)"
+      );
+      await selectOption(ownerPage.getByLabel("Default conferencing"), ownerPage, "Zoom (owner.zoom@example.test)");
 
       await expect(ownerPage.getByRole("switch", { name: "Hidden" }).first()).toBeChecked();
       await expect(ownerPage.getByRole("textbox", { name: "Success URL" })).toHaveValue("https://example.com/success");
       await expect(ownerPage.getByRole("textbox", { name: "Private link" })).toHaveValue("vip");
       await expect(ownerPage.getByText("Topic").first()).toBeVisible();
+      await expect(ownerPage.getByRole("checkbox", { name: "Primary calendar Google Calendar - owner.google@example.test" })).toBeChecked();
     })();
 
     await step("Update recurring fields and save & verify update toast appears")(async () => {
@@ -304,11 +360,35 @@ test.describe("@smoke", () => {
       await ownerPage.getByRole("tab", { name: "Advanced" }).click();
       await expect(ownerPage.getByRole("textbox", { name: "Private link" })).toHaveValue("vip");
       await expect(ownerPage.getByRole("textbox", { name: "Option value" }).first()).toHaveValue("sales");
+      await expect(ownerPage.getByRole("checkbox", { name: "Primary calendar Google Calendar - owner.google@example.test" })).toBeChecked();
+      await expect(ownerPage.getByLabel("Destination calendar")).toContainText(
+        "Focus calendar (Google Calendar - owner.google@example.test)"
+      );
+      await expect(ownerPage.getByLabel("Default conferencing")).toContainText("Zoom (owner.zoom@example.test)");
       await ownerPage.getByRole("tab", { name: "Limits" }).click();
       await expect(ownerPage.getByRole("textbox", { name: "Slot interval" })).toHaveValue("15");
       await ownerPage.getByRole("tab", { name: "Recurring" }).click();
       await expect(ownerPage.getByRole("switch", { name: "Recurring event" })).toBeChecked();
       await expect(ownerPage.getByRole("textbox", { name: "Occurrences" })).toHaveValue("6");
+    })();
+
+    await step("Open public booking with selected calendar busy window & verify blocked slot is hidden")(async () => {
+      const profile = await ownerPage.evaluate(async () => {
+        const response = await fetch("/api/scheduling/profile");
+        if (!response.ok) throw new Error(await response.text());
+        return (await response.json()) as { handle: string };
+      });
+      const search = new URLSearchParams({
+        date: "2026-06-01",
+        duration: "45",
+        timezone: "Africa/Johannesburg"
+      });
+
+      await ownerPage.goto(`/${profile.handle}/${updatedSlug}?${search.toString()}`);
+
+      await expect(ownerPage.getByTestId("booker-timeslots")).toBeVisible();
+      await expect(ownerPage.getByRole("button", { name: "09:00" })).not.toBeVisible();
+      await expect(ownerPage.getByText(googleCredentialId)).not.toBeVisible();
     })();
 
     // === DUPLICATE AND DELETE ===

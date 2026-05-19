@@ -86,6 +86,28 @@ public sealed class CoreConnectorEndpointsTests : EndpointBaseTest<MainDbContext
     }
 
     [Fact]
+    public async Task EnsureTestCoreConnectorCredentials_WhenDevelopment_ShouldCreateDeterministicCoreAccounts()
+    {
+        // Arrange
+        var busyStartTime = DateTimeOffset.Parse("2026-06-01T07:00:00Z");
+        var busyEndTime = DateTimeOffset.Parse("2026-06-01T07:30:00Z");
+
+        // Act
+        var response = await AuthenticatedOwnerHttpClient.PostAsJsonAsync(
+            "/api/connectors/core/test-fixtures",
+            new { busyStartTime, busyEndTime }
+        );
+
+        // Assert
+        response.ShouldBeSuccessfulGetRequest();
+        var accounts = await response.DeserializeResponse<CoreConnectorAccountsResponse>();
+        accounts!.Accounts.Select(account => account.Integration).Should().Equal("google-calendar", "office365-calendar", "zoom-video");
+        accounts.Accounts[0].Id.Should().StartWith("fake-busy:");
+        accounts.Accounts[0].Calendars.Select(calendar => calendar.ExternalId).Should().Equal("primary", "focus");
+        accounts.Accounts[2].Calendars.Should().BeEmpty();
+    }
+
+    [Fact]
     public async Task UpdateEventTypeConnectorSettings_WhenCredentialDoesNotBelongToOwner_ShouldReturnBadRequest()
     {
         // Arrange
