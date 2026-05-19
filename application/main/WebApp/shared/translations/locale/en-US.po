@@ -228,9 +228,6 @@ msgstr "Burning the midnight oil?"
 msgid "By"
 msgstr "By"
 
-msgid "Calendar ID"
-msgstr "Calendar ID"
-
 msgid "Calendar view"
 msgstr "Calendar view"
 
@@ -351,9 +348,6 @@ msgstr "Create schedule"
 
 msgid "Create the booking page basics now, then finish setup on the next screen."
 msgstr "Create the booking page basics now, then finish setup on the next screen."
-
-msgid "Credential reference"
-msgstr "Credential reference"
 
 msgid "Daily"
 msgstr "Daily"
@@ -613,6 +607,9 @@ msgstr "Link"
 msgid "List view"
 msgstr "List view"
 
+msgid "Loading connected accounts..."
+msgstr "Loading connected accounts..."
+
 msgid "Loading deliveries..."
 msgstr "Loading deliveries..."
 
@@ -731,6 +728,9 @@ msgstr "No availability windows"
 msgid "No bookings this week"
 msgstr "No bookings this week"
 
+msgid "No connected Google or Microsoft calendars."
+msgstr "No connected Google or Microsoft calendars."
+
 msgid "No custom booking fields yet."
 msgstr "No custom booking fields yet."
 
@@ -760,9 +760,6 @@ msgstr "No private links yet."
 
 msgid "No schedules yet"
 msgstr "No schedules yet"
-
-msgid "No selected calendars. Availability only uses Nerova bookings."
-msgstr "No selected calendars. Availability only uses Nerova bookings."
 
 msgid "No settings available yet."
 msgstr "No settings available yet."

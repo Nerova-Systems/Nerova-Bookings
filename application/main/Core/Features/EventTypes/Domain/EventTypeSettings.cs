@@ -123,18 +123,18 @@ public sealed record EventTypeSettings
                                   string.IsNullOrWhiteSpace(source.DestinationCalendar.ExternalId)
                 ? null
                 : source.DestinationCalendar with
-                    {
-                        Integration = source.DestinationCalendar.Integration.Trim(),
-                        ExternalId = source.DestinationCalendar.ExternalId.Trim(),
-                        CredentialId = string.IsNullOrWhiteSpace(source.DestinationCalendar.CredentialId) ? null : source.DestinationCalendar.CredentialId.Trim()
-                    },
+                {
+                    Integration = source.DestinationCalendar.Integration.Trim(),
+                    ExternalId = source.DestinationCalendar.ExternalId.Trim(),
+                    CredentialId = string.IsNullOrWhiteSpace(source.DestinationCalendar.CredentialId) ? null : source.DestinationCalendar.CredentialId.Trim()
+                },
             DefaultConferencing = source.DefaultConferencing is null || string.IsNullOrWhiteSpace(source.DefaultConferencing.App)
                 ? null
                 : source.DefaultConferencing with
-                    {
-                        App = source.DefaultConferencing.App.Trim(),
-                        CredentialId = string.IsNullOrWhiteSpace(source.DefaultConferencing.CredentialId) ? null : source.DefaultConferencing.CredentialId.Trim()
-                    },
+                {
+                    App = source.DefaultConferencing.App.Trim(),
+                    CredentialId = string.IsNullOrWhiteSpace(source.DefaultConferencing.CredentialId) ? null : source.DefaultConferencing.CredentialId.Trim()
+                },
             CancellationPolicy = source.CancellationPolicy,
             ReschedulePolicy = source.ReschedulePolicy,
             Redirects = source.Redirects,

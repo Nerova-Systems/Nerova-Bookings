@@ -154,4 +154,9 @@ public sealed class EventType : SoftDeletableAggregateRoot<EventTypeId>, ITenant
         Settings = Settings with { PrivateLinks = privateLinks };
         return true;
     }
+
+    public void UpdateSettings(EventTypeSettings settings)
+    {
+        Settings = EventTypeSettings.Normalize(settings, DurationMinutes, LocationType, LocationValue);
+    }
 }

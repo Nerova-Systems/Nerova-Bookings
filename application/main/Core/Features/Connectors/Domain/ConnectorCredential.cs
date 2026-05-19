@@ -1,0 +1,88 @@
+using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json;
+using SharedKernel.Domain;
+
+namespace Main.Features.Connectors.Domain;
+
+public sealed class ConnectorCredential : AggregateRoot<string>, ITenantScopedEntity
+{
+    private static readonly JsonSerializerOptions JsonSerializerOptions = new(JsonSerializerOptions.Default)
+    {
+        PropertyNameCaseInsensitive = true
+    };
+
+    private ConnectorCredential() : base(string.Empty)
+    {
+        OwnerUserId = new UserId(string.Empty);
+        Integration = string.Empty;
+        ExternalAccountId = string.Empty;
+        AccountEmail = string.Empty;
+        DisplayName = string.Empty;
+        Status = string.Empty;
+        SecretReference = string.Empty;
+        CalendarsJson = "[]";
+    }
+
+    private ConnectorCredential(
+        TenantId tenantId,
+        string id,
+        UserId ownerUserId,
+        string integration,
+        string externalAccountId,
+        string accountEmail,
+        string displayName,
+        string status,
+        string secretReference,
+        CoreConnectorCalendar[] calendars
+    ) : base(id)
+    {
+        TenantId = tenantId;
+        OwnerUserId = ownerUserId;
+        Integration = integration.Trim();
+        ExternalAccountId = externalAccountId.Trim();
+        AccountEmail = accountEmail.Trim().ToLowerInvariant();
+        DisplayName = displayName.Trim();
+        Status = status.Trim();
+        SecretReference = secretReference.Trim();
+        CalendarsJson = JsonSerializer.Serialize(calendars, JsonSerializerOptions);
+    }
+
+    public TenantId TenantId { get; } = new(0);
+
+    public UserId OwnerUserId { get; }
+
+    public string Integration { get; }
+
+    public string ExternalAccountId { get; }
+
+    public string AccountEmail { get; }
+
+    public string DisplayName { get; }
+
+    public string Status { get; }
+
+    public string SecretReference { get; }
+
+    public string CalendarsJson { get; }
+
+    [NotMapped]
+    public CoreConnectorCalendar[] Calendars => JsonSerializer.Deserialize<CoreConnectorCalendar[]>(CalendarsJson, JsonSerializerOptions) ?? [];
+
+    public static ConnectorCredential Create(
+        TenantId tenantId,
+        string id,
+        UserId ownerUserId,
+        string integration,
+        string externalAccountId,
+        string accountEmail,
+        string displayName,
+        string status,
+        string secretReference,
+        CoreConnectorCalendar[] calendars
+    )
+    {
+        return new ConnectorCredential(tenantId, id, ownerUserId, integration, externalAccountId, accountEmail, displayName, status, secretReference, calendars);
+    }
+}
+
+public sealed record CoreConnectorCalendar(string ExternalId, string Name, bool Primary);

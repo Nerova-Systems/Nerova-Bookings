@@ -2,6 +2,7 @@
 import { t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
 import { Button } from "@repo/ui/components/Button";
+import { Checkbox } from "@repo/ui/components/Checkbox";
 import { DateField } from "@repo/ui/components/DateField";
 import { FormValidationContext } from "@repo/ui/components/Form";
 import { NumberField } from "@repo/ui/components/NumberField";
@@ -11,6 +12,8 @@ import { SwitchField } from "@repo/ui/components/SwitchField";
 import { TextField } from "@repo/ui/components/TextField";
 import { ArrowDownIcon, ArrowUpIcon, PlusIcon, TrashIcon } from "lucide-react";
 
+import { api, type Schemas } from "@/shared/lib/api/client";
+
 import type { EventTypeTabProps } from "./EventTypeTabTypes";
 
 import { getEventTypeSettings, updateEventTypeSettings, updateEventTypeSettingsSection } from "../schedulingTypes";
@@ -18,6 +21,7 @@ import { DisabledFeatureRow, EventTypeTabSection } from "./EventTypeTabSection";
 
 export function EventTypeAdvancedTab({ value, onChange, error }: EventTypeTabProps) {
   const settings = getEventTypeSettings(value);
+  const coreConnectorAccountsQuery = api.useQuery("get", "/api/connectors/core/accounts");
   const interfaceLanguages = [
     { value: "auto", label: t`Browser default` },
     { value: "en-US", label: t`English` },
@@ -262,6 +266,11 @@ export function EventTypeAdvancedTab({ value, onChange, error }: EventTypeTabPro
         >
           <CoreConnectorSettings
             settings={settings}
+            accounts={coreConnectorAccountsQuery.data?.accounts ?? []}
+            isLoading={coreConnectorAccountsQuery.isLoading}
+            onSelectedCalendarsChange={(selectedCalendars) =>
+              updateSettings((nextSettings) => ({ ...nextSettings, selectedCalendars }))
+            }
             onDestinationCalendarChange={updateDestinationCalendar}
             onDefaultConferencingChange={updateDefaultConferencing}
           />
@@ -288,146 +297,237 @@ export function EventTypeAdvancedTab({ value, onChange, error }: EventTypeTabPro
 }
 
 type EventTypeSettings = ReturnType<typeof getEventTypeSettings>;
+type CoreConnectorAccount = Schemas["CoreConnectorAccountResponse"];
 type BookingField = EventTypeSettings["bookingFields"][number];
 type BookingFieldOption = BookingField["options"][number];
 type PrivateLink = EventTypeSettings["privateLinks"][number];
 
 function CoreConnectorSettings({
   settings,
+  accounts,
+  isLoading,
+  onSelectedCalendarsChange,
   onDestinationCalendarChange,
   onDefaultConferencingChange
 }: Readonly<{
   settings: EventTypeSettings;
+  accounts: CoreConnectorAccount[];
+  isLoading: boolean;
+  onSelectedCalendarsChange: (selectedCalendars: EventTypeSettings["selectedCalendars"]) => void;
   onDestinationCalendarChange: (destinationCalendar: EventTypeSettings["destinationCalendar"]) => void;
   onDefaultConferencingChange: (defaultConferencing: EventTypeSettings["defaultConferencing"]) => void;
 }>) {
-  const calendarIntegrations = [
+  const calendarAccounts = accounts.filter((account) => isCalendarIntegration(account.integration));
+  const destinationCalendarOptions = [
     { value: "none", label: t`No destination calendar` },
-    { value: "google-calendar", label: t`Google Calendar` },
-    { value: "office365-calendar", label: t`Office 365 Calendar` }
+    ...calendarAccounts.flatMap((account) =>
+      account.calendars.map((calendar) => ({
+        value: connectorCalendarValue(account.integration, calendar.externalId, account.id),
+        label: `${calendar.name} (${connectorLabel(account.integration)} - ${account.accountEmail})`
+      }))
+    )
   ];
-  const conferencingApps = [
+  const conferencingOptions = [
     { value: "none", label: t`No default conferencing` },
-    { value: "google-meet", label: t`Google Meet` },
-    { value: "office365-video", label: t`Office 365 video` },
-    { value: "zoom-video", label: t`Zoom` }
+    ...accounts.flatMap((account) => conferencingAppsForAccount(account))
   ];
   const destinationCalendar = settings.destinationCalendar;
   const defaultConferencing = settings.defaultConferencing;
-
-  const updateDestination = (patch: Partial<NonNullable<EventTypeSettings["destinationCalendar"]>>) => {
-    const nextDestination = {
-      integration: destinationCalendar?.integration || "google-calendar",
-      externalId: destinationCalendar?.externalId || "primary",
-      credentialId: destinationCalendar?.credentialId ?? null,
-      ...patch
-    };
-    onDestinationCalendarChange(nextDestination);
-  };
-  const updateConferencing = (patch: Partial<NonNullable<EventTypeSettings["defaultConferencing"]>>) => {
-    const nextConferencing = {
-      app: defaultConferencing?.app || "zoom-video",
-      credentialId: defaultConferencing?.credentialId ?? null,
-      ...patch
-    };
-    onDefaultConferencingChange(nextConferencing);
-  };
+  const destinationValue = destinationCalendar
+    ? connectorCalendarValue(
+        destinationCalendar.integration,
+        destinationCalendar.externalId,
+        destinationCalendar.credentialId
+      )
+    : "none";
+  const conferencingValue = defaultConferencing
+    ? connectorConferencingValue(defaultConferencing.app, defaultConferencing.credentialId)
+    : "none";
 
   return (
     <div className="grid gap-5">
+      {isLoading && (
+        <div className="rounded-md border p-4 text-sm text-muted-foreground">
+          <Trans>Loading connected accounts...</Trans>
+        </div>
+      )}
       <div className="grid gap-4 rounded-md border p-4">
         <SelectField
           name="destinationCalendarIntegration"
           label={t`Destination calendar`}
-          items={calendarIntegrations}
-          value={destinationCalendar?.integration ?? "none"}
-          onValueChange={(integration) =>
-            !integration || integration === "none" ? onDestinationCalendarChange(null) : updateDestination({ integration })
+          items={destinationCalendarOptions}
+          value={destinationValue}
+          onValueChange={(nextValue) =>
+            !nextValue || nextValue === "none"
+              ? onDestinationCalendarChange(null)
+              : onDestinationCalendarChange(parseConnectorCalendarValue(nextValue))
           }
         >
           <SelectTrigger>
             <SelectValue>
-              {(integration: string) =>
-                calendarIntegrations.find((item) => item.value === integration)?.label ?? integration
+              {(nextValue: string) =>
+                destinationCalendarOptions.find((item) => item.value === nextValue)?.label ?? nextValue
               }
             </SelectValue>
           </SelectTrigger>
           <SelectContent>
-            {calendarIntegrations.map((integration) => (
-              <SelectItem key={integration.value} value={integration.value}>
-                {integration.label}
+            {destinationCalendarOptions.map((option) => (
+              <SelectItem key={option.value} value={option.value}>
+                {option.label}
               </SelectItem>
             ))}
           </SelectContent>
         </SelectField>
-        {destinationCalendar && (
-          <div className="grid gap-4 md:grid-cols-2">
-            <TextField
-              name="destinationCalendarExternalId"
-              label={t`Calendar ID`}
-              value={destinationCalendar.externalId}
-              onChange={(externalId) => updateDestination({ externalId })}
-            />
-            <TextField
-              name="destinationCalendarCredentialId"
-              label={t`Credential reference`}
-              value={destinationCalendar.credentialId ?? ""}
-              onChange={(credentialId) => updateDestination({ credentialId: credentialId || null })}
-            />
-          </div>
-        )}
       </div>
       <div className="grid gap-4 rounded-md border p-4">
         <SelectField
           name="defaultConferencingApp"
           label={t`Default conferencing`}
-          items={conferencingApps}
-          value={defaultConferencing?.app ?? "none"}
-          onValueChange={(app) => (!app || app === "none" ? onDefaultConferencingChange(null) : updateConferencing({ app }))}
+          items={conferencingOptions}
+          value={conferencingValue}
+          onValueChange={(nextValue) =>
+            !nextValue || nextValue === "none"
+              ? onDefaultConferencingChange(null)
+              : onDefaultConferencingChange(parseConnectorConferencingValue(nextValue))
+          }
         >
           <SelectTrigger>
             <SelectValue>
-              {(app: string) => conferencingApps.find((item) => item.value === app)?.label ?? app}
+              {(nextValue: string) => conferencingOptions.find((item) => item.value === nextValue)?.label ?? nextValue}
             </SelectValue>
           </SelectTrigger>
           <SelectContent>
-            {conferencingApps.map((app) => (
-              <SelectItem key={app.value} value={app.value}>
-                {app.label}
+            {conferencingOptions.map((option) => (
+              <SelectItem key={option.value} value={option.value}>
+                {option.label}
               </SelectItem>
             ))}
           </SelectContent>
         </SelectField>
-        {defaultConferencing && (
-          <TextField
-            name="defaultConferencingCredentialId"
-            label={t`Credential reference`}
-            value={defaultConferencing.credentialId ?? ""}
-            onChange={(credentialId) => updateConferencing({ credentialId: credentialId || null })}
-          />
-        )}
       </div>
       <div className="grid gap-3 rounded-md border p-4">
         <div className="text-sm font-medium">
           <Trans>Selected calendars</Trans>
         </div>
-        {settings.selectedCalendars.length === 0 ? (
+        {calendarAccounts.length === 0 ? (
           <div className="text-sm text-muted-foreground">
-            <Trans>No selected calendars. Availability only uses Nerova bookings.</Trans>
+            <Trans>No connected Google or Microsoft calendars.</Trans>
           </div>
         ) : (
-          <div className="grid gap-2 text-sm">
-            {settings.selectedCalendars.map((calendar) => (
-              <div key={`${calendar.integration}-${calendar.externalId}-${calendar.credentialId ?? ""}`} className="rounded-md bg-muted/40 p-3">
-                <div className="font-medium">{calendar.integration}</div>
-                <div className="text-muted-foreground">{calendar.externalId}</div>
-              </div>
-            ))}
+          <div className="grid gap-2">
+            {calendarAccounts.flatMap((account) =>
+              account.calendars.map((calendar) => {
+                const checkboxId = `selected-calendar-${account.id}-${calendar.externalId}`;
+                const checked = settings.selectedCalendars.some(
+                  (selectedCalendar) =>
+                    selectedCalendar.integration === account.integration &&
+                    selectedCalendar.externalId === calendar.externalId &&
+                    selectedCalendar.credentialId === account.id
+                );
+                return (
+                  <label
+                    key={`${account.id}-${calendar.externalId}`}
+                    htmlFor={checkboxId}
+                    className="flex items-start gap-3 rounded-md border p-3 text-sm"
+                  >
+                    <Checkbox
+                      id={checkboxId}
+                      checked={checked}
+                      onCheckedChange={(nextChecked) =>
+                        onSelectedCalendarsChange(
+                          nextChecked
+                            ? [
+                                ...settings.selectedCalendars,
+                                {
+                                  integration: account.integration,
+                                  externalId: calendar.externalId,
+                                  credentialId: account.id
+                                }
+                              ]
+                            : settings.selectedCalendars.filter(
+                                (selectedCalendar) =>
+                                  selectedCalendar.integration !== account.integration ||
+                                  selectedCalendar.externalId !== calendar.externalId ||
+                                  selectedCalendar.credentialId !== account.id
+                              )
+                        )
+                      }
+                    />
+                    <span className="min-w-0">
+                      <span className="block font-medium">{calendar.name}</span>
+                      <span className="block text-muted-foreground">
+                        {connectorLabel(account.integration)} - {account.accountEmail}
+                      </span>
+                    </span>
+                  </label>
+                );
+              })
+            )}
           </div>
         )}
       </div>
     </div>
   );
+}
+
+function isCalendarIntegration(integration: string) {
+  return integration === "google-calendar" || integration === "office365-calendar";
+}
+
+function connectorLabel(integration: string) {
+  if (integration === "google-calendar") return t`Google Calendar`;
+  if (integration === "office365-calendar") return t`Office 365 Calendar`;
+  if (integration === "zoom-video") return t`Zoom`;
+  return integration;
+}
+
+function connectorCalendarValue(integration: string, externalId: string, credentialId?: string | null) {
+  return `${integration}|${externalId}|${credentialId ?? ""}`;
+}
+
+function parseConnectorCalendarValue(value: string): NonNullable<EventTypeSettings["destinationCalendar"]> {
+  const [integration, externalId, credentialId] = value.split("|");
+  return { integration, externalId, credentialId: credentialId || null };
+}
+
+function connectorConferencingValue(app: string, credentialId?: string | null) {
+  return `${app}|${credentialId ?? ""}`;
+}
+
+function parseConnectorConferencingValue(value: string): NonNullable<EventTypeSettings["defaultConferencing"]> {
+  const [app, credentialId] = value.split("|");
+  return { app, credentialId: credentialId || null };
+}
+
+function conferencingAppsForAccount(account: CoreConnectorAccount) {
+  if (account.integration === "google-calendar") {
+    return [
+      {
+        value: connectorConferencingValue("google-meet", account.id),
+        label: `${t`Google Meet`} (${account.accountEmail})`
+      }
+    ];
+  }
+
+  if (account.integration === "office365-calendar") {
+    return [
+      {
+        value: connectorConferencingValue("office365-video", account.id),
+        label: `${t`Office 365 video`} (${account.accountEmail})`
+      }
+    ];
+  }
+
+  if (account.integration === "zoom-video") {
+    return [
+      {
+        value: connectorConferencingValue("zoom-video", account.id),
+        label: `${t`Zoom`} (${account.accountEmail})`
+      }
+    ];
+  }
+
+  return [];
 }
 
 function BookingFieldsEditor({
