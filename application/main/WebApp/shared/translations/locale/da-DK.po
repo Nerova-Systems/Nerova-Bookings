@@ -153,6 +153,9 @@ msgstr "Tilbage"
 msgid "Back to availability"
 msgstr "Tilbage til tilgængelighed"
 
+msgid "Back to dates"
+msgstr ""
+
 msgid "Back to times"
 msgstr "Tilbage til tider"
 

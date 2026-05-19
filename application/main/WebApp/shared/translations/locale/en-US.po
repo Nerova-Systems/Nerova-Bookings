@@ -153,6 +153,9 @@ msgstr "Back"
 msgid "Back to availability"
 msgstr "Back to availability"
 
+msgid "Back to dates"
+msgstr "Back to dates"
+
 msgid "Back to times"
 msgstr "Back to times"
 

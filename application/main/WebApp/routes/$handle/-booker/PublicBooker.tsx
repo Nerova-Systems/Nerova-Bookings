@@ -1,6 +1,7 @@
 import { Trans } from "@lingui/react/macro";
+import { cn } from "@repo/ui/utils";
 
-import { AvailableTimeSlots } from "./PublicBookerAvailability";
+import { DatePickerSection, TimeSlotsSection } from "./PublicBookerAvailability";
 import { BookEventForm } from "./PublicBookerForm";
 import { EventMeta } from "./PublicBookerMeta";
 import { PublicBookerSkeleton } from "./PublicBookerSkeleton";
@@ -34,6 +35,7 @@ export function PublicBooker({
   onSlotChange,
   onTimezoneChange,
   onBookingComplete,
+  onBackToDates,
   onBackToTimes
 }: Readonly<{
   handle: string;
@@ -55,6 +57,7 @@ export function PublicBooker({
   onSlotChange: (slot: AvailableSlot) => void;
   onTimezoneChange: (timezone: string | null) => void;
   onBookingComplete: () => void;
+  onBackToDates: () => void;
   onBackToTimes: () => void;
 }>) {
   const slots = getAvailableSlots(slotsByDate, selectedDate);
@@ -69,29 +72,47 @@ export function PublicBooker({
 
   if (state === "loading") return <PublicBookerSkeleton />;
   if (!eventType || rescheduleUnavailable) return <PublicBookerUnavailable />;
+  const showTimeslots = state === "selecting_time";
 
   return (
     <div
       data-testid="booker-container"
       data-booker-state={state}
-      className="mx-auto grid w-full max-w-[70rem] items-start overflow-hidden rounded-md border border-border bg-background shadow-sm transition-[width] duration-300 lg:grid-cols-[20rem_minmax(0,1fr)]"
+      className={cn(
+        "mx-auto grid w-full max-w-full items-start overflow-hidden rounded-md border border-border bg-background shadow-sm transition-[width] duration-300 motion-reduce:transition-none",
+        "[--booker-timeslots-width:240px] lg:[--booker-timeslots-width:280px]",
+        state === "booking"
+          ? "[--booker-main-width:420px] [--booker-meta-width:340px]"
+          : "[--booker-main-width:480px] [--booker-meta-width:280px]",
+        "md:min-h-[450px] md:w-[calc(var(--booker-meta-width)+var(--booker-main-width))]",
+        "md:grid-cols-[var(--booker-meta-width)_var(--booker-main-width)]",
+        showTimeslots &&
+          "md:w-[calc(var(--booker-meta-width)+var(--booker-main-width)+var(--booker-timeslots-width))] md:grid-cols-[var(--booker-meta-width)_var(--booker-main-width)_var(--booker-timeslots-width)]"
+      )}
     >
       <EventMeta eventType={eventType} handle={handle} eventSlug={eventSlug} timezone={timezone} />
       {!selectedSlotDate ? (
-        <div className="grid min-h-[38rem] min-w-0 lg:grid-cols-[minmax(0,1fr)_18rem]">
-          <AvailableTimeSlots
+        <>
+          <DatePickerSection
             slotsByDate={slotsByDate}
             monthAnchor={monthAnchor}
             selectedDate={selectedDate}
-            selectedSlot={selectedSlotDate}
-            slots={slots}
             timezone={timezone}
             onDateChange={onDateChange}
             onMonthChange={onMonthChange}
-            onSlotChange={onSlotChange}
             onTimezoneChange={onTimezoneChange}
           />
-        </div>
+          {showTimeslots && (
+            <TimeSlotsSection
+              eventTitle={eventType.title}
+              selectedDate={selectedDate}
+              selectedSlot={selectedSlotDate}
+              slots={slots}
+              onSlotChange={onSlotChange}
+              onClose={onBackToDates}
+            />
+          )}
+        </>
       ) : (
         <BookEventForm
           handle={handle}

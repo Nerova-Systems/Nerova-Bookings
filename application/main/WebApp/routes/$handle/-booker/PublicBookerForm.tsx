@@ -43,7 +43,7 @@ export function BookEventForm({
   const isRescheduling = rescheduleBooking !== null;
   return (
     <div
-      className="fixed inset-0 z-40 flex bg-background lg:static lg:z-auto lg:min-h-[38rem] lg:border-l"
+      className="fixed inset-0 z-40 flex bg-background md:static md:z-auto md:min-h-[450px] md:w-(--booker-main-width) md:border-l"
       data-testid="public-booker-form"
     >
       <div className="mx-auto flex w-full max-w-[42rem] flex-col gap-5 overflow-auto p-5 sm:p-6 lg:max-w-none lg:p-6">
