@@ -48,4 +48,19 @@ public sealed record BookingSideEffectDeliverySummaryResponse(
     int Attempts,
     DateTimeOffset? NextRetryAt,
     string? LastError
-);
+)
+{
+    public static BookingSideEffectDeliverySummaryResponse From(BookingSideEffectDelivery delivery)
+    {
+        return new BookingSideEffectDeliverySummaryResponse(
+            delivery.Id.Value,
+            delivery.BookingId.Value,
+            delivery.Trigger,
+            delivery.Kind,
+            delivery.Status,
+            delivery.Attempts,
+            delivery.NextRetryAt,
+            delivery.LastError
+        );
+    }
+}

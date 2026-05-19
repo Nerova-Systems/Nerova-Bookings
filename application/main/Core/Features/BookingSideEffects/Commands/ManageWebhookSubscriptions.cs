@@ -4,6 +4,7 @@ using JetBrains.Annotations;
 using Main.Features.BookingSideEffects.Domain;
 using Main.Features.BookingSideEffects.Shared;
 using Main.Features.EventTypes.Domain;
+using Main.Features.Scheduling.Domain;
 using SharedKernel.Cqrs;
 using SharedKernel.ExecutionContext;
 
@@ -198,7 +199,7 @@ public sealed class TestWebhookSubscriptionHandler(
                 null
             )
         );
-        var delivery = BookingSideEffectDelivery.Create(executionContext.TenantId!, new Main.Features.Scheduling.Domain.BookingId("book_01HX0000000000000000000000"), command.EventTypeId, "WEBHOOK_TEST", BookingSideEffectConstants.WebhookKind, payloadJson, dedupeKey, timeProvider.GetUtcNow());
+        var delivery = BookingSideEffectDelivery.Create(executionContext.TenantId!, new BookingId("book_01HX0000000000000000000000"), command.EventTypeId, "WEBHOOK_TEST", BookingSideEffectConstants.WebhookKind, payloadJson, dedupeKey, timeProvider.GetUtcNow());
         await deliveryRepository.AddAsync(delivery, cancellationToken);
         return new BookingSideEffectDeliverySummaryResponse(delivery.Id.Value, delivery.BookingId.Value, delivery.Trigger, delivery.Kind, delivery.Status, delivery.Attempts, delivery.NextRetryAt, delivery.LastError);
     }

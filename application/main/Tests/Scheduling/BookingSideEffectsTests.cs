@@ -1,10 +1,15 @@
 using System.Net;
 using System.Net.Http.Json;
+using System.Security.Cryptography;
+using System.Text;
 using FluentAssertions;
 using JetBrains.Annotations;
 using Main.Database;
+using Main.Features.BookingSideEffects.Domain;
 using Main.Features.BookingSideEffects.Workers;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging.Abstractions;
 using NSubstitute;
 using SharedKernel.Integrations.Email;
 using SharedKernel.Tests;
@@ -168,6 +173,154 @@ public sealed class BookingSideEffectsTests : EndpointBaseTest<MainDbContext>
     }
 
     [Fact]
+    public async Task GetEventTypeDeliveries_WhenSideEffectsExist_ShouldReturnDeliverySummaries()
+    {
+        // Arrange
+        await UpdateSchedulingProfileAsync("owner");
+        var schedule = await CreateScheduleAsync();
+        var eventType = await CreateEventTypeAsync(schedule.Id, "Intro call", "intro-call");
+        await CreateWorkflowAsync(eventType.Id, "BOOKING_CREATED");
+        await CreateWebhookAsync(eventType.Id, "BOOKING_CREATED");
+        var booking = await CreateBookingAsync("intro-call", "2026-06-01T07:00:00Z", "Ada Lovelace", "ada@example.com");
+
+        // Act
+        var response = await AuthenticatedOwnerHttpClient.GetAsync($"/api/event-types/{eventType.Id}/side-effect-deliveries");
+
+        // Assert
+        response.ShouldBeSuccessfulGetRequest();
+        var deliveries = await response.DeserializeResponse<BookingSideEffectDeliveriesResponse>();
+        deliveries!.Deliveries.Should().HaveCount(2);
+        deliveries.Deliveries.Should().OnlyContain(delivery => delivery.BookingId == booking.Id && delivery.Trigger == "BOOKING_CREATED" && delivery.Status == "pending");
+        deliveries.Deliveries.Select(delivery => delivery.Kind).Should().BeEquivalentTo("email", "webhook");
+    }
+
+    [Fact]
+    public async Task GetBookingDeliveries_WhenSideEffectsExist_ShouldReturnOnlyThatBooking()
+    {
+        // Arrange
+        await UpdateSchedulingProfileAsync("owner");
+        var schedule = await CreateScheduleAsync();
+        var eventType = await CreateEventTypeAsync(schedule.Id, "Intro call", "intro-call");
+        await CreateWorkflowAsync(eventType.Id, "BOOKING_CREATED");
+        await CreateBookingAsync("intro-call", "2026-06-01T07:00:00Z", "Ada Lovelace", "ada@example.com");
+        var expectedBooking = await CreateBookingAsync("intro-call", "2026-06-02T07:00:00Z", "Grace Hopper", "grace@example.com");
+
+        // Act
+        var response = await AuthenticatedOwnerHttpClient.GetAsync($"/api/bookings/{expectedBooking.Id}/side-effects");
+
+        // Assert
+        response.ShouldBeSuccessfulGetRequest();
+        var deliveries = await response.DeserializeResponse<BookingSideEffectDeliveriesResponse>();
+        deliveries!.Deliveries.Should().ContainSingle();
+        deliveries.Deliveries[0].BookingId.Should().Be(expectedBooking.Id);
+    }
+
+    [Fact]
+    public async Task CreatePublicBooking_WhenWorkflowAndWebhookAreInactive_ShouldNotEnqueueDeliveries()
+    {
+        // Arrange
+        await UpdateSchedulingProfileAsync("owner");
+        var schedule = await CreateScheduleAsync();
+        var eventType = await CreateEventTypeAsync(schedule.Id, "Intro call", "intro-call");
+        await CreateWorkflowAsync(eventType.Id, "BOOKING_CREATED", false);
+        await CreateWebhookAsync(eventType.Id, "BOOKING_CREATED", false);
+
+        // Act
+        var booking = await CreateBookingAsync("intro-call", "2026-06-01T07:00:00Z", "Ada Lovelace", "ada@example.com");
+
+        // Assert
+        Connection.ExecuteScalar<long>(
+            "SELECT COUNT(*) FROM booking_side_effect_deliveries WHERE booking_id = @booking_id",
+            [new { booking_id = booking.Id }]
+        ).Should().Be(0);
+    }
+
+    [Fact]
+    public async Task ProcessPendingDeliveries_WhenRunTwice_ShouldNotDuplicateSentEmail()
+    {
+        // Arrange
+        await UpdateSchedulingProfileAsync("owner");
+        var schedule = await CreateScheduleAsync();
+        var eventType = await CreateEventTypeAsync(schedule.Id, "Intro call", "intro-call");
+        await CreateWorkflowAsync(eventType.Id, "BOOKING_CREATED");
+        await CreateBookingAsync("intro-call", "2026-06-01T07:00:00Z", "Ada Lovelace", "ada@example.com");
+
+        using var scope = Provider.CreateScope();
+        var processor = scope.ServiceProvider.GetRequiredService<BookingSideEffectProcessor>();
+
+        // Act
+        var firstRun = await processor.ProcessPendingAsync(10, CancellationToken.None);
+        var secondRun = await processor.ProcessPendingAsync(10, CancellationToken.None);
+
+        // Assert
+        firstRun.Should().Be(1);
+        secondRun.Should().Be(0);
+        await EmailClient.Received(1).SendAsync(Arg.Any<EmailMessage>(), Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task ProcessPendingDeliveries_WhenWebhookFails_ShouldRetryThenMarkFailedAtMaxAttempts()
+    {
+        // Arrange
+        await UpdateSchedulingProfileAsync("owner");
+        var schedule = await CreateScheduleAsync();
+        var eventType = await CreateEventTypeAsync(schedule.Id, "Intro call", "intro-call");
+        await CreateWebhookAsync(eventType.Id, "BOOKING_CREATED", subscriberUrl: "http://localhost:1/cal/webhook");
+        await CreateBookingAsync("intro-call", "2026-06-01T07:00:00Z", "Ada Lovelace", "ada@example.com");
+
+        using var scope = Provider.CreateScope();
+        var dbContext = scope.ServiceProvider.GetRequiredService<MainDbContext>();
+        var processor = scope.ServiceProvider.GetRequiredService<BookingSideEffectProcessor>();
+
+        // Act
+        var delivery = await ProcessDueWebhookAsync(processor, dbContext);
+        for (var attempt = delivery.Attempts; attempt < 5; attempt++)
+        {
+            await MarkWebhookRetryDueAsync(dbContext, delivery.Id.Value);
+            delivery = await ProcessDueWebhookAsync(processor, dbContext);
+        }
+
+        // Assert
+        delivery.Status.Should().Be("failed");
+        delivery.Attempts.Should().Be(5);
+        delivery.NextRetryAt.Should().BeNull();
+        delivery.LastError.Should().NotBeNullOrWhiteSpace();
+    }
+
+    [Fact]
+    public async Task ProcessPendingDeliveries_WhenWebhookSucceeds_ShouldSendCalCompatibleHeadersAndSignature()
+    {
+        // Arrange
+        await UpdateSchedulingProfileAsync("owner");
+        var schedule = await CreateScheduleAsync();
+        var eventType = await CreateEventTypeAsync(schedule.Id, "Intro call", "intro-call");
+        await CreateWebhookAsync(eventType.Id, "BOOKING_CREATED");
+        await CreateBookingAsync("intro-call", "2026-06-01T07:00:00Z", "Ada Lovelace", "ada@example.com");
+
+        using var scope = Provider.CreateScope();
+        var httpHandler = new CapturingHttpMessageHandler();
+        var processor = new BookingSideEffectProcessor(
+            scope.ServiceProvider.GetRequiredService<MainDbContext>(),
+            EmailClient,
+            new StaticHttpClientFactory(new HttpClient(httpHandler)),
+            TimeProvider.System,
+            NullLogger<BookingSideEffectProcessor>.Instance
+        );
+
+        // Act
+        var processed = await processor.ProcessPendingAsync(10, CancellationToken.None);
+
+        // Assert
+        processed.Should().Be(1);
+        var delivery = await LoadWebhookDeliveryAsync(scope.ServiceProvider.GetRequiredService<MainDbContext>());
+        var expectedSignature = ComputeSignature(delivery.PayloadJson, "top-secret");
+        httpHandler.Request!.Headers.GetValues("X-Cal-Event").Should().ContainSingle().Which.Should().Be("BOOKING_CREATED");
+        httpHandler.Request.Headers.GetValues("X-Cal-Webhook-Version").Should().ContainSingle().Which.Should().Be("v1");
+        httpHandler.Request.Headers.GetValues("X-Cal-Signature-256").Should().ContainSingle().Which.Should().Be(expectedSignature);
+        delivery.Status.Should().Be("sent");
+    }
+
+    [Fact]
     public async Task CreateWebhook_WhenUrlIsNotHttp_ShouldReturnBadRequest()
     {
         // Arrange
@@ -191,6 +344,40 @@ public sealed class BookingSideEffectsTests : EndpointBaseTest<MainDbContext>
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+    }
+
+    private static string ComputeSignature(string payloadJson, string secret)
+    {
+        var key = Encoding.UTF8.GetBytes(secret);
+        var payload = Encoding.UTF8.GetBytes(payloadJson);
+        using var hmac = new HMACSHA256(key);
+        return $"sha256={Convert.ToHexString(hmac.ComputeHash(payload)).ToLowerInvariant()}";
+    }
+
+    private static async Task<BookingSideEffectDelivery> ProcessDueWebhookAsync(BookingSideEffectProcessor processor, MainDbContext dbContext)
+    {
+        await processor.ProcessPendingAsync(10, CancellationToken.None);
+        dbContext.ChangeTracker.Clear();
+        return await LoadWebhookDeliveryAsync(dbContext);
+    }
+
+    private static async Task MarkWebhookRetryDueAsync(MainDbContext dbContext, string deliveryId)
+    {
+        await dbContext.Database.ExecuteSqlInterpolatedAsync(
+            $"""
+             UPDATE booking_side_effect_deliveries
+             SET next_retry_at = {DateTimeOffset.UtcNow.AddMinutes(-1)}
+             WHERE id = {deliveryId}
+             """
+        );
+        dbContext.ChangeTracker.Clear();
+    }
+
+    private static async Task<BookingSideEffectDelivery> LoadWebhookDeliveryAsync(MainDbContext dbContext)
+    {
+        return await dbContext.Set<BookingSideEffectDelivery>()
+            .IgnoreQueryFilters()
+            .SingleAsync(delivery => delivery.Kind == "webhook");
     }
 
     private async Task UpdateSchedulingProfileAsync(string handle)
@@ -264,14 +451,14 @@ public sealed class BookingSideEffectsTests : EndpointBaseTest<MainDbContext>
         return (await response.DeserializeResponse<CreatePublicBookingResponse>())!;
     }
 
-    private async Task<WorkflowResponse> CreateWorkflowAsync(string eventTypeId, string trigger)
+    private async Task<WorkflowResponse> CreateWorkflowAsync(string eventTypeId, string trigger, bool active = true)
     {
         var response = await AuthenticatedOwnerHttpClient.PostAsJsonAsync(
             $"/api/event-types/{eventTypeId}/workflows",
             new
             {
                 name = $"{trigger} email",
-                active = true,
+                active,
                 trigger,
                 scheduledOffsetMinutes = (int?)null,
                 steps = new[] { new { kind = "email", recipient = "booker", subject = (string?)null, body = (string?)null } }
@@ -281,14 +468,14 @@ public sealed class BookingSideEffectsTests : EndpointBaseTest<MainDbContext>
         return (await response.DeserializeResponse<WorkflowResponse>())!;
     }
 
-    private async Task<WebhookSubscriptionResponse> CreateWebhookAsync(string eventTypeId, string trigger)
+    private async Task<WebhookSubscriptionResponse> CreateWebhookAsync(string eventTypeId, string trigger, bool active = true, string subscriberUrl = "https://example.com/cal/webhook")
     {
         var response = await AuthenticatedOwnerHttpClient.PostAsJsonAsync(
             $"/api/event-types/{eventTypeId}/webhooks",
             new
             {
-                active = true,
-                subscriberUrl = "https://example.com/cal/webhook",
+                active,
+                subscriberUrl,
                 secret = "top-secret",
                 triggers = new[] { trigger },
                 payloadFormat = "cal-com",
@@ -306,14 +493,63 @@ public sealed class BookingSideEffectsTests : EndpointBaseTest<MainDbContext>
     private sealed record EventTypeResponse(string Id);
 
     [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
-    private sealed record WorkflowResponse(string Id, string Name, bool Active, string Trigger, int? ScheduledOffsetMinutes, WorkflowStepResponse[] Steps);
+    private sealed record WorkflowResponse(
+        string Id,
+        string Name,
+        bool Active,
+        string Trigger,
+        int? ScheduledOffsetMinutes,
+        WorkflowStepResponse[] Steps
+    );
 
     [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
     private sealed record WorkflowStepResponse(string Kind, string Recipient, string? Subject, string? Body);
 
     [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
-    private sealed record WebhookSubscriptionResponse(string Id, bool Active, string SubscriberUrl, string? Secret, string[] Triggers, string PayloadFormat, string PayloadVersion);
+    private sealed record WebhookSubscriptionResponse(
+        string Id,
+        bool Active,
+        string SubscriberUrl,
+        string? Secret,
+        string[] Triggers,
+        string PayloadFormat,
+        string PayloadVersion
+    );
 
     [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
     private sealed record CreatePublicBookingResponse(string Id);
+
+    [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
+    private sealed record BookingSideEffectDeliveriesResponse(BookingSideEffectDeliverySummaryResponse[] Deliveries);
+
+    [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
+    private sealed record BookingSideEffectDeliverySummaryResponse(
+        string Id,
+        string BookingId,
+        string Trigger,
+        string Kind,
+        string Status,
+        int Attempts,
+        DateTimeOffset? NextRetryAt,
+        string? LastError
+    );
+
+    private sealed class StaticHttpClientFactory(HttpClient httpClient) : IHttpClientFactory
+    {
+        public HttpClient CreateClient(string name)
+        {
+            return httpClient;
+        }
+    }
+
+    private sealed class CapturingHttpMessageHandler : HttpMessageHandler
+    {
+        public HttpRequestMessage? Request { get; private set; }
+
+        protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+        {
+            Request = request;
+            return Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK));
+        }
+    }
 }

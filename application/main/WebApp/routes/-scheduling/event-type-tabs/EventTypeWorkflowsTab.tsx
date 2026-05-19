@@ -25,6 +25,7 @@ import { toast } from "sonner";
 import { api, queryClient, type Schemas } from "@/shared/lib/api/client";
 
 import { GeneralApiErrors } from "../ApiErrors";
+import { SideEffectDeliveriesPanel } from "./SideEffectDeliveriesPanel";
 
 type Workflow = Schemas["WorkflowResponse"];
 type WorkflowStep = Schemas["WorkflowStep"];
@@ -120,6 +121,7 @@ export function EventTypeWorkflowsTab({ eventTypeId }: EventTypeWorkflowsTabProp
           ))}
         </div>
       )}
+      <SideEffectDeliveriesPanel eventTypeId={eventTypeId} kind="email" />
       <WorkflowDialog eventTypeId={eventTypeId} workflow={editingWorkflow} onOpenChange={setEditingWorkflow} />
     </section>
   );

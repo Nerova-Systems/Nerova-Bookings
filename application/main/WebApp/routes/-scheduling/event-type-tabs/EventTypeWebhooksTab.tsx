@@ -23,6 +23,7 @@ import { toast } from "sonner";
 import { api, queryClient, type Schemas } from "@/shared/lib/api/client";
 
 import { GeneralApiErrors } from "../ApiErrors";
+import { SideEffectDeliveriesPanel } from "./SideEffectDeliveriesPanel";
 
 type WebhookSubscription = Schemas["WebhookSubscriptionResponse"];
 type WebhookPayload = Schemas["CreateWebhookSubscriptionRequest"];
@@ -131,6 +132,7 @@ export function EventTypeWebhooksTab({ eventTypeId }: EventTypeWebhooksTabProps)
           ))}
         </div>
       )}
+      <SideEffectDeliveriesPanel eventTypeId={eventTypeId} kind="webhook" />
       <WebhookDialog eventTypeId={eventTypeId} webhook={editingWebhook} onOpenChange={setEditingWebhook} />
     </section>
   );

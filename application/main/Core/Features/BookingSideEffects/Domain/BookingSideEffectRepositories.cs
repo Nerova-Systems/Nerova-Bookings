@@ -1,5 +1,6 @@
 using Main.Database;
 using Main.Features.EventTypes.Domain;
+using Main.Features.Scheduling.Domain;
 using Microsoft.EntityFrameworkCore;
 using SharedKernel.Domain;
 using SharedKernel.Persistence;
@@ -84,6 +85,10 @@ public interface IBookingSideEffectDeliveryRepository : IAppendRepository<Bookin
     void Update(BookingSideEffectDelivery delivery);
 
     Task<bool> ExistsByDedupeKeyAsync(string dedupeKey, CancellationToken cancellationToken);
+
+    Task<BookingSideEffectDelivery[]> GetForEventTypeAsync(TenantId tenantId, EventTypeId eventTypeId, CancellationToken cancellationToken);
+
+    Task<BookingSideEffectDelivery[]> GetForBookingAsync(TenantId tenantId, BookingId bookingId, CancellationToken cancellationToken);
 }
 
 public sealed class BookingSideEffectDeliveryRepository(MainDbContext mainDbContext)
@@ -92,5 +97,35 @@ public sealed class BookingSideEffectDeliveryRepository(MainDbContext mainDbCont
     public async Task<bool> ExistsByDedupeKeyAsync(string dedupeKey, CancellationToken cancellationToken)
     {
         return await DbSet.IgnoreQueryFilters().AnyAsync(delivery => delivery.DedupeKey == dedupeKey, cancellationToken);
+    }
+
+    public async Task<BookingSideEffectDelivery[]> GetForEventTypeAsync(TenantId tenantId, EventTypeId eventTypeId, CancellationToken cancellationToken)
+    {
+        var deliveries = await DbSet
+            .IgnoreQueryFilters()
+            .AsNoTracking()
+            .Where(delivery => delivery.TenantId == tenantId)
+            .Where(delivery => delivery.EventTypeId == eventTypeId)
+            .ToArrayAsync(cancellationToken);
+
+        return deliveries
+            .OrderByDescending(delivery => delivery.NextRetryAt)
+            .ThenByDescending(delivery => delivery.Id)
+            .ToArray();
+    }
+
+    public async Task<BookingSideEffectDelivery[]> GetForBookingAsync(TenantId tenantId, BookingId bookingId, CancellationToken cancellationToken)
+    {
+        var deliveries = await DbSet
+            .IgnoreQueryFilters()
+            .AsNoTracking()
+            .Where(delivery => delivery.TenantId == tenantId)
+            .Where(delivery => delivery.BookingId == bookingId)
+            .ToArrayAsync(cancellationToken);
+
+        return deliveries
+            .OrderByDescending(delivery => delivery.NextRetryAt)
+            .ThenByDescending(delivery => delivery.Id)
+            .ToArray();
     }
 }

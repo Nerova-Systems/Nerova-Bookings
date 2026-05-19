@@ -1,5 +1,6 @@
-import { expect, type Page } from "@playwright/test";
+import { expect, type Browser, type Page } from "@playwright/test";
 import { test } from "@shared/e2e/fixtures/page-auth";
+import { getBackOfficeBaseUrl } from "@shared/e2e/utils/constants";
 import {
   blurActiveElement,
   createTestContext,
@@ -7,7 +8,67 @@ import {
   expectValidationError,
   selectOption
 } from "@shared/e2e/utils/test-assertions";
+import { logInAsAdmin } from "@shared/e2e/utils/test-data";
 import { step } from "@shared/e2e/utils/test-step-wrapper";
+
+const BACK_OFFICE_BASE_URL = getBackOfficeBaseUrl();
+const SIDE_EFFECT_FLAGS = ["cal-com-core", "cal-com-workflows", "cal-com-webhooks"] as const;
+
+async function getAntiforgeryHeaders(page: Page): Promise<{ "x-xsrf-token": string }> {
+  const token = await page.evaluate(
+    () => document.head.querySelector('meta[name="antiforgeryToken"]')?.getAttribute("content") ?? ""
+  );
+  return { "x-xsrf-token": token };
+}
+
+async function enableSideEffectFlags(browser: Browser, ownerPage: Page) {
+  const backOfficeContext = await browser.newContext({ baseURL: BACK_OFFICE_BASE_URL, ignoreHTTPSErrors: true });
+  const backOfficePage = await backOfficeContext.newPage();
+
+  try {
+    await backOfficePage.goto(`${BACK_OFFICE_BASE_URL}/feature-flags`);
+    await logInAsAdmin(backOfficePage, `${BACK_OFFICE_BASE_URL}/feature-flags`);
+    const headers = await getAntiforgeryHeaders(backOfficePage);
+
+    for (const flagKey of SIDE_EFFECT_FLAGS) {
+      const activateResponse = await backOfficePage.request.put(
+        `${BACK_OFFICE_BASE_URL}/api/back-office/feature-flags/${flagKey}/activate`,
+        { headers }
+      );
+      if (!activateResponse.ok()) {
+        const flag = await getBackOfficeFeatureFlag(backOfficePage, flagKey);
+        expect(flag?.isActive).toBe(true);
+      }
+
+      const rolloutResponse = await backOfficePage.request.put(
+        `${BACK_OFFICE_BASE_URL}/api/back-office/feature-flags/${flagKey}/rollout-percentage`,
+        { data: { rolloutPercentage: 100 }, headers }
+      );
+      if (!rolloutResponse.ok()) {
+        const flag = await getBackOfficeFeatureFlag(backOfficePage, flagKey);
+        expect(flag?.rolloutPercentage).toBe(100);
+      }
+    }
+  } finally {
+    await backOfficeContext.close();
+  }
+
+  const ownerHeaders = await getAntiforgeryHeaders(ownerPage);
+  const refreshResponse = await ownerPage.request.put("/api/account/feature-flags/compact-view/user-override", {
+    data: { enabled: false },
+    headers: ownerHeaders
+  });
+  expect(refreshResponse.ok()).toBe(true);
+}
+
+async function getBackOfficeFeatureFlag(page: Page, flagKey: string) {
+  const response = await page.request.get(`${BACK_OFFICE_BASE_URL}/api/back-office/feature-flags/`);
+  expect(response.ok()).toBe(true);
+  const body = (await response.json()) as {
+    flags: { key: string; isActive: boolean; rolloutPercentage: number | null }[];
+  };
+  return body.flags.find((flag) => flag.key === flagKey);
+}
 
 async function createSchedule(page: Page, name: string) {
   await page.goto("/availability");
@@ -50,6 +111,75 @@ async function deleteCurrentEventType(page: Page, title: string) {
 }
 
 test.describe("@smoke", () => {
+  test("should manage workflow and webhook side-effect settings", async ({ browser, ownerPage }) => {
+    const context = createTestContext(ownerPage);
+    const unique = Date.now();
+    const scheduleName = `Side effects schedule ${unique}`;
+    const eventTitle = `Side effects event ${unique}`;
+    const eventSlug = `side-effects-event-${unique}`;
+
+    await step("Create availability schedule and event type")(async () => {
+      await enableSideEffectFlags(browser, ownerPage);
+      await ownerPage.reload();
+      await createSchedule(ownerPage, scheduleName);
+      await expectToastMessage(context, "Schedule created");
+      await createEventType(ownerPage, eventTitle, eventSlug, "30");
+      await expectToastMessage(context, "Event type created");
+    })();
+
+    await step("Create, edit, and delete workflow")(async () => {
+      await ownerPage.getByRole("tab", { name: "Workflows" }).click();
+      await expect(ownerPage.getByText("Recent deliveries")).toBeVisible();
+      await expect(ownerPage.getByText("No delivery attempts yet.")).toBeVisible();
+      await ownerPage.getByRole("button", { name: "Add workflow" }).click();
+      await ownerPage.getByRole("textbox", { name: "Name" }).fill("Lifecycle email");
+      await ownerPage.getByRole("textbox", { name: "Email subject" }).fill("Booking lifecycle update");
+      await ownerPage.getByRole("textbox", { name: "Email body" }).fill("A booking changed.");
+      await ownerPage.getByRole("button", { name: "Save workflow" }).click();
+      await expectToastMessage(context, "Workflow saved");
+      await expect(ownerPage.getByText("Lifecycle email")).toBeVisible();
+
+      await ownerPage.getByRole("button", { name: "Edit" }).first().click();
+      await ownerPage.getByRole("textbox", { name: "Name" }).fill("Lifecycle email updated");
+      await ownerPage.getByRole("button", { name: "Save workflow" }).click();
+      await expectToastMessage(context, "Workflow saved");
+      await expect(ownerPage.getByText("Lifecycle email updated")).toBeVisible();
+
+      await ownerPage.getByRole("button", { name: "Delete" }).nth(1).click();
+      await expectToastMessage(context, "Workflow deleted");
+      await expect(ownerPage.getByText("No workflows configured.")).toBeVisible();
+    })();
+
+    await step("Validate, create, test, and delete webhook")(async () => {
+      await ownerPage.getByRole("tab", { name: "Webhooks" }).click();
+      await expect(ownerPage.getByText("Recent deliveries")).toBeVisible();
+      await expect(ownerPage.getByText("No delivery attempts yet.")).toBeVisible();
+      await ownerPage.getByRole("button", { name: "Add webhook" }).click();
+      await ownerPage.getByRole("textbox", { name: "Subscriber URL" }).fill("ftp://example.com/cal/webhook");
+      await ownerPage.getByRole("button", { name: "Save webhook" }).click();
+      await expectValidationError(context, "Webhook subscriber URL must be an HTTP or HTTPS URL.");
+
+      await ownerPage.getByRole("textbox", { name: "Subscriber URL" }).fill("https://example.com/cal/webhook");
+      await ownerPage.getByRole("button", { name: "Save webhook" }).click();
+      await expectToastMessage(context, "Webhook saved");
+      await expect(ownerPage.getByText("https://example.com/cal/webhook")).toBeVisible();
+
+      await ownerPage.getByRole("button", { name: "Test" }).click();
+      await expectToastMessage(context, "Test webhook queued");
+      await expect(ownerPage.getByText("WEBHOOK_TEST")).toBeVisible();
+      await expect(ownerPage.getByText("Pending")).toBeVisible();
+
+      await ownerPage.getByRole("button", { name: "Delete" }).nth(1).click();
+      await expectToastMessage(context, "Webhook deleted");
+      await expect(ownerPage.getByText("No webhooks configured.")).toBeVisible();
+    })();
+
+    await step("Delete event type & verify cleanup completes")(async () => {
+      await deleteCurrentEventType(ownerPage, eventTitle);
+      await expectToastMessage(context, "Event type deleted");
+    })();
+  });
+
   /**
    * Covers the core owner event type workflow:
    * - Create availability schedule and event type through dialogs

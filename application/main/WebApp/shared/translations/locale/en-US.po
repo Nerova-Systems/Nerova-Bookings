@@ -123,6 +123,9 @@ msgstr "Apps"
 msgid "At least one schedule exists"
 msgstr "At least one schedule exists"
 
+msgid "Attempts"
+msgstr "Attempts"
+
 msgid "Attendee email"
 msgstr "Attendee email"
 
@@ -490,6 +493,9 @@ msgstr "Exclude emails"
 msgid "Expires"
 msgstr "Expires"
 
+msgid "Failed"
+msgstr "Failed"
+
 msgid "Filter"
 msgstr "Filter"
 
@@ -585,6 +591,9 @@ msgstr "Link"
 
 msgid "List view"
 msgstr "List view"
+
+msgid "Loading deliveries..."
+msgstr "Loading deliveries..."
 
 msgid "Loading event type..."
 msgstr "Loading event type..."
@@ -707,6 +716,9 @@ msgstr "No custom booking fields yet."
 msgid "No custom responses were captured."
 msgstr "No custom responses were captured."
 
+msgid "No delivery attempts yet."
+msgstr "No delivery attempts yet."
+
 msgid "No event types match your search."
 msgstr "No event types match your search."
 
@@ -786,6 +798,9 @@ msgstr "Overrides: {0}"
 msgid "Passed"
 msgstr "Passed"
 
+msgid "Pending"
+msgstr "Pending"
+
 msgid "Phone"
 msgstr "Phone"
 
@@ -830,6 +845,9 @@ msgstr "Radio"
 
 msgid "Reason"
 msgstr "Reason"
+
+msgid "Recent deliveries"
+msgstr "Recent deliveries"
 
 msgid "Recurring"
 msgstr "Recurring"
@@ -1028,6 +1046,9 @@ msgstr "Send Cal.com-compatible booking emails when lifecycle events happen."
 
 msgid "Send Cal.com-compatible booking lifecycle payloads to external systems."
 msgstr "Send Cal.com-compatible booking lifecycle payloads to external systems."
+
+msgid "Sent"
+msgstr "Sent"
 
 msgid "Set as default"
 msgstr "Set as default"

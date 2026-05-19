@@ -123,6 +123,9 @@ msgstr "Apps"
 msgid "At least one schedule exists"
 msgstr "Der findes mindst én tidsplan"
 
+msgid "Attempts"
+msgstr "Forsøg"
+
 msgid "Attendee email"
 msgstr "Deltager-e-mail"
 
@@ -490,6 +493,9 @@ msgstr "Ekskluder e-mails"
 msgid "Expires"
 msgstr "Udløber"
 
+msgid "Failed"
+msgstr "Mislykket"
+
 msgid "Filter"
 msgstr "Filtrer"
 
@@ -585,6 +591,9 @@ msgstr "Link"
 
 msgid "List view"
 msgstr "Listevisning"
+
+msgid "Loading deliveries..."
+msgstr "Indlæser leveringer..."
 
 msgid "Loading event type..."
 msgstr "Indlæser begivenhedstype..."
@@ -707,6 +716,9 @@ msgstr "Ingen brugerdefinerede bookingfelter endnu."
 msgid "No custom responses were captured."
 msgstr "Ingen brugerdefinerede svar blev registreret."
 
+msgid "No delivery attempts yet."
+msgstr "Ingen leveringsforsøg endnu."
+
 msgid "No event types match your search."
 msgstr "Ingen begivenhedstyper matcher din søgning."
 
@@ -786,6 +798,9 @@ msgstr "Undtagelser: {0}"
 msgid "Passed"
 msgstr "Bestået"
 
+msgid "Pending"
+msgstr "Afventer"
+
 msgid "Phone"
 msgstr "Telefon"
 
@@ -830,6 +845,9 @@ msgstr "Radioknap"
 
 msgid "Reason"
 msgstr "Årsag"
+
+msgid "Recent deliveries"
+msgstr "Seneste leveringer"
 
 msgid "Recurring"
 msgstr "Gentagende"
@@ -1028,6 +1046,9 @@ msgstr "Send Cal.com-kompatible bookingmails, når livscyklushændelser sker."
 
 msgid "Send Cal.com-compatible booking lifecycle payloads to external systems."
 msgstr "Send Cal.com-kompatible booking-livscyklusdata til eksterne systemer."
+
+msgid "Sent"
+msgstr "Sendt"
 
 msgid "Set as default"
 msgstr "Angiv som standard"

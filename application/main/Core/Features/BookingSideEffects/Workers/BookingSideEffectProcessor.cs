@@ -96,21 +96,22 @@ public sealed class BookingSideEffectProcessor(
         var client = httpClientFactory.CreateClient();
         using var request = new HttpRequestMessage(HttpMethod.Post, payload.SubscriberUrl);
         request.Content = JsonContent.Create(new
-        {
-            triggerEvent = payload.Trigger,
-            createdAt = timeProvider.GetUtcNow(),
-            payload = new
             {
-                uid = payload.BookingId,
-                type = payload.EventTitle,
-                title = payload.EventTitle,
-                startTime = payload.StartTime,
-                endTime = payload.EndTime,
-                status = payload.Status,
-                attendees = new[] { new { name = payload.BookerName, email = payload.BookerEmail } },
-                location = payload.LocationValue
+                triggerEvent = payload.Trigger,
+                createdAt = timeProvider.GetUtcNow(),
+                payload = new
+                {
+                    uid = payload.BookingId,
+                    type = payload.EventTitle,
+                    title = payload.EventTitle,
+                    startTime = payload.StartTime,
+                    endTime = payload.EndTime,
+                    status = payload.Status,
+                    attendees = new[] { new { name = payload.BookerName, email = payload.BookerEmail } },
+                    location = payload.LocationValue
+                }
             }
-        });
+        );
 
         request.Headers.Add("X-Cal-Event", payload.Trigger);
         request.Headers.Add("X-Cal-Webhook-Version", payload.PayloadVersion);

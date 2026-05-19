@@ -3,6 +3,7 @@ using Main.Features.BookingSideEffects.Domain;
 using Main.Features.BookingSideEffects.Queries;
 using Main.Features.BookingSideEffects.Shared;
 using Main.Features.EventTypes.Domain;
+using Main.Features.Scheduling.Domain;
 using SharedKernel.ApiResults;
 using SharedKernel.Endpoints;
 
@@ -51,6 +52,19 @@ public sealed class BookingSideEffectEndpoints : IEndpoints
         group.MapDelete("/webhooks/{id}", async Task<ApiResult> (EventTypeId eventTypeId, WebhookSubscriptionId id, IMediator mediator)
             => await mediator.Send(new DeleteWebhookSubscriptionCommand(eventTypeId, id))
         );
+
+        group.MapGet("/side-effect-deliveries", async Task<ApiResult<BookingSideEffectDeliveriesResponse>> (EventTypeId eventTypeId, IMediator mediator)
+            => await mediator.Send(new GetEventTypeSideEffectDeliveriesQuery(eventTypeId))
+        ).Produces<BookingSideEffectDeliveriesResponse>();
+
+        routes.MapGroup("/api/bookings")
+            .WithTags("BookingSideEffects")
+            .RequireAuthorization()
+            .ProducesValidationProblem()
+            .MapGet("/{id}/side-effects", async Task<ApiResult<BookingSideEffectDeliveriesResponse>> (BookingId id, IMediator mediator)
+                => await mediator.Send(new GetBookingSideEffectDeliveriesQuery(id))
+            )
+            .Produces<BookingSideEffectDeliveriesResponse>();
     }
 }
 
