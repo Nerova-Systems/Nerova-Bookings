@@ -22,9 +22,9 @@ public sealed class CoreConnectorEndpoints : IEndpoints
         ).Produces<CoreConnectorAccountsResponse>();
 
         connectorGroup.MapPost("/test-fixtures", async Task<ApiResult<CoreConnectorAccountsResponse>> (EnsureTestCoreConnectorCredentialsRequest request, IMediator mediator)
-            => await mediator.Send(new EnsureTestCoreConnectorCredentialsCommand(request.BusyStartTime, request.BusyEndTime))
-        ).Produces<CoreConnectorAccountsResponse>()
-         .ExcludeFromDescription();
+                => await mediator.Send(new EnsureTestCoreConnectorCredentialsCommand(request.BusyStartTime, request.BusyEndTime))
+            ).Produces<CoreConnectorAccountsResponse>()
+            .ExcludeFromDescription();
 
         var eventTypeGroup = routes.MapGroup("/api/event-types/{eventTypeId}/connector-settings")
             .WithTags("CoreConnectors")

@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json;
+using JetBrains.Annotations;
 using SharedKernel.Domain;
 
 namespace Main.Features.Connectors.Domain;
@@ -11,6 +12,7 @@ public sealed class ConnectorCredential : AggregateRoot<string>, ITenantScopedEn
         PropertyNameCaseInsensitive = true
     };
 
+    [UsedImplicitly]
     private ConnectorCredential() : base(string.Empty)
     {
         OwnerUserId = new UserId(string.Empty);
@@ -47,8 +49,6 @@ public sealed class ConnectorCredential : AggregateRoot<string>, ITenantScopedEn
         CalendarsJson = JsonSerializer.Serialize(calendars, JsonSerializerOptions);
     }
 
-    public TenantId TenantId { get; } = new(0);
-
     public UserId OwnerUserId { get; }
 
     public string Integration { get; }
@@ -67,6 +67,8 @@ public sealed class ConnectorCredential : AggregateRoot<string>, ITenantScopedEn
 
     [NotMapped]
     public CoreConnectorCalendar[] Calendars => JsonSerializer.Deserialize<CoreConnectorCalendar[]>(CalendarsJson, JsonSerializerOptions) ?? [];
+
+    public TenantId TenantId { get; } = new(0);
 
     public static ConnectorCredential Create(
         TenantId tenantId,

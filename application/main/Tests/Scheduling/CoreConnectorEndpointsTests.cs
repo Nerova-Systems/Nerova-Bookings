@@ -268,12 +268,8 @@ public sealed class CoreConnectorEndpointsTests : EndpointBaseTest<MainDbContext
     private sealed record EventTypeDefaultConferencingResponse(string App, string? CredentialId);
 }
 
-public sealed class CoreConnectorProductionEndpointsTests : EndpointBaseTest<MainDbContext>
+public sealed class CoreConnectorProductionEndpointsTests() : EndpointBaseTest<MainDbContext>(Environments.Production)
 {
-    public CoreConnectorProductionEndpointsTests() : base(Environments.Production)
-    {
-    }
-
     [Fact]
     public async Task EnsureTestCoreConnectorCredentials_WhenNotDevelopment_ShouldReturnNotFound()
     {

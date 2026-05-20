@@ -53,14 +53,14 @@ public sealed class ConnectorCredentialRepository(MainDbContext mainDbContext)
             .IgnoreQueryFilters()
             .Where(credential => credential.TenantId == tenantId)
             .Where(credential => credential.OwnerUserId == ownerUserId)
-            .Where(credential => !retainedCredentialIds.Contains(credential.Id))
             .Where(credential =>
                 credential.Id.StartsWith("fake-busy:") ||
                 credential.Id.StartsWith("e2e-office365-calendar:") ||
-                credential.Id.StartsWith("e2e-zoom-video:"))
+                credential.Id.StartsWith("e2e-zoom-video:")
+            )
             .ToArrayAsync(cancellationToken);
 
-        RemoveRange(credentials);
+        RemoveRange(credentials.Where(credential => Array.IndexOf(retainedCredentialIds, credential.Id) < 0).ToArray());
     }
 
     private static int ConnectorSortOrder(string integration)

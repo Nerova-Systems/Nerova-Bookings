@@ -323,7 +323,9 @@ test.describe("@smoke", () => {
       await ownerPage.getByRole("textbox", { name: "Option label" }).last().fill("Support");
       await ownerPage.getByRole("textbox", { name: "Option value" }).last().fill("support");
       await expect(ownerPage.getByText("Primary calendar")).toBeVisible();
-      await ownerPage.getByRole("checkbox", { name: "Primary calendar Google Calendar - owner.google@example.test" }).click();
+      await ownerPage
+        .getByRole("checkbox", { name: "Primary calendar Google Calendar - owner.google@example.test" })
+        .click();
       await selectOption(
         ownerPage.getByLabel("Destination calendar"),
         ownerPage,
@@ -335,7 +337,9 @@ test.describe("@smoke", () => {
       await expect(ownerPage.getByRole("textbox", { name: "Success URL" })).toHaveValue("https://example.com/success");
       await expect(ownerPage.getByRole("textbox", { name: "Private link" })).toHaveValue("vip");
       await expect(ownerPage.getByText("Topic").first()).toBeVisible();
-      await expect(ownerPage.getByRole("checkbox", { name: "Primary calendar Google Calendar - owner.google@example.test" })).toBeChecked();
+      await expect(
+        ownerPage.getByRole("checkbox", { name: "Primary calendar Google Calendar - owner.google@example.test" })
+      ).toBeChecked();
     })();
 
     await step("Update recurring fields and save & verify update toast appears")(async () => {
@@ -360,7 +364,9 @@ test.describe("@smoke", () => {
       await ownerPage.getByRole("tab", { name: "Advanced" }).click();
       await expect(ownerPage.getByRole("textbox", { name: "Private link" })).toHaveValue("vip");
       await expect(ownerPage.getByRole("textbox", { name: "Option value" }).first()).toHaveValue("sales");
-      await expect(ownerPage.getByRole("checkbox", { name: "Primary calendar Google Calendar - owner.google@example.test" })).toBeChecked();
+      await expect(
+        ownerPage.getByRole("checkbox", { name: "Primary calendar Google Calendar - owner.google@example.test" })
+      ).toBeChecked();
       await expect(ownerPage.getByLabel("Destination calendar")).toContainText(
         "Focus calendar (Google Calendar - owner.google@example.test)"
       );
