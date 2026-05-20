@@ -87,6 +87,9 @@ for (const viewport of eventTypeEditorViewports) {
         await expect(page.getByTestId("cal-com-ui-parity-fixture")).toBeVisible();
         await expect(page.getByTestId("event-type-layout")).toBeVisible();
         await expect(page.getByRole("heading", { name: "Product Consultation" })).toBeVisible();
+        if (viewport.name === "mobile") {
+          await expect(page.getByRole("button", { name: "Event type actions" })).toBeVisible();
+        }
 
         await captureScreenshot(page, testInfo, "wave-1-7", `event-type-editor-${state}-${viewport.name}.png`);
       });
@@ -132,6 +135,38 @@ async function submitPublicBookerForm(page: Page) {
 }
 
 async function mockEventTypeSideEffectApis(page: Page) {
+  await page.route("**/api/connectors/core/accounts", async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({
+        accounts: [
+          {
+            accountEmail: "owner@example.com",
+            calendars: [
+              { externalId: "primary", name: "Primary calendar", primary: true },
+              { externalId: "team-product", name: "Team product", primary: false }
+            ],
+            displayName: "Nerova Product",
+            id: "cred_visual_google",
+            integration: "google-calendar"
+          },
+          {
+            accountEmail: "owner@example.com",
+            calendars: [],
+            displayName: "Nerova Zoom",
+            id: "cred_visual_zoom",
+            integration: "zoom-video"
+          }
+        ],
+        integrations: [
+          { configured: true, integration: "google-calendar" },
+          { configured: true, integration: "office365-calendar" },
+          { configured: true, integration: "zoom-video" }
+        ]
+      })
+    });
+  });
   await page.route("**/api/event-types/etype_visual_product_consultation/workflows", async (route) => {
     await route.fulfill({
       status: 200,

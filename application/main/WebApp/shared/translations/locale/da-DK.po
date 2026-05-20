@@ -487,6 +487,9 @@ msgstr "E-mailemne"
 msgid "Email verification"
 msgstr "Email verification"
 
+msgid "Embed"
+msgstr "Integrer"
+
 msgid "End"
 msgstr "Slut"
 
