@@ -10,6 +10,8 @@ public interface IConnectorCredentialRepository : ICrudRepository<ConnectorCrede
     Task<ConnectorCredential[]> GetCoreForOwnerAsync(TenantId tenantId, UserId ownerUserId, CancellationToken cancellationToken);
 
     Task<ConnectorCredential?> GetOwnedAsync(TenantId tenantId, UserId ownerUserId, string id, CancellationToken cancellationToken);
+
+    Task RemoveTestFixturesForOwnerAsync(TenantId tenantId, UserId ownerUserId, string[] retainedCredentialIds, CancellationToken cancellationToken);
 }
 
 public sealed class ConnectorCredentialRepository(MainDbContext mainDbContext)
@@ -43,6 +45,22 @@ public sealed class ConnectorCredentialRepository(MainDbContext mainDbContext)
             .Where(credential => credential.OwnerUserId == ownerUserId)
             .Where(credential => credential.Id == id.Trim())
             .SingleOrDefaultAsync(cancellationToken);
+    }
+
+    public async Task RemoveTestFixturesForOwnerAsync(TenantId tenantId, UserId ownerUserId, string[] retainedCredentialIds, CancellationToken cancellationToken)
+    {
+        var credentials = await DbSet
+            .IgnoreQueryFilters()
+            .Where(credential => credential.TenantId == tenantId)
+            .Where(credential => credential.OwnerUserId == ownerUserId)
+            .Where(credential => !retainedCredentialIds.Contains(credential.Id))
+            .Where(credential =>
+                credential.Id.StartsWith("fake-busy:") ||
+                credential.Id.StartsWith("e2e-office365-calendar:") ||
+                credential.Id.StartsWith("e2e-zoom-video:"))
+            .ToArrayAsync(cancellationToken);
+
+        RemoveRange(credentials);
     }
 
     private static int ConnectorSortOrder(string integration)

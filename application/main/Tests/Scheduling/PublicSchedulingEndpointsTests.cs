@@ -236,7 +236,7 @@ public sealed class PublicSchedulingEndpointsTests : EndpointBaseTest<MainDbCont
                     {
                         integration = "google-calendar",
                         externalId = "primary",
-                        credentialId = "fake-busy:2026-06-01T07:00:00Z/2026-06-01T07:30:00Z"
+                        credentialId = "fake-busy:owner-scope|2026-06-01T07:00:00Z/2026-06-01T07:30:00Z"
                     }
                 }
             }

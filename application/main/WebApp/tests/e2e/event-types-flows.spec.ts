@@ -381,7 +381,8 @@ test.describe("@smoke", () => {
       const search = new URLSearchParams({
         date: "2026-06-01",
         duration: "45",
-        timezone: "Africa/Johannesburg"
+        timezone: "Africa/Johannesburg",
+        privateLink: "vip"
       });
 
       await ownerPage.goto(`/${profile.handle}/${updatedSlug}?${search.toString()}`);

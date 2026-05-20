@@ -1,3 +1,5 @@
+using System.Security.Cryptography;
+using System.Text;
 using JetBrains.Annotations;
 using Main.Features.Connectors.Domain;
 using Main.Features.Connectors.Shared;
@@ -34,7 +36,11 @@ public sealed class EnsureTestCoreConnectorCredentialsHandler(
 
         var tenantId = executionContext.TenantId!;
         var ownerUserId = executionContext.UserInfo.Id!;
-        var googleCredentialId = $"fake-busy:{command.BusyStartTime:O}/{command.BusyEndTime:O}";
+        var ownerScope = OwnerScopeHash(tenantId, ownerUserId);
+        var googleCredentialId = $"fake-busy:{ownerScope}|{command.BusyStartTime:O}/{command.BusyEndTime:O}";
+        var officeCredentialId = $"e2e-office365-calendar:{ownerScope}:{command.BusyStartTime:O}/{command.BusyEndTime:O}";
+        var zoomCredentialId = $"e2e-zoom-video:{ownerScope}:{command.BusyStartTime:O}/{command.BusyEndTime:O}";
+        await connectorCredentialRepository.RemoveTestFixturesForOwnerAsync(tenantId, ownerUserId, [googleCredentialId, officeCredentialId, zoomCredentialId], cancellationToken);
         var googleCredential = await EnsureCredentialAsync(
             tenantId,
             ownerUserId,
@@ -52,7 +58,7 @@ public sealed class EnsureTestCoreConnectorCredentialsHandler(
         var officeCredential = await EnsureCredentialAsync(
             tenantId,
             ownerUserId,
-            "e2e-office365-calendar",
+            officeCredentialId,
             CoreConnectorConstants.Office365Calendar,
             "office-test-account",
             "owner.office@example.test",
@@ -66,7 +72,7 @@ public sealed class EnsureTestCoreConnectorCredentialsHandler(
         var zoomCredential = await EnsureCredentialAsync(
             tenantId,
             ownerUserId,
-            "e2e-zoom-video",
+            zoomCredentialId,
             CoreConnectorConstants.ZoomVideo,
             "zoom-test-account",
             "owner.zoom@example.test",
@@ -107,5 +113,11 @@ public sealed class EnsureTestCoreConnectorCredentialsHandler(
         );
         await connectorCredentialRepository.AddAsync(credential, cancellationToken);
         return credential;
+    }
+
+    private static string OwnerScopeHash(TenantId tenantId, UserId ownerUserId)
+    {
+        var hashBytes = SHA256.HashData(Encoding.UTF8.GetBytes($"{tenantId.Value}:{ownerUserId.Value}"));
+        return Convert.ToHexString(hashBytes)[..16].ToLowerInvariant();
     }
 }

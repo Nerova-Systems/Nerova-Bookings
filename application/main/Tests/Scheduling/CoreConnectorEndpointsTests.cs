@@ -5,6 +5,7 @@ using JetBrains.Annotations;
 using Main.Database;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using SharedKernel.Tests;
 using SharedKernel.Tests.Persistence;
 using Xunit;
@@ -97,14 +98,38 @@ public sealed class CoreConnectorEndpointsTests : EndpointBaseTest<MainDbContext
             "/api/connectors/core/test-fixtures",
             new { busyStartTime, busyEndTime }
         );
+        var repeatedResponse = await AuthenticatedOwnerHttpClient.PostAsJsonAsync(
+            "/api/connectors/core/test-fixtures",
+            new { busyStartTime, busyEndTime }
+        );
 
         // Assert
         response.ShouldBeSuccessfulGetRequest();
+        repeatedResponse.ShouldBeSuccessfulGetRequest();
         var accounts = await response.DeserializeResponse<CoreConnectorAccountsResponse>();
         accounts!.Accounts.Select(account => account.Integration).Should().Equal("google-calendar", "office365-calendar", "zoom-video");
         accounts.Accounts[0].Id.Should().StartWith("fake-busy:");
+        accounts.Accounts.Select(account => account.Id).Should().OnlyContain(id => id.Length <= 120);
         accounts.Accounts[0].Calendars.Select(calendar => calendar.ExternalId).Should().Equal("primary", "focus");
         accounts.Accounts[2].Calendars.Should().BeEmpty();
+        Connection.ExecuteScalar<long>("SELECT COUNT(*) FROM connector_credentials", []).Should().Be(3);
+    }
+
+    [Fact]
+    public async Task EnsureTestCoreConnectorCredentials_WhenBusyEndIsBeforeStart_ShouldReturnBadRequest()
+    {
+        // Arrange
+        var busyStartTime = DateTimeOffset.Parse("2026-06-01T07:30:00Z");
+        var busyEndTime = DateTimeOffset.Parse("2026-06-01T07:00:00Z");
+
+        // Act
+        var response = await AuthenticatedOwnerHttpClient.PostAsJsonAsync(
+            "/api/connectors/core/test-fixtures",
+            new { busyStartTime, busyEndTime }
+        );
+
+        // Assert
+        await response.ShouldHaveErrorStatusCode(HttpStatusCode.BadRequest, "Busy end time must be after busy start time.");
     }
 
     [Fact]
@@ -241,4 +266,29 @@ public sealed class CoreConnectorEndpointsTests : EndpointBaseTest<MainDbContext
 
     [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
     private sealed record EventTypeDefaultConferencingResponse(string App, string? CredentialId);
+}
+
+public sealed class CoreConnectorProductionEndpointsTests : EndpointBaseTest<MainDbContext>
+{
+    public CoreConnectorProductionEndpointsTests() : base(Environments.Production)
+    {
+    }
+
+    [Fact]
+    public async Task EnsureTestCoreConnectorCredentials_WhenNotDevelopment_ShouldReturnNotFound()
+    {
+        // Arrange
+        var busyStartTime = DateTimeOffset.Parse("2026-06-01T07:00:00Z");
+        var busyEndTime = DateTimeOffset.Parse("2026-06-01T07:30:00Z");
+
+        // Act
+        var response = await AuthenticatedOwnerHttpClient.PostAsJsonAsync(
+            "/api/connectors/core/test-fixtures",
+            new { busyStartTime, busyEndTime }
+        );
+
+        // Assert
+        await response.ShouldHaveErrorStatusCode(HttpStatusCode.NotFound, "Core connector test fixtures are only available in development.");
+        Connection.ExecuteScalar<long>("SELECT COUNT(*) FROM connector_credentials", []).Should().Be(0);
+    }
 }

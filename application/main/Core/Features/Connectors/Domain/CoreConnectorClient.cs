@@ -111,7 +111,14 @@ public sealed class FakeCoreConnectorClient : ICoreConnectorClient
             yield break;
         }
 
-        var windows = credentialId[FakeBusyPrefix.Length..].Split(';', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+        var rawWindows = credentialId[FakeBusyPrefix.Length..];
+        var ownerScopeSeparatorIndex = rawWindows.IndexOf('|');
+        if (ownerScopeSeparatorIndex >= 0)
+        {
+            rawWindows = rawWindows[(ownerScopeSeparatorIndex + 1)..];
+        }
+
+        var windows = rawWindows.Split(';', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
         foreach (var window in windows)
         {
             var parts = window.Split('/', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);

@@ -12,6 +12,7 @@ using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using NSubstitute;
 using SharedKernel.Authentication;
 using SharedKernel.Authentication.TokenGeneration;
@@ -36,7 +37,7 @@ public abstract class EndpointBaseTest<TContext> : IDisposable where TContext : 
     private readonly WebApplicationFactory<Program> _webApplicationFactory;
     protected TelemetryEventsCollectorSpy TelemetryEventsCollectorSpy;
 
-    protected EndpointBaseTest()
+    protected EndpointBaseTest(string environmentName = "Development")
     {
         Environment.SetEnvironmentVariable(SinglePageAppConfiguration.PublicUrlKey, TestPublicUrl);
         Environment.SetEnvironmentVariable(SinglePageAppConfiguration.CdnUrlKey, $"{TestPublicUrl}/main");
@@ -99,6 +100,7 @@ public abstract class EndpointBaseTest<TContext> : IDisposable where TContext : 
 
         _webApplicationFactory = new WebApplicationFactory<Program>().WithWebHostBuilder(builder =>
             {
+                builder.UseEnvironment(environmentName);
                 builder.ConfigureLogging(logging =>
                     {
                         logging.AddFilter(_ => false); // Suppress all logs during tests

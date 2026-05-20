@@ -1334,6 +1334,3 @@ msgstr "Your booking is confirmed."
 
 msgid "Your dashboard is empty"
 msgstr "Your dashboard is empty"
-
-msgid "Zoom"
-msgstr "Zoom"

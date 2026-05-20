@@ -477,7 +477,7 @@ function isCalendarIntegration(integration: string) {
 function connectorLabel(integration: string) {
   if (integration === "google-calendar") return t`Google Calendar`;
   if (integration === "office365-calendar") return t`Office 365 Calendar`;
-  if (integration === "zoom-video") return t`Zoom`;
+  if (integration === "zoom-video") return "Zoom";
   return integration;
 }
 
@@ -486,7 +486,8 @@ function connectorCalendarValue(integration: string, externalId: string, credent
 }
 
 function parseConnectorCalendarValue(value: string): NonNullable<EventTypeSettings["destinationCalendar"]> {
-  const [integration, externalId, credentialId] = value.split("|");
+  const [integration, externalId, ...credentialIdParts] = value.split("|");
+  const credentialId = credentialIdParts.join("|");
   return { integration, externalId, credentialId: credentialId || null };
 }
 
@@ -522,7 +523,7 @@ function conferencingAppsForAccount(account: CoreConnectorAccount) {
     return [
       {
         value: connectorConferencingValue("zoom-video", account.id),
-        label: `${t`Zoom`} (${account.accountEmail})`
+        label: `Zoom (${account.accountEmail})`
       }
     ];
   }
