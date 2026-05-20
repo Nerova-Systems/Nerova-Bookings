@@ -1,5 +1,6 @@
 using Main.Features.EventTypes.Domain;
 using Main.Features.Scheduling.Domain;
+using SharedKernel.Domain;
 
 namespace Main.Features.Connectors.Domain;
 
@@ -7,7 +8,13 @@ public sealed record CalendarBusyWindow(DateTimeOffset StartTime, DateTimeOffset
 
 public interface ICoreConnectorClient
 {
-    Task<CalendarBusyWindow[]> GetBusyWindowsAsync(EventTypeSelectedCalendar[] selectedCalendars, DateTimeOffset startTime, DateTimeOffset endTime, CancellationToken cancellationToken);
+    Task<CalendarBusyWindow[]> GetBusyWindowsAsync(
+        TenantId tenantId,
+        EventTypeSelectedCalendar[] selectedCalendars,
+        DateTimeOffset startTime,
+        DateTimeOffset endTime,
+        CancellationToken cancellationToken
+    );
 
     Task<BookingReference> CreateCalendarEventAsync(Booking booking, EventTypeDestinationCalendar destinationCalendar, CancellationToken cancellationToken);
 
@@ -22,11 +29,90 @@ public interface ICoreConnectorClient
     Task DeleteMeetingAsync(Booking booking, EventTypeDefaultConferencing conferencing, CancellationToken cancellationToken);
 }
 
-public sealed class FakeCoreConnectorClient : ICoreConnectorClient
+public sealed class CoreConnectorClient(
+    IConnectorCredentialRepository connectorCredentialRepository,
+    IEnumerable<ICoreConnectorProvider> providers,
+    FakeCoreConnectorClient fakeCoreConnectorClient
+) : ICoreConnectorClient
+{
+    public async Task<CalendarBusyWindow[]> GetBusyWindowsAsync(
+        TenantId tenantId,
+        EventTypeSelectedCalendar[] selectedCalendars,
+        DateTimeOffset startTime,
+        DateTimeOffset endTime,
+        CancellationToken cancellationToken
+    )
+    {
+        var credentialIds = selectedCalendars
+            .Select(calendar => calendar.CredentialId)
+            .Where(id => !string.IsNullOrWhiteSpace(id) && !IsFakeCredentialId(id))
+            .Select(id => id!)
+            .ToArray();
+        var credentials = await connectorCredentialRepository.GetForTenantByIdsAsync(tenantId, credentialIds, cancellationToken);
+        var busyWindows = new List<CalendarBusyWindow>();
+
+        foreach (var provider in providers)
+        {
+            var providerSelectedCalendars = selectedCalendars
+                .Where(calendar => provider.Supports(calendar.Integration))
+                .Where(calendar => credentials.Any(credential => credential.Id == calendar.CredentialId))
+                .ToArray();
+            if (providerSelectedCalendars.Length == 0) continue;
+
+            busyWindows.AddRange(await provider.GetBusyWindowsAsync(credentials, providerSelectedCalendars, startTime, endTime, cancellationToken));
+        }
+
+        busyWindows.AddRange(await fakeCoreConnectorClient.GetBusyWindowsAsync(tenantId, selectedCalendars, startTime, endTime, cancellationToken));
+        return busyWindows
+            .OrderBy(window => window.StartTime)
+            .ThenBy(window => window.EndTime)
+            .ToArray();
+    }
+
+    public Task<BookingReference> CreateCalendarEventAsync(Booking booking, EventTypeDestinationCalendar destinationCalendar, CancellationToken cancellationToken)
+    {
+        return fakeCoreConnectorClient.CreateCalendarEventAsync(booking, destinationCalendar, cancellationToken);
+    }
+
+    public Task<BookingReference> UpdateCalendarEventAsync(Booking booking, EventTypeDestinationCalendar destinationCalendar, CancellationToken cancellationToken)
+    {
+        return fakeCoreConnectorClient.UpdateCalendarEventAsync(booking, destinationCalendar, cancellationToken);
+    }
+
+    public Task DeleteCalendarEventAsync(Booking booking, EventTypeDestinationCalendar destinationCalendar, CancellationToken cancellationToken)
+    {
+        return fakeCoreConnectorClient.DeleteCalendarEventAsync(booking, destinationCalendar, cancellationToken);
+    }
+
+    public Task<BookingReference> CreateMeetingAsync(Booking booking, EventTypeDefaultConferencing conferencing, CancellationToken cancellationToken)
+    {
+        return fakeCoreConnectorClient.CreateMeetingAsync(booking, conferencing, cancellationToken);
+    }
+
+    public Task<BookingReference> UpdateMeetingAsync(Booking booking, EventTypeDefaultConferencing conferencing, CancellationToken cancellationToken)
+    {
+        return fakeCoreConnectorClient.UpdateMeetingAsync(booking, conferencing, cancellationToken);
+    }
+
+    public Task DeleteMeetingAsync(Booking booking, EventTypeDefaultConferencing conferencing, CancellationToken cancellationToken)
+    {
+        return fakeCoreConnectorClient.DeleteMeetingAsync(booking, conferencing, cancellationToken);
+    }
+
+    private static bool IsFakeCredentialId(string? credentialId)
+    {
+        return credentialId?.StartsWith("fake-busy:", StringComparison.OrdinalIgnoreCase) == true ||
+               credentialId?.StartsWith("e2e-office365-calendar:", StringComparison.OrdinalIgnoreCase) == true ||
+               credentialId?.StartsWith("e2e-zoom-video:", StringComparison.OrdinalIgnoreCase) == true;
+    }
+}
+
+public sealed class FakeCoreConnectorClient
 {
     private const string FakeBusyPrefix = "fake-busy:";
 
     public Task<CalendarBusyWindow[]> GetBusyWindowsAsync(
+        TenantId tenantId,
         EventTypeSelectedCalendar[] selectedCalendars,
         DateTimeOffset startTime,
         DateTimeOffset endTime,

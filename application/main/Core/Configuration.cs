@@ -28,7 +28,11 @@ public static class Configuration
             return services
                 .AddHttpClient()
                 .AddScoped<BookingSideEffectProcessor>()
-                .AddScoped<ICoreConnectorClient, FakeCoreConnectorClient>()
+                .AddScoped<FakeCoreConnectorClient>()
+                .AddScoped<ICoreConnectorAccessTokenProvider, ConfigurationCoreConnectorAccessTokenProvider>()
+                .AddScoped<ICoreConnectorProvider, GoogleCalendarCoreConnectorProvider>()
+                .AddScoped<ICoreConnectorProvider, Office365CalendarCoreConnectorProvider>()
+                .AddScoped<ICoreConnectorClient, CoreConnectorClient>()
                 .AddScoped<PublicSchedulingResolver>()
                 .AddScoped<PublicSlotCalculator>()
                 .AddSharedServices<MainDbContext>([Assembly]);

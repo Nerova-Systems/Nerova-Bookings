@@ -89,6 +89,7 @@ public sealed class CreatePublicBookingHandler(
         }
 
         var busyWindows = await coreConnectorClient.GetBusyWindowsAsync(
+            context.Profile.TenantId,
             context.EventType.Settings.SelectedCalendars,
             command.StartTime,
             endTime,

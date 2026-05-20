@@ -52,6 +52,7 @@ public sealed class GetPublicSlotsHandler(
             cancellationToken
         );
         var busyWindows = await coreConnectorClient.GetBusyWindowsAsync(
+            context.Profile.TenantId,
             context.EventType.Settings.SelectedCalendars,
             query.StartTime,
             query.EndTime,

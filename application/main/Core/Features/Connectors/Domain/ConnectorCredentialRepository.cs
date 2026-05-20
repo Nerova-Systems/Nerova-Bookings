@@ -11,6 +11,8 @@ public interface IConnectorCredentialRepository : ICrudRepository<ConnectorCrede
 
     Task<ConnectorCredential?> GetOwnedAsync(TenantId tenantId, UserId ownerUserId, string id, CancellationToken cancellationToken);
 
+    Task<ConnectorCredential[]> GetForTenantByIdsAsync(TenantId tenantId, string[] ids, CancellationToken cancellationToken);
+
     Task RemoveTestFixturesForOwnerAsync(TenantId tenantId, UserId ownerUserId, string[] retainedCredentialIds, CancellationToken cancellationToken);
 }
 
@@ -45,6 +47,26 @@ public sealed class ConnectorCredentialRepository(MainDbContext mainDbContext)
             .Where(credential => credential.OwnerUserId == ownerUserId)
             .Where(credential => credential.Id == id.Trim())
             .SingleOrDefaultAsync(cancellationToken);
+    }
+
+    public async Task<ConnectorCredential[]> GetForTenantByIdsAsync(TenantId tenantId, string[] ids, CancellationToken cancellationToken)
+    {
+        var normalizedIds = ids
+            .Where(id => !string.IsNullOrWhiteSpace(id))
+            .Select(id => id.Trim())
+            .Distinct(StringComparer.Ordinal)
+            .ToArray();
+        if (normalizedIds.Length == 0) return [];
+
+        var credentials = await DbSet
+            .IgnoreQueryFilters()
+            .AsNoTracking()
+            .Where(credential => credential.TenantId == tenantId)
+            .ToArrayAsync(cancellationToken);
+
+        return credentials
+            .Where(credential => Array.IndexOf(normalizedIds, credential.Id) >= 0)
+            .ToArray();
     }
 
     public async Task RemoveTestFixturesForOwnerAsync(TenantId tenantId, UserId ownerUserId, string[] retainedCredentialIds, CancellationToken cancellationToken)
