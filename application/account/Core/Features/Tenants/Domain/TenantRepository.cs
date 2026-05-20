@@ -76,6 +76,19 @@ public interface ITenantRepository : ICrudRepository<Tenant, TenantId>, ISoftDel
     ///     or <see langword="null" /> if the tenant has no parent (i.e., it is Solo or an Organization itself).
     /// </summary>
     Task<Tenant?> GetParentOfAsync(TenantId childId, CancellationToken cancellationToken);
+
+    /// <summary>
+    ///     Returns the <see cref="TenantKind.Organization" /> tenant with the given <paramref name="slug" />,
+    ///     or <see langword="null" /> if no organization has that slug. Soft-deleted organizations are excluded.
+    /// </summary>
+    Task<Tenant?> GetBySlugAsync(string slug, CancellationToken cancellationToken);
+
+    /// <summary>
+    ///     Returns the <see cref="TenantKind.Team" /> tenant with the given <paramref name="slug" />
+    ///     that is a direct child of <paramref name="orgId" />, or <see langword="null" /> if not found.
+    ///     Soft-deleted teams are excluded.
+    /// </summary>
+    Task<Tenant?> GetTeamBySlugInOrgAsync(TenantId orgId, string slug, CancellationToken cancellationToken);
 }
 
 public sealed class TenantRepository(AccountDbContext accountDbContext, IExecutionContext executionContext)
@@ -224,5 +237,24 @@ public sealed class TenantRepository(AccountDbContext accountDbContext, IExecuti
         var child = await DbSet.SingleOrDefaultAsync(t => t.Id == childId, cancellationToken);
         if (child?.ParentTenantId is null) return null;
         return await GetByIdAsync(child.ParentTenantId, cancellationToken);
+    }
+
+    /// <summary>
+    ///     Returns the <see cref="TenantKind.Organization" /> tenant with the given <paramref name="slug" />,
+    ///     or <see langword="null" /> if no organization has that slug. Soft-deleted organizations are excluded.
+    /// </summary>
+    public Task<Tenant?> GetBySlugAsync(string slug, CancellationToken cancellationToken)
+    {
+        return DbSet.SingleOrDefaultAsync(t => t.Kind == TenantKind.Organization && t.Slug == slug, cancellationToken);
+    }
+
+    /// <summary>
+    ///     Returns the <see cref="TenantKind.Team" /> tenant with the given <paramref name="slug" />
+    ///     that is a direct child of <paramref name="orgId" />, or <see langword="null" /> if not found.
+    ///     Soft-deleted teams are excluded.
+    /// </summary>
+    public Task<Tenant?> GetTeamBySlugInOrgAsync(TenantId orgId, string slug, CancellationToken cancellationToken)
+    {
+        return DbSet.SingleOrDefaultAsync(t => t.Kind == TenantKind.Team && t.ParentTenantId == orgId && t.Slug == slug, cancellationToken);
     }
 }
