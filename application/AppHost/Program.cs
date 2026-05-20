@@ -156,7 +156,7 @@ var mainApi = builder
     .AddProject<Main_Api>("main-api")
     .WithEnvironment("KESTREL_PORT", ports.MainApi.ToString())
     .WithUrlConfiguration(appHostname, ports.AppGateway, "")
-    .WithEnvironment("Connectors__Core__OAuth__PublicUrl", "https://localhost:" + ports.AppGateway)
+    .WithEnvironment("Connectors__Core__OAuth__PublicUrl", appBaseUrl)
     .WithEnvironment("Connectors__Core__OAuth__GoogleCalendar__ClientId", coreConnectorOAuth.GoogleCalendarClientId)
     .WithEnvironment("Connectors__Core__OAuth__GoogleCalendar__ClientSecret", coreConnectorOAuth.GoogleCalendarClientSecret)
     .WithEnvironment("Connectors__Core__OAuth__Office365Calendar__ClientId", coreConnectorOAuth.Office365CalendarClientId)

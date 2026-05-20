@@ -1,9 +1,9 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
-using System.Diagnostics.CodeAnalysis;
 using JetBrains.Annotations;
 using Main.Database;
 using Microsoft.AspNetCore.DataProtection;
@@ -32,7 +32,14 @@ public sealed record CoreConnectorOAuthAccount(
 
 public sealed record CoreConnectorOAuthCallbackResult(CoreConnectorTokenSet TokenSet, CoreConnectorOAuthAccount Account);
 
-public sealed record CoreConnectorOAuthState(TenantId TenantId, UserId OwnerUserId, string Integration, string ReturnTo, string Nonce, DateTimeOffset ExpiresAt);
+public sealed record CoreConnectorOAuthState(
+    TenantId TenantId,
+    UserId OwnerUserId,
+    string Integration,
+    string ReturnTo,
+    string Nonce,
+    DateTimeOffset ExpiresAt
+);
 
 public sealed class CoreConnectorOAuthException(string code, string message) : Exception(message)
 {
@@ -167,6 +174,14 @@ public abstract class CoreConnectorOAuthProviderBase(IConfiguration configuratio
 
     protected string ClientSecret => ConfigValue("ClientSecret", $"test-{Integration}-client-secret");
 
+    protected string ProviderOptionsName => Integration switch
+    {
+        CoreConnectorConstants.GoogleCalendar => "GoogleCalendar",
+        CoreConnectorConstants.Office365Calendar => "Office365Calendar",
+        CoreConnectorConstants.ZoomVideo => "Zoom",
+        _ => Integration
+    };
+
     public bool Supports(string integration)
     {
         return integration.Equals(Integration, StringComparison.OrdinalIgnoreCase);
@@ -253,10 +268,11 @@ public abstract class CoreConnectorOAuthProviderBase(IConfiguration configuratio
         {
             return googleItems.EnumerateArray()
                 .Select(item => new CoreConnectorCalendar(
-                    ExtractString(item, "id") ?? "primary",
-                    ExtractString(item, "summary") ?? ExtractString(item, "name") ?? "Calendar",
-                    item.TryGetProperty("primary", out var primary) && primary.ValueKind == JsonValueKind.True
-                ))
+                        ExtractString(item, "id") ?? "primary",
+                        ExtractString(item, "summary") ?? ExtractString(item, "name") ?? "Calendar",
+                        item.TryGetProperty("primary", out var primary) && primary.ValueKind == JsonValueKind.True
+                    )
+                )
                 .ToArray();
         }
 
@@ -264,10 +280,11 @@ public abstract class CoreConnectorOAuthProviderBase(IConfiguration configuratio
         {
             return graphItems.EnumerateArray()
                 .Select(item => new CoreConnectorCalendar(
-                    ExtractString(item, "id") ?? "calendar",
-                    ExtractString(item, "name") ?? "Calendar",
-                    ExtractString(item, "isDefaultCalendar")?.Equals("true", StringComparison.OrdinalIgnoreCase) == true
-                ))
+                        ExtractString(item, "id") ?? "calendar",
+                        ExtractString(item, "name") ?? "Calendar",
+                        ExtractString(item, "isDefaultCalendar")?.Equals("true", StringComparison.OrdinalIgnoreCase) == true
+                    )
+                )
                 .ToArray();
         }
 
@@ -363,14 +380,6 @@ public abstract class CoreConnectorOAuthProviderBase(IConfiguration configuratio
         return !string.IsNullOrWhiteSpace(value) && !value.Equals("not-configured", StringComparison.OrdinalIgnoreCase);
     }
 
-    protected string ProviderOptionsName => Integration switch
-    {
-        CoreConnectorConstants.GoogleCalendar => "GoogleCalendar",
-        CoreConnectorConstants.Office365Calendar => "Office365Calendar",
-        CoreConnectorConstants.ZoomVideo => "Zoom",
-        _ => Integration
-    };
-
     protected static string? ExtractString(JsonElement? element, params string[] names)
     {
         if (element is null || element.Value.ValueKind is JsonValueKind.Null or JsonValueKind.Undefined) return null;
@@ -403,10 +412,15 @@ public sealed class GoogleCalendarOAuthProvider(IConfiguration configuration, IH
     : CoreConnectorOAuthProviderBase(configuration, hostEnvironment, httpClientFactory)
 {
     protected override string Integration => CoreConnectorConstants.GoogleCalendar;
+
     protected override string AuthorizationEndpoint => "https://accounts.google.com/o/oauth2/v2/auth";
+
     protected override string TokenEndpoint => "https://oauth2.googleapis.com/token";
+
     protected override string ProfileEndpoint => "https://openidconnect.googleapis.com/v1/userinfo";
+
     protected override string CalendarListEndpoint => "https://www.googleapis.com/calendar/v3/users/me/calendarList";
+
     protected override string[] Scopes => ["https://www.googleapis.com/auth/calendar", "https://www.googleapis.com/auth/userinfo.profile"];
 
     protected override void AddAuthorizationParameters(Dictionary<string, string?> query)
@@ -444,10 +458,15 @@ public sealed class Office365CalendarOAuthProvider(IConfiguration configuration,
     : CoreConnectorOAuthProviderBase(configuration, hostEnvironment, httpClientFactory)
 {
     protected override string Integration => CoreConnectorConstants.Office365Calendar;
+
     protected override string AuthorizationEndpoint => "https://login.microsoftonline.com/common/oauth2/v2.0/authorize";
+
     protected override string TokenEndpoint => "https://login.microsoftonline.com/common/oauth2/v2.0/token";
+
     protected override string ProfileEndpoint => "https://graph.microsoft.com/v1.0/me";
+
     protected override string CalendarListEndpoint => "https://graph.microsoft.com/v1.0/me/calendars";
+
     protected override string[] Scopes => ["offline_access", "Calendars.Read", "Calendars.ReadWrite", "User.Read"];
 
     protected override bool TryCompleteMockCallback(string code, [NotNullWhen(true)] out CoreConnectorOAuthCallbackResult? result)
@@ -479,9 +498,13 @@ public sealed class ZoomOAuthProvider(IConfiguration configuration, IHostEnviron
     : CoreConnectorOAuthProviderBase(configuration, hostEnvironment, httpClientFactory)
 {
     protected override string Integration => CoreConnectorConstants.ZoomVideo;
+
     protected override string AuthorizationEndpoint => "https://zoom.us/oauth/authorize";
+
     protected override string TokenEndpoint => "https://zoom.us/oauth/token";
+
     protected override string ProfileEndpoint => "https://api.zoom.us/v2/users/me";
+
     protected override string[] Scopes => [];
 
     protected override HttpRequestMessage CreateTokenRequest(Dictionary<string, string> formValues)

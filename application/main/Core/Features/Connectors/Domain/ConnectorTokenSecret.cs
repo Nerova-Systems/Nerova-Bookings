@@ -24,11 +24,11 @@ public sealed class ConnectorTokenSecret : AggregateRoot<string>, ITenantScopedE
         ProtectedPayload = protectedPayload;
     }
 
-    public TenantId TenantId { get; } = new(0);
-
     public string CredentialId { get; }
 
     public string ProtectedPayload { get; private set; }
+
+    public TenantId TenantId { get; } = new(0);
 
     public static ConnectorTokenSecret Create(TenantId tenantId, string id, string credentialId, string protectedPayload)
     {
