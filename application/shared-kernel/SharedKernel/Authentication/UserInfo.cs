@@ -65,6 +65,25 @@ public class UserInfo
 
     public int? UserRolloutBucket { get; init; }
 
+    /// <summary>
+    ///     The currently-active team scope, or <see langword="null" /> when not in a team session.
+    ///     Populated from the <c>active_team_id</c> JWT claim after a scope switch.
+    /// </summary>
+    public TenantId? ActiveTeamId { get; init; }
+
+    /// <summary>
+    ///     The currently-active organization, or <see langword="null" /> when not in an org session.
+    ///     For a team session this is the team's parent org; for an org session this equals <c>TenantId</c>.
+    ///     Populated from the <c>active_org_id</c> JWT claim after a scope switch.
+    /// </summary>
+    public TenantId? ActiveOrgId { get; init; }
+
+    /// <summary>
+    ///     The OrgProfile ID the user acts as in the current org session, or <see langword="null" />.
+    ///     Populated from the <c>active_org_profile_id</c> JWT claim after a scope switch.
+    /// </summary>
+    public string? ActiveOrgProfileId { get; init; }
+
     public bool IsFeatureFlagEnabled(string flagKey)
     {
         return FeatureFlags.Contains(flagKey);
@@ -90,6 +109,9 @@ public class UserInfo
         var featureFlagsClaim = user.FindFirstValue(AuthenticationTokenHttpKeys.FeatureFlagsClaimName);
         var tenantRolloutBucketClaim = user.FindFirstValue("tenant_rollout_bucket");
         var userRolloutBucketClaim = user.FindFirstValue("user_rollout_bucket");
+        var activeTeamIdClaim = user.FindFirstValue("active_team_id");
+        var activeOrgIdClaim = user.FindFirstValue("active_org_id");
+        var activeOrgProfileIdClaim = user.FindFirstValue("active_org_profile_id");
         return new UserInfo
         {
             IsAuthenticated = true,
@@ -111,7 +133,10 @@ public class UserInfo
             IsInternalUser = IsInternalUserEmail(email),
             FeatureFlags = ParseFeatureFlags(featureFlagsClaim),
             TenantRolloutBucket = !string.IsNullOrEmpty(tenantRolloutBucketClaim) ? int.Parse(tenantRolloutBucketClaim) : 0,
-            UserRolloutBucket = !string.IsNullOrEmpty(userRolloutBucketClaim) ? int.Parse(userRolloutBucketClaim) : null
+            UserRolloutBucket = !string.IsNullOrEmpty(userRolloutBucketClaim) ? int.Parse(userRolloutBucketClaim) : null,
+            ActiveTeamId = string.IsNullOrEmpty(activeTeamIdClaim) ? null : new TenantId(long.Parse(activeTeamIdClaim)),
+            ActiveOrgId = string.IsNullOrEmpty(activeOrgIdClaim) ? null : new TenantId(long.Parse(activeOrgIdClaim)),
+            ActiveOrgProfileId = string.IsNullOrEmpty(activeOrgProfileIdClaim) ? null : activeOrgProfileIdClaim
         };
     }
 

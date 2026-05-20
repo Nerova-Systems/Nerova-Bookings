@@ -36,17 +36,29 @@ public sealed class PermissionCheckBehaviorTests(AccountWebApplicationFactory fa
     [RequirePermission(PermissionResource.Team, PermissionAction.Read)]
     private sealed record TwoPermissionsCommand : IRequest<Result>;
 
+    // Requires Team scope
+    [RequirePermission(PermissionResource.Team, PermissionAction.Manage, PermissionScope.Team)]
+    private sealed record TeamScopedCommand : IRequest<Result>;
+
+    // Requires Organization scope
+    [RequirePermission(PermissionResource.Team, PermissionAction.Manage, PermissionScope.Organization)]
+    private sealed record OrgScopedCommand : IRequest<Result>;
+
     // ── Helpers ───────────────────────────────────────────────────────────────
 
     private static (IPermissionCheckService permissionService, IExecutionContext executionContext) BuildMocks(
         UserId? userId = null,
-        TenantId? tenantId = null)
+        TenantId? tenantId = null,
+        TenantId? activeTeamId = null,
+        TenantId? activeOrgId = null)
     {
         var permissionService = Substitute.For<IPermissionCheckService>();
         var executionContext = Substitute.For<IExecutionContext>();
 
         executionContext.UserInfo.Returns(new UserInfo { Id = userId });
         executionContext.TenantId.Returns(tenantId);
+        executionContext.ActiveTeamId.Returns(activeTeamId);
+        executionContext.ActiveOrgId.Returns(activeOrgId);
 
         return (permissionService, executionContext);
     }
@@ -199,5 +211,121 @@ public sealed class PermissionCheckBehaviorTests(AccountWebApplicationFactory fa
         // Assert
         handlerCalled.Should().BeFalse();
         result.StatusCode.Should().Be(HttpStatusCode.Forbidden);
+    }
+
+    // ── Scope-aware permission tests ──────────────────────────────────────────
+
+    [Fact]
+    public async Task Handle_WhenTeamScopeAndActiveTeamIdSet_ShouldCheckAgainstTeamTenant()
+    {
+        // Arrange
+        var userId = UserId.NewId();
+        var tenantId = new TenantId(2000L);
+        var teamId = new TenantId(2001L);
+        var (permissionService, executionContext) = BuildMocks(userId, tenantId, activeTeamId: teamId);
+
+        permissionService
+            .HasPermissionAsync(userId, teamId, new Permission(PermissionResource.Team, PermissionAction.Manage), Arg.Any<CancellationToken>())
+            .Returns(Task.FromResult(true));
+
+        var behavior = BuildBehavior<TeamScopedCommand>(permissionService, executionContext);
+
+        var handlerCalled = false;
+        Task<Result> next(CancellationToken _)
+        {
+            handlerCalled = true;
+            return Task.FromResult(Result.Success());
+        }
+
+        // Act
+        var result = await behavior.Handle(new TeamScopedCommand(), next, CancellationToken.None);
+
+        // Assert
+        handlerCalled.Should().BeTrue();
+        result.IsSuccess.Should().BeTrue();
+        await permissionService.DidNotReceive().HasPermissionAsync(userId, tenantId, Arg.Any<Permission>(), Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task Handle_WhenTeamScopeAndActiveTeamIdIsNull_ShouldReturnForbidden()
+    {
+        // Arrange — no active team scope in context
+        var userId = UserId.NewId();
+        var tenantId = new TenantId(2002L);
+        var (permissionService, executionContext) = BuildMocks(userId, tenantId, activeTeamId: null);
+
+        var behavior = BuildBehavior<TeamScopedCommand>(permissionService, executionContext);
+
+        var handlerCalled = false;
+        Task<Result> next(CancellationToken _)
+        {
+            handlerCalled = true;
+            return Task.FromResult(Result.Success());
+        }
+
+        // Act
+        var result = await behavior.Handle(new TeamScopedCommand(), next, CancellationToken.None);
+
+        // Assert
+        handlerCalled.Should().BeFalse();
+        result.StatusCode.Should().Be(HttpStatusCode.Forbidden);
+        await permissionService.DidNotReceiveWithAnyArgs().HasPermissionAsync(default!, default!, default!, default);
+    }
+
+    [Fact]
+    public async Task Handle_WhenOrgScopeAndActiveOrgIdSet_ShouldCheckAgainstOrgTenant()
+    {
+        // Arrange
+        var userId = UserId.NewId();
+        var tenantId = new TenantId(3000L);
+        var orgId = new TenantId(3001L);
+        var (permissionService, executionContext) = BuildMocks(userId, tenantId, activeOrgId: orgId);
+
+        permissionService
+            .HasPermissionAsync(userId, orgId, new Permission(PermissionResource.Team, PermissionAction.Manage), Arg.Any<CancellationToken>())
+            .Returns(Task.FromResult(true));
+
+        var behavior = BuildBehavior<OrgScopedCommand>(permissionService, executionContext);
+
+        var handlerCalled = false;
+        Task<Result> next(CancellationToken _)
+        {
+            handlerCalled = true;
+            return Task.FromResult(Result.Success());
+        }
+
+        // Act
+        var result = await behavior.Handle(new OrgScopedCommand(), next, CancellationToken.None);
+
+        // Assert
+        handlerCalled.Should().BeTrue();
+        result.IsSuccess.Should().BeTrue();
+        await permissionService.DidNotReceive().HasPermissionAsync(userId, tenantId, Arg.Any<Permission>(), Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task Handle_WhenOrgScopeAndActiveOrgIdIsNull_ShouldReturnForbidden()
+    {
+        // Arrange — no active org scope in context
+        var userId = UserId.NewId();
+        var tenantId = new TenantId(3002L);
+        var (permissionService, executionContext) = BuildMocks(userId, tenantId, activeOrgId: null);
+
+        var behavior = BuildBehavior<OrgScopedCommand>(permissionService, executionContext);
+
+        var handlerCalled = false;
+        Task<Result> next(CancellationToken _)
+        {
+            handlerCalled = true;
+            return Task.FromResult(Result.Success());
+        }
+
+        // Act
+        var result = await behavior.Handle(new OrgScopedCommand(), next, CancellationToken.None);
+
+        // Assert
+        handlerCalled.Should().BeFalse();
+        result.StatusCode.Should().Be(HttpStatusCode.Forbidden);
+        await permissionService.DidNotReceiveWithAnyArgs().HasPermissionAsync(default!, default!, default!, default);
     }
 }

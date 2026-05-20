@@ -1,4 +1,5 @@
 using Account.Features.Authentication.Domain;
+using Account.Features.OrgProfiles.Domain;
 using Account.Features.Tenants.Domain;
 using Account.Features.Users.Domain;
 using Account.Features.Users.Shared;
@@ -15,12 +16,13 @@ using SharedKernel.Telemetry;
 namespace Account.Features.Authentication.Commands;
 
 [PublicAPI]
-public sealed record SwitchTenantCommand(TenantId TenantId) : ICommand, IRequest<Result>;
+public sealed record SwitchTenantCommand(TenantId TenantId, OrgProfileId? OrgProfileId = null) : ICommand, IRequest<Result>;
 
 public sealed class SwitchTenantHandler(
     IUserRepository userRepository,
     ITenantRepository tenantRepository,
     ISessionRepository sessionRepository,
+    IOrgProfileRepository orgProfileRepository,
     UserInfoFactory userInfoFactory,
     AuthenticationTokenService authenticationTokenService,
     IHttpContextAccessor httpContextAccessor,
@@ -42,7 +44,8 @@ public sealed class SwitchTenantHandler(
             return Result.Forbidden($"User does not have access to tenant '{command.TenantId}'.");
         }
 
-        if (!await tenantRepository.ExistsAsync(command.TenantId, cancellationToken))
+        var targetTenant = await tenantRepository.GetByIdUnfilteredAsync(command.TenantId, cancellationToken);
+        if (targetTenant is null)
         {
             return Result.Forbidden("Tenant is no longer available.");
         }
@@ -67,6 +70,50 @@ public sealed class SwitchTenantHandler(
             return Result.Unauthorized("Session has been revoked.");
         }
 
+        // Derive org/team scope from the target tenant's kind
+        TenantId? activeTeamId = null;
+        TenantId? activeOrgId = null;
+        OrgProfileId? activeOrgProfileId = null;
+
+        if (targetTenant.Kind == TenantKind.Team)
+        {
+            var parentOrg = await tenantRepository.GetParentOfAsync(command.TenantId, cancellationToken);
+            if (parentOrg is null)
+            {
+                logger.LogWarning("Team tenant '{TenantId}' has no parent organization", command.TenantId);
+                return Result.BadRequest("Team tenant has no parent organization.");
+            }
+
+            activeTeamId = command.TenantId;
+            activeOrgId = parentOrg.Id;
+
+            var orgProfile = await orgProfileRepository.GetByUserAndOrgAsync(targetUser.Id, parentOrg.Id, cancellationToken);
+            if (command.OrgProfileId is not null)
+            {
+                if (orgProfile is null || orgProfile.Id != command.OrgProfileId)
+                {
+                    return Result.Forbidden("The specified OrgProfile does not belong to the user in this organization.");
+                }
+            }
+
+            activeOrgProfileId = orgProfile?.Id;
+        }
+        else if (targetTenant.Kind == TenantKind.Organization)
+        {
+            activeOrgId = command.TenantId;
+
+            var orgProfile = await orgProfileRepository.GetByUserAndOrgAsync(targetUser.Id, command.TenantId, cancellationToken);
+            if (command.OrgProfileId is not null)
+            {
+                if (orgProfile is null || orgProfile.Id != command.OrgProfileId)
+                {
+                    return Result.Forbidden("The specified OrgProfile does not belong to the user in this organization.");
+                }
+            }
+
+            activeOrgProfileId = orgProfile?.Id;
+        }
+
         var now = timeProvider.GetUtcNow();
         currentSession.Revoke(now, SessionRevokedReason.SwitchTenant);
         sessionRepository.Update(currentSession);
@@ -81,7 +128,12 @@ public sealed class SwitchTenantHandler(
         targetUser.UpdateLastSeen(timeProvider.GetUtcNow());
         userRepository.Update(targetUser);
 
-        var userInfoResult = await userInfoFactory.CreateUserInfoAsync(targetUser, session.Id, cancellationToken);
+        var userInfoResult = await userInfoFactory.CreateUserInfoAsync(
+            targetUser, session.Id, cancellationToken,
+            activeTeamId: activeTeamId,
+            activeOrgId: activeOrgId,
+            activeOrgProfileId: activeOrgProfileId
+        );
         if (!userInfoResult.IsSuccess) return Result.From(userInfoResult);
 
         authenticationTokenService.SwitchTenantAndSetAuthenticationTokens(userInfoResult.Value!, session.Id, session.RefreshTokenJti, currentSession.ExpiresAt);

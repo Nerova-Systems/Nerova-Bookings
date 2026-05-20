@@ -4,6 +4,7 @@ using Account.Features.Permissions.Services;
 using MediatR;
 using Microsoft.Extensions.Logging;
 using SharedKernel.Cqrs;
+using SharedKernel.Domain;
 using SharedKernel.ExecutionContext;
 using SharedKernel.Validation;
 
@@ -19,6 +20,13 @@ namespace Account.Features.Permissions.Pipeline;
 ///             <item>Reads the current user's ID and tenant from <see cref="IExecutionContext" />.</item>
 ///             <item>Fails closed (HTTP 403) if the request is unauthenticated (null userId or tenantId).</item>
 ///             <item>
+///                 Resolves the tenant to check against based on the attribute's <see cref="PermissionScope" />:
+///                 <see cref="PermissionScope.CurrentTenant" /> uses <see cref="IExecutionContext.TenantId" />;
+///                 <see cref="PermissionScope.Team" /> uses <see cref="IExecutionContext.ActiveTeamId" />;
+///                 <see cref="PermissionScope.Organization" /> uses <see cref="IExecutionContext.ActiveOrgId" />.
+///                 Returns HTTP 403 if the required scope tenant is null (e.g., no active team or org).
+///             </item>
+///             <item>
 ///                 Calls <see cref="IPermissionCheckService.HasPermissionAsync" /> for each required
 ///                 permission. Returns HTTP 403 on the first denial (fail-fast, AND semantics).
 ///             </item>
@@ -28,10 +36,6 @@ namespace Account.Features.Permissions.Pipeline;
 ///     <para>
 ///         The set of required permissions is computed once per generic instantiation via a
 ///         <see langword="static" /> field, so reflection overhead is paid only at first use.
-///     </para>
-///     <para>
-///         TODO(f1-context-injection): Tighten context injection once the dedicated context-injection
-///         task ships so that the execution context is guaranteed non-null for authenticated routes.
 ///     </para>
 /// </summary>
 public sealed class PermissionCheckBehavior<TRequest, TResponse>(
@@ -43,9 +47,9 @@ public sealed class PermissionCheckBehavior<TRequest, TResponse>(
     where TResponse : ResultBase
 {
     // Static per-generic-instantiation: reflection runs once per TRequest type at application startup.
-    private static readonly IReadOnlyList<Permission> RequiredPermissions =
+    private static readonly IReadOnlyList<(Permission Permission, PermissionScope Scope)> RequiredPermissions =
         typeof(TRequest).GetCustomAttributes<RequirePermissionAttribute>(false)
-            .Select(a => a.Permission)
+            .Select(a => (a.Permission, a.Scope))
             .ToList();
 
     public async Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TResponse> next, CancellationToken cancellationToken)
@@ -53,16 +57,25 @@ public sealed class PermissionCheckBehavior<TRequest, TResponse>(
         if (RequiredPermissions.Count == 0) return await next(cancellationToken);
 
         var userId = executionContext.UserInfo.Id;
-        var tenantId = executionContext.TenantId;
 
-        if (userId is null || tenantId is null)
+        if (userId is null)
         {
             logger.LogWarning("Permission check failed: unauthenticated request on {RequestType}", typeof(TRequest).Name);
             return CreateForbiddenResult();
         }
 
-        foreach (var permission in RequiredPermissions)
+        foreach (var (permission, scope) in RequiredPermissions)
         {
+            var tenantId = ResolveScope(scope);
+            if (tenantId is null)
+            {
+                logger.LogWarning(
+                    "Permission check failed: scope {Scope} required but not set on {RequestType}",
+                    scope, typeof(TRequest).Name
+                );
+                return CreateForbiddenResult();
+            }
+
             if (!await permissionCheckService.HasPermissionAsync(userId, tenantId, permission, cancellationToken))
             {
                 logger.LogWarning("Permission {Permission} denied for user {UserId} on tenant {TenantId}", permission, userId, tenantId);
@@ -71,6 +84,16 @@ public sealed class PermissionCheckBehavior<TRequest, TResponse>(
         }
 
         return await next(cancellationToken);
+    }
+
+    private TenantId? ResolveScope(PermissionScope scope)
+    {
+        return scope switch
+        {
+            PermissionScope.Team => executionContext.ActiveTeamId,
+            PermissionScope.Organization => executionContext.ActiveOrgId,
+            _ => executionContext.TenantId
+        };
     }
 
     private static TResponse CreateForbiddenResult()
