@@ -8,6 +8,13 @@
       "command": "aspire",
       "args": ["agent", "mcp"]
     },
+    "gcloud": {
+      "command": "npx",
+      "args": ["-y", "@google-cloud/gcloud-mcp"]
+    },
+    "zoom-workspace": {
+      "url": "https://mcp.zoom.us/mcp/zoom/streamable"
+    },
     "azure-staging": {
       "command": "npx",
       "args": [

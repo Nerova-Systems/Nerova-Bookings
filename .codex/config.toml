@@ -42,6 +42,17 @@ cwd = "C:\\Users\\colin\\dev\\NerovaBookings"
 startup_timeout_sec = 30
 tool_timeout_sec = 120
 
+[mcp_servers.gcloud]
+command = "npx"
+args = ["-y", "@google-cloud/gcloud-mcp"]
+cwd = "C:\\Users\\colin\\dev\\NerovaBookings"
+startup_timeout_sec = 60
+tool_timeout_sec = 180
+
+[mcp_servers.zoom-workspace]
+url = "https://mcp.zoom.us/mcp/zoom/streamable"
+tool_timeout_sec = 180
+
 [mcp_servers.azure-staging]
 command = "powershell"
 args = ["-NoProfile", "-ExecutionPolicy", "Bypass", "-Command", "$env:AZURE_SUBSCRIPTION_ID=$env:AZURE_SUBSCRIPTION_ID_STAGING; npx -y @azure/mcp@latest server start --read-only --namespace monitor --namespace applicationinsights --namespace subscription --namespace group"]
