@@ -64,6 +64,18 @@ public interface ITenantRepository : ICrudRepository<Tenant, TenantId>, ISoftDel
     ///     Tenant query filter is ignored because tenant creation predates tenant context.
     /// </summary>
     Task<int> GetNextRolloutIndexUnfilteredAsync(CancellationToken cancellationToken);
+
+    /// <summary>
+    ///     Returns all direct child <see cref="TenantKind.Team" /> tenants of the given parent Organization.
+    ///     Soft-deleted children are excluded. No tenant-scope filter is applied (Tenants are not scoped entities).
+    /// </summary>
+    Task<Tenant[]> GetChildrenOfAsync(TenantId parentId, CancellationToken cancellationToken);
+
+    /// <summary>
+    ///     Returns the parent <see cref="TenantKind.Organization" /> of <paramref name="childId" />,
+    ///     or <see langword="null" /> if the tenant has no parent (i.e., it is Solo or an Organization itself).
+    /// </summary>
+    Task<Tenant?> GetParentOfAsync(TenantId childId, CancellationToken cancellationToken);
 }
 
 public sealed class TenantRepository(AccountDbContext accountDbContext, IExecutionContext executionContext)
@@ -192,5 +204,25 @@ public sealed class TenantRepository(AccountDbContext accountDbContext, IExecuti
         // the cast non-negative past 2.1B cumulative inserts (including rolled-back/leaked values) while
         // preserving int.MaxValue itself (the `% int.MaxValue` form silently collapses that value to 0).
         return (int)((nextSequenceValue - 1) & 0x7FFF_FFFF);
+    }
+
+    /// <summary>
+    ///     Returns all direct child <see cref="TenantKind.Team" /> tenants of the given parent Organization.
+    ///     Soft-deleted children are excluded. No tenant-scope filter is applied (Tenants are not scoped entities).
+    /// </summary>
+    public async Task<Tenant[]> GetChildrenOfAsync(TenantId parentId, CancellationToken cancellationToken)
+    {
+        return await DbSet.Where(t => t.ParentTenantId == parentId).ToArrayAsync(cancellationToken);
+    }
+
+    /// <summary>
+    ///     Returns the parent <see cref="TenantKind.Organization" /> of <paramref name="childId" />,
+    ///     or <see langword="null" /> if the tenant has no parent (i.e., it is Solo or an Organization itself).
+    /// </summary>
+    public async Task<Tenant?> GetParentOfAsync(TenantId childId, CancellationToken cancellationToken)
+    {
+        var child = await DbSet.SingleOrDefaultAsync(t => t.Id == childId, cancellationToken);
+        if (child?.ParentTenantId is null) return null;
+        return await GetByIdAsync(child.ParentTenantId, cancellationToken);
     }
 }
