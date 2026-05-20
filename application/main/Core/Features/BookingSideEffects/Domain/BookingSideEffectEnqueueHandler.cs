@@ -122,9 +122,11 @@ public sealed class BookingSideEffectEnqueueHandler(
     private async Task EnqueueConnectorSyncAsync(BookingLifecycleSideEffectEvent notification, EventType eventType, CancellationToken cancellationToken)
     {
         var operation = ResolveConnectorOperation(notification.Trigger);
+        var conferencing = ResolveConferencing(eventType);
         if (eventType.Settings.DestinationCalendar is { } destinationCalendar &&
             CoreConnectorConstants.IsCoreCalendar(destinationCalendar.Integration))
         {
+            var calendarConferencing = IsConferencingHandledByCalendar(destinationCalendar, conferencing) ? conferencing : null;
             await EnqueueDeliveryAsync(
                 notification,
                 BookingSideEffectConstants.CalendarKind,
@@ -134,14 +136,17 @@ public sealed class BookingSideEffectEnqueueHandler(
                     operation,
                     destinationCalendar.Integration,
                     destinationCalendar.ExternalId,
-                    destinationCalendar.CredentialId
+                    destinationCalendar.CredentialId,
+                    calendarConferencing?.App,
+                    calendarConferencing?.CredentialId
                 ),
                 cancellationToken
             );
         }
 
-        var conferencing = ResolveConferencing(eventType);
-        if (conferencing is not null && CoreConnectorConstants.IsCoreConferencing(conferencing.App))
+        if (conferencing is not null &&
+            CoreConnectorConstants.IsCoreConferencing(conferencing.App) &&
+            conferencing.App.Equals(CoreConnectorConstants.ZoomVideo, StringComparison.OrdinalIgnoreCase))
         {
             await EnqueueDeliveryAsync(
                 notification,
@@ -177,6 +182,15 @@ public sealed class BookingSideEffectEnqueueHandler(
             ),
             cancellationToken
         );
+    }
+
+    private static bool IsConferencingHandledByCalendar(EventTypeDestinationCalendar destinationCalendar, EventTypeDefaultConferencing? conferencing)
+    {
+        return conferencing is not null &&
+               ((destinationCalendar.Integration.Equals(CoreConnectorConstants.GoogleCalendar, StringComparison.OrdinalIgnoreCase) &&
+                 conferencing.App.Equals(CoreConnectorConstants.GoogleMeet, StringComparison.OrdinalIgnoreCase)) ||
+                (destinationCalendar.Integration.Equals(CoreConnectorConstants.Office365Calendar, StringComparison.OrdinalIgnoreCase) &&
+                 conferencing.App.Equals(CoreConnectorConstants.Office365Video, StringComparison.OrdinalIgnoreCase)));
     }
 
     private static EventTypeDefaultConferencing? ResolveConferencing(EventType eventType)
@@ -248,7 +262,9 @@ public sealed record BookingConnectorCalendarDeliveryPayload(
     string Operation,
     string Integration,
     string ExternalId,
-    string? CredentialId
+    string? CredentialId,
+    string? ConferencingApp = null,
+    string? ConferencingCredentialId = null
 );
 
 public sealed record BookingConnectorConferencingDeliveryPayload(

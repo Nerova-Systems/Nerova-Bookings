@@ -148,6 +148,13 @@ public sealed class BookingSideEffectProcessor(
             ExternalId = payload.ExternalId,
             CredentialId = payload.CredentialId
         };
+        var conferencing = string.IsNullOrWhiteSpace(payload.ConferencingApp)
+            ? null
+            : new EventTypeDefaultConferencing
+            {
+                App = payload.ConferencingApp,
+                CredentialId = payload.ConferencingCredentialId
+            };
         var operation = ResolveConnectorOperation(payload.Operation, delivery.Trigger);
 
         if (operation.Equals(BookingSideEffectConstants.DeleteOperation, StringComparison.OrdinalIgnoreCase))
@@ -158,8 +165,8 @@ public sealed class BookingSideEffectProcessor(
         }
 
         var reference = operation.Equals(BookingSideEffectConstants.UpdateOperation, StringComparison.OrdinalIgnoreCase)
-            ? await coreConnectorClient.UpdateCalendarEventAsync(booking, destinationCalendar, cancellationToken)
-            : await coreConnectorClient.CreateCalendarEventAsync(booking, destinationCalendar, cancellationToken);
+            ? await coreConnectorClient.UpdateCalendarEventAsync(booking, destinationCalendar, conferencing, cancellationToken)
+            : await coreConnectorClient.CreateCalendarEventAsync(booking, destinationCalendar, conferencing, cancellationToken);
         booking.UpsertReference(reference);
     }
 

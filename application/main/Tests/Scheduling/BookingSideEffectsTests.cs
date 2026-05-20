@@ -160,6 +160,53 @@ public sealed class BookingSideEffectsTests : EndpointBaseTest<MainDbContext>
     }
 
     [Fact]
+    public async Task CreatePublicBooking_WhenGoogleDestinationAndMeetAreConfigured_ShouldSyncMeetThroughCalendarDelivery()
+    {
+        // Arrange
+        await UpdateSchedulingProfileAsync("owner");
+        var schedule = await CreateScheduleAsync();
+        await CreateEventTypeAsync(
+            schedule.Id,
+            "Intro call",
+            "intro-call",
+            new
+            {
+                destinationCalendar = new { integration = "google-calendar", externalId = "primary", credentialId = "fake-google" },
+                defaultConferencing = new { app = "google-meet", credentialId = "fake-google" }
+            },
+            "integration",
+            "google-meet"
+        );
+        var booking = await CreateBookingAsync("intro-call", "2026-06-01T07:00:00Z", "Ada Lovelace", "ada@example.com");
+
+        using var scope = Provider.CreateScope();
+        var processor = scope.ServiceProvider.GetRequiredService<BookingSideEffectProcessor>();
+
+        // Act
+        var processed = await processor.ProcessPendingAsync(10, CancellationToken.None);
+
+        // Assert
+        processed.Should().Be(1);
+        Connection.ExecuteScalar<long>(
+            "SELECT COUNT(*) FROM booking_side_effect_deliveries WHERE booking_id = @booking_id AND kind = 'calendar' AND status = 'sent'",
+            [new { booking_id = booking.Id }]
+        ).Should().Be(1);
+        Connection.ExecuteScalar<long>(
+            "SELECT COUNT(*) FROM booking_side_effect_deliveries WHERE booking_id = @booking_id AND kind = 'conferencing'",
+            [new { booking_id = booking.Id }]
+        ).Should().Be(0);
+
+        var referencesJson = Connection.ExecuteScalar<string>("SELECT references_json FROM bookings WHERE id = @id", [new { id = booking.Id }]);
+        referencesJson.Should().Contain("google-calendar");
+        referencesJson.Should().Contain("https://meet.google.com");
+
+        var deliveriesResponse = await AuthenticatedOwnerHttpClient.GetAsync($"/api/bookings/{booking.Id}/side-effects");
+        deliveriesResponse.ShouldBeSuccessfulGetRequest();
+        var deliveries = await deliveriesResponse.DeserializeResponse<BookingSideEffectDeliveriesResponse>();
+        deliveries!.Deliveries.Should().ContainSingle(delivery => delivery.Kind == "calendar" && delivery.Operation == "create");
+    }
+
+    [Fact]
     public async Task ConfirmBooking_WhenConnectorSettingsExist_ShouldEnqueueUpdateOperations()
     {
         // Arrange
