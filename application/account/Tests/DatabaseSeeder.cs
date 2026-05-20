@@ -2,6 +2,7 @@ using System.Net;
 using Account.Database;
 using Account.Features.Authentication.Domain;
 using Account.Features.FeatureFlags.Domain;
+using Account.Features.Permissions.Domain;
 using Account.Features.Subscriptions.Domain;
 using Account.Features.Tenants.Domain;
 using Account.Features.Users.Domain;
@@ -22,6 +23,11 @@ public sealed class DatabaseSeeder
     public readonly User Tenant1Owner;
     public readonly Session Tenant1OwnerSession;
     public readonly Subscription Tenant1Subscription;
+
+    // System roles — seeded here because EnsureCreated() does not run migrations.
+    public readonly Role OwnerRole;
+    public readonly Role AdminRole;
+    public readonly Role MemberRole;
 
     public DatabaseSeeder(AccountDbContext accountDbContext)
     {
@@ -63,6 +69,13 @@ public sealed class DatabaseSeeder
         ExperimentalUiFlag = FeatureFlag.Create("experimental-ui", FeatureFlagScope.User);
         ExperimentalUiFlag.Activate(now);
         accountDbContext.Set<FeatureFlag>().Add(ExperimentalUiFlag);
+
+        // System roles: EnsureCreated() does not execute migrations (including InsertData),
+        // so we seed them explicitly here for the test environment.
+        OwnerRole = SystemRoles.CreateOwnerRole();
+        AdminRole = SystemRoles.CreateAdminRole();
+        MemberRole = SystemRoles.CreateMemberRole();
+        accountDbContext.Set<Role>().AddRange(OwnerRole, AdminRole, MemberRole);
 
         accountDbContext.SaveChanges();
     }

@@ -1,6 +1,7 @@
 using JetBrains.Annotations;
 using SharedKernel.Domain;
 using SharedKernel.StronglyTypedIds;
+using Account.Features.Permissions.Domain;
 
 namespace Account.Features.Memberships.Domain;
 
@@ -115,6 +116,15 @@ public sealed class Membership : AggregateRoot<MembershipId>
     /// </summary>
     public bool DisableImpersonation { get; private set; }
 
+    /// <summary>
+    ///     Optional custom PBAC role override for this specific member.
+    ///     When <see langword="null" />, the member's effective permissions are derived from
+    ///     <see cref="Role" /> (the system role). When set, this custom role supplements or
+    ///     overrides the system role's permission set for this member specifically.
+    ///     Maps to the <c>custom_role_id</c> FK column in the <c>memberships</c> table.
+    /// </summary>
+    public RoleId? CustomRoleId { get; private set; }
+
     // ─── Factory methods ──────────────────────────────────────────────────────
 
     /// <summary>
@@ -193,5 +203,24 @@ public sealed class Membership : AggregateRoot<MembershipId>
     public void SetDisableImpersonation(bool disabled)
     {
         DisableImpersonation = disabled;
+    }
+
+    /// <summary>
+    ///     Assigns a custom PBAC role to this member, overriding the system role's default permissions.
+    /// </summary>
+    /// <param name="roleId">The custom role to assign.</param>
+    public void AssignCustomRole(RoleId roleId)
+    {
+        ArgumentNullException.ThrowIfNull(roleId);
+        CustomRoleId = roleId;
+    }
+
+    /// <summary>
+    ///     Clears the custom PBAC role override, reverting this member's effective permissions back to
+    ///     the system role defined by <see cref="Role" />.
+    /// </summary>
+    public void ClearCustomRole()
+    {
+        CustomRoleId = null;
     }
 }

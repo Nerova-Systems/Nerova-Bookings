@@ -1,3 +1,4 @@
+using Account.Features.Permissions.Domain;
 using Account.Features.Tenants.Domain;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -14,12 +15,19 @@ public sealed class MembershipConfiguration : IEntityTypeConfiguration<Membershi
         builder.MapStronglyTypedLongId<Membership, TenantId>(m => m.TenantId);
         builder.MapStronglyTypedUuid<Membership, UserId>(m => m.UserId);
         builder.MapStronglyTypedNullableId<Membership, UserId, string>(m => m.InvitedBy);
+        builder.MapStronglyTypedNullableId<Membership, RoleId, string>(m => m.CustomRoleId);
 
         // Tenant (Team/Org): Cascade — deleting a Team/Org removes all its memberships.
         builder.HasOne<Tenant>()
             .WithMany()
             .HasForeignKey(m => m.TenantId)
             .OnDelete(DeleteBehavior.Cascade);
+
+        // Custom PBAC role: Restrict — prevent deletion of a role while memberships reference it.
+        builder.HasOne<Role>()
+            .WithMany()
+            .HasForeignKey(m => m.CustomRoleId)
+            .OnDelete(DeleteBehavior.Restrict);
 
         // Boolean columns need HasDefaultValue(false) so that EnsureCreated() generates DEFAULT 0
         // in the SQLite test schema. Without this, raw-SQL inserts that omit these columns fail
