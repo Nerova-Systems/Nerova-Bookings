@@ -3,6 +3,8 @@ using Account.Features.EmailAuthentication.Shared;
 using Account.Features.ExternalAuthentication;
 using Account.Features.ExternalAuthentication.Shared;
 using Account.Features.FeatureFlags.Shared;
+using Account.Features.Permissions.Pipeline;
+using Account.Features.Permissions.Services;
 using Account.Features.Subscriptions.Shared;
 using Account.Features.Users.Shared;
 using Account.Integrations.Gravatar;
@@ -10,10 +12,12 @@ using Account.Integrations.OAuth;
 using Account.Integrations.OAuth.Google;
 using Account.Integrations.OAuth.Mock;
 using Account.Integrations.Paystack;
+using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 using SharedKernel.Configuration;
+using SharedKernel.Cqrs;
 using SharedKernel.Emails;
 using SharedKernel.OpenIdConnect;
 
@@ -38,6 +42,10 @@ public static class Configuration
     {
         public IServiceCollection AddAccountServices()
         {
+            // PermissionCheckBehavior must be registered BEFORE AddSharedServices so it is the outermost
+            // pipeline behavior (runs before Validation — security gate first, business logic second).
+            services.AddTransient(typeof(IPipelineBehavior<,>), typeof(PermissionCheckBehavior<,>));
+
             services.AddHttpClient<GravatarClient>(client =>
                 {
                     client.BaseAddress = new Uri("https://gravatar.com/");
@@ -84,7 +92,8 @@ public static class Configuration
                 .AddScoped<ProcessPendingPaystackEvents>()
                 .AddScoped<ProcessSubscriptionBilling>()
                 .AddScoped<ExternalAuthenticationService>()
-                .AddScoped<ExternalAuthenticationHelper>();
+                .AddScoped<ExternalAuthenticationHelper>()
+                .AddScoped<IPermissionCheckService, PermissionCheckService>();
         }
     }
 }

@@ -1,3 +1,6 @@
+using Account.Features.Memberships.Domain;
+using System.Diagnostics;
+
 namespace Account.Features.Permissions.Domain;
 
 /// <summary>
@@ -79,4 +82,24 @@ public static class SystemRoles
     /// <summary>Creates the <c>Member</c> system role with its deterministic ID.</summary>
     public static Role CreateMemberRole() =>
         Role.CreateSystem(MemberId, "Member", "Day-to-day access to bookings, event types and schedules.", MemberPermissions);
+
+    // ─── Lookup helpers ───────────────────────────────────────────────────────
+
+    /// <summary>Maps a <see cref="MembershipRole" /> to the corresponding system role ID.</summary>
+    public static RoleId GetIdForRole(MembershipRole role) => role switch
+    {
+        MembershipRole.Owner => OwnerId,
+        MembershipRole.Admin => AdminId,
+        MembershipRole.Member => MemberId,
+        _ => throw new UnreachableException($"Unknown MembershipRole: {role}.")
+    };
+
+    /// <summary>Returns the static in-memory permission set for the given system <see cref="MembershipRole" />.</summary>
+    public static IEnumerable<Permission> GetPermissionsForRole(MembershipRole role) => role switch
+    {
+        MembershipRole.Owner => OwnerPermissions,
+        MembershipRole.Admin => AdminPermissions,
+        MembershipRole.Member => MemberPermissions,
+        _ => throw new UnreachableException($"Unknown MembershipRole: {role}.")
+    };
 }
