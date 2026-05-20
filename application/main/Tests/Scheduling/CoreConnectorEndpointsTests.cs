@@ -1,8 +1,10 @@
 using System.Net;
 using System.Net.Http.Json;
+using System.Web;
 using FluentAssertions;
 using JetBrains.Annotations;
 using Main.Database;
+using Main.Features.Connectors.Domain;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -27,10 +29,13 @@ public sealed class CoreConnectorEndpointsTests : EndpointBaseTest<MainDbContext
         var response = await AuthenticatedOwnerHttpClient.GetAsync("/api/connectors/core/accounts");
 
         // Assert
-        response.ShouldBeSuccessfulGetRequest();
+        response.EnsureSuccessStatusCode();
         var accounts = await response.DeserializeResponse<CoreConnectorAccountsResponse>();
         accounts!.Accounts.Select(account => account.Integration).Should().Equal("google-calendar", "office365-calendar", "zoom-video");
         accounts.Accounts[0].Calendars.Select(calendar => calendar.ExternalId).Should().Equal("primary", "team");
+        accounts.Integrations.Select(integration => integration.Integration).Should().Equal("google-calendar", "office365-calendar", "zoom-video");
+        accounts.Integrations.Should().OnlyContain(integration => integration.Configured);
+        accounts.Integrations.Should().Contain(integration => integration.Integration == "google-calendar" && integration.Connected);
     }
 
     [Fact]
@@ -104,7 +109,7 @@ public sealed class CoreConnectorEndpointsTests : EndpointBaseTest<MainDbContext
         );
 
         // Assert
-        response.ShouldBeSuccessfulGetRequest();
+        response.EnsureSuccessStatusCode();
         repeatedResponse.ShouldBeSuccessfulGetRequest();
         var accounts = await response.DeserializeResponse<CoreConnectorAccountsResponse>();
         accounts!.Accounts.Select(account => account.Integration).Should().Equal("google-calendar", "office365-calendar", "zoom-video");
@@ -130,6 +135,172 @@ public sealed class CoreConnectorEndpointsTests : EndpointBaseTest<MainDbContext
 
         // Assert
         await response.ShouldHaveErrorStatusCode(HttpStatusCode.BadRequest, "Busy end time must be after busy start time.");
+    }
+
+    [Fact]
+    public async Task GetAuthorizationUrl_WhenGoogleCalendarIsConfigured_ShouldReturnCalComShapedAuthorizationUrl()
+    {
+        // Act
+        var response = await AuthenticatedOwnerHttpClient.GetAsync("/api/connectors/core/google-calendar/authorization-url?returnTo=/event-types");
+
+        // Assert
+        response.EnsureSuccessStatusCode();
+        var authorizationUrl = await response.DeserializeResponse<CoreConnectorAuthorizationUrlResponse>();
+        authorizationUrl!.Url.Should().StartWith("https://accounts.google.com/o/oauth2/v2/auth?");
+        var query = HttpUtility.ParseQueryString(new Uri(authorizationUrl.Url).Query);
+        query["client_id"].Should().Be("test-google-calendar-client-id");
+        query["access_type"].Should().Be("offline");
+        query["prompt"].Should().Be("consent");
+        query["scope"].Should().Contain("https://www.googleapis.com/auth/calendar");
+        query["scope"].Should().Contain("https://www.googleapis.com/auth/userinfo.profile");
+        query["redirect_uri"].Should().Be("https://localhost/api/connectors/core/google-calendar/callback");
+        query["state"].Should().NotBeNullOrWhiteSpace();
+    }
+
+    [Fact]
+    public async Task CompleteOAuthCallback_WhenGoogleMockCodeIsValid_ShouldCreateCredentialAndProtectedToken()
+    {
+        // Arrange
+        var authorizationUrlResponse = await AuthenticatedOwnerHttpClient.GetAsync("/api/connectors/core/google-calendar/authorization-url?returnTo=/event-types");
+        authorizationUrlResponse.ShouldBeSuccessfulGetRequest();
+        var authorizationUrl = await authorizationUrlResponse.DeserializeResponse<CoreConnectorAuthorizationUrlResponse>();
+        var state = HttpUtility.ParseQueryString(new Uri(authorizationUrl!.Url).Query)["state"];
+
+        // Act
+        var response = await NoRedirectAuthenticatedOwnerHttpClient.GetAsync($"/api/connectors/core/google-calendar/callback?code=mock-google-success&state={Uri.EscapeDataString(state!)}");
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.Redirect);
+        response.Headers.Location!.ToString().Should().Be("/event-types?connector=google-calendar");
+
+        var accountsResponse = await AuthenticatedOwnerHttpClient.GetAsync("/api/connectors/core/accounts");
+        accountsResponse.ShouldBeSuccessfulGetRequest();
+        var accounts = await accountsResponse.DeserializeResponse<CoreConnectorAccountsResponse>();
+        var googleAccount = accounts!.Accounts.Should().ContainSingle(account => account.Integration == "google-calendar").Which;
+        googleAccount.ExternalAccountId.Should().Be("google-account-1");
+        googleAccount.AccountEmail.Should().Be("owner.google@example.test");
+        googleAccount.Calendars.Select(calendar => calendar.ExternalId).Should().Equal("primary", "focus");
+
+        var secretReference = Connection.ExecuteScalar<string>(
+            "SELECT secret_reference FROM connector_credentials WHERE id = @id",
+            [new { id = googleAccount.Id }]
+        );
+        secretReference.Should().StartWith("protected-connector-token:");
+        Connection.ExecuteScalar<long>(
+            "SELECT COUNT(*) FROM connector_token_secrets WHERE tenant_id = @tenant_id AND credential_id = @credential_id",
+            [new { tenant_id = DatabaseSeeder.TenantId.Value, credential_id = googleAccount.Id }]
+        ).Should().Be(1);
+    }
+
+    [Fact]
+    public async Task CompleteOAuthCallback_WhenStateIsInvalid_ShouldRedirectWithoutCreatingCredential()
+    {
+        // Act
+        var response = await NoRedirectAuthenticatedOwnerHttpClient.GetAsync("/api/connectors/core/google-calendar/callback?code=mock-google-success&state=invalid-state");
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.Redirect);
+        response.Headers.Location!.ToString().Should().Be("/event-types?error=invalid_state");
+        Connection.ExecuteScalar<long>("SELECT COUNT(*) FROM connector_credentials", []).Should().Be(0);
+    }
+
+    [Fact]
+    public async Task CompleteOAuthCallback_WhenProviderRejectsCode_ShouldRedirectWithoutCreatingCredential()
+    {
+        // Arrange
+        var authorizationUrlResponse = await AuthenticatedOwnerHttpClient.GetAsync("/api/connectors/core/zoom-video/authorization-url?returnTo=/event-types");
+        authorizationUrlResponse.ShouldBeSuccessfulGetRequest();
+        var authorizationUrl = await authorizationUrlResponse.DeserializeResponse<CoreConnectorAuthorizationUrlResponse>();
+        var state = HttpUtility.ParseQueryString(new Uri(authorizationUrl!.Url).Query)["state"];
+
+        // Act
+        var response = await NoRedirectAuthenticatedOwnerHttpClient.GetAsync($"/api/connectors/core/zoom-video/callback?code=mock-provider-error&state={Uri.EscapeDataString(state!)}");
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.Redirect);
+        response.Headers.Location!.ToString().Should().Be("/event-types?error=provider_error");
+        Connection.ExecuteScalar<long>("SELECT COUNT(*) FROM connector_credentials", []).Should().Be(0);
+    }
+
+    [Fact]
+    public async Task CoreConnectorAccessTokenProvider_WhenTokenIsExpired_ShouldRefreshAndPersistToken()
+    {
+        // Arrange
+        using var serviceScope = Provider.CreateScope();
+        var tokenStore = serviceScope.ServiceProvider.GetRequiredService<IConnectorTokenStore>();
+        var accessTokenProvider = serviceScope.ServiceProvider.GetRequiredService<ICoreConnectorAccessTokenProvider>();
+        var credential = ConnectorCredential.Create(
+            DatabaseSeeder.TenantId,
+            "cred_google",
+            DatabaseSeeder.Tenant1Owner.Id!,
+            "google-calendar",
+            "google-account-1",
+            "owner.google@example.test",
+            "Owner Google",
+            "connected",
+            "protected-connector-token:secret_google",
+            [new CoreConnectorCalendar("primary", "Primary calendar", true)]
+        );
+        var dbContext = serviceScope.ServiceProvider.GetRequiredService<MainDbContext>();
+        await dbContext.Set<ConnectorCredential>().AddAsync(credential);
+        await tokenStore.SaveAsync(
+            DatabaseSeeder.TenantId,
+            "secret_google",
+            credential.Id,
+            new CoreConnectorTokenSet(
+                "expired-access-token",
+                "mock-google-refresh-token",
+                DateTimeOffset.UtcNow.AddMinutes(-5),
+                "offline",
+                "Bearer"
+            ),
+            CancellationToken.None
+        );
+        await dbContext.SaveChangesAsync();
+
+        // Act
+        var accessToken = await accessTokenProvider.GetAccessTokenAsync(credential, CancellationToken.None);
+
+        // Assert
+        accessToken.Should().Be("refreshed-google-access-token");
+        var refreshedToken = await tokenStore.GetAsync(DatabaseSeeder.TenantId, "secret_google", CancellationToken.None);
+        refreshedToken!.AccessToken.Should().Be("refreshed-google-access-token");
+        refreshedToken.ExpiresAt.Should().BeAfter(DateTimeOffset.UtcNow);
+    }
+
+    [Fact]
+    public async Task DeleteConnectorAccount_WhenOwned_ShouldRemoveCredentialAndToken()
+    {
+        // Arrange
+        var authorizationUrlResponse = await AuthenticatedOwnerHttpClient.GetAsync("/api/connectors/core/zoom-video/authorization-url?returnTo=/event-types");
+        authorizationUrlResponse.ShouldBeSuccessfulGetRequest();
+        var authorizationUrl = await authorizationUrlResponse.DeserializeResponse<CoreConnectorAuthorizationUrlResponse>();
+        var state = HttpUtility.ParseQueryString(new Uri(authorizationUrl!.Url).Query)["state"];
+        var callbackResponse = await NoRedirectAuthenticatedOwnerHttpClient.GetAsync($"/api/connectors/core/zoom-video/callback?code=mock-zoom-success&state={Uri.EscapeDataString(state!)}");
+        callbackResponse.StatusCode.Should().Be(HttpStatusCode.Redirect);
+        var accountId = Connection.ExecuteScalar<string>("SELECT id FROM connector_credentials WHERE integration = 'zoom-video'", []);
+
+        // Act
+        var response = await AuthenticatedOwnerHttpClient.DeleteAsync($"/api/connectors/core/accounts/{accountId}");
+
+        // Assert
+        response.EnsureSuccessStatusCode();
+        Connection.ExecuteScalar<long>("SELECT COUNT(*) FROM connector_credentials WHERE id = @id", [new { id = accountId }]).Should().Be(0);
+        Connection.ExecuteScalar<long>("SELECT COUNT(*) FROM connector_token_secrets WHERE credential_id = @credential_id", [new { credential_id = accountId }]).Should().Be(0);
+    }
+
+    [Fact]
+    public async Task DeleteConnectorAccount_WhenCredentialBelongsToAnotherUser_ShouldReturnNotFound()
+    {
+        // Arrange
+        await SeedConnectorCredentialAsync("cred_google", "google-calendar", "google-account", "owner@gmail.com", "Owner Google");
+
+        // Act
+        var response = await AuthenticatedMemberHttpClient.DeleteAsync("/api/connectors/core/accounts/cred_google");
+
+        // Assert
+        await response.ShouldHaveErrorStatusCode(HttpStatusCode.Forbidden, "Only owners and admins can manage event types.");
+        Connection.ExecuteScalar<long>("SELECT COUNT(*) FROM connector_credentials WHERE id = 'cred_google'", []).Should().Be(1);
     }
 
     [Fact]
@@ -229,7 +400,7 @@ public sealed class CoreConnectorEndpointsTests : EndpointBaseTest<MainDbContext
     }
 
     [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
-    private sealed record CoreConnectorAccountsResponse(CoreConnectorAccountResponse[] Accounts);
+    private sealed record CoreConnectorAccountsResponse(CoreConnectorAccountResponse[] Accounts, CoreConnectorIntegrationResponse[] Integrations);
 
     [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
     private sealed record CoreConnectorAccountResponse(
@@ -244,6 +415,12 @@ public sealed class CoreConnectorEndpointsTests : EndpointBaseTest<MainDbContext
 
     [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
     private sealed record CoreConnectorCalendarResponse(string ExternalId, string Name, bool Primary);
+
+    [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
+    private sealed record CoreConnectorIntegrationResponse(string Integration, string Label, bool Configured, bool Connected);
+
+    [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
+    private sealed record CoreConnectorAuthorizationUrlResponse(string Url);
 
     [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
     private sealed record ScheduleResponse(string Id);
@@ -271,6 +448,21 @@ public sealed class CoreConnectorEndpointsTests : EndpointBaseTest<MainDbContext
 public sealed class CoreConnectorProductionEndpointsTests() : EndpointBaseTest<MainDbContext>(Environments.Production)
 {
     [Fact]
+    public async Task GetCoreConnectorAccounts_WhenProviderKeysAreMissing_ShouldReturnUnconfiguredIntegrations()
+    {
+        // Act
+        var response = await AuthenticatedOwnerHttpClient.GetAsync("/api/connectors/core/accounts");
+
+        // Assert
+        response.EnsureSuccessStatusCode();
+        var accounts = await response.DeserializeResponse<CoreConnectorAccountsResponse>();
+        accounts!.Accounts.Should().BeEmpty();
+        accounts.Integrations.Select(integration => integration.Integration).Should().Equal("google-calendar", "office365-calendar", "zoom-video");
+        accounts.Integrations.Should().OnlyContain(integration => !integration.Configured);
+        accounts.Integrations.Should().OnlyContain(integration => !integration.Connected);
+    }
+
+    [Fact]
     public async Task EnsureTestCoreConnectorCredentials_WhenNotDevelopment_ShouldReturnNotFound()
     {
         // Arrange
@@ -287,4 +479,13 @@ public sealed class CoreConnectorProductionEndpointsTests() : EndpointBaseTest<M
         await response.ShouldHaveErrorStatusCode(HttpStatusCode.NotFound, "Core connector test fixtures are only available in development.");
         Connection.ExecuteScalar<long>("SELECT COUNT(*) FROM connector_credentials", []).Should().Be(0);
     }
+
+    [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
+    private sealed record CoreConnectorAccountsResponse(CoreConnectorAccountResponse[] Accounts, CoreConnectorIntegrationResponse[] Integrations);
+
+    [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
+    private sealed record CoreConnectorAccountResponse(string Integration);
+
+    [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
+    private sealed record CoreConnectorIntegrationResponse(string Integration, string Label, bool Configured, bool Connected);
 }

@@ -49,21 +49,21 @@ public sealed class ConnectorCredential : AggregateRoot<string>, ITenantScopedEn
         CalendarsJson = JsonSerializer.Serialize(calendars, JsonSerializerOptions);
     }
 
-    public UserId OwnerUserId { get; }
+    public UserId OwnerUserId { get; private set; }
 
-    public string Integration { get; }
+    public string Integration { get; private set; }
 
-    public string ExternalAccountId { get; }
+    public string ExternalAccountId { get; private set; }
 
-    public string AccountEmail { get; }
+    public string AccountEmail { get; private set; }
 
-    public string DisplayName { get; }
+    public string DisplayName { get; private set; }
 
-    public string Status { get; }
+    public string Status { get; private set; }
 
-    public string SecretReference { get; }
+    public string SecretReference { get; private set; }
 
-    public string CalendarsJson { get; }
+    public string CalendarsJson { get; private set; }
 
     [NotMapped]
     public CoreConnectorCalendar[] Calendars => JsonSerializer.Deserialize<CoreConnectorCalendar[]>(CalendarsJson, JsonSerializerOptions) ?? [];
@@ -84,6 +84,15 @@ public sealed class ConnectorCredential : AggregateRoot<string>, ITenantScopedEn
     )
     {
         return new ConnectorCredential(tenantId, id, ownerUserId, integration, externalAccountId, accountEmail, displayName, status, secretReference, calendars);
+    }
+
+    public void UpdateAccount(string accountEmail, string displayName, string status, string secretReference, CoreConnectorCalendar[] calendars)
+    {
+        AccountEmail = accountEmail.Trim().ToLowerInvariant();
+        DisplayName = displayName.Trim();
+        Status = status.Trim();
+        SecretReference = secretReference.Trim();
+        CalendarsJson = JsonSerializer.Serialize(calendars, JsonSerializerOptions);
     }
 }
 

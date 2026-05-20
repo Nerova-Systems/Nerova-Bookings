@@ -131,10 +131,14 @@ public abstract class EndpointBaseTest<TContext> : IDisposable where TContext : 
         var ownerAccessToken = AccessTokenGenerator.Generate(DatabaseSeeder.Tenant1Owner);
         AuthenticatedOwnerHttpClient = _webApplicationFactory.CreateClient();
         AuthenticatedOwnerHttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", ownerAccessToken);
+        NoRedirectAuthenticatedOwnerHttpClient = _webApplicationFactory.CreateClient(new WebApplicationFactoryClientOptions { AllowAutoRedirect = false });
+        NoRedirectAuthenticatedOwnerHttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", ownerAccessToken);
 
         var memberAccessToken = AccessTokenGenerator.Generate(DatabaseSeeder.Tenant1Member.Adapt<UserInfo>());
         AuthenticatedMemberHttpClient = _webApplicationFactory.CreateClient();
         AuthenticatedMemberHttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", memberAccessToken);
+        NoRedirectAuthenticatedMemberHttpClient = _webApplicationFactory.CreateClient(new WebApplicationFactoryClientOptions { AllowAutoRedirect = false });
+        NoRedirectAuthenticatedMemberHttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", memberAccessToken);
 
         // Set the environment variable to bypass antiforgery validation on the server. ASP.NET uses a cryptographic
         // double-submit pattern that encrypts the user's ClaimUid in the token, which is complex to replicate in tests
@@ -160,6 +164,10 @@ public abstract class EndpointBaseTest<TContext> : IDisposable where TContext : 
     protected HttpClient AuthenticatedOwnerHttpClient { get; }
 
     protected HttpClient AuthenticatedMemberHttpClient { get; }
+
+    protected HttpClient NoRedirectAuthenticatedOwnerHttpClient { get; }
+
+    protected HttpClient NoRedirectAuthenticatedMemberHttpClient { get; }
 
     public void Dispose()
     {

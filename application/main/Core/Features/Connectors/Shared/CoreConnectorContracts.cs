@@ -3,7 +3,9 @@ using Main.Features.EventTypes.Domain;
 
 namespace Main.Features.Connectors.Shared;
 
-public sealed record CoreConnectorAccountsResponse(CoreConnectorAccountResponse[] Accounts);
+public sealed record CoreConnectorAccountsResponse(CoreConnectorAccountResponse[] Accounts, CoreConnectorIntegrationResponse[] Integrations);
+
+public sealed record CoreConnectorIntegrationResponse(string Integration, string Label, bool Configured, bool Connected);
 
 public sealed record CoreConnectorAccountResponse(
     string Id,

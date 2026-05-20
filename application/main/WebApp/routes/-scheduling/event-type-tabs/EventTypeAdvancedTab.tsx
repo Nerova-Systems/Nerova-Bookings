@@ -11,6 +11,7 @@ import { SelectField } from "@repo/ui/components/SelectField";
 import { SwitchField } from "@repo/ui/components/SwitchField";
 import { TextField } from "@repo/ui/components/TextField";
 import { ArrowDownIcon, ArrowUpIcon, PlusIcon, TrashIcon } from "lucide-react";
+import { useState } from "react";
 
 import { api, type Schemas } from "@/shared/lib/api/client";
 
@@ -267,7 +268,9 @@ export function EventTypeAdvancedTab({ value, onChange, error }: EventTypeTabPro
           <CoreConnectorSettings
             settings={settings}
             accounts={coreConnectorAccountsQuery.data?.accounts ?? []}
+            integrations={coreConnectorAccountsQuery.data?.integrations ?? []}
             isLoading={coreConnectorAccountsQuery.isLoading}
+            onAccountsChanged={() => void coreConnectorAccountsQuery.refetch()}
             onSelectedCalendarsChange={(selectedCalendars) =>
               updateSettings((nextSettings) => ({ ...nextSettings, selectedCalendars }))
             }
@@ -298,6 +301,7 @@ export function EventTypeAdvancedTab({ value, onChange, error }: EventTypeTabPro
 
 type EventTypeSettings = ReturnType<typeof getEventTypeSettings>;
 type CoreConnectorAccount = Schemas["CoreConnectorAccountResponse"];
+type CoreConnectorIntegration = Schemas["CoreConnectorIntegrationResponse"];
 type BookingField = EventTypeSettings["bookingFields"][number];
 type BookingFieldOption = BookingField["options"][number];
 type PrivateLink = EventTypeSettings["privateLinks"][number];
@@ -305,14 +309,18 @@ type PrivateLink = EventTypeSettings["privateLinks"][number];
 function CoreConnectorSettings({
   settings,
   accounts,
+  integrations,
   isLoading,
+  onAccountsChanged,
   onSelectedCalendarsChange,
   onDestinationCalendarChange,
   onDefaultConferencingChange
 }: Readonly<{
   settings: EventTypeSettings;
   accounts: CoreConnectorAccount[];
+  integrations: CoreConnectorIntegration[];
   isLoading: boolean;
+  onAccountsChanged: () => void;
   onSelectedCalendarsChange: (selectedCalendars: EventTypeSettings["selectedCalendars"]) => void;
   onDestinationCalendarChange: (destinationCalendar: EventTypeSettings["destinationCalendar"]) => void;
   onDefaultConferencingChange: (defaultConferencing: EventTypeSettings["defaultConferencing"]) => void;
@@ -351,6 +359,11 @@ function CoreConnectorSettings({
           <Trans>Loading connected accounts...</Trans>
         </div>
       )}
+      <CoreConnectorConnectionControls
+        accounts={accounts}
+        integrations={integrations}
+        onAccountsChanged={onAccountsChanged}
+      />
       <div className="grid gap-4 rounded-md border p-4">
         <SelectField
           name="destinationCalendarIntegration"
@@ -466,6 +479,135 @@ function CoreConnectorSettings({
           </div>
         )}
       </div>
+    </div>
+  );
+}
+
+function CoreConnectorConnectionControls({
+  accounts,
+  integrations,
+  onAccountsChanged
+}: Readonly<{
+  accounts: CoreConnectorAccount[];
+  integrations: CoreConnectorIntegration[];
+  onAccountsChanged: () => void;
+}>) {
+  const [pendingIntegration, setPendingIntegration] = useState<string | null>(null);
+  const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const coreIntegrations = [
+    { integration: "google-calendar", label: t`Google Calendar`, connectLabel: t`Connect Google` },
+    { integration: "office365-calendar", label: t`Office 365 Calendar`, connectLabel: t`Connect Microsoft` },
+    { integration: "zoom-video", label: "Zoom", connectLabel: t`Connect Zoom` }
+  ].map((integration) => ({
+    ...integration,
+    configured:
+      integrations.find((configuredIntegration) => configuredIntegration.integration === integration.integration)
+        ?.configured ?? false
+  }));
+
+  const startOAuth = async (integration: string) => {
+    setError(null);
+    setPendingIntegration(integration);
+    try {
+      const response = await fetch(
+        `${import.meta.env.PUBLIC_URL}/api/connectors/core/${integration}/authorization-url?returnTo=${encodeURIComponent(
+          window.location.pathname
+        )}`,
+        { credentials: "include" }
+      );
+      if (!response.ok) throw new Error(t`Connector is not configured.`);
+      const authorization = (await response.json()) as { url?: string };
+      if (!authorization.url) throw new Error(t`Connector authorization URL was not returned.`);
+      window.location.href = authorization.url;
+    } catch (unknownError) {
+      setError(unknownError instanceof Error ? unknownError.message : t`Could not start connector setup.`);
+      setPendingIntegration(null);
+    }
+  };
+
+  const deleteAccount = async (credentialId: string) => {
+    setError(null);
+    setPendingDeleteId(credentialId);
+    try {
+      const response = await fetch(
+        `${import.meta.env.PUBLIC_URL}/api/connectors/core/accounts/${encodeURIComponent(credentialId)}`,
+        {
+          method: "DELETE",
+          credentials: "include",
+          headers: { "x-xsrf-token": import.meta.antiforgeryToken }
+        }
+      );
+      if (!response.ok) throw new Error(t`Could not disconnect connector account.`);
+      onAccountsChanged();
+    } catch (unknownError) {
+      setError(unknownError instanceof Error ? unknownError.message : t`Could not disconnect connector account.`);
+    } finally {
+      setPendingDeleteId(null);
+    }
+  };
+
+  return (
+    <div className="grid gap-4 rounded-md border p-4">
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <div className="text-sm font-medium">
+            <Trans>Connector accounts</Trans>
+          </div>
+          <div className="text-sm text-muted-foreground">
+            <Trans>Connect Google, Microsoft, and Zoom accounts for calendars and conferencing.</Trans>
+          </div>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          {coreIntegrations.map((integration) => (
+            <Button
+              key={integration.integration}
+              type="button"
+              variant="outline"
+              size="sm"
+              disabled={!integration.configured || pendingIntegration !== null || pendingDeleteId !== null}
+              title={integration.configured ? undefined : t`Configuration required`}
+              onClick={() => void startOAuth(integration.integration)}
+            >
+              <PlusIcon />
+              {pendingIntegration === integration.integration
+                ? t`Connecting...`
+                : integration.configured
+                  ? integration.connectLabel
+                  : t`Configuration required`}
+            </Button>
+          ))}
+        </div>
+      </div>
+      {error && <div className="rounded-md border border-destructive/40 p-3 text-sm text-destructive">{error}</div>}
+      {accounts.length === 0 ? (
+        <div className="rounded-md border border-dashed p-4 text-sm text-muted-foreground">
+          <Trans>No connector accounts are connected yet.</Trans>
+        </div>
+      ) : (
+        <div className="grid gap-2">
+          {accounts.map((account) => (
+            <div key={account.id} className="flex flex-wrap items-center justify-between gap-3 rounded-md border p-3">
+              <div className="min-w-0">
+                <div className="text-sm font-medium">{connectorLabel(account.integration)}</div>
+                <div className="truncate text-sm text-muted-foreground">
+                  {account.displayName} - {account.accountEmail}
+                </div>
+              </div>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                disabled={pendingDeleteId !== null || pendingIntegration !== null}
+                onClick={() => void deleteAccount(account.id)}
+              >
+                <TrashIcon />
+                {pendingDeleteId === account.id ? t`Disconnecting...` : t`Disconnect`}
+              </Button>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

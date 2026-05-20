@@ -29,6 +29,7 @@ var certificatePassword = await builder.CreateSslCertificateIfNotExists();
 SecretManagerHelper.GenerateAuthenticationTokenSigningKey("authentication-token-signing-key");
 
 var (googleOAuthConfigured, googleOAuthClientId, googleOAuthClientSecret) = ConfigureGoogleOAuthParameters();
+var coreConnectorOAuth = ConfigureCoreConnectorOAuthParameters();
 
 var (paystackConfigured, paystackPublicKey, paystackSecretKey, paystackStandardPlanCode, paystackPremiumPlanCode, paystackCardAuthorizationAmountSubunit) = ConfigurePaystackParameters();
 var paystackFullyConfigured = paystackConfigured
@@ -141,6 +142,12 @@ var mainDatabase = postgres
 var mainWorkers = builder
     .AddProject<Main_Workers>("main-workers")
     .WithEnvironment("KESTREL_PORT", ports.MainWorkers.ToString())
+    .WithEnvironment("Connectors__Core__OAuth__GoogleCalendar__ClientId", coreConnectorOAuth.GoogleCalendarClientId)
+    .WithEnvironment("Connectors__Core__OAuth__GoogleCalendar__ClientSecret", coreConnectorOAuth.GoogleCalendarClientSecret)
+    .WithEnvironment("Connectors__Core__OAuth__Office365Calendar__ClientId", coreConnectorOAuth.Office365CalendarClientId)
+    .WithEnvironment("Connectors__Core__OAuth__Office365Calendar__ClientSecret", coreConnectorOAuth.Office365CalendarClientSecret)
+    .WithEnvironment("Connectors__Core__OAuth__Zoom__ClientId", coreConnectorOAuth.ZoomClientId)
+    .WithEnvironment("Connectors__Core__OAuth__Zoom__ClientSecret", coreConnectorOAuth.ZoomClientSecret)
     .WithReference(mainDatabase)
     .WithReference(azureStorage)
     .WaitFor(mainDatabase);
@@ -149,6 +156,13 @@ var mainApi = builder
     .AddProject<Main_Api>("main-api")
     .WithEnvironment("KESTREL_PORT", ports.MainApi.ToString())
     .WithUrlConfiguration(appHostname, ports.AppGateway, "")
+    .WithEnvironment("Connectors__Core__OAuth__PublicUrl", "https://localhost:" + ports.AppGateway)
+    .WithEnvironment("Connectors__Core__OAuth__GoogleCalendar__ClientId", coreConnectorOAuth.GoogleCalendarClientId)
+    .WithEnvironment("Connectors__Core__OAuth__GoogleCalendar__ClientSecret", coreConnectorOAuth.GoogleCalendarClientSecret)
+    .WithEnvironment("Connectors__Core__OAuth__Office365Calendar__ClientId", coreConnectorOAuth.Office365CalendarClientId)
+    .WithEnvironment("Connectors__Core__OAuth__Office365Calendar__ClientSecret", coreConnectorOAuth.Office365CalendarClientSecret)
+    .WithEnvironment("Connectors__Core__OAuth__Zoom__ClientId", coreConnectorOAuth.ZoomClientId)
+    .WithEnvironment("Connectors__Core__OAuth__Zoom__ClientSecret", coreConnectorOAuth.ZoomClientSecret)
     .WithReference(mainDatabase)
     .WithReference(azureStorage)
     .WithEnvironment("PUBLIC_GOOGLE_OAUTH_ENABLED", googleOAuthConfigured ? "true" : "false")
@@ -225,6 +239,52 @@ return;
         builder.CreateResourceBuilder(new ParameterResource("google-oauth-client-id", _ => "not-configured", true)),
         builder.CreateResourceBuilder(new ParameterResource("google-oauth-client-secret", _ => "not-configured", true))
     );
+}
+
+CoreConnectorOAuthParameters ConfigureCoreConnectorOAuthParameters()
+{
+    var googleCalendar = ConfigureCoreConnectorOAuthParameter("google-calendar", "Google Calendar", "Google Cloud Console");
+    var office365Calendar = ConfigureCoreConnectorOAuthParameter("office365-calendar", "Office 365 Calendar", "Microsoft Entra admin center");
+    var zoom = ConfigureCoreConnectorOAuthParameter("zoom-video", "Zoom", "Zoom App Marketplace");
+
+    return new CoreConnectorOAuthParameters(
+        googleCalendar.ClientId,
+        googleCalendar.ClientSecret,
+        office365Calendar.ClientId,
+        office365Calendar.ClientSecret,
+        zoom.ClientId,
+        zoom.ClientSecret
+    );
+}
+
+(IResourceBuilder<ParameterResource> ClientId, IResourceBuilder<ParameterResource> ClientSecret) ConfigureCoreConnectorOAuthParameter(
+    string parameterPrefix,
+    string displayName,
+    string providerPortal
+)
+{
+    _ = builder.AddParameter($"{parameterPrefix}-oauth-enabled")
+        .WithDescription($"""
+                          **{displayName} connector OAuth** -- Enables Cal.com-style provider connection for booking calendars and conferencing.
+
+                          Configure the OAuth app in the {providerPortal}, then restart Aspire after enabling.
+                          """, true
+        );
+
+    var configured = builder.Configuration[$"Parameters:{parameterPrefix}-oauth-enabled"] == "true";
+    if (!configured)
+    {
+        return (
+            builder.CreateResourceBuilder(new ParameterResource($"{parameterPrefix}-oauth-client-id", _ => "not-configured", true)),
+            builder.CreateResourceBuilder(new ParameterResource($"{parameterPrefix}-oauth-client-secret", _ => "not-configured", true))
+        );
+    }
+
+    var clientId = builder.AddParameter($"{parameterPrefix}-oauth-client-id", true)
+        .WithDescription($"{displayName} connector OAuth Client ID from the {providerPortal}.", true);
+    var clientSecret = builder.AddParameter($"{parameterPrefix}-oauth-client-secret", true)
+        .WithDescription($"{displayName} connector OAuth Client Secret from the {providerPortal}.", true);
+    return (clientId, clientSecret);
 }
 
 (bool Configured, IResourceBuilder<ParameterResource> PublicKey, IResourceBuilder<ParameterResource> SecretKey, IResourceBuilder<ParameterResource> StandardPlanCode, IResourceBuilder<ParameterResource> PremiumPlanCode, IResourceBuilder<ParameterResource> CardAuthorizationAmountSubunit) ConfigurePaystackParameters()
@@ -342,3 +402,12 @@ void CheckPortAvailability(PortAllocation portAllocation)
         }
     }
 }
+
+internal sealed record CoreConnectorOAuthParameters(
+    IResourceBuilder<ParameterResource> GoogleCalendarClientId,
+    IResourceBuilder<ParameterResource> GoogleCalendarClientSecret,
+    IResourceBuilder<ParameterResource> Office365CalendarClientId,
+    IResourceBuilder<ParameterResource> Office365CalendarClientSecret,
+    IResourceBuilder<ParameterResource> ZoomClientId,
+    IResourceBuilder<ParameterResource> ZoomClientSecret
+);

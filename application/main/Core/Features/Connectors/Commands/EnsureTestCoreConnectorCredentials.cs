@@ -17,7 +17,8 @@ public sealed record EnsureTestCoreConnectorCredentialsCommand(DateTimeOffset Bu
 public sealed class EnsureTestCoreConnectorCredentialsHandler(
     IConnectorCredentialRepository connectorCredentialRepository,
     IExecutionContext executionContext,
-    IHostEnvironment hostEnvironment
+    IHostEnvironment hostEnvironment,
+    CoreConnectorOAuthProviderRegistry providerRegistry
 ) : IRequestHandler<EnsureTestCoreConnectorCredentialsCommand, Result<CoreConnectorAccountsResponse>>
 {
     public async Task<Result<CoreConnectorAccountsResponse>> Handle(EnsureTestCoreConnectorCredentialsCommand command, CancellationToken cancellationToken)
@@ -82,7 +83,18 @@ public sealed class EnsureTestCoreConnectorCredentialsHandler(
         );
 
         var credentials = new[] { googleCredential, officeCredential, zoomCredential };
-        return new CoreConnectorAccountsResponse(credentials.Select(CoreConnectorAccountResponse.From).ToArray());
+        return new CoreConnectorAccountsResponse(
+            credentials.Select(CoreConnectorAccountResponse.From).ToArray(),
+            CoreConnectorConstants.CoreIntegrations
+                .Select(integration => new CoreConnectorIntegrationResponse(
+                        integration,
+                        CoreConnectorConstants.Label(integration),
+                        providerRegistry.GetProvider(integration)?.IsConfigured() == true,
+                        credentials.Any(credential => credential.Integration.Equals(integration, StringComparison.OrdinalIgnoreCase))
+                    )
+                )
+                .ToArray()
+        );
     }
 
     private async Task<ConnectorCredential> EnsureCredentialAsync(

@@ -276,6 +276,9 @@ msgstr "Collect Cal.com-compatible custom answers from bookers."
 msgid "Column"
 msgstr "Column"
 
+msgid "Configuration required"
+msgstr "Configuration required"
+
 msgid "Configure the appointment types clients can book."
 msgstr "Configure the appointment types clients can book."
 
@@ -288,11 +291,35 @@ msgstr "Confirm booking?"
 msgid "Confirmation"
 msgstr "Confirmation"
 
+msgid "Connect Google"
+msgstr "Connect Google"
+
+msgid "Connect Google, Microsoft, and Zoom accounts for calendars and conferencing."
+msgstr "Connect Google, Microsoft, and Zoom accounts for calendars and conferencing."
+
 msgid "Connect installed apps to this event type."
 msgstr "Connect installed apps to this event type."
 
+msgid "Connect Microsoft"
+msgstr "Connect Microsoft"
+
+msgid "Connect Zoom"
+msgstr "Connect Zoom"
+
 msgid "Connected features"
 msgstr "Connected features"
+
+msgid "Connecting..."
+msgstr "Connecting..."
+
+msgid "Connector accounts"
+msgstr "Connector accounts"
+
+msgid "Connector authorization URL was not returned."
+msgstr "Connector authorization URL was not returned."
+
+msgid "Connector is not configured."
+msgstr "Connector is not configured."
 
 msgid "Continue"
 msgstr "Continue"
@@ -321,6 +348,12 @@ msgstr "Copy public link"
 
 msgid "Copy times"
 msgstr "Copy times"
+
+msgid "Could not disconnect connector account."
+msgstr "Could not disconnect connector account."
+
+msgid "Could not start connector setup."
+msgstr "Could not start connector setup."
 
 msgid "Create a private setup event type before opening public booking."
 msgstr "Create a private setup event type before opening public booking."
@@ -402,6 +435,12 @@ msgstr "Disable on prefill"
 
 msgid "Disabled"
 msgstr "Disabled"
+
+msgid "Disconnect"
+msgstr "Disconnect"
+
+msgid "Disconnecting..."
+msgstr "Disconnecting..."
 
 msgid "Duplicate"
 msgstr "Duplicate"
@@ -730,6 +769,9 @@ msgstr "No bookings this week"
 
 msgid "No connected Google or Microsoft calendars."
 msgstr "No connected Google or Microsoft calendars."
+
+msgid "No connector accounts are connected yet."
+msgstr "No connector accounts are connected yet."
 
 msgid "No custom booking fields yet."
 msgstr "No custom booking fields yet."

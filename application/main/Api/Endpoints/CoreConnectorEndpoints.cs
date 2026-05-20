@@ -1,4 +1,5 @@
 using Main.Features.Connectors.Commands;
+using Main.Features.Connectors.Domain;
 using Main.Features.Connectors.Queries;
 using Main.Features.Connectors.Shared;
 using Main.Features.EventTypes.Domain;
@@ -20,6 +21,25 @@ public sealed class CoreConnectorEndpoints : IEndpoints
         connectorGroup.MapGet("/accounts", async Task<ApiResult<CoreConnectorAccountsResponse>> (IMediator mediator)
             => await mediator.Send(new GetCoreConnectorAccountsQuery())
         ).Produces<CoreConnectorAccountsResponse>();
+
+        connectorGroup.MapGet("/{integration}/authorization-url", async Task<ApiResult<CoreConnectorAuthorizationUrlResponse>> (
+                string integration,
+                string? returnTo,
+                IMediator mediator
+            ) => await mediator.Send(new GetCoreConnectorAuthorizationUrlQuery(integration, returnTo))
+        ).Produces<CoreConnectorAuthorizationUrlResponse>();
+
+        connectorGroup.MapGet("/{integration}/callback", async Task<ApiResult<string>> (
+                string integration,
+                string? code,
+                string? state,
+                IMediator mediator
+            ) => await mediator.Send(new CompleteCoreConnectorOAuthCallbackCommand(integration, code, state))
+        ).ExcludeFromDescription();
+
+        connectorGroup.MapDelete("/accounts/{credentialId}", async Task<ApiResult> (string credentialId, IMediator mediator)
+            => await mediator.Send(new DeleteCoreConnectorAccountCommand(credentialId))
+        );
 
         connectorGroup.MapPost("/test-fixtures", async Task<ApiResult<CoreConnectorAccountsResponse>> (EnsureTestCoreConnectorCredentialsRequest request, IMediator mediator)
                 => await mediator.Send(new EnsureTestCoreConnectorCredentialsCommand(request.BusyStartTime, request.BusyEndTime))

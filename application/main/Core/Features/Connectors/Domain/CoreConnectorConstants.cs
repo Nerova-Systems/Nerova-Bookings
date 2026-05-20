@@ -8,6 +8,8 @@ public static class CoreConnectorConstants
     public const string Office365Video = "office365-video";
     public const string ZoomVideo = "zoom-video";
 
+    public static readonly string[] CoreIntegrations = [GoogleCalendar, Office365Calendar, ZoomVideo];
+
     public static bool IsCoreCalendar(string integration)
     {
         return integration.Equals(GoogleCalendar, StringComparison.OrdinalIgnoreCase) ||
@@ -19,5 +21,16 @@ public static class CoreConnectorConstants
         return app.Equals(GoogleMeet, StringComparison.OrdinalIgnoreCase) ||
                app.Equals(Office365Video, StringComparison.OrdinalIgnoreCase) ||
                app.Equals(ZoomVideo, StringComparison.OrdinalIgnoreCase);
+    }
+
+    public static string Label(string integration)
+    {
+        return integration.ToLowerInvariant() switch
+        {
+            GoogleCalendar => "Google Calendar",
+            Office365Calendar => "Office 365 Calendar",
+            ZoomVideo => "Zoom",
+            _ => integration
+        };
     }
 }

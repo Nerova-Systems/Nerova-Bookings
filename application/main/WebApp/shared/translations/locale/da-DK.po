@@ -276,6 +276,9 @@ msgstr "Indsaml Cal.com-kompatible brugerdefinerede svar fra bookere."
 msgid "Column"
 msgstr "Column"
 
+msgid "Configuration required"
+msgstr "Konfiguration påkrævet"
+
 msgid "Configure the appointment types clients can book."
 msgstr "Konfigurer de aftaletyper, kunder kan booke."
 
@@ -288,11 +291,35 @@ msgstr "Bekræft booking?"
 msgid "Confirmation"
 msgstr "Confirmation"
 
+msgid "Connect Google"
+msgstr "Forbind Google"
+
+msgid "Connect Google, Microsoft, and Zoom accounts for calendars and conferencing."
+msgstr "Forbind Google-, Microsoft- og Zoom-konti til kalendere og videomøder."
+
 msgid "Connect installed apps to this event type."
 msgstr "Connect installed apps to this event type."
 
+msgid "Connect Microsoft"
+msgstr "Forbind Microsoft"
+
+msgid "Connect Zoom"
+msgstr "Forbind Zoom"
+
 msgid "Connected features"
 msgstr "Connected features"
+
+msgid "Connecting..."
+msgstr "Forbinder..."
+
+msgid "Connector accounts"
+msgstr "Connector-konti"
+
+msgid "Connector authorization URL was not returned."
+msgstr "Connector-godkendelses-URL blev ikke returneret."
+
+msgid "Connector is not configured."
+msgstr "Connectoren er ikke konfigureret."
 
 msgid "Continue"
 msgstr "Fortsæt"
@@ -321,6 +348,12 @@ msgstr "Kopiér offentligt link"
 
 msgid "Copy times"
 msgstr "Kopier tider"
+
+msgid "Could not disconnect connector account."
+msgstr "Kunne ikke afbryde connector-kontoen."
+
+msgid "Could not start connector setup."
+msgstr "Kunne ikke starte connector-opsætningen."
 
 msgid "Create a private setup event type before opening public booking."
 msgstr "Opret en privat opsætningsaftaletype, før offentlig booking åbnes."
@@ -402,6 +435,12 @@ msgstr "Deaktiver ved forudfyldning"
 
 msgid "Disabled"
 msgstr "Deaktiveret"
+
+msgid "Disconnect"
+msgstr "Afbryd"
+
+msgid "Disconnecting..."
+msgstr "Afbryder..."
 
 msgid "Duplicate"
 msgstr "Dupliker"
@@ -730,6 +769,9 @@ msgstr "Ingen bookinger denne uge"
 
 msgid "No connected Google or Microsoft calendars."
 msgstr "Ingen tilsluttede Google- eller Microsoft-kalendere."
+
+msgid "No connector accounts are connected yet."
+msgstr "Der er endnu ikke forbundet nogen connector-konti."
 
 msgid "No custom booking fields yet."
 msgstr "Ingen brugerdefinerede bookingfelter endnu."

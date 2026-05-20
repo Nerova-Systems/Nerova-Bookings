@@ -24,5 +24,7 @@ public sealed class ConnectorCredentialConfiguration : IEntityTypeConfiguration<
 
         builder.HasIndex(credential => new { credential.TenantId, credential.OwnerUserId, credential.Integration });
         builder.HasIndex(credential => new { credential.TenantId, credential.OwnerUserId, credential.Id });
+        builder.HasIndex(credential => new { credential.TenantId, credential.OwnerUserId, credential.Integration, credential.ExternalAccountId })
+            .IsUnique();
     }
 }

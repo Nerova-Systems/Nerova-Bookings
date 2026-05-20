@@ -2,7 +2,10 @@ using Main.Database;
 using Main.Features.BookingSideEffects.Workers;
 using Main.Features.Connectors.Domain;
 using Main.Features.Scheduling.Shared;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Hosting;
 using SharedKernel.Configuration;
 
@@ -25,11 +28,19 @@ public static class Configuration
     {
         public IServiceCollection AddMainServices()
         {
+            services.TryAddSingleton<IConfiguration>(new ConfigurationBuilder().Build());
+            services.TryAddSingleton<IHostEnvironment>(new MainFallbackHostEnvironment());
+
             return services
                 .AddHttpClient()
                 .AddScoped<BookingSideEffectProcessor>()
                 .AddScoped<FakeCoreConnectorClient>()
-                .AddScoped<ICoreConnectorAccessTokenProvider, ConfigurationCoreConnectorAccessTokenProvider>()
+                .AddScoped<IConnectorTokenStore, ProtectedConnectorTokenStore>()
+                .AddScoped<CoreConnectorOAuthProviderRegistry>()
+                .AddScoped<ICoreConnectorOAuthProvider, GoogleCalendarOAuthProvider>()
+                .AddScoped<ICoreConnectorOAuthProvider, Office365CalendarOAuthProvider>()
+                .AddScoped<ICoreConnectorOAuthProvider, ZoomOAuthProvider>()
+                .AddScoped<ICoreConnectorAccessTokenProvider, ProtectedCoreConnectorAccessTokenProvider>()
                 .AddScoped<ICoreConnectorProvider, GoogleCalendarCoreConnectorProvider>()
                 .AddScoped<ICoreConnectorProvider, Office365CalendarCoreConnectorProvider>()
                 .AddScoped<ICoreCalendarConnectorProvider, GoogleCalendarCoreConnectorProvider>()
@@ -40,5 +51,16 @@ public static class Configuration
                 .AddScoped<PublicSlotCalculator>()
                 .AddSharedServices<MainDbContext>([Assembly]);
         }
+    }
+
+    private sealed class MainFallbackHostEnvironment : IHostEnvironment
+    {
+        public string EnvironmentName { get; set; } = Environments.Development;
+
+        public string ApplicationName { get; set; } = "Main";
+
+        public string ContentRootPath { get; set; } = AppContext.BaseDirectory;
+
+        public IFileProvider ContentRootFileProvider { get; set; } = new NullFileProvider();
     }
 }

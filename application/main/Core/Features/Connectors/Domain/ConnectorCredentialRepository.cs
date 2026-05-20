@@ -11,6 +11,14 @@ public interface IConnectorCredentialRepository : ICrudRepository<ConnectorCrede
 
     Task<ConnectorCredential?> GetOwnedAsync(TenantId tenantId, UserId ownerUserId, string id, CancellationToken cancellationToken);
 
+    Task<ConnectorCredential?> GetOwnedByExternalAccountAsync(
+        TenantId tenantId,
+        UserId ownerUserId,
+        string integration,
+        string externalAccountId,
+        CancellationToken cancellationToken
+    );
+
     Task<ConnectorCredential[]> GetForTenantByIdsAsync(TenantId tenantId, string[] ids, CancellationToken cancellationToken);
 
     Task RemoveTestFixturesForOwnerAsync(TenantId tenantId, UserId ownerUserId, string[] retainedCredentialIds, CancellationToken cancellationToken);
@@ -46,6 +54,25 @@ public sealed class ConnectorCredentialRepository(MainDbContext mainDbContext)
             .Where(credential => credential.TenantId == tenantId)
             .Where(credential => credential.OwnerUserId == ownerUserId)
             .Where(credential => credential.Id == id.Trim())
+            .SingleOrDefaultAsync(cancellationToken);
+    }
+
+    public async Task<ConnectorCredential?> GetOwnedByExternalAccountAsync(
+        TenantId tenantId,
+        UserId ownerUserId,
+        string integration,
+        string externalAccountId,
+        CancellationToken cancellationToken
+    )
+    {
+        var normalizedIntegration = integration.Trim();
+        var normalizedExternalAccountId = externalAccountId.Trim();
+        return await DbSet
+            .IgnoreQueryFilters()
+            .Where(credential => credential.TenantId == tenantId)
+            .Where(credential => credential.OwnerUserId == ownerUserId)
+            .Where(credential => credential.Integration == normalizedIntegration)
+            .Where(credential => credential.ExternalAccountId == normalizedExternalAccountId)
             .SingleOrDefaultAsync(cancellationToken);
     }
 
