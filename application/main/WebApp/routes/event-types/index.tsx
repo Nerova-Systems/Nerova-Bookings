@@ -5,15 +5,14 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { PlusIcon } from "lucide-react";
 import { useState } from "react";
 
-import { api } from "@/shared/lib/api/client";
-
-import type { EventType } from "../-scheduling/schedulingTypes";
+import { api, queryClient } from "@/shared/lib/api/client";
 
 import { CreateEventTypeDialog } from "../-scheduling/CreateEventTypeDialog";
 import { DeleteEventTypeDialog } from "../-scheduling/event-types-shell/DeleteEventTypeDialog";
 import { DuplicateEventTypeDialog } from "../-scheduling/event-types-shell/DuplicateEventTypeDialog";
 import { EventTypesList } from "../-scheduling/event-types-shell/EventTypesList";
 import { SchedulingPageShell } from "../-scheduling/SchedulingPageShell";
+import { eventTypeToPayload, eventTypeToUpdatePayload, type EventType } from "../-scheduling/schedulingTypes";
 
 export const Route = createFileRoute("/event-types/")({
   staticData: { trackingTitle: "Event types" },
@@ -35,6 +34,9 @@ function EventTypesPage() {
   const duplicateEventType =
     eventTypesData?.eventTypes.find((eventType) => eventType.id === search.duplicateEventTypeId) ?? null;
   const [deleteEventType, setDeleteEventType] = useState<EventType | null>(null);
+  const updateEventTypeMutation = api.useMutation("put", "/api/event-types/{id}", {
+    onSuccess: () => void queryClient.invalidateQueries()
+  });
 
   const openCreateDialog = () =>
     navigate({ to: "/event-types", search: { dialog: "new", duplicateEventTypeId: undefined } });
@@ -44,11 +46,11 @@ function EventTypesPage() {
   return (
     <SchedulingPageShell
       title={t`Event types`}
-      subtitle={t`Configure the appointment types clients can book.`}
+      subtitle={t`Configure different events for people to book on your calendar.`}
       actions={
         <Button onClick={openCreateDialog}>
           <PlusIcon />
-          <Trans>New event type</Trans>
+          <Trans>New</Trans>
         </Button>
       }
     >
@@ -57,6 +59,12 @@ function EventTypesPage() {
         schedules={schedules}
         publicHandle={schedulingProfile?.handle}
         isLoading={isLoading}
+        onHiddenChange={(eventType, hidden) =>
+          updateEventTypeMutation.mutate({
+            params: { path: { id: eventType.id } },
+            body: eventTypeToUpdatePayload(eventType.id, { ...eventTypeToPayload(eventType), hidden })
+          })
+        }
         onDuplicate={(eventType) =>
           navigate({
             to: "/event-types",

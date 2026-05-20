@@ -91,7 +91,7 @@ async function createSchedule(page: Page, name: string) {
 
 async function createEventType(page: Page, title: string, slug: string, duration: string) {
   await page.goto("/event-types");
-  await page.getByRole("button", { name: "New event type" }).click();
+  await page.getByRole("button", { name: "New" }).click();
   await page.getByRole("textbox", { name: "Title" }).fill(title);
   await page.getByRole("textbox", { name: "Slug" }).fill(slug);
   await page.getByRole("textbox", { name: "Duration", exact: true }).fill(duration);
@@ -103,15 +103,22 @@ async function createEventType(page: Page, title: string, slug: string, duration
 
 async function openEventTypeDuplicateDialog(page: Page, title: string) {
   await page.goto("/event-types");
-  await page.getByRole("textbox", { name: "Search event types" }).fill(title);
-  await expect(page.getByRole("link", { name: title })).toBeVisible();
-  await page.getByRole("button", { name: "Duplicate event type" }).first().click();
+  await page.getByRole("textbox", { name: "Search" }).fill(title);
+  await expect(page.getByRole("link").filter({ hasText: title }).first()).toBeVisible();
+  await page.getByRole("button", { name: "Event type actions" }).first().click();
+  await page.getByRole("menuitem", { name: "Duplicate" }).click();
 
   await expect(page.getByRole("dialog", { name: "Duplicate event type" })).toBeVisible();
 }
 
 async function deleteCurrentEventType(page: Page, title: string) {
-  await page.getByRole("button", { name: "Delete" }).first().click();
+  const deleteButton = page.getByRole("button", { name: "Delete" }).first();
+  try {
+    await deleteButton.click({ timeout: 2_000 });
+  } catch {
+    await page.getByRole("button", { name: "Event type actions" }).first().click();
+    await page.getByRole("menuitem", { name: "Delete" }).click();
+  }
   const deleteDialog = page.getByRole("alertdialog");
   await expect(deleteDialog).toBeVisible();
   await expect(deleteDialog.getByText(`This removes the booking page for ${title}.`)).toBeVisible();
@@ -313,7 +320,7 @@ test.describe("@smoke", () => {
       await ownerPage.getByRole("button", { name: "Add booking field" }).click();
       await ownerPage.getByRole("textbox", { name: "Label" }).last().fill("Topic");
       await ownerPage.getByRole("textbox", { name: "Name" }).last().fill("topic");
-      await ownerPage.getByLabel("Type").click();
+      await ownerPage.getByRole("combobox", { name: "Type" }).click();
       await ownerPage.getByRole("option", { name: "Select", exact: true }).click();
       await ownerPage.getByRole("switch", { name: "Required" }).click();
       await ownerPage.getByRole("button", { name: "Add option" }).click();
@@ -356,7 +363,7 @@ test.describe("@smoke", () => {
 
     await step("Reload event type detail & verify persisted values are visible")(async () => {
       await ownerPage.reload();
-      await ownerPage.getByRole("tab", { name: "Setup" }).click();
+      await ownerPage.getByRole("tab", { name: "Basics" }).click();
 
       await expect(ownerPage.getByRole("textbox", { name: "Title" })).toHaveValue(updatedTitle);
       await expect(ownerPage.getByRole("textbox", { name: "Slug" })).toHaveValue(updatedSlug);
@@ -416,8 +423,8 @@ test.describe("@smoke", () => {
     })();
 
     await step("Delete original event type & verify cleanup completes")(async () => {
-      await ownerPage.getByRole("textbox", { name: "Search event types" }).fill(updatedTitle);
-      await ownerPage.getByRole("link", { name: updatedTitle }).click();
+      await ownerPage.getByRole("textbox", { name: "Search" }).fill(updatedTitle);
+      await ownerPage.getByRole("link").filter({ hasText: updatedTitle }).first().click();
       await deleteCurrentEventType(ownerPage, updatedTitle);
 
       await expectToastMessage(context, "Event type deleted");
@@ -430,7 +437,7 @@ test.describe("@comprehensive", () => {
    * Covers event type hardening surfaces:
    * - Duplicate slug validation through the duplicate dialog
    * - Mobile editor tab navigation and save action
-   * - Dependency placeholder tab rendering without unavailable API calls
+   * - Apps placeholder tab rendering without unavailable API calls
    */
   test("should handle duplicate validation, mobile editing, and dependency placeholders", async ({ ownerPage }) => {
     const context = createTestContext(ownerPage);
@@ -473,7 +480,7 @@ test.describe("@comprehensive", () => {
       await expect(ownerPage.getByRole("textbox", { name: "Title" })).toHaveValue(duplicateTitle);
     })();
 
-    // === MOBILE AND DEPENDENCIES ===
+    // === MOBILE AND APPS ===
     await step("Open editor at mobile width and update limits & verify save remains usable")(async () => {
       await ownerPage.setViewportSize({ width: 390, height: 844 });
       await ownerPage.getByRole("tab", { name: "Limits" }).click();
@@ -485,13 +492,12 @@ test.describe("@comprehensive", () => {
       await expectToastMessage(context, "Event type updated");
     })();
 
-    await step("Open dependency tab & verify disabled placeholder states render")(async () => {
-      await ownerPage.getByRole("tab", { name: "Dependencies" }).click();
+    await step("Open apps tab & verify placeholder states render")(async () => {
+      await ownerPage.getByRole("tab", { name: "Apps" }).click();
 
-      await expect(ownerPage.getByText("Requires another booking")).toBeVisible();
-      await expect(ownerPage.getByText("Blocks other event types")).toBeVisible();
-      await expect(ownerPage.getByText("Managed relationship rules")).toBeVisible();
-      await expect(ownerPage.getByText("Not available").first()).toBeVisible();
+      await expect(ownerPage.getByText("No apps installed")).toBeVisible();
+      await expect(ownerPage.getByText("Available apps")).toBeVisible();
+      await expect(ownerPage.getByRole("button", { name: "Browse app store" })).toBeVisible();
     })();
 
     // === CLEANUP ===
@@ -504,8 +510,8 @@ test.describe("@comprehensive", () => {
     await step("Delete original event type & verify cleanup completes")(async () => {
       await ownerPage.setViewportSize({ width: 1280, height: 720 });
       await ownerPage.goto("/event-types");
-      await ownerPage.getByRole("textbox", { name: "Search event types" }).fill(originalTitle);
-      await ownerPage.getByRole("link", { name: originalTitle }).click();
+      await ownerPage.getByRole("textbox", { name: "Search" }).fill(originalTitle);
+      await ownerPage.getByRole("link").filter({ hasText: originalTitle }).first().click();
       await deleteCurrentEventType(ownerPage, originalTitle);
 
       await expectToastMessage(context, "Event type deleted");

@@ -1,15 +1,28 @@
+import { t } from "@lingui/core/macro";
 import { Form } from "@repo/ui/components/Form";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@repo/ui/components/Tabs";
+import { HorizontalTabs } from "@repo/ui/components/HorizontalTabs";
+import { VerticalTabs, type VerticalTabItem } from "@repo/ui/components/VerticalTabs";
 import { useNavigate } from "@tanstack/react-router";
+import {
+  CalendarIcon,
+  ClockIcon,
+  Grid3X3Icon,
+  LinkIcon,
+  RefreshCcwIcon,
+  SlidersHorizontalIcon,
+  WebhookIcon,
+  ZapIcon
+} from "lucide-react";
 
 import type { ApiValidationError, EventTypePayload, Schedule } from "../schedulingTypes";
 
 import { EventTypeAdvancedTab } from "../event-type-tabs/EventTypeAdvancedTab";
+import { EventTypeAppsTab } from "../event-type-tabs/EventTypeAppsTab";
 import { EventTypeAvailabilityTab } from "../event-type-tabs/EventTypeAvailabilityTab";
-import { EventTypeDependenciesTab } from "../event-type-tabs/EventTypeDependenciesTab";
 import { EventTypeLimitsTab } from "../event-type-tabs/EventTypeLimitsTab";
 import { EventTypeRecurringTab } from "../event-type-tabs/EventTypeRecurringTab";
 import { EventTypeSetupTab } from "../event-type-tabs/EventTypeSetupTab";
+import { type EventTypeTabProps } from "../event-type-tabs/EventTypeTabTypes";
 import { EventTypeWebhooksTab } from "../event-type-tabs/EventTypeWebhooksTab";
 import { EventTypeWorkflowsTab } from "../event-type-tabs/EventTypeWorkflowsTab";
 import { eventTypeTabNames, getEventTypeTabLabel, type EventTypeTabName } from "./eventTypeShellTypes";
@@ -39,68 +52,126 @@ export function EventTypeEditorTabs({
 }: EventTypeEditorTabsProps) {
   const navigate = useNavigate();
   const tabProps = { value: draft, schedules, onChange, error };
+  const activeTabName = tabName === "dependencies" ? "apps" : tabName;
+  const tabs = getEventTypeTabs(draft, schedules);
+  const contentClassName = "min-w-0 rounded-lg border bg-background p-4 md:p-6";
+  const navigateToTab = (nextTabName: string) =>
+    navigate({
+      to: "/event-types/$eventTypeId",
+      params: { eventTypeId },
+      search: { tabName: nextTabName as EventTypeTabName }
+    });
 
   return (
-    <Tabs
-      value={tabName}
-      className="flex flex-col gap-4 lg:flex-row lg:items-start lg:gap-6"
-      onValueChange={(nextTabName) =>
-        navigate({
-          to: "/event-types/$eventTypeId",
-          params: { eventTypeId },
-          search: { tabName: nextTabName as EventTypeTabName }
-        })
-      }
-    >
-      <TabsList
-        className="w-full overflow-x-auto border-b lg:sticky lg:top-20 lg:w-60 lg:shrink-0 lg:flex-col lg:items-stretch lg:overflow-visible lg:border-r lg:border-b-0"
+    <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:gap-6">
+      <VerticalTabs
+        tabs={tabs}
+        value={activeTabName}
+        onValueChange={navigateToTab}
+        className="hidden w-64 shrink-0 xl:sticky xl:top-20 xl:flex"
+        itemClassName="items-start"
         data-testid="event-type-vertical-tabs"
-      >
-        {eventTypeTabNames.map((eventTypeTabName) => (
-          <TabsTrigger
-            key={eventTypeTabName}
-            value={eventTypeTabName}
-            className="shrink-0 lg:justify-start lg:after:hidden"
-          >
-            {getEventTypeTabLabel(eventTypeTabName)}
-          </TabsTrigger>
-        ))}
-      </TabsList>
+      />
       <Form
         id={eventTypeFormId}
         validationBehavior="aria"
         validationErrors={error?.errors}
-        className="min-w-0"
+        className="min-w-0 flex-1"
         onSubmit={(event) => {
           event.preventDefault();
           if (canSave) onSubmit();
         }}
       >
-        <TabsContent value="setup" className="min-w-0 rounded-md border bg-background p-4 shadow-xs md:p-6">
-          <EventTypeSetupTab {...tabProps} />
-        </TabsContent>
-        <TabsContent value="availability" className="min-w-0 rounded-md border bg-background p-4 shadow-xs md:p-6">
-          <EventTypeAvailabilityTab {...tabProps} />
-        </TabsContent>
-        <TabsContent value="limits" className="min-w-0 rounded-md border bg-background p-4 shadow-xs md:p-6">
-          <EventTypeLimitsTab {...tabProps} />
-        </TabsContent>
-        <TabsContent value="advanced" className="min-w-0 rounded-md border bg-background p-4 shadow-xs md:p-6">
-          <EventTypeAdvancedTab {...tabProps} />
-        </TabsContent>
-        <TabsContent value="workflows" className="min-w-0 rounded-md border bg-background p-4 shadow-xs md:p-6">
-          <EventTypeWorkflowsTab eventTypeId={eventTypeId} />
-        </TabsContent>
-        <TabsContent value="webhooks" className="min-w-0 rounded-md border bg-background p-4 shadow-xs md:p-6">
-          <EventTypeWebhooksTab eventTypeId={eventTypeId} />
-        </TabsContent>
-        <TabsContent value="recurring" className="min-w-0 rounded-md border bg-background p-4 shadow-xs md:p-6">
-          <EventTypeRecurringTab {...tabProps} />
-        </TabsContent>
-        <TabsContent value="dependencies" className="min-w-0 rounded-md border bg-background p-4 shadow-xs md:p-6">
-          <EventTypeDependenciesTab {...tabProps} />
-        </TabsContent>
+        <HorizontalTabs
+          tabs={tabs}
+          value={activeTabName}
+          onValueChange={navigateToTab}
+          className="mb-4 xl:hidden"
+          data-testid="event-type-horizontal-tabs"
+        />
+        <div className={contentClassName}>{renderEventTypeTab(activeTabName, tabProps, eventTypeId)}</div>
       </Form>
-    </Tabs>
+    </div>
   );
+}
+
+function getEventTypeTabs(draft: EventTypePayload, schedules: Schedule[]): VerticalTabItem[] {
+  const scheduleName = schedules.find((schedule) => schedule.id === draft.scheduleId)?.name ?? "Working hours";
+  return eventTypeTabNames.map((tabName) => ({
+    value: tabName,
+    label: getEventTypeTabLabel(tabName),
+    description: getEventTypeTabDescription(tabName, draft, scheduleName),
+    icon: getEventTypeTabIcon(tabName)
+  }));
+}
+
+function getEventTypeTabDescription(tabName: EventTypeTabName, draft: EventTypePayload, scheduleName: string) {
+  switch (tabName) {
+    case "setup":
+      return `${draft.durationMinutes} mins`;
+    case "availability":
+      return scheduleName;
+    case "limits":
+      return t`How often you can be booked`;
+    case "advanced":
+      return t`Calendar settings & more...`;
+    case "recurring":
+      return t`Set up a repeating schedule`;
+    case "apps":
+      return t`0 apps, 0 active`;
+    case "workflows":
+      return t`0 active`;
+    case "webhooks":
+      return t`0 active`;
+    case "dependencies":
+      return "";
+  }
+}
+
+function getEventTypeTabIcon(tabName: EventTypeTabName) {
+  switch (tabName) {
+    case "setup":
+      return <LinkIcon />;
+    case "availability":
+      return <CalendarIcon />;
+    case "limits":
+      return <ClockIcon />;
+    case "advanced":
+      return <SlidersHorizontalIcon />;
+    case "recurring":
+      return <RefreshCcwIcon />;
+    case "apps":
+      return <Grid3X3Icon />;
+    case "workflows":
+      return <ZapIcon />;
+    case "webhooks":
+      return <WebhookIcon />;
+    case "dependencies":
+      return null;
+  }
+}
+
+function renderEventTypeTab(
+  tabName: Exclude<EventTypeTabName, "dependencies">,
+  tabProps: EventTypeTabProps,
+  eventTypeId: string
+) {
+  switch (tabName) {
+    case "setup":
+      return <EventTypeSetupTab {...tabProps} />;
+    case "availability":
+      return <EventTypeAvailabilityTab {...tabProps} />;
+    case "limits":
+      return <EventTypeLimitsTab {...tabProps} />;
+    case "advanced":
+      return <EventTypeAdvancedTab {...tabProps} />;
+    case "recurring":
+      return <EventTypeRecurringTab {...tabProps} />;
+    case "apps":
+      return <EventTypeAppsTab />;
+    case "workflows":
+      return <EventTypeWorkflowsTab eventTypeId={eventTypeId} />;
+    case "webhooks":
+      return <EventTypeWebhooksTab eventTypeId={eventTypeId} />;
+  }
 }

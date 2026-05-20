@@ -1,6 +1,7 @@
 /* eslint-disable max-lines, max-lines-per-function */
 import { t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
+import { Badge } from "@repo/ui/components/Badge";
 import { Button } from "@repo/ui/components/Button";
 import { Checkbox } from "@repo/ui/components/Checkbox";
 import { DateField } from "@repo/ui/components/DateField";
@@ -8,6 +9,7 @@ import { FormValidationContext } from "@repo/ui/components/Form";
 import { NumberField } from "@repo/ui/components/NumberField";
 import { SelectContent, SelectItem, SelectTrigger, SelectValue } from "@repo/ui/components/Select";
 import { SelectField } from "@repo/ui/components/SelectField";
+import { SettingsToggle } from "@repo/ui/components/SettingsToggle";
 import { SwitchField } from "@repo/ui/components/SwitchField";
 import { TextField } from "@repo/ui/components/TextField";
 import { ArrowDownIcon, ArrowUpIcon, PlusIcon, TrashIcon } from "lucide-react";
@@ -84,10 +86,191 @@ export function EventTypeAdvancedTab({ value, onChange, error }: EventTypeTabPro
   const updateDefaultConferencing = (defaultConferencing: EventTypeSettings["defaultConferencing"]) => {
     updateSettings((nextSettings) => ({ ...nextSettings, defaultConferencing }));
   };
+  const updateMetadata = (metadataPatch: Record<string, string>) => {
+    updateSettings((nextSettings) => ({ ...nextSettings, metadata: { ...nextSettings.metadata, ...metadataPatch } }));
+  };
+  const metadata = settings.metadata;
+  const calendarEventName =
+    typeof metadata.calendarEventName === "string"
+      ? metadata.calendarEventName
+      : `${value.title} between {Organizer} and {Scheduler}`;
+  const requiresCancellationReason =
+    typeof metadata.requiresCancellationReason === "string"
+      ? metadata.requiresCancellationReason
+      : "mandatory-host-only";
+  const canSendCalVideoTranscriptionEmails = metadata.canSendCalVideoTranscriptionEmails === "true";
 
   return (
     <FormValidationContext.Provider value={error?.errors ?? {}}>
       <div className="grid gap-5">
+        <EventTypeTabSection title={<Trans>Calendar event</Trans>}>
+          <TextField
+            name="calendarEventName"
+            label={t`Calendar event name`}
+            value={calendarEventName}
+            onChange={(nextCalendarEventName) => updateMetadata({ calendarEventName: nextCalendarEventName })}
+          />
+          <div className="grid gap-2">
+            <div className="text-sm font-medium">
+              <Trans>Add to calendar</Trans>
+            </div>
+            <div className="rounded-md border px-3 py-2 text-sm text-muted-foreground">
+              {settings.destinationCalendar ? (
+                <span>
+                  <Badge variant="secondary" className="mr-2">
+                    <Trans>Default</Trans>
+                  </Badge>
+                  {settings.destinationCalendar.externalId}
+                </span>
+              ) : (
+                <Trans>No destination calendar selected</Trans>
+              )}
+            </div>
+            <p className="text-sm text-muted-foreground">
+              <Trans>We will display this email address as the organizer, and send confirmation emails here.</Trans>
+            </p>
+          </div>
+        </EventTypeTabSection>
+        <EventTypeTabSection
+          title={<Trans>Layout</Trans>}
+          description={<Trans>You can select multiple and your bookers can switch views.</Trans>}
+        >
+          <div className="grid gap-4 lg:grid-cols-3">
+            {[
+              { value: "month", label: t`Month`, description: t`Default` },
+              { value: "week", label: t`Weekly`, description: t`Calendar grid` },
+              { value: "column", label: t`Column`, description: t`Time slots` }
+            ].map((layout) => {
+              const isSelected = settings.bookerLayout === layout.value;
+              return (
+                <Button
+                  key={layout.value}
+                  type="button"
+                  variant="ghost"
+                  aria-pressed={isSelected}
+                  className="grid h-auto w-full gap-3 rounded-lg border p-3 text-left transition-colors hover:bg-muted/60 aria-pressed:border-primary max-sm:w-full"
+                  onClick={() => updateSettings((nextSettings) => ({ ...nextSettings, bookerLayout: layout.value }))}
+                >
+                  <div className="aspect-[2/1] rounded-md border bg-muted p-3">
+                    <div className="mb-3 h-6 rounded bg-background" />
+                    <div className="grid grid-cols-5 gap-2">
+                      {Array.from({ length: 15 }).map((_, index) => (
+                        <span key={index} className="h-2 rounded bg-background" />
+                      ))}
+                    </div>
+                  </div>
+                  <span className="flex items-center gap-2 font-medium">
+                    <span
+                      aria-hidden="true"
+                      className="flex size-4 items-center justify-center rounded-sm border bg-background text-xs"
+                    >
+                      {isSelected ? <span className="size-2 rounded-sm bg-primary" /> : null}
+                    </span>
+                    {layout.label}
+                    {isSelected && <span className="text-muted-foreground">({layout.description})</span>}
+                  </span>
+                </Button>
+              );
+            })}
+          </div>
+          <div className="grid gap-2">
+            <div className="text-sm font-medium">
+              <Trans>Default view</Trans>
+            </div>
+            <div className="flex w-fit overflow-hidden rounded-md border">
+              {[
+                { value: "month", label: t`Month` },
+                { value: "week", label: t`Weekly` },
+                { value: "column", label: t`Column` }
+              ].map((layout) => (
+                <Button
+                  key={layout.value}
+                  type="button"
+                  variant={settings.bookerLayout === layout.value ? "secondary" : "ghost"}
+                  size="sm"
+                  className="rounded-none border-r last:border-r-0"
+                  onClick={() => updateSettings((nextSettings) => ({ ...nextSettings, bookerLayout: layout.value }))}
+                >
+                  {layout.label}
+                </Button>
+              ))}
+            </div>
+          </div>
+        </EventTypeTabSection>
+        <EventTypeTabSection
+          title={<Trans>Booking questions</Trans>}
+          description={<Trans>Customize the questions asked on the booking page. Learn more</Trans>}
+        >
+          <BookingQuestionsPreview fields={settings.bookingFields} />
+        </EventTypeTabSection>
+        <EventTypeTabSection title={<Trans>Require cancellation reason</Trans>}>
+          <SelectField
+            name="requiresCancellationReason"
+            label={t`Require cancellation reason`}
+            items={[
+              { value: "mandatory-host-only", label: t`Mandatory for host only` },
+              { value: "mandatory-both", label: t`Mandatory for both` },
+              { value: "mandatory-attendee-only", label: t`Mandatory for attendee only` },
+              { value: "optional-both", label: t`Optional for both` }
+            ]}
+            value={requiresCancellationReason}
+            onValueChange={(nextValue) =>
+              updateMetadata({ requiresCancellationReason: nextValue ?? "mandatory-host-only" })
+            }
+          >
+            <SelectTrigger>
+              <SelectValue>
+                {(nextValue: string) =>
+                  ({
+                    "mandatory-host-only": t`Mandatory for host only`,
+                    "mandatory-both": t`Mandatory for both`,
+                    "mandatory-attendee-only": t`Mandatory for attendee only`,
+                    "optional-both": t`Optional for both`
+                  })[nextValue] ?? nextValue
+                }
+              </SelectValue>
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="mandatory-host-only">{t`Mandatory for host only`}</SelectItem>
+              <SelectItem value="mandatory-both">{t`Mandatory for both`}</SelectItem>
+              <SelectItem value="mandatory-attendee-only">{t`Mandatory for attendee only`}</SelectItem>
+              <SelectItem value="optional-both">{t`Optional for both`}</SelectItem>
+            </SelectContent>
+          </SelectField>
+        </EventTypeTabSection>
+        <SettingsToggle
+          title={<Trans>Requires confirmation</Trans>}
+          description={
+            <Trans>
+              The booking needs to be manually confirmed before it is pushed to your calendar and a confirmation is
+              sent. Learn more
+            </Trans>
+          }
+          checked={settings.confirmationPolicy.requiresConfirmation}
+          onCheckedChange={(requiresConfirmation) => updateConfirmationPolicy({ requiresConfirmation })}
+        />
+        <SettingsToggle
+          title={<Trans>Disable cancelling</Trans>}
+          description={<Trans>Disable event cancellation via calendar invite or email. Learn more</Trans>}
+          checked={!settings.cancellationPolicy.allowCancellation}
+          onCheckedChange={(disabledCancelling) => updateCancellationPolicy({ allowCancellation: !disabledCancelling })}
+        />
+        <SettingsToggle
+          title={<Trans>Disable rescheduling</Trans>}
+          description={<Trans>Disable rescheduling via calendar invite or email. Learn more</Trans>}
+          checked={!settings.reschedulePolicy.allowReschedule}
+          onCheckedChange={(disableRescheduling) => updateReschedulePolicy({ allowReschedule: !disableRescheduling })}
+        />
+        <SettingsToggle
+          title={<Trans>Send Cal Video transcription emails</Trans>}
+          description={
+            <Trans>
+              Send emails with the transcription of the Cal Video after the meeting ends. Requires a paid plan.
+            </Trans>
+          }
+          checked={canSendCalVideoTranscriptionEmails}
+          onCheckedChange={(nextValue) => updateMetadata({ canSendCalVideoTranscriptionEmails: String(nextValue) })}
+        />
         <EventTypeTabSection
           title={<Trans>Visibility</Trans>}
           description={<Trans>Control whether this booking page is listed publicly.</Trans>}
@@ -305,6 +488,78 @@ type CoreConnectorIntegration = Schemas["CoreConnectorIntegrationResponse"];
 type BookingField = EventTypeSettings["bookingFields"][number];
 type BookingFieldOption = BookingField["options"][number];
 type PrivateLink = EventTypeSettings["privateLinks"][number];
+
+function BookingQuestionsPreview({ fields }: Readonly<{ fields: BookingField[] }>) {
+  const defaultFields = [
+    { label: t`Your name`, type: t`Name`, state: t`Required`, enabled: true },
+    { label: t`Email address`, type: t`Email`, state: t`Required`, enabled: true },
+    { label: t`Phone number`, type: t`Phone`, state: t`Hidden`, enabled: false },
+    { label: t`What is this meeting about?`, type: t`Short Text`, state: t`Hidden`, enabled: false },
+    { label: t`Additional notes`, type: t`Long Text`, state: t`Optional`, enabled: true },
+    { label: t`Add guests`, type: t`Multiple Emails`, state: t`Optional`, enabled: true },
+    { label: t`Reason for reschedule`, type: t`Long Text`, state: t`Optional`, enabled: true }
+  ];
+  const fieldRows =
+    fields.length > 0
+      ? fields.map((field) => ({
+          label: field.label || field.name,
+          type: field.type,
+          state: field.hidden ? t`Hidden` : field.required ? t`Required` : t`Optional`,
+          enabled: !field.hidden
+        }))
+      : defaultFields;
+
+  return (
+    <div className="overflow-hidden rounded-lg border">
+      <div className="flex items-start justify-between gap-3 border-b p-4">
+        <div>
+          <div className="font-semibold">
+            <Trans>Confirmation</Trans>
+          </div>
+          <p className="text-sm text-muted-foreground">
+            <Trans>What your booker should provide to receive confirmations</Trans>
+          </p>
+        </div>
+        <div className="flex overflow-hidden rounded-md border text-sm">
+          <span className="bg-muted px-3 py-2">
+            <Trans>Email</Trans>
+          </span>
+          <span className="px-3 py-2 text-muted-foreground">
+            <Trans>Phone</Trans>
+          </span>
+        </div>
+      </div>
+      <div>
+        {fieldRows.map((field) => (
+          <div
+            key={`${field.label}-${field.type}`}
+            className="flex items-center justify-between gap-4 border-b p-4 last:border-b-0"
+          >
+            <div className="min-w-0">
+              <div className="flex min-w-0 flex-wrap items-center gap-2 font-medium">
+                <span className="truncate">{field.label}</span>
+                <Badge variant="secondary">{field.state}</Badge>
+              </div>
+              <div className="text-sm text-muted-foreground">{field.type}</div>
+            </div>
+            <div className="flex items-center gap-3">
+              <Checkbox checked={field.enabled} disabled aria-label={t`Field enabled`} />
+              <Button type="button" variant="outline" size="sm">
+                <Trans>Edit</Trans>
+              </Button>
+            </div>
+          </div>
+        ))}
+      </div>
+      <div className="border-t p-4">
+        <Button type="button" variant="ghost">
+          <PlusIcon />
+          <Trans>Add a question</Trans>
+        </Button>
+      </div>
+    </div>
+  );
+}
 
 function CoreConnectorSettings({
   settings,

@@ -7,6 +7,7 @@ export type EventTypeTabName =
   | "availability"
   | "limits"
   | "advanced"
+  | "apps"
   | "workflows"
   | "webhooks"
   | "recurring"
@@ -17,22 +18,24 @@ export const eventTypeTabNames: EventTypeTabName[] = [
   "availability",
   "limits",
   "advanced",
-  "workflows",
-  "webhooks",
   "recurring",
-  "dependencies"
+  "apps",
+  "workflows",
+  "webhooks"
 ];
 
 export function getEventTypeTabLabel(tabName: EventTypeTabName) {
   switch (tabName) {
     case "setup":
-      return t`Setup`;
+      return t`Basics`;
     case "availability":
       return t`Availability`;
     case "limits":
       return t`Limits`;
     case "advanced":
       return t`Advanced`;
+    case "apps":
+      return t`Apps`;
     case "workflows":
       return t`Workflows`;
     case "webhooks":
@@ -50,6 +53,7 @@ export function isEventTypeTabName(value: unknown): value is EventTypeTabName {
     value === "availability" ||
     value === "limits" ||
     value === "advanced" ||
+    value === "apps" ||
     value === "workflows" ||
     value === "webhooks" ||
     value === "recurring" ||

@@ -6,7 +6,7 @@ import { Button } from "@repo/ui/components/Button";
 import { ButtonGroup } from "@repo/ui/components/ButtonGroup";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@repo/ui/components/Tooltip";
 import { createFileRoute } from "@tanstack/react-router";
-import { ArrowLeftIcon, BookmarkIcon, ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
+import { ArrowLeftIcon, BookmarkIcon, ChevronLeftIcon, ChevronRightIcon, PlusIcon } from "lucide-react";
 import { useMemo, useState } from "react";
 
 import { PublicBooker } from "./$handle/-booker/PublicBooker";
@@ -34,6 +34,7 @@ import { WeekPicker } from "./-bookings/WeekPicker";
 import { EventTypeEditorTabs } from "./-scheduling/event-types-shell/EventTypeEditorTabs";
 import { EventTypeHeaderActions } from "./-scheduling/event-types-shell/EventTypeHeaderActions";
 import { type EventTypeTabName } from "./-scheduling/event-types-shell/eventTypeShellTypes";
+import { EventTypesList } from "./-scheduling/event-types-shell/EventTypesList";
 import {
   eventTypeToPayload,
   type EventType,
@@ -51,8 +52,10 @@ type PublicBookerVisualState =
 
 type EventTypeEditorVisualState = Extract<
   EventTypeTabName,
-  "setup" | "availability" | "limits" | "advanced" | "workflows" | "webhooks"
+  "setup" | "availability" | "limits" | "advanced" | "recurring" | "apps" | "workflows" | "webhooks"
 >;
+
+type EventTypesListVisualState = "default" | "empty" | "loading" | "search-empty";
 
 type BookingDashboardVisualState =
   | "list-upcoming"
@@ -88,6 +91,8 @@ function CalComUiParityFixture() {
     >
       {surface === "public-booker" ? (
         <PublicBookerFixture state={isPublicBookerVisualState(state) ? state : "selecting-time"} />
+      ) : surface === "event-types-list" ? (
+        <EventTypesListFixture state={isEventTypesListVisualState(state) ? state : "default"} />
       ) : surface === "booking-dashboard" ? (
         <BookingDashboardFixture state={isBookingDashboardVisualState(state) ? state : "list-upcoming"} />
       ) : (
@@ -159,9 +164,15 @@ function isEventTypeEditorVisualState(value: unknown): value is EventTypeEditorV
     value === "availability" ||
     value === "limits" ||
     value === "advanced" ||
+    value === "recurring" ||
+    value === "apps" ||
     value === "workflows" ||
     value === "webhooks"
   );
+}
+
+function isEventTypesListVisualState(value: unknown): value is EventTypesListVisualState {
+  return value === "default" || value === "empty" || value === "loading" || value === "search-empty";
 }
 
 function isBookingDashboardVisualState(value: unknown): value is BookingDashboardVisualState {
@@ -183,7 +194,7 @@ function isBookingDashboardVisualState(value: unknown): value is BookingDashboar
 }
 
 function normalizeSurface(value: unknown) {
-  if (value === "event-type-editor" || value === "booking-dashboard") return value;
+  if (value === "event-type-editor" || value === "event-types-list" || value === "booking-dashboard") return value;
   return "public-booker";
 }
 
@@ -192,11 +203,65 @@ function normalizeVisualState(surface: unknown, state: unknown) {
     return isEventTypeEditorVisualState(state) ? state : "setup";
   }
 
+  if (surface === "event-types-list") {
+    return isEventTypesListVisualState(state) ? state : "default";
+  }
+
   if (surface === "booking-dashboard") {
     return isBookingDashboardVisualState(state) ? state : "list-upcoming";
   }
 
   return isPublicBookerVisualState(state) ? state : "selecting-time";
+}
+
+function EventTypesListFixture({ state }: Readonly<{ state: EventTypesListVisualState }>) {
+  const eventTypes =
+    state === "empty"
+      ? []
+      : [
+          visualEditorEventType,
+          {
+            ...visualEditorEventType,
+            durationMinutes: 45,
+            hidden: true,
+            id: "etype_visual_secret_review",
+            slug: "secret-review",
+            title: "Secret review"
+          },
+          {
+            ...visualEditorEventType,
+            durationMinutes: 15,
+            id: "etype_visual_quick_sync",
+            slug: "quick-sync",
+            title: "Quick sync"
+          }
+        ];
+
+  return (
+    <section className="mx-auto max-w-[80rem]" data-testid="event-types-list-layout">
+      <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+        <div className="min-w-0">
+          <h1 className="text-2xl font-semibold tracking-normal">Event types</h1>
+          <p className="mt-1 text-base text-muted-foreground">
+            Configure different events for people to book on your calendar.
+          </p>
+        </div>
+        <Button type="button" className="w-fit gap-2">
+          <PlusIcon />
+          New
+        </Button>
+      </div>
+      <EventTypesList
+        eventTypes={eventTypes}
+        schedules={visualSchedules}
+        publicHandle="visual"
+        isLoading={state === "loading"}
+        onDuplicate={() => {}}
+        onDelete={() => {}}
+        onHiddenChange={() => {}}
+      />
+    </section>
+  );
 }
 
 function BookingDashboardFixture({ state }: Readonly<{ state: BookingDashboardVisualState }>) {

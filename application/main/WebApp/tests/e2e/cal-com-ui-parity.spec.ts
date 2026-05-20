@@ -10,7 +10,18 @@ const publicBookerStates = [
   "success"
 ] as const;
 
-const eventTypeEditorStates = ["setup", "availability", "limits", "advanced", "workflows", "webhooks"] as const;
+const eventTypesListStates = ["default", "empty", "loading"] as const;
+
+const eventTypeEditorStates = [
+  "setup",
+  "availability",
+  "limits",
+  "advanced",
+  "recurring",
+  "apps",
+  "workflows",
+  "webhooks"
+] as const;
 
 const bookingDashboardStates = [
   "list-upcoming",
@@ -35,6 +46,46 @@ const viewports = [
 ] as const;
 
 const eventTypeEditorViewports = viewports.filter((viewport) => viewport.name !== "tablet");
+
+for (const viewport of eventTypeEditorViewports) {
+  test.describe(`@smoke event types list visual parity ${viewport.name}`, () => {
+    test.describe.configure({ mode: "serial" });
+    test.use({ viewport: { width: viewport.width, height: viewport.height } });
+
+    for (const state of eventTypesListStates) {
+      test(`captures event types list ${state}`, async ({ page }, testInfo) => {
+        await page.goto(`/cal-com-ui-parity?surface=event-types-list&state=${state}`);
+        await expect(page.getByTestId("cal-com-ui-parity-fixture")).toBeVisible();
+        await expect(page.getByTestId("event-types-list-layout")).toBeVisible();
+        await expect(page.getByRole("heading", { name: "Event types" })).toBeVisible();
+        await expect(page.getByText("Configure different events for people to book on your calendar.")).toBeVisible();
+        await expect(page.getByRole("button", { name: "New" })).toBeVisible();
+
+        if (state === "empty") {
+          await expect(page.getByText("No event types yet")).toBeVisible();
+        } else if (state === "loading") {
+          await expect(page.getByText("Loading event types...")).toBeVisible();
+        } else {
+          await expect(page.getByRole("textbox", { name: "Search" })).toBeVisible();
+          await expect(page.getByRole("heading", { name: "Product Consultation" })).toBeVisible();
+          await expect(page.getByText("/visual/product-consultation")).toBeVisible();
+          await expect(page.getByText("30m")).toBeVisible();
+          await expect(page.getByLabel("Hide event type from profile").first()).toBeVisible();
+          if (viewport.name !== "mobile") {
+            await expect(page.getByLabel("Preview booking page").first()).toBeVisible();
+          }
+          await expect(
+            viewport.name === "mobile"
+              ? page.getByLabel("Event type actions").last()
+              : page.getByLabel("Event type actions").first()
+          ).toBeVisible();
+        }
+
+        await captureScreenshot(page, testInfo, "wave-1-14", `event-types-list-${state}-${viewport.name}.png`);
+      });
+    }
+  });
+}
 
 for (const viewport of viewports) {
   test.describe(`@smoke public booker visual parity ${viewport.name}`, () => {
@@ -87,11 +138,31 @@ for (const viewport of eventTypeEditorViewports) {
         await expect(page.getByTestId("cal-com-ui-parity-fixture")).toBeVisible();
         await expect(page.getByTestId("event-type-layout")).toBeVisible();
         await expect(page.getByRole("heading", { name: "Product Consultation" })).toBeVisible();
+        for (const tabName of [
+          "Basics",
+          "Availability",
+          "Limits",
+          "Advanced",
+          "Recurring",
+          "Apps",
+          "Workflows",
+          "Webhooks"
+        ]) {
+          await expect(page.getByRole("button", { name: new RegExp(tabName) })).toBeVisible();
+        }
+        if (state === "advanced") {
+          await expect(page.getByText("Calendar event name")).toBeVisible();
+          await expect(page.getByText("Add to calendar")).toBeVisible();
+          await expect(page.getByText("Layout")).toBeVisible();
+          await expect(page.getByText("Booking questions")).toBeVisible();
+          await expect(page.getByText("Require cancellation reason").first()).toBeVisible();
+          await expect(page.getByText("Disable rescheduling", { exact: true })).toBeVisible();
+        }
         if (viewport.name === "mobile") {
           await expect(page.getByRole("button", { name: "Event type actions" })).toBeVisible();
         }
 
-        await captureScreenshot(page, testInfo, "wave-1-7", `event-type-editor-${state}-${viewport.name}.png`);
+        await captureScreenshot(page, testInfo, "wave-1-14", `event-type-editor-${state}-${viewport.name}.png`);
       });
     }
   });

@@ -8,7 +8,7 @@ import {
   DropdownMenuTrigger
 } from "@repo/ui/components/DropdownMenu";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@repo/ui/components/Tooltip";
-import { CopyIcon, EllipsisIcon, EyeIcon, FilesIcon, Trash2Icon } from "lucide-react";
+import { EllipsisIcon, ExternalLinkIcon, FilesIcon, LinkIcon, Trash2Icon } from "lucide-react";
 import { toast } from "sonner";
 
 import type { EventType } from "../schedulingTypes";
@@ -34,7 +34,7 @@ export function CopyEventTypeButton({
       <TooltipTrigger
         render={
           <Button type="button" variant="ghost" size="icon-sm" onClick={() => copyPublicUrl(eventType, publicHandle)}>
-            <CopyIcon />
+            <LinkIcon />
             <span className="sr-only">
               <Trans>Copy public link</Trans>
             </span>
@@ -60,9 +60,10 @@ export function PreviewEventTypeButton({
             type="button"
             variant="ghost"
             size="icon-sm"
+            aria-label={t`Preview booking page`}
             onClick={() => previewPublicUrl(eventType, publicHandle)}
           >
-            <EyeIcon />
+            <ExternalLinkIcon />
             <span className="sr-only">
               <Trans>Preview booking page</Trans>
             </span>
@@ -91,7 +92,7 @@ export function EventTypeOverflowActions({
     <DropdownMenu trackingTitle={t`Event type actions`}>
       <DropdownMenuTrigger
         render={
-          <Button type="button" variant="ghost" size="icon-sm">
+          <Button type="button" variant="ghost" size="icon-sm" aria-label={t`Event type actions`}>
             <EllipsisIcon />
             <span className="sr-only">
               <Trans>Event type actions</Trans>
@@ -101,14 +102,14 @@ export function EventTypeOverflowActions({
       />
       <DropdownMenuContent align="end">
         <DropdownMenuItem onClick={() => copyPublicUrl(eventType, publicHandle)} trackingLabel={t`Copy public link`}>
-          <CopyIcon />
+          <LinkIcon />
           <Trans>Copy link</Trans>
         </DropdownMenuItem>
         <DropdownMenuItem
           onClick={() => previewPublicUrl(eventType, publicHandle)}
           trackingLabel={t`Preview booking page`}
         >
-          <EyeIcon />
+          <ExternalLinkIcon />
           <Trans>Preview</Trans>
         </DropdownMenuItem>
         <DropdownMenuItem onClick={onDuplicate} trackingLabel={t`Duplicate event type`}>

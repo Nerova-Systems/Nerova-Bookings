@@ -92,7 +92,13 @@ function MobileEventTypeActions({
     <DropdownMenu trackingTitle={t`Event type actions`}>
       <DropdownMenuTrigger
         render={
-          <Button type="button" variant="outline" size="icon-sm" className="lg:hidden">
+          <Button
+            type="button"
+            variant="outline"
+            size="icon-sm"
+            aria-label={t`Event type actions`}
+            className="lg:hidden"
+          >
             <EllipsisIcon />
             <span className="sr-only">
               <Trans>Event type actions</Trans>
@@ -147,6 +153,9 @@ function DeleteEventTypeHeaderButton({
   return (
     <Button type="button" variant={variant} size="icon-sm" aria-label={t`Delete`} onClick={onDelete}>
       <Trash2Icon />
+      <span className="sr-only">
+        <Trans>Delete</Trans>
+      </span>
     </Button>
   );
 }
