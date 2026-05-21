@@ -3151,3 +3151,88 @@ msgstr "Solo"
 
 msgid "Teams"
 msgstr "Teams"
+
+#, fuzzy
+msgid "Roles"
+msgstr "Roles"
+#, fuzzy
+msgid "Define custom roles and assign permissions to control what your members can do."
+msgstr "Define custom roles and assign permissions to control what your members can do."
+#, fuzzy
+msgid "New role"
+msgstr "New role"
+#, fuzzy
+msgid "Create a role"
+msgstr "Create a role"
+#, fuzzy
+msgid "Create a custom role to grant members the exact permissions they need."
+msgstr "Create a custom role to grant members the exact permissions they need."
+#, fuzzy
+msgid "No roles yet"
+msgstr "No roles yet"
+#, fuzzy
+msgid "Members"
+msgstr "Members"
+#, fuzzy
+msgid "Edit {0}"
+msgstr "Edit {0}"
+#, fuzzy
+msgid "Delete {0}"
+msgstr "Delete {0}"
+#, fuzzy
+msgid "Create role"
+msgstr "Create role"
+#, fuzzy
+msgid "Creating..."
+msgstr "Creating..."
+#, fuzzy
+msgid "Choose a name and select the permissions this role grants."
+msgstr "Choose a name and select the permissions this role grants."
+#, fuzzy
+msgid "Role created: {0}"
+msgstr "Role created: {0}"
+#, fuzzy
+msgid "Failed to create role. Please try again."
+msgstr "Failed to create role. Please try again."
+#, fuzzy
+msgid "Role updated: {0}"
+msgstr "Role updated: {0}"
+#, fuzzy
+msgid "System roles cannot be edited. The permission set is fixed."
+msgstr "System roles cannot be edited. The permission set is fixed."
+#, fuzzy
+msgid "Update the role's permissions or description."
+msgstr "Update the role's permissions or description."
+#, fuzzy
+msgid "{0} members assigned"
+msgstr "{0} members assigned"
+#, fuzzy
+msgid "Failed to update role. Please try again."
+msgstr "Failed to update role. Please try again."
+#, fuzzy
+msgid "Role name"
+msgstr "Role name"
+#, fuzzy
+msgid "Role description"
+msgstr "Role description"
+#, fuzzy
+msgid "Permissions"
+msgstr "Permissions"
+#, fuzzy
+msgid "Selecting <0>Manage</0> for a resource implicitly grants Create, Read, Update, and Delete."
+msgstr "Selecting <0>Manage</0> for a resource implicitly grants Create, Read, Update, and Delete."
+#, fuzzy
+msgid "Loading permissions..."
+msgstr "Loading permissions..."
+#, fuzzy
+msgid "Resource"
+msgstr "Resource"
+#, fuzzy
+msgid "Delete role"
+msgstr "Delete role"
+#, fuzzy
+msgid "Are you sure you want to delete <0>{0}</0>? Members assigned to this role will lose its permissions."
+msgstr "Are you sure you want to delete <0>{0}</0>? Members assigned to this role will lose its permissions."
+#, fuzzy
+msgid "Role deleted: {0}"
+msgstr "Role deleted: {0}"

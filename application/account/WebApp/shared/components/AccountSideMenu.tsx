@@ -21,6 +21,7 @@ import {
   CreditCardIcon,
   HomeIcon,
   MonitorSmartphoneIcon,
+  ShieldCheckIcon,
   SlidersHorizontalIcon,
   UserIcon,
   UsersIcon
@@ -46,6 +47,7 @@ export function AccountSideMenu() {
   const { navigateToMain } = useMainNavigation();
   const { enabled: isSubscriptionEnabled } = useFeatureFlag("subscriptions");
   const { enabled: isAccountOverviewEnabled } = useFeatureFlag("account-overview");
+  const { enabled: isTierEnterpriseEnabled } = useFeatureFlag("tier-enterprise");
 
   const isActive = (target: string, matchPrefix = false) => {
     const normalized = normalizePath(target);
@@ -53,6 +55,7 @@ export function AccountSideMenu() {
   };
 
   const showBilling = userInfo?.role === "Owner" && isSubscriptionEnabled;
+  const showRoles = (userInfo?.role === "Owner" || userInfo?.role === "Admin") && isTierEnterpriseEnabled;
 
   return (
     <Sidebar collapsible="icon" mobileContent={<MobileMenu onNavigate={navigateToMain ?? undefined} />}>
@@ -143,6 +146,22 @@ export function AccountSideMenu() {
                     </RouterLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
+                {showRoles && (
+                  <SidebarMenuItem>
+                    <SidebarMenuButton
+                      asChild={true}
+                      isActive={isActive("/account/settings/roles", true)}
+                      tooltip={t`Roles`}
+                    >
+                      <RouterLink to="/account/settings/roles">
+                        <ShieldCheckIcon />
+                        <span>
+                          <Trans>Roles</Trans>
+                        </span>
+                      </RouterLink>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                )}
                 {showBilling && (
                   <SidebarMenuItem>
                     <SidebarMenuButton
