@@ -1,7 +1,9 @@
+using Account.Features.Attributes.Domain;
 using Account.Features.Authentication.Domain;
 using Account.Features.EmailAuthentication.Domain;
 using Account.Features.ExternalAuthentication.Domain;
 using Account.Features.FeatureFlags.Domain;
+using Account.Features.Memberships.Domain;
 using Account.Features.Subscriptions.Domain;
 using Account.Features.Tenants.Domain;
 using Account.Features.Users.Domain;
@@ -9,6 +11,8 @@ using SharedKernel.Authentication.TokenGeneration;
 using SharedKernel.Domain;
 using SharedKernel.FeatureFlags;
 using SharedKernel.Telemetry;
+
+// ReSharper disable once RedundantUsingDirective (used by MicrosoftSso* events)
 
 namespace Account.Features;
 
@@ -18,6 +22,30 @@ namespace Account.Features;
 /// This particular includes the naming of the telemetry events (which should be in past tense) and the properties that
 /// are collected with each telemetry event. Since missing or bad data cannot be fixed, it is important to have a good
 /// data quality from the start.
+public sealed class AttributeAssigned(MembershipId membershipId, AttributeId attributeId)
+    : TelemetryEvent(("membership_id", membershipId), ("attribute_id", attributeId));
+
+public sealed class AttributeCreated(AttributeId attributeId, TenantId orgId)
+    : TelemetryEvent(("attribute_id", attributeId), ("org_id", orgId));
+
+public sealed class AttributeDeleted(AttributeId attributeId, TenantId orgId)
+    : TelemetryEvent(("attribute_id", attributeId), ("org_id", orgId));
+
+public sealed class AttributeOptionCreated(AttributeOptionId optionId, AttributeId attributeId)
+    : TelemetryEvent(("option_id", optionId), ("attribute_id", attributeId));
+
+public sealed class AttributeOptionDeleted(AttributeOptionId optionId, AttributeId attributeId)
+    : TelemetryEvent(("option_id", optionId), ("attribute_id", attributeId));
+
+public sealed class AttributeOptionUpdated(AttributeOptionId optionId, AttributeId attributeId)
+    : TelemetryEvent(("option_id", optionId), ("attribute_id", attributeId));
+
+public sealed class AttributeUnassigned(MembershipId membershipId, AttributeId attributeId)
+    : TelemetryEvent(("membership_id", membershipId), ("attribute_id", attributeId));
+
+public sealed class AttributeUpdated(AttributeId attributeId, TenantId orgId)
+    : TelemetryEvent(("attribute_id", attributeId), ("org_id", orgId));
+
 public sealed class BackOfficeImpersonationEnded(UserId targetUserId)
     : TelemetryEvent(("target_user_id", targetUserId));
 
@@ -131,6 +159,15 @@ public sealed class ImpersonationStarted(UserId actorUserId, UserId targetUserId
 
 public sealed class Logout
     : TelemetryEvent;
+
+public sealed class MicrosoftSsoLoginStarted(TenantId orgId)
+    : TelemetryEvent(("org_id", orgId));
+
+public sealed class MicrosoftSsoLoginSucceeded(UserId userId, TenantId orgId)
+    : TelemetryEvent(("user_id", userId), ("org_id", orgId));
+
+public sealed class MicrosoftSsoLoginFailed(TenantId orgId, string reason)
+    : TelemetryEvent(("org_id", orgId), ("reason", reason));
 
 public sealed class PaymentFailed(SubscriptionId subscriptionId, SubscriptionPlan plan, decimal priceAmount, string currency)
     : TelemetryEvent(("subscription_id", subscriptionId), ("plan", plan), ("price_amount", priceAmount), ("currency", currency));
