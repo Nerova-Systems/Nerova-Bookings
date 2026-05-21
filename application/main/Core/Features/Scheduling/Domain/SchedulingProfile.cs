@@ -43,9 +43,38 @@ public sealed class SchedulingProfile : SoftDeletableAggregateRoot<SchedulingPro
 
     public TenantId TenantId { get; } = new(0);
 
-    public static SchedulingProfile Create(TenantId tenantId, UserId ownerUserId, string handle, string displayName, string? avatarUrl)
+    /// <summary>
+    ///     When non-null, references a Tenant of TenantKind.Team. When null, the aggregate is owned by the existing
+    ///     user/solo scope.
+    /// </summary>
+    public TenantId? TeamId { get; private set; }
+
+    /// <summary>
+    ///     Assigns this scheduling profile to a team.
+    /// </summary>
+    /// <remarks>
+    ///     The command layer is responsible for verifying that <paramref name="teamId" /> references a Tenant of
+    ///     TenantKind.Team. This aggregate cannot verify TenantKind itself.
+    /// </remarks>
+    public void AssignToTeam(TenantId teamId)
     {
-        return new SchedulingProfile(tenantId, ownerUserId, handle, displayName, avatarUrl);
+        // Command layer must ensure teamId refers to a TenantKind.Team tenant.
+        TeamId = teamId;
+    }
+
+    /// <summary>
+    ///     Removes the team association, reverting the scheduling profile to user/solo scope.
+    /// </summary>
+    public void RemoveFromTeam()
+    {
+        TeamId = null;
+    }
+
+    public static SchedulingProfile Create(TenantId tenantId, UserId ownerUserId, string handle, string displayName, string? avatarUrl, TenantId? teamId = null)
+    {
+        var profile = new SchedulingProfile(tenantId, ownerUserId, handle, displayName, avatarUrl);
+        if (teamId is not null) profile.AssignToTeam(teamId);
+        return profile;
     }
 
     public void Update(string handle, string displayName, string? avatarUrl)

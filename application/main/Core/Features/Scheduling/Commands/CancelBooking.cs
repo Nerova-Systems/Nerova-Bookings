@@ -21,7 +21,7 @@ public sealed class CancelBookingHandler(IBookingRepository bookingRepository, I
             return Result.Unauthorized("Authentication is required.");
         }
 
-        var item = await bookingRepository.GetForOwnerWithEventTypeAsync(tenantId, ownerUserId, command.Id, cancellationToken);
+        var item = await bookingRepository.GetForOwnerWithEventTypeAsync(tenantId, ownerUserId, executionContext.ActiveTeamId, command.Id, cancellationToken);
         if (item is null)
         {
             return Result.NotFound($"Booking '{command.Id}' was not found.");

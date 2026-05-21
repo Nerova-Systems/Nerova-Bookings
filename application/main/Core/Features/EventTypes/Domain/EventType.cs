@@ -81,6 +81,33 @@ public sealed class EventType : SoftDeletableAggregateRoot<EventTypeId>, ITenant
 
     public TenantId TenantId { get; } = new(0);
 
+    /// <summary>
+    ///     When non-null, references a Tenant of TenantKind.Team. When null, the aggregate is owned by the existing
+    ///     user/solo scope.
+    /// </summary>
+    public TenantId? TeamId { get; private set; }
+
+    /// <summary>
+    ///     Assigns this event type to a team.
+    /// </summary>
+    /// <remarks>
+    ///     The command layer is responsible for verifying that <paramref name="teamId" /> references a Tenant of
+    ///     TenantKind.Team. This aggregate cannot verify TenantKind itself.
+    /// </remarks>
+    public void AssignToTeam(TenantId teamId)
+    {
+        // Command layer must ensure teamId refers to a TenantKind.Team tenant.
+        TeamId = teamId;
+    }
+
+    /// <summary>
+    ///     Removes the team association, reverting the event type to user/solo scope.
+    /// </summary>
+    public void RemoveFromTeam()
+    {
+        TeamId = null;
+    }
+
     public static EventType Create(
         TenantId tenantId,
         UserId ownerUserId,
@@ -96,10 +123,13 @@ public sealed class EventType : SoftDeletableAggregateRoot<EventTypeId>, ITenant
         int minimumBookingNoticeMinutes,
         string? locationType,
         string? locationValue,
-        EventTypeSettings? settings
+        EventTypeSettings? settings,
+        TenantId? teamId = null
     )
     {
-        return new EventType(tenantId, ownerUserId, title, slug, description, durationMinutes, hidden, scheduleId, beforeEventBufferMinutes, afterEventBufferMinutes, slotIntervalMinutes, minimumBookingNoticeMinutes, locationType, locationValue, settings);
+        var eventType = new EventType(tenantId, ownerUserId, title, slug, description, durationMinutes, hidden, scheduleId, beforeEventBufferMinutes, afterEventBufferMinutes, slotIntervalMinutes, minimumBookingNoticeMinutes, locationType, locationValue, settings);
+        if (teamId is not null) eventType.AssignToTeam(teamId);
+        return eventType;
     }
 
     public void Update(

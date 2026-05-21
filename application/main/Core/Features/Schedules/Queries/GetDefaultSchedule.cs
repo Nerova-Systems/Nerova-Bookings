@@ -20,7 +20,7 @@ public sealed class GetDefaultScheduleHandler(IScheduleRepository scheduleReposi
             return Result<ScheduleResponse>.Unauthorized("Authentication is required.");
         }
 
-        var schedule = await scheduleRepository.GetDefaultForOwnerAsync(ownerUserId, cancellationToken);
+        var schedule = await scheduleRepository.GetDefaultForOwnerAsync(ownerUserId, executionContext.ActiveTeamId, cancellationToken);
         if (schedule is null)
         {
             return Result<ScheduleResponse>.NotFound("Default schedule was not found.");

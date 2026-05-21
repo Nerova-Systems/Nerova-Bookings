@@ -61,6 +61,33 @@ public sealed class Schedule : SoftDeletableAggregateRoot<ScheduleId>, ITenantSc
 
     public TenantId TenantId { get; } = new(0);
 
+    /// <summary>
+    ///     When non-null, references a Tenant of TenantKind.Team. When null, the aggregate is owned by the existing
+    ///     user/solo scope.
+    /// </summary>
+    public TenantId? TeamId { get; private set; }
+
+    /// <summary>
+    ///     Assigns this schedule to a team.
+    /// </summary>
+    /// <remarks>
+    ///     The command layer is responsible for verifying that <paramref name="teamId" /> references a Tenant of
+    ///     TenantKind.Team. This aggregate cannot verify TenantKind itself.
+    /// </remarks>
+    public void AssignToTeam(TenantId teamId)
+    {
+        // Command layer must ensure teamId refers to a TenantKind.Team tenant.
+        TeamId = teamId;
+    }
+
+    /// <summary>
+    ///     Removes the team association, reverting the schedule to user/solo scope.
+    /// </summary>
+    public void RemoveFromTeam()
+    {
+        TeamId = null;
+    }
+
     public static Schedule Create(
         TenantId tenantId,
         UserId ownerUserId,
@@ -68,10 +95,13 @@ public sealed class Schedule : SoftDeletableAggregateRoot<ScheduleId>, ITenantSc
         string timeZone,
         bool isDefault,
         AvailabilityWindow[] availabilityWindows,
-        AvailabilityDateOverride[] dateOverrides
+        AvailabilityDateOverride[] dateOverrides,
+        TenantId? teamId = null
     )
     {
-        return new Schedule(tenantId, ownerUserId, name, timeZone, isDefault, availabilityWindows, dateOverrides);
+        var schedule = new Schedule(tenantId, ownerUserId, name, timeZone, isDefault, availabilityWindows, dateOverrides);
+        if (teamId is not null) schedule.AssignToTeam(teamId);
+        return schedule;
     }
 
     public void Update(string name, string timeZone, bool isDefault, AvailabilityWindow[] availabilityWindows, AvailabilityDateOverride[] dateOverrides)

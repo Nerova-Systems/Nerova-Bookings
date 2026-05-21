@@ -7,7 +7,7 @@ namespace Main.Features.Scheduling.Domain;
 
 public interface ISchedulingProfileRepository : ICrudRepository<SchedulingProfile, SchedulingProfileId>, ISoftDeletableRepository<SchedulingProfile, SchedulingProfileId>
 {
-    Task<SchedulingProfile?> GetForOwnerAsync(UserId ownerUserId, CancellationToken cancellationToken);
+    Task<SchedulingProfile?> GetForOwnerAsync(UserId ownerUserId, TenantId? teamId, CancellationToken cancellationToken);
 
     Task<SchedulingProfile?> GetByHandleAsync(string handle, CancellationToken cancellationToken);
 
@@ -23,11 +23,13 @@ public interface ISchedulingProfileRepository : ICrudRepository<SchedulingProfil
 public sealed class SchedulingProfileRepository(MainDbContext mainDbContext)
     : SoftDeletableRepositoryBase<SchedulingProfile, SchedulingProfileId>(mainDbContext), ISchedulingProfileRepository
 {
-    public async Task<SchedulingProfile?> GetForOwnerAsync(UserId ownerUserId, CancellationToken cancellationToken)
+    public async Task<SchedulingProfile?> GetForOwnerAsync(UserId ownerUserId, TenantId? teamId, CancellationToken cancellationToken)
     {
-        return await DbSet
-            .Where(profile => profile.OwnerUserId == ownerUserId)
-            .FirstOrDefaultAsync(cancellationToken);
+        var query = teamId is not null
+            ? DbSet.Where(profile => profile.TeamId == teamId)
+            : DbSet.Where(profile => profile.OwnerUserId == ownerUserId && profile.TeamId == null);
+
+        return await query.FirstOrDefaultAsync(cancellationToken);
     }
 
     public async Task<SchedulingProfile?> GetByHandleAsync(string handle, CancellationToken cancellationToken)

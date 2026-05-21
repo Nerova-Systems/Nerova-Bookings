@@ -16,6 +16,7 @@ public sealed class ScheduleConfiguration : IEntityTypeConfiguration<Schedule>
     {
         builder.MapStronglyTypedUuid<Schedule, ScheduleId>(schedule => schedule.Id);
         builder.MapStronglyTypedLongId<Schedule, TenantId>(schedule => schedule.TenantId);
+        builder.MapStronglyTypedNullableLongId<Schedule, TenantId>(schedule => schedule.TeamId);
         builder.MapStronglyTypedUuid<Schedule, UserId>(schedule => schedule.OwnerUserId);
 
         builder.Property(schedule => schedule.Name).HasMaxLength(120);
@@ -47,5 +48,6 @@ public sealed class ScheduleConfiguration : IEntityTypeConfiguration<Schedule>
 
         builder.HasIndex(schedule => new { schedule.TenantId, schedule.OwnerUserId, schedule.Name });
         builder.HasIndex(schedule => new { schedule.TenantId, schedule.OwnerUserId, schedule.IsDefault });
+        builder.HasIndex(schedule => schedule.TeamId);
     }
 }

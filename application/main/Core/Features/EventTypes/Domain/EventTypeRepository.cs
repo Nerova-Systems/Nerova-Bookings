@@ -8,7 +8,7 @@ namespace Main.Features.EventTypes.Domain;
 
 public interface IEventTypeRepository : ICrudRepository<EventType, EventTypeId>, ISoftDeletableRepository<EventType, EventTypeId>
 {
-    Task<EventType[]> GetForOwnerAsync(UserId ownerUserId, CancellationToken cancellationToken);
+    Task<EventType[]> GetForOwnerAsync(UserId ownerUserId, TenantId? teamId, CancellationToken cancellationToken);
 
     Task<EventType?> GetPublicBySlugUnfilteredAsync(TenantId tenantId, UserId ownerUserId, string slug, CancellationToken cancellationToken);
 
@@ -20,10 +20,13 @@ public interface IEventTypeRepository : ICrudRepository<EventType, EventTypeId>,
 public sealed class EventTypeRepository(MainDbContext mainDbContext)
     : SoftDeletableRepositoryBase<EventType, EventTypeId>(mainDbContext), IEventTypeRepository
 {
-    public async Task<EventType[]> GetForOwnerAsync(UserId ownerUserId, CancellationToken cancellationToken)
+    public async Task<EventType[]> GetForOwnerAsync(UserId ownerUserId, TenantId? teamId, CancellationToken cancellationToken)
     {
-        return await DbSet
-            .Where(eventType => eventType.OwnerUserId == ownerUserId)
+        var query = teamId is not null
+            ? DbSet.Where(eventType => eventType.TeamId == teamId)
+            : DbSet.Where(eventType => eventType.OwnerUserId == ownerUserId && eventType.TeamId == null);
+
+        return await query
             .OrderBy(eventType => eventType.Title)
             .ThenBy(eventType => eventType.Id)
             .ToArrayAsync(cancellationToken);

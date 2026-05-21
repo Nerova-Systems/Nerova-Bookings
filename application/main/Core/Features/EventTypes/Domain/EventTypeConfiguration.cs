@@ -15,6 +15,7 @@ public sealed class EventTypeConfiguration : IEntityTypeConfiguration<EventType>
     {
         builder.MapStronglyTypedUuid<EventType, EventTypeId>(eventType => eventType.Id);
         builder.MapStronglyTypedLongId<EventType, TenantId>(eventType => eventType.TenantId);
+        builder.MapStronglyTypedNullableLongId<EventType, TenantId>(eventType => eventType.TeamId);
         builder.MapStronglyTypedUuid<EventType, UserId>(eventType => eventType.OwnerUserId);
         builder.MapStronglyTypedUuid<EventType, ScheduleId>(eventType => eventType.ScheduleId);
 
@@ -40,5 +41,6 @@ public sealed class EventTypeConfiguration : IEntityTypeConfiguration<EventType>
             .IsUnique()
             .HasFilter("deleted_at IS NULL");
         builder.HasIndex(eventType => new { eventType.TenantId, eventType.OwnerUserId, eventType.Title });
+        builder.HasIndex(eventType => eventType.TeamId);
     }
 }
