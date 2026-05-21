@@ -1,4 +1,7 @@
 using Account.Database;
+using Account.Features.AuditLog.Domain;
+using Account.Features.AuditLog.Infrastructure;
+using Account.Features.Smtp.Infrastructure;
 using Account.Features.EmailAuthentication.Shared;
 using Account.Features.ExternalAuthentication;
 using Account.Features.ExternalAuthentication.Shared;
@@ -8,6 +11,7 @@ using Account.Features.Permissions.Services;
 using Account.Features.Subscriptions.Shared;
 using Account.Features.Users.Shared;
 using Account.Integrations.Gravatar;
+using SharedKernel.AuditLog;
 using Account.Integrations.OAuth;
 using Account.Integrations.OAuth.Google;
 using Account.Integrations.OAuth.Mock;
@@ -19,6 +23,7 @@ using Microsoft.Extensions.Options;
 using SharedKernel.Configuration;
 using SharedKernel.Cqrs;
 using SharedKernel.Emails;
+using SharedKernel.Integrations.Email;
 using SharedKernel.OpenIdConnect;
 
 namespace Account;
@@ -83,6 +88,8 @@ public static class Configuration
 
             return services
                 .AddSharedServices<AccountDbContext>([Assembly])
+                .AddScoped<SmtpCredentialProtector>()
+                .Decorate<IEmailClient, TenantAwareEmailClient>()
                 .AddScoped<StartEmailConfirmation>()
                 .AddScoped<CompleteEmailConfirmation>()
                 .AddScoped<AvatarUpdater>()
@@ -93,7 +100,9 @@ public static class Configuration
                 .AddScoped<ProcessSubscriptionBilling>()
                 .AddScoped<ExternalAuthenticationService>()
                 .AddScoped<ExternalAuthenticationHelper>()
-                .AddScoped<IPermissionCheckService, PermissionCheckService>();
+                .AddScoped<IPermissionCheckService, PermissionCheckService>()
+                .AddScoped<IAuditLogRepository, AuditLogRepository>()
+                .AddScoped<IAuditLogEmitter, AuditLogEmitter>();
         }
     }
 }

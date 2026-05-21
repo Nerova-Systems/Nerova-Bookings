@@ -32,5 +32,8 @@ public enum PermissionAction
     Invite,
 
     /// <summary>List / enumerate resource instances without necessarily reading each one in full.</summary>
-    List
+    List,
+
+    /// <summary>Take on the identity of a user for support and debugging purposes (with full audit trail).</summary>
+    Impersonate
 }

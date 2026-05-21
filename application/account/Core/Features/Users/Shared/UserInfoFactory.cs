@@ -38,7 +38,9 @@ public sealed class UserInfoFactory(
         CancellationToken cancellationToken,
         TenantId? activeTeamId = null,
         TenantId? activeOrgId = null,
-        OrgProfileId? activeOrgProfileId = null)
+        OrgProfileId? activeOrgProfileId = null,
+        string? impersonatedByIdentifier = null,
+        UserId? impersonatedByUserId = null)
     {
         var tenant = await tenantRepository.GetByIdAsync(user.TenantId, cancellationToken);
         if (tenant is null) return Result<UserInfo>.BadRequest("Tenant has been deleted.");
@@ -74,7 +76,9 @@ public sealed class UserInfoFactory(
             UserRolloutBucket = user.RolloutBucket,
             ActiveTeamId = activeTeamId,
             ActiveOrgId = activeOrgId,
-            ActiveOrgProfileId = activeOrgProfileId?.Value
+            ActiveOrgProfileId = activeOrgProfileId?.Value,
+            ImpersonatedByIdentifier = impersonatedByIdentifier,
+            ImpersonatedByUserId = impersonatedByUserId
         };
     }
 }

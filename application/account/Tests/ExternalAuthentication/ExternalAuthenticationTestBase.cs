@@ -20,6 +20,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using NSubstitute;
 using SharedKernel.Domain;
 using SharedKernel.ExecutionContext;
@@ -112,7 +113,9 @@ public abstract class ExternalAuthenticationTestBase : IDisposable
                         TelemetryEventsCollectorSpy = new TelemetryEventsCollectorSpy(new TelemetryEventsCollector());
                         testServices.AddScoped<ITelemetryEventsCollector>(_ => TelemetryEventsCollectorSpy);
 
-                        testServices.Remove(testServices.Single(d => d.ServiceType == typeof(IEmailClient)));
+                        // Scrutor's Decorate<IEmailClient, TenantAwareEmailClient>() registers two IEmailClient
+                        // descriptors (inner platform client + outer decorator). RemoveAll clears both.
+                        testServices.RemoveAll(typeof(IEmailClient));
                         testServices.AddTransient<IEmailClient>(_ => emailClient);
 
                         testServices.AddScoped<IExecutionContext, HttpExecutionContext>();

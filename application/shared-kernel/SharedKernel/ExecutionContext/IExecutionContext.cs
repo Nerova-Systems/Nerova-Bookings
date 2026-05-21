@@ -43,5 +43,13 @@ public interface IExecutionContext
     /// </summary>
     UserInfo UserInfo { get; }
 
+    /// <summary>
+    ///     The <see cref="UserId" /> of the original actor who started this impersonation session,
+    ///     or <see langword="null" /> when the current request is not an impersonated session.
+    ///     Non-null only for org-admin impersonation; BackOffice impersonation yields <see langword="null" />
+    ///     because the BackOffice principal has no Nerova <see cref="UserId" />.
+    /// </summary>
+    UserId? ImpersonatedByUserId { get; }
+
     IPAddress ClientIpAddress { get; }
 }

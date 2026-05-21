@@ -58,5 +58,8 @@ public enum PermissionResource
     Smtp,
 
     /// <summary>Billing settings and invoices.</summary>
-    Billing
+    Billing,
+
+    /// <summary>User accounts managed within a team or organization.</summary>
+    User
 }

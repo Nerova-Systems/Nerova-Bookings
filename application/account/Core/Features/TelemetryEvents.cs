@@ -18,6 +18,12 @@ namespace Account.Features;
 /// This particular includes the naming of the telemetry events (which should be in past tense) and the properties that
 /// are collected with each telemetry event. Since missing or bad data cannot be fixed, it is important to have a good
 /// data quality from the start.
+public sealed class BackOfficeImpersonationEnded(UserId targetUserId)
+    : TelemetryEvent(("target_user_id", targetUserId));
+
+public sealed class BackOfficeImpersonationStarted(UserId targetUserId)
+    : TelemetryEvent(("target_user_id", targetUserId));
+
 public sealed class BillingDriftSkippedDueToPaystackUnavailable(SubscriptionId subscriptionId)
     : TelemetryEvent(("subscription_id", subscriptionId));
 
@@ -116,6 +122,12 @@ public sealed class FeatureFlagUserOverrideSet(string flagKey, UserId userId, Fe
 
 public sealed class GravatarUpdated(long size)
     : TelemetryEvent(("size", size));
+
+public sealed class ImpersonationEnded(UserId actorUserId, UserId targetUserId, TenantId orgId)
+    : TelemetryEvent(("actor_user_id", actorUserId), ("target_user_id", targetUserId), ("org_id", orgId));
+
+public sealed class ImpersonationStarted(UserId actorUserId, UserId targetUserId, TenantId orgId)
+    : TelemetryEvent(("actor_user_id", actorUserId), ("target_user_id", targetUserId), ("org_id", orgId));
 
 public sealed class Logout
     : TelemetryEvent;

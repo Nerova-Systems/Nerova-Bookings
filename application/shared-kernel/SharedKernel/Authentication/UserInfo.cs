@@ -84,6 +84,20 @@ public class UserInfo
     /// </summary>
     public string? ActiveOrgProfileId { get; init; }
 
+    /// <summary>
+    ///     Raw value of the <c>impersonated_by</c> JWT claim, or <see langword="null" /> when not
+    ///     impersonating.  The value is the original actor's <see cref="UserId" /> string for
+    ///     org-admin impersonation, or the sentinel <c>"backoffice"</c> for BackOffice impersonation.
+    /// </summary>
+    public string? ImpersonatedByIdentifier { get; init; }
+
+    /// <summary>
+    ///     Parsed <see cref="UserId" /> of the org-admin who started this impersonation session.
+    ///     Non-null only when <see cref="ImpersonatedByIdentifier" /> starts with <c>"usr_"</c>
+    ///     (org-admin path). Null for BackOffice impersonation and non-impersonated sessions.
+    /// </summary>
+    public UserId? ImpersonatedByUserId { get; init; }
+
     public bool IsFeatureFlagEnabled(string flagKey)
     {
         return FeatureFlags.Contains(flagKey);
@@ -112,6 +126,7 @@ public class UserInfo
         var activeTeamIdClaim = user.FindFirstValue("active_team_id");
         var activeOrgIdClaim = user.FindFirstValue("active_org_id");
         var activeOrgProfileIdClaim = user.FindFirstValue("active_org_profile_id");
+        var impersonatedByClaim = user.FindFirstValue("impersonated_by");
         return new UserInfo
         {
             IsAuthenticated = true,
@@ -136,7 +151,9 @@ public class UserInfo
             UserRolloutBucket = !string.IsNullOrEmpty(userRolloutBucketClaim) ? int.Parse(userRolloutBucketClaim) : null,
             ActiveTeamId = string.IsNullOrEmpty(activeTeamIdClaim) ? null : new TenantId(long.Parse(activeTeamIdClaim)),
             ActiveOrgId = string.IsNullOrEmpty(activeOrgIdClaim) ? null : new TenantId(long.Parse(activeOrgIdClaim)),
-            ActiveOrgProfileId = string.IsNullOrEmpty(activeOrgProfileIdClaim) ? null : activeOrgProfileIdClaim
+            ActiveOrgProfileId = string.IsNullOrEmpty(activeOrgProfileIdClaim) ? null : activeOrgProfileIdClaim,
+            ImpersonatedByIdentifier = string.IsNullOrEmpty(impersonatedByClaim) ? null : impersonatedByClaim,
+            ImpersonatedByUserId = impersonatedByClaim?.StartsWith("usr_") == true ? new UserId(impersonatedByClaim) : null
         };
     }
 

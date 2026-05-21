@@ -15,6 +15,8 @@ public class BackgroundWorkerExecutionContext(TenantId? tenantId = null, UserInf
 
     public string? ActiveOrgProfileId => UserInfo.ActiveOrgProfileId;
 
+    public UserId? ImpersonatedByUserId => UserInfo.ImpersonatedByUserId;
+
     public UserInfo UserInfo { get; } = userInfo ?? UserInfo.System;
 
     public IPAddress ClientIpAddress { get; } = IPAddress.None;

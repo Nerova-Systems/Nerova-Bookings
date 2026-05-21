@@ -48,7 +48,8 @@ public static class SystemRoles
     public static IEnumerable<Permission> AdminPermissions =>
         Permission.All.Where(p =>
             !(p.Resource == PermissionResource.Billing && p.Action == PermissionAction.Manage) &&
-            !(p.Resource == PermissionResource.Organization && p.Action == PermissionAction.Delete));
+            !(p.Resource == PermissionResource.Organization && p.Action == PermissionAction.Delete) &&
+            !(p.Resource == PermissionResource.User && p.Action == PermissionAction.Impersonate));
 
     /// <summary>
     ///     Limited read/create/update permissions for everyday work.

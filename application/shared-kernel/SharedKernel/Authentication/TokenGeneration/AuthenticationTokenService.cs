@@ -31,6 +31,14 @@ public sealed class AuthenticationTokenService(
         SetAuthenticationTokensOnHttpResponse(refreshToken, accessToken);
     }
 
+    /// <summary>Sets only the access token response header for an impersonation session. No refresh token is issued or modified.</summary>
+    public void SetImpersonationAccessToken(UserInfo userInfo)
+    {
+        var accessToken = accessTokenGenerator.Generate(userInfo);
+        var httpContext = httpContextAccessor.HttpContext ?? throw new InvalidOperationException("HttpContext is null.");
+        httpContext.Response.Headers[AuthenticationTokenHttpKeys.AccessTokenHttpHeaderKey] = accessToken;
+    }
+
     private void SetAuthenticationTokensOnHttpResponse(string refreshToken, string accessToken)
     {
         var httpContext = httpContextAccessor.HttpContext ?? throw new InvalidOperationException("HttpContext is null.");

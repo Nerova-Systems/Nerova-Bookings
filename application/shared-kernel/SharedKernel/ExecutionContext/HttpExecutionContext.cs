@@ -16,6 +16,8 @@ public class HttpExecutionContext(IHttpContextAccessor httpContextAccessor) : IE
 
     public string? ActiveOrgProfileId => UserInfo.ActiveOrgProfileId;
 
+    public UserId? ImpersonatedByUserId => UserInfo.ImpersonatedByUserId;
+
     public UserInfo UserInfo
     {
         get
