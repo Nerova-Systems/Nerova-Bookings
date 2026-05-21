@@ -1,3 +1,4 @@
+using Account.Features.Memberships.Commands;
 using Account.Features.Memberships.Domain;
 using Account.Features.Permissions;
 using Account.Features.Permissions.Commands.AssignRoleToMembership;
@@ -74,6 +75,10 @@ public sealed class PermissionsEndpoints : IEndpoints
                 AssignRoleToMembershipCommand command,
                 IMediator mediator)
             => await mediator.Send(command with { MembershipId = id })
+        );
+
+        membershipGroup.MapDelete("/{id}", async Task<ApiResult> (MembershipId id, IMediator mediator)
+            => await mediator.Send(new RemoveMembershipCommand(id))
         );
 
         // ─── Permission catalog ───────────────────────────────────────────────

@@ -384,6 +384,21 @@ public sealed class TenantSwitched(TenantId fromTenantId, TenantId toTenantId, U
 public sealed class TenantUpdated
     : TelemetryEvent;
 
+public sealed class TeamCreated(TenantId teamId, TenantId orgId)
+    : TelemetryEvent(("team_id", teamId), ("org_id", orgId));
+
+public sealed class TeamUpdated(TenantId teamId, TenantId orgId)
+    : TelemetryEvent(("team_id", teamId), ("org_id", orgId));
+
+public sealed class TeamDeleted(TenantId teamId, TenantId orgId, int memberCount)
+    : TelemetryEvent(("team_id", teamId), ("org_id", orgId), ("member_count", memberCount));
+
+public sealed class TeamMemberInvited(TenantId teamId, TenantId orgId, MembershipId membershipId, MembershipRole role)
+    : TelemetryEvent(("team_id", teamId), ("org_id", orgId), ("membership_id", membershipId), ("role", role));
+
+public sealed class MembershipRemoved(MembershipId membershipId, TenantId tenantId, MembershipRole role)
+    : TelemetryEvent(("membership_id", membershipId), ("tenant_id", tenantId), ("role", role));
+
 public sealed class UserAbInclusionPinUpdated(UserId userId, AbInclusionPin? fromPin, AbInclusionPin? toPin)
     : TelemetryEvent(("user_id", userId), ("from_pin", fromPin as object ?? "none"), ("to_pin", toPin as object ?? "none"));
 
