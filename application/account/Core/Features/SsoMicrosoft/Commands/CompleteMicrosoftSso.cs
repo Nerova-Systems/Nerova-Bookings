@@ -1,10 +1,16 @@
 using System.Net.Http.Json;
+using System.Security.Claims;
+using System.Text.Json;
+using Account.Features.AttributeSync.Domain;
 using Account.Features.Authentication.Domain;
+using Account.Features.Memberships.Domain;
 using Account.Features.Sso.Domain;
+using Account.Features.Sso.Events;
 using Account.Features.SsoMicrosoft.Infrastructure;
 using Account.Features.Users.Domain;
 using Account.Features.Users.Shared;
 using JetBrains.Annotations;
+using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
@@ -44,6 +50,8 @@ public sealed class CompleteMicrosoftSsoHandler(
     IExecutionContext executionContext,
     ITelemetryEventsCollector events,
     TimeProvider timeProvider,
+    IMembershipRepository membershipRepository,
+    IPublisher publisher,
     ILogger<CompleteMicrosoftSsoHandler> logger
 ) : IRequestHandler<CompleteMicrosoftSsoCommand, Result<string>>
 {
@@ -104,7 +112,7 @@ public sealed class CompleteMicrosoftSsoHandler(
             }
 
             // Validate ID token.
-            var userEmail = await ValidateIdTokenAndGetEmailAsync(
+            var (userEmail, tokenClaims) = await ValidateIdTokenAndGetEmailAsync(
                 tokenResponse.IdToken, resolved, stateCookie.Nonce, cancellationToken
             );
 
@@ -144,6 +152,20 @@ public sealed class CompleteMicrosoftSsoHandler(
             if (!userInfoResult.IsSuccess) return Result<string>.From(userInfoResult);
 
             authenticationTokenService.CreateAndSetAuthenticationTokens(userInfoResult.Value!, session.Id, session.RefreshTokenJti);
+
+            // Publish SSO login event so attribute sync rules are applied.
+            // Failures in the handler must never block SSO login — the handler catches internally.
+            var membership = await membershipRepository.GetByUserAndTenantAsync(user.Id, stateCookie.OrgId, cancellationToken);
+            if (membership is not null)
+            {
+                await publisher.Publish(
+                    new SsoLoginCompletedEvent(membership.Id, stateCookie.OrgId, SyncSource.MicrosoftSso, tokenClaims),
+                    cancellationToken);
+            }
+            else
+            {
+                logger.LogWarning("Microsoft SSO: membership not found for user {UserId} in org {OrgId} — skipping attribute sync", user.Id, stateCookie.OrgId);
+            }
 
             events.CollectEvent(new SessionCreated(session.Id));
             events.CollectEvent(new MicrosoftSsoLoginSucceeded(user.Id, stateCookie.OrgId));
@@ -206,14 +228,14 @@ public sealed class CompleteMicrosoftSsoHandler(
         }
     }
 
-    private async Task<string?> ValidateIdTokenAndGetEmailAsync(
+    private async Task<(string? Email, IReadOnlyDictionary<string, JsonElement> Claims)> ValidateIdTokenAndGetEmailAsync(
         string? idToken,
         ResolvedMicrosoftSsoConfig resolved,
         string expectedNonce,
         CancellationToken cancellationToken)
     {
-        if (string.IsNullOrEmpty(idToken)) return null;
-        if (!TokenHandler.CanReadToken(idToken)) return null;
+        if (string.IsNullOrEmpty(idToken)) return (null, new Dictionary<string, JsonElement>());
+        if (!TokenHandler.CanReadToken(idToken)) return (null, new Dictionary<string, JsonElement>());
 
         var discoveryUrl = MicrosoftSsoConfigurator.GetDiscoveryUrl(resolved.AzureTenantId);
         var configManager = configManagerFactory.GetOrCreate(discoveryUrl);
@@ -236,7 +258,7 @@ public sealed class CompleteMicrosoftSsoHandler(
         if (!validationResult.IsValid)
         {
             logger.LogError(validationResult.Exception, "Microsoft SSO ID token validation failed");
-            return null;
+            return (null, new Dictionary<string, JsonElement>());
         }
 
         var token = (JsonWebToken)validationResult.SecurityToken;
@@ -246,7 +268,7 @@ public sealed class CompleteMicrosoftSsoHandler(
         if (tokenNonce != expectedNonce)
         {
             logger.LogWarning("Microsoft SSO nonce mismatch");
-            return null;
+            return (null, new Dictionary<string, JsonElement>());
         }
 
         // Microsoft uses preferred_username (UPN) as the primary email-like identifier;
@@ -257,10 +279,26 @@ public sealed class CompleteMicrosoftSsoHandler(
         if (string.IsNullOrEmpty(email) || !email.Contains('@'))
         {
             logger.LogWarning("Microsoft SSO ID token missing valid email identifier");
-            return null;
+            return (null, new Dictionary<string, JsonElement>());
         }
 
-        return email.ToLowerInvariant();
+        return (email.ToLowerInvariant(), BuildClaimsDictionary(token.Claims));
+    }
+
+    private static IReadOnlyDictionary<string, JsonElement> BuildClaimsDictionary(IEnumerable<Claim> claims)
+    {
+        return claims
+            .GroupBy(c => c.Type)
+            .ToDictionary(
+                g => g.Key,
+                g =>
+                {
+                    var values = g.Select(c => c.Value).ToArray();
+                    return values.Length == 1
+                        ? JsonSerializer.SerializeToElement(values[0])
+                        : JsonSerializer.SerializeToElement(values);
+                }
+            );
     }
 
     private Result<string> Fail(string reason, TenantId? orgId = null)

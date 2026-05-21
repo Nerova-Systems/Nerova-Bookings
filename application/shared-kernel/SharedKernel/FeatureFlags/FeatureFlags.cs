@@ -292,6 +292,21 @@ public static partial class FeatureFlags
         "tier-organizations"
     );
 
+    /// <summary>
+    ///     Gates IdP attribute sync — automatically syncs user attributes from SAML/SCIM/SSO
+    ///     claims (e.g., group memberships, department) into the Attribute aggregate on every SSO login.
+    ///     Ports cal.com packages/features/ee/attributes/lib/attributeSyncUtils.ts.
+    ///     Gated on tier-organizations via ParentDependency.
+    /// </summary>
+    public static readonly FeatureFlagDefinition CapIntegrationAttributeSync = new TenantAdminManagedFlag(
+        "cap-integration-attribute-sync",
+        "IdP attribute sync",
+        "Automatically sync user attributes from SAML/SCIM/SSO claims into org member profiles on every SSO login. Ports cal.com IdP attribute sync.",
+        false,
+        true,
+        "tier-organizations"
+    );
+
     // -----------------------------------------------------------------------------------------
     // Capability flags — tier-enterprise
     //

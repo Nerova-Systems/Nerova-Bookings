@@ -1,3 +1,4 @@
+using Account.Features.AttributeSync.Domain;
 using Account.Features.Attributes.Domain;
 using Account.Features.Authentication.Domain;
 using Account.Features.EmailAuthentication.Domain;
@@ -39,6 +40,24 @@ public sealed class AttributeOptionDeleted(AttributeOptionId optionId, Attribute
 
 public sealed class AttributeOptionUpdated(AttributeOptionId optionId, AttributeId attributeId)
     : TelemetryEvent(("option_id", optionId), ("attribute_id", attributeId));
+
+public sealed class AttributeSyncApplied(AttributeSyncRuleId ruleId, MembershipId membershipId, TenantId orgId)
+    : TelemetryEvent(("rule_id", ruleId), ("membership_id", membershipId), ("org_id", orgId));
+
+public sealed class AttributeSyncFailed(AttributeSyncRuleId ruleId, MembershipId membershipId, TenantId orgId, string reason)
+    : TelemetryEvent(("rule_id", ruleId), ("membership_id", membershipId), ("org_id", orgId), ("reason", reason));
+
+public sealed class AttributeSyncRuleCreated(AttributeSyncRuleId ruleId, TenantId orgId)
+    : TelemetryEvent(("rule_id", ruleId), ("org_id", orgId));
+
+public sealed class AttributeSyncRuleDeleted(AttributeSyncRuleId ruleId, TenantId orgId)
+    : TelemetryEvent(("rule_id", ruleId), ("org_id", orgId));
+
+public sealed class AttributeSyncRuleUpdated(AttributeSyncRuleId ruleId, TenantId orgId)
+    : TelemetryEvent(("rule_id", ruleId), ("org_id", orgId));
+
+public sealed class AttributeSyncSkipped(AttributeSyncRuleId ruleId, MembershipId membershipId, TenantId orgId, string reason)
+    : TelemetryEvent(("rule_id", ruleId), ("membership_id", membershipId), ("org_id", orgId), ("reason", reason));
 
 public sealed class AttributeUnassigned(MembershipId membershipId, AttributeId attributeId)
     : TelemetryEvent(("membership_id", membershipId), ("attribute_id", attributeId));

@@ -2,6 +2,8 @@ using Account.Database;
 using Account.Features.ApiKeys.Infrastructure;
 using Account.Features.Attributes.Domain;
 using Account.Features.Attributes.Infrastructure;
+using Account.Features.AttributeSync.Domain;
+using Account.Features.AttributeSync.Infrastructure;
 using Account.Features.AuditLog.Domain;
 using Account.Features.AuditLog.Infrastructure;
 using Account.Features.DelegationCredentials.Domain;
@@ -109,6 +111,8 @@ public static class Configuration
                 .AddScoped<IDelegationCredentialTester, NotConfiguredDelegationCredentialTester>()
                 .AddScoped<IAttributeRepository, AttributeRepository>()
                 .AddScoped<IAttributeAssignmentRepository, AttributeAssignmentRepository>()
+                .AddScoped<IAttributeSyncRuleRepository, AttributeSyncRuleRepository>()
+                .AddScoped<AttributeSyncService>()
                 .AddScoped<MicrosoftSsoSecretProtector>()
                 .AddScoped<IOrgSsoConfigRepository, OrgSsoConfigRepository>()
                 .AddScoped<MicrosoftSsoConfigurator>()

@@ -1,10 +1,16 @@
 using System.Net.Http.Json;
+using System.Security.Claims;
+using System.Text.Json;
+using Account.Features.AttributeSync.Domain;
 using Account.Features.Authentication.Domain;
+using Account.Features.Memberships.Domain;
 using Account.Features.Sso.Domain;
+using Account.Features.Sso.Events;
 using Account.Features.SsoGoogle.Infrastructure;
 using Account.Features.Users.Domain;
 using Account.Features.Users.Shared;
 using JetBrains.Annotations;
+using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
@@ -45,6 +51,8 @@ public sealed class CompleteGoogleSsoHandler(
     IExecutionContext executionContext,
     ITelemetryEventsCollector events,
     TimeProvider timeProvider,
+    IMembershipRepository membershipRepository,
+    IPublisher publisher,
     ILogger<CompleteGoogleSsoHandler> logger
 ) : IRequestHandler<CompleteGoogleSsoCommand, Result<string>>
 {
@@ -105,7 +113,7 @@ public sealed class CompleteGoogleSsoHandler(
             }
 
             // Validate ID token and extract email + hd claim.
-            var (userEmail, hostedDomainClaim) = await ValidateIdTokenAndGetClaimsAsync(
+            var (userEmail, hostedDomainClaim, tokenClaims) = await ValidateIdTokenAndGetClaimsAsync(
                 tokenResponse.IdToken, resolved, stateCookie.Nonce, cancellationToken
             );
 
@@ -157,6 +165,20 @@ public sealed class CompleteGoogleSsoHandler(
             if (!userInfoResult.IsSuccess) return Result<string>.From(userInfoResult);
 
             authenticationTokenService.CreateAndSetAuthenticationTokens(userInfoResult.Value!, session.Id, session.RefreshTokenJti);
+
+            // Publish SSO login event so attribute sync rules are applied.
+            // Failures in the handler must never block SSO login — the handler catches internally.
+            var membership = await membershipRepository.GetByUserAndTenantAsync(user.Id, stateCookie.OrgId, cancellationToken);
+            if (membership is not null)
+            {
+                await publisher.Publish(
+                    new SsoLoginCompletedEvent(membership.Id, stateCookie.OrgId, SyncSource.GoogleSso, tokenClaims),
+                    cancellationToken);
+            }
+            else
+            {
+                logger.LogWarning("Google SSO: membership not found for user {UserId} in org {OrgId} — skipping attribute sync", user.Id, stateCookie.OrgId);
+            }
 
             events.CollectEvent(new SessionCreated(session.Id));
             events.CollectEvent(new GoogleSsoLoginSucceeded(user.Id, stateCookie.OrgId));
@@ -219,14 +241,15 @@ public sealed class CompleteGoogleSsoHandler(
         }
     }
 
-    private async Task<(string? Email, string? HostedDomain)> ValidateIdTokenAndGetClaimsAsync(
+    private async Task<(string? Email, string? HostedDomain, IReadOnlyDictionary<string, JsonElement> Claims)> ValidateIdTokenAndGetClaimsAsync(
         string? idToken,
         ResolvedGoogleSsoConfig resolved,
         string expectedNonce,
         CancellationToken cancellationToken)
     {
-        if (string.IsNullOrEmpty(idToken)) return (null, null);
-        if (!TokenHandler.CanReadToken(idToken)) return (null, null);
+        var emptyClaims = (IReadOnlyDictionary<string, JsonElement>)new Dictionary<string, JsonElement>();
+        if (string.IsNullOrEmpty(idToken)) return (null, null, emptyClaims);
+        if (!TokenHandler.CanReadToken(idToken)) return (null, null, emptyClaims);
 
         var configManager = configManagerFactory.GetOrCreate(GoogleSsoConfigurator.GoogleDiscoveryUrl);
         var openIdConfig = await configManager.GetConfigurationAsync(cancellationToken);
@@ -249,7 +272,7 @@ public sealed class CompleteGoogleSsoHandler(
         if (!validationResult.IsValid)
         {
             logger.LogError(validationResult.Exception, "Google SSO ID token validation failed");
-            return (null, null);
+            return (null, null, emptyClaims);
         }
 
         var token = (JsonWebToken)validationResult.SecurityToken;
@@ -259,21 +282,37 @@ public sealed class CompleteGoogleSsoHandler(
         if (tokenNonce != expectedNonce)
         {
             logger.LogWarning("Google SSO nonce mismatch");
-            return (null, null);
+            return (null, null, emptyClaims);
         }
 
         var email = token.Claims.FirstOrDefault(c => c.Type == "email")?.Value;
         if (string.IsNullOrEmpty(email) || !email.Contains('@'))
         {
             logger.LogWarning("Google SSO ID token missing valid email claim");
-            return (null, null);
+            return (null, null, emptyClaims);
         }
 
         // `hd` claim = hosted domain for Google Workspace users.
         // Personal Google accounts do NOT have this claim.
         var hd = token.Claims.FirstOrDefault(c => c.Type == "hd")?.Value;
 
-        return (email.ToLowerInvariant(), hd);
+        return (email.ToLowerInvariant(), hd, BuildClaimsDictionary(token.Claims));
+    }
+
+    private static IReadOnlyDictionary<string, JsonElement> BuildClaimsDictionary(IEnumerable<Claim> claims)
+    {
+        return claims
+            .GroupBy(c => c.Type)
+            .ToDictionary(
+                g => g.Key,
+                g =>
+                {
+                    var values = g.Select(c => c.Value).ToArray();
+                    return values.Length == 1
+                        ? JsonSerializer.SerializeToElement(values[0])
+                        : JsonSerializer.SerializeToElement(values);
+                }
+            );
     }
 
     private Result<string> Fail(string reason, TenantId? orgId = null)

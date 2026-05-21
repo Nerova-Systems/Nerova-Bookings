@@ -1,5 +1,6 @@
 using Main.Features.EventTypes.Domain;
 using Main.Features.Schedules.Domain;
+using Main.Features.Workflows.Domain;
 using SharedKernel.Telemetry;
 
 namespace Main.Features;
@@ -27,3 +28,36 @@ public sealed class EventTypeUpdated(EventTypeId eventTypeId)
 
 public sealed class EventTypeDeleted(EventTypeId eventTypeId)
     : TelemetryEvent(("event_type_id", eventTypeId));
+
+public sealed class WorkflowCreated(WorkflowId workflowId)
+    : TelemetryEvent(("workflow_id", workflowId));
+
+public sealed class WorkflowUpdated(WorkflowId workflowId)
+    : TelemetryEvent(("workflow_id", workflowId));
+
+public sealed class WorkflowDeleted(WorkflowId workflowId)
+    : TelemetryEvent(("workflow_id", workflowId));
+
+public sealed class WorkflowStepAdded(WorkflowId workflowId, WorkflowStepId stepId)
+    : TelemetryEvent(("workflow_id", workflowId), ("step_id", stepId));
+
+public sealed class WorkflowStepUpdated(WorkflowId workflowId, WorkflowStepId stepId)
+    : TelemetryEvent(("workflow_id", workflowId), ("step_id", stepId));
+
+public sealed class WorkflowStepDeleted(WorkflowId workflowId, WorkflowStepId stepId)
+    : TelemetryEvent(("workflow_id", workflowId), ("step_id", stepId));
+
+public sealed class WorkflowBoundToEventType(WorkflowId workflowId, EventTypeId eventTypeId)
+    : TelemetryEvent(("workflow_id", workflowId), ("event_type_id", eventTypeId));
+
+public sealed class WorkflowUnboundFromEventType(WorkflowId workflowId, EventTypeId eventTypeId)
+    : TelemetryEvent(("workflow_id", workflowId), ("event_type_id", eventTypeId));
+
+public sealed class WorkflowReminderScheduled(WorkflowReminderId reminderId)
+    : TelemetryEvent(("reminder_id", reminderId));
+
+public sealed class WorkflowReminderDispatched(WorkflowReminderId reminderId)
+    : TelemetryEvent(("reminder_id", reminderId));
+
+public sealed class WorkflowReminderCancelled(WorkflowReminderId reminderId)
+    : TelemetryEvent(("reminder_id", reminderId));
