@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 using JetBrains.Annotations;
 
 namespace Account.Features.Permissions.Domain;
@@ -11,6 +12,7 @@ namespace Account.Features.Permissions.Domain;
 ///     </para>
 /// </summary>
 [PublicAPI]
+[JsonConverter(typeof(JsonStringEnumConverter))]
 public enum PermissionAction
 {
     /// <summary>Create a new resource instance.</summary>

@@ -8,6 +8,14 @@ namespace Account.Features.Permissions.Domain;
 public interface IRoleRepository : ICrudRepository<Role, RoleId>
 {
     /// <summary>
+    ///     Loads the role with its owned <see cref="Role.Permissions" /> collection eagerly populated.
+    ///     EF Core's <c>FindAsync</c> (used by the base <c>GetByIdAsync</c>) does not auto-include
+    ///     owned collections, so command-side handlers that mutate or delete the role MUST call this
+    ///     overload to ensure the children are tracked and the shadow surrogate key is known.
+    /// </summary>
+    Task<Role?> GetByIdWithPermissionsAsync(RoleId id, CancellationToken cancellationToken);
+
+    /// <summary>
     ///     Returns all three system roles (Owner, Admin, Member) with their permission sets loaded.
     /// </summary>
     Task<Role[]> GetSystemRolesAsync(CancellationToken cancellationToken);
@@ -32,9 +40,14 @@ public sealed class RoleRepository(AccountDbContext accountDbContext)
     ///     collection. EF Core's <c>FindAsync</c> does not automatically eager-load OwnsMany
     ///     navigations, so we use a keyed single-entity query instead.
     /// </summary>
-    public new Task<Role?> GetByIdAsync(RoleId id, CancellationToken cancellationToken)
+    public Task<Role?> GetByIdWithPermissionsAsync(RoleId id, CancellationToken cancellationToken)
     {
+        // AsTracking() is required because SharedKernelDbContext sets NoTracking globally.
+        // Without it, Included owned permissions are detached → EF cannot preserve the
+        // shadow surrogate 'id' on Update/Delete and SaveChanges throws
+        // "shadow key property 'Permission.id' is unknown". Mirrors AttributeRepository.GetByIdUnfilteredAsync.
         return DbSet
+            .AsTracking()
             .Include(r => r.Permissions)
             .SingleOrDefaultAsync(r => r.Id == id, cancellationToken);
     }

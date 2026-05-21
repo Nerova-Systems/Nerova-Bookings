@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 using JetBrains.Annotations;
 
 namespace Account.Features.Permissions.Domain;
@@ -13,6 +14,7 @@ namespace Account.Features.Permissions.Domain;
 ///     </para>
 /// </summary>
 [PublicAPI]
+[JsonConverter(typeof(JsonStringEnumConverter))]
 public enum PermissionResource
 {
     /// <summary>Booking event types configured by a user or team.</summary>

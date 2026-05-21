@@ -174,6 +174,31 @@ public sealed class Role : AggregateRoot<RoleId>
         Description = description;
     }
 
+    /// <summary>
+    ///     Replaces this role's permission set with <paramref name="newPermissions" />, removing any
+    ///     permissions not in the new set and adding any not currently granted. The collection is
+    ///     mutated in place so EF Core's owned-entity change tracking picks up adds and removes.
+    /// </summary>
+    /// <exception cref="InvalidOperationException">Thrown if this is a system role.</exception>
+    public void ReplacePermissions(IEnumerable<Permission> newPermissions)
+    {
+        ThrowIfSystem();
+        ArgumentNullException.ThrowIfNull(newPermissions);
+
+        var target = newPermissions.Distinct().ToArray();
+        // Remove any current permission that is not in the target set.
+        _permissions.RemoveAll(existing =>
+            !target.Any(t => t.Resource == existing.Resource && t.Action == existing.Action));
+        // Add any target permission that is not already present.
+        foreach (var p in target)
+        {
+            if (!_permissions.Any(x => x.Resource == p.Resource && x.Action == p.Action))
+            {
+                _permissions.Add(new Permission(p.Resource, p.Action));
+            }
+        }
+    }
+
     private void ThrowIfSystem()
     {
         if (IsSystem)

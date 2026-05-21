@@ -5,6 +5,7 @@ using Account.Features.EmailAuthentication.Domain;
 using Account.Features.ExternalAuthentication.Domain;
 using Account.Features.FeatureFlags.Domain;
 using Account.Features.Memberships.Domain;
+using Account.Features.Permissions.Domain;
 using Account.Features.Subscriptions.Domain;
 using Account.Features.Tenants.Domain;
 using Account.Features.Users.Domain;
@@ -217,6 +218,18 @@ public sealed class PaymentRefunded(SubscriptionId subscriptionId, SubscriptionP
 
 public sealed class RenewalPaymentRetried(SubscriptionId subscriptionId)
     : TelemetryEvent(("subscription_id", subscriptionId));
+
+public sealed class RoleCreated(RoleId roleId, TenantId orgId)
+    : TelemetryEvent(("role_id", roleId), ("org_id", orgId));
+
+public sealed class RoleUpdated(RoleId roleId, TenantId orgId)
+    : TelemetryEvent(("role_id", roleId), ("org_id", orgId));
+
+public sealed class RoleDeleted(RoleId roleId, TenantId orgId, int unassignedMembershipCount)
+    : TelemetryEvent(("role_id", roleId), ("org_id", orgId), ("unassigned_membership_count", unassignedMembershipCount));
+
+public sealed class MembershipRoleAssigned(MembershipId membershipId, RoleId? roleId, TenantId orgId)
+    : TelemetryEvent(("membership_id", membershipId), ("role_id", roleId as object ?? "none"), ("org_id", orgId));
 
 public sealed class SessionCreated(SessionId sessionId)
     : TelemetryEvent(("session_id", sessionId));

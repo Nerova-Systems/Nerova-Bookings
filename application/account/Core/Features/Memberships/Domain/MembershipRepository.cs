@@ -43,6 +43,13 @@ public interface IMembershipRepository : ICrudRepository<Membership, MembershipI
     ///     before calling <see cref="Membership.ChangeRole" />.
     /// </summary>
     Task<int> CountOwnersAsync(TenantId tenantId, CancellationToken cancellationToken);
+
+    /// <summary>
+    ///     Returns all memberships whose <see cref="Membership.CustomRoleId" /> matches the supplied
+    ///     role. Used by <c>DeleteRoleCommand</c> to unassign the custom role from every member before
+    ///     the role itself is removed.
+    /// </summary>
+    Task<Membership[]> GetByCustomRoleIdAsync(Permissions.Domain.RoleId roleId, CancellationToken cancellationToken);
 }
 
 public sealed class MembershipRepository(AccountDbContext accountDbContext)
@@ -78,5 +85,10 @@ public sealed class MembershipRepository(AccountDbContext accountDbContext)
     public Task<int> CountOwnersAsync(TenantId tenantId, CancellationToken cancellationToken)
     {
         return DbSet.CountAsync(m => m.TenantId == tenantId && m.Role == MembershipRole.Owner, cancellationToken);
+    }
+
+    public Task<Membership[]> GetByCustomRoleIdAsync(Permissions.Domain.RoleId roleId, CancellationToken cancellationToken)
+    {
+        return DbSet.Where(m => m.CustomRoleId == roleId).ToArrayAsync(cancellationToken);
     }
 }
