@@ -311,8 +311,8 @@ public sealed class MembershipAggregateTests(AccountWebApplicationFactory factor
         await dbContext.SaveChangesAsync();
 
         // Act
-        var all = await repository.GetMembersOfTenantAsync(org.Id, includePending: true, CancellationToken.None);
-        var acceptedOnly = await repository.GetMembersOfTenantAsync(org.Id, includePending: false, CancellationToken.None);
+        var all = await repository.GetMembersOfTenantAsync(org.Id, true, CancellationToken.None);
+        var acceptedOnly = await repository.GetMembersOfTenantAsync(org.Id, false, CancellationToken.None);
 
         // Assert
         all.Should().HaveCount(2);

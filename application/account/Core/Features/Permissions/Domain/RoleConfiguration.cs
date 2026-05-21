@@ -31,25 +31,26 @@ public sealed class RoleConfiguration : IEntityTypeConfiguration<Role>
         // PropertyAccessMode.Field so it never tries to use the read-only property getter.
 
         builder.OwnsMany(r => r.Permissions, ownedBuilder =>
-        {
-            ownedBuilder.ToTable("role_permissions");
+            {
+                ownedBuilder.ToTable("role_permissions");
 
-            // Shadow FK column; snake_case convention matches migration definition.
-            ownedBuilder.WithOwner().HasForeignKey("role_id");
+                // Shadow FK column; snake_case convention matches migration definition.
+                ownedBuilder.WithOwner().HasForeignKey("role_id");
 
-            // Auto-generated surrogate PK.  Without this, EF Core uses the sealed record's
-            // structural equality to deduplicate owned entities in the change tracker: when multiple
-            // roles share the same (Resource, Action) pair (e.g. Owner and Admin both have
-            // EventType.Create), SaveChanges would only insert ONE row for the last role processed.
-            // A surrogate key forces EF to treat every Permission instance as distinct.
-            ownedBuilder.Property<long>("id").ValueGeneratedOnAdd();
-            ownedBuilder.HasKey("id");
+                // Auto-generated surrogate PK.  Without this, EF Core uses the sealed record's
+                // structural equality to deduplicate owned entities in the change tracker: when multiple
+                // roles share the same (Resource, Action) pair (e.g. Owner and Admin both have
+                // EventType.Create), SaveChanges would only insert ONE row for the last role processed.
+                // A surrogate key forces EF to treat every Permission instance as distinct.
+                ownedBuilder.Property<long>("id").ValueGeneratedOnAdd();
+                ownedBuilder.HasKey("id");
 
-            // Enforce the uniqueness constraint at the DB level.
-            ownedBuilder.HasIndex("role_id", nameof(Permission.Resource), nameof(Permission.Action))
-                .IsUnique()
-                .HasDatabaseName("uix_role_permissions_role_resource_action");
-        });
+                // Enforce the uniqueness constraint at the DB level.
+                ownedBuilder.HasIndex("role_id", nameof(Permission.Resource), nameof(Permission.Action))
+                    .IsUnique()
+                    .HasDatabaseName("uix_role_permissions_role_resource_action");
+            }
+        );
 
         builder.Navigation(r => r.Permissions)
             .HasField("_permissions")

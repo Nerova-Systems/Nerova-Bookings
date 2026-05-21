@@ -16,6 +16,8 @@ using Account.Features.Smtp.Infrastructure;
 using Account.Features.Sso.Domain;
 using Account.Features.SsoMicrosoft;
 using Account.Features.SsoMicrosoft.Infrastructure;
+using Account.Features.SsoGoogle;
+using Account.Features.SsoGoogle.Infrastructure;
 using Account.Features.Subscriptions.Shared;
 using Account.Features.Users.Shared;
 using Account.Integrations.Gravatar;
@@ -78,6 +80,7 @@ public static class Configuration
             services.AddScoped<OAuthProviderFactory>();
 
             services.AddHttpClient("microsoft-sso", client => { client.Timeout = TimeSpan.FromSeconds(30); });
+            services.AddHttpClient("google-sso", client => { client.Timeout = TimeSpan.FromSeconds(30); });
 
             services.AddEmailRendering("WebApp");
 
@@ -110,6 +113,9 @@ public static class Configuration
                 .AddScoped<IOrgSsoConfigRepository, OrgSsoConfigRepository>()
                 .AddScoped<MicrosoftSsoConfigurator>()
                 .AddScoped<SsoStateService>()
+                .AddScoped<GoogleSsoSecretProtector>()
+                .AddScoped<GoogleSsoConfigurator>()
+                .AddScoped<GoogleSsoStateService>()
                 .Decorate<IEmailClient, TenantAwareEmailClient>()
                 .AddScoped<StartEmailConfirmation>()
                 .AddScoped<CompleteEmailConfirmation>()

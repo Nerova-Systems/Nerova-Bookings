@@ -1,3 +1,5 @@
+using System.Security.Cryptography;
+using System.Text;
 using Account.Database;
 using Account.Features.ApiKeys.Domain;
 using Account.Features.Subscriptions.Domain;
@@ -6,7 +8,6 @@ using Account.Features.Users.Domain;
 using FluentAssertions;
 using Microsoft.Extensions.DependencyInjection;
 using SharedKernel.Domain;
-using SharedKernel.Tests.Persistence;
 using Xunit;
 
 namespace Account.Tests.ApiKeys;
@@ -32,7 +33,7 @@ public sealed class ApiKeyRepositoryTests(AccountWebApplicationFactory factory)
         var db = sp.GetRequiredService<AccountDbContext>();
         var (userId, userTenantId) = await SeedUserAsync(db);
 
-        var (key, plainText) = ApiKey.CreateUserKey(userTenantId, userId, "Test Key", expiresAt: null);
+        var (key, plainText) = ApiKey.CreateUserKey(userTenantId, userId, "Test Key", null);
         await repo.AddAsync(key, CancellationToken.None);
         await db.SaveChangesAsync();
 
@@ -202,7 +203,7 @@ public sealed class ApiKeyRepositoryTests(AccountWebApplicationFactory factory)
 
     private static string ComputeHash(string plainText)
     {
-        var bytes = System.Text.Encoding.UTF8.GetBytes(plainText);
-        return Convert.ToHexString(System.Security.Cryptography.SHA256.HashData(bytes)).ToLowerInvariant();
+        var bytes = Encoding.UTF8.GetBytes(plainText);
+        return Convert.ToHexString(SHA256.HashData(bytes)).ToLowerInvariant();
     }
 }

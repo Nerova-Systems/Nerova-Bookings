@@ -5,10 +5,8 @@ using Account.Features.Permissions.Services;
 using Account.Features.Tenants.Domain;
 using Account.Features.Users.Domain;
 using FluentAssertions;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using NSubstitute;
-using SharedKernel.Domain;
 using Xunit;
 
 namespace Account.Tests.Permissions;
@@ -56,7 +54,7 @@ public sealed class PermissionCheckServiceTests(AccountWebApplicationFactory fac
 
         foreach (var permission in samplePermissions)
         {
-            (await service.HasPermissionAsync(DatabaseSeeder.Tenant1Owner.Id, org.Id, permission, CancellationToken.None)).Should().BeTrue(because: $"owner should have {permission}");
+            (await service.HasPermissionAsync(DatabaseSeeder.Tenant1Owner.Id, org.Id, permission, CancellationToken.None)).Should().BeTrue($"owner should have {permission}");
         }
     }
 

@@ -26,10 +26,18 @@ namespace Account.Features.Permissions.Domain;
 public sealed record Permission(PermissionResource Resource, PermissionAction Action)
 {
     /// <summary>
+    ///     The complete catalog of every (resource, action) combination. Useful for seeding and UI display.
+    /// </summary>
+    public static readonly IReadOnlySet<Permission> All = BuildAll();
+
+    /// <summary>
     ///     Returns the canonical cal.com-compatible permission string, e.g. <c>"eventType.create"</c>.
     ///     The resource is lowerCamelCase; the action is fully lowercase.
     /// </summary>
-    public override string ToString() => $"{ResourceToString(Resource)}.{Action.ToString().ToLowerInvariant()}";
+    public override string ToString()
+    {
+        return $"{ResourceToString(Resource)}.{Action.ToString().ToLowerInvariant()}";
+    }
 
     /// <summary>
     ///     Parses a permission string in the format <c>"resource.action"</c> (lowerCamelCase resource,
@@ -39,7 +47,9 @@ public sealed record Permission(PermissionResource Resource, PermissionAction Ac
     public static Permission Parse(string value)
     {
         if (!TryParse(value, out var result))
+        {
             throw new FormatException($"'{value}' is not a valid permission string. Expected format: 'resource.action'.");
+        }
 
         return result;
     }
@@ -62,17 +72,12 @@ public sealed record Permission(PermissionResource Resource, PermissionAction Ac
         // lowerCamelCase → PascalCase: capitalise first character only.
         var pascalResource = char.ToUpper(resourcePart[0]) + resourcePart[1..];
 
-        if (!Enum.TryParse<PermissionResource>(pascalResource, ignoreCase: false, out var resource)) return false;
-        if (!Enum.TryParse<PermissionAction>(actionPart, ignoreCase: true, out var action)) return false;
+        if (!Enum.TryParse<PermissionResource>(pascalResource, false, out var resource)) return false;
+        if (!Enum.TryParse<PermissionAction>(actionPart, true, out var action)) return false;
 
         result = new Permission(resource, action);
         return true;
     }
-
-    /// <summary>
-    ///     The complete catalog of every (resource, action) combination. Useful for seeding and UI display.
-    /// </summary>
-    public static readonly IReadOnlySet<Permission> All = BuildAll();
 
     private static HashSet<Permission> BuildAll()
     {

@@ -1,5 +1,3 @@
-using JetBrains.Annotations;
-
 namespace SharedKernel.DelegationCredentials;
 
 /// <summary>
@@ -22,4 +20,5 @@ public sealed record ResolvedCredential(
     WorkspacePlatform Platform,
     string AccessTokenOrServiceAccountKey,
     string MemberEmail,
-    string Domain);
+    string Domain
+);

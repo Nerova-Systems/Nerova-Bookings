@@ -80,7 +80,9 @@ public sealed class OrgProfileRepository(AccountDbContext accountDbContext)
         var query = DbSet.Where(p => p.OrgTenantId == orgTenantId && p.Username == username);
 
         if (excludeId is not null)
+        {
             query = query.Where(p => p.Id != excludeId);
+        }
 
         return !await query.AnyAsync(cancellationToken);
     }

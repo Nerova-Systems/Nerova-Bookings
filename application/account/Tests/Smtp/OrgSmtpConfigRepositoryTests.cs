@@ -36,14 +36,14 @@ public sealed class OrgSmtpConfigRepositoryTests(AccountWebApplicationFactory fa
 
         var config = OrgSmtpConfig.Create(
             orgTenant,
-            host: "smtp.acme.com",
-            port: 587,
-            useSsl: true,
-            username: "noreply@acme.com",
-            encryptedPassword: "enc_secret",
-            fromEmail: "noreply@acme.com",
-            fromName: "Acme Bookings",
-            replyToEmail: "support@acme.com"
+            "smtp.acme.com",
+            587,
+            true,
+            "noreply@acme.com",
+            "enc_secret",
+            "noreply@acme.com",
+            "Acme Bookings",
+            "support@acme.com"
         );
 
         // Act

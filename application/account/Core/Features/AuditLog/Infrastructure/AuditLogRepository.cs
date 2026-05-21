@@ -24,19 +24,29 @@ public sealed class AuditLogRepository(AccountDbContext context)
         var query = DbSet.AsNoTracking();
 
         if (filter.ActorUserId is not null)
+        {
             query = query.Where(e => e.ActorUserId == filter.ActorUserId);
+        }
 
         if (filter.Resource is not null)
+        {
             query = query.Where(e => e.Resource == filter.Resource);
+        }
 
         if (filter.Action is not null)
+        {
             query = query.Where(e => e.Action == filter.Action);
+        }
 
         if (filter.FromDate.HasValue)
+        {
             query = query.Where(e => e.CreatedAt >= filter.FromDate.Value);
+        }
 
         if (filter.ToDate.HasValue)
+        {
             query = query.Where(e => e.CreatedAt <= filter.ToDate.Value);
+        }
 
         var totalCount = await query.CountAsync(cancellationToken);
 

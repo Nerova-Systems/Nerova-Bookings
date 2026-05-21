@@ -13,7 +13,10 @@ namespace Account.Features.AuditLog.Domain;
 [JsonConverter(typeof(StronglyTypedIdJsonConverter<string, AuditLogEntryId>))]
 public sealed record AuditLogEntryId(string Value) : StronglyTypedUlid<AuditLogEntryId>(Value)
 {
-    public override string ToString() => Value;
+    public override string ToString()
+    {
+        return Value;
+    }
 }
 
 /// <summary>
@@ -54,9 +57,6 @@ public sealed class AuditLogEntry : AggregateRoot<AuditLogEntryId>, ITenantScope
         UserAgent = userAgent;
     }
 
-    /// <summary>The tenant whose log this entry belongs to.</summary>
-    public TenantId TenantId { get; }
-
     /// <summary>The user who triggered this event, or <see langword="null" /> for system-initiated actions.</summary>
     public UserId? ActorUserId { get; }
 
@@ -80,6 +80,9 @@ public sealed class AuditLogEntry : AggregateRoot<AuditLogEntryId>, ITenantScope
 
     /// <summary>Client user-agent string at the time the event was emitted.</summary>
     public string? UserAgent { get; }
+
+    /// <summary>The tenant whose log this entry belongs to.</summary>
+    public TenantId TenantId { get; }
 
     // ─── Factory ──────────────────────────────────────────────────────────────
 
@@ -112,6 +115,7 @@ public sealed class AuditLogEntry : AggregateRoot<AuditLogEntryId>, ITenantScope
             resourceId,
             metadata,
             ipAddress,
-            userAgent);
+            userAgent
+        );
     }
 }

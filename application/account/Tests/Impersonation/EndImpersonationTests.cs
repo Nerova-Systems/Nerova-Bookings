@@ -67,9 +67,9 @@ public sealed class EndImpersonationTests(AccountWebApplicationFactory factory)
         // Arrange
         // The "current user" is Tenant1Member being impersonated; actor is Tenant1Owner (already seeded).
         SetImpersonationToken(
-            targetUserId: DatabaseSeeder.Tenant1Member.Id,
-            actorUserId: DatabaseSeeder.Tenant1Owner.Id,
-            targetTenantId: DatabaseSeeder.Tenant1.Id
+            DatabaseSeeder.Tenant1Member.Id,
+            DatabaseSeeder.Tenant1Owner.Id,
+            DatabaseSeeder.Tenant1.Id
         );
 
         // Act

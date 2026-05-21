@@ -21,7 +21,7 @@ public sealed class TeamScopingDomainTests
     public void Schedule_WhenCreatedWithoutTeamId_ShouldHaveNullTeamId()
     {
         var schedule = Schedule.Create(
-            TenantId.NewId(), UserId.NewId(), "Working Hours", "UTC", isDefault: true,
+            TenantId.NewId(), UserId.NewId(), "Working Hours", "UTC", true,
             [new AvailabilityWindow([1, 2, 3, 4, 5], 540, 1020)], []
         );
 
@@ -33,7 +33,7 @@ public sealed class TeamScopingDomainTests
     {
         var teamId = TenantId.NewId();
         var schedule = Schedule.Create(
-            TenantId.NewId(), UserId.NewId(), "Working Hours", "UTC", isDefault: true,
+            TenantId.NewId(), UserId.NewId(), "Working Hours", "UTC", true,
             [new AvailabilityWindow([1, 2, 3, 4, 5], 540, 1020)], [],
             teamId
         );
@@ -46,7 +46,7 @@ public sealed class TeamScopingDomainTests
     {
         var teamId = TenantId.NewId();
         var schedule = Schedule.Create(
-            TenantId.NewId(), UserId.NewId(), "Working Hours", "UTC", isDefault: true,
+            TenantId.NewId(), UserId.NewId(), "Working Hours", "UTC", true,
             [new AvailabilityWindow([1, 2, 3, 4, 5], 540, 1020)], []
         );
 
@@ -60,7 +60,7 @@ public sealed class TeamScopingDomainTests
     {
         var teamId = TenantId.NewId();
         var schedule = Schedule.Create(
-            TenantId.NewId(), UserId.NewId(), "Working Hours", "UTC", isDefault: true,
+            TenantId.NewId(), UserId.NewId(), "Working Hours", "UTC", true,
             [new AvailabilityWindow([1, 2, 3, 4, 5], 540, 1020)], [],
             teamId
         );

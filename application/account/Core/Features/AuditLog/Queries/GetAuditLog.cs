@@ -30,7 +30,8 @@ public sealed record AuditLogResponse(
     int PageSize,
     int TotalPages,
     int CurrentPageOffset,
-    AuditLogEntryResponse[] Entries);
+    AuditLogEntryResponse[] Entries
+);
 
 [PublicAPI]
 public sealed record AuditLogEntryResponse(
@@ -43,7 +44,8 @@ public sealed record AuditLogEntryResponse(
     string? ResourceId,
     string? Metadata,
     string? IpAddress,
-    string? UserAgent);
+    string? UserAgent
+);
 
 public sealed class GetAuditLogQueryValidator : AbstractValidator<GetAuditLogQuery>
 {
@@ -67,35 +69,41 @@ public sealed class GetAuditLogHandler(IAuditLogRepository repository)
         if (query.ActorUserId is not null)
         {
             if (!UserId.TryParse(query.ActorUserId, out actorUserId))
+            {
                 return Result<AuditLogResponse>.BadRequest("Invalid actor user ID format.");
+            }
         }
 
         var filter = new AuditLogFilter(
-            ActorUserId: actorUserId,
-            Resource: query.Resource,
-            Action: query.Action,
-            FromDate: query.FromDate,
-            ToDate: query.ToDate);
+            actorUserId,
+            query.Resource,
+            query.Action,
+            query.FromDate,
+            query.ToDate
+        );
 
         var (entries, totalCount) = await repository.GetPagedAsync(filter, query.PageOffset, query.PageSize, cancellationToken);
 
         var totalPages = totalCount == 0 ? 0 : (int)Math.Ceiling((double)totalCount / query.PageSize);
 
         if (query.PageOffset > 0 && query.PageOffset >= totalPages)
+        {
             return Result<AuditLogResponse>.BadRequest($"The page offset {query.PageOffset} is greater than the total number of pages.");
+        }
 
         var entryResponses = entries.Select(e => new AuditLogEntryResponse(
-            e.Id,
-            e.CreatedAt,
-            e.ActorUserId?.ToString(),
-            e.ActorEmail,
-            e.Resource,
-            e.Action,
-            e.ResourceId,
-            e.Metadata,
-            e.IpAddress,
-            e.UserAgent
-        )).ToArray();
+                e.Id,
+                e.CreatedAt,
+                e.ActorUserId?.ToString(),
+                e.ActorEmail,
+                e.Resource,
+                e.Action,
+                e.ResourceId,
+                e.Metadata,
+                e.IpAddress,
+                e.UserAgent
+            )
+        ).ToArray();
 
         return new AuditLogResponse(totalCount, query.PageSize, totalPages, query.PageOffset, entryResponses);
     }

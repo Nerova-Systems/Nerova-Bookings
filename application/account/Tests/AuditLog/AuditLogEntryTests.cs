@@ -45,10 +45,10 @@ public sealed class AuditLogEntryTests
             "actor@example.com",
             "Role",
             "Deleted",
-            resourceId: "role_01ABC",
-            metadata: """{"roleName":"Admin"}""",
-            ipAddress: "192.168.1.1",
-            userAgent: "Mozilla/5.0"
+            "role_01ABC",
+            """{"roleName":"Admin"}""",
+            "192.168.1.1",
+            "Mozilla/5.0"
         );
 
         entry.ResourceId.Should().Be("role_01ABC");

@@ -320,7 +320,7 @@ public sealed class OrgProfileAggregateTests(AccountWebApplicationFactory factor
 
         // Assert
         members.Should().HaveCount(2);
-        members.Select(p => p.Username).Should().BeEquivalentTo(["owner-slug", "member-slug"]);
+        members.Select(p => p.Username).Should().BeEquivalentTo("owner-slug", "member-slug");
     }
 
     [Fact]

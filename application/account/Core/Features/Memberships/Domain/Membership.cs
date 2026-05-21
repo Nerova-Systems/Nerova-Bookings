@@ -1,7 +1,7 @@
+using Account.Features.Permissions.Domain;
 using JetBrains.Annotations;
 using SharedKernel.Domain;
 using SharedKernel.StronglyTypedIds;
-using Account.Features.Permissions.Domain;
 
 namespace Account.Features.Memberships.Domain;
 
@@ -14,7 +14,10 @@ namespace Account.Features.Memberships.Domain;
 [JsonConverter(typeof(StronglyTypedIdJsonConverter<string, MembershipId>))]
 public sealed record MembershipId(string Value) : StronglyTypedUlid<MembershipId>(Value)
 {
-    public override string ToString() => Value;
+    public override string ToString()
+    {
+        return Value;
+    }
 }
 
 /// <summary>
@@ -177,7 +180,9 @@ public sealed class Membership : AggregateRoot<MembershipId>
     public void Accept(DateTimeOffset acceptedAt)
     {
         if (Accepted)
+        {
             throw new InvalidOperationException("Membership is already accepted.");
+        }
 
         Accepted = true;
         AcceptedAt = acceptedAt;

@@ -45,10 +45,10 @@ public sealed class AuditLogRepositoryTests(AccountWebApplicationFactory factory
             "owner@tenant-1.com",
             "Membership",
             "Invited",
-            resourceId: "mbr_01TEST",
-            metadata: """{"invitedEmail":"new@example.com"}""",
-            ipAddress: "10.0.0.1",
-            userAgent: "TestAgent/1.0"
+            "mbr_01TEST",
+            """{"invitedEmail":"new@example.com"}""",
+            "10.0.0.1",
+            "TestAgent/1.0"
         );
 
         // Act
@@ -134,15 +134,15 @@ public sealed class AuditLogRepositoryTests(AccountWebApplicationFactory factory
     public async Task GetPagedAsync_WhenFilteredByActorUserId_ShouldReturnOnlyThoseEntries()
     {
         // Arrange
-        await SeedEntryAsync("Role", "Assigned", actorUserId: DatabaseSeeder.Tenant1Owner.Id);
-        await SeedEntryAsync("Role", "Assigned", actorUserId: DatabaseSeeder.Tenant1Member.Id);
+        await SeedEntryAsync("Role", "Assigned", DatabaseSeeder.Tenant1Owner.Id);
+        await SeedEntryAsync("Role", "Assigned", DatabaseSeeder.Tenant1Member.Id);
 
         // Act
         using var tenantProvider = CreateTenantScopedProvider();
         using var scope = tenantProvider.CreateScope();
         var repository = scope.ServiceProvider.GetRequiredService<IAuditLogRepository>();
 
-        var filter = new AuditLogFilter(ActorUserId: DatabaseSeeder.Tenant1Owner.Id);
+        var filter = new AuditLogFilter(DatabaseSeeder.Tenant1Owner.Id);
         var (items, totalCount) = await repository.GetPagedAsync(filter, 0, 25, CancellationToken.None);
 
         // Assert
@@ -155,7 +155,9 @@ public sealed class AuditLogRepositoryTests(AccountWebApplicationFactory factory
     {
         // Arrange — seed 5 entries for the tenant
         for (var i = 0; i < 5; i++)
+        {
             await SeedEntryAsync("Membership", "Invited");
+        }
 
         // Act
         using var tenantProvider = CreateTenantScopedProvider();
@@ -187,7 +189,8 @@ public sealed class AuditLogRepositoryTests(AccountWebApplicationFactory factory
         services.AddLogging();
         services.AddSingleton(TimeProvider.System);
         services.AddDbContext<AccountDbContext>(opts =>
-            opts.UseSqlite(Connection).UseSnakeCaseNamingConvention());
+            opts.UseSqlite(Connection).UseSnakeCaseNamingConvention()
+        );
         services.AddScoped<IAuditLogRepository, AuditLogRepository>();
         services.RemoveAll<IExecutionContext>();
         services.AddScoped<IExecutionContext>(_ => mockContext);

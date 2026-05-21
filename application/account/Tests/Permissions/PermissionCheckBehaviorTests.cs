@@ -4,7 +4,6 @@ using Account.Features.Permissions.Domain;
 using Account.Features.Permissions.Pipeline;
 using Account.Features.Permissions.Services;
 using FluentAssertions;
-using MediatR;
 using Microsoft.Extensions.Logging.Abstractions;
 using NSubstitute;
 using SharedKernel.Authentication;
@@ -22,28 +21,6 @@ namespace Account.Tests.Permissions;
 public sealed class PermissionCheckBehaviorTests(AccountWebApplicationFactory factory)
     : EndpointBaseTest<AccountDbContext>(factory), IClassFixture<AccountWebApplicationFactory>
 {
-    // ── Test request types ────────────────────────────────────────────────────
-
-    // No permissions required — open command
-    private sealed record OpenCommand : IRequest<Result>;
-
-    // Requires a single permission
-    [RequirePermission(PermissionResource.Billing, PermissionAction.Manage)]
-    private sealed record BillingManageCommand : IRequest<Result>;
-
-    // Requires two permissions (AND semantics)
-    [RequirePermission(PermissionResource.EventType, PermissionAction.Create)]
-    [RequirePermission(PermissionResource.Team, PermissionAction.Read)]
-    private sealed record TwoPermissionsCommand : IRequest<Result>;
-
-    // Requires Team scope
-    [RequirePermission(PermissionResource.Team, PermissionAction.Manage, PermissionScope.Team)]
-    private sealed record TeamScopedCommand : IRequest<Result>;
-
-    // Requires Organization scope
-    [RequirePermission(PermissionResource.Team, PermissionAction.Manage, PermissionScope.Organization)]
-    private sealed record OrgScopedCommand : IRequest<Result>;
-
     // ── Helpers ───────────────────────────────────────────────────────────────
 
     private static (IPermissionCheckService permissionService, IExecutionContext executionContext) BuildMocks(
@@ -71,7 +48,8 @@ public sealed class PermissionCheckBehaviorTests(AccountWebApplicationFactory fa
         return new PermissionCheckBehavior<TRequest, Result>(
             permissionService,
             executionContext,
-            NullLogger<PermissionCheckBehavior<TRequest, Result>>.Instance);
+            NullLogger<PermissionCheckBehavior<TRequest, Result>>.Instance
+        );
     }
 
     // ── Tests ─────────────────────────────────────────────────────────────────
@@ -84,6 +62,7 @@ public sealed class PermissionCheckBehaviorTests(AccountWebApplicationFactory fa
         var behavior = BuildBehavior<OpenCommand>(permissionService, executionContext);
 
         var handlerCalled = false;
+
         Task<Result> next(CancellationToken _)
         {
             handlerCalled = true;
@@ -103,10 +82,11 @@ public sealed class PermissionCheckBehaviorTests(AccountWebApplicationFactory fa
     public async Task Handle_WhenUnauthenticated_ShouldReturnForbidden()
     {
         // Arrange — null userId and tenantId to simulate unauthenticated request
-        var (permissionService, executionContext) = BuildMocks(userId: null, tenantId: null);
+        var (permissionService, executionContext) = BuildMocks(null, null);
         var behavior = BuildBehavior<BillingManageCommand>(permissionService, executionContext);
 
         var handlerCalled = false;
+
         Task<Result> next(CancellationToken _)
         {
             handlerCalled = true;
@@ -137,6 +117,7 @@ public sealed class PermissionCheckBehaviorTests(AccountWebApplicationFactory fa
         var behavior = BuildBehavior<BillingManageCommand>(permissionService, executionContext);
 
         var handlerCalled = false;
+
         Task<Result> next(CancellationToken _)
         {
             handlerCalled = true;
@@ -166,6 +147,7 @@ public sealed class PermissionCheckBehaviorTests(AccountWebApplicationFactory fa
         var behavior = BuildBehavior<BillingManageCommand>(permissionService, executionContext);
 
         var handlerCalled = false;
+
         Task<Result> next(CancellationToken _)
         {
             handlerCalled = true;
@@ -199,6 +181,7 @@ public sealed class PermissionCheckBehaviorTests(AccountWebApplicationFactory fa
         var behavior = BuildBehavior<TwoPermissionsCommand>(permissionService, executionContext);
 
         var handlerCalled = false;
+
         Task<Result> next(CancellationToken _)
         {
             handlerCalled = true;
@@ -222,7 +205,7 @@ public sealed class PermissionCheckBehaviorTests(AccountWebApplicationFactory fa
         var userId = UserId.NewId();
         var tenantId = new TenantId(2000L);
         var teamId = new TenantId(2001L);
-        var (permissionService, executionContext) = BuildMocks(userId, tenantId, activeTeamId: teamId);
+        var (permissionService, executionContext) = BuildMocks(userId, tenantId, teamId);
 
         permissionService
             .HasPermissionAsync(userId, teamId, new Permission(PermissionResource.Team, PermissionAction.Manage), Arg.Any<CancellationToken>())
@@ -231,6 +214,7 @@ public sealed class PermissionCheckBehaviorTests(AccountWebApplicationFactory fa
         var behavior = BuildBehavior<TeamScopedCommand>(permissionService, executionContext);
 
         var handlerCalled = false;
+
         Task<Result> next(CancellationToken _)
         {
             handlerCalled = true;
@@ -252,11 +236,12 @@ public sealed class PermissionCheckBehaviorTests(AccountWebApplicationFactory fa
         // Arrange — no active team scope in context
         var userId = UserId.NewId();
         var tenantId = new TenantId(2002L);
-        var (permissionService, executionContext) = BuildMocks(userId, tenantId, activeTeamId: null);
+        var (permissionService, executionContext) = BuildMocks(userId, tenantId, null);
 
         var behavior = BuildBehavior<TeamScopedCommand>(permissionService, executionContext);
 
         var handlerCalled = false;
+
         Task<Result> next(CancellationToken _)
         {
             handlerCalled = true;
@@ -288,6 +273,7 @@ public sealed class PermissionCheckBehaviorTests(AccountWebApplicationFactory fa
         var behavior = BuildBehavior<OrgScopedCommand>(permissionService, executionContext);
 
         var handlerCalled = false;
+
         Task<Result> next(CancellationToken _)
         {
             handlerCalled = true;
@@ -314,6 +300,7 @@ public sealed class PermissionCheckBehaviorTests(AccountWebApplicationFactory fa
         var behavior = BuildBehavior<OrgScopedCommand>(permissionService, executionContext);
 
         var handlerCalled = false;
+
         Task<Result> next(CancellationToken _)
         {
             handlerCalled = true;
@@ -328,4 +315,25 @@ public sealed class PermissionCheckBehaviorTests(AccountWebApplicationFactory fa
         result.StatusCode.Should().Be(HttpStatusCode.Forbidden);
         await permissionService.DidNotReceiveWithAnyArgs().HasPermissionAsync(default!, default!, default!, default);
     }
+    // ── Test request types ────────────────────────────────────────────────────
+
+    // No permissions required — open command
+    private sealed record OpenCommand : IRequest<Result>;
+
+    // Requires a single permission
+    [RequirePermission(PermissionResource.Billing, PermissionAction.Manage)]
+    private sealed record BillingManageCommand : IRequest<Result>;
+
+    // Requires two permissions (AND semantics)
+    [RequirePermission(PermissionResource.EventType, PermissionAction.Create)]
+    [RequirePermission(PermissionResource.Team, PermissionAction.Read)]
+    private sealed record TwoPermissionsCommand : IRequest<Result>;
+
+    // Requires Team scope
+    [RequirePermission(PermissionResource.Team, PermissionAction.Manage, PermissionScope.Team)]
+    private sealed record TeamScopedCommand : IRequest<Result>;
+
+    // Requires Organization scope
+    [RequirePermission(PermissionResource.Team, PermissionAction.Manage, PermissionScope.Organization)]
+    private sealed record OrgScopedCommand : IRequest<Result>;
 }

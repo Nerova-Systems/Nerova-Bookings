@@ -31,7 +31,10 @@ public sealed class AuthenticationTokenService(
         SetAuthenticationTokensOnHttpResponse(refreshToken, accessToken);
     }
 
-    /// <summary>Sets only the access token response header for an impersonation session. No refresh token is issued or modified.</summary>
+    /// <summary>
+    ///     Sets only the access token response header for an impersonation session. No refresh token is issued or
+    ///     modified.
+    /// </summary>
     public void SetImpersonationAccessToken(UserInfo userInfo)
     {
         var accessToken = accessTokenGenerator.Generate(userInfo);

@@ -347,8 +347,8 @@ public sealed class ConfigureOrgSmtpTests(AccountWebApplicationFactory factory)
 
         var payload = new
         {
-            Host = "127.0.0.1",      // localhost — no SMTP server listening
-            Port = 19876,             // unlikely to be bound
+            Host = "127.0.0.1", // localhost — no SMTP server listening
+            Port = 19876, // unlikely to be bound
             UseSsl = false,
             Username = "testuser",
             Password = "testpass",
@@ -421,12 +421,12 @@ public sealed class ConfigureOrgSmtpTests(AccountWebApplicationFactory factory)
                 ("role", role.ToString()),
                 ("accepted", true),
                 ("accepted_at", now),
-                ("invited_by", (object?)null),
-                ("invite_token", (object?)null),
+                ("invited_by", null),
+                ("invite_token", null),
                 ("disable_impersonation", false),
-                ("custom_role_id", (object?)null),
+                ("custom_role_id", null),
                 ("created_at", now),
-                ("modified_at", (object?)null)
+                ("modified_at", null)
             ]
         );
     }
@@ -453,28 +453,34 @@ public sealed class ConfigureOrgSmtpTests(AccountWebApplicationFactory factory)
         AnonymousHttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
     }
 
-    private static object ValidPutPayload() => new
+    private static object ValidPutPayload()
     {
-        Host = "smtp.example.com",
-        Port = 587,
-        UseSsl = true,
-        Username = "noreply@example.com",
-        Password = "super_secret",
-        FromEmail = "noreply@example.com",
-        FromName = "Example Bookings",
-        ReplyToEmail = "support@example.com"
-    };
+        return new
+        {
+            Host = "smtp.example.com",
+            Port = 587,
+            UseSsl = true,
+            Username = "noreply@example.com",
+            Password = "super_secret",
+            FromEmail = "noreply@example.com",
+            FromName = "Example Bookings",
+            ReplyToEmail = "support@example.com"
+        };
+    }
 
-    private static object ValidTestPayload() => new
+    private static object ValidTestPayload()
     {
-        Host = "smtp.example.com",
-        Port = 587,
-        UseSsl = true,
-        Username = "noreply@example.com",
-        Password = "super_secret",
-        FromEmail = "noreply@example.com",
-        RecipientEmail = "test@example.com"
-    };
+        return new
+        {
+            Host = "smtp.example.com",
+            Port = 587,
+            UseSsl = true,
+            Username = "noreply@example.com",
+            Password = "super_secret",
+            FromEmail = "noreply@example.com",
+            RecipientEmail = "test@example.com"
+        };
+    }
 
     /// <summary>Minimal deserialization shape for the TestOrgSmtpResult response body.</summary>
     private sealed record TestOrgSmtpResultResponse(bool Success, string? ErrorMessage);

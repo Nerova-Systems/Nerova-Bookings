@@ -118,7 +118,7 @@ public sealed class Tenant : SoftDeletableAggregateRoot<TenantId>
     ///     pre-hierarchy (Solo) tenants are distinguished from Teams and Organizations.
     ///     <see href="cal.com/packages/prisma/schema.prisma">Team.isOrganization</see>
     /// </summary>
-    public TenantKind Kind { get; private set; }
+    public TenantKind Kind { get; }
 
     /// <summary>
     ///     The ID of the parent <see cref="TenantKind.Organization" /> tenant when this tenant is a
@@ -161,8 +161,11 @@ public sealed class Tenant : SoftDeletableAggregateRoot<TenantId>
     public static Tenant CreateTeam(Tenant parentOrg, int existingCount)
     {
         if (parentOrg.Kind != TenantKind.Organization)
+        {
             throw new InvalidOperationException(
-                $"A Team can only be created under an Organization tenant, but the provided parent has kind '{parentOrg.Kind}'.");
+                $"A Team can only be created under an Organization tenant, but the provided parent has kind '{parentOrg.Kind}'."
+            );
+        }
 
         return new Tenant(RolloutBucketHasher.ComputeRolloutBucket(existingCount), TenantKind.Team, parentOrg.Id)
         {
@@ -198,7 +201,9 @@ public sealed class Tenant : SoftDeletableAggregateRoot<TenantId>
     public void SetSlug(string? slug)
     {
         if (Kind == TenantKind.Solo)
+        {
             throw new InvalidOperationException("Solo tenants do not have a slug. Only Teams and Organizations can have a slug.");
+        }
 
         Slug = slug;
     }
@@ -221,7 +226,9 @@ public sealed class Tenant : SoftDeletableAggregateRoot<TenantId>
         string? weekStart)
     {
         if (Kind == TenantKind.Solo)
+        {
             throw new InvalidOperationException("Solo tenants cannot have team branding settings.");
+        }
 
         Bio = bio;
         HideBranding = hideBranding;

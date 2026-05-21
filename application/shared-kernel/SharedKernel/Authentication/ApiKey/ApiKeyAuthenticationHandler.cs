@@ -32,7 +32,9 @@ public sealed class ApiKeyAuthenticationHandler(
             {
                 var candidate = authHeader["Bearer ".Length..].Trim();
                 if (candidate.StartsWith(ApiKeyAuthenticationDefaults.TokenPrefix, StringComparison.Ordinal))
+                {
                     token = candidate;
+                }
             }
         }
 

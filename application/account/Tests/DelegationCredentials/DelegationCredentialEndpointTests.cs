@@ -445,12 +445,12 @@ public sealed class DelegationCredentialEndpointTests(AccountWebApplicationFacto
                 ("role", role.ToString()),
                 ("accepted", true),
                 ("accepted_at", now),
-                ("invited_by", (object?)null),
-                ("invite_token", (object?)null),
+                ("invited_by", null),
+                ("invite_token", null),
                 ("disable_impersonation", false),
-                ("custom_role_id", (object?)null),
+                ("custom_role_id", null),
                 ("created_at", now),
-                ("modified_at", (object?)null)
+                ("modified_at", null)
             ]
         );
     }
@@ -477,17 +477,23 @@ public sealed class DelegationCredentialEndpointTests(AccountWebApplicationFacto
         AnonymousHttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
     }
 
-    private static object ValidPutPayload() => new
+    private static object ValidPutPayload()
     {
-        Platform = "Google",
-        Domain = "acme.com",
-        KeyBlob = """{"type":"service_account","project_id":"my-project"}"""
-    };
+        return new
+        {
+            Platform = "Google",
+            Domain = "acme.com",
+            KeyBlob = """{"type":"service_account","project_id":"my-project"}"""
+        };
+    }
 
-    private static object ValidTestPayload() => new
+    private static object ValidTestPayload()
     {
-        MemberEmail = "member@acme.com"
-    };
+        return new
+        {
+            MemberEmail = "member@acme.com"
+        };
+    }
 
     /// <summary>Minimal deserialization shape for the test result response body.</summary>
     private sealed record TestDelegationCredentialResultResponse(bool Success, string? ErrorMessage);

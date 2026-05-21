@@ -1,7 +1,7 @@
+using Account.Features.ApiKeys.Domain;
 using Account.Features.AuditLog.Domain;
 using Account.Features.Permissions.Domain;
 using Account.Features.Permissions.Pipeline;
-using Account.Features.ApiKeys.Domain;
 using JetBrains.Annotations;
 using Microsoft.AspNetCore.Http;
 using SharedKernel.AuditLog;
@@ -26,32 +26,39 @@ public sealed class RevokeOrgApiKeyHandler(
     public async Task<Result> Handle(RevokeOrgApiKeyCommand command, CancellationToken cancellationToken)
     {
         if (!executionContext.UserInfo.IsFeatureFlagEnabled(FeatureFlagDefinitions.CapApiKeys.Key))
+        {
             return Result.Forbidden("The API keys feature is not enabled for this tenant.");
+        }
 
         var orgId = executionContext.ActiveOrgId!;
 
         // Bypass the tenant filter because the key lives in the org tenant, not the caller's solo tenant.
         var apiKey = await apiKeyRepository.GetByIdUnfilteredAsync(command.Id, cancellationToken);
         if (apiKey is null || apiKey.Scope != ApiKeyScope.Organization || apiKey.TenantId != orgId)
+        {
             return Result.NotFound($"API key '{command.Id}' not found in this organization.");
+        }
 
         if (apiKey.RevokedAt.HasValue)
+        {
             return Result.BadRequest("This API key has already been revoked.");
+        }
 
         apiKey.Revoke(timeProvider.GetUtcNow());
         apiKeyRepository.Update(apiKey);
 
         var userId = executionContext.UserInfo.Id!;
         await auditLogEmitter.EmitAsync(new AuditLogEvent(
-            TenantId: orgId,
-            ActorId: userId,
-            ActorEmail: executionContext.UserInfo.Email ?? string.Empty,
-            Resource: AuditResource.ApiKey.ToString(),
-            Action: AuditAction.Revoked.ToString(),
-            ResourceId: apiKey.Id.ToString(),
-            IpAddress: httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
-            UserAgent: httpContextAccessor.HttpContext?.Request.Headers.UserAgent.ToString()
-        ), cancellationToken);
+                orgId,
+                userId,
+                executionContext.UserInfo.Email ?? string.Empty,
+                AuditResource.ApiKey.ToString(),
+                AuditAction.Revoked.ToString(),
+                apiKey.Id.ToString(),
+                IpAddress: httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
+                UserAgent: httpContextAccessor.HttpContext?.Request.Headers.UserAgent.ToString()
+            ), cancellationToken
+        );
 
         return Result.Success();
     }

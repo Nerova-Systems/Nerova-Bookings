@@ -15,7 +15,10 @@ namespace Account.Features.Permissions.Domain;
 [JsonConverter(typeof(StronglyTypedIdJsonConverter<string, RoleId>))]
 public sealed record RoleId(string Value) : StronglyTypedUlid<RoleId>(Value)
 {
-    public override string ToString() => Value;
+    public override string ToString()
+    {
+        return Value;
+    }
 }
 
 /// <summary>
@@ -91,7 +94,9 @@ public sealed class Role : AggregateRoot<RoleId>
             // Passing a shared instance (e.g. from Permission.All) across multiple roles
             // would cause EF Core to re-assign the object to the last role that "claims" it.
             if (!role._permissions.Any(x => x.Resource == p.Resource && x.Action == p.Action))
+            {
                 role._permissions.Add(new Permission(p.Resource, p.Action));
+            }
         }
 
         return role;
@@ -108,7 +113,9 @@ public sealed class Role : AggregateRoot<RoleId>
     public static Role CreateCustom(TenantId tenantId, TenantKind tenantKind, string name, string? description, IEnumerable<Permission>? initialPermissions = null)
     {
         if (tenantKind == TenantKind.Solo)
+        {
             throw new InvalidOperationException("Solo tenants cannot own custom roles. Only Team or Organization tenants may create custom roles.");
+        }
 
         ArgumentException.ThrowIfNullOrWhiteSpace(name);
         var role = new Role(RoleId.NewId(), tenantId, name, description);
@@ -117,7 +124,9 @@ public sealed class Role : AggregateRoot<RoleId>
             foreach (var p in initialPermissions)
             {
                 if (!role._permissions.Any(x => x.Resource == p.Resource && x.Action == p.Action))
+                {
                     role._permissions.Add(new Permission(p.Resource, p.Action));
+                }
             }
         }
 
@@ -134,7 +143,9 @@ public sealed class Role : AggregateRoot<RoleId>
     {
         ThrowIfSystem();
         if (!_permissions.Any(x => x.Resource == permission.Resource && x.Action == permission.Action))
+        {
             _permissions.Add(new Permission(permission.Resource, permission.Action));
+        }
     }
 
     /// <summary>
@@ -146,7 +157,9 @@ public sealed class Role : AggregateRoot<RoleId>
         ThrowIfSystem();
         var existing = _permissions.FirstOrDefault(x => x.Resource == permission.Resource && x.Action == permission.Action);
         if (existing is not null)
+        {
             _permissions.Remove(existing);
+        }
     }
 
     /// <summary>
@@ -164,6 +177,8 @@ public sealed class Role : AggregateRoot<RoleId>
     private void ThrowIfSystem()
     {
         if (IsSystem)
+        {
             throw new InvalidOperationException("System roles cannot be modified. Create a custom role instead.");
+        }
     }
 }

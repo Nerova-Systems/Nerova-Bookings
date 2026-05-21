@@ -1,7 +1,6 @@
 using Account.Features.Tenants.Domain;
 using JetBrains.Annotations;
 using SharedKernel.Domain;
-using SharedKernel.Persistence;
 using SharedKernel.StronglyTypedIds;
 
 namespace Account.Features.Smtp.Domain;
@@ -15,7 +14,10 @@ namespace Account.Features.Smtp.Domain;
 [JsonConverter(typeof(StronglyTypedIdJsonConverter<string, OrgSmtpConfigId>))]
 public sealed record OrgSmtpConfigId(string Value) : StronglyTypedUlid<OrgSmtpConfigId>(Value)
 {
-    public override string ToString() => Value;
+    public override string ToString()
+    {
+        return Value;
+    }
 }
 
 /// <summary>
@@ -29,9 +31,9 @@ public sealed record OrgSmtpConfigId(string Value) : StronglyTypedUlid<OrgSmtpCo
 /// </summary>
 public sealed class OrgSmtpConfig : AggregateRoot<OrgSmtpConfigId>, ITenantScopedEntity
 {
-    private OrgSmtpConfig(OrgSmtpConfigId id) : base(id) { }
-
-    public TenantId TenantId { get; private set; } = null!;
+    private OrgSmtpConfig(OrgSmtpConfigId id) : base(id)
+    {
+    }
 
     public string Host { get; private set; } = null!;
 
@@ -58,6 +60,8 @@ public sealed class OrgSmtpConfig : AggregateRoot<OrgSmtpConfigId>, ITenantScope
     /// </summary>
     public bool IsEnabled { get; private set; }
 
+    public TenantId TenantId { get; private set; } = null!;
+
     // ─── Factory ──────────────────────────────────────────────────────────────
 
     /// <summary>
@@ -78,7 +82,9 @@ public sealed class OrgSmtpConfig : AggregateRoot<OrgSmtpConfigId>, ITenantScope
         string? replyToEmail)
     {
         if (tenant.Kind != TenantKind.Organization)
+        {
             throw new InvalidOperationException("SMTP configuration can only be created for organization tenants.");
+        }
 
         return new OrgSmtpConfig(OrgSmtpConfigId.NewId())
         {
@@ -117,9 +123,15 @@ public sealed class OrgSmtpConfig : AggregateRoot<OrgSmtpConfigId>, ITenantScope
         ReplyToEmail = replyToEmail;
     }
 
-    public void Enable() => IsEnabled = true;
+    public void Enable()
+    {
+        IsEnabled = true;
+    }
 
-    public void Disable() => IsEnabled = false;
+    public void Disable()
+    {
+        IsEnabled = false;
+    }
 }
 
 public interface IOrgSmtpConfigRepository : ICrudRepository<OrgSmtpConfig, OrgSmtpConfigId>

@@ -1,7 +1,6 @@
 using Account.Features.Smtp.Domain;
 using Account.Features.Smtp.Infrastructure;
 using Account.Features.Tenants.Domain;
-using FluentAssertions;
 using Microsoft.AspNetCore.DataProtection;
 using NSubstitute;
 using SharedKernel.Authentication;
@@ -20,20 +19,22 @@ namespace Account.Tests.Smtp;
 /// </summary>
 public sealed class TenantAwareEmailClientTests
 {
-    private readonly IEmailClient _platformClient = Substitute.For<IEmailClient>();
+    private static readonly EmailMessage SampleMessage = new(
+        "recipient@example.com",
+        "Test",
+        "<p>Hello</p>",
+        "Hello"
+    );
+
     private readonly IOrgSmtpConfigRepository _configRepository = Substitute.For<IOrgSmtpConfigRepository>();
-    private readonly IExecutionContext _executionContext = Substitute.For<IExecutionContext>();
+
     private readonly SmtpCredentialProtector _credentialProtector =
         new(new EphemeralDataProtectionProvider());
 
-    private readonly TenantAwareEmailClient _sut;
+    private readonly IExecutionContext _executionContext = Substitute.For<IExecutionContext>();
+    private readonly IEmailClient _platformClient = Substitute.For<IEmailClient>();
 
-    private static readonly EmailMessage SampleMessage = new(
-        Recipient: "recipient@example.com",
-        Subject: "Test",
-        HtmlBody: "<p>Hello</p>",
-        PlainTextBody: "Hello"
-    );
+    private readonly TenantAwareEmailClient _sut;
 
     public TenantAwareEmailClientTests()
     {
@@ -142,14 +143,14 @@ public sealed class TenantAwareEmailClientTests
         var encryptedPassword = _credentialProtector.Protect(plainPassword);
         var config = OrgSmtpConfig.Create(
             orgTenant,
-            host: "127.0.0.1",
-            port: 19876,           // no server here — connection will be refused
-            useSsl: false,
-            username: "user",
-            encryptedPassword: encryptedPassword,
-            fromEmail: "from@acme.com",
-            fromName: null,
-            replyToEmail: null
+            "127.0.0.1",
+            19876, // no server here — connection will be refused
+            false,
+            "user",
+            encryptedPassword,
+            "from@acme.com",
+            null,
+            null
         );
 
         _executionContext.ActiveOrgId.Returns(orgId);
@@ -157,8 +158,7 @@ public sealed class TenantAwareEmailClientTests
         _configRepository.GetByOrgIdAsync(orgId, Arg.Any<CancellationToken>()).Returns(config);
 
         // Act — SmtpClient.SendMailAsync throws because no server is listening; that is expected
-        await Assert.ThrowsAnyAsync<Exception>(
-            async () => await _sut.SendAsync(SampleMessage, CancellationToken.None)
+        await Assert.ThrowsAnyAsync<Exception>(async () => await _sut.SendAsync(SampleMessage, CancellationToken.None)
         );
 
         // Assert — platform client was NEVER called; the decorator tried org SMTP
@@ -169,15 +169,21 @@ public sealed class TenantAwareEmailClientTests
     // Helpers
     // ──────────────────────────────────────────────────────────────────────────
 
-    private static UserInfo UserInfoWithFlag() => new()
+    private static UserInfo UserInfoWithFlag()
     {
-        IsAuthenticated = true,
-        FeatureFlags = new HashSet<string> { FeatureFlagDefinitions.CapCustomSmtp.Key }
-    };
+        return new UserInfo
+        {
+            IsAuthenticated = true,
+            FeatureFlags = new HashSet<string> { FeatureFlagDefinitions.CapCustomSmtp.Key }
+        };
+    }
 
-    private static UserInfo UserInfoWithoutFlag() => new()
+    private static UserInfo UserInfoWithoutFlag()
     {
-        IsAuthenticated = true,
-        FeatureFlags = new HashSet<string>()
-    };
+        return new UserInfo
+        {
+            IsAuthenticated = true,
+            FeatureFlags = new HashSet<string>()
+        };
+    }
 }

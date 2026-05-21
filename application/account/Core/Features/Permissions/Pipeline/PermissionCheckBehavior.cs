@@ -1,8 +1,6 @@
 using System.Net;
 using Account.Features.Permissions.Domain;
 using Account.Features.Permissions.Services;
-using MediatR;
-using Microsoft.Extensions.Logging;
 using SharedKernel.Cqrs;
 using SharedKernel.Domain;
 using SharedKernel.ExecutionContext;
@@ -41,7 +39,8 @@ namespace Account.Features.Permissions.Pipeline;
 public sealed class PermissionCheckBehavior<TRequest, TResponse>(
     IPermissionCheckService permissionCheckService,
     IExecutionContext executionContext,
-    ILogger<PermissionCheckBehavior<TRequest, TResponse>> logger)
+    ILogger<PermissionCheckBehavior<TRequest, TResponse>> logger
+)
     : IPipelineBehavior<TRequest, TResponse>
     where TRequest : class
     where TResponse : ResultBase

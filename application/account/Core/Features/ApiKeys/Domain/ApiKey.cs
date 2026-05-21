@@ -2,7 +2,6 @@ using System.Security.Cryptography;
 using System.Text;
 using JetBrains.Annotations;
 using SharedKernel.Domain;
-using SharedKernel.Persistence;
 using SharedKernel.StronglyTypedIds;
 
 namespace Account.Features.ApiKeys.Domain;
@@ -16,7 +15,10 @@ namespace Account.Features.ApiKeys.Domain;
 [JsonConverter(typeof(StronglyTypedIdJsonConverter<string, ApiKeyId>))]
 public sealed record ApiKeyId(string Value) : StronglyTypedUlid<ApiKeyId>(Value)
 {
-    public override string ToString() => Value;
+    public override string ToString()
+    {
+        return Value;
+    }
 }
 
 /// <summary>
@@ -33,10 +35,9 @@ public sealed record ApiKeyId(string Value) : StronglyTypedUlid<ApiKeyId>(Value)
 /// </summary>
 public sealed class ApiKey : AggregateRoot<ApiKeyId>, ITenantScopedEntity
 {
-    private ApiKey(ApiKeyId id) : base(id) { }
-
-    /// <summary>The tenant that owns this key (solo tenant for user keys, org tenant for org keys).</summary>
-    public TenantId TenantId { get; private set; } = null!;
+    private ApiKey(ApiKeyId id) : base(id)
+    {
+    }
 
     /// <summary>Human-readable label set by the key creator.</summary>
     public string Name { get; private set; } = null!;
@@ -61,6 +62,9 @@ public sealed class ApiKey : AggregateRoot<ApiKeyId>, ITenantScopedEntity
 
     /// <summary>The user who created this key. Used to populate authentication context.</summary>
     public UserId CreatedByUserId { get; private set; } = null!;
+
+    /// <summary>The tenant that owns this key (solo tenant for user keys, org tenant for org keys).</summary>
+    public TenantId TenantId { get; private set; } = null!;
 
     // ─── Factory ──────────────────────────────────────────────────────────────
 
@@ -107,18 +111,26 @@ public sealed class ApiKey : AggregateRoot<ApiKeyId>, ITenantScopedEntity
     // ─── Mutations ────────────────────────────────────────────────────────────
 
     /// <summary>Records that the key was successfully used for authentication at <paramref name="now" />.</summary>
-    public void MarkUsed(DateTimeOffset now) => LastUsedAt = now;
+    public void MarkUsed(DateTimeOffset now)
+    {
+        LastUsedAt = now;
+    }
 
     /// <summary>Permanently revokes the key. Revoked keys fail validation immediately.</summary>
-    public void Revoke(DateTimeOffset now) => RevokedAt = now;
+    public void Revoke(DateTimeOffset now)
+    {
+        RevokedAt = now;
+    }
 
     // ─── Predicates ───────────────────────────────────────────────────────────
 
     /// <summary>
     ///     Returns <see langword="true" /> when the key has not been revoked and has not passed its expiry.
     /// </summary>
-    public bool IsValid(DateTimeOffset now) =>
-        RevokedAt is null && (ExpiresAt is null || ExpiresAt > now);
+    public bool IsValid(DateTimeOffset now)
+    {
+        return RevokedAt is null && (ExpiresAt is null || ExpiresAt > now);
+    }
 
     // ─── Helpers ──────────────────────────────────────────────────────────────
 

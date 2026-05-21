@@ -21,7 +21,8 @@ namespace Account.Features.Permissions.Pipeline;
 public sealed class RequirePermissionAttribute(
     PermissionResource resource,
     PermissionAction action,
-    PermissionScope scope = PermissionScope.CurrentTenant) : Attribute
+    PermissionScope scope = PermissionScope.CurrentTenant
+) : Attribute
 {
     /// <summary>The permission this attribute demands.</summary>
     public Permission Permission { get; } = new(resource, action);

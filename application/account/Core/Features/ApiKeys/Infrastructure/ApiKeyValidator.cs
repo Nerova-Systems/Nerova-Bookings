@@ -6,7 +6,6 @@ using Account.Features.Users.Domain;
 using Account.Features.Users.Shared;
 using SharedKernel.Authentication;
 using SharedKernel.Authentication.ApiKey;
-using SharedKernel.Authentication.TokenGeneration;
 
 namespace Account.Features.ApiKeys.Infrastructure;
 
@@ -41,7 +40,7 @@ public sealed class ApiKeyValidator(
         var activeOrgId = apiKey.Scope == ApiKeyScope.Organization ? apiKey.TenantId : null;
 
         var userInfoResult = await userInfoFactory.CreateUserInfoAsync(
-            user, sessionId: null, cancellationToken, activeOrgId: activeOrgId
+            user, null, cancellationToken, activeOrgId: activeOrgId
         );
         if (!userInfoResult.IsSuccess) return null;
 

@@ -1,7 +1,7 @@
+using Account.Features.ApiKeys.Domain;
 using Account.Features.AuditLog.Domain;
 using Account.Features.Permissions.Domain;
 using Account.Features.Permissions.Pipeline;
-using Account.Features.ApiKeys.Domain;
 using FluentValidation;
 using JetBrains.Annotations;
 using Microsoft.AspNetCore.Http;
@@ -21,6 +21,7 @@ public sealed record CreateApiKeyResponse(ApiKeyId Id, string PlainText, string 
 public sealed record CreateUserApiKeyCommand : ICommand, IRequest<Result<CreateApiKeyResponse>>
 {
     public required string Name { get; init; }
+
     public DateTimeOffset? ExpiresAt { get; init; }
 }
 
@@ -50,7 +51,9 @@ public sealed class CreateUserApiKeyHandler(
     public async Task<Result<CreateApiKeyResponse>> Handle(CreateUserApiKeyCommand command, CancellationToken cancellationToken)
     {
         if (!executionContext.UserInfo.IsFeatureFlagEnabled(FeatureFlagDefinitions.CapApiKeys.Key))
+        {
             return Result<CreateApiKeyResponse>.Forbidden("The API keys feature is not enabled for this tenant.");
+        }
 
         var userId = executionContext.UserInfo.Id!;
         var tenantId = executionContext.TenantId!;
@@ -59,15 +62,16 @@ public sealed class CreateUserApiKeyHandler(
         await apiKeyRepository.AddAsync(apiKey, cancellationToken);
 
         await auditLogEmitter.EmitAsync(new AuditLogEvent(
-            TenantId: tenantId,
-            ActorId: userId,
-            ActorEmail: executionContext.UserInfo.Email ?? string.Empty,
-            Resource: AuditResource.ApiKey.ToString(),
-            Action: AuditAction.Created.ToString(),
-            ResourceId: apiKey.Id.ToString(),
-            IpAddress: httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
-            UserAgent: httpContextAccessor.HttpContext?.Request.Headers.UserAgent.ToString()
-        ), cancellationToken);
+                tenantId,
+                userId,
+                executionContext.UserInfo.Email ?? string.Empty,
+                AuditResource.ApiKey.ToString(),
+                AuditAction.Created.ToString(),
+                apiKey.Id.ToString(),
+                IpAddress: httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
+                UserAgent: httpContextAccessor.HttpContext?.Request.Headers.UserAgent.ToString()
+            ), cancellationToken
+        );
 
         return new CreateApiKeyResponse(apiKey.Id, plainText, apiKey.KeyPrefix);
     }

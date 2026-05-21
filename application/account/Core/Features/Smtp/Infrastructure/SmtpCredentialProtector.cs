@@ -15,7 +15,13 @@ public sealed class SmtpCredentialProtector
         _protector = provider.CreateProtector("org-smtp-credentials");
     }
 
-    public string Protect(string plaintext) => _protector.Protect(plaintext);
+    public string Protect(string plaintext)
+    {
+        return _protector.Protect(plaintext);
+    }
 
-    public string Unprotect(string ciphertext) => _protector.Unprotect(ciphertext);
+    public string Unprotect(string ciphertext)
+    {
+        return _protector.Unprotect(ciphertext);
+    }
 }

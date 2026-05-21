@@ -21,12 +21,19 @@ namespace Account.Features.Smtp.Commands;
 public sealed record ConfigureOrgSmtpCommand : ICommand, IRequest<Result>
 {
     public required string Host { get; init; }
+
     public required int Port { get; init; }
+
     public required bool UseSsl { get; init; }
+
     public required string Username { get; init; }
+
     public required string Password { get; init; }
+
     public required string FromEmail { get; init; }
+
     public string? FromName { get; init; }
+
     public string? ReplyToEmail { get; init; }
 }
 
@@ -68,12 +75,15 @@ public sealed class ConfigureOrgSmtpHandler(
     IOrgSmtpConfigRepository configRepository,
     ITenantRepository tenantRepository,
     SmtpCredentialProtector credentialProtector,
-    IExecutionContext executionContext) : IRequestHandler<ConfigureOrgSmtpCommand, Result>
+    IExecutionContext executionContext
+) : IRequestHandler<ConfigureOrgSmtpCommand, Result>
 {
     public async Task<Result> Handle(ConfigureOrgSmtpCommand command, CancellationToken cancellationToken)
     {
         if (!executionContext.UserInfo.IsFeatureFlagEnabled(FeatureFlagDefinitions.CapCustomSmtp.Key))
+        {
             return Result.Forbidden("The custom SMTP feature is not enabled for this organization.");
+        }
 
         var orgId = executionContext.ActiveOrgId!;
         var encryptedPassword = credentialProtector.Protect(command.Password);
@@ -89,7 +99,8 @@ public sealed class ConfigureOrgSmtpHandler(
                 encryptedPassword,
                 command.FromEmail,
                 command.FromName,
-                command.ReplyToEmail);
+                command.ReplyToEmail
+            );
 
             configRepository.Update(existing);
         }
@@ -97,7 +108,9 @@ public sealed class ConfigureOrgSmtpHandler(
         {
             var tenant = await tenantRepository.GetByIdAsync(orgId, cancellationToken);
             if (tenant is null)
+            {
                 return Result.NotFound($"Organization '{orgId}' not found.");
+            }
 
             var config = OrgSmtpConfig.Create(
                 tenant,
@@ -108,7 +121,8 @@ public sealed class ConfigureOrgSmtpHandler(
                 encryptedPassword,
                 command.FromEmail,
                 command.FromName,
-                command.ReplyToEmail);
+                command.ReplyToEmail
+            );
 
             await configRepository.AddAsync(config, cancellationToken);
         }

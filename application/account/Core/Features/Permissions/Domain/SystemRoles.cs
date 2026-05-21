@@ -1,5 +1,4 @@
 using Account.Features.Memberships.Domain;
-using System.Diagnostics;
 
 namespace Account.Features.Permissions.Domain;
 
@@ -49,7 +48,8 @@ public static class SystemRoles
         Permission.All.Where(p =>
             !(p.Resource == PermissionResource.Billing && p.Action == PermissionAction.Manage) &&
             !(p.Resource == PermissionResource.Organization && p.Action == PermissionAction.Delete) &&
-            !(p.Resource == PermissionResource.User && p.Action == PermissionAction.Impersonate));
+            !(p.Resource == PermissionResource.User && p.Action == PermissionAction.Impersonate)
+        );
 
     /// <summary>
     ///     Limited read/create/update permissions for everyday work.
@@ -68,40 +68,53 @@ public static class SystemRoles
         new(PermissionResource.Schedule, PermissionAction.Create),
         new(PermissionResource.Schedule, PermissionAction.Read),
         new(PermissionResource.Schedule, PermissionAction.Update),
-        new(PermissionResource.ApiKey, PermissionAction.Manage)
+        new(PermissionResource.ApiKey, PermissionAction.Manage),
+        new(PermissionResource.Attribute, PermissionAction.Read)
     ];
 
     // ─── Factory helpers ──────────────────────────────────────────────────────
 
     /// <summary>Creates the <c>Owner</c> system role with its deterministic ID and full permission set.</summary>
-    public static Role CreateOwnerRole() =>
-        Role.CreateSystem(OwnerId, "Owner", "Full access to all resources.", OwnerPermissions);
+    public static Role CreateOwnerRole()
+    {
+        return Role.CreateSystem(OwnerId, "Owner", "Full access to all resources.", OwnerPermissions);
+    }
 
     /// <summary>Creates the <c>Admin</c> system role with its deterministic ID.</summary>
-    public static Role CreateAdminRole() =>
-        Role.CreateSystem(AdminId, "Admin", "Full access except billing management and organization deletion.", AdminPermissions);
+    public static Role CreateAdminRole()
+    {
+        return Role.CreateSystem(AdminId, "Admin", "Full access except billing management and organization deletion.", AdminPermissions);
+    }
 
     /// <summary>Creates the <c>Member</c> system role with its deterministic ID.</summary>
-    public static Role CreateMemberRole() =>
-        Role.CreateSystem(MemberId, "Member", "Day-to-day access to bookings, event types and schedules.", MemberPermissions);
+    public static Role CreateMemberRole()
+    {
+        return Role.CreateSystem(MemberId, "Member", "Day-to-day access to bookings, event types and schedules.", MemberPermissions);
+    }
 
     // ─── Lookup helpers ───────────────────────────────────────────────────────
 
     /// <summary>Maps a <see cref="MembershipRole" /> to the corresponding system role ID.</summary>
-    public static RoleId GetIdForRole(MembershipRole role) => role switch
+    public static RoleId GetIdForRole(MembershipRole role)
     {
-        MembershipRole.Owner => OwnerId,
-        MembershipRole.Admin => AdminId,
-        MembershipRole.Member => MemberId,
-        _ => throw new UnreachableException($"Unknown MembershipRole: {role}.")
-    };
+        return role switch
+        {
+            MembershipRole.Owner => OwnerId,
+            MembershipRole.Admin => AdminId,
+            MembershipRole.Member => MemberId,
+            _ => throw new UnreachableException($"Unknown MembershipRole: {role}.")
+        };
+    }
 
     /// <summary>Returns the static in-memory permission set for the given system <see cref="MembershipRole" />.</summary>
-    public static IEnumerable<Permission> GetPermissionsForRole(MembershipRole role) => role switch
+    public static IEnumerable<Permission> GetPermissionsForRole(MembershipRole role)
     {
-        MembershipRole.Owner => OwnerPermissions,
-        MembershipRole.Admin => AdminPermissions,
-        MembershipRole.Member => MemberPermissions,
-        _ => throw new UnreachableException($"Unknown MembershipRole: {role}.")
-    };
+        return role switch
+        {
+            MembershipRole.Owner => OwnerPermissions,
+            MembershipRole.Admin => AdminPermissions,
+            MembershipRole.Member => MemberPermissions,
+            _ => throw new UnreachableException($"Unknown MembershipRole: {role}.")
+        };
+    }
 }

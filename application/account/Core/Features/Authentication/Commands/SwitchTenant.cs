@@ -130,9 +130,9 @@ public sealed class SwitchTenantHandler(
 
         var userInfoResult = await userInfoFactory.CreateUserInfoAsync(
             targetUser, session.Id, cancellationToken,
-            activeTeamId: activeTeamId,
-            activeOrgId: activeOrgId,
-            activeOrgProfileId: activeOrgProfileId
+            activeTeamId,
+            activeOrgId,
+            activeOrgProfileId
         );
         if (!userInfoResult.IsSuccess) return Result.From(userInfoResult);
 

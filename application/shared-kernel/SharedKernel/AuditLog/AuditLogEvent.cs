@@ -26,4 +26,5 @@ public record AuditLogEvent(
     string? ResourceId = null,
     IReadOnlyDictionary<string, string>? Metadata = null,
     string? IpAddress = null,
-    string? UserAgent = null);
+    string? UserAgent = null
+);

@@ -16,7 +16,10 @@ namespace Account.Features.OrgProfiles.Domain;
 [JsonConverter(typeof(StronglyTypedIdJsonConverter<string, OrgProfileId>))]
 public sealed record OrgProfileId(string Value) : StronglyTypedUlid<OrgProfileId>(Value)
 {
-    public override string ToString() => Value;
+    public override string ToString()
+    {
+        return Value;
+    }
 }
 
 /// <summary>
@@ -185,8 +188,11 @@ public sealed class OrgProfile : AggregateRoot<OrgProfileId>
         string? bio)
     {
         if (orgTenantKind != TenantKind.Organization)
+        {
             throw new InvalidOperationException(
-                $"OrgProfile can only be created for an Organization tenant, but the provided tenant has kind '{orgTenantKind}'.");
+                $"OrgProfile can only be created for an Organization tenant, but the provided tenant has kind '{orgTenantKind}'."
+            );
+        }
 
         ValidateUsername(username);
 
@@ -230,15 +236,23 @@ public sealed class OrgProfile : AggregateRoot<OrgProfileId>
     private static void ValidateUsername(string username)
     {
         if (string.IsNullOrWhiteSpace(username))
+        {
             throw new ArgumentException("Username cannot be empty or whitespace.", nameof(username));
+        }
 
         if (username.Length > MaxUsernameLength)
+        {
             throw new ArgumentException(
-                $"Username must not exceed {MaxUsernameLength} characters; got {username.Length}.", nameof(username));
+                $"Username must not exceed {MaxUsernameLength} characters; got {username.Length}.", nameof(username)
+            );
+        }
 
         if (!UsernamePattern.IsMatch(username))
+        {
             throw new ArgumentException(
                 "Username must match '^[a-z0-9-]+$' (lowercase letters, digits, and hyphens only).",
-                nameof(username));
+                nameof(username)
+            );
+        }
     }
 }

@@ -51,4 +51,3 @@ public sealed class TenantConfiguration : IEntityTypeConfiguration<Tenant>
             .HasDatabaseName("uix_tenants_slug_parent");
     }
 }
-

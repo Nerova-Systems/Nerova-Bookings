@@ -25,14 +25,14 @@ public sealed class OrgSmtpConfigTests
     {
         var config = OrgSmtpConfig.Create(
             OrgTenant,
-            host: "smtp.acme.com",
-            port: 587,
-            useSsl: true,
-            username: "noreply@acme.com",
-            encryptedPassword: "enc_secret",
-            fromEmail: "noreply@acme.com",
-            fromName: "Acme Bookings",
-            replyToEmail: "support@acme.com"
+            "smtp.acme.com",
+            587,
+            true,
+            "noreply@acme.com",
+            "enc_secret",
+            "noreply@acme.com",
+            "Acme Bookings",
+            "support@acme.com"
         );
 
         config.Id.Should().NotBeNull();
@@ -54,14 +54,14 @@ public sealed class OrgSmtpConfigTests
     {
         var config = OrgSmtpConfig.Create(
             OrgTenant,
-            host: "smtp.acme.com",
-            port: 25,
-            useSsl: false,
-            username: "user",
-            encryptedPassword: "enc",
-            fromEmail: "from@acme.com",
-            fromName: null,
-            replyToEmail: null
+            "smtp.acme.com",
+            25,
+            false,
+            "user",
+            "enc",
+            "from@acme.com",
+            null,
+            null
         );
 
         config.FromName.Should().BeNull();
@@ -86,14 +86,14 @@ public sealed class OrgSmtpConfigTests
     {
         var act = () => OrgSmtpConfig.Create(
             SoloTenant,
-            host: "smtp.solo.com",
-            port: 587,
-            useSsl: true,
-            username: "u",
-            encryptedPassword: "e",
-            fromEmail: "from@solo.com",
-            fromName: null,
-            replyToEmail: null
+            "smtp.solo.com",
+            587,
+            true,
+            "u",
+            "e",
+            "from@solo.com",
+            null,
+            null
         );
 
         act.Should().Throw<InvalidOperationException>()
@@ -110,14 +110,14 @@ public sealed class OrgSmtpConfigTests
         var config = OrgSmtpConfig.Create(OrgTenant, "old.smtp.com", 25, false, "olduser", "oldenc", "old@from.com", null, null);
 
         config.Update(
-            host: "new.smtp.com",
-            port: 465,
-            useSsl: true,
-            username: "newuser",
-            encryptedPassword: "newenc",
-            fromEmail: "new@from.com",
-            fromName: "New Name",
-            replyToEmail: "new@reply.com"
+            "new.smtp.com",
+            465,
+            true,
+            "newuser",
+            "newenc",
+            "new@from.com",
+            "New Name",
+            "new@reply.com"
         );
 
         config.Host.Should().Be("new.smtp.com");

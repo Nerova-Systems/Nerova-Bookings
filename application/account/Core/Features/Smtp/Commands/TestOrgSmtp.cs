@@ -1,12 +1,11 @@
+using System.Net;
+using System.Net.Mail;
 using Account.Features.Permissions.Domain;
 using Account.Features.Permissions.Pipeline;
-using Account.Features.Smtp.Infrastructure;
 using FluentValidation;
 using JetBrains.Annotations;
 using SharedKernel.Cqrs;
 using SharedKernel.ExecutionContext;
-using System.Net;
-using System.Net.Mail;
 using FeatureFlagDefinitions = SharedKernel.FeatureFlags.FeatureFlags;
 
 namespace Account.Features.Smtp.Commands;
@@ -21,11 +20,17 @@ namespace Account.Features.Smtp.Commands;
 public sealed record TestOrgSmtpCommand : ICommand, IRequest<Result<TestOrgSmtpResult>>
 {
     public required string Host { get; init; }
+
     public required int Port { get; init; }
+
     public required bool UseSsl { get; init; }
+
     public required string Username { get; init; }
+
     public required string Password { get; init; }
+
     public required string FromEmail { get; init; }
+
     public string? FromName { get; init; }
 
     /// <summary>Email address that will receive the test message.</summary>
@@ -74,7 +79,9 @@ public sealed class TestOrgSmtpHandler(IExecutionContext executionContext) : IRe
     public async Task<Result<TestOrgSmtpResult>> Handle(TestOrgSmtpCommand command, CancellationToken cancellationToken)
     {
         if (!executionContext.UserInfo.IsFeatureFlagEnabled(FeatureFlagDefinitions.CapCustomSmtp.Key))
+        {
             return Result<TestOrgSmtpResult>.Forbidden("The custom SMTP feature is not enabled for this organization.");
+        }
 
         try
         {
@@ -97,11 +104,11 @@ public sealed class TestOrgSmtpHandler(IExecutionContext executionContext) : IRe
             mailMessage.To.Add(command.RecipientEmail);
 
             await smtpClient.SendMailAsync(mailMessage, cancellationToken);
-            return new TestOrgSmtpResult(Success: true, ErrorMessage: null);
+            return new TestOrgSmtpResult(true, null);
         }
         catch (Exception ex)
         {
-            return new TestOrgSmtpResult(Success: false, ErrorMessage: ex.Message);
+            return new TestOrgSmtpResult(false, ex.Message);
         }
     }
 }

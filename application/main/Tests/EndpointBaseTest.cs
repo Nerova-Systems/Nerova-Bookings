@@ -160,18 +160,18 @@ public abstract class EndpointBaseTest<TContext> : IDisposable where TContext : 
 
     protected HttpClient AuthenticatedMemberHttpClient { get; }
 
+    public void Dispose()
+    {
+        Dispose(true);
+        GC.SuppressFinalize(this);
+    }
+
     protected HttpClient CreateAuthenticatedHttpClient(UserInfo userInfo)
     {
         var token = AccessTokenGenerator.Generate(userInfo);
         var client = _webApplicationFactory.CreateClient();
         client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
         return client;
-    }
-
-    public void Dispose()
-    {
-        Dispose(true);
-        GC.SuppressFinalize(this);
     }
 
     protected void RegisterMockLoggers(IServiceCollection services)

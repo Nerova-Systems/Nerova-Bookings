@@ -1,13 +1,11 @@
 using Account.Database;
 using Account.Features.DelegationCredentials.Domain;
-using Account.Features.DelegationCredentials.Infrastructure;
 using Account.Features.Subscriptions.Domain;
 using Account.Features.Tenants.Domain;
 using FluentAssertions;
 using Microsoft.Extensions.DependencyInjection;
 using SharedKernel.DelegationCredentials;
 using SharedKernel.Domain;
-using SharedKernel.Tests.Persistence;
 using Xunit;
 
 namespace Account.Tests.DelegationCredentials;
@@ -42,9 +40,10 @@ public sealed class DelegationCredentialRepositoryTests(AccountWebApplicationFac
         var credential = DelegationCredential.Create(
             orgTenant,
             WorkspacePlatform.Google,
-            domain: "acme.com",
-            encryptedKeyBlob: "enc_blob",
-            createdByUserId: SomeUserId);
+            "acme.com",
+            "enc_blob",
+            SomeUserId
+        );
 
         // Act
         await repository.AddAsync(credential, CancellationToken.None);

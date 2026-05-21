@@ -27,9 +27,10 @@ public sealed class DelegationCredentialTests
         var credential = DelegationCredential.Create(
             OrgTenant,
             WorkspacePlatform.Google,
-            domain: "acme.com",
-            encryptedKeyBlob: "enc_blob",
-            createdByUserId: SomeUserId);
+            "acme.com",
+            "enc_blob",
+            SomeUserId
+        );
 
         credential.Id.Should().NotBeNull();
         credential.Id.ToString().Should().StartWith("dcrd_");
@@ -50,9 +51,10 @@ public sealed class DelegationCredentialTests
         var credential = DelegationCredential.Create(
             OrgTenant,
             WorkspacePlatform.Microsoft,
-            domain: "ACME.COM",
-            encryptedKeyBlob: "enc_blob",
-            createdByUserId: SomeUserId);
+            "ACME.COM",
+            "enc_blob",
+            SomeUserId
+        );
 
         credential.Domain.Should().Be("acme.com");
     }
@@ -76,9 +78,10 @@ public sealed class DelegationCredentialTests
         var act = () => DelegationCredential.Create(
             SoloTenant,
             WorkspacePlatform.Google,
-            domain: "solo.com",
-            encryptedKeyBlob: "enc",
-            createdByUserId: SomeUserId);
+            "solo.com",
+            "enc",
+            SomeUserId
+        );
 
         act.Should().Throw<InvalidOperationException>()
             .WithMessage("*organization tenants*");
@@ -169,7 +172,7 @@ public sealed class DelegationCredentialTests
         var credential = DelegationCredential.Create(OrgTenant, WorkspacePlatform.Google, "acme.com", "enc", SomeUserId);
         var testedAt = DateTimeOffset.UtcNow;
 
-        credential.MarkTestResult(success: true, error: null, testedAt);
+        credential.MarkTestResult(true, null, testedAt);
 
         credential.LastTestedAt.Should().Be(testedAt);
         credential.LastTestStatus.Should().Be(CredentialTestStatus.Success);
@@ -182,7 +185,7 @@ public sealed class DelegationCredentialTests
         var credential = DelegationCredential.Create(OrgTenant, WorkspacePlatform.Google, "acme.com", "enc", SomeUserId);
         var testedAt = DateTimeOffset.UtcNow;
 
-        credential.MarkTestResult(success: false, error: "invalid_grant", testedAt);
+        credential.MarkTestResult(false, "invalid_grant", testedAt);
 
         credential.LastTestedAt.Should().Be(testedAt);
         credential.LastTestStatus.Should().Be(CredentialTestStatus.Failed);
@@ -193,9 +196,9 @@ public sealed class DelegationCredentialTests
     public void MarkTestResult_Success_AfterPreviousFailure_ShouldClearError()
     {
         var credential = DelegationCredential.Create(OrgTenant, WorkspacePlatform.Google, "acme.com", "enc", SomeUserId);
-        credential.MarkTestResult(success: false, error: "some_error", DateTimeOffset.UtcNow);
+        credential.MarkTestResult(false, "some_error", DateTimeOffset.UtcNow);
 
-        credential.MarkTestResult(success: true, error: null, DateTimeOffset.UtcNow);
+        credential.MarkTestResult(true, null, DateTimeOffset.UtcNow);
 
         credential.LastTestStatus.Should().Be(CredentialTestStatus.Success);
         credential.LastTestError.Should().BeNull();

@@ -41,7 +41,7 @@ public sealed class StartBackOfficeImpersonationHandler(
 
         var userInfoResult = await userInfoFactory.CreateUserInfoAsync(
             targetUser,
-            sessionId: null,
+            null,
             cancellationToken,
             impersonatedByIdentifier: BackOfficeIdentifier
         );
@@ -52,20 +52,21 @@ public sealed class StartBackOfficeImpersonationHandler(
         var adminEmail = httpContextAccessor.HttpContext?.User.FindFirstValue(ClaimTypes.Email) ?? string.Empty;
 
         await auditLogEmitter.EmitAsync(new AuditLogEvent(
-            TenantId: targetUser.TenantId,
-            ActorId: null,
-            ActorEmail: adminEmail,
-            Resource: "User",
-            Action: "ImpersonationStarted",
-            ResourceId: command.TargetUserId.ToString(),
-            Metadata: new Dictionary<string, string>
-            {
-                ["target_user_id"] = command.TargetUserId.ToString(),
-                ["original_actor_identifier"] = BackOfficeIdentifier
-            },
-            IpAddress: executionContext.ClientIpAddress.ToString(),
-            UserAgent: httpContextAccessor.HttpContext?.Request.Headers.UserAgent.ToString() ?? string.Empty
-        ), cancellationToken);
+                targetUser.TenantId,
+                null,
+                adminEmail,
+                "User",
+                "ImpersonationStarted",
+                command.TargetUserId.ToString(),
+                new Dictionary<string, string>
+                {
+                    ["target_user_id"] = command.TargetUserId.ToString(),
+                    ["original_actor_identifier"] = BackOfficeIdentifier
+                },
+                executionContext.ClientIpAddress.ToString(),
+                httpContextAccessor.HttpContext?.Request.Headers.UserAgent.ToString() ?? string.Empty
+            ), cancellationToken
+        );
 
         events.CollectEvent(new BackOfficeImpersonationStarted(command.TargetUserId));
 

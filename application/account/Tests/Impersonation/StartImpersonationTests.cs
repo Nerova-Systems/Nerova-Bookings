@@ -108,12 +108,12 @@ public sealed class StartImpersonationTests(AccountWebApplicationFactory factory
                 ("role", role.ToString()),
                 ("accepted", true),
                 ("accepted_at", now),
-                ("invited_by", (object?)null),
-                ("invite_token", (object?)null),
+                ("invited_by", null),
+                ("invite_token", null),
                 ("disable_impersonation", disableImpersonation),
-                ("custom_role_id", (object?)null),
+                ("custom_role_id", null),
                 ("created_at", now),
-                ("modified_at", (object?)null)
+                ("modified_at", null)
             ]
         );
     }
@@ -205,7 +205,7 @@ public sealed class StartImpersonationTests(AccountWebApplicationFactory factory
         InsertMembership(DatabaseSeeder.Tenant1Member.Id, orgId, MembershipRole.Admin);
         InsertMembership(targetUserId, orgId, MembershipRole.Member);
 
-        SetActorToken(DatabaseSeeder.Tenant1Member.Id, DatabaseSeeder.Tenant1.Id, orgId, role: "Admin");
+        SetActorToken(DatabaseSeeder.Tenant1Member.Id, DatabaseSeeder.Tenant1.Id, orgId, "Admin");
 
         // Act
         var response = await AnonymousHttpClient.PostAsJsonAsync(
@@ -224,7 +224,7 @@ public sealed class StartImpersonationTests(AccountWebApplicationFactory factory
         var orgId = InsertOrgTenant();
         var targetUserId = InsertUserInOrg(orgId, Faker.Internet.UniqueEmail());
         InsertMembership(DatabaseSeeder.Tenant1Owner.Id, orgId, MembershipRole.Owner);
-        InsertMembership(targetUserId, orgId, MembershipRole.Member, disableImpersonation: true);
+        InsertMembership(targetUserId, orgId, MembershipRole.Member, true);
 
         SetActorToken(DatabaseSeeder.Tenant1Owner.Id, DatabaseSeeder.Tenant1.Id, orgId);
 

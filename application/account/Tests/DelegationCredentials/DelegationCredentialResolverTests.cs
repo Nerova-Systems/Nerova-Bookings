@@ -17,11 +17,10 @@ namespace Account.Tests.DelegationCredentials;
 /// </summary>
 public sealed class DelegationCredentialResolverTests
 {
-    private readonly IDelegationCredentialRepository _repository = Substitute.For<IDelegationCredentialRepository>();
-    private readonly DelegationCredentialEncryption _encryption = new(new EphemeralDataProtectionProvider());
-    private readonly DelegationCredentialResolver _resolver;
-
     private static readonly TenantId OrgId = TenantId.NewId();
+    private readonly DelegationCredentialEncryption _encryption = new(new EphemeralDataProtectionProvider());
+    private readonly IDelegationCredentialRepository _repository = Substitute.For<IDelegationCredentialRepository>();
+    private readonly DelegationCredentialResolver _resolver;
 
     public DelegationCredentialResolverTests()
     {

@@ -21,7 +21,7 @@ public sealed class ApiKeyTests
     [Fact]
     public void CreateUserKey_ShouldSetScopeUserAndTenantId()
     {
-        var (key, _) = ApiKey.CreateUserKey(SomeTenantId, SomeUserId, "My Key", expiresAt: null);
+        var (key, _) = ApiKey.CreateUserKey(SomeTenantId, SomeUserId, "My Key", null);
 
         key.Scope.Should().Be(ApiKeyScope.User);
         key.TenantId.Should().Be(SomeTenantId);
@@ -35,7 +35,7 @@ public sealed class ApiKeyTests
     [Fact]
     public void CreateUserKey_PlainText_ShouldStartWithNerovaPrefixAndHave12CharPrefix()
     {
-        var (key, plainText) = ApiKey.CreateUserKey(SomeTenantId, SomeUserId, "k", expiresAt: null);
+        var (key, plainText) = ApiKey.CreateUserKey(SomeTenantId, SomeUserId, "k", null);
 
         plainText.Should().StartWith("nerova_user_");
         key.KeyPrefix.Should().Be(plainText[..12]);
@@ -44,7 +44,7 @@ public sealed class ApiKeyTests
     [Fact]
     public void CreateUserKey_IdShouldStartWithKeyPrefix()
     {
-        var (key, _) = ApiKey.CreateUserKey(SomeTenantId, SomeUserId, "k", expiresAt: null);
+        var (key, _) = ApiKey.CreateUserKey(SomeTenantId, SomeUserId, "k", null);
 
         key.Id.ToString().Should().StartWith("key_");
     }
@@ -88,7 +88,7 @@ public sealed class ApiKeyTests
     {
         var orgId = TenantId.NewId();
 
-        var (key, _) = ApiKey.CreateOrgKey(orgId, SomeUserId, "Org Key", expiresAt: null);
+        var (key, _) = ApiKey.CreateOrgKey(orgId, SomeUserId, "Org Key", null);
 
         key.Scope.Should().Be(ApiKeyScope.Organization);
         key.TenantId.Should().Be(orgId);

@@ -63,7 +63,9 @@ public sealed class MembershipRepository(AccountDbContext accountDbContext)
         var query = DbSet.Where(m => m.TenantId == tenantId);
 
         if (!includePending)
+        {
             query = query.Where(m => m.Accepted);
+        }
 
         return await query.ToArrayAsync(cancellationToken);
     }

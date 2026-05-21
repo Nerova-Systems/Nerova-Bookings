@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using Account.Features.Memberships.Domain;
 using Account.Features.Permissions.Domain;
 using Account.Features.Tenants.Domain;
@@ -26,7 +25,10 @@ namespace Account.Features.Permissions.Services;
 /// </summary>
 public interface IPermissionCheckService
 {
-    /// <summary>Returns <see langword="true" /> if <paramref name="userId" /> holds <paramref name="permission" /> within <paramref name="tenantId" />.</summary>
+    /// <summary>
+    ///     Returns <see langword="true" /> if <paramref name="userId" /> holds <paramref name="permission" /> within
+    ///     <paramref name="tenantId" />.
+    /// </summary>
     Task<bool> HasPermissionAsync(UserId userId, TenantId tenantId, Permission permission, CancellationToken cancellationToken);
 }
 
@@ -34,7 +36,8 @@ public sealed class PermissionCheckService(
     IMembershipRepository membershipRepository,
     IRoleRepository roleRepository,
     ITenantRepository tenantRepository,
-    IUserRepository userRepository) : IPermissionCheckService
+    IUserRepository userRepository
+) : IPermissionCheckService
 {
     private readonly Dictionary<(UserId, TenantId), IReadOnlySet<Permission>> _cache = [];
 
@@ -87,11 +90,14 @@ public sealed class PermissionCheckService(
         return permissions;
     }
 
-    private static MembershipRole MapUserRole(UserRole role) => role switch
+    private static MembershipRole MapUserRole(UserRole role)
     {
-        UserRole.Owner => MembershipRole.Owner,
-        UserRole.Admin => MembershipRole.Admin,
-        UserRole.Member => MembershipRole.Member,
-        _ => throw new UnreachableException($"Unknown UserRole: {role}.")
-    };
+        return role switch
+        {
+            UserRole.Owner => MembershipRole.Owner,
+            UserRole.Admin => MembershipRole.Admin,
+            UserRole.Member => MembershipRole.Member,
+            _ => throw new UnreachableException($"Unknown UserRole: {role}.")
+        };
+    }
 }

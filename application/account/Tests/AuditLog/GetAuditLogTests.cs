@@ -142,8 +142,8 @@ public sealed class GetAuditLogTests(AccountWebApplicationFactory factory)
     public async Task GetAuditLog_WhenFilteredByActorUserId_ShouldReturnOnlyThoseEntries()
     {
         // Arrange
-        await SeedEntryAsync("Smtp", "Enabled", actorUserId: DatabaseSeeder.Tenant1Owner.Id);
-        await SeedEntryAsync("Smtp", "Disabled", actorUserId: DatabaseSeeder.Tenant1Member.Id);
+        await SeedEntryAsync("Smtp", "Enabled", DatabaseSeeder.Tenant1Owner.Id);
+        await SeedEntryAsync("Smtp", "Disabled", DatabaseSeeder.Tenant1Member.Id);
 
         // Act
         var ownerId = DatabaseSeeder.Tenant1Owner.Id.ToString();
@@ -195,7 +195,9 @@ public sealed class GetAuditLogTests(AccountWebApplicationFactory factory)
     {
         // Arrange — seed 5 entries
         for (var i = 0; i < 5; i++)
+        {
             await SeedEntryAsync("Sso", "Enabled");
+        }
 
         // Act
         var response = await AuthenticatedOwnerHttpClient.GetAsync($"{Url}?Resource=Sso&Action=Enabled&PageSize=2");
@@ -230,10 +232,10 @@ public sealed class GetAuditLogTests(AccountWebApplicationFactory factory)
             "owner@tenant-1.com",
             resource,
             action,
-            resourceId: resourceId,
-            metadata: metadata,
-            ipAddress: ipAddress,
-            userAgent: userAgent
+            resourceId,
+            metadata,
+            ipAddress,
+            userAgent
         );
 
         // Write directly to DbContext — bypasses ITenantScopedEntity query filter on writes.

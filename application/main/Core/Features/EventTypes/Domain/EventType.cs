@@ -79,13 +79,13 @@ public sealed class EventType : SoftDeletableAggregateRoot<EventTypeId>, ITenant
 
     public int[] DurationOptions => Settings.DurationOptions.Length == 0 ? [DurationMinutes] : Settings.DurationOptions;
 
-    public TenantId TenantId { get; } = new(0);
-
     /// <summary>
     ///     When non-null, references a Tenant of TenantKind.Team. When null, the aggregate is owned by the existing
     ///     user/solo scope.
     /// </summary>
     public TenantId? TeamId { get; private set; }
+
+    public TenantId TenantId { get; } = new(0);
 
     /// <summary>
     ///     Assigns this event type to a team.

@@ -2,7 +2,6 @@ using Account.Features.Tenants.Domain;
 using JetBrains.Annotations;
 using SharedKernel.DelegationCredentials;
 using SharedKernel.Domain;
-using SharedKernel.Persistence;
 using SharedKernel.StronglyTypedIds;
 
 namespace Account.Features.DelegationCredentials.Domain;
@@ -16,7 +15,10 @@ namespace Account.Features.DelegationCredentials.Domain;
 [JsonConverter(typeof(StronglyTypedIdJsonConverter<string, DelegationCredentialId>))]
 public sealed record DelegationCredentialId(string Value) : StronglyTypedUlid<DelegationCredentialId>(Value)
 {
-    public override string ToString() => Value;
+    public override string ToString()
+    {
+        return Value;
+    }
 }
 
 /// <summary>
@@ -55,9 +57,9 @@ public enum CredentialTestStatus
 /// </summary>
 public sealed class DelegationCredential : AggregateRoot<DelegationCredentialId>, ITenantScopedEntity
 {
-    private DelegationCredential(DelegationCredentialId id) : base(id) { }
-
-    public TenantId TenantId { get; private set; } = null!;
+    private DelegationCredential(DelegationCredentialId id) : base(id)
+    {
+    }
 
     public WorkspacePlatform Platform { get; private set; }
 
@@ -84,6 +86,8 @@ public sealed class DelegationCredential : AggregateRoot<DelegationCredentialId>
 
     public UserId CreatedByUserId { get; private set; } = null!;
 
+    public TenantId TenantId { get; private set; } = null!;
+
     // ─── Factory ──────────────────────────────────────────────────────────────
 
     /// <summary>
@@ -100,7 +104,9 @@ public sealed class DelegationCredential : AggregateRoot<DelegationCredentialId>
         UserId createdByUserId)
     {
         if (tenant.Kind != TenantKind.Organization)
+        {
             throw new InvalidOperationException("Delegation credentials can only be created for organization tenants.");
+        }
 
         return new DelegationCredential(DelegationCredentialId.NewId())
         {
@@ -125,9 +131,15 @@ public sealed class DelegationCredential : AggregateRoot<DelegationCredentialId>
         Domain = domain.ToLowerInvariant();
     }
 
-    public void Enable() => Status = DelegationCredentialStatus.Active;
+    public void Enable()
+    {
+        Status = DelegationCredentialStatus.Active;
+    }
 
-    public void Disable() => Status = DelegationCredentialStatus.Inactive;
+    public void Disable()
+    {
+        Status = DelegationCredentialStatus.Inactive;
+    }
 
     /// <summary>
     ///     Records the outcome of the most recent connectivity test.

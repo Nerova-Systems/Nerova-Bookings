@@ -2,7 +2,6 @@ using Account.Features.AuditLog.Domain;
 using Account.Features.DelegationCredentials.Domain;
 using Account.Features.Permissions.Domain;
 using Account.Features.Permissions.Pipeline;
-using Account.Features.Tenants.Domain;
 using JetBrains.Annotations;
 using Microsoft.AspNetCore.Http;
 using SharedKernel.AuditLog;
@@ -28,31 +27,37 @@ public sealed class EnableDelegationCredentialHandler(
     IDelegationCredentialRepository credentialRepository,
     IAuditLogEmitter auditLogEmitter,
     IHttpContextAccessor httpContextAccessor,
-    IExecutionContext executionContext) : IRequestHandler<EnableDelegationCredentialCommand, Result>
+    IExecutionContext executionContext
+) : IRequestHandler<EnableDelegationCredentialCommand, Result>
 {
     public async Task<Result> Handle(EnableDelegationCredentialCommand command, CancellationToken cancellationToken)
     {
         if (!executionContext.UserInfo.IsFeatureFlagEnabled(FeatureFlagDefinitions.CapDelegationCredentials.Key))
+        {
             return Result.Forbidden("The delegation credentials feature is not enabled for this organization.");
+        }
 
         var orgId = executionContext.ActiveOrgId!;
         var credential = await credentialRepository.GetByOrgAndPlatformAsync(orgId, command.Platform, cancellationToken);
         if (credential is null)
+        {
             return Result.NotFound($"No {command.Platform} delegation credential found for this organization.");
+        }
 
         credential.Enable();
         credentialRepository.Update(credential);
 
         await auditLogEmitter.EmitAsync(new AuditLogEvent(
-            TenantId: orgId,
-            ActorId: executionContext.UserInfo.Id!,
-            ActorEmail: executionContext.UserInfo.Email ?? string.Empty,
-            Resource: AuditResource.DelegationCredential.ToString(),
-            Action: AuditAction.Enabled.ToString(),
-            ResourceId: credential.Id.ToString(),
-            IpAddress: httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
-            UserAgent: httpContextAccessor.HttpContext?.Request.Headers.UserAgent.ToString()
-        ), cancellationToken);
+                orgId,
+                executionContext.UserInfo.Id!,
+                executionContext.UserInfo.Email ?? string.Empty,
+                AuditResource.DelegationCredential.ToString(),
+                AuditAction.Enabled.ToString(),
+                credential.Id.ToString(),
+                IpAddress: httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
+                UserAgent: httpContextAccessor.HttpContext?.Request.Headers.UserAgent.ToString()
+            ), cancellationToken
+        );
 
         return Result.Success();
     }

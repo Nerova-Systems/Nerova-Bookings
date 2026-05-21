@@ -3,7 +3,6 @@ using Account.Features.DelegationCredentials.Domain;
 using Account.Features.DelegationCredentials.Infrastructure;
 using Account.Features.Permissions.Domain;
 using Account.Features.Permissions.Pipeline;
-using Account.Features.Tenants.Domain;
 using FluentValidation;
 using JetBrains.Annotations;
 using Microsoft.AspNetCore.Http;
@@ -52,19 +51,24 @@ public sealed class TestDelegationCredentialHandler(
     IAuditLogEmitter auditLogEmitter,
     IHttpContextAccessor httpContextAccessor,
     IExecutionContext executionContext,
-    TimeProvider timeProvider) : IRequestHandler<TestDelegationCredentialCommand, Result<TestDelegationCredentialResult>>
+    TimeProvider timeProvider
+) : IRequestHandler<TestDelegationCredentialCommand, Result<TestDelegationCredentialResult>>
 {
     public async Task<Result<TestDelegationCredentialResult>> Handle(
         TestDelegationCredentialCommand command,
         CancellationToken cancellationToken)
     {
         if (!executionContext.UserInfo.IsFeatureFlagEnabled(FeatureFlagDefinitions.CapDelegationCredentials.Key))
+        {
             return Result<TestDelegationCredentialResult>.Forbidden("The delegation credentials feature is not enabled for this organization.");
+        }
 
         var orgId = executionContext.ActiveOrgId!;
         var credential = await credentialRepository.GetByOrgAndPlatformAsync(orgId, command.Platform, cancellationToken);
         if (credential is null)
+        {
             return Result<TestDelegationCredentialResult>.NotFound($"No {command.Platform} delegation credential found for this organization.");
+        }
 
         var keyBlob = encryption.Unprotect(credential.EncryptedKeyBlob);
         var testResult = await tester.TestAsync(keyBlob, command.Platform, command.MemberEmail, cancellationToken);
@@ -73,15 +77,16 @@ public sealed class TestDelegationCredentialHandler(
         credentialRepository.Update(credential);
 
         await auditLogEmitter.EmitAsync(new AuditLogEvent(
-            TenantId: orgId,
-            ActorId: executionContext.UserInfo.Id!,
-            ActorEmail: executionContext.UserInfo.Email ?? string.Empty,
-            Resource: AuditResource.DelegationCredential.ToString(),
-            Action: AuditAction.Tested.ToString(),
-            ResourceId: credential.Id.ToString(),
-            IpAddress: httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
-            UserAgent: httpContextAccessor.HttpContext?.Request.Headers.UserAgent.ToString()
-        ), cancellationToken);
+                orgId,
+                executionContext.UserInfo.Id!,
+                executionContext.UserInfo.Email ?? string.Empty,
+                AuditResource.DelegationCredential.ToString(),
+                AuditAction.Tested.ToString(),
+                credential.Id.ToString(),
+                IpAddress: httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
+                UserAgent: httpContextAccessor.HttpContext?.Request.Headers.UserAgent.ToString()
+            ), cancellationToken
+        );
 
         return new TestDelegationCredentialResult(testResult.Success, testResult.Error);
     }

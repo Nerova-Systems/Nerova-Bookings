@@ -21,7 +21,9 @@ public sealed class NotConfiguredDelegationCredentialTester : IDelegationCredent
         CancellationToken cancellationToken = default)
     {
         return Task.FromResult(new DelegationCredentialTestResult(
-            Success: false,
-            Error: "Delegation credential testing is not yet configured. Real testing requires Wave 3 SDK integration."));
+                false,
+                "Delegation credential testing is not yet configured. Real testing requires Wave 3 SDK integration."
+            )
+        );
     }
 }

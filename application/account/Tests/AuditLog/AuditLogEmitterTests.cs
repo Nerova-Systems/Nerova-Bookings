@@ -15,11 +15,10 @@ namespace Account.Tests.AuditLog;
 /// </summary>
 public sealed class AuditLogEmitterTests
 {
-    private readonly IAuditLogRepository _repository = Substitute.For<IAuditLogRepository>();
-    private readonly AuditLogEmitter _emitter;
-
     private static readonly TenantId TenantId = TenantId.NewId();
     private static readonly UserId UserId = UserId.NewId();
+    private readonly AuditLogEmitter _emitter;
+    private readonly IAuditLogRepository _repository = Substitute.For<IAuditLogRepository>();
 
     public AuditLogEmitterTests()
     {
@@ -40,8 +39,10 @@ public sealed class AuditLogEmitterTests
                 e.ActorEmail == "actor@example.com" &&
                 e.Resource == "Membership" &&
                 e.Action == "Invited" &&
-                e.Metadata == null),
-            CancellationToken.None);
+                e.Metadata == null
+            ),
+            CancellationToken.None
+        );
     }
 
     [Fact]
@@ -62,8 +63,10 @@ public sealed class AuditLogEmitterTests
             Arg.Is<AuditLogEntry>(e =>
                 e.Metadata != null &&
                 e.Metadata.Contains("roleName") &&
-                e.Metadata.Contains("Admin")),
-            CancellationToken.None);
+                e.Metadata.Contains("Admin")
+            ),
+            CancellationToken.None
+        );
     }
 
     [Fact]
@@ -82,7 +85,8 @@ public sealed class AuditLogEmitterTests
 
         await _repository.Received(1).AddAsync(
             Arg.Is<AuditLogEntry>(e => e.Metadata == null),
-            CancellationToken.None);
+            CancellationToken.None
+        );
     }
 
     [Fact]
@@ -94,7 +98,8 @@ public sealed class AuditLogEmitterTests
 
         await _repository.Received(1).AddAsync(
             Arg.Is<AuditLogEntry>(e => e.Metadata == null),
-            CancellationToken.None);
+            CancellationToken.None
+        );
     }
 
     [Fact]
@@ -106,7 +111,7 @@ public sealed class AuditLogEmitterTests
             "system@nerova.io",
             "Tenant",
             "Deleted",
-            ResourceId: "ten_123",
+            "ten_123",
             IpAddress: "10.0.0.1",
             UserAgent: "PostmanRuntime/7.0"
         );
@@ -118,8 +123,10 @@ public sealed class AuditLogEmitterTests
                 e.ActorUserId == null &&
                 e.ResourceId == "ten_123" &&
                 e.IpAddress == "10.0.0.1" &&
-                e.UserAgent == "PostmanRuntime/7.0"),
-            CancellationToken.None);
+                e.UserAgent == "PostmanRuntime/7.0"
+            ),
+            CancellationToken.None
+        );
     }
 
     [Fact]

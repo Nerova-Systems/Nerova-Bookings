@@ -5,5 +5,6 @@ namespace Account.Features.Sso.Domain;
 [PublicAPI]
 public enum SsoProvider
 {
-    Microsoft
+    Microsoft,
+    Google
 }

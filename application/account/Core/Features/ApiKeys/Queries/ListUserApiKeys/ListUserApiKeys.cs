@@ -3,7 +3,6 @@ using Account.Features.Permissions.Domain;
 using Account.Features.Permissions.Pipeline;
 using JetBrains.Annotations;
 using SharedKernel.Cqrs;
-using SharedKernel.Domain;
 using SharedKernel.ExecutionContext;
 using FeatureFlagDefinitions = SharedKernel.FeatureFlags.FeatureFlags;
 
@@ -19,7 +18,8 @@ public sealed record ApiKeyResponse(
     DateTimeOffset CreatedAt,
     DateTimeOffset? ExpiresAt,
     DateTimeOffset? RevokedAt,
-    DateTimeOffset? LastUsedAt);
+    DateTimeOffset? LastUsedAt
+);
 
 [PublicAPI]
 [RequirePermission(PermissionResource.ApiKey, PermissionAction.Manage)]
@@ -33,12 +33,16 @@ public sealed class ListUserApiKeysHandler(
     public async Task<Result<IReadOnlyList<ApiKeyResponse>>> Handle(ListUserApiKeysQuery query, CancellationToken cancellationToken)
     {
         if (!executionContext.UserInfo.IsFeatureFlagEnabled(FeatureFlagDefinitions.CapApiKeys.Key))
+        {
             return Result<IReadOnlyList<ApiKeyResponse>>.Forbidden("The API keys feature is not enabled for this tenant.");
+        }
 
         var keys = await apiKeyRepository.GetByUserAsync(executionContext.TenantId!, cancellationToken);
         return keys.Select(ToResponse).ToList();
     }
 
-    private static ApiKeyResponse ToResponse(ApiKey k) =>
-        new(k.Id, k.Name, k.Scope, k.KeyPrefix, k.CreatedAt, k.ExpiresAt, k.RevokedAt, k.LastUsedAt);
+    private static ApiKeyResponse ToResponse(ApiKey k)
+    {
+        return new ApiKeyResponse(k.Id, k.Name, k.Scope, k.KeyPrefix, k.CreatedAt, k.ExpiresAt, k.RevokedAt, k.LastUsedAt);
+    }
 }

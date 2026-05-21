@@ -19,7 +19,8 @@ public enum LoginMethod
 {
     OneTimePassword,
     Google,
-    MicrosoftSso
+    MicrosoftSso,
+    GoogleSso
 }
 
 /// <summary>

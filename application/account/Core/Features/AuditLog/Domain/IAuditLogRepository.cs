@@ -11,7 +11,8 @@ public sealed record AuditLogFilter(
     string? Resource = null,
     string? Action = null,
     DateTimeOffset? FromDate = null,
-    DateTimeOffset? ToDate = null);
+    DateTimeOffset? ToDate = null
+);
 
 /// <summary>
 ///     Repository contract for <see cref="AuditLogEntry" /> aggregates.

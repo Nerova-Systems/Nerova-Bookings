@@ -59,13 +59,13 @@ public sealed class Schedule : SoftDeletableAggregateRoot<ScheduleId>, ITenantSc
 
     public ImmutableArray<AvailabilityDateOverride> DateOverrides { get; private set; }
 
-    public TenantId TenantId { get; } = new(0);
-
     /// <summary>
     ///     When non-null, references a Tenant of TenantKind.Team. When null, the aggregate is owned by the existing
     ///     user/solo scope.
     /// </summary>
     public TenantId? TeamId { get; private set; }
+
+    public TenantId TenantId { get; } = new(0);
 
     /// <summary>
     ///     Assigns this schedule to a team.

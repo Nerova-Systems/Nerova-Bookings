@@ -13,9 +13,14 @@ namespace Account.Tests;
 public sealed class DatabaseSeeder
 {
     public readonly FeatureFlag AccountOverviewFlag;
+    public readonly Role AdminRole;
     public readonly FeatureFlag BetaFeaturesFlag;
     public readonly FeatureFlag CompactViewFlag;
     public readonly FeatureFlag ExperimentalUiFlag;
+    public readonly Role MemberRole;
+
+    // System roles — seeded here because EnsureCreated() does not run migrations.
+    public readonly Role OwnerRole;
     public readonly FeatureFlag SsoFlag;
     public readonly Tenant Tenant1;
     public readonly User Tenant1Member;
@@ -23,11 +28,6 @@ public sealed class DatabaseSeeder
     public readonly User Tenant1Owner;
     public readonly Session Tenant1OwnerSession;
     public readonly Subscription Tenant1Subscription;
-
-    // System roles — seeded here because EnsureCreated() does not run migrations.
-    public readonly Role OwnerRole;
-    public readonly Role AdminRole;
-    public readonly Role MemberRole;
 
     public DatabaseSeeder(AccountDbContext accountDbContext)
     {

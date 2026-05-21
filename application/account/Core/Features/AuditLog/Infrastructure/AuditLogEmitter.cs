@@ -27,7 +27,8 @@ public sealed class AuditLogEmitter(IAuditLogRepository repository) : IAuditLogE
             evt.ResourceId,
             metadata,
             evt.IpAddress,
-            evt.UserAgent);
+            evt.UserAgent
+        );
 
         await repository.AddAsync(entry, cancellationToken);
     }

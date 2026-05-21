@@ -1,5 +1,3 @@
-using JetBrains.Annotations;
-
 namespace SharedKernel.DelegationCredentials;
 
 /// <summary>

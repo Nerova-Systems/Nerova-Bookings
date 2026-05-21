@@ -1,5 +1,3 @@
-using System.Text.Json.Serialization;
-
 namespace Account.Features.ApiKeys.Domain;
 
 /// <summary>Defines the scope of a Nerova API key.</summary>

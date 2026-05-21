@@ -123,7 +123,7 @@ public static partial class FeatureFlags
         "Enables organization-level functionality: org management, org-scoped attributes, custom SMTP, billing, delegation credentials, and SSO",
         false,
         true,
-        parentDependency: "tier-teams"
+        "tier-teams"
     );
 
     /// <summary>
@@ -138,7 +138,7 @@ public static partial class FeatureFlags
         "Enables enterprise-only functionality: audit log, workflows, API keys, impersonation, and analytics insights",
         false,
         true,
-        parentDependency: "tier-organizations"
+        "tier-organizations"
     );
 
     // -----------------------------------------------------------------------------------------
@@ -162,7 +162,7 @@ public static partial class FeatureFlags
         "Team-owned event types with locked fields that members inherit. Ports cal.com managed-event-types.",
         false,
         true,
-        parentDependency: "tier-teams"
+        "tier-teams"
     );
 
     /// <summary>
@@ -176,7 +176,7 @@ public static partial class FeatureFlags
         "Distribute bookings across available team members in rotation. Ports cal.com round-robin.",
         false,
         true,
-        parentDependency: "tier-teams"
+        "tier-teams"
     );
 
     /// <summary>
@@ -190,7 +190,7 @@ public static partial class FeatureFlags
         "Require all listed team members to be available before a slot is offered to bookers. Ports cal.com collective scheduling.",
         false,
         true,
-        parentDependency: "tier-teams"
+        "tier-teams"
     );
 
     // -----------------------------------------------------------------------------------------
@@ -214,7 +214,7 @@ public static partial class FeatureFlags
         "Org-defined custom fields attached to memberships, e.g. department, skills, timezone. Ports cal.com attributes.",
         false,
         true,
-        parentDependency: "tier-organizations"
+        "tier-organizations"
     );
 
     /// <summary>
@@ -228,7 +228,7 @@ public static partial class FeatureFlags
         "Per-org SMTP server override so org-scoped emails are sent from the org's own mail domain. Ports cal.com custom-smtp.",
         false,
         true,
-        parentDependency: "tier-organizations"
+        "tier-organizations"
     );
 
     /// <summary>
@@ -244,7 +244,7 @@ public static partial class FeatureFlags
         "Seat-based billing and subscription management at the organization level. Ports cal.com billing/organizations. Requires g3-org-billing.",
         false,
         true,
-        parentDependency: "tier-organizations"
+        "tier-organizations"
     );
 
     /// <summary>
@@ -259,7 +259,7 @@ public static partial class FeatureFlags
         "Multi-tenant Google/Microsoft OAuth so the org can read calendar busy-time and create conferencing links on behalf of members. Ports cal.com delegation-credentials.",
         false,
         true,
-        parentDependency: "tier-organizations"
+        "tier-organizations"
     );
 
     /// <summary>
@@ -274,7 +274,7 @@ public static partial class FeatureFlags
         "Allow org members to sign in via Microsoft Entra ID / Azure AD. Ports cal.com Microsoft SSO. Requires g3-sso-microsoft.",
         false,
         true,
-        parentDependency: "tier-organizations"
+        "tier-organizations"
     );
 
     /// <summary>
@@ -289,7 +289,7 @@ public static partial class FeatureFlags
         "Allow org members to sign in via Google Workspace. Ports cal.com Google SSO. Requires g3-sso-google.",
         false,
         true,
-        parentDependency: "tier-organizations"
+        "tier-organizations"
     );
 
     // -----------------------------------------------------------------------------------------
@@ -314,7 +314,7 @@ public static partial class FeatureFlags
         "Immutable record of all significant system events across every SCS, written via the shared-kernel event bus. Ports cal.com booking-audit.",
         false,
         true,
-        parentDependency: "tier-enterprise"
+        "tier-enterprise"
     );
 
     /// <summary>
@@ -329,7 +329,7 @@ public static partial class FeatureFlags
         "Automated booking reminders, follow-ups, and no-show handling. Ports cal.com workflows. Requires g3-workflows.",
         false,
         true,
-        parentDependency: "tier-enterprise"
+        "tier-enterprise"
     );
 
     /// <summary>
@@ -343,7 +343,7 @@ public static partial class FeatureFlags
         "Generate long-lived API keys for programmatic access at the user or org level. Ports cal.com api-keys.",
         false,
         true,
-        parentDependency: "tier-enterprise"
+        "tier-enterprise"
     );
 
     /// <summary>
@@ -357,7 +357,7 @@ public static partial class FeatureFlags
         "Allow system admins to impersonate any user account for support and debugging, with a full audit trail. Ports cal.com impersonation.",
         false,
         true,
-        parentDependency: "tier-enterprise"
+        "tier-enterprise"
     );
 
     /// <summary>
@@ -372,6 +372,6 @@ public static partial class FeatureFlags
         "Analytics dashboard: booking volume, event-type performance, and member load metrics. Ports cal.com insights. Requires g3-insights.",
         false,
         true,
-        parentDependency: "tier-enterprise"
+        "tier-enterprise"
     );
 }

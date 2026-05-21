@@ -28,32 +28,38 @@ public sealed record DelegationCredentialResponse(
     CredentialTestStatus? LastTestStatus,
     string? LastTestError,
     DateTimeOffset CreatedAt,
-    DateTimeOffset? ModifiedAt);
+    DateTimeOffset? ModifiedAt
+);
 
 public sealed class GetDelegationCredentialsHandler(
     IDelegationCredentialRepository credentialRepository,
-    IExecutionContext executionContext) : IRequestHandler<GetDelegationCredentialsQuery, Result<DelegationCredentialResponse[]>>
+    IExecutionContext executionContext
+) : IRequestHandler<GetDelegationCredentialsQuery, Result<DelegationCredentialResponse[]>>
 {
     public async Task<Result<DelegationCredentialResponse[]>> Handle(
         GetDelegationCredentialsQuery query,
         CancellationToken cancellationToken)
     {
         if (!executionContext.UserInfo.IsFeatureFlagEnabled(FeatureFlagDefinitions.CapDelegationCredentials.Key))
+        {
             return Result<DelegationCredentialResponse[]>.Forbidden("The delegation credentials feature is not enabled for this organization.");
+        }
 
         var orgId = executionContext.ActiveOrgId!;
         var credentials = await credentialRepository.GetAllByOrgIdAsync(orgId, cancellationToken);
 
         var responses = credentials.Select(c => new DelegationCredentialResponse(
-            Id: c.Id.ToString(),
-            Platform: c.Platform,
-            Domain: c.Domain,
-            Status: c.Status,
-            LastTestedAt: c.LastTestedAt,
-            LastTestStatus: c.LastTestStatus,
-            LastTestError: c.LastTestError,
-            CreatedAt: c.CreatedAt,
-            ModifiedAt: c.ModifiedAt)).ToArray();
+                c.Id.ToString(),
+                c.Platform,
+                c.Domain,
+                c.Status,
+                c.LastTestedAt,
+                c.LastTestStatus,
+                c.LastTestError,
+                c.CreatedAt,
+                c.ModifiedAt
+            )
+        ).ToArray();
 
         return responses;
     }

@@ -19,17 +19,22 @@ public sealed record RemoveOrgSmtpCommand : ICommand, IRequest<Result>;
 
 public sealed class RemoveOrgSmtpHandler(
     IOrgSmtpConfigRepository configRepository,
-    IExecutionContext executionContext) : IRequestHandler<RemoveOrgSmtpCommand, Result>
+    IExecutionContext executionContext
+) : IRequestHandler<RemoveOrgSmtpCommand, Result>
 {
     public async Task<Result> Handle(RemoveOrgSmtpCommand command, CancellationToken cancellationToken)
     {
         if (!executionContext.UserInfo.IsFeatureFlagEnabled(FeatureFlagDefinitions.CapCustomSmtp.Key))
+        {
             return Result.Forbidden("The custom SMTP feature is not enabled for this organization.");
+        }
 
         var orgId = executionContext.ActiveOrgId!;
         var config = await configRepository.GetByOrgIdAsync(orgId, cancellationToken);
         if (config is null)
+        {
             return Result.NotFound("No SMTP configuration found for this organization.");
+        }
 
         configRepository.Remove(config);
         return Result.Success();

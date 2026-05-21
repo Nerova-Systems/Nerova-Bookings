@@ -41,13 +41,13 @@ public sealed class SchedulingProfile : SoftDeletableAggregateRoot<SchedulingPro
 
     public string? AvatarUrl { get; private set; }
 
-    public TenantId TenantId { get; } = new(0);
-
     /// <summary>
     ///     When non-null, references a Tenant of TenantKind.Team. When null, the aggregate is owned by the existing
     ///     user/solo scope.
     /// </summary>
     public TenantId? TeamId { get; private set; }
+
+    public TenantId TenantId { get; } = new(0);
 
     /// <summary>
     ///     Assigns this scheduling profile to a team.

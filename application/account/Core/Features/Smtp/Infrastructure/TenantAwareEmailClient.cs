@@ -1,8 +1,8 @@
+using System.Net;
+using System.Net.Mail;
 using Account.Features.Smtp.Domain;
 using SharedKernel.ExecutionContext;
 using SharedKernel.Integrations.Email;
-using System.Net;
-using System.Net.Mail;
 using FeatureFlagDefinitions = SharedKernel.FeatureFlags.FeatureFlags;
 
 namespace Account.Features.Smtp.Infrastructure;
@@ -21,7 +21,8 @@ public sealed class TenantAwareEmailClient(
     IEmailClient platformClient,
     IOrgSmtpConfigRepository configRepository,
     IExecutionContext executionContext,
-    SmtpCredentialProtector credentialProtector) : IEmailClient
+    SmtpCredentialProtector credentialProtector
+) : IEmailClient
 {
     public async Task SendAsync(EmailMessage message, CancellationToken cancellationToken)
     {
@@ -63,12 +64,16 @@ public sealed class TenantAwareEmailClient(
         mailMessage.To.Add(message.Recipient);
 
         if (config.ReplyToEmail is not null)
+        {
             mailMessage.ReplyToList.Add(new MailAddress(config.ReplyToEmail));
+        }
 
         if (message.Headers is not null)
         {
             foreach (var (key, value) in message.Headers)
+            {
                 mailMessage.Headers.Add(key, value);
+            }
         }
 
         await smtpClient.SendMailAsync(mailMessage, cancellationToken);

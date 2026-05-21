@@ -5,7 +5,6 @@ using Microsoft.AspNetCore.Http;
 using SharedKernel.AuditLog;
 using SharedKernel.Authentication.TokenGeneration;
 using SharedKernel.Cqrs;
-using SharedKernel.Domain;
 using SharedKernel.ExecutionContext;
 using SharedKernel.Telemetry;
 
@@ -39,20 +38,21 @@ public sealed class EndImpersonationHandler(
         if (impersonatedByUserId is null)
         {
             await auditLogEmitter.EmitAsync(new AuditLogEvent(
-                TenantId: executionContext.TenantId!,
-                ActorId: null,
-                ActorEmail: impersonatedByIdentifier,
-                Resource: "User",
-                Action: "ImpersonationEnded",
-                ResourceId: targetUserId.ToString(),
-                Metadata: new Dictionary<string, string>
-                {
-                    ["target_user_id"] = targetUserId.ToString(),
-                    ["original_actor_identifier"] = impersonatedByIdentifier
-                },
-                IpAddress: executionContext.ClientIpAddress.ToString(),
-                UserAgent: httpContextAccessor.HttpContext?.Request.Headers.UserAgent.ToString() ?? string.Empty
-            ), cancellationToken);
+                    executionContext.TenantId!,
+                    null,
+                    impersonatedByIdentifier,
+                    "User",
+                    "ImpersonationEnded",
+                    targetUserId.ToString(),
+                    new Dictionary<string, string>
+                    {
+                        ["target_user_id"] = targetUserId.ToString(),
+                        ["original_actor_identifier"] = impersonatedByIdentifier
+                    },
+                    executionContext.ClientIpAddress.ToString(),
+                    httpContextAccessor.HttpContext?.Request.Headers.UserAgent.ToString() ?? string.Empty
+                ), cancellationToken
+            );
 
             events.CollectEvent(new BackOfficeImpersonationEnded(targetUserId));
             return Result.Success();
@@ -67,7 +67,7 @@ public sealed class EndImpersonationHandler(
 
         var userInfoResult = await userInfoFactory.CreateUserInfoAsync(
             actorUser,
-            sessionId: executionContext.UserInfo.SessionId,
+            executionContext.UserInfo.SessionId,
             cancellationToken,
             activeOrgId: executionContext.ActiveOrgId
         );
@@ -78,20 +78,21 @@ public sealed class EndImpersonationHandler(
         var activeOrgId = executionContext.ActiveOrgId ?? actorUser.TenantId;
 
         await auditLogEmitter.EmitAsync(new AuditLogEvent(
-            TenantId: activeOrgId,
-            ActorId: impersonatedByUserId,
-            ActorEmail: actorUser.Email,
-            Resource: "User",
-            Action: "ImpersonationEnded",
-            ResourceId: targetUserId.ToString(),
-            Metadata: new Dictionary<string, string>
-            {
-                ["target_user_id"] = targetUserId.ToString(),
-                ["original_actor_user_id"] = impersonatedByUserId.ToString()
-            },
-            IpAddress: executionContext.ClientIpAddress.ToString(),
-            UserAgent: httpContextAccessor.HttpContext?.Request.Headers.UserAgent.ToString() ?? string.Empty
-        ), cancellationToken);
+                activeOrgId,
+                impersonatedByUserId,
+                actorUser.Email,
+                "User",
+                "ImpersonationEnded",
+                targetUserId.ToString(),
+                new Dictionary<string, string>
+                {
+                    ["target_user_id"] = targetUserId.ToString(),
+                    ["original_actor_user_id"] = impersonatedByUserId.ToString()
+                },
+                executionContext.ClientIpAddress.ToString(),
+                httpContextAccessor.HttpContext?.Request.Headers.UserAgent.ToString() ?? string.Empty
+            ), cancellationToken
+        );
 
         events.CollectEvent(new ImpersonationEnded(impersonatedByUserId, targetUserId, activeOrgId));
 

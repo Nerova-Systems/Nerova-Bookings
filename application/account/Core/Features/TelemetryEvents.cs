@@ -169,6 +169,15 @@ public sealed class MicrosoftSsoLoginSucceeded(UserId userId, TenantId orgId)
 public sealed class MicrosoftSsoLoginFailed(TenantId orgId, string reason)
     : TelemetryEvent(("org_id", orgId), ("reason", reason));
 
+public sealed class GoogleSsoLoginStarted(TenantId orgId)
+    : TelemetryEvent(("org_id", orgId));
+
+public sealed class GoogleSsoLoginSucceeded(UserId userId, TenantId orgId)
+    : TelemetryEvent(("user_id", userId), ("org_id", orgId));
+
+public sealed class GoogleSsoLoginFailed(TenantId orgId, string reason)
+    : TelemetryEvent(("org_id", orgId), ("reason", reason));
+
 public sealed class PaymentFailed(SubscriptionId subscriptionId, SubscriptionPlan plan, decimal priceAmount, string currency)
     : TelemetryEvent(("subscription_id", subscriptionId), ("plan", plan), ("price_amount", priceAmount), ("currency", currency));
 

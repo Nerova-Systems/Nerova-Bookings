@@ -64,7 +64,7 @@ public sealed class StartImpersonationHandler(
 
         var userInfoResult = await userInfoFactory.CreateUserInfoAsync(
             targetUser,
-            sessionId: executionContext.UserInfo.SessionId,
+            executionContext.UserInfo.SessionId,
             cancellationToken,
             activeOrgId: activeOrgId,
             impersonatedByIdentifier: actorId.ToString(),
@@ -75,20 +75,21 @@ public sealed class StartImpersonationHandler(
         authenticationTokenService.SetImpersonationAccessToken(userInfoResult.Value!);
 
         await auditLogEmitter.EmitAsync(new AuditLogEvent(
-            TenantId: activeOrgId!,
-            ActorId: actorId,
-            ActorEmail: actorEmail,
-            Resource: "User",
-            Action: "ImpersonationStarted",
-            ResourceId: command.TargetUserId.ToString(),
-            Metadata: new Dictionary<string, string>
-            {
-                ["target_user_id"] = command.TargetUserId.ToString(),
-                ["original_actor_user_id"] = actorId.ToString()
-            },
-            IpAddress: executionContext.ClientIpAddress.ToString(),
-            UserAgent: httpContextAccessor.HttpContext?.Request.Headers.UserAgent.ToString() ?? string.Empty
-        ), cancellationToken);
+                activeOrgId!,
+                actorId,
+                actorEmail,
+                "User",
+                "ImpersonationStarted",
+                command.TargetUserId.ToString(),
+                new Dictionary<string, string>
+                {
+                    ["target_user_id"] = command.TargetUserId.ToString(),
+                    ["original_actor_user_id"] = actorId.ToString()
+                },
+                executionContext.ClientIpAddress.ToString(),
+                httpContextAccessor.HttpContext?.Request.Headers.UserAgent.ToString() ?? string.Empty
+            ), cancellationToken
+        );
 
         events.CollectEvent(new ImpersonationStarted(actorId, command.TargetUserId, activeOrgId!));
 

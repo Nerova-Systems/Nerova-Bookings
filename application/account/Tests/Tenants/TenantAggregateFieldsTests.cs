@@ -3,7 +3,6 @@ using Account.Features.Tenants.Domain;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using SharedKernel.Tests.Persistence;
 using Xunit;
 
 namespace Account.Tests.Tenants;
@@ -111,17 +110,17 @@ public sealed class TenantAggregateFieldsTests(AccountWebApplicationFactory fact
         var solo = Tenant.Create("owner@test.com", 0);
 
         var act = () => solo.UpdateBranding(
-            bio: "Bio",
-            hideBranding: true,
-            hideTeamProfileLink: false,
-            isPrivate: false,
-            hideBookATeamMember: false,
-            theme: null,
-            brandColor: null,
-            darkBrandColor: null,
-            timeFormat: null,
-            timeZone: null,
-            weekStart: null
+            "Bio",
+            true,
+            false,
+            false,
+            false,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
         );
 
         act.Should().Throw<InvalidOperationException>()
@@ -134,17 +133,17 @@ public sealed class TenantAggregateFieldsTests(AccountWebApplicationFactory fact
         var org = Tenant.CreateOrganization("admin@acme.com", 0);
 
         org.UpdateBranding(
-            bio: "We build things",
-            hideBranding: true,
-            hideTeamProfileLink: true,
-            isPrivate: true,
-            hideBookATeamMember: true,
-            theme: "dark",
-            brandColor: "#FF0000",
-            darkBrandColor: "#AA0000",
-            timeFormat: 24,
-            timeZone: "Africa/Johannesburg",
-            weekStart: "Monday"
+            "We build things",
+            true,
+            true,
+            true,
+            true,
+            "dark",
+            "#FF0000",
+            "#AA0000",
+            24,
+            "Africa/Johannesburg",
+            "Monday"
         );
 
         org.Bio.Should().Be("We build things");
@@ -175,17 +174,17 @@ public sealed class TenantAggregateFieldsTests(AccountWebApplicationFactory fact
         var org = Tenant.CreateOrganization("admin@branding.com", 10);
         org.SetSlug("branding-org");
         org.UpdateBranding(
-            bio: "We build things",
-            hideBranding: true,
-            hideTeamProfileLink: true,
-            isPrivate: true,
-            hideBookATeamMember: true,
-            theme: "dark",
-            brandColor: "#112233",
-            darkBrandColor: "#AABBCC",
-            timeFormat: 12,
-            timeZone: "America/New_York",
-            weekStart: "Monday"
+            "We build things",
+            true,
+            true,
+            true,
+            true,
+            "dark",
+            "#112233",
+            "#AABBCC",
+            12,
+            "America/New_York",
+            "Monday"
         );
         dbContext.Set<Tenant>().Add(org);
         await dbContext.SaveChangesAsync();

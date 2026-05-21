@@ -88,7 +88,7 @@ public sealed class ApiKeyEndpointTests(AccountWebApplicationFactory factory)
     [Fact]
     public async Task PostUserKey_WhenCapFlagNotEnabled_ShouldReturnForbidden()
     {
-        SetUserToken(DatabaseSeeder.Tenant1Owner.Id, DatabaseSeeder.Tenant1.Id, featureFlags: []);
+        SetUserToken(DatabaseSeeder.Tenant1Owner.Id, DatabaseSeeder.Tenant1.Id, []);
 
         var response = await AnonymousHttpClient.PostAsJsonAsync(UserKeysUrl, ValidCreatePayload());
 
@@ -101,7 +101,7 @@ public sealed class ApiKeyEndpointTests(AccountWebApplicationFactory factory)
     [Fact]
     public async Task GetUserKeys_WhenCapFlagNotEnabled_ShouldReturnForbidden()
     {
-        SetUserToken(DatabaseSeeder.Tenant1Owner.Id, DatabaseSeeder.Tenant1.Id, featureFlags: []);
+        SetUserToken(DatabaseSeeder.Tenant1Owner.Id, DatabaseSeeder.Tenant1.Id, []);
 
         var response = await AnonymousHttpClient.GetAsync(UserKeysUrl);
 
@@ -354,16 +354,18 @@ public sealed class ApiKeyEndpointTests(AccountWebApplicationFactory factory)
                 ("role", role.ToString()),
                 ("accepted", true),
                 ("accepted_at", now),
-                ("invited_by", (object?)null),
-                ("invite_token", (object?)null),
+                ("invited_by", null),
+                ("invite_token", null),
                 ("disable_impersonation", false),
-                ("custom_role_id", (object?)null),
+                ("custom_role_id", null),
                 ("created_at", now),
-                ("modified_at", (object?)null)
+                ("modified_at", null)
             ]
         );
     }
 
-    private static object ValidCreatePayload(string name = "My API Key") =>
-        new { Name = name, ExpiresAt = (DateTimeOffset?)null };
+    private static object ValidCreatePayload(string name = "My API Key")
+    {
+        return new { Name = name, ExpiresAt = (DateTimeOffset?)null };
+    }
 }
