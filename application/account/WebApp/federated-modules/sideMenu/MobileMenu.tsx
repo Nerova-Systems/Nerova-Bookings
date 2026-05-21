@@ -21,7 +21,7 @@ import { useContext, useEffect, useState } from "react";
 
 import { SupportDialog } from "../common/SupportDialog";
 import { SwitchingAccountLoader } from "../common/SwitchingAccountLoader";
-import { fetchTenants, switchTenantApi, type TenantInfo } from "../common/tenantUtils";
+import { fetchSwitchableScopes, switchTenantApi, type TenantInfo } from "../common/tenantUtils";
 import { MobileMenuContent } from "./MobileMenuContent";
 import { TenantSwitcherDrawer } from "./TenantSwitcherDrawer";
 
@@ -118,7 +118,7 @@ export default function MobileMenu({ onNavigate }: Readonly<MobileMenuProps>) {
 
   useEffect(() => {
     if (userInfo?.isAuthenticated) {
-      fetchTenants()
+      fetchSwitchableScopes()
         .then((response) => setTenants(response.tenants || []))
         .catch(() => setTenants([]));
     }

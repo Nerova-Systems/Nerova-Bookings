@@ -24,6 +24,8 @@ interface UserMenuDropdownContentProps {
   onLogout: () => void;
   onShowSupport: () => void;
   onTenantSwitch: (tenant: TenantInfo) => void;
+  onCreateTeam?: () => void;
+  onCreateOrganization?: () => void;
 }
 
 export function UserMenuDropdownContent({
@@ -39,7 +41,9 @@ export function UserMenuDropdownContent({
   onNavigateToAccountSettings,
   onLogout,
   onShowSupport,
-  onTenantSwitch
+  onTenantSwitch,
+  onCreateTeam,
+  onCreateOrganization
 }: Readonly<UserMenuDropdownContentProps>) {
   return (
     <>
@@ -75,6 +79,8 @@ export function UserMenuDropdownContent({
             isLoadingTenants={isLoadingTenants}
             userInfo={userInfo}
             onTenantSwitch={onTenantSwitch}
+            onCreateTeam={onCreateTeam}
+            onCreateOrganization={onCreateOrganization}
           />
           {canAccessAccountSettings && (
             <DropdownMenuItem onClick={onNavigateToAccountSettings} aria-label={t`Account settings`}>

@@ -6,7 +6,7 @@ import { authSyncService, type TenantSwitchedMessage } from "@repo/infrastructur
 import { loggedInPath } from "@repo/infrastructure/auth/constants";
 import { useEffect, useState } from "react";
 
-import { fetchTenants, sortTenants, switchTenantApi, type TenantInfo } from "../common/tenantUtils";
+import { fetchSwitchableScopes, sortTenants, switchTenantApi, type TenantInfo } from "../common/tenantUtils";
 
 export function useUserMenuTenants(isMenuOpen: boolean, userInfo: ReturnType<typeof useUserInfo>) {
   const [tenants, setTenants] = useState<TenantInfo[]>([]);
@@ -16,7 +16,7 @@ export function useUserMenuTenants(isMenuOpen: boolean, userInfo: ReturnType<typ
   useEffect(() => {
     if (isMenuOpen && userInfo?.isAuthenticated) {
       setIsLoadingTenants(true);
-      fetchTenants()
+      fetchSwitchableScopes()
         .then((response) => {
           setTenants(response.tenants || []);
         })
@@ -32,7 +32,7 @@ export function useUserMenuTenants(isMenuOpen: boolean, userInfo: ReturnType<typ
   useEffect(() => {
     const handleTenantUpdated = () => {
       if (userInfo?.isAuthenticated) {
-        fetchTenants()
+        fetchSwitchableScopes()
           .then((response) => {
             setTenants(response.tenants || []);
           })

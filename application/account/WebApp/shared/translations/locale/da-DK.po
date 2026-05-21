@@ -3136,3 +3136,18 @@ msgstr "YouTube"
 
 msgid "Zoom"
 msgstr "Zoom"
+
+msgid "Create new organization"
+msgstr "Opret ny organisation"
+
+msgid "Create new team"
+msgstr "Opret nyt team"
+
+msgid "Organizations"
+msgstr "Organisationer"
+
+msgid "Solo"
+msgstr "Solo"
+
+msgid "Teams"
+msgstr "Teams"
