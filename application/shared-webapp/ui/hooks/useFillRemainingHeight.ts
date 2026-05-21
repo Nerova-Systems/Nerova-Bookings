@@ -7,9 +7,7 @@ import { useLayoutEffect, useRef } from "react";
  *
  * Ported from cal.com `packages/lib/hooks/useFillRemainingHeight.ts` (cf2a55c).
  */
-export function useFillRemainingHeight<T extends HTMLElement = HTMLDivElement>(
-  offset = 0
-): React.RefObject<T | null> {
+export function useFillRemainingHeight<T extends HTMLElement = HTMLDivElement>(offset = 0): React.RefObject<T | null> {
   const ref = useRef<T>(null);
 
   useLayoutEffect(() => {

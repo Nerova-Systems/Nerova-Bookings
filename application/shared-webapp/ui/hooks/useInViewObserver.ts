@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 
-const isIntersectionObserverSupported =
-  typeof window !== "undefined" && "IntersectionObserver" in window;
+const isIntersectionObserverSupported = typeof window !== "undefined" && "IntersectionObserver" in window;
 
 /**
  * Returns a ref-setter. When the attached element enters the viewport (or a custom

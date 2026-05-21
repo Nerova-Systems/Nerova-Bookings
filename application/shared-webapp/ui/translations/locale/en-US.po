@@ -17,8 +17,14 @@ msgstr ""
 msgid "{0, plural, one {# day ago} other {# days ago}}"
 msgstr "{0, plural, one {# day ago} other {# days ago}}"
 
+msgid "{credits} credits"
+msgstr "{credits} credits"
+
 msgid "{diffDays, plural, one {In # day} other {In # days}}"
 msgstr "{diffDays, plural, one {In # day} other {In # days}}"
+
+msgid "{name} is unpublished"
+msgstr "{name} is unpublished"
 
 msgid "A/B rollout"
 msgstr "A/B rollout"
@@ -26,14 +32,68 @@ msgstr "A/B rollout"
 msgid "Account overview page"
 msgstr "Account overview page"
 
+msgid "Add"
+msgstr "Add"
+
+msgid "Add email address"
+msgstr "Add email address"
+
+msgid "Add option"
+msgstr "Add option"
+
+msgid "Allow org members to sign in via Google Workspace. Ports cal.com Google SSO. Requires g3-sso-google."
+msgstr "Allow org members to sign in via Google Workspace. Ports cal.com Google SSO. Requires g3-sso-google."
+
+msgid "Allow org members to sign in via Microsoft Entra ID / Azure AD. Ports cal.com Microsoft SSO. Requires g3-sso-microsoft."
+msgstr "Allow org members to sign in via Microsoft Entra ID / Azure AD. Ports cal.com Microsoft SSO. Requires g3-sso-microsoft."
+
+msgid "Allow system admins to impersonate any user account for support and debugging, with a full audit trail. Ports cal.com impersonation."
+msgstr "Allow system admins to impersonate any user account for support and debugging, with a full audit trail. Ports cal.com impersonation."
+
 msgid "Allow users to authenticate using enterprise identity providers"
 msgstr "Allow users to authenticate using enterprise identity providers"
+
+msgid "Analytics dashboard: booking volume, event-type performance, and member load metrics. Ports cal.com insights. Requires g3-insights."
+msgstr "Analytics dashboard: booking volume, event-type performance, and member load metrics. Ports cal.com insights. Requires g3-insights."
+
+msgid "API keys"
+msgstr "API keys"
+
+msgid "API token"
+msgstr "API token"
+
+msgid "Are you sure you want to disconnect <0>{label}</0>? This cannot be undone."
+msgstr "Are you sure you want to disconnect <0>{label}</0>? This cannot be undone."
+
+msgid "Are you sure you want to disconnect this integration? This cannot be undone."
+msgstr "Are you sure you want to disconnect this integration? This cannot be undone."
+
+msgid "Audit log"
+msgstr "Audit log"
+
+msgid "Automated booking reminders, follow-ups, and no-show handling. Ports cal.com workflows. Requires g3-workflows."
+msgstr "Automated booking reminders, follow-ups, and no-show handling. Ports cal.com workflows. Requires g3-workflows."
+
+msgid "Automatically sync user attributes from SAML/SCIM/SSO claims into org member profiles on every SSO login. Ports cal.com IdP attribute sync."
+msgstr "Automatically sync user attributes from SAML/SCIM/SSO claims into org member profiles on every SSO login. Ports cal.com IdP attribute sync."
+
+msgid "Back"
+msgstr "Back"
+
+msgid "Banner preview"
+msgstr "Banner preview"
 
 msgid "Beta features"
 msgstr "Beta features"
 
+msgid "Bold"
+msgstr "Bold"
+
 msgid "Breadcrumb"
 msgstr "Breadcrumb"
+
+msgid "Cancel"
+msgstr "Cancel"
 
 msgid "Clear date"
 msgstr "Clear date"
@@ -50,11 +110,29 @@ msgstr "Close menu"
 msgid "Close sidebar"
 msgstr "Close sidebar"
 
+msgid "Collective scheduling"
+msgstr "Collective scheduling"
+
 msgid "Compact view"
 msgstr "Compact view"
 
+msgid "Configure {name}"
+msgstr "Configure {name}"
+
+msgid "Copied"
+msgstr "Copied"
+
+msgid "Copy token"
+msgstr "Copy token"
+
 msgid "Create <0>{search}</0>"
 msgstr "Create <0>{search}</0>"
+
+msgid "Crop banner"
+msgstr "Crop banner"
+
+msgid "Custom SMTP"
+msgstr "Custom SMTP"
 
 msgid "Decrease"
 msgstr "Decrease"
@@ -62,26 +140,107 @@ msgstr "Decrease"
 msgid "Default"
 msgstr "Default"
 
+msgid "Delegation credentials"
+msgstr "Delegation credentials"
+
+msgid "Disconnect"
+msgstr "Disconnect"
+
+msgid "Disconnect {label}"
+msgstr "Disconnect {label}"
+
+msgid "Disconnect {name}"
+msgstr "Disconnect {name}"
+
+msgid "Disconnect integration"
+msgstr "Disconnect integration"
+
+msgid "Disconnecting…"
+msgstr "Disconnecting…"
+
+msgid "Distribute bookings across available team members in rotation. Ports cal.com round-robin."
+msgstr "Distribute bookings across available team members in rotation. Ports cal.com round-robin."
+
 msgid "Drop files here, or click to browse"
 msgstr "Drop files here, or click to browse"
 
 msgid "Early access to experimental features before general availability"
 msgstr "Early access to experimental features before general availability"
 
+msgid "Edit name"
+msgstr "Edit name"
+
+msgid "Enables enterprise-only functionality: audit log, workflows, API keys, impersonation, and analytics insights"
+msgstr "Enables enterprise-only functionality: audit log, workflows, API keys, impersonation, and analytics insights"
+
+msgid "Enables organization-level functionality: org management, org-scoped attributes, custom SMTP, billing, delegation credentials, and SSO"
+msgstr "Enables organization-level functionality: org management, org-scoped attributes, custom SMTP, billing, delegation credentials, and SSO"
+
+msgid "Enables team-level functionality: team management, team-scoped event types and schedules, round-robin and collective scheduling"
+msgstr "Enables team-level functionality: team management, team-scoped event types and schedules, round-robin and collective scheduling"
+
+msgid "Enter address"
+msgstr "Enter address"
+
+msgid "Enterprise tier"
+msgstr "Enterprise tier"
+
 msgid "Experimental UI"
 msgstr "Experimental UI"
+
+msgid "Finish"
+msgstr "Finish"
+
+msgid "Generate long-lived API keys for programmatic access at the user or org level. Ports cal.com api-keys."
+msgstr "Generate long-lived API keys for programmatic access at the user or org level. Ports cal.com api-keys."
 
 msgid "Go to next page"
 msgstr "Go to next page"
 
+msgid "Go to next step"
+msgstr "Go to next step"
+
 msgid "Go to previous page"
 msgstr "Go to previous page"
+
+msgid "Go to previous step"
+msgstr "Go to previous step"
 
 msgid "Google OAuth"
 msgstr "Google OAuth"
 
+msgid "Google SSO"
+msgstr "Google SSO"
+
+msgid "Hex color value"
+msgstr "Hex color value"
+
+msgid "IdP attribute sync"
+msgstr "IdP attribute sync"
+
+msgid "Immutable record of all significant system events across every SCS, written via the shared-kernel event bus. Ports cal.com booking-audit."
+msgstr "Immutable record of all significant system events across every SCS, written via the shared-kernel event bus. Ports cal.com booking-audit."
+
+msgid "Impersonation"
+msgstr "Impersonation"
+
 msgid "Increase"
 msgstr "Increase"
+
+msgid "Insights"
+msgstr "Insights"
+
+msgid "Install"
+msgstr "Install"
+
+msgid "Install {name}"
+msgstr "Install {name}"
+
+msgid "Installed"
+msgstr "Installed"
+
+msgid "Italic"
+msgstr "Italic"
 
 msgid "Leave"
 msgstr "Leave"
@@ -92,14 +251,32 @@ msgstr "Loading"
 msgid "Main content"
 msgstr "Main content"
 
+msgid "Managed event types"
+msgstr "Managed event types"
+
 msgid "Manual override"
 msgstr "Manual override"
+
+msgid "Member attributes"
+msgstr "Member attributes"
+
+msgid "Microsoft SSO"
+msgstr "Microsoft SSO"
 
 msgid "Mobile navigation menu"
 msgstr "Mobile navigation menu"
 
+msgid "More options"
+msgstr "More options"
+
 msgid "More pages"
 msgstr "More pages"
+
+msgid "Multi-tenant Google/Microsoft OAuth so the org can read calendar busy-time and create conferencing links on behalf of members. Ports cal.com delegation-credentials."
+msgstr "Multi-tenant Google/Microsoft OAuth so the org can read calendar busy-time and create conferencing links on behalf of members. Ports cal.com delegation-credentials."
+
+msgid "New option value"
+msgstr "New option value"
 
 msgid "Next"
 msgstr "Next"
@@ -113,8 +290,30 @@ msgstr "Open calendar"
 msgid "Open navigation menu"
 msgstr "Open navigation menu"
 
+#. placeholder {0}: i + 1
+msgid "Option {0}"
+msgstr "Option {0}"
+
+msgid "Ordered list"
+msgstr "Ordered list"
+
+msgid "Org billing"
+msgstr "Org billing"
+
+msgid "Org-defined custom fields attached to memberships, e.g. department, skills, timezone. Ports cal.com attributes."
+msgstr "Org-defined custom fields attached to memberships, e.g. department, skills, timezone. Ports cal.com attributes."
+
+msgid "Organizations tier"
+msgstr "Organizations tier"
+
 msgid "Pagination"
 msgstr "Pagination"
+
+msgid "Paid"
+msgstr "Paid"
+
+msgid "Per-org SMTP server override so org-scoped emails are sent from the org's own mail domain. Ports cal.com custom-smtp."
+msgstr "Per-org SMTP server override so org-scoped emails are sent from the org's own mail domain. Ports cal.com custom-smtp."
 
 msgid "Plan"
 msgstr "Plan"
@@ -122,11 +321,42 @@ msgstr "Plan"
 msgid "Previous"
 msgstr "Previous"
 
+msgid "Redo"
+msgstr "Redo"
+
 msgid "Reduce spacing between UI elements for a denser layout"
 msgstr "Reduce spacing between UI elements for a denser layout"
 
+msgid "Remove"
+msgstr "Remove"
+
+msgid "Remove {email}"
+msgstr "Remove {email}"
+
+#. placeholder {0}: i + 1
+msgid "Remove option {0}"
+msgstr "Remove option {0}"
+
+msgid "Require all listed team members to be available before a slot is offered to bookers. Ports cal.com collective scheduling."
+msgstr "Require all listed team members to be available before a slot is offered to bookers. Ports cal.com collective scheduling."
+
 msgid "Resize sidebar"
 msgstr "Resize sidebar"
+
+msgid "Rich text editor"
+msgstr "Rich text editor"
+
+msgid "Round-robin scheduling"
+msgstr "Round-robin scheduling"
+
+msgid "Save"
+msgstr "Save"
+
+msgid "Saving…"
+msgstr "Saving…"
+
+msgid "Seat-based billing and subscription management at the organization level. Ports cal.com billing/organizations. Requires g3-org-billing."
+msgstr "Seat-based billing and subscription management at the organization level. Ports cal.com billing/organizations. Requires g3-org-billing."
 
 msgid "Select dates"
 msgstr "Select dates"
@@ -134,11 +364,17 @@ msgstr "Select dates"
 msgid "Select time zone"
 msgstr "Select time zone"
 
+msgid "Settings"
+msgstr "Settings"
+
 msgid "Show more"
 msgstr "Show more"
 
 msgid "Show the account overview dashboard with user statistics at /account. When disabled, signed-in users go straight to the users list."
 msgstr "Show the account overview dashboard with user statistics at /account. When disabled, signed-in users go straight to the users list."
+
+msgid "Show time in all timezones"
+msgstr "Show time in all timezones"
 
 msgid "Sign in with Google using OpenID Connect"
 msgstr "Sign in with Google using OpenID Connect"
@@ -149,14 +385,32 @@ msgstr "Single sign-on"
 msgid "Skip to main content"
 msgstr "Skip to main content"
 
+msgid "Start typing…"
+msgstr "Start typing…"
+
 msgid "Stay"
 msgstr "Stay"
+
+msgid "Step {step}"
+msgstr "Step {step}"
 
 msgid "Stripe-powered subscription billing and plan management"
 msgstr "Stripe-powered subscription billing and plan management"
 
 msgid "Subscriptions"
 msgstr "Subscriptions"
+
+msgid "Team-owned event types with locked fields that members inherit. Ports cal.com managed-event-types."
+msgstr "Team-owned event types with locked fields that members inherit. Ports cal.com managed-event-types."
+
+msgid "Teams"
+msgstr "Teams"
+
+msgid "Teams tier"
+msgstr "Teams tier"
+
+msgid "This page is not visible to the public."
+msgstr "This page is not visible to the public."
 
 msgid "Today"
 msgstr "Today"
@@ -170,11 +424,38 @@ msgstr "Tomorrow"
 msgid "Try out experimental user interface components"
 msgstr "Try out experimental user interface components"
 
+msgid "Undo"
+msgstr "Undo"
+
+msgid "Unordered list"
+msgstr "Unordered list"
+
 msgid "Unsaved changes"
 msgstr "Unsaved changes"
+
+msgid "Upload"
+msgstr "Upload"
+
+msgid "Upload banner image"
+msgstr "Upload banner image"
+
+msgid "View {name} in marketplace"
+msgstr "View {name} in marketplace"
+
+msgid "Workflows"
+msgstr "Workflows"
 
 msgid "Yesterday"
 msgstr "Yesterday"
 
+msgid "You are viewing <0>{orgName}</0>"
+msgstr "You are viewing <0>{orgName}</0>"
+
 msgid "You have unsaved changes. If you leave now, your changes will be lost."
 msgstr "You have unsaved changes. If you leave now, your changes will be lost."
+
+msgid "Zoom"
+msgstr "Zoom"
+
+msgid "Zoom image"
+msgstr "Zoom image"

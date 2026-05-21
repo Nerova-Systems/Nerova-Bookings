@@ -12,10 +12,7 @@ export function useCopy() {
 
   const noop = () => {};
 
-  const copyToClipboard = (
-    text: string,
-    options: { onSuccess?: () => void; onFailure?: () => void } = {}
-  ) => {
+  const copyToClipboard = (text: string, options: { onSuccess?: () => void; onFailure?: () => void } = {}) => {
     const { onSuccess = noop, onFailure = noop } = options;
     if (typeof navigator !== "undefined" && navigator.clipboard) {
       navigator.clipboard

@@ -33,12 +33,12 @@ export function useKeyPress(
       }
     };
 
-    element.addEventListener("keydown", downHandler as EventListener);
-    element.addEventListener("keyup", upHandler as EventListener);
+    element.addEventListener("keydown", downHandler as unknown as EventListener);
+    element.addEventListener("keyup", upHandler as unknown as EventListener);
 
     return () => {
-      element.removeEventListener("keydown", downHandler as EventListener);
-      element.removeEventListener("keyup", upHandler as EventListener);
+      element.removeEventListener("keydown", downHandler as unknown as EventListener);
+      element.removeEventListener("keyup", upHandler as unknown as EventListener);
     };
     // Intentionally omit deps to match cal.com behaviour (mount/unmount only).
     // eslint-disable-next-line react-hooks/exhaustive-deps

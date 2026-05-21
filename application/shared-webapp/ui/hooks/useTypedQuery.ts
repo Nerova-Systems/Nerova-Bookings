@@ -37,7 +37,7 @@ export const queryStringArray = z
  * Deviation: cal.com uses Next.js `useRouter` + `usePathname`. Nerova uses browser
  * `history.replaceState` directly so the hook is router-agnostic and SSR-safe.
  */
-export function useTypedQuery<T extends z.AnyZodObject>(schema: T) {
+export function useTypedQuery<T extends z.ZodObject<z.ZodRawShape>>(schema: T) {
   type Output = z.infer<typeof schema>;
   type FullOutput = Required<Output>;
   type OutputKeys = Required<keyof FullOutput>;
@@ -96,7 +96,7 @@ export function useTypedQuery<T extends z.AnyZodObject>(schema: T) {
     replaceQuery(search);
   }
 
-  function pushItemToKey<J extends ArrayOutputKeys>(key: J, value: ArrayOutput[J][number]) {
+  function pushItemToKey<J extends ArrayOutputKeys>(key: J, value: ArrayOutput[J] extends Array<infer I> ? I : never) {
     const existingValue = parsedQuery[key];
     if (Array.isArray(existingValue)) {
       if (existingValue.includes(value)) return;
@@ -106,15 +106,15 @@ export function useTypedQuery<T extends z.AnyZodObject>(schema: T) {
     }
   }
 
-  function removeItemByKeyAndValue<J extends ArrayOutputKeys>(key: J, value: ArrayOutput[J][number]) {
+  function removeItemByKeyAndValue<J extends ArrayOutputKeys>(
+    key: J,
+    value: ArrayOutput[J] extends Array<infer I> ? I : never
+  ) {
     const existingValue = parsedQuery[key];
     if (Array.isArray(existingValue) && existingValue.length > 1) {
-      setQuery(
-        key as OutputKeys,
-        existingValue.filter((item) => item !== value) as Output[typeof key]
-      );
+      setQuery(key as OutputKeys, existingValue.filter((item: unknown) => item !== value) as Output[typeof key]);
     } else {
-      removeByKey(key as OutputOptionalKeys);
+      removeByKey(key as unknown as OutputOptionalKeys);
     }
   }
 
