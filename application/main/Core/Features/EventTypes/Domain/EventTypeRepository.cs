@@ -15,6 +15,12 @@ public interface IEventTypeRepository : ICrudRepository<EventType, EventTypeId>,
     Task<bool> ExistsForScheduleAsync(UserId ownerUserId, ScheduleId scheduleId, CancellationToken cancellationToken);
 
     Task<bool> SlugExistsForOwnerAsync(UserId ownerUserId, string slug, EventTypeId? excludedEventTypeId, CancellationToken cancellationToken);
+
+    /// <summary>Returns all non-deleted child replicas for the given parent template.</summary>
+    Task<EventType[]> GetChildrenAsync(EventTypeId parentId, CancellationToken cancellationToken);
+
+    /// <summary>Returns the child replica belonging to the given parent and member, or null if not assigned.</summary>
+    Task<EventType?> GetChildByParentAndMemberAsync(EventTypeId parentId, UserId memberUserId, CancellationToken cancellationToken);
 }
 
 public sealed class EventTypeRepository(MainDbContext mainDbContext)
@@ -65,5 +71,20 @@ public sealed class EventTypeRepository(MainDbContext mainDbContext)
         }
 
         return await eventTypes.AnyAsync(cancellationToken);
+    }
+
+    public async Task<EventType[]> GetChildrenAsync(EventTypeId parentId, CancellationToken cancellationToken)
+    {
+        return await DbSet
+            .Where(eventType => eventType.ParentEventTypeId == parentId)
+            .OrderBy(eventType => eventType.OwnerUserId)
+            .ToArrayAsync(cancellationToken);
+    }
+
+    public async Task<EventType?> GetChildByParentAndMemberAsync(EventTypeId parentId, UserId memberUserId, CancellationToken cancellationToken)
+    {
+        return await DbSet
+            .Where(eventType => eventType.ParentEventTypeId == parentId && eventType.OwnerUserId == memberUserId)
+            .FirstOrDefaultAsync(cancellationToken);
     }
 }

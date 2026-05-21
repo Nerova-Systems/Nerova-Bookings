@@ -18,6 +18,7 @@ public sealed class EventTypeConfiguration : IEntityTypeConfiguration<EventType>
         builder.MapStronglyTypedNullableLongId<EventType, TenantId>(eventType => eventType.TeamId);
         builder.MapStronglyTypedUuid<EventType, UserId>(eventType => eventType.OwnerUserId);
         builder.MapStronglyTypedUuid<EventType, ScheduleId>(eventType => eventType.ScheduleId);
+        builder.MapStronglyTypedNullableId<EventType, EventTypeId, string>(eventType => eventType.ParentEventTypeId);
 
         builder.Property(eventType => eventType.Title).HasMaxLength(120);
         builder.Property(eventType => eventType.Slug).HasMaxLength(120);
@@ -29,6 +30,12 @@ public sealed class EventTypeConfiguration : IEntityTypeConfiguration<EventType>
             .HasConversion(
                 settings => JsonSerializer.Serialize(settings, JsonSerializerOptions),
                 value => JsonSerializer.Deserialize<EventTypeSettings>(value, JsonSerializerOptions) ?? new EventTypeSettings()
+            );
+        builder.Property(eventType => eventType.UnlockedFields)
+            .HasColumnType("jsonb")
+            .HasConversion(
+                fields => JsonSerializer.Serialize(fields, JsonSerializerOptions),
+                value => JsonSerializer.Deserialize<string[]>(value, JsonSerializerOptions) ?? Array.Empty<string>()
             );
 
         builder.HasOne<Schedule>()

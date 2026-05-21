@@ -1,5 +1,7 @@
 using Main.Database;
 using Main.Features.Insights.Shared;
+using Main.Features.ManagedEventTypes.EventHandlers;
+using Main.Features.ManagedEventTypes.Services;
 using Main.Features.Scheduling.Shared;
 using Main.Features.Workflows.Domain;
 using Main.Features.Workflows.EventHandlers;
@@ -36,6 +38,8 @@ public static class Configuration
                 .AddScoped<PublicSchedulingResolver>()
                 .AddScoped<PublicSlotCalculator>()
                 .AddScoped<InsightsScopeResolver>()
+                .AddScoped<ManagedEventTypePropagator>()
+                .AddScoped<EventTypeUpdatedManagedSyncHandler>()
                 .AddSharedServices<MainDbContext>([Assembly]);
         }
 

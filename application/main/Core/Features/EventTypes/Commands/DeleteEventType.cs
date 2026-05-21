@@ -35,6 +35,13 @@ public sealed class DeleteEventTypeHandler(
             return Result.NotFound($"Event type '{command.Id}' was not found.");
         }
 
+        // If this is a managed template, soft-delete all child replicas first.
+        var children = await eventTypeRepository.GetChildrenAsync(command.Id, cancellationToken);
+        foreach (var child in children)
+        {
+            eventTypeRepository.Remove(child);
+        }
+
         eventTypeRepository.Remove(eventType);
         events.CollectEvent(new EventTypeDeleted(eventType.Id));
 

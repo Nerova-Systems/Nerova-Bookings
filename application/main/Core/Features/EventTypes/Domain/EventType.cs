@@ -1,5 +1,7 @@
 using JetBrains.Annotations;
+using Main.Features.ManagedEventTypes.Shared;
 using Main.Features.Schedules.Domain;
+using SharedKernel.Cqrs;
 using SharedKernel.Domain;
 using SharedKernel.StronglyTypedIds;
 
@@ -49,6 +51,35 @@ public sealed class EventType : SoftDeletableAggregateRoot<EventTypeId>, ITenant
         Update(title, slug, description, durationMinutes, hidden, scheduleId, beforeEventBufferMinutes, afterEventBufferMinutes, slotIntervalMinutes, minimumBookingNoticeMinutes, locationType, locationValue, settings);
     }
 
+    private EventType(
+        EventTypeId parentId,
+        TenantId tenantId,
+        UserId ownerUserId,
+        string title,
+        string slug,
+        string? description,
+        int durationMinutes,
+        bool hidden,
+        ScheduleId scheduleId,
+        int beforeEventBufferMinutes,
+        int afterEventBufferMinutes,
+        int slotIntervalMinutes,
+        int minimumBookingNoticeMinutes,
+        string? locationType,
+        string? locationValue,
+        EventTypeSettings? settings,
+        TenantId? teamId,
+        string[] unlockedFields
+    ) : base(EventTypeId.NewId())
+    {
+        TenantId = tenantId;
+        OwnerUserId = ownerUserId;
+        ParentEventTypeId = parentId;
+        TeamId = teamId;
+        UnlockedFields = unlockedFields.ToArray();
+        Update(title, slug, description, durationMinutes, hidden, scheduleId, beforeEventBufferMinutes, afterEventBufferMinutes, slotIntervalMinutes, minimumBookingNoticeMinutes, locationType, locationValue, settings);
+    }
+
     public UserId OwnerUserId { get; private set; }
 
     public string Title { get; private set; } = string.Empty;
@@ -88,6 +119,17 @@ public sealed class EventType : SoftDeletableAggregateRoot<EventTypeId>, ITenant
     public TenantId TenantId { get; } = new(0);
 
     /// <summary>
+    ///     When non-null, this event type is a child replica managed by a parent template.
+    /// </summary>
+    public EventTypeId? ParentEventTypeId { get; private set; }
+
+    /// <summary>
+    ///     Field names that the assigned member is allowed to override on their child replica.
+    ///     Fields NOT in this list are locked and propagated from the parent template.
+    /// </summary>
+    public string[] UnlockedFields { get; private set; } = [];
+
+    /// <summary>
     ///     Assigns this event type to a team.
     /// </summary>
     /// <remarks>
@@ -107,6 +149,89 @@ public sealed class EventType : SoftDeletableAggregateRoot<EventTypeId>, ITenant
     {
         TeamId = null;
     }
+
+    /// <summary>
+    ///     Validates that this event type can serve as a managed template.
+    ///     Returns a bad-request result if validation fails.
+    /// </summary>
+    public Result EnsureCanBeManagedTemplate()
+    {
+        if (TeamId is null)
+        {
+            return Result.BadRequest("Managed templates must be team-scoped.");
+        }
+
+        if (ParentEventTypeId is not null)
+        {
+            return Result.BadRequest("A child event type cannot become a managed template.");
+        }
+
+        return Result.Success();
+    }
+
+    /// <summary>
+    ///     Creates a child replica of this template for the specified team member.
+    ///     Copies all field values; the member may later override the <see cref="UnlockedFields" />.
+    /// </summary>
+    public EventType CreateChildReplica(UserId memberUserId)
+    {
+        return new EventType(
+            Id, TenantId, memberUserId, Title, Slug, Description, DurationMinutes, Hidden, ScheduleId,
+            BeforeEventBufferMinutes, AfterEventBufferMinutes, SlotIntervalMinutes, MinimumBookingNoticeMinutes,
+            LocationType, LocationValue, Settings, TeamId, UnlockedFields
+        );
+    }
+
+    /// <summary>
+    ///     Propagates the parent template's locked field values into this child replica.
+    ///     Fields listed in <see cref="UnlockedFields" /> retain the child's own values.
+    /// </summary>
+    public void PropagateFromParent(EventType parent)
+    {
+        var unlocked = UnlockedFields;
+        Update(
+            IsLocked(unlocked, ManagedEventTypeFields.Title) ? parent.Title : Title,
+            IsLocked(unlocked, ManagedEventTypeFields.Slug) ? parent.Slug : Slug,
+            IsLocked(unlocked, ManagedEventTypeFields.Description) ? parent.Description : Description,
+            IsLocked(unlocked, ManagedEventTypeFields.DurationMinutes) ? parent.DurationMinutes : DurationMinutes,
+            IsLocked(unlocked, ManagedEventTypeFields.Hidden) ? parent.Hidden : Hidden,
+            IsLocked(unlocked, ManagedEventTypeFields.ScheduleId) ? parent.ScheduleId : ScheduleId,
+            IsLocked(unlocked, ManagedEventTypeFields.BeforeEventBufferMinutes) ? parent.BeforeEventBufferMinutes : BeforeEventBufferMinutes,
+            IsLocked(unlocked, ManagedEventTypeFields.AfterEventBufferMinutes) ? parent.AfterEventBufferMinutes : AfterEventBufferMinutes,
+            IsLocked(unlocked, ManagedEventTypeFields.SlotIntervalMinutes) ? parent.SlotIntervalMinutes : SlotIntervalMinutes,
+            IsLocked(unlocked, ManagedEventTypeFields.MinimumBookingNoticeMinutes) ? parent.MinimumBookingNoticeMinutes : MinimumBookingNoticeMinutes,
+            IsLocked(unlocked, ManagedEventTypeFields.LocationType) ? parent.LocationType : LocationType,
+            IsLocked(unlocked, ManagedEventTypeFields.LocationValue) ? parent.LocationValue : LocationValue,
+            IsLocked(unlocked, ManagedEventTypeFields.Settings) ? parent.Settings : Settings
+        );
+        UnlockedFields = parent.UnlockedFields.ToArray();
+    }
+
+    /// <summary>
+    ///     Checks that all requested field names are unlocked on this child replica.
+    ///     Returns <see cref="Result.Forbidden" /> listing any locked fields.
+    /// </summary>
+    public Result CheckCanUpdateFields(IEnumerable<string> requestedFields)
+    {
+        var locked = requestedFields
+            .Where(f => !UnlockedFields.Contains(f, StringComparer.OrdinalIgnoreCase))
+            .ToArray();
+        return locked.Length > 0
+            ? Result.Forbidden($"Fields {string.Join(", ", locked)} are locked by the managed template.")
+            : Result.Success();
+    }
+
+    /// <summary>
+    ///     Updates the unlocked fields list on a parent template.
+    ///     Should be followed by propagation to all children.
+    /// </summary>
+    public void UpdateUnlockedFields(string[] unlockedFields)
+    {
+        UnlockedFields = unlockedFields.Select(f => f.Trim()).Where(f => f.Length > 0).ToArray();
+    }
+
+    private static bool IsLocked(string[] unlocked, string fieldName)
+        => !unlocked.Contains(fieldName, StringComparer.OrdinalIgnoreCase);
 
     public static EventType Create(
         TenantId tenantId,

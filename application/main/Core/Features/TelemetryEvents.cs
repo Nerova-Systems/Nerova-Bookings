@@ -1,6 +1,7 @@
 using Main.Features.EventTypes.Domain;
 using Main.Features.Schedules.Domain;
 using Main.Features.Workflows.Domain;
+using SharedKernel.Domain;
 using SharedKernel.Telemetry;
 
 namespace Main.Features;
@@ -61,3 +62,18 @@ public sealed class WorkflowReminderDispatched(WorkflowReminderId reminderId)
 
 public sealed class WorkflowReminderCancelled(WorkflowReminderId reminderId)
     : TelemetryEvent(("reminder_id", reminderId));
+
+public sealed class ManagedEventTypeAssigned(EventTypeId parentId, EventTypeId childId, UserId memberUserId)
+    : TelemetryEvent(("parent_event_type_id", parentId), ("child_event_type_id", childId), ("member_user_id", memberUserId));
+
+public sealed class ManagedEventTypeUnassigned(EventTypeId parentId, EventTypeId childId, UserId memberUserId)
+    : TelemetryEvent(("parent_event_type_id", parentId), ("child_event_type_id", childId), ("member_user_id", memberUserId));
+
+public sealed class ManagedEventTypeSynced(EventTypeId parentId, int childCount)
+    : TelemetryEvent(("parent_event_type_id", parentId), ("child_count", childCount));
+
+public sealed class ManagedEventTypeLocksUpdated(EventTypeId parentId, int unlockedFieldCount)
+    : TelemetryEvent(("parent_event_type_id", parentId), ("unlocked_field_count", unlockedFieldCount));
+
+public sealed class ManagedEventTypeFieldOverrideRejected(EventTypeId childId, string fieldName)
+    : TelemetryEvent(("child_event_type_id", childId), ("field_name", fieldName));
