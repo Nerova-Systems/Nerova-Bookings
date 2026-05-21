@@ -95,6 +95,10 @@ function getKnownFeatureFlagLabels(): Record<string, FeatureFlagLabel> {
       name: t`Google SSO`,
       description: t`Allow org members to sign in via Google Workspace. Ports cal.com Google SSO. Requires g3-sso-google.`
     },
+    "cap-integration-attribute-sync": {
+      name: t`IdP attribute sync`,
+      description: t`Automatically sync user attributes from SAML/SCIM/SSO claims into org member profiles on every SSO login. Ports cal.com IdP attribute sync.`
+    },
     "cap-audit-log": {
       name: t`Audit log`,
       description: t`Immutable record of all significant system events across every SCS, written via the shared-kernel event bus. Ports cal.com booking-audit.`

@@ -9,7 +9,7 @@
 // `useFeatureFlag(deletedKey)` and `getFeatureFlagLabel(deletedKey)` callsite into a TS compile
 // error after the next backend build regenerates this file.
 
-export type FeatureFlagKey = "google-oauth" | "subscriptions" | "beta-features" | "sso" | "account-overview" | "compact-view" | "experimental-ui" | "tier-teams" | "tier-organizations" | "tier-enterprise" | "cap-managed-event-types" | "cap-round-robin" | "cap-collective" | "cap-attributes" | "cap-custom-smtp" | "cap-org-billing" | "cap-delegation-credentials" | "cap-sso-microsoft" | "cap-sso-google" | "cap-audit-log" | "cap-workflows" | "cap-api-keys" | "cap-impersonation" | "cap-insights";
+export type FeatureFlagKey = "google-oauth" | "subscriptions" | "beta-features" | "sso" | "account-overview" | "compact-view" | "experimental-ui" | "tier-teams" | "tier-organizations" | "tier-enterprise" | "cap-managed-event-types" | "cap-round-robin" | "cap-collective" | "cap-attributes" | "cap-custom-smtp" | "cap-org-billing" | "cap-delegation-credentials" | "cap-sso-microsoft" | "cap-sso-google" | "cap-integration-attribute-sync" | "cap-audit-log" | "cap-workflows" | "cap-api-keys" | "cap-impersonation" | "cap-insights";
 
 type FeatureFlagScope = "system" | "tenant" | "user";
 type FeatureFlagAdminLevel = "systemAdmin" | "tenantOwner" | "user";
@@ -168,6 +168,13 @@ const featureFlagRegistry: Record<FeatureFlagKey, FeatureFlagDefinition> = {
       adminLevel: "systemAdmin",
       parentDependency: "tier-organizations",
       description: "Allow org members to sign in via Google Workspace. Ports cal.com Google SSO. Requires g3-sso-google."
+    },
+    "cap-integration-attribute-sync": {
+      key: "cap-integration-attribute-sync",
+      scope: "tenant",
+      adminLevel: "systemAdmin",
+      parentDependency: "tier-organizations",
+      description: "Automatically sync user attributes from SAML/SCIM/SSO claims into org member profiles on every SSO login. Ports cal.com IdP attribute sync."
     },
     "cap-audit-log": {
       key: "cap-audit-log",

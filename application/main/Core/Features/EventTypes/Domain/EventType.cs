@@ -110,6 +110,8 @@ public sealed class EventType : SoftDeletableAggregateRoot<EventTypeId>, ITenant
 
     public int[] DurationOptions => Settings.DurationOptions.Length == 0 ? [DurationMinutes] : Settings.DurationOptions;
 
+    public SchedulingType SchedulingType { get; private set; } = SchedulingType.Default;
+
     /// <summary>
     ///     When non-null, references a Tenant of TenantKind.Team. When null, the aggregate is owned by the existing
     ///     user/solo scope.
@@ -128,6 +130,21 @@ public sealed class EventType : SoftDeletableAggregateRoot<EventTypeId>, ITenant
     ///     Fields NOT in this list are locked and propagated from the parent template.
     /// </summary>
     public string[] UnlockedFields { get; private set; } = [];
+
+    /// <summary>
+    ///     Changes the scheduling type of this event type.
+    ///     Only valid for team-scoped event types (TeamId must be set).
+    /// </summary>
+    public Result SetSchedulingType(SchedulingType schedulingType)
+    {
+        if (schedulingType != SchedulingType.Default && TeamId is null)
+        {
+            return Result.BadRequest("Scheduling type can only be changed on team-scoped event types.");
+        }
+
+        SchedulingType = schedulingType;
+        return Result.Success();
+    }
 
     /// <summary>
     ///     Assigns this event type to a team.

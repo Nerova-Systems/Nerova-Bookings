@@ -33,6 +33,12 @@ public interface IBookingRepository : IAppendRepository<Booking, BookingId>
     ///     Date-range narrowing is performed in memory by callers.
     /// </summary>
     Task<BookingWithEventType[]> GetForScopeWithEventTypesUnfilteredAsync(TenantId tenantId, UserId ownerUserId, TenantId? teamId, CancellationToken cancellationToken);
+
+    /// <summary>
+    ///     Returns bookings grouped by owner for multiple user IDs. Used by collective scheduling to check
+    ///     availability across all hosts simultaneously.
+    /// </summary>
+    Task<IReadOnlyDictionary<UserId, Booking[]>> GetForMultipleOwnersRangeAsync(TenantId tenantId, IReadOnlyList<UserId> ownerUserIds, DateTimeOffset startTime, DateTimeOffset endTime, CancellationToken cancellationToken);
 }
 
 public sealed record BookingWithEventType(Booking Booking, EventType EventType);
@@ -126,5 +132,29 @@ public sealed class BookingRepository(MainDbContext mainDbContext)
                 (booking, eventType) => new BookingWithEventType(booking, eventType)
             )
             .ToArrayAsync(cancellationToken);
+    }
+
+    /// <summary>
+    ///     Retrieves bookings grouped by owner for multiple user IDs. Used by collective scheduling to check
+    ///     availability across all hosts simultaneously.
+    ///     Date-range narrowing is performed in memory (SQLite EF Core cannot translate
+    ///     <see cref="DateTimeOffset" /> range comparisons to SQL).
+    /// </summary>
+    public async Task<IReadOnlyDictionary<UserId, Booking[]>> GetForMultipleOwnersRangeAsync(
+        TenantId tenantId,
+        IReadOnlyList<UserId> ownerUserIds,
+        DateTimeOffset startTime,
+        DateTimeOffset endTime,
+        CancellationToken cancellationToken)
+    {
+        var allBookings = await DbSet
+            .IgnoreQueryFilters()
+            .Where(booking => booking.TenantId == tenantId && ownerUserIds.Contains(booking.OwnerUserId))
+            .ToArrayAsync(cancellationToken);
+
+        return allBookings
+            .Where(booking => booking.StartTime < endTime && booking.EndTime > startTime)
+            .GroupBy(booking => booking.OwnerUserId)
+            .ToDictionary(group => group.Key, group => group.OrderBy(b => b.StartTime).ToArray());
     }
 }

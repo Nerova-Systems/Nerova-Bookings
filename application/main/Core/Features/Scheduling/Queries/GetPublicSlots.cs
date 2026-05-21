@@ -1,7 +1,9 @@
 using JetBrains.Annotations;
+using Main.Features.EventTypes.Domain;
 using Main.Features.Scheduling.Domain;
 using Main.Features.Scheduling.Shared;
 using SharedKernel.Cqrs;
+using SharedKernel.Domain;
 
 namespace Main.Features.Scheduling.Queries;
 
@@ -19,7 +21,9 @@ public sealed record GetPublicSlotsQuery(
 public sealed class GetPublicSlotsHandler(
     PublicSchedulingResolver publicSchedulingResolver,
     IBookingRepository bookingRepository,
-    PublicSlotCalculator publicSlotCalculator
+    IHostRepository hostRepository,
+    PublicSlotCalculator publicSlotCalculator,
+    CollectiveSlotCalculator collectiveSlotCalculator
 ) : IRequestHandler<GetPublicSlotsQuery, Result<PublicSlotsResponse>>
 {
     public async Task<Result<PublicSlotsResponse>> Handle(GetPublicSlotsQuery query, CancellationToken cancellationToken)
@@ -42,14 +46,34 @@ public sealed class GetPublicSlotsHandler(
             return Result<PublicSlotsResponse>.BadRequest("Duration is not available for this event type.");
         }
 
-        var bookings = await bookingRepository.GetForOwnerRangeUnfilteredAsync(
-            context.Profile.TenantId,
-            context.Profile.OwnerUserId,
-            query.StartTime.AddDays(-1),
-            query.EndTime.AddDays(1),
-            cancellationToken
-        );
-        var slots = publicSlotCalculator.GetSlots(context.EventType, context.Schedule, bookings, query.StartTime, query.EndTime, query.TimeZone, duration);
+        Dictionary<string, PublicSlotResponse[]> slots;
+
+        if (context.EventType.SchedulingType == SchedulingType.Collective)
+        {
+            var hosts = await hostRepository.GetForEventTypeUnfilteredAsync(context.EventType.Id, cancellationToken);
+            var hostUserIds = hosts.Select(h => h.UserId).ToList();
+            var hostBookings = hostUserIds.Count > 0
+                ? await bookingRepository.GetForMultipleOwnersRangeAsync(
+                    context.Profile.TenantId,
+                    hostUserIds,
+                    query.StartTime.AddDays(-1),
+                    query.EndTime.AddDays(1),
+                    cancellationToken)
+                : (IReadOnlyDictionary<UserId, Booking[]>)new Dictionary<UserId, Booking[]>();
+
+            slots = collectiveSlotCalculator.GetSlots(context.EventType, context.Schedule, hostBookings, query.StartTime, query.EndTime, query.TimeZone, duration);
+        }
+        else
+        {
+            var bookings = await bookingRepository.GetForOwnerRangeUnfilteredAsync(
+                context.Profile.TenantId,
+                context.Profile.OwnerUserId,
+                query.StartTime.AddDays(-1),
+                query.EndTime.AddDays(1),
+                cancellationToken
+            );
+            slots = publicSlotCalculator.GetSlots(context.EventType, context.Schedule, bookings, query.StartTime, query.EndTime, query.TimeZone, duration);
+        }
 
         return new PublicSlotsResponse(slots);
     }

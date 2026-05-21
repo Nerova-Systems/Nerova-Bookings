@@ -77,3 +77,12 @@ public sealed class ManagedEventTypeLocksUpdated(EventTypeId parentId, int unloc
 
 public sealed class ManagedEventTypeFieldOverrideRejected(EventTypeId childId, string fieldName)
     : TelemetryEvent(("child_event_type_id", childId), ("field_name", fieldName));
+
+public sealed class CollectiveHostAdded(EventTypeId eventTypeId, UserId userId)
+    : TelemetryEvent(("event_type_id", eventTypeId), ("user_id", userId));
+
+public sealed class CollectiveHostRemoved(EventTypeId eventTypeId, UserId userId)
+    : TelemetryEvent(("event_type_id", eventTypeId), ("user_id", userId));
+
+public sealed class CollectiveSlotComputed(EventTypeId eventTypeId, int hostCount, int offeredCount)
+    : TelemetryEvent(("event_type_id", eventTypeId), ("host_count", hostCount), ("offered_count", offeredCount));

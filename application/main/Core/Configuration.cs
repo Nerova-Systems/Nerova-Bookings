@@ -1,4 +1,5 @@
 using Main.Database;
+using Main.Features.EventTypes.Domain;
 using Main.Features.Insights.Shared;
 using Main.Features.ManagedEventTypes.EventHandlers;
 using Main.Features.ManagedEventTypes.Services;
@@ -37,6 +38,8 @@ public static class Configuration
             return services
                 .AddScoped<PublicSchedulingResolver>()
                 .AddScoped<PublicSlotCalculator>()
+                .AddScoped<CollectiveSlotCalculator>()
+                .AddScoped<IHostRepository, HostRepository>()
                 .AddScoped<InsightsScopeResolver>()
                 .AddScoped<ManagedEventTypePropagator>()
                 .AddScoped<EventTypeUpdatedManagedSyncHandler>()

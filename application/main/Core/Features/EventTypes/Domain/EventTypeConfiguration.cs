@@ -38,6 +38,12 @@ public sealed class EventTypeConfiguration : IEntityTypeConfiguration<EventType>
                 value => JsonSerializer.Deserialize<string[]>(value, JsonSerializerOptions) ?? Array.Empty<string>()
             );
 
+        builder.Property(eventType => eventType.SchedulingType)
+            .HasConversion(
+                v => v.ToString(),
+                v => Enum.Parse<SchedulingType>(v)
+            );
+
         builder.HasOne<Schedule>()
             .WithMany()
             .HasForeignKey(eventType => eventType.ScheduleId)
