@@ -100,30 +100,34 @@ public sealed class FeatureFlagEvaluator(IFeatureFlagRepository featureFlagRepos
         return RolloutBucketHasher.IsInRolloutBucketRange(userRolloutBucket.Value, baseRow.BucketStart.Value, baseRow.BucketEnd.Value);
     }
 
-    // Two-pass parent-first ordering: parentless flags first, then flags with a parent. This relies on
-    // the one-level dependency invariant enforced by FeatureFlags.ValidateFlags — a parent can never
-    // itself have a parent, so a single pass over each bucket is sufficient (no full topological sort
-    // is needed).
+    // Topological sort: guarantees every flag's parent is in the sorted output before the flag
+    // itself, regardless of chain depth. Previously a 2-pass sort sufficed because only one level
+    // of dependency existed; the tier-flag chain (tier-enterprise → tier-organizations → tier-teams)
+    // and the cap-flag chain above it (cap-* → tier-enterprise) require a proper graph walk.
+    //
+    // Uses a depth-first post-order traversal (standard DFS toposort). The cycle guard in
+    // FeatureFlags.ValidateFlags runs at startup, so no cycle detection is needed here.
     private static FeatureFlagDefinition[] SortByParentDependencyFirst(FeatureFlagDefinition[] definitions)
     {
+        var byKey = definitions.ToDictionary(d => d.Key);
         var result = new List<FeatureFlagDefinition>(definitions.Length);
+        var visited = new HashSet<string>(definitions.Length);
 
-        // Add feature flags without parent dependencies first
-        foreach (var definition in definitions)
+        void Visit(FeatureFlagDefinition definition)
         {
-            if (definition.ParentDependency is null)
+            if (!visited.Add(definition.Key)) return;
+
+            if (definition.ParentDependency is not null && byKey.TryGetValue(definition.ParentDependency, out var parent))
             {
-                result.Add(definition);
+                Visit(parent);
             }
+
+            result.Add(definition);
         }
 
-        // Then add feature flags with parent dependencies
         foreach (var definition in definitions)
         {
-            if (definition.ParentDependency is not null)
-            {
-                result.Add(definition);
-            }
+            Visit(definition);
         }
 
         return result.ToArray();
