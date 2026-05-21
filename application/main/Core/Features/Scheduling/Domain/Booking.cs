@@ -115,6 +115,12 @@ public sealed class Booking : AggregateRoot<BookingId>, ITenantScopedEntity
         Status = "cancelled";
     }
 
+    /// <summary>Reassigns this booking to a different host (round-robin reassignment).</summary>
+    public void Reassign(UserId newOwnerUserId)
+    {
+        OwnerUserId = newOwnerUserId;
+    }
+
     public static Booking Create(
         TenantId tenantId,
         UserId ownerUserId,

@@ -23,7 +23,8 @@ public sealed class GetPublicSlotsHandler(
     IBookingRepository bookingRepository,
     IHostRepository hostRepository,
     PublicSlotCalculator publicSlotCalculator,
-    CollectiveSlotCalculator collectiveSlotCalculator
+    CollectiveSlotCalculator collectiveSlotCalculator,
+    RoundRobinSlotCalculator roundRobinSlotCalculator
 ) : IRequestHandler<GetPublicSlotsQuery, Result<PublicSlotsResponse>>
 {
     public async Task<Result<PublicSlotsResponse>> Handle(GetPublicSlotsQuery query, CancellationToken cancellationToken)
@@ -62,6 +63,21 @@ public sealed class GetPublicSlotsHandler(
                 : (IReadOnlyDictionary<UserId, Booking[]>)new Dictionary<UserId, Booking[]>();
 
             slots = collectiveSlotCalculator.GetSlots(context.EventType, context.Schedule, hostBookings, query.StartTime, query.EndTime, query.TimeZone, duration);
+        }
+        else if (context.EventType.SchedulingType == SchedulingType.RoundRobin)
+        {
+            var hosts = await hostRepository.GetForEventTypeUnfilteredAsync(context.EventType.Id, cancellationToken);
+            var hostUserIds = hosts.Select(h => h.UserId).ToList();
+            var hostBookings = hostUserIds.Count > 0
+                ? await bookingRepository.GetForMultipleOwnersRangeAsync(
+                    context.Profile.TenantId,
+                    hostUserIds,
+                    query.StartTime.AddDays(-1),
+                    query.EndTime.AddDays(1),
+                    cancellationToken)
+                : (IReadOnlyDictionary<UserId, Booking[]>)new Dictionary<UserId, Booking[]>();
+
+            slots = roundRobinSlotCalculator.GetSlots(context.EventType, context.Schedule, hostBookings, hosts, query.StartTime, query.EndTime, query.TimeZone, duration);
         }
         else
         {

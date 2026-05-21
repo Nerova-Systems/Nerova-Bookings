@@ -73,4 +73,12 @@ public sealed class Host : AggregateRoot<HostId>, ITenantScopedEntity
     {
         return new Host(tenantId, eventTypeId, userId, isFixed, priority, weight);
     }
+
+    /// <summary>Updates mutable fields on this host (round-robin only).</summary>
+    public void Update(bool isFixed, int priority, int weight)
+    {
+        IsFixed = isFixed;
+        Priority = priority;
+        Weight = weight;
+    }
 }

@@ -39,6 +39,7 @@ public static class Configuration
                 .AddScoped<PublicSchedulingResolver>()
                 .AddScoped<PublicSlotCalculator>()
                 .AddScoped<CollectiveSlotCalculator>()
+                .AddScoped<RoundRobinSlotCalculator>()
                 .AddScoped<IHostRepository, HostRepository>()
                 .AddScoped<InsightsScopeResolver>()
                 .AddScoped<ManagedEventTypePropagator>()

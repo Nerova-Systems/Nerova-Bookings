@@ -1,5 +1,6 @@
 using Main.Features.EventTypes.Domain;
 using Main.Features.Schedules.Domain;
+using Main.Features.Scheduling.Domain;
 using Main.Features.Workflows.Domain;
 using SharedKernel.Domain;
 using SharedKernel.Telemetry;
@@ -86,3 +87,15 @@ public sealed class CollectiveHostRemoved(EventTypeId eventTypeId, UserId userId
 
 public sealed class CollectiveSlotComputed(EventTypeId eventTypeId, int hostCount, int offeredCount)
     : TelemetryEvent(("event_type_id", eventTypeId), ("host_count", hostCount), ("offered_count", offeredCount));
+
+public sealed class RoundRobinHostAdded(EventTypeId eventTypeId, UserId userId)
+    : TelemetryEvent(("event_type_id", eventTypeId), ("user_id", userId));
+
+public sealed class RoundRobinHostRemoved(EventTypeId eventTypeId, UserId userId)
+    : TelemetryEvent(("event_type_id", eventTypeId), ("user_id", userId));
+
+public sealed class RoundRobinHostUpdated(EventTypeId eventTypeId, UserId userId)
+    : TelemetryEvent(("event_type_id", eventTypeId), ("user_id", userId));
+
+public sealed class RoundRobinBookingReassigned(BookingId bookingId, UserId newOwnerUserId)
+    : TelemetryEvent(("booking_id", bookingId), ("new_owner_user_id", newOwnerUserId));
