@@ -61,5 +61,8 @@ public enum PermissionResource
     Billing,
 
     /// <summary>User accounts managed within a team or organization.</summary>
-    User
+    User,
+
+    /// <summary>Organization-level settings (SMTP, delegation credentials, etc.).</summary>
+    OrgSettings
 }

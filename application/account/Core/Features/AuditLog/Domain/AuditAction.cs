@@ -21,5 +21,8 @@ public enum AuditAction
     Exported,
     Imported,
     Approved,
-    Rejected
+    Rejected,
+    Configured,
+    Tested,
+    KeyRotated
 }

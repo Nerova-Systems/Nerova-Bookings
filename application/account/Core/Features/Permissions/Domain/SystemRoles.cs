@@ -67,7 +67,8 @@ public static class SystemRoles
         new(PermissionResource.EventType, PermissionAction.Update),
         new(PermissionResource.Schedule, PermissionAction.Create),
         new(PermissionResource.Schedule, PermissionAction.Read),
-        new(PermissionResource.Schedule, PermissionAction.Update)
+        new(PermissionResource.Schedule, PermissionAction.Update),
+        new(PermissionResource.ApiKey, PermissionAction.Manage)
     ];
 
     // ─── Factory helpers ──────────────────────────────────────────────────────

@@ -20,5 +20,6 @@ public enum AuditResource
     Sso,
     Smtp,
     Billing,
-    OrgProfile
+    OrgProfile,
+    DelegationCredential
 }
