@@ -1,8 +1,9 @@
 import { t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
 import { Button } from "@repo/ui/components/Button";
-import { BookmarkIcon } from "lucide-react";
+import { BookmarkIcon, DownloadIcon } from "lucide-react";
 import { useState } from "react";
+import { toast } from "sonner";
 
 import type { EventType } from "../-scheduling/schedulingTypes";
 
@@ -18,6 +19,7 @@ import {
   getBookingStatusLabel
 } from "./bookingTypes";
 import { BookingViewToggleButton } from "./BookingViewToggleButton";
+import { downloadBookingsCsv } from "./exportBookingsCsv";
 
 export function BookingListContainer({
   status,
@@ -57,6 +59,20 @@ export function BookingListContainer({
         </div>
         <BookingsFilters eventTypes={eventTypes} search={search} onSearchChange={onSearchChange} />
         <div className="hidden grow md:block" />
+        <Button
+          type="button"
+          variant="secondary"
+          size="sm"
+          disabled={bookings.length === 0}
+          onClick={() => {
+            const filename = `bookings-${status}-${new Date().toISOString().slice(0, 10)}.csv`;
+            downloadBookingsCsv(bookings, filename);
+            toast.success(t`Exported ${bookings.length} bookings`);
+          }}
+        >
+          <DownloadIcon />
+          <Trans>Export CSV</Trans>
+        </Button>
         <Button type="button" variant="secondary" size="sm" disabled title={t`Saved filters are not implemented yet.`}>
           <BookmarkIcon />
           <Trans>Saved filters</Trans>
