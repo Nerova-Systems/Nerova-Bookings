@@ -22,6 +22,10 @@ msgstr "{0}"
 msgid "{0} min"
 msgstr "{0} min"
 
+#. placeholder {0}: workflow.steps.length
+msgid "{0} steps"
+msgstr "{0} trin"
+
 #. placeholder {0}: schedule.availabilityWindows.length
 msgid "{0} windows"
 msgstr "{0} vinduer"
@@ -36,11 +40,20 @@ msgstr "En bekræftelse sendes til den e-mailadresse, du har angivet."
 msgid "Accepted"
 msgstr "Accepteret"
 
-msgid "Access"
-msgstr "Access"
+msgid "Action"
+msgstr "Handling"
+
+msgid "Active (coming soon)"
+msgstr "Aktiv (kommer snart)"
 
 msgid "Active bookings per booker"
 msgstr "Active bookings per booker"
+
+msgid "Active on event types"
+msgstr "Aktiv på event-typer"
+
+msgid "Add a step to send a reminder, email, or message."
+msgstr "Tilføj et trin for at sende en påmindelse, e-mail eller besked."
 
 msgid "Add an override"
 msgstr "Tilføj en undtagelse"
@@ -63,8 +76,14 @@ msgstr "Tilføj ny tidsplan"
 msgid "Add override"
 msgstr "Tilføj undtagelse"
 
+msgid "Add step"
+msgstr "Tilføj trin"
+
 msgid "Add time"
 msgstr "Tilføj tid"
+
+msgid "Add, remove, and weight individual hosts and host groups."
+msgstr "Tilføj, fjern og vægt enkelte værter og værtsgrupper."
 
 msgid "Additional notes"
 msgstr "Yderligere noter"
@@ -78,11 +97,14 @@ msgstr "Buffer efter"
 msgid "After event"
 msgstr "Efter begivenhed"
 
-msgid "AI"
-msgstr "AI"
+msgid "After the event ends"
+msgstr "Efter eventet slutter"
 
-msgid "AI settings are not connected to this editor yet."
-msgstr "AI settings are not connected to this editor yet."
+msgid "Agent configuration"
+msgstr "Agentkonfiguration"
+
+msgid "AI voice agent"
+msgstr "AI-stemmeagent"
 
 msgid "All event types"
 msgstr "Alle aftaletyper"
@@ -92,6 +114,15 @@ msgstr "Allow cancellation"
 
 msgid "Allow reschedule"
 msgstr "Allow reschedule"
+
+msgid "Allow rescheduling cancelled bookings"
+msgstr "Tillad omplanlægning af annullerede bookinger"
+
+msgid "Allow rescheduling past bookings"
+msgstr "Tillad omplanlægning af tidligere bookinger"
+
+msgid "App marketplace"
+msgstr "App-markedsplads"
 
 msgid "Apply filters"
 msgstr "Anvend filtre"
@@ -111,8 +142,8 @@ msgstr "Deltager-e-mail"
 msgid "Attendee name"
 msgstr "Deltagernavn"
 
-msgid "Automate reminders and follow-up messages for this event type."
-msgstr "Automate reminders and follow-up messages for this event type."
+msgid "Automate reminders, follow-ups, and notifications for your bookings."
+msgstr "Automatiser påmindelser, opfølgninger og notifikationer for dine bookinger."
 
 msgid "Availability"
 msgstr "Tilgængelighed"
@@ -135,11 +166,23 @@ msgstr "Tilbage til tider"
 msgid "Before buffer"
 msgstr "Buffer før"
 
-msgid "Blocks other event types"
-msgstr "Blokerer andre begivenhedstyper"
+msgid "Before the event starts"
+msgstr "Før eventet starter"
+
+msgid "Block slot while pending"
+msgstr "Bloker tidspunkt mens afventer"
 
 msgid "Booked minutes per day"
 msgstr "Booked minutes per day"
+
+msgid "Booked minutes per month"
+msgstr "Bookede minutter pr. måned"
+
+msgid "Booked minutes per week"
+msgstr "Bookede minutter pr. uge"
+
+msgid "Booked minutes per year"
+msgstr "Bookede minutter pr. år"
 
 msgid "Booker layout"
 msgstr "Booker layout"
@@ -185,6 +228,15 @@ msgstr "Bookinger i den valgte uge vises i kalendervisningen."
 
 msgid "Bookings per day"
 msgstr "Bookings per day"
+
+msgid "Bookings per month"
+msgstr "Bookinger pr. måned"
+
+msgid "Bookings per week"
+msgstr "Bookinger pr. uge"
+
+msgid "Bookings per year"
+msgstr "Bookinger pr. år"
 
 msgid "Browser default"
 msgstr "Browser default"
@@ -234,8 +286,8 @@ msgstr "Capacity limits"
 msgid "Choose the booker layout and accent color for this event type."
 msgstr "Choose the booker layout and accent color for this event type."
 
-msgid "Choose where confirmed bookings should be written."
-msgstr "Choose where confirmed bookings should be written."
+msgid "Choose which language the public booking page renders in."
+msgstr "Vælg hvilket sprog den offentlige bookingside vises på."
 
 msgid "Choose which schedule controls when this event type can be booked."
 msgstr "Vælg, hvilken tidsplan der styrer, hvornår denne begivenhedstype kan bookes."
@@ -255,14 +307,14 @@ msgstr "Konfigurer de aftaletyper, kunder kan booke."
 msgid "Confirm booking"
 msgstr "Bekræft booking"
 
+msgid "Confirm free-email bookers"
+msgstr "Bekræft bookere med gratis e-mail"
+
 msgid "Confirmation"
 msgstr "Confirmation"
 
-msgid "Connect installed apps to this event type."
-msgstr "Connect installed apps to this event type."
-
-msgid "Connected features"
-msgstr "Connected features"
+msgid "Connect installed apps to this event type to add payments, conferencing, and more."
+msgstr "Forbind installerede apps til denne begivenhedstype for at tilføje betalinger, videomøder og mere."
 
 msgid "Continue"
 msgstr "Fortsæt"
@@ -276,9 +328,6 @@ msgstr "Control manual approval and booker email checks."
 msgid "Control whether this booking page is listed publicly."
 msgstr "Styr, om denne bookingside vises offentligt."
 
-msgid "Coordinate event type dependencies without calling unavailable APIs."
-msgstr "Koordiner afhængigheder for begivenhedstyper uden at kalde utilgængelige API'er."
-
 msgid "Copy link"
 msgstr "Kopiér link"
 
@@ -291,6 +340,12 @@ msgstr "Kopiér offentligt link"
 
 msgid "Copy times"
 msgstr "Kopier tider"
+
+msgid "Count no-shows"
+msgstr "Tæl udeblivelser"
+
+msgid "Create"
+msgstr "Opret"
 
 msgid "Create a private setup event type before opening public booking."
 msgstr "Opret en privat opsætningsaftaletype, før offentlig booking åbnes."
@@ -313,11 +368,32 @@ msgstr "Opret duplikat"
 msgid "Create event type"
 msgstr "Opret aftaletype"
 
+msgid "Create private link"
+msgstr "Opret privat link"
+
 msgid "Create schedule"
 msgstr "Opret tidsplan"
 
 msgid "Create the booking page basics now, then finish setup on the next screen."
 msgstr "Opret de grundlæggende bookingoplysninger nu, og færdiggør opsætningen på næste skærm."
+
+msgid "Create workflow"
+msgstr "Opret workflow"
+
+msgid "Create your first workflow to automate reminders and notifications."
+msgstr "Opret dit første workflow for at automatisere påmindelser og notifikationer."
+
+msgid "Custom"
+msgstr "Brugerdefineret"
+
+msgid "Custom event name"
+msgstr "Brugerdefineret begivenhedsnavn"
+
+msgid "Custom reply-to email"
+msgstr "Brugerdefineret svar-til-e-mail"
+
+msgid "Customize the calendar event title and the reply-to address bookers see."
+msgstr "Tilpas kalenderbegivenhedens titel og svar-til-adressen som bookerne ser."
 
 msgid "Daily"
 msgstr "Daily"
@@ -337,6 +413,9 @@ msgstr "Datoundtagelser"
 msgid "Date range"
 msgstr "Datointerval"
 
+msgid "Days"
+msgstr "Dage"
+
 msgid "Default"
 msgstr "Standard"
 
@@ -355,17 +434,20 @@ msgstr "Slet begivenhedstype?"
 msgid "Delete schedule"
 msgstr "Slet tidsplan"
 
-msgid "Dependencies"
-msgstr "Afhængigheder"
+msgid "Delete workflow"
+msgstr "Slet workflow"
 
-msgid "Dependency rules are placeholders until event type relationships are supported."
-msgstr "Afhængighedsregler er pladsholdere, indtil relationer mellem begivenhedstyper understøttes."
+msgid "Delete workflow?"
+msgstr "Slet workflow?"
 
 msgid "Description"
 msgstr "Beskrivelse"
 
-msgid "Destination calendar"
-msgstr "Destination calendar"
+msgid "Disable guests"
+msgstr "Deaktiver gæster"
+
+msgid "Distribute bookings across hosts based on weighting and lead history."
+msgstr "Fordel bookinger på værter baseret på vægtning og lead-historik."
 
 msgid "Distribution of bookings by status."
 msgstr "Fordeling af bookinger efter status."
@@ -382,6 +464,9 @@ msgstr "Varighed"
 msgid "Duration options"
 msgstr "Duration options"
 
+msgid "Edit"
+msgstr "Rediger"
+
 msgid "Edit booking setup for this appointment type."
 msgstr "Rediger bookingopsætningen for denne aftaletype."
 
@@ -394,8 +479,29 @@ msgstr "Rediger lokation"
 msgid "Email"
 msgstr "E-mail"
 
+msgid "Email address or phone number depending on the action."
+msgstr "E-mailadresse eller telefonnummer afhængigt af handlingen."
+
+msgid "Email subject"
+msgstr "E-mailemne"
+
+msgid "Email to a specific address"
+msgstr "E-mail til en bestemt adresse"
+
+msgid "Email to attendee"
+msgstr "E-mail til deltager"
+
+msgid "Email to host"
+msgstr "E-mail til vært"
+
 msgid "Email verification"
 msgstr "Email verification"
+
+msgid "Enable AI voice agent"
+msgstr "Aktivér AI-stemmeagent"
+
+msgid "Enabling and disabling workflows is coming soon."
+msgstr "Aktivering og deaktivering af workflows kommer snart."
 
 msgid "End"
 msgstr "Slut"
@@ -412,6 +518,9 @@ msgstr "Indtast dine oplysninger"
 msgid "Event color"
 msgstr "Event color"
 
+msgid "Event name"
+msgstr "Begivenhedsnavn"
+
 msgid "Event type"
 msgstr "Aftaletype"
 
@@ -427,6 +536,12 @@ msgstr "Aftaletype slettet"
 msgid "Event type duplicated"
 msgstr "Begivenhedstype duplikeret"
 
+msgid "Event type linked"
+msgstr "Event-type tilknyttet"
+
+msgid "Event type unlinked"
+msgstr "Event-type frakoblet"
+
 msgid "Event type updated"
 msgstr "Aftaletype opdateret"
 
@@ -441,6 +556,9 @@ msgstr "Alle tidsplaner har ugentlig tilgængelighed"
 
 msgid "Exactly one default schedule exists"
 msgstr "Der findes præcis én standardtidsplan"
+
+msgid "Existing links are not displayed yet."
+msgstr "Eksisterende tilknytninger vises endnu ikke."
 
 msgid "Filter"
 msgstr "Filtrer"
@@ -462,6 +580,9 @@ msgstr "Fredag"
 
 msgid "From"
 msgstr "Fra"
+
+msgid "Generate one-off links that bypass the public schedule and expire after use."
+msgstr "Generér engangslinks der omgår den offentlige plan og udløber efter brug."
 
 msgid "Get started"
 msgstr "Kom i gang"
@@ -496,11 +617,44 @@ msgstr "Her er dit overblik over hvad der sker."
 msgid "Hidden"
 msgstr "Skjult"
 
+msgid "Hide booker information from external calendars and disable guests."
+msgstr "Skjul bookeroplysninger fra eksterne kalendere og deaktiver gæster."
+
+msgid "Hide calendar event details"
+msgstr "Skjul kalenderbegivenhedens detaljer"
+
+msgid "Hide calendar notes"
+msgstr "Skjul kalendernoter"
+
+msgid "Host group editing is not yet wired up. Use the team admin UI to manage hosts."
+msgstr "Redigering af værtsgrupper er endnu ikke tilkoblet. Brug teamadministrationen til at administrere værter."
+
+msgid "Host picker"
+msgstr "Værtsvælger"
+
+msgid "Host segmentation"
+msgstr "Værtssegmentering"
+
+msgid "Host subset rotation"
+msgstr "Rotation af værtsundergruppe"
+
+msgid "Hosts"
+msgstr "Værter"
+
+msgid "Hours"
+msgstr "Timer"
+
 msgid "In person"
 msgstr "Fysisk"
 
 msgid "Insights"
 msgstr "Indsigt"
+
+msgid "Instant meeting"
+msgstr "Øjeblikkeligt møde"
+
+msgid "Instant meeting schedule"
+msgstr "Plan for øjeblikkelige møder"
 
 msgid "Interface language"
 msgstr "Interface language"
@@ -514,20 +668,35 @@ msgstr "Deltag i møde"
 msgid "Keep booking"
 msgstr "Behold booking"
 
+msgid "Language"
+msgstr "Sprog"
+
 msgid "Launch troubleshooter"
 msgstr "Start fejlfinding"
+
+msgid "Let an AI voice agent answer booker calls, qualify them, and place them on this event type's calendar."
+msgstr "Lad en AI-stemmeagent besvare bookeropkald, kvalificere dem og placere dem på denne begivenhedstypes kalender."
 
 msgid "Let bookers reserve a series of repeated bookings."
 msgstr "Let bookers reserve a series of repeated bookings."
 
+msgid "Let qualified bookers start a meeting immediately. Hosts get an instant alert and have a short window to accept before the request expires."
+msgstr "Lad kvalificerede bookere starte et møde med det samme. Værter får en øjeblikkelig besked og har et kort vindue til at acceptere, før anmodningen udløber."
+
 msgid "Limit booking volume across the event type and individual bookers."
 msgstr "Limit booking volume across the event type and individual bookers."
+
+msgid "Limit which hosts can be assigned using a segment expression."
+msgstr "Begræns hvilke værter der kan tildeles ved hjælp af et segmentudtryk."
 
 msgid "Limits"
 msgstr "Grænser"
 
 msgid "Link"
 msgstr "Link"
+
+msgid "Link copied"
+msgstr "Link kopieret"
 
 msgid "List view"
 msgstr "Listevisning"
@@ -538,8 +707,20 @@ msgstr "Indlæser begivenhedstype..."
 msgid "Loading event types..."
 msgstr "Indlæser aftaletyper..."
 
+msgid "Loading private links…"
+msgstr "Indlæser private links…"
+
 msgid "Loading schedules..."
 msgstr "Indlæser tidsplaner..."
+
+msgid "Loading workflow..."
+msgstr "Indlæser workflow..."
+
+msgid "Loading workflows..."
+msgstr "Indlæser workflows..."
+
+msgid "Loading..."
+msgstr "Indlæser..."
 
 msgid "Location"
 msgstr "Lokation"
@@ -553,6 +734,15 @@ msgstr "Lokationstype"
 msgid "Locations"
 msgstr "Locations"
 
+msgid "Lock the booking page timezone or follow the booker."
+msgstr "Lås bookingsidens tidszone eller følg bookeren."
+
+msgid "Lock timezone on booking page"
+msgstr "Lås tidszone på bookingside"
+
+msgid "Locked timezone"
+msgstr "Låst tidszone"
+
 msgid "Log in"
 msgstr "Log ind"
 
@@ -562,20 +752,23 @@ msgstr "Hovednavigation"
 msgid "Make another schedule default before deleting this one."
 msgstr "Gør en anden tidsplan til standard, før du sletter denne."
 
-msgid "Make this event type available only after a related booking exists."
-msgstr "Gør kun denne begivenhedstype tilgængelig, når en relateret booking findes."
-
 msgid "Manage weekly schedules for booking availability."
 msgstr "Administrer ugentlige tidsplaner for bookingtilgængelighed."
-
-msgid "Managed relationship rules"
-msgstr "Administrerede relationsregler"
 
 msgid "Mark as no-show"
 msgstr "Marker som udeblevet"
 
+msgid "Max lead threshold"
+msgstr "Maksimal lead-tærskel"
+
 msgid "Members handling the most bookings."
 msgstr "Medlemmer der håndterer flest bookinger."
+
+msgid "Message"
+msgstr "Besked"
+
+msgid "Minutes"
+msgstr "Minutter"
 
 msgid "Mon"
 msgstr "Man"
@@ -598,6 +791,9 @@ msgstr "Flyt aftaletyper til en anden tidsplan, før du sletter denne."
 msgid "Name"
 msgstr "Navn"
 
+msgid "Name your workflow and pick the trigger that schedules its reminders."
+msgstr "Navngiv dit workflow og vælg den udløser, der planlægger dets påmindelser."
+
 msgid "Navigation"
 msgstr "Navigation"
 
@@ -609,6 +805,12 @@ msgstr "Ny aftaletype"
 
 msgid "New schedule"
 msgstr "Ny tidsplan"
+
+msgid "New step"
+msgstr "Nyt trin"
+
+msgid "New workflow"
+msgstr "Nyt workflow"
 
 msgid "Next"
 msgstr "Næste"
@@ -629,6 +831,9 @@ msgstr "Ingen bookinger denne uge"
 msgid "No custom responses were captured."
 msgstr "Ingen brugerdefinerede svar blev registreret."
 
+msgid "No event types available."
+msgstr "Ingen event-typer tilgængelige."
+
 msgid "No event types match your search."
 msgstr "Ingen begivenhedstyper matcher din søgning."
 
@@ -638,11 +843,20 @@ msgstr "Ingen aftaletyper endnu"
 msgid "No filters"
 msgstr "Ingen filtre"
 
+msgid "No private links yet."
+msgstr "Ingen private links endnu."
+
 msgid "No schedules yet"
 msgstr "Ingen tidsplaner endnu"
 
 msgid "No settings available yet."
 msgstr "Ingen indstillinger er tilgængelige endnu."
+
+msgid "No specific schedule"
+msgstr "Ingen specifik plan"
+
+msgid "No steps yet"
+msgstr "Endnu ingen trin"
 
 msgid "No times available on this date."
 msgstr "Ingen tider er tilgængelige på denne dato."
@@ -653,20 +867,26 @@ msgstr "Ingen ugentlig tilgængelighed"
 msgid "No weekly hours"
 msgstr "Ingen ugentlige timer"
 
+msgid "No workflows yet"
+msgstr "Endnu ingen workflows"
+
+msgid "No workflows yet. Create one to send automated booker messages."
+msgstr "Ingen workflows endnu. Opret et for at sende automatiske beskeder til bookere."
+
 msgid "Not available"
 msgstr "Ikke tilgængelig"
 
 msgid "Notice"
 msgstr "Varsel"
 
-msgid "Notify external systems when bookings change."
-msgstr "Notify external systems when bookings change."
-
 msgid "Occurrences"
 msgstr "Occurrences"
 
 msgid "Offer multiple seats for each available time."
 msgstr "Offer multiple seats for each available time."
+
+msgid "Offer reschedule when at limit"
+msgstr "Tilbyd omplanlægning når grænse er nået"
 
 msgid "Offer seats"
 msgstr "Offer seats"
@@ -676,6 +896,12 @@ msgstr "Offset start"
 
 msgid "One-on-one"
 msgstr "En-til-en"
+
+msgid "Only show first available slot"
+msgstr "Vis kun første ledige tidspunkt"
+
+msgid "Outgoing webhooks"
+msgstr "Udgående webhooks"
 
 #. placeholder {0}: schedule.dateOverrides.length
 msgid "Overrides: {0}"
@@ -687,14 +913,14 @@ msgstr "Bestået"
 msgid "Pending"
 msgstr "Afventer"
 
+msgid "Per-event-type app configuration will be available in a future release."
+msgstr "App-konfiguration pr. begivenhedstype bliver tilgængelig i en fremtidig udgivelse."
+
 msgid "Phone"
 msgstr "Telefon"
 
 msgid "Phone call"
 msgstr "Telefonopkald"
-
-msgid "Prevent selected event types from being booked when this one is active."
-msgstr "Forhindr valgte begivenhedstyper i at blive booket, når denne er aktiv."
 
 msgid "Preview"
 msgstr "Forhåndsvisning"
@@ -708,6 +934,15 @@ msgstr "Forrige"
 msgid "Primary location"
 msgstr "Primary location"
 
+msgid "Privacy"
+msgstr "Privatliv"
+
+msgid "Private link created"
+msgstr "Privat link oprettet"
+
+msgid "Private link removed"
+msgstr "Privat link fjernet"
+
 msgid "Private links"
 msgstr "Private links"
 
@@ -716,6 +951,9 @@ msgstr "Offentlig booking"
 
 msgid "Public link copied"
 msgstr "Offentligt link kopieret"
+
+msgid "Rating request"
+msgstr "Vurderingsanmodning"
 
 msgid "Recurring"
 msgstr "Gentagende"
@@ -732,8 +970,17 @@ msgstr "Recurring events cannot be enabled while seats are enabled."
 msgid "Redirects"
 msgstr "Redirects"
 
+msgid "Reminder"
+msgstr "Påmindelse"
+
+msgid "Remove"
+msgstr "Fjern"
+
 msgid "Remove date override"
 msgstr "Fjern datoundtagelse"
+
+msgid "Remove link"
+msgstr "Fjern link"
 
 msgid "Remove time"
 msgstr "Fjern tid"
@@ -744,11 +991,14 @@ msgstr "Erstat denne eksempelside med dine egne produktinformationer og branding
 msgid "Report booking"
 msgstr "Rapporter booking"
 
+msgid "Request expires after"
+msgstr "Anmodning udløber efter"
+
 msgid "Request reschedule"
 msgstr "Anmod om ny tid"
 
-msgid "Requires another booking"
-msgstr "Kræver en anden booking"
+msgid "Require cancellation reason"
+msgstr "Kræv annulleringsårsag"
 
 msgid "Requires confirmation"
 msgstr "Kræver bekræftelse"
@@ -758,6 +1008,9 @@ msgstr "Flyt booking"
 
 msgid "Reschedule notice"
 msgstr "Reschedule notice"
+
+msgid "Reschedule with same host"
+msgstr "Omplanlæg med samme vært"
 
 msgid "Reserve time before and after every booking."
 msgstr "Reserver tid før og efter hver booking."
@@ -779,6 +1032,9 @@ msgstr "Gennemgå den valgte tidsplan, før du gemmer denne begivenhedstype."
 
 msgid "Rolling window"
 msgstr "Rolling window"
+
+msgid "Round robin"
+msgstr "Round robin"
 
 msgid "Sat"
 msgstr "Lør"
@@ -843,6 +1099,9 @@ msgstr "Seats"
 msgid "Seats cannot be enabled while recurring events are enabled."
 msgstr "Seats cannot be enabled while recurring events are enabled."
 
+msgid "Segment query"
+msgstr "Segmentforespørgsel"
+
 msgid "Select a date and time"
 msgstr "Vælg dato og tid"
 
@@ -864,6 +1123,12 @@ msgstr "Vælg uge"
 msgid "Send bookers to a custom page after success or cancellation."
 msgstr "Send bookers to a custom page after success or cancellation."
 
+msgid "Send HTTP requests to external systems when bookings on this event type are created, cancelled, or rescheduled."
+msgstr "Send HTTP-anmodninger til eksterne systemer når bookinger på denne begivenhedstype oprettes, annulleres eller omplanlægges."
+
+msgid "Send to"
+msgstr "Send til"
+
 msgid "Set as default"
 msgstr "Angiv som standard"
 
@@ -872,9 +1137,6 @@ msgstr "Angiv tilpasset tilgængelighed for én dato."
 
 msgid "Set how long this booking reserves on the calendar."
 msgstr "Angiv, hvor længe denne booking reserverer i kalenderen."
-
-msgid "Set language and private booking links."
-msgstr "Set language and private booking links."
 
 msgid "Set the primary location and optional alternatives shown to bookers."
 msgstr "Set the primary location and optional alternatives shown to bookers."
@@ -885,14 +1147,29 @@ msgstr "Set whether bookers can change bookings and how much notice is required.
 msgid "Setup"
 msgstr "Opsætning"
 
+msgid "Share one-off booking links that bypass the public schedule."
+msgstr "Del engangsbookinglinks der omgår den offentlige plan."
+
 msgid "Show attendee info"
 msgstr "Show attendee info"
+
+msgid "Show optimized slots"
+msgstr "Vis optimerede tidspunkter"
+
+msgid "Slot display"
+msgstr "Visning af tidspunkter"
 
 msgid "Slot interval"
 msgstr "Slotinterval"
 
 msgid "Slug"
 msgstr "Slug"
+
+msgid "SMS to a specific number"
+msgstr "SMS til et bestemt nummer"
+
+msgid "SMS to attendee"
+msgstr "SMS til deltager"
 
 msgid "Something doesn't look right?"
 msgstr "Ser noget forkert ud?"
@@ -906,6 +1183,21 @@ msgstr "Start med en ugentlig tidsplan, og finjuster tilgængeligheden på næst
 msgid "Status breakdown"
 msgstr "Statusfordeling"
 
+msgid "Step {stepNumber}"
+msgstr "Trin {stepNumber}"
+
+msgid "Step added"
+msgstr "Trin tilføjet"
+
+msgid "Step removed"
+msgstr "Trin fjernet"
+
+msgid "Step updated"
+msgstr "Trin opdateret"
+
+msgid "Steps"
+msgstr "Trin"
+
 msgid "Success URL"
 msgstr "Success URL"
 
@@ -918,8 +1210,20 @@ msgstr "Søndag"
 msgid "System"
 msgstr "System"
 
-msgid "These features need more integration before they can be edited here."
-msgstr "These features need more integration before they can be edited here."
+msgid "Team"
+msgstr "Team"
+
+msgid "Template"
+msgstr "Skabelon"
+
+msgid "Thank you"
+msgstr "Tak"
+
+msgid "The list-bindings endpoint is on the backlog. Toggle to link or unlink."
+msgstr "Endpoint til at liste bindinger er på backloggen. Slå til/fra for at tilknytte eller frakoble."
+
+msgid "The trigger can't be changed after the workflow is created."
+msgstr "Udløseren kan ikke ændres, efter workflowet er oprettet."
 
 msgid "this attendee"
 msgstr "denne deltager"
@@ -940,6 +1244,9 @@ msgstr "Her vil dit personlige dashboard-indhold blive vist. Hold dig opdateret.
 msgid "This removes the booking page for {deleteSubject}."
 msgstr "Dette fjerner bookingsiden for {deleteSubject}."
 
+msgid "This removes the workflow \"{expectedName}\" and every reminder it schedules. Type the workflow name to confirm."
+msgstr "Dette fjerner workflowet \"{expectedName}\" og alle påmindelser det planlægger. Indtast workflowets navn for at bekræfte."
+
 msgid "This window overlaps another window on the same day."
 msgstr "Dette vindue overlapper et andet vindue på samme dag."
 
@@ -948,6 +1255,9 @@ msgstr "Tor"
 
 msgid "Thursday"
 msgstr "Torsdag"
+
+msgid "Time before/after event"
+msgstr "Tid før/efter event"
 
 msgid "Time zone"
 msgstr "Tidszone"
@@ -976,14 +1286,38 @@ msgstr "Mest aktive værter"
 msgid "Total bookings"
 msgstr "Bookinger i alt"
 
+msgid "Trigger"
+msgstr "Udløser"
+
 msgid "Tue"
 msgstr "Tir"
 
 msgid "Tuesday"
 msgstr "Tirsdag"
 
+msgid "Tune how the schedule presents available slots to bookers."
+msgstr "Justér hvordan planen præsenterer ledige tidspunkter for bookerne."
+
 msgid "Unavailable"
 msgstr "Utilgængelig"
+
+msgid "Unit"
+msgstr "Enhed"
+
+msgid "Untitled workflow"
+msgstr "Workflow uden titel"
+
+msgid "Use booker timezone for organizer"
+msgstr "Brug bookerens tidszone til arrangør"
+
+msgid "Use segment query"
+msgstr "Brug segmentforespørgsel"
+
+msgid "Use weights"
+msgstr "Brug vægte"
+
+msgid "Variables like {EVENT_NAME} and {ATTENDEE_NAME} are replaced at send time."
+msgstr "Variabler som {EVENT_NAME} og {ATTENDEE_NAME} erstattes på afsendelsestidspunktet."
 
 msgid "Video call"
 msgstr "Videoopkald"
@@ -1006,6 +1340,9 @@ msgstr "Vis sessionsdetaljer"
 msgid "Visibility"
 msgstr "Synlighed"
 
+msgid "Webhook subscriptions will be available in a future release."
+msgstr "Webhook-abonnementer bliver tilgængelige i en fremtidig udgivelse."
+
 msgid "Webhooks"
 msgstr "Webhooks"
 
@@ -1024,203 +1361,20 @@ msgstr "Weekly"
 msgid "Weekly hours"
 msgstr "Ugentlige tider"
 
+msgid "Weeks"
+msgstr "Uger"
+
 msgid "Welcome to PlatformPlatform"
 msgstr "Velkommen til PlatformPlatform"
 
+msgid "WhatsApp to a specific number"
+msgstr "WhatsApp til et bestemt nummer"
+
+msgid "WhatsApp to attendee"
+msgstr "WhatsApp til deltager"
+
 msgid "When"
 msgstr "Hvornår"
-
-msgid "Workflows"
-msgstr "Workflows"
-
-msgid "Yearly"
-msgstr "Yearly"
-
-msgid "You successfully deployed PlatformPlatform! 🎉"
-msgstr "Du har installeret PlatformPlatform med succes! 🎉"
-
-msgid "You successfully installed PlatformPlatform! 🎉"
-msgstr "Du har installeret PlatformPlatform med succes! 🎉"
-
-msgid "Your booking is confirmed."
-msgstr "Din booking er bekræftet."
-
-msgid "Your dashboard is empty"
-msgstr "Dit dashboard er tomt"
-
-msgid "Action"
-msgstr "Handling"
-
-msgid "Active (coming soon)"
-msgstr "Aktiv (kommer snart)"
-
-msgid "Active on event types"
-msgstr "Aktiv på event-typer"
-
-msgid "Add a step to send a reminder, email, or message."
-msgstr "Tilføj et trin for at sende en påmindelse, e-mail eller besked."
-
-msgid "Add step"
-msgstr "Tilføj trin"
-
-msgid "After the event ends"
-msgstr "Efter eventet slutter"
-
-msgid "Automate reminders, follow-ups, and notifications for your bookings."
-msgstr "Automatiser påmindelser, opfølgninger og notifikationer for dine bookinger."
-
-msgid "Before the event starts"
-msgstr "Før eventet starter"
-
-msgid "Create"
-msgstr "Opret"
-
-msgid "Create your first workflow to automate reminders and notifications."
-msgstr "Opret dit første workflow for at automatisere påmindelser og notifikationer."
-
-msgid "Create workflow"
-msgstr "Opret workflow"
-
-msgid "Custom"
-msgstr "Brugerdefineret"
-
-msgid "Days"
-msgstr "Dage"
-
-msgid "Delete workflow"
-msgstr "Slet workflow"
-
-msgid "Delete workflow?"
-msgstr "Slet workflow?"
-
-msgid "Edit"
-msgstr "Rediger"
-
-msgid "Email address or phone number depending on the action."
-msgstr "E-mailadresse eller telefonnummer afhængigt af handlingen."
-
-msgid "Email subject"
-msgstr "E-mailemne"
-
-msgid "Email to a specific address"
-msgstr "E-mail til en bestemt adresse"
-
-msgid "Email to attendee"
-msgstr "E-mail til deltager"
-
-msgid "Email to host"
-msgstr "E-mail til vært"
-
-msgid "Enabling and disabling workflows is coming soon."
-msgstr "Aktivering og deaktivering af workflows kommer snart."
-
-msgid "Event type linked"
-msgstr "Event-type tilknyttet"
-
-msgid "Event type unlinked"
-msgstr "Event-type frakoblet"
-
-msgid "Existing links are not displayed yet."
-msgstr "Eksisterende tilknytninger vises endnu ikke."
-
-msgid "Hours"
-msgstr "Timer"
-
-msgid "Loading workflow..."
-msgstr "Indlæser workflow..."
-
-msgid "Loading workflows..."
-msgstr "Indlæser workflows..."
-
-msgid "Loading..."
-msgstr "Indlæser..."
-
-msgid "Message"
-msgstr "Besked"
-
-msgid "Minutes"
-msgstr "Minutter"
-
-msgid "New step"
-msgstr "Nyt trin"
-
-msgid "New workflow"
-msgstr "Nyt workflow"
-
-msgid "No event types available."
-msgstr "Ingen event-typer tilgængelige."
-
-msgid "No steps yet"
-msgstr "Endnu ingen trin"
-
-msgid "No workflows yet"
-msgstr "Endnu ingen workflows"
-
-msgid "Name your workflow and pick the trigger that schedules its reminders."
-msgstr "Navngiv dit workflow og vælg den udløser, der planlægger dets påmindelser."
-
-msgid "Rating request"
-msgstr "Vurderingsanmodning"
-
-msgid "Reminder"
-msgstr "Påmindelse"
-
-msgid "Remove"
-msgstr "Fjern"
-
-msgid "SMS to a specific number"
-msgstr "SMS til et bestemt nummer"
-
-msgid "SMS to attendee"
-msgstr "SMS til deltager"
-
-msgid "Send to"
-msgstr "Send til"
-
-msgid "Step added"
-msgstr "Trin tilføjet"
-
-msgid "Step removed"
-msgstr "Trin fjernet"
-
-msgid "Step updated"
-msgstr "Trin opdateret"
-
-msgid "Step {0}"
-msgstr "Trin {0}"
-
-msgid "Steps"
-msgstr "Trin"
-
-msgid "Template"
-msgstr "Skabelon"
-
-msgid "Thank you"
-msgstr "Tak"
-
-msgid "The list-bindings endpoint is on the backlog. Toggle to link or unlink."
-msgstr "Endpoint til at liste bindinger er på backloggen. Slå til/fra for at tilknytte eller frakoble."
-
-msgid "The trigger can't be changed after the workflow is created."
-msgstr "Udløseren kan ikke ændres, efter workflowet er oprettet."
-
-msgid "Time before/after event"
-msgstr "Tid før/efter event"
-
-msgid "Trigger"
-msgstr "Udløser"
-
-msgid "Unit"
-msgstr "Enhed"
-
-msgid "Untitled workflow"
-msgstr "Workflow uden titel"
-
-msgid "Variables like {EVENT_NAME} and {ATTENDEE_NAME} are replaced at send time."
-msgstr "Variabler som {EVENT_NAME} og {ATTENDEE_NAME} erstattes på afsendelsestidspunktet."
-
-msgid "Weeks"
-msgstr "Uger"
 
 msgid "When a booking is cancelled"
 msgstr "Når en booking annulleres"
@@ -1230,12 +1384,6 @@ msgstr "Når en booking flyttes"
 
 msgid "When a new booking is created"
 msgstr "Når en ny booking oprettes"
-
-msgid "WhatsApp to a specific number"
-msgstr "WhatsApp til et bestemt nummer"
-
-msgid "WhatsApp to attendee"
-msgstr "WhatsApp til deltager"
 
 msgid "Workflow"
 msgstr "Workflow"
@@ -1252,5 +1400,23 @@ msgstr "Workflownavn"
 msgid "Workflow renamed"
 msgstr "Workflow omdøbt"
 
-msgid "{0} steps"
-msgstr "{0} trin"
+msgid "Workflows"
+msgstr "Workflows"
+
+msgid "Workflows automate booking confirmations, reminders, and follow-up messages. Bind a workflow to this event type from the workflow editor."
+msgstr "Workflows automatiserer bookingbekræftelser, påmindelser og opfølgningsbeskeder. Tilknyt et workflow til denne begivenhedstype fra workfloweditoren."
+
+msgid "Yearly"
+msgstr "Yearly"
+
+msgid "You successfully deployed PlatformPlatform! 🎉"
+msgstr "Du har installeret PlatformPlatform med succes! 🎉"
+
+msgid "You successfully installed PlatformPlatform! 🎉"
+msgstr "Du har installeret PlatformPlatform med succes! 🎉"
+
+msgid "Your booking is confirmed."
+msgstr "Din booking er bekræftet."
+
+msgid "Your dashboard is empty"
+msgstr "Dit dashboard er tomt"
