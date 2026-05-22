@@ -1047,3 +1047,210 @@ msgstr "Your booking is confirmed."
 
 msgid "Your dashboard is empty"
 msgstr "Your dashboard is empty"
+
+msgid "Action"
+msgstr "Action"
+
+msgid "Active (coming soon)"
+msgstr "Active (coming soon)"
+
+msgid "Active on event types"
+msgstr "Active on event types"
+
+msgid "Add a step to send a reminder, email, or message."
+msgstr "Add a step to send a reminder, email, or message."
+
+msgid "Add step"
+msgstr "Add step"
+
+msgid "After the event ends"
+msgstr "After the event ends"
+
+msgid "Automate reminders, follow-ups, and notifications for your bookings."
+msgstr "Automate reminders, follow-ups, and notifications for your bookings."
+
+msgid "Before the event starts"
+msgstr "Before the event starts"
+
+msgid "Create"
+msgstr "Create"
+
+msgid "Create your first workflow to automate reminders and notifications."
+msgstr "Create your first workflow to automate reminders and notifications."
+
+msgid "Create workflow"
+msgstr "Create workflow"
+
+msgid "Custom"
+msgstr "Custom"
+
+msgid "Days"
+msgstr "Days"
+
+msgid "Delete workflow"
+msgstr "Delete workflow"
+
+msgid "Delete workflow?"
+msgstr "Delete workflow?"
+
+msgid "Edit"
+msgstr "Edit"
+
+msgid "Email address or phone number depending on the action."
+msgstr "Email address or phone number depending on the action."
+
+msgid "Email subject"
+msgstr "Email subject"
+
+msgid "Email to a specific address"
+msgstr "Email to a specific address"
+
+msgid "Email to attendee"
+msgstr "Email to attendee"
+
+msgid "Email to host"
+msgstr "Email to host"
+
+msgid "Enabling and disabling workflows is coming soon."
+msgstr "Enabling and disabling workflows is coming soon."
+
+msgid "Event type linked"
+msgstr "Event type linked"
+
+msgid "Event type unlinked"
+msgstr "Event type unlinked"
+
+msgid "Existing links are not displayed yet."
+msgstr "Existing links are not displayed yet."
+
+msgid "Hours"
+msgstr "Hours"
+
+msgid "Loading workflow..."
+msgstr "Loading workflow..."
+
+msgid "Loading workflows..."
+msgstr "Loading workflows..."
+
+msgid "Loading..."
+msgstr "Loading..."
+
+msgid "Message"
+msgstr "Message"
+
+msgid "Minutes"
+msgstr "Minutes"
+
+msgid "New step"
+msgstr "New step"
+
+msgid "New workflow"
+msgstr "New workflow"
+
+msgid "No event types available."
+msgstr "No event types available."
+
+msgid "No steps yet"
+msgstr "No steps yet"
+
+msgid "No workflows yet"
+msgstr "No workflows yet"
+
+msgid "Name your workflow and pick the trigger that schedules its reminders."
+msgstr "Name your workflow and pick the trigger that schedules its reminders."
+
+msgid "Rating request"
+msgstr "Rating request"
+
+msgid "Reminder"
+msgstr "Reminder"
+
+msgid "Remove"
+msgstr "Remove"
+
+msgid "SMS to a specific number"
+msgstr "SMS to a specific number"
+
+msgid "SMS to attendee"
+msgstr "SMS to attendee"
+
+msgid "Send to"
+msgstr "Send to"
+
+msgid "Step added"
+msgstr "Step added"
+
+msgid "Step removed"
+msgstr "Step removed"
+
+msgid "Step updated"
+msgstr "Step updated"
+
+msgid "Step {0}"
+msgstr "Step {0}"
+
+msgid "Steps"
+msgstr "Steps"
+
+msgid "Template"
+msgstr "Template"
+
+msgid "Thank you"
+msgstr "Thank you"
+
+msgid "The list-bindings endpoint is on the backlog. Toggle to link or unlink."
+msgstr "The list-bindings endpoint is on the backlog. Toggle to link or unlink."
+
+msgid "The trigger can't be changed after the workflow is created."
+msgstr "The trigger can't be changed after the workflow is created."
+
+msgid "Time before/after event"
+msgstr "Time before/after event"
+
+msgid "Trigger"
+msgstr "Trigger"
+
+msgid "Unit"
+msgstr "Unit"
+
+msgid "Untitled workflow"
+msgstr "Untitled workflow"
+
+msgid "Variables like {EVENT_NAME} and {ATTENDEE_NAME} are replaced at send time."
+msgstr "Variables like {EVENT_NAME} and {ATTENDEE_NAME} are replaced at send time."
+
+msgid "Weeks"
+msgstr "Weeks"
+
+msgid "When a booking is cancelled"
+msgstr "When a booking is cancelled"
+
+msgid "When a booking is rescheduled"
+msgstr "When a booking is rescheduled"
+
+msgid "When a new booking is created"
+msgstr "When a new booking is created"
+
+msgid "WhatsApp to a specific number"
+msgstr "WhatsApp to a specific number"
+
+msgid "WhatsApp to attendee"
+msgstr "WhatsApp to attendee"
+
+msgid "Workflow"
+msgstr "Workflow"
+
+msgid "Workflow created"
+msgstr "Workflow created"
+
+msgid "Workflow deleted"
+msgstr "Workflow deleted"
+
+msgid "Workflow name"
+msgstr "Workflow name"
+
+msgid "Workflow renamed"
+msgstr "Workflow renamed"
+
+msgid "{0} steps"
+msgstr "{0} steps"

@@ -17,7 +17,14 @@ import {
 import { Link as RouterLink, useNavigate, useRouter } from "@tanstack/react-router";
 import MobileMenu from "account/MobileMenu";
 import UserMenu from "account/UserMenu";
-import { BarChart3Icon, CalendarCheckIcon, CalendarDaysIcon, LayoutDashboardIcon, TimerIcon } from "lucide-react";
+import {
+  BarChart3Icon,
+  CalendarCheckIcon,
+  CalendarDaysIcon,
+  LayoutDashboardIcon,
+  TimerIcon,
+  ZapIcon
+} from "lucide-react";
 import { use } from "react";
 
 import { getWeekStartDate } from "@/routes/-bookings/bookingTypes";
@@ -36,6 +43,7 @@ export function MainSideMenu() {
   const currentPath = normalizePath(router.state.location.pathname);
   const navigate = useNavigate();
   const { enabled: isInsightsEnabled } = useFeatureFlag("cap-insights");
+  const { enabled: isWorkflowsEnabled } = useFeatureFlag("cap-workflows");
   const handleNavigate = (path: string) => {
     navigate({ to: path });
   };
@@ -131,6 +139,22 @@ export function MainSideMenu() {
                         <BarChart3Icon />
                         <span>
                           <Trans>Insights</Trans>
+                        </span>
+                      </RouterLink>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                )}
+                {isWorkflowsEnabled && (
+                  <SidebarMenuItem>
+                    <SidebarMenuButton
+                      asChild={true}
+                      isActive={currentPath.startsWith("/workflows")}
+                      tooltip={t`Workflows`}
+                    >
+                      <RouterLink to="/workflows">
+                        <ZapIcon />
+                        <span>
+                          <Trans>Workflows</Trans>
                         </span>
                       </RouterLink>
                     </SidebarMenuButton>

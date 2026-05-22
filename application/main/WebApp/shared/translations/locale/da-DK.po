@@ -1047,3 +1047,210 @@ msgstr "Din booking er bekræftet."
 
 msgid "Your dashboard is empty"
 msgstr "Dit dashboard er tomt"
+
+msgid "Action"
+msgstr "Handling"
+
+msgid "Active (coming soon)"
+msgstr "Aktiv (kommer snart)"
+
+msgid "Active on event types"
+msgstr "Aktiv på event-typer"
+
+msgid "Add a step to send a reminder, email, or message."
+msgstr "Tilføj et trin for at sende en påmindelse, e-mail eller besked."
+
+msgid "Add step"
+msgstr "Tilføj trin"
+
+msgid "After the event ends"
+msgstr "Efter eventet slutter"
+
+msgid "Automate reminders, follow-ups, and notifications for your bookings."
+msgstr "Automatiser påmindelser, opfølgninger og notifikationer for dine bookinger."
+
+msgid "Before the event starts"
+msgstr "Før eventet starter"
+
+msgid "Create"
+msgstr "Opret"
+
+msgid "Create your first workflow to automate reminders and notifications."
+msgstr "Opret dit første workflow for at automatisere påmindelser og notifikationer."
+
+msgid "Create workflow"
+msgstr "Opret workflow"
+
+msgid "Custom"
+msgstr "Brugerdefineret"
+
+msgid "Days"
+msgstr "Dage"
+
+msgid "Delete workflow"
+msgstr "Slet workflow"
+
+msgid "Delete workflow?"
+msgstr "Slet workflow?"
+
+msgid "Edit"
+msgstr "Rediger"
+
+msgid "Email address or phone number depending on the action."
+msgstr "E-mailadresse eller telefonnummer afhængigt af handlingen."
+
+msgid "Email subject"
+msgstr "E-mailemne"
+
+msgid "Email to a specific address"
+msgstr "E-mail til en bestemt adresse"
+
+msgid "Email to attendee"
+msgstr "E-mail til deltager"
+
+msgid "Email to host"
+msgstr "E-mail til vært"
+
+msgid "Enabling and disabling workflows is coming soon."
+msgstr "Aktivering og deaktivering af workflows kommer snart."
+
+msgid "Event type linked"
+msgstr "Event-type tilknyttet"
+
+msgid "Event type unlinked"
+msgstr "Event-type frakoblet"
+
+msgid "Existing links are not displayed yet."
+msgstr "Eksisterende tilknytninger vises endnu ikke."
+
+msgid "Hours"
+msgstr "Timer"
+
+msgid "Loading workflow..."
+msgstr "Indlæser workflow..."
+
+msgid "Loading workflows..."
+msgstr "Indlæser workflows..."
+
+msgid "Loading..."
+msgstr "Indlæser..."
+
+msgid "Message"
+msgstr "Besked"
+
+msgid "Minutes"
+msgstr "Minutter"
+
+msgid "New step"
+msgstr "Nyt trin"
+
+msgid "New workflow"
+msgstr "Nyt workflow"
+
+msgid "No event types available."
+msgstr "Ingen event-typer tilgængelige."
+
+msgid "No steps yet"
+msgstr "Endnu ingen trin"
+
+msgid "No workflows yet"
+msgstr "Endnu ingen workflows"
+
+msgid "Name your workflow and pick the trigger that schedules its reminders."
+msgstr "Navngiv dit workflow og vælg den udløser, der planlægger dets påmindelser."
+
+msgid "Rating request"
+msgstr "Vurderingsanmodning"
+
+msgid "Reminder"
+msgstr "Påmindelse"
+
+msgid "Remove"
+msgstr "Fjern"
+
+msgid "SMS to a specific number"
+msgstr "SMS til et bestemt nummer"
+
+msgid "SMS to attendee"
+msgstr "SMS til deltager"
+
+msgid "Send to"
+msgstr "Send til"
+
+msgid "Step added"
+msgstr "Trin tilføjet"
+
+msgid "Step removed"
+msgstr "Trin fjernet"
+
+msgid "Step updated"
+msgstr "Trin opdateret"
+
+msgid "Step {0}"
+msgstr "Trin {0}"
+
+msgid "Steps"
+msgstr "Trin"
+
+msgid "Template"
+msgstr "Skabelon"
+
+msgid "Thank you"
+msgstr "Tak"
+
+msgid "The list-bindings endpoint is on the backlog. Toggle to link or unlink."
+msgstr "Endpoint til at liste bindinger er på backloggen. Slå til/fra for at tilknytte eller frakoble."
+
+msgid "The trigger can't be changed after the workflow is created."
+msgstr "Udløseren kan ikke ændres, efter workflowet er oprettet."
+
+msgid "Time before/after event"
+msgstr "Tid før/efter event"
+
+msgid "Trigger"
+msgstr "Udløser"
+
+msgid "Unit"
+msgstr "Enhed"
+
+msgid "Untitled workflow"
+msgstr "Workflow uden titel"
+
+msgid "Variables like {EVENT_NAME} and {ATTENDEE_NAME} are replaced at send time."
+msgstr "Variabler som {EVENT_NAME} og {ATTENDEE_NAME} erstattes på afsendelsestidspunktet."
+
+msgid "Weeks"
+msgstr "Uger"
+
+msgid "When a booking is cancelled"
+msgstr "Når en booking annulleres"
+
+msgid "When a booking is rescheduled"
+msgstr "Når en booking flyttes"
+
+msgid "When a new booking is created"
+msgstr "Når en ny booking oprettes"
+
+msgid "WhatsApp to a specific number"
+msgstr "WhatsApp til et bestemt nummer"
+
+msgid "WhatsApp to attendee"
+msgstr "WhatsApp til deltager"
+
+msgid "Workflow"
+msgstr "Workflow"
+
+msgid "Workflow created"
+msgstr "Workflow oprettet"
+
+msgid "Workflow deleted"
+msgstr "Workflow slettet"
+
+msgid "Workflow name"
+msgstr "Workflownavn"
+
+msgid "Workflow renamed"
+msgstr "Workflow omdøbt"
+
+msgid "{0} steps"
+msgstr "{0} trin"
