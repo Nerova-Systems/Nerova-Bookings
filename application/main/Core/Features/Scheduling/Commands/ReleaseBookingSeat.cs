@@ -1,31 +1,24 @@
-using FluentValidation;
+using System.Text.Json;
 using JetBrains.Annotations;
 using Main.Features.Scheduling.Domain;
-using Main.Features.Scheduling.Shared;
 using SharedKernel.Cqrs;
 using SharedKernel.ExecutionContext;
 
 namespace Main.Features.Scheduling.Commands;
 
 [PublicAPI]
-public sealed record CancelBookingCommand(BookingId Id, string? Reason = null) : ICommand, IRequest<Result>;
+public sealed record ReleaseBookingSeatCommand(BookingId Id, BookingSeatId SeatId) : ICommand, IRequest<Result>;
 
-public sealed class CancelBookingValidator : AbstractValidator<CancelBookingCommand>
-{
-    public CancelBookingValidator()
-    {
-        RuleFor(command => command.Reason).MaximumLength(1000);
-    }
-}
-
-public sealed class CancelBookingHandler(
+public sealed class ReleaseBookingSeatHandler(
     IBookingRepository bookingRepository,
+    IBookingAttendeeRepository bookingAttendeeRepository,
+    IBookingSeatRepository bookingSeatRepository,
     IBookingHistoryEntryRepository bookingHistoryEntryRepository,
     IExecutionContext executionContext,
     TimeProvider timeProvider
-) : IRequestHandler<CancelBookingCommand, Result>
+) : IRequestHandler<ReleaseBookingSeatCommand, Result>
 {
-    public async Task<Result> Handle(CancelBookingCommand command, CancellationToken cancellationToken)
+    public async Task<Result> Handle(ReleaseBookingSeatCommand command, CancellationToken cancellationToken)
     {
         var tenantId = executionContext.UserInfo.TenantId;
         var ownerUserId = executionContext.UserInfo.Id;
@@ -40,26 +33,27 @@ public sealed class CancelBookingHandler(
             return Result.NotFound($"Booking '{command.Id}' was not found.");
         }
 
-        var cancelAction = BookingActionAvailability.ResolveCancel(item.Booking, item.EventType, timeProvider.GetUtcNow());
-        if (!cancelAction.Enabled)
+        var seat = await bookingSeatRepository.GetByIdAsync(command.SeatId, cancellationToken);
+        if (seat is null || seat.BookingId != item.Booking.Id)
         {
-            return Result.BadRequest(cancelAction.DisabledReason!);
+            return Result.NotFound($"Seat '{command.SeatId}' was not found.");
         }
 
-        if (item.EventType.Settings.ConfirmationPolicy.RequiresCancellationReason && string.IsNullOrWhiteSpace(command.Reason))
+        var attendee = await bookingAttendeeRepository.GetByIdAsync(seat.AttendeeId, cancellationToken);
+        bookingSeatRepository.Remove(seat);
+        if (attendee is not null)
         {
-            return Result.BadRequest("A cancellation reason is required for this event type.");
+            bookingAttendeeRepository.Remove(attendee);
         }
 
-        item.Booking.Cancel(command.Reason, ownerUserId.Value);
-        bookingRepository.Update(item.Booking);
-
+        var payload = JsonSerializer.Serialize(new { seatId = seat.Id.Value });
         var entry = BookingHistoryEntry.Create(
             tenantId,
             item.Booking.Id,
-            BookingHistoryEventType.Cancelled,
+            BookingHistoryEventType.SeatReleased,
             timeProvider.GetUtcNow(),
-            ownerUserId
+            ownerUserId,
+            payload
         );
         await bookingHistoryEntryRepository.AddAsync(entry, cancellationToken);
 

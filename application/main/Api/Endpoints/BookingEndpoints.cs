@@ -18,8 +18,68 @@ public sealed class BookingEndpoints : IEndpoints
             => await mediator.Send(query)
         ).Produces<BookingsResponse>();
 
-        group.MapPost("/{id}/cancel", async Task<ApiResult> (BookingId id, IMediator mediator)
-            => await mediator.Send(new CancelBookingCommand(id))
+        group.MapGet("/{id}", async Task<ApiResult<BookingDetailsResponse>> (BookingId id, IMediator mediator)
+            => await mediator.Send(new GetBookingDetailsQuery(id))
+        ).Produces<BookingDetailsResponse>();
+
+        group.MapGet("/{id}/attendees", async Task<ApiResult<BookingAttendeesResponse>> (BookingId id, IMediator mediator)
+            => await mediator.Send(new GetBookingAttendeesQuery(id))
+        ).Produces<BookingAttendeesResponse>();
+
+        group.MapGet("/{id}/history", async Task<ApiResult<BookingHistoryResponse>> (BookingId id, [AsParameters] GetBookingHistoryQuery query, IMediator mediator)
+            => await mediator.Send(query with { Id = id })
+        ).Produces<BookingHistoryResponse>();
+
+        group.MapPost("/{id}/cancel", async Task<ApiResult> (BookingId id, string? reason, IMediator mediator)
+            => await mediator.Send(new CancelBookingCommand(id, reason))
+        );
+
+        group.MapPost("/{id}/confirm", async Task<ApiResult> (BookingId id, IMediator mediator)
+            => await mediator.Send(new ConfirmBookingCommand(id))
+        );
+
+        group.MapPost("/{id}/reject", async Task<ApiResult> (BookingId id, RejectBookingCommand command, IMediator mediator)
+            => await mediator.Send(command with { Id = id })
+        );
+
+        group.MapPost("/{id}/request-reschedule", async Task<ApiResult> (BookingId id, RequestRescheduleCommand command, IMediator mediator)
+            => await mediator.Send(command with { Id = id })
+        );
+
+        group.MapPost("/{id}/location", async Task<ApiResult> (BookingId id, EditBookingLocationCommand command, IMediator mediator)
+            => await mediator.Send(command with { Id = id })
+        );
+
+        group.MapPost("/{id}/guests", async Task<ApiResult> (BookingId id, AddBookingGuestsCommand command, IMediator mediator)
+            => await mediator.Send(command with { Id = id })
+        );
+
+        group.MapPost("/{id}/no-show", async Task<ApiResult> (BookingId id, MarkNoShowCommand command, IMediator mediator)
+            => await mediator.Send(command with { Id = id })
+        );
+
+        group.MapPost("/{id}/reassign", async Task<ApiResult> (BookingId id, ReassignBookingCommand command, IMediator mediator)
+            => await mediator.Send(command with { Id = id })
+        );
+
+        group.MapPost("/{id}/rate", async Task<ApiResult> (BookingId id, RateBookingCommand command, IMediator mediator)
+            => await mediator.Send(command with { Id = id })
+        );
+
+        group.MapPost("/{id}/notes", async Task<ApiResult<BookingInternalNoteId>> (BookingId id, AddBookingInternalNoteCommand command, IMediator mediator)
+            => await mediator.Send(command with { Id = id })
+        ).Produces<BookingInternalNoteId>();
+
+        group.MapDelete("/{id}/notes/{noteId}", async Task<ApiResult> (BookingId id, BookingInternalNoteId noteId, IMediator mediator)
+            => await mediator.Send(new DeleteBookingInternalNoteCommand(id, noteId))
+        );
+
+        group.MapPost("/{id}/seats", async Task<ApiResult<ReserveBookingSeatResponse>> (BookingId id, ReserveBookingSeatCommand command, IMediator mediator)
+            => await mediator.Send(command with { Id = id })
+        ).Produces<ReserveBookingSeatResponse>();
+
+        group.MapDelete("/{id}/seats/{seatId}", async Task<ApiResult> (BookingId id, BookingSeatId seatId, IMediator mediator)
+            => await mediator.Send(new ReleaseBookingSeatCommand(id, seatId))
         );
     }
 }

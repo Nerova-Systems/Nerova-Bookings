@@ -144,7 +144,7 @@ public sealed class BookingEndpointsTests : EndpointBaseTest<MainDbContext>
         actionsByBookingId[cancelled.Id].Cancel.Should().Be(new BookingActionResponse(true, false, "Cancelled bookings cannot be cancelled."));
         actionsByBookingId[rejected.Id].Cancel.Should().Be(new BookingActionResponse(true, false, "Rejected bookings cannot be cancelled."));
         actionsByBookingId[upcoming.Id].Reschedule.Enabled.Should().BeFalse();
-        actionsByBookingId[upcoming.Id].AddGuests.Enabled.Should().BeFalse();
+        actionsByBookingId[upcoming.Id].AddGuests.Enabled.Should().BeTrue();
         actionsByBookingId[upcoming.Id].Report.Enabled.Should().BeFalse();
     }
 

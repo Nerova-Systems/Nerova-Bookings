@@ -1,31 +1,32 @@
+using System.Text.Json;
 using FluentValidation;
 using JetBrains.Annotations;
 using Main.Features.Scheduling.Domain;
-using Main.Features.Scheduling.Shared;
 using SharedKernel.Cqrs;
 using SharedKernel.ExecutionContext;
 
 namespace Main.Features.Scheduling.Commands;
 
 [PublicAPI]
-public sealed record CancelBookingCommand(BookingId Id, string? Reason = null) : ICommand, IRequest<Result>;
+public sealed record EditBookingLocationCommand(BookingId Id, string? LocationType, string? LocationValue) : ICommand, IRequest<Result>;
 
-public sealed class CancelBookingValidator : AbstractValidator<CancelBookingCommand>
+public sealed class EditBookingLocationValidator : AbstractValidator<EditBookingLocationCommand>
 {
-    public CancelBookingValidator()
+    public EditBookingLocationValidator()
     {
-        RuleFor(command => command.Reason).MaximumLength(1000);
+        RuleFor(command => command.LocationType).MaximumLength(80);
+        RuleFor(command => command.LocationValue).MaximumLength(2000);
     }
 }
 
-public sealed class CancelBookingHandler(
+public sealed class EditBookingLocationHandler(
     IBookingRepository bookingRepository,
     IBookingHistoryEntryRepository bookingHistoryEntryRepository,
     IExecutionContext executionContext,
     TimeProvider timeProvider
-) : IRequestHandler<CancelBookingCommand, Result>
+) : IRequestHandler<EditBookingLocationCommand, Result>
 {
-    public async Task<Result> Handle(CancelBookingCommand command, CancellationToken cancellationToken)
+    public async Task<Result> Handle(EditBookingLocationCommand command, CancellationToken cancellationToken)
     {
         var tenantId = executionContext.UserInfo.TenantId;
         var ownerUserId = executionContext.UserInfo.Id;
@@ -40,26 +41,22 @@ public sealed class CancelBookingHandler(
             return Result.NotFound($"Booking '{command.Id}' was not found.");
         }
 
-        var cancelAction = BookingActionAvailability.ResolveCancel(item.Booking, item.EventType, timeProvider.GetUtcNow());
-        if (!cancelAction.Enabled)
+        if (item.Booking.Status is BookingStatus.Cancelled or BookingStatus.Rejected)
         {
-            return Result.BadRequest(cancelAction.DisabledReason!);
+            return Result.BadRequest("Closed bookings cannot have their location edited.");
         }
 
-        if (item.EventType.Settings.ConfirmationPolicy.RequiresCancellationReason && string.IsNullOrWhiteSpace(command.Reason))
-        {
-            return Result.BadRequest("A cancellation reason is required for this event type.");
-        }
-
-        item.Booking.Cancel(command.Reason, ownerUserId.Value);
+        item.Booking.SetLocation(command.LocationType, command.LocationValue);
         bookingRepository.Update(item.Booking);
 
+        var payload = JsonSerializer.Serialize(new { locationType = command.LocationType, locationValue = command.LocationValue });
         var entry = BookingHistoryEntry.Create(
             tenantId,
             item.Booking.Id,
-            BookingHistoryEventType.Cancelled,
+            BookingHistoryEventType.LocationChanged,
             timeProvider.GetUtcNow(),
-            ownerUserId
+            ownerUserId,
+            payload
         );
         await bookingHistoryEntryRepository.AddAsync(entry, cancellationToken);
 

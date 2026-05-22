@@ -1,31 +1,36 @@
+using System.Text.Json;
 using FluentValidation;
 using JetBrains.Annotations;
 using Main.Features.Scheduling.Domain;
-using Main.Features.Scheduling.Shared;
 using SharedKernel.Cqrs;
 using SharedKernel.ExecutionContext;
 
 namespace Main.Features.Scheduling.Commands;
 
+/// <summary>
+///     Submit a 1–5 rating with optional feedback for a completed booking. Mirrors cal.com booking
+///     ratings; gated to past, accepted bookings.
+/// </summary>
 [PublicAPI]
-public sealed record CancelBookingCommand(BookingId Id, string? Reason = null) : ICommand, IRequest<Result>;
+public sealed record RateBookingCommand(BookingId Id, int Rating, string? Feedback) : ICommand, IRequest<Result>;
 
-public sealed class CancelBookingValidator : AbstractValidator<CancelBookingCommand>
+public sealed class RateBookingValidator : AbstractValidator<RateBookingCommand>
 {
-    public CancelBookingValidator()
+    public RateBookingValidator()
     {
-        RuleFor(command => command.Reason).MaximumLength(1000);
+        RuleFor(command => command.Rating).InclusiveBetween(1, 5);
+        RuleFor(command => command.Feedback).MaximumLength(2000);
     }
 }
 
-public sealed class CancelBookingHandler(
+public sealed class RateBookingHandler(
     IBookingRepository bookingRepository,
     IBookingHistoryEntryRepository bookingHistoryEntryRepository,
     IExecutionContext executionContext,
     TimeProvider timeProvider
-) : IRequestHandler<CancelBookingCommand, Result>
+) : IRequestHandler<RateBookingCommand, Result>
 {
-    public async Task<Result> Handle(CancelBookingCommand command, CancellationToken cancellationToken)
+    public async Task<Result> Handle(RateBookingCommand command, CancellationToken cancellationToken)
     {
         var tenantId = executionContext.UserInfo.TenantId;
         var ownerUserId = executionContext.UserInfo.Id;
@@ -40,26 +45,27 @@ public sealed class CancelBookingHandler(
             return Result.NotFound($"Booking '{command.Id}' was not found.");
         }
 
-        var cancelAction = BookingActionAvailability.ResolveCancel(item.Booking, item.EventType, timeProvider.GetUtcNow());
-        if (!cancelAction.Enabled)
+        if (item.Booking.Status != BookingStatus.Accepted)
         {
-            return Result.BadRequest(cancelAction.DisabledReason!);
+            return Result.BadRequest("Only accepted bookings can be rated.");
         }
 
-        if (item.EventType.Settings.ConfirmationPolicy.RequiresCancellationReason && string.IsNullOrWhiteSpace(command.Reason))
+        if (item.Booking.EndTime > timeProvider.GetUtcNow())
         {
-            return Result.BadRequest("A cancellation reason is required for this event type.");
+            return Result.BadRequest("Bookings can only be rated after they end.");
         }
 
-        item.Booking.Cancel(command.Reason, ownerUserId.Value);
+        item.Booking.Rate(command.Rating, command.Feedback);
         bookingRepository.Update(item.Booking);
 
+        var payload = JsonSerializer.Serialize(new { rating = command.Rating });
         var entry = BookingHistoryEntry.Create(
             tenantId,
             item.Booking.Id,
-            BookingHistoryEventType.Cancelled,
+            BookingHistoryEventType.Rated,
             timeProvider.GetUtcNow(),
-            ownerUserId
+            ownerUserId,
+            payload
         );
         await bookingHistoryEntryRepository.AddAsync(entry, cancellationToken);
 

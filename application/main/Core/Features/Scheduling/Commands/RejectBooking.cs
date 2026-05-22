@@ -1,31 +1,30 @@
 using FluentValidation;
 using JetBrains.Annotations;
 using Main.Features.Scheduling.Domain;
-using Main.Features.Scheduling.Shared;
 using SharedKernel.Cqrs;
 using SharedKernel.ExecutionContext;
 
 namespace Main.Features.Scheduling.Commands;
 
 [PublicAPI]
-public sealed record CancelBookingCommand(BookingId Id, string? Reason = null) : ICommand, IRequest<Result>;
+public sealed record RejectBookingCommand(BookingId Id, string Reason) : ICommand, IRequest<Result>;
 
-public sealed class CancelBookingValidator : AbstractValidator<CancelBookingCommand>
+public sealed class RejectBookingValidator : AbstractValidator<RejectBookingCommand>
 {
-    public CancelBookingValidator()
+    public RejectBookingValidator()
     {
-        RuleFor(command => command.Reason).MaximumLength(1000);
+        RuleFor(command => command.Reason).NotEmpty().MaximumLength(1000);
     }
 }
 
-public sealed class CancelBookingHandler(
+public sealed class RejectBookingHandler(
     IBookingRepository bookingRepository,
     IBookingHistoryEntryRepository bookingHistoryEntryRepository,
     IExecutionContext executionContext,
     TimeProvider timeProvider
-) : IRequestHandler<CancelBookingCommand, Result>
+) : IRequestHandler<RejectBookingCommand, Result>
 {
-    public async Task<Result> Handle(CancelBookingCommand command, CancellationToken cancellationToken)
+    public async Task<Result> Handle(RejectBookingCommand command, CancellationToken cancellationToken)
     {
         var tenantId = executionContext.UserInfo.TenantId;
         var ownerUserId = executionContext.UserInfo.Id;
@@ -40,24 +39,18 @@ public sealed class CancelBookingHandler(
             return Result.NotFound($"Booking '{command.Id}' was not found.");
         }
 
-        var cancelAction = BookingActionAvailability.ResolveCancel(item.Booking, item.EventType, timeProvider.GetUtcNow());
-        if (!cancelAction.Enabled)
+        if (item.Booking.Status != BookingStatus.Pending && item.Booking.Status != BookingStatus.AwaitingHost)
         {
-            return Result.BadRequest(cancelAction.DisabledReason!);
+            return Result.BadRequest($"Booking '{command.Id}' is not awaiting confirmation.");
         }
 
-        if (item.EventType.Settings.ConfirmationPolicy.RequiresCancellationReason && string.IsNullOrWhiteSpace(command.Reason))
-        {
-            return Result.BadRequest("A cancellation reason is required for this event type.");
-        }
-
-        item.Booking.Cancel(command.Reason, ownerUserId.Value);
+        item.Booking.Reject(command.Reason);
         bookingRepository.Update(item.Booking);
 
         var entry = BookingHistoryEntry.Create(
             tenantId,
             item.Booking.Id,
-            BookingHistoryEventType.Cancelled,
+            BookingHistoryEventType.Rejected,
             timeProvider.GetUtcNow(),
             ownerUserId
         );

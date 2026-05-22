@@ -129,6 +129,12 @@ public sealed class Booking : AggregateRoot<BookingId>, ITenantScopedEntity
     /// <summary>Arbitrary metadata blob mirroring cal.com <c>metadata</c>.</summary>
     public string? MetadataJson { get; private set; }
 
+    /// <summary>Per-booking location-type override. When null, the booking inherits its event type's location.</summary>
+    public string? LocationType { get; private set; }
+
+    /// <summary>Per-booking location value override (URL, address, phone number, etc.).</summary>
+    public string? LocationValue { get; private set; }
+
     public TenantId TenantId { get; } = new(0);
 
     public void AssignToTeam(TenantId teamId)
@@ -207,6 +213,12 @@ public sealed class Booking : AggregateRoot<BookingId>, ITenantScopedEntity
     public void SetMetadataJson(string? metadataJson)
     {
         MetadataJson = metadataJson;
+    }
+
+    public void SetLocation(string? locationType, string? locationValue)
+    {
+        LocationType = string.IsNullOrWhiteSpace(locationType) ? null : locationType.Trim();
+        LocationValue = string.IsNullOrWhiteSpace(locationValue) ? null : locationValue.Trim();
     }
 
     public static Booking Create(

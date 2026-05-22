@@ -35,6 +35,8 @@ public sealed class BookingConfiguration : IEntityTypeConfiguration<Booking>
         builder.Property(booking => booking.OneTimePassword).HasMaxLength(64);
         builder.Property(booking => booking.CustomInputsJson).HasColumnType("jsonb");
         builder.Property(booking => booking.MetadataJson).HasColumnType("jsonb");
+        builder.Property(booking => booking.LocationType).HasMaxLength(80);
+        builder.Property(booking => booking.LocationValue).HasMaxLength(2000);
 
         builder.HasOne<EventType>()
             .WithMany()

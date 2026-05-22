@@ -12,7 +12,11 @@ public sealed record BookingActionsResponse(
     BookingActionResponse ViewRecordings,
     BookingActionResponse ViewSessionDetails,
     BookingActionResponse MarkNoShow,
-    BookingActionResponse Report
+    BookingActionResponse Report,
+    BookingActionResponse Confirm,
+    BookingActionResponse Reject,
+    BookingActionResponse Rate,
+    BookingActionResponse Reassign
 );
 
 public sealed record BookingActionResponse(bool Visible, bool Enabled, string? DisabledReason);
@@ -24,13 +28,17 @@ public static class BookingActionAvailability
         return new BookingActionsResponse(
             ResolveCancel(booking, eventType, now),
             Disabled("Reschedule booking is not implemented yet."),
-            Disabled("Request reschedule is not implemented yet."),
-            Disabled("Edit location is not implemented yet."),
-            Disabled("Add guests is not implemented yet."),
+            ResolveRequestReschedule(booking, now),
+            ResolveEditLocation(booking),
+            ResolveAddGuests(booking, now),
             Disabled("Recordings are not available until conferencing is ported."),
             Disabled("Session details are not available until conferencing is ported."),
-            Disabled("No-show tracking is not implemented yet."),
-            Disabled("Report booking is not implemented yet.")
+            ResolveMarkNoShow(booking, now),
+            Disabled("Report booking is not implemented yet."),
+            ResolveConfirm(booking),
+            ResolveReject(booking),
+            ResolveRate(booking, now),
+            ResolveReassign(booking)
         );
     }
 
@@ -62,6 +70,90 @@ public static class BookingActionAvailability
             return Disabled("This booking is inside the minimum cancellation notice.");
         }
 
+        return new BookingActionResponse(true, true, null);
+    }
+
+    public static BookingActionResponse ResolveConfirm(Booking booking)
+    {
+        if (booking.Status is BookingStatus.Pending or BookingStatus.AwaitingHost)
+        {
+            return new BookingActionResponse(true, true, null);
+        }
+        return Disabled("Only awaiting-confirmation bookings can be confirmed.");
+    }
+
+    public static BookingActionResponse ResolveReject(Booking booking)
+    {
+        if (booking.Status is BookingStatus.Pending or BookingStatus.AwaitingHost)
+        {
+            return new BookingActionResponse(true, true, null);
+        }
+        return Disabled("Only awaiting-confirmation bookings can be rejected.");
+    }
+
+    public static BookingActionResponse ResolveRequestReschedule(Booking booking, DateTimeOffset now)
+    {
+        if (booking.Status is BookingStatus.Cancelled or BookingStatus.Rejected)
+        {
+            return Disabled("Closed bookings cannot be rescheduled.");
+        }
+        if (booking.EndTime <= now)
+        {
+            return Disabled("Past bookings cannot be rescheduled.");
+        }
+        return new BookingActionResponse(true, true, null);
+    }
+
+    public static BookingActionResponse ResolveEditLocation(Booking booking)
+    {
+        if (booking.Status is BookingStatus.Cancelled or BookingStatus.Rejected)
+        {
+            return Disabled("Closed bookings cannot have their location edited.");
+        }
+        return new BookingActionResponse(true, true, null);
+    }
+
+    public static BookingActionResponse ResolveAddGuests(Booking booking, DateTimeOffset now)
+    {
+        if (booking.Status is BookingStatus.Cancelled or BookingStatus.Rejected)
+        {
+            return Disabled("Closed bookings cannot have guests added.");
+        }
+        if (booking.EndTime <= now)
+        {
+            return Disabled("Past bookings cannot have guests added.");
+        }
+        return new BookingActionResponse(true, true, null);
+    }
+
+    public static BookingActionResponse ResolveMarkNoShow(Booking booking, DateTimeOffset now)
+    {
+        if (booking.EndTime > now)
+        {
+            return Disabled("No-show can only be recorded after the booking has ended.");
+        }
+        return new BookingActionResponse(true, true, null);
+    }
+
+    public static BookingActionResponse ResolveRate(Booking booking, DateTimeOffset now)
+    {
+        if (booking.Status != BookingStatus.Accepted)
+        {
+            return Disabled("Only accepted bookings can be rated.");
+        }
+        if (booking.EndTime > now)
+        {
+            return Disabled("Bookings can only be rated after they end.");
+        }
+        return new BookingActionResponse(true, true, null);
+    }
+
+    public static BookingActionResponse ResolveReassign(Booking booking)
+    {
+        if (booking.Status is BookingStatus.Cancelled or BookingStatus.Rejected)
+        {
+            return Disabled("Closed bookings cannot be reassigned.");
+        }
         return new BookingActionResponse(true, true, null);
     }
 

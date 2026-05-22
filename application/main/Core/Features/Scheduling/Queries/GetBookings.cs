@@ -20,6 +20,9 @@ public sealed record GetBookingsQuery(
     BookingId? BookingUid = null,
     DateTimeOffset? AfterStartDate = null,
     DateTimeOffset? BeforeEndDate = null,
+    bool NoShowOnly = false,
+    int? MinRating = null,
+    bool HasInternalNote = false,
     int PageOffset = 0,
     int PageSize = 25
 ) : IRequest<Result<BookingsResponse>>
@@ -59,6 +62,7 @@ public sealed class GetBookingsQueryValidator : AbstractValidator<GetBookingsQue
         RuleFor(query => query.AttendeeEmail).MaximumLength(320);
         RuleFor(query => query.PageOffset).GreaterThanOrEqualTo(0);
         RuleFor(query => query.PageSize).InclusiveBetween(1, 100);
+        RuleFor(query => query.MinRating!).InclusiveBetween(1, 5).When(query => query.MinRating is not null);
     }
 }
 
@@ -88,7 +92,7 @@ public sealed record BookingListItemResponse(
     BookingActionsResponse Actions
 );
 
-public sealed class GetBookingsHandler(IBookingRepository bookingRepository, IExecutionContext executionContext, TimeProvider timeProvider)
+public sealed class GetBookingsHandler(IBookingRepository bookingRepository, IBookingInternalNoteRepository bookingInternalNoteRepository, IExecutionContext executionContext, TimeProvider timeProvider)
     : IRequestHandler<GetBookingsQuery, Result<BookingsResponse>>
 {
     public async Task<Result<BookingsResponse>> Handle(GetBookingsQuery query, CancellationToken cancellationToken)
@@ -102,10 +106,23 @@ public sealed class GetBookingsHandler(IBookingRepository bookingRepository, IEx
 
         var now = timeProvider.GetUtcNow();
         var bookings = await bookingRepository.GetForOwnerWithEventTypesAsync(tenantId, ownerUserId, executionContext.ActiveTeamId, cancellationToken);
-        var filtered = bookings
+        var preFiltered = bookings
             .Where(booking => query.Statuses.Any(status => MatchesStatus(booking, status, now)))
             .Where(booking => MatchesFilters(booking, query))
             .ToArray();
+
+        var filtered = preFiltered;
+        if (query.HasInternalNote)
+        {
+            var bookingIds = preFiltered.Select(item => item.Booking.Id).ToArray();
+            var bookingsWithNotes = new HashSet<BookingId>();
+            foreach (var bookingId in bookingIds)
+            {
+                var notes = await bookingInternalNoteRepository.GetForBookingAsync(bookingId, cancellationToken);
+                if (notes.Length > 0) bookingsWithNotes.Add(bookingId);
+            }
+            filtered = preFiltered.Where(item => bookingsWithNotes.Contains(item.Booking.Id)).ToArray();
+        }
 
         var ordered = OrderByStatus(filtered, query.Statuses);
         var page = ordered
@@ -147,6 +164,8 @@ public sealed class GetBookingsHandler(IBookingRepository bookingRepository, IEx
         if (query.BeforeEndDate is not null && booking.EndTime > query.BeforeEndDate) return false;
         if (query.AttendeeName is not null && !booking.BookerName.Contains(query.AttendeeName, StringComparison.OrdinalIgnoreCase)) return false;
         if (query.AttendeeEmail is not null && !booking.BookerEmail.Contains(query.AttendeeEmail, StringComparison.OrdinalIgnoreCase)) return false;
+        if (query.NoShowOnly && booking.NoShowHost != true) return false;
+        if (query.MinRating is not null && (booking.Rating is null || booking.Rating < query.MinRating)) return false;
 
         return query.Search is null ||
                eventType.Title.Contains(query.Search, StringComparison.OrdinalIgnoreCase) ||
@@ -188,8 +207,8 @@ public sealed class GetBookingsHandler(IBookingRepository bookingRepository, IEx
             booking.TimeZone,
             booking.Status,
             listingStatus,
-            eventType.LocationType,
-            eventType.LocationValue,
+            booking.LocationType ?? eventType.LocationType,
+            booking.LocationValue ?? eventType.LocationValue,
             eventType.Settings.Locations,
             JsonSerializer.Deserialize<Dictionary<string, string>>(booking.ResponsesJson) ?? [],
             eventType.Settings.Recurrence is not null,

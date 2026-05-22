@@ -1,31 +1,33 @@
+using System.Text.Json;
 using FluentValidation;
 using JetBrains.Annotations;
 using Main.Features.Scheduling.Domain;
-using Main.Features.Scheduling.Shared;
 using SharedKernel.Cqrs;
+using SharedKernel.Domain;
 using SharedKernel.ExecutionContext;
 
 namespace Main.Features.Scheduling.Commands;
 
 [PublicAPI]
-public sealed record CancelBookingCommand(BookingId Id, string? Reason = null) : ICommand, IRequest<Result>;
+public sealed record ReassignBookingCommand(BookingId Id, UserId NewOwnerUserId, string? Reason) : ICommand, IRequest<Result>;
 
-public sealed class CancelBookingValidator : AbstractValidator<CancelBookingCommand>
+public sealed class ReassignBookingValidator : AbstractValidator<ReassignBookingCommand>
 {
-    public CancelBookingValidator()
+    public ReassignBookingValidator()
     {
+        RuleFor(command => command.NewOwnerUserId.Value).NotEmpty();
         RuleFor(command => command.Reason).MaximumLength(1000);
     }
 }
 
-public sealed class CancelBookingHandler(
+public sealed class ReassignBookingHandler(
     IBookingRepository bookingRepository,
     IBookingHistoryEntryRepository bookingHistoryEntryRepository,
     IExecutionContext executionContext,
     TimeProvider timeProvider
-) : IRequestHandler<CancelBookingCommand, Result>
+) : IRequestHandler<ReassignBookingCommand, Result>
 {
-    public async Task<Result> Handle(CancelBookingCommand command, CancellationToken cancellationToken)
+    public async Task<Result> Handle(ReassignBookingCommand command, CancellationToken cancellationToken)
     {
         var tenantId = executionContext.UserInfo.TenantId;
         var ownerUserId = executionContext.UserInfo.Id;
@@ -40,26 +42,23 @@ public sealed class CancelBookingHandler(
             return Result.NotFound($"Booking '{command.Id}' was not found.");
         }
 
-        var cancelAction = BookingActionAvailability.ResolveCancel(item.Booking, item.EventType, timeProvider.GetUtcNow());
-        if (!cancelAction.Enabled)
+        if (item.Booking.Status is BookingStatus.Cancelled or BookingStatus.Rejected)
         {
-            return Result.BadRequest(cancelAction.DisabledReason!);
+            return Result.BadRequest("Closed bookings cannot be reassigned.");
         }
 
-        if (item.EventType.Settings.ConfirmationPolicy.RequiresCancellationReason && string.IsNullOrWhiteSpace(command.Reason))
-        {
-            return Result.BadRequest("A cancellation reason is required for this event type.");
-        }
-
-        item.Booking.Cancel(command.Reason, ownerUserId.Value);
+        var previousOwnerId = item.Booking.OwnerUserId;
+        item.Booking.Reassign(command.NewOwnerUserId, command.Reason, ownerUserId);
         bookingRepository.Update(item.Booking);
 
+        var payload = JsonSerializer.Serialize(new { previousOwnerId = previousOwnerId.Value, newOwnerId = command.NewOwnerUserId.Value, reason = command.Reason });
         var entry = BookingHistoryEntry.Create(
             tenantId,
             item.Booking.Id,
-            BookingHistoryEventType.Cancelled,
+            BookingHistoryEventType.Reassigned,
             timeProvider.GetUtcNow(),
-            ownerUserId
+            ownerUserId,
+            payload
         );
         await bookingHistoryEntryRepository.AddAsync(entry, cancellationToken);
 

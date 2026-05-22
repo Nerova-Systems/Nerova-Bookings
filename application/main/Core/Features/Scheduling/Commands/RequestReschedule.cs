@@ -1,31 +1,35 @@
+using System.Text.Json;
 using FluentValidation;
 using JetBrains.Annotations;
 using Main.Features.Scheduling.Domain;
-using Main.Features.Scheduling.Shared;
 using SharedKernel.Cqrs;
 using SharedKernel.ExecutionContext;
 
 namespace Main.Features.Scheduling.Commands;
 
+/// <summary>
+///     Host-initiated reschedule request: invalidates the existing booking time so the booker can
+///     pick a new slot via the public scheduling page. Mirrors cal.com <c>requestReschedule</c>.
+/// </summary>
 [PublicAPI]
-public sealed record CancelBookingCommand(BookingId Id, string? Reason = null) : ICommand, IRequest<Result>;
+public sealed record RequestRescheduleCommand(BookingId Id, string? Reason) : ICommand, IRequest<Result>;
 
-public sealed class CancelBookingValidator : AbstractValidator<CancelBookingCommand>
+public sealed class RequestRescheduleValidator : AbstractValidator<RequestRescheduleCommand>
 {
-    public CancelBookingValidator()
+    public RequestRescheduleValidator()
     {
         RuleFor(command => command.Reason).MaximumLength(1000);
     }
 }
 
-public sealed class CancelBookingHandler(
+public sealed class RequestRescheduleHandler(
     IBookingRepository bookingRepository,
     IBookingHistoryEntryRepository bookingHistoryEntryRepository,
     IExecutionContext executionContext,
     TimeProvider timeProvider
-) : IRequestHandler<CancelBookingCommand, Result>
+) : IRequestHandler<RequestRescheduleCommand, Result>
 {
-    public async Task<Result> Handle(CancelBookingCommand command, CancellationToken cancellationToken)
+    public async Task<Result> Handle(RequestRescheduleCommand command, CancellationToken cancellationToken)
     {
         var tenantId = executionContext.UserInfo.TenantId;
         var ownerUserId = executionContext.UserInfo.Id;
@@ -40,26 +44,27 @@ public sealed class CancelBookingHandler(
             return Result.NotFound($"Booking '{command.Id}' was not found.");
         }
 
-        var cancelAction = BookingActionAvailability.ResolveCancel(item.Booking, item.EventType, timeProvider.GetUtcNow());
-        if (!cancelAction.Enabled)
+        if (item.Booking.Status is BookingStatus.Cancelled or BookingStatus.Rejected)
         {
-            return Result.BadRequest(cancelAction.DisabledReason!);
+            return Result.BadRequest("This booking cannot be rescheduled.");
         }
 
-        if (item.EventType.Settings.ConfirmationPolicy.RequiresCancellationReason && string.IsNullOrWhiteSpace(command.Reason))
+        if (item.Booking.EndTime <= timeProvider.GetUtcNow())
         {
-            return Result.BadRequest("A cancellation reason is required for this event type.");
+            return Result.BadRequest("Past bookings cannot be rescheduled.");
         }
 
-        item.Booking.Cancel(command.Reason, ownerUserId.Value);
+        item.Booking.MarkRescheduled(ownerUserId.Value);
         bookingRepository.Update(item.Booking);
 
+        var payload = JsonSerializer.Serialize(new { reason = command.Reason });
         var entry = BookingHistoryEntry.Create(
             tenantId,
             item.Booking.Id,
-            BookingHistoryEventType.Cancelled,
+            BookingHistoryEventType.Rescheduled,
             timeProvider.GetUtcNow(),
-            ownerUserId
+            ownerUserId,
+            payload
         );
         await bookingHistoryEntryRepository.AddAsync(entry, cancellationToken);
 
