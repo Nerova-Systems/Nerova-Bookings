@@ -69,10 +69,11 @@ public sealed class GetTopEventTypesQueryTests : InsightsEndpointBaseTest
         var b2 = await CreateBookingAsync("consult", "2026-06-01T09:00:00Z");
         Connection.Update("bookings", "id", b1.Id, [("start_time", DateTimeOffset.Parse("2025-06-01T07:00:00Z")), ("end_time", DateTimeOffset.Parse("2025-06-01T07:30:00Z"))]);
         Connection.Update("bookings", "id", b2.Id, [
-            ("start_time", DateTimeOffset.Parse("2025-06-01T09:00:00Z")),
-            ("end_time", DateTimeOffset.Parse("2025-06-01T09:30:00Z")),
-            ("status", "cancelled")
-        ]);
+                ("start_time", DateTimeOffset.Parse("2025-06-01T09:00:00Z")),
+                ("end_time", DateTimeOffset.Parse("2025-06-01T09:30:00Z")),
+                ("status", "cancelled")
+            ]
+        );
 
         // Act
         var response = await InsightsClient.GetAsync(Url);

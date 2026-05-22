@@ -1,4 +1,6 @@
 using Main.Database;
+using Main.Features.BookingSideEffects.Workers;
+using Main.Features.Connectors.Domain;
 using Main.Features.EventTypes.Domain;
 using Main.Features.Insights.Shared;
 using Main.Features.ManagedEventTypes.EventHandlers;
@@ -10,12 +12,14 @@ using Main.Features.Workflows.Infrastructure;
 using Main.Features.Workflows.Jobs;
 using Main.Features.Workflows.Senders;
 using Main.Features.Workflows.Services;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Hosting;
 using SharedKernel.Configuration;
 using TickerQ.DependencyInjection;
+using TickerQ.EntityFrameworkCore.Customizer;
 using TickerQ.EntityFrameworkCore.DependencyInjection;
 
 namespace Main;
@@ -86,11 +90,12 @@ public static class Configuration
 
             // TickerQ with EF Core persistence (tables added to MainDbContext via model customizer)
             services.AddTickerQ(opt =>
-            {
-                opt.AddOperationalStore(ef =>
-                ef.UseApplicationDbContext<MainDbContext>(TickerQ.EntityFrameworkCore.Customizer.ConfigurationType.UseModelCustomizer)
-                );
-            });
+                {
+                    opt.AddOperationalStore(ef =>
+                        ef.UseApplicationDbContext<MainDbContext>(ConfigurationType.UseModelCustomizer)
+                    );
+                }
+            );
 
             // Register cron jobs — run every 60 seconds
             services.MapTicker<WorkflowSchedulerJob>()

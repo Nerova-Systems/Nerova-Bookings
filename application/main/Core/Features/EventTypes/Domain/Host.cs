@@ -44,8 +44,6 @@ public sealed class Host : AggregateRoot<HostId>, ITenantScopedEntity
         Weight = weight;
     }
 
-    public TenantId TenantId { get; } = new(0);
-
     public EventTypeId EventTypeId { get; private set; }
 
     public UserId UserId { get; private set; }
@@ -61,6 +59,8 @@ public sealed class Host : AggregateRoot<HostId>, ITenantScopedEntity
 
     /// <summary>Round-robin weight (higher = more bookings). Unused for collective.</summary>
     public int Weight { get; private set; }
+
+    public TenantId TenantId { get; } = new(0);
 
     public static Host Create(
         TenantId tenantId,

@@ -24,7 +24,7 @@ public sealed class ManagedEventTypeDomainTests
             ScheduleId.NewId(),
             0, 0, 30, 60,
             null, null, null,
-            teamId: team
+            team
         );
     }
 
@@ -75,7 +75,8 @@ public sealed class ManagedEventTypeDomainTests
 
         // Update parent title; child has same (unlocked = empty → all locked)
         parent.Update("New title", "new-slug", null, 45, false,
-            parent.ScheduleId, 0, 0, 30, 60, null, null, null);
+            parent.ScheduleId, 0, 0, 30, 60, null, null, null
+        );
 
         child.PropagateFromParent(parent);
 
@@ -92,11 +93,13 @@ public sealed class ManagedEventTypeDomainTests
 
         // Give child a different title
         child.Update("My custom title", "intro-call", null, 30, false,
-            child.ScheduleId, 0, 0, 30, 60, null, null, null);
+            child.ScheduleId, 0, 0, 30, 60, null, null, null
+        );
 
         // Parent changes title
         parent.Update("Parent new title", "intro-call", null, 30, false,
-            parent.ScheduleId, 0, 0, 30, 60, null, null, null);
+            parent.ScheduleId, 0, 0, 30, 60, null, null, null
+        );
 
         child.PropagateFromParent(parent);
 
@@ -133,7 +136,7 @@ public sealed class ManagedEventTypeDomainTests
 
         template.UpdateUnlockedFields(["  title  ", "", "   ", "description"]);
 
-        template.UnlockedFields.Should().BeEquivalentTo(["title", "description"]);
+        template.UnlockedFields.Should().BeEquivalentTo("title", "description");
     }
 
     [Fact]

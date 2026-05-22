@@ -1,5 +1,4 @@
 using Main.Database;
-using Main.Features.EventTypes.Domain;
 using Main.Features.Scheduling.Domain;
 using Microsoft.EntityFrameworkCore;
 
@@ -37,7 +36,8 @@ public sealed class WorkflowBookingReader(MainDbContext context)
             .Where(b => b.Status != "cancelled" && b.Status != "rejected")
             .Where(b => !context.Set<WorkflowReminder>()
                 .IgnoreQueryFilters()
-                .Any(r => r.BookingId == b.Id))
+                .Any(r => r.BookingId == b.Id)
+            )
             .Take(BatchSize)
             .ToArrayAsync(ct);
 
@@ -126,13 +126,14 @@ public sealed class WorkflowBookingReader(MainDbContext context)
             .ToArrayAsync(ct);
 
         return bookings.Select(booking =>
-        {
-            var pairs = bindingsWithWorkflows
-                .Where(bw => bw.Binding.EventTypeId == booking.EventTypeId)
-                .Select(bw => new WorkflowWithBinding(bw.Workflow, bw.Binding))
-                .ToArray();
-            return new BookingWithWorkflows(booking, pairs);
-        }).ToArray();
+            {
+                var pairs = bindingsWithWorkflows
+                    .Where(bw => bw.Binding.EventTypeId == booking.EventTypeId)
+                    .Select(bw => new WorkflowWithBinding(bw.Workflow, bw.Binding))
+                    .ToArray();
+                return new BookingWithWorkflows(booking, pairs);
+            }
+        ).ToArray();
     }
 }
 

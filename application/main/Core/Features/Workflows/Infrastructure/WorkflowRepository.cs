@@ -46,7 +46,10 @@ public sealed class WorkflowRepository(MainDbContext context)
         entry.Property("workflow_id").CurrentValue = workflow.Id;
     }
 
-    public void TrackRemovedStep(WorkflowStep step) => Context.Entry(step).State = EntityState.Deleted;
+    public void TrackRemovedStep(WorkflowStep step)
+    {
+        Context.Entry(step).State = EntityState.Deleted;
+    }
 
     public async Task<Workflow[]> GetForOwnerAsync(UserId ownerUserId, CancellationToken cancellationToken)
     {

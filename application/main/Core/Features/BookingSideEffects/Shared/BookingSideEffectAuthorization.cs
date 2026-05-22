@@ -10,7 +10,7 @@ public static class BookingSideEffectAuthorization
 {
     public static Result CanManageWorkflows(IExecutionContext executionContext)
     {
-        if (!executionContext.UserInfo.IsFeatureFlagEnabled(FeatureFlagRegistry.CalComWorkflows.Key))
+        if (!executionContext.UserInfo.IsFeatureFlagEnabled(FeatureFlagRegistry.CapWorkflows.Key))
         {
             return Result.Forbidden("Cal.com workflows are disabled for this tenant.");
         }
@@ -30,7 +30,7 @@ public static class BookingSideEffectAuthorization
 
     public static Result CanManageWebhooks(IExecutionContext executionContext)
     {
-        if (!executionContext.UserInfo.IsFeatureFlagEnabled(FeatureFlagRegistry.CalComWebhooks.Key))
+        if (!executionContext.UserInfo.IsFeatureFlagEnabled(FeatureFlagRegistry.CapWorkflows.Key))
         {
             return Result.Forbidden("Cal.com webhooks are disabled for this tenant.");
         }

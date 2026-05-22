@@ -46,7 +46,8 @@ public sealed class GetCancellationReasonsHandler(
         var cancellations = all
             .Where(b => b.StartTime >= query.From && b.StartTime < query.To)
             .Where(b => b.Status.Equals(BookingStatuses.Cancelled, StringComparison.OrdinalIgnoreCase)
-                        || b.Status.Equals(BookingStatuses.Rejected, StringComparison.OrdinalIgnoreCase))
+                        || b.Status.Equals(BookingStatuses.Rejected, StringComparison.OrdinalIgnoreCase)
+            )
             .Select(b => b.ResponsesJson);
 
         var reasons = cancellations

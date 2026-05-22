@@ -1,12 +1,11 @@
+using System.Text.RegularExpressions;
 using Main.Database;
 using Main.Features.Scheduling.Domain;
 using Main.Features.Workflows.Domain;
 using Main.Features.Workflows.Senders;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 using SharedKernel.Integrations.Email;
 using SharedKernel.Persistence;
-using TickerQ.Utilities;
 using TickerQ.Utilities.Base;
 using TickerQ.Utilities.Interfaces;
 
@@ -139,10 +138,10 @@ public sealed class DispatchWorkflowReminderJob(
     private async Task SendEmailAsync(WorkflowReminder reminder, string recipient, string subject, string body, CancellationToken ct)
     {
         var message = new EmailMessage(
-            Recipient: recipient,
-            Subject: subject,
-            HtmlBody: body,
-            PlainTextBody: StripHtml(body)
+            recipient,
+            subject,
+            body,
+            StripHtml(body)
         );
 
         await emailClient.SendAsync(message, ct);
@@ -151,6 +150,6 @@ public sealed class DispatchWorkflowReminderJob(
 
     private static string StripHtml(string html)
     {
-        return System.Text.RegularExpressions.Regex.Replace(html, "<[^>]*>", string.Empty);
+        return Regex.Replace(html, "<[^>]*>", string.Empty);
     }
 }

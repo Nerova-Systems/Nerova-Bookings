@@ -21,13 +21,12 @@ namespace Main.Tests.RoundRobin;
 /// </summary>
 public sealed class RoundRobinBookingFlowTests : EndpointBaseTest<MainDbContext>
 {
-    private readonly HttpClient _rrClient;
-
     // Fixed test date: Wednesday 2026-06-03 (mid-week, avoids weekend edge cases)
     // 09:00 SAST = 07:00 UTC; 10:00 SAST = 08:00 UTC
     private static readonly string TestDate = "2026-06-03";
     private static readonly string SlotTimeUtc = $"{TestDate}T07:00:00Z"; // 09:00 SAST
     private static readonly string FreeSlotTimeUtc = $"{TestDate}T08:00:00Z"; // 10:00 SAST
+    private readonly HttpClient _rrClient;
 
     public RoundRobinBookingFlowTests()
     {
@@ -69,7 +68,7 @@ public sealed class RoundRobinBookingFlowTests : EndpointBaseTest<MainDbContext>
     [Fact]
     public async Task GetPublicSlots_WhenOneRotatingHostBusy_OtherFree_ShouldStillOfferSlot()
     {
-        var (handle, eventType) = await SetupRoundRobinEventTypeAsync(addSecondRotatingHost: true);
+        var (handle, eventType) = await SetupRoundRobinEventTypeAsync(true);
 
         // Seed a conflicting booking only for the member (first rotating host)
         await SeedHostBookingAsync(DatabaseSeeder.Tenant1Member.Id!, eventType.Id, DateTimeOffset.Parse(SlotTimeUtc), 30);
@@ -190,15 +189,16 @@ public sealed class RoundRobinBookingFlowTests : EndpointBaseTest<MainDbContext>
         var (handle, eventType) = await SetupRoundRobinEventTypeAsync();
 
         var bookingResponse = await AnonymousHttpClient.PostAsJsonAsync("/api/public/bookings", new
-        {
-            handle,
-            eventSlug = eventType.Slug,
-            startTime = FreeSlotTimeUtc,
-            duration = 30,
-            timeZone = "Africa/Johannesburg",
-            bookerName = "Test Booker",
-            bookerEmail = "booker@example.com"
-        });
+            {
+                handle,
+                eventSlug = eventType.Slug,
+                startTime = FreeSlotTimeUtc,
+                duration = 30,
+                timeZone = "Africa/Johannesburg",
+                bookerName = "Test Booker",
+                bookerEmail = "booker@example.com"
+            }
+        );
         bookingResponse.EnsureSuccessStatusCode();
         var created = (await bookingResponse.DeserializeResponse<CreatePublicBookingResponse>())!;
 
@@ -227,15 +227,16 @@ public sealed class RoundRobinBookingFlowTests : EndpointBaseTest<MainDbContext>
 
         // Create a booking for the Default event type via public API
         var bookingResponse = await AnonymousHttpClient.PostAsJsonAsync("/api/public/bookings", new
-        {
-            handle = "owner",
-            eventSlug = eventType.Slug,
-            startTime = FreeSlotTimeUtc,
-            duration = 30,
-            timeZone = "Africa/Johannesburg",
-            bookerName = "Test Booker",
-            bookerEmail = "booker@example.com"
-        });
+            {
+                handle = "owner",
+                eventSlug = eventType.Slug,
+                startTime = FreeSlotTimeUtc,
+                duration = 30,
+                timeZone = "Africa/Johannesburg",
+                bookerName = "Test Booker",
+                bookerEmail = "booker@example.com"
+            }
+        );
         bookingResponse.EnsureSuccessStatusCode();
         var created = (await bookingResponse.DeserializeResponse<CreatePublicBookingResponse>())!;
 
@@ -262,7 +263,7 @@ public sealed class RoundRobinBookingFlowTests : EndpointBaseTest<MainDbContext>
         // Add member as a rotating (non-fixed) host
         var addHostResponse = await _rrClient.PostAsJsonAsync(
             $"/api/round-robin/{eventType.Id}/hosts",
-            new AddRoundRobinHostRequest(DatabaseSeeder.Tenant1Member.Id!, IsFixed: false, Priority: 0, Weight: 100)
+            new AddRoundRobinHostRequest(DatabaseSeeder.Tenant1Member.Id!, false, 0, 100)
         );
         addHostResponse.EnsureSuccessStatusCode();
 
@@ -271,7 +272,7 @@ public sealed class RoundRobinBookingFlowTests : EndpointBaseTest<MainDbContext>
             // Owner also becomes a rotating host for tests that need two rotating hosts
             var ownerAsHost = await _rrClient.PostAsJsonAsync(
                 $"/api/round-robin/{eventType.Id}/hosts",
-                new AddRoundRobinHostRequest(DatabaseSeeder.Tenant1Owner.Id!, IsFixed: false, Priority: 0, Weight: 100)
+                new AddRoundRobinHostRequest(DatabaseSeeder.Tenant1Owner.Id!, false, 0, 100)
             );
             ownerAsHost.EnsureSuccessStatusCode();
         }
@@ -290,13 +291,13 @@ public sealed class RoundRobinBookingFlowTests : EndpointBaseTest<MainDbContext>
         // Owner as fixed host (always attends)
         await _rrClient.PostAsJsonAsync(
             $"/api/round-robin/{eventType.Id}/hosts",
-            new AddRoundRobinHostRequest(DatabaseSeeder.Tenant1Owner.Id!, IsFixed: true, Priority: 0, Weight: 100)
+            new AddRoundRobinHostRequest(DatabaseSeeder.Tenant1Owner.Id!, true, 0, 100)
         );
 
         // Member as rotating host
         await _rrClient.PostAsJsonAsync(
             $"/api/round-robin/{eventType.Id}/hosts",
-            new AddRoundRobinHostRequest(DatabaseSeeder.Tenant1Member.Id!, IsFixed: false, Priority: 0, Weight: 100)
+            new AddRoundRobinHostRequest(DatabaseSeeder.Tenant1Member.Id!, false, 0, 100)
         );
 
         return (handle, eventType);
@@ -313,8 +314,8 @@ public sealed class RoundRobinBookingFlowTests : EndpointBaseTest<MainDbContext>
             new EventTypeId(eventTypeId),
             startTime,
             durationMinutes,
-            beforeEventBufferMinutes: 0,
-            afterEventBufferMinutes: 0,
+            0,
+            0,
             "Host Event",
             "host@example.com",
             "UTC",
@@ -337,12 +338,13 @@ public sealed class RoundRobinBookingFlowTests : EndpointBaseTest<MainDbContext>
     private async Task<ScheduleIdResponse> CreateScheduleAsync()
     {
         var response = await AuthenticatedOwnerHttpClient.PostAsJsonAsync("/api/schedules", new
-        {
-            name = "Working hours",
-            timeZone = "Africa/Johannesburg",
-            isDefault = true,
-            availabilityWindows = new[] { new { days = new[] { 1, 2, 3, 4, 5 }, startMinute = 540, endMinute = 1020 } }
-        });
+            {
+                name = "Working hours",
+                timeZone = "Africa/Johannesburg",
+                isDefault = true,
+                availabilityWindows = new[] { new { days = new[] { 1, 2, 3, 4, 5 }, startMinute = 540, endMinute = 1020 } }
+            }
+        );
         response.EnsureSuccessStatusCode();
         return (await response.DeserializeResponse<ScheduleIdResponse>())!;
     }
@@ -368,17 +370,18 @@ public sealed class RoundRobinBookingFlowTests : EndpointBaseTest<MainDbContext>
     {
         var slug = $"rr-{Guid.NewGuid():N}";
         var response = await client.PostAsJsonAsync("/api/event-types", new
-        {
-            title = "RR event",
-            slug,
-            durationMinutes = 30,
-            hidden = false,
-            scheduleId,
-            beforeEventBufferMinutes = 0,
-            afterEventBufferMinutes = 0,
-            slotIntervalMinutes = 30,
-            minimumBookingNoticeMinutes = 0
-        });
+            {
+                title = "RR event",
+                slug,
+                durationMinutes = 30,
+                hidden = false,
+                scheduleId,
+                beforeEventBufferMinutes = 0,
+                afterEventBufferMinutes = 0,
+                slotIntervalMinutes = 30,
+                minimumBookingNoticeMinutes = 0
+            }
+        );
         response.EnsureSuccessStatusCode();
         var result = (await response.DeserializeResponse<EventTypeIdResponse>())!;
         return new EventTypeInfo(result.Id, slug);

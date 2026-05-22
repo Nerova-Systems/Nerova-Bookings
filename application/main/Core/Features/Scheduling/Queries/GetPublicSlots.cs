@@ -59,8 +59,9 @@ public sealed class GetPublicSlotsHandler(
                     hostUserIds,
                     query.StartTime.AddDays(-1),
                     query.EndTime.AddDays(1),
-                    cancellationToken)
-                : (IReadOnlyDictionary<UserId, Booking[]>)new Dictionary<UserId, Booking[]>();
+                    cancellationToken
+                )
+                : new Dictionary<UserId, Booking[]>();
 
             slots = collectiveSlotCalculator.GetSlots(context.EventType, context.Schedule, hostBookings, query.StartTime, query.EndTime, query.TimeZone, duration);
         }
@@ -74,8 +75,9 @@ public sealed class GetPublicSlotsHandler(
                     hostUserIds,
                     query.StartTime.AddDays(-1),
                     query.EndTime.AddDays(1),
-                    cancellationToken)
-                : (IReadOnlyDictionary<UserId, Booking[]>)new Dictionary<UserId, Booking[]>();
+                    cancellationToken
+                )
+                : new Dictionary<UserId, Booking[]>();
 
             slots = roundRobinSlotCalculator.GetSlots(context.EventType, context.Schedule, hostBookings, hosts, query.StartTime, query.EndTime, query.TimeZone, duration);
         }
@@ -88,7 +90,7 @@ public sealed class GetPublicSlotsHandler(
                 query.EndTime.AddDays(1),
                 cancellationToken
             );
-            slots = publicSlotCalculator.GetSlots(context.EventType, context.Schedule, bookings, query.StartTime, query.EndTime, query.TimeZone, duration);
+            slots = publicSlotCalculator.GetSlots(context.EventType, context.Schedule, bookings, [], query.StartTime, query.EndTime, query.TimeZone, duration);
         }
 
         return new PublicSlotsResponse(slots);

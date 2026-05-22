@@ -54,7 +54,7 @@ public sealed class GetPublicRescheduleBookingHandler(
         }
 
         var context = contextResult.Value!;
-        var item = await bookingRepository.GetForOwnerWithEventTypeAsync(context.Profile.TenantId, context.Profile.OwnerUserId, query.Id, cancellationToken);
+        var item = await bookingRepository.GetForOwnerWithEventTypeAsync(context.Profile.TenantId, context.Profile.OwnerUserId, context.EventType.TeamId, query.Id, cancellationToken);
         if (item is null || item.EventType.Id != context.EventType.Id)
         {
             return Result<PublicRescheduleBookingResponse>.NotFound($"Booking '{query.Id}' was not found.");

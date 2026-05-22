@@ -16,15 +16,16 @@ public sealed class WorkflowConfiguration : IEntityTypeConfiguration<Workflow>
         builder.Property(w => w.Name).HasMaxLength(100);
 
         builder.OwnsMany(w => w.Steps, stepBuilder =>
-        {
-            stepBuilder.ToTable("workflow_steps");
-            stepBuilder.WithOwner().HasForeignKey("workflow_id");
-            stepBuilder.HasKey(s => s.Id);
-            stepBuilder.MapStronglyTypedUuid<Workflow, WorkflowStep, WorkflowStepId>(s => s.Id);
-            stepBuilder.Property(s => s.SendTo).HasMaxLength(320);
-            stepBuilder.Property(s => s.EmailSubject).HasMaxLength(500);
-            stepBuilder.Property(s => s.EmailBody).HasMaxLength(5000);
-        });
+            {
+                stepBuilder.ToTable("workflow_steps");
+                stepBuilder.WithOwner().HasForeignKey("workflow_id");
+                stepBuilder.HasKey(s => s.Id);
+                stepBuilder.MapStronglyTypedUuid<Workflow, WorkflowStep, WorkflowStepId>(s => s.Id);
+                stepBuilder.Property(s => s.SendTo).HasMaxLength(320);
+                stepBuilder.Property(s => s.EmailSubject).HasMaxLength(500);
+                stepBuilder.Property(s => s.EmailBody).HasMaxLength(5000);
+            }
+        );
 
         builder.Navigation(w => w.Steps).HasField("_steps").UsePropertyAccessMode(PropertyAccessMode.Field);
 

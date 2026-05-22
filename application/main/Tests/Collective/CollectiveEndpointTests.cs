@@ -7,7 +7,6 @@ using Main.Features;
 using Main.Features.Collective.Shared;
 using Main.Features.EventTypes.Domain;
 using SharedKernel.Authentication;
-using SharedKernel.Domain;
 using SharedKernel.Tests;
 using Xunit;
 
@@ -236,17 +235,18 @@ public sealed class CollectiveEndpointTests : EndpointBaseTest<MainDbContext>
         var teamClient = CreateAuthenticatedHttpClient(ownerWithTeam);
 
         var response = await teamClient.PostAsJsonAsync("/api/event-types", new
-        {
-            title = "Team event",
-            slug = $"collective-{Guid.NewGuid():N}",
-            durationMinutes = 30,
-            hidden = false,
-            scheduleId,
-            beforeEventBufferMinutes = 0,
-            afterEventBufferMinutes = 0,
-            slotIntervalMinutes = 30,
-            minimumBookingNoticeMinutes = 0
-        });
+            {
+                title = "Team event",
+                slug = $"collective-{Guid.NewGuid():N}",
+                durationMinutes = 30,
+                hidden = false,
+                scheduleId,
+                beforeEventBufferMinutes = 0,
+                afterEventBufferMinutes = 0,
+                slotIntervalMinutes = 30,
+                minimumBookingNoticeMinutes = 0
+            }
+        );
         response.EnsureSuccessStatusCode();
         return (await response.DeserializeResponse<EventTypeIdResponse>())!;
     }
@@ -254,17 +254,18 @@ public sealed class CollectiveEndpointTests : EndpointBaseTest<MainDbContext>
     private async Task<EventTypeIdResponse> CreateSoloEventTypeAsync(string scheduleId)
     {
         var response = await AuthenticatedOwnerHttpClient.PostAsJsonAsync("/api/event-types", new
-        {
-            title = "Solo event",
-            slug = $"solo-{Guid.NewGuid():N}",
-            durationMinutes = 30,
-            hidden = false,
-            scheduleId,
-            beforeEventBufferMinutes = 0,
-            afterEventBufferMinutes = 0,
-            slotIntervalMinutes = 30,
-            minimumBookingNoticeMinutes = 0
-        });
+            {
+                title = "Solo event",
+                slug = $"solo-{Guid.NewGuid():N}",
+                durationMinutes = 30,
+                hidden = false,
+                scheduleId,
+                beforeEventBufferMinutes = 0,
+                afterEventBufferMinutes = 0,
+                slotIntervalMinutes = 30,
+                minimumBookingNoticeMinutes = 0
+            }
+        );
         response.EnsureSuccessStatusCode();
         return (await response.DeserializeResponse<EventTypeIdResponse>())!;
     }
@@ -272,12 +273,13 @@ public sealed class CollectiveEndpointTests : EndpointBaseTest<MainDbContext>
     private async Task<ScheduleIdResponse> CreateScheduleAsync()
     {
         var response = await AuthenticatedOwnerHttpClient.PostAsJsonAsync("/api/schedules", new
-        {
-            name = "Work Hours",
-            timeZone = "Africa/Johannesburg",
-            isDefault = true,
-            availabilityWindows = new[] { new { days = new[] { 1, 2, 3, 4, 5 }, startMinute = 540, endMinute = 1020 } }
-        });
+            {
+                name = "Work Hours",
+                timeZone = "Africa/Johannesburg",
+                isDefault = true,
+                availabilityWindows = new[] { new { days = new[] { 1, 2, 3, 4, 5 }, startMinute = 540, endMinute = 1020 } }
+            }
+        );
         response.EnsureSuccessStatusCode();
         return (await response.DeserializeResponse<ScheduleIdResponse>())!;
     }

@@ -10,7 +10,7 @@ public static class CoreConnectorAuthorization
 {
     public static Result CanManageConnectors(IExecutionContext executionContext)
     {
-        if (!executionContext.UserInfo.IsFeatureFlagEnabled(FeatureFlagRegistry.CalComAppsConnectors.Key))
+        if (!executionContext.UserInfo.IsFeatureFlagEnabled(FeatureFlagRegistry.CapDelegationCredentials.Key))
         {
             return Result.Forbidden("Cal.com apps connectors are disabled for this tenant.");
         }
@@ -30,7 +30,7 @@ public static class CoreConnectorAuthorization
 
     public static Result CanManageConferencing(IExecutionContext executionContext)
     {
-        if (!executionContext.UserInfo.IsFeatureFlagEnabled(FeatureFlagRegistry.CalComConferencing.Key))
+        if (!executionContext.UserInfo.IsFeatureFlagEnabled(FeatureFlagRegistry.CapDelegationCredentials.Key))
         {
             return Result.Forbidden("Cal.com conferencing is disabled for this tenant.");
         }

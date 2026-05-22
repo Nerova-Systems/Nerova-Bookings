@@ -43,10 +43,12 @@ public sealed class CreatePublicBookingValidator : AbstractValidator<CreatePubli
 public sealed class CreatePublicBookingHandler(
     PublicSchedulingResolver publicSchedulingResolver,
     IBookingRepository bookingRepository,
+    IEventTypeRepository eventTypeRepository,
     IHostRepository hostRepository,
     PublicSlotCalculator publicSlotCalculator,
     CollectiveSlotCalculator collectiveSlotCalculator,
-    RoundRobinSlotCalculator roundRobinSlotCalculator
+    RoundRobinSlotCalculator roundRobinSlotCalculator,
+    TimeProvider timeProvider
 ) : IRequestHandler<CreatePublicBookingCommand, Result<CreatePublicBookingResponse>>
 {
     public async Task<Result<CreatePublicBookingResponse>> Handle(CreatePublicBookingCommand command, CancellationToken cancellationToken)
@@ -78,7 +80,7 @@ public sealed class CreatePublicBookingHandler(
         var endTime = command.StartTime.AddMinutes(command.Duration);
 
         bool slotAvailable;
-        UserId ownerUserId = context.Profile.OwnerUserId;
+        var ownerUserId = context.Profile.OwnerUserId;
 
         if (context.EventType.SchedulingType == SchedulingType.Collective)
         {
@@ -90,8 +92,9 @@ public sealed class CreatePublicBookingHandler(
                     hostUserIds,
                     command.StartTime.AddDays(-1),
                     endTime.AddDays(1),
-                    cancellationToken)
-                : (IReadOnlyDictionary<UserId, Booking[]>)new Dictionary<UserId, Booking[]>();
+                    cancellationToken
+                )
+                : new Dictionary<UserId, Booking[]>();
 
             slotAvailable = collectiveSlotCalculator.IsSlotAvailable(context.EventType, context.Schedule, hostBookings, command.StartTime, command.Duration, command.TimeZone);
         }
@@ -105,8 +108,9 @@ public sealed class CreatePublicBookingHandler(
                     hostUserIds,
                     command.StartTime.AddDays(-1),
                     endTime.AddDays(1),
-                    cancellationToken)
-                : (IReadOnlyDictionary<UserId, Booking[]>)new Dictionary<UserId, Booking[]>();
+                    cancellationToken
+                )
+                : new Dictionary<UserId, Booking[]>();
 
             slotAvailable = roundRobinSlotCalculator.IsSlotAvailable(context.EventType, context.Schedule, hostBookings, hosts, command.StartTime, command.Duration, command.TimeZone);
 
@@ -118,7 +122,8 @@ public sealed class CreatePublicBookingHandler(
                     command.StartTime,
                     command.Duration,
                     context.EventType.BeforeEventBufferMinutes,
-                    context.EventType.AfterEventBufferMinutes);
+                    context.EventType.AfterEventBufferMinutes
+                );
 
                 if (selectedHost is not null)
                 {
@@ -135,7 +140,7 @@ public sealed class CreatePublicBookingHandler(
                 endTime.AddDays(1),
                 cancellationToken
             );
-            slotAvailable = publicSlotCalculator.IsSlotAvailable(context.EventType, context.Schedule, bookings, command.StartTime, command.Duration, command.TimeZone);
+            slotAvailable = publicSlotCalculator.IsSlotAvailable(context.EventType, context.Schedule, bookings, [], command.StartTime, command.Duration, command.TimeZone);
         }
 
         if (!slotAvailable)
@@ -291,7 +296,7 @@ public sealed class CreatePublicBookingHandler(
 
     private async Task<Result<Booking>> ResolveOriginalRescheduleBookingAsync(CreatePublicBookingCommand command, PublicSchedulingContext context, CancellationToken cancellationToken)
     {
-        var item = await bookingRepository.GetForOwnerWithEventTypeAsync(context.Profile.TenantId, context.Profile.OwnerUserId, command.RescheduleBookingId!, cancellationToken);
+        var item = await bookingRepository.GetForOwnerWithEventTypeAsync(context.Profile.TenantId, context.Profile.OwnerUserId, context.EventType.TeamId, command.RescheduleBookingId!, cancellationToken);
         if (item is null || item.EventType.Id != context.EventType.Id)
         {
             return Result<Booking>.NotFound($"Booking '{command.RescheduleBookingId}' was not found.");

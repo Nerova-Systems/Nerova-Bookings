@@ -1,5 +1,4 @@
 using Main.Features.Workflows.Senders;
-using Microsoft.Extensions.Logging;
 using SharedKernel.Domain;
 
 namespace Main.Features.Workflows.Infrastructure;

@@ -76,10 +76,11 @@ public sealed class InsightsScopeResolverTests
     public void HasInsightsAccess_WhenFlagEnabled_ShouldReturnTrue()
     {
         _context.UserInfo.Returns(new UserInfo
-        {
-            IsAuthenticated = true,
-            FeatureFlags = new HashSet<string> { InsightsAuthorization.InsightsFeatureFlagKey }
-        });
+            {
+                IsAuthenticated = true,
+                FeatureFlags = new HashSet<string> { InsightsAuthorization.InsightsFeatureFlagKey }
+            }
+        );
 
         _sut.HasInsightsAccess().Should().BeTrue();
     }

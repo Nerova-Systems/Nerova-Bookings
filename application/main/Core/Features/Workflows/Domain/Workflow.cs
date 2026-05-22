@@ -8,28 +8,40 @@ namespace Main.Features.Workflows.Domain;
 [JsonConverter(typeof(StronglyTypedIdJsonConverter<string, WorkflowStepId>))]
 public sealed record WorkflowStepId(string Value) : StronglyTypedUlid<WorkflowStepId>(Value)
 {
-    public override string ToString() => Value;
+    public override string ToString()
+    {
+        return Value;
+    }
 }
 
 [IdPrefix("wf")]
 [JsonConverter(typeof(StronglyTypedIdJsonConverter<string, WorkflowId>))]
 public sealed record WorkflowId(string Value) : StronglyTypedUlid<WorkflowId>(Value)
 {
-    public override string ToString() => Value;
+    public override string ToString()
+    {
+        return Value;
+    }
 }
 
 [IdPrefix("wfbind")]
 [JsonConverter(typeof(StronglyTypedIdJsonConverter<string, WorkflowEventTypeBindingId>))]
 public sealed record WorkflowEventTypeBindingId(string Value) : StronglyTypedUlid<WorkflowEventTypeBindingId>(Value)
 {
-    public override string ToString() => Value;
+    public override string ToString()
+    {
+        return Value;
+    }
 }
 
 [IdPrefix("wfrem")]
 [JsonConverter(typeof(StronglyTypedIdJsonConverter<string, WorkflowReminderId>))]
 public sealed record WorkflowReminderId(string Value) : StronglyTypedUlid<WorkflowReminderId>(Value)
 {
-    public override string ToString() => Value;
+    public override string ToString()
+    {
+        return Value;
+    }
 }
 
 public sealed class WorkflowStep : Entity<WorkflowStepId>

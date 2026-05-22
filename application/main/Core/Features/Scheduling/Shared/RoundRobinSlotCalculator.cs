@@ -121,15 +121,17 @@ public sealed class RoundRobinSlotCalculator(TimeProvider timeProvider)
         // Weighted least-busy: score = bookingCount / weight (lower = preferred)
         var selected = topTier
             .OrderBy(h =>
-            {
-                var bookingCount = hostBookings.TryGetValue(h.UserId, out var bookings) ? bookings.Length : 0;
-                return (double)bookingCount / h.Weight;
-            })
+                {
+                    var bookingCount = hostBookings.TryGetValue(h.UserId, out var bookings) ? bookings.Length : 0;
+                    return (double)bookingCount / h.Weight;
+                }
+            )
             .ThenBy(h =>
-            {
-                if (!hostBookings.TryGetValue(h.UserId, out var bookings) || bookings.Length == 0) return DateTimeOffset.MinValue;
-                return bookings.Max(b => b.StartTime);
-            })
+                {
+                    if (!hostBookings.TryGetValue(h.UserId, out var bookings) || bookings.Length == 0) return DateTimeOffset.MinValue;
+                    return bookings.Max(b => b.StartTime);
+                }
+            )
             .First();
 
         return selected.UserId;

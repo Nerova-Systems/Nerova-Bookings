@@ -3,7 +3,6 @@ using JetBrains.Annotations;
 using Main.Features.Scheduling.Domain;
 using SharedKernel.ExecutionContext;
 using Cqrs = SharedKernel.Cqrs;
-using FeatureFlagRegistry = SharedKernel.FeatureFlags.FeatureFlags;
 
 namespace Main.Features.Scheduling.Commands;
 
@@ -179,11 +178,6 @@ internal static class BookingLifecycleCommandGuard
 {
     public static async Task<Cqrs.Result<BookingWithEventType>> GetBookingAsync(IBookingRepository bookingRepository, IExecutionContext executionContext, BookingId bookingId, CancellationToken cancellationToken)
     {
-        if (!executionContext.UserInfo.IsFeatureFlagEnabled(FeatureFlagRegistry.CalComBookings.Key))
-        {
-            return Cqrs.Result<BookingWithEventType>.Forbidden("Cal.com bookings are disabled for this tenant.");
-        }
-
         var tenantId = executionContext.UserInfo.TenantId;
         var ownerUserId = executionContext.UserInfo.Id;
         if (tenantId is null || ownerUserId is null)
@@ -191,7 +185,7 @@ internal static class BookingLifecycleCommandGuard
             return Cqrs.Result<BookingWithEventType>.Unauthorized("Authentication is required.");
         }
 
-        var item = await bookingRepository.GetForOwnerWithEventTypeAsync(tenantId, ownerUserId, bookingId, cancellationToken);
+        var item = await bookingRepository.GetForOwnerWithEventTypeAsync(tenantId, ownerUserId, executionContext.ActiveTeamId, bookingId, cancellationToken);
         if (item is null)
         {
             return Cqrs.Result<BookingWithEventType>.NotFound($"Booking '{bookingId}' was not found.");

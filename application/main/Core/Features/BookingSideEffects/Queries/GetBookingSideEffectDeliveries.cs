@@ -36,7 +36,7 @@ public sealed class GetEventTypeSideEffectDeliveriesHandler(
 
     private static Result CanViewSideEffects(IExecutionContext executionContext)
     {
-        if (!executionContext.UserInfo.IsFeatureFlagEnabled(FeatureFlagRegistry.CalComWorkflows.Key) && !executionContext.UserInfo.IsFeatureFlagEnabled(FeatureFlagRegistry.CalComWebhooks.Key))
+        if (!executionContext.UserInfo.IsFeatureFlagEnabled(FeatureFlagRegistry.CapWorkflows.Key))
         {
             return Result.Forbidden("Cal.com workflows and webhooks are disabled for this tenant.");
         }
@@ -66,7 +66,7 @@ public sealed class GetBookingSideEffectDeliveriesHandler(
         var authorization = CanViewBookingSideEffects(executionContext);
         if (!authorization.IsSuccess) return Result<BookingSideEffectDeliveriesResponse>.From(authorization);
 
-        var booking = await bookingRepository.GetForOwnerWithEventTypeAsync(executionContext.TenantId!, executionContext.UserInfo.Id!, query.BookingId, cancellationToken);
+        var booking = await bookingRepository.GetForOwnerWithEventTypeAsync(executionContext.TenantId!, executionContext.UserInfo.Id!, executionContext.ActiveTeamId, query.BookingId, cancellationToken);
         if (booking is null)
         {
             return Result<BookingSideEffectDeliveriesResponse>.NotFound($"Booking '{query.BookingId}' was not found.");
@@ -78,12 +78,7 @@ public sealed class GetBookingSideEffectDeliveriesHandler(
 
     private static Result CanViewBookingSideEffects(IExecutionContext executionContext)
     {
-        if (!executionContext.UserInfo.IsFeatureFlagEnabled(FeatureFlagRegistry.CalComBookings.Key))
-        {
-            return Result.Forbidden("Cal.com bookings are disabled for this tenant.");
-        }
-
-        if (!executionContext.UserInfo.IsFeatureFlagEnabled(FeatureFlagRegistry.CalComWorkflows.Key) && !executionContext.UserInfo.IsFeatureFlagEnabled(FeatureFlagRegistry.CalComWebhooks.Key))
+        if (!executionContext.UserInfo.IsFeatureFlagEnabled(FeatureFlagRegistry.CapWorkflows.Key))
         {
             return Result.Forbidden("Cal.com workflows and webhooks are disabled for this tenant.");
         }

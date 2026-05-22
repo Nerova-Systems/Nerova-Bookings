@@ -6,7 +6,6 @@ using Main.Database;
 using Main.Features.Collective.Shared;
 using Main.Features.EventTypes.Domain;
 using Main.Features.Scheduling.Domain;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using SharedKernel.Authentication;
 using SharedKernel.Domain;
@@ -21,13 +20,12 @@ namespace Main.Tests.Collective;
 /// </summary>
 public sealed class CollectiveBookingFlowTests : EndpointBaseTest<MainDbContext>
 {
-    private readonly HttpClient _collectiveClient;
-
     // Fixed test date: Wednesday 2026-06-03 (to avoid weekends)
     // 09:00 SAST = 07:00 UTC; 09:30 SAST = 07:30 UTC
     private static readonly string TestDate = "2026-06-03";
     private static readonly string SlotTimeUtc = $"{TestDate}T07:00:00Z"; // 09:00 SAST
     private static readonly string FreeSlotTimeUtc = $"{TestDate}T08:00:00Z"; // 10:00 SAST
+    private readonly HttpClient _collectiveClient;
 
     public CollectiveBookingFlowTests()
     {
@@ -208,8 +206,8 @@ public sealed class CollectiveBookingFlowTests : EndpointBaseTest<MainDbContext>
             new EventTypeId(eventTypeId),
             startTime,
             durationMinutes,
-            beforeEventBufferMinutes: 0,
-            afterEventBufferMinutes: 0,
+            0,
+            0,
             "Host Event",
             "host@example.com",
             "UTC",
@@ -232,12 +230,13 @@ public sealed class CollectiveBookingFlowTests : EndpointBaseTest<MainDbContext>
     private async Task<ScheduleIdResponse> CreateScheduleAsync()
     {
         var response = await AuthenticatedOwnerHttpClient.PostAsJsonAsync("/api/schedules", new
-        {
-            name = "Working hours",
-            timeZone = "Africa/Johannesburg",
-            isDefault = true,
-            availabilityWindows = new[] { new { days = new[] { 1, 2, 3, 4, 5 }, startMinute = 540, endMinute = 1020 } }
-        });
+            {
+                name = "Working hours",
+                timeZone = "Africa/Johannesburg",
+                isDefault = true,
+                availabilityWindows = new[] { new { days = new[] { 1, 2, 3, 4, 5 }, startMinute = 540, endMinute = 1020 } }
+            }
+        );
         response.EnsureSuccessStatusCode();
         return (await response.DeserializeResponse<ScheduleIdResponse>())!;
     }
@@ -263,17 +262,18 @@ public sealed class CollectiveBookingFlowTests : EndpointBaseTest<MainDbContext>
     {
         var slug = $"collective-{Guid.NewGuid():N}";
         var response = await client.PostAsJsonAsync("/api/event-types", new
-        {
-            title = "Team event",
-            slug,
-            durationMinutes = 30,
-            hidden = false,
-            scheduleId,
-            beforeEventBufferMinutes = 0,
-            afterEventBufferMinutes = 0,
-            slotIntervalMinutes = 30,
-            minimumBookingNoticeMinutes = 0
-        });
+            {
+                title = "Team event",
+                slug,
+                durationMinutes = 30,
+                hidden = false,
+                scheduleId,
+                beforeEventBufferMinutes = 0,
+                afterEventBufferMinutes = 0,
+                slotIntervalMinutes = 30,
+                minimumBookingNoticeMinutes = 0
+            }
+        );
         response.EnsureSuccessStatusCode();
         var result = (await response.DeserializeResponse<EventTypeIdResponse>())!;
         return new EventTypeInfo(result.Id, slug);

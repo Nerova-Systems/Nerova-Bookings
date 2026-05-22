@@ -58,19 +58,22 @@ public sealed class GetBookingKpisQueryTests : InsightsEndpointBaseTest
         var cancelled = await CreateBookingAsync("consultation", "2026-06-01T09:00:00Z");
         var pending = await CreateBookingAsync("consultation", "2026-06-01T11:00:00Z");
         Connection.Update("bookings", "id", accepted.Id, [
-            ("start_time", DateTimeOffset.Parse("2025-06-02T07:00:00Z")),
-            ("end_time", DateTimeOffset.Parse("2025-06-02T07:30:00Z"))
-        ]);
+                ("start_time", DateTimeOffset.Parse("2025-06-02T07:00:00Z")),
+                ("end_time", DateTimeOffset.Parse("2025-06-02T07:30:00Z"))
+            ]
+        );
         Connection.Update("bookings", "id", cancelled.Id, [
-            ("status", "cancelled"),
-            ("start_time", DateTimeOffset.Parse("2025-06-02T09:00:00Z")),
-            ("end_time", DateTimeOffset.Parse("2025-06-02T09:30:00Z"))
-        ]);
+                ("status", "cancelled"),
+                ("start_time", DateTimeOffset.Parse("2025-06-02T09:00:00Z")),
+                ("end_time", DateTimeOffset.Parse("2025-06-02T09:30:00Z"))
+            ]
+        );
         Connection.Update("bookings", "id", pending.Id, [
-            ("status", "pending"),
-            ("start_time", DateTimeOffset.Parse("2025-06-02T11:00:00Z")),
-            ("end_time", DateTimeOffset.Parse("2025-06-02T11:30:00Z"))
-        ]);
+                ("status", "pending"),
+                ("start_time", DateTimeOffset.Parse("2025-06-02T11:00:00Z")),
+                ("end_time", DateTimeOffset.Parse("2025-06-02T11:30:00Z"))
+            ]
+        );
 
         // Act
         var response = await InsightsClient.GetAsync(Url);

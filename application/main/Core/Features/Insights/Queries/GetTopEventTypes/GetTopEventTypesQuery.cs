@@ -51,25 +51,28 @@ public sealed class GetTopEventTypesHandler(
         // DateTimeOffset comparisons cannot be translated to SQL on SQLite; filter in memory after loading.
         // Soft-delete filter on EventType is disabled so bookings for deleted event types are still included.
         var withEventTypes = await bookingRepository.GetForScopeWithEventTypesUnfilteredAsync(
-            scope.TenantId, scope.UserId, scope.TeamId, cancellationToken);
+            scope.TenantId, scope.UserId, scope.TeamId, cancellationToken
+        );
 
         var grouped = withEventTypes
             .Where(x => x.Booking.StartTime >= query.From && x.Booking.StartTime < query.To)
             .GroupBy(x => new { x.EventType.Id, x.EventType.Title, x.EventType.Slug })
             .Select(g =>
-            {
-                var total = g.Count();
-                var cancelled = g.Count(x => x.Booking.Status.Equals(BookingStatuses.Cancelled, StringComparison.OrdinalIgnoreCase)
-                                              || x.Booking.Status.Equals(BookingStatuses.Rejected, StringComparison.OrdinalIgnoreCase));
-                return new EventTypeInsights(
-                    g.Key.Id,
-                    g.Key.Title,
-                    g.Key.Slug,
-                    total,
-                    cancelled,
-                    total > 0 ? Math.Round((double)cancelled / total, 4) : 0.0
-                );
-            })
+                {
+                    var total = g.Count();
+                    var cancelled = g.Count(x => x.Booking.Status.Equals(BookingStatuses.Cancelled, StringComparison.OrdinalIgnoreCase)
+                                                 || x.Booking.Status.Equals(BookingStatuses.Rejected, StringComparison.OrdinalIgnoreCase)
+                    );
+                    return new EventTypeInsights(
+                        g.Key.Id,
+                        g.Key.Title,
+                        g.Key.Slug,
+                        total,
+                        cancelled,
+                        total > 0 ? Math.Round((double)cancelled / total, 4) : 0.0
+                    );
+                }
+            )
             .OrderByDescending(e => e.TotalCount)
             .Take(query.Limit)
             .ToArray();

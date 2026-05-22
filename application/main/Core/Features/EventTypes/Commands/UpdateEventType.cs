@@ -1,3 +1,4 @@
+using System.Text.Json;
 using FluentValidation;
 using JetBrains.Annotations;
 using Main.Features.EventTypes.Domain;
@@ -201,7 +202,7 @@ public sealed class UpdateEventTypeHandler(
         }
 
         var normalizedSettings = EventTypeSettings.Normalize(command.Settings, command.DurationMinutes, normalizedLocationType, normalizedLocationValue);
-        if (System.Text.Json.JsonSerializer.Serialize(normalizedSettings) != System.Text.Json.JsonSerializer.Serialize(eventType.Settings))
+        if (JsonSerializer.Serialize(normalizedSettings) != JsonSerializer.Serialize(eventType.Settings))
         {
             yield return ManagedEventTypeFields.Settings;
         }

@@ -1,8 +1,6 @@
 using Main.Features.Workflows.Domain;
 using Main.Features.Workflows.EventHandlers;
-using Main.Features.Workflows.Infrastructure;
 using SharedKernel.Persistence;
-using TickerQ.Utilities;
 using TickerQ.Utilities.Base;
 using TickerQ.Utilities.Interfaces;
 

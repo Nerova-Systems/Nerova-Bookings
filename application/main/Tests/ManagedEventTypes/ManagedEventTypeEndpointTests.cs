@@ -4,10 +4,8 @@ using FluentAssertions;
 using JetBrains.Annotations;
 using Main.Database;
 using Main.Features;
-using Main.Features.EventTypes.Domain;
 using Main.Features.ManagedEventTypes.Shared;
 using SharedKernel.Authentication;
-using SharedKernel.Domain;
 using SharedKernel.Tests;
 using SharedKernel.Validation;
 using Xunit;
@@ -167,17 +165,18 @@ public sealed class ManagedEventTypeEndpointTests : EndpointBaseTest<MainDbConte
 
         // Update the parent via the standard event type endpoint
         await AuthenticatedOwnerHttpClient.PutAsJsonAsync($"/api/event-types/{parent.Id}", new
-        {
-            title = "Updated by owner",
-            slug = "team-event",
-            durationMinutes = 45,
-            hidden = false,
-            scheduleId = schedule.Id,
-            beforeEventBufferMinutes = 0,
-            afterEventBufferMinutes = 0,
-            slotIntervalMinutes = 30,
-            minimumBookingNoticeMinutes = 60
-        });
+            {
+                title = "Updated by owner",
+                slug = "team-event",
+                durationMinutes = 45,
+                hidden = false,
+                scheduleId = schedule.Id,
+                beforeEventBufferMinutes = 0,
+                afterEventBufferMinutes = 0,
+                slotIntervalMinutes = 30,
+                minimumBookingNoticeMinutes = 60
+            }
+        );
 
         // Sync
         var syncResponse = await _managedClient.PostAsync($"/api/managed-event-types/{parent.Id}/sync", null);
@@ -207,7 +206,7 @@ public sealed class ManagedEventTypeEndpointTests : EndpointBaseTest<MainDbConte
 
         var statusResponse = await _managedClient.GetAsync($"/api/managed-event-types/{parent.Id}/status");
         var status = await statusResponse.DeserializeResponse<AssignmentStatusResponse>();
-        status!.UnlockedFields.Should().BeEquivalentTo(["title", "description"]);
+        status!.UnlockedFields.Should().BeEquivalentTo("title", "description");
     }
 
     [Fact]
@@ -222,7 +221,8 @@ public sealed class ManagedEventTypeEndpointTests : EndpointBaseTest<MainDbConte
         );
 
         await response.ShouldHaveErrorStatusCode(HttpStatusCode.BadRequest,
-            [new ErrorDetail("UnlockedFields", "Unknown fields: unknownField.")]);
+            [new ErrorDetail("UnlockedFields", "Unknown fields: unknownField.")]
+        );
     }
 
     // ─── Delete cascade ───────────────────────────────────────────────────────
@@ -278,7 +278,7 @@ public sealed class ManagedEventTypeEndpointTests : EndpointBaseTest<MainDbConte
             Id = memberId,
             IsAuthenticated = true,
             Locale = DatabaseSeeder.Tenant1Member.Locale,
-            Role = DatabaseSeeder.Tenant1Owner.Role,  // Owner role to pass CanManageSchedulingSetup
+            Role = DatabaseSeeder.Tenant1Owner.Role, // Owner role to pass CanManageSchedulingSetup
             TenantId = DatabaseSeeder.Tenant1Member.TenantId,
             FeatureFlags = new HashSet<string> { ManagedEventTypeAuthorization.ManagedEventTypesFeatureFlagKey }
         };
@@ -286,17 +286,18 @@ public sealed class ManagedEventTypeEndpointTests : EndpointBaseTest<MainDbConte
 
         // Attempt to change a locked field (title is locked by default — UnlockedFields is empty)
         var response = await memberOwnerClient.PutAsJsonAsync($"/api/event-types/{child.ChildId}", new
-        {
-            title = "Attempting to override locked title",
-            slug = child.Slug,
-            durationMinutes = 30,
-            hidden = false,
-            scheduleId = schedule.Id,  // lock check fires before schedule lookup, so any valid ScheduleId works
-            beforeEventBufferMinutes = 0,
-            afterEventBufferMinutes = 0,
-            slotIntervalMinutes = 30,
-            minimumBookingNoticeMinutes = 60
-        });
+            {
+                title = "Attempting to override locked title",
+                slug = child.Slug,
+                durationMinutes = 30,
+                hidden = false,
+                scheduleId = schedule.Id, // lock check fires before schedule lookup, so any valid ScheduleId works
+                beforeEventBufferMinutes = 0,
+                afterEventBufferMinutes = 0,
+                slotIntervalMinutes = 30,
+                minimumBookingNoticeMinutes = 60
+            }
+        );
 
         await response.ShouldHaveErrorStatusCode(HttpStatusCode.Forbidden, "Fields title are locked by the managed template.");
         TelemetryEventsCollectorSpy.CollectedEvents.OfType<ManagedEventTypeFieldOverrideRejected>().Should().ContainSingle();
@@ -321,17 +322,18 @@ public sealed class ManagedEventTypeEndpointTests : EndpointBaseTest<MainDbConte
         var teamClient = CreateAuthenticatedHttpClient(ownerWithTeam);
 
         var response = await teamClient.PostAsJsonAsync("/api/event-types", new
-        {
-            title = "Team event",
-            slug = $"team-event-{Guid.NewGuid():N}",
-            durationMinutes = 30,
-            hidden = false,
-            scheduleId,
-            beforeEventBufferMinutes = 0,
-            afterEventBufferMinutes = 0,
-            slotIntervalMinutes = 30,
-            minimumBookingNoticeMinutes = 60
-        });
+            {
+                title = "Team event",
+                slug = $"team-event-{Guid.NewGuid():N}",
+                durationMinutes = 30,
+                hidden = false,
+                scheduleId,
+                beforeEventBufferMinutes = 0,
+                afterEventBufferMinutes = 0,
+                slotIntervalMinutes = 30,
+                minimumBookingNoticeMinutes = 60
+            }
+        );
         response.EnsureSuccessStatusCode();
         return (await response.DeserializeResponse<EventTypeIdResponse>())!;
     }
@@ -339,12 +341,13 @@ public sealed class ManagedEventTypeEndpointTests : EndpointBaseTest<MainDbConte
     private async Task<ScheduleIdResponse> CreateScheduleAsync()
     {
         var response = await AuthenticatedOwnerHttpClient.PostAsJsonAsync("/api/schedules", new
-        {
-            name = "Working hours",
-            timeZone = "Africa/Johannesburg",
-            isDefault = true,
-            availabilityWindows = new[] { new { days = new[] { 1, 2, 3, 4, 5 }, startMinute = 540, endMinute = 1020 } }
-        });
+            {
+                name = "Working hours",
+                timeZone = "Africa/Johannesburg",
+                isDefault = true,
+                availabilityWindows = new[] { new { days = new[] { 1, 2, 3, 4, 5 }, startMinute = 540, endMinute = 1020 } }
+            }
+        );
         response.EnsureSuccessStatusCode();
         return (await response.DeserializeResponse<ScheduleIdResponse>())!;
     }

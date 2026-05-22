@@ -86,7 +86,7 @@ public sealed class Booking : AggregateRoot<BookingId>, ITenantScopedEntity
         FromReschedule = null;
     }
 
-    public UserId OwnerUserId { get; }
+    public UserId OwnerUserId { get; private set; }
 
     public EventTypeId EventTypeId { get; }
 
@@ -115,6 +115,40 @@ public sealed class Booking : AggregateRoot<BookingId>, ITenantScopedEntity
     public string Status { get; private set; }
 
     public string ResponsesJson { get; private set; }
+
+    public string MetadataJson { get; }
+
+    public string AttendeesJson { get; private set; }
+
+    public string ReferencesJson { get; private set; }
+
+    public string SeatReferencesJson { get; }
+
+    public string? CancellationReason { get; private set; }
+
+    public string? RejectionReason { get; private set; }
+
+    public string? RescheduleReason { get; private set; }
+
+    public bool Rescheduled { get; private set; }
+
+    public string? FromReschedule { get; private set; }
+
+    public string? CancelledBy { get; private set; }
+
+    public string? RescheduledBy { get; private set; }
+
+    [NotMapped]
+    public BookingAttendee[] Attendees => JsonSerializer.Deserialize<BookingAttendee[]>(AttendeesJson, JsonSerializerOptions) ?? [];
+
+    [NotMapped]
+    public BookingReference[] References => JsonSerializer.Deserialize<BookingReference[]>(ReferencesJson, JsonSerializerOptions) ?? [];
+
+    [NotMapped]
+    public BookingSeatReference[] SeatReferences => JsonSerializer.Deserialize<BookingSeatReference[]>(SeatReferencesJson, JsonSerializerOptions) ?? [];
+
+    [NotMapped]
+    public Dictionary<string, string> Metadata => JsonSerializer.Deserialize<Dictionary<string, string>>(MetadataJson, JsonSerializerOptions) ?? [];
 
     /// <summary>
     ///     When non-null, references a Tenant of TenantKind.Team. When null, the aggregate is owned by the existing
@@ -145,7 +179,26 @@ public sealed class Booking : AggregateRoot<BookingId>, ITenantScopedEntity
         TeamId = null;
     }
 
-    public void Cancel()
+    public void RecordCreated()
+    {
+        RaiseSideEffectEvent(BookingSideEffectConstants.BookingCreated);
+    }
+
+    public void Confirm()
+    {
+        Status = "accepted";
+        RejectionReason = null;
+        RaiseSideEffectEvent(BookingSideEffectConstants.BookingConfirmed);
+    }
+
+    public void Reject(string? rejectionReason)
+    {
+        Status = "rejected";
+        RejectionReason = string.IsNullOrWhiteSpace(rejectionReason) ? null : rejectionReason.Trim();
+        RaiseSideEffectEvent(BookingSideEffectConstants.BookingRejected);
+    }
+
+    public void Cancel(string? cancellationReason = null, string? cancelledBy = null)
     {
         Status = "cancelled";
         CancellationReason = string.IsNullOrWhiteSpace(cancellationReason) ? null : cancellationReason.Trim();
@@ -232,6 +285,25 @@ public sealed class Booking : AggregateRoot<BookingId>, ITenantScopedEntity
         int durationMinutes,
         int beforeEventBufferMinutes,
         int afterEventBufferMinutes,
+        string bookerName,
+        string bookerEmail,
+        string timeZone,
+        string status,
+        Dictionary<string, string> responses,
+        TenantId? teamId = null
+    )
+    {
+        return Create(tenantId, ownerUserId, eventTypeId, startTime, durationMinutes, beforeEventBufferMinutes, afterEventBufferMinutes, string.Empty, null, null, null, bookerName, bookerEmail, timeZone, status, responses, teamId);
+    }
+
+    public static Booking Create(
+        TenantId tenantId,
+        UserId ownerUserId,
+        EventTypeId eventTypeId,
+        DateTimeOffset startTime,
+        int durationMinutes,
+        int beforeEventBufferMinutes,
+        int afterEventBufferMinutes,
         string title,
         string? description,
         string? locationType,
@@ -244,9 +316,41 @@ public sealed class Booking : AggregateRoot<BookingId>, ITenantScopedEntity
         TenantId? teamId = null
     )
     {
-        var booking = new Booking(tenantId, ownerUserId, eventTypeId, startTime, startTime.AddMinutes(durationMinutes), beforeEventBufferMinutes, afterEventBufferMinutes, bookerName, bookerEmail, timeZone, status, responses);
+        var booking = new Booking(tenantId, ownerUserId, eventTypeId, startTime, startTime.AddMinutes(durationMinutes), beforeEventBufferMinutes, afterEventBufferMinutes, title, description, locationType, locationValue, bookerName, bookerEmail, timeZone, status, responses, null);
         if (teamId is not null) booking.AssignToTeam(teamId);
         return booking;
+    }
+
+    private void RaiseSideEffectEvent(string trigger)
+    {
+        AddDomainEvent(
+            new BookingLifecycleSideEffectEvent(
+                TenantId,
+                OwnerUserId,
+                EventTypeId,
+                Id,
+                trigger,
+                Title,
+                BookerName,
+                BookerEmail,
+                StartTime,
+                EndTime,
+                Status,
+                LocationType,
+                LocationValue
+            )
+        );
+    }
+
+    private static bool IsSameReference(BookingReference existing, BookingReference replacement)
+    {
+        if (!existing.Type.Equals(replacement.Type, StringComparison.OrdinalIgnoreCase)) return false;
+        if (!string.IsNullOrWhiteSpace(existing.ExternalCalendarId) || !string.IsNullOrWhiteSpace(replacement.ExternalCalendarId))
+        {
+            return string.Equals(existing.ExternalCalendarId, replacement.ExternalCalendarId, StringComparison.OrdinalIgnoreCase);
+        }
+
+        return string.Equals(existing.Uid, replacement.Uid, StringComparison.OrdinalIgnoreCase);
     }
 }
 
