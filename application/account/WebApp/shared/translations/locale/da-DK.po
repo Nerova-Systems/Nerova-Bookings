@@ -29,6 +29,11 @@ msgstr "{0, plural, one {Slet # opskrift} other {Slet # opskrifter}}"
 msgid "{0} hours ago"
 msgstr "for {0} timer siden"
 
+#. placeholder {0}: role.memberCount
+#, fuzzy
+msgid "{0} members assigned"
+msgstr "{0} members assigned"
+
 #. placeholder {0}: smartDate.value
 msgid "{0} minutes ago"
 msgstr "for {0} minutter siden"
@@ -127,6 +132,10 @@ msgstr "Et hurtigt overblik over din kontoaktivitet."
 msgid "A small selection of chart variants built on recharts."
 msgstr "Et lille udvalg af diagramvarianter bygget på recharts."
 
+#, fuzzy
+msgid "About"
+msgstr "About"
+
 msgid "About this feature"
 msgstr "Om denne funktion"
 
@@ -186,6 +195,18 @@ msgstr "Konto skiftet"
 
 msgid "Achieved in Microsoft Defender for Cloud following Azure best practices"
 msgstr "Opnået i Microsoft Defender for Cloud ved at følge Azures bedste praksis"
+
+#, fuzzy
+msgid "acme-design"
+msgstr "acme-design"
+
+#, fuzzy
+msgid "acme.com"
+msgstr "acme.com"
+
+#, fuzzy
+msgid "acme.com, partner.com"
+msgstr "acme.com, partner.com"
 
 msgid "Action"
 msgstr "Handling"
@@ -280,6 +301,10 @@ msgstr "Alle modifikatorer"
 msgid "All users"
 msgstr "Alle brugere"
 
+#, fuzzy
+msgid "Allowed email domains"
+msgstr "Tilladte e-mail-domæner"
+
 msgid "Always underlined"
 msgstr "Altid understreget"
 
@@ -332,6 +357,11 @@ msgstr "Arkiver dette element?"
 msgid "Are you sure you want to delete <0>{0} users</0>?"
 msgstr "Er du sikker på, at du vil slette <0>{0} brugere</0>?"
 
+#. placeholder {0}: role.name
+#, fuzzy
+msgid "Are you sure you want to delete <0>{0}</0>? Members assigned to this role will lose its permissions."
+msgstr "Are you sure you want to delete <0>{0}</0>? Members assigned to this role will lose its permissions."
+
 msgid "Are you sure you want to delete <0>{userDisplayName}</0>?"
 msgstr "Er du sikker på, at du vil slette <0>{userDisplayName}</0>?"
 
@@ -353,6 +383,10 @@ msgstr "Arealdiagram - Interaktivt"
 
 msgid "Aspect ratio"
 msgstr "Billedformat"
+
+#, fuzzy
+msgid "Attributes"
+msgstr "Attributes"
 
 msgid "Audit reports and assessments"
 msgstr "Revisions rapporter og vurderinger"
@@ -383,6 +417,10 @@ msgstr "Azure Overholdelse"
 
 msgid "Azure Compliance (opens in new window)"
 msgstr "Azure Overholdelse (åbner i nyt vindue)"
+
+#, fuzzy
+msgid "Azure tenant ID"
+msgstr "Azure tenant-ID"
 
 msgid "Back"
 msgstr "Tilbage"
@@ -642,6 +680,10 @@ msgstr "Chicken katsu"
 msgid "Chiles rellenos"
 msgstr "Chiles rellenos"
 
+#, fuzzy
+msgid "Choose a name and select the permissions this role grants."
+msgstr "Choose a name and select the permissions this role grants."
+
 msgid "Choose a plan to get started."
 msgstr "Vælg en plan for at komme i gang."
 
@@ -668,6 +710,14 @@ msgstr "Ryd søgning"
 
 msgid "Click a row to open the side pane. Use Shift or Cmd/Ctrl with click or arrow keys to multi-select, Enter to open, and Space to toggle the selection."
 msgstr "Klik på en række for at åbne sidepanelet. Brug Shift eller Cmd/Ctrl sammen med klik eller piletaster for flervalg, Enter for at åbne og mellemrum for at skifte markeringen."
+
+#, fuzzy
+msgid "Client ID"
+msgstr "Klient-ID"
+
+#, fuzzy
+msgid "Client secret"
+msgstr "Klienthemmelighed"
 
 msgid "Close"
 msgstr "Luk"
@@ -732,6 +782,10 @@ msgstr "Bekræft handling"
 msgid "Confirm downgrade"
 msgstr "Bekræft nedgradering"
 
+#, fuzzy
+msgid "Confirm team name"
+msgstr "Confirm team name"
+
 msgid "Contact support"
 msgstr "Kontakt support"
 
@@ -746,6 +800,10 @@ msgstr "Kontekstmenu"
 
 msgid "Continue"
 msgstr "Fortsæt"
+
+#, fuzzy
+msgid "Control how your team appears to bookers."
+msgstr "Control how your team appears to bookers."
 
 msgid "Controls"
 msgstr "Kontroller"
@@ -777,17 +835,55 @@ msgstr "Land"
 msgid "Create"
 msgstr "Opret"
 
+#, fuzzy
+msgid "Create a custom role to grant members the exact permissions they need."
+msgstr "Create a custom role to grant members the exact permissions they need."
+
+#, fuzzy
+msgid "Create a role"
+msgstr "Create a role"
+
+#, fuzzy
+msgid "Create a team"
+msgstr "Create a team"
+
+#, fuzzy
+msgid "Create a team to collaborate on event types and bookings with your colleagues."
+msgstr "Create a team to collaborate on event types and bookings with your colleagues."
+
 msgid "Create new account"
 msgstr "Opret ny konto"
 
+msgid "Create new organization"
+msgstr "Opret ny organisation"
+
+msgid "Create new team"
+msgstr "Opret nyt team"
+
+#, fuzzy
+msgid "Create role"
+msgstr "Create role"
+
 msgid "Create shortcut..."
 msgstr "Opret genvej..."
+
+#, fuzzy
+msgid "Create team"
+msgstr "Create team"
+
+#, fuzzy
+msgid "Create teams to group members and share event types, schedules, and bookings."
+msgstr "Create teams to group members and share event types, schedules, and bookings."
 
 msgid "Create your account"
 msgstr "Opret din konto"
 
 msgid "Created"
 msgstr "Oprettet"
+
+#, fuzzy
+msgid "Creating..."
+msgstr "Creating..."
 
 msgid "Credit note"
 msgstr "Kreditnota"
@@ -812,6 +908,18 @@ msgstr "Nuværende side"
 
 msgid "Current plan"
 msgstr "Nuværende plan"
+
+#, fuzzy
+msgid "Custom role"
+msgstr "Custom role"
+
+#, fuzzy
+msgid "Custom role updated"
+msgstr "Custom role updated"
+
+#, fuzzy
+msgid "Custom SMTP"
+msgstr "Brugerdefineret SMTP"
 
 msgid "Customer deleted"
 msgstr "Kunde slettet"
@@ -882,8 +990,17 @@ msgstr "Standard"
 msgid "Default alert"
 msgstr "Standardadvarsel"
 
+#, fuzzy
+msgid "Define custom roles and assign permissions to control what your members can do."
+msgstr "Define custom roles and assign permissions to control what your members can do."
+
 msgid "Delete"
 msgstr "Slet"
+
+#. placeholder {0}: role.name
+#, fuzzy
+msgid "Delete {0}"
+msgstr "Delete {0}"
 
 #. placeholder {0}: selectedUsers.length
 msgid "Delete {0} users"
@@ -901,8 +1018,15 @@ msgstr "Slet permanent"
 msgid "Delete recipe"
 msgstr "Slet opskrift"
 
+#, fuzzy
+msgid "Delete role"
+msgstr "Delete role"
+
 msgid "Delete selected recipes"
 msgstr "Slet valgte opskrifter"
+
+msgid "Delete team"
+msgstr "Delete team"
 
 msgid "Delete this item?"
 msgstr "Slet dette element?"
@@ -927,6 +1051,15 @@ msgstr "Slettede brugere indlæses"
 
 msgid "Deleted users will appear here for recovery"
 msgstr "Slettede brugere vil blive vist her til gendannelse"
+
+#. placeholder {0}: team.name
+#, fuzzy
+msgid "Deleting <0>{0}</0> will remove all memberships and is irreversible. Type the team name to confirm."
+msgstr "Deleting <0>{0}</0> will remove all memberships and is irreversible. Type the team name to confirm."
+
+#, fuzzy
+msgid "Deleting a team is permanent and cannot be undone."
+msgstr "Deleting a team is permanent and cannot be undone."
 
 msgid "Description"
 msgstr "Beskrivelse"
@@ -957,6 +1090,10 @@ msgstr "Sværhedsgrad"
 
 msgid "Dirty dialog"
 msgstr "Uren dialog"
+
+#, fuzzy
+msgid "Disable"
+msgstr "Deaktiver"
 
 msgid "Disabled"
 msgstr "Deaktiveret"
@@ -1045,6 +1182,11 @@ msgstr "Edge"
 msgid "Edit"
 msgstr "Rediger"
 
+#. placeholder {0}: role.name
+#, fuzzy
+msgid "Edit {0}"
+msgstr "Edit {0}"
+
 msgid "Edit billing information"
 msgstr "Rediger faktureringsoplysninger"
 
@@ -1081,11 +1223,23 @@ msgstr "Tom"
 msgid "Empty recycle bin"
 msgstr "Tøm papirkurv"
 
+#, fuzzy
+msgid "Enable"
+msgstr "Aktiver"
+
 msgid "Enabled"
 msgstr "Aktiveret"
 
 msgid "Enchiladas verdes"
 msgstr "Enchiladas verdes"
+
+#, fuzzy
+msgid "Encrypt SMTP connection with SSL/TLS."
+msgstr "Kryptér SMTP-forbindelsen med SSL/TLS."
+
+#, fuzzy
+msgid "Enter SMTP password"
+msgstr "Indtast SMTP-adgangskode"
 
 msgid "Enter the billing details for your subscription."
 msgstr "Indtast faktureringsoplysningerne for dit abonnement."
@@ -1156,6 +1310,18 @@ msgstr "Ekstra lille"
 msgid "Failed"
 msgstr "Mislykket"
 
+#, fuzzy
+msgid "Failed to create role. Please try again."
+msgstr "Failed to create role. Please try again."
+
+#, fuzzy
+msgid "Failed to create team. Please try again."
+msgstr "Failed to create team. Please try again."
+
+#, fuzzy
+msgid "Failed to update role. Please try again."
+msgstr "Failed to update role. Please try again."
+
 msgid "Feature preferences"
 msgstr "Funktionspræferencer"
 
@@ -1204,6 +1370,14 @@ msgstr "Fransk"
 msgid "friend@example.com"
 msgstr "friend@example.com"
 
+#, fuzzy
+msgid "From email"
+msgstr "Fra-e-mail"
+
+#, fuzzy
+msgid "From name"
+msgstr "Fra-navn"
+
 msgid "Full access except changing user roles and account settings"
 msgstr "Fuld adgang undtagen ændring af brugerroller og kontoindstillinger"
 
@@ -1231,6 +1405,10 @@ msgstr "GDPR-kompatibel"
 msgid "GDPR Compliant"
 msgstr "GDPR-kompatibel"
 
+#, fuzzy
+msgid "General"
+msgstr "General"
+
 msgid "Ghost"
 msgstr "Gennemsigtig"
 
@@ -1243,14 +1421,46 @@ msgstr "GitHub deployer direkte til Azure uden adgangskoder eller API-nøgler"
 msgid "Go to account settings"
 msgstr "Gå til kontoindstillinger"
 
+#, fuzzy
+msgid "Go to billing"
+msgstr "Gå til fakturering"
+
 msgid "Go to home"
 msgstr "Gå til forsiden"
 
 msgid "Google"
 msgstr "Google"
 
+#, fuzzy
+msgid "Google SSO configuration saved"
+msgstr "Google SSO-konfiguration gemt"
+
+#, fuzzy
+msgid "Google SSO disabled"
+msgstr "Google SSO deaktiveret"
+
+#, fuzzy
+msgid "Google SSO enabled"
+msgstr "Google SSO aktiveret"
+
+#, fuzzy
+msgid "Google SSO test failed"
+msgstr "Google SSO-test mislykkedes"
+
+#, fuzzy
+msgid "Google SSO test succeeded"
+msgstr "Google SSO-test lykkedes"
+
+#, fuzzy
+msgid "Google Workspace"
+msgstr "Google Workspace"
+
 msgid "Green curry"
 msgstr "Grøn karry"
+
+#, fuzzy
+msgid "Group members into teams to share event types, schedules, and round-robin assignments."
+msgstr "Gruppér medlemmer i teams for at dele begivenhedstyper, kalendere og round-robin-tildelinger."
 
 msgid "Hard"
 msgstr "Svær"
@@ -1261,8 +1471,32 @@ msgstr "Hjælp dit team med at genkende dine invitationer"
 msgid "Hi! Welcome back"
 msgstr "Hej! Velkommen tilbage"
 
+#, fuzzy
+msgid "Hide \"Book a team member\""
+msgstr "Hide \"Book a team member\""
+
+#, fuzzy
+msgid "Hide branding"
+msgstr "Hide branding"
+
 msgid "Hide details"
 msgstr "Skjul detaljer"
+
+#, fuzzy
+msgid "Hide team profile link"
+msgstr "Hide team profile link"
+
+#, fuzzy
+msgid "Hide the \"Powered by\" footer on booking pages."
+msgstr "Hide the \"Powered by\" footer on booking pages."
+
+#, fuzzy
+msgid "Hide the option to book any available member from the team profile page."
+msgstr "Hide the option to book any available member from the team profile page."
+
+#, fuzzy
+msgid "Hide the team's member list and profile page from public visitors."
+msgstr "Hide the team's member list and profile page from public visitors."
 
 msgid "Home"
 msgstr "Hjem"
@@ -1272,6 +1506,10 @@ msgstr "Vandret"
 
 msgid "Horizontal nav bar with rich dropdown sections. Use it for marketing-style site headers or top-level discovery navigation."
 msgstr "Vandret navigationsbjælke med rige dropdown-sektioner. Brug det til marketingsstilede site-headers eller top-niveau opdagelsesnavigation."
+
+#, fuzzy
+msgid "Host"
+msgstr "Vært"
 
 msgid "HoverCard"
 msgstr "HoverCard"
@@ -1324,8 +1562,20 @@ msgstr "Ugyldig anmodning"
 msgid "Invitation pending"
 msgstr "Invitation afventer"
 
+#, fuzzy
+msgid "Invitation sent"
+msgstr "Invitation sent"
+
 msgid "Invite"
 msgstr "Inviter"
+
+#, fuzzy
+msgid "Invite member"
+msgstr "Invite member"
+
+#, fuzzy
+msgid "Invite team member"
+msgstr "Invite team member"
 
 msgid "Invite user"
 msgstr "Inviter bruger"
@@ -1453,6 +1703,10 @@ msgstr "Lær mere"
 msgid "Leave"
 msgstr "Forlad"
 
+#, fuzzy
+msgid "Leave blank to keep current secret"
+msgstr "Lad være tom for at beholde nuværende hemmelighed"
+
 msgid "Left"
 msgstr "Venstre"
 
@@ -1501,6 +1755,10 @@ msgstr "Linkvarianter"
 msgid "LinkedIn"
 msgstr "LinkedIn"
 
+#, fuzzy
+msgid "Loading permissions..."
+msgstr "Loading permissions..."
+
 msgid "Loading..."
 msgstr "Indlæser..."
 
@@ -1534,6 +1792,14 @@ msgstr "Login-bekræftelseskode"
 msgid "Logo"
 msgstr "Logo"
 
+#, fuzzy
+msgid "Logo removed"
+msgstr "Logo fjernet"
+
+#, fuzzy
+msgid "Logo updated"
+msgstr "Logo opdateret"
+
 msgid "Long date"
 msgstr "Lang dato"
 
@@ -1552,11 +1818,24 @@ msgstr "Hovednavigation"
 msgid "Manage"
 msgstr "Administrer"
 
+#. placeholder {0}: team.name
+#, fuzzy
+msgid "Manage {0}"
+msgstr "Manage {0}"
+
 msgid "Manage subscription"
 msgstr "Administrer abonnement"
 
+#, fuzzy
+msgid "Manage teams"
+msgstr "Administrer teams"
+
 msgid "Manage your account here."
 msgstr "Administrer din konto her."
+
+#, fuzzy
+msgid "Manage your organization's subscription and invoices."
+msgstr "Administrer din organisations abonnement og fakturaer."
 
 msgid "Manage your payment methods and billing information."
 msgstr "Administrer dine betalingsmetoder og faktureringsoplysninger."
@@ -1588,6 +1867,22 @@ msgstr "Mødenoter fra sidste uge"
 msgid "Member"
 msgstr "Medlem"
 
+#, fuzzy
+msgid "Member attributes are coming soon."
+msgstr "Member attributes are coming soon."
+
+#, fuzzy
+msgid "Member removed"
+msgstr "Member removed"
+
+#, fuzzy
+msgid "Members"
+msgstr "Members"
+
+#, fuzzy
+msgid "Membership role"
+msgstr "Membership role"
+
 msgid "Merge"
 msgstr "Flet"
 
@@ -1612,8 +1907,32 @@ msgstr "Microsoft DBA"
 msgid "Microsoft DPA (opens in new window)"
 msgstr "Microsoft DBA (åbner i nyt vindue)"
 
+#, fuzzy
+msgid "Microsoft Entra ID"
+msgstr "Microsoft Entra ID"
+
 msgid "Microsoft patches and secures all PaaS infrastructure automatically"
 msgstr "Microsoft opdaterer og sikrer automatisk al PaaS infrastruktur"
+
+#, fuzzy
+msgid "Microsoft SSO configuration saved"
+msgstr "Microsoft SSO-konfiguration gemt"
+
+#, fuzzy
+msgid "Microsoft SSO disabled"
+msgstr "Microsoft SSO deaktiveret"
+
+#, fuzzy
+msgid "Microsoft SSO enabled"
+msgstr "Microsoft SSO aktiveret"
+
+#, fuzzy
+msgid "Microsoft SSO test failed"
+msgstr "Microsoft SSO-test mislykkedes"
+
+#, fuzzy
+msgid "Microsoft SSO test succeeded"
+msgstr "Microsoft SSO-test lykkedes"
 
 msgid "Middle"
 msgstr "Midte"
@@ -1696,6 +2015,14 @@ msgstr "Aldrig understreget"
 msgid "New document"
 msgstr "Nyt dokument"
 
+#, fuzzy
+msgid "New role"
+msgstr "New role"
+
+#, fuzzy
+msgid "New team"
+msgstr "New team"
+
 msgid "Next"
 msgstr "Næste"
 
@@ -1714,8 +2041,20 @@ msgstr "Ingen aktive sessioner"
 msgid "No billing information on file"
 msgstr "Ingen faktureringsoplysninger registreret"
 
+#, fuzzy
+msgid "No custom roles available"
+msgstr "No custom roles available"
+
 msgid "No longer needed"
 msgstr "Ikke længere nødvendigt"
+
+#, fuzzy
+msgid "No members in this organization yet."
+msgstr "Ingen medlemmer i denne organisation endnu."
+
+#, fuzzy
+msgid "No members yet. Invite your first teammate to get started."
+msgstr "No members yet. Invite your first teammate to get started."
 
 msgid "No payment history available."
 msgstr "Ingen betalingshistorik tilgængelig."
@@ -1731,6 +2070,18 @@ msgstr "Ingen resultater fundet"
 
 msgid "No results found."
 msgstr "Ingen resultater fundet."
+
+#, fuzzy
+msgid "No roles yet"
+msgstr "No roles yet"
+
+#, fuzzy
+msgid "No teams yet"
+msgstr "No teams yet"
+
+#, fuzzy
+msgid "No teams yet. Create your first team to start collaborating."
+msgstr "Ingen teams endnu. Opret dit første team for at begynde at samarbejde."
 
 msgid "No users found"
 msgstr "Ingen brugere fundet"
@@ -1764,6 +2115,10 @@ msgstr "Okonomiyaki"
 
 msgid "On"
 msgstr "Til"
+
+#, fuzzy
+msgid "One domain per line, or comma-separated. Only users with these email domains can sign in."
+msgstr "Et domæne pr. linje eller adskilt med komma. Kun brugere med disse e-mail-domæner kan logge ind."
 
 msgid "One-time code"
 msgstr "Engangskode"
@@ -1800,6 +2155,29 @@ msgstr "eller"
 
 msgid "or press"
 msgstr "eller tryk"
+
+#, fuzzy
+msgid "Organization"
+msgstr "Organisation"
+
+#, fuzzy
+msgid "Organization name"
+msgstr "Organisationsnavn"
+
+#, fuzzy
+msgid "Organization profile updated"
+msgstr "Organisationsprofil opdateret"
+
+#, fuzzy
+msgid "Organization settings"
+msgstr "Organisationsindstillinger"
+
+#, fuzzy
+msgid "Organization-level billing controls are coming soon. In the meantime, you can manage your subscription from the main billing page."
+msgstr "Faktureringskontrol på organisationsniveau kommer snart. I mellemtiden kan du administrere dit abonnement på hovedfaktureringssiden."
+
+msgid "Organizations"
+msgstr "Organisationer"
 
 msgid "Osso buco"
 msgstr "Osso buco"
@@ -1842,6 +2220,10 @@ msgstr "Palak paneer"
 
 msgid "Passkeys"
 msgstr "Passkeys"
+
+#, fuzzy
+msgid "Password"
+msgstr "Adgangskode"
 
 msgid "Passwordless deployments"
 msgstr "Adgangskodeløse implementeringer"
@@ -1901,11 +2283,19 @@ msgstr "Slet bruger permanent"
 msgid "Permanently delete users"
 msgstr "Slet brugere permanent"
 
+#, fuzzy
+msgid "Permissions"
+msgstr "Permissions"
+
 msgid "Pick a chart"
 msgstr "Vælg et diagram"
 
 msgid "Pick a date"
 msgstr "Vælg en dato"
+
+#, fuzzy
+msgid "Pick a name and a unique URL slug. You can configure branding and invite members after creating the team."
+msgstr "Pick a name and a unique URL slug. You can configure branding and invite members after creating the team."
 
 msgid "Pick a recipe"
 msgstr "Vælg en opskrift"
@@ -1943,6 +2333,14 @@ msgstr "Tjek din e-mail for en bekræftelseskode sendt til <0>{email}</0>"
 msgid "Please enter a valid email address"
 msgstr "Indtast en gyldig e-mailadresse"
 
+#, fuzzy
+msgid "Please enter both the SMTP password and a recipient email address."
+msgstr "Indtast både SMTP-adgangskode og modtagerens e-mail-adresse."
+
+#, fuzzy
+msgid "Please enter the SMTP password to save the configuration."
+msgstr "Indtast SMTP-adgangskoden for at gemme konfigurationen."
+
 msgid "Please include your country code"
 msgstr "Inkluder venligst din landekode"
 
@@ -1957,6 +2355,10 @@ msgstr "Prøv venligst igen eller vend tilbage til forsiden."
 
 msgid "Please wait while we confirm your payment. This may take a few moments."
 msgstr "Vent venligst mens vi bekræfter din betaling. Det kan tage et øjeblik."
+
+#, fuzzy
+msgid "Port"
+msgstr "Port"
 
 msgid "Postal code"
 msgstr "Postnummer"
@@ -2006,14 +2408,19 @@ msgstr "Fortrolighedspolitikker"
 msgid "Privacy Policy"
 msgstr "Privatlivspolitik"
 
+#, fuzzy
+msgid "Private team"
+msgstr "Private team"
+
 msgid "Processing payment..."
 msgstr "Behandler betaling..."
 
 msgid "Processing..."
 msgstr "Behandler..."
 
+#, fuzzy
 msgid "Profile"
-msgstr "Profil"
+msgstr "Profile"
 
 msgid "Profile avatar"
 msgstr "Profilavatar"
@@ -2029,6 +2436,10 @@ msgstr "Profil opdateret succesfuldt"
 
 msgid "Progress"
 msgstr "Fremskridt"
+
+#, fuzzy
+msgid "Public information shown on your team's booking pages."
+msgstr "Public information shown on your team's booking pages."
 
 msgid "Publish now"
 msgstr "Udgiv nu"
@@ -2142,8 +2553,14 @@ msgid "Remove"
 msgstr "Fjern"
 
 #. placeholder {0}: image.file.name
+#. placeholder {0}: member.email
 msgid "Remove {0}"
 msgstr "Fjern {0}"
+
+#. placeholder {0}: memberToRemove.email
+#, fuzzy
+msgid "Remove <0>{0}</0> from this team? They will lose access to team event types and bookings."
+msgstr "Remove <0>{0}</0> from this team? They will lose access to team event types and bookings."
 
 msgid "Remove image from {label}"
 msgstr "Fjern billede fra {label}"
@@ -2151,8 +2568,20 @@ msgstr "Fjern billede fra {label}"
 msgid "Remove logo"
 msgstr "Fjern logo"
 
+#, fuzzy
+msgid "Remove member"
+msgstr "Remove member"
+
 msgid "Remove profile picture"
 msgstr "Fjern profilbillede"
+
+#, fuzzy
+msgid "Remove the link back to the team profile from individual member pages."
+msgstr "Remove the link back to the team profile from individual member pages."
+
+#, fuzzy
+msgid "Reply-to email"
+msgstr "Svar-til-e-mail"
 
 msgid "Request a new code"
 msgstr "Anmod om en ny kode"
@@ -2162,6 +2591,10 @@ msgstr "Justerbar app-skal"
 
 msgid "Resizable panels"
 msgstr "Justerbare paneler"
+
+#, fuzzy
+msgid "Resource"
+msgstr "Resource"
 
 msgid "Responsive layout"
 msgstr "Responsivt layout"
@@ -2220,6 +2653,38 @@ msgstr "Rogan josh"
 
 msgid "Role"
 msgstr "Rolle"
+
+#. placeholder {0}: created.name
+#, fuzzy
+msgid "Role created: {0}"
+msgstr "Role created: {0}"
+
+#. placeholder {0}: role.name
+#, fuzzy
+msgid "Role deleted: {0}"
+msgstr "Role deleted: {0}\"#, fuzzy"
+
+#, fuzzy
+msgid "Role description"
+msgstr "Role description"
+
+#, fuzzy
+msgid "Role name"
+msgstr "Role name"
+
+#. placeholder {0}: user.email
+#, fuzzy
+msgid "Role updated for {0}"
+msgstr "Rolle opdateret for {0}"
+
+#. placeholder {0}: updated.name
+#, fuzzy
+msgid "Role updated: {0}"
+msgstr "Role updated: {0}"
+
+#, fuzzy
+msgid "Roles"
+msgstr "Roles"
 
 msgid "Safari"
 msgstr "Safari"
@@ -2323,8 +2788,24 @@ msgstr "Vælg dit foretrukne sprog. Gemt på din profil."
 msgid "Selected recipes"
 msgstr "Valgte opskrifter"
 
+#, fuzzy
+msgid "Selecting <0>Manage</0> for a resource implicitly grants Create, Read, Update, and Delete."
+msgstr "Selecting <0>Manage</0> for a resource implicitly grants Create, Read, Update, and Delete."
+
+#, fuzzy
+msgid "Send a test email to this address"
+msgstr "Send en test-e-mail til denne adresse"
+
 msgid "Send invite"
 msgstr "Send invitation"
+
+#, fuzzy
+msgid "Send test"
+msgstr "Send test"
+
+#, fuzzy
+msgid "Send transactional emails from your own SMTP server."
+msgstr "Send transaktions-e-mails fra din egen SMTP-server."
 
 msgid "Sending verification code..."
 msgstr "Sender bekræftelseskode..."
@@ -2407,6 +2888,10 @@ msgstr "Viser samlede besøgende de sidste 3 måneder"
 msgid "Showing total visitors for the last 6 months"
 msgstr "Viser samlede besøgende de sidste 6 måneder"
 
+#, fuzzy
+msgid "Shown across booking pages and email notifications for this organization."
+msgstr "Vises på bookingsider og i e-mail-notifikationer for denne organisation."
+
 msgid "Side pane"
 msgstr "Sidepanel"
 
@@ -2418,6 +2903,14 @@ msgstr "Sidemenu"
 
 msgid "Sidebar footer"
 msgstr "Sidemenu-sidefod"
+
+#, fuzzy
+msgid "Sign in with Google accounts from your workspace domain."
+msgstr "Log ind med Google-konti fra dit workspace-domæne."
+
+#, fuzzy
+msgid "Sign in with Microsoft accounts from your Azure tenant."
+msgstr "Log ind med Microsoft-konti fra dit Azure-tenant."
 
 msgid "Sign in without a password using your device."
 msgstr "Log ind uden adgangskode ved hjælp af din enhed."
@@ -2461,14 +2954,41 @@ msgstr "Slider med trin"
 msgid "Slow-cooked classics"
 msgstr "Langtidsstegte klassikere"
 
+#, fuzzy
+msgid "Slug"
+msgstr "Slug"
+
 msgid "Small"
 msgstr "Lille"
+
+#, fuzzy
+msgid "SMTP"
+msgstr "SMTP"
+
+#, fuzzy
+msgid "SMTP configuration removed"
+msgstr "SMTP-konfiguration fjernet"
+
+#, fuzzy
+msgid "SMTP configuration saved"
+msgstr "SMTP-konfiguration gemt"
+
+#, fuzzy
+msgid "SMTP test email sent successfully"
+msgstr "SMTP-test-e-mail sendt"
+
+#, fuzzy
+msgid "SMTP test failed"
+msgstr "SMTP-test mislykkedes"
 
 msgid "SOC and ISO Reports"
 msgstr "SOC og ISO rapporter"
 
 msgid "SOC and ISO Reports (opens in new window)"
 msgstr "SOC og ISO rapporter (åbner i nyt vindue)"
+
+msgid "Solo"
+msgstr "Solo"
 
 msgid "Som tam salad"
 msgstr "Som tam-salat"
@@ -2502,6 +3022,10 @@ msgstr "Delte knapper"
 
 msgid "Squash and merge"
 msgstr "Squash og flet"
+
+#, fuzzy
+msgid "SSO"
+msgstr "SSO"
 
 msgid "Standard"
 msgstr "Standard"
@@ -2561,6 +3085,10 @@ msgstr "Skifter konto..."
 msgid "System"
 msgstr "System"
 
+#, fuzzy
+msgid "System roles cannot be edited. The permission set is fixed."
+msgstr "System roles cannot be edited. The permission set is fixed."
+
 msgid "Tables and side pane"
 msgstr "Tabeller og sidepanel"
 
@@ -2579,6 +3107,36 @@ msgstr "Moms"
 msgid "Tax ID (VAT number)"
 msgstr "CVR-nummer"
 
+#. placeholder {0}: created.name
+#, fuzzy
+msgid "Team created: {0}"
+msgstr "Team oprettet: {0}"
+
+#. placeholder {0}: team.name
+#, fuzzy
+msgid "Team deleted: {0}"
+msgstr "Team deleted: {0}"
+
+#, fuzzy
+msgid "Team description"
+msgstr "Team description"
+
+#, fuzzy
+msgid "Team name"
+msgstr "Team name"
+
+#, fuzzy
+msgid "Team slug"
+msgstr "Team slug"
+
+#. placeholder {0}: updated.name
+#, fuzzy
+msgid "Team updated: {0}"
+msgstr "Team updated: {0}"
+
+msgid "Teams"
+msgstr "Teams"
+
 msgid "Tell us a bit about yourself to get started."
 msgstr "Fortæl os lidt om dig selv for at komme i gang."
 
@@ -2596,6 +3154,14 @@ msgstr "Servicevilkår"
 
 msgid "Terms of use"
 msgstr "Brugsvilkår"
+
+#, fuzzy
+msgid "Test recipient"
+msgstr "Testmodtager"
+
+#, fuzzy
+msgid "Test recipient email"
+msgstr "Testmodtagerens e-mail"
 
 msgid "Text area"
 msgstr "Tekstområde"
@@ -2618,8 +3184,20 @@ msgstr "Elementet flyttes til arkivet. Du kan gendanne det senere fra arkivet."
 msgid "The name of your account, shown to users and in email notifications"
 msgstr "Navnet på din konto, vist til brugere og i e-mail-notifikationer"
 
+#, fuzzy
+msgid "The organization name appears throughout the product and in outgoing emails."
+msgstr "Organisationsnavnet vises overalt i produktet og i udgående e-mails."
+
 msgid "The page you are looking for does not exist or was moved."
 msgstr "Siden du leder efter findes ikke eller er blevet flyttet."
+
+#, fuzzy
+msgid "The slug becomes part of your team's public URLs. Leave blank to auto-generate later."
+msgstr "The slug becomes part of your team's public URLs. Leave blank to auto-generate later."
+
+#, fuzzy
+msgid "The user must already have an account. Pick the role they will hold in this team."
+msgstr "The user must already have an account. Pick the role they will hold in this team."
 
 msgid "Theme"
 msgstr "Tema"
@@ -2659,6 +3237,10 @@ msgstr "Dette er en informationsmeddelelse."
 
 msgid "This is the region where your data is stored"
 msgstr "Dette er den region, hvor dine data er lagret"
+
+#, fuzzy
+msgid "This organization has {count} team(s)."
+msgstr "Denne organisation har {count} team(s)."
 
 msgid "This will permanently delete <0>{totalDeletedUsersCount} users</0> in the recycle bin."
 msgstr "Dette vil permanent slette <0>{totalDeletedUsersCount} brugere</0> i papirkurven."
@@ -2807,6 +3389,10 @@ msgstr "Opdater betalingsmetode"
 msgid "Update the billing details associated with your subscription."
 msgstr "Opdater faktureringsoplysningerne tilknyttet dit abonnement."
 
+#, fuzzy
+msgid "Update the role's permissions or description."
+msgstr "Update the role's permissions or description."
+
 msgid "Update your personal information and profile photo."
 msgstr "Opdater dine personlige oplysninger og profilbillede."
 
@@ -2825,6 +3411,10 @@ msgstr "Opgrader nu"
 #. placeholder {0}: targetPlanDetails.name
 msgid "Upgrade to {0}"
 msgstr "Opgrader til {0}"
+
+#, fuzzy
+msgid "Upload"
+msgstr "Upload"
 
 msgid "Upload image for {label}"
 msgstr "Upload billede til {label}"
@@ -2846,6 +3436,14 @@ msgstr "Brug en vandret separator til at gruppere relaterede sektioner i en kolo
 
 msgid "Use Accordion to stack multiple related disclosable sections. Good for FAQs, settings groups, or any list where users scan items and expand a few."
 msgstr "Brug Accordion til at stable flere relaterede sektioner. God til FAQs, indstillingsgrupper eller lister hvor brugere scanner elementer og udvider et par stykker."
+
+#, fuzzy
+msgid "Use SSL"
+msgstr "Brug SSL"
+
+#, fuzzy
+msgid "Use SSL/TLS"
+msgstr "Brug SSL/TLS"
 
 msgid "User"
 msgstr "Bruger"
@@ -2904,6 +3502,10 @@ msgstr "Brugerfaner"
 msgid "user@email.com"
 msgstr "user@email.com"
 
+#, fuzzy
+msgid "Username"
+msgstr "Brugernavn"
+
 msgid "Users"
 msgstr "Brugere"
 
@@ -2958,6 +3560,10 @@ msgstr "Vis profilbekræftelse"
 msgid "View users"
 msgstr "Se brugere"
 
+#, fuzzy
+msgid "Visibility & branding"
+msgstr "Visibility & branding"
+
 msgid "Visitors"
 msgstr "Besøgende"
 
@@ -2985,6 +3591,10 @@ msgstr "Med ikoner"
 msgid "Workday picker"
 msgstr "Hverdagsvælger"
 
+#, fuzzy
+msgid "Workspace domain"
+msgstr "Workspace-domæne"
+
 msgid "Yakitori skewers"
 msgstr "Yakitori-spyd"
 
@@ -2999,6 +3609,10 @@ msgstr "Du kan ikke slette dig selv"
 
 msgid "You do not have permission to access this page."
 msgstr "Du har ikke tilladelse til at tilgå denne side."
+
+#, fuzzy
+msgid "You don't have permission to view organization settings."
+msgstr "Du har ikke tilladelse til at se organisationsindstillinger."
 
 msgid "You have {invitationCount} pending invitations."
 msgstr "Du har {invitationCount} afventende invitationer."
@@ -3136,252 +3750,3 @@ msgstr "YouTube"
 
 msgid "Zoom"
 msgstr "Zoom"
-
-msgid "Create new organization"
-msgstr "Opret ny organisation"
-
-msgid "Create new team"
-msgstr "Opret nyt team"
-
-msgid "Organizations"
-msgstr "Organisationer"
-
-msgid "Solo"
-msgstr "Solo"
-
-msgid "Teams"
-msgstr "Teams"
-
-#, fuzzy
-msgid "Roles"
-msgstr "Roles"
-#, fuzzy
-msgid "Define custom roles and assign permissions to control what your members can do."
-msgstr "Define custom roles and assign permissions to control what your members can do."
-#, fuzzy
-msgid "New role"
-msgstr "New role"
-#, fuzzy
-msgid "Create a role"
-msgstr "Create a role"
-#, fuzzy
-msgid "Create a custom role to grant members the exact permissions they need."
-msgstr "Create a custom role to grant members the exact permissions they need."
-#, fuzzy
-msgid "No roles yet"
-msgstr "No roles yet"
-#, fuzzy
-msgid "Members"
-msgstr "Members"
-#, fuzzy
-msgid "Edit {0}"
-msgstr "Edit {0}"
-#, fuzzy
-msgid "Delete {0}"
-msgstr "Delete {0}"
-#, fuzzy
-msgid "Create role"
-msgstr "Create role"
-#, fuzzy
-msgid "Creating..."
-msgstr "Creating..."
-#, fuzzy
-msgid "Choose a name and select the permissions this role grants."
-msgstr "Choose a name and select the permissions this role grants."
-#, fuzzy
-msgid "Role created: {0}"
-msgstr "Role created: {0}"
-#, fuzzy
-msgid "Failed to create role. Please try again."
-msgstr "Failed to create role. Please try again."
-#, fuzzy
-msgid "Role updated: {0}"
-msgstr "Role updated: {0}"
-#, fuzzy
-msgid "System roles cannot be edited. The permission set is fixed."
-msgstr "System roles cannot be edited. The permission set is fixed."
-#, fuzzy
-msgid "Update the role's permissions or description."
-msgstr "Update the role's permissions or description."
-#, fuzzy
-msgid "{0} members assigned"
-msgstr "{0} members assigned"
-#, fuzzy
-msgid "Failed to update role. Please try again."
-msgstr "Failed to update role. Please try again."
-#, fuzzy
-msgid "Role name"
-msgstr "Role name"
-#, fuzzy
-msgid "Role description"
-msgstr "Role description"
-#, fuzzy
-msgid "Permissions"
-msgstr "Permissions"
-#, fuzzy
-msgid "Selecting <0>Manage</0> for a resource implicitly grants Create, Read, Update, and Delete."
-msgstr "Selecting <0>Manage</0> for a resource implicitly grants Create, Read, Update, and Delete."
-#, fuzzy
-msgid "Loading permissions..."
-msgstr "Loading permissions..."
-#, fuzzy
-msgid "Resource"
-msgstr "Resource"
-#, fuzzy
-msgid "Delete role"
-msgstr "Delete role"
-#, fuzzy
-msgid "Are you sure you want to delete <0>{0}</0>? Members assigned to this role will lose its permissions."
-msgstr "Are you sure you want to delete <0>{0}</0>? Members assigned to this role will lose its permissions."
-#, fuzzy
-msgid "Role deleted: {0}"
-msgstr "Role deleted: {0}"#, fuzzy
-msgid "Delete team"
-msgstr "Delete team"
-#, fuzzy
-msgid "Team name"
-msgstr "Team name"
-#, fuzzy
-msgid "Confirm team name"
-msgstr "Confirm team name"
-#, fuzzy
-msgid "Team deleted: {0}"
-msgstr "Team deleted: {0}"
-#, fuzzy
-msgid "Invite team member"
-msgstr "Invite team member"
-#, fuzzy
-msgid "The user must already have an account. Pick the role they will hold in this team."
-msgstr "The user must already have an account. Pick the role they will hold in this team."
-#, fuzzy
-msgid "Invitation sent"
-msgstr "Invitation sent"
-#, fuzzy
-msgid "Membership role"
-msgstr "Membership role"
-#, fuzzy
-msgid "Custom role"
-msgstr "Custom role"
-#, fuzzy
-msgid "No custom roles available"
-msgstr "No custom roles available"
-#, fuzzy
-msgid "General"
-msgstr "General"
-#, fuzzy
-msgid "Attributes"
-msgstr "Attributes"
-#, fuzzy
-msgid "Member attributes are coming soon."
-msgstr "Member attributes are coming soon."
-#, fuzzy
-msgid "Team updated: {0}"
-msgstr "Team updated: {0}"
-#, fuzzy
-msgid "Profile"
-msgstr "Profile"
-#, fuzzy
-msgid "Public information shown on your team's booking pages."
-msgstr "Public information shown on your team's booking pages."
-#, fuzzy
-msgid "Slug"
-msgstr "Slug"
-#, fuzzy
-msgid "Team slug"
-msgstr "Team slug"
-#, fuzzy
-msgid "About"
-msgstr "About"
-#, fuzzy
-msgid "Team description"
-msgstr "Team description"
-#, fuzzy
-msgid "Visibility & branding"
-msgstr "Visibility & branding"
-#, fuzzy
-msgid "Control how your team appears to bookers."
-msgstr "Control how your team appears to bookers."
-#, fuzzy
-msgid "Private team"
-msgstr "Private team"
-#, fuzzy
-msgid "Hide the team's member list and profile page from public visitors."
-msgstr "Hide the team's member list and profile page from public visitors."
-#, fuzzy
-msgid "Hide branding"
-msgstr "Hide branding"
-#, fuzzy
-msgid "Hide the \"Powered by\" footer on booking pages."
-msgstr "Hide the \"Powered by\" footer on booking pages."
-#, fuzzy
-msgid "Hide \"Book a team member\""
-msgstr "Hide \"Book a team member\""
-#, fuzzy
-msgid "Hide the option to book any available member from the team profile page."
-msgstr "Hide the option to book any available member from the team profile page."
-#, fuzzy
-msgid "Hide team profile link"
-msgstr "Hide team profile link"
-#, fuzzy
-msgid "Remove the link back to the team profile from individual member pages."
-msgstr "Remove the link back to the team profile from individual member pages."
-#, fuzzy
-msgid "Deleting a team is permanent and cannot be undone."
-msgstr "Deleting a team is permanent and cannot be undone."
-#, fuzzy
-msgid "Custom role updated"
-msgstr "Custom role updated"
-#, fuzzy
-msgid "Member removed"
-msgstr "Member removed"
-#, fuzzy
-msgid "Invite member"
-msgstr "Invite member"
-#, fuzzy
-msgid "No members yet. Invite your first teammate to get started."
-msgstr "No members yet. Invite your first teammate to get started."
-#, fuzzy
-msgid "Remove member"
-msgstr "Remove member"
-#, fuzzy
-msgid "Remove <0>{0}</0> from this team? They will lose access to team event types and bookings."
-msgstr "Remove <0>{0}</0> from this team? They will lose access to team event types and bookings."
-#, fuzzy
-msgid "Deleting <0>{0}</0> will remove all memberships and is irreversible. Type the team name to confirm."
-msgstr "Deleting <0>{0}</0> will remove all memberships and is irreversible. Type the team name to confirm."
-#, fuzzy
-msgid "Create teams to group members and share event types, schedules, and bookings."
-msgstr "Create teams to group members and share event types, schedules, and bookings."
-#, fuzzy
-msgid "New team"
-msgstr "New team"
-#, fuzzy
-msgid "No teams yet"
-msgstr "No teams yet"
-#, fuzzy
-msgid "Create a team to collaborate on event types and bookings with your colleagues."
-msgstr "Create a team to collaborate on event types and bookings with your colleagues."
-#, fuzzy
-msgid "Create a team"
-msgstr "Create a team"
-#, fuzzy
-msgid "Manage {0}"
-msgstr "Manage {0}"
-#, fuzzy
-msgid "Create team"
-msgstr "Create team"
-#, fuzzy
-msgid "Pick a name and a unique URL slug. You can configure branding and invite members after creating the team."
-msgstr "Pick a name and a unique URL slug. You can configure branding and invite members after creating the team."
-#, fuzzy
-msgid "acme-design"
-msgstr "acme-design"
-#, fuzzy
-msgid "The slug becomes part of your team's public URLs. Leave blank to auto-generate later."
-msgstr "The slug becomes part of your team's public URLs. Leave blank to auto-generate later."
-#, fuzzy
-msgid "Creating..."
-msgstr "Creating..."
-#, fuzzy
-msgid "Failed to create team. Please try again."
-msgstr "Failed to create team. Please try again."

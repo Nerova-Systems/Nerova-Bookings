@@ -29,6 +29,10 @@ msgstr "{0, plural, one {Delete # recipe} other {Delete # recipes}}"
 msgid "{0} hours ago"
 msgstr "{0} hours ago"
 
+#. placeholder {0}: role.memberCount
+msgid "{0} members assigned"
+msgstr "{0} members assigned"
+
 #. placeholder {0}: smartDate.value
 msgid "{0} minutes ago"
 msgstr "{0} minutes ago"
@@ -127,6 +131,9 @@ msgstr "A quick summary of your account activity."
 msgid "A small selection of chart variants built on recharts."
 msgstr "A small selection of chart variants built on recharts."
 
+msgid "About"
+msgstr "About"
+
 msgid "About this feature"
 msgstr "About this feature"
 
@@ -186,6 +193,15 @@ msgstr "Account switched"
 
 msgid "Achieved in Microsoft Defender for Cloud following Azure best practices"
 msgstr "Achieved in Microsoft Defender for Cloud following Azure best practices"
+
+msgid "acme-design"
+msgstr "acme-design"
+
+msgid "acme.com"
+msgstr "acme.com"
+
+msgid "acme.com, partner.com"
+msgstr "acme.com, partner.com"
 
 msgid "Action"
 msgstr "Action"
@@ -280,6 +296,9 @@ msgstr "All modifiers"
 msgid "All users"
 msgstr "All users"
 
+msgid "Allowed email domains"
+msgstr "Allowed email domains"
+
 msgid "Always underlined"
 msgstr "Always underlined"
 
@@ -332,6 +351,10 @@ msgstr "Archive this item?"
 msgid "Are you sure you want to delete <0>{0} users</0>?"
 msgstr "Are you sure you want to delete <0>{0} users</0>?"
 
+#. placeholder {0}: role.name
+msgid "Are you sure you want to delete <0>{0}</0>? Members assigned to this role will lose its permissions."
+msgstr "Are you sure you want to delete <0>{0}</0>? Members assigned to this role will lose its permissions."
+
 msgid "Are you sure you want to delete <0>{userDisplayName}</0>?"
 msgstr "Are you sure you want to delete <0>{userDisplayName}</0>?"
 
@@ -353,6 +376,9 @@ msgstr "Area Chart - Interactive"
 
 msgid "Aspect ratio"
 msgstr "Aspect ratio"
+
+msgid "Attributes"
+msgstr "Attributes"
 
 msgid "Audit reports and assessments"
 msgstr "Audit reports and assessments"
@@ -383,6 +409,9 @@ msgstr "Azure Compliance"
 
 msgid "Azure Compliance (opens in new window)"
 msgstr "Azure Compliance (opens in new window)"
+
+msgid "Azure tenant ID"
+msgstr "Azure tenant ID"
 
 msgid "Back"
 msgstr "Back"
@@ -642,6 +671,9 @@ msgstr "Chicken katsu"
 msgid "Chiles rellenos"
 msgstr "Chiles rellenos"
 
+msgid "Choose a name and select the permissions this role grants."
+msgstr "Choose a name and select the permissions this role grants."
+
 msgid "Choose a plan to get started."
 msgstr "Choose a plan to get started."
 
@@ -668,6 +700,12 @@ msgstr "Clear search"
 
 msgid "Click a row to open the side pane. Use Shift or Cmd/Ctrl with click or arrow keys to multi-select, Enter to open, and Space to toggle the selection."
 msgstr "Click a row to open the side pane. Use Shift or Cmd/Ctrl with click or arrow keys to multi-select, Enter to open, and Space to toggle the selection."
+
+msgid "Client ID"
+msgstr "Client ID"
+
+msgid "Client secret"
+msgstr "Client secret"
 
 msgid "Close"
 msgstr "Close"
@@ -732,6 +770,9 @@ msgstr "Confirm action"
 msgid "Confirm downgrade"
 msgstr "Confirm downgrade"
 
+msgid "Confirm team name"
+msgstr "Confirm team name"
+
 msgid "Contact support"
 msgstr "Contact support"
 
@@ -746,6 +787,9 @@ msgstr "Context menu"
 
 msgid "Continue"
 msgstr "Continue"
+
+msgid "Control how your team appears to bookers."
+msgstr "Control how your team appears to bookers."
 
 msgid "Controls"
 msgstr "Controls"
@@ -777,17 +821,47 @@ msgstr "Country"
 msgid "Create"
 msgstr "Create"
 
+msgid "Create a custom role to grant members the exact permissions they need."
+msgstr "Create a custom role to grant members the exact permissions they need."
+
+msgid "Create a role"
+msgstr "Create a role"
+
+msgid "Create a team"
+msgstr "Create a team"
+
+msgid "Create a team to collaborate on event types and bookings with your colleagues."
+msgstr "Create a team to collaborate on event types and bookings with your colleagues."
+
 msgid "Create new account"
 msgstr "Create new account"
 
+msgid "Create new organization"
+msgstr "Create new organization"
+
+msgid "Create new team"
+msgstr "Create new team"
+
+msgid "Create role"
+msgstr "Create role"
+
 msgid "Create shortcut..."
 msgstr "Create shortcut..."
+
+msgid "Create team"
+msgstr "Create team"
+
+msgid "Create teams to group members and share event types, schedules, and bookings."
+msgstr "Create teams to group members and share event types, schedules, and bookings."
 
 msgid "Create your account"
 msgstr "Create your account"
 
 msgid "Created"
 msgstr "Created"
+
+msgid "Creating..."
+msgstr "Creating..."
 
 msgid "Credit note"
 msgstr "Credit note"
@@ -812,6 +886,15 @@ msgstr "Current page"
 
 msgid "Current plan"
 msgstr "Current plan"
+
+msgid "Custom role"
+msgstr "Custom role"
+
+msgid "Custom role updated"
+msgstr "Custom role updated"
+
+msgid "Custom SMTP"
+msgstr "Custom SMTP"
 
 msgid "Customer deleted"
 msgstr "Customer deleted"
@@ -882,8 +965,15 @@ msgstr "Default"
 msgid "Default alert"
 msgstr "Default alert"
 
+msgid "Define custom roles and assign permissions to control what your members can do."
+msgstr "Define custom roles and assign permissions to control what your members can do."
+
 msgid "Delete"
 msgstr "Delete"
+
+#. placeholder {0}: role.name
+msgid "Delete {0}"
+msgstr "Delete {0}"
 
 #. placeholder {0}: selectedUsers.length
 msgid "Delete {0} users"
@@ -901,8 +991,14 @@ msgstr "Delete permanently"
 msgid "Delete recipe"
 msgstr "Delete recipe"
 
+msgid "Delete role"
+msgstr "Delete role"
+
 msgid "Delete selected recipes"
 msgstr "Delete selected recipes"
+
+msgid "Delete team"
+msgstr "Delete team"
 
 msgid "Delete this item?"
 msgstr "Delete this item?"
@@ -927,6 +1023,13 @@ msgstr "Deleted users loading"
 
 msgid "Deleted users will appear here for recovery"
 msgstr "Deleted users will appear here for recovery"
+
+#. placeholder {0}: team.name
+msgid "Deleting <0>{0}</0> will remove all memberships and is irreversible. Type the team name to confirm."
+msgstr "Deleting <0>{0}</0> will remove all memberships and is irreversible. Type the team name to confirm."
+
+msgid "Deleting a team is permanent and cannot be undone."
+msgstr "Deleting a team is permanent and cannot be undone."
 
 msgid "Description"
 msgstr "Description"
@@ -957,6 +1060,9 @@ msgstr "Difficulty"
 
 msgid "Dirty dialog"
 msgstr "Dirty dialog"
+
+msgid "Disable"
+msgstr "Disable"
 
 msgid "Disabled"
 msgstr "Disabled"
@@ -1045,6 +1151,10 @@ msgstr "Edge"
 msgid "Edit"
 msgstr "Edit"
 
+#. placeholder {0}: role.name
+msgid "Edit {0}"
+msgstr "Edit {0}"
+
 msgid "Edit billing information"
 msgstr "Edit billing information"
 
@@ -1081,11 +1191,20 @@ msgstr "Empty"
 msgid "Empty recycle bin"
 msgstr "Empty recycle bin"
 
+msgid "Enable"
+msgstr "Enable"
+
 msgid "Enabled"
 msgstr "Enabled"
 
 msgid "Enchiladas verdes"
 msgstr "Enchiladas verdes"
+
+msgid "Encrypt SMTP connection with SSL/TLS."
+msgstr "Encrypt SMTP connection with SSL/TLS."
+
+msgid "Enter SMTP password"
+msgstr "Enter SMTP password"
 
 msgid "Enter the billing details for your subscription."
 msgstr "Enter the billing details for your subscription."
@@ -1156,6 +1275,15 @@ msgstr "Extra small"
 msgid "Failed"
 msgstr "Failed"
 
+msgid "Failed to create role. Please try again."
+msgstr "Failed to create role. Please try again."
+
+msgid "Failed to create team. Please try again."
+msgstr "Failed to create team. Please try again."
+
+msgid "Failed to update role. Please try again."
+msgstr "Failed to update role. Please try again."
+
 msgid "Feature preferences"
 msgstr "Feature preferences"
 
@@ -1204,6 +1332,12 @@ msgstr "French"
 msgid "friend@example.com"
 msgstr "friend@example.com"
 
+msgid "From email"
+msgstr "From email"
+
+msgid "From name"
+msgstr "From name"
+
 msgid "Full access except changing user roles and account settings"
 msgstr "Full access except changing user roles and account settings"
 
@@ -1231,6 +1365,9 @@ msgstr "GDPR compliant"
 msgid "GDPR Compliant"
 msgstr "GDPR Compliant"
 
+msgid "General"
+msgstr "General"
+
 msgid "Ghost"
 msgstr "Ghost"
 
@@ -1243,14 +1380,38 @@ msgstr "GitHub deploys directly to Azure without passwords or API keys"
 msgid "Go to account settings"
 msgstr "Go to account settings"
 
+msgid "Go to billing"
+msgstr "Go to billing"
+
 msgid "Go to home"
 msgstr "Go to home"
 
 msgid "Google"
 msgstr "Google"
 
+msgid "Google SSO configuration saved"
+msgstr "Google SSO configuration saved"
+
+msgid "Google SSO disabled"
+msgstr "Google SSO disabled"
+
+msgid "Google SSO enabled"
+msgstr "Google SSO enabled"
+
+msgid "Google SSO test failed"
+msgstr "Google SSO test failed"
+
+msgid "Google SSO test succeeded"
+msgstr "Google SSO test succeeded"
+
+msgid "Google Workspace"
+msgstr "Google Workspace"
+
 msgid "Green curry"
 msgstr "Green curry"
+
+msgid "Group members into teams to share event types, schedules, and round-robin assignments."
+msgstr "Group members into teams to share event types, schedules, and round-robin assignments."
 
 msgid "Hard"
 msgstr "Hard"
@@ -1261,8 +1422,26 @@ msgstr "Help your team recognize your invites"
 msgid "Hi! Welcome back"
 msgstr "Hi! Welcome back"
 
+msgid "Hide \"Book a team member\""
+msgstr "Hide \"Book a team member\""
+
+msgid "Hide branding"
+msgstr "Hide branding"
+
 msgid "Hide details"
 msgstr "Hide details"
+
+msgid "Hide team profile link"
+msgstr "Hide team profile link"
+
+msgid "Hide the \"Powered by\" footer on booking pages."
+msgstr "Hide the \"Powered by\" footer on booking pages."
+
+msgid "Hide the option to book any available member from the team profile page."
+msgstr "Hide the option to book any available member from the team profile page."
+
+msgid "Hide the team's member list and profile page from public visitors."
+msgstr "Hide the team's member list and profile page from public visitors."
 
 msgid "Home"
 msgstr "Home"
@@ -1272,6 +1451,9 @@ msgstr "Horizontal"
 
 msgid "Horizontal nav bar with rich dropdown sections. Use it for marketing-style site headers or top-level discovery navigation."
 msgstr "Horizontal nav bar with rich dropdown sections. Use it for marketing-style site headers or top-level discovery navigation."
+
+msgid "Host"
+msgstr "Host"
 
 msgid "HoverCard"
 msgstr "HoverCard"
@@ -1324,8 +1506,17 @@ msgstr "Invalid request"
 msgid "Invitation pending"
 msgstr "Invitation pending"
 
+msgid "Invitation sent"
+msgstr "Invitation sent"
+
 msgid "Invite"
 msgstr "Invite"
+
+msgid "Invite member"
+msgstr "Invite member"
+
+msgid "Invite team member"
+msgstr "Invite team member"
 
 msgid "Invite user"
 msgstr "Invite user"
@@ -1453,6 +1644,9 @@ msgstr "Learn more"
 msgid "Leave"
 msgstr "Leave"
 
+msgid "Leave blank to keep current secret"
+msgstr "Leave blank to keep current secret"
+
 msgid "Left"
 msgstr "Left"
 
@@ -1501,6 +1695,9 @@ msgstr "Link variants"
 msgid "LinkedIn"
 msgstr "LinkedIn"
 
+msgid "Loading permissions..."
+msgstr "Loading permissions..."
+
 msgid "Loading..."
 msgstr "Loading..."
 
@@ -1534,6 +1731,12 @@ msgstr "Login verification code"
 msgid "Logo"
 msgstr "Logo"
 
+msgid "Logo removed"
+msgstr "Logo removed"
+
+msgid "Logo updated"
+msgstr "Logo updated"
+
 msgid "Long date"
 msgstr "Long date"
 
@@ -1552,11 +1755,21 @@ msgstr "Main navigation"
 msgid "Manage"
 msgstr "Manage"
 
+#. placeholder {0}: team.name
+msgid "Manage {0}"
+msgstr "Manage {0}"
+
 msgid "Manage subscription"
 msgstr "Manage subscription"
 
+msgid "Manage teams"
+msgstr "Manage teams"
+
 msgid "Manage your account here."
 msgstr "Manage your account here."
+
+msgid "Manage your organization's subscription and invoices."
+msgstr "Manage your organization's subscription and invoices."
 
 msgid "Manage your payment methods and billing information."
 msgstr "Manage your payment methods and billing information."
@@ -1588,6 +1801,18 @@ msgstr "Meeting notes from last week"
 msgid "Member"
 msgstr "Member"
 
+msgid "Member attributes are coming soon."
+msgstr "Member attributes are coming soon."
+
+msgid "Member removed"
+msgstr "Member removed"
+
+msgid "Members"
+msgstr "Members"
+
+msgid "Membership role"
+msgstr "Membership role"
+
 msgid "Merge"
 msgstr "Merge"
 
@@ -1612,8 +1837,26 @@ msgstr "Microsoft DPA"
 msgid "Microsoft DPA (opens in new window)"
 msgstr "Microsoft DPA (opens in new window)"
 
+msgid "Microsoft Entra ID"
+msgstr "Microsoft Entra ID"
+
 msgid "Microsoft patches and secures all PaaS infrastructure automatically"
 msgstr "Microsoft patches and secures all PaaS infrastructure automatically"
+
+msgid "Microsoft SSO configuration saved"
+msgstr "Microsoft SSO configuration saved"
+
+msgid "Microsoft SSO disabled"
+msgstr "Microsoft SSO disabled"
+
+msgid "Microsoft SSO enabled"
+msgstr "Microsoft SSO enabled"
+
+msgid "Microsoft SSO test failed"
+msgstr "Microsoft SSO test failed"
+
+msgid "Microsoft SSO test succeeded"
+msgstr "Microsoft SSO test succeeded"
 
 msgid "Middle"
 msgstr "Middle"
@@ -1696,6 +1939,12 @@ msgstr "Never underlined"
 msgid "New document"
 msgstr "New document"
 
+msgid "New role"
+msgstr "New role"
+
+msgid "New team"
+msgstr "New team"
+
 msgid "Next"
 msgstr "Next"
 
@@ -1714,8 +1963,17 @@ msgstr "No active sessions found."
 msgid "No billing information on file"
 msgstr "No billing information on file"
 
+msgid "No custom roles available"
+msgstr "No custom roles available"
+
 msgid "No longer needed"
 msgstr "No longer needed"
+
+msgid "No members in this organization yet."
+msgstr "No members in this organization yet."
+
+msgid "No members yet. Invite your first teammate to get started."
+msgstr "No members yet. Invite your first teammate to get started."
 
 msgid "No payment history available."
 msgstr "No payment history available."
@@ -1731,6 +1989,15 @@ msgstr "No results found"
 
 msgid "No results found."
 msgstr "No results found."
+
+msgid "No roles yet"
+msgstr "No roles yet"
+
+msgid "No teams yet"
+msgstr "No teams yet"
+
+msgid "No teams yet. Create your first team to start collaborating."
+msgstr "No teams yet. Create your first team to start collaborating."
 
 msgid "No users found"
 msgstr "No users found"
@@ -1764,6 +2031,9 @@ msgstr "Okonomiyaki"
 
 msgid "On"
 msgstr "On"
+
+msgid "One domain per line, or comma-separated. Only users with these email domains can sign in."
+msgstr "One domain per line, or comma-separated. Only users with these email domains can sign in."
 
 msgid "One-time code"
 msgstr "One-time code"
@@ -1800,6 +2070,24 @@ msgstr "or"
 
 msgid "or press"
 msgstr "or press"
+
+msgid "Organization"
+msgstr "Organization"
+
+msgid "Organization name"
+msgstr "Organization name"
+
+msgid "Organization profile updated"
+msgstr "Organization profile updated"
+
+msgid "Organization settings"
+msgstr "Organization settings"
+
+msgid "Organization-level billing controls are coming soon. In the meantime, you can manage your subscription from the main billing page."
+msgstr "Organization-level billing controls are coming soon. In the meantime, you can manage your subscription from the main billing page."
+
+msgid "Organizations"
+msgstr "Organizations"
 
 msgid "Osso buco"
 msgstr "Osso buco"
@@ -1842,6 +2130,9 @@ msgstr "Palak paneer"
 
 msgid "Passkeys"
 msgstr "Passkeys"
+
+msgid "Password"
+msgstr "Password"
 
 msgid "Passwordless deployments"
 msgstr "Passwordless deployments"
@@ -1901,11 +2192,17 @@ msgstr "Permanently delete user"
 msgid "Permanently delete users"
 msgstr "Permanently delete users"
 
+msgid "Permissions"
+msgstr "Permissions"
+
 msgid "Pick a chart"
 msgstr "Pick a chart"
 
 msgid "Pick a date"
 msgstr "Pick a date"
+
+msgid "Pick a name and a unique URL slug. You can configure branding and invite members after creating the team."
+msgstr "Pick a name and a unique URL slug. You can configure branding and invite members after creating the team."
 
 msgid "Pick a recipe"
 msgstr "Pick a recipe"
@@ -1943,6 +2240,12 @@ msgstr "Please check your email for a verification code sent to <0>{email}</0>"
 msgid "Please enter a valid email address"
 msgstr "Please enter a valid email address"
 
+msgid "Please enter both the SMTP password and a recipient email address."
+msgstr "Please enter both the SMTP password and a recipient email address."
+
+msgid "Please enter the SMTP password to save the configuration."
+msgstr "Please enter the SMTP password to save the configuration."
+
 msgid "Please include your country code"
 msgstr "Please include your country code"
 
@@ -1957,6 +2260,9 @@ msgstr "Please try again or return to the home page."
 
 msgid "Please wait while we confirm your payment. This may take a few moments."
 msgstr "Please wait while we confirm your payment. This may take a few moments."
+
+msgid "Port"
+msgstr "Port"
 
 msgid "Postal code"
 msgstr "Postal code"
@@ -2006,6 +2312,9 @@ msgstr "Privacy policies"
 msgid "Privacy Policy"
 msgstr "Privacy Policy"
 
+msgid "Private team"
+msgstr "Private team"
+
 msgid "Processing payment..."
 msgstr "Processing payment..."
 
@@ -2029,6 +2338,9 @@ msgstr "Profile updated successfully"
 
 msgid "Progress"
 msgstr "Progress"
+
+msgid "Public information shown on your team's booking pages."
+msgstr "Public information shown on your team's booking pages."
 
 msgid "Publish now"
 msgstr "Publish now"
@@ -2142,8 +2454,13 @@ msgid "Remove"
 msgstr "Remove"
 
 #. placeholder {0}: image.file.name
+#. placeholder {0}: member.email
 msgid "Remove {0}"
 msgstr "Remove {0}"
+
+#. placeholder {0}: memberToRemove.email
+msgid "Remove <0>{0}</0> from this team? They will lose access to team event types and bookings."
+msgstr "Remove <0>{0}</0> from this team? They will lose access to team event types and bookings."
 
 msgid "Remove image from {label}"
 msgstr "Remove image from {label}"
@@ -2151,8 +2468,17 @@ msgstr "Remove image from {label}"
 msgid "Remove logo"
 msgstr "Remove logo"
 
+msgid "Remove member"
+msgstr "Remove member"
+
 msgid "Remove profile picture"
 msgstr "Remove profile picture"
+
+msgid "Remove the link back to the team profile from individual member pages."
+msgstr "Remove the link back to the team profile from individual member pages."
+
+msgid "Reply-to email"
+msgstr "Reply-to email"
 
 msgid "Request a new code"
 msgstr "Request a new code"
@@ -2162,6 +2488,9 @@ msgstr "Resizable app shell"
 
 msgid "Resizable panels"
 msgstr "Resizable panels"
+
+msgid "Resource"
+msgstr "Resource"
 
 msgid "Responsive layout"
 msgstr "Responsive layout"
@@ -2220,6 +2549,31 @@ msgstr "Rogan josh"
 
 msgid "Role"
 msgstr "Role"
+
+#. placeholder {0}: created.name
+msgid "Role created: {0}"
+msgstr "Role created: {0}"
+
+#. placeholder {0}: role.name
+msgid "Role deleted: {0}"
+msgstr "Delete team"
+
+msgid "Role description"
+msgstr "Role description"
+
+msgid "Role name"
+msgstr "Role name"
+
+#. placeholder {0}: user.email
+msgid "Role updated for {0}"
+msgstr "Role updated for {0}"
+
+#. placeholder {0}: updated.name
+msgid "Role updated: {0}"
+msgstr "Role updated: {0}"
+
+msgid "Roles"
+msgstr "Roles"
 
 msgid "Safari"
 msgstr "Safari"
@@ -2323,8 +2677,20 @@ msgstr "Select your preferred language. Saved to your profile."
 msgid "Selected recipes"
 msgstr "Selected recipes"
 
+msgid "Selecting <0>Manage</0> for a resource implicitly grants Create, Read, Update, and Delete."
+msgstr "Selecting <0>Manage</0> for a resource implicitly grants Create, Read, Update, and Delete."
+
+msgid "Send a test email to this address"
+msgstr "Send a test email to this address"
+
 msgid "Send invite"
 msgstr "Send invite"
+
+msgid "Send test"
+msgstr "Send test"
+
+msgid "Send transactional emails from your own SMTP server."
+msgstr "Send transactional emails from your own SMTP server."
 
 msgid "Sending verification code..."
 msgstr "Sending verification code..."
@@ -2407,6 +2773,9 @@ msgstr "Showing total visitors for the last 3 months"
 msgid "Showing total visitors for the last 6 months"
 msgstr "Showing total visitors for the last 6 months"
 
+msgid "Shown across booking pages and email notifications for this organization."
+msgstr "Shown across booking pages and email notifications for this organization."
+
 msgid "Side pane"
 msgstr "Side pane"
 
@@ -2418,6 +2787,12 @@ msgstr "Sidebar"
 
 msgid "Sidebar footer"
 msgstr "Sidebar footer"
+
+msgid "Sign in with Google accounts from your workspace domain."
+msgstr "Sign in with Google accounts from your workspace domain."
+
+msgid "Sign in with Microsoft accounts from your Azure tenant."
+msgstr "Sign in with Microsoft accounts from your Azure tenant."
 
 msgid "Sign in without a password using your device."
 msgstr "Sign in without a password using your device."
@@ -2461,14 +2836,35 @@ msgstr "Slider with steps"
 msgid "Slow-cooked classics"
 msgstr "Slow-cooked classics"
 
+msgid "Slug"
+msgstr "Slug"
+
 msgid "Small"
 msgstr "Small"
+
+msgid "SMTP"
+msgstr "SMTP"
+
+msgid "SMTP configuration removed"
+msgstr "SMTP configuration removed"
+
+msgid "SMTP configuration saved"
+msgstr "SMTP configuration saved"
+
+msgid "SMTP test email sent successfully"
+msgstr "SMTP test email sent successfully"
+
+msgid "SMTP test failed"
+msgstr "SMTP test failed"
 
 msgid "SOC and ISO Reports"
 msgstr "SOC and ISO Reports"
 
 msgid "SOC and ISO Reports (opens in new window)"
 msgstr "SOC and ISO Reports (opens in new window)"
+
+msgid "Solo"
+msgstr "Solo"
 
 msgid "Som tam salad"
 msgstr "Som tam salad"
@@ -2502,6 +2898,9 @@ msgstr "Split buttons"
 
 msgid "Squash and merge"
 msgstr "Squash and merge"
+
+msgid "SSO"
+msgstr "SSO"
 
 msgid "Standard"
 msgstr "Standard"
@@ -2561,6 +2960,9 @@ msgstr "Switching account..."
 msgid "System"
 msgstr "System"
 
+msgid "System roles cannot be edited. The permission set is fixed."
+msgstr "System roles cannot be edited. The permission set is fixed."
+
 msgid "Tables and side pane"
 msgstr "Tables and side pane"
 
@@ -2579,6 +2981,30 @@ msgstr "Tax"
 msgid "Tax ID (VAT number)"
 msgstr "Tax ID (VAT number)"
 
+#. placeholder {0}: created.name
+msgid "Team created: {0}"
+msgstr "Team created: {0}"
+
+#. placeholder {0}: team.name
+msgid "Team deleted: {0}"
+msgstr "Team deleted: {0}"
+
+msgid "Team description"
+msgstr "Team description"
+
+msgid "Team name"
+msgstr "Team name"
+
+msgid "Team slug"
+msgstr "Team slug"
+
+#. placeholder {0}: updated.name
+msgid "Team updated: {0}"
+msgstr "Team updated: {0}"
+
+msgid "Teams"
+msgstr "Teams"
+
 msgid "Tell us a bit about yourself to get started."
 msgstr "Tell us a bit about yourself to get started."
 
@@ -2596,6 +3022,12 @@ msgstr "Terms of Service"
 
 msgid "Terms of use"
 msgstr "Terms of use"
+
+msgid "Test recipient"
+msgstr "Test recipient"
+
+msgid "Test recipient email"
+msgstr "Test recipient email"
 
 msgid "Text area"
 msgstr "Text area"
@@ -2618,8 +3050,17 @@ msgstr "The item will be moved to the archive. You can restore it later from the
 msgid "The name of your account, shown to users and in email notifications"
 msgstr "The name of your account, shown to users and in email notifications"
 
+msgid "The organization name appears throughout the product and in outgoing emails."
+msgstr "The organization name appears throughout the product and in outgoing emails."
+
 msgid "The page you are looking for does not exist or was moved."
 msgstr "The page you are looking for does not exist or was moved."
+
+msgid "The slug becomes part of your team's public URLs. Leave blank to auto-generate later."
+msgstr "The slug becomes part of your team's public URLs. Leave blank to auto-generate later."
+
+msgid "The user must already have an account. Pick the role they will hold in this team."
+msgstr "The user must already have an account. Pick the role they will hold in this team."
 
 msgid "Theme"
 msgstr "Theme"
@@ -2659,6 +3100,9 @@ msgstr "This is an informational message."
 
 msgid "This is the region where your data is stored"
 msgstr "This is the region where your data is stored"
+
+msgid "This organization has {count} team(s)."
+msgstr "This organization has {count} team(s)."
 
 msgid "This will permanently delete <0>{totalDeletedUsersCount} users</0> in the recycle bin."
 msgstr "This will permanently delete <0>{totalDeletedUsersCount} users</0> in the recycle bin."
@@ -2807,6 +3251,9 @@ msgstr "Update payment method"
 msgid "Update the billing details associated with your subscription."
 msgstr "Update the billing details associated with your subscription."
 
+msgid "Update the role's permissions or description."
+msgstr "Update the role's permissions or description."
+
 msgid "Update your personal information and profile photo."
 msgstr "Update your personal information and profile photo."
 
@@ -2825,6 +3272,9 @@ msgstr "Upgrade now"
 #. placeholder {0}: targetPlanDetails.name
 msgid "Upgrade to {0}"
 msgstr "Upgrade to {0}"
+
+msgid "Upload"
+msgstr "Upload"
 
 msgid "Upload image for {label}"
 msgstr "Upload image for {label}"
@@ -2846,6 +3296,12 @@ msgstr "Use a horizontal separator to group related sections in a column layout.
 
 msgid "Use Accordion to stack multiple related disclosable sections. Good for FAQs, settings groups, or any list where users scan items and expand a few."
 msgstr "Use Accordion to stack multiple related disclosable sections. Good for FAQs, settings groups, or any list where users scan items and expand a few."
+
+msgid "Use SSL"
+msgstr "Use SSL"
+
+msgid "Use SSL/TLS"
+msgstr "Use SSL/TLS"
 
 msgid "User"
 msgstr "User"
@@ -2904,6 +3360,9 @@ msgstr "User tabs"
 msgid "user@email.com"
 msgstr "user@email.com"
 
+msgid "Username"
+msgstr "Username"
+
 msgid "Users"
 msgstr "Users"
 
@@ -2958,6 +3417,9 @@ msgstr "View profile verification"
 msgid "View users"
 msgstr "View users"
 
+msgid "Visibility & branding"
+msgstr "Visibility & branding"
+
 msgid "Visitors"
 msgstr "Visitors"
 
@@ -2985,6 +3447,9 @@ msgstr "With icons"
 msgid "Workday picker"
 msgstr "Workday picker"
 
+msgid "Workspace domain"
+msgstr "Workspace domain"
+
 msgid "Yakitori skewers"
 msgstr "Yakitori skewers"
 
@@ -2999,6 +3464,9 @@ msgstr "You cannot delete yourself"
 
 msgid "You do not have permission to access this page."
 msgstr "You do not have permission to access this page."
+
+msgid "You don't have permission to view organization settings."
+msgstr "You don't have permission to view organization settings."
 
 msgid "You have {invitationCount} pending invitations."
 msgstr "You have {invitationCount} pending invitations."
@@ -3136,174 +3604,3 @@ msgstr "YouTube"
 
 msgid "Zoom"
 msgstr "Zoomtest-modify"
-
-msgid "Create new organization"
-msgstr "Create new organization"
-
-msgid "Create new team"
-msgstr "Create new team"
-
-msgid "Organizations"
-msgstr "Organizations"
-
-msgid "Solo"
-msgstr "Solo"
-
-msgid "Teams"
-msgstr "Teams"
-
-msgid "Roles"
-msgstr "Roles"
-msgid "Define custom roles and assign permissions to control what your members can do."
-msgstr "Define custom roles and assign permissions to control what your members can do."
-msgid "New role"
-msgstr "New role"
-msgid "Create a role"
-msgstr "Create a role"
-msgid "Create a custom role to grant members the exact permissions they need."
-msgstr "Create a custom role to grant members the exact permissions they need."
-msgid "No roles yet"
-msgstr "No roles yet"
-msgid "Members"
-msgstr "Members"
-msgid "Edit {0}"
-msgstr "Edit {0}"
-msgid "Delete {0}"
-msgstr "Delete {0}"
-msgid "Create role"
-msgstr "Create role"
-msgid "Creating..."
-msgstr "Creating..."
-msgid "Choose a name and select the permissions this role grants."
-msgstr "Choose a name and select the permissions this role grants."
-msgid "Role created: {0}"
-msgstr "Role created: {0}"
-msgid "Failed to create role. Please try again."
-msgstr "Failed to create role. Please try again."
-msgid "Role updated: {0}"
-msgstr "Role updated: {0}"
-msgid "System roles cannot be edited. The permission set is fixed."
-msgstr "System roles cannot be edited. The permission set is fixed."
-msgid "Update the role's permissions or description."
-msgstr "Update the role's permissions or description."
-msgid "{0} members assigned"
-msgstr "{0} members assigned"
-msgid "Failed to update role. Please try again."
-msgstr "Failed to update role. Please try again."
-msgid "Role name"
-msgstr "Role name"
-msgid "Role description"
-msgstr "Role description"
-msgid "Permissions"
-msgstr "Permissions"
-msgid "Selecting <0>Manage</0> for a resource implicitly grants Create, Read, Update, and Delete."
-msgstr "Selecting <0>Manage</0> for a resource implicitly grants Create, Read, Update, and Delete."
-msgid "Loading permissions..."
-msgstr "Loading permissions..."
-msgid "Resource"
-msgstr "Resource"
-msgid "Delete role"
-msgstr "Delete role"
-msgid "Are you sure you want to delete <0>{0}</0>? Members assigned to this role will lose its permissions."
-msgstr "Are you sure you want to delete <0>{0}</0>? Members assigned to this role will lose its permissions."
-msgid "Role deleted: {0}"
-msgstr "Role deleted: {0}"msgid "Delete team"
-msgstr "Delete team"
-msgid "Team name"
-msgstr "Team name"
-msgid "Confirm team name"
-msgstr "Confirm team name"
-msgid "Team deleted: {0}"
-msgstr "Team deleted: {0}"
-msgid "Invite team member"
-msgstr "Invite team member"
-msgid "The user must already have an account. Pick the role they will hold in this team."
-msgstr "The user must already have an account. Pick the role they will hold in this team."
-msgid "Invitation sent"
-msgstr "Invitation sent"
-msgid "Membership role"
-msgstr "Membership role"
-msgid "Custom role"
-msgstr "Custom role"
-msgid "No custom roles available"
-msgstr "No custom roles available"
-msgid "General"
-msgstr "General"
-msgid "Attributes"
-msgstr "Attributes"
-msgid "Member attributes are coming soon."
-msgstr "Member attributes are coming soon."
-msgid "Team updated: {0}"
-msgstr "Team updated: {0}"
-msgid "Profile"
-msgstr "Profile"
-msgid "Public information shown on your team's booking pages."
-msgstr "Public information shown on your team's booking pages."
-msgid "Slug"
-msgstr "Slug"
-msgid "Team slug"
-msgstr "Team slug"
-msgid "About"
-msgstr "About"
-msgid "Team description"
-msgstr "Team description"
-msgid "Visibility & branding"
-msgstr "Visibility & branding"
-msgid "Control how your team appears to bookers."
-msgstr "Control how your team appears to bookers."
-msgid "Private team"
-msgstr "Private team"
-msgid "Hide the team's member list and profile page from public visitors."
-msgstr "Hide the team's member list and profile page from public visitors."
-msgid "Hide branding"
-msgstr "Hide branding"
-msgid "Hide the \"Powered by\" footer on booking pages."
-msgstr "Hide the \"Powered by\" footer on booking pages."
-msgid "Hide \"Book a team member\""
-msgstr "Hide \"Book a team member\""
-msgid "Hide the option to book any available member from the team profile page."
-msgstr "Hide the option to book any available member from the team profile page."
-msgid "Hide team profile link"
-msgstr "Hide team profile link"
-msgid "Remove the link back to the team profile from individual member pages."
-msgstr "Remove the link back to the team profile from individual member pages."
-msgid "Deleting a team is permanent and cannot be undone."
-msgstr "Deleting a team is permanent and cannot be undone."
-msgid "Custom role updated"
-msgstr "Custom role updated"
-msgid "Member removed"
-msgstr "Member removed"
-msgid "Invite member"
-msgstr "Invite member"
-msgid "No members yet. Invite your first teammate to get started."
-msgstr "No members yet. Invite your first teammate to get started."
-msgid "Remove member"
-msgstr "Remove member"
-msgid "Remove <0>{0}</0> from this team? They will lose access to team event types and bookings."
-msgstr "Remove <0>{0}</0> from this team? They will lose access to team event types and bookings."
-msgid "Deleting <0>{0}</0> will remove all memberships and is irreversible. Type the team name to confirm."
-msgstr "Deleting <0>{0}</0> will remove all memberships and is irreversible. Type the team name to confirm."
-msgid "Create teams to group members and share event types, schedules, and bookings."
-msgstr "Create teams to group members and share event types, schedules, and bookings."
-msgid "New team"
-msgstr "New team"
-msgid "No teams yet"
-msgstr "No teams yet"
-msgid "Create a team to collaborate on event types and bookings with your colleagues."
-msgstr "Create a team to collaborate on event types and bookings with your colleagues."
-msgid "Create a team"
-msgstr "Create a team"
-msgid "Manage {0}"
-msgstr "Manage {0}"
-msgid "Create team"
-msgstr "Create team"
-msgid "Pick a name and a unique URL slug. You can configure branding and invite members after creating the team."
-msgstr "Pick a name and a unique URL slug. You can configure branding and invite members after creating the team."
-msgid "acme-design"
-msgstr "acme-design"
-msgid "The slug becomes part of your team's public URLs. Leave blank to auto-generate later."
-msgstr "The slug becomes part of your team's public URLs. Leave blank to auto-generate later."
-msgid "Creating..."
-msgstr "Creating..."
-msgid "Failed to create team. Please try again."
-msgstr "Failed to create team. Please try again."
