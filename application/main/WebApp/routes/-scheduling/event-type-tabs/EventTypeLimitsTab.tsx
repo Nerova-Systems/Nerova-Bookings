@@ -1,7 +1,9 @@
+/* eslint-disable max-lines, max-lines-per-function */
 import { t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
 import { FormValidationContext } from "@repo/ui/components/Form";
 import { NumberField } from "@repo/ui/components/NumberField";
+import { SwitchField } from "@repo/ui/components/SwitchField";
 
 import type { EventTypeTabProps } from "./EventTypeTabTypes";
 
@@ -97,6 +99,33 @@ export function EventTypeLimitsTab({ value, onChange, error }: EventTypeTabProps
               onChange={(maxBookingsPerDay) => updateLimits({ maxBookingsPerDay })}
             />
             <NumberField
+              name="maxBookingsPerWeek"
+              label={t`Bookings per week`}
+              minValue={0}
+              maxValue={10000}
+              allowEmpty={true}
+              value={settings.limits.maxBookingsPerWeek ?? undefined}
+              onChange={(maxBookingsPerWeek) => updateLimits({ maxBookingsPerWeek })}
+            />
+            <NumberField
+              name="maxBookingsPerMonth"
+              label={t`Bookings per month`}
+              minValue={0}
+              maxValue={10000}
+              allowEmpty={true}
+              value={settings.limits.maxBookingsPerMonth ?? undefined}
+              onChange={(maxBookingsPerMonth) => updateLimits({ maxBookingsPerMonth })}
+            />
+            <NumberField
+              name="maxBookingsPerYear"
+              label={t`Bookings per year`}
+              minValue={0}
+              maxValue={100000}
+              allowEmpty={true}
+              value={settings.limits.maxBookingsPerYear ?? undefined}
+              onChange={(maxBookingsPerYear) => updateLimits({ maxBookingsPerYear })}
+            />
+            <NumberField
               name="maxBookingDurationMinutesPerDay"
               label={t`Booked minutes per day`}
               minValue={0}
@@ -106,6 +135,33 @@ export function EventTypeLimitsTab({ value, onChange, error }: EventTypeTabProps
               onChange={(maxBookingDurationMinutesPerDay) => updateLimits({ maxBookingDurationMinutesPerDay })}
             />
             <NumberField
+              name="maxBookingDurationPerWeek"
+              label={t`Booked minutes per week`}
+              minValue={0}
+              maxValue={525600}
+              allowEmpty={true}
+              value={settings.limits.maxBookingDurationPerWeek ?? undefined}
+              onChange={(maxBookingDurationPerWeek) => updateLimits({ maxBookingDurationPerWeek })}
+            />
+            <NumberField
+              name="maxBookingDurationPerMonth"
+              label={t`Booked minutes per month`}
+              minValue={0}
+              maxValue={525600}
+              allowEmpty={true}
+              value={settings.limits.maxBookingDurationPerMonth ?? undefined}
+              onChange={(maxBookingDurationPerMonth) => updateLimits({ maxBookingDurationPerMonth })}
+            />
+            <NumberField
+              name="maxBookingDurationPerYear"
+              label={t`Booked minutes per year`}
+              minValue={0}
+              maxValue={5256000}
+              allowEmpty={true}
+              value={settings.limits.maxBookingDurationPerYear ?? undefined}
+              onChange={(maxBookingDurationPerYear) => updateLimits({ maxBookingDurationPerYear })}
+            />
+            <NumberField
               name="maxActiveBookingsPerBooker"
               label={t`Active bookings per booker`}
               minValue={0}
@@ -113,6 +169,33 @@ export function EventTypeLimitsTab({ value, onChange, error }: EventTypeTabProps
               allowEmpty={true}
               value={settings.limits.maxActiveBookingsPerBooker ?? undefined}
               onChange={(maxActiveBookingsPerBooker) => updateLimits({ maxActiveBookingsPerBooker })}
+            />
+            <SwitchField
+              name="maxActiveBookingPerBookerOfferReschedule"
+              label={t`Offer reschedule when at limit`}
+              checked={settings.limits.maxActiveBookingPerBookerOfferReschedule}
+              onCheckedChange={(maxActiveBookingPerBookerOfferReschedule) =>
+                updateLimits({ maxActiveBookingPerBookerOfferReschedule })
+              }
+            />
+          </div>
+        </EventTypeTabSection>
+        <EventTypeTabSection
+          title={<Trans>Slot display</Trans>}
+          description={<Trans>Tune how the schedule presents available slots to bookers.</Trans>}
+        >
+          <div className="grid gap-4 md:grid-cols-2">
+            <SwitchField
+              name="onlyShowFirstAvailableSlot"
+              label={t`Only show first available slot`}
+              checked={settings.limits.onlyShowFirstAvailableSlot}
+              onCheckedChange={(onlyShowFirstAvailableSlot) => updateLimits({ onlyShowFirstAvailableSlot })}
+            />
+            <SwitchField
+              name="showOptimizedSlots"
+              label={t`Show optimized slots`}
+              checked={settings.limits.showOptimizedSlots}
+              onCheckedChange={(showOptimizedSlots) => updateLimits({ showOptimizedSlots })}
             />
           </div>
         </EventTypeTabSection>
