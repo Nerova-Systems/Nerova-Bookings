@@ -22,6 +22,9 @@ public sealed class ScheduleUpdated(ScheduleId scheduleId)
 public sealed class ScheduleDeleted(ScheduleId scheduleId)
     : TelemetryEvent(("schedule_id", scheduleId));
 
+public sealed class ScheduleDuplicated(ScheduleId sourceScheduleId, ScheduleId duplicateScheduleId)
+    : TelemetryEvent(("source_schedule_id", sourceScheduleId), ("schedule_id", duplicateScheduleId));
+
 public sealed class EventTypeCreated(EventTypeId eventTypeId)
     : TelemetryEvent(("event_type_id", eventTypeId));
 

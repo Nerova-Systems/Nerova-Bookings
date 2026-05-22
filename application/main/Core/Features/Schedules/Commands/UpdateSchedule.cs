@@ -70,7 +70,7 @@ public sealed class UpdateScheduleHandler(
         }
 
         var schedule = await scheduleRepository.GetByIdAsync(command.Id, cancellationToken);
-        if (schedule is null || schedule.OwnerUserId != ownerUserId)
+        if (schedule is null || !ScheduleAccess.HasAccess(schedule, ownerUserId, executionContext.ActiveTeamId))
         {
             return Result<ScheduleResponse>.NotFound($"Schedule '{command.Id}' was not found.");
         }

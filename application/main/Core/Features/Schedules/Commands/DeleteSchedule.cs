@@ -1,6 +1,7 @@
 using JetBrains.Annotations;
 using Main.Features.EventTypes.Domain;
 using Main.Features.Schedules.Domain;
+using Main.Features.Schedules.Shared;
 using Main.Features.Scheduling.Shared;
 using SharedKernel.Cqrs;
 using SharedKernel.ExecutionContext;
@@ -32,7 +33,7 @@ public sealed class DeleteScheduleHandler(
         }
 
         var schedule = await scheduleRepository.GetByIdAsync(command.Id, cancellationToken);
-        if (schedule is null || schedule.OwnerUserId != ownerUserId)
+        if (schedule is null || !ScheduleAccess.HasAccess(schedule, ownerUserId, executionContext.ActiveTeamId))
         {
             return Result.NotFound($"Schedule '{command.Id}' was not found.");
         }
