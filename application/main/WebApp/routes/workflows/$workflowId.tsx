@@ -17,7 +17,7 @@ import { WorkflowApiErrors } from "./-components/WorkflowApiErrors";
 import { WorkflowBindingsCard } from "./-components/WorkflowBindingsCard";
 import { WorkflowsPageShell } from "./-components/WorkflowsPageShell";
 import { WorkflowStepsSection } from "./-components/WorkflowStepsSection";
-import { getWorkflowTriggerLabel } from "./-components/workflowTypes";
+import { getWorkflowTriggerLabel, workflowPathId } from "./-components/workflowTypes";
 
 export const Route = createFileRoute("/workflows/$workflowId")({
   beforeLoad: () => {
@@ -35,7 +35,7 @@ function WorkflowDetailsPage() {
   const [deleteOpen, setDeleteOpen] = useState(false);
 
   const { data: workflow, isLoading } = api.useQuery("get", "/api/workflows/{id}", {
-    params: { path: { id: workflowId } }
+    params: { path: { id: workflowPathId(workflowId) } }
   });
 
   const renameMutation = api.useMutation("put", "/api/workflows/{id}", {
@@ -57,8 +57,8 @@ function WorkflowDetailsPage() {
 
   const handleRename = (newName: string) => {
     renameMutation.mutate({
-      params: { path: { id: workflow.id } },
-      body: { workflowId: workflow.id, name: newName }
+      params: { path: { id: workflowPathId(workflow.id) } },
+      body: { workflowId: workflowPathId(workflow.id), name: newName }
     });
   };
 

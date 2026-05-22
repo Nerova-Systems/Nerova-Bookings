@@ -8,10 +8,15 @@ import {
   WorkflowTrigger
 } from "@/shared/lib/api/client";
 
-export type Workflow = Schemas["WorkflowResponse"];
+export type Workflow = Schemas["WorkflowResponse2"];
 export type WorkflowStep = Schemas["WorkflowStepResponse"];
 export type EventType = Schemas["EventTypeResponse"];
+export type WorkflowPathId = Schemas["WorkflowId2"];
 export type ApiValidationError = Schemas["HttpValidationProblemDetails"] | null | undefined;
+
+export function workflowPathId(value: string): WorkflowPathId {
+  return value as unknown as WorkflowPathId;
+}
 
 export function getApiErrorMessages(error: ApiValidationError): string[] {
   return [error?.detail, ...Object.values(error?.errors ?? {}).flat()].filter(

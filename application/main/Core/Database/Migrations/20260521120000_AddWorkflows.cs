@@ -10,7 +10,7 @@ public sealed class AddWorkflows : Migration
     protected override void Up(MigrationBuilder migrationBuilder)
     {
         migrationBuilder.CreateTable(
-            "workflows",
+            "workflow_definitions",
             table => new
             {
                 id = table.Column<string>("text", nullable: false),
@@ -22,7 +22,7 @@ public sealed class AddWorkflows : Migration
                 modified_at = table.Column<DateTimeOffset>("timestamp with time zone", nullable: true),
                 deleted_at = table.Column<DateTimeOffset>("timestamp with time zone", nullable: true)
             },
-            constraints: table => { table.PrimaryKey("pk_workflows", w => w.id); }
+            constraints: table => { table.PrimaryKey("pk_workflow_definitions", w => w.id); }
         );
 
         migrationBuilder.CreateTable(
@@ -45,7 +45,7 @@ public sealed class AddWorkflows : Migration
                 table.ForeignKey(
                     "fk_workflow_steps_workflow_workflow_id",
                     s => s.workflow_id,
-                    "workflows",
+                    "workflow_definitions",
                     "id",
                     onDelete: ReferentialAction.Cascade
                 );
@@ -69,7 +69,7 @@ public sealed class AddWorkflows : Migration
                 table.ForeignKey(
                     "fk_workflow_event_type_bindings_workflows_workflow_id",
                     b => b.workflow_id,
-                    "workflows",
+                    "workflow_definitions",
                     "id",
                     onDelete: ReferentialAction.Cascade
                 );
@@ -109,7 +109,7 @@ public sealed class AddWorkflows : Migration
             constraints: table => { table.PrimaryKey("pk_workflow_reminders", r => r.id); }
         );
 
-        migrationBuilder.CreateIndex("ix_workflows_tenant_id_owner_user_id", "workflows", new[] { "tenant_id", "owner_user_id" });
+        migrationBuilder.CreateIndex("ix_workflow_definitions_tenant_id_owner_user_id", "workflow_definitions", new[] { "tenant_id", "owner_user_id" });
         migrationBuilder.CreateIndex("ix_workflow_steps_workflow_id", "workflow_steps", "workflow_id");
         migrationBuilder.CreateIndex("ix_workflow_event_type_bindings_workflow_id_event_type_id", "workflow_event_type_bindings", new[] { "workflow_id", "event_type_id" }, unique: true);
         migrationBuilder.CreateIndex("ix_workflow_event_type_bindings_event_type_id", "workflow_event_type_bindings", "event_type_id");

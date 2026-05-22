@@ -153,6 +153,7 @@ public sealed class AddPbacDomain : Migration
         migrationBuilder.InsertData(
             "roles",
             new[] { "id", "tenant_id", "created_at", "modified_at", "name", "description" },
+            new[] { "text", "bigint", "timestamptz", "timestamptz", "text", "text" },
             new object[,]
             {
                 { ownerId, null!, seedTime, null!, "Owner", "Full access to all resources." },
@@ -167,6 +168,7 @@ public sealed class AddPbacDomain : Migration
 
         // Build object[,] for each role's permissions (required by MigrationBuilder.InsertData overload).
         var permColumns = new[] { "role_id", "resource", "action" };
+        var permColumnTypes = new[] { "text", "text", "text" };
 
         var ownerRows = resources.SelectMany(r => actions.Select(a => (r, a))).ToArray();
         var ownerData = new object[ownerRows.Length, 3];
@@ -177,7 +179,7 @@ public sealed class AddPbacDomain : Migration
             ownerData[i, 2] = ownerRows[i].a;
         }
 
-        migrationBuilder.InsertData("role_permissions", permColumns, ownerData);
+        migrationBuilder.InsertData("role_permissions", permColumns, permColumnTypes, ownerData);
 
         // Admin: all except Billing.Manage and Organization.Delete.
         var adminRows = resources
@@ -193,12 +195,13 @@ public sealed class AddPbacDomain : Migration
             adminData[i, 2] = adminRows[i].a;
         }
 
-        migrationBuilder.InsertData("role_permissions", permColumns, adminData);
+        migrationBuilder.InsertData("role_permissions", permColumns, permColumnTypes, adminData);
 
         // Member: limited set only.
         migrationBuilder.InsertData(
             "role_permissions",
             permColumns,
+            permColumnTypes,
             new object[,]
             {
                 { memberId, "Team", "Read" },

@@ -79,7 +79,7 @@ function KpiTile({ label, value, delta, deltaSuffix, invertDelta }: Readonly<Kpi
       </CardHeader>
       <CardContent>
         <div className="flex items-baseline gap-2">
-          <span className="font-semibold text-2xl tabular-nums">{value}</span>
+          <span className="text-2xl font-semibold tabular-nums">{value}</span>
           {delta !== undefined && <DeltaBadge value={delta} suffix={deltaSuffix} invert={invertDelta} />}
         </div>
       </CardContent>

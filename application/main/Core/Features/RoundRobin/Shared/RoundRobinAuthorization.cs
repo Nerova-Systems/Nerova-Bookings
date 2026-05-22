@@ -1,4 +1,5 @@
 using SharedKernel.Authentication;
+using FeatureFlagRegistry = SharedKernel.FeatureFlags.FeatureFlags;
 
 namespace Main.Features.RoundRobin.Shared;
 
@@ -8,7 +9,7 @@ public static class RoundRobinAuthorization
 
     public const string RoundRobinFeatureDisabledMessage = "The round-robin scheduling feature is not enabled for your account.";
 
-    public const string RoundRobinFeatureFlagKey = "cap-round-robin";
+    public static string RoundRobinFeatureFlagKey => FeatureFlagRegistry.CapRoundRobin.Key;
 
     public static bool HasRoundRobinFeature(UserInfo userInfo)
     {

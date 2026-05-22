@@ -20,6 +20,7 @@ import { api, queryClient } from "@/shared/lib/api/client";
 import type { Workflow } from "./workflowTypes";
 
 import { WorkflowApiErrors } from "./WorkflowApiErrors";
+import { workflowPathId } from "./workflowTypes";
 
 export function DeleteWorkflowDialog({
   workflow,
@@ -88,7 +89,7 @@ export function DeleteWorkflowDialog({
             disabled={!canConfirm}
             onClick={() => {
               if (!workflow) return;
-              deleteMutation.mutate({ params: { path: { id: workflow.id } } });
+              deleteMutation.mutate({ params: { path: { id: workflowPathId(workflow.id) } } });
             }}
           >
             <Trans>Delete</Trans>

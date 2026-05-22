@@ -1,4 +1,5 @@
 using SharedKernel.Authentication;
+using FeatureFlagRegistry = SharedKernel.FeatureFlags.FeatureFlags;
 
 namespace Main.Features.ManagedEventTypes.Shared;
 
@@ -8,7 +9,7 @@ public static class ManagedEventTypeAuthorization
 
     public const string ManagedEventTypesFeatureDisabledMessage = "The managed event types feature is not enabled for your account.";
 
-    public const string ManagedEventTypesFeatureFlagKey = "cap-managed-event-types";
+    public static string ManagedEventTypesFeatureFlagKey => FeatureFlagRegistry.CapManagedEventTypes.Key;
 
     public static bool CanManageManagedEventTypes(UserInfo userInfo)
     {

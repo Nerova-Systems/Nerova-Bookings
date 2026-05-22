@@ -11,7 +11,7 @@ import { api, queryClient } from "@/shared/lib/api/client";
 import type { Workflow, WorkflowStepDraft } from "./workflowTypes";
 
 import { WorkflowStepCard } from "./WorkflowStepCard";
-import { isStepDirty, newStepDraft, nullIfBlank, stepToDraft } from "./workflowTypes";
+import { isStepDirty, newStepDraft, nullIfBlank, stepToDraft, workflowPathId } from "./workflowTypes";
 
 export function WorkflowStepsSection({ workflow }: Readonly<{ workflow: Workflow }>) {
   const [newStep, setNewStep] = useState<WorkflowStepDraft | null>(null);
@@ -51,7 +51,7 @@ export function WorkflowStepsSection({ workflow }: Readonly<{ workflow: Workflow
 
   const handleSaveStep = (stepId: string | null, draft: WorkflowStepDraft) => {
     const payload = {
-      workflowId: workflow.id,
+      workflowId: workflowPathId(workflow.id),
       action: draft.action,
       template: draft.template,
       reminderTime: draft.reminderTime,
@@ -61,10 +61,10 @@ export function WorkflowStepsSection({ workflow }: Readonly<{ workflow: Workflow
       emailBody: nullIfBlank(draft.emailBody)
     };
     if (stepId === null) {
-      addStepMutation.mutate({ params: { path: { id: workflow.id } }, body: payload });
+      addStepMutation.mutate({ params: { path: { id: workflowPathId(workflow.id) } }, body: payload });
     } else {
       updateStepMutation.mutate({
-        params: { path: { id: workflow.id, stepId } },
+        params: { path: { id: workflowPathId(workflow.id), stepId } },
         body: { ...payload, stepId }
       });
     }
@@ -75,7 +75,7 @@ export function WorkflowStepsSection({ workflow }: Readonly<{ workflow: Workflow
       setNewStep(null);
       return;
     }
-    removeStepMutation.mutate({ params: { path: { id: workflow.id, stepId } } });
+    removeStepMutation.mutate({ params: { path: { id: workflowPathId(workflow.id), stepId } } });
   };
 
   return (

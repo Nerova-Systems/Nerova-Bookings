@@ -9,6 +9,8 @@ public sealed class WorkflowConfiguration : IEntityTypeConfiguration<Workflow>
 {
     public void Configure(EntityTypeBuilder<Workflow> builder)
     {
+        builder.ToTable("workflow_definitions");
+
         builder.MapStronglyTypedUuid<Workflow, WorkflowId>(w => w.Id);
         builder.MapStronglyTypedLongId<Workflow, TenantId>(w => w.TenantId);
         builder.MapStronglyTypedUuid<Workflow, UserId>(w => w.OwnerUserId);

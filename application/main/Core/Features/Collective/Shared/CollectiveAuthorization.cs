@@ -1,4 +1,5 @@
 using SharedKernel.Authentication;
+using FeatureFlagRegistry = SharedKernel.FeatureFlags.FeatureFlags;
 
 namespace Main.Features.Collective.Shared;
 
@@ -8,7 +9,7 @@ public static class CollectiveAuthorization
 
     public const string CollectiveFeatureDisabledMessage = "The collective scheduling feature is not enabled for your account.";
 
-    public const string CollectiveFeatureFlagKey = "cap-collective";
+    public static string CollectiveFeatureFlagKey => FeatureFlagRegistry.CapCollective.Key;
 
     public static bool HasCollectiveFeature(UserInfo userInfo)
     {

@@ -10,6 +10,7 @@ import { api, queryClient } from "@/shared/lib/api/client";
 import type { Workflow } from "./workflowTypes";
 
 import { WorkflowApiErrors } from "./WorkflowApiErrors";
+import { workflowPathId } from "./workflowTypes";
 
 export function WorkflowBindingsCard({ workflow }: Readonly<{ workflow: Workflow }>) {
   const { data: eventTypesData } = api.useQuery("get", "/api/event-types");
@@ -35,11 +36,11 @@ export function WorkflowBindingsCard({ workflow }: Readonly<{ workflow: Workflow
   const handleToggleBinding = (eventTypeId: string, checked: boolean) => {
     if (checked) {
       bindMutation.mutate({
-        params: { path: { id: workflow.id } },
-        body: { workflowId: workflow.id, eventTypeId }
+        params: { path: { id: workflowPathId(workflow.id) } },
+        body: { workflowId: workflowPathId(workflow.id), eventTypeId }
       });
     } else {
-      unbindMutation.mutate({ params: { path: { id: workflow.id, eventTypeId } } });
+      unbindMutation.mutate({ params: { path: { id: workflowPathId(workflow.id), eventTypeId } } });
     }
   };
 

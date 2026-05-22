@@ -2,6 +2,7 @@ using Bogus;
 using Main.Database;
 using SharedKernel.Authentication;
 using SharedKernel.Domain;
+using FeatureFlagRegistry = SharedKernel.FeatureFlags.FeatureFlags;
 
 namespace Main.Tests;
 
@@ -28,15 +29,24 @@ public sealed class DatabaseSeeder
             TenantId = TenantId,
             FeatureFlags = new HashSet<string>
             {
-                "cal-com-core",
-                "cal-com-event-types",
-                "cal-com-availability",
-                "cal-com-public-booking",
-                "cal-com-bookings",
-                "cal-com-workflows",
-                "cal-com-webhooks",
-                "cal-com-apps-connectors",
-                "cal-com-conferencing"
+                FeatureFlagRegistry.TierTeams.Key,
+                FeatureFlagRegistry.TierOrganizations.Key,
+                FeatureFlagRegistry.TierEnterprise.Key,
+                FeatureFlagRegistry.CapManagedEventTypes.Key,
+                FeatureFlagRegistry.CapRoundRobin.Key,
+                FeatureFlagRegistry.CapCollective.Key,
+                FeatureFlagRegistry.CapAttributes.Key,
+                FeatureFlagRegistry.CapCustomSmtp.Key,
+                FeatureFlagRegistry.CapOrgBilling.Key,
+                FeatureFlagRegistry.CapDelegationCredentials.Key,
+                FeatureFlagRegistry.CapSsoMicrosoft.Key,
+                FeatureFlagRegistry.CapSsoGoogle.Key,
+                FeatureFlagRegistry.CapIntegrationAttributeSync.Key,
+                FeatureFlagRegistry.CapAuditLog.Key,
+                FeatureFlagRegistry.CapWorkflows.Key,
+                FeatureFlagRegistry.CapApiKeys.Key,
+                FeatureFlagRegistry.CapImpersonation.Key,
+                FeatureFlagRegistry.CapInsights.Key
             }
         };
 
@@ -52,15 +62,24 @@ public sealed class DatabaseSeeder
             TenantId = TenantId,
             FeatureFlags = new HashSet<string>
             {
-                "cal-com-core",
-                "cal-com-event-types",
-                "cal-com-availability",
-                "cal-com-public-booking",
-                "cal-com-bookings",
-                "cal-com-workflows",
-                "cal-com-webhooks",
-                "cal-com-apps-connectors",
-                "cal-com-conferencing"
+                FeatureFlagRegistry.TierTeams.Key,
+                FeatureFlagRegistry.TierOrganizations.Key,
+                FeatureFlagRegistry.TierEnterprise.Key,
+                FeatureFlagRegistry.CapManagedEventTypes.Key,
+                FeatureFlagRegistry.CapRoundRobin.Key,
+                FeatureFlagRegistry.CapCollective.Key,
+                FeatureFlagRegistry.CapAttributes.Key,
+                FeatureFlagRegistry.CapCustomSmtp.Key,
+                FeatureFlagRegistry.CapOrgBilling.Key,
+                FeatureFlagRegistry.CapDelegationCredentials.Key,
+                FeatureFlagRegistry.CapSsoMicrosoft.Key,
+                FeatureFlagRegistry.CapSsoGoogle.Key,
+                FeatureFlagRegistry.CapIntegrationAttributeSync.Key,
+                FeatureFlagRegistry.CapAuditLog.Key,
+                FeatureFlagRegistry.CapWorkflows.Key,
+                FeatureFlagRegistry.CapApiKeys.Key,
+                FeatureFlagRegistry.CapImpersonation.Key,
+                FeatureFlagRegistry.CapInsights.Key
             }
         };
 
