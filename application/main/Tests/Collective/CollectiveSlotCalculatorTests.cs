@@ -232,7 +232,7 @@ public sealed class CollectiveSlotCalculatorTests
             bookingStart, 30,
             beforeEventBufferMinutes: 0,
             afterEventBufferMinutes: 30,
-            "Booker", "booker@example.com", "UTC", "accepted",
+            "Booker", "booker@example.com", "UTC", BookingStatus.Accepted,
             new Dictionary<string, string>()
         );
 
@@ -263,8 +263,7 @@ public sealed class CollectiveSlotCalculatorTests
             afterEventBufferMinutes: 0,
             "Test Booker",
             "booker@example.com",
-            "UTC",
-            "accepted",
+            "UTC", BookingStatus.Accepted,
             new Dictionary<string, string>()
         );
     }

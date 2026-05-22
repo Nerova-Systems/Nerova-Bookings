@@ -133,7 +133,7 @@ public sealed class CreatePublicBookingHandler(
             return Result<CreatePublicBookingResponse>.BadRequest($"{requiredMissingField.Label} is required.");
         }
 
-        var status = context.EventType.Settings.ConfirmationPolicy.RequiresConfirmation ? "pending" : "accepted";
+        var status = context.EventType.Settings.ConfirmationPolicy.RequiresConfirmation ? BookingStatus.Pending : BookingStatus.Accepted;
         var booking = Booking.Create(
             context.Profile.TenantId,
             ownerUserId,
@@ -152,6 +152,6 @@ public sealed class CreatePublicBookingHandler(
 
         await bookingRepository.AddAsync(booking, cancellationToken);
 
-        return new CreatePublicBookingResponse(booking.Id, booking.StartTime, booking.EndTime, status);
+        return new CreatePublicBookingResponse(booking.Id, booking.StartTime, booking.EndTime, status.ToString());
     }
 }

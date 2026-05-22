@@ -54,13 +54,13 @@ public sealed class GetBookingKpisHandler(
         var current = all.Where(b => b.StartTime >= range.From && b.StartTime < range.To).ToList();
         var priorData = all.Where(b => b.StartTime >= prior.From && b.StartTime < prior.To).ToList();
 
-        var completed = current.Count(b => b.Status.Equals(BookingStatuses.Accepted, StringComparison.OrdinalIgnoreCase) && b.EndTime < now);
-        var cancelled = current.Count(b => b.Status.Equals(BookingStatuses.Cancelled, StringComparison.OrdinalIgnoreCase) || b.Status.Equals(BookingStatuses.Rejected, StringComparison.OrdinalIgnoreCase));
-        var accepted = current.Count(b => b.Status.Equals(BookingStatuses.Accepted, StringComparison.OrdinalIgnoreCase));
-        var pending = current.Count(b => b.Status.Equals(BookingStatuses.Pending, StringComparison.OrdinalIgnoreCase));
+        var completed = current.Count(b => b.Status == BookingStatus.Accepted && b.EndTime < now);
+        var cancelled = current.Count(b => b.Status == BookingStatus.Cancelled || b.Status == BookingStatus.Rejected);
+        var accepted = current.Count(b => b.Status == BookingStatus.Accepted);
+        var pending = current.Count(b => b.Status == BookingStatus.Pending);
 
-        var priorCancelled = priorData.Count(b => b.Status.Equals(BookingStatuses.Cancelled, StringComparison.OrdinalIgnoreCase) || b.Status.Equals(BookingStatuses.Rejected, StringComparison.OrdinalIgnoreCase));
-        var priorAccepted = priorData.Count(b => b.Status.Equals(BookingStatuses.Accepted, StringComparison.OrdinalIgnoreCase));
+        var priorCancelled = priorData.Count(b => b.Status == BookingStatus.Cancelled || b.Status == BookingStatus.Rejected);
+        var priorAccepted = priorData.Count(b => b.Status == BookingStatus.Accepted);
 
         return new BookingKpisResponse(
             TotalCount: current.Count,

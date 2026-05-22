@@ -34,7 +34,7 @@ public sealed class WorkflowBookingReader(MainDbContext context)
         var newBookings = await context.Set<Booking>()
             .IgnoreQueryFilters()
             .Where(b => activeEventTypeIds.Contains(b.EventTypeId))
-            .Where(b => b.Status != "cancelled" && b.Status != "rejected")
+            .Where(b => b.Status != BookingStatus.Cancelled && b.Status != BookingStatus.Rejected)
             .Where(b => !context.Set<WorkflowReminder>()
                 .IgnoreQueryFilters()
                 .Any(r => r.BookingId == b.Id))
@@ -63,7 +63,7 @@ public sealed class WorkflowBookingReader(MainDbContext context)
         return await context.Set<Booking>()
             .IgnoreQueryFilters()
             .Where(b => bookingIdsWithPendingReminders.Contains(b.Id))
-            .Where(b => b.Status == "cancelled")
+            .Where(b => b.Status == BookingStatus.Cancelled)
             .Take(BatchSize)
             .ToArrayAsync(ct);
     }
@@ -87,7 +87,7 @@ public sealed class WorkflowBookingReader(MainDbContext context)
         var bookings = await context.Set<Booking>()
             .IgnoreQueryFilters()
             .Where(b => bookingIds.Contains(b.Id))
-            .Where(b => b.Status != "cancelled")
+            .Where(b => b.Status != BookingStatus.Cancelled)
             .ToArrayAsync(ct);
 
         var bookingById = bookings.ToDictionary(b => b.Id);

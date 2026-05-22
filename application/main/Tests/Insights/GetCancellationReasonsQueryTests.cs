@@ -39,7 +39,7 @@ public sealed class GetCancellationReasonsQueryTests : InsightsEndpointBaseTest
         Connection.Update("bookings", "id", b.Id, [
             ("start_time", DateTimeOffset.Parse("2025-06-01T07:00:00Z")),
             ("end_time", DateTimeOffset.Parse("2025-06-01T07:30:00Z")),
-            ("status", "cancelled")
+            ("status", "Cancelled")
         ]);
 
         // Act
@@ -66,13 +66,13 @@ public sealed class GetCancellationReasonsQueryTests : InsightsEndpointBaseTest
         Connection.Update("bookings", "id", b1.Id, [
             ("start_time", DateTimeOffset.Parse("2025-06-01T07:00:00Z")),
             ("end_time", DateTimeOffset.Parse("2025-06-01T07:30:00Z")),
-            ("status", "cancelled"),
+            ("status", "Cancelled"),
             ("responses_json", """{"cancellationReason":"Schedule conflict"}""")
         ]);
         Connection.Update("bookings", "id", b2.Id, [
             ("start_time", DateTimeOffset.Parse("2025-06-01T09:00:00Z")),
             ("end_time", DateTimeOffset.Parse("2025-06-01T09:30:00Z")),
-            ("status", "cancelled"),
+            ("status", "Cancelled"),
             ("responses_json", """{"cancellationReason":"Schedule conflict"}""")
         ]);
 

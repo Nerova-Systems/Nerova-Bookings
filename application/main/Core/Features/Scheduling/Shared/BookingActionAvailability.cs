@@ -36,13 +36,12 @@ public static class BookingActionAvailability
 
     public static BookingActionResponse ResolveCancel(Booking booking, EventType eventType, DateTimeOffset now)
     {
-        var normalizedStatus = booking.Status.Trim().ToLowerInvariant();
-        if (normalizedStatus == "cancelled")
+        if (booking.Status == BookingStatus.Cancelled)
         {
             return Disabled("Cancelled bookings cannot be cancelled.");
         }
 
-        if (normalizedStatus == "rejected")
+        if (booking.Status == BookingStatus.Rejected)
         {
             return Disabled("Rejected bookings cannot be cancelled.");
         }

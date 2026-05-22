@@ -34,9 +34,9 @@ public sealed class BookingEndpointsTests : EndpointBaseTest<MainDbContext>
         var recurring = await CreateBookingAsync("weekly-sync", "2026-06-02T07:00:00Z", "Alan Turing", "alan@example.com");
         var past = await CreateBookingAsync("intro-call", "2026-06-03T07:00:00Z", "Katherine Johnson", "katherine@example.com");
         var cancelled = await CreateBookingAsync("intro-call", "2026-06-03T08:00:00Z", "Margaret Hamilton", "margaret@example.com");
-        Connection.Update("bookings", "id", pending.Id, [("status", "pending")]);
+        Connection.Update("bookings", "id", pending.Id, [("status", "Pending")]);
         Connection.Update("bookings", "id", past.Id, [("start_time", DateTimeOffset.Parse("2026-05-01T07:00:00Z")), ("end_time", DateTimeOffset.Parse("2026-05-01T07:30:00Z"))]);
-        Connection.Update("bookings", "id", cancelled.Id, [("status", "cancelled")]);
+        Connection.Update("bookings", "id", cancelled.Id, [("status", "Cancelled")]);
 
         // Act
         var upcomingResponse = await AuthenticatedOwnerHttpClient.GetAsync($"/api/bookings?status=upcoming&eventTypeId={introEventType.Id}&attendeeEmail=ada");
@@ -124,10 +124,10 @@ public sealed class BookingEndpointsTests : EndpointBaseTest<MainDbContext>
         var past = await CreateBookingAsync("intro-call", "2026-06-03T07:00:00Z", "Katherine Johnson", "katherine@example.com");
         var cancelled = await CreateBookingAsync("intro-call", "2026-06-03T08:00:00Z", "Margaret Hamilton", "margaret@example.com");
         var rejected = await CreateBookingAsync("intro-call", "2026-06-03T09:00:00Z", "Dorothy Vaughan", "dorothy@example.com");
-        Connection.Update("bookings", "id", pending.Id, [("status", "pending")]);
+        Connection.Update("bookings", "id", pending.Id, [("status", "Pending")]);
         Connection.Update("bookings", "id", past.Id, [("start_time", DateTimeOffset.Parse("2026-05-01T07:00:00Z")), ("end_time", DateTimeOffset.Parse("2026-05-01T07:30:00Z"))]);
-        Connection.Update("bookings", "id", cancelled.Id, [("status", "cancelled")]);
-        Connection.Update("bookings", "id", rejected.Id, [("status", "rejected")]);
+        Connection.Update("bookings", "id", cancelled.Id, [("status", "Cancelled")]);
+        Connection.Update("bookings", "id", rejected.Id, [("status", "Rejected")]);
 
         // Act
         var response = await AuthenticatedOwnerHttpClient.GetAsync(
@@ -172,7 +172,7 @@ public sealed class BookingEndpointsTests : EndpointBaseTest<MainDbContext>
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        Connection.ExecuteScalar<string>("SELECT status FROM bookings WHERE id = @id", [new { id = booking.Id }]).Should().Be("cancelled");
+        Connection.ExecuteScalar<string>("SELECT status FROM bookings WHERE id = @id", [new { id = booking.Id }]).Should().Be("Cancelled");
     }
 
     [Fact]
@@ -190,7 +190,7 @@ public sealed class BookingEndpointsTests : EndpointBaseTest<MainDbContext>
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-        Connection.ExecuteScalar<string>("SELECT status FROM bookings WHERE id = @id", [new { id = past.Id }]).Should().Be("accepted");
+        Connection.ExecuteScalar<string>("SELECT status FROM bookings WHERE id = @id", [new { id = past.Id }]).Should().Be("Accepted");
     }
 
     [Fact]
@@ -207,7 +207,7 @@ public sealed class BookingEndpointsTests : EndpointBaseTest<MainDbContext>
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-        Connection.ExecuteScalar<string>("SELECT status FROM bookings WHERE id = @id", [new { id = booking.Id }]).Should().Be("accepted");
+        Connection.ExecuteScalar<string>("SELECT status FROM bookings WHERE id = @id", [new { id = booking.Id }]).Should().Be("Accepted");
     }
 
     [Fact]
@@ -224,7 +224,7 @@ public sealed class BookingEndpointsTests : EndpointBaseTest<MainDbContext>
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
-        Connection.ExecuteScalar<string>("SELECT status FROM bookings WHERE id = @id", [new { id = booking.Id }]).Should().Be("accepted");
+        Connection.ExecuteScalar<string>("SELECT status FROM bookings WHERE id = @id", [new { id = booking.Id }]).Should().Be("Accepted");
     }
 
     private async Task UpdateSchedulingProfileAsync(string handle)

@@ -78,7 +78,7 @@ public sealed record BookingListItemResponse(
     string BookerName,
     string BookerEmail,
     string TimeZone,
-    string Status,
+    BookingStatus Status,
     string ListingStatus,
     string? LocationType,
     string? LocationValue,
@@ -120,14 +120,14 @@ public sealed class GetBookingsHandler(IBookingRepository bookingRepository, IEx
     private static bool MatchesStatus(BookingWithEventType item, string status, DateTimeOffset now)
     {
         var booking = item.Booking;
-        var normalizedStatus = booking.Status.Trim().ToLowerInvariant();
-        var isCancelled = normalizedStatus is "cancelled" or "rejected";
-        var isPending = normalizedStatus is "pending";
+        var isCancelled = booking.Status is BookingStatus.Cancelled or BookingStatus.Rejected;
+        var isPending = booking.Status == BookingStatus.Pending;
+        var isAccepted = booking.Status == BookingStatus.Accepted;
         var isRecurring = item.EventType.Settings.Recurrence is not null;
 
         return status switch
         {
-            "upcoming" => booking.EndTime >= now && (!isRecurring || normalizedStatus == "accepted") && !isCancelled,
+            "upcoming" => booking.EndTime >= now && (!isRecurring || isAccepted) && !isCancelled,
             "recurring" => booking.EndTime >= now && isRecurring && !isCancelled,
             "past" => booking.EndTime <= now && !isCancelled,
             "cancelled" => isCancelled,

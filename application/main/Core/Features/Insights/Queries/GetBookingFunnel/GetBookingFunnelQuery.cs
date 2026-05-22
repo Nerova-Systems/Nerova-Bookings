@@ -47,8 +47,8 @@ public sealed class GetBookingFunnelHandler(
         var bookings = all.Where(b => b.StartTime >= query.From && b.StartTime < query.To).ToList();
 
         var created = bookings.Count;
-        var accepted = bookings.Count(b => b.Status.Equals(BookingStatuses.Accepted, StringComparison.OrdinalIgnoreCase));
-        var completed = bookings.Count(b => b.Status.Equals(BookingStatuses.Accepted, StringComparison.OrdinalIgnoreCase) && b.EndTime < now);
+        var accepted = bookings.Count(b => b.Status == BookingStatus.Accepted);
+        var completed = bookings.Count(b => b.Status == BookingStatus.Accepted && b.EndTime < now);
 
         return new BookingFunnelResponse(created, accepted, completed);
     }

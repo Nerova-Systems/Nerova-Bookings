@@ -374,8 +374,7 @@ public sealed class RoundRobinSlotCalculatorTests
             afterEventBufferMinutes: 0,
             "Test Booker",
             "booker@example.com",
-            "UTC",
-            "accepted",
+            "UTC", BookingStatus.Accepted,
             new Dictionary<string, string>()
         );
     }

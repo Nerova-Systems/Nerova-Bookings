@@ -162,7 +162,7 @@ public sealed class TeamScopingDomainTests
         var booking = Booking.Create(
             TenantId.NewId(), UserId.NewId(), EventTypeId.NewId(),
             DateTimeOffset.UtcNow, 30, 0, 0,
-            "Alice", "alice@example.com", "UTC", "confirmed", new Dictionary<string, string>()
+            "Alice", "alice@example.com", "UTC", BookingStatus.Accepted, new Dictionary<string, string>()
         );
 
         booking.TeamId.Should().BeNull();
@@ -175,7 +175,7 @@ public sealed class TeamScopingDomainTests
         var booking = Booking.Create(
             TenantId.NewId(), UserId.NewId(), EventTypeId.NewId(),
             DateTimeOffset.UtcNow, 30, 0, 0,
-            "Alice", "alice@example.com", "UTC", "confirmed", new Dictionary<string, string>(),
+            "Alice", "alice@example.com", "UTC", BookingStatus.Accepted, new Dictionary<string, string>(),
             teamId
         );
 
@@ -189,7 +189,7 @@ public sealed class TeamScopingDomainTests
         var booking = Booking.Create(
             TenantId.NewId(), UserId.NewId(), EventTypeId.NewId(),
             DateTimeOffset.UtcNow, 30, 0, 0,
-            "Alice", "alice@example.com", "UTC", "confirmed", new Dictionary<string, string>()
+            "Alice", "alice@example.com", "UTC", BookingStatus.Accepted, new Dictionary<string, string>()
         );
 
         booking.AssignToTeam(teamId);
