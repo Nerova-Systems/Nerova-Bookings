@@ -48,7 +48,7 @@ export function getBookingEmptyDescription(status: BookingStatusView) {
 }
 
 export function getActiveBookingFiltersCount(search: BookingFilterState) {
-  return [
+  const baseFilters = [
     search.search,
     search.eventTypeId,
     search.attendeeName,
@@ -57,6 +57,13 @@ export function getActiveBookingFiltersCount(search: BookingFilterState) {
     search.dateFrom,
     search.dateTo
   ].filter((value) => value !== undefined && value !== "").length;
+
+  const toggleFilters =
+    (search.noShowOnly ? 1 : 0) +
+    (search.hasInternalNote ? 1 : 0) +
+    (search.minRating !== undefined && search.minRating > 0 ? 1 : 0);
+
+  return baseFilters + toggleFilters;
 }
 
 export function getWeekStartDate(date: Date, weekStartsOn = 1) {
@@ -97,6 +104,9 @@ export interface BookingFilterState {
   bookingUid?: string;
   dateFrom?: string;
   dateTo?: string;
+  noShowOnly?: boolean;
+  hasInternalNote?: boolean;
+  minRating?: number;
 }
 
 export function getStatusVariant(status: string): "default" | "secondary" | "destructive" | "outline" {

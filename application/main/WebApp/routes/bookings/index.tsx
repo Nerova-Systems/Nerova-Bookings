@@ -24,6 +24,9 @@ function BookingsIndexRedirect() {
         bookingUid: undefined,
         dateFrom: undefined,
         dateTo: undefined,
+        noShowOnly: undefined,
+        hasInternalNote: undefined,
+        minRating: undefined,
         view: "list",
         weekStart: formatWeekStartSearchValue(getWeekStartDate(new Date())),
         pageOffset: 0

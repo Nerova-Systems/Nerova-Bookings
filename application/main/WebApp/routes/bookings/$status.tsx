@@ -31,6 +31,9 @@ export const Route = createFileRoute("/bookings/$status")({
     bookingUid: stringValue(search.bookingUid),
     dateFrom: stringValue(search.dateFrom),
     dateTo: stringValue(search.dateTo),
+    noShowOnly: booleanValue(search.noShowOnly),
+    hasInternalNote: booleanValue(search.hasInternalNote),
+    minRating: ratingValue(search.minRating),
     view: stringValue(search.view),
     weekStart: stringValue(search.weekStart),
     pageOffset: numberValue(search.pageOffset) ?? 0
@@ -63,6 +66,9 @@ function BookingsPage() {
           BookingUid: search.bookingUid,
           AfterStartDate: toDateTimeOffset(search.dateFrom, false),
           BeforeEndDate: toDateTimeOffset(search.dateTo, true),
+          NoShowOnly: search.noShowOnly,
+          HasInternalNote: search.hasInternalNote,
+          MinRating: search.minRating,
           PageOffset: search.pageOffset,
           PageSize: pageSize
         }
@@ -148,6 +154,9 @@ function toRouteSearch(
     bookingUid: search.bookingUid,
     dateFrom: search.dateFrom,
     dateTo: search.dateTo,
+    noShowOnly: search.noShowOnly,
+    hasInternalNote: search.hasInternalNote,
+    minRating: search.minRating,
     view,
     weekStart: weekStart ?? formatWeekStartSearchValue(getWeekStartDate(new Date())),
     pageOffset
@@ -163,6 +172,9 @@ function normalizeSearch(search: ReturnType<typeof Route.useSearch>, view: Booki
     bookingUid: search.bookingUid,
     dateFrom: search.dateFrom,
     dateTo: search.dateTo,
+    noShowOnly: search.noShowOnly,
+    hasInternalNote: search.hasInternalNote,
+    minRating: search.minRating,
     view,
     weekStart: search.weekStart ?? formatWeekStartSearchValue(getWeekStartDate(new Date())),
     pageOffset: search.pageOffset
@@ -175,6 +187,18 @@ function numberValue(value: unknown) {
 
   const parsed = Number(value);
   return Number.isFinite(parsed) ? Math.max(0, Math.floor(parsed)) : undefined;
+}
+
+function booleanValue(value: unknown): boolean | undefined {
+  if (typeof value === "boolean") return value || undefined;
+  if (value === "true") return true;
+  return undefined;
+}
+
+function ratingValue(value: unknown) {
+  const parsed = numberValue(value);
+  if (parsed === undefined) return undefined;
+  return Math.min(5, Math.max(1, parsed));
 }
 
 function toDateTimeOffset(value: string | undefined, endOfDay: boolean) {

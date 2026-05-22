@@ -14,7 +14,10 @@ const emptyBookingFilterSearch: BookingFilterSearch = {
   attendeeEmail: undefined,
   bookingUid: undefined,
   dateFrom: undefined,
-  dateTo: undefined
+  dateTo: undefined,
+  noShowOnly: undefined,
+  hasInternalNote: undefined,
+  minRating: undefined
 };
 
 export function ActiveBookingFilters({
@@ -62,6 +65,9 @@ function getActiveBookingFilters(eventTypes: EventType[], search: BookingFilterS
     search.attendeeEmail ? { key: "attendeeEmail", label: t`Attendee email`, value: search.attendeeEmail } : null,
     search.bookingUid ? { key: "bookingUid", label: t`Booking ID`, value: search.bookingUid } : null,
     search.dateFrom ? { key: "dateFrom", label: t`From`, value: search.dateFrom } : null,
-    search.dateTo ? { key: "dateTo", label: t`To`, value: search.dateTo } : null
+    search.dateTo ? { key: "dateTo", label: t`To`, value: search.dateTo } : null,
+    search.noShowOnly ? { key: "noShowOnly", label: t`No-show only`, value: t`Yes` } : null,
+    search.hasInternalNote ? { key: "hasInternalNote", label: t`Has internal note`, value: t`Yes` } : null,
+    search.minRating ? { key: "minRating", label: t`Minimum rating`, value: `${search.minRating}+` } : null
   ].filter((filter): filter is { key: string; label: string; value: string } => filter !== null);
 }

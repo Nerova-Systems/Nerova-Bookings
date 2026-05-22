@@ -74,8 +74,6 @@ export function TopEventTypesChart({ data, isLoading }: Readonly<TopEventTypesCh
 
 function EmptyState({ message }: Readonly<{ message: string }>) {
   return (
-    <div className="flex h-[15.625rem] w-full items-center justify-center text-sm text-muted-foreground">
-      {message}
-    </div>
+    <div className="flex h-[15.625rem] w-full items-center justify-center text-sm text-muted-foreground">{message}</div>
   );
 }

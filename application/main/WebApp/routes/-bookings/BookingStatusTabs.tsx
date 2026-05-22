@@ -38,6 +38,9 @@ export interface BookingsRouteSearch {
   bookingUid: string | undefined;
   dateFrom: string | undefined;
   dateTo: string | undefined;
+  noShowOnly: boolean | undefined;
+  hasInternalNote: boolean | undefined;
+  minRating: number | undefined;
   view: "list" | "calendar";
   weekStart: string;
   pageOffset: number;
