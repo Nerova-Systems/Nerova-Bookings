@@ -8,7 +8,7 @@ namespace Main.Features.EventTypes.Domain;
 
 public interface IEventTypeRepository : ICrudRepository<EventType, EventTypeId>, ISoftDeletableRepository<EventType, EventTypeId>
 {
-    Task<EventType[]> GetForOwnerAsync(UserId ownerUserId, CancellationToken cancellationToken);
+    Task<EventType[]> GetForOwnerAsync(UserId ownerUserId, TenantId? teamId, CancellationToken cancellationToken);
 
     Task<EventType?> GetByIdUnfilteredAsync(TenantId tenantId, EventTypeId eventTypeId, CancellationToken cancellationToken);
 
@@ -17,15 +17,24 @@ public interface IEventTypeRepository : ICrudRepository<EventType, EventTypeId>,
     Task<bool> ExistsForScheduleAsync(UserId ownerUserId, ScheduleId scheduleId, CancellationToken cancellationToken);
 
     Task<bool> SlugExistsForOwnerAsync(UserId ownerUserId, string slug, EventTypeId? excludedEventTypeId, CancellationToken cancellationToken);
+
+    /// <summary>Returns all non-deleted child replicas for the given parent template.</summary>
+    Task<EventType[]> GetChildrenAsync(EventTypeId parentId, CancellationToken cancellationToken);
+
+    /// <summary>Returns the child replica belonging to the given parent and member, or null if not assigned.</summary>
+    Task<EventType?> GetChildByParentAndMemberAsync(EventTypeId parentId, UserId memberUserId, CancellationToken cancellationToken);
 }
 
 public sealed class EventTypeRepository(MainDbContext mainDbContext)
     : SoftDeletableRepositoryBase<EventType, EventTypeId>(mainDbContext), IEventTypeRepository
 {
-    public async Task<EventType[]> GetForOwnerAsync(UserId ownerUserId, CancellationToken cancellationToken)
+    public async Task<EventType[]> GetForOwnerAsync(UserId ownerUserId, TenantId? teamId, CancellationToken cancellationToken)
     {
-        return await DbSet
-            .Where(eventType => eventType.OwnerUserId == ownerUserId)
+        var query = teamId is not null
+            ? DbSet.Where(eventType => eventType.TeamId == teamId)
+            : DbSet.Where(eventType => eventType.OwnerUserId == ownerUserId && eventType.TeamId == null);
+
+        return await query
             .OrderBy(eventType => eventType.Title)
             .ThenBy(eventType => eventType.Id)
             .ToArrayAsync(cancellationToken);
@@ -74,5 +83,20 @@ public sealed class EventTypeRepository(MainDbContext mainDbContext)
         }
 
         return await eventTypes.AnyAsync(cancellationToken);
+    }
+
+    public async Task<EventType[]> GetChildrenAsync(EventTypeId parentId, CancellationToken cancellationToken)
+    {
+        return await DbSet
+            .Where(eventType => eventType.ParentEventTypeId == parentId)
+            .OrderBy(eventType => eventType.OwnerUserId)
+            .ToArrayAsync(cancellationToken);
+    }
+
+    public async Task<EventType?> GetChildByParentAndMemberAsync(EventTypeId parentId, UserId memberUserId, CancellationToken cancellationToken)
+    {
+        return await DbSet
+            .Where(eventType => eventType.ParentEventTypeId == parentId && eventType.OwnerUserId == memberUserId)
+            .FirstOrDefaultAsync(cancellationToken);
     }
 }

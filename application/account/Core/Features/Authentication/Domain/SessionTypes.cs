@@ -18,7 +18,9 @@ public enum DeviceType
 public enum LoginMethod
 {
     OneTimePassword,
-    Google
+    Google,
+    MicrosoftSso,
+    GoogleSso
 }
 
 /// <summary>

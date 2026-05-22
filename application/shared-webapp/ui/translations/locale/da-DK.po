@@ -17,8 +17,14 @@ msgstr ""
 msgid "{0, plural, one {# day ago} other {# days ago}}"
 msgstr "{0, plural, one {for # dag siden} other {for # dage siden}}"
 
+msgid "{credits} credits"
+msgstr "{credits} kreditter"
+
 msgid "{diffDays, plural, one {In # day} other {In # days}}"
 msgstr "{diffDays, plural, one {Om # dag} other {Om # dage}}"
+
+msgid "{name} is unpublished"
+msgstr "{name} er ikke publiceret"
 
 msgid "A/B rollout"
 msgstr "A/B-udrulning"
@@ -26,53 +32,68 @@ msgstr "A/B-udrulning"
 msgid "Account overview page"
 msgstr "Kontooversigtsside"
 
+msgid "Add"
+msgstr "Tilføj"
+
+msgid "Add email address"
+msgstr "Tilføj e-mailadresse"
+
+msgid "Add option"
+msgstr "Tilføj mulighed"
+
+msgid "Allow org members to sign in via Google Workspace. Ports cal.com Google SSO. Requires g3-sso-google."
+msgstr "Giv org-medlemmer mulighed for at logge ind via Google Workspace. Porter cal.com Google SSO. Kræver g3-sso-google."
+
+msgid "Allow org members to sign in via Microsoft Entra ID / Azure AD. Ports cal.com Microsoft SSO. Requires g3-sso-microsoft."
+msgstr "Giv org-medlemmer mulighed for at logge ind via Microsoft Entra ID / Azure AD. Porter cal.com Microsoft SSO. Kræver g3-sso-microsoft."
+
+msgid "Allow system admins to impersonate any user account for support and debugging, with a full audit trail. Ports cal.com impersonation."
+msgstr "Giv systemadministratorer mulighed for at udgive sig som enhver brugerkonto til support og fejlfinding med fuld revisionslog. Porter cal.com impersonation."
+
 msgid "Allow users to authenticate using enterprise identity providers"
 msgstr "Tillad brugere at logge ind via virksomhedsidentitetsudbydere"
+
+msgid "Analytics dashboard: booking volume, event-type performance, and member load metrics. Ports cal.com insights. Requires g3-insights."
+msgstr "Analysedashboard: bookingvolumen, hændelsestype-ydeevne og medlemsbelastningsmetrikker. Porter cal.com insights. Kræver g3-insights."
+
+msgid "API keys"
+msgstr "API-nøgler"
+
+msgid "API token"
+msgstr "API-token"
+
+msgid "Are you sure you want to disconnect <0>{label}</0>? This cannot be undone."
+msgstr "Er du sikker på, at du vil frakoble <0>{label}</0>? Dette kan ikke fortrydes."
+
+msgid "Are you sure you want to disconnect this integration? This cannot be undone."
+msgstr "Er du sikker på, at du vil frakoble denne integration? Dette kan ikke fortrydes."
+
+msgid "Audit log"
+msgstr "Revisionslog"
+
+msgid "Automated booking reminders, follow-ups, and no-show handling. Ports cal.com workflows. Requires g3-workflows."
+msgstr "Automatiske bookingpåmindelser, opfølgninger og håndtering af udeblivelser. Porter cal.com workflows. Kræver g3-workflows."
+
+msgid "Automatically sync user attributes from SAML/SCIM/SSO claims into org member profiles on every SSO login. Ports cal.com IdP attribute sync."
+msgstr "Synkroniser automatisk brugerattributter fra SAML/SCIM/SSO-krav til org-medlemsprofiler ved hvert SSO-login. Porter cal.com IdP-attributsynkronisering."
+
+msgid "Back"
+msgstr "Tilbage"
+
+msgid "Banner preview"
+msgstr "Bannerforhåndsvisning"
 
 msgid "Beta features"
 msgstr "Beta-funktioner"
 
+msgid "Bold"
+msgstr "Fed"
+
 msgid "Breadcrumb"
 msgstr "Brødkrumme"
 
-msgid "Cal.com API compatibility"
-msgstr "Cal.com API-kompatibilitet"
-
-msgid "Cal.com apps and connectors"
-msgstr "Cal.com-apps og forbindelser"
-
-msgid "Cal.com availability"
-msgstr "Cal.com-tilgængelighed"
-
-msgid "Cal.com bookings"
-msgstr "Cal.com-bookinger"
-
-msgid "Cal.com conferencing"
-msgstr "Cal.com-videomøder"
-
-msgid "Cal.com core"
-msgstr "Cal.com-kerne"
-
-msgid "Cal.com embeds"
-msgstr "Cal.com-indlejringer"
-
-msgid "Cal.com event types"
-msgstr "Cal.com-begivenhedstyper"
-
-msgid "Cal.com payments"
-msgstr "Cal.com-betalinger"
-
-msgid "Cal.com public booking"
-msgstr "Cal.com-offentlig booking"
-
-msgid "Cal.com teams and organizations"
-msgstr "Cal.com-teams og organisationer"
-
-msgid "Cal.com webhooks"
-msgstr "Cal.com-webhooks"
-
-msgid "Cal.com workflows"
-msgstr "Cal.com-arbejdsgange"
+msgid "Cancel"
+msgstr "Annuller"
 
 msgid "Clear date"
 msgstr "Ryd dato"
@@ -89,11 +110,29 @@ msgstr "Luk menu"
 msgid "Close sidebar"
 msgstr "Luk sidemenu"
 
+msgid "Collective scheduling"
+msgstr "Kollektiv planlægning"
+
 msgid "Compact view"
 msgstr "Kompakt visning"
 
+msgid "Configure {name}"
+msgstr "Konfigurer {name}"
+
+msgid "Copied"
+msgstr "Kopieret"
+
+msgid "Copy token"
+msgstr "Kopiér token"
+
 msgid "Create <0>{search}</0>"
 msgstr "Opret <0>{search}</0>"
+
+msgid "Crop banner"
+msgstr "Beskær banner"
+
+msgid "Custom SMTP"
+msgstr "Brugerdefineret SMTP"
 
 msgid "Decrease"
 msgstr "Formindsk"
@@ -101,65 +140,107 @@ msgstr "Formindsk"
 msgid "Default"
 msgstr "Standard"
 
+msgid "Delegation credentials"
+msgstr "Delegationsoplysninger"
+
+msgid "Disconnect"
+msgstr "Frakobl"
+
+msgid "Disconnect {label}"
+msgstr "Frakobl {label}"
+
+msgid "Disconnect {name}"
+msgstr "Frakobl {name}"
+
+msgid "Disconnect integration"
+msgstr "Frakobl integration"
+
+msgid "Disconnecting…"
+msgstr "Frakobler…"
+
+msgid "Distribute bookings across available team members in rotation. Ports cal.com round-robin."
+msgstr "Fordel bookinger på tværs af tilgængelige teammedlemmer på skift. Porter cal.com round-robin."
+
 msgid "Drop files here, or click to browse"
 msgstr "Slip filer her, eller klik for at vælge"
 
 msgid "Early access to experimental features before general availability"
 msgstr "Tidlig adgang til eksperimentelle funktioner inden generel tilgængelighed"
 
+msgid "Edit name"
+msgstr "Rediger navn"
+
+msgid "Enables enterprise-only functionality: audit log, workflows, API keys, impersonation, and analytics insights"
+msgstr "Aktiverer enterprise-eksklusiv funktionalitet: revisionslog, arbejdsflows, API-nøgler, brugerefterligning og analysestatistik"
+
+msgid "Enables organization-level functionality: org management, org-scoped attributes, custom SMTP, billing, delegation credentials, and SSO"
+msgstr "Aktiverer organisationsniveau-funktionalitet: org-administration, org-scoped attributter, brugerdefineret SMTP, fakturering, delegationsoplysninger og SSO"
+
+msgid "Enables team-level functionality: team management, team-scoped event types and schedules, round-robin and collective scheduling"
+msgstr "Aktiverer teamniveau-funktionalitet: teamadministration, teamscoped hændelsestyper og tidsplaner, round-robin og kollektiv planlægning"
+
+msgid "Enter address"
+msgstr "Indtast adresse"
+
+msgid "Enterprise tier"
+msgstr "Enterprise-niveau"
+
 msgid "Experimental UI"
 msgstr "Eksperimentel UI"
 
-msgid "Expose Cal.com API compatibility routes after parity validation"
-msgstr "Vis Cal.com API-kompatibilitetsruter efter paritetsvalidering"
+msgid "Finish"
+msgstr "Afslut"
 
-msgid "Expose Cal.com app-store and connector behavior after parity validation"
-msgstr "Vis Cal.com app-store- og forbindelsesadfærd efter paritetsvalidering"
-
-msgid "Expose Cal.com booking lifecycle and booking management after parity validation"
-msgstr "Vis Cal.com bookinglivscyklus og bookingadministration efter paritetsvalidering"
-
-msgid "Expose Cal.com conferencing integrations after parity validation"
-msgstr "Vis Cal.com-videomødeintegrationer efter paritetsvalidering"
-
-msgid "Expose Cal.com embed behavior after parity validation"
-msgstr "Vis Cal.com-indlejringsadfærd efter paritetsvalidering"
-
-msgid "Expose Cal.com event type setup and management after parity validation"
-msgstr "Vis Cal.com opsætning og administration af begivenhedstyper efter paritetsvalidering"
-
-msgid "Expose Cal.com payment behavior after parity validation"
-msgstr "Vis Cal.com-betalingsadfærd efter paritetsvalidering"
-
-msgid "Expose Cal.com public web booking after parity validation"
-msgstr "Vis Cal.com offentlig webbooking efter paritetsvalidering"
-
-msgid "Expose Cal.com schedules, availability, slots, and busy-time behavior after parity validation"
-msgstr "Vis Cal.com tidsplaner, tilgængelighed, tidsrum og optaget-tid-adfærd efter paritetsvalidering"
-
-msgid "Expose Cal.com team and organization behavior after parity validation"
-msgstr "Vis Cal.com team- og organisationsadfærd efter paritetsvalidering"
-
-msgid "Expose Cal.com webhook behavior after parity validation"
-msgstr "Vis Cal.com webhook-adfærd efter paritetsvalidering"
-
-msgid "Expose Cal.com workflow automation after parity validation"
-msgstr "Vis Cal.com workflow-automatisering efter paritetsvalidering"
-
-msgid "Expose the imported Cal.com product layer after parity validation"
-msgstr "Vis det importerede Cal.com-produktlag efter paritetsvalidering"
+msgid "Generate long-lived API keys for programmatic access at the user or org level. Ports cal.com api-keys."
+msgstr "Generer langtidsholdbare API-nøgler til programmatisk adgang på bruger- eller org-niveau. Porter cal.com api-keys."
 
 msgid "Go to next page"
 msgstr "Gå til næste side"
 
+msgid "Go to next step"
+msgstr "Gå til næste trin"
+
 msgid "Go to previous page"
 msgstr "Gå til forrige side"
+
+msgid "Go to previous step"
+msgstr "Gå til forrige trin"
 
 msgid "Google OAuth"
 msgstr "Google OAuth"
 
+msgid "Google SSO"
+msgstr "Google SSO"
+
+msgid "Hex color value"
+msgstr "Hex-farveværdi"
+
+msgid "IdP attribute sync"
+msgstr "IdP-attributsynkronisering"
+
+msgid "Immutable record of all significant system events across every SCS, written via the shared-kernel event bus. Ports cal.com booking-audit."
+msgstr "Uforanderlig registrering af alle væsentlige systemhændelser på tværs af alle SCS-moduler, skrevet via shared-kernel hændelsesbussen. Porter cal.com booking-audit."
+
+msgid "Impersonation"
+msgstr "Brugerefterligning"
+
 msgid "Increase"
 msgstr "Forøg"
+
+msgid "Insights"
+msgstr "Statistik"
+
+msgid "Install"
+msgstr "Installer"
+
+msgid "Install {name}"
+msgstr "Installer {name}"
+
+msgid "Installed"
+msgstr "Installeret"
+
+msgid "Italic"
+msgstr "Kursiv"
 
 msgid "Leave"
 msgstr "Forlad"
@@ -170,14 +251,32 @@ msgstr "Indlæser"
 msgid "Main content"
 msgstr "Hovedindhold"
 
+msgid "Managed event types"
+msgstr "Administrerede hændelsestyper"
+
 msgid "Manual override"
 msgstr "Manuel tilsidesættelse"
+
+msgid "Member attributes"
+msgstr "Medlemsattributter"
+
+msgid "Microsoft SSO"
+msgstr "Microsoft SSO"
 
 msgid "Mobile navigation menu"
 msgstr "Mobilnavigationsmenu"
 
+msgid "More options"
+msgstr "Flere muligheder"
+
 msgid "More pages"
 msgstr "Flere sider"
+
+msgid "Multi-tenant Google/Microsoft OAuth so the org can read calendar busy-time and create conferencing links on behalf of members. Ports cal.com delegation-credentials."
+msgstr "Multi-tenant Google/Microsoft OAuth, så org kan aflæse kalenderoptaget tid og oprette konferencelinks på vegne af medlemmer. Porter cal.com delegation-credentials."
+
+msgid "New option value"
+msgstr "Ny optionsværdi"
 
 msgid "Next"
 msgstr "Næste"
@@ -191,8 +290,30 @@ msgstr "Åbn kalender"
 msgid "Open navigation menu"
 msgstr "Åbn navigationsmenu"
 
+#. placeholder {0}: i + 1
+msgid "Option {0}"
+msgstr "Mulighed {0}"
+
+msgid "Ordered list"
+msgstr "Nummereret liste"
+
+msgid "Org billing"
+msgstr "Org-fakturering"
+
+msgid "Org-defined custom fields attached to memberships, e.g. department, skills, timezone. Ports cal.com attributes."
+msgstr "Org-definerede brugerdefinerede felter knyttet til medlemskaber, f.eks. afdeling, færdigheder, tidszone. Porter cal.com attributes."
+
+msgid "Organizations tier"
+msgstr "Organisations-niveau"
+
 msgid "Pagination"
 msgstr "Paginering"
+
+msgid "Paid"
+msgstr "Betalt"
+
+msgid "Per-org SMTP server override so org-scoped emails are sent from the org's own mail domain. Ports cal.com custom-smtp."
+msgstr "SMTP-serveroverride pr. org, så org-scoped e-mails sendes fra orgs eget maildomæne. Porter cal.com custom-smtp."
 
 msgid "Plan"
 msgstr "Plan"
@@ -200,11 +321,42 @@ msgstr "Plan"
 msgid "Previous"
 msgstr "Forrige"
 
+msgid "Redo"
+msgstr "Gentag"
+
 msgid "Reduce spacing between UI elements for a denser layout"
 msgstr "Reducér afstanden mellem UI-elementer for et tættere layout"
 
+msgid "Remove"
+msgstr "Fjern"
+
+msgid "Remove {email}"
+msgstr "Fjern {email}"
+
+#. placeholder {0}: i + 1
+msgid "Remove option {0}"
+msgstr "Fjern mulighed {0}"
+
+msgid "Require all listed team members to be available before a slot is offered to bookers. Ports cal.com collective scheduling."
+msgstr "Kræv, at alle angivne teammedlemmer er tilgængelige, inden en ledig tid tilbydes bookers. Porter cal.com kollektiv planlægning."
+
 msgid "Resize sidebar"
 msgstr "Ændr bredde på sidepanel"
+
+msgid "Rich text editor"
+msgstr "Rich text-editor"
+
+msgid "Round-robin scheduling"
+msgstr "Round-robin-planlægning"
+
+msgid "Save"
+msgstr "Gem"
+
+msgid "Saving…"
+msgstr "Gemmer…"
+
+msgid "Seat-based billing and subscription management at the organization level. Ports cal.com billing/organizations. Requires g3-org-billing."
+msgstr "Sædebaseret fakturering og abonnementsstyring på organisationsniveau. Porter cal.com billing/organizations. Kræver g3-org-billing."
 
 msgid "Select dates"
 msgstr "Vælg datoer"
@@ -212,11 +364,17 @@ msgstr "Vælg datoer"
 msgid "Select time zone"
 msgstr "Vælg tidszone"
 
+msgid "Settings"
+msgstr "Indstillinger"
+
 msgid "Show more"
 msgstr "Vis flere"
 
 msgid "Show the account overview dashboard with user statistics at /account. When disabled, signed-in users go straight to the users list."
 msgstr "Vis kontooversigten med brugerstatistik på /account. Når deaktiveret, sendes loggede brugere direkte til brugerlisten."
+
+msgid "Show time in all timezones"
+msgstr "Vis tid i alle tidszoner"
 
 msgid "Sign in with Google using OpenID Connect"
 msgstr "Log ind med Google via OpenID Connect"
@@ -227,14 +385,32 @@ msgstr "Single sign-on"
 msgid "Skip to main content"
 msgstr "Spring til hovedindhold"
 
+msgid "Start typing…"
+msgstr "Begynd at skrive…"
+
 msgid "Stay"
 msgstr "Bliv"
+
+msgid "Step {step}"
+msgstr "Trin {step}"
 
 msgid "Stripe-powered subscription billing and plan management"
 msgstr "Stripe-drevet abonnementsfakturering og abonnementsstyring"
 
 msgid "Subscriptions"
 msgstr "Abonnementer"
+
+msgid "Team-owned event types with locked fields that members inherit. Ports cal.com managed-event-types."
+msgstr "Teamejede hændelsestyper med låste felter, som medlemmer arver. Porter cal.com managed-event-types."
+
+msgid "Teams"
+msgstr "Teams"
+
+msgid "Teams tier"
+msgstr "Teams-niveau"
+
+msgid "This page is not visible to the public."
+msgstr "Denne side er ikke synlig for offentligheden."
 
 msgid "Today"
 msgstr "I dag"
@@ -248,11 +424,38 @@ msgstr "I morgen"
 msgid "Try out experimental user interface components"
 msgstr "Afprøv eksperimentelle brugergrænsefladekomponenter"
 
+msgid "Undo"
+msgstr "Fortryd"
+
+msgid "Unordered list"
+msgstr "Punktliste"
+
 msgid "Unsaved changes"
 msgstr "Ugemte ændringer"
+
+msgid "Upload"
+msgstr "Upload"
+
+msgid "Upload banner image"
+msgstr "Upload bannerbillede"
+
+msgid "View {name} in marketplace"
+msgstr "Se {name} i markedsplads"
+
+msgid "Workflows"
+msgstr "Arbejdsflows"
 
 msgid "Yesterday"
 msgstr "I går"
 
+msgid "You are viewing <0>{orgName}</0>"
+msgstr "Du ser <0>{orgName}</0>"
+
 msgid "You have unsaved changes. If you leave now, your changes will be lost."
 msgstr "Du har ugemte ændringer. Hvis du forlader nu, vil dine ændringer gå tabt."
+
+msgid "Zoom"
+msgstr "Zoom"
+
+msgid "Zoom image"
+msgstr "Zoom billede"

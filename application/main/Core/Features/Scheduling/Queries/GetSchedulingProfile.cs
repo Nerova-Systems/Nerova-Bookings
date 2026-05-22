@@ -22,7 +22,7 @@ public sealed class GetSchedulingProfileHandler(ISchedulingProfileRepository sch
             return Result<SchedulingProfileResponse>.Unauthorized("Authentication is required.");
         }
 
-        var profile = await schedulingProfileRepository.GetForOwnerAsync(ownerUserId, cancellationToken);
+        var profile = await schedulingProfileRepository.GetForOwnerAsync(ownerUserId, executionContext.ActiveTeamId, cancellationToken);
         if (profile is not null)
         {
             return SchedulingProfileResponse.From(profile);
@@ -36,7 +36,8 @@ public sealed class GetSchedulingProfileHandler(ISchedulingProfileRepository sch
             ownerUserId,
             handle,
             string.IsNullOrWhiteSpace(displayName) ? handle : displayName,
-            executionContext.UserInfo.AvatarUrl
+            executionContext.UserInfo.AvatarUrl,
+            executionContext.ActiveTeamId
         );
         await schedulingProfileRepository.AddAsync(profile, cancellationToken);
 

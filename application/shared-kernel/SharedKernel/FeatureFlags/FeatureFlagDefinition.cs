@@ -32,7 +32,11 @@ public abstract class FeatureFlagDefinition(string key, string label, string des
     /// </summary>
     public abstract FeatureFlagAdminLevel AdminLevel { get; }
 
-    /// <summary>Another flag's Key that must be enabled for this flag to evaluate true. Only one level of nesting allowed.</summary>
+    /// <summary>
+    ///     Another flag's Key that must be enabled for this flag to evaluate true. Chains of any finite
+    ///     depth are supported; cycles are rejected at startup by <see cref="FeatureFlagsRegistry" />.
+    ///     The evaluator's topological sort guarantees every ancestor is resolved before its dependents.
+    /// </summary>
     public virtual string? ParentDependency => null;
 
     /// <summary>
@@ -243,6 +247,39 @@ public sealed class UserAbTestFlag(
     public override bool TrackInTelemetry => trackInTelemetry;
 
     public override string? TelemetryName => telemetryName;
+
+    public override bool IsKillSwitchEnabled => isKillSwitchEnabled;
+}
+
+// Tenant scope, system-admin-managed. Used for capability and tier flags that a system admin
+// explicitly grants per-tenant via a tenant override. Not A/B-eligible (no gradual rollout),
+// not owner-configurable. Activation is always an explicit admin action.
+//
+// This is the flag subtype used for all tier flags (tier-teams, tier-organizations, tier-enterprise)
+// and all capability flags (cap-*). Both categories default OFF — IsKillSwitchEnabled=true means
+// the reconciler creates the base row inactive and an admin must explicitly activate it per tenant.
+//
+// ParentDependency enables the capability-gating chain: a capability flag evaluates true only if
+// both the capability itself is enabled for the tenant AND its tier parent is enabled. The chain
+// can be multi-level (capability → tier_enterprise → tier_organizations → tier_teams); the
+// evaluator's topological sort and per-flag parent check handle any depth.
+[PublicAPI]
+public sealed class TenantAdminManagedFlag(
+    string key,
+    string label,
+    string description,
+    bool trackInTelemetry,
+    bool isKillSwitchEnabled,
+    string? parentDependency = null
+) : FeatureFlagDefinition(key, label, description)
+{
+    public override FeatureFlagScope Scope => FeatureFlagScope.Tenant;
+
+    public override FeatureFlagAdminLevel AdminLevel => FeatureFlagAdminLevel.SystemAdmin;
+
+    public override string? ParentDependency => parentDependency;
+
+    public override bool TrackInTelemetry => trackInTelemetry;
 
     public override bool IsKillSwitchEnabled => isKillSwitchEnabled;
 }

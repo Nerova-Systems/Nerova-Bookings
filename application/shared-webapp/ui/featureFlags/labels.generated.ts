@@ -47,57 +47,77 @@ function getKnownFeatureFlagLabels(): Record<string, FeatureFlagLabel> {
       name: t`Experimental UI`,
       description: t`Try out experimental user interface components`
     },
-    "cal-com-core": {
-      name: t`Cal.com core`,
-      description: t`Expose the imported Cal.com product layer after parity validation`
+    "tier-teams": {
+      name: t`Teams tier`,
+      description: t`Enables team-level functionality: team management, team-scoped event types and schedules, round-robin and collective scheduling`
     },
-    "cal-com-event-types": {
-      name: t`Cal.com event types`,
-      description: t`Expose Cal.com event type setup and management after parity validation`
+    "tier-organizations": {
+      name: t`Organizations tier`,
+      description: t`Enables organization-level functionality: org management, org-scoped attributes, custom SMTP, billing, delegation credentials, and SSO`
     },
-    "cal-com-availability": {
-      name: t`Cal.com availability`,
-      description: t`Expose Cal.com schedules, availability, slots, and busy-time behavior after parity validation`
+    "tier-enterprise": {
+      name: t`Enterprise tier`,
+      description: t`Enables enterprise-only functionality: audit log, workflows, API keys, impersonation, and analytics insights`
     },
-    "cal-com-public-booking": {
-      name: t`Cal.com public booking`,
-      description: t`Expose Cal.com public web booking after parity validation`
+    "cap-managed-event-types": {
+      name: t`Managed event types`,
+      description: t`Team-owned event types with locked fields that members inherit. Ports cal.com managed-event-types.`
     },
-    "cal-com-bookings": {
-      name: t`Cal.com bookings`,
-      description: t`Expose Cal.com booking lifecycle and booking management after parity validation`
+    "cap-round-robin": {
+      name: t`Round-robin scheduling`,
+      description: t`Distribute bookings across available team members in rotation. Ports cal.com round-robin.`
     },
-    "cal-com-workflows": {
-      name: t`Cal.com workflows`,
-      description: t`Expose Cal.com workflow automation after parity validation`
+    "cap-collective": {
+      name: t`Collective scheduling`,
+      description: t`Require all listed team members to be available before a slot is offered to bookers. Ports cal.com collective scheduling.`
     },
-    "cal-com-webhooks": {
-      name: t`Cal.com webhooks`,
-      description: t`Expose Cal.com webhook behavior after parity validation`
+    "cap-attributes": {
+      name: t`Member attributes`,
+      description: t`Org-defined custom fields attached to memberships, e.g. department, skills, timezone. Ports cal.com attributes.`
     },
-    "cal-com-apps-connectors": {
-      name: t`Cal.com apps and connectors`,
-      description: t`Expose Cal.com app-store and connector behavior after parity validation`
+    "cap-custom-smtp": {
+      name: t`Custom SMTP`,
+      description: t`Per-org SMTP server override so org-scoped emails are sent from the org's own mail domain. Ports cal.com custom-smtp.`
     },
-    "cal-com-conferencing": {
-      name: t`Cal.com conferencing`,
-      description: t`Expose Cal.com conferencing integrations after parity validation`
+    "cap-org-billing": {
+      name: t`Org billing`,
+      description: t`Seat-based billing and subscription management at the organization level. Ports cal.com billing/organizations. Requires g3-org-billing.`
     },
-    "cal-com-teams-organizations": {
-      name: t`Cal.com teams and organizations`,
-      description: t`Expose Cal.com team and organization behavior after parity validation`
+    "cap-delegation-credentials": {
+      name: t`Delegation credentials`,
+      description: t`Multi-tenant Google/Microsoft OAuth so the org can read calendar busy-time and create conferencing links on behalf of members. Ports cal.com delegation-credentials.`
     },
-    "cal-com-embeds": {
-      name: t`Cal.com embeds`,
-      description: t`Expose Cal.com embed behavior after parity validation`
+    "cap-sso-microsoft": {
+      name: t`Microsoft SSO`,
+      description: t`Allow org members to sign in via Microsoft Entra ID / Azure AD. Ports cal.com Microsoft SSO. Requires g3-sso-microsoft.`
     },
-    "cal-com-payments": {
-      name: t`Cal.com payments`,
-      description: t`Expose Cal.com payment behavior after parity validation`
+    "cap-sso-google": {
+      name: t`Google SSO`,
+      description: t`Allow org members to sign in via Google Workspace. Ports cal.com Google SSO. Requires g3-sso-google.`
     },
-    "cal-com-api-compatibility": {
-      name: t`Cal.com API compatibility`,
-      description: t`Expose Cal.com API compatibility routes after parity validation`
+    "cap-integration-attribute-sync": {
+      name: t`IdP attribute sync`,
+      description: t`Automatically sync user attributes from SAML/SCIM/SSO claims into org member profiles on every SSO login. Ports cal.com IdP attribute sync.`
+    },
+    "cap-audit-log": {
+      name: t`Audit log`,
+      description: t`Immutable record of all significant system events across every SCS, written via the shared-kernel event bus. Ports cal.com booking-audit.`
+    },
+    "cap-workflows": {
+      name: t`Workflows`,
+      description: t`Automated booking reminders, follow-ups, and no-show handling. Ports cal.com workflows. Requires g3-workflows.`
+    },
+    "cap-api-keys": {
+      name: t`API keys`,
+      description: t`Generate long-lived API keys for programmatic access at the user or org level. Ports cal.com api-keys.`
+    },
+    "cap-impersonation": {
+      name: t`Impersonation`,
+      description: t`Allow system admins to impersonate any user account for support and debugging, with a full audit trail. Ports cal.com impersonation.`
+    },
+    "cap-insights": {
+      name: t`Insights`,
+      description: t`Analytics dashboard: booking volume, event-type performance, and member load metrics. Ports cal.com insights. Requires g3-insights.`
     }
   };
 }

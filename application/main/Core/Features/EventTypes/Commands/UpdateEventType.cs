@@ -2,6 +2,7 @@ using FluentValidation;
 using JetBrains.Annotations;
 using Main.Features.EventTypes.Domain;
 using Main.Features.EventTypes.Shared;
+using Main.Features.ManagedEventTypes.Shared;
 using Main.Features.Schedules.Domain;
 using Main.Features.Scheduling.Shared;
 using SharedKernel.Cqrs;
@@ -84,13 +85,30 @@ public sealed class UpdateEventTypeHandler(
             return Result<EventTypeResponse>.NotFound($"Event type '{command.Id}' was not found.");
         }
 
+        var slug = command.Slug.Trim().ToLowerInvariant();
+        if (eventType.ParentEventTypeId is not null)
+        {
+            var changedFields = GetChangedManagedFields(command, eventType, slug).ToArray();
+            var lockedFields = changedFields
+                .Where(f => !eventType.UnlockedFields.Contains(f, StringComparer.OrdinalIgnoreCase))
+                .ToArray();
+            if (lockedFields.Length > 0)
+            {
+                foreach (var field in lockedFields)
+                {
+                    events.CollectEvent(new ManagedEventTypeFieldOverrideRejected(eventType.Id, field));
+                }
+
+                return Result<EventTypeResponse>.Forbidden($"Fields {string.Join(", ", lockedFields)} are locked by the managed template.");
+            }
+        }
+
         var schedule = await scheduleRepository.GetByIdAsync(command.ScheduleId, cancellationToken);
         if (schedule is null || schedule.OwnerUserId != ownerUserId)
         {
             return Result<EventTypeResponse>.BadRequest($"Schedule '{command.ScheduleId}' was not found.");
         }
 
-        var slug = command.Slug.Trim().ToLowerInvariant();
         if (await eventTypeRepository.SlugExistsForOwnerAsync(ownerUserId, slug, eventType.Id, cancellationToken))
         {
             return Result<EventTypeResponse>.BadRequest($"An event type with slug '{slug}' already exists.");
@@ -115,5 +133,77 @@ public sealed class UpdateEventTypeHandler(
         events.CollectEvent(new EventTypeUpdated(eventType.Id));
 
         return EventTypeResponse.From(eventType);
+    }
+
+    private static IEnumerable<string> GetChangedManagedFields(UpdateEventTypeCommand command, EventType eventType, string normalizedSlug)
+    {
+        if (command.Title.Trim() != eventType.Title)
+        {
+            yield return ManagedEventTypeFields.Title;
+        }
+
+        if (normalizedSlug != eventType.Slug)
+        {
+            yield return ManagedEventTypeFields.Slug;
+        }
+
+        var normalizedDescription = string.IsNullOrWhiteSpace(command.Description) ? null : command.Description.Trim();
+        if (normalizedDescription != eventType.Description)
+        {
+            yield return ManagedEventTypeFields.Description;
+        }
+
+        if (command.DurationMinutes != eventType.DurationMinutes)
+        {
+            yield return ManagedEventTypeFields.DurationMinutes;
+        }
+
+        if (command.Hidden != eventType.Hidden)
+        {
+            yield return ManagedEventTypeFields.Hidden;
+        }
+
+        if (command.ScheduleId != eventType.ScheduleId)
+        {
+            yield return ManagedEventTypeFields.ScheduleId;
+        }
+
+        if (command.BeforeEventBufferMinutes != eventType.BeforeEventBufferMinutes)
+        {
+            yield return ManagedEventTypeFields.BeforeEventBufferMinutes;
+        }
+
+        if (command.AfterEventBufferMinutes != eventType.AfterEventBufferMinutes)
+        {
+            yield return ManagedEventTypeFields.AfterEventBufferMinutes;
+        }
+
+        if (command.SlotIntervalMinutes != eventType.SlotIntervalMinutes)
+        {
+            yield return ManagedEventTypeFields.SlotIntervalMinutes;
+        }
+
+        if (command.MinimumBookingNoticeMinutes != eventType.MinimumBookingNoticeMinutes)
+        {
+            yield return ManagedEventTypeFields.MinimumBookingNoticeMinutes;
+        }
+
+        var normalizedLocationType = string.IsNullOrWhiteSpace(command.LocationType) ? null : command.LocationType.Trim();
+        if (normalizedLocationType != eventType.LocationType)
+        {
+            yield return ManagedEventTypeFields.LocationType;
+        }
+
+        var normalizedLocationValue = string.IsNullOrWhiteSpace(command.LocationValue) ? null : command.LocationValue.Trim();
+        if (normalizedLocationValue != eventType.LocationValue)
+        {
+            yield return ManagedEventTypeFields.LocationValue;
+        }
+
+        var normalizedSettings = EventTypeSettings.Normalize(command.Settings, command.DurationMinutes, normalizedLocationType, normalizedLocationValue);
+        if (System.Text.Json.JsonSerializer.Serialize(normalizedSettings) != System.Text.Json.JsonSerializer.Serialize(eventType.Settings))
+        {
+            yield return ManagedEventTypeFields.Settings;
+        }
     }
 }

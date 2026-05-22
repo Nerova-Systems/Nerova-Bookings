@@ -1,49 +1,77 @@
-import type React from "react";
+import { Trans } from "@lingui/react/macro";
 
 import { cn } from "../utils";
-import { Label } from "./Label";
 import { Switch } from "./Switch";
+
+/**
+ * A settings row with a switch, title, description, and optional children (expanded content).
+ * Ported from cal.com `packages/ui/components/switch/SettingsToggle.tsx` (cf2a55c).
+ *
+ * Prop deviation: `labelClassName` was not in cal.com but added here for layout flexibility.
+ * `onCheckedChange` maps to cal.com's `onToggle`. Both names accepted.
+ *
+ * Note: Nerova `SwitchField` covers field-in-form usage. This component targets
+ * full-width settings rows (title + description + toggle inline, with optional
+ * expanded content below). Confirmed distinct semantics from SwitchField.
+ */
+interface SettingsToggleProps {
+  title: React.ReactNode;
+  description?: React.ReactNode;
+  /** Checked state */
+  checked?: boolean;
+  defaultChecked?: boolean;
+  onCheckedChange?: (checked: boolean) => void;
+  disabled?: boolean;
+  /** Content revealed below the toggle row when checked (or always if not conditional). */
+  children?: React.ReactNode;
+  /** Whether children are shown based on the checked state. @default false */
+  hideChildrenWhenUnchecked?: boolean;
+  loading?: boolean;
+  className?: string;
+  labelClassName?: string;
+  switchContainerClassName?: string;
+  "data-testid"?: string;
+}
 
 export function SettingsToggle({
   title,
   description,
   checked,
+  defaultChecked,
+  onCheckedChange,
   disabled,
   children,
-  onCheckedChange,
+  hideChildrenWhenUnchecked = false,
+  loading,
   className,
-  contentClassName,
-  hideSwitch,
-  badge,
+  labelClassName,
+  switchContainerClassName,
   "data-testid": dataTestId
-}: Readonly<{
-  title: React.ReactNode;
-  description?: React.ReactNode;
-  checked: boolean;
-  disabled?: boolean;
-  children?: React.ReactNode;
-  onCheckedChange?: (checked: boolean) => void;
-  className?: string;
-  contentClassName?: string;
-  hideSwitch?: boolean;
-  badge?: React.ReactNode;
-  "data-testid"?: string;
-}>) {
+}: SettingsToggleProps) {
+  const showChildren = !hideChildrenWhenUnchecked || checked;
+
   return (
-    <div className={cn("rounded-lg border bg-background", checked && children ? "overflow-hidden" : "", className)}>
-      <div className="flex items-center justify-between gap-4 px-4 py-5 sm:px-6">
-        <div className="min-w-0">
-          <div className="flex min-w-0 items-center gap-2">
-            <Label className="text-sm leading-tight font-semibold">{title}</Label>
-            {badge}
-          </div>
-          {description && <div className="mt-1 text-sm leading-normal text-muted-foreground">{description}</div>}
+    <div data-slot="settings-toggle" className={cn("flex flex-col gap-4", className)} data-testid={dataTestId}>
+      <div className={cn("flex items-start justify-between gap-4", switchContainerClassName)}>
+        <div className={cn("flex flex-col gap-1", labelClassName)}>
+          <span className="text-sm font-semibold text-foreground">{title}</span>
+          {description && <p className="text-sm text-muted-foreground">{description}</p>}
         </div>
-        {!hideSwitch && (
-          <Switch checked={checked} disabled={disabled} data-testid={dataTestId} onCheckedChange={onCheckedChange} />
-        )}
+        <div className="flex shrink-0 items-center gap-2">
+          {loading && (
+            <span className="text-xs text-muted-foreground">
+              <Trans>Saving…</Trans>
+            </span>
+          )}
+          <Switch
+            checked={checked}
+            defaultChecked={defaultChecked}
+            onCheckedChange={onCheckedChange}
+            disabled={disabled || loading}
+          />
+        </div>
       </div>
-      {checked && children && <div className={cn("border-t p-4 sm:p-6", contentClassName)}>{children}</div>}
+      {children && showChildren && <div className="pl-0">{children}</div>}
     </div>
   );
 }

@@ -9,7 +9,7 @@
 // `useFeatureFlag(deletedKey)` and `getFeatureFlagLabel(deletedKey)` callsite into a TS compile
 // error after the next backend build regenerates this file.
 
-export type FeatureFlagKey = "google-oauth" | "subscriptions" | "beta-features" | "sso" | "account-overview" | "compact-view" | "experimental-ui" | "cal-com-core" | "cal-com-event-types" | "cal-com-availability" | "cal-com-public-booking" | "cal-com-bookings" | "cal-com-workflows" | "cal-com-webhooks" | "cal-com-apps-connectors" | "cal-com-conferencing" | "cal-com-teams-organizations" | "cal-com-embeds" | "cal-com-payments" | "cal-com-api-compatibility";
+export type FeatureFlagKey = "google-oauth" | "subscriptions" | "beta-features" | "sso" | "account-overview" | "compact-view" | "experimental-ui" | "tier-teams" | "tier-organizations" | "tier-enterprise" | "cap-managed-event-types" | "cap-round-robin" | "cap-collective" | "cap-attributes" | "cap-custom-smtp" | "cap-org-billing" | "cap-delegation-credentials" | "cap-sso-microsoft" | "cap-sso-google" | "cap-integration-attribute-sync" | "cap-audit-log" | "cap-workflows" | "cap-api-keys" | "cap-impersonation" | "cap-insights";
 
 type FeatureFlagScope = "system" | "tenant" | "user";
 type FeatureFlagAdminLevel = "systemAdmin" | "tenantOwner" | "user";
@@ -85,96 +85,131 @@ const featureFlagRegistry: Record<FeatureFlagKey, FeatureFlagDefinition> = {
       parentDependency: null,
       description: "Try out experimental user interface components"
     },
-    "cal-com-core": {
-      key: "cal-com-core",
+    "tier-teams": {
+      key: "tier-teams",
       scope: "tenant",
       adminLevel: "systemAdmin",
       parentDependency: null,
-      description: "Expose the imported Cal.com product layer after parity validation"
+      description: "Enables team-level functionality: team management, team-scoped event types and schedules, round-robin and collective scheduling"
     },
-    "cal-com-event-types": {
-      key: "cal-com-event-types",
+    "tier-organizations": {
+      key: "tier-organizations",
       scope: "tenant",
       adminLevel: "systemAdmin",
-      parentDependency: "cal-com-core",
-      description: "Expose Cal.com event type setup and management after parity validation"
+      parentDependency: "tier-teams",
+      description: "Enables organization-level functionality: org management, org-scoped attributes, custom SMTP, billing, delegation credentials, and SSO"
     },
-    "cal-com-availability": {
-      key: "cal-com-availability",
+    "tier-enterprise": {
+      key: "tier-enterprise",
       scope: "tenant",
       adminLevel: "systemAdmin",
-      parentDependency: "cal-com-core",
-      description: "Expose Cal.com schedules, availability, slots, and busy-time behavior after parity validation"
+      parentDependency: "tier-organizations",
+      description: "Enables enterprise-only functionality: audit log, workflows, API keys, impersonation, and analytics insights"
     },
-    "cal-com-public-booking": {
-      key: "cal-com-public-booking",
+    "cap-managed-event-types": {
+      key: "cap-managed-event-types",
       scope: "tenant",
       adminLevel: "systemAdmin",
-      parentDependency: "cal-com-core",
-      description: "Expose Cal.com public web booking after parity validation"
+      parentDependency: "tier-teams",
+      description: "Team-owned event types with locked fields that members inherit. Ports cal.com managed-event-types."
     },
-    "cal-com-bookings": {
-      key: "cal-com-bookings",
+    "cap-round-robin": {
+      key: "cap-round-robin",
       scope: "tenant",
       adminLevel: "systemAdmin",
-      parentDependency: "cal-com-core",
-      description: "Expose Cal.com booking lifecycle and booking management after parity validation"
+      parentDependency: "tier-teams",
+      description: "Distribute bookings across available team members in rotation. Ports cal.com round-robin."
     },
-    "cal-com-workflows": {
-      key: "cal-com-workflows",
+    "cap-collective": {
+      key: "cap-collective",
       scope: "tenant",
       adminLevel: "systemAdmin",
-      parentDependency: "cal-com-core",
-      description: "Expose Cal.com workflow automation after parity validation"
+      parentDependency: "tier-teams",
+      description: "Require all listed team members to be available before a slot is offered to bookers. Ports cal.com collective scheduling."
     },
-    "cal-com-webhooks": {
-      key: "cal-com-webhooks",
+    "cap-attributes": {
+      key: "cap-attributes",
       scope: "tenant",
       adminLevel: "systemAdmin",
-      parentDependency: "cal-com-core",
-      description: "Expose Cal.com webhook behavior after parity validation"
+      parentDependency: "tier-organizations",
+      description: "Org-defined custom fields attached to memberships, e.g. department, skills, timezone. Ports cal.com attributes."
     },
-    "cal-com-apps-connectors": {
-      key: "cal-com-apps-connectors",
+    "cap-custom-smtp": {
+      key: "cap-custom-smtp",
       scope: "tenant",
       adminLevel: "systemAdmin",
-      parentDependency: "cal-com-core",
-      description: "Expose Cal.com app-store and connector behavior after parity validation"
+      parentDependency: "tier-organizations",
+      description: "Per-org SMTP server override so org-scoped emails are sent from the org's own mail domain. Ports cal.com custom-smtp."
     },
-    "cal-com-conferencing": {
-      key: "cal-com-conferencing",
+    "cap-org-billing": {
+      key: "cap-org-billing",
       scope: "tenant",
       adminLevel: "systemAdmin",
-      parentDependency: "cal-com-core",
-      description: "Expose Cal.com conferencing integrations after parity validation"
+      parentDependency: "tier-organizations",
+      description: "Seat-based billing and subscription management at the organization level. Ports cal.com billing/organizations. Requires g3-org-billing."
     },
-    "cal-com-teams-organizations": {
-      key: "cal-com-teams-organizations",
+    "cap-delegation-credentials": {
+      key: "cap-delegation-credentials",
       scope: "tenant",
       adminLevel: "systemAdmin",
-      parentDependency: "cal-com-core",
-      description: "Expose Cal.com team and organization behavior after parity validation"
+      parentDependency: "tier-organizations",
+      description: "Multi-tenant Google/Microsoft OAuth so the org can read calendar busy-time and create conferencing links on behalf of members. Ports cal.com delegation-credentials."
     },
-    "cal-com-embeds": {
-      key: "cal-com-embeds",
+    "cap-sso-microsoft": {
+      key: "cap-sso-microsoft",
       scope: "tenant",
       adminLevel: "systemAdmin",
-      parentDependency: "cal-com-core",
-      description: "Expose Cal.com embed behavior after parity validation"
+      parentDependency: "tier-organizations",
+      description: "Allow org members to sign in via Microsoft Entra ID / Azure AD. Ports cal.com Microsoft SSO. Requires g3-sso-microsoft."
     },
-    "cal-com-payments": {
-      key: "cal-com-payments",
+    "cap-sso-google": {
+      key: "cap-sso-google",
       scope: "tenant",
       adminLevel: "systemAdmin",
-      parentDependency: "cal-com-core",
-      description: "Expose Cal.com payment behavior after parity validation"
+      parentDependency: "tier-organizations",
+      description: "Allow org members to sign in via Google Workspace. Ports cal.com Google SSO. Requires g3-sso-google."
     },
-    "cal-com-api-compatibility": {
-      key: "cal-com-api-compatibility",
+    "cap-integration-attribute-sync": {
+      key: "cap-integration-attribute-sync",
       scope: "tenant",
       adminLevel: "systemAdmin",
-      parentDependency: "cal-com-core",
-      description: "Expose Cal.com API compatibility routes after parity validation"
+      parentDependency: "tier-organizations",
+      description: "Automatically sync user attributes from SAML/SCIM/SSO claims into org member profiles on every SSO login. Ports cal.com IdP attribute sync."
+    },
+    "cap-audit-log": {
+      key: "cap-audit-log",
+      scope: "tenant",
+      adminLevel: "systemAdmin",
+      parentDependency: "tier-enterprise",
+      description: "Immutable record of all significant system events across every SCS, written via the shared-kernel event bus. Ports cal.com booking-audit."
+    },
+    "cap-workflows": {
+      key: "cap-workflows",
+      scope: "tenant",
+      adminLevel: "systemAdmin",
+      parentDependency: "tier-enterprise",
+      description: "Automated booking reminders, follow-ups, and no-show handling. Ports cal.com workflows. Requires g3-workflows."
+    },
+    "cap-api-keys": {
+      key: "cap-api-keys",
+      scope: "tenant",
+      adminLevel: "systemAdmin",
+      parentDependency: "tier-enterprise",
+      description: "Generate long-lived API keys for programmatic access at the user or org level. Ports cal.com api-keys."
+    },
+    "cap-impersonation": {
+      key: "cap-impersonation",
+      scope: "tenant",
+      adminLevel: "systemAdmin",
+      parentDependency: "tier-enterprise",
+      description: "Allow system admins to impersonate any user account for support and debugging, with a full audit trail. Ports cal.com impersonation."
+    },
+    "cap-insights": {
+      key: "cap-insights",
+      scope: "tenant",
+      adminLevel: "systemAdmin",
+      parentDependency: "tier-enterprise",
+      description: "Analytics dashboard: booking volume, event-type performance, and member load metrics. Ports cal.com insights. Requires g3-insights."
     }
 };
 

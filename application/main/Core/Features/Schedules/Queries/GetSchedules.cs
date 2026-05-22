@@ -20,7 +20,7 @@ public sealed class GetSchedulesHandler(IScheduleRepository scheduleRepository, 
             return Result<SchedulesResponse>.Unauthorized("Authentication is required.");
         }
 
-        var schedules = await scheduleRepository.GetForOwnerAsync(ownerUserId, cancellationToken);
+        var schedules = await scheduleRepository.GetForOwnerAsync(ownerUserId, executionContext.ActiveTeamId, cancellationToken);
         return new SchedulesResponse(schedules.Select(ScheduleResponse.From).ToArray());
     }
 }

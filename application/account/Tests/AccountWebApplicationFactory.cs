@@ -108,7 +108,10 @@ public class AccountWebApplicationFactory : WebApplicationFactory<Program>
                 services.RemoveAll(typeof(MockPaystackState));
                 services.AddTransient<MockPaystackState>(_ => CurrentContext.PaystackState);
 
-                services.Remove(services.Single(d => d.ServiceType == typeof(IEmailClient)));
+                // Scrutor's Decorate<IEmailClient, TenantAwareEmailClient>() registers two IEmailClient
+                // descriptors (the inner platform client + the outer decorator). RemoveAll clears both
+                // so the test mock is the only IEmailClient in the container.
+                services.RemoveAll(typeof(IEmailClient));
                 services.AddTransient<IEmailClient>(_ => CurrentContext.EmailClient);
 
                 services.AddSingleton(new TelemetryClient(new TelemetryConfiguration { TelemetryChannel = Substitute.For<ITelemetryChannel>() }));

@@ -1,11 +1,11 @@
 using FluentValidation;
 using JetBrains.Annotations;
-using Main.Features.Connectors.Domain;
 using Main.Features.EventTypes.Domain;
 using Main.Features.Schedules.Domain;
 using Main.Features.Scheduling.Domain;
 using Main.Features.Scheduling.Shared;
 using SharedKernel.Cqrs;
+using SharedKernel.Domain;
 
 namespace Main.Features.Scheduling.Commands;
 
@@ -43,10 +43,10 @@ public sealed class CreatePublicBookingValidator : AbstractValidator<CreatePubli
 public sealed class CreatePublicBookingHandler(
     PublicSchedulingResolver publicSchedulingResolver,
     IBookingRepository bookingRepository,
-    IEventTypeRepository eventTypeRepository,
+    IHostRepository hostRepository,
     PublicSlotCalculator publicSlotCalculator,
-    ICoreConnectorClient coreConnectorClient,
-    TimeProvider timeProvider
+    CollectiveSlotCalculator collectiveSlotCalculator,
+    RoundRobinSlotCalculator roundRobinSlotCalculator
 ) : IRequestHandler<CreatePublicBookingCommand, Result<CreatePublicBookingResponse>>
 {
     public async Task<Result<CreatePublicBookingResponse>> Handle(CreatePublicBookingCommand command, CancellationToken cancellationToken)
@@ -76,26 +76,69 @@ public sealed class CreatePublicBookingHandler(
         }
 
         var endTime = command.StartTime.AddMinutes(command.Duration);
-        var bookings = await bookingRepository.GetForOwnerRangeUnfilteredAsync(
-            context.Profile.TenantId,
-            context.Profile.OwnerUserId,
-            command.StartTime.AddDays(-1),
-            endTime.AddDays(1),
-            cancellationToken
-        );
-        if (originalBooking is not null)
+
+        bool slotAvailable;
+        UserId ownerUserId = context.Profile.OwnerUserId;
+
+        if (context.EventType.SchedulingType == SchedulingType.Collective)
         {
-            bookings = bookings.Where(booking => booking.Id != originalBooking.Id).ToArray();
+            var hosts = await hostRepository.GetForEventTypeUnfilteredAsync(context.EventType.Id, cancellationToken);
+            var hostUserIds = hosts.Select(h => h.UserId).ToList();
+            var hostBookings = hostUserIds.Count > 0
+                ? await bookingRepository.GetForMultipleOwnersRangeAsync(
+                    context.Profile.TenantId,
+                    hostUserIds,
+                    command.StartTime.AddDays(-1),
+                    endTime.AddDays(1),
+                    cancellationToken)
+                : (IReadOnlyDictionary<UserId, Booking[]>)new Dictionary<UserId, Booking[]>();
+
+            slotAvailable = collectiveSlotCalculator.IsSlotAvailable(context.EventType, context.Schedule, hostBookings, command.StartTime, command.Duration, command.TimeZone);
+        }
+        else if (context.EventType.SchedulingType == SchedulingType.RoundRobin)
+        {
+            var hosts = await hostRepository.GetForEventTypeUnfilteredAsync(context.EventType.Id, cancellationToken);
+            var hostUserIds = hosts.Select(h => h.UserId).ToList();
+            var hostBookings = hostUserIds.Count > 0
+                ? await bookingRepository.GetForMultipleOwnersRangeAsync(
+                    context.Profile.TenantId,
+                    hostUserIds,
+                    command.StartTime.AddDays(-1),
+                    endTime.AddDays(1),
+                    cancellationToken)
+                : (IReadOnlyDictionary<UserId, Booking[]>)new Dictionary<UserId, Booking[]>();
+
+            slotAvailable = roundRobinSlotCalculator.IsSlotAvailable(context.EventType, context.Schedule, hostBookings, hosts, command.StartTime, command.Duration, command.TimeZone);
+
+            if (slotAvailable)
+            {
+                var selectedHost = roundRobinSlotCalculator.SelectRoundRobinHost(
+                    hosts,
+                    hostBookings,
+                    command.StartTime,
+                    command.Duration,
+                    context.EventType.BeforeEventBufferMinutes,
+                    context.EventType.AfterEventBufferMinutes);
+
+                if (selectedHost is not null)
+                {
+                    ownerUserId = selectedHost;
+                }
+            }
+        }
+        else
+        {
+            var bookings = await bookingRepository.GetForOwnerRangeUnfilteredAsync(
+                context.Profile.TenantId,
+                context.Profile.OwnerUserId,
+                command.StartTime.AddDays(-1),
+                endTime.AddDays(1),
+                cancellationToken
+            );
+            slotAvailable = publicSlotCalculator.IsSlotAvailable(context.EventType, context.Schedule, bookings, command.StartTime, command.Duration, command.TimeZone);
         }
 
-        var busyWindows = await coreConnectorClient.GetBusyWindowsAsync(
-            context.Profile.TenantId,
-            context.EventType.Settings.SelectedCalendars,
-            command.StartTime,
-            endTime,
-            cancellationToken
-        );
-        if (!publicSlotCalculator.IsSlotAvailable(context.EventType, context.Schedule, bookings, busyWindows, command.StartTime, command.Duration, command.TimeZone))
+        if (!slotAvailable)
         {
             return Result<CreatePublicBookingResponse>.Conflict("The selected slot is no longer available.");
         }
@@ -115,7 +158,7 @@ public sealed class CreatePublicBookingHandler(
         var status = context.EventType.Settings.ConfirmationPolicy.RequiresConfirmation ? "pending" : "accepted";
         var booking = Booking.Create(
             context.Profile.TenantId,
-            context.Profile.OwnerUserId,
+            ownerUserId,
             context.EventType.Id,
             command.StartTime,
             command.Duration,
@@ -129,7 +172,8 @@ public sealed class CreatePublicBookingHandler(
             command.BookerEmail,
             command.TimeZone,
             status,
-            command.Responses ?? new Dictionary<string, string>(StringComparer.Ordinal)
+            command.Responses ?? new Dictionary<string, string>(StringComparer.Ordinal),
+            context.EventType.TeamId
         );
 
         if (originalBooking is not null)

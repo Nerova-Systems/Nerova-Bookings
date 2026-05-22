@@ -116,62 +116,36 @@ public sealed class Booking : AggregateRoot<BookingId>, ITenantScopedEntity
 
     public string ResponsesJson { get; private set; }
 
-    public string MetadataJson { get; }
-
-    public string AttendeesJson { get; private set; }
-
-    public string ReferencesJson { get; private set; }
-
-    public string SeatReferencesJson { get; }
-
-    public string? CancellationReason { get; private set; }
-
-    public string? RejectionReason { get; private set; }
-
-    public string? RescheduleReason { get; private set; }
-
-    public bool Rescheduled { get; private set; }
-
-    public string? FromReschedule { get; private set; }
-
-    public string? CancelledBy { get; private set; }
-
-    public string? RescheduledBy { get; private set; }
-
-    [NotMapped]
-    public BookingAttendee[] Attendees => JsonSerializer.Deserialize<BookingAttendee[]>(AttendeesJson, JsonSerializerOptions) ?? [];
-
-    [NotMapped]
-    public BookingReference[] References => JsonSerializer.Deserialize<BookingReference[]>(ReferencesJson, JsonSerializerOptions) ?? [];
-
-    [NotMapped]
-    public BookingSeatReference[] SeatReferences => JsonSerializer.Deserialize<BookingSeatReference[]>(SeatReferencesJson, JsonSerializerOptions) ?? [];
-
-    [NotMapped]
-    public Dictionary<string, string> Metadata => JsonSerializer.Deserialize<Dictionary<string, string>>(MetadataJson, JsonSerializerOptions) ?? [];
+    /// <summary>
+    ///     When non-null, references a Tenant of TenantKind.Team. When null, the aggregate is owned by the existing
+    ///     user/solo scope.
+    /// </summary>
+    public TenantId? TeamId { get; private set; }
 
     public TenantId TenantId { get; } = new(0);
 
-    public void RecordCreated()
+    /// <summary>
+    ///     Assigns this booking to a team.
+    /// </summary>
+    /// <remarks>
+    ///     The command layer is responsible for verifying that <paramref name="teamId" /> references a Tenant of
+    ///     TenantKind.Team. This aggregate cannot verify TenantKind itself.
+    /// </remarks>
+    public void AssignToTeam(TenantId teamId)
     {
-        RaiseSideEffectEvent(BookingSideEffectConstants.BookingCreated);
+        // Command layer must ensure teamId refers to a TenantKind.Team tenant.
+        TeamId = teamId;
     }
 
-    public void Confirm()
+    /// <summary>
+    ///     Removes the team association, reverting the booking to user/solo scope.
+    /// </summary>
+    public void RemoveFromTeam()
     {
-        Status = "accepted";
-        RejectionReason = null;
-        RaiseSideEffectEvent(BookingSideEffectConstants.BookingConfirmed);
+        TeamId = null;
     }
 
-    public void Reject(string? rejectionReason)
-    {
-        Status = "rejected";
-        RejectionReason = string.IsNullOrWhiteSpace(rejectionReason) ? null : rejectionReason.Trim();
-        RaiseSideEffectEvent(BookingSideEffectConstants.BookingRejected);
-    }
-
-    public void Cancel(string? cancellationReason = null, string? cancelledBy = null)
+    public void Cancel()
     {
         Status = "cancelled";
         CancellationReason = string.IsNullOrWhiteSpace(cancellationReason) ? null : cancellationReason.Trim();
@@ -244,6 +218,12 @@ public sealed class Booking : AggregateRoot<BookingId>, ITenantScopedEntity
         ReferencesJson = JsonSerializer.Serialize(references, JsonSerializerOptions);
     }
 
+    /// <summary>Reassigns this booking to a different host (round-robin reassignment).</summary>
+    public void Reassign(UserId newOwnerUserId)
+    {
+        OwnerUserId = newOwnerUserId;
+    }
+
     public static Booking Create(
         TenantId tenantId,
         UserId ownerUserId,
@@ -261,42 +241,12 @@ public sealed class Booking : AggregateRoot<BookingId>, ITenantScopedEntity
         string timeZone,
         string status,
         Dictionary<string, string> responses,
-        Dictionary<string, string>? metadata = null
+        TenantId? teamId = null
     )
     {
-        return new Booking(tenantId, ownerUserId, eventTypeId, startTime, startTime.AddMinutes(durationMinutes), beforeEventBufferMinutes, afterEventBufferMinutes, title, description, locationType, locationValue, bookerName, bookerEmail, timeZone, status, responses, metadata);
-    }
-
-    private void RaiseSideEffectEvent(string trigger)
-    {
-        AddDomainEvent(
-            new BookingLifecycleSideEffectEvent(
-                TenantId,
-                OwnerUserId,
-                EventTypeId,
-                Id,
-                trigger,
-                Title,
-                BookerName,
-                BookerEmail,
-                StartTime,
-                EndTime,
-                Status,
-                LocationType,
-                LocationValue
-            )
-        );
-    }
-
-    private static bool IsSameReference(BookingReference existing, BookingReference replacement)
-    {
-        if (!existing.Type.Equals(replacement.Type, StringComparison.OrdinalIgnoreCase)) return false;
-        if (!string.IsNullOrWhiteSpace(existing.ExternalCalendarId) || !string.IsNullOrWhiteSpace(replacement.ExternalCalendarId))
-        {
-            return string.Equals(existing.ExternalCalendarId, replacement.ExternalCalendarId, StringComparison.OrdinalIgnoreCase);
-        }
-
-        return string.Equals(existing.Uid, replacement.Uid, StringComparison.OrdinalIgnoreCase);
+        var booking = new Booking(tenantId, ownerUserId, eventTypeId, startTime, startTime.AddMinutes(durationMinutes), beforeEventBufferMinutes, afterEventBufferMinutes, bookerName, bookerEmail, timeZone, status, responses);
+        if (teamId is not null) booking.AssignToTeam(teamId);
+        return booking;
     }
 }
 

@@ -1,3 +1,4 @@
+using Account.Features.Memberships.Queries;
 using Account.Features.Tenants.Commands;
 using Account.Features.Tenants.Queries;
 using SharedKernel.ApiResults;
@@ -26,6 +27,10 @@ public sealed class TenantEndpoints : IEndpoints
         group.MapGet("/", async Task<ApiResult<GetTenantsForUserResponse>> (IMediator mediator)
             => await mediator.Send(new GetTenantsForUserQuery())
         ).Produces<GetTenantsForUserResponse>();
+
+        group.MapGet("/switchable-scopes", async Task<ApiResult<GetSwitchableScopesResponse>> (IMediator mediator)
+            => await mediator.Send(new GetSwitchableScopesQuery())
+        ).Produces<GetSwitchableScopesResponse>();
 
         group.MapPost("/current/update-logo", async Task<ApiResult> (IFormFile file, IMediator mediator)
             => await mediator.Send(new UpdateTenantLogoCommand(file.OpenReadStream(), file.ContentType))

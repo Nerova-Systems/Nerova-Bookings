@@ -37,7 +37,7 @@ public sealed class DeleteScheduleHandler(
             return Result.NotFound($"Schedule '{command.Id}' was not found.");
         }
 
-        var schedules = await scheduleRepository.GetForOwnerAsync(ownerUserId, cancellationToken);
+        var schedules = await scheduleRepository.GetForOwnerAsync(ownerUserId, executionContext.ActiveTeamId, cancellationToken);
         if (schedules.Length == 1)
         {
             return Result.BadRequest("At least one schedule is required.");

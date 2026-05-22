@@ -1,10 +1,12 @@
 using Account.Features.FeatureFlags.Shared;
+using Account.Features.OrgProfiles.Domain;
 using Account.Features.Subscriptions.Domain;
 using Account.Features.Tenants.Domain;
 using Account.Features.Users.Domain;
 using SharedKernel.Authentication;
 using SharedKernel.Authentication.TokenGeneration;
 using SharedKernel.Cqrs;
+using SharedKernel.Domain;
 
 namespace Account.Features.Users.Shared;
 
@@ -22,8 +24,23 @@ public sealed class UserInfoFactory(
     /// <summary>
     ///     Creates a UserInfo instance from a User entity, including tenant name.
     ///     Returns a failure result if the tenant has been soft-deleted.
+    ///     <para>
+    ///         The optional <paramref name="activeTeamId" />, <paramref name="activeOrgId" />, and
+    ///         <paramref name="activeOrgProfileId" /> parameters are forwarded into the resulting
+    ///         <see cref="UserInfo" /> and subsequently encoded as JWT claims by
+    ///         <see cref="AccessTokenGenerator" />. Pass non-null values only when issuing tokens
+    ///         for a team- or org-scoped session (e.g., after a scope switch).
+    ///     </para>
     /// </summary>
-    public async Task<Result<UserInfo>> CreateUserInfoAsync(User user, SessionId? sessionId, CancellationToken cancellationToken)
+    public async Task<Result<UserInfo>> CreateUserInfoAsync(
+        User user,
+        SessionId? sessionId,
+        CancellationToken cancellationToken,
+        TenantId? activeTeamId = null,
+        TenantId? activeOrgId = null,
+        OrgProfileId? activeOrgProfileId = null,
+        string? impersonatedByIdentifier = null,
+        UserId? impersonatedByUserId = null)
     {
         var tenant = await tenantRepository.GetByIdAsync(user.TenantId, cancellationToken);
         if (tenant is null) return Result<UserInfo>.BadRequest("Tenant has been deleted.");
@@ -56,7 +73,12 @@ public sealed class UserInfoFactory(
             IsInternalUser = user.IsInternalUser,
             FeatureFlags = new HashSet<string>(enabledFlags),
             TenantRolloutBucket = tenant.RolloutBucket,
-            UserRolloutBucket = user.RolloutBucket
+            UserRolloutBucket = user.RolloutBucket,
+            ActiveTeamId = activeTeamId,
+            ActiveOrgId = activeOrgId,
+            ActiveOrgProfileId = activeOrgProfileId?.Value,
+            ImpersonatedByIdentifier = impersonatedByIdentifier,
+            ImpersonatedByUserId = impersonatedByUserId
         };
     }
 }

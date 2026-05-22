@@ -47,10 +47,10 @@ public sealed class UpdateSchedulingProfileHandler(ISchedulingProfileRepository 
             return Result<SchedulingProfileResponse>.BadRequest($"Scheduling handle '{handle}' is already taken.");
         }
 
-        var profile = await schedulingProfileRepository.GetForOwnerAsync(ownerUserId, cancellationToken);
+        var profile = await schedulingProfileRepository.GetForOwnerAsync(ownerUserId, executionContext.ActiveTeamId, cancellationToken);
         if (profile is null)
         {
-            profile = SchedulingProfile.Create(tenantId, ownerUserId, handle, command.DisplayName, command.AvatarUrl);
+            profile = SchedulingProfile.Create(tenantId, ownerUserId, handle, command.DisplayName, command.AvatarUrl, executionContext.ActiveTeamId);
             await schedulingProfileRepository.AddAsync(profile, cancellationToken);
         }
         else

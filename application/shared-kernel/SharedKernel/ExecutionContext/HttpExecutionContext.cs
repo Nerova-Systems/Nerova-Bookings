@@ -10,6 +10,14 @@ public class HttpExecutionContext(IHttpContextAccessor httpContextAccessor) : IE
 {
     public TenantId? TenantId => UserInfo.TenantId;
 
+    public TenantId? ActiveTeamId => UserInfo.ActiveTeamId;
+
+    public TenantId? ActiveOrgId => UserInfo.ActiveOrgId;
+
+    public string? ActiveOrgProfileId => UserInfo.ActiveOrgProfileId;
+
+    public UserId? ImpersonatedByUserId => UserInfo.ImpersonatedByUserId;
+
     public UserInfo UserInfo
     {
         get

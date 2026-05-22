@@ -117,8 +117,7 @@ public sealed class GetBookingsHandler(
         }
 
         var now = timeProvider.GetUtcNow();
-        var profile = await schedulingProfileRepository.GetForOwnerAsync(ownerUserId, cancellationToken);
-        var bookings = await bookingRepository.GetForOwnerWithEventTypesAsync(tenantId, ownerUserId, cancellationToken);
+        var bookings = await bookingRepository.GetForOwnerWithEventTypesAsync(tenantId, ownerUserId, executionContext.ActiveTeamId, cancellationToken);
         var filtered = bookings
             .Where(booking => query.Statuses.Any(status => MatchesStatus(booking, status, now)))
             .Where(booking => MatchesFilters(booking, query))
