@@ -2,7 +2,18 @@ import { t } from "@lingui/core/macro";
 
 import type { EventType, EventTypePayload, Schedule } from "../schedulingTypes";
 
-export type EventTypeTabName = "setup" | "availability" | "limits" | "advanced" | "recurring" | "dependencies";
+export type EventTypeTabName =
+  | "setup"
+  | "availability"
+  | "limits"
+  | "advanced"
+  | "recurring"
+  | "team"
+  | "instant-meeting"
+  | "ai-voice-agent"
+  | "workflows"
+  | "webhooks"
+  | "apps";
 
 export const eventTypeTabNames: EventTypeTabName[] = [
   "setup",
@@ -10,7 +21,12 @@ export const eventTypeTabNames: EventTypeTabName[] = [
   "limits",
   "advanced",
   "recurring",
-  "dependencies"
+  "team",
+  "instant-meeting",
+  "ai-voice-agent",
+  "workflows",
+  "webhooks",
+  "apps"
 ];
 
 export function getEventTypeTabLabel(tabName: EventTypeTabName) {
@@ -25,20 +41,23 @@ export function getEventTypeTabLabel(tabName: EventTypeTabName) {
       return t`Advanced`;
     case "recurring":
       return t`Recurring`;
-    case "dependencies":
-      return t`Dependencies`;
+    case "team":
+      return t`Team`;
+    case "instant-meeting":
+      return t`Instant meeting`;
+    case "ai-voice-agent":
+      return t`AI voice agent`;
+    case "workflows":
+      return t`Workflows`;
+    case "webhooks":
+      return t`Webhooks`;
+    case "apps":
+      return t`Apps`;
   }
 }
 
 export function isEventTypeTabName(value: unknown): value is EventTypeTabName {
-  return (
-    value === "setup" ||
-    value === "availability" ||
-    value === "limits" ||
-    value === "advanced" ||
-    value === "recurring" ||
-    value === "dependencies"
-  );
+  return eventTypeTabNames.includes(value as EventTypeTabName);
 }
 
 export function getScheduleName(scheduleId: string, schedules: Schedule[]) {

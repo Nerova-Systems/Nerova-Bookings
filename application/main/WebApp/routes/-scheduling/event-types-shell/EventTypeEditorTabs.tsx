@@ -5,11 +5,16 @@ import { useNavigate } from "@tanstack/react-router";
 import type { ApiValidationError, EventTypePayload, Schedule } from "../schedulingTypes";
 
 import { EventTypeAdvancedTab } from "../event-type-tabs/EventTypeAdvancedTab";
+import { EventTypeAiVoiceAgentTab } from "../event-type-tabs/EventTypeAiVoiceAgentTab";
+import { EventTypeAppsTab } from "../event-type-tabs/EventTypeAppsTab";
 import { EventTypeAvailabilityTab } from "../event-type-tabs/EventTypeAvailabilityTab";
-import { EventTypeDependenciesTab } from "../event-type-tabs/EventTypeDependenciesTab";
+import { EventTypeInstantMeetingTab } from "../event-type-tabs/EventTypeInstantMeetingTab";
 import { EventTypeLimitsTab } from "../event-type-tabs/EventTypeLimitsTab";
 import { EventTypeRecurringTab } from "../event-type-tabs/EventTypeRecurringTab";
 import { EventTypeSetupTab } from "../event-type-tabs/EventTypeSetupTab";
+import { EventTypeTeamTab } from "../event-type-tabs/EventTypeTeamTab";
+import { EventTypeWebhooksTab } from "../event-type-tabs/EventTypeWebhooksTab";
+import { EventTypeWorkflowsTab } from "../event-type-tabs/EventTypeWorkflowsTab";
 import { eventTypeTabNames, getEventTypeTabLabel, type EventTypeTabName } from "./eventTypeShellTypes";
 
 export const eventTypeFormId = "event-type-editor-form";
@@ -36,7 +41,7 @@ export function EventTypeEditorTabs({
   onSubmit
 }: EventTypeEditorTabsProps) {
   const navigate = useNavigate();
-  const tabProps = { value: draft, schedules, onChange, error };
+  const tabProps = { eventTypeId, value: draft, schedules, onChange, error };
 
   return (
     <Tabs
@@ -82,8 +87,23 @@ export function EventTypeEditorTabs({
         <TabsContent value="recurring" className="min-w-0">
           <EventTypeRecurringTab {...tabProps} />
         </TabsContent>
-        <TabsContent value="dependencies" className="min-w-0">
-          <EventTypeDependenciesTab {...tabProps} />
+        <TabsContent value="team" className="min-w-0">
+          <EventTypeTeamTab {...tabProps} />
+        </TabsContent>
+        <TabsContent value="instant-meeting" className="min-w-0">
+          <EventTypeInstantMeetingTab {...tabProps} />
+        </TabsContent>
+        <TabsContent value="ai-voice-agent" className="min-w-0">
+          <EventTypeAiVoiceAgentTab {...tabProps} />
+        </TabsContent>
+        <TabsContent value="workflows" className="min-w-0">
+          <EventTypeWorkflowsTab {...tabProps} />
+        </TabsContent>
+        <TabsContent value="webhooks" className="min-w-0">
+          <EventTypeWebhooksTab {...tabProps} />
+        </TabsContent>
+        <TabsContent value="apps" className="min-w-0">
+          <EventTypeAppsTab {...tabProps} />
         </TabsContent>
       </Form>
     </Tabs>
