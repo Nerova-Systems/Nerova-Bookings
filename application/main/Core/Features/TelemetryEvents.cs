@@ -99,3 +99,12 @@ public sealed class RoundRobinHostUpdated(EventTypeId eventTypeId, UserId userId
 
 public sealed class RoundRobinBookingReassigned(BookingId bookingId, UserId newOwnerUserId)
     : TelemetryEvent(("booking_id", bookingId), ("new_owner_user_id", newOwnerUserId));
+
+public sealed class HashedLinkCreated(EventTypeId eventTypeId, HashedLinkId hashedLinkId)
+    : TelemetryEvent(("event_type_id", eventTypeId), ("hashed_link_id", hashedLinkId));
+
+public sealed class HashedLinkDeleted(EventTypeId eventTypeId, HashedLinkId hashedLinkId)
+    : TelemetryEvent(("event_type_id", eventTypeId), ("hashed_link_id", hashedLinkId));
+
+public sealed class TeamAssignmentUpdated(EventTypeId eventTypeId, bool assignAllTeamMembers)
+    : TelemetryEvent(("event_type_id", eventTypeId), ("assign_all_team_members", assignAllTeamMembers));

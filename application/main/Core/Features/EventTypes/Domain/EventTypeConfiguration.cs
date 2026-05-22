@@ -19,6 +19,7 @@ public sealed class EventTypeConfiguration : IEntityTypeConfiguration<EventType>
         builder.MapStronglyTypedUuid<EventType, UserId>(eventType => eventType.OwnerUserId);
         builder.MapStronglyTypedUuid<EventType, ScheduleId>(eventType => eventType.ScheduleId);
         builder.MapStronglyTypedNullableId<EventType, EventTypeId, string>(eventType => eventType.ParentEventTypeId);
+        builder.MapStronglyTypedNullableId<EventType, UserId, string>(eventType => eventType.SecondaryEmailUserId);
 
         builder.Property(eventType => eventType.Title).HasMaxLength(120);
         builder.Property(eventType => eventType.Slug).HasMaxLength(120);

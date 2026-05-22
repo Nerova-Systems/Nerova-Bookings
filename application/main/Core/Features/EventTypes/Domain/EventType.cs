@@ -108,6 +108,19 @@ public sealed class EventType : SoftDeletableAggregateRoot<EventTypeId>, ITenant
 
     public EventTypeSettings Settings { get; private set; } = new();
 
+    public bool IsInstantEvent { get; private set; }
+
+    public bool AssignAllTeamMembers { get; private set; }
+
+    public bool HideOrganizerEmail { get; private set; }
+
+    public bool BookingRequiresAuthentication { get; private set; }
+
+    /// <summary>
+    ///     Nullable reference to a secondary email's owning user. No FK constraint enforced; relationship is logical.
+    /// </summary>
+    public UserId? SecondaryEmailUserId { get; private set; }
+
     public int[] DurationOptions => Settings.DurationOptions.Length == 0 ? [DurationMinutes] : Settings.DurationOptions;
 
     public SchedulingType SchedulingType { get; private set; } = SchedulingType.Default;
@@ -303,5 +316,40 @@ public sealed class EventType : SoftDeletableAggregateRoot<EventTypeId>, ITenant
         LocationType = string.IsNullOrWhiteSpace(locationType) ? null : locationType.Trim();
         LocationValue = string.IsNullOrWhiteSpace(locationValue) ? null : locationValue.Trim();
         Settings = EventTypeSettings.Normalize(settings, DurationMinutes, LocationType, LocationValue);
+    }
+
+    public void SetSettings(EventTypeSettings settings)
+    {
+        Settings = EventTypeSettings.Normalize(settings, DurationMinutes, LocationType, LocationValue);
+    }
+
+    public void SetIsInstantEvent(bool isInstantEvent)
+    {
+        IsInstantEvent = isInstantEvent;
+    }
+
+    public void SetAssignAllTeamMembers(bool assignAllTeamMembers)
+    {
+        AssignAllTeamMembers = assignAllTeamMembers;
+    }
+
+    public void SetHideOrganizerEmail(bool hideOrganizerEmail)
+    {
+        HideOrganizerEmail = hideOrganizerEmail;
+    }
+
+    public void SetBookingRequiresAuthentication(bool bookingRequiresAuthentication)
+    {
+        BookingRequiresAuthentication = bookingRequiresAuthentication;
+    }
+
+    public void SetSecondaryEmailUserId(UserId? secondaryEmailUserId)
+    {
+        SecondaryEmailUserId = secondaryEmailUserId;
+    }
+
+    public HashedLink AddHashedLink(string hash, int? expiresAfterUses, DateTimeOffset? expiresAt)
+    {
+        return HashedLink.Create(TenantId, Id, hash, expiresAfterUses, expiresAt);
     }
 }

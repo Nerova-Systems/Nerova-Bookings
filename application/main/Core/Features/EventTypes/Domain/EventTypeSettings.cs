@@ -1,5 +1,7 @@
 using System.Text.RegularExpressions;
 using FluentValidation;
+using Main.Features.Schedules.Domain;
+using SharedKernel.Domain;
 
 namespace Main.Features.EventTypes.Domain;
 
@@ -37,6 +39,20 @@ public sealed record EventTypeSettings
 
     public Dictionary<string, string> Metadata { get; init; } = new(StringComparer.Ordinal);
 
+    public EventTypeInstantMeeting InstantMeeting { get; init; } = new();
+
+    public EventTypeAiVoiceAgent AiVoiceAgent { get; init; } = new();
+
+    public EventTypeTeamAssignment TeamAssignment { get; init; } = new();
+
+    public EventTypeTimezone Timezone { get; init; } = new();
+
+    public EventTypePrivacy Privacy { get; init; } = new();
+
+    public EventTypeEmail Email { get; init; } = new();
+
+    public bool EnablePerHostLocations { get; init; }
+
     public static EventTypeSettings Default(int durationMinutes, string? locationType, string? locationValue)
     {
         return Normalize(new EventTypeSettings(), durationMinutes, locationType, locationValue);
@@ -54,8 +70,8 @@ public sealed record EventTypeSettings
             ? [durationMinutes]
             : source.DurationOptions.Distinct().Order().ToArray();
         var locations = source.Locations.Length == 0 && !string.IsNullOrWhiteSpace(locationType)
-            ? [new EventTypeLocation(locationType.Trim(), string.IsNullOrWhiteSpace(locationValue) ? null : locationValue.Trim())]
-            : source.Locations.Select(location => new EventTypeLocation(location.Type.Trim(), string.IsNullOrWhiteSpace(location.Value) ? null : location.Value.Trim())).ToArray();
+            ? [new EventTypeLocation(locationType.Trim(), string.IsNullOrWhiteSpace(locationValue) ? null : locationValue.Trim(), false)]
+            : source.Locations.Select(location => new EventTypeLocation(location.Type.Trim(), string.IsNullOrWhiteSpace(location.Value) ? null : location.Value.Trim(), location.DisplayLocationPubliclyToTeam)).ToArray();
 
         return source with
         {
@@ -93,7 +109,14 @@ public sealed record EventTypeSettings
             InterfaceLanguage = string.IsNullOrWhiteSpace(source.InterfaceLanguage) ? null : source.InterfaceLanguage.Trim(),
             Metadata = source.Metadata
                 .Where(pair => !string.IsNullOrWhiteSpace(pair.Key))
-                .ToDictionary(pair => pair.Key.Trim(), pair => pair.Value, StringComparer.Ordinal)
+                .ToDictionary(pair => pair.Key.Trim(), pair => pair.Value, StringComparer.Ordinal),
+            InstantMeeting = source.InstantMeeting,
+            AiVoiceAgent = source.AiVoiceAgent,
+            TeamAssignment = source.TeamAssignment,
+            Timezone = source.Timezone,
+            Privacy = source.Privacy,
+            Email = source.Email,
+            EnablePerHostLocations = source.EnablePerHostLocations
         };
     }
 }
@@ -190,7 +213,14 @@ public sealed class EventTypeSettingsValidator : AbstractValidator<EventTypeSett
         RuleFor(settings => settings.Limits)
             .Must(limits =>
                 IsNonNegative(limits.MaxBookingsPerDay) &&
+                IsNonNegative(limits.MaxBookingsPerWeek) &&
+                IsNonNegative(limits.MaxBookingsPerMonth) &&
+                IsNonNegative(limits.MaxBookingsPerYear) &&
                 IsNonNegative(limits.MaxBookingDurationMinutesPerDay) &&
+                IsNonNegative(limits.MaxBookingDurationPerDay) &&
+                IsNonNegative(limits.MaxBookingDurationPerWeek) &&
+                IsNonNegative(limits.MaxBookingDurationPerMonth) &&
+                IsNonNegative(limits.MaxBookingDurationPerYear) &&
                 IsNonNegative(limits.MaxActiveBookingsPerBooker) &&
                 IsNonNegative(limits.FirstAvailableSlotMinutes) &&
                 IsNonNegative(limits.OffsetStartMinutes)
@@ -241,6 +271,16 @@ public sealed class EventTypeSettingsValidator : AbstractValidator<EventTypeSett
                 )
             )
             .WithMessage($"Metadata keys must be at most {MaximumMetadataKeyLength} characters and values must be at most {MaximumMetadataValueLength} characters.");
+        RuleFor(settings => settings.Email.EventName).MaximumLength(200).WithMessage("Custom event name must be at most 200 characters.");
+        RuleFor(settings => settings.Email.CustomReplyToEmail).MaximumLength(200).WithMessage("Custom reply-to email must be at most 200 characters.");
+        RuleFor(settings => settings.Timezone.TimeZone).MaximumLength(80).WithMessage("Time zone must be at most 80 characters.");
+        RuleFor(settings => settings.Timezone.LockedTimeZone).MaximumLength(80).WithMessage("Locked time zone must be at most 80 characters.");
+        RuleFor(settings => settings.InstantMeeting.ExpiryTimeOffsetInSeconds)
+            .Must(seconds => seconds is null or >= 0)
+            .WithMessage("Instant meeting expiry must be non-negative.");
+        RuleFor(settings => settings.TeamAssignment.MaxLeadThreshold)
+            .Must(value => value is null or > 0)
+            .WithMessage("Max lead threshold must be positive.");
     }
 
     private static bool IsNonNegative(int? value)
@@ -279,7 +319,7 @@ public sealed class EventTypeSettingsValidator : AbstractValidator<EventTypeSett
     }
 }
 
-public sealed record EventTypeLocation(string Type, string? Value);
+public sealed record EventTypeLocation(string Type, string? Value, bool DisplayLocationPubliclyToTeam = false);
 
 public sealed record EventTypeBookingField(
     string Name,
@@ -302,13 +342,33 @@ public sealed record EventTypeLimits
 {
     public int? MaxBookingsPerDay { get; init; }
 
+    public int? MaxBookingsPerWeek { get; init; }
+
+    public int? MaxBookingsPerMonth { get; init; }
+
+    public int? MaxBookingsPerYear { get; init; }
+
     public int? MaxBookingDurationMinutesPerDay { get; init; }
+
+    public int? MaxBookingDurationPerDay { get; init; }
+
+    public int? MaxBookingDurationPerWeek { get; init; }
+
+    public int? MaxBookingDurationPerMonth { get; init; }
+
+    public int? MaxBookingDurationPerYear { get; init; }
 
     public int? MaxActiveBookingsPerBooker { get; init; }
 
     public int? FirstAvailableSlotMinutes { get; init; }
 
     public int? OffsetStartMinutes { get; init; }
+
+    public bool OnlyShowFirstAvailableSlot { get; init; }
+
+    public bool ShowOptimizedSlots { get; init; }
+
+    public bool MaxActiveBookingPerBookerOfferReschedule { get; init; }
 }
 
 public sealed record EventTypeConfirmationPolicy
@@ -316,6 +376,12 @@ public sealed record EventTypeConfirmationPolicy
     public bool RequiresConfirmation { get; init; }
 
     public bool RequiresBookerEmailVerification { get; init; }
+
+    public bool BlockSlotWhilePending { get; init; }
+
+    public bool RequiresConfirmationForFreeEmail { get; init; }
+
+    public bool RequiresCancellationReason { get; init; }
 }
 
 public sealed record EventTypeRecurrence
@@ -348,6 +414,76 @@ public sealed record EventTypeReschedulePolicy
     public bool AllowReschedule { get; init; } = true;
 
     public int? MinimumNoticeMinutes { get; init; }
+
+    public bool AllowReschedulingPastBookings { get; init; }
+
+    public bool AllowReschedulingCancelledBookings { get; init; }
+}
+
+public sealed record EventTypeInstantMeeting
+{
+    public int? ExpiryTimeOffsetInSeconds { get; init; }
+
+    public ScheduleId? InstantMeetingScheduleId { get; init; }
+
+    public Dictionary<string, string>? Parameters { get; init; }
+}
+
+public sealed record EventTypeAiVoiceAgent
+{
+    public bool Enabled { get; init; }
+
+    public string? AgentConfig { get; init; }
+}
+
+public sealed record EventTypeTeamAssignment
+{
+    public bool AssignRRMembersUsingSegment { get; init; }
+
+    public string? RrSegmentQueryValue { get; init; }
+
+    public bool IsRRWeightsEnabled { get; init; }
+
+    public int? MaxLeadThreshold { get; init; }
+
+    public bool IncludeNoShowInRRCalculation { get; init; }
+
+    public bool RescheduleWithSameRoundRobinHost { get; init; }
+
+    public bool RrHostSubsetEnabled { get; init; }
+
+    public HostGroup[] HostGroups { get; init; } = [];
+}
+
+public sealed record HostGroup(string Id, string Name, UserId[] MemberUserIds);
+
+public sealed record EventTypeTimezone
+{
+    public string? TimeZone { get; init; }
+
+    public bool LockTimeZoneToggleOnBookingPage { get; init; }
+
+    public string? LockedTimeZone { get; init; }
+
+    public bool UseBookerTimezone { get; init; }
+
+    public ScheduleId? RestrictionScheduleId { get; init; }
+}
+
+public sealed record EventTypePrivacy
+{
+    public bool DisableGuests { get; init; }
+
+    public bool HideCalendarNotes { get; init; }
+
+    public bool HideCalendarEventDetails { get; init; }
+}
+
+public sealed record EventTypeEmail
+{
+    public string? EventName { get; init; }
+
+    public string? CustomReplyToEmail { get; init; }
 }
 
 public sealed record EventTypeRedirects

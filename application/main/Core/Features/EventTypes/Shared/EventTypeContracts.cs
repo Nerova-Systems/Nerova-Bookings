@@ -1,6 +1,7 @@
 using JetBrains.Annotations;
 using Main.Features.EventTypes.Domain;
 using Main.Features.Schedules.Domain;
+using SharedKernel.Domain;
 
 namespace Main.Features.EventTypes.Shared;
 
@@ -19,7 +20,12 @@ public sealed record EventTypeResponse(
     int MinimumBookingNoticeMinutes,
     string? LocationType,
     string? LocationValue,
-    EventTypeSettings Settings
+    EventTypeSettings Settings,
+    bool IsInstantEvent,
+    bool AssignAllTeamMembers,
+    bool HideOrganizerEmail,
+    bool BookingRequiresAuthentication,
+    UserId? SecondaryEmailUserId
 )
 {
     public static EventTypeResponse From(EventType eventType)
@@ -38,10 +44,33 @@ public sealed record EventTypeResponse(
             eventType.MinimumBookingNoticeMinutes,
             eventType.LocationType,
             eventType.LocationValue,
-            eventType.Settings
+            eventType.Settings,
+            eventType.IsInstantEvent,
+            eventType.AssignAllTeamMembers,
+            eventType.HideOrganizerEmail,
+            eventType.BookingRequiresAuthentication,
+            eventType.SecondaryEmailUserId
         );
     }
 }
 
 [PublicAPI]
 public sealed record EventTypesResponse(EventTypeResponse[] EventTypes);
+
+[PublicAPI]
+public sealed record HashedLinkResponse(
+    HashedLinkId Id,
+    EventTypeId EventTypeId,
+    string Hash,
+    int? ExpiresAfterUses,
+    DateTimeOffset? ExpiresAt
+)
+{
+    public static HashedLinkResponse From(HashedLink link)
+    {
+        return new HashedLinkResponse(link.Id, link.EventTypeId, link.Hash, link.ExpiresAfterUses, link.ExpiresAt);
+    }
+}
+
+[PublicAPI]
+public sealed record HashedLinksResponse(HashedLinkResponse[] HashedLinks);
