@@ -3235,4 +3235,153 @@ msgid "Are you sure you want to delete <0>{0}</0>? Members assigned to this role
 msgstr "Are you sure you want to delete <0>{0}</0>? Members assigned to this role will lose its permissions."
 #, fuzzy
 msgid "Role deleted: {0}"
-msgstr "Role deleted: {0}"
+msgstr "Role deleted: {0}"#, fuzzy
+msgid "Delete team"
+msgstr "Delete team"
+#, fuzzy
+msgid "Team name"
+msgstr "Team name"
+#, fuzzy
+msgid "Confirm team name"
+msgstr "Confirm team name"
+#, fuzzy
+msgid "Team deleted: {0}"
+msgstr "Team deleted: {0}"
+#, fuzzy
+msgid "Invite team member"
+msgstr "Invite team member"
+#, fuzzy
+msgid "The user must already have an account. Pick the role they will hold in this team."
+msgstr "The user must already have an account. Pick the role they will hold in this team."
+#, fuzzy
+msgid "Invitation sent"
+msgstr "Invitation sent"
+#, fuzzy
+msgid "Membership role"
+msgstr "Membership role"
+#, fuzzy
+msgid "Custom role"
+msgstr "Custom role"
+#, fuzzy
+msgid "No custom roles available"
+msgstr "No custom roles available"
+#, fuzzy
+msgid "General"
+msgstr "General"
+#, fuzzy
+msgid "Attributes"
+msgstr "Attributes"
+#, fuzzy
+msgid "Member attributes are coming soon."
+msgstr "Member attributes are coming soon."
+#, fuzzy
+msgid "Team updated: {0}"
+msgstr "Team updated: {0}"
+#, fuzzy
+msgid "Profile"
+msgstr "Profile"
+#, fuzzy
+msgid "Public information shown on your team's booking pages."
+msgstr "Public information shown on your team's booking pages."
+#, fuzzy
+msgid "Slug"
+msgstr "Slug"
+#, fuzzy
+msgid "Team slug"
+msgstr "Team slug"
+#, fuzzy
+msgid "About"
+msgstr "About"
+#, fuzzy
+msgid "Team description"
+msgstr "Team description"
+#, fuzzy
+msgid "Visibility & branding"
+msgstr "Visibility & branding"
+#, fuzzy
+msgid "Control how your team appears to bookers."
+msgstr "Control how your team appears to bookers."
+#, fuzzy
+msgid "Private team"
+msgstr "Private team"
+#, fuzzy
+msgid "Hide the team's member list and profile page from public visitors."
+msgstr "Hide the team's member list and profile page from public visitors."
+#, fuzzy
+msgid "Hide branding"
+msgstr "Hide branding"
+#, fuzzy
+msgid "Hide the \"Powered by\" footer on booking pages."
+msgstr "Hide the \"Powered by\" footer on booking pages."
+#, fuzzy
+msgid "Hide \"Book a team member\""
+msgstr "Hide \"Book a team member\""
+#, fuzzy
+msgid "Hide the option to book any available member from the team profile page."
+msgstr "Hide the option to book any available member from the team profile page."
+#, fuzzy
+msgid "Hide team profile link"
+msgstr "Hide team profile link"
+#, fuzzy
+msgid "Remove the link back to the team profile from individual member pages."
+msgstr "Remove the link back to the team profile from individual member pages."
+#, fuzzy
+msgid "Deleting a team is permanent and cannot be undone."
+msgstr "Deleting a team is permanent and cannot be undone."
+#, fuzzy
+msgid "Custom role updated"
+msgstr "Custom role updated"
+#, fuzzy
+msgid "Member removed"
+msgstr "Member removed"
+#, fuzzy
+msgid "Invite member"
+msgstr "Invite member"
+#, fuzzy
+msgid "No members yet. Invite your first teammate to get started."
+msgstr "No members yet. Invite your first teammate to get started."
+#, fuzzy
+msgid "Remove member"
+msgstr "Remove member"
+#, fuzzy
+msgid "Remove <0>{0}</0> from this team? They will lose access to team event types and bookings."
+msgstr "Remove <0>{0}</0> from this team? They will lose access to team event types and bookings."
+#, fuzzy
+msgid "Deleting <0>{0}</0> will remove all memberships and is irreversible. Type the team name to confirm."
+msgstr "Deleting <0>{0}</0> will remove all memberships and is irreversible. Type the team name to confirm."
+#, fuzzy
+msgid "Create teams to group members and share event types, schedules, and bookings."
+msgstr "Create teams to group members and share event types, schedules, and bookings."
+#, fuzzy
+msgid "New team"
+msgstr "New team"
+#, fuzzy
+msgid "No teams yet"
+msgstr "No teams yet"
+#, fuzzy
+msgid "Create a team to collaborate on event types and bookings with your colleagues."
+msgstr "Create a team to collaborate on event types and bookings with your colleagues."
+#, fuzzy
+msgid "Create a team"
+msgstr "Create a team"
+#, fuzzy
+msgid "Manage {0}"
+msgstr "Manage {0}"
+#, fuzzy
+msgid "Create team"
+msgstr "Create team"
+#, fuzzy
+msgid "Pick a name and a unique URL slug. You can configure branding and invite members after creating the team."
+msgstr "Pick a name and a unique URL slug. You can configure branding and invite members after creating the team."
+#, fuzzy
+msgid "acme-design"
+msgstr "acme-design"
+#, fuzzy
+msgid "The slug becomes part of your team's public URLs. Leave blank to auto-generate later."
+msgstr "The slug becomes part of your team's public URLs. Leave blank to auto-generate later."
+#, fuzzy
+msgid "Creating..."
+msgstr "Creating..."
+#, fuzzy
+msgid "Failed to create team. Please try again."
+msgstr "Failed to create team. Please try again."

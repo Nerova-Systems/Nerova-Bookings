@@ -24,9 +24,10 @@ import {
   ShieldCheckIcon,
   SlidersHorizontalIcon,
   UserIcon,
-  UsersIcon
+  UsersIcon,
+  UsersRoundIcon
 } from "lucide-react";
-import { use } from "react";
+import { type ReactNode, use } from "react";
 
 import MobileMenu from "@/federated-modules/sideMenu/MobileMenu";
 import UserMenu from "@/federated-modules/userMenu/UserMenu";
@@ -40,6 +41,27 @@ function HeaderUserMenu() {
   return <UserMenu isCollapsed={isCollapsed} />;
 }
 
+type AccountNavItemProps = {
+  to: string;
+  icon: ReactNode;
+  label: ReactNode;
+  tooltip: string;
+  isActive: boolean;
+};
+
+function AccountNavItem({ to, icon, label, tooltip, isActive }: Readonly<AccountNavItemProps>) {
+  return (
+    <SidebarMenuItem>
+      <SidebarMenuButton asChild={true} isActive={isActive} tooltip={tooltip}>
+        <RouterLink to={to}>
+          {icon}
+          <span>{label}</span>
+        </RouterLink>
+      </SidebarMenuButton>
+    </SidebarMenuItem>
+  );
+}
+
 export function AccountSideMenu() {
   const userInfo = useUserInfo();
   const router = useRouter();
@@ -48,6 +70,7 @@ export function AccountSideMenu() {
   const { enabled: isSubscriptionEnabled } = useFeatureFlag("subscriptions");
   const { enabled: isAccountOverviewEnabled } = useFeatureFlag("account-overview");
   const { enabled: isTierEnterpriseEnabled } = useFeatureFlag("tier-enterprise");
+  const { enabled: isTierTeamsEnabled } = useFeatureFlag("tier-teams");
 
   const isActive = (target: string, matchPrefix = false) => {
     const normalized = normalizePath(target);
@@ -56,6 +79,7 @@ export function AccountSideMenu() {
 
   const showBilling = userInfo?.role === "Owner" && isSubscriptionEnabled;
   const showRoles = (userInfo?.role === "Owner" || userInfo?.role === "Admin") && isTierEnterpriseEnabled;
+  const showTeams = (userInfo?.role === "Owner" || userInfo?.role === "Admin") && isTierTeamsEnabled;
 
   return (
     <Sidebar collapsible="icon" mobileContent={<MobileMenu onNavigate={navigateToMain ?? undefined} />}>
@@ -146,37 +170,32 @@ export function AccountSideMenu() {
                     </RouterLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
+                {showTeams && (
+                  <AccountNavItem
+                    to="/account/settings/teams"
+                    icon={<UsersRoundIcon />}
+                    label={<Trans>Teams</Trans>}
+                    tooltip={t`Teams`}
+                    isActive={isActive("/account/settings/teams", true)}
+                  />
+                )}
                 {showRoles && (
-                  <SidebarMenuItem>
-                    <SidebarMenuButton
-                      asChild={true}
-                      isActive={isActive("/account/settings/roles", true)}
-                      tooltip={t`Roles`}
-                    >
-                      <RouterLink to="/account/settings/roles">
-                        <ShieldCheckIcon />
-                        <span>
-                          <Trans>Roles</Trans>
-                        </span>
-                      </RouterLink>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
+                  <AccountNavItem
+                    to="/account/settings/roles"
+                    icon={<ShieldCheckIcon />}
+                    label={<Trans>Roles</Trans>}
+                    tooltip={t`Roles`}
+                    isActive={isActive("/account/settings/roles", true)}
+                  />
                 )}
                 {showBilling && (
-                  <SidebarMenuItem>
-                    <SidebarMenuButton
-                      asChild={true}
-                      isActive={isActive("/account/billing", true)}
-                      tooltip={t`Billing`}
-                    >
-                      <RouterLink to="/account/billing">
-                        <CreditCardIcon />
-                        <span>
-                          <Trans>Billing</Trans>
-                        </span>
-                      </RouterLink>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
+                  <AccountNavItem
+                    to="/account/billing"
+                    icon={<CreditCardIcon />}
+                    label={<Trans>Billing</Trans>}
+                    tooltip={t`Billing`}
+                    isActive={isActive("/account/billing", true)}
+                  />
                 )}
               </SidebarMenu>
             </SidebarGroupContent>
