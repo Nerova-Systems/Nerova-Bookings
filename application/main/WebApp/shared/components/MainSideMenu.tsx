@@ -1,5 +1,6 @@
 import { t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
+import { useFeatureFlag } from "@repo/infrastructure/featureFlags/useFeatureFlag";
 import {
   collapsedContext,
   Sidebar,
@@ -16,7 +17,7 @@ import {
 import { Link as RouterLink, useNavigate, useRouter } from "@tanstack/react-router";
 import MobileMenu from "account/MobileMenu";
 import UserMenu from "account/UserMenu";
-import { CalendarCheckIcon, CalendarDaysIcon, LayoutDashboardIcon, TimerIcon } from "lucide-react";
+import { BarChart3Icon, CalendarCheckIcon, CalendarDaysIcon, LayoutDashboardIcon, TimerIcon } from "lucide-react";
 import { use } from "react";
 
 import { getWeekStartDate } from "@/routes/-bookings/bookingTypes";
@@ -34,6 +35,7 @@ export function MainSideMenu() {
   const router = useRouter();
   const currentPath = normalizePath(router.state.location.pathname);
   const navigate = useNavigate();
+  const { enabled: isInsightsEnabled } = useFeatureFlag("cap-insights");
   const handleNavigate = (path: string) => {
     navigate({ to: path });
   };
@@ -118,6 +120,22 @@ export function MainSideMenu() {
                     </RouterLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
+                {isInsightsEnabled && (
+                  <SidebarMenuItem>
+                    <SidebarMenuButton
+                      asChild={true}
+                      isActive={currentPath.startsWith("/insights")}
+                      tooltip={t`Insights`}
+                    >
+                      <RouterLink to="/insights" search={{ from: undefined, to: undefined }}>
+                        <BarChart3Icon />
+                        <span>
+                          <Trans>Insights</Trans>
+                        </span>
+                      </RouterLink>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                )}
               </SidebarMenu>
             </SidebarGroupContent>
           </SidebarGroup>
