@@ -23,84 +23,85 @@ import type { BookingListItem } from "./bookingTypes";
 
 import { GeneralApiErrors } from "../-scheduling/ApiErrors";
 
-export function CancelBookingDialog({
+export function RejectBookingDialog({
   booking,
   isOpen,
   onOpenChange,
-  onCancelled
+  onRejected
 }: Readonly<{
   booking: BookingListItem | null;
   isOpen: boolean;
   onOpenChange: (isOpen: boolean) => void;
-  onCancelled?: () => void;
+  onRejected?: () => void;
 }>) {
   return (
-    <Dialog trackingTitle={t`Cancel booking`} open={isOpen} onOpenChange={onOpenChange}>
+    <Dialog trackingTitle={t`Reject booking`} open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent className="sm:w-dialog-md">
         <DialogHeader>
           <DialogTitle>
-            <Trans>Cancel event?</Trans>
+            <Trans>Reject booking</Trans>
           </DialogTitle>
           <DialogDescription>
-            {booking ? (
-              <Trans>This cancels the booking with {booking.bookerName}.</Trans>
-            ) : (
-              <Trans>This cancels the booking.</Trans>
-            )}
+            <Trans>The attendee will be notified that their booking has been rejected.</Trans>
           </DialogDescription>
         </DialogHeader>
-        {booking && <CancelBookingDialogBody booking={booking} onClose={() => onOpenChange(false)} onCancelled={onCancelled} />}
+        {booking && <RejectBookingDialogBody booking={booking} onRejected={onRejected} onClose={() => onOpenChange(false)} />}
       </DialogContent>
     </Dialog>
   );
 }
 
-function CancelBookingDialogBody({
+function RejectBookingDialogBody({
   booking,
   onClose,
-  onCancelled
-}: Readonly<{ booking: BookingListItem; onClose: () => void; onCancelled?: () => void }>) {
+  onRejected
+}: Readonly<{ booking: BookingListItem; onClose: () => void; onRejected?: () => void }>) {
   const [reason, setReason] = useState("");
-  const cancelMutation = api.useMutation("post", "/api/bookings/{id}/cancel", {
+  const rejectMutation = api.useMutation("post", "/api/bookings/{id}/reject", {
     onSuccess: () => {
-      toast.success(t`Booking cancelled`);
+      toast.success(t`Booking rejected`);
       void queryClient.invalidateQueries();
       onClose();
-      onCancelled?.();
+      onRejected?.();
     }
   });
 
   return (
     <DialogForm
-      validationErrors={cancelMutation.error?.errors}
+      validationErrors={rejectMutation.error?.errors}
       onSubmit={() => {
-        cancelMutation.mutate({
-          params: { path: { id: booking.id }, query: { reason: reason.trim() || null } }
-        });
+        if (reason.trim().length === 0) return;
+        rejectMutation.mutate({ params: { path: { id: booking.id } }, body: { id: booking.id, reason: reason.trim() } });
       }}
     >
       <DialogBody>
-        <GeneralApiErrors error={cancelMutation.error} />
+        <GeneralApiErrors error={rejectMutation.error} />
         <div className="flex flex-col gap-2">
-          <Label htmlFor="cancel-reason">
-            <Trans>Reason (optional)</Trans>
+          <Label htmlFor="reject-reason">
+            <Trans>Reason</Trans>
           </Label>
           <Textarea
-            id="cancel-reason"
+            id="reject-reason"
             name="reason"
+            required={true}
             autoFocus={true}
             value={reason}
-            placeholder={t`Let the attendee know why this booking is being cancelled`}
+            placeholder={t`Explain why this booking is being rejected`}
             onChange={(event) => setReason(event.currentTarget.value)}
           />
         </div>
       </DialogBody>
       <DialogFooter>
-        <DialogClose render={<Button type="reset" variant="secondary" disabled={cancelMutation.isPending} />}>
-          <Trans>Keep booking</Trans>
+        <DialogClose render={<Button type="reset" variant="secondary" disabled={rejectMutation.isPending} />}>
+          <Trans>Cancel</Trans>
         </DialogClose>
-        <Button type="submit" variant="destructive" isPending={cancelMutation.isPending}>
-          <Trans>Cancel event</Trans>
+        <Button
+          type="submit"
+          variant="destructive"
+          isPending={rejectMutation.isPending}
+          disabled={reason.trim().length === 0}
+        >
+          <Trans>Reject booking</Trans>
         </Button>
       </DialogFooter>
     </DialogForm>
