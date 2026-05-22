@@ -124,7 +124,13 @@ export function eventTypeToUpdatePayload(
 export function getEventTypeSettings(payload: EventTypePayload): EventTypeSettings {
   const settings = payload.settings;
   const primaryLocation = payload.locationType
-    ? [{ type: payload.locationType, value: payload.locationValue?.trim() || null }]
+    ? [
+        {
+          type: payload.locationType,
+          value: payload.locationValue?.trim() || null,
+          displayLocationPubliclyToTeam: false
+        }
+      ]
     : [];
   const durationOptions =
     settings?.durationOptions && settings.durationOptions.length > 0
@@ -133,7 +139,14 @@ export function getEventTypeSettings(payload: EventTypePayload): EventTypeSettin
 
   return {
     durationOptions,
-    locations: settings?.locations && settings.locations.length > 0 ? settings.locations : primaryLocation,
+    locations:
+      settings?.locations && settings.locations.length > 0
+        ? settings.locations.map((location) => ({
+            type: location.type,
+            value: location.value,
+            displayLocationPubliclyToTeam: location.displayLocationPubliclyToTeam ?? false
+          }))
+        : primaryLocation,
     bookingFields: settings?.bookingFields ?? [],
     bookerLayout: settings?.bookerLayout?.trim() || "month",
     eventColor: settings?.eventColor?.trim() || null,
@@ -144,14 +157,27 @@ export function getEventTypeSettings(payload: EventTypePayload): EventTypeSettin
     },
     limits: {
       maxBookingsPerDay: settings?.limits?.maxBookingsPerDay ?? null,
+      maxBookingsPerWeek: settings?.limits?.maxBookingsPerWeek ?? null,
+      maxBookingsPerMonth: settings?.limits?.maxBookingsPerMonth ?? null,
+      maxBookingsPerYear: settings?.limits?.maxBookingsPerYear ?? null,
       maxBookingDurationMinutesPerDay: settings?.limits?.maxBookingDurationMinutesPerDay ?? null,
+      maxBookingDurationPerDay: settings?.limits?.maxBookingDurationPerDay ?? null,
+      maxBookingDurationPerWeek: settings?.limits?.maxBookingDurationPerWeek ?? null,
+      maxBookingDurationPerMonth: settings?.limits?.maxBookingDurationPerMonth ?? null,
+      maxBookingDurationPerYear: settings?.limits?.maxBookingDurationPerYear ?? null,
       maxActiveBookingsPerBooker: settings?.limits?.maxActiveBookingsPerBooker ?? null,
+      maxActiveBookingPerBookerOfferReschedule: settings?.limits?.maxActiveBookingPerBookerOfferReschedule ?? false,
       firstAvailableSlotMinutes: settings?.limits?.firstAvailableSlotMinutes ?? null,
-      offsetStartMinutes: settings?.limits?.offsetStartMinutes ?? null
+      offsetStartMinutes: settings?.limits?.offsetStartMinutes ?? null,
+      onlyShowFirstAvailableSlot: settings?.limits?.onlyShowFirstAvailableSlot ?? false,
+      showOptimizedSlots: settings?.limits?.showOptimizedSlots ?? false
     },
     confirmationPolicy: {
       requiresConfirmation: settings?.confirmationPolicy?.requiresConfirmation ?? false,
-      requiresBookerEmailVerification: settings?.confirmationPolicy?.requiresBookerEmailVerification ?? false
+      requiresBookerEmailVerification: settings?.confirmationPolicy?.requiresBookerEmailVerification ?? false,
+      blockSlotWhilePending: settings?.confirmationPolicy?.blockSlotWhilePending ?? false,
+      requiresConfirmationForFreeEmail: settings?.confirmationPolicy?.requiresConfirmationForFreeEmail ?? false,
+      requiresCancellationReason: settings?.confirmationPolicy?.requiresCancellationReason ?? false
     },
     recurrence: settings?.recurrence ?? null,
     seats: {
@@ -166,14 +192,52 @@ export function getEventTypeSettings(payload: EventTypePayload): EventTypeSettin
     },
     reschedulePolicy: {
       allowReschedule: settings?.reschedulePolicy?.allowReschedule ?? true,
-      minimumNoticeMinutes: settings?.reschedulePolicy?.minimumNoticeMinutes ?? null
+      minimumNoticeMinutes: settings?.reschedulePolicy?.minimumNoticeMinutes ?? null,
+      allowReschedulingPastBookings: settings?.reschedulePolicy?.allowReschedulingPastBookings ?? false,
+      allowReschedulingCancelledBookings: settings?.reschedulePolicy?.allowReschedulingCancelledBookings ?? false
     },
     redirects: {
       successUrl: settings?.redirects?.successUrl ?? null,
       cancellationUrl: settings?.redirects?.cancellationUrl ?? null
     },
     interfaceLanguage: settings?.interfaceLanguage?.trim() || null,
-    metadata: settings?.metadata ?? {}
+    metadata: settings?.metadata ?? {},
+    instantMeeting: {
+      expiryTimeOffsetInSeconds: settings?.instantMeeting?.expiryTimeOffsetInSeconds ?? null,
+      instantMeetingScheduleId: settings?.instantMeeting?.instantMeetingScheduleId ?? null,
+      parameters: settings?.instantMeeting?.parameters ?? null
+    },
+    aiVoiceAgent: {
+      enabled: settings?.aiVoiceAgent?.enabled ?? false,
+      agentConfig: settings?.aiVoiceAgent?.agentConfig ?? null
+    },
+    teamAssignment: {
+      assignRRMembersUsingSegment: settings?.teamAssignment?.assignRRMembersUsingSegment ?? false,
+      rrSegmentQueryValue: settings?.teamAssignment?.rrSegmentQueryValue ?? null,
+      isRRWeightsEnabled: settings?.teamAssignment?.isRRWeightsEnabled ?? false,
+      maxLeadThreshold: settings?.teamAssignment?.maxLeadThreshold ?? null,
+      includeNoShowInRRCalculation: settings?.teamAssignment?.includeNoShowInRRCalculation ?? false,
+      rescheduleWithSameRoundRobinHost: settings?.teamAssignment?.rescheduleWithSameRoundRobinHost ?? false,
+      rrHostSubsetEnabled: settings?.teamAssignment?.rrHostSubsetEnabled ?? false,
+      hostGroups: settings?.teamAssignment?.hostGroups ?? []
+    },
+    timezone: {
+      timeZone: settings?.timezone?.timeZone ?? null,
+      lockTimeZoneToggleOnBookingPage: settings?.timezone?.lockTimeZoneToggleOnBookingPage ?? false,
+      lockedTimeZone: settings?.timezone?.lockedTimeZone ?? null,
+      useBookerTimezone: settings?.timezone?.useBookerTimezone ?? false,
+      restrictionScheduleId: settings?.timezone?.restrictionScheduleId ?? null
+    },
+    privacy: {
+      disableGuests: settings?.privacy?.disableGuests ?? false,
+      hideCalendarNotes: settings?.privacy?.hideCalendarNotes ?? false,
+      hideCalendarEventDetails: settings?.privacy?.hideCalendarEventDetails ?? false
+    },
+    email: {
+      eventName: settings?.email?.eventName ?? null,
+      customReplyToEmail: settings?.email?.customReplyToEmail ?? null
+    },
+    enablePerHostLocations: settings?.enablePerHostLocations ?? false
   };
 }
 

@@ -206,11 +206,11 @@ function formatDurationOptions(options: number[]) {
 }
 
 function replacePrimaryLocation(
-  locations: Array<{ type: string; value: string | null }>,
+  locations: Array<{ type: string; value: string | null; displayLocationPubliclyToTeam: boolean }>,
   type: string,
   value: string | null
 ) {
-  const primaryLocation = { type, value: value?.trim() || null };
+  const primaryLocation = { type, value: value?.trim() || null, displayLocationPubliclyToTeam: false };
   return locations.length === 0 ? [primaryLocation] : [primaryLocation, ...locations.slice(1)];
 }
 
@@ -223,7 +223,7 @@ function parseLocations(value: string) {
     .split("\n")
     .map((line) => {
       const [type, ...rest] = line.split(":");
-      return { type: type.trim(), value: rest.join(":").trim() || null };
+      return { type: type.trim(), value: rest.join(":").trim() || null, displayLocationPubliclyToTeam: false };
     })
     .filter((location) => location.type.length > 0);
 }
