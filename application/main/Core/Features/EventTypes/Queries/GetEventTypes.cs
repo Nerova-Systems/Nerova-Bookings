@@ -20,7 +20,7 @@ public sealed class GetEventTypesHandler(IEventTypeRepository eventTypeRepositor
             return Result<EventTypesResponse>.Unauthorized("Authentication is required.");
         }
 
-        var eventTypes = await eventTypeRepository.GetForOwnerAsync(ownerUserId, cancellationToken);
+        var eventTypes = await eventTypeRepository.GetForOwnerAsync(ownerUserId, executionContext.ActiveTeamId, cancellationToken);
         return new EventTypesResponse(eventTypes.Select(EventTypeResponse.From).ToArray());
     }
 }

@@ -9,6 +9,14 @@ public class BackgroundWorkerExecutionContext(TenantId? tenantId = null, UserInf
 {
     public TenantId? TenantId { get; } = tenantId;
 
+    public TenantId? ActiveTeamId => UserInfo.ActiveTeamId;
+
+    public TenantId? ActiveOrgId => UserInfo.ActiveOrgId;
+
+    public string? ActiveOrgProfileId => UserInfo.ActiveOrgProfileId;
+
+    public UserId? ImpersonatedByUserId => UserInfo.ImpersonatedByUserId;
+
     public UserInfo UserInfo { get; } = userInfo ?? UserInfo.System;
 
     public IPAddress ClientIpAddress { get; } = IPAddress.None;

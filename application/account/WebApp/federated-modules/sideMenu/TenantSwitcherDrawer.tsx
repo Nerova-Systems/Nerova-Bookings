@@ -6,7 +6,38 @@ import { Dialog, DialogBody, DialogContent, DialogHeader, DialogTitle } from "@r
 import { TenantLogo } from "@repo/ui/components/TenantLogo";
 import { Check } from "lucide-react";
 
-import { sortTenants, type TenantInfo } from "../common/tenantUtils";
+import { groupScopes, sortTenants, type TenantInfo } from "../common/tenantUtils";
+
+function ScopeButton({
+  scope,
+  isCurrent,
+  indent,
+  onSelect
+}: Readonly<{ scope: TenantInfo; isCurrent: boolean; indent: boolean; onSelect: () => void }>) {
+  return (
+    <Button
+      variant="ghost"
+      onClick={onSelect}
+      disabled={isCurrent || scope.isNew}
+      className={`flex h-[var(--control-height)] w-full items-center justify-start gap-3 rounded-md py-2 text-sm font-normal hover:bg-hover-background active:bg-hover-background disabled:cursor-default disabled:opacity-100 ${indent ? "pr-3 pl-9" : "px-3"}`}
+    >
+      <TenantLogo logoUrl={scope.logoUrl} tenantName={scope.tenantName || ""} />
+      <div className="flex min-w-0 flex-1 items-center justify-between gap-2">
+        <span className="overflow-hidden text-left text-ellipsis whitespace-nowrap">
+          {scope.tenantName || t`Unnamed account`}
+        </span>
+        <div className="flex shrink-0 items-center gap-2">
+          {scope.isNew && (
+            <Badge variant="secondary" className="bg-warning text-xs text-warning-foreground">
+              <Trans>Invitation pending</Trans>
+            </Badge>
+          )}
+          {isCurrent && <Check className="size-4" />}
+        </div>
+      </div>
+    </Button>
+  );
+}
 
 export function TenantSwitcherDrawer({
   isOpen,
@@ -22,6 +53,7 @@ export function TenantSwitcherDrawer({
   onTenantSwitch: (tenant: TenantInfo) => void;
 }) {
   const sortedTenants = sortTenants(tenants);
+  const { solo, orgs, orphanTeams } = groupScopes(sortedTenants);
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange} modal={false} trackingTitle="Switch account">
@@ -35,31 +67,67 @@ export function TenantSwitcherDrawer({
           </DialogTitle>
         </DialogHeader>
         <DialogBody>
-          <div className="flex flex-col gap-1">
-            {sortedTenants.map((tenant) => (
-              <Button
-                key={tenant.tenantId}
-                variant="ghost"
-                onClick={() => onTenantSwitch(tenant)}
-                disabled={tenant.tenantId === currentTenantId || tenant.isNew}
-                className="flex h-[var(--control-height)] w-full items-center justify-start gap-3 rounded-md px-3 py-2 text-sm font-normal hover:bg-hover-background active:bg-hover-background disabled:cursor-default disabled:opacity-100"
-              >
-                <TenantLogo logoUrl={tenant.logoUrl} tenantName={tenant.tenantName || ""} />
-                <div className="flex min-w-0 flex-1 items-center justify-between gap-2">
-                  <span className="overflow-hidden text-left text-ellipsis whitespace-nowrap">
-                    {tenant.tenantName || t`Unnamed account`}
-                  </span>
-                  <div className="flex shrink-0 items-center gap-2">
-                    {tenant.isNew && (
-                      <Badge variant="secondary" className="bg-warning text-xs text-warning-foreground">
-                        <Trans>Invitation pending</Trans>
-                      </Badge>
-                    )}
-                    {tenant.tenantId === currentTenantId && <Check className="size-4" />}
+          <div className="flex flex-col gap-3">
+            {solo.length > 0 && (
+              <div className="flex flex-col gap-1">
+                <h6 className="px-3 text-xs font-medium text-muted-foreground">
+                  <Trans>Solo</Trans>
+                </h6>
+                {solo.map((scope) => (
+                  <ScopeButton
+                    key={scope.tenantId}
+                    scope={scope}
+                    isCurrent={scope.tenantId === currentTenantId}
+                    indent={false}
+                    onSelect={() => onTenantSwitch(scope)}
+                  />
+                ))}
+              </div>
+            )}
+
+            {orgs.length > 0 && (
+              <div className="flex flex-col gap-1">
+                <h6 className="px-3 text-xs font-medium text-muted-foreground">
+                  <Trans>Organizations</Trans>
+                </h6>
+                {orgs.map(({ org, teams: orgTeams }) => (
+                  <div key={org.tenantId} className="flex flex-col">
+                    <ScopeButton
+                      scope={org}
+                      isCurrent={org.tenantId === currentTenantId}
+                      indent={false}
+                      onSelect={() => onTenantSwitch(org)}
+                    />
+                    {orgTeams.map((team) => (
+                      <ScopeButton
+                        key={team.tenantId}
+                        scope={team}
+                        isCurrent={team.tenantId === currentTenantId}
+                        indent
+                        onSelect={() => onTenantSwitch(team)}
+                      />
+                    ))}
                   </div>
-                </div>
-              </Button>
-            ))}
+                ))}
+              </div>
+            )}
+
+            {orphanTeams.length > 0 && (
+              <div className="flex flex-col gap-1">
+                <h6 className="px-3 text-xs font-medium text-muted-foreground">
+                  <Trans>Teams</Trans>
+                </h6>
+                {orphanTeams.map((team) => (
+                  <ScopeButton
+                    key={team.tenantId}
+                    scope={team}
+                    isCurrent={team.tenantId === currentTenantId}
+                    indent={false}
+                    onSelect={() => onTenantSwitch(team)}
+                  />
+                ))}
+              </div>
+            )}
           </div>
         </DialogBody>
       </DialogContent>

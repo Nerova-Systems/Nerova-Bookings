@@ -105,7 +105,8 @@ public sealed class CreateEventTypeHandler(
             command.MinimumBookingNoticeMinutes,
             command.LocationType,
             command.LocationValue,
-            command.Settings
+            command.Settings,
+            executionContext.ActiveTeamId
         );
 
         await eventTypeRepository.AddAsync(eventType, cancellationToken);

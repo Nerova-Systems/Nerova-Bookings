@@ -48,7 +48,7 @@ export function useSwitchTenant(options?: UseSwitchTenantOptions) {
       localStorage.setItem(`tenant-name-${tenantId}`, tenantName);
     }
 
-    switchTenantMutation.mutate({ body: { tenantId } });
+    switchTenantMutation.mutate({ body: { tenantId, orgProfileId: null } });
   };
 
   return {

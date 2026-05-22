@@ -12,6 +12,7 @@ public sealed class BookingConfiguration : IEntityTypeConfiguration<Booking>
     {
         builder.MapStronglyTypedUuid<Booking, BookingId>(booking => booking.Id);
         builder.MapStronglyTypedLongId<Booking, TenantId>(booking => booking.TenantId);
+        builder.MapStronglyTypedNullableLongId<Booking, TenantId>(booking => booking.TeamId);
         builder.MapStronglyTypedUuid<Booking, UserId>(booking => booking.OwnerUserId);
         builder.MapStronglyTypedUuid<Booking, EventTypeId>(booking => booking.EventTypeId);
 
@@ -29,5 +30,6 @@ public sealed class BookingConfiguration : IEntityTypeConfiguration<Booking>
 
         builder.HasIndex(booking => new { booking.TenantId, booking.OwnerUserId, booking.StartTime, booking.EndTime });
         builder.HasIndex(booking => new { booking.TenantId, booking.EventTypeId, booking.StartTime, booking.EndTime });
+        builder.HasIndex(booking => booking.TeamId);
     }
 }

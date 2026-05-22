@@ -81,11 +81,44 @@ public sealed class Booking : AggregateRoot<BookingId>, ITenantScopedEntity
 
     public string ResponsesJson { get; private set; }
 
+    /// <summary>
+    ///     When non-null, references a Tenant of TenantKind.Team. When null, the aggregate is owned by the existing
+    ///     user/solo scope.
+    /// </summary>
+    public TenantId? TeamId { get; private set; }
+
     public TenantId TenantId { get; } = new(0);
+
+    /// <summary>
+    ///     Assigns this booking to a team.
+    /// </summary>
+    /// <remarks>
+    ///     The command layer is responsible for verifying that <paramref name="teamId" /> references a Tenant of
+    ///     TenantKind.Team. This aggregate cannot verify TenantKind itself.
+    /// </remarks>
+    public void AssignToTeam(TenantId teamId)
+    {
+        // Command layer must ensure teamId refers to a TenantKind.Team tenant.
+        TeamId = teamId;
+    }
+
+    /// <summary>
+    ///     Removes the team association, reverting the booking to user/solo scope.
+    /// </summary>
+    public void RemoveFromTeam()
+    {
+        TeamId = null;
+    }
 
     public void Cancel()
     {
         Status = "cancelled";
+    }
+
+    /// <summary>Reassigns this booking to a different host (round-robin reassignment).</summary>
+    public void Reassign(UserId newOwnerUserId)
+    {
+        OwnerUserId = newOwnerUserId;
     }
 
     public static Booking Create(
@@ -100,9 +133,12 @@ public sealed class Booking : AggregateRoot<BookingId>, ITenantScopedEntity
         string bookerEmail,
         string timeZone,
         string status,
-        Dictionary<string, string> responses
+        Dictionary<string, string> responses,
+        TenantId? teamId = null
     )
     {
-        return new Booking(tenantId, ownerUserId, eventTypeId, startTime, startTime.AddMinutes(durationMinutes), beforeEventBufferMinutes, afterEventBufferMinutes, bookerName, bookerEmail, timeZone, status, responses);
+        var booking = new Booking(tenantId, ownerUserId, eventTypeId, startTime, startTime.AddMinutes(durationMinutes), beforeEventBufferMinutes, afterEventBufferMinutes, bookerName, bookerEmail, timeZone, status, responses);
+        if (teamId is not null) booking.AssignToTeam(teamId);
+        return booking;
     }
 }

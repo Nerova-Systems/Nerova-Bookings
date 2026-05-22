@@ -70,7 +70,7 @@ public sealed class CreateScheduleHandler(
             return Result<ScheduleResponse>.Unauthorized("Authentication is required.");
         }
 
-        var existingSchedules = await scheduleRepository.GetForOwnerAsync(ownerUserId, cancellationToken);
+        var existingSchedules = await scheduleRepository.GetForOwnerAsync(ownerUserId, executionContext.ActiveTeamId, cancellationToken);
         var isDefault = command.IsDefault || existingSchedules.Length == 0;
 
         var schedule = Schedule.Create(
@@ -80,12 +80,13 @@ public sealed class CreateScheduleHandler(
             command.TimeZone,
             isDefault,
             command.AvailabilityWindows.Select(window => window.ToAvailabilityWindow()).ToArray(),
-            (command.DateOverrides ?? []).Select(dateOverride => dateOverride.ToAvailabilityDateOverride()).ToArray()
+            (command.DateOverrides ?? []).Select(dateOverride => dateOverride.ToAvailabilityDateOverride()).ToArray(),
+            executionContext.ActiveTeamId
         );
 
         if (schedule.IsDefault)
         {
-            await ClearOtherDefaults(scheduleRepository, ownerUserId, null, cancellationToken);
+            await ClearOtherDefaults(scheduleRepository, ownerUserId, executionContext.ActiveTeamId, null, cancellationToken);
         }
 
         await scheduleRepository.AddAsync(schedule, cancellationToken);
@@ -94,9 +95,9 @@ public sealed class CreateScheduleHandler(
         return ScheduleResponse.From(schedule);
     }
 
-    private static async Task ClearOtherDefaults(IScheduleRepository scheduleRepository, UserId ownerUserId, ScheduleId? excludedScheduleId, CancellationToken cancellationToken)
+    private static async Task ClearOtherDefaults(IScheduleRepository scheduleRepository, UserId ownerUserId, TenantId? teamId, ScheduleId? excludedScheduleId, CancellationToken cancellationToken)
     {
-        var defaultSchedules = await scheduleRepository.GetDefaultCandidatesForOwnerAsync(ownerUserId, excludedScheduleId, cancellationToken);
+        var defaultSchedules = await scheduleRepository.GetDefaultCandidatesForOwnerAsync(ownerUserId, teamId, excludedScheduleId, cancellationToken);
         foreach (var defaultSchedule in defaultSchedules)
         {
             defaultSchedule.SetDefault(false);

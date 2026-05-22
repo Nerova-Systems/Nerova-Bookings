@@ -1,8 +1,25 @@
 using Account.Database;
+using Account.Features.ApiKeys.Infrastructure;
+using Account.Features.Attributes.Domain;
+using Account.Features.Attributes.Infrastructure;
+using Account.Features.AttributeSync.Domain;
+using Account.Features.AttributeSync.Infrastructure;
+using Account.Features.AuditLog.Domain;
+using Account.Features.AuditLog.Infrastructure;
+using Account.Features.DelegationCredentials.Domain;
+using Account.Features.DelegationCredentials.Infrastructure;
 using Account.Features.EmailAuthentication.Shared;
 using Account.Features.ExternalAuthentication;
 using Account.Features.ExternalAuthentication.Shared;
 using Account.Features.FeatureFlags.Shared;
+using Account.Features.Permissions.Pipeline;
+using Account.Features.Permissions.Services;
+using Account.Features.Smtp.Infrastructure;
+using Account.Features.Sso.Domain;
+using Account.Features.SsoMicrosoft;
+using Account.Features.SsoMicrosoft.Infrastructure;
+using Account.Features.SsoGoogle;
+using Account.Features.SsoGoogle.Infrastructure;
 using Account.Features.Subscriptions.Shared;
 using Account.Features.Users.Shared;
 using Account.Integrations.Gravatar;
@@ -10,11 +27,16 @@ using Account.Integrations.OAuth;
 using Account.Integrations.OAuth.Google;
 using Account.Integrations.OAuth.Mock;
 using Account.Integrations.Paystack;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
+using SharedKernel.AuditLog;
+using SharedKernel.Authentication.ApiKey;
 using SharedKernel.Configuration;
+using SharedKernel.DelegationCredentials;
 using SharedKernel.Emails;
+using SharedKernel.Integrations.Email;
 using SharedKernel.OpenIdConnect;
 
 namespace Account;
@@ -38,6 +60,10 @@ public static class Configuration
     {
         public IServiceCollection AddAccountServices()
         {
+            // PermissionCheckBehavior must be registered BEFORE AddSharedServices so it is the outermost
+            // pipeline behavior (runs before Validation — security gate first, business logic second).
+            services.AddTransient(typeof(IPipelineBehavior<,>), typeof(PermissionCheckBehavior<,>));
+
             services.AddHttpClient<GravatarClient>(client =>
                 {
                     client.BaseAddress = new Uri("https://gravatar.com/");
@@ -54,6 +80,9 @@ public static class Configuration
             services.AddKeyedScoped<IOAuthProvider, GoogleOAuthProvider>("google");
             services.AddKeyedScoped<IOAuthProvider, MockOAuthProvider>("mock-google");
             services.AddScoped<OAuthProviderFactory>();
+
+            services.AddHttpClient("microsoft-sso", client => { client.Timeout = TimeSpan.FromSeconds(30); });
+            services.AddHttpClient("google-sso", client => { client.Timeout = TimeSpan.FromSeconds(30); });
 
             services.AddEmailRendering("WebApp");
 
@@ -75,6 +104,23 @@ public static class Configuration
 
             return services
                 .AddSharedServices<AccountDbContext>([Assembly])
+                .AddScoped<SmtpCredentialProtector>()
+                .AddScoped<DelegationCredentialEncryption>()
+                .AddScoped<IDelegationCredentialRepository, DelegationCredentialRepository>()
+                .AddScoped<IDelegationCredentialResolver, DelegationCredentialResolver>()
+                .AddScoped<IDelegationCredentialTester, NotConfiguredDelegationCredentialTester>()
+                .AddScoped<IAttributeRepository, AttributeRepository>()
+                .AddScoped<IAttributeAssignmentRepository, AttributeAssignmentRepository>()
+                .AddScoped<IAttributeSyncRuleRepository, AttributeSyncRuleRepository>()
+                .AddScoped<AttributeSyncService>()
+                .AddScoped<MicrosoftSsoSecretProtector>()
+                .AddScoped<IOrgSsoConfigRepository, OrgSsoConfigRepository>()
+                .AddScoped<MicrosoftSsoConfigurator>()
+                .AddScoped<SsoStateService>()
+                .AddScoped<GoogleSsoSecretProtector>()
+                .AddScoped<GoogleSsoConfigurator>()
+                .AddScoped<GoogleSsoStateService>()
+                .Decorate<IEmailClient, TenantAwareEmailClient>()
                 .AddScoped<StartEmailConfirmation>()
                 .AddScoped<CompleteEmailConfirmation>()
                 .AddScoped<AvatarUpdater>()
@@ -84,7 +130,47 @@ public static class Configuration
                 .AddScoped<ProcessPendingPaystackEvents>()
                 .AddScoped<ProcessSubscriptionBilling>()
                 .AddScoped<ExternalAuthenticationService>()
-                .AddScoped<ExternalAuthenticationHelper>();
+                .AddScoped<ExternalAuthenticationHelper>()
+                .AddScoped<IPermissionCheckService, PermissionCheckService>()
+                .AddScoped<IAuditLogRepository, AuditLogRepository>()
+                .AddScoped<IAuditLogEmitter, AuditLogEmitter>()
+                .AddScoped<IApiKeyValidator, ApiKeyValidator>()
+                .AddApiKeyAuthentication();
+        }
+
+        private IServiceCollection AddApiKeyAuthentication()
+        {
+            // Register the API key authentication scheme alongside the existing JWT scheme.
+            // The JWT scheme's ForwardDefaultSelector will route nerova_* tokens here.
+            services
+                .AddAuthentication()
+                .AddScheme<ApiKeyAuthenticationOptions, ApiKeyAuthenticationHandler>(
+                    ApiKeyAuthenticationDefaults.SchemeName, _ => { }
+                );
+
+            // Forward requests that carry a Nerova API key token to the ApiKey scheme
+            // before the JWT bearer handler has a chance to reject them.
+            services.PostConfigure<JwtBearerOptions>(JwtBearerDefaults.AuthenticationScheme, opts =>
+                {
+                    opts.ForwardDefaultSelector = ctx =>
+                    {
+                        if (ctx.Request.Headers.ContainsKey("X-Api-Key"))
+                        {
+                            return ApiKeyAuthenticationDefaults.SchemeName;
+                        }
+
+                        var auth = ctx.Request.Headers.Authorization.ToString();
+                        if (auth.StartsWith("Bearer " + ApiKeyAuthenticationDefaults.TokenPrefix, StringComparison.OrdinalIgnoreCase))
+                        {
+                            return ApiKeyAuthenticationDefaults.SchemeName;
+                        }
+
+                        return null;
+                    };
+                }
+            );
+
+            return services;
         }
     }
 }

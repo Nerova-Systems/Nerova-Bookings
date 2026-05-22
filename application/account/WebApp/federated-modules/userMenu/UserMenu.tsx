@@ -91,6 +91,20 @@ export default function UserMenu({ isCollapsed: isCollapsedProp }: Readonly<User
     navigate({ to: "/user/preferences" });
   };
 
+  const handleCreateTeam = () => {
+    closeMenuAndOverlay();
+    // Placeholder route — the create-team flow lands in a follow-up task. Use a hard navigation
+    // because the typed router doesn't know this route yet; once the flow exists, switch to
+    // `navigate({ to: "/account/settings/teams/new" })`.
+    window.location.href = "/account/settings/teams/new";
+  };
+
+  const handleCreateOrganization = () => {
+    closeMenuAndOverlay();
+    // Placeholder route — see handleCreateTeam.
+    window.location.href = "/account/settings/organizations/new";
+  };
+
   const handleNavigateToProfile = () => {
     if (overlayCtx?.isOpen) {
       overlayCtx.close();
@@ -158,6 +172,8 @@ export default function UserMenu({ isCollapsed: isCollapsedProp }: Readonly<User
             onLogout={handleLogout}
             onShowSupport={handleShowSupport}
             onTenantSwitch={handleTenantSwitch}
+            onCreateTeam={handleCreateTeam}
+            onCreateOrganization={handleCreateOrganization}
           />
         </DropdownMenuContent>
       </DropdownMenu>

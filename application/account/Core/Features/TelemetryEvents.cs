@@ -1,7 +1,11 @@
+using Account.Features.AttributeSync.Domain;
+using Account.Features.Attributes.Domain;
 using Account.Features.Authentication.Domain;
 using Account.Features.EmailAuthentication.Domain;
 using Account.Features.ExternalAuthentication.Domain;
 using Account.Features.FeatureFlags.Domain;
+using Account.Features.Memberships.Domain;
+using Account.Features.Permissions.Domain;
 using Account.Features.Subscriptions.Domain;
 using Account.Features.Tenants.Domain;
 using Account.Features.Users.Domain;
@@ -9,6 +13,8 @@ using SharedKernel.Authentication.TokenGeneration;
 using SharedKernel.Domain;
 using SharedKernel.FeatureFlags;
 using SharedKernel.Telemetry;
+
+// ReSharper disable once RedundantUsingDirective (used by MicrosoftSso* events)
 
 namespace Account.Features;
 
@@ -18,6 +24,54 @@ namespace Account.Features;
 /// This particular includes the naming of the telemetry events (which should be in past tense) and the properties that
 /// are collected with each telemetry event. Since missing or bad data cannot be fixed, it is important to have a good
 /// data quality from the start.
+public sealed class AttributeAssigned(MembershipId membershipId, AttributeId attributeId)
+    : TelemetryEvent(("membership_id", membershipId), ("attribute_id", attributeId));
+
+public sealed class AttributeCreated(AttributeId attributeId, TenantId orgId)
+    : TelemetryEvent(("attribute_id", attributeId), ("org_id", orgId));
+
+public sealed class AttributeDeleted(AttributeId attributeId, TenantId orgId)
+    : TelemetryEvent(("attribute_id", attributeId), ("org_id", orgId));
+
+public sealed class AttributeOptionCreated(AttributeOptionId optionId, AttributeId attributeId)
+    : TelemetryEvent(("option_id", optionId), ("attribute_id", attributeId));
+
+public sealed class AttributeOptionDeleted(AttributeOptionId optionId, AttributeId attributeId)
+    : TelemetryEvent(("option_id", optionId), ("attribute_id", attributeId));
+
+public sealed class AttributeOptionUpdated(AttributeOptionId optionId, AttributeId attributeId)
+    : TelemetryEvent(("option_id", optionId), ("attribute_id", attributeId));
+
+public sealed class AttributeSyncApplied(AttributeSyncRuleId ruleId, MembershipId membershipId, TenantId orgId)
+    : TelemetryEvent(("rule_id", ruleId), ("membership_id", membershipId), ("org_id", orgId));
+
+public sealed class AttributeSyncFailed(AttributeSyncRuleId ruleId, MembershipId membershipId, TenantId orgId, string reason)
+    : TelemetryEvent(("rule_id", ruleId), ("membership_id", membershipId), ("org_id", orgId), ("reason", reason));
+
+public sealed class AttributeSyncRuleCreated(AttributeSyncRuleId ruleId, TenantId orgId)
+    : TelemetryEvent(("rule_id", ruleId), ("org_id", orgId));
+
+public sealed class AttributeSyncRuleDeleted(AttributeSyncRuleId ruleId, TenantId orgId)
+    : TelemetryEvent(("rule_id", ruleId), ("org_id", orgId));
+
+public sealed class AttributeSyncRuleUpdated(AttributeSyncRuleId ruleId, TenantId orgId)
+    : TelemetryEvent(("rule_id", ruleId), ("org_id", orgId));
+
+public sealed class AttributeSyncSkipped(AttributeSyncRuleId ruleId, MembershipId membershipId, TenantId orgId, string reason)
+    : TelemetryEvent(("rule_id", ruleId), ("membership_id", membershipId), ("org_id", orgId), ("reason", reason));
+
+public sealed class AttributeUnassigned(MembershipId membershipId, AttributeId attributeId)
+    : TelemetryEvent(("membership_id", membershipId), ("attribute_id", attributeId));
+
+public sealed class AttributeUpdated(AttributeId attributeId, TenantId orgId)
+    : TelemetryEvent(("attribute_id", attributeId), ("org_id", orgId));
+
+public sealed class BackOfficeImpersonationEnded(UserId targetUserId)
+    : TelemetryEvent(("target_user_id", targetUserId));
+
+public sealed class BackOfficeImpersonationStarted(UserId targetUserId)
+    : TelemetryEvent(("target_user_id", targetUserId));
+
 public sealed class BillingDriftSkippedDueToPaystackUnavailable(SubscriptionId subscriptionId)
     : TelemetryEvent(("subscription_id", subscriptionId));
 
@@ -117,8 +171,32 @@ public sealed class FeatureFlagUserOverrideSet(string flagKey, UserId userId, Fe
 public sealed class GravatarUpdated(long size)
     : TelemetryEvent(("size", size));
 
+public sealed class ImpersonationEnded(UserId actorUserId, UserId targetUserId, TenantId orgId)
+    : TelemetryEvent(("actor_user_id", actorUserId), ("target_user_id", targetUserId), ("org_id", orgId));
+
+public sealed class ImpersonationStarted(UserId actorUserId, UserId targetUserId, TenantId orgId)
+    : TelemetryEvent(("actor_user_id", actorUserId), ("target_user_id", targetUserId), ("org_id", orgId));
+
 public sealed class Logout
     : TelemetryEvent;
+
+public sealed class MicrosoftSsoLoginStarted(TenantId orgId)
+    : TelemetryEvent(("org_id", orgId));
+
+public sealed class MicrosoftSsoLoginSucceeded(UserId userId, TenantId orgId)
+    : TelemetryEvent(("user_id", userId), ("org_id", orgId));
+
+public sealed class MicrosoftSsoLoginFailed(TenantId orgId, string reason)
+    : TelemetryEvent(("org_id", orgId), ("reason", reason));
+
+public sealed class GoogleSsoLoginStarted(TenantId orgId)
+    : TelemetryEvent(("org_id", orgId));
+
+public sealed class GoogleSsoLoginSucceeded(UserId userId, TenantId orgId)
+    : TelemetryEvent(("user_id", userId), ("org_id", orgId));
+
+public sealed class GoogleSsoLoginFailed(TenantId orgId, string reason)
+    : TelemetryEvent(("org_id", orgId), ("reason", reason));
 
 public sealed class PaymentFailed(SubscriptionId subscriptionId, SubscriptionPlan plan, decimal priceAmount, string currency)
     : TelemetryEvent(("subscription_id", subscriptionId), ("plan", plan), ("price_amount", priceAmount), ("currency", currency));
@@ -140,6 +218,18 @@ public sealed class PaymentRefunded(SubscriptionId subscriptionId, SubscriptionP
 
 public sealed class RenewalPaymentRetried(SubscriptionId subscriptionId)
     : TelemetryEvent(("subscription_id", subscriptionId));
+
+public sealed class RoleCreated(RoleId roleId, TenantId orgId)
+    : TelemetryEvent(("role_id", roleId), ("org_id", orgId));
+
+public sealed class RoleUpdated(RoleId roleId, TenantId orgId)
+    : TelemetryEvent(("role_id", roleId), ("org_id", orgId));
+
+public sealed class RoleDeleted(RoleId roleId, TenantId orgId, int unassignedMembershipCount)
+    : TelemetryEvent(("role_id", roleId), ("org_id", orgId), ("unassigned_membership_count", unassignedMembershipCount));
+
+public sealed class MembershipRoleAssigned(MembershipId membershipId, RoleId? roleId, TenantId orgId)
+    : TelemetryEvent(("membership_id", membershipId), ("role_id", roleId as object ?? "none"), ("org_id", orgId));
 
 public sealed class SessionCreated(SessionId sessionId)
     : TelemetryEvent(("session_id", sessionId));
@@ -293,6 +383,21 @@ public sealed class TenantSwitched(TenantId fromTenantId, TenantId toTenantId, U
 
 public sealed class TenantUpdated
     : TelemetryEvent;
+
+public sealed class TeamCreated(TenantId teamId, TenantId orgId)
+    : TelemetryEvent(("team_id", teamId), ("org_id", orgId));
+
+public sealed class TeamUpdated(TenantId teamId, TenantId orgId)
+    : TelemetryEvent(("team_id", teamId), ("org_id", orgId));
+
+public sealed class TeamDeleted(TenantId teamId, TenantId orgId, int memberCount)
+    : TelemetryEvent(("team_id", teamId), ("org_id", orgId), ("member_count", memberCount));
+
+public sealed class TeamMemberInvited(TenantId teamId, TenantId orgId, MembershipId membershipId, MembershipRole role)
+    : TelemetryEvent(("team_id", teamId), ("org_id", orgId), ("membership_id", membershipId), ("role", role));
+
+public sealed class MembershipRemoved(MembershipId membershipId, TenantId tenantId, MembershipRole role)
+    : TelemetryEvent(("membership_id", membershipId), ("tenant_id", tenantId), ("role", role));
 
 public sealed class UserAbInclusionPinUpdated(UserId userId, AbInclusionPin? fromPin, AbInclusionPin? toPin)
     : TelemetryEvent(("user_id", userId), ("from_pin", fromPin as object ?? "none"), ("to_pin", toPin as object ?? "none"));

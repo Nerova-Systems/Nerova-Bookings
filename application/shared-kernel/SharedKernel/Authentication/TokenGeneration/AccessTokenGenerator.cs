@@ -13,27 +13,37 @@ public sealed class AccessTokenGenerator(ITokenSigningClient tokenSigningClient,
 
     public string Generate(UserInfo userInfo)
     {
+        var claims = new List<Claim>
+        {
+            new(JwtRegisteredClaimNames.Sub, userInfo.Id!),
+            new(JwtRegisteredClaimNames.Email, userInfo.Email!),
+            new(JwtRegisteredClaimNames.GivenName, userInfo.FirstName ?? string.Empty),
+            new(JwtRegisteredClaimNames.FamilyName, userInfo.LastName ?? string.Empty),
+            new(ClaimTypes.Role, userInfo.Role!),
+            new("tenant_id", userInfo.TenantId!.ToString()),
+            new("tenant_name", userInfo.TenantName ?? string.Empty),
+            new("tenant_logo_url", userInfo.TenantLogoUrl ?? string.Empty),
+            new("subscription_plan", userInfo.SubscriptionPlan ?? string.Empty),
+            new("title", userInfo.Title ?? string.Empty),
+            new("avatar_url", userInfo.AvatarUrl ?? string.Empty),
+            new("locale", userInfo.Locale!),
+            new("session_id", userInfo.SessionId?.ToString() ?? string.Empty),
+            new(AuthenticationTokenHttpKeys.FeatureFlagsClaimName, string.Join(",", userInfo.FeatureFlags)),
+            new("tenant_rollout_bucket", userInfo.TenantRolloutBucket.ToString()),
+            new("user_rollout_bucket", userInfo.UserRolloutBucket?.ToString() ?? string.Empty),
+            new("active_team_id", userInfo.ActiveTeamId?.ToString() ?? string.Empty),
+            new("active_org_id", userInfo.ActiveOrgId?.ToString() ?? string.Empty),
+            new("active_org_profile_id", userInfo.ActiveOrgProfileId ?? string.Empty)
+        };
+
+        if (userInfo.ImpersonatedByIdentifier is not null)
+        {
+            claims.Add(new Claim("impersonated_by", userInfo.ImpersonatedByIdentifier));
+        }
+
         var tokenDescriptor = new SecurityTokenDescriptor
         {
-            Subject = new ClaimsIdentity([
-                    new Claim(JwtRegisteredClaimNames.Sub, userInfo.Id!),
-                    new Claim(JwtRegisteredClaimNames.Email, userInfo.Email!),
-                    new Claim(JwtRegisteredClaimNames.GivenName, userInfo.FirstName ?? string.Empty),
-                    new Claim(JwtRegisteredClaimNames.FamilyName, userInfo.LastName ?? string.Empty),
-                    new Claim(ClaimTypes.Role, userInfo.Role!),
-                    new Claim("tenant_id", userInfo.TenantId!.ToString()),
-                    new Claim("tenant_name", userInfo.TenantName ?? string.Empty),
-                    new Claim("tenant_logo_url", userInfo.TenantLogoUrl ?? string.Empty),
-                    new Claim("subscription_plan", userInfo.SubscriptionPlan ?? string.Empty),
-                    new Claim("title", userInfo.Title ?? string.Empty),
-                    new Claim("avatar_url", userInfo.AvatarUrl ?? string.Empty),
-                    new Claim("locale", userInfo.Locale!),
-                    new Claim("session_id", userInfo.SessionId?.ToString() ?? string.Empty),
-                    new Claim(AuthenticationTokenHttpKeys.FeatureFlagsClaimName, string.Join(",", userInfo.FeatureFlags)),
-                    new Claim("tenant_rollout_bucket", userInfo.TenantRolloutBucket.ToString()),
-                    new Claim("user_rollout_bucket", userInfo.UserRolloutBucket?.ToString() ?? string.Empty)
-                ]
-            )
+            Subject = new ClaimsIdentity(claims)
         };
 
         var now = timeProvider.GetUtcNow();

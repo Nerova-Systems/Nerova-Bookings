@@ -95,15 +95,15 @@ public sealed class BookingEndpointsTests : EndpointBaseTest<MainDbContext>
         await UpdateSchedulingProfileAsync("owner");
         var schedule = await CreateScheduleAsync();
         await CreateEventTypeAsync(schedule.Id, "Intro call", "intro-call");
-        var upcoming = await CreateBookingAsync("intro-call", "2026-05-18T07:00:00Z", "Ada Lovelace", "ada@example.com");
-        var past = await CreateBookingAsync("intro-call", "2026-06-03T07:00:00Z", "Katherine Johnson", "katherine@example.com");
-        var outsideWindow = await CreateBookingAsync("intro-call", "2026-06-10T07:00:00Z", "Dorothy Vaughan", "dorothy@example.com");
-        Connection.Update("bookings", "id", past.Id, [("start_time", DateTimeOffset.Parse("2026-05-15T07:00:00Z")), ("end_time", DateTimeOffset.Parse("2026-05-15T07:30:00Z"))]);
-        Connection.Update("bookings", "id", outsideWindow.Id, [("start_time", DateTimeOffset.Parse("2026-05-25T07:00:00Z")), ("end_time", DateTimeOffset.Parse("2026-05-25T07:30:00Z"))]);
+        var upcoming = await CreateBookingAsync("intro-call", "2026-07-07T07:00:00Z", "Ada Lovelace", "ada@example.com");
+        var past = await CreateBookingAsync("intro-call", "2026-07-14T07:00:00Z", "Katherine Johnson", "katherine@example.com");
+        var outsideWindow = await CreateBookingAsync("intro-call", "2026-07-21T07:00:00Z", "Dorothy Vaughan", "dorothy@example.com");
+        Connection.Update("bookings", "id", past.Id, [("start_time", DateTimeOffset.Parse("2026-07-03T07:00:00Z")), ("end_time", DateTimeOffset.Parse("2026-07-03T07:30:00Z"))]);
+        Connection.Update("bookings", "id", outsideWindow.Id, [("start_time", DateTimeOffset.Parse("2026-07-17T07:00:00Z")), ("end_time", DateTimeOffset.Parse("2026-07-17T07:30:00Z"))]);
 
         // Act
         var response = await AuthenticatedOwnerHttpClient.GetAsync(
-            "/api/bookings?statuses=upcoming&statuses=past&afterStartDate=2026-05-12T00:00:00Z&beforeEndDate=2026-05-18T23:59:59Z&pageSize=100"
+            "/api/bookings?statuses=upcoming&statuses=past&afterStartDate=2026-07-01T00:00:00Z&beforeEndDate=2026-07-07T23:59:59Z&pageSize=100"
         );
 
         // Assert

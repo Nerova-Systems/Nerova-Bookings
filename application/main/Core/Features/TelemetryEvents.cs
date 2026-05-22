@@ -1,5 +1,8 @@
 using Main.Features.EventTypes.Domain;
 using Main.Features.Schedules.Domain;
+using Main.Features.Scheduling.Domain;
+using Main.Features.Workflows.Domain;
+using SharedKernel.Domain;
 using SharedKernel.Telemetry;
 
 namespace Main.Features;
@@ -27,3 +30,72 @@ public sealed class EventTypeUpdated(EventTypeId eventTypeId)
 
 public sealed class EventTypeDeleted(EventTypeId eventTypeId)
     : TelemetryEvent(("event_type_id", eventTypeId));
+
+public sealed class WorkflowCreated(WorkflowId workflowId)
+    : TelemetryEvent(("workflow_id", workflowId));
+
+public sealed class WorkflowUpdated(WorkflowId workflowId)
+    : TelemetryEvent(("workflow_id", workflowId));
+
+public sealed class WorkflowDeleted(WorkflowId workflowId)
+    : TelemetryEvent(("workflow_id", workflowId));
+
+public sealed class WorkflowStepAdded(WorkflowId workflowId, WorkflowStepId stepId)
+    : TelemetryEvent(("workflow_id", workflowId), ("step_id", stepId));
+
+public sealed class WorkflowStepUpdated(WorkflowId workflowId, WorkflowStepId stepId)
+    : TelemetryEvent(("workflow_id", workflowId), ("step_id", stepId));
+
+public sealed class WorkflowStepDeleted(WorkflowId workflowId, WorkflowStepId stepId)
+    : TelemetryEvent(("workflow_id", workflowId), ("step_id", stepId));
+
+public sealed class WorkflowBoundToEventType(WorkflowId workflowId, EventTypeId eventTypeId)
+    : TelemetryEvent(("workflow_id", workflowId), ("event_type_id", eventTypeId));
+
+public sealed class WorkflowUnboundFromEventType(WorkflowId workflowId, EventTypeId eventTypeId)
+    : TelemetryEvent(("workflow_id", workflowId), ("event_type_id", eventTypeId));
+
+public sealed class WorkflowReminderScheduled(WorkflowReminderId reminderId)
+    : TelemetryEvent(("reminder_id", reminderId));
+
+public sealed class WorkflowReminderDispatched(WorkflowReminderId reminderId)
+    : TelemetryEvent(("reminder_id", reminderId));
+
+public sealed class WorkflowReminderCancelled(WorkflowReminderId reminderId)
+    : TelemetryEvent(("reminder_id", reminderId));
+
+public sealed class ManagedEventTypeAssigned(EventTypeId parentId, EventTypeId childId, UserId memberUserId)
+    : TelemetryEvent(("parent_event_type_id", parentId), ("child_event_type_id", childId), ("member_user_id", memberUserId));
+
+public sealed class ManagedEventTypeUnassigned(EventTypeId parentId, EventTypeId childId, UserId memberUserId)
+    : TelemetryEvent(("parent_event_type_id", parentId), ("child_event_type_id", childId), ("member_user_id", memberUserId));
+
+public sealed class ManagedEventTypeSynced(EventTypeId parentId, int childCount)
+    : TelemetryEvent(("parent_event_type_id", parentId), ("child_count", childCount));
+
+public sealed class ManagedEventTypeLocksUpdated(EventTypeId parentId, int unlockedFieldCount)
+    : TelemetryEvent(("parent_event_type_id", parentId), ("unlocked_field_count", unlockedFieldCount));
+
+public sealed class ManagedEventTypeFieldOverrideRejected(EventTypeId childId, string fieldName)
+    : TelemetryEvent(("child_event_type_id", childId), ("field_name", fieldName));
+
+public sealed class CollectiveHostAdded(EventTypeId eventTypeId, UserId userId)
+    : TelemetryEvent(("event_type_id", eventTypeId), ("user_id", userId));
+
+public sealed class CollectiveHostRemoved(EventTypeId eventTypeId, UserId userId)
+    : TelemetryEvent(("event_type_id", eventTypeId), ("user_id", userId));
+
+public sealed class CollectiveSlotComputed(EventTypeId eventTypeId, int hostCount, int offeredCount)
+    : TelemetryEvent(("event_type_id", eventTypeId), ("host_count", hostCount), ("offered_count", offeredCount));
+
+public sealed class RoundRobinHostAdded(EventTypeId eventTypeId, UserId userId)
+    : TelemetryEvent(("event_type_id", eventTypeId), ("user_id", userId));
+
+public sealed class RoundRobinHostRemoved(EventTypeId eventTypeId, UserId userId)
+    : TelemetryEvent(("event_type_id", eventTypeId), ("user_id", userId));
+
+public sealed class RoundRobinHostUpdated(EventTypeId eventTypeId, UserId userId)
+    : TelemetryEvent(("event_type_id", eventTypeId), ("user_id", userId));
+
+public sealed class RoundRobinBookingReassigned(BookingId bookingId, UserId newOwnerUserId)
+    : TelemetryEvent(("booking_id", bookingId), ("new_owner_user_id", newOwnerUserId));

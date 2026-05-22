@@ -387,6 +387,103 @@ public sealed class FeatureFlagEvaluatorTests : EndpointBaseTest<AccountDbContex
         result.Should().NotContain(child.Key);
     }
 
+    [Fact]
+    public async Task Evaluate_WhenGrandparentBaseRowInactive_ShouldExcludeEntireChain()
+    {
+        // Arrange — 3-level chain: grandparent (tier-gp) ← parent (tier-mid) ← child (cap-leaf),
+        // using TenantAdminManagedFlag to mirror the real tier topology. Enabling a flag of this
+        // subtype requires both an active base row AND an active tenant override. The grandparent
+        // base row is inactive; the parent and child are fully activated (base + tenant override).
+        // With the DFS topological sort the grandparent evaluates first, resolves to false, and that
+        // missing entry in enabledFeatureFlagSet transitively gates parent and child.
+        var grandparent = new TenantAdminManagedFlag("test-tier-gp", "GP", "Grandparent tier flag", false, true);
+        var parent = new TenantAdminManagedFlag("test-tier-mid", "Mid", "Middle tier flag", false, true, "test-tier-gp");
+        var child = new TenantAdminManagedFlag("test-tier-leaf", "Leaf", "Leaf capability flag", false, true, "test-tier-mid");
+        var evaluator = new FeatureFlagEvaluator(_scope.ServiceProvider.GetRequiredService<IFeatureFlagRepository>())
+        {
+            DefinitionsProvider = () => [grandparent, parent, child]
+        };
+
+        var now = TimeProvider.System.GetUtcNow();
+        // Grandparent base row is inactive (no EnabledAt).
+        InsertFeatureFlag(grandparent.Key, null, null, null, null, null, null);
+        // Parent and child fully activated (base row + tenant override active).
+        InsertFeatureFlag(parent.Key, null, null, now, null, null, null);
+        InsertFeatureFlag(parent.Key, DatabaseSeeder.Tenant1.Id.Value, null, now, null, null, null);
+        InsertFeatureFlag(child.Key, null, null, now, null, null, null);
+        InsertFeatureFlag(child.Key, DatabaseSeeder.Tenant1.Id.Value, null, now, null, null, null);
+
+        // Act
+        var result = await evaluator.EvaluateAsync(DatabaseSeeder.Tenant1.Id, DatabaseSeeder.Tenant1Owner.Id, 50, 50, null, null, CancellationToken.None);
+
+        // Assert — parent gated by inactive grandparent; child transitively gated.
+        result.Should().NotContain(parent.Key);
+        result.Should().NotContain(child.Key);
+    }
+
+    [Fact]
+    public async Task Evaluate_WhenFullThreeLevelChainActive_ShouldIncludeAllThreeFlags()
+    {
+        // Arrange — all three tiers are fully activated (base row + tenant override active for each).
+        var grandparent = new TenantAdminManagedFlag("test-tier-gp", "GP", "Grandparent tier flag", false, true);
+        var parent = new TenantAdminManagedFlag("test-tier-mid", "Mid", "Middle tier flag", false, true, "test-tier-gp");
+        var child = new TenantAdminManagedFlag("test-tier-leaf", "Leaf", "Leaf capability flag", false, true, "test-tier-mid");
+        var evaluator = new FeatureFlagEvaluator(_scope.ServiceProvider.GetRequiredService<IFeatureFlagRepository>())
+        {
+            DefinitionsProvider = () => [grandparent, parent, child]
+        };
+
+        var now = TimeProvider.System.GetUtcNow();
+        InsertFeatureFlag(grandparent.Key, null, null, now, null, null, null);
+        InsertFeatureFlag(grandparent.Key, DatabaseSeeder.Tenant1.Id.Value, null, now, null, null, null);
+        InsertFeatureFlag(parent.Key, null, null, now, null, null, null);
+        InsertFeatureFlag(parent.Key, DatabaseSeeder.Tenant1.Id.Value, null, now, null, null, null);
+        InsertFeatureFlag(child.Key, null, null, now, null, null, null);
+        InsertFeatureFlag(child.Key, DatabaseSeeder.Tenant1.Id.Value, null, now, null, null, null);
+
+        // Act
+        var result = await evaluator.EvaluateAsync(DatabaseSeeder.Tenant1.Id, DatabaseSeeder.Tenant1Owner.Id, 50, 50, null, null, CancellationToken.None);
+
+        // Assert — every tier in the chain resolves to enabled.
+        result.Should().Contain(grandparent.Key);
+        result.Should().Contain(parent.Key);
+        result.Should().Contain(child.Key);
+    }
+
+    [Fact]
+    public async Task Evaluate_WhenGrandparentActiveAndParentNotGranted_ShouldExcludeChild()
+    {
+        // Arrange — grandparent is fully activated; parent's base row is active but has no tenant
+        // override, so EvaluateTenantScope returns false (TenantAdminManagedFlag requires an
+        // explicit tenant grant; IsAbTestEligible=false means the rollout path is unavailable).
+        // Child has a tenant override but is still gated by its ungranted parent.
+        var grandparent = new TenantAdminManagedFlag("test-tier-gp", "GP", "Grandparent tier flag", false, true);
+        var parent = new TenantAdminManagedFlag("test-tier-mid", "Mid", "Middle tier flag", false, true, "test-tier-gp");
+        var child = new TenantAdminManagedFlag("test-tier-leaf", "Leaf", "Leaf capability flag", false, true, "test-tier-mid");
+        var evaluator = new FeatureFlagEvaluator(_scope.ServiceProvider.GetRequiredService<IFeatureFlagRepository>())
+        {
+            DefinitionsProvider = () => [grandparent, parent, child]
+        };
+
+        var now = TimeProvider.System.GetUtcNow();
+        // Grandparent fully activated.
+        InsertFeatureFlag(grandparent.Key, null, null, now, null, null, null);
+        InsertFeatureFlag(grandparent.Key, DatabaseSeeder.Tenant1.Id.Value, null, now, null, null, null);
+        // Parent base row active, but no tenant override — evaluates to false.
+        InsertFeatureFlag(parent.Key, null, null, now, null, null, null);
+        // Child fully activated.
+        InsertFeatureFlag(child.Key, null, null, now, null, null, null);
+        InsertFeatureFlag(child.Key, DatabaseSeeder.Tenant1.Id.Value, null, now, null, null, null);
+
+        // Act
+        var result = await evaluator.EvaluateAsync(DatabaseSeeder.Tenant1.Id, DatabaseSeeder.Tenant1Owner.Id, 50, 50, null, null, CancellationToken.None);
+
+        // Assert — grandparent enabled; parent and child excluded because parent was not granted.
+        result.Should().Contain(grandparent.Key);
+        result.Should().NotContain(parent.Key);
+        result.Should().NotContain(child.Key);
+    }
+
     protected override void Dispose(bool disposing)
     {
         if (disposing) _scope.Dispose();

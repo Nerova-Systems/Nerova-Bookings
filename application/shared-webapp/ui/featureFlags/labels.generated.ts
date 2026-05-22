@@ -46,6 +46,78 @@ function getKnownFeatureFlagLabels(): Record<string, FeatureFlagLabel> {
     "experimental-ui": {
       name: t`Experimental UI`,
       description: t`Try out experimental user interface components`
+    },
+    "tier-teams": {
+      name: t`Teams tier`,
+      description: t`Enables team-level functionality: team management, team-scoped event types and schedules, round-robin and collective scheduling`
+    },
+    "tier-organizations": {
+      name: t`Organizations tier`,
+      description: t`Enables organization-level functionality: org management, org-scoped attributes, custom SMTP, billing, delegation credentials, and SSO`
+    },
+    "tier-enterprise": {
+      name: t`Enterprise tier`,
+      description: t`Enables enterprise-only functionality: audit log, workflows, API keys, impersonation, and analytics insights`
+    },
+    "cap-managed-event-types": {
+      name: t`Managed event types`,
+      description: t`Team-owned event types with locked fields that members inherit. Ports cal.com managed-event-types.`
+    },
+    "cap-round-robin": {
+      name: t`Round-robin scheduling`,
+      description: t`Distribute bookings across available team members in rotation. Ports cal.com round-robin.`
+    },
+    "cap-collective": {
+      name: t`Collective scheduling`,
+      description: t`Require all listed team members to be available before a slot is offered to bookers. Ports cal.com collective scheduling.`
+    },
+    "cap-attributes": {
+      name: t`Member attributes`,
+      description: t`Org-defined custom fields attached to memberships, e.g. department, skills, timezone. Ports cal.com attributes.`
+    },
+    "cap-custom-smtp": {
+      name: t`Custom SMTP`,
+      description: t`Per-org SMTP server override so org-scoped emails are sent from the org's own mail domain. Ports cal.com custom-smtp.`
+    },
+    "cap-org-billing": {
+      name: t`Org billing`,
+      description: t`Seat-based billing and subscription management at the organization level. Ports cal.com billing/organizations. Requires g3-org-billing.`
+    },
+    "cap-delegation-credentials": {
+      name: t`Delegation credentials`,
+      description: t`Multi-tenant Google/Microsoft OAuth so the org can read calendar busy-time and create conferencing links on behalf of members. Ports cal.com delegation-credentials.`
+    },
+    "cap-sso-microsoft": {
+      name: t`Microsoft SSO`,
+      description: t`Allow org members to sign in via Microsoft Entra ID / Azure AD. Ports cal.com Microsoft SSO. Requires g3-sso-microsoft.`
+    },
+    "cap-sso-google": {
+      name: t`Google SSO`,
+      description: t`Allow org members to sign in via Google Workspace. Ports cal.com Google SSO. Requires g3-sso-google.`
+    },
+    "cap-integration-attribute-sync": {
+      name: t`IdP attribute sync`,
+      description: t`Automatically sync user attributes from SAML/SCIM/SSO claims into org member profiles on every SSO login. Ports cal.com IdP attribute sync.`
+    },
+    "cap-audit-log": {
+      name: t`Audit log`,
+      description: t`Immutable record of all significant system events across every SCS, written via the shared-kernel event bus. Ports cal.com booking-audit.`
+    },
+    "cap-workflows": {
+      name: t`Workflows`,
+      description: t`Automated booking reminders, follow-ups, and no-show handling. Ports cal.com workflows. Requires g3-workflows.`
+    },
+    "cap-api-keys": {
+      name: t`API keys`,
+      description: t`Generate long-lived API keys for programmatic access at the user or org level. Ports cal.com api-keys.`
+    },
+    "cap-impersonation": {
+      name: t`Impersonation`,
+      description: t`Allow system admins to impersonate any user account for support and debugging, with a full audit trail. Ports cal.com impersonation.`
+    },
+    "cap-insights": {
+      name: t`Insights`,
+      description: t`Analytics dashboard: booking volume, event-type performance, and member load metrics. Ports cal.com insights. Requires g3-insights.`
     }
   };
 }

@@ -2,6 +2,7 @@ using Main;
 using Main.Database;
 using SharedKernel.Configuration;
 using SharedKernel.Database;
+using TickerQ.DependencyInjection;
 
 // Worker service is using WebApplication.CreateBuilder instead of Host.CreateDefaultBuilder to allow scaling to zero
 var builder = WebApplication.CreateBuilder(args);
@@ -14,12 +15,15 @@ builder
 // Configure dependency injection services like Repositories, MediatR, Pipelines, FluentValidation validators, etc.
 builder.Services
     .AddWorkerServices()
-    .AddMainServices();
+    .AddMainServices()
+    .AddMainTickerQ();
 
 builder.Services.AddTransient<DatabaseMigrationService<MainDbContext>>();
 builder.Services.AddTransient<DataMigrationRunner<MainDbContext>>();
 
 var host = builder.Build();
+
+host.UseTickerQ();
 
 var lifetime = host.Services.GetRequiredService<IHostApplicationLifetime>();
 
