@@ -221,6 +221,12 @@ msgstr "Active users"
 msgid "Active users in the past 30 days"
 msgstr "Active users in the past 30 days"
 
+msgid "Actor"
+msgstr "Actor"
+
+msgid "Actor user ID"
+msgstr "Actor user ID"
+
 msgid "Add an extra layer of security to your account."
 msgstr "Add an extra layer of security to your account."
 
@@ -329,6 +335,15 @@ msgstr "An unexpected state occurred. Please reload the page."
 msgid "Analytics"
 msgstr "Analytics"
 
+msgid "Any action"
+msgstr "Any action"
+
+msgid "Any actor"
+msgstr "Any actor"
+
+msgid "Any resource"
+msgstr "Any resource"
+
 msgid "Any role"
 msgstr "Any role"
 
@@ -379,6 +394,12 @@ msgstr "Aspect ratio"
 
 msgid "Attributes"
 msgstr "Attributes"
+
+msgid "Audit log"
+msgstr "Audit log"
+
+msgid "Audit log entries"
+msgstr "Audit log entries"
 
 msgid "Audit reports and assessments"
 msgstr "Audit reports and assessments"
@@ -724,6 +745,9 @@ msgstr "Co-cooks"
 
 msgid "Collapse Components"
 msgstr "Collapse Components"
+
+msgid "Collapse details"
+msgstr "Collapse details"
 
 msgid "Collapse Examples"
 msgstr "Collapse Examples"
@@ -1221,6 +1245,9 @@ msgstr "Enter your verification code"
 msgid "Enterprise-grade Azure infrastructure"
 msgstr "Enterprise-grade Azure infrastructure"
 
+msgid "Entry ID"
+msgstr "Entry ID"
+
 msgid "Environment isolation"
 msgstr "Environment isolation"
 
@@ -1244,6 +1271,9 @@ msgstr "Excl. tax"
 
 msgid "Expand Components"
 msgstr "Expand Components"
+
+msgid "Expand details"
+msgstr "Expand details"
 
 msgid "Expand Examples"
 msgstr "Expand Examples"
@@ -1819,6 +1849,9 @@ msgstr "Merge"
 msgid "Merge commit"
 msgstr "Merge commit"
 
+msgid "Metadata"
+msgstr "Metadata"
+
 msgid "Mexican"
 msgstr "Mexican"
 
@@ -1960,11 +1993,17 @@ msgstr "No account found for this email address. Please sign up to create an acc
 msgid "No active sessions found."
 msgstr "No active sessions found."
 
+msgid "No audit entries yet"
+msgstr "No audit entries yet"
+
 msgid "No billing information on file"
 msgstr "No billing information on file"
 
 msgid "No custom roles available"
 msgstr "No custom roles available"
+
+msgid "No entries match your filters"
+msgstr "No entries match your filters"
 
 msgid "No longer needed"
 msgstr "No longer needed"
@@ -2492,6 +2531,12 @@ msgstr "Resizable panels"
 msgid "Resource"
 msgstr "Resource"
 
+msgid "Resource ID"
+msgstr "Resource ID"
+
+msgid "Resource type"
+msgstr "Resource type"
+
 msgid "Responsive layout"
 msgstr "Responsive layout"
 
@@ -2516,6 +2561,9 @@ msgstr "Retry payment"
 
 msgid "Retry pending payment"
 msgstr "Retry pending payment"
+
+msgid "Review every significant action performed in your organization."
+msgstr "Review every significant action performed in your organization."
 
 msgid "Revoke"
 msgstr "Revoke"
@@ -2808,6 +2856,9 @@ msgstr "Sign up with email"
 
 msgid "Sign up with Google"
 msgstr "Sign up with Google"
+
+msgid "Significant actions across your organization will appear here once they happen."
+msgstr "Significant actions across your organization will appear here once they happen."
 
 msgid "Signup verification code"
 msgstr "Signup verification code"
@@ -3113,6 +3164,9 @@ msgstr "This will permanently delete <0>1 user</0> in the recycle bin."
 msgid "Time zone"
 msgstr "Time zone"
 
+msgid "Timestamp"
+msgstr "Timestamp"
+
 msgid "Tinkers with food on weekends. Recipe library curator since 2024."
 msgstr "Tinkers with food on weekends. Recipe library curator since 2024."
 
@@ -3202,6 +3256,9 @@ msgstr "Try adjusting your search or filters"
 
 msgid "Try again"
 msgstr "Try again"
+
+msgid "Try clearing or adjusting the filters to see more results."
+msgstr "Try clearing or adjusting the filters to see more results."
 
 msgid "Two-factor authentication"
 msgstr "Two-factor authentication"
@@ -3308,6 +3365,9 @@ msgstr "User"
 
 msgid "User actions"
 msgstr "User actions"
+
+msgid "User agent"
+msgstr "User agent"
 
 msgid "User data updated"
 msgstr "User data updated"
@@ -3467,6 +3527,9 @@ msgstr "You do not have permission to access this page."
 
 msgid "You don't have permission to view organization settings."
 msgstr "You don't have permission to view organization settings."
+
+msgid "You don't have permission to view the audit log."
+msgstr "You don't have permission to view the audit log."
 
 msgid "You have {invitationCount} pending invitations."
 msgstr "You have {invitationCount} pending invitations."

@@ -14,6 +14,7 @@ import { Link as RouterLink } from "@tanstack/react-router";
 import {
   Building2Icon,
   CreditCardIcon,
+  FileClockIcon,
   HomeIcon,
   LandmarkIcon,
   MonitorSmartphoneIcon,
@@ -97,6 +98,7 @@ export type AccountGroupProps = {
   showOrganization: boolean;
   showTeams: boolean;
   showRoles: boolean;
+  showAuditLog: boolean;
   showBilling: boolean;
 };
 
@@ -166,6 +168,15 @@ export function AccountGroup(props: Readonly<AccountGroupProps>) {
               label={<Trans>Roles</Trans>}
               tooltip={t`Roles`}
               isActive={isActive("/account/settings/roles", true)}
+            />
+          )}
+          {props.showAuditLog && (
+            <AccountNavItem
+              to="/account/settings/audit-log"
+              icon={<FileClockIcon />}
+              label={<Trans>Audit log</Trans>}
+              tooltip={t`Audit log`}
+              isActive={isActive("/account/settings/audit-log", true)}
             />
           )}
           {props.showBilling && (

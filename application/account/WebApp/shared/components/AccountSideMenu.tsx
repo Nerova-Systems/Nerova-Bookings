@@ -29,6 +29,7 @@ export function AccountSideMenu() {
   const { enabled: isTierEnterpriseEnabled } = useFeatureFlag("tier-enterprise");
   const { enabled: isTierTeamsEnabled } = useFeatureFlag("tier-teams");
   const { enabled: isTierOrganizationsEnabled } = useFeatureFlag("tier-organizations");
+  const { enabled: isAuditLogEnabled } = useFeatureFlag("cap-audit-log");
 
   const isActive = (target: string, matchPrefix = false) => {
     const normalized = normalizePath(target);
@@ -40,6 +41,7 @@ export function AccountSideMenu() {
   const showRoles = isPrivileged && isTierEnterpriseEnabled;
   const showTeams = isPrivileged && isTierTeamsEnabled;
   const showOrganization = isPrivileged && isTierOrganizationsEnabled;
+  const showAuditLog = isPrivileged && isAuditLogEnabled;
 
   return (
     <Sidebar collapsible="icon" mobileContent={<MobileMenu onNavigate={navigateToMain ?? undefined} />}>
@@ -55,6 +57,7 @@ export function AccountSideMenu() {
             showOrganization={showOrganization}
             showTeams={showTeams}
             showRoles={showRoles}
+            showAuditLog={showAuditLog}
             showBilling={showBilling}
           />
         </SidebarContent>
