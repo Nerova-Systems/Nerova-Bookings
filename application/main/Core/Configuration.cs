@@ -1,6 +1,7 @@
 using Main.Database;
 using Main.Features.Apps.Connectors.GoogleCalendar;
 using Main.Features.Apps.Connectors.GoogleMeet;
+using Main.Features.Apps.Connectors.MsTeams;
 using Main.Features.Apps.Connectors.Office365Calendar;
 using Main.Features.Apps.Connectors.Zoom;
 using Main.Features.Apps.Domain;
@@ -142,6 +143,16 @@ public static class Configuration
                 // ICredentialRepository on each call to check the prerequisite.
                 .AddSingleton<IAppInstaller, GoogleMeetInstaller>()
                 .AddScoped<IConferenceLinkProvider, GoogleMeetConferenceLinkProvider>()
+                // ─── Microsoft Teams connector ─────────────────────────────
+                // Conferencing connector that piggy-backs on the office365-calendar credential —
+                // no OAuth flow of its own, no new HttpClient (reuses office365-calendar's
+                // named client through Office365CalendarServiceFactory). Installer is singleton
+                // (matches the other installers and the registry's lifetime); it scope-resolves
+                // ICredentialRepository + CredentialProtector on each call to check the
+                // prerequisite + verify the existing credential carries the
+                // OnlineMeetings.ReadWrite scope.
+                .AddSingleton<IAppInstaller, MsTeamsInstaller>()
+                .AddScoped<IConferenceLinkProvider, MsTeamsConferenceLinkProvider>()
                 // Scheduling → conferencing bridge. Resolves the right IConferenceLinkProvider
                 // for an event type's location and stamps the join URL + BookingReference
                 // onto the persisted booking.

@@ -139,6 +139,150 @@ public sealed class Office365CalendarServiceTests
     }
 
     [Fact]
+    public async Task CreateOnlineMeetingAsync_WhenCalled_ShouldPostUtcBodyAndReturnJoinWebUrl()
+    {
+        // Pins the exact onlineMeetings POST shape: subject + UTC ISO-8601 with trailing 'Z'
+        // (no separate timeZone field — unlike /me/calendar/events) — and the preferred
+        // joinWebUrl extraction (mirrors cal.com office365video).
+        HttpRequestMessage? captured = null;
+        string? capturedBody = null;
+        var handler = new RecordingHandler(request =>
+        {
+            captured = request;
+            capturedBody = request.Content!.ReadAsStringAsync().GetAwaiter().GetResult();
+            return Response(HttpStatusCode.Created, """{"id":"mtg-1","joinWebUrl":"https://teams.microsoft.com/l/meetup-join/abc","joinUrl":"https://teams.microsoft.com/l/meetup-join/legacy"}""");
+        });
+        var service = BuildService(handler, NewBlob());
+
+        var input = new BookingEvent(
+            Title: "Sync",
+            Description: "ignored",
+            // 15:00 local in +02:00 = 13:00 UTC — proves we normalize to UTC before emitting.
+            StartTime: new DateTimeOffset(2026, 1, 5, 15, 0, 0, TimeSpan.FromHours(2)),
+            EndTime: new DateTimeOffset(2026, 1, 5, 15, 30, 0, TimeSpan.FromHours(2)),
+            TimeZone: "Europe/Copenhagen",
+            OrganizerEmail: "host@contoso.com",
+            OrganizerName: null,
+            Attendees: []
+        );
+
+        var (id, joinUrl) = await service.CreateOnlineMeetingAsync(input, CancellationToken.None);
+
+        id.Should().Be("mtg-1");
+        joinUrl.Should().Be("https://teams.microsoft.com/l/meetup-join/abc");
+        captured!.Method.Should().Be(HttpMethod.Post);
+        captured.RequestUri!.AbsoluteUri.Should().EndWith("/me/onlineMeetings");
+
+        using var doc = JsonDocument.Parse(capturedBody!);
+        doc.RootElement.GetProperty("subject").GetString().Should().Be("Sync");
+        doc.RootElement.GetProperty("startDateTime").GetString().Should().Be("2026-01-05T13:00:00Z");
+        doc.RootElement.GetProperty("endDateTime").GetString().Should().Be("2026-01-05T13:30:00Z");
+        // Microsoft rejects unknown fields with 400 on this endpoint — be strict about what we send.
+        doc.RootElement.TryGetProperty("attendees", out _).Should().BeFalse();
+        doc.RootElement.TryGetProperty("body", out _).Should().BeFalse();
+    }
+
+    [Fact]
+    public async Task CreateOnlineMeetingAsync_WhenJoinWebUrlMissing_ShouldFallBackToJoinUrl()
+    {
+        // Some older tenants only return joinUrl — verify the fallback so meetings created on
+        // those tenants still land a working link.
+        var handler = new RecordingHandler(_ => Response(HttpStatusCode.Created, """{"id":"mtg-2","joinUrl":"https://teams.microsoft.com/l/meetup-join/legacy"}"""));
+        var service = BuildService(handler, NewBlob());
+
+        var (id, joinUrl) = await service.CreateOnlineMeetingAsync(NewMeetingInput(), CancellationToken.None);
+
+        id.Should().Be("mtg-2");
+        joinUrl.Should().Be("https://teams.microsoft.com/l/meetup-join/legacy");
+    }
+
+    [Fact]
+    public async Task UpdateOnlineMeetingAsync_ShouldUsePatchAndReturnRefreshedJoinUrl()
+    {
+        HttpRequestMessage? captured = null;
+        var handler = new RecordingHandler(request =>
+        {
+            captured = request;
+            return Response(HttpStatusCode.OK, """{"id":"mtg-3","joinWebUrl":"https://teams.microsoft.com/l/meetup-join/new"}""");
+        });
+        var service = BuildService(handler, NewBlob());
+
+        var (_, joinUrl) = await service.UpdateOnlineMeetingAsync("mtg-3", NewMeetingInput(), CancellationToken.None);
+
+        captured!.Method.Should().Be(HttpMethod.Patch);
+        captured.RequestUri!.AbsoluteUri.Should().EndWith("/me/onlineMeetings/mtg-3");
+        joinUrl.Should().Be("https://teams.microsoft.com/l/meetup-join/new");
+    }
+
+    [Fact]
+    public async Task CancelOnlineMeetingAsync_When404_ShouldSucceed()
+    {
+        // Double-cancel is a no-op upstream — booking teardown must not fail because the
+        // meeting was already gone.
+        var handler = new RecordingHandler(_ => Response(HttpStatusCode.NotFound, ""));
+        var service = BuildService(handler, NewBlob());
+
+        var act = async () => await service.CancelOnlineMeetingAsync("mtg-x", CancellationToken.None);
+
+        await act.Should().NotThrowAsync();
+    }
+
+    [Fact]
+    public async Task CreateOnlineMeetingAsync_When401_ShouldRefreshAndRetry()
+    {
+        // Proves online-meeting calls share the same SendWithRefresh pipeline as calendar
+        // calls — a single token refresh covers Calendar + Teams without separate plumbing.
+        var attempts = 0;
+        var seenBearers = new List<string?>();
+        var handler = new RecordingHandler(request =>
+        {
+            if (request.RequestUri!.AbsoluteUri.EndsWith("/oauth2/v2.0/token"))
+            {
+                var json = JsonSerializer.Serialize(new
+                {
+                    access_token = "access-2",
+                    refresh_token = "refresh-2",
+                    expires_in = 3600,
+                    scope = "offline_access Calendars.ReadWrite OnlineMeetings.ReadWrite",
+                    token_type = "Bearer"
+                });
+                return Response(HttpStatusCode.OK, json);
+            }
+            if (request.RequestUri.AbsoluteUri.EndsWith("/me/onlineMeetings"))
+            {
+                attempts++;
+                seenBearers.Add(request.Headers.Authorization?.Parameter);
+                return attempts == 1
+                    ? Response(HttpStatusCode.Unauthorized, "expired")
+                    : Response(HttpStatusCode.Created, """{"id":"mtg-r","joinWebUrl":"https://teams.microsoft.com/l/meetup-join/r"}""");
+            }
+            return Response(HttpStatusCode.NotFound, "");
+        });
+        var service = BuildService(handler, NewBlob());
+
+        var (id, _) = await service.CreateOnlineMeetingAsync(NewMeetingInput(), CancellationToken.None);
+
+        id.Should().Be("mtg-r");
+        attempts.Should().Be(2);
+        seenBearers[0].Should().Be("access-1");
+        seenBearers[1].Should().Be("access-2");
+    }
+
+    private static BookingEvent NewMeetingInput()
+    {
+        return new BookingEvent(
+            "Sync",
+            null,
+            new DateTimeOffset(2026, 1, 5, 15, 0, 0, TimeSpan.Zero),
+            new DateTimeOffset(2026, 1, 5, 15, 30, 0, TimeSpan.Zero),
+            "UTC",
+            "host@contoso.com",
+            null,
+            []
+        );
+    }
+
+    [Fact]
     public async Task SendWithRefresh_When401_ShouldRefreshTokenAndRetryWithNewBearer()
     {
         var seenBearers = new List<string?>();

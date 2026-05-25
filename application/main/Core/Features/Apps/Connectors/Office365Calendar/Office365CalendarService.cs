@@ -157,6 +157,91 @@ public sealed class Office365CalendarService
         await EnsureSuccessAsync(response, "events.delete", cancellationToken);
     }
 
+    // ─── Online meeting lifecycle (MS Teams) ────────────────────────────────
+
+    /// <summary>
+    ///     POSTs to <c>/me/onlineMeetings</c> to create a Microsoft Teams meeting and returns
+    ///     the meeting <c>id</c> + <c>joinUrl</c>. The Graph API only accepts <c>subject</c> +
+    ///     <c>startDateTime</c>/<c>endDateTime</c> — attendees and description are surfaced via
+    ///     the calendar event the booking layer creates separately, not on the meeting itself.
+    /// </summary>
+    public async Task<(string Id, string JoinUrl)> CreateOnlineMeetingAsync(BookingEvent input, CancellationToken cancellationToken)
+    {
+        var body = BuildOnlineMeetingBody(input);
+
+        using var response = await SendWithRefreshAsync(
+            () => new HttpRequestMessage(HttpMethod.Post, $"{_options.ApiBaseUrl}/me/onlineMeetings")
+            {
+                Content = JsonContent.Create(body, options: JsonOptions)
+            },
+            cancellationToken
+        );
+
+        await EnsureSuccessAsync(response, "onlineMeetings.create", cancellationToken);
+        return await ParseOnlineMeetingAsync(response, cancellationToken);
+    }
+
+    public async Task<(string Id, string JoinUrl)> UpdateOnlineMeetingAsync(string meetingId, BookingEvent input, CancellationToken cancellationToken)
+    {
+        // Graph uses PATCH for onlineMeeting updates — sending PUT returns 405. The response
+        // body is the updated meeting (same shape as create), so we re-parse the joinUrl in
+        // case it ever changes upstream (today it is stable but the contract allows rotation).
+        var body = BuildOnlineMeetingBody(input);
+
+        using var response = await SendWithRefreshAsync(
+            () => new HttpRequestMessage(HttpMethod.Patch, $"{_options.ApiBaseUrl}/me/onlineMeetings/{Uri.EscapeDataString(meetingId)}")
+            {
+                Content = JsonContent.Create(body, options: JsonOptions)
+            },
+            cancellationToken
+        );
+
+        await EnsureSuccessAsync(response, "onlineMeetings.update", cancellationToken);
+        return await ParseOnlineMeetingAsync(response, cancellationToken);
+    }
+
+    public async Task CancelOnlineMeetingAsync(string meetingId, CancellationToken cancellationToken)
+    {
+        using var response = await SendWithRefreshAsync(
+            () => new HttpRequestMessage(HttpMethod.Delete, $"{_options.ApiBaseUrl}/me/onlineMeetings/{Uri.EscapeDataString(meetingId)}"),
+            cancellationToken
+        );
+
+        // Double-cancel is a no-op upstream — treat 404/410 as success so booking lifecycle
+        // never blows up because the meeting was already torn down.
+        if (response.StatusCode == HttpStatusCode.NotFound || response.StatusCode == HttpStatusCode.Gone) return;
+        await EnsureSuccessAsync(response, "onlineMeetings.delete", cancellationToken);
+    }
+
+    internal static object BuildOnlineMeetingBody(BookingEvent input)
+    {
+        // Microsoft Graph expects ISO-8601 with the offset (e.g. "2026-01-05T15:00:00Z") on
+        // the onlineMeetings endpoint — unlike events.create, there is no separate timeZone
+        // field. Round-tripping in UTC keeps the payload deterministic across hosts.
+        return new
+        {
+            startDateTime = input.StartTime.ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ", System.Globalization.CultureInfo.InvariantCulture),
+            endDateTime = input.EndTime.ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ", System.Globalization.CultureInfo.InvariantCulture),
+            subject = input.Title
+        };
+    }
+
+    private static async Task<(string Id, string JoinUrl)> ParseOnlineMeetingAsync(HttpResponseMessage response, CancellationToken cancellationToken)
+    {
+        await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
+        var root = await JsonNode.ParseAsync(stream, cancellationToken: cancellationToken)
+            ?? throw new InvalidOperationException("Microsoft Graph onlineMeetings response was empty.");
+
+        var id = root["id"]?.GetValue<string>()
+            ?? throw new InvalidOperationException("Microsoft Graph onlineMeetings response missing 'id'.");
+        // Graph returns both joinUrl (deprecated alias) and joinWebUrl on most tenants — prefer
+        // joinWebUrl when present (matches cal.com's office365video adapter), fall back to joinUrl.
+        var joinUrl = root["joinWebUrl"]?.GetValue<string>()
+            ?? root["joinUrl"]?.GetValue<string>()
+            ?? throw new InvalidOperationException("Microsoft Graph onlineMeetings response missing 'joinUrl'/'joinWebUrl'.");
+        return (id, joinUrl);
+    }
+
     // ─── Internals ──────────────────────────────────────────────────────────
 
     internal static object BuildEventBody(BookingEvent input)

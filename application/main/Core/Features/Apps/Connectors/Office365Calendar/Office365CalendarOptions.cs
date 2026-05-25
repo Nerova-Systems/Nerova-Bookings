@@ -37,11 +37,23 @@ public sealed class Office365CalendarOptions
     /// <summary>
     ///     Scopes requested at authorize time. <c>offline_access</c> is required for refresh
     ///     tokens; <c>Calendars.ReadWrite</c> covers both free-busy lookups (via getSchedule)
-    ///     and event create/update/cancel.
+    ///     and event create/update/cancel. <c>OnlineMeetings.ReadWrite</c> is requested up
+    ///     front so the MS Teams conferencing connector can reuse this credential without an
+    ///     incremental consent round-trip — mirrors cal.com's <c>office365video</c> app, which
+    ///     piggy-backs on the same Microsoft Graph credential.
     /// </summary>
     public string[] Scopes { get; set; } =
     [
         "offline_access",
-        "Calendars.ReadWrite"
+        "Calendars.ReadWrite",
+        "OnlineMeetings.ReadWrite"
     ];
+
+    /// <summary>
+    ///     The Microsoft Graph scope required for the MS Teams conferencing connector. Exposed
+    ///     as a constant so the MS Teams installer can verify the existing credential's stored
+    ///     scope string includes it (otherwise the user installed Office 365 before this scope
+    ///     was requested and must reconnect).
+    /// </summary>
+    public const string OnlineMeetingsScope = "OnlineMeetings.ReadWrite";
 }

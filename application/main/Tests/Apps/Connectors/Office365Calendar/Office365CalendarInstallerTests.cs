@@ -46,6 +46,7 @@ public sealed class Office365CalendarInstallerTests
         query["prompt"].Should().Be("consent");
         query["scope"].Should().Contain("offline_access");
         query["scope"].Should().Contain("Calendars.ReadWrite");
+        query["scope"].Should().Contain("OnlineMeetings.ReadWrite");
     }
 
     [Fact]
