@@ -318,6 +318,17 @@ public sealed class EventType : SoftDeletableAggregateRoot<EventTypeId>, ITenant
         Settings = EventTypeSettings.Normalize(settings, DurationMinutes, LocationType, LocationValue);
     }
 
+    /// <summary>
+    ///     Replaces only the location fields on this event type, leaving all other state untouched.
+    ///     Used by bulk-apply commands so the caller does not need to re-send the full Update payload.
+    /// </summary>
+    public void SetLocation(string? locationType, string? locationValue)
+    {
+        LocationType = string.IsNullOrWhiteSpace(locationType) ? null : locationType.Trim();
+        LocationValue = string.IsNullOrWhiteSpace(locationValue) ? null : locationValue.Trim();
+        Settings = EventTypeSettings.Normalize(Settings, DurationMinutes, LocationType, LocationValue);
+    }
+
     public void SetSettings(EventTypeSettings settings)
     {
         Settings = EventTypeSettings.Normalize(settings, DurationMinutes, LocationType, LocationValue);

@@ -21,6 +21,17 @@ public interface IEventTypeRepository : ICrudRepository<EventType, EventTypeId>,
 
     /// <summary>Returns the child replica belonging to the given parent and member, or null if not assigned.</summary>
     Task<EventType?> GetChildByParentAndMemberAsync(EventTypeId parentId, UserId memberUserId, CancellationToken cancellationToken);
+
+    /// <summary>
+    ///     Returns all event types the caller can see for grouping by viewer scope:
+    ///     personal (TeamId == null AND OwnerUserId == caller) plus team-scoped event types
+    ///     where the caller is the owner OR appears as a Host. Org-level event types are
+    ///     not exposed (no main-SCS data to determine org membership).
+    /// </summary>
+    Task<EventType[]> GetForViewerAsync(UserId callerUserId, CancellationToken cancellationToken);
+
+    /// <summary>Returns event types matching the given ids (no soft-deletes).</summary>
+    Task<EventType[]> GetByIdsAsync(EventTypeId[] ids, CancellationToken cancellationToken);
 }
 
 public sealed class EventTypeRepository(MainDbContext mainDbContext)
@@ -86,5 +97,31 @@ public sealed class EventTypeRepository(MainDbContext mainDbContext)
         return await DbSet
             .Where(eventType => eventType.ParentEventTypeId == parentId && eventType.OwnerUserId == memberUserId)
             .FirstOrDefaultAsync(cancellationToken);
+    }
+
+    public async Task<EventType[]> GetForViewerAsync(UserId callerUserId, CancellationToken cancellationToken)
+    {
+        // Personal: caller owns and not team-scoped.
+        // Team:     caller owns OR caller is a host (Hosts table) on a team-scoped event type.
+        // Org-level event types are deferred: main has no membership data to filter on.
+        var hostedEventTypeIds = Context.Set<Host>()
+            .Where(host => host.UserId == callerUserId)
+            .Select(host => host.EventTypeId);
+
+        return await DbSet
+            .Where(eventType =>
+                (eventType.TeamId == null && eventType.OwnerUserId == callerUserId) ||
+                (eventType.TeamId != null && (eventType.OwnerUserId == callerUserId || hostedEventTypeIds.Contains(eventType.Id)))
+            )
+            .OrderBy(eventType => eventType.TeamId == null ? 0 : 1)
+            .ThenBy(eventType => eventType.Title)
+            .ThenBy(eventType => eventType.Id)
+            .ToArrayAsync(cancellationToken);
+    }
+
+    public async Task<EventType[]> GetByIdsAsync(EventTypeId[] ids, CancellationToken cancellationToken)
+    {
+        if (ids.Length == 0) return [];
+        return await DbSet.Where(eventType => ids.Contains(eventType.Id)).ToArrayAsync(cancellationToken);
     }
 }

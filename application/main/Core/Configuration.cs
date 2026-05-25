@@ -9,6 +9,8 @@ using Main.Features.Permissions.Pipeline;
 using Main.Features.Permissions.Services;
 using Main.Features.Scheduling.Notifications;
 using Main.Features.Scheduling.Shared;
+using Main.Features.TeamMembers.Domain;
+using Main.Features.TeamMembers.Infrastructure;
 using Main.Features.Webhooks.Infrastructure;
 using Main.Features.Webhooks.Jobs;
 using Main.Features.Workflows.Domain;
@@ -55,6 +57,7 @@ public static class Configuration
                 .AddScoped<CollectiveSlotCalculator>()
                 .AddScoped<RoundRobinSlotCalculator>()
                 .AddScoped<IHostRepository, HostRepository>()
+                .AddScoped<ITeamMemberDirectory, AccountDbTeamMemberDirectory>()
                 .AddScoped<InsightsScopeResolver>()
                 .AddScoped<ManagedEventTypePropagator>()
                 .AddScoped<EventTypeUpdatedManagedSyncHandler>()

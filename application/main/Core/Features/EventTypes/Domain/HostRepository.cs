@@ -16,6 +16,9 @@ public interface IHostRepository : ICrudRepository<Host, HostId>
     Task<Host[]> GetForEventTypeUnfilteredAsync(EventTypeId eventTypeId, CancellationToken cancellationToken);
 
     Task<Host?> GetByEventTypeAndUserAsync(EventTypeId eventTypeId, UserId userId, CancellationToken cancellationToken);
+
+    /// <summary>Distinct user ids that appear as a host on any event type belonging to the given team.</summary>
+    Task<UserId[]> GetDistinctUserIdsForTeamAsync(TenantId teamId, CancellationToken cancellationToken);
 }
 
 public sealed class HostRepository(MainDbContext mainDbContext)
@@ -45,5 +48,18 @@ public sealed class HostRepository(MainDbContext mainDbContext)
         return await DbSet
             .Where(host => host.EventTypeId == eventTypeId && host.UserId == userId)
             .FirstOrDefaultAsync(cancellationToken);
+    }
+
+    public async Task<UserId[]> GetDistinctUserIdsForTeamAsync(TenantId teamId, CancellationToken cancellationToken)
+    {
+        var eventTypeIds = Context.Set<EventType>()
+            .Where(eventType => eventType.TeamId == teamId)
+            .Select(eventType => eventType.Id);
+
+        return await DbSet
+            .Where(host => eventTypeIds.Contains(host.EventTypeId))
+            .Select(host => host.UserId)
+            .Distinct()
+            .ToArrayAsync(cancellationToken);
     }
 }

@@ -50,5 +50,25 @@ public sealed class EventTypeEndpoints : IEndpoints
         group.MapPost("/{id}/team-assignment", async Task<ApiResult<EventTypeResponse>> (EventTypeId id, UpdateTeamAssignmentCommand command, IMediator mediator)
             => await mediator.Send(command with { Id = id })
         ).Produces<EventTypeResponse>();
+
+        group.MapGet("/by-viewer", async Task<ApiResult<EventTypesByViewerResponse>> (IMediator mediator)
+            => await mediator.Send(new GetEventTypesByViewerQuery())
+        ).Produces<EventTypesByViewerResponse>();
+
+        group.MapGet("/groups", async Task<ApiResult<EventTypeGroupsResponse>> (IMediator mediator)
+            => await mediator.Send(new GetEventTypeGroupsQuery())
+        ).Produces<EventTypeGroupsResponse>();
+
+        group.MapGet("/{id}/assignment-candidates", async Task<ApiResult<HostsForAssignmentResponse>> (EventTypeId id, IMediator mediator)
+            => await mediator.Send(new GetHostsForAssignmentQuery(id))
+        ).Produces<HostsForAssignmentResponse>();
+
+        group.MapGet("/{id}/availability", async Task<ApiResult<HostsForAvailabilityResponse>> (EventTypeId id, DateOnly from, DateOnly to, IMediator mediator)
+            => await mediator.Send(new GetHostsForAvailabilityQuery(id, from, to))
+        ).Produces<HostsForAvailabilityResponse>();
+
+        group.MapPost("/bulk-apply-locations", async Task<ApiResult<BulkApplyLocationsResponse>> (BulkApplyLocationsCommand command, IMediator mediator)
+            => await mediator.Send(command)
+        ).Produces<BulkApplyLocationsResponse>();
     }
 }
