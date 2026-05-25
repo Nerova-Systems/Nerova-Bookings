@@ -1,5 +1,7 @@
 using Main.Database;
 using Main.Features.Apps.Connectors.GoogleCalendar;
+using Main.Features.Apps.Connectors.Office365Calendar;
+using Main.Features.Apps.Connectors.Zoom;
 using Main.Features.Apps.Domain;
 using Main.Features.Apps.Infrastructure;
 using Main.Features.EventTypes.Domain;
@@ -57,6 +59,19 @@ public static class Configuration
             // .AddHttpClient(name) returns IHttpClientBuilder.
             services.AddHttpClient(GoogleCalendarSlug.HttpClientName);
 
+            // Named HttpClient for the Office 365 Calendar connector — outbound calls to the
+            // Microsoft identity platform and Microsoft Graph.
+            services.AddHttpClient(Office365CalendarSlug.HttpClientName);
+
+            // Named HttpClient for the Zoom connector — outbound calls to Zoom OAuth
+            // (zoom.us) and the Zoom REST API (api.zoom.us).
+            services.AddHttpClient(ZoomSlug.HttpClientName);
+
+            // Named HttpClients for workflow reminder providers (Twilio SMS, Meta WhatsApp).
+            // Registered here so the API + worker contexts both get the IHttpClientFactory bindings.
+            services.AddHttpClient(TwilioSmsProvider.HttpClientName);
+            services.AddHttpClient(MetaWhatsAppProvider.HttpClientName);
+
             return services
                 .AddScoped<IPermissionCheckService, PermissionCheckService>()
                 .AddScoped<PublicSchedulingResolver>()
@@ -90,12 +105,46 @@ public static class Configuration
                 .AddSingleton<IAppInstaller, GoogleCalendarInstaller>()
                 .AddScoped<GoogleCalendarServiceFactory>()
                 .AddScoped<IExternalBusyTimeProvider, GoogleCalendarBusyTimeProvider>()
+                // ─── Office 365 Calendar connector ─────────────────────────
+                // Mirrors the Google wiring: env-bound options, singleton installer (no
+                // per-request state), scoped service factory + busy-time provider so the
+                // refresh-token persistence flows through the request-scoped repository.
+                .Configure<Office365CalendarOptions>(opts =>
+                {
+                    opts.ClientId = Environment.GetEnvironmentVariable("OFFICE365_CALENDAR_CLIENT_ID") ?? string.Empty;
+                    opts.ClientSecret = Environment.GetEnvironmentVariable("OFFICE365_CALENDAR_CLIENT_SECRET") ?? string.Empty;
+                    var tenantId = Environment.GetEnvironmentVariable("OFFICE365_CALENDAR_TENANT_ID");
+                    if (!string.IsNullOrWhiteSpace(tenantId)) opts.TenantId = tenantId;
+                })
+                .AddSingleton<IAppInstaller, Office365CalendarInstaller>()
+                .AddScoped<Office365CalendarServiceFactory>()
+                .AddScoped<IExternalBusyTimeProvider, Office365CalendarBusyTimeProvider>()
                 .AddScoped<IBookingReferenceRepository, BookingReferenceRepository>()
+                // ─── Zoom connector ────────────────────────────────────────
+                // Conferencing connector: provides Zoom meeting links via IConferenceLinkProvider.
+                // Same shape as the calendar connectors — env-bound options, singleton installer,
+                // scoped factory + provider so the per-credential service flows through the
+                // request-scoped ICredentialRepository when persisting refreshed tokens.
+                .Configure<ZoomOptions>(opts =>
+                {
+                    opts.ClientId = Environment.GetEnvironmentVariable("ZOOM_CLIENT_ID") ?? string.Empty;
+                    opts.ClientSecret = Environment.GetEnvironmentVariable("ZOOM_CLIENT_SECRET") ?? string.Empty;
+                })
+                .AddSingleton<IAppInstaller, ZoomInstaller>()
+                .AddScoped<ZoomServiceFactory>()
+                .AddScoped<IConferenceLinkProvider, ZoomConferenceLinkProvider>()
+                // Scheduling → conferencing bridge. Resolves the right IConferenceLinkProvider
+                // for an event type's location and stamps the join URL + BookingReference
+                // onto the persisted booking.
+                .AddScoped<ConferenceLinkOrchestrator>()
                 // ─── Webhook platform ──────────────────────────────────────
                 // Dispatcher is scoped — uses MainDbContext via the repositories. HttpClient
                 // factory is required by the worker-side processor; safe to register here so the
                 // API can also be wired up (e.g., for synchronous test-fire) without duplicating.
                 .AddScoped<IWebhookDispatcher, WebhookDispatcher>()
+                // Booking → webhook bridge. Command handlers call this to fan booking lifecycle
+                // events (created/cancelled/rescheduled/reported) out to subscribed endpoints.
+                .AddScoped<IBookingWebhookNotifier, BookingWebhookNotifier>()
                 .AddHttpClient()
                 .AddEmailRendering("WebApp")
                 .AddSharedServices<MainDbContext>([Assembly]);
@@ -114,8 +163,23 @@ public static class Configuration
                 .AddScoped<BookingCreatedWorkflowHandler>()
                 .AddScoped<BookingCancelledWorkflowHandler>()
                 .AddScoped<BookingRescheduledWorkflowHandler>()
-                .AddSingleton<ISmsSender, StubSmsSender>()
-                .AddSingleton<IWhatsappSender, StubWhatsappSender>()
+                // ─── Workflow reminder providers ──────────────────────────
+                // Env-bound options + singleton providers (no per-request state — they pull HttpClient
+                // from the factory on each call). When env vars are missing the providers short-circuit
+                // with NotConfigured so the worker keeps ticking in dev / unconfigured environments.
+                .Configure<TwilioOptions>(opts =>
+                {
+                    opts.AccountSid = Environment.GetEnvironmentVariable("TWILIO_ACCOUNT_SID") ?? string.Empty;
+                    opts.AuthToken = Environment.GetEnvironmentVariable("TWILIO_AUTH_TOKEN") ?? string.Empty;
+                    opts.FromNumber = Environment.GetEnvironmentVariable("TWILIO_FROM_NUMBER") ?? string.Empty;
+                })
+                .Configure<MetaWhatsAppOptions>(opts =>
+                {
+                    opts.PhoneNumberId = Environment.GetEnvironmentVariable("META_WABA_PHONE_NUMBER_ID") ?? string.Empty;
+                    opts.AccessToken = Environment.GetEnvironmentVariable("META_WABA_ACCESS_TOKEN") ?? string.Empty;
+                })
+                .AddSingleton<ISmsProvider, TwilioSmsProvider>()
+                .AddSingleton<IWhatsAppProvider, MetaWhatsAppProvider>()
                 // Cross-SCS host lookup (account-database). Scoped because it opens an Npgsql
                 // connection per call; the connection is awaited and disposed within the call.
                 .AddScoped<IUserContactLookup, AccountDbUserContactLookup>()
