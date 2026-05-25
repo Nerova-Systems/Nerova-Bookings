@@ -46,7 +46,10 @@ public static class SystemRoles
         new(PermissionResource.EventType, PermissionAction.Duplicate),
         new(PermissionResource.Schedule, PermissionAction.Read),
         new(PermissionResource.Schedule, PermissionAction.Create),
-        new(PermissionResource.Schedule, PermissionAction.Update)
+        new(PermissionResource.Schedule, PermissionAction.Update),
+        new(PermissionResource.App, PermissionAction.Read),
+        new(PermissionResource.App, PermissionAction.Create),
+        new(PermissionResource.App, PermissionAction.Delete)
     };
 
     /// <summary>

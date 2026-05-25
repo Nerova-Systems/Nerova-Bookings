@@ -1,6 +1,8 @@
+using Main.Features.Apps.Domain;
 using Main.Features.EventTypes.Domain;
 using Main.Features.Schedules.Domain;
 using Main.Features.Scheduling.Domain;
+using Main.Features.Webhooks.Domain;
 using Main.Features.Workflows.Domain;
 using SharedKernel.Domain;
 using SharedKernel.Telemetry;
@@ -129,3 +131,27 @@ public sealed class HashedLinkDeleted(EventTypeId eventTypeId, HashedLinkId hash
 
 public sealed class TeamAssignmentUpdated(EventTypeId eventTypeId, bool assignAllTeamMembers)
     : TelemetryEvent(("event_type_id", eventTypeId), ("assign_all_team_members", assignAllTeamMembers));
+
+public sealed class AppInstallStarted(AppSlug slug)
+    : TelemetryEvent(("app_slug", slug));
+
+public sealed class AppInstallCompleted(AppSlug slug)
+    : TelemetryEvent(("app_slug", slug));
+
+public sealed class AppUninstalled(AppSlug slug)
+    : TelemetryEvent(("app_slug", slug));
+
+public sealed class WebhookCreated(WebhookId webhookId)
+    : TelemetryEvent(("webhook_id", webhookId));
+
+public sealed class WebhookUpdated(WebhookId webhookId)
+    : TelemetryEvent(("webhook_id", webhookId));
+
+public sealed class WebhookDeleted(WebhookId webhookId)
+    : TelemetryEvent(("webhook_id", webhookId));
+
+public sealed class WebhookDelivered(WebhookId webhookId, string eventType)
+    : TelemetryEvent(("webhook_id", webhookId), ("event_type", eventType));
+
+public sealed class WebhookDeliveryDeadLettered(WebhookId webhookId, string eventType)
+    : TelemetryEvent(("webhook_id", webhookId), ("event_type", eventType));

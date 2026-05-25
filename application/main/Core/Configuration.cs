@@ -1,4 +1,6 @@
 using Main.Database;
+using Main.Features.Apps.Domain;
+using Main.Features.Apps.Infrastructure;
 using Main.Features.EventTypes.Domain;
 using Main.Features.Insights.Shared;
 using Main.Features.ManagedEventTypes.EventHandlers;
@@ -6,6 +8,8 @@ using Main.Features.ManagedEventTypes.Services;
 using Main.Features.Permissions.Pipeline;
 using Main.Features.Permissions.Services;
 using Main.Features.Scheduling.Shared;
+using Main.Features.Webhooks.Infrastructure;
+using Main.Features.Webhooks.Jobs;
 using Main.Features.Workflows.Domain;
 using Main.Features.Workflows.EventHandlers;
 using Main.Features.Workflows.Infrastructure;
@@ -52,6 +56,21 @@ public static class Configuration
                 .AddScoped<InsightsScopeResolver>()
                 .AddScoped<ManagedEventTypePropagator>()
                 .AddScoped<EventTypeUpdatedManagedSyncHandler>()
+                // ─── App platform ──────────────────────────────────────────
+                // Singleton state store (15-min TTL in-memory). Connector tracks may swap in a
+                // Redis-backed implementation by replacing this registration.
+                .AddSingleton<IOAuthStateStore, InMemoryOAuthStateStore>()
+                // Registry is singleton: it caches the slug→installer dictionary at construction.
+                // It depends on the set of registered IAppInstaller implementations — connector
+                // tracks add their installers as singletons; this track ships zero installers.
+                .AddSingleton<IAppRegistry, AppRegistry>()
+                .AddSingleton<CredentialProtector>()
+                // ─── Webhook platform ──────────────────────────────────────
+                // Dispatcher is scoped — uses MainDbContext via the repositories. HttpClient
+                // factory is required by the worker-side processor; safe to register here so the
+                // API can also be wired up (e.g., for synchronous test-fire) without duplicating.
+                .AddScoped<IWebhookDispatcher, WebhookDispatcher>()
+                .AddHttpClient()
                 .AddSharedServices<MainDbContext>([Assembly]);
         }
 
@@ -85,6 +104,14 @@ public static class Configuration
                 .WithCron("*/1 * * * *");
 
             services.MapTicker<DispatchWorkflowReminderJob>()
+                .WithCron("*/1 * * * *");
+
+            // ─── Webhook delivery worker ──────────────────────────────────
+            // The processor encapsulates the HTTP + backoff behaviour so it can be unit-tested
+            // without the TickerQ host; the job is the cron entry point that batches due rows.
+            services.AddScoped<WebhookDeliveryProcessor>();
+
+            services.MapTicker<WebhookDeliveryJob>()
                 .WithCron("*/1 * * * *");
 
             return services;

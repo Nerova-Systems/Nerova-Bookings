@@ -27,5 +27,8 @@ public enum PermissionResource
     EventType,
 
     /// <summary>Availability schedules.</summary>
-    Schedule
+    Schedule,
+
+    /// <summary>Installed third-party application connectors (Google Calendar, Zoom, etc.).</summary>
+    App
 }
