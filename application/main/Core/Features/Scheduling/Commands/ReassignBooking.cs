@@ -1,6 +1,8 @@
 using System.Text.Json;
 using FluentValidation;
 using JetBrains.Annotations;
+using Main.Features.Permissions.Domain;
+using Main.Features.Permissions.Pipeline;
 using Main.Features.Scheduling.Domain;
 using SharedKernel.Cqrs;
 using SharedKernel.Domain;
@@ -9,6 +11,7 @@ using SharedKernel.ExecutionContext;
 namespace Main.Features.Scheduling.Commands;
 
 [PublicAPI]
+[RequirePermission(PermissionResource.Booking, PermissionAction.Reassign)]
 public sealed record ReassignBookingCommand(BookingId Id, UserId NewOwnerUserId, string? Reason) : ICommand, IRequest<Result>;
 
 public sealed class ReassignBookingValidator : AbstractValidator<ReassignBookingCommand>

@@ -1,5 +1,7 @@
 using System.Text.Json;
 using JetBrains.Annotations;
+using Main.Features.Permissions.Domain;
+using Main.Features.Permissions.Pipeline;
 using Main.Features.EventTypes.Domain;
 using Main.Features.Scheduling.Domain;
 using Main.Features.Scheduling.Shared;
@@ -10,6 +12,7 @@ using SharedKernel.ExecutionContext;
 namespace Main.Features.Scheduling.Queries;
 
 [PublicAPI]
+[RequirePermission(PermissionResource.Booking, PermissionAction.Read)]
 public sealed record GetBookingDetailsQuery(BookingId Id) : IRequest<Result<BookingDetailsResponse>>;
 
 [PublicAPI]

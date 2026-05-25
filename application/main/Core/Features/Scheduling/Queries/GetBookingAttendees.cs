@@ -1,4 +1,6 @@
 using JetBrains.Annotations;
+using Main.Features.Permissions.Domain;
+using Main.Features.Permissions.Pipeline;
 using Main.Features.Scheduling.Domain;
 using SharedKernel.Cqrs;
 using SharedKernel.ExecutionContext;
@@ -6,6 +8,7 @@ using SharedKernel.ExecutionContext;
 namespace Main.Features.Scheduling.Queries;
 
 [PublicAPI]
+[RequirePermission(PermissionResource.Booking, PermissionAction.Read)]
 public sealed record GetBookingAttendeesQuery(BookingId Id) : IRequest<Result<BookingAttendeesResponse>>;
 
 [PublicAPI]

@@ -1,6 +1,8 @@
 using System.Text.Json;
 using FluentValidation;
 using JetBrains.Annotations;
+using Main.Features.Permissions.Domain;
+using Main.Features.Permissions.Pipeline;
 using Main.Features.Scheduling.Domain;
 using SharedKernel.Cqrs;
 using SharedKernel.ExecutionContext;
@@ -12,6 +14,7 @@ namespace Main.Features.Scheduling.Commands;
 ///     pick a new slot via the public scheduling page. Mirrors cal.com <c>requestReschedule</c>.
 /// </summary>
 [PublicAPI]
+[RequirePermission(PermissionResource.Booking, PermissionAction.Reschedule)]
 public sealed record RequestRescheduleCommand(BookingId Id, string? Reason) : ICommand, IRequest<Result>;
 
 public sealed class RequestRescheduleValidator : AbstractValidator<RequestRescheduleCommand>

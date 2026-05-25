@@ -1,5 +1,7 @@
 using FluentValidation;
 using JetBrains.Annotations;
+using Main.Features.Permissions.Domain;
+using Main.Features.Permissions.Pipeline;
 using Main.Features.Schedules.Domain;
 using Main.Features.Schedules.Shared;
 using Main.Features.Scheduling.Shared;
@@ -10,6 +12,7 @@ using SharedKernel.Telemetry;
 namespace Main.Features.Schedules.Commands;
 
 [PublicAPI]
+[RequirePermission(PermissionResource.Schedule, PermissionAction.Create)]
 public sealed record DuplicateScheduleCommand(ScheduleId SourceScheduleId, string NewName)
     : ICommand, IRequest<Result<ScheduleResponse>>;
 

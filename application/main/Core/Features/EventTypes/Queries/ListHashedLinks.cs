@@ -1,4 +1,6 @@
 using JetBrains.Annotations;
+using Main.Features.Permissions.Domain;
+using Main.Features.Permissions.Pipeline;
 using Main.Features.EventTypes.Domain;
 using Main.Features.EventTypes.Shared;
 using SharedKernel.Cqrs;
@@ -7,6 +9,7 @@ using SharedKernel.ExecutionContext;
 namespace Main.Features.EventTypes.Queries;
 
 [PublicAPI]
+[RequirePermission(PermissionResource.EventType, PermissionAction.Read)]
 public sealed record ListHashedLinksQuery(EventTypeId EventTypeId) : IRequest<Result<HashedLinksResponse>>;
 
 public sealed class ListHashedLinksHandler(

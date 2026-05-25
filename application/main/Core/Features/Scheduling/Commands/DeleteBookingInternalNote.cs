@@ -1,4 +1,6 @@
 using JetBrains.Annotations;
+using Main.Features.Permissions.Domain;
+using Main.Features.Permissions.Pipeline;
 using Main.Features.Scheduling.Domain;
 using SharedKernel.Cqrs;
 using SharedKernel.ExecutionContext;
@@ -6,6 +8,7 @@ using SharedKernel.ExecutionContext;
 namespace Main.Features.Scheduling.Commands;
 
 [PublicAPI]
+[RequirePermission(PermissionResource.Booking, PermissionAction.Update)]
 public sealed record DeleteBookingInternalNoteCommand(BookingId Id, BookingInternalNoteId NoteId) : ICommand, IRequest<Result>;
 
 public sealed class DeleteBookingInternalNoteHandler(

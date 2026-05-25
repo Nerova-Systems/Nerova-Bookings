@@ -534,7 +534,7 @@ public sealed class EventTypeEndpointsTests : EndpointBaseTest<MainDbContext>
         var response = await AuthenticatedMemberHttpClient.DeleteAsync($"/api/event-types/{eventType.Id}");
 
         // Assert
-        await response.ShouldHaveErrorStatusCode(HttpStatusCode.Forbidden, "Only owners and admins can manage event types.");
+        await response.ShouldHaveErrorStatusCode(HttpStatusCode.Forbidden, "You do not have permission to perform this action.");
     }
 
     [Fact]

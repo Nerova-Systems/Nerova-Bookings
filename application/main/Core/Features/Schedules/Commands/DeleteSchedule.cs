@@ -1,4 +1,6 @@
 using JetBrains.Annotations;
+using Main.Features.Permissions.Domain;
+using Main.Features.Permissions.Pipeline;
 using Main.Features.EventTypes.Domain;
 using Main.Features.Schedules.Domain;
 using Main.Features.Schedules.Shared;
@@ -10,6 +12,7 @@ using SharedKernel.Telemetry;
 namespace Main.Features.Schedules.Commands;
 
 [PublicAPI]
+[RequirePermission(PermissionResource.Schedule, PermissionAction.Delete)]
 public sealed record DeleteScheduleCommand(ScheduleId Id) : ICommand, IRequest<Result>;
 
 public sealed class DeleteScheduleHandler(
