@@ -15,7 +15,9 @@ export default function BookingReschedule({ locale }: Readonly<BookingReschedule
   return (
     <TransactionalEmail locale={locale} preview="Your booking has been rescheduled">
       <Subject>
-        <Trans>Booking rescheduled: <Value path="EventTitle" sample="30 min Meeting" /></Trans>
+        <Trans>
+          Booking rescheduled: <Value path="EventTitle" sample="30 min Meeting" />
+        </Trans>
       </Subject>
 
       <Heading level={1} className="text-center">
@@ -30,8 +32,15 @@ export default function BookingReschedule({ locale }: Readonly<BookingReschedule
 
       <Text className="m-[0px] mb-[16px] text-[14px] leading-[24px]">
         <Trans>
-          Your booking for <strong><Value path="EventTitle" sample="30 min Meeting" /></strong> with{" "}
-          <strong><Value path="HostName" sample="Anna Host" /></strong> has been moved to a new time.
+          Your booking for{" "}
+          <strong>
+            <Value path="EventTitle" sample="30 min Meeting" />
+          </strong>{" "}
+          with{" "}
+          <strong>
+            <Value path="HostName" sample="Anna Host" />
+          </strong>{" "}
+          has been moved to a new time.
         </Trans>
       </Text>
 

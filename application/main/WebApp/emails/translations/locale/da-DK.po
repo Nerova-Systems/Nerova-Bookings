@@ -65,13 +65,13 @@ msgid "Was scheduled for"
 msgstr "Var planlagt til"
 
 msgid "Your booking for <0><1/></0> with <2><3/></2> has been cancelled."
-msgstr ""
+msgstr "Din booking af <0><1/></0> med <2><3/></2> er blevet annulleret."
 
 msgid "Your booking for <0><1/></0> with <2><3/></2> has been moved to a new time."
-msgstr ""
+msgstr "Din booking af <0><1/></0> med <2><3/></2> er blevet flyttet til et nyt tidspunkt."
 
 msgid "Your booking for <0><1/></0> with <2><3/></2> is confirmed."
-msgstr ""
+msgstr "Din booking af <0><1/></0> med <2><3/></2> er bekræftet."
 
 msgid "Your booking has been cancelled"
 msgstr "Din booking er annulleret"

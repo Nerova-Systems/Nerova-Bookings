@@ -4,7 +4,7 @@ import { Hr, Section, Text } from "@react-email/components";
 import { Heading } from "@repo/emails/components/Heading";
 import { Subject } from "@repo/emails/components/Subject";
 import { TransactionalEmail } from "@repo/emails/components/TransactionalEmail";
-import { If, Else } from "@repo/emails/helpers/If";
+import { If } from "@repo/emails/helpers/If";
 import { Value } from "@repo/emails/helpers/Value";
 
 type BookingCancellationProps = {
@@ -15,7 +15,9 @@ export default function BookingCancellation({ locale }: Readonly<BookingCancella
   return (
     <TransactionalEmail locale={locale} preview="Your booking has been cancelled">
       <Subject>
-        <Trans>Booking cancelled: <Value path="EventTitle" sample="30 min Meeting" /></Trans>
+        <Trans>
+          Booking cancelled: <Value path="EventTitle" sample="30 min Meeting" />
+        </Trans>
       </Subject>
 
       <Heading level={1} className="text-center">
@@ -30,8 +32,15 @@ export default function BookingCancellation({ locale }: Readonly<BookingCancella
 
       <Text className="m-[0px] mb-[16px] text-[14px] leading-[24px]">
         <Trans>
-          Your booking for <strong><Value path="EventTitle" sample="30 min Meeting" /></strong> with{" "}
-          <strong><Value path="HostName" sample="Anna Host" /></strong> has been cancelled.
+          Your booking for{" "}
+          <strong>
+            <Value path="EventTitle" sample="30 min Meeting" />
+          </strong>{" "}
+          with{" "}
+          <strong>
+            <Value path="HostName" sample="Anna Host" />
+          </strong>{" "}
+          has been cancelled.
         </Trans>
       </Text>
 
