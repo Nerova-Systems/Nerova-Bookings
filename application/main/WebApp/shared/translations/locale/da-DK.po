@@ -148,8 +148,8 @@ msgstr "Tillad omplanlægning af tidligere bookinger"
 msgid "Any rating"
 msgstr "Enhver vurdering"
 
-msgid "App marketplace"
-msgstr "App-markedsplads"
+msgid "App uninstalled"
+msgstr ""
 
 msgid "Apply filters"
 msgstr "Anvend filtre"
@@ -159,6 +159,9 @@ msgstr "Anvend på alle"
 
 msgid "Apps"
 msgstr "Apps"
+
+msgid "Apps installed for your account are available to this event type. Conferencing apps appear as location choices on the Setup tab, and connected calendars are used to check availability."
+msgstr ""
 
 msgid "At least one schedule exists"
 msgstr "Der findes mindst én tidsplan"
@@ -308,6 +311,9 @@ msgstr "Sidder du stadig oppe?"
 msgid "By {0}"
 msgstr "Af {0}"
 
+msgid "Calendar"
+msgstr ""
+
 msgid "Calendar view"
 msgstr "Kalendervisning"
 
@@ -370,6 +376,9 @@ msgstr "Column"
 msgid "Completed"
 msgstr "Gennemført"
 
+msgid "Conferencing"
+msgstr ""
+
 msgid "Configuration"
 msgstr "Konfiguration"
 
@@ -391,8 +400,14 @@ msgstr "Confirmation"
 msgid "Confirmed"
 msgstr "Bekræftet"
 
-msgid "Connect installed apps to this event type to add payments, conferencing, and more."
-msgstr "Forbind installerede apps til denne begivenhedstype for at tilføje betalinger, videomøder og mere."
+msgid "Connect your calendars and conferencing tools so bookings sync automatically and meeting links are created for you."
+msgstr ""
+
+msgid "Connected"
+msgstr ""
+
+msgid "Connected calendars"
+msgstr ""
 
 msgid "Continue"
 msgstr "Fortsæt"
@@ -702,6 +717,9 @@ msgstr "Kunne ikke kopiere hemmelighed"
 msgid "Failed to queue test event"
 msgstr "Kunne ikke sætte testhændelse i kø"
 
+msgid "Failed to start install. Please try again."
+msgstr ""
+
 msgid "Feedback (optional)"
 msgstr "Feedback (valgfrit)"
 
@@ -819,6 +837,22 @@ msgstr "Fysisk"
 msgid "Insights"
 msgstr "Indsigt"
 
+msgid "Install"
+msgstr ""
+
+#. placeholder {0}: missingPrerequisite.name
+msgid "Install {0} first — this app reuses its connection."
+msgstr ""
+
+msgid "Install a calendar or conferencing app to use it with this event type."
+msgstr ""
+
+msgid "Installed"
+msgstr ""
+
+msgid "Installed apps"
+msgstr ""
+
 msgid "Instant meeting"
 msgstr "Øjeblikkeligt møde"
 
@@ -885,6 +919,9 @@ msgstr "Link kopieret"
 msgid "List view"
 msgstr "Listevisning"
 
+msgid "Loading apps..."
+msgstr ""
+
 msgid "Loading event type..."
 msgstr "Indlæser begivenhedstype..."
 
@@ -947,6 +984,9 @@ msgstr "Hovednavigation"
 
 msgid "Make another schedule default before deleting this one."
 msgstr "Gør en anden tidsplan til standard, før du sletter denne."
+
+msgid "Manage apps"
+msgstr ""
 
 msgid "Manage weekly schedules for booking availability."
 msgstr "Administrer ugentlige tidsplaner for bookingtilgængelighed."
@@ -1053,6 +1093,12 @@ msgstr "Næste"
 msgid "No {0} bookings yet"
 msgstr "Ingen {0} bookinger endnu"
 
+msgid "No apps available"
+msgstr ""
+
+msgid "No apps installed"
+msgstr ""
+
 msgid "No availability windows"
 msgstr "Ingen tilgængelighedsvinduer"
 
@@ -1061,6 +1107,15 @@ msgstr "Ingen bookinger i det valgte interval."
 
 msgid "No bookings this week"
 msgstr "Ingen bookinger denne uge"
+
+msgid "No calendars connected. Install one so availability checks include external events."
+msgstr ""
+
+msgid "No conferencing apps connected. Install one to add it as a location."
+msgstr ""
+
+msgid "No connectors are registered yet. Check back once integrations are enabled."
+msgstr ""
 
 msgid "No custom responses were captured."
 msgstr "Ingen brugerdefinerede svar blev registreret."
@@ -1125,6 +1180,9 @@ msgstr "Kun udeblevne"
 msgid "Not available"
 msgstr "Ikke tilgængelig"
 
+msgid "Not installed"
+msgstr ""
+
 msgid "Note"
 msgstr "Note"
 
@@ -1167,6 +1225,9 @@ msgstr "Vis kun bookinger med mindst én intern note."
 msgid "Only show first available slot"
 msgstr "Vis kun første ledige tidspunkt"
 
+msgid "Other"
+msgstr ""
+
 msgid "Outgoing webhooks"
 msgstr "Udgående webhooks"
 
@@ -1183,11 +1244,14 @@ msgstr "Sat på pause"
 msgid "Paused webhooks stop receiving deliveries until reactivated."
 msgstr "Pausede webhooks modtager ikke leveringer, før de genaktiveres."
 
+msgid "Payment"
+msgstr ""
+
 msgid "Pending"
 msgstr "Afventer"
 
-msgid "Per-event-type app configuration will be available in a future release."
-msgstr "App-konfiguration pr. begivenhedstype bliver tilgængelig i en fremtidig udgivelse."
+msgid "Per-event-type calendar destination is not yet configurable — connected calendars are used for availability only."
+msgstr ""
 
 msgid "Phone"
 msgstr "Telefon"
@@ -1701,6 +1765,16 @@ msgstr "Justér hvordan planen præsenterer ledige tidspunkter for bookerne."
 msgid "Unavailable"
 msgstr "Utilgængelig"
 
+msgid "Uninstall"
+msgstr ""
+
+#. placeholder {0}: app?.name ?? ""
+msgid "Uninstall {0}?"
+msgstr ""
+
+msgid "Uninstall app"
+msgstr ""
+
 msgid "Unit"
 msgstr "Enhed"
 
@@ -1847,3 +1921,6 @@ msgstr "Din booking er bekræftet."
 
 msgid "Your dashboard is empty"
 msgstr "Dit dashboard er tomt"
+
+msgid "Your stored connection will be removed. Existing bookings keep their location and calendar destination, but new bookings will no longer use this app."
+msgstr ""

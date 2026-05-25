@@ -148,8 +148,8 @@ msgstr "Allow rescheduling past bookings"
 msgid "Any rating"
 msgstr "Any rating"
 
-msgid "App marketplace"
-msgstr "App marketplace"
+msgid "App uninstalled"
+msgstr "App uninstalled"
 
 msgid "Apply filters"
 msgstr "Apply filters"
@@ -159,6 +159,9 @@ msgstr "Apply to all"
 
 msgid "Apps"
 msgstr "Apps"
+
+msgid "Apps installed for your account are available to this event type. Conferencing apps appear as location choices on the Setup tab, and connected calendars are used to check availability."
+msgstr "Apps installed for your account are available to this event type. Conferencing apps appear as location choices on the Setup tab, and connected calendars are used to check availability."
 
 msgid "At least one schedule exists"
 msgstr "At least one schedule exists"
@@ -308,6 +311,9 @@ msgstr "Burning the midnight oil?"
 msgid "By {0}"
 msgstr "By {0}"
 
+msgid "Calendar"
+msgstr "Calendar"
+
 msgid "Calendar view"
 msgstr "Calendar view"
 
@@ -370,6 +376,9 @@ msgstr "Column"
 msgid "Completed"
 msgstr "Completed"
 
+msgid "Conferencing"
+msgstr "Conferencing"
+
 msgid "Configuration"
 msgstr "Configuration"
 
@@ -391,8 +400,14 @@ msgstr "Confirmation"
 msgid "Confirmed"
 msgstr "Confirmed"
 
-msgid "Connect installed apps to this event type to add payments, conferencing, and more."
-msgstr "Connect installed apps to this event type to add payments, conferencing, and more."
+msgid "Connect your calendars and conferencing tools so bookings sync automatically and meeting links are created for you."
+msgstr "Connect your calendars and conferencing tools so bookings sync automatically and meeting links are created for you."
+
+msgid "Connected"
+msgstr "Connected"
+
+msgid "Connected calendars"
+msgstr "Connected calendars"
 
 msgid "Continue"
 msgstr "Continue"
@@ -702,6 +717,9 @@ msgstr "Failed to copy secret"
 msgid "Failed to queue test event"
 msgstr "Failed to queue test event"
 
+msgid "Failed to start install. Please try again."
+msgstr "Failed to start install. Please try again."
+
 msgid "Feedback (optional)"
 msgstr "Feedback (optional)"
 
@@ -819,6 +837,22 @@ msgstr "In person"
 msgid "Insights"
 msgstr "Insights"
 
+msgid "Install"
+msgstr "Install"
+
+#. placeholder {0}: missingPrerequisite.name
+msgid "Install {0} first — this app reuses its connection."
+msgstr "Install {0} first — this app reuses its connection."
+
+msgid "Install a calendar or conferencing app to use it with this event type."
+msgstr "Install a calendar or conferencing app to use it with this event type."
+
+msgid "Installed"
+msgstr "Installed"
+
+msgid "Installed apps"
+msgstr "Installed apps"
+
 msgid "Instant meeting"
 msgstr "Instant meeting"
 
@@ -885,6 +919,9 @@ msgstr "Link copied"
 msgid "List view"
 msgstr "List view"
 
+msgid "Loading apps..."
+msgstr "Loading apps..."
+
 msgid "Loading event type..."
 msgstr "Loading event type..."
 
@@ -947,6 +984,9 @@ msgstr "Main navigation"
 
 msgid "Make another schedule default before deleting this one."
 msgstr "Make another schedule default before deleting this one."
+
+msgid "Manage apps"
+msgstr "Manage apps"
 
 msgid "Manage weekly schedules for booking availability."
 msgstr "Manage weekly schedules for booking availability."
@@ -1053,6 +1093,12 @@ msgstr "Next"
 msgid "No {0} bookings yet"
 msgstr "No {0} bookings yet"
 
+msgid "No apps available"
+msgstr "No apps available"
+
+msgid "No apps installed"
+msgstr "No apps installed"
+
 msgid "No availability windows"
 msgstr "No availability windows"
 
@@ -1061,6 +1107,15 @@ msgstr "No bookings in the selected range."
 
 msgid "No bookings this week"
 msgstr "No bookings this week"
+
+msgid "No calendars connected. Install one so availability checks include external events."
+msgstr "No calendars connected. Install one so availability checks include external events."
+
+msgid "No conferencing apps connected. Install one to add it as a location."
+msgstr "No conferencing apps connected. Install one to add it as a location."
+
+msgid "No connectors are registered yet. Check back once integrations are enabled."
+msgstr "No connectors are registered yet. Check back once integrations are enabled."
 
 msgid "No custom responses were captured."
 msgstr "No custom responses were captured."
@@ -1125,6 +1180,9 @@ msgstr "No-show only"
 msgid "Not available"
 msgstr "Not available"
 
+msgid "Not installed"
+msgstr "Not installed"
+
 msgid "Note"
 msgstr "Note"
 
@@ -1167,6 +1225,9 @@ msgstr "Only show bookings with at least one internal note."
 msgid "Only show first available slot"
 msgstr "Only show first available slot"
 
+msgid "Other"
+msgstr "Other"
+
 msgid "Outgoing webhooks"
 msgstr "Outgoing webhooks"
 
@@ -1183,11 +1244,14 @@ msgstr "Paused"
 msgid "Paused webhooks stop receiving deliveries until reactivated."
 msgstr "Paused webhooks stop receiving deliveries until reactivated."
 
+msgid "Payment"
+msgstr "Payment"
+
 msgid "Pending"
 msgstr "Pending"
 
-msgid "Per-event-type app configuration will be available in a future release."
-msgstr "Per-event-type app configuration will be available in a future release."
+msgid "Per-event-type calendar destination is not yet configurable — connected calendars are used for availability only."
+msgstr "Per-event-type calendar destination is not yet configurable — connected calendars are used for availability only."
 
 msgid "Phone"
 msgstr "Phone"
@@ -1701,6 +1765,16 @@ msgstr "Tune how the schedule presents available slots to bookers."
 msgid "Unavailable"
 msgstr "Unavailable"
 
+msgid "Uninstall"
+msgstr "Uninstall"
+
+#. placeholder {0}: app?.name ?? ""
+msgid "Uninstall {0}?"
+msgstr "Uninstall {0}?"
+
+msgid "Uninstall app"
+msgstr "Uninstall app"
+
 msgid "Unit"
 msgstr "Unit"
 
@@ -1847,3 +1921,6 @@ msgstr "Your booking is confirmed."
 
 msgid "Your dashboard is empty"
 msgstr "Your dashboard is empty"
+
+msgid "Your stored connection will be removed. Existing bookings keep their location and calendar destination, but new bookings will no longer use this app."
+msgstr "Your stored connection will be removed. Existing bookings keep their location and calendar destination, but new bookings will no longer use this app."
