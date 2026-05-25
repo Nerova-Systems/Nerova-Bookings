@@ -91,6 +91,9 @@ msgstr "100 GB storage"
 msgid "100% Security Score"
 msgstr "100% Security Score"
 
+msgid "12 hour"
+msgstr "12 hour"
+
 msgid ""
 "123 Example Street\n"
 "Anytown, AA 12345"
@@ -103,6 +106,9 @@ msgstr "14 h 30 min logged"
 
 msgid "2 hours ago"
 msgstr "2 hours ago"
+
+msgid "24 hour"
+msgstr "24 hour"
 
 msgid "2X large"
 msgstr "2X large"
@@ -698,6 +704,9 @@ msgstr "Choose a name and select the permissions this role grants."
 msgid "Choose a plan to get started."
 msgstr "Choose a plan to get started."
 
+msgid "Choose between a 12-hour or 24-hour clock display."
+msgstr "Choose between a 12-hour or 24-hour clock display."
+
 msgid "Choose how the application looks to you on this device."
 msgstr "Choose how the application looks to you on this device."
 
@@ -838,6 +847,9 @@ msgstr "Cooking time"
 
 msgid "Coq au vin"
 msgstr "Coq au vin"
+
+msgid "Could not save preferences. Please try again."
+msgstr "Could not save preferences. Please try again."
 
 msgid "Country"
 msgstr "Country"
@@ -1227,6 +1239,9 @@ msgstr "Enchiladas verdes"
 msgid "Encrypt SMTP connection with SSL/TLS."
 msgstr "Encrypt SMTP connection with SSL/TLS."
 
+msgid "Enter a valid IANA time zone (e.g. Europe/Copenhagen)."
+msgstr "Enter a valid IANA time zone (e.g. Europe/Copenhagen)."
+
 msgid "Enter SMTP password"
 msgstr "Enter SMTP password"
 
@@ -1358,6 +1373,9 @@ msgstr "Free, open-source .NET and React starter kit for building modern SaaS ap
 
 msgid "French"
 msgstr "French"
+
+msgid "Friday"
+msgstr "Friday"
 
 msgid "friend@example.com"
 msgstr "friend@example.com"
@@ -1789,6 +1807,9 @@ msgstr "Manage"
 msgid "Manage {0}"
 msgstr "Manage {0}"
 
+msgid "Manage how dates, times, and language are presented across the app."
+msgstr "Manage how dates, times, and language are presented across the app."
+
 msgid "Manage subscription"
 msgstr "Manage subscription"
 
@@ -1908,6 +1929,9 @@ msgstr "Modifier combo"
 
 msgid "Mole poblano"
 msgstr "Mole poblano"
+
+msgid "Monday"
+msgstr "Monday"
 
 msgid "More export options"
 msgstr "More export options"
@@ -2318,6 +2342,9 @@ msgstr "Preference updated successfully"
 msgid "Preferences"
 msgstr "Preferences"
 
+msgid "Preferences saved"
+msgstr "Preferences saved"
+
 msgid "Premium"
 msgstr "Premium"
 
@@ -2625,6 +2652,9 @@ msgstr "Roles"
 
 msgid "Safari"
 msgstr "Safari"
+
+msgid "Saturday"
+msgstr "Saturday"
 
 msgid "Save"
 msgstr "Save"
@@ -2959,6 +2989,9 @@ msgstr "Standard"
 msgid "Standard user access"
 msgstr "Standard user access"
 
+msgid "Start of week"
+msgstr "Start of week"
+
 msgid "State / Province"
 msgstr "State / Province"
 
@@ -2995,6 +3028,9 @@ msgstr "Subtle background for grouped rows inside a panel."
 
 msgid "Suggestions"
 msgstr "Suggestions"
+
+msgid "Sunday"
+msgstr "Sunday"
 
 msgid "Suspended"
 msgstr "Suspended"
@@ -3095,8 +3131,14 @@ msgstr "The agreement governing your use of our Service, including acceptable us
 msgid "The authentication request was invalid. Please try again."
 msgstr "The authentication request was invalid. Please try again."
 
+msgid "The first day shown in calendar views and weekly schedules."
+msgstr "The first day shown in calendar views and weekly schedules."
+
 msgid "The item will be moved to the archive. You can restore it later from the archive."
 msgstr "The item will be moved to the archive. You can restore it later from the archive."
+
+msgid "The language used throughout the application."
+msgstr "The language used throughout the application."
 
 msgid "The name of your account, shown to users and in email notifications"
 msgstr "The name of your account, shown to users and in email notifications"
@@ -3160,6 +3202,12 @@ msgstr "This will permanently delete <0>{totalDeletedUsersCount} users</0> in th
 
 msgid "This will permanently delete <0>1 user</0> in the recycle bin."
 msgstr "This will permanently delete <0>1 user</0> in the recycle bin."
+
+msgid "Thursday"
+msgstr "Thursday"
+
+msgid "Time format"
+msgstr "Time format"
 
 msgid "Time zone"
 msgstr "Time zone"
@@ -3260,6 +3308,9 @@ msgstr "Try again"
 msgid "Try clearing or adjusting the filters to see more results."
 msgstr "Try clearing or adjusting the filters to see more results."
 
+msgid "Tuesday"
+msgstr "Tuesday"
+
 msgid "Two-factor authentication"
 msgstr "Two-factor authentication"
 
@@ -3359,6 +3410,9 @@ msgstr "Use SSL"
 
 msgid "Use SSL/TLS"
 msgstr "Use SSL/TLS"
+
+msgid "Used to display booking times in your local time."
+msgstr "Used to display booking times in your local time."
 
 msgid "User"
 msgstr "User"
@@ -3491,6 +3545,9 @@ msgstr "Warning alert"
 
 msgid "We detected a security issue with your login attempt. Please try again."
 msgstr "We detected a security issue with your login attempt. Please try again."
+
+msgid "Wednesday"
+msgstr "Wednesday"
 
 msgid "What's at the market this week"
 msgstr "What's at the market this week"
