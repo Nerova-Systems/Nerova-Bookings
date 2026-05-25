@@ -41,7 +41,10 @@ public sealed class RequestRescheduleHandler(
             return Result.Unauthorized("Authentication is required.");
         }
 
-        var item = await bookingRepository.GetForOwnerWithEventTypeAsync(tenantId, ownerUserId, executionContext.ActiveTeamId, command.Id, cancellationToken);
+        var isAdminOrOwner = executionContext.UserInfo.Role is SystemRoles.Owner or SystemRoles.Admin;
+        var item = isAdminOrOwner
+            ? await bookingRepository.GetByIdInTenantWithEventTypeAsync(tenantId, command.Id, cancellationToken)
+            : await bookingRepository.GetForOwnerWithEventTypeAsync(tenantId, ownerUserId, executionContext.ActiveTeamId, command.Id, cancellationToken);
         if (item is null)
         {
             return Result.NotFound($"Booking '{command.Id}' was not found.");

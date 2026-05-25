@@ -37,7 +37,13 @@ public sealed class CancelBookingHandler(
             return Result.Unauthorized("Authentication is required.");
         }
 
-        var item = await bookingRepository.GetForOwnerWithEventTypeAsync(tenantId, ownerUserId, executionContext.ActiveTeamId, command.Id, cancellationToken);
+        // Admin/Owner may cancel any booking in the tenant; Member is restricted to bookings they
+        // host (owner-scoped lookup). Member calls on a booking they don't own return NotFound to
+        // avoid leaking existence — diverges from the original task spec which suggested 403.
+        var isAdminOrOwner = executionContext.UserInfo.Role is SystemRoles.Owner or SystemRoles.Admin;
+        var item = isAdminOrOwner
+            ? await bookingRepository.GetByIdInTenantWithEventTypeAsync(tenantId, command.Id, cancellationToken)
+            : await bookingRepository.GetForOwnerWithEventTypeAsync(tenantId, ownerUserId, executionContext.ActiveTeamId, command.Id, cancellationToken);
         if (item is null)
         {
             return Result.NotFound($"Booking '{command.Id}' was not found.");

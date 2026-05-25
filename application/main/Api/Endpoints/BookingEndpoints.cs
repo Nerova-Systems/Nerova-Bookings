@@ -81,5 +81,13 @@ public sealed class BookingEndpoints : IEndpoints
         group.MapDelete("/{id}/seats/{seatId}", async Task<ApiResult> (BookingId id, BookingSeatId seatId, IMediator mediator)
             => await mediator.Send(new ReleaseBookingSeatCommand(id, seatId))
         );
+
+        group.MapPost("/{id}/report", async Task<ApiResult<BookingReportId>> (BookingId id, ReportBookingCommand command, IMediator mediator)
+            => await mediator.Send(command with { Id = id })
+        ).Produces<BookingReportId>();
+
+        group.MapGet("/reports", async Task<ApiResult<BookingReportsResponse>> ([AsParameters] GetReportsForTenantQuery query, IMediator mediator)
+            => await mediator.Send(query)
+        ).Produces<BookingReportsResponse>();
     }
 }

@@ -30,8 +30,8 @@ public static class SystemRoles
 
     /// <summary>
     ///     Members receive day-to-day permissions: read/create/update across all three resources, plus
-    ///     the booking-update sub-actions (cancel, reschedule) and event-type duplication.
-    ///     Members cannot reassign bookings, run reports, or delete resources.
+    ///     the booking-update sub-actions (cancel, reschedule, report) and event-type duplication.
+    ///     Members cannot reassign bookings, list reports / run reports, or delete resources.
     /// </summary>
     public static readonly IReadOnlySet<Permission> MemberPermissions = new HashSet<Permission>
     {
@@ -40,6 +40,7 @@ public static class SystemRoles
         new(PermissionResource.Booking, PermissionAction.Update),
         new(PermissionResource.Booking, PermissionAction.Cancel),
         new(PermissionResource.Booking, PermissionAction.Reschedule),
+        new(PermissionResource.Booking, PermissionAction.Report),
         new(PermissionResource.EventType, PermissionAction.Read),
         new(PermissionResource.EventType, PermissionAction.Create),
         new(PermissionResource.EventType, PermissionAction.Update),
