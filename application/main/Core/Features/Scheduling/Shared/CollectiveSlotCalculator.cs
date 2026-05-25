@@ -19,11 +19,13 @@ public sealed class CollectiveSlotCalculator(TimeProvider timeProvider)
         DateTimeOffset startTime,
         DateTimeOffset endTime,
         string timeZone,
-        int duration
+        int duration,
+        ScheduleAdjustments? adjustments = null
     )
     {
         var scheduleTimeZone = TimeZoneInfo.FindSystemTimeZoneById(schedule.TimeZone);
         var requestTimeZone = TimeZoneInfo.FindSystemTimeZoneById(timeZone);
+        var effectiveAdjustments = adjustments ?? ScheduleAdjustments.Empty;
         var now = timeProvider.GetUtcNow();
         var earliestStart = now.AddMinutes(eventType.MinimumBookingNoticeMinutes + (eventType.Settings.Limits.FirstAvailableSlotMinutes ?? 0));
         var slots = new List<PublicSlotResponse>();
@@ -32,6 +34,8 @@ public sealed class CollectiveSlotCalculator(TimeProvider timeProvider)
 
         for (var date = firstLocalDate; date <= lastLocalDate; date = date.AddDays(1))
         {
+            if (effectiveAdjustments.IsOutOfOffice(date)) continue;
+            var dateTimeZone = effectiveAdjustments.GetEffectiveTimeZone(date, scheduleTimeZone);
             foreach (var window in GetWindows(schedule, date))
             {
                 var localStart = date.ToDateTime(TimeOnly.MinValue).AddMinutes(window.StartMinute + (eventType.Settings.Limits.OffsetStartMinutes ?? 0));
@@ -45,7 +49,7 @@ public sealed class CollectiveSlotCalculator(TimeProvider timeProvider)
                         continue;
                     }
 
-                    var candidateStart = new DateTimeOffset(candidate, scheduleTimeZone.GetUtcOffset(candidate)).ToUniversalTime();
+                    var candidateStart = new DateTimeOffset(candidate, dateTimeZone.GetUtcOffset(candidate)).ToUniversalTime();
                     var candidateEnd = candidateStart.AddMinutes(duration);
                     if (candidateStart < startTime || candidateEnd > endTime || candidateStart < earliestStart) continue;
                     if (!IsInsideBookingWindow(eventType, candidateStart, requestTimeZone, now)) continue;
@@ -68,9 +72,9 @@ public sealed class CollectiveSlotCalculator(TimeProvider timeProvider)
             );
     }
 
-    public bool IsSlotAvailable(EventType eventType, Schedule schedule, IReadOnlyDictionary<UserId, Booking[]> hostBookings, DateTimeOffset startTime, int duration, string timeZone)
+    public bool IsSlotAvailable(EventType eventType, Schedule schedule, IReadOnlyDictionary<UserId, Booking[]> hostBookings, DateTimeOffset startTime, int duration, string timeZone, ScheduleAdjustments? adjustments = null)
     {
-        return GetSlots(eventType, schedule, hostBookings, startTime, startTime.AddMinutes(duration), timeZone, duration)
+        return GetSlots(eventType, schedule, hostBookings, startTime, startTime.AddMinutes(duration), timeZone, duration, adjustments)
             .Values
             .SelectMany(slots => slots)
             .Any(slot => slot.Time == startTime);
