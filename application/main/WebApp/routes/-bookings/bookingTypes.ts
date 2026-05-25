@@ -96,6 +96,18 @@ export function formatBookingDateRange(booking: BookingListItem) {
   return `${dateFormatter.format(start)}, ${timeFormatter.format(start)} - ${timeFormatter.format(end)}`;
 }
 
+export function formatBookingDuration(booking: BookingListItem) {
+  const start = new Date(booking.startTime).getTime();
+  const end = new Date(booking.endTime).getTime();
+  const minutes = Math.max(0, Math.round((end - start) / 60_000));
+  if (minutes < 60) {
+    return `${minutes}m`;
+  }
+  const hours = Math.floor(minutes / 60);
+  const remaining = minutes % 60;
+  return remaining === 0 ? `${hours}h` : `${hours}h ${remaining}m`;
+}
+
 export interface BookingFilterState {
   search?: string;
   eventTypeId?: string;

@@ -14,8 +14,8 @@ const csvHeaders = [
 ] as const;
 
 function escapeCsvCell(value: string): string {
-  if (value.includes(",") || value.includes("\"") || value.includes("\n") || value.includes("\r")) {
-    return `"${value.replace(/"/g, "\"\"")}"`;
+  if (value.includes(",") || value.includes('"') || value.includes("\n") || value.includes("\r")) {
+    return `"${value.replace(/"/g, '""')}"`;
   }
   return value;
 }
@@ -37,7 +37,10 @@ function bookingToRow(booking: BookingListItem): string[] {
 }
 
 export function downloadBookingsCsv(bookings: readonly BookingListItem[], filename: string): void {
-  const rows = [csvHeaders.map(escapeCsvCell).join(","), ...bookings.map((booking) => bookingToRow(booking).map(escapeCsvCell).join(","))];
+  const rows = [
+    csvHeaders.map(escapeCsvCell).join(","),
+    ...bookings.map((booking) => bookingToRow(booking).map(escapeCsvCell).join(","))
+  ];
   const csvContent = `\uFEFF${rows.join("\r\n")}`;
   const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8" });
   const url = URL.createObjectURL(blob);

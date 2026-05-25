@@ -49,7 +49,9 @@ export function EditBookingLocationDialog({
             <Trans>Edit location</Trans>
           </DialogTitle>
         </DialogHeader>
-        {booking && <EditBookingLocationDialogBody booking={booking} onClose={() => onOpenChange(false)} onSaved={onSaved} />}
+        {booking && (
+          <EditBookingLocationDialogBody booking={booking} onClose={() => onOpenChange(false)} onSaved={onSaved} />
+        )}
       </DialogContent>
     </Dialog>
   );

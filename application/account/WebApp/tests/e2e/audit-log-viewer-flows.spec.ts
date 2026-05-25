@@ -64,10 +64,7 @@ test.describe("@smoke", () => {
    * - The "Clear filters" button is hidden when no filters are active — assert that too to lock in
    *   the default-state UX contract
    */
-  test("should render the audit log viewer with the empty state for a fresh tenant", async ({
-    ownerPage,
-    browser
-  }) => {
+  test("should render the audit log viewer with the empty state for a fresh tenant", async ({ ownerPage, browser }) => {
     await step("Activate the full tier chain + cap-audit-log & enable every tenant override")(async () => {
       await activateBaseFlags(browser, FLAG_CHAIN);
       await setOwnerTenantOverrides(ownerPage, FLAG_CHAIN, true);

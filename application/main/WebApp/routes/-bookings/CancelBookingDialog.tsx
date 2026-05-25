@@ -49,7 +49,9 @@ export function CancelBookingDialog({
             )}
           </DialogDescription>
         </DialogHeader>
-        {booking && <CancelBookingDialogBody booking={booking} onClose={() => onOpenChange(false)} onCancelled={onCancelled} />}
+        {booking && (
+          <CancelBookingDialogBody booking={booking} onClose={() => onOpenChange(false)} onCancelled={onCancelled} />
+        )}
       </DialogContent>
     </Dialog>
   );

@@ -45,7 +45,9 @@ export function RejectBookingDialog({
             <Trans>The attendee will be notified that their booking has been rejected.</Trans>
           </DialogDescription>
         </DialogHeader>
-        {booking && <RejectBookingDialogBody booking={booking} onRejected={onRejected} onClose={() => onOpenChange(false)} />}
+        {booking && (
+          <RejectBookingDialogBody booking={booking} onRejected={onRejected} onClose={() => onOpenChange(false)} />
+        )}
       </DialogContent>
     </Dialog>
   );
@@ -71,7 +73,10 @@ function RejectBookingDialogBody({
       validationErrors={rejectMutation.error?.errors}
       onSubmit={() => {
         if (reason.trim().length === 0) return;
-        rejectMutation.mutate({ params: { path: { id: booking.id } }, body: { id: booking.id, reason: reason.trim() } });
+        rejectMutation.mutate({
+          params: { path: { id: booking.id } },
+          body: { id: booking.id, reason: reason.trim() }
+        });
       }}
     >
       <DialogBody>

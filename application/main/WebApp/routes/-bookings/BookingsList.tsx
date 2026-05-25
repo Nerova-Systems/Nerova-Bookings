@@ -1,9 +1,11 @@
 import { Trans } from "@lingui/react/macro";
 import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@repo/ui/components/Empty";
 import { Skeleton } from "@repo/ui/components/Skeleton";
+import { type RowKey, Table, TableBody } from "@repo/ui/components/Table";
 import { CalendarXIcon } from "lucide-react";
 
-import { BookingListItem as BookingListRow } from "./BookingListItem";
+import { BookingsTableHeader } from "./BookingsTableHeader";
+import { BookingsTableRow } from "./BookingsTableRow";
 import {
   type BookingListItem,
   type BookingStatusView,
@@ -15,20 +17,26 @@ export function BookingsList({
   bookings,
   status,
   isLoading,
-  selectedBookingId,
-  onSelectBooking
+  selectedKeys,
+  onSelectionChange,
+  onActivate
 }: Readonly<{
   bookings: BookingListItem[];
   status: BookingStatusView;
   isLoading: boolean;
-  selectedBookingId: string | null;
-  onSelectBooking: (booking: BookingListItem) => void;
+  selectedKeys: ReadonlySet<RowKey>;
+  onSelectionChange: (keys: ReadonlySet<RowKey>) => void;
+  onActivate: (booking: BookingListItem) => void;
 }>) {
   if (isLoading) {
     return (
       <div className="overflow-hidden rounded-md border bg-background">
         {Array.from({ length: 5 }).map((_, index) => (
-          <div key={index} className="grid gap-4 border-b p-4 last:border-b-0 sm:grid-cols-[12rem_1fr_auto]">
+          <div
+            // biome-ignore lint/suspicious/noArrayIndexKey: skeleton placeholders
+            key={index}
+            className="grid gap-4 border-b p-4 last:border-b-0 sm:grid-cols-[12rem_1fr_auto]"
+          >
             <Skeleton className="h-10 w-full" />
             <Skeleton className="h-14 w-full" />
             <Skeleton className="h-9 w-28" />
@@ -57,15 +65,25 @@ export function BookingsList({
   }
 
   return (
-    <div className="overflow-hidden rounded-md border bg-background" data-testid={`${status}-bookings`}>
-      {bookings.map((booking) => (
-        <BookingListRow
-          key={booking.id}
-          booking={booking}
-          isSelected={selectedBookingId === booking.id}
-          onSelectBooking={onSelectBooking}
-        />
-      ))}
-    </div>
+    <Table
+      data-testid={`${status}-bookings`}
+      rowSize="spacious"
+      selectionMode="multiple"
+      selectedKeys={selectedKeys}
+      onSelectionChange={onSelectionChange}
+      onActivate={(key) => {
+        const booking = bookings.find((current) => current.id === key);
+        if (booking) {
+          onActivate(booking);
+        }
+      }}
+    >
+      <BookingsTableHeader />
+      <TableBody>
+        {bookings.map((booking) => (
+          <BookingsTableRow key={booking.id} booking={booking} isSelected={selectedKeys.has(booking.id)} />
+        ))}
+      </TableBody>
+    </Table>
   );
 }

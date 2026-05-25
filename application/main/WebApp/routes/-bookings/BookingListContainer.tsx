@@ -1,13 +1,16 @@
+import type { RowKey } from "@repo/ui/components/Table";
+
 import { t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
 import { Button } from "@repo/ui/components/Button";
 import { BookmarkIcon, DownloadIcon } from "lucide-react";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { toast } from "sonner";
 
 import type { EventType } from "../-scheduling/schedulingTypes";
 
 import { ActiveBookingFilters } from "./ActiveBookingFilters";
+import { BookingBulkActionBar } from "./BookingBulkActionBar";
 import { BookingDetailsSheet } from "./BookingDetailsSheet";
 import { BookingsFilters, type BookingFilterSearch } from "./BookingsFilters";
 import { BookingsList } from "./BookingsList";
@@ -47,6 +50,11 @@ export function BookingListContainer({
   onPageOffsetChange: (pageOffset: number) => void;
 }>) {
   const [selectedBooking, setSelectedBooking] = useState<BookingListItem | null>(null);
+  const [selectedKeys, setSelectedKeys] = useState<ReadonlySet<RowKey>>(() => new Set<RowKey>());
+  const selectedBookings = useMemo(
+    () => bookings.filter((booking) => selectedKeys.has(booking.id)),
+    [bookings, selectedKeys]
+  );
   const pageOffset = search.pageOffset;
   const canGoPrevious = pageOffset > 0;
   const canGoNext = pageOffset + pageSize < totalCount;
@@ -112,10 +120,12 @@ export function BookingListContainer({
           bookings={bookings}
           status={status}
           isLoading={isLoading}
-          selectedBookingId={selectedBooking?.id ?? null}
-          onSelectBooking={setSelectedBooking}
+          selectedKeys={selectedKeys}
+          onSelectionChange={setSelectedKeys}
+          onActivate={setSelectedBooking}
         />
       </div>
+      <BookingBulkActionBar selectedBookings={selectedBookings} onClear={() => setSelectedKeys(new Set<RowKey>())} />
       <BookingDetailsSheet
         booking={selectedBooking}
         isOpen={selectedBooking !== null}

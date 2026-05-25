@@ -1,5 +1,6 @@
 import { t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
+import { DropdownMenuContent, DropdownMenuSeparator } from "@repo/ui/components/DropdownMenu";
 import {
   CheckIcon,
   CircleXIcon,
@@ -22,7 +23,6 @@ import type { BookingDialogKind } from "./BookingActionDialogs";
 import type { BookingListItem } from "./bookingTypes";
 
 import { BookingActionGroup, BookingActionItem, type BookingActionMenuItem } from "./BookingActionMenuItems";
-import { DropdownMenuContent, DropdownMenuSeparator } from "@repo/ui/components/DropdownMenu";
 
 const ALWAYS_ENABLED = { visible: true, enabled: true, disabledReason: null } as const;
 
@@ -31,7 +31,12 @@ export function BookingActionsMenuContent({
   onSelectDialog
 }: Readonly<{ booking: BookingListItem; onSelectDialog: (dialog: Exclude<BookingDialogKind, null>) => void }>) {
   const confirmActions: BookingActionMenuItem[] = [
-    { key: "confirm", icon: <CheckIcon />, label: <Trans>Confirm booking</Trans>, onSelect: () => onSelectDialog("confirm") },
+    {
+      key: "confirm",
+      icon: <CheckIcon />,
+      label: <Trans>Confirm booking</Trans>,
+      onSelect: () => onSelectDialog("confirm")
+    },
     {
       key: "reject",
       icon: <XIcon />,
@@ -60,7 +65,12 @@ export function BookingActionsMenuContent({
       label: <Trans>Add guests</Trans>,
       onSelect: () => onSelectDialog("addGuests")
     },
-    { key: "reassign", icon: <RefreshCcwIcon />, label: <Trans>Reassign host</Trans> }
+    {
+      key: "reassign",
+      icon: <RefreshCcwIcon />,
+      label: <Trans>Reassign host</Trans>,
+      onSelect: () => onSelectDialog("reassign")
+    }
   ];
 
   const afterEventActions: BookingActionMenuItem[] = [

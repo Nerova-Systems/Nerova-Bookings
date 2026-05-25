@@ -12,10 +12,13 @@ import {
   DialogHeader,
   DialogTitle
 } from "@repo/ui/components/Dialog";
+import { Input } from "@repo/ui/components/Input";
 import { Label } from "@repo/ui/components/Label";
 import { Textarea } from "@repo/ui/components/Textarea";
 import { useState } from "react";
 import { toast } from "sonner";
+
+import type { Schemas } from "@/shared/lib/api/client";
 
 import { api, queryClient } from "@/shared/lib/api/client";
 
@@ -23,33 +26,36 @@ import type { BookingListItem } from "./bookingTypes";
 
 import { GeneralApiErrors } from "../-scheduling/ApiErrors";
 
-export function RequestRescheduleDialog({
+type UserId = Schemas["UserId"];
+
+// TODO: Wave 4.5 — replace plain text input with a host picker (search users in the booker's team).
+export function ReassignBookingDialog({
   booking,
   isOpen,
   onOpenChange,
-  onRequested
+  onReassigned
 }: Readonly<{
   booking: BookingListItem | null;
   isOpen: boolean;
   onOpenChange: (isOpen: boolean) => void;
-  onRequested?: () => void;
+  onReassigned?: () => void;
 }>) {
   return (
-    <Dialog trackingTitle={t`Request reschedule`} open={isOpen} onOpenChange={onOpenChange}>
+    <Dialog trackingTitle={t`Reassign host`} open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent className="sm:w-dialog-md">
         <DialogHeader>
           <DialogTitle>
-            <Trans>Request reschedule</Trans>
+            <Trans>Reassign host</Trans>
           </DialogTitle>
           <DialogDescription>
-            <Trans>The attendee will be asked to pick a new time. Add an optional message.</Trans>
+            <Trans>Move this booking to a different host. The new host will be notified.</Trans>
           </DialogDescription>
         </DialogHeader>
         {booking && (
-          <RequestRescheduleDialogBody
+          <ReassignBookingDialogBody
             booking={booking}
             onClose={() => onOpenChange(false)}
-            onRequested={onRequested}
+            onReassigned={onReassigned}
           />
         )}
       </DialogContent>
@@ -57,43 +63,64 @@ export function RequestRescheduleDialog({
   );
 }
 
-function RequestRescheduleDialogBody({
+function ReassignBookingDialogBody({
   booking,
   onClose,
-  onRequested
-}: Readonly<{ booking: BookingListItem; onClose: () => void; onRequested?: () => void }>) {
+  onReassigned
+}: Readonly<{ booking: BookingListItem; onClose: () => void; onReassigned?: () => void }>) {
+  const [newOwnerUserId, setNewOwnerUserId] = useState("");
   const [reason, setReason] = useState("");
-  const mutation = api.useMutation("post", "/api/bookings/{id}/request-reschedule", {
+  const mutation = api.useMutation("post", "/api/bookings/{id}/reassign", {
     onSuccess: () => {
-      toast.success(t`Reschedule requested`);
+      toast.success(t`Booking reassigned`);
       void queryClient.invalidateQueries();
       onClose();
-      onRequested?.();
+      onReassigned?.();
     }
   });
+
+  const trimmedId = newOwnerUserId.trim();
 
   return (
     <DialogForm
       validationErrors={mutation.error?.errors}
       onSubmit={() => {
+        if (trimmedId.length === 0) return;
         mutation.mutate({
           params: { path: { id: booking.id } },
-          body: { id: booking.id, reason: reason.trim() || null }
+          body: {
+            id: booking.id,
+            newOwnerUserId: trimmedId as UserId,
+            reason: reason.trim() || null
+          }
         });
       }}
     >
       <DialogBody>
         <GeneralApiErrors error={mutation.error} />
         <div className="flex flex-col gap-2">
-          <Label htmlFor="reschedule-reason">
-            <Trans>Message (optional)</Trans>
+          <Label htmlFor="reassign-host-id">
+            <Trans>New host user ID</Trans>
+          </Label>
+          <Input
+            id="reassign-host-id"
+            name="newOwnerUserId"
+            autoFocus={true}
+            required={true}
+            value={newOwnerUserId}
+            placeholder={t`user_...`}
+            onChange={(event) => setNewOwnerUserId(event.currentTarget.value)}
+          />
+        </div>
+        <div className="flex flex-col gap-2">
+          <Label htmlFor="reassign-reason">
+            <Trans>Reason (optional)</Trans>
           </Label>
           <Textarea
-            id="reschedule-reason"
+            id="reassign-reason"
             name="reason"
-            autoFocus={true}
             value={reason}
-            placeholder={t`Let the attendee know why you need to reschedule`}
+            placeholder={t`Why is this booking being reassigned?`}
             onChange={(event) => setReason(event.currentTarget.value)}
           />
         </div>
@@ -102,8 +129,8 @@ function RequestRescheduleDialogBody({
         <DialogClose render={<Button type="reset" variant="secondary" disabled={mutation.isPending} />}>
           <Trans>Cancel</Trans>
         </DialogClose>
-        <Button type="submit" isPending={mutation.isPending}>
-          <Trans>Send request</Trans>
+        <Button type="submit" isPending={mutation.isPending} disabled={trimmedId.length === 0}>
+          <Trans>Reassign</Trans>
         </Button>
       </DialogFooter>
     </DialogForm>

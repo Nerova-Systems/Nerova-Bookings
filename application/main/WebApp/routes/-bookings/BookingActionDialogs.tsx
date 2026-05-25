@@ -7,6 +7,7 @@ import { ConfirmBookingDialog } from "./ConfirmBookingDialog";
 import { EditBookingLocationDialog } from "./EditBookingLocationDialog";
 import { MarkNoShowDialog } from "./MarkNoShowDialog";
 import { RateBookingDialog } from "./RateBookingDialog";
+import { ReassignBookingDialog } from "./ReassignBookingDialog";
 import { RejectBookingDialog } from "./RejectBookingDialog";
 import { RequestRescheduleDialog } from "./RequestRescheduleDialog";
 
@@ -20,6 +21,7 @@ export type BookingDialogKind =
   | "markNoShow"
   | "rate"
   | "addNote"
+  | "reassign"
   | null;
 
 export function BookingActionDialogs({
@@ -52,6 +54,7 @@ export function BookingActionDialogs({
       <MarkNoShowDialog {...dialogProps("markNoShow")} onMarked={onActionComplete} />
       <RateBookingDialog {...dialogProps("rate")} onRated={onActionComplete} />
       <AddBookingInternalNoteDialog {...dialogProps("addNote")} onAdded={onActionComplete} />
+      <ReassignBookingDialog {...dialogProps("reassign")} onReassigned={onActionComplete} />
     </>
   );
 }

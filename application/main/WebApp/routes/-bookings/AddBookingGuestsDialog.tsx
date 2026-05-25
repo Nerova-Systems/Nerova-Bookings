@@ -47,7 +47,9 @@ export function AddBookingGuestsDialog({
             <Trans>Guests will receive an invite for this booking.</Trans>
           </DialogDescription>
         </DialogHeader>
-        {booking && <AddBookingGuestsDialogBody booking={booking} onClose={() => onOpenChange(false)} onAdded={onAdded} />}
+        {booking && (
+          <AddBookingGuestsDialogBody booking={booking} onClose={() => onOpenChange(false)} onAdded={onAdded} />
+        )}
       </DialogContent>
     </Dialog>
   );

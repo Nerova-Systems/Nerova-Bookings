@@ -64,10 +64,7 @@ test.describe("@smoke", () => {
    * - Verify the InsightsFilters Reset button is hidden on the default range (last-30-days)
    *   because hasCustomRange is false without any `from`/`to` search params
    */
-  test("should render the insights dashboard with default date range and KPI tiles", async ({
-    ownerPage,
-    browser
-  }) => {
+  test("should render the insights dashboard with default date range and KPI tiles", async ({ ownerPage, browser }) => {
     await step("Activate the full tier chain + cap-insights & enable every tenant override")(async () => {
       await activateBaseFlags(browser, FLAG_CHAIN);
       await setOwnerTenantOverrides(ownerPage, FLAG_CHAIN, true);

@@ -65,9 +65,7 @@ export function FacetedFilters({
           }}
         >
           <SelectTrigger id="booking-min-rating" className="w-full" aria-label={t`Minimum rating`}>
-            <SelectValue>
-              {(value: string) => (value === "any" ? t`Any rating` : t`${value} stars and up`)}
-            </SelectValue>
+            <SelectValue>{(value: string) => (value === "any" ? t`Any rating` : t`${value} stars and up`)}</SelectValue>
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="any">
