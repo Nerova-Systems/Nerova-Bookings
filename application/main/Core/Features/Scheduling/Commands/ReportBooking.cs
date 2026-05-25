@@ -1,8 +1,11 @@
 using FluentValidation;
 using JetBrains.Annotations;
+using Main.Features.EventTypes.Domain;
 using Main.Features.Permissions.Domain;
 using Main.Features.Permissions.Pipeline;
 using Main.Features.Scheduling.Domain;
+using Main.Features.Scheduling.Notifications;
+using Main.Features.Webhooks.Domain;
 using SharedKernel.Cqrs;
 using SharedKernel.ExecutionContext;
 
@@ -29,6 +32,8 @@ public sealed class ReportBookingValidator : AbstractValidator<ReportBookingComm
 public sealed class ReportBookingHandler(
     IBookingRepository bookingRepository,
     IBookingReportRepository bookingReportRepository,
+    IEventTypeRepository eventTypeRepository,
+    IBookingWebhookNotifier webhookNotifier,
     IExecutionContext executionContext
 ) : IRequestHandler<ReportBookingCommand, Result<BookingReportId>>
 {
@@ -52,6 +57,19 @@ public sealed class ReportBookingHandler(
 
         var report = BookingReport.Create(tenantId, booking.Id, reporterUserId, command.ReasonCode, command.Notes);
         await bookingReportRepository.AddAsync(report, cancellationToken);
+
+        // Fan out a BookingReported webhook so trust-and-safety integrations get notified in
+        // near-real time. The event type is fetched only when at least one subscriber exists is
+        // out of scope — we always look it up so the payload carries the title/slug. Best-effort.
+        var eventType = await eventTypeRepository.GetByIdAsync(booking.EventTypeId, cancellationToken);
+        await webhookNotifier.NotifyAsync(
+            WebhookEventType.BookingReported,
+            booking,
+            eventType,
+            attendees: null,
+            report: report,
+            cancellationToken
+        );
 
         return report.Id;
     }

@@ -16,6 +16,7 @@ public enum WebhookEventType
     BookingCancelled,
     BookingRescheduled,
     BookingPaid,
+    BookingReported,
     MeetingStarted,
     MeetingEnded,
     FormSubmitted,

@@ -3,7 +3,9 @@ using JetBrains.Annotations;
 using Main.Features.Permissions.Domain;
 using Main.Features.Permissions.Pipeline;
 using Main.Features.Scheduling.Domain;
+using Main.Features.Scheduling.Notifications;
 using Main.Features.Scheduling.Shared;
+using Main.Features.Webhooks.Domain;
 using SharedKernel.Cqrs;
 using SharedKernel.ExecutionContext;
 
@@ -25,6 +27,7 @@ public sealed class CancelBookingHandler(
     IBookingRepository bookingRepository,
     IBookingHistoryEntryRepository bookingHistoryEntryRepository,
     IExecutionContext executionContext,
+    IBookingWebhookNotifier webhookNotifier,
     TimeProvider timeProvider
 ) : IRequestHandler<CancelBookingCommand, Result>
 {
@@ -71,6 +74,17 @@ public sealed class CancelBookingHandler(
             ownerUserId
         );
         await bookingHistoryEntryRepository.AddAsync(entry, cancellationToken);
+
+        // Fan out a BookingCancelled webhook. Best-effort — failures are swallowed inside the
+        // notifier so a flaky subscriber endpoint cannot fail the cancellation.
+        await webhookNotifier.NotifyAsync(
+            WebhookEventType.BookingCancelled,
+            item.Booking,
+            item.EventType,
+            attendees: null,
+            report: null,
+            cancellationToken
+        );
 
         return Result.Success();
     }

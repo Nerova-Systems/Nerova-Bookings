@@ -4,6 +4,8 @@ using JetBrains.Annotations;
 using Main.Features.Permissions.Domain;
 using Main.Features.Permissions.Pipeline;
 using Main.Features.Scheduling.Domain;
+using Main.Features.Scheduling.Notifications;
+using Main.Features.Webhooks.Domain;
 using SharedKernel.Cqrs;
 using SharedKernel.ExecutionContext;
 
@@ -29,6 +31,7 @@ public sealed class RequestRescheduleHandler(
     IBookingRepository bookingRepository,
     IBookingHistoryEntryRepository bookingHistoryEntryRepository,
     IExecutionContext executionContext,
+    IBookingWebhookNotifier webhookNotifier,
     TimeProvider timeProvider
 ) : IRequestHandler<RequestRescheduleCommand, Result>
 {
@@ -73,6 +76,19 @@ public sealed class RequestRescheduleHandler(
             payload
         );
         await bookingHistoryEntryRepository.AddAsync(entry, cancellationToken);
+
+        // Fan out a BookingRescheduled webhook. Note: the host has only marked the booking as
+        // rescheduled — the booker still needs to pick a new slot via the public scheduling
+        // page. Cal.com fires `BOOKING_RESCHEDULED` at this point too, so subscribers stay in
+        // sync with cal.com integrations.
+        await webhookNotifier.NotifyAsync(
+            WebhookEventType.BookingRescheduled,
+            item.Booking,
+            item.EventType,
+            attendees: null,
+            report: null,
+            cancellationToken
+        );
 
         return Result.Success();
     }
