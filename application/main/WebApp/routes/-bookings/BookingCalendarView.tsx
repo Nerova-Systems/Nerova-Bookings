@@ -1,4 +1,8 @@
 import { Trans } from "@lingui/react/macro";
+import {
+  preferencesToTimeFormatOptions,
+  useUserPreferences
+} from "@repo/infrastructure/userPreferences/UserPreferencesContext";
 import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@repo/ui/components/Empty";
 import { Skeleton } from "@repo/ui/components/Skeleton";
 import { cn } from "@repo/ui/utils";
@@ -22,6 +26,12 @@ export function BookingCalendarView({
   selectedBookingId: string | null;
   onSelectBooking: (booking: BookingListItem) => void;
 }>) {
+  // TODO(T4-user-prefs-ui follow-up): the hour grid (`hours` const) and weekday column ordering
+  // (`getWeekDays`) are hard-coded to start at 00:00 and the supplied `weekStart`. Wire these to the
+  // user's preferred `weekStart` and consider compressed work-day windows once Wave 5 availability
+  // lands. The TODO is intentionally non-blocking — the visual order already follows `weekStart`
+  // because the container passes the preference-aware Monday/Sunday/etc.
+  const { hour12 } = preferencesToTimeFormatOptions(useUserPreferences());
   const days = getWeekDays(weekStart);
 
   if (isLoading) {
@@ -68,7 +78,7 @@ export function BookingCalendarView({
                 className="border-b pr-2 text-right text-xs text-muted-foreground"
                 style={{ height: `${hourHeightRem}rem` }}
               >
-                {formatHour(hour)}
+                {formatHour(hour, hour12)}
               </div>
             ))}
           </div>
@@ -97,7 +107,7 @@ export function BookingCalendarView({
                   >
                     <span className="block truncate font-medium">{booking.eventTypeTitle}</span>
                     <span className="block truncate text-muted-foreground">{booking.bookerName}</span>
-                    <span className="block truncate text-muted-foreground">{formatBookingTime(booking)}</span>
+                    <span className="block truncate text-muted-foreground">{formatBookingTime(booking, hour12)}</span>
                   </button>
                 ))}
             </div>
@@ -135,15 +145,19 @@ function getBookingPositionStyle(booking: BookingListItem) {
   };
 }
 
-function formatHour(hour: number) {
-  return new Intl.DateTimeFormat(undefined, { hour: "numeric" }).format(new Date(2026, 0, 1, hour));
+function formatHour(hour: number, hour12?: boolean) {
+  return new Intl.DateTimeFormat(undefined, {
+    hour: "numeric",
+    ...(hour12 === undefined ? {} : { hour12 })
+  }).format(new Date(2026, 0, 1, hour));
 }
 
-function formatBookingTime(booking: BookingListItem) {
+function formatBookingTime(booking: BookingListItem, hour12?: boolean) {
   const formatter = new Intl.DateTimeFormat(undefined, {
     hour: "numeric",
     minute: "2-digit",
-    timeZone: booking.timeZone
+    timeZone: booking.timeZone,
+    ...(hour12 === undefined ? {} : { hour12 })
   });
   return `${formatter.format(new Date(booking.startTime))} - ${formatter.format(new Date(booking.endTime))}`;
 }

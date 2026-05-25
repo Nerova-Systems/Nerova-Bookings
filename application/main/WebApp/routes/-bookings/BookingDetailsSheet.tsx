@@ -1,5 +1,9 @@
 import { t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
+import {
+  preferencesToTimeFormatOptions,
+  useUserPreferences
+} from "@repo/infrastructure/userPreferences/UserPreferencesContext";
 import { Badge } from "@repo/ui/components/Badge";
 import { Button } from "@repo/ui/components/Button";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@repo/ui/components/Sheet";
@@ -34,6 +38,7 @@ export function BookingDetailsSheet({
 }
 
 function BookingDetailsSheetBody({ booking, onClose }: Readonly<{ booking: BookingListItem; onClose: () => void }>) {
+  const { hour12 } = preferencesToTimeFormatOptions(useUserPreferences());
   const { data: details, isPending } = api.useQuery("get", "/api/bookings/{id}", {
     params: { path: { id: booking.id } }
   });
@@ -44,7 +49,7 @@ function BookingDetailsSheetBody({ booking, onClose }: Readonly<{ booking: Booki
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
             <SheetTitle>{booking.eventTypeTitle}</SheetTitle>
-            <SheetDescription>{formatBookingDateRange(booking)}</SheetDescription>
+            <SheetDescription>{formatBookingDateRange(booking, hour12)}</SheetDescription>
           </div>
           <BookingActionsDropdown booking={booking} onActionComplete={onClose} />
         </div>
@@ -66,7 +71,7 @@ function BookingDetailsSheetBody({ booking, onClose }: Readonly<{ booking: Booki
           </div>
           <div className="grid gap-4">
             <DetailRow icon={<CalendarClockIcon />} label={<Trans>When</Trans>}>
-              {formatBookingDateRange(booking)}
+              {formatBookingDateRange(booking, hour12)}
             </DetailRow>
             <DetailRow icon={<ClockIcon />} label={<Trans>Timezone</Trans>}>
               {booking.timeZone}

@@ -52,6 +52,9 @@ msgstr "Accepteret"
 msgid "Action"
 msgstr "Handling"
 
+msgid "Active"
+msgstr "Aktiv"
+
 msgid "Active (coming soon)"
 msgstr "Aktiv (kommer snart)"
 
@@ -229,6 +232,9 @@ msgstr "Booking annulleret"
 msgid "Booking confirmed"
 msgstr "Booking bekræftet"
 
+msgid "Booking created"
+msgstr "Booking oprettet"
+
 msgid "Booking details"
 msgstr "Bookingdetaljer"
 
@@ -247,11 +253,20 @@ msgstr "Booking page"
 msgid "Booking page unavailable"
 msgstr "Bookingsiden er ikke tilgængelig"
 
+msgid "Booking paid"
+msgstr "Booking betalt"
+
 msgid "Booking reassigned"
 msgstr "Booking omfordelt"
 
 msgid "Booking rejected"
 msgstr "Booking afvist"
+
+msgid "Booking reported"
+msgstr "Booking rapporteret"
+
+msgid "Booking rescheduled"
+msgstr "Booking ændret"
 
 msgid "Booking volume"
 msgstr "Bookingvolumen"
@@ -355,6 +370,9 @@ msgstr "Column"
 msgid "Completed"
 msgstr "Gennemført"
 
+msgid "Configuration"
+msgstr "Konfiguration"
+
 msgid "Configure the appointment types clients can book."
 msgstr "Konfigurer de aftaletyper, kunder kan booke."
 
@@ -388,8 +406,14 @@ msgstr "Control manual approval and booker email checks."
 msgid "Control whether this booking page is listed publicly."
 msgstr "Styr, om denne bookingside vises offentligt."
 
+msgid "Copied"
+msgstr "Kopieret"
+
 msgid "Copy"
 msgstr "Kopiér"
+
+msgid "Copy and store this secret now — you won't be able to see it again."
+msgstr "Kopiér og opbevar denne hemmelighed nu — du vil ikke kunne se den igen."
 
 msgid "Copy booking link"
 msgstr "Kopiér booking-link"
@@ -404,6 +428,9 @@ msgstr "Kopi af {0}"
 msgid "Copy public link"
 msgstr "Kopiér offentligt link"
 
+msgid "Copy signing secret"
+msgstr "Kopiér signeringshemmelighed"
+
 msgid "Copy times"
 msgstr "Kopier tider"
 
@@ -415,6 +442,9 @@ msgstr "Opret"
 
 msgid "Create a private setup event type before opening public booking."
 msgstr "Opret en privat opsætningsaftaletype, før offentlig booking åbnes."
+
+msgid "Create a webhook to forward booking events to your own services."
+msgstr "Opret en webhook for at videresende booking-hændelser til dine egne tjenester."
 
 msgid "Create a weekly schedule before publishing event types."
 msgstr "Opret en ugentlig tidsplan, før aftaletyper udgives."
@@ -442,6 +472,9 @@ msgstr "Opret tidsplan"
 
 msgid "Create the booking page basics now, then finish setup on the next screen."
 msgstr "Opret de grundlæggende bookingoplysninger nu, og færdiggør opsætningen på næste skærm."
+
+msgid "Create webhook"
+msgstr "Opret webhook"
 
 msgid "Create workflow"
 msgstr "Opret workflow"
@@ -506,6 +539,12 @@ msgstr "Slet note"
 msgid "Delete schedule"
 msgstr "Slet tidsplan"
 
+msgid "Delete webhook"
+msgstr "Slet webhook"
+
+msgid "Delete webhook?"
+msgstr "Slet webhook?"
+
 msgid "Delete workflow"
 msgstr "Slet workflow"
 
@@ -526,6 +565,9 @@ msgstr "Fordel bookinger på værter baseret på vægtning og lead-historik."
 
 msgid "Distribution of bookings by status."
 msgstr "Fordeling af bookinger efter status."
+
+msgid "Done"
+msgstr "Færdig"
 
 msgid "Duplicate"
 msgstr "Dupliker"
@@ -587,6 +629,9 @@ msgstr "Sluttidspunktet skal være efter starttidspunktet."
 msgid "English"
 msgstr "English"
 
+msgid "Enter a valid http(s) URL."
+msgstr "Indtast en gyldig http(s)-URL."
+
 msgid "Enter your details"
 msgstr "Indtast dine oplysninger"
 
@@ -595,6 +640,9 @@ msgstr "Event color"
 
 msgid "Event name"
 msgstr "Begivenhedsnavn"
+
+msgid "Event subscriptions"
+msgstr "Hændelsesabonnementer"
 
 msgid "Event type"
 msgstr "Aftaletype"
@@ -648,6 +696,12 @@ msgstr "{0} bookinger eksporteret"
 msgid "Exported {count} bookings"
 msgstr "{count} bookinger eksporteret"
 
+msgid "Failed to copy secret"
+msgstr "Kunne ikke kopiere hemmelighed"
+
+msgid "Failed to queue test event"
+msgstr "Kunne ikke sætte testhændelse i kø"
+
 msgid "Feedback (optional)"
 msgstr "Feedback (valgfrit)"
 
@@ -659,6 +713,12 @@ msgstr "Filtrer bookinger"
 
 msgid "First slot only"
 msgstr "First slot only"
+
+msgid "For security, the signing secret is only shown once — right after the webhook is created. If you've lost it, delete this webhook and create a new one to receive a fresh secret."
+msgstr "Af sikkerhedsmæssige årsager vises signeringshemmeligheden kun én gang — lige efter webhooken er oprettet. Hvis du har mistet den, skal du slette denne webhook og oprette en ny for at modtage en ny hemmelighed."
+
+msgid "Form submitted"
+msgstr "Formular indsendt"
 
 msgid "Frequency"
 msgstr "Frequency"
@@ -807,6 +867,9 @@ msgstr "Fortæl deltageren hvorfor du har brug for at omplanlægge"
 msgid "Limit booking volume across the event type and individual bookers."
 msgstr "Limit booking volume across the event type and individual bookers."
 
+msgid "Limit deliveries to bookings for a single event type, or leave unscoped to receive everything."
+msgstr "Begræns leveringer til bookinger for en enkelt hændelsestype, eller lad være uden afgrænsning for at modtage alt."
+
 msgid "Limit which hosts can be assigned using a segment expression."
 msgstr "Begræns hvilke værter der kan tildeles ved hjælp af et segmentudtryk."
 
@@ -833,6 +896,12 @@ msgstr "Indlæser private links…"
 
 msgid "Loading schedules..."
 msgstr "Indlæser tidsplaner..."
+
+msgid "Loading webhook..."
+msgstr "Indlæser webhook..."
+
+msgid "Loading webhooks..."
+msgstr "Indlæser webhooks..."
 
 msgid "Loading workflow..."
 msgstr "Indlæser workflow..."
@@ -902,8 +971,14 @@ msgstr "Markeret som udeblevet"
 msgid "Max lead threshold"
 msgstr "Maksimal lead-tærskel"
 
+msgid "Meeting ended"
+msgstr "Møde afsluttet"
+
 msgid "Meeting link, address, or phone number"
 msgstr "Mødelink, adresse eller telefonnummer"
+
+msgid "Meeting started"
+msgstr "Møde startet"
 
 msgid "Members handling the most bookings."
 msgstr "Medlemmer der håndterer flest bookinger."
@@ -965,6 +1040,9 @@ msgstr "Ny tidsplan"
 msgid "New step"
 msgstr "Nyt trin"
 
+msgid "New webhook"
+msgstr "Ny webhook"
+
 msgid "New workflow"
 msgstr "Nyt workflow"
 
@@ -1022,6 +1100,9 @@ msgstr "Endnu ingen trin"
 
 msgid "No times available on this date."
 msgstr "Ingen tider er tilgængelige på denne dato."
+
+msgid "No webhooks yet"
+msgstr "Ingen webhooks endnu"
 
 msgid "No weekly availability"
 msgstr "Ingen ugentlig tilgængelighed"
@@ -1096,6 +1177,12 @@ msgstr "Undtagelser: {0}"
 msgid "Passed"
 msgstr "Bestået"
 
+msgid "Paused"
+msgstr "Sat på pause"
+
+msgid "Paused webhooks stop receiving deliveries until reactivated."
+msgstr "Pausede webhooks modtager ikke leveringer, før de genaktiveres."
+
 msgid "Pending"
 msgstr "Afventer"
 
@@ -1107,6 +1194,9 @@ msgstr "Telefon"
 
 msgid "Phone call"
 msgstr "Telefonopkald"
+
+msgid "Ping"
+msgstr "Ping"
 
 msgid "Preview"
 msgstr "Forhåndsvisning"
@@ -1173,6 +1263,9 @@ msgstr "Omfordel vært"
 
 msgid "Reassigned"
 msgstr "Omfordelt"
+
+msgid "Recording ready"
+msgstr "Optagelse klar"
 
 msgid "Recurring"
 msgstr "Gentagende"
@@ -1276,6 +1369,9 @@ msgstr "Lørdag"
 msgid "Save"
 msgstr "Gem"
 
+msgid "Save changes"
+msgstr "Gem ændringer"
+
 msgid "Save location"
 msgstr "Gem lokation"
 
@@ -1318,6 +1414,9 @@ msgstr "Tidsplan utilgængelig"
 msgid "Schedule updated"
 msgstr "Tidsplan opdateret"
 
+msgid "Scope"
+msgstr "Omfang"
+
 msgid "Search"
 msgstr "Søg"
 
@@ -1342,6 +1441,12 @@ msgstr "Seats"
 msgid "Seats cannot be enabled while recurring events are enabled."
 msgstr "Seats cannot be enabled while recurring events are enabled."
 
+msgid "Secret copied to clipboard"
+msgstr "Hemmelighed kopieret til udklipsholderen"
+
+msgid "Secret hidden"
+msgstr "Hemmelighed skjult"
+
 msgid "Segment query"
 msgstr "Segmentforespørgsel"
 
@@ -1363,6 +1468,9 @@ msgstr "Vælg tidsplan"
 msgid "Select week"
 msgstr "Vælg uge"
 
+msgid "Send a signed HTTP POST to your endpoint when the selected events occur."
+msgstr "Send en signeret HTTP POST til dit endpoint, når de valgte hændelser indtræffer."
+
 msgid "Send bookers to a custom page after success or cancellation."
 msgstr "Send bookers to a custom page after success or cancellation."
 
@@ -1371,6 +1479,12 @@ msgstr "Send HTTP-anmodninger til eksterne systemer når bookinger på denne beg
 
 msgid "Send request"
 msgstr "Send anmodning"
+
+msgid "Send signed HTTP notifications to your services when booking lifecycle events occur."
+msgstr "Send signerede HTTP-meddelelser til dine tjenester, når booking-livscyklushændelser indtræffer."
+
+msgid "Send test event"
+msgstr "Send testhændelse"
 
 msgid "Send to"
 msgstr "Send til"
@@ -1404,6 +1518,9 @@ msgstr "Show attendee info"
 
 msgid "Show optimized slots"
 msgstr "Vis optimerede tidspunkter"
+
+msgid "Signing secret"
+msgstr "Signeringshemmelighed"
 
 msgid "Slot display"
 msgstr "Visning af tidspunkter"
@@ -1465,11 +1582,17 @@ msgstr "Søndag"
 msgid "System"
 msgstr "System"
 
+msgid "Target URL"
+msgstr "Mål-URL"
+
 msgid "Team"
 msgstr "Team"
 
 msgid "Template"
 msgstr "Skabelon"
+
+msgid "Test event queued for delivery"
+msgstr "Testhændelse sat i kø til levering"
 
 msgid "Thank you"
 msgstr "Tak"
@@ -1482,6 +1605,13 @@ msgstr "Deltageren vil blive underrettet om, at deres booking er blevet afvist."
 
 msgid "The attendee will be notified that their booking is confirmed."
 msgstr "Deltageren vil blive underrettet om, at deres booking er bekræftet."
+
+#. placeholder {0}: truncateUrl(webhook?.targetUrl ?? "", 80)
+msgid "The endpoint <0>{0}</0> will stop receiving deliveries. This cannot be undone."
+msgstr "Endpointet <0>{0}</0> vil ikke længere modtage leveringer. Dette kan ikke fortrydes."
+
+msgid "The event type scope is locked once a webhook is created."
+msgstr "Hændelsestypens omfang er låst, når webhooken er oprettet."
 
 msgid "The list-bindings endpoint is on the backlog. Toggle to link or unlink."
 msgstr "Endpoint til at liste bindinger er på backloggen. Slå til/fra for at tilknytte eller frakoble."
@@ -1583,6 +1713,9 @@ msgstr "Brug bookerens tidszone til arrangør"
 msgid "Use segment query"
 msgstr "Brug segmentforespørgsel"
 
+msgid "Use this signing secret to verify the HMAC signature on incoming webhook deliveries."
+msgstr "Brug denne signeringshemmelighed til at verificere HMAC-signaturen på indkommende webhook-leveringer."
+
 msgid "Use weights"
 msgstr "Brug vægte"
 
@@ -1613,8 +1746,20 @@ msgstr "Vis sessionsdetaljer"
 msgid "Visibility"
 msgstr "Synlighed"
 
+msgid "Webhook"
+msgstr "Webhook"
+
+msgid "Webhook created"
+msgstr "Webhook oprettet"
+
+msgid "Webhook deleted"
+msgstr "Webhook slettet"
+
 msgid "Webhook subscriptions will be available in a future release."
 msgstr "Webhook-abonnementer bliver tilgængelige i en fremtidig udgivelse."
+
+msgid "Webhook updated"
+msgstr "Webhook opdateret"
 
 msgid "Webhooks"
 msgstr "Webhooks"

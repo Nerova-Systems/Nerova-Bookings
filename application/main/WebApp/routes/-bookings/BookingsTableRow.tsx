@@ -1,4 +1,8 @@
 import { Trans } from "@lingui/react/macro";
+import {
+  preferencesToTimeFormatOptions,
+  useUserPreferences
+} from "@repo/infrastructure/userPreferences/UserPreferencesContext";
 import { Badge } from "@repo/ui/components/Badge";
 import { Checkbox } from "@repo/ui/components/Checkbox";
 import { TableCell, TableRow } from "@repo/ui/components/Table";
@@ -15,6 +19,8 @@ export function BookingsTableRow({
   booking: BookingListItem;
   isSelected: boolean;
 }>) {
+  const preferences = useUserPreferences();
+  const { hour12 } = preferencesToTimeFormatOptions(preferences);
   const startTime = new Date(booking.startTime);
   const isCancelled = ["cancelled", "rejected"].includes(booking.status.toLowerCase());
 
@@ -46,7 +52,7 @@ export function BookingsTableRow({
       </TableCell>
       <TableCell className="text-sm">
         <div className="flex flex-col">
-          <span>{formatStartDate(startTime, booking.timeZone)}</span>
+          <span>{formatStartDate(startTime, booking.timeZone, hour12)}</span>
           <span className="text-xs text-muted-foreground">{booking.timeZone}</span>
         </div>
       </TableCell>
@@ -116,12 +122,13 @@ function getBookingRating(_booking: BookingListItem): number | null {
   return null;
 }
 
-function formatStartDate(date: Date, timeZone: string) {
+function formatStartDate(date: Date, timeZone: string, hour12?: boolean) {
   return new Intl.DateTimeFormat(undefined, {
     month: "short",
     day: "numeric",
     hour: "numeric",
     minute: "2-digit",
-    timeZone
+    timeZone,
+    ...(hour12 === undefined ? {} : { hour12 })
   }).format(date);
 }

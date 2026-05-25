@@ -52,6 +52,9 @@ msgstr "Accepted"
 msgid "Action"
 msgstr "Action"
 
+msgid "Active"
+msgstr "Active"
+
 msgid "Active (coming soon)"
 msgstr "Active (coming soon)"
 
@@ -229,6 +232,9 @@ msgstr "Booking cancelled"
 msgid "Booking confirmed"
 msgstr "Booking confirmed"
 
+msgid "Booking created"
+msgstr "Booking created"
+
 msgid "Booking details"
 msgstr "Booking details"
 
@@ -247,11 +253,20 @@ msgstr "Booking page"
 msgid "Booking page unavailable"
 msgstr "Booking page unavailable"
 
+msgid "Booking paid"
+msgstr "Booking paid"
+
 msgid "Booking reassigned"
 msgstr "Booking reassigned"
 
 msgid "Booking rejected"
 msgstr "Booking rejected"
+
+msgid "Booking reported"
+msgstr "Booking reported"
+
+msgid "Booking rescheduled"
+msgstr "Booking rescheduled"
 
 msgid "Booking volume"
 msgstr "Booking volume"
@@ -355,6 +370,9 @@ msgstr "Column"
 msgid "Completed"
 msgstr "Completed"
 
+msgid "Configuration"
+msgstr "Configuration"
+
 msgid "Configure the appointment types clients can book."
 msgstr "Configure the appointment types clients can book."
 
@@ -388,8 +406,14 @@ msgstr "Control manual approval and booker email checks."
 msgid "Control whether this booking page is listed publicly."
 msgstr "Control whether this booking page is listed publicly."
 
+msgid "Copied"
+msgstr "Copied"
+
 msgid "Copy"
 msgstr "Copy"
+
+msgid "Copy and store this secret now — you won't be able to see it again."
+msgstr "Copy and store this secret now — you won't be able to see it again."
 
 msgid "Copy booking link"
 msgstr "Copy booking link"
@@ -404,6 +428,9 @@ msgstr "Copy of {0}"
 msgid "Copy public link"
 msgstr "Copy public link"
 
+msgid "Copy signing secret"
+msgstr "Copy signing secret"
+
 msgid "Copy times"
 msgstr "Copy times"
 
@@ -415,6 +442,9 @@ msgstr "Create"
 
 msgid "Create a private setup event type before opening public booking."
 msgstr "Create a private setup event type before opening public booking."
+
+msgid "Create a webhook to forward booking events to your own services."
+msgstr "Create a webhook to forward booking events to your own services."
 
 msgid "Create a weekly schedule before publishing event types."
 msgstr "Create a weekly schedule before publishing event types."
@@ -442,6 +472,9 @@ msgstr "Create schedule"
 
 msgid "Create the booking page basics now, then finish setup on the next screen."
 msgstr "Create the booking page basics now, then finish setup on the next screen."
+
+msgid "Create webhook"
+msgstr "Create webhook"
 
 msgid "Create workflow"
 msgstr "Create workflow"
@@ -506,6 +539,12 @@ msgstr "Delete note"
 msgid "Delete schedule"
 msgstr "Delete schedule"
 
+msgid "Delete webhook"
+msgstr "Delete webhook"
+
+msgid "Delete webhook?"
+msgstr "Delete webhook?"
+
 msgid "Delete workflow"
 msgstr "Delete workflow"
 
@@ -526,6 +565,9 @@ msgstr "Distribute bookings across hosts based on weighting and lead history."
 
 msgid "Distribution of bookings by status."
 msgstr "Distribution of bookings by status."
+
+msgid "Done"
+msgstr "Done"
 
 msgid "Duplicate"
 msgstr "Duplicate"
@@ -587,6 +629,9 @@ msgstr "End time must be after start time."
 msgid "English"
 msgstr "English"
 
+msgid "Enter a valid http(s) URL."
+msgstr "Enter a valid http(s) URL."
+
 msgid "Enter your details"
 msgstr "Enter your details"
 
@@ -595,6 +640,9 @@ msgstr "Event color"
 
 msgid "Event name"
 msgstr "Event name"
+
+msgid "Event subscriptions"
+msgstr "Event subscriptions"
 
 msgid "Event type"
 msgstr "Event type"
@@ -648,6 +696,12 @@ msgstr "Exported {0} bookings"
 msgid "Exported {count} bookings"
 msgstr "Exported {count} bookings"
 
+msgid "Failed to copy secret"
+msgstr "Failed to copy secret"
+
+msgid "Failed to queue test event"
+msgstr "Failed to queue test event"
+
 msgid "Feedback (optional)"
 msgstr "Feedback (optional)"
 
@@ -659,6 +713,12 @@ msgstr "Filter bookings"
 
 msgid "First slot only"
 msgstr "First slot only"
+
+msgid "For security, the signing secret is only shown once — right after the webhook is created. If you've lost it, delete this webhook and create a new one to receive a fresh secret."
+msgstr "For security, the signing secret is only shown once — right after the webhook is created. If you've lost it, delete this webhook and create a new one to receive a fresh secret."
+
+msgid "Form submitted"
+msgstr "Form submitted"
 
 msgid "Frequency"
 msgstr "Frequency"
@@ -807,6 +867,9 @@ msgstr "Let the attendee know why you need to reschedule"
 msgid "Limit booking volume across the event type and individual bookers."
 msgstr "Limit booking volume across the event type and individual bookers."
 
+msgid "Limit deliveries to bookings for a single event type, or leave unscoped to receive everything."
+msgstr "Limit deliveries to bookings for a single event type, or leave unscoped to receive everything."
+
 msgid "Limit which hosts can be assigned using a segment expression."
 msgstr "Limit which hosts can be assigned using a segment expression."
 
@@ -833,6 +896,12 @@ msgstr "Loading private links…"
 
 msgid "Loading schedules..."
 msgstr "Loading schedules..."
+
+msgid "Loading webhook..."
+msgstr "Loading webhook..."
+
+msgid "Loading webhooks..."
+msgstr "Loading webhooks..."
 
 msgid "Loading workflow..."
 msgstr "Loading workflow..."
@@ -902,8 +971,14 @@ msgstr "Marked as no-show"
 msgid "Max lead threshold"
 msgstr "Max lead threshold"
 
+msgid "Meeting ended"
+msgstr "Meeting ended"
+
 msgid "Meeting link, address, or phone number"
 msgstr "Meeting link, address, or phone number"
+
+msgid "Meeting started"
+msgstr "Meeting started"
 
 msgid "Members handling the most bookings."
 msgstr "Members handling the most bookings."
@@ -965,6 +1040,9 @@ msgstr "New schedule"
 msgid "New step"
 msgstr "New step"
 
+msgid "New webhook"
+msgstr "New webhook"
+
 msgid "New workflow"
 msgstr "New workflow"
 
@@ -1022,6 +1100,9 @@ msgstr "No steps yet"
 
 msgid "No times available on this date."
 msgstr "No times available on this date."
+
+msgid "No webhooks yet"
+msgstr "No webhooks yet"
 
 msgid "No weekly availability"
 msgstr "No weekly availability"
@@ -1096,6 +1177,12 @@ msgstr "Overrides: {0}"
 msgid "Passed"
 msgstr "Passed"
 
+msgid "Paused"
+msgstr "Paused"
+
+msgid "Paused webhooks stop receiving deliveries until reactivated."
+msgstr "Paused webhooks stop receiving deliveries until reactivated."
+
 msgid "Pending"
 msgstr "Pending"
 
@@ -1107,6 +1194,9 @@ msgstr "Phone"
 
 msgid "Phone call"
 msgstr "Phone call"
+
+msgid "Ping"
+msgstr "Ping"
 
 msgid "Preview"
 msgstr "Preview"
@@ -1173,6 +1263,9 @@ msgstr "Reassign host"
 
 msgid "Reassigned"
 msgstr "Reassigned"
+
+msgid "Recording ready"
+msgstr "Recording ready"
 
 msgid "Recurring"
 msgstr "Recurring"
@@ -1276,6 +1369,9 @@ msgstr "Saturday"
 msgid "Save"
 msgstr "Save"
 
+msgid "Save changes"
+msgstr "Save changes"
+
 msgid "Save location"
 msgstr "Save location"
 
@@ -1318,6 +1414,9 @@ msgstr "Schedule unavailable"
 msgid "Schedule updated"
 msgstr "Schedule updated"
 
+msgid "Scope"
+msgstr "Scope"
+
 msgid "Search"
 msgstr "Search"
 
@@ -1342,6 +1441,12 @@ msgstr "Seats"
 msgid "Seats cannot be enabled while recurring events are enabled."
 msgstr "Seats cannot be enabled while recurring events are enabled."
 
+msgid "Secret copied to clipboard"
+msgstr "Secret copied to clipboard"
+
+msgid "Secret hidden"
+msgstr "Secret hidden"
+
 msgid "Segment query"
 msgstr "Segment query"
 
@@ -1363,6 +1468,9 @@ msgstr "Select schedule"
 msgid "Select week"
 msgstr "Select week"
 
+msgid "Send a signed HTTP POST to your endpoint when the selected events occur."
+msgstr "Send a signed HTTP POST to your endpoint when the selected events occur."
+
 msgid "Send bookers to a custom page after success or cancellation."
 msgstr "Send bookers to a custom page after success or cancellation."
 
@@ -1371,6 +1479,12 @@ msgstr "Send HTTP requests to external systems when bookings on this event type 
 
 msgid "Send request"
 msgstr "Send request"
+
+msgid "Send signed HTTP notifications to your services when booking lifecycle events occur."
+msgstr "Send signed HTTP notifications to your services when booking lifecycle events occur."
+
+msgid "Send test event"
+msgstr "Send test event"
 
 msgid "Send to"
 msgstr "Send to"
@@ -1404,6 +1518,9 @@ msgstr "Show attendee info"
 
 msgid "Show optimized slots"
 msgstr "Show optimized slots"
+
+msgid "Signing secret"
+msgstr "Signing secret"
 
 msgid "Slot display"
 msgstr "Slot display"
@@ -1465,11 +1582,17 @@ msgstr "Sunday"
 msgid "System"
 msgstr "System"
 
+msgid "Target URL"
+msgstr "Target URL"
+
 msgid "Team"
 msgstr "Team"
 
 msgid "Template"
 msgstr "Template"
+
+msgid "Test event queued for delivery"
+msgstr "Test event queued for delivery"
 
 msgid "Thank you"
 msgstr "Thank you"
@@ -1482,6 +1605,13 @@ msgstr "The attendee will be notified that their booking has been rejected."
 
 msgid "The attendee will be notified that their booking is confirmed."
 msgstr "The attendee will be notified that their booking is confirmed."
+
+#. placeholder {0}: truncateUrl(webhook?.targetUrl ?? "", 80)
+msgid "The endpoint <0>{0}</0> will stop receiving deliveries. This cannot be undone."
+msgstr "The endpoint <0>{0}</0> will stop receiving deliveries. This cannot be undone."
+
+msgid "The event type scope is locked once a webhook is created."
+msgstr "The event type scope is locked once a webhook is created."
 
 msgid "The list-bindings endpoint is on the backlog. Toggle to link or unlink."
 msgstr "The list-bindings endpoint is on the backlog. Toggle to link or unlink."
@@ -1583,6 +1713,9 @@ msgstr "Use booker timezone for organizer"
 msgid "Use segment query"
 msgstr "Use segment query"
 
+msgid "Use this signing secret to verify the HMAC signature on incoming webhook deliveries."
+msgstr "Use this signing secret to verify the HMAC signature on incoming webhook deliveries."
+
 msgid "Use weights"
 msgstr "Use weights"
 
@@ -1613,8 +1746,20 @@ msgstr "View session details"
 msgid "Visibility"
 msgstr "Visibility"
 
+msgid "Webhook"
+msgstr "Webhook"
+
+msgid "Webhook created"
+msgstr "Webhook created"
+
+msgid "Webhook deleted"
+msgstr "Webhook deleted"
+
 msgid "Webhook subscriptions will be available in a future release."
 msgstr "Webhook subscriptions will be available in a future release."
+
+msgid "Webhook updated"
+msgstr "Webhook updated"
 
 msgid "Webhooks"
 msgstr "Webhooks"
