@@ -25,6 +25,24 @@ public sealed class ScheduleDeleted(ScheduleId scheduleId)
 public sealed class ScheduleDuplicated(ScheduleId sourceScheduleId, ScheduleId duplicateScheduleId)
     : TelemetryEvent(("source_schedule_id", sourceScheduleId), ("schedule_id", duplicateScheduleId));
 
+public sealed class TravelScheduleCreated(TravelScheduleId travelScheduleId)
+    : TelemetryEvent(("travel_schedule_id", travelScheduleId));
+
+public sealed class TravelScheduleUpdated(TravelScheduleId travelScheduleId)
+    : TelemetryEvent(("travel_schedule_id", travelScheduleId));
+
+public sealed class TravelScheduleDeleted(TravelScheduleId travelScheduleId)
+    : TelemetryEvent(("travel_schedule_id", travelScheduleId));
+
+public sealed class OutOfOfficeCreated(OutOfOfficeId outOfOfficeId)
+    : TelemetryEvent(("out_of_office_id", outOfOfficeId));
+
+public sealed class OutOfOfficeUpdated(OutOfOfficeId outOfOfficeId)
+    : TelemetryEvent(("out_of_office_id", outOfOfficeId));
+
+public sealed class OutOfOfficeDeleted(OutOfOfficeId outOfOfficeId)
+    : TelemetryEvent(("out_of_office_id", outOfOfficeId));
+
 public sealed class EventTypeCreated(EventTypeId eventTypeId)
     : TelemetryEvent(("event_type_id", eventTypeId));
 
