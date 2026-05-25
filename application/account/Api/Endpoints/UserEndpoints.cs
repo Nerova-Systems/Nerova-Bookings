@@ -95,5 +95,13 @@ public sealed class UserEndpoints : IEndpoints
         group.MapPut("/me/change-theme", async Task<ApiResult> (ChangeThemeCommand command, IMediator mediator)
             => await mediator.Send(command)
         );
+
+        group.MapGet("/me/preferences", async Task<ApiResult<UserPreferencesResponse>> (IMediator mediator)
+            => await mediator.Send(new GetCurrentUserPreferencesQuery())
+        ).Produces<UserPreferencesResponse>();
+
+        group.MapPatch("/me/preferences", async Task<ApiResult<UserPreferencesResponse>> (UpdateCurrentUserPreferencesCommand command, IMediator mediator)
+            => await mediator.Send(command)
+        ).Produces<UserPreferencesResponse>();
     }
 }

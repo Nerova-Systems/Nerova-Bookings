@@ -19,15 +19,18 @@ public sealed record CurrentUserResponse(
     string FirstName,
     string LastName,
     string Title,
-    string? AvatarUrl
+    string? AvatarUrl,
+    UserPreferencesResponse Preferences
 );
 
-public sealed class GetUserHandler(IUserRepository userRepository)
+public sealed class GetUserHandler(IUserRepository userRepository, IUserPreferencesRepository preferencesRepository)
     : IRequestHandler<GetUserQuery, Result<CurrentUserResponse>>
 {
     public async Task<Result<CurrentUserResponse>> Handle(GetUserQuery query, CancellationToken cancellationToken)
     {
         var user = await userRepository.GetLoggedInUserAsync(cancellationToken);
-        return user.Adapt<CurrentUserResponse>();
+        var preferences = await preferencesRepository.GetByUserIdAsync(user.Id, cancellationToken);
+        var response = user.Adapt<CurrentUserResponse>();
+        return response with { Preferences = UserPreferencesResponse.FromAggregateOrDefault(preferences) };
     }
 }

@@ -426,6 +426,9 @@ public sealed class UserInvited(UserId userId)
 public sealed class UserLocaleChanged(string fromLocale, string toLocale)
     : TelemetryEvent(("from_locale", fromLocale), ("to_locale", toLocale));
 
+public sealed class UserPreferencesUpdated(UserId userId)
+    : TelemetryEvent(("user_id", userId));
+
 public sealed class UserPurged(UserId userId, UserPurgeReason reason)
     : TelemetryEvent(("user_id", userId), ("reason", reason));
 

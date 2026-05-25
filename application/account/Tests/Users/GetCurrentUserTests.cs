@@ -32,8 +32,19 @@ public sealed class GetCurrentUserTests(AccountWebApplicationFactory factory) : 
                     'role': {'type': 'string', 'minLength': 1, 'maxLength': 20},
                     'emailConfirmed': {'type': 'boolean'},
                     'avatarUrl': {'type': ['null', 'string'], 'maxLength': 100},
+                    'preferences': {
+                        'type': 'object',
+                        'properties': {
+                            'timeFormat': {'type': 'string', 'enum': ['TwelveHour', 'TwentyFourHour']},
+                            'weekStart': {'type': 'string'},
+                            'language': {'type': 'string'},
+                            'timeZone': {'type': 'string'}
+                        },
+                        'required': ['timeFormat', 'weekStart', 'language', 'timeZone'],
+                        'additionalProperties': false
+                    }
                 },
-                'required': ['id', 'createdAt', 'modifiedAt', 'email', 'role'],
+                'required': ['id', 'createdAt', 'modifiedAt', 'email', 'role', 'preferences'],
                 'additionalProperties': false
             }
             """
