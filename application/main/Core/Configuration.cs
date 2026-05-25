@@ -7,6 +7,7 @@ using Main.Features.ManagedEventTypes.EventHandlers;
 using Main.Features.ManagedEventTypes.Services;
 using Main.Features.Permissions.Pipeline;
 using Main.Features.Permissions.Services;
+using Main.Features.Scheduling.Notifications;
 using Main.Features.Scheduling.Shared;
 using Main.Features.Webhooks.Infrastructure;
 using Main.Features.Webhooks.Jobs;
@@ -19,6 +20,7 @@ using Main.Features.Workflows.Services;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using SharedKernel.Configuration;
+using SharedKernel.Emails;
 using TickerQ.DependencyInjection;
 using TickerQ.EntityFrameworkCore.DependencyInjection;
 
@@ -71,6 +73,7 @@ public static class Configuration
                 // API can also be wired up (e.g., for synchronous test-fire) without duplicating.
                 .AddScoped<IWebhookDispatcher, WebhookDispatcher>()
                 .AddHttpClient()
+                .AddEmailRendering("WebApp")
                 .AddSharedServices<MainDbContext>([Assembly]);
         }
 
@@ -89,7 +92,11 @@ public static class Configuration
                 .AddScoped<BookingRescheduledWorkflowHandler>()
                 .AddSingleton<ISmsSender, StubSmsSender>()
                 .AddSingleton<IWhatsappSender, StubWhatsappSender>()
-                .AddSingleton<IHostEmailProvider, StubHostEmailProvider>();
+                // Cross-SCS host lookup (account-database). Scoped because it opens an Npgsql
+                // connection per call; the connection is awaited and disposed within the call.
+                .AddScoped<IUserContactLookup, AccountDbUserContactLookup>()
+                .AddScoped<IHostEmailProvider, HostEmailProvider>()
+                .AddScoped<IBookingNotificationDispatcher, BookingNotificationDispatcher>();
 
             // TickerQ with EF Core persistence (tables added to MainDbContext via model customizer)
             services.AddTickerQ(opt =>

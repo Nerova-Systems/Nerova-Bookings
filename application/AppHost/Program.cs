@@ -142,6 +142,10 @@ var mainWorkers = builder
     .AddProject<Main_Workers>("main-workers")
     .WithEnvironment("KESTREL_PORT", ports.MainWorkers.ToString())
     .WithReference(mainDatabase)
+    // Workers resolve host (booking owner) email/locale by reading the account-database users table.
+    // Cross-SCS read-only lookup; no cross-write. Booking notification emails depend on this; without
+    // it, host-side notifications and EmailHost workflow reminders would silently no-op.
+    .WithReference(accountDatabase)
     .WithReference(azureStorage)
     .WaitFor(mainDatabase);
 
