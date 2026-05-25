@@ -1,7 +1,9 @@
 using Main.Database;
+using Main.Features.Apps.Connectors.GoogleCalendar;
 using Main.Features.Apps.Domain;
 using Main.Features.Apps.Infrastructure;
 using Main.Features.EventTypes.Domain;
+using Main.Features.Scheduling.Domain;
 using Main.Features.Insights.Shared;
 using Main.Features.ManagedEventTypes.EventHandlers;
 using Main.Features.ManagedEventTypes.Services;
@@ -50,6 +52,11 @@ public static class Configuration
             // logic second). Mirrors the Account SCS registration order.
             services.AddTransient(typeof(IPipelineBehavior<,>), typeof(PermissionCheckBehavior<,>));
 
+            // Named HttpClient for the Google Calendar connector — outbound calls to Google's
+            // OAuth and Calendar API. Registered separately from the chain below because
+            // .AddHttpClient(name) returns IHttpClientBuilder.
+            services.AddHttpClient(GoogleCalendarSlug.HttpClientName);
+
             return services
                 .AddScoped<IPermissionCheckService, PermissionCheckService>()
                 .AddScoped<PublicSchedulingResolver>()
@@ -70,6 +77,20 @@ public static class Configuration
                 // tracks add their installers as singletons; this track ships zero installers.
                 .AddSingleton<IAppRegistry, AppRegistry>()
                 .AddSingleton<CredentialProtector>()
+                // ─── Google Calendar connector ─────────────────────────────
+                // Options bound from env vars (set by AppHost). Installer is a singleton because
+                // it carries no per-request state; the per-credential GoogleCalendarService is
+                // built on demand by the factory (scoped) so token refresh persistence flows
+                // through the request-scoped ICredentialRepository.
+                .Configure<GoogleCalendarOptions>(opts =>
+                {
+                    opts.ClientId = Environment.GetEnvironmentVariable("GOOGLE_CALENDAR_CLIENT_ID") ?? string.Empty;
+                    opts.ClientSecret = Environment.GetEnvironmentVariable("GOOGLE_CALENDAR_CLIENT_SECRET") ?? string.Empty;
+                })
+                .AddSingleton<IAppInstaller, GoogleCalendarInstaller>()
+                .AddScoped<GoogleCalendarServiceFactory>()
+                .AddScoped<IExternalBusyTimeProvider, GoogleCalendarBusyTimeProvider>()
+                .AddScoped<IBookingReferenceRepository, BookingReferenceRepository>()
                 // ─── Webhook platform ──────────────────────────────────────
                 // Dispatcher is scoped — uses MainDbContext via the repositories. HttpClient
                 // factory is required by the worker-side processor; safe to register here so the
