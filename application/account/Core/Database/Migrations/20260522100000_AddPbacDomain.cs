@@ -153,6 +153,7 @@ public sealed class AddPbacDomain : Migration
         migrationBuilder.InsertData(
             "roles",
             new[] { "id", "tenant_id", "created_at", "modified_at", "name", "description" },
+            new[] { "text", "bigint", "timestamptz", "timestamptz", "text", "text" },
             new object[,]
             {
                 { ownerId, null!, seedTime, null!, "Owner", "Full access to all resources." },
@@ -177,7 +178,7 @@ public sealed class AddPbacDomain : Migration
             ownerData[i, 2] = ownerRows[i].a;
         }
 
-        migrationBuilder.InsertData("role_permissions", permColumns, ownerData);
+        migrationBuilder.InsertData("role_permissions", permColumns, new[] { "text", "text", "text" }, ownerData);
 
         // Admin: all except Billing.Manage and Organization.Delete.
         var adminRows = resources
@@ -193,12 +194,13 @@ public sealed class AddPbacDomain : Migration
             adminData[i, 2] = adminRows[i].a;
         }
 
-        migrationBuilder.InsertData("role_permissions", permColumns, adminData);
+        migrationBuilder.InsertData("role_permissions", permColumns, new[] { "text", "text", "text" }, adminData);
 
         // Member: limited set only.
         migrationBuilder.InsertData(
             "role_permissions",
             permColumns,
+            new[] { "text", "text", "text" },
             new object[,]
             {
                 { memberId, "Team", "Read" },

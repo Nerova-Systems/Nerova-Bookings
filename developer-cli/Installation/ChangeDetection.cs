@@ -64,10 +64,11 @@ public static class ChangeDetection
         var currentHash = CalculateMd5HashForSolution();
         if (currentHash == Configuration.GetConfigurationSetting().Hash) return;
 
-        PublishDeveloperCli(currentHash);
-
-        // When running in debug mode (via `dotnet run`), the parent process manages execution -- don't re-run.
+        // When running in debug mode (via `dotnet run`), the code is already compiled fresh by `dotnet run` itself.
+        // Skip the publish cycle entirely — all binaries are locked by the running process and cannot be rebuilt.
         if (isDebugBuild) return;
+
+        PublishDeveloperCli(currentHash);
 
         // Re-execute the original command against the freshly published binary so the user does not
         // have to retype it. Environment.ProcessPath now resolves to the new binary on disk; the old
