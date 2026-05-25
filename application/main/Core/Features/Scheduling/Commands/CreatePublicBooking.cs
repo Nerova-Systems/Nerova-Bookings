@@ -1,8 +1,11 @@
 using FluentValidation;
 using JetBrains.Annotations;
+using Main.Features.Apps.Domain;
 using Main.Features.EventTypes.Domain;
 using Main.Features.Scheduling.Domain;
+using Main.Features.Scheduling.Notifications;
 using Main.Features.Scheduling.Shared;
+using Main.Features.Webhooks.Domain;
 using SharedKernel.Cqrs;
 using SharedKernel.Domain;
 
@@ -40,7 +43,9 @@ public sealed class CreatePublicBookingHandler(
     IHostRepository hostRepository,
     PublicSlotCalculator publicSlotCalculator,
     CollectiveSlotCalculator collectiveSlotCalculator,
-    RoundRobinSlotCalculator roundRobinSlotCalculator
+    RoundRobinSlotCalculator roundRobinSlotCalculator,
+    ConferenceLinkOrchestrator conferenceLinkOrchestrator,
+    IBookingWebhookNotifier webhookNotifier
 ) : IRequestHandler<CreatePublicBookingCommand, Result<CreatePublicBookingResponse>>
 {
     public async Task<Result<CreatePublicBookingResponse>> Handle(CreatePublicBookingCommand command, CancellationToken cancellationToken)
@@ -151,6 +156,24 @@ public sealed class CreatePublicBookingHandler(
         );
 
         await bookingRepository.AddAsync(booking, cancellationToken);
+
+        // Conferencing integration (Zoom, …): if the event type declares an integration
+        // location and the owner has the matching credential, create the upstream meeting and
+        // stamp the join URL onto the booking. Soft-fails if anything is missing — see
+        // ConferenceLinkOrchestrator XML docs.
+        await conferenceLinkOrchestrator.ApplyAsync(booking, context.EventType, context.Profile.TenantId, ownerUserId, cancellationToken);
+
+        // Booking is persisted (and conferencing-stamped) — fan out a BookingCreated webhook to
+        // every subscribed endpoint for this tenant. Best-effort: failures are logged, never
+        // bubble up. See BookingWebhookNotifier.
+        await webhookNotifier.NotifyAsync(
+            WebhookEventType.BookingCreated,
+            booking,
+            context.EventType,
+            attendees: null,
+            report: null,
+            cancellationToken
+        );
 
         return new CreatePublicBookingResponse(booking.Id, booking.StartTime, booking.EndTime, status.ToString());
     }
