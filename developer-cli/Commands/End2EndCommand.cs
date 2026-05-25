@@ -355,7 +355,7 @@ public partial class End2EndCommand : Command
 
         // Write a temporary combined Playwright config
         var combinedConfigPath = Path.Combine(Configuration.ApplicationFolder, "playwright.combined.config.ts");
-        var testMatchEntries = string.Join(", ", testDirs.Select(dir => $"\"{dir}/**/*.spec.ts\""));
+        var testMatchEntries = string.Join(", ", testDirs.Select(dir => $"\"{dir.Replace('\\', '/')}/**/*.spec.ts\""));
         var configContent = $$"""
                               import { defineConfig } from "@playwright/test";
                               import baseConfig from "./shared-webapp/tests/e2e/playwright.config";
@@ -431,7 +431,6 @@ public partial class End2EndCommand : Command
         }
         finally
         {
-            // Clean up the temporary config
             if (File.Exists(combinedConfigPath)) File.Delete(combinedConfigPath);
         }
     }

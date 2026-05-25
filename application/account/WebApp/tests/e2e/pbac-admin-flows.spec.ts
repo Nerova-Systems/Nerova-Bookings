@@ -1,11 +1,8 @@
-import { expect, type Browser, type Page } from "@playwright/test";
+import { expect } from "@playwright/test";
 import { test } from "@shared/e2e/fixtures/page-auth";
-import { getBackOfficeBaseUrl } from "@shared/e2e/utils/constants";
+import { activateBaseFlags, setOwnerTenantOverrides } from "@shared/e2e/utils/feature-flag-helpers";
 import { createTestContext, expectToastMessage } from "@shared/e2e/utils/test-assertions";
-import { logInAsAdmin } from "@shared/e2e/utils/test-data";
 import { step } from "@shared/e2e/utils/test-step-wrapper";
-
-const BACK_OFFICE_BASE_URL = getBackOfficeBaseUrl();
 
 // The PBAC admin UI is gated on the tier-enterprise flag. Like every TenantAdminManagedFlag,
 // tier-enterprise has a parent dependency chain (tier-teams → tier-organizations → tier-enterprise)
@@ -14,43 +11,6 @@ const BACK_OFFICE_BASE_URL = getBackOfficeBaseUrl();
 // owner's tenant override can take effect. Both steps are idempotent so concurrent workers don't
 // fight each other.
 const FLAG_CHAIN = ["tier-teams", "tier-organizations", "tier-enterprise"] as const;
-
-async function getAntiforgeryHeaders(page: Page): Promise<{ "x-xsrf-token": string }> {
-  const token = await page.evaluate(
-    () => document.head.querySelector('meta[name="antiforgeryToken"]')?.getAttribute("content") ?? ""
-  );
-  return { "x-xsrf-token": token };
-}
-
-async function activateBaseFlags(browser: Browser, flagKeys: readonly string[]): Promise<void> {
-  const context = await browser.newContext({ baseURL: BACK_OFFICE_BASE_URL, ignoreHTTPSErrors: true });
-  const page = await context.newPage();
-  await page.goto(`${BACK_OFFICE_BASE_URL}/feature-flags`);
-  await logInAsAdmin(page, `${BACK_OFFICE_BASE_URL}/feature-flags`);
-  const headers = await getAntiforgeryHeaders(page);
-  for (const flagKey of flagKeys) {
-    const response = await page.request.put(
-      `${BACK_OFFICE_BASE_URL}/api/back-office/feature-flags/${flagKey}/activate`,
-      { headers }
-    );
-    expect(response.ok()).toBe(true);
-  }
-  await context.close();
-}
-
-async function setOwnerTenantOverrides(ownerPage: Page, flagKeys: readonly string[], enabled: boolean): Promise<void> {
-  // Owner needs the SPA shell loaded so the antiforgery meta tag is in the DOM. /account/settings
-  // is gated on no flags, so it's the safest anchor.
-  await ownerPage.goto("/account/settings");
-  const headers = await getAntiforgeryHeaders(ownerPage);
-  for (const flagKey of flagKeys) {
-    const response = await ownerPage.request.put(`/api/account/feature-flags/${flagKey}/tenant-override`, {
-      data: { enabled },
-      headers
-    });
-    expect(response.ok()).toBe(true);
-  }
-}
 
 test.describe("@smoke", () => {
   test.afterEach(async ({ ownerPage }) => {

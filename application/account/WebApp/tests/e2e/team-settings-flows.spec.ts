@@ -1,52 +1,14 @@
-import { expect, type Browser, type Page } from "@playwright/test";
+import { expect } from "@playwright/test";
 import { test } from "@shared/e2e/fixtures/page-auth";
-import { getBackOfficeBaseUrl } from "@shared/e2e/utils/constants";
+import { activateBaseFlags, setOwnerTenantOverrides } from "@shared/e2e/utils/feature-flag-helpers";
 import { createTestContext, expectToastMessage } from "@shared/e2e/utils/test-assertions";
-import { logInAsAdmin } from "@shared/e2e/utils/test-data";
 import { step } from "@shared/e2e/utils/test-step-wrapper";
-
-const BACK_OFFICE_BASE_URL = getBackOfficeBaseUrl();
 
 // Teams admin is gated on the tier-teams flag which is the root of the tier dependency chain (so no
 // parents to activate). The reconciler still creates the row inactive, so an admin must Activate
 // the base row before the owner can flip the tenant override. Both calls are idempotent so parallel
 // workers don't fight each other.
 const FLAG_CHAIN = ["tier-teams"] as const;
-
-async function getAntiforgeryHeaders(page: Page): Promise<{ "x-xsrf-token": string }> {
-  const token = await page.evaluate(
-    () => document.head.querySelector('meta[name="antiforgeryToken"]')?.getAttribute("content") ?? ""
-  );
-  return { "x-xsrf-token": token };
-}
-
-async function activateBaseFlags(browser: Browser, flagKeys: readonly string[]): Promise<void> {
-  const context = await browser.newContext({ baseURL: BACK_OFFICE_BASE_URL, ignoreHTTPSErrors: true });
-  const page = await context.newPage();
-  await page.goto(`${BACK_OFFICE_BASE_URL}/feature-flags`);
-  await logInAsAdmin(page, `${BACK_OFFICE_BASE_URL}/feature-flags`);
-  const headers = await getAntiforgeryHeaders(page);
-  for (const flagKey of flagKeys) {
-    const response = await page.request.put(
-      `${BACK_OFFICE_BASE_URL}/api/back-office/feature-flags/${flagKey}/activate`,
-      { headers }
-    );
-    expect(response.ok()).toBe(true);
-  }
-  await context.close();
-}
-
-async function setOwnerTenantOverrides(ownerPage: Page, flagKeys: readonly string[], enabled: boolean): Promise<void> {
-  await ownerPage.goto("/account/settings");
-  const headers = await getAntiforgeryHeaders(ownerPage);
-  for (const flagKey of flagKeys) {
-    const response = await ownerPage.request.put(`/api/account/feature-flags/${flagKey}/tenant-override`, {
-      data: { enabled },
-      headers
-    });
-    expect(response.ok()).toBe(true);
-  }
-}
 
 test.describe("@smoke", () => {
   test.afterEach(async ({ ownerPage }) => {
