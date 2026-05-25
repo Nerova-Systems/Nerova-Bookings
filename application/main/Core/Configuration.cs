@@ -3,6 +3,8 @@ using Main.Features.EventTypes.Domain;
 using Main.Features.Insights.Shared;
 using Main.Features.ManagedEventTypes.EventHandlers;
 using Main.Features.ManagedEventTypes.Services;
+using Main.Features.Permissions.Pipeline;
+using Main.Features.Permissions.Services;
 using Main.Features.Scheduling.Shared;
 using Main.Features.Workflows.Domain;
 using Main.Features.Workflows.EventHandlers;
@@ -35,7 +37,13 @@ public static class Configuration
     {
         public IServiceCollection AddMainServices()
         {
+            // PermissionCheckBehavior must be registered BEFORE AddSharedServices so it is the
+            // outermost pipeline behavior (runs before Validation — security gate first, business
+            // logic second). Mirrors the Account SCS registration order.
+            services.AddTransient(typeof(IPipelineBehavior<,>), typeof(PermissionCheckBehavior<,>));
+
             return services
+                .AddScoped<IPermissionCheckService, PermissionCheckService>()
                 .AddScoped<PublicSchedulingResolver>()
                 .AddScoped<PublicSlotCalculator>()
                 .AddScoped<CollectiveSlotCalculator>()
