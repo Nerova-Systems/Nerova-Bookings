@@ -113,6 +113,39 @@ public sealed class GoogleCalendarService
             ?? throw new InvalidOperationException("Google events.insert response missing 'id'.");
     }
 
+    /// <summary>
+    ///     Creates a Google Calendar event with an attached Google Meet conference (via
+    ///     <c>conferenceData.createRequest</c> + <c>conferenceDataVersion=1</c>) and returns the
+    ///     event id and the generated <c>hangoutLink</c>. Used by the Google Meet connector,
+    ///     which reuses the Google Calendar credential rather than holding its own.
+    /// </summary>
+    public async Task<(string EventId, string JoinUrl)> CreateEventWithMeetLinkAsync(
+        BookingEvent input,
+        CancellationToken cancellationToken
+    )
+    {
+        var body = BuildEventBodyWithMeet(input);
+
+        using var response = await SendWithRefreshAsync(
+            () => new HttpRequestMessage(HttpMethod.Post, $"{_options.ApiBaseUrl}/calendars/primary/events?conferenceDataVersion=1")
+            {
+                Content = JsonContent.Create(body, options: JsonOptions)
+            },
+            cancellationToken
+        );
+
+        await EnsureSuccessAsync(response, "events.insert", cancellationToken);
+        await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
+        var json = await JsonNode.ParseAsync(stream, cancellationToken: cancellationToken)
+            ?? throw new InvalidOperationException("Google events.insert response was empty.");
+        var eventId = json["id"]?.GetValue<string>()
+            ?? throw new InvalidOperationException("Google events.insert response missing 'id'.");
+        var joinUrl = json["hangoutLink"]?.GetValue<string>()
+            ?? json["conferenceData"]?["entryPoints"]?.AsArray().FirstOrDefault()?["uri"]?.GetValue<string>()
+            ?? throw new InvalidOperationException("Google events.insert response missing 'hangoutLink' / conferenceData entry point — was conferenceData.createRequest accepted?");
+        return (eventId, joinUrl);
+    }
+
     public async Task UpdateEventAsync(string externalEventId, BookingEvent input, CancellationToken cancellationToken)
     {
         var body = BuildEventBody(input);
@@ -144,12 +177,7 @@ public sealed class GoogleCalendarService
 
     internal static object BuildEventBody(BookingEvent input)
     {
-        var attendees = input.Attendees
-            .Select(attendee => attendee.Name is null
-                ? (object)new { email = attendee.Email }
-                : new { email = attendee.Email, displayName = attendee.Name }
-            )
-            .ToArray();
+        var attendees = BuildAttendees(input);
 
         return new
         {
@@ -162,6 +190,45 @@ public sealed class GoogleCalendarService
             organizer = new { email = input.OrganizerEmail, displayName = input.OrganizerName },
             attendees
         };
+    }
+
+    internal static object BuildEventBodyWithMeet(BookingEvent input)
+    {
+        var attendees = BuildAttendees(input);
+        // Per Google Calendar API: a unique requestId scopes the createRequest so retried inserts
+        // don't generate multiple conferences. We use the iCalUid when supplied (stable for a
+        // booking) and fall back to a fresh GUID.
+        var requestId = string.IsNullOrEmpty(input.ICalUid) ? Guid.NewGuid().ToString("N") : input.ICalUid;
+
+        return new
+        {
+            summary = input.Title,
+            description = input.Description,
+            location = input.Location,
+            iCalUID = input.ICalUid,
+            start = new { dateTime = input.StartTime.ToUniversalTime().ToString("o"), timeZone = input.TimeZone },
+            end = new { dateTime = input.EndTime.ToUniversalTime().ToString("o"), timeZone = input.TimeZone },
+            organizer = new { email = input.OrganizerEmail, displayName = input.OrganizerName },
+            attendees,
+            conferenceData = new
+            {
+                createRequest = new
+                {
+                    requestId,
+                    conferenceSolutionKey = new { type = "hangoutsMeet" }
+                }
+            }
+        };
+    }
+
+    private static object[] BuildAttendees(BookingEvent input)
+    {
+        return input.Attendees
+            .Select(attendee => attendee.Name is null
+                ? (object)new { email = attendee.Email }
+                : new { email = attendee.Email, displayName = attendee.Name }
+            )
+            .ToArray();
     }
 
     private async Task<HttpResponseMessage> SendWithRefreshAsync(

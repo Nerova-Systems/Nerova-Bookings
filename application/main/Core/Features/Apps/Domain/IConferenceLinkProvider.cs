@@ -47,6 +47,15 @@ public interface IConferenceLinkProvider
     ///     the right provider from the registered set.</summary>
     AppSlug Slug { get; }
 
+    /// <summary>
+    ///     The <see cref="AppSlug" /> whose <see cref="Credential" /> this provider consumes.
+    ///     Defaults to <see cref="Slug" /> for the common case where install and conferencing
+    ///     credentials are one and the same (Zoom, MS Teams). Connectors that piggy-back on
+    ///     another connector's credential (e.g. Google Meet reusing the Google Calendar tokens)
+    ///     override this so the orchestrator looks up the right credential row.
+    /// </summary>
+    AppSlug CredentialAppSlug => Slug;
+
     Task<ConferenceLink> CreateAsync(Credential credential, BookingEvent input, CancellationToken cancellationToken);
 
     Task<ConferenceLink> UpdateAsync(Credential credential, string externalId, BookingEvent input, CancellationToken cancellationToken);

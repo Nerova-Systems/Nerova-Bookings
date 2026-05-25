@@ -1,5 +1,6 @@
 using Main.Database;
 using Main.Features.Apps.Connectors.GoogleCalendar;
+using Main.Features.Apps.Connectors.GoogleMeet;
 using Main.Features.Apps.Connectors.Office365Calendar;
 using Main.Features.Apps.Connectors.Zoom;
 using Main.Features.Apps.Domain;
@@ -133,6 +134,14 @@ public static class Configuration
                 .AddSingleton<IAppInstaller, ZoomInstaller>()
                 .AddScoped<ZoomServiceFactory>()
                 .AddScoped<IConferenceLinkProvider, ZoomConferenceLinkProvider>()
+                // ─── Google Meet connector ─────────────────────────────────
+                // Conferencing connector that piggy-backs on the google-calendar credential —
+                // no OAuth flow of its own, no new HttpClient (reuses google-calendar's named
+                // client through GoogleCalendarServiceFactory). Installer is singleton (matches
+                // the other installers and the registry's lifetime); it scope-resolves
+                // ICredentialRepository on each call to check the prerequisite.
+                .AddSingleton<IAppInstaller, GoogleMeetInstaller>()
+                .AddScoped<IConferenceLinkProvider, GoogleMeetConferenceLinkProvider>()
                 // Scheduling → conferencing bridge. Resolves the right IConferenceLinkProvider
                 // for an event type's location and stamps the join URL + BookingReference
                 // onto the persisted booking.

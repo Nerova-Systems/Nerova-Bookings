@@ -34,8 +34,14 @@ public sealed record AppInstallCallbackContext(
 ///     Result of completing the OAuth flow. The <paramref name="EncryptedKey" /> field is the
 ///     already-encrypted JSON blob the platform will persist in <see cref="Credential" />.
 ///     Connectors call <c>CredentialProtector</c> to produce it.
+///     <para>
+///         Connectors that piggy-back on another connector's credential (e.g. Google Meet
+///         reuses the Google Calendar tokens) set <paramref name="PersistCredential" /> to
+///         <c>false</c> so the platform skips writing a duplicate <see cref="Credential" />
+///         row. In that case <paramref name="EncryptedKey" /> may be empty.
+///     </para>
 /// </summary>
-public sealed record AppInstallCallbackResult(string EncryptedKey);
+public sealed record AppInstallCallbackResult(string EncryptedKey, bool PersistCredential = true);
 
 /// <summary>
 ///     The contract every connector implements (one implementation per <see cref="AppSlug" />) to

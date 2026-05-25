@@ -97,6 +97,7 @@ public sealed class CompleteAppInstallHandler(
 
         var installer = appRegistry.Resolve(command.Slug);
         string encryptedKey;
+        var persistCredential = true;
         if (installer is null)
         {
             // Foundation track stub: persist a placeholder encrypted blob so the contract is observable.
@@ -109,18 +110,22 @@ public sealed class CompleteAppInstallHandler(
             var context = new AppInstallCallbackContext(tenantId, userId, command.Code, redirectUri);
             var result = await installer.CompleteInstallAsync(context, cancellationToken);
             encryptedKey = result.EncryptedKey;
+            persistCredential = result.PersistCredential;
         }
 
-        var existingCredential = await credentialRepository.GetForUserAsync(userId, command.Slug, cancellationToken);
-        if (existingCredential is null)
+        if (persistCredential)
         {
-            var credential = Credential.Create(tenantId, userId, command.Slug, encryptedKey);
-            await credentialRepository.AddAsync(credential, cancellationToken);
-        }
-        else
-        {
-            existingCredential.UpdateKey(encryptedKey);
-            credentialRepository.Update(existingCredential);
+            var existingCredential = await credentialRepository.GetForUserAsync(userId, command.Slug, cancellationToken);
+            if (existingCredential is null)
+            {
+                var credential = Credential.Create(tenantId, userId, command.Slug, encryptedKey);
+                await credentialRepository.AddAsync(credential, cancellationToken);
+            }
+            else
+            {
+                existingCredential.UpdateKey(encryptedKey);
+                credentialRepository.Update(existingCredential);
+            }
         }
 
         var installation = await installationRepository.GetForTenantAsync(command.Slug, cancellationToken);

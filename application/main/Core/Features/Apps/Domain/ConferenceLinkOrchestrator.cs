@@ -48,12 +48,12 @@ public sealed class ConferenceLinkOrchestrator(
             return;
         }
 
-        var credential = await credentialRepository.GetForUserAsync(ownerUserId, slug, cancellationToken);
+        var credential = await credentialRepository.GetForUserAsync(ownerUserId, provider.CredentialAppSlug, cancellationToken);
         if (credential is null)
         {
             logger.LogWarning(
                 "Owner {OwnerUserId} has no '{Slug}' credential installed; booking {BookingId} will save without a join URL.",
-                ownerUserId.Value, slug.Value, booking.Id.Value
+                ownerUserId.Value, provider.CredentialAppSlug.Value, booking.Id.Value
             );
             return;
         }
