@@ -479,6 +479,9 @@ msgstr "Basic support"
 msgid "Basis"
 msgstr "Basis"
 
+msgid "Becomes part of your team's public URLs. Leave blank to auto-generate later."
+msgstr "Becomes part of your team's public URLs. Leave blank to auto-generate later."
+
 msgid "Bill to"
 msgstr "Bill to"
 
@@ -1323,9 +1326,6 @@ msgstr "Failed"
 msgid "Failed to create role. Please try again."
 msgstr "Failed to create role. Please try again."
 
-msgid "Failed to create team. Please try again."
-msgstr "Failed to create team. Please try again."
-
 msgid "Failed to update role. Please try again."
 msgstr "Failed to update role. Please try again."
 
@@ -1619,6 +1619,9 @@ msgstr "January - June 2024"
 
 msgid "Japanese"
 msgstr "Japanese"
+
+msgid "Joined"
+msgstr "Joined"
 
 msgid "Joined March 2024"
 msgstr "Joined March 2024"
@@ -2264,8 +2267,8 @@ msgstr "Pick a chart"
 msgid "Pick a date"
 msgstr "Pick a date"
 
-msgid "Pick a name and a unique URL slug. You can configure branding and invite members after creating the team."
-msgstr "Pick a name and a unique URL slug. You can configure branding and invite members after creating the team."
+msgid "Pick a name and a URL slug. You can configure branding and invite members after creating the team."
+msgstr "Pick a name and a URL slug. You can configure branding and invite members after creating the team."
 
 msgid "Pick a recipe"
 msgstr "Pick a recipe"
@@ -2594,6 +2597,10 @@ msgstr "Review every significant action performed in your organization."
 
 msgid "Revoke"
 msgstr "Revoke"
+
+#. placeholder {0}: member.email
+msgid "Revoke invitation for {0}"
+msgstr "Revoke invitation for {0}"
 
 msgid "Revoke session"
 msgstr "Revoke session"
@@ -3148,9 +3155,6 @@ msgstr "The organization name appears throughout the product and in outgoing ema
 
 msgid "The page you are looking for does not exist or was moved."
 msgstr "The page you are looking for does not exist or was moved."
-
-msgid "The slug becomes part of your team's public URLs. Leave blank to auto-generate later."
-msgstr "The slug becomes part of your team's public URLs. Leave blank to auto-generate later."
 
 msgid "The user must already have an account. Pick the role they will hold in this team."
 msgstr "The user must already have an account. Pick the role they will hold in this team."

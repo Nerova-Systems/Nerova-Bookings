@@ -19,10 +19,11 @@ type TeamResponse = Schemas["TeamResponse"];
 interface TeamGeneralTabProps {
   team: TeamResponse;
   canManage: boolean;
+  canDelete: boolean;
   onDelete: () => void;
 }
 
-export function TeamGeneralTab({ team, canManage, onDelete }: Readonly<TeamGeneralTabProps>) {
+export function TeamGeneralTab({ team, canManage, canDelete, onDelete }: Readonly<TeamGeneralTabProps>) {
   const queryClient = useQueryClient();
   const [name, setName] = useState(team.name);
   const [slug, setSlug] = useState(team.slug ?? "");
@@ -157,7 +158,7 @@ export function TeamGeneralTab({ team, canManage, onDelete }: Readonly<TeamGener
         </div>
       )}
 
-      {canManage && (
+      {canDelete && (
         <Section title={t`Danger zone`} description={t`Deleting a team is permanent and cannot be undone.`}>
           <div>
             <Button type="button" variant="destructive" onClick={onDelete}>

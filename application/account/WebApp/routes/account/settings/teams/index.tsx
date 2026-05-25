@@ -5,13 +5,16 @@ import { isFeatureFlagEnabled } from "@repo/infrastructure/featureFlags/useFeatu
 import { AppLayout } from "@repo/ui/components/AppLayout";
 import { Avatar, AvatarFallback, AvatarImage } from "@repo/ui/components/Avatar";
 import { Badge } from "@repo/ui/components/Badge";
-import { buttonVariants } from "@repo/ui/components/Button";
+import { Button, buttonVariants } from "@repo/ui/components/Button";
 import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@repo/ui/components/Empty";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@repo/ui/components/Table";
 import { createFileRoute, Link, redirect } from "@tanstack/react-router";
 import { PlusIcon, UsersIcon } from "lucide-react";
+import { useState } from "react";
 
 import { api } from "@/shared/lib/api/client";
+
+import { CreateTeamDialog } from "./-components/CreateTeamDialog";
 
 export const Route = createFileRoute("/account/settings/teams/")({
   beforeLoad: () => {
@@ -28,6 +31,7 @@ export const Route = createFileRoute("/account/settings/teams/")({
 function TeamsPage() {
   const userInfo = useUserInfo();
   const canManageTeams = userInfo?.role === "Owner" || userInfo?.role === "Admin";
+  const [isCreateOpen, setCreateOpen] = useState(false);
 
   const { data: teams, isLoading } = api.useQuery("get", "/api/account/teams");
 
@@ -40,14 +44,10 @@ function TeamsPage() {
     >
       {canManageTeams && (
         <div className="flex justify-end">
-          <Link
-            to="/account/settings/teams/new"
-            className={buttonVariants({ variant: "default" })}
-            aria-label={t`New team`}
-          >
+          <Button onClick={() => setCreateOpen(true)} aria-label={t`New team`}>
             <PlusIcon />
             <Trans>New team</Trans>
-          </Link>
+          </Button>
         </div>
       )}
 
@@ -66,14 +66,10 @@ function TeamsPage() {
           </EmptyHeader>
           {canManageTeams && (
             <EmptyContent>
-              <Link
-                to="/account/settings/teams/new"
-                className={buttonVariants({ variant: "default" })}
-                aria-label={t`Create a team`}
-              >
+              <Button onClick={() => setCreateOpen(true)} aria-label={t`Create a team`}>
                 <PlusIcon />
                 <Trans>Create a team</Trans>
-              </Link>
+              </Button>
             </EmptyContent>
           )}
         </Empty>
@@ -124,6 +120,8 @@ function TeamsPage() {
           </TableBody>
         </Table>
       )}
+
+      <CreateTeamDialog isOpen={isCreateOpen} onOpenChange={setCreateOpen} />
     </AppLayout>
   );
 }

@@ -488,6 +488,9 @@ msgstr "Basal support"
 msgid "Basis"
 msgstr "Basis"
 
+msgid "Becomes part of your team's public URLs. Leave blank to auto-generate later."
+msgstr "Bliver en del af dit teams offentlige URL'er. Lad stå tomt for at autogenerere senere."
+
 msgid "Bill to"
 msgstr "Faktureres til"
 
@@ -1360,10 +1363,6 @@ msgid "Failed to create role. Please try again."
 msgstr "Failed to create role. Please try again."
 
 #, fuzzy
-msgid "Failed to create team. Please try again."
-msgstr "Failed to create team. Please try again."
-
-#, fuzzy
 msgid "Failed to update role. Please try again."
 msgstr "Failed to update role. Please try again."
 
@@ -1678,6 +1677,9 @@ msgstr "Januar - juni 2024"
 
 msgid "Japanese"
 msgstr "Japansk"
+
+msgid "Joined"
+msgstr "Tilmeldt"
 
 msgid "Joined March 2024"
 msgstr "Tilmeldt marts 2024"
@@ -2356,9 +2358,8 @@ msgstr "Vælg et diagram"
 msgid "Pick a date"
 msgstr "Vælg en dato"
 
-#, fuzzy
-msgid "Pick a name and a unique URL slug. You can configure branding and invite members after creating the team."
-msgstr "Pick a name and a unique URL slug. You can configure branding and invite members after creating the team."
+msgid "Pick a name and a URL slug. You can configure branding and invite members after creating the team."
+msgstr "Vælg et navn og en URL-slug. Du kan konfigurere branding og invitere medlemmer efter oprettelse af teamet."
 
 msgid "Pick a recipe"
 msgstr "Vælg en opskrift"
@@ -2698,6 +2699,10 @@ msgstr "Gennemgå enhver væsentlig handling udført i din organisation."
 
 msgid "Revoke"
 msgstr "Tilbagekald"
+
+#. placeholder {0}: member.email
+msgid "Revoke invitation for {0}"
+msgstr "Tilbagekald invitation til {0}"
 
 msgid "Revoke session"
 msgstr "Tilbagekald session"
@@ -3283,10 +3288,6 @@ msgstr "Organisationsnavnet vises overalt i produktet og i udgående e-mails."
 
 msgid "The page you are looking for does not exist or was moved."
 msgstr "Siden du leder efter findes ikke eller er blevet flyttet."
-
-#, fuzzy
-msgid "The slug becomes part of your team's public URLs. Leave blank to auto-generate later."
-msgstr "The slug becomes part of your team's public URLs. Leave blank to auto-generate later."
 
 #, fuzzy
 msgid "The user must already have an account. Pick the role they will hold in this team."

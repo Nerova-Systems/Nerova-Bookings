@@ -5,6 +5,7 @@ import { Badge } from "@repo/ui/components/Badge";
 import { Button } from "@repo/ui/components/Button";
 import { ComboboxField } from "@repo/ui/components/ComboboxField";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@repo/ui/components/Table";
+import { useFormatDate } from "@repo/ui/hooks/useSmartDate";
 import { Trash2Icon } from "lucide-react";
 
 import { type Schemas } from "@/shared/lib/api/client";
@@ -59,6 +60,9 @@ export function MembersTable({
           <TableHead>
             <Trans>Status</Trans>
           </TableHead>
+          <TableHead>
+            <Trans>Joined</Trans>
+          </TableHead>
           {canManage && <TableHead className="w-px text-right" />}
         </TableRow>
       </TableHeader>
@@ -89,7 +93,10 @@ interface MemberRowProps {
 }
 
 function MemberRow({ member, roles, canManage, isAssigning, onAssignRole, onRequestRemove }: Readonly<MemberRowProps>) {
+  const formatDate = useFormatDate();
   const displayName = [member.firstName, member.lastName].filter(Boolean).join(" ") || member.email;
+  const joinedAt = member.acceptedAt ?? member.invitedAt;
+  const joinedDate = joinedAt ? formatDate(joinedAt) : "—";
   return (
     <TableRow>
       <TableCell>
@@ -134,13 +141,14 @@ function MemberRow({ member, roles, canManage, isAssigning, onAssignRole, onRequ
           </Badge>
         )}
       </TableCell>
+      <TableCell className="text-sm text-muted-foreground">{joinedDate}</TableCell>
       {canManage && (
         <TableCell className="text-right">
           <Button
             variant="ghost"
             size="sm"
             onClick={() => onRequestRemove(member)}
-            aria-label={t`Remove ${member.email}`}
+            aria-label={member.accepted ? t`Remove ${member.email}` : t`Revoke invitation for ${member.email}`}
           >
             <Trash2Icon className="size-4" />
           </Button>
