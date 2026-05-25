@@ -1,0 +1,354 @@
+using System.Net;
+using System.Net.Http.Json;
+using System.Text.Json;
+using System.Text.Json.Nodes;
+using Main.Features.Apps.Connectors.GoogleCalendar;
+using Main.Features.Apps.Domain;
+using Main.Features.Apps.Infrastructure;
+using Microsoft.Extensions.Options;
+
+namespace Main.Features.Apps.Connectors.Office365Calendar;
+
+/// <summary>
+///     Per-credential Microsoft Graph client for Outlook/Office 365 Calendar. Handles
+///     free-busy lookups via <c>/me/calendar/getSchedule</c> and the booking event lifecycle
+///     (create / update / cancel). Transparently refreshes the OAuth access token on a 401
+///     response and persists the rotated blob back via the supplied callback so subsequent
+///     calls reuse the new token without a second refresh round-trip.
+///     <para>
+///         Construct one instance per credential via <see cref="Office365CalendarServiceFactory" /> —
+///         the service is intentionally stateful (it caches the current token blob and the
+///         lazily-resolved user principal name) and must not be registered as a long-lived
+///         singleton.
+///     </para>
+/// </summary>
+public sealed class Office365CalendarService
+{
+    private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web);
+
+    private readonly HttpClient _httpClient;
+    private readonly Office365CalendarOptions _options;
+    private readonly Func<string, CancellationToken, Task> _persistRefreshedBlobAsync;
+    private readonly TimeProvider _timeProvider;
+    private Office365CredentialBlob _blob;
+
+    public Office365CalendarService(
+        HttpClient httpClient,
+        Office365CalendarOptions options,
+        Office365CredentialBlob initialBlob,
+        Func<string, CancellationToken, Task> persistRefreshedBlobAsync,
+        TimeProvider timeProvider
+    )
+    {
+        _httpClient = httpClient;
+        _options = options;
+        _blob = initialBlob;
+        _persistRefreshedBlobAsync = persistRefreshedBlobAsync;
+        _timeProvider = timeProvider;
+    }
+
+    /// <summary>Snapshot of the in-memory credential — exposed for tests and the busy-time provider.</summary>
+    public Office365CredentialBlob CurrentBlob => _blob;
+
+    // ─── Free-busy ───────────────────────────────────────────────────────────
+
+    public async Task<IReadOnlyList<ExternalBusyTime>> GetBusyTimesAsync(
+        DateTimeOffset from,
+        DateTimeOffset to,
+        CancellationToken cancellationToken
+    )
+    {
+        var upn = await EnsureUserPrincipalNameAsync(cancellationToken);
+
+        var payload = new
+        {
+            schedules = new[] { upn },
+            // Microsoft expects ISO-8601 without a trailing 'Z' when the timeZone field is
+            // provided alongside; UTC + "UTC" timeZone is the simplest interoperable shape.
+            startTime = new { dateTime = from.ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ss"), timeZone = "UTC" },
+            endTime = new { dateTime = to.ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ss"), timeZone = "UTC" },
+            availabilityViewInterval = 30
+        };
+
+        using var response = await SendWithRefreshAsync(
+            () => new HttpRequestMessage(HttpMethod.Post, $"{_options.ApiBaseUrl}/me/calendar/getSchedule")
+            {
+                Content = JsonContent.Create(payload, options: JsonOptions)
+            },
+            cancellationToken
+        );
+
+        await EnsureSuccessAsync(response, "getSchedule", cancellationToken);
+        await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
+        var root = await JsonNode.ParseAsync(stream, cancellationToken: cancellationToken);
+        var value = root?["value"]?.AsArray();
+        if (value is null || value.Count == 0) return [];
+
+        var result = new List<ExternalBusyTime>();
+        foreach (var schedule in value)
+        {
+            var items = schedule?["scheduleItems"]?.AsArray();
+            if (items is null) continue;
+            foreach (var item in items)
+            {
+                var status = item?["status"]?.GetValue<string>();
+                // "free" and "workingElsewhere" should not block a slot; everything else
+                // (busy, tentative, oof, unknown) counts as unavailable.
+                if (string.Equals(status, "free", StringComparison.OrdinalIgnoreCase)) continue;
+                if (string.Equals(status, "workingElsewhere", StringComparison.OrdinalIgnoreCase)) continue;
+
+                var start = ReadGraphDateTime(item?["start"]);
+                var end = ReadGraphDateTime(item?["end"]);
+                if (start is null || end is null) continue;
+                result.Add(new ExternalBusyTime(start.Value, end.Value));
+            }
+        }
+
+        return result;
+    }
+
+    // ─── Event lifecycle ────────────────────────────────────────────────────
+
+    public async Task<string> CreateEventAsync(BookingEvent input, CancellationToken cancellationToken)
+    {
+        var body = BuildEventBody(input);
+
+        using var response = await SendWithRefreshAsync(
+            () => new HttpRequestMessage(HttpMethod.Post, $"{_options.ApiBaseUrl}/me/calendar/events")
+            {
+                Content = JsonContent.Create(body, options: JsonOptions)
+            },
+            cancellationToken
+        );
+
+        await EnsureSuccessAsync(response, "events.create", cancellationToken);
+        await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
+        var json = await JsonNode.ParseAsync(stream, cancellationToken: cancellationToken);
+        return json?["id"]?.GetValue<string>()
+            ?? throw new InvalidOperationException("Microsoft Graph events.create response missing 'id'.");
+    }
+
+    public async Task UpdateEventAsync(string externalEventId, BookingEvent input, CancellationToken cancellationToken)
+    {
+        var body = BuildEventBody(input);
+
+        // Microsoft Graph uses PATCH (partial update) for events.update — sending PUT
+        // returns 405.
+        using var response = await SendWithRefreshAsync(
+            () => new HttpRequestMessage(HttpMethod.Patch, $"{_options.ApiBaseUrl}/me/calendar/events/{Uri.EscapeDataString(externalEventId)}")
+            {
+                Content = JsonContent.Create(body, options: JsonOptions)
+            },
+            cancellationToken
+        );
+
+        await EnsureSuccessAsync(response, "events.update", cancellationToken);
+    }
+
+    public async Task CancelEventAsync(string externalEventId, CancellationToken cancellationToken)
+    {
+        using var response = await SendWithRefreshAsync(
+            () => new HttpRequestMessage(HttpMethod.Delete, $"{_options.ApiBaseUrl}/me/calendar/events/{Uri.EscapeDataString(externalEventId)}"),
+            cancellationToken
+        );
+
+        // 404 is acceptable — the event was already deleted upstream.
+        if (response.StatusCode == HttpStatusCode.NotFound || response.StatusCode == HttpStatusCode.Gone) return;
+        await EnsureSuccessAsync(response, "events.delete", cancellationToken);
+    }
+
+    // ─── Internals ──────────────────────────────────────────────────────────
+
+    internal static object BuildEventBody(BookingEvent input)
+    {
+        var attendees = input.Attendees
+            .Select(attendee => new
+            {
+                emailAddress = new { address = attendee.Email, name = attendee.Name ?? attendee.Email },
+                type = "required"
+            })
+            .ToArray();
+
+        return new
+        {
+            subject = input.Title,
+            body = new
+            {
+                contentType = "HTML",
+                content = input.Description ?? string.Empty
+            },
+            start = new { dateTime = input.StartTime.ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ss"), timeZone = "UTC" },
+            end = new { dateTime = input.EndTime.ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ss"), timeZone = "UTC" },
+            originalStartTimeZone = input.TimeZone,
+            originalEndTimeZone = input.TimeZone,
+            location = input.Location is null ? null : new { displayName = input.Location },
+            organizer = new
+            {
+                emailAddress = new { address = input.OrganizerEmail, name = input.OrganizerName ?? input.OrganizerEmail }
+            },
+            attendees,
+            iCalUId = input.ICalUid,
+            // Suppress Graph's own notification email — we send our own confirmation flow.
+            isReminderOn = false
+        };
+    }
+
+    private static DateTimeOffset? ReadGraphDateTime(JsonNode? node)
+    {
+        if (node is null) return null;
+        var dateTime = node["dateTime"]?.GetValue<string>();
+        if (string.IsNullOrEmpty(dateTime)) return null;
+        var timeZone = node["timeZone"]?.GetValue<string>();
+
+        // Graph returns local-style ISO-8601 ("2026-01-02T09:00:00.0000000") with a
+        // separate timeZone field (no trailing 'Z'). Because the string has no offset,
+        // DateTimeOffset.TryParse would interpret it as the host's local time — instead
+        // honour the timeZone field: we always request "UTC" so any other value is
+        // unexpected and treated as UTC defensively.
+        if (DateTime.TryParse(
+                dateTime,
+                System.Globalization.CultureInfo.InvariantCulture,
+                System.Globalization.DateTimeStyles.AssumeUniversal | System.Globalization.DateTimeStyles.AdjustToUniversal,
+                out var dt
+            ))
+        {
+            _ = timeZone; // documented above; we always send UTC
+            return new DateTimeOffset(DateTime.SpecifyKind(dt, DateTimeKind.Utc));
+        }
+
+        return null;
+    }
+
+    private async Task<string> EnsureUserPrincipalNameAsync(CancellationToken cancellationToken)
+    {
+        if (!string.IsNullOrEmpty(_blob.UserPrincipalName)) return _blob.UserPrincipalName;
+
+        using var response = await SendWithRefreshAsync(
+            () => new HttpRequestMessage(HttpMethod.Get, $"{_options.ApiBaseUrl}/me?$select=mail,userPrincipalName"),
+            cancellationToken
+        );
+        await EnsureSuccessAsync(response, "me", cancellationToken);
+
+        await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
+        var root = await JsonNode.ParseAsync(stream, cancellationToken: cancellationToken);
+        var upn = root?["mail"]?.GetValue<string>() ?? root?["userPrincipalName"]?.GetValue<string>();
+        if (string.IsNullOrEmpty(upn))
+        {
+            throw new InvalidOperationException("Microsoft Graph /me response missing both mail and userPrincipalName.");
+        }
+
+        _blob = _blob with { UserPrincipalName = upn };
+        await _persistRefreshedBlobAsync(_blob.ToJson(), cancellationToken);
+        return upn;
+    }
+
+    private async Task<HttpResponseMessage> SendWithRefreshAsync(
+        Func<HttpRequestMessage> buildRequest,
+        CancellationToken cancellationToken
+    )
+    {
+        var first = buildRequest();
+        Office365CalendarInstaller.ApplyBearer(first, _blob.AccessToken);
+        var response = await _httpClient.SendAsync(first, cancellationToken);
+        if (response.StatusCode != HttpStatusCode.Unauthorized) return response;
+
+        response.Dispose();
+        await RefreshAccessTokenAsync(cancellationToken);
+
+        var retry = buildRequest();
+        Office365CalendarInstaller.ApplyBearer(retry, _blob.AccessToken);
+        return await _httpClient.SendAsync(retry, cancellationToken);
+    }
+
+    private async Task RefreshAccessTokenAsync(CancellationToken cancellationToken)
+    {
+        using var request = new HttpRequestMessage(HttpMethod.Post, _options.TokenUrl)
+        {
+            Content = new FormUrlEncodedContent(new Dictionary<string, string>
+                {
+                    ["client_id"] = _options.ClientId,
+                    ["client_secret"] = _options.ClientSecret,
+                    ["refresh_token"] = _blob.RefreshToken,
+                    ["grant_type"] = "refresh_token",
+                    ["scope"] = string.Join(' ', _options.Scopes)
+                }
+            )
+        };
+        using var response = await _httpClient.SendAsync(request, cancellationToken);
+        var body = await response.Content.ReadAsStringAsync(cancellationToken);
+        if (!response.IsSuccessStatusCode)
+        {
+            throw new InvalidOperationException(
+                $"Microsoft token refresh failed with status {(int)response.StatusCode}: {body}"
+            );
+        }
+
+        var token = JsonSerializer.Deserialize<Office365TokenResponse>(body, Office365TokenResponse.JsonOptions)
+            ?? throw new InvalidOperationException("Microsoft token refresh response was empty.");
+        if (string.IsNullOrEmpty(token.AccessToken)) throw new InvalidOperationException("Microsoft token refresh response missing access_token.");
+
+        _blob = new Office365CredentialBlob(
+            token.AccessToken,
+            // Microsoft rotates the refresh token on every refresh — keep the new one when
+            // provided, otherwise fall back to the existing one (defensive).
+            string.IsNullOrEmpty(token.RefreshToken) ? _blob.RefreshToken : token.RefreshToken,
+            _timeProvider.GetUtcNow().AddSeconds(Math.Max(token.ExpiresIn - 60, 60)),
+            token.Scope ?? _blob.Scope,
+            _blob.UserPrincipalName
+        );
+
+        await _persistRefreshedBlobAsync(_blob.ToJson(), cancellationToken);
+    }
+
+    private static async Task EnsureSuccessAsync(HttpResponseMessage response, string operation, CancellationToken cancellationToken)
+    {
+        if (response.IsSuccessStatusCode) return;
+        var body = await response.Content.ReadAsStringAsync(cancellationToken);
+        throw new InvalidOperationException(
+            $"Microsoft Graph {operation} failed with status {(int)response.StatusCode}: {body}"
+        );
+    }
+}
+
+/// <summary>
+///     Builds an <see cref="Office365CalendarService" /> for a stored <see cref="Credential" />,
+///     handling decryption of the JSON blob and wiring the refresh-token persistence callback
+///     back through <see cref="ICredentialRepository" />.
+/// </summary>
+public sealed class Office365CalendarServiceFactory(
+    IHttpClientFactory httpClientFactory,
+    IOptionsMonitor<Office365CalendarOptions> options,
+    CredentialProtector protector,
+    ICredentialRepository credentialRepository,
+    TimeProvider timeProvider
+)
+{
+    public Office365CalendarService Create(Credential credential)
+    {
+        if (credential.AppSlug != Office365CalendarSlug.Slug)
+        {
+            throw new ArgumentException(
+                $"Credential is for app '{credential.AppSlug.Value}', not '{Office365CalendarSlug.Value}'.",
+                nameof(credential)
+            );
+        }
+
+        var blob = Office365CredentialBlob.FromJson(protector.Unprotect(credential.EncryptedKey));
+        var client = httpClientFactory.CreateClient(Office365CalendarSlug.HttpClientName);
+
+        return new Office365CalendarService(
+            client,
+            options.CurrentValue,
+            blob,
+            async (newJson, ct) =>
+            {
+                var encrypted = protector.Protect(newJson);
+                credential.UpdateKey(encrypted);
+                credentialRepository.Update(credential);
+                await Task.CompletedTask;
+                _ = ct;
+            },
+            timeProvider
+        );
+    }
+}
