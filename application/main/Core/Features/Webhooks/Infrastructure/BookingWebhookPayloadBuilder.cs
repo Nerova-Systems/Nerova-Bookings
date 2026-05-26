@@ -141,6 +141,7 @@ internal sealed record BookingWebhookPayload(
     string? Location,
     string? CancellationReason,
     bool? Rescheduled,
+    [property: JsonPropertyName("iCalSequence")]
     int CalSequence,
     BookingWebhookOrganizer Organizer,
     IReadOnlyList<BookingWebhookAttendee> Attendees,

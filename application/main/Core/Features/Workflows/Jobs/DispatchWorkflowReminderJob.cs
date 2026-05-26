@@ -2,13 +2,13 @@ using System.Text.RegularExpressions;
 using Main.Database;
 using Main.Features.Scheduling.Domain;
 using Main.Features.Workflows.Domain;
+using Main.Features.Workflows.Infrastructure;
 using Main.Features.Workflows.Senders;
 using Microsoft.EntityFrameworkCore;
 using SharedKernel.Integrations.Email;
 using SharedKernel.Persistence;
 using TickerQ.Utilities.Base;
 using TickerQ.Utilities.Interfaces;
-using Main.Features.Workflows.Infrastructure;
 
 namespace Main.Features.Workflows.Jobs;
 

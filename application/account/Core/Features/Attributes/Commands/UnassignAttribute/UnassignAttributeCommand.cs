@@ -18,9 +18,11 @@ namespace Account.Features.Attributes.Commands.UnassignAttribute;
 [RequirePermission(PermissionResource.Attribute, PermissionAction.Delete, PermissionScope.Organization)]
 public sealed record UnassignAttributeCommand : ICommand, IRequest<Result>
 {
-    public required MembershipId MembershipId { get; init; }
+    [JsonIgnore] // Removes this property from the API contract
+    public MembershipId MembershipId { get; init; } = null!;
 
-    public required AttributeId AttributeId { get; init; }
+    [JsonIgnore] // Removes this property from the API contract
+    public AttributeId AttributeId { get; init; } = null!;
 
     /// <summary>
     ///     When specified, removes only the assignment for this specific option.

@@ -14,9 +14,11 @@ namespace Account.Features.Attributes.Commands.UpdateAttributeOption;
 [RequirePermission(PermissionResource.Attribute, PermissionAction.Update, PermissionScope.Organization)]
 public sealed record UpdateAttributeOptionCommand : ICommand, IRequest<Result<AttributeOptionResponse>>
 {
-    public required AttributeId AttributeId { get; init; }
+    [JsonIgnore] // Removes this property from the API contract
+    public AttributeId AttributeId { get; init; } = null!;
 
-    public required AttributeOptionId OptionId { get; init; }
+    [JsonIgnore] // Removes this property from the API contract
+    public AttributeOptionId OptionId { get; init; } = null!;
 
     public required string Value { get; init; }
 

@@ -13,9 +13,11 @@ namespace Account.Features.Attributes.Commands.DeleteAttributeOption;
 [RequirePermission(PermissionResource.Attribute, PermissionAction.Delete, PermissionScope.Organization)]
 public sealed record DeleteAttributeOptionCommand : ICommand, IRequest<Result>
 {
-    public required AttributeId AttributeId { get; init; }
+    [JsonIgnore] // Removes this property from the API contract
+    public AttributeId AttributeId { get; init; } = null!;
 
-    public required AttributeOptionId OptionId { get; init; }
+    [JsonIgnore] // Removes this property from the API contract
+    public AttributeOptionId OptionId { get; init; } = null!;
 }
 
 public sealed class DeleteAttributeOptionHandler(

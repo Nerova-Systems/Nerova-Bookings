@@ -17,7 +17,8 @@ namespace Account.Features.Attributes.Commands.UpdateAttribute;
 [RequirePermission(PermissionResource.Attribute, PermissionAction.Update, PermissionScope.Organization)]
 public sealed record UpdateAttributeCommand : ICommand, IRequest<Result<AttributeResponse>>
 {
-    public required AttributeId AttributeId { get; init; }
+    [JsonIgnore] // Removes this property from the API contract
+    public AttributeId AttributeId { get; init; } = null!;
 
     public required string Name { get; init; }
 

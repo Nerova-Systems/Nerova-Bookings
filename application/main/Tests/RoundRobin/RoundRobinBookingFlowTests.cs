@@ -291,7 +291,7 @@ public sealed class RoundRobinBookingFlowTests : EndpointBaseTest<MainDbContext>
         // Owner as fixed host (always attends)
         await _rrClient.PostAsJsonAsync(
             $"/api/round-robin/{eventType.Id}/hosts",
-            new AddRoundRobinHostRequest(DatabaseSeeder.Tenant1Owner.Id!, IsFixed: true)
+            new AddRoundRobinHostRequest(DatabaseSeeder.Tenant1Owner.Id!, true)
         );
 
         // Member as rotating host

@@ -1,11 +1,11 @@
 using JetBrains.Annotations;
 using Main.Features.EventTypes.Domain;
 using Main.Features.Workflows.Domain;
+using Main.Features.Workflows.Infrastructure;
 using Main.Features.Workflows.Shared;
 using SharedKernel.Cqrs;
 using SharedKernel.ExecutionContext;
 using SharedKernel.Telemetry;
-using Main.Features.Workflows.Infrastructure;
 
 namespace Main.Features.Workflows.Commands;
 

@@ -18,9 +18,11 @@ namespace Account.Features.Attributes.Commands.AssignAttribute;
 [RequirePermission(PermissionResource.Attribute, PermissionAction.Update, PermissionScope.Organization)]
 public sealed record AssignAttributeCommand : ICommand, IRequest<Result<AttributeAssignmentResponse>>
 {
-    public required MembershipId MembershipId { get; init; }
+    [JsonIgnore] // Removes this property from the API contract
+    public MembershipId MembershipId { get; init; } = null!;
 
-    public required AttributeId AttributeId { get; init; }
+    [JsonIgnore] // Removes this property from the API contract
+    public AttributeId AttributeId { get; init; } = null!;
 
     /// <summary>
     ///     Option ID for <see cref="AttributeType.SingleSelect" /> and

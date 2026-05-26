@@ -168,6 +168,13 @@ public static class Configuration
                 // Booking → webhook bridge. Command handlers call this to fan booking lifecycle
                 // events (created/cancelled/rescheduled/reported) out to subscribed endpoints.
                 .AddScoped<IBookingWebhookNotifier, BookingWebhookNotifier>()
+                // ─── Booking notifications (email) ─────────────────────────
+                // Booking command handlers (Create/Confirm/Cancel) depend on the dispatcher to
+                // send confirmation/cancellation emails to attendee + host. Registered here (not
+                // in AddMainTickerQ) so the API context can resolve it. The Workers context
+                // calls AddMainServices first, so this registration is shared.
+                .AddScoped<IUserContactLookup, AccountDbUserContactLookup>()
+                .AddScoped<IBookingNotificationDispatcher, BookingNotificationDispatcher>()
                 .AddHttpClient()
                 .AddEmailRendering("WebApp")
                 .AddSharedServices<MainDbContext>([Assembly]);
@@ -205,11 +212,7 @@ public static class Configuration
                 )
                 .AddSingleton<ISmsProvider, TwilioSmsProvider>()
                 .AddSingleton<IWhatsAppProvider, MetaWhatsAppProvider>()
-                // Cross-SCS host lookup (account-database). Scoped because it opens an Npgsql
-                // connection per call; the connection is awaited and disposed within the call.
-                .AddScoped<IUserContactLookup, AccountDbUserContactLookup>()
-                .AddScoped<IHostEmailProvider, HostEmailProvider>()
-                .AddScoped<IBookingNotificationDispatcher, BookingNotificationDispatcher>();
+                .AddScoped<IHostEmailProvider, HostEmailProvider>();
 
             // TickerQ with EF Core persistence (tables added to MainDbContext via model customizer)
             services.AddTickerQ(opt =>

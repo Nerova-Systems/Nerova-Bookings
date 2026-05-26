@@ -14,7 +14,8 @@ namespace Account.Features.Attributes.Commands.CreateAttributeOption;
 [RequirePermission(PermissionResource.Attribute, PermissionAction.Update, PermissionScope.Organization)]
 public sealed record CreateAttributeOptionCommand : ICommand, IRequest<Result<AttributeOptionResponse>>
 {
-    public required AttributeId AttributeId { get; init; }
+    [JsonIgnore] // Removes this property from the API contract
+    public AttributeId AttributeId { get; init; } = null!;
 
     public required string Value { get; init; }
 }

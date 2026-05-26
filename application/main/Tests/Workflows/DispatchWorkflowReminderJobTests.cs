@@ -4,6 +4,7 @@ using Main.Features.EventTypes.Domain;
 using Main.Features.Schedules.Domain;
 using Main.Features.Scheduling.Domain;
 using Main.Features.Workflows.Domain;
+using Main.Features.Workflows.Infrastructure;
 using Main.Features.Workflows.Jobs;
 using Main.Features.Workflows.Senders;
 using Microsoft.Extensions.DependencyInjection;
@@ -12,7 +13,6 @@ using NSubstitute;
 using SharedKernel.Integrations.Email;
 using SharedKernel.Persistence;
 using Xunit;
-using Main.Features.Workflows.Infrastructure;
 
 namespace Main.Tests.Workflows;
 
