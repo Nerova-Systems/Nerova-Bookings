@@ -1,3 +1,5 @@
+using System.Text;
+using FluentAssertions;
 using Main.Features.EventTypes.Domain;
 using Main.Features.Scheduling.Domain;
 using Main.Features.Scheduling.EmailTemplates;
@@ -111,6 +113,134 @@ public sealed class BookingNotificationDispatcherTests
         _emailRenderer.Received(1).RenderEmail(Arg.Is<EmailTemplateBase>(t => t is BookingConfirmationEmailTemplate));
         _emailRenderer.Received(1).RenderEmail(Arg.Is<EmailTemplateBase>(t => t is BookingCancellationEmailTemplate));
         _emailRenderer.Received(1).RenderEmail(Arg.Is<EmailTemplateBase>(t => t is BookingRescheduleEmailTemplate));
+    }
+
+    [Fact]
+    public async Task DispatchBookingConfirmation_AttachesIcsInvite()
+    {
+        var booking = CreateBooking();
+        _userContactLookup.GetAsync(booking.OwnerUserId, Arg.Any<CancellationToken>())
+            .Returns(new UserContactInfo("host@example.com", "en-US", "Anna Host"));
+
+        var dispatcher = CreateDispatcher();
+
+        await dispatcher.DispatchAsync(booking, null, BookingNotificationKind.Created, CancellationToken.None);
+
+        await _emailClient.Received(2).SendAsync(
+            Arg.Is<EmailMessage>(m => HasIcsInvite(m, "REQUEST", "CONFIRMED", booking.CalUid!, booking.CalSequence)),
+            Arg.Any<CancellationToken>()
+        );
+    }
+
+    [Fact]
+    public async Task DispatchBookingCancellation_AttachesIcsCancellation()
+    {
+        var booking = CreateBooking();
+        booking.Cancel("no longer needed");
+        _userContactLookup.GetAsync(booking.OwnerUserId, Arg.Any<CancellationToken>())
+            .Returns(new UserContactInfo("host@example.com", "en-US", "Anna Host"));
+
+        var dispatcher = CreateDispatcher();
+
+        await dispatcher.DispatchAsync(booking, null, BookingNotificationKind.Cancelled, CancellationToken.None);
+
+        await _emailClient.Received(2).SendAsync(
+            Arg.Is<EmailMessage>(m => HasIcsInvite(m, "CANCEL", "CANCELLED", booking.CalUid!, booking.CalSequence)),
+            Arg.Any<CancellationToken>()
+        );
+    }
+
+    [Fact]
+    public async Task DispatchBookingReschedule_AttachesIcsUpdate()
+    {
+        var booking = CreateBooking();
+        booking.MarkRescheduled("user-rescheduler");
+        _userContactLookup.GetAsync(booking.OwnerUserId, Arg.Any<CancellationToken>())
+            .Returns(new UserContactInfo("host@example.com", "en-US", "Anna Host"));
+
+        var dispatcher = CreateDispatcher();
+
+        await dispatcher.DispatchAsync(booking, null, BookingNotificationKind.Rescheduled, CancellationToken.None);
+
+        // CalSequence should be 1 after MarkRescheduled (was 0 on creation).
+        booking.CalSequence.Should().Be(1);
+        await _emailClient.Received(2).SendAsync(
+            Arg.Is<EmailMessage>(m => HasIcsInvite(m, "REQUEST", "CONFIRMED", booking.CalUid!, booking.CalSequence)),
+            Arg.Any<CancellationToken>()
+        );
+    }
+
+    [Fact]
+    public void CalendarFileBuilder_Build_ProducesParseableIcsWithExpectedFields()
+    {
+        var booking = CreateBooking();
+
+        var bytes = CalendarFileBuilder.Build(
+            booking,
+            CalendarMethod.Request,
+            "30 min meeting",
+            "host@example.com",
+            "Anna Host"
+        );
+
+        var ics = Encoding.UTF8.GetString(bytes);
+        var logicalLines = UnfoldIcs(ics);
+
+        logicalLines.Should().Contain("BEGIN:VCALENDAR");
+        logicalLines.Should().Contain("VERSION:2.0");
+        logicalLines.Should().Contain("METHOD:REQUEST");
+        logicalLines.Should().Contain("BEGIN:VEVENT");
+        logicalLines.Should().Contain($"UID:{booking.CalUid}");
+        logicalLines.Should().Contain($"SEQUENCE:{booking.CalSequence}");
+        logicalLines.Should().Contain("STATUS:CONFIRMED");
+        logicalLines.Should().Contain("SUMMARY:30 min meeting");
+        logicalLines.Should().Contain("END:VEVENT");
+        logicalLines.Should().Contain("END:VCALENDAR");
+        // ORGANIZER + at least two ATTENDEE lines (host + booker)
+        logicalLines.Should().Contain(l => l.StartsWith("ORGANIZER", StringComparison.Ordinal) && l.Contains("mailto:host@example.com"));
+        logicalLines.Count(l => l.StartsWith("ATTENDEE", StringComparison.Ordinal)).Should().Be(2);
+        // All lines end with CRLF in the raw output (no bare LF).
+        ics.Should().NotContain("\n\n");
+        ics.Replace("\r\n", string.Empty).Should().NotContain("\n");
+    }
+
+    private static bool HasIcsInvite(EmailMessage m, string method, string status, string uid, int sequence)
+    {
+        if (m.Enclosures is null || m.Enclosures.Count != 1) return false;
+        var enclosure = m.Enclosures[0];
+        if (enclosure.FileName != "invite.ics") return false;
+        if (!enclosure.ContentType.StartsWith("text/calendar", StringComparison.Ordinal)) return false;
+
+        var body = Encoding.UTF8.GetString(enclosure.ContentBytes);
+        var lines = UnfoldIcs(body);
+        return lines.Contains($"METHOD:{method}")
+               && lines.Contains($"STATUS:{status}")
+               && lines.Contains($"UID:{uid}")
+               && lines.Contains($"SEQUENCE:{sequence}");
+    }
+
+    /// <summary>
+    ///     Tiny RFC 5545 §3.1 unfolder: lines starting with a single space or tab are
+    ///     continuations of the previous logical line.
+    /// </summary>
+    private static List<string> UnfoldIcs(string ics)
+    {
+        var rawLines = ics.Split("\r\n");
+        var logical = new List<string>();
+        foreach (var line in rawLines)
+        {
+            if (line.Length == 0) continue;
+            if ((line[0] == ' ' || line[0] == '\t') && logical.Count > 0)
+            {
+                logical[^1] += line[1..];
+            }
+            else
+            {
+                logical.Add(line);
+            }
+        }
+
+        return logical;
     }
 
     private BookingNotificationDispatcher CreateDispatcher()

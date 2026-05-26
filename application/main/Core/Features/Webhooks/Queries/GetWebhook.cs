@@ -23,6 +23,6 @@ public sealed class GetWebhookHandler(
         var webhook = await webhookRepository.GetByIdAsync(query.Id, cancellationToken);
         if (webhook is null) return Result<WebhookResponse>.NotFound($"Webhook '{query.Id}' was not found.");
 
-        return WebhookResponse.From(webhook, revealSecret: false);
+        return WebhookResponse.From(webhook, false);
     }
 }

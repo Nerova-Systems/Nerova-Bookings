@@ -5,5 +5,6 @@ public sealed record EmailMessage(
     string Subject,
     string HtmlBody,
     string PlainTextBody,
-    IReadOnlyDictionary<string, string>? Headers = null
+    IReadOnlyDictionary<string, string>? Headers = null,
+    IReadOnlyList<EmailEnclosure>? Enclosures = null
 );

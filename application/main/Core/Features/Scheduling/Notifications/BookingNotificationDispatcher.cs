@@ -57,6 +57,27 @@ public sealed class BookingNotificationDispatcher(
         var hostName = host?.DisplayName ?? "your host";
         var eventTitle = eventType?.Title ?? "your meeting";
 
+        // Build the calendar invite once per dispatch — the same .ics rides along both recipient
+        // emails so the booker and host calendars stay in sync. When host contact lookup failed
+        // (null) we still attach an invite for the booker; ORGANIZER falls back to a noreply
+        // address since cal clients reject events with an empty ORGANIZER mailto.
+        var calendarMethod = kind == BookingNotificationKind.Cancelled ? CalendarMethod.Cancel : CalendarMethod.Request;
+        var icsBytes = CalendarFileBuilder.Build(
+            booking,
+            calendarMethod,
+            eventTitle,
+            host?.Email ?? "noreply@nerova",
+            hostName
+        );
+        var enclosures = new[]
+        {
+            new EmailEnclosure(
+                "invite.ics",
+                $"text/calendar; method={(calendarMethod == CalendarMethod.Cancel ? "CANCEL" : "REQUEST")}; charset=utf-8",
+                icsBytes
+            )
+        };
+
         // Attendee: always en-US (Booking has no locale field — see class doc).
         await SendAsync(
             kind,
@@ -66,6 +87,7 @@ public sealed class BookingNotificationDispatcher(
             booking,
             hostName,
             eventTitle,
+            enclosures,
             ct
         );
 
@@ -88,6 +110,7 @@ public sealed class BookingNotificationDispatcher(
             booking,
             hostName,
             eventTitle,
+            enclosures,
             ct
         );
     }
@@ -100,6 +123,7 @@ public sealed class BookingNotificationDispatcher(
         Booking booking,
         string hostName,
         string eventTitle,
+        IReadOnlyList<EmailEnclosure> enclosures,
         CancellationToken ct
     )
     {
@@ -125,7 +149,7 @@ public sealed class BookingNotificationDispatcher(
 
         var rendered = emailRenderer.RenderEmail(template);
         await emailClient.SendAsync(
-            new EmailMessage(toEmail, rendered.Subject, rendered.HtmlBody, rendered.PlainTextBody),
+            new EmailMessage(toEmail, rendered.Subject, rendered.HtmlBody, rendered.PlainTextBody, Enclosures: enclosures),
             ct
         );
     }

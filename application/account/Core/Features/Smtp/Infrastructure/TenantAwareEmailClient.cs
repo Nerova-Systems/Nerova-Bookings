@@ -77,6 +77,15 @@ public sealed class TenantAwareEmailClient(
             }
         }
 
+        if (message.Enclosures is not null)
+        {
+            foreach (var enclosure in message.Enclosures)
+            {
+                var stream = new MemoryStream(enclosure.ContentBytes);
+                mailMessage.Attachments.Add(new Attachment(stream, enclosure.FileName, enclosure.ContentType));
+            }
+        }
+
         await smtpClient.SendMailAsync(mailMessage, cancellationToken);
     }
 }
