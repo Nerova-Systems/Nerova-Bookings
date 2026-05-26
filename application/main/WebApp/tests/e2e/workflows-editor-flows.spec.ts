@@ -1,6 +1,6 @@
 import { expect } from "@playwright/test";
 import { test } from "@shared/e2e/fixtures/page-auth";
-import { activateBaseFlags, setOwnerTenantOverrides } from "@shared/e2e/utils/feature-flag-helpers";
+import { activateBaseFlags, setAdminTenantOverrides } from "@shared/e2e/utils/feature-flag-helpers";
 import { createTestContext, expectToastMessage } from "@shared/e2e/utils/test-assertions";
 import { step } from "@shared/e2e/utils/test-step-wrapper";
 
@@ -10,8 +10,8 @@ import { step } from "@shared/e2e/utils/test-step-wrapper";
 const FLAG_CHAIN = ["tier-teams", "tier-organizations", "tier-enterprise", "cap-workflows"] as const;
 
 test.describe("@smoke", () => {
-  test.afterEach(async ({ ownerPage }) => {
-    await setOwnerTenantOverrides(ownerPage, [...FLAG_CHAIN].reverse(), false);
+  test.afterEach(async ({ ownerPage, browser }) => {
+    await setAdminTenantOverrides(browser, ownerPage, [...FLAG_CHAIN].reverse(), false);
   });
 
   /**
@@ -32,7 +32,7 @@ test.describe("@smoke", () => {
 
     await step("Activate the full tier chain + cap-workflows & enable every tenant override")(async () => {
       await activateBaseFlags(browser, FLAG_CHAIN);
-      await setOwnerTenantOverrides(ownerPage, FLAG_CHAIN, true);
+      await setAdminTenantOverrides(browser, ownerPage, FLAG_CHAIN, true);
     })();
 
     await step("Navigate to /workflows & verify the empty state with the New workflow CTA")(async () => {
@@ -55,7 +55,7 @@ test.describe("@smoke", () => {
 
       await expectToastMessage(context, "Workflow created");
       await expect(ownerPage).toHaveURL(/\/workflows\/[^/]+$/);
-      await expect(ownerPage.getByRole("heading", { name: workflowName })).toBeVisible();
+      await expect(ownerPage.getByRole("heading", { name: workflowName, exact: true })).toBeVisible();
     })();
 
     await step("Delete the workflow & verify routing back to the empty workflows list")(async () => {

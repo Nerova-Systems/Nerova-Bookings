@@ -1,4 +1,5 @@
 using Account.Database;
+using Account.Features.Permissions.Domain;
 using Microsoft.EntityFrameworkCore;
 using SharedKernel.Domain;
 using SharedKernel.Persistence;
@@ -49,7 +50,7 @@ public interface IMembershipRepository : ICrudRepository<Membership, MembershipI
     ///     role. Used by <c>DeleteRoleCommand</c> to unassign the custom role from every member before
     ///     the role itself is removed.
     /// </summary>
-    Task<Membership[]> GetByCustomRoleIdAsync(Permissions.Domain.RoleId roleId, CancellationToken cancellationToken);
+    Task<Membership[]> GetByCustomRoleIdAsync(RoleId roleId, CancellationToken cancellationToken);
 }
 
 public sealed class MembershipRepository(AccountDbContext accountDbContext)
@@ -87,7 +88,7 @@ public sealed class MembershipRepository(AccountDbContext accountDbContext)
         return DbSet.CountAsync(m => m.TenantId == tenantId && m.Role == MembershipRole.Owner, cancellationToken);
     }
 
-    public Task<Membership[]> GetByCustomRoleIdAsync(Permissions.Domain.RoleId roleId, CancellationToken cancellationToken)
+    public Task<Membership[]> GetByCustomRoleIdAsync(RoleId roleId, CancellationToken cancellationToken)
     {
         return DbSet.Where(m => m.CustomRoleId == roleId).ToArrayAsync(cancellationToken);
     }

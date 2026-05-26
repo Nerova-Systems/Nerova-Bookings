@@ -86,6 +86,7 @@ public sealed class TestOrgSmtpHandler(IExecutionContext executionContext) : IRe
         try
         {
 #pragma warning disable SYSLIB0006 // SmtpClient is deprecated but no alternative ships with .NET BCL; revisit when project adopts MailKit.
+            // ReSharper disable once UsingStatementResourceInitialization
             using var smtpClient = new SmtpClient(command.Host, command.Port)
             {
                 EnableSsl = command.UseSsl,
@@ -94,14 +95,15 @@ public sealed class TestOrgSmtpHandler(IExecutionContext executionContext) : IRe
             };
 #pragma warning restore SYSLIB0006
 
+            // ReSharper disable once UsingStatementResourceInitialization
             using var mailMessage = new MailMessage
             {
                 From = new MailAddress(command.FromEmail, command.FromName ?? string.Empty),
                 Subject = "Nerova Bookings — SMTP configuration test",
                 Body = "This is an automated test message from Nerova Bookings to verify your custom SMTP configuration.",
-                IsBodyHtml = false
+                IsBodyHtml = false,
+                To = { command.RecipientEmail }
             };
-            mailMessage.To.Add(command.RecipientEmail);
 
             await smtpClient.SendMailAsync(mailMessage, cancellationToken);
             return new TestOrgSmtpResult(true, null);

@@ -66,7 +66,7 @@ public sealed class GetAuditLogTests(AccountWebApplicationFactory factory)
         response.ShouldBeSuccessfulGetRequest();
         var result = await response.Content.ReadFromJsonAsync<AuditLogResponse>();
         result.Should().NotBeNull();
-        result!.TotalCount.Should().BeGreaterThanOrEqualTo(2);
+        result.TotalCount.Should().BeGreaterThanOrEqualTo(2);
         result.Entries.Should().HaveCountGreaterThanOrEqualTo(2);
         result.Entries[0].CreatedAt.Should().BeOnOrAfter(result.Entries[1].CreatedAt);
     }
@@ -108,7 +108,7 @@ public sealed class GetAuditLogTests(AccountWebApplicationFactory factory)
         result.TotalPages.Should().BeGreaterThanOrEqualTo(1);
 
         // Assert — verify entry fields
-        var entry = result.Entries.First(e => e.Resource == "ApiKey" && e.Action == "Revoked");
+        var entry = result.Entries.First(e => e is { Resource: "ApiKey", Action: "Revoked" });
         entry.Id.Should().NotBeNull();
         entry.CreatedAt.Should().BeCloseTo(DateTimeOffset.UtcNow, TimeSpan.FromSeconds(10));
         entry.ActorEmail.Should().Be("owner@tenant-1.com");

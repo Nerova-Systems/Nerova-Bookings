@@ -52,7 +52,7 @@ public sealed class ApiKey : AggregateRoot<ApiKeyId>, ITenantScopedEntity
     public string KeyPrefix { get; private set; } = null!;
 
     /// <summary>Optional expiry. A <see langword="null" /> value means the key never expires.</summary>
-    public DateTimeOffset? ExpiresAt { get; private set; }
+    public DateTimeOffset? ExpiresAt { get; private init; }
 
     /// <summary>Set when the key is explicitly revoked. A revoked key cannot authenticate.</summary>
     public DateTimeOffset? RevokedAt { get; private set; }
@@ -64,7 +64,7 @@ public sealed class ApiKey : AggregateRoot<ApiKeyId>, ITenantScopedEntity
     public UserId CreatedByUserId { get; private set; } = null!;
 
     /// <summary>The tenant that owns this key (solo tenant for user keys, org tenant for org keys).</summary>
-    public TenantId TenantId { get; private set; } = null!;
+    public TenantId TenantId { get; private init; } = null!;
 
     // ─── Factory ──────────────────────────────────────────────────────────────
 

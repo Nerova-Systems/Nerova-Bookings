@@ -19,7 +19,7 @@ public sealed class AuditLogEntryConfiguration : IEntityTypeConfiguration<AuditL
         builder.Property(e => e.Resource).IsRequired();
         builder.Property(e => e.Action).IsRequired();
         builder.Property(e => e.ResourceId);
-        builder.Property(e => e.Metadata);
+        builder.Property(e => e.Metadata).HasColumnType("jsonb");
         builder.Property(e => e.IpAddress);
         builder.Property(e => e.UserAgent);
 

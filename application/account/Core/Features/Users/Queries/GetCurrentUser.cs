@@ -12,6 +12,7 @@ public sealed record GetUserQuery : IRequest<Result<CurrentUserResponse>>;
 [PublicAPI]
 public sealed record CurrentUserResponse(
     UserId Id,
+    TenantId TenantId,
     DateTimeOffset CreatedAt,
     DateTimeOffset? ModifiedAt,
     string Email,

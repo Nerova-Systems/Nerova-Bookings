@@ -3,7 +3,6 @@ using Account.Features.Tenants.Domain;
 using FluentValidation;
 using JetBrains.Annotations;
 using SharedKernel.Cqrs;
-using SharedKernel.Domain;
 using SharedKernel.ExecutionContext;
 using SharedKernel.Telemetry;
 using FeatureFlagDefinitions = SharedKernel.FeatureFlags.FeatureFlags;
@@ -43,38 +42,53 @@ public sealed class CreateTeamHandler(
     public async Task<Result<TeamResponse>> Handle(CreateTeamCommand command, CancellationToken cancellationToken)
     {
         if (!executionContext.UserInfo.IsFeatureFlagEnabled(FeatureFlagDefinitions.TierTeams.Key))
+        {
             return Result<TeamResponse>.Forbidden("The teams feature is not enabled for this organization.");
-
-        if (executionContext.ActiveOrgId is null)
-            return Result<TeamResponse>.Forbidden("An active organization is required to create a team.");
+        }
 
         if (executionContext.UserInfo.Id is null)
+        {
             return Result<TeamResponse>.Unauthorized("User is not authenticated.");
+        }
 
-        var orgId = executionContext.ActiveOrgId;
+        var parentId = executionContext.ActiveOrgId ?? executionContext.TenantId;
+        if (parentId is null) return Result<TeamResponse>.Unauthorized("User is not associated with a tenant.");
         var userId = executionContext.UserInfo.Id;
 
-        var callerMembership = await membershipRepository.GetByUserAndTenantAsync(userId, orgId, cancellationToken);
-        if (callerMembership is null || !callerMembership.Accepted)
-            return Result<TeamResponse>.Forbidden("You are not a member of this organization.");
+        if (executionContext.ActiveOrgId is not null)
+        {
+            // Org context: the caller must be an accepted Owner or Admin of the organization.
+            var callerMembership = await membershipRepository.GetByUserAndTenantAsync(userId, parentId, cancellationToken);
+            if (callerMembership is null || !callerMembership.Accepted)
+            {
+                return Result<TeamResponse>.Forbidden("You are not a member of this organization.");
+            }
 
-        if (callerMembership.Role == MembershipRole.Member)
-            return Result<TeamResponse>.Forbidden("Only organization owners and admins can create teams.");
+            if (callerMembership.Role == MembershipRole.Member)
+            {
+                return Result<TeamResponse>.Forbidden("Only organization owners and admins can create teams.");
+            }
+        }
+        // Solo context: user owns the tenant, no membership check required.
 
-        var org = await tenantRepository.GetByIdUnfilteredAsync(orgId, cancellationToken);
-        if (org is null) return Result<TeamResponse>.NotFound($"Organization '{orgId}' not found.");
-        if (org.Kind != TenantKind.Organization)
-            return Result<TeamResponse>.BadRequest("Teams can only be created under an Organization tenant.");
+        var parent = await tenantRepository.GetByIdUnfilteredAsync(parentId, cancellationToken);
+        if (parent is null) return Result<TeamResponse>.NotFound($"Tenant '{parentId}' not found.");
+        if (parent.Kind == TenantKind.Team)
+        {
+            return Result<TeamResponse>.BadRequest("Teams cannot be nested under another team.");
+        }
 
         if (!string.IsNullOrWhiteSpace(command.Slug))
         {
-            var existing = await tenantRepository.GetTeamBySlugInOrgAsync(orgId, command.Slug, cancellationToken);
+            var existing = await tenantRepository.GetTeamBySlugInOrgAsync(parentId, command.Slug, cancellationToken);
             if (existing is not null)
+            {
                 return Result<TeamResponse>.BadRequest($"A team with slug '{command.Slug}' already exists in this organization.");
+            }
         }
 
         var rolloutIndex = await tenantRepository.GetNextRolloutIndexUnfilteredAsync(cancellationToken);
-        var team = Tenant.CreateTeam(org, rolloutIndex);
+        var team = Tenant.CreateTeam(parent, rolloutIndex);
         team.Update(command.Name);
         if (!string.IsNullOrWhiteSpace(command.Slug)) team.SetSlug(command.Slug);
 
@@ -83,8 +97,8 @@ public sealed class CreateTeamHandler(
         var seedOwner = Membership.CreateSeedOwner(team.Id, userId);
         await membershipRepository.AddAsync(seedOwner, cancellationToken);
 
-        events.CollectEvent(new TeamCreated(team.Id, orgId));
+        events.CollectEvent(new TeamCreated(team.Id, parentId));
 
-        return team.ToResponse(memberCount: 1);
+        return team.ToResponse(1);
     }
 }

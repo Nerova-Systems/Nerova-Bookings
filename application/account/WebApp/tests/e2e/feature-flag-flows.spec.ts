@@ -55,7 +55,11 @@ async function activateAndPinRollout(page: Page, flagKey: string, rolloutPercent
       });
       return r.ok;
     },
-    { url: `${BACK_OFFICE_BASE_URL}/api/back-office/feature-flags/${flagKey}/rollout-percentage`, headers, rolloutPercentage }
+    {
+      url: `${BACK_OFFICE_BASE_URL}/api/back-office/feature-flags/${flagKey}/rollout-percentage`,
+      headers,
+      rolloutPercentage
+    }
   );
   expect(rolloutOk).toBe(true);
 }

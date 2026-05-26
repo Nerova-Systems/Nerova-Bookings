@@ -43,7 +43,7 @@ public sealed class ApiKeyRepositoryTests(AccountWebApplicationFactory factory)
 
         // Assert
         loaded.Should().NotBeNull();
-        loaded!.Id.Should().Be(key.Id);
+        loaded.Id.Should().Be(key.Id);
         loaded.Scope.Should().Be(ApiKeyScope.User);
         loaded.TenantId.Should().Be(userTenantId);
         loaded.KeyPrefix.Should().Be(key.KeyPrefix);
@@ -155,7 +155,7 @@ public sealed class ApiKeyRepositoryTests(AccountWebApplicationFactory factory)
         var loaded = await repo.GetByIdUnfilteredAsync(orgKey.Id, CancellationToken.None);
 
         loaded.Should().NotBeNull();
-        loaded!.Id.Should().Be(orgKey.Id);
+        loaded.Id.Should().Be(orgKey.Id);
         loaded.TenantId.Should().Be(orgId);
     }
 

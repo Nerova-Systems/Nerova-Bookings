@@ -23,6 +23,7 @@ public sealed class GetCurrentUserTests(AccountWebApplicationFactory factory) : 
                 'type': 'object',
                 'properties': {
                     'id': {'type': 'string', 'pattern': '^usr_[A-Z0-9]{26}$'},
+                    'tenantId': {'type': 'string', 'pattern': '^[0-9]+$'},
                     'createdAt': {'type': 'string', 'format': 'date-time'},
                     'modifiedAt': {'type': ['null', 'string'], 'format': 'date-time'},
                     'email': {'type': 'string', 'maxLength': 100},
@@ -44,7 +45,7 @@ public sealed class GetCurrentUserTests(AccountWebApplicationFactory factory) : 
                         'additionalProperties': false
                     }
                 },
-                'required': ['id', 'createdAt', 'modifiedAt', 'email', 'role', 'preferences'],
+                'required': ['id', 'tenantId', 'createdAt', 'modifiedAt', 'email', 'role', 'preferences'],
                 'additionalProperties': false
             }
             """

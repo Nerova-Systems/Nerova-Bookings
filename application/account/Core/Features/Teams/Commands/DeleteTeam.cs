@@ -27,31 +27,49 @@ public sealed class DeleteTeamHandler(
     public async Task<Result> Handle(DeleteTeamCommand command, CancellationToken cancellationToken)
     {
         if (!executionContext.UserInfo.IsFeatureFlagEnabled(FeatureFlagDefinitions.TierTeams.Key))
+        {
             return Result.Forbidden("The teams feature is not enabled for this organization.");
-        if (executionContext.ActiveOrgId is null)
-            return Result.Forbidden("An active organization is required to delete a team.");
+        }
+
         if (executionContext.UserInfo.Id is null)
+        {
             return Result.Unauthorized("User is not authenticated.");
+        }
 
-        var orgId = executionContext.ActiveOrgId;
+        var parentId = executionContext.ActiveOrgId ?? executionContext.TenantId;
+        if (parentId is null) return Result.Unauthorized("User is not associated with a tenant.");
         var userId = executionContext.UserInfo.Id;
-
-        var caller = await membershipRepository.GetByUserAndTenantAsync(userId, orgId, cancellationToken);
-        if (caller is null || !caller.Accepted)
-            return Result.Forbidden("You are not a member of this organization.");
-        if (caller.Role != MembershipRole.Owner)
-            return Result.Forbidden("Only organization owners can delete teams.");
 
         var team = await tenantRepository.GetByIdUnfilteredAsync(command.Id, cancellationToken);
         if (team is null || team.Kind != TenantKind.Team)
+        {
             return Result.NotFound($"Team '{command.Id}' not found.");
-        if (team.ParentTenantId != orgId)
-            return Result.Forbidden("This team does not belong to your organization.");
+        }
 
-        var members = await membershipRepository.GetMembersOfTenantAsync(team.Id, includePending: true, cancellationToken);
+        if (team.ParentTenantId != parentId)
+        {
+            return Result.Forbidden("This team does not belong to your account.");
+        }
+
+        if (executionContext.ActiveOrgId is not null)
+        {
+            var caller = await membershipRepository.GetByUserAndTenantAsync(userId, parentId, cancellationToken);
+            if (caller is null || !caller.Accepted)
+            {
+                return Result.Forbidden("You are not a member of this organization.");
+            }
+
+            if (caller.Role != MembershipRole.Owner)
+            {
+                return Result.Forbidden("Only organization owners can delete teams.");
+            }
+        }
+        // Solo context: owning the parent tenant implies full access.
+
+        var members = await membershipRepository.GetMembersOfTenantAsync(team.Id, true, cancellationToken);
         tenantRepository.Remove(team);
 
-        events.CollectEvent(new TeamDeleted(team.Id, orgId, members.Length));
+        events.CollectEvent(new TeamDeleted(team.Id, parentId, members.Length));
 
         return Result.Success();
     }

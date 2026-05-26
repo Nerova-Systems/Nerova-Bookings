@@ -6,9 +6,10 @@ import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@r
 import { Link as RouterLink } from "@tanstack/react-router";
 import { BlocksIcon } from "lucide-react";
 
+import { AppCategory, api } from "@/shared/lib/api/client";
+
 import type { EventTypeTabProps } from "./EventTypeTabTypes";
 
-import { AppCategory, api } from "@/shared/lib/api/client";
 import { EventTypeTabSection } from "./EventTypeTabSection";
 
 export function EventTypeAppsTab(_props: EventTypeTabProps) {
@@ -20,12 +21,8 @@ export function EventTypeAppsTab(_props: EventTypeTabProps) {
   // payment app configuration.
   const { data, isLoading } = api.useQuery("get", "/api/apps");
   const apps = data?.apps ?? [];
-  const calendarApps = apps.filter(
-    (app) => app.category === AppCategory.Calendar && app.isConnectedForUser
-  );
-  const conferencingApps = apps.filter(
-    (app) => app.category === AppCategory.Conferencing && app.isConnectedForUser
-  );
+  const calendarApps = apps.filter((app) => app.category === AppCategory.Calendar && app.isConnectedForUser);
+  const conferencingApps = apps.filter((app) => app.category === AppCategory.Conferencing && app.isConnectedForUser);
   const hasAnyConnected = calendarApps.length > 0 || conferencingApps.length > 0;
 
   return (
@@ -111,7 +108,11 @@ function InstalledAppGroup({
           {apps.map((app) => (
             <div key={app.slug} className="flex items-center gap-3 border-b p-3 last:border-b-0">
               {app.logoUrl ? (
-                <img src={app.logoUrl} alt="" className="h-8 w-8 shrink-0 rounded border bg-background object-contain p-1" />
+                <img
+                  src={app.logoUrl}
+                  alt=""
+                  className="h-8 w-8 shrink-0 rounded border bg-background object-contain p-1"
+                />
               ) : (
                 <div
                   aria-hidden="true"

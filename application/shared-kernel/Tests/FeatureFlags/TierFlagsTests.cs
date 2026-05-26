@@ -192,7 +192,7 @@ public sealed class TierFlagsTests
         // it to run. If the multi-level chain (enterprise → organizations → teams) were invalid
         // the static constructor would have thrown before any test ran. This test makes the
         // intent explicit by calling GetAll() and asserting it completes without error.
-        var act = () => FeatureFlagRegistry.GetAll();
+        Func<FeatureFlagDefinition[]> act = FeatureFlagRegistry.GetAll;
         act.Should().NotThrow("the tier ParentDependency chain is valid and must not be rejected by the validator");
     }
 }

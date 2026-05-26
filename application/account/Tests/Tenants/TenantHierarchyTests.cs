@@ -52,14 +52,14 @@ public sealed class TenantHierarchyTests(AccountWebApplicationFactory factory)
     }
 
     [Fact]
-    public void CreateTeam_WhenParentIsSolo_ShouldThrowInvalidOperationException()
+    public void CreateTeam_WhenParentIsSolo_ShouldSucceedAndHaveTeamKindWithSoloParent()
     {
         var solo = Tenant.Create("owner@test.com", 0);
 
-        var act = () => Tenant.CreateTeam(solo, 0);
+        var team = Tenant.CreateTeam(solo, 0);
 
-        act.Should().Throw<InvalidOperationException>()
-            .WithMessage("*Organization*");
+        team.Kind.Should().Be(TenantKind.Team);
+        team.ParentTenantId.Should().Be(solo.Id);
     }
 
     [Fact]
@@ -72,7 +72,7 @@ public sealed class TenantHierarchyTests(AccountWebApplicationFactory factory)
         var act = () => Tenant.CreateTeam(team, 2);
 
         act.Should().Throw<InvalidOperationException>()
-            .WithMessage("*Organization*");
+            .WithMessage("*Team*");
     }
 
     // ──────────────────────────────────────────────────────────────────────────
@@ -143,7 +143,7 @@ public sealed class TenantHierarchyTests(AccountWebApplicationFactory factory)
 
         // Assert
         parent.Should().NotBeNull();
-        parent!.Id.Should().Be(org.Id);
+        parent.Id.Should().Be(org.Id);
         parent.Kind.Should().Be(TenantKind.Organization);
     }
 
@@ -169,7 +169,7 @@ public sealed class TenantHierarchyTests(AccountWebApplicationFactory factory)
         var tenant = await repository.GetByIdAsync(DatabaseSeeder.Tenant1.Id, CancellationToken.None);
 
         tenant.Should().NotBeNull();
-        tenant!.Kind.Should().Be(TenantKind.Solo);
+        tenant.Kind.Should().Be(TenantKind.Solo);
         tenant.ParentTenantId.Should().BeNull();
     }
 }

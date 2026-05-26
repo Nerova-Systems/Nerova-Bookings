@@ -1,6 +1,6 @@
 import { expect } from "@playwright/test";
 import { test } from "@shared/e2e/fixtures/page-auth";
-import { activateBaseFlags, setOwnerTenantOverrides } from "@shared/e2e/utils/feature-flag-helpers";
+import { activateBaseFlags, setAdminTenantOverrides } from "@shared/e2e/utils/feature-flag-helpers";
 import { step } from "@shared/e2e/utils/test-step-wrapper";
 
 // cap-audit-log is a capability flag whose parent is tier-enterprise, which itself depends on
@@ -10,8 +10,8 @@ import { step } from "@shared/e2e/utils/test-step-wrapper";
 const FLAG_CHAIN = ["tier-teams", "tier-organizations", "tier-enterprise", "cap-audit-log"] as const;
 
 test.describe("@smoke", () => {
-  test.afterEach(async ({ ownerPage }) => {
-    await setOwnerTenantOverrides(ownerPage, [...FLAG_CHAIN].reverse(), false);
+  test.afterEach(async ({ ownerPage, browser }) => {
+    await setAdminTenantOverrides(browser, ownerPage, [...FLAG_CHAIN].reverse(), false);
   });
 
   /**
@@ -29,7 +29,7 @@ test.describe("@smoke", () => {
   test("should render the audit log viewer with the empty state for a fresh tenant", async ({ ownerPage, browser }) => {
     await step("Activate the full tier chain + cap-audit-log & enable every tenant override")(async () => {
       await activateBaseFlags(browser, FLAG_CHAIN);
-      await setOwnerTenantOverrides(ownerPage, FLAG_CHAIN, true);
+      await setAdminTenantOverrides(browser, ownerPage, FLAG_CHAIN, true);
     })();
 
     await step("Navigate to /account/settings/audit-log & verify the viewer renders")(async () => {

@@ -34,7 +34,7 @@ public abstract class FeatureFlagDefinition(string key, string label, string des
 
     /// <summary>
     ///     Another flag's Key that must be enabled for this flag to evaluate true. Chains of any finite
-    ///     depth are supported; cycles are rejected at startup by <see cref="FeatureFlagsRegistry" />.
+    ///     depth are supported; cycles are rejected at startup by <c>FeatureFlagsRegistry</c>.
     ///     The evaluator's topological sort guarantees every ancestor is resolved before its dependents.
     /// </summary>
     public virtual string? ParentDependency => null;

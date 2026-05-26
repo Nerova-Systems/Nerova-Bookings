@@ -144,7 +144,7 @@ public sealed class ConfigureOrgSmtpTests(AccountWebApplicationFactory factory)
 
         var result = await response.Content.ReadFromJsonAsync<OrgSmtpConfigResponse>();
         result.Should().NotBeNull();
-        result!.Host.Should().Be("smtp.example.com");
+        result.Host.Should().Be("smtp.example.com");
         result.Port.Should().Be(587);
         result.UseSsl.Should().BeTrue();
         result.Username.Should().Be("noreply@example.com");
@@ -361,7 +361,7 @@ public sealed class ConfigureOrgSmtpTests(AccountWebApplicationFactory factory)
         response.ShouldBeSuccessfulGetRequest();
         var result = await response.Content.ReadFromJsonAsync<TestOrgSmtpResultResponse>();
         result.Should().NotBeNull();
-        result!.Success.Should().BeFalse();
+        result.Success.Should().BeFalse();
         result.ErrorMessage.Should().NotBeNullOrEmpty();
     }
 

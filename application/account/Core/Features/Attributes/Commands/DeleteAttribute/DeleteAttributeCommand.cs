@@ -1,5 +1,5 @@
-using Account.Features.AuditLog.Domain;
 using Account.Features.Attributes.Domain;
+using Account.Features.AuditLog.Domain;
 using Account.Features.Permissions.Domain;
 using Account.Features.Permissions.Pipeline;
 using JetBrains.Annotations;
@@ -30,29 +30,36 @@ public sealed class DeleteAttributeHandler(
     public async Task<Result> Handle(DeleteAttributeCommand command, CancellationToken cancellationToken)
     {
         if (!executionContext.UserInfo.IsFeatureFlagEnabled(FeatureFlagDefinitions.CapAttributes.Key))
+        {
             return Result.Forbidden("The attributes feature is not enabled for this organization.");
+        }
 
         var orgId = executionContext.ActiveOrgId!;
 
         var attribute = await attributeRepository.GetByIdUnfilteredAsync(command.AttributeId, cancellationToken);
         if (attribute is null)
+        {
             return Result.NotFound($"Attribute '{command.AttributeId}' not found.");
+        }
 
         if (attribute.TenantId != orgId)
+        {
             return Result.Forbidden("You do not have access to this attribute.");
+        }
 
         attributeRepository.Remove(attribute);
 
         await auditLogEmitter.EmitAsync(new AuditLogEvent(
-            TenantId: orgId,
-            ActorId: executionContext.UserInfo.Id!,
-            ActorEmail: executionContext.UserInfo.Email ?? string.Empty,
-            Resource: AuditResource.Attribute.ToString(),
-            Action: AuditAction.Deleted.ToString(),
-            ResourceId: attribute.Id.ToString(),
-            IpAddress: httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
-            UserAgent: httpContextAccessor.HttpContext?.Request.Headers.UserAgent.ToString()
-        ), cancellationToken);
+                orgId,
+                executionContext.UserInfo.Id!,
+                executionContext.UserInfo.Email ?? string.Empty,
+                nameof(AuditResource.Attribute),
+                nameof(AuditAction.Deleted),
+                attribute.Id.ToString(),
+                IpAddress: httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
+                UserAgent: httpContextAccessor.HttpContext?.Request.Headers.UserAgent.ToString()
+            ), cancellationToken
+        );
 
         events.CollectEvent(new AttributeDeleted(attribute.Id, orgId));
 

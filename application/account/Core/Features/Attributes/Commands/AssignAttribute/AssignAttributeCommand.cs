@@ -1,5 +1,5 @@
-using Account.Features.AuditLog.Domain;
 using Account.Features.Attributes.Domain;
+using Account.Features.AuditLog.Domain;
 using Account.Features.Memberships.Domain;
 using Account.Features.Permissions.Domain;
 using Account.Features.Permissions.Pipeline;
@@ -18,8 +18,9 @@ namespace Account.Features.Attributes.Commands.AssignAttribute;
 [RequirePermission(PermissionResource.Attribute, PermissionAction.Update, PermissionScope.Organization)]
 public sealed record AssignAttributeCommand : ICommand, IRequest<Result<AttributeAssignmentResponse>>
 {
-    public MembershipId MembershipId { get; init; } = default!;
-    public AttributeId AttributeId { get; init; } = default!;
+    public required MembershipId MembershipId { get; init; }
+
+    public required AttributeId AttributeId { get; init; }
 
     /// <summary>
     ///     Option ID for <see cref="AttributeType.SingleSelect" /> and
@@ -59,29 +60,41 @@ public sealed class AssignAttributeHandler(
     public async Task<Result<AttributeAssignmentResponse>> Handle(AssignAttributeCommand command, CancellationToken cancellationToken)
     {
         if (!executionContext.UserInfo.IsFeatureFlagEnabled(FeatureFlagDefinitions.CapAttributes.Key))
+        {
             return Result<AttributeAssignmentResponse>.Forbidden("The attributes feature is not enabled for this organization.");
+        }
 
         var orgId = executionContext.ActiveOrgId!;
 
         // Validate attribute belongs to this org.
         var attribute = await attributeRepository.GetByIdUnfilteredAsync(command.AttributeId, cancellationToken);
         if (attribute is null)
+        {
             return Result<AttributeAssignmentResponse>.NotFound($"Attribute '{command.AttributeId}' not found.");
+        }
 
         if (attribute.TenantId != orgId)
+        {
             return Result<AttributeAssignmentResponse>.Forbidden("You do not have access to this attribute.");
+        }
 
         // Validate membership belongs to this org.
         var membership = await membershipRepository.GetByIdAsync(command.MembershipId, cancellationToken);
         if (membership is null)
+        {
             return Result<AttributeAssignmentResponse>.NotFound($"Membership '{command.MembershipId}' not found.");
+        }
 
         if (membership.TenantId != orgId)
+        {
             return Result<AttributeAssignmentResponse>.Forbidden("You do not have access to this membership.");
+        }
 
         // Validate option exists on this attribute (for select types).
-        if (command.OptionId is not null && !attribute.Options.Any(o => o.Id == command.OptionId))
+        if (command.OptionId is not null && attribute.Options.All(o => o.Id != command.OptionId))
+        {
             return Result<AttributeAssignmentResponse>.BadRequest($"Option '{command.OptionId}' does not belong to attribute '{command.AttributeId}'.");
+        }
 
         // Type-specific cross-validation.
         switch (attribute.Type)
@@ -101,12 +114,15 @@ public sealed class AssignAttributeHandler(
             var existing = await assignmentRepository.GetByAttributeAsync(attribute.Id, cancellationToken);
             var toRemove = existing.Where(a => a.MembershipId == command.MembershipId).ToList();
             foreach (var old in toRemove)
+            {
                 assignmentRepository.Remove(old);
+            }
         }
 
         // Upsert: find exact match for (membership, attribute, option) and update or create.
         var assignment = await assignmentRepository.GetByMembershipAttributeOptionAsync(
-            command.MembershipId, command.AttributeId, command.OptionId, cancellationToken);
+            command.MembershipId, command.AttributeId, command.OptionId, cancellationToken
+        );
 
         bool isNew;
         if (assignment is not null)
@@ -118,21 +134,23 @@ public sealed class AssignAttributeHandler(
         else
         {
             assignment = AttributeAssignment.Create(orgId, command.MembershipId, command.AttributeId,
-                command.OptionId, command.Value, command.Weight);
+                command.OptionId, command.Value, command.Weight
+            );
             await assignmentRepository.AddAsync(assignment, cancellationToken);
             isNew = true;
         }
 
         await auditLogEmitter.EmitAsync(new AuditLogEvent(
-            TenantId: orgId,
-            ActorId: executionContext.UserInfo.Id!,
-            ActorEmail: executionContext.UserInfo.Email ?? string.Empty,
-            Resource: AuditResource.Attribute.ToString(),
-            Action: (isNew ? AuditAction.Created : AuditAction.Updated).ToString(),
-            ResourceId: assignment.Id.ToString(),
-            IpAddress: httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
-            UserAgent: httpContextAccessor.HttpContext?.Request.Headers.UserAgent.ToString()
-        ), cancellationToken);
+                orgId,
+                executionContext.UserInfo.Id!,
+                executionContext.UserInfo.Email ?? string.Empty,
+                nameof(AuditResource.Attribute),
+                (isNew ? AuditAction.Created : AuditAction.Updated).ToString(),
+                assignment.Id.ToString(),
+                IpAddress: httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
+                UserAgent: httpContextAccessor.HttpContext?.Request.Headers.UserAgent.ToString()
+            ), cancellationToken
+        );
 
         events.CollectEvent(new AttributeAssigned(command.MembershipId, command.AttributeId));
 

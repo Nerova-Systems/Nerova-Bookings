@@ -1,5 +1,5 @@
-using Account.Features.AuditLog.Domain;
 using Account.Features.Attributes.Domain;
+using Account.Features.AuditLog.Domain;
 using Account.Features.Memberships.Domain;
 using Account.Features.Permissions.Domain;
 using Account.Features.Permissions.Pipeline;
@@ -18,8 +18,9 @@ namespace Account.Features.Attributes.Commands.UnassignAttribute;
 [RequirePermission(PermissionResource.Attribute, PermissionAction.Delete, PermissionScope.Organization)]
 public sealed record UnassignAttributeCommand : ICommand, IRequest<Result>
 {
-    public MembershipId MembershipId { get; init; } = default!;
-    public AttributeId AttributeId { get; init; } = default!;
+    public required MembershipId MembershipId { get; init; }
+
+    public required AttributeId AttributeId { get; init; }
 
     /// <summary>
     ///     When specified, removes only the assignment for this specific option.
@@ -39,7 +40,9 @@ public sealed class UnassignAttributeHandler(
     public async Task<Result> Handle(UnassignAttributeCommand command, CancellationToken cancellationToken)
     {
         if (!executionContext.UserInfo.IsFeatureFlagEnabled(FeatureFlagDefinitions.CapAttributes.Key))
+        {
             return Result.Forbidden("The attributes feature is not enabled for this organization.");
+        }
 
         var orgId = executionContext.ActiveOrgId!;
 
@@ -47,13 +50,18 @@ public sealed class UnassignAttributeHandler(
         {
             // Remove specific (membership, attribute, option) assignment.
             var assignment = await assignmentRepository.GetByMembershipAttributeOptionAsync(
-                command.MembershipId, command.AttributeId, command.OptionId, cancellationToken);
+                command.MembershipId, command.AttributeId, command.OptionId, cancellationToken
+            );
 
             if (assignment is null)
+            {
                 return Result.NotFound("Assignment not found.");
+            }
 
             if (assignment.TenantId != orgId)
+            {
                 return Result.Forbidden("You do not have access to this assignment.");
+            }
 
             assignmentRepository.Remove(assignment);
 
@@ -69,7 +77,9 @@ public sealed class UnassignAttributeHandler(
                 .ToList();
 
             if (toRemove.Count == 0)
+            {
                 return Result.NotFound("No assignments found for this membership and attribute.");
+            }
 
             foreach (var assignment in toRemove)
             {
@@ -83,15 +93,18 @@ public sealed class UnassignAttributeHandler(
         return Result.Success();
     }
 
-    private Task EmitAuditAsync(string resourceId, TenantId orgId, CancellationToken cancellationToken) =>
-        auditLogEmitter.EmitAsync(new AuditLogEvent(
-            TenantId: orgId,
-            ActorId: executionContext.UserInfo.Id!,
-            ActorEmail: executionContext.UserInfo.Email ?? string.Empty,
-            Resource: AuditResource.Attribute.ToString(),
-            Action: AuditAction.Deleted.ToString(),
-            ResourceId: resourceId,
-            IpAddress: httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
-            UserAgent: httpContextAccessor.HttpContext?.Request.Headers.UserAgent.ToString()
-        ), cancellationToken);
+    private Task EmitAuditAsync(string resourceId, TenantId orgId, CancellationToken cancellationToken)
+    {
+        return auditLogEmitter.EmitAsync(new AuditLogEvent(
+                orgId,
+                executionContext.UserInfo.Id!,
+                executionContext.UserInfo.Email ?? string.Empty,
+                nameof(AuditResource.Attribute),
+                nameof(AuditAction.Deleted),
+                resourceId,
+                IpAddress: httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
+                UserAgent: httpContextAccessor.HttpContext?.Request.Headers.UserAgent.ToString()
+            ), cancellationToken
+        );
+    }
 }

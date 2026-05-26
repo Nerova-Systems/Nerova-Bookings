@@ -1,4 +1,3 @@
-using System.Text.Json.Serialization;
 using Account.Features.Memberships.Domain;
 using Account.Features.Tenants.Domain;
 using FluentValidation;
@@ -69,32 +68,52 @@ public sealed class UpdateTeamHandler(
     public async Task<Result<TeamResponse>> Handle(UpdateTeamCommand command, CancellationToken cancellationToken)
     {
         if (!executionContext.UserInfo.IsFeatureFlagEnabled(FeatureFlagDefinitions.TierTeams.Key))
+        {
             return Result<TeamResponse>.Forbidden("The teams feature is not enabled for this organization.");
-        if (executionContext.ActiveOrgId is null)
-            return Result<TeamResponse>.Forbidden("An active organization is required to update a team.");
-        if (executionContext.UserInfo.Id is null)
-            return Result<TeamResponse>.Unauthorized("User is not authenticated.");
+        }
 
-        var orgId = executionContext.ActiveOrgId;
+        if (executionContext.UserInfo.Id is null)
+        {
+            return Result<TeamResponse>.Unauthorized("User is not authenticated.");
+        }
+
+        var parentId = executionContext.ActiveOrgId ?? executionContext.TenantId;
+        if (parentId is null) return Result<TeamResponse>.Unauthorized("User is not associated with a tenant.");
         var userId = executionContext.UserInfo.Id;
 
-        var caller = await membershipRepository.GetByUserAndTenantAsync(userId, orgId, cancellationToken);
-        if (caller is null || !caller.Accepted)
-            return Result<TeamResponse>.Forbidden("You are not a member of this organization.");
-        if (caller.Role == MembershipRole.Member)
-            return Result<TeamResponse>.Forbidden("Only organization owners and admins can update teams.");
+        if (executionContext.ActiveOrgId is not null)
+        {
+            var caller = await membershipRepository.GetByUserAndTenantAsync(userId, parentId, cancellationToken);
+            if (caller is null || !caller.Accepted)
+            {
+                return Result<TeamResponse>.Forbidden("You are not a member of this organization.");
+            }
+
+            if (caller.Role == MembershipRole.Member)
+            {
+                return Result<TeamResponse>.Forbidden("Only organization owners and admins can update teams.");
+            }
+        }
+        // Solo context: owning the parent tenant implies full access.
 
         var team = await tenantRepository.GetByIdUnfilteredAsync(command.Id, cancellationToken);
         if (team is null || team.Kind != TenantKind.Team)
+        {
             return Result<TeamResponse>.NotFound($"Team '{command.Id}' not found.");
-        if (team.ParentTenantId != orgId)
-            return Result<TeamResponse>.Forbidden("This team does not belong to your organization.");
+        }
+
+        if (team.ParentTenantId != parentId)
+        {
+            return Result<TeamResponse>.Forbidden("This team does not belong to your account.");
+        }
 
         if (!string.IsNullOrWhiteSpace(command.Slug) && command.Slug != team.Slug)
         {
-            var existing = await tenantRepository.GetTeamBySlugInOrgAsync(orgId, command.Slug, cancellationToken);
+            var existing = await tenantRepository.GetTeamBySlugInOrgAsync(parentId, command.Slug, cancellationToken);
             if (existing is not null && existing.Id != team.Id)
+            {
                 return Result<TeamResponse>.BadRequest($"A team with slug '{command.Slug}' already exists in this organization.");
+            }
         }
 
         team.Update(command.Name);
@@ -110,12 +129,13 @@ public sealed class UpdateTeamHandler(
             command.DarkBrandColor,
             command.TimeFormat,
             command.TimeZone,
-            command.WeekStart);
+            command.WeekStart
+        );
 
         tenantRepository.Update(team);
 
-        var members = await membershipRepository.GetMembersOfTenantAsync(team.Id, includePending: true, cancellationToken);
-        events.CollectEvent(new TeamUpdated(team.Id, orgId));
+        var members = await membershipRepository.GetMembersOfTenantAsync(team.Id, true, cancellationToken);
+        events.CollectEvent(new TeamUpdated(team.Id, parentId));
 
         return team.ToResponse(members.Length);
     }

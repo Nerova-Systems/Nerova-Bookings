@@ -1,6 +1,6 @@
 import { expect } from "@playwright/test";
 import { test } from "@shared/e2e/fixtures/page-auth";
-import { activateBaseFlags, setOwnerTenantOverrides } from "@shared/e2e/utils/feature-flag-helpers";
+import { activateBaseFlags, setAdminTenantOverrides } from "@shared/e2e/utils/feature-flag-helpers";
 import { step } from "@shared/e2e/utils/test-step-wrapper";
 
 // cap-insights is gated behind the same tier-enterprise dependency chain as the rest of the
@@ -11,8 +11,8 @@ import { step } from "@shared/e2e/utils/test-step-wrapper";
 const FLAG_CHAIN = ["tier-teams", "tier-organizations", "tier-enterprise", "cap-insights"] as const;
 
 test.describe("@smoke", () => {
-  test.afterEach(async ({ ownerPage }) => {
-    await setOwnerTenantOverrides(ownerPage, [...FLAG_CHAIN].reverse(), false);
+  test.afterEach(async ({ ownerPage, browser }) => {
+    await setAdminTenantOverrides(browser, ownerPage, [...FLAG_CHAIN].reverse(), false);
   });
 
   /**
@@ -27,7 +27,7 @@ test.describe("@smoke", () => {
   test("should render the insights dashboard with default date range and KPI tiles", async ({ ownerPage, browser }) => {
     await step("Activate the full tier chain + cap-insights & enable every tenant override")(async () => {
       await activateBaseFlags(browser, FLAG_CHAIN);
-      await setOwnerTenantOverrides(ownerPage, FLAG_CHAIN, true);
+      await setAdminTenantOverrides(browser, ownerPage, FLAG_CHAIN, true);
     })();
 
     await step("Navigate to /insights & verify the dashboard renders the heading")(async () => {

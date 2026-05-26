@@ -52,8 +52,8 @@ public sealed class RevokeOrgApiKeyHandler(
                 orgId,
                 userId,
                 executionContext.UserInfo.Email ?? string.Empty,
-                AuditResource.ApiKey.ToString(),
-                AuditAction.Revoked.ToString(),
+                nameof(AuditResource.ApiKey),
+                nameof(AuditAction.Revoked),
                 apiKey.Id.ToString(),
                 IpAddress: httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
                 UserAgent: httpContextAccessor.HttpContext?.Request.Headers.UserAgent.ToString()

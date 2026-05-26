@@ -80,8 +80,8 @@ public sealed class TestDelegationCredentialHandler(
                 orgId,
                 executionContext.UserInfo.Id!,
                 executionContext.UserInfo.Email ?? string.Empty,
-                AuditResource.DelegationCredential.ToString(),
-                AuditAction.Tested.ToString(),
+                nameof(AuditResource.DelegationCredential),
+                nameof(AuditAction.Tested),
                 credential.Id.ToString(),
                 IpAddress: httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
                 UserAgent: httpContextAccessor.HttpContext?.Request.Headers.UserAgent.ToString()

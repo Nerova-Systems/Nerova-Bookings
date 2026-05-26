@@ -46,9 +46,9 @@ public static class SystemRoles
     /// </summary>
     public static IEnumerable<Permission> AdminPermissions =>
         Permission.All.Where(p =>
-            !(p.Resource == PermissionResource.Billing && p.Action == PermissionAction.Manage) &&
-            !(p.Resource == PermissionResource.Organization && p.Action == PermissionAction.Delete) &&
-            !(p.Resource == PermissionResource.User && p.Action == PermissionAction.Impersonate)
+            p is not { Resource: PermissionResource.Billing, Action: PermissionAction.Manage } &&
+            p is not { Resource: PermissionResource.Organization, Action: PermissionAction.Delete } &&
+            p is not { Resource: PermissionResource.User, Action: PermissionAction.Impersonate }
         );
 
     /// <summary>

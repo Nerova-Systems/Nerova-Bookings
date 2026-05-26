@@ -78,11 +78,7 @@ export function AppRow({ app, allApps, onUninstall }: Readonly<AppRowProps>) {
 function AppIcon({ app }: Readonly<{ app: App }>) {
   if (app.logoUrl) {
     return (
-      <img
-        src={app.logoUrl}
-        alt=""
-        className="h-10 w-10 shrink-0 rounded-md border bg-background object-contain p-1"
-      />
+      <img src={app.logoUrl} alt="" className="h-10 w-10 shrink-0 rounded-md border bg-background object-contain p-1" />
     );
   }
   return (

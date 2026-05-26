@@ -1,16 +1,20 @@
 import { t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
 import { Button } from "@repo/ui/components/Button";
+import { TextField } from "@repo/ui/components/TextField";
 import { CopyIcon, LinkIcon, TrashIcon } from "lucide-react";
+import { useState } from "react";
 import { toast } from "sonner";
 
 import { api, queryClient } from "@/shared/lib/api/client";
 
 export function EventTypePrivateLinksSection({ eventTypeId }: Readonly<{ eventTypeId: string }>) {
+  const [filter, setFilter] = useState("");
   const { data, isLoading } = api.useQuery("get", "/api/event-types/{id}/hashed-links", {
     params: { path: { id: eventTypeId } }
   });
   const hashedLinks = data?.hashedLinks ?? [];
+  const filteredLinks = filter ? hashedLinks.filter((link) => link.hash.includes(filter)) : hashedLinks;
 
   const createMutation = api.useMutation("post", "/api/event-types/{id}/hashed-links", {
     onSuccess: () => {
@@ -43,6 +47,7 @@ export function EventTypePrivateLinksSection({ eventTypeId }: Readonly<{ eventTy
 
   return (
     <div className="grid gap-3">
+      <TextField name="privateLinksFilter" label={t`Private links`} value={filter} onChange={setFilter} />
       <div className="text-sm text-muted-foreground">
         <Trans>Generate one-off links that bypass the public schedule and expire after use.</Trans>
       </div>
@@ -50,13 +55,13 @@ export function EventTypePrivateLinksSection({ eventTypeId }: Readonly<{ eventTy
         <div className="text-sm text-muted-foreground">
           <Trans>Loading private links…</Trans>
         </div>
-      ) : hashedLinks.length === 0 ? (
+      ) : filteredLinks.length === 0 ? (
         <div className="rounded-md border p-3 text-sm text-muted-foreground">
           <Trans>No private links yet.</Trans>
         </div>
       ) : (
         <ul className="grid gap-2">
-          {hashedLinks.map((link) => (
+          {filteredLinks.map((link) => (
             <li key={link.id} className="flex items-center justify-between gap-2 rounded-md border p-3">
               <div className="flex min-w-0 items-center gap-2">
                 <LinkIcon className="h-4 w-4 shrink-0" aria-hidden="true" />

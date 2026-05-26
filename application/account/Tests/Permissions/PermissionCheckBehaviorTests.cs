@@ -63,43 +63,43 @@ public sealed class PermissionCheckBehaviorTests(AccountWebApplicationFactory fa
 
         var handlerCalled = false;
 
-        Task<Result> next(CancellationToken _)
+        Task<Result> Next(CancellationToken _)
         {
             handlerCalled = true;
             return Task.FromResult(Result.Success());
         }
 
         // Act
-        var result = await behavior.Handle(new OpenCommand(), next, CancellationToken.None);
+        var result = await behavior.Handle(new OpenCommand(), Next, CancellationToken.None);
 
         // Assert
         handlerCalled.Should().BeTrue();
         result.IsSuccess.Should().BeTrue();
-        await permissionService.DidNotReceiveWithAnyArgs().HasPermissionAsync(default!, default!, default!, default);
+        await permissionService.DidNotReceiveWithAnyArgs().HasPermissionAsync(null!, null!, null!, CancellationToken.None);
     }
 
     [Fact]
     public async Task Handle_WhenUnauthenticated_ShouldReturnForbidden()
     {
         // Arrange — null userId and tenantId to simulate unauthenticated request
-        var (permissionService, executionContext) = BuildMocks(null, null);
+        var (permissionService, executionContext) = BuildMocks();
         var behavior = BuildBehavior<BillingManageCommand>(permissionService, executionContext);
 
         var handlerCalled = false;
 
-        Task<Result> next(CancellationToken _)
+        Task<Result> Next(CancellationToken _)
         {
             handlerCalled = true;
             return Task.FromResult(Result.Success());
         }
 
         // Act
-        var result = await behavior.Handle(new BillingManageCommand(), next, CancellationToken.None);
+        var result = await behavior.Handle(new BillingManageCommand(), Next, CancellationToken.None);
 
         // Assert
         handlerCalled.Should().BeFalse();
         result.StatusCode.Should().Be(HttpStatusCode.Forbidden);
-        await permissionService.DidNotReceiveWithAnyArgs().HasPermissionAsync(default!, default!, default!, default);
+        await permissionService.DidNotReceiveWithAnyArgs().HasPermissionAsync(null!, null!, null!, CancellationToken.None);
     }
 
     [Fact]
@@ -118,14 +118,14 @@ public sealed class PermissionCheckBehaviorTests(AccountWebApplicationFactory fa
 
         var handlerCalled = false;
 
-        Task<Result> next(CancellationToken _)
+        Task<Result> Next(CancellationToken _)
         {
             handlerCalled = true;
             return Task.FromResult(Result.Success());
         }
 
         // Act
-        var result = await behavior.Handle(new BillingManageCommand(), next, CancellationToken.None);
+        var result = await behavior.Handle(new BillingManageCommand(), Next, CancellationToken.None);
 
         // Assert
         handlerCalled.Should().BeTrue();
@@ -148,14 +148,14 @@ public sealed class PermissionCheckBehaviorTests(AccountWebApplicationFactory fa
 
         var handlerCalled = false;
 
-        Task<Result> next(CancellationToken _)
+        Task<Result> Next(CancellationToken _)
         {
             handlerCalled = true;
             return Task.FromResult(Result.Success());
         }
 
         // Act
-        var result = await behavior.Handle(new BillingManageCommand(), next, CancellationToken.None);
+        var result = await behavior.Handle(new BillingManageCommand(), Next, CancellationToken.None);
 
         // Assert
         handlerCalled.Should().BeFalse();
@@ -182,14 +182,14 @@ public sealed class PermissionCheckBehaviorTests(AccountWebApplicationFactory fa
 
         var handlerCalled = false;
 
-        Task<Result> next(CancellationToken _)
+        Task<Result> Next(CancellationToken _)
         {
             handlerCalled = true;
             return Task.FromResult(Result.Success());
         }
 
         // Act
-        var result = await behavior.Handle(new TwoPermissionsCommand(), next, CancellationToken.None);
+        var result = await behavior.Handle(new TwoPermissionsCommand(), Next, CancellationToken.None);
 
         // Assert
         handlerCalled.Should().BeFalse();
@@ -215,14 +215,14 @@ public sealed class PermissionCheckBehaviorTests(AccountWebApplicationFactory fa
 
         var handlerCalled = false;
 
-        Task<Result> next(CancellationToken _)
+        Task<Result> Next(CancellationToken _)
         {
             handlerCalled = true;
             return Task.FromResult(Result.Success());
         }
 
         // Act
-        var result = await behavior.Handle(new TeamScopedCommand(), next, CancellationToken.None);
+        var result = await behavior.Handle(new TeamScopedCommand(), Next, CancellationToken.None);
 
         // Assert
         handlerCalled.Should().BeTrue();
@@ -236,25 +236,25 @@ public sealed class PermissionCheckBehaviorTests(AccountWebApplicationFactory fa
         // Arrange — no active team scope in context
         var userId = UserId.NewId();
         var tenantId = new TenantId(2002L);
-        var (permissionService, executionContext) = BuildMocks(userId, tenantId, null);
+        var (permissionService, executionContext) = BuildMocks(userId, tenantId);
 
         var behavior = BuildBehavior<TeamScopedCommand>(permissionService, executionContext);
 
         var handlerCalled = false;
 
-        Task<Result> next(CancellationToken _)
+        Task<Result> Next(CancellationToken _)
         {
             handlerCalled = true;
             return Task.FromResult(Result.Success());
         }
 
         // Act
-        var result = await behavior.Handle(new TeamScopedCommand(), next, CancellationToken.None);
+        var result = await behavior.Handle(new TeamScopedCommand(), Next, CancellationToken.None);
 
         // Assert
         handlerCalled.Should().BeFalse();
         result.StatusCode.Should().Be(HttpStatusCode.Forbidden);
-        await permissionService.DidNotReceiveWithAnyArgs().HasPermissionAsync(default!, default!, default!, default);
+        await permissionService.DidNotReceiveWithAnyArgs().HasPermissionAsync(null!, null!, null!, CancellationToken.None);
     }
 
     [Fact]
@@ -274,14 +274,14 @@ public sealed class PermissionCheckBehaviorTests(AccountWebApplicationFactory fa
 
         var handlerCalled = false;
 
-        Task<Result> next(CancellationToken _)
+        Task<Result> Next(CancellationToken _)
         {
             handlerCalled = true;
             return Task.FromResult(Result.Success());
         }
 
         // Act
-        var result = await behavior.Handle(new OrgScopedCommand(), next, CancellationToken.None);
+        var result = await behavior.Handle(new OrgScopedCommand(), Next, CancellationToken.None);
 
         // Assert
         handlerCalled.Should().BeTrue();
@@ -301,19 +301,19 @@ public sealed class PermissionCheckBehaviorTests(AccountWebApplicationFactory fa
 
         var handlerCalled = false;
 
-        Task<Result> next(CancellationToken _)
+        Task<Result> Next(CancellationToken _)
         {
             handlerCalled = true;
             return Task.FromResult(Result.Success());
         }
 
         // Act
-        var result = await behavior.Handle(new OrgScopedCommand(), next, CancellationToken.None);
+        var result = await behavior.Handle(new OrgScopedCommand(), Next, CancellationToken.None);
 
         // Assert
         handlerCalled.Should().BeFalse();
         result.StatusCode.Should().Be(HttpStatusCode.Forbidden);
-        await permissionService.DidNotReceiveWithAnyArgs().HasPermissionAsync(default!, default!, default!, default);
+        await permissionService.DidNotReceiveWithAnyArgs().HasPermissionAsync(null!, null!, null!, CancellationToken.None);
     }
     // ── Test request types ────────────────────────────────────────────────────
 

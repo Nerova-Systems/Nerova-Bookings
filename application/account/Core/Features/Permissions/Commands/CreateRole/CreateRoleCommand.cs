@@ -14,7 +14,7 @@ using FeatureFlagDefinitions = SharedKernel.FeatureFlags.FeatureFlags;
 namespace Account.Features.Permissions.Commands.CreateRole;
 
 [PublicAPI]
-[RequirePermission(PermissionResource.Role, PermissionAction.Create, PermissionScope.Organization)]
+[RequirePermission(PermissionResource.Role, PermissionAction.Create)]
 public sealed record CreateRoleCommand : ICommand, IRequest<Result<RoleResponse>>
 {
     public required string Name { get; init; }
@@ -51,46 +51,53 @@ public sealed class CreateRoleHandler(
     public async Task<Result<RoleResponse>> Handle(CreateRoleCommand command, CancellationToken cancellationToken)
     {
         if (!executionContext.UserInfo.IsFeatureFlagEnabled(FeatureFlagDefinitions.TierEnterprise.Key))
+        {
             return Result<RoleResponse>.Forbidden("The custom roles feature is not enabled for this organization.");
+        }
 
-        var orgId = executionContext.ActiveOrgId!;
+        var tenantId = executionContext.ActiveOrgId ?? executionContext.TenantId;
+        if (tenantId is null) return Result<RoleResponse>.Unauthorized("User is not associated with a tenant.");
 
-        var tenant = await tenantRepository.GetByIdUnfilteredAsync(orgId, cancellationToken);
+        var tenant = await tenantRepository.GetByIdUnfilteredAsync(tenantId, cancellationToken);
         if (tenant is null)
-            return Result<RoleResponse>.NotFound($"Organization '{orgId}' not found.");
-
-        if (tenant.Kind == TenantKind.Solo)
-            return Result<RoleResponse>.BadRequest("Custom roles can only be created in team or organization tenants.");
+        {
+            return Result<RoleResponse>.NotFound($"Tenant '{tenantId}' not found.");
+        }
 
         var permissions = new List<Permission>();
         foreach (var key in command.Permissions)
         {
             if (!Permission.TryParse(key, out var permission))
+            {
                 return Result<RoleResponse>.BadRequest($"Permission '{key}' is not a valid permission string.");
+            }
 
             permissions.Add(permission);
         }
 
-        var existing = await roleRepository.GetByNameAsync(orgId, command.Name, cancellationToken);
+        var existing = await roleRepository.GetByNameAsync(tenantId, command.Name, cancellationToken);
         if (existing is not null)
+        {
             return Result<RoleResponse>.BadRequest($"A role named '{command.Name}' already exists in this organization.");
+        }
 
         var role = Role.CreateCustom(tenant.Id, tenant.Kind, command.Name, command.Description, permissions);
         await roleRepository.AddAsync(role, cancellationToken);
 
         await auditLogEmitter.EmitAsync(new AuditLogEvent(
-            TenantId: orgId,
-            ActorId: executionContext.UserInfo.Id!,
-            ActorEmail: executionContext.UserInfo.Email ?? string.Empty,
-            Resource: AuditResource.Role.ToString(),
-            Action: AuditAction.Created.ToString(),
-            ResourceId: role.Id.ToString(),
-            IpAddress: httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
-            UserAgent: httpContextAccessor.HttpContext?.Request.Headers.UserAgent.ToString()
-        ), cancellationToken);
+                tenantId,
+                executionContext.UserInfo.Id!,
+                executionContext.UserInfo.Email ?? string.Empty,
+                nameof(AuditResource.Role),
+                nameof(AuditAction.Created),
+                role.Id.ToString(),
+                IpAddress: httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
+                UserAgent: httpContextAccessor.HttpContext?.Request.Headers.UserAgent.ToString()
+            ), cancellationToken
+        );
 
-        events.CollectEvent(new RoleCreated(role.Id, orgId));
+        events.CollectEvent(new RoleCreated(role.Id, tenantId));
 
-        return role.ToResponse(memberCount: 0);
+        return role.ToResponse(0);
     }
 }

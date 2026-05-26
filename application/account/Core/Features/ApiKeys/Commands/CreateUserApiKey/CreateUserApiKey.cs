@@ -65,8 +65,8 @@ public sealed class CreateUserApiKeyHandler(
                 tenantId,
                 userId,
                 executionContext.UserInfo.Email ?? string.Empty,
-                AuditResource.ApiKey.ToString(),
-                AuditAction.Created.ToString(),
+                nameof(AuditResource.ApiKey),
+                nameof(AuditAction.Created),
                 apiKey.Id.ToString(),
                 IpAddress: httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
                 UserAgent: httpContextAccessor.HttpContext?.Request.Headers.UserAgent.ToString()

@@ -15,13 +15,13 @@ namespace Account.Tests.AuditLog;
 /// <summary>
 ///     Database round-trip tests for <see cref="AuditLogRepository" />.
 ///     <para>
-///         Write operations use the base <see cref="Provider" /> (null execution context — writes bypass
+///         Write operations use the base <c>Provider</c> (null execution context — writes bypass
 ///         the <c>ITenantScopedEntity</c> query filter).
 ///     </para>
 ///     <para>
-///         Paged query operations use a second <see cref="_tenantScopedProvider" /> built from the same
+///         Paged query operations use a second <c>_tenantScopedProvider</c> built from the same
 ///         SQLite connection but with a mock <see cref="IExecutionContext" /> that returns
-///         <see cref="DatabaseSeeder.Tenant1.Id" />, satisfying the global query filter.
+///         <c>DatabaseSeeder.Tenant1.Id</c>, satisfying the global query filter.
 ///     </para>
 /// </summary>
 public sealed class AuditLogRepositoryTests(AccountWebApplicationFactory factory)
@@ -59,7 +59,7 @@ public sealed class AuditLogRepositoryTests(AccountWebApplicationFactory factory
 
         // Assert
         loaded.Should().NotBeNull();
-        loaded!.Id.Should().Be(entry.Id);
+        loaded.Id.Should().Be(entry.Id);
         loaded.TenantId.Should().Be(DatabaseSeeder.Tenant1.Id);
         loaded.ActorUserId.Should().Be(DatabaseSeeder.Tenant1Owner.Id);
         loaded.ActorEmail.Should().Be("owner@tenant-1.com");
@@ -97,7 +97,7 @@ public sealed class AuditLogRepositoryTests(AccountWebApplicationFactory factory
         await SeedEntryAsync("Role", "Deleted");
 
         // Act — read via tenant-scoped provider
-        using var tenantProvider = CreateTenantScopedProvider();
+        await using var tenantProvider = CreateTenantScopedProvider();
         using var scope = tenantProvider.CreateScope();
         var repository = scope.ServiceProvider.GetRequiredService<IAuditLogRepository>();
 
@@ -118,7 +118,7 @@ public sealed class AuditLogRepositoryTests(AccountWebApplicationFactory factory
         await SeedEntryAsync("Role", "Deleted");
 
         // Act
-        using var tenantProvider = CreateTenantScopedProvider();
+        await using var tenantProvider = CreateTenantScopedProvider();
         using var scope = tenantProvider.CreateScope();
         var repository = scope.ServiceProvider.GetRequiredService<IAuditLogRepository>();
 
@@ -138,7 +138,7 @@ public sealed class AuditLogRepositoryTests(AccountWebApplicationFactory factory
         await SeedEntryAsync("Role", "Assigned", DatabaseSeeder.Tenant1Member.Id);
 
         // Act
-        using var tenantProvider = CreateTenantScopedProvider();
+        await using var tenantProvider = CreateTenantScopedProvider();
         using var scope = tenantProvider.CreateScope();
         var repository = scope.ServiceProvider.GetRequiredService<IAuditLogRepository>();
 
@@ -160,7 +160,7 @@ public sealed class AuditLogRepositoryTests(AccountWebApplicationFactory factory
         }
 
         // Act
-        using var tenantProvider = CreateTenantScopedProvider();
+        await using var tenantProvider = CreateTenantScopedProvider();
         using var scope = tenantProvider.CreateScope();
         var repository = scope.ServiceProvider.GetRequiredService<IAuditLogRepository>();
 

@@ -36,7 +36,7 @@ export function CancelBookingDialog({
 }>) {
   return (
     <Dialog trackingTitle={t`Cancel booking`} open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:w-dialog-md">
+      <DialogContent className="sm:w-dialog-md" role="alertdialog">
         <DialogHeader>
           <DialogTitle>
             <Trans>Cancel event?</Trans>

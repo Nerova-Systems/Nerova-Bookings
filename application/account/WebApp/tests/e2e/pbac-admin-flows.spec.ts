@@ -1,6 +1,6 @@
 import { expect } from "@playwright/test";
 import { test } from "@shared/e2e/fixtures/page-auth";
-import { activateBaseFlags, setOwnerTenantOverrides } from "@shared/e2e/utils/feature-flag-helpers";
+import { activateBaseFlags, setAdminTenantOverrides } from "@shared/e2e/utils/feature-flag-helpers";
 import { createTestContext, expectToastMessage } from "@shared/e2e/utils/test-assertions";
 import { step } from "@shared/e2e/utils/test-step-wrapper";
 
@@ -13,10 +13,10 @@ import { step } from "@shared/e2e/utils/test-step-wrapper";
 const FLAG_CHAIN = ["tier-teams", "tier-organizations", "tier-enterprise"] as const;
 
 test.describe("@smoke", () => {
-  test.afterEach(async ({ ownerPage }) => {
+  test.afterEach(async ({ ownerPage, browser }) => {
     // Reverse the chain on cleanup so tier-enterprise drops before tier-organizations, mirroring the
     // dependency order. Disabling an override row that does not exist is a no-op on the backend.
-    await setOwnerTenantOverrides(ownerPage, [...FLAG_CHAIN].reverse(), false);
+    await setAdminTenantOverrides(browser, ownerPage, [...FLAG_CHAIN].reverse(), false);
   });
 
   /**
@@ -39,7 +39,7 @@ test.describe("@smoke", () => {
 
     await step("Activate tier flag chain in back-office & enable tenant overrides for the worker tenant")(async () => {
       await activateBaseFlags(browser, FLAG_CHAIN);
-      await setOwnerTenantOverrides(ownerPage, FLAG_CHAIN, true);
+      await setAdminTenantOverrides(browser, ownerPage, FLAG_CHAIN, true);
     })();
 
     await step("Navigate to /account/settings/roles & verify the roles admin page renders")(async () => {

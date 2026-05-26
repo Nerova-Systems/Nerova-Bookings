@@ -1,5 +1,4 @@
 using System.Security.Cryptography;
-using System.Text.Json.Serialization;
 using Account.Features.Memberships.Domain;
 using Account.Features.Permissions.Domain;
 using Account.Features.Tenants.Domain;
@@ -57,35 +56,58 @@ public sealed class InviteTeamMemberHandler(
     public async Task<Result<MembershipId>> Handle(InviteTeamMemberCommand command, CancellationToken cancellationToken)
     {
         if (!executionContext.UserInfo.IsFeatureFlagEnabled(FeatureFlagDefinitions.TierTeams.Key))
+        {
             return Result<MembershipId>.Forbidden("The teams feature is not enabled for this organization.");
-        if (executionContext.ActiveOrgId is null)
-            return Result<MembershipId>.Forbidden("An active organization is required to invite team members.");
-        if (executionContext.UserInfo.Id is null)
-            return Result<MembershipId>.Unauthorized("User is not authenticated.");
+        }
 
-        var orgId = executionContext.ActiveOrgId;
+        if (executionContext.UserInfo.Id is null)
+        {
+            return Result<MembershipId>.Unauthorized("User is not authenticated.");
+        }
+
+        var parentId = executionContext.ActiveOrgId ?? executionContext.TenantId;
+        if (parentId is null) return Result<MembershipId>.Unauthorized("User is not associated with a tenant.");
         var inviterId = executionContext.UserInfo.Id;
 
-        var caller = await membershipRepository.GetByUserAndTenantAsync(inviterId, orgId, cancellationToken);
-        if (caller is null || !caller.Accepted)
-            return Result<MembershipId>.Forbidden("You are not a member of this organization.");
-        if (caller.Role == MembershipRole.Member)
-            return Result<MembershipId>.Forbidden("Only organization owners and admins can invite team members.");
+        if (executionContext.ActiveOrgId is not null)
+        {
+            var caller = await membershipRepository.GetByUserAndTenantAsync(inviterId, parentId, cancellationToken);
+            if (caller is null || !caller.Accepted)
+            {
+                return Result<MembershipId>.Forbidden("You are not a member of this organization.");
+            }
+
+            if (caller.Role == MembershipRole.Member)
+            {
+                return Result<MembershipId>.Forbidden("Only organization owners and admins can invite team members.");
+            }
+        }
+        // Solo context: owning the parent tenant implies full access.
 
         var team = await tenantRepository.GetByIdUnfilteredAsync(command.TeamId, cancellationToken);
         if (team is null || team.Kind != TenantKind.Team)
+        {
             return Result<MembershipId>.NotFound($"Team '{command.TeamId}' not found.");
-        if (team.ParentTenantId != orgId)
-            return Result<MembershipId>.Forbidden("This team does not belong to your organization.");
+        }
+
+        if (team.ParentTenantId != parentId)
+        {
+            return Result<MembershipId>.Forbidden("This team does not belong to your account.");
+        }
 
         var user = await userRepository.GetUserByEmailUnfilteredAsync(command.Email, cancellationToken);
         if (user is null)
+        {
             return Result<MembershipId>.BadRequest(
-                $"User with email '{command.Email}' does not have an account; the signup-invite flow is not yet implemented.");
+                $"User with email '{command.Email}' does not have an account; the signup-invite flow is not yet implemented."
+            );
+        }
 
         var existing = await membershipRepository.GetByUserAndTenantAsync(user.Id, team.Id, cancellationToken);
         if (existing is not null)
+        {
             return Result<MembershipId>.Conflict($"User with email '{command.Email}' already has a membership in this team.");
+        }
 
         var inviteToken = Convert.ToHexString(RandomNumberGenerator.GetBytes(32));
         var invite = Membership.CreateInvite(team.Id, user.Id, command.Role, inviterId, inviteToken);
@@ -93,7 +115,7 @@ public sealed class InviteTeamMemberHandler(
 
         await membershipRepository.AddAsync(invite, cancellationToken);
 
-        events.CollectEvent(new TeamMemberInvited(team.Id, orgId, invite.Id, command.Role));
+        events.CollectEvent(new TeamMemberInvited(team.Id, parentId, invite.Id, command.Role));
 
         return invite.Id;
     }

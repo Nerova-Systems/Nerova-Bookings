@@ -153,7 +153,7 @@ public sealed class MembershipAggregateTests(AccountWebApplicationFactory factor
 
         // Assert
         loaded.Should().NotBeNull();
-        loaded!.TenantId.Should().Be(org.Id);
+        loaded.TenantId.Should().Be(org.Id);
         loaded.UserId.Should().Be(DatabaseSeeder.Tenant1Owner.Id);
         loaded.Role.Should().Be(MembershipRole.Owner);
         loaded.Accepted.Should().BeTrue();
@@ -191,7 +191,7 @@ public sealed class MembershipAggregateTests(AccountWebApplicationFactory factor
 
         // Assert
         loaded.Should().NotBeNull();
-        loaded!.Role.Should().Be(MembershipRole.Admin);
+        loaded.Role.Should().Be(MembershipRole.Admin);
         loaded.Accepted.Should().BeFalse();
         loaded.AcceptedAt.Should().BeNull();
         loaded.InviteToken.Should().Be(token);
@@ -219,7 +219,7 @@ public sealed class MembershipAggregateTests(AccountWebApplicationFactory factor
 
         // Assert
         result.Should().NotBeNull();
-        result!.Id.Should().Be(membership.Id);
+        result.Id.Should().Be(membership.Id);
     }
 
     [Fact]
@@ -269,7 +269,7 @@ public sealed class MembershipAggregateTests(AccountWebApplicationFactory factor
 
         // Assert
         result.Should().NotBeNull();
-        result!.Id.Should().Be(membership.Id);
+        result.Id.Should().Be(membership.Id);
     }
 
     [Fact]

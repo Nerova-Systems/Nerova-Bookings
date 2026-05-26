@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using SharedKernel.Domain;
 using SharedKernel.EntityFramework;
 using SharedKernel.Persistence;
+using Attribute = Account.Features.Attributes.Domain.Attribute;
 
 namespace Account.Features.Attributes.Infrastructure;
 
@@ -11,13 +12,13 @@ namespace Account.Features.Attributes.Infrastructure;
 ///     Repository for <see cref="Domain.Attribute" /> aggregates.
 /// </summary>
 public sealed class AttributeRepository(AccountDbContext context)
-    : RepositoryBase<Domain.Attribute, AttributeId>(context), IAttributeRepository
+    : RepositoryBase<Attribute, AttributeId>(context), IAttributeRepository
 {
     /// <remarks>
     ///     Bypasses the global tenant query filter because <see cref="Domain.Attribute.TenantId" />
     ///     is an org tenant ID, which differs from the solo tenant ID in the execution context.
     /// </remarks>
-    public async Task<IReadOnlyList<Domain.Attribute>> GetByOrgUnfilteredAsync(
+    public async Task<IReadOnlyList<Attribute>> GetByOrgUnfilteredAsync(
         TenantId orgTenantId,
         CancellationToken cancellationToken)
     {
@@ -34,7 +35,7 @@ public sealed class AttributeRepository(AccountDbContext context)
     /// <remarks>
     ///     Bypasses the global tenant query filter. See <see cref="GetByOrgUnfilteredAsync" /> for rationale.
     /// </remarks>
-    public Task<Domain.Attribute?> GetByIdUnfilteredAsync(AttributeId id, CancellationToken cancellationToken)
+    public Task<Attribute?> GetByIdUnfilteredAsync(AttributeId id, CancellationToken cancellationToken)
     {
         // OwnsMany collections are NOT loaded via FindAsync; use a LINQ query with Include to
         // materialise the Options collection alongside the aggregate.

@@ -1,10 +1,10 @@
 using Account.Features.Attributes.Domain;
 using Account.Features.Memberships.Domain;
-using Account.Features.Tenants.Domain;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using SharedKernel.Domain;
 using SharedKernel.EntityFramework;
+using Attribute = Account.Features.Attributes.Domain.Attribute;
 
 namespace Account.Features.Attributes.Infrastructure;
 
@@ -38,7 +38,7 @@ public sealed class AttributeAssignmentConfiguration : IEntityTypeConfiguration<
             .OnDelete(DeleteBehavior.Cascade);
 
         // FK: attribute (cascade — if an attribute is deleted, its assignments vanish)
-        builder.HasOne<Domain.Attribute>()
+        builder.HasOne<Attribute>()
             .WithMany()
             .HasForeignKey(a => a.AttributeId)
             .OnDelete(DeleteBehavior.Cascade);

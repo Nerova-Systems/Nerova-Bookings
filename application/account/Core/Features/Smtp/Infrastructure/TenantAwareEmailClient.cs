@@ -45,6 +45,7 @@ public sealed class TenantAwareEmailClient(
         var password = credentialProtector.Unprotect(config.EncryptedPassword);
 
 #pragma warning disable SYSLIB0006 // SmtpClient is deprecated but no alternative ships with .NET BCL; revisit when project adopts MailKit.
+        // ReSharper disable once UsingStatementResourceInitialization
         using var smtpClient = new SmtpClient(config.Host, config.Port)
         {
             EnableSsl = config.UseSsl,
@@ -53,15 +54,15 @@ public sealed class TenantAwareEmailClient(
         };
 #pragma warning restore SYSLIB0006
 
+        // ReSharper disable once UsingStatementResourceInitialization
         using var mailMessage = new MailMessage
         {
             From = new MailAddress(config.FromEmail, config.FromName ?? string.Empty),
             Subject = message.Subject,
-            IsBodyHtml = message.HtmlBody is not null
+            IsBodyHtml = true,
+            Body = message.HtmlBody,
+            To = { message.Recipient }
         };
-
-        mailMessage.Body = message.HtmlBody ?? message.PlainTextBody;
-        mailMessage.To.Add(message.Recipient);
 
         if (config.ReplyToEmail is not null)
         {

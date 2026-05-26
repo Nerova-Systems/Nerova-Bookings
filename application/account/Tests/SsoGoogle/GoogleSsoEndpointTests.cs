@@ -155,7 +155,7 @@ public sealed class GoogleSsoEndpointTests : EndpointBaseTest<AccountDbContext>,
 
         var result = await response.Content.ReadFromJsonAsync<OrgGoogleSsoConfigResponse>();
         result.Should().NotBeNull();
-        result!.HostedDomain.Should().Be("acme.com");
+        result.HostedDomain.Should().Be("acme.com");
         result.ClientId.Should().Be("test-client-id");
         result.AllowedDomains.Should().Contain("acme.com");
         result.IsEnabled.Should().BeTrue();
@@ -337,7 +337,7 @@ public sealed class GoogleSsoEndpointTests : EndpointBaseTest<AccountDbContext>,
         var result = await response.Content.ReadFromJsonAsync<TestGoogleSsoResultResponse>();
         result.Should().NotBeNull();
         // Google's discovery URL is always reachable; the test validates connectivity only
-        result!.Success.Should().BeTrue();
+        result.Success.Should().BeTrue();
     }
 
     // ──────────────────────────────────────────────────────────────────────────

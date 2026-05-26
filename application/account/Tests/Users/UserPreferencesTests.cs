@@ -26,7 +26,7 @@ public sealed class UserPreferencesTests(AccountWebApplicationFactory factory)
         response.ShouldBeSuccessfulGetRequest();
         var body = await response.Content.ReadFromJsonAsync<UserPreferencesResponse>();
         body.Should().NotBeNull();
-        body!.TimeFormat.Should().Be(UserPreferences.DefaultTimeFormat);
+        body.TimeFormat.Should().Be(UserPreferences.DefaultTimeFormat);
         body.WeekStart.Should().Be(UserPreferences.DefaultWeekStart);
         body.Language.Should().Be(UserPreferences.DefaultLanguage);
         body.TimeZone.Should().Be(UserPreferences.DefaultTimeZone);
@@ -50,7 +50,7 @@ public sealed class UserPreferencesTests(AccountWebApplicationFactory factory)
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var body = await response.Content.ReadFromJsonAsync<UserPreferencesResponse>();
         body.Should().NotBeNull();
-        body!.TimeFormat.Should().Be(TimeFormat.TwelveHour);
+        body.TimeFormat.Should().Be(TimeFormat.TwelveHour);
         body.WeekStart.Should().Be(DayOfWeek.Sunday);
         body.Language.Should().Be("da-DK");
         body.TimeZone.Should().Be("Europe/Copenhagen");
@@ -76,9 +76,9 @@ public sealed class UserPreferencesTests(AccountWebApplicationFactory factory)
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var body = await response.Content.ReadFromJsonAsync<UserPreferencesResponse>();
         body!.TimeFormat.Should().Be(TimeFormat.TwelveHour); // unchanged
-        body.WeekStart.Should().Be(DayOfWeek.Sunday);        // unchanged
-        body.Language.Should().Be("da-DK");                   // unchanged
-        body.TimeZone.Should().Be("America/Los_Angeles");    // updated
+        body.WeekStart.Should().Be(DayOfWeek.Sunday); // unchanged
+        body.Language.Should().Be("da-DK"); // unchanged
+        body.TimeZone.Should().Be("America/Los_Angeles"); // updated
     }
 
     [Fact]
@@ -138,7 +138,7 @@ public sealed class UserPreferencesTests(AccountWebApplicationFactory factory)
         response.ShouldBeSuccessfulGetRequest();
         var body = await response.Content.ReadFromJsonAsync<CurrentUserResponse>();
         body.Should().NotBeNull();
-        body!.Preferences.TimeFormat.Should().Be(TimeFormat.TwelveHour);
+        body.Preferences.TimeFormat.Should().Be(TimeFormat.TwelveHour);
         body.Preferences.WeekStart.Should().Be(DayOfWeek.Sunday);
         body.Preferences.Language.Should().Be("da-DK");
         body.Preferences.TimeZone.Should().Be("Europe/Copenhagen");

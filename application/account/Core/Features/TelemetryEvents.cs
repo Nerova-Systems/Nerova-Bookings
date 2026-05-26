@@ -1,5 +1,5 @@
-using Account.Features.AttributeSync.Domain;
 using Account.Features.Attributes.Domain;
+using Account.Features.AttributeSync.Domain;
 using Account.Features.Authentication.Domain;
 using Account.Features.EmailAuthentication.Domain;
 using Account.Features.ExternalAuthentication.Domain;

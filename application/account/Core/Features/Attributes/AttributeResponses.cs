@@ -1,6 +1,7 @@
 using Account.Features.Attributes.Domain;
 using Account.Features.Memberships.Domain;
 using JetBrains.Annotations;
+using Attribute = Account.Features.Attributes.Domain.Attribute;
 
 namespace Account.Features.Attributes;
 
@@ -11,7 +12,8 @@ public sealed record AttributeOptionResponse(
     string Value,
     string Slug,
     bool IsGroup,
-    string[] Contains);
+    string[] Contains
+);
 
 /// <summary>Serialisable representation of an <see cref="Domain.Attribute" /> as returned by the API.</summary>
 [PublicAPI]
@@ -25,7 +27,8 @@ public sealed record AttributeResponse(
     bool IsLocked,
     AttributeOptionResponse[] Options,
     DateTimeOffset CreatedAt,
-    DateTimeOffset? ModifiedAt);
+    DateTimeOffset? ModifiedAt
+);
 
 /// <summary>Serialisable representation of an <see cref="AttributeAssignment" /> as returned by the API.</summary>
 [PublicAPI]
@@ -35,38 +38,48 @@ public sealed record AttributeAssignmentResponse(
     AttributeId AttributeId,
     string? Value,
     AttributeOptionId? AttributeOptionId,
-    int? Weight);
+    int? Weight
+);
 
 /// <summary>Mapping helpers shared across attribute command and query handlers.</summary>
 public static class AttributeMappings
 {
-    public static AttributeOptionResponse ToResponse(this AttributeOption option) =>
-        new(
-            Id: option.Id,
-            Value: option.Value,
-            Slug: option.Slug,
-            IsGroup: option.IsGroup,
-            Contains: option.Contains);
+    public static AttributeOptionResponse ToResponse(this AttributeOption option)
+    {
+        return new AttributeOptionResponse(
+            option.Id,
+            option.Value,
+            option.Slug,
+            option.IsGroup,
+            option.Contains
+        );
+    }
 
-    public static AttributeResponse ToResponse(this Domain.Attribute attribute) =>
-        new(
-            Id: attribute.Id,
-            Name: attribute.Name,
-            Slug: attribute.Slug,
-            Type: attribute.Type,
-            IsWeightsEnabled: attribute.IsWeightsEnabled,
-            Enabled: attribute.Enabled,
-            IsLocked: attribute.IsLocked,
-            Options: attribute.Options.Select(o => o.ToResponse()).ToArray(),
-            CreatedAt: attribute.CreatedAt,
-            ModifiedAt: attribute.ModifiedAt);
+    public static AttributeResponse ToResponse(this Attribute attribute)
+    {
+        return new AttributeResponse(
+            attribute.Id,
+            attribute.Name,
+            attribute.Slug,
+            attribute.Type,
+            attribute.IsWeightsEnabled,
+            attribute.Enabled,
+            attribute.IsLocked,
+            attribute.Options.Select(o => o.ToResponse()).ToArray(),
+            attribute.CreatedAt,
+            attribute.ModifiedAt
+        );
+    }
 
-    public static AttributeAssignmentResponse ToResponse(this AttributeAssignment assignment) =>
-        new(
-            Id: assignment.Id,
-            MembershipId: assignment.MembershipId,
-            AttributeId: assignment.AttributeId,
-            Value: assignment.Value,
-            AttributeOptionId: assignment.AttributeOptionId,
-            Weight: assignment.Weight);
+    public static AttributeAssignmentResponse ToResponse(this AttributeAssignment assignment)
+    {
+        return new AttributeAssignmentResponse(
+            assignment.Id,
+            assignment.MembershipId,
+            assignment.AttributeId,
+            assignment.Value,
+            assignment.AttributeOptionId,
+            assignment.Weight
+        );
+    }
 }

@@ -57,17 +57,94 @@ export async function activateBaseFlags(browser: Browser, flagKeys: readonly str
     await logInAsAdmin(page, `${BACK_OFFICE_BASE_URL}/feature-flags`);
     const headers = await getAntiforgeryHeaders(page);
     for (const flagKey of flagKeys) {
-      const { ok } = await browserFetch(
-        page,
-        `${BACK_OFFICE_BASE_URL}/api/back-office/feature-flags/${flagKey}/activate`,
-        "PUT",
-        headers
-      );
-      if (!ok) throw new Error(`activateBaseFlags: failed to activate feature flag '${flagKey}'`);
+      let lastStatus = 0;
+      let lastText = "";
+      let succeeded = false;
+      for (let attempt = 0; attempt < 4; attempt++) {
+        if (attempt > 0) await new Promise((r) => setTimeout(r, 150 * attempt));
+        const { ok, status, text } = await browserFetch(
+          page,
+          `${BACK_OFFICE_BASE_URL}/api/back-office/feature-flags/${flagKey}/activate`,
+          "PUT",
+          headers
+        );
+        if (ok) {
+          succeeded = true;
+          break;
+        }
+        lastStatus = status;
+        lastText = text;
+        // 409 Conflict = already active (another worker beat us) — treat as success
+        if (status === 409) {
+          succeeded = true;
+          break;
+        }
+      }
+      if (!succeeded)
+        throw new Error(
+          `activateBaseFlags: failed to activate feature flag '${flagKey}' (status ${lastStatus}): ${lastText}`
+        );
     }
   } finally {
     await context.close();
   }
+}
+
+/**
+ * Set tenant-level feature flag overrides for the owner's tenant via the back-office admin API.
+ * Required for TenantAdminManagedFlags (tier-*, cap-*) which cannot be set via the account app.
+ * Fetches the real TenantId from /api/account/users/me, then calls the back-office override endpoint.
+ * All HTTP calls go through Chromium to avoid Node.js DNS failures on *.localhost (Windows).
+ */
+export async function setAdminTenantOverrides(
+  browser: Browser,
+  ownerPage: Page,
+  flagKeys: readonly string[],
+  enabled: boolean
+): Promise<void> {
+  await ownerPage.goto("/account/settings");
+  const ownerHeaders = await getAntiforgeryHeaders(ownerPage);
+  const meResult = await browserFetch(ownerPage, "/api/account/users/me", "GET", ownerHeaders);
+  if (!meResult.ok) {
+    throw new Error(`setAdminTenantOverrides: failed to get current user (status ${meResult.status})`);
+  }
+  const me = JSON.parse(meResult.text) as { tenantId: string };
+  const { tenantId } = me;
+
+  const context = await browser.newContext({ baseURL: BACK_OFFICE_BASE_URL, ignoreHTTPSErrors: true });
+  const page = await context.newPage();
+  try {
+    await page.goto(`${BACK_OFFICE_BASE_URL}/feature-flags`);
+    await logInAsAdmin(page, `${BACK_OFFICE_BASE_URL}/feature-flags`);
+    const headers = await getAntiforgeryHeaders(page);
+    for (const flagKey of flagKeys) {
+      const { ok, status } = await browserFetch(
+        page,
+        `${BACK_OFFICE_BASE_URL}/api/back-office/feature-flags/${flagKey}/tenant-override`,
+        "PUT",
+        headers,
+        { tenantId, enabled }
+      );
+      if (!ok) {
+        throw new Error(`setAdminTenantOverrides: failed to set override for flag '${flagKey}' (status ${status})`);
+      }
+    }
+  } finally {
+    await context.close();
+  }
+
+  // Force ownerPage's JWT to be refreshed so the updated tenant overrides are reflected in the
+  // feature-flag bootstrap (import.meta.user_info_env.featureFlags) on the next full page load.
+  //
+  // The back-office override API intentionally does NOT emit x-refresh-authentication-tokens-required
+  // (it runs as the system admin, not the tenant owner), so the owner's access token still encodes
+  // the pre-override flag set. AppGateway only refreshes the JWT when the access token is absent or
+  // expired, so we delete it from the browser's cookie jar and navigate to force a full refresh cycle:
+  //   1. No __Host-access-token cookie → AppGateway calls the refresh endpoint with the refresh token
+  //   2. Account API re-evaluates flags from DB (now includes the activated overrides)
+  //   3. New JWT is issued and set as cookies; HTML bootstrap carries the updated flag set
+  await ownerPage.context().clearCookies({ name: "__Host-access-token" });
+  await ownerPage.goto("/account/settings");
 }
 
 /**

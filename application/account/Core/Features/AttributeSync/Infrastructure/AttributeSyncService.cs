@@ -1,13 +1,14 @@
 using System.Text.Json;
+using Account.Features.Attributes.Domain;
 using Account.Features.AttributeSync.Domain;
 using Account.Features.AuditLog.Domain;
-using Account.Features.Attributes.Domain;
 using Account.Features.Memberships.Domain;
 using Microsoft.AspNetCore.Http;
 using SharedKernel.AuditLog;
 using SharedKernel.Domain;
 using SharedKernel.ExecutionContext;
 using SharedKernel.Telemetry;
+using Attribute = Account.Features.Attributes.Domain.Attribute;
 
 namespace Account.Features.AttributeSync.Infrastructure;
 
@@ -63,7 +64,8 @@ public sealed class AttributeSyncService(
             catch (Exception ex)
             {
                 logger.LogError(ex, "AttributeSync rule {RuleId} failed for membership {MembershipId} (source: {Source})",
-                    rule.Id, membershipId, source);
+                    rule.Id, membershipId, source
+                );
                 events.CollectEvent(new AttributeSyncFailed(rule.Id, membershipId, orgTenantId, ex.Message));
             }
         }
@@ -103,17 +105,20 @@ public sealed class AttributeSyncService(
         {
             case ClaimMappingMode.Direct:
                 await ApplyDirectAsync(rule, attribute, membershipId, orgTenantId, claimElement,
-                    actorId, actorEmail, ipAddress, userAgent, cancellationToken);
+                    actorId, actorEmail, ipAddress, userAgent, cancellationToken
+                );
                 break;
 
             case ClaimMappingMode.Lookup:
                 await ApplyLookupAsync(rule, attribute, membershipId, orgTenantId, claimElement,
-                    actorId, actorEmail, ipAddress, userAgent, cancellationToken);
+                    actorId, actorEmail, ipAddress, userAgent, cancellationToken
+                );
                 break;
 
             case ClaimMappingMode.Group:
                 await ApplyGroupAsync(rule, attribute, membershipId, orgTenantId, claimElement,
-                    actorId, actorEmail, ipAddress, userAgent, cancellationToken);
+                    actorId, actorEmail, ipAddress, userAgent, cancellationToken
+                );
                 break;
         }
     }
@@ -122,7 +127,7 @@ public sealed class AttributeSyncService(
 
     private async Task ApplyDirectAsync(
         AttributeSyncRule rule,
-        Attributes.Domain.Attribute attribute,
+        Attribute attribute,
         MembershipId membershipId,
         TenantId orgTenantId,
         JsonElement claimElement,
@@ -140,7 +145,8 @@ public sealed class AttributeSyncService(
         }
 
         var existing = await assignmentRepository.GetByMembershipAttributeOptionAsync(
-            membershipId, attribute.Id, null, cancellationToken);
+            membershipId, attribute.Id, null, cancellationToken
+        );
 
         if (existing is not null)
         {
@@ -163,7 +169,7 @@ public sealed class AttributeSyncService(
 
     private async Task ApplyLookupAsync(
         AttributeSyncRule rule,
-        Attributes.Domain.Attribute attribute,
+        Attribute attribute,
         MembershipId membershipId,
         TenantId orgTenantId,
         JsonElement claimElement,
@@ -185,7 +191,8 @@ public sealed class AttributeSyncService(
 
         // For SingleSelect: clear existing selection first, then assign the desired option.
         var existingAll = await assignmentRepository.GetByMembershipAttributeOptionAsync(
-            membershipId, attribute.Id, null, cancellationToken);
+            membershipId, attribute.Id, null, cancellationToken
+        );
         if (existingAll is not null && existingAll.AttributeOptionId != option.Id)
         {
             assignmentRepository.Remove(existingAll);
@@ -193,7 +200,8 @@ public sealed class AttributeSyncService(
         }
 
         var desired = await assignmentRepository.GetByMembershipAttributeOptionAsync(
-            membershipId, attribute.Id, option.Id, cancellationToken);
+            membershipId, attribute.Id, option.Id, cancellationToken
+        );
         if (desired is null)
         {
             var assignment = AttributeAssignment.Create(orgTenantId, membershipId, attribute.Id, option.Id, null, null);
@@ -207,7 +215,7 @@ public sealed class AttributeSyncService(
 
     private async Task ApplyGroupAsync(
         AttributeSyncRule rule,
-        Attributes.Domain.Attribute attribute,
+        Attribute attribute,
         MembershipId membershipId,
         TenantId orgTenantId,
         JsonElement claimElement,
@@ -230,7 +238,9 @@ public sealed class AttributeSyncService(
         {
             var option = ResolveOrCreateOption(rule, attribute, val, membershipId, orgTenantId);
             if (option is not null)
+            {
                 desiredOptionIds.Add(option.Id);
+            }
         }
 
         // Load all existing assignments for (membership, attribute).
@@ -259,12 +269,12 @@ public sealed class AttributeSyncService(
 
     private AttributeOption? ResolveOrCreateOption(
         AttributeSyncRule rule,
-        Attributes.Domain.Attribute attribute,
+        Attribute attribute,
         string value,
         MembershipId membershipId,
         TenantId orgTenantId)
     {
-        var slug = Attributes.Domain.Attribute.GenerateSlug(value);
+        var slug = Attribute.GenerateSlug(value);
         var existing = attribute.Options.FirstOrDefault(o => o.Slug == slug || string.Equals(o.Value, value, StringComparison.OrdinalIgnoreCase));
         if (existing is not null) return existing;
 
@@ -302,15 +312,16 @@ public sealed class AttributeSyncService(
         CancellationToken cancellationToken)
     {
         return auditLogEmitter.EmitAsync(new AuditLogEvent(
-            TenantId: orgTenantId,
-            ActorId: actorId,
-            ActorEmail: actorEmail,
-            Resource: AuditResource.Attribute.ToString(),
-            Action: action.ToString(),
-            ResourceId: resourceId,
-            IpAddress: ipAddress,
-            UserAgent: userAgent
-        ), cancellationToken);
+                orgTenantId,
+                actorId,
+                actorEmail,
+                nameof(AuditResource.Attribute),
+                action.ToString(),
+                resourceId,
+                IpAddress: ipAddress,
+                UserAgent: userAgent
+            ), cancellationToken
+        );
     }
 
     private static string? ExtractScalarString(JsonElement element)
@@ -330,7 +341,7 @@ public sealed class AttributeSyncService(
         if (element.ValueKind == JsonValueKind.Array)
         {
             return element.EnumerateArray()
-                .Select(e => ExtractScalarString(e))
+                .Select(ExtractScalarString)
                 .Where(v => v is not null)
                 .Select(v => v!)
                 .ToArray();

@@ -104,19 +104,10 @@ public sealed class Role : AggregateRoot<RoleId>
 
     /// <summary>
     ///     Creates a custom role scoped to the given <paramref name="tenantId" />.
-    ///     The tenant must be a <see cref="TenantKind.Team" /> or
-    ///     <see cref="TenantKind.Organization" /> — Solo tenants cannot own custom roles.
+    ///     Only <see cref="TenantKind.Team" /> parents cannot own child custom roles.
     /// </summary>
-    /// <exception cref="InvalidOperationException">
-    ///     Thrown when <paramref name="tenantKind" /> is <see cref="TenantKind.Solo" />.
-    /// </exception>
     public static Role CreateCustom(TenantId tenantId, TenantKind tenantKind, string name, string? description, IEnumerable<Permission>? initialPermissions = null)
     {
-        if (tenantKind == TenantKind.Solo)
-        {
-            throw new InvalidOperationException("Solo tenants cannot own custom roles. Only Team or Organization tenants may create custom roles.");
-        }
-
         ArgumentException.ThrowIfNullOrWhiteSpace(name);
         var role = new Role(RoleId.NewId(), tenantId, name, description);
         if (initialPermissions is not null)
@@ -188,7 +179,8 @@ public sealed class Role : AggregateRoot<RoleId>
         var target = newPermissions.Distinct().ToArray();
         // Remove any current permission that is not in the target set.
         _permissions.RemoveAll(existing =>
-            !target.Any(t => t.Resource == existing.Resource && t.Action == existing.Action));
+            !target.Any(t => t.Resource == existing.Resource && t.Action == existing.Action)
+        );
         // Add any target permission that is not already present.
         foreach (var p in target)
         {

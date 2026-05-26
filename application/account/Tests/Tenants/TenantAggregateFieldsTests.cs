@@ -194,7 +194,7 @@ public sealed class TenantAggregateFieldsTests(AccountWebApplicationFactory fact
 
         // Assert
         loaded.Should().NotBeNull();
-        loaded!.Slug.Should().Be("branding-org");
+        loaded.Slug.Should().Be("branding-org");
         loaded.Bio.Should().Be("We build things");
         loaded.HideBranding.Should().BeTrue();
         loaded.HideTeamProfileLink.Should().BeTrue();
@@ -218,7 +218,7 @@ public sealed class TenantAggregateFieldsTests(AccountWebApplicationFactory fact
         var tenant = await repository.GetByIdAsync(DatabaseSeeder.Tenant1.Id, CancellationToken.None);
 
         tenant.Should().NotBeNull();
-        tenant!.Kind.Should().Be(TenantKind.Solo);
+        tenant.Kind.Should().Be(TenantKind.Solo);
         tenant.Slug.Should().BeNull();
         tenant.Bio.Should().BeNull();
         tenant.HideBranding.Should().BeFalse();
@@ -251,7 +251,7 @@ public sealed class TenantAggregateFieldsTests(AccountWebApplicationFactory fact
 
         // Assert
         result.Should().NotBeNull();
-        result!.Id.Should().Be(org.Id);
+        result.Id.Should().Be(org.Id);
         result.Kind.Should().Be(TenantKind.Organization);
     }
 
@@ -285,7 +285,7 @@ public sealed class TenantAggregateFieldsTests(AccountWebApplicationFactory fact
 
         // Assert
         result.Should().NotBeNull();
-        result!.Id.Should().Be(team.Id);
+        result.Id.Should().Be(team.Id);
         result.Kind.Should().Be(TenantKind.Team);
     }
 

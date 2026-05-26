@@ -2,6 +2,7 @@ import { t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
 import { DropdownMenuContent, DropdownMenuSeparator } from "@repo/ui/components/DropdownMenu";
 import {
+  CalendarClockIcon,
   CheckIcon,
   CircleXIcon,
   FlagIcon,
@@ -52,6 +53,11 @@ export function BookingActionsMenuContent({
       icon: <SendIcon />,
       label: <Trans>Request reschedule</Trans>,
       onSelect: () => onSelectDialog("requestReschedule")
+    },
+    {
+      key: "reschedule",
+      icon: <CalendarClockIcon />,
+      label: <Trans>Reschedule booking</Trans>
     },
     {
       key: "editLocation",

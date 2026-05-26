@@ -10,7 +10,6 @@ using Account.Features.SsoGoogle.Infrastructure;
 using Account.Features.Users.Domain;
 using Account.Features.Users.Shared;
 using JetBrains.Annotations;
-using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
@@ -173,7 +172,8 @@ public sealed class CompleteGoogleSsoHandler(
             {
                 await publisher.Publish(
                     new SsoLoginCompletedEvent(membership.Id, stateCookie.OrgId, SyncSource.GoogleSso, tokenClaims),
-                    cancellationToken);
+                    cancellationToken
+                );
             }
             else
             {

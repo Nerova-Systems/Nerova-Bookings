@@ -221,7 +221,7 @@ public sealed class OrgProfileAggregateTests(AccountWebApplicationFactory factor
 
         // Assert
         loaded.Should().NotBeNull();
-        loaded!.UserId.Should().Be(DatabaseSeeder.Tenant1Owner.Id);
+        loaded.UserId.Should().Be(DatabaseSeeder.Tenant1Owner.Id);
         loaded.OrgTenantId.Should().Be(org.Id);
         loaded.Username.Should().Be("john-doe");
         loaded.Name.Should().Be("John Doe");
@@ -250,7 +250,7 @@ public sealed class OrgProfileAggregateTests(AccountWebApplicationFactory factor
 
         // Assert
         result.Should().NotBeNull();
-        result!.Id.Should().Be(profile.Id);
+        result.Id.Should().Be(profile.Id);
     }
 
     [Fact]

@@ -53,7 +53,8 @@ public sealed class AttributeAssignmentRepository(AccountDbContext context)
                 a => a.MembershipId == membershipId
                      && a.AttributeId == attributeId
                      && a.AttributeOptionId == optionId,
-                cancellationToken);
+                cancellationToken
+            );
     }
 
     public async Task<IReadOnlyList<AttributeAssignment>> GetByOrgAsync(

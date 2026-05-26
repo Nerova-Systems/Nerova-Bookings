@@ -2638,7 +2638,7 @@ msgstr "Role created: {0}"
 
 #. placeholder {0}: role.name
 msgid "Role deleted: {0}"
-msgstr "Delete team"
+msgstr "Role deleted: {0}"
 
 msgid "Role description"
 msgstr "Role description"

@@ -38,7 +38,7 @@ public sealed class DelegationCredentialResolverTests
         const string plainBlob = """{"type":"service_account"}""";
         var encryptedBlob = _encryption.Protect(plainBlob);
         var credential = BuildActiveCredential(WorkspacePlatform.Google, "acme.com", encryptedBlob);
-        _repository.GetByOrgAndPlatformAsync(OrgId, WorkspacePlatform.Google, default)
+        _repository.GetByOrgAndPlatformAsync(OrgId, WorkspacePlatform.Google, CancellationToken.None)
             .Returns(credential);
 
         // Act
@@ -46,7 +46,7 @@ public sealed class DelegationCredentialResolverTests
 
         // Assert
         result.Should().NotBeNull();
-        result!.Platform.Should().Be(WorkspacePlatform.Google);
+        result.Platform.Should().Be(WorkspacePlatform.Google);
         result.AccessTokenOrServiceAccountKey.Should().Be(plainBlob);
         result.MemberEmail.Should().Be("user@acme.com");
         result.Domain.Should().Be("acme.com");
@@ -61,7 +61,7 @@ public sealed class DelegationCredentialResolverTests
     {
         // Arrange — credential is for "acme.com" but email is "@other.com"
         var credential = BuildActiveCredential(WorkspacePlatform.Google, "acme.com", "enc");
-        _repository.GetByOrgAndPlatformAsync(OrgId, WorkspacePlatform.Google, default)
+        _repository.GetByOrgAndPlatformAsync(OrgId, WorkspacePlatform.Google, CancellationToken.None)
             .Returns(credential);
 
         // Act
@@ -78,7 +78,7 @@ public sealed class DelegationCredentialResolverTests
         const string plainBlob = "blob";
         var encryptedBlob = _encryption.Protect(plainBlob);
         var credential = BuildActiveCredential(WorkspacePlatform.Google, "acme.com", encryptedBlob);
-        _repository.GetByOrgAndPlatformAsync(OrgId, WorkspacePlatform.Google, default)
+        _repository.GetByOrgAndPlatformAsync(OrgId, WorkspacePlatform.Google, CancellationToken.None)
             .Returns(credential);
 
         // Act — email domain in upper case
@@ -98,7 +98,7 @@ public sealed class DelegationCredentialResolverTests
         // Arrange
         var credential = BuildActiveCredential(WorkspacePlatform.Google, "acme.com", "enc");
         credential.Disable();
-        _repository.GetByOrgAndPlatformAsync(OrgId, WorkspacePlatform.Google, default)
+        _repository.GetByOrgAndPlatformAsync(OrgId, WorkspacePlatform.Google, CancellationToken.None)
             .Returns(credential);
 
         // Act
@@ -116,7 +116,7 @@ public sealed class DelegationCredentialResolverTests
     public async Task ResolveAsync_WhenNoCredentialExists_ShouldReturnNull()
     {
         // Arrange
-        _repository.GetByOrgAndPlatformAsync(OrgId, WorkspacePlatform.Google, default)
+        _repository.GetByOrgAndPlatformAsync(OrgId, WorkspacePlatform.Google, CancellationToken.None)
             .Returns((DelegationCredential?)null);
 
         // Act
@@ -135,7 +135,7 @@ public sealed class DelegationCredentialResolverTests
     {
         // Arrange — even if a credential is configured, a malformed email should not resolve
         var credential = BuildActiveCredential(WorkspacePlatform.Google, "acme.com", "enc");
-        _repository.GetByOrgAndPlatformAsync(OrgId, WorkspacePlatform.Google, default)
+        _repository.GetByOrgAndPlatformAsync(OrgId, WorkspacePlatform.Google, CancellationToken.None)
             .Returns(credential);
 
         // Act

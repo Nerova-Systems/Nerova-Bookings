@@ -118,7 +118,7 @@ public sealed class ConfigureDelegationCredentialHandler(
                 orgId,
                 userId,
                 executionContext.UserInfo.Email ?? string.Empty,
-                AuditResource.DelegationCredential.ToString(),
+                nameof(AuditResource.DelegationCredential),
                 action.ToString(),
                 resourceId,
                 IpAddress: httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),

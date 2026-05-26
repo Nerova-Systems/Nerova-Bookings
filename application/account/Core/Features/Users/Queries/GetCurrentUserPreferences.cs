@@ -1,4 +1,3 @@
-using System.Text.Json.Serialization;
 using Account.Features.Users.Domain;
 using JetBrains.Annotations;
 using SharedKernel.Cqrs;
@@ -11,7 +10,8 @@ public sealed record GetCurrentUserPreferencesQuery : IRequest<Result<UserPrefer
 [PublicAPI]
 public sealed record UserPreferencesResponse(
     TimeFormat TimeFormat,
-    [property: JsonConverter(typeof(JsonStringEnumConverter<DayOfWeek>))] DayOfWeek WeekStart,
+    [property: JsonConverter(typeof(JsonStringEnumConverter<DayOfWeek>))]
+    DayOfWeek WeekStart,
     string Language,
     string TimeZone
 )

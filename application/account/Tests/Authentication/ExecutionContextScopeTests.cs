@@ -179,7 +179,7 @@ public sealed class ExecutionContextScopeTests(AccountWebApplicationFactory fact
     {
         // Arrange
         var orgId = InsertOrgTenant();
-        var userId = InsertUserForTenant(orgId, DatabaseSeeder.Tenant1Member.Email);
+        InsertUserForTenant(orgId, DatabaseSeeder.Tenant1Member.Email);
 
         // Act
         var response = await AuthenticatedMemberHttpClient.PostAsJsonAsync(
@@ -221,7 +221,7 @@ public sealed class ExecutionContextScopeTests(AccountWebApplicationFactory fact
         InsertUserForTenant(teamId, DatabaseSeeder.Tenant1Member.Email);
         // Also need user in the team's org so that GetParentOfAsync can find the org
         // (The handler switches to the *team* tenant's user, but OrgProfile lookup uses the org tenant)
-        var userInOrg = InsertUserForTenant(orgId, Faker.Internet.UniqueEmail());
+        InsertUserForTenant(orgId, Faker.Internet.UniqueEmail());
 
         // Act
         var response = await AuthenticatedMemberHttpClient.PostAsJsonAsync(

@@ -12,7 +12,7 @@ namespace Account.Tests.Smtp;
 /// <summary>
 ///     Database round-trip tests for <see cref="OrgSmtpConfigRepository" />.
 ///     <para>
-///         All operations use the base <see cref="Provider" /> (no HTTP context → execution-context
+///         All operations use the base <c>Provider</c> (no HTTP context → execution-context
 ///         TenantId is null).  <see cref="IOrgSmtpConfigRepository.GetByOrgIdAsync" /> explicitly calls
 ///         <c>IgnoreQueryFilters(Tenant)</c>, so no tenant-scoped provider is needed.
 ///     </para>
@@ -54,7 +54,7 @@ public sealed class OrgSmtpConfigRepositoryTests(AccountWebApplicationFactory fa
 
         // Assert
         loaded.Should().NotBeNull();
-        loaded!.Id.Should().Be(config.Id);
+        loaded.Id.Should().Be(config.Id);
         loaded.TenantId.Should().Be(orgTenant.Id);
         loaded.Host.Should().Be("smtp.acme.com");
         loaded.Port.Should().Be(587);
@@ -90,7 +90,7 @@ public sealed class OrgSmtpConfigRepositoryTests(AccountWebApplicationFactory fa
 
         // Assert
         result.Should().NotBeNull();
-        result!.Id.Should().Be(config.Id);
+        result.Id.Should().Be(config.Id);
         result.Host.Should().Be("smtp.org.com");
     }
 

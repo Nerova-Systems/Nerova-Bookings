@@ -1388,6 +1388,9 @@ msgstr "Require cancellation reason"
 msgid "Requires confirmation"
 msgstr "Requires confirmation"
 
+msgid "Reschedule booking"
+msgstr "Reschedule booking"
+
 msgid "Reschedule notice"
 msgstr "Reschedule notice"
 

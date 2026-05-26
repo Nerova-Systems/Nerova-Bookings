@@ -128,7 +128,7 @@ public sealed class PermissionsEndpointTests(AccountWebApplicationFactory factor
         response.ShouldBeSuccessfulGetRequest();
         var groups = await response.Content.ReadFromJsonAsync<List<PermissionGroupResponse>>();
         groups.Should().NotBeNullOrEmpty();
-        groups!.SelectMany(g => g.Permissions).Should().HaveCount(Permission.All.Count);
+        groups.SelectMany(g => g.Permissions).Should().HaveCount(Permission.All.Count);
     }
 
     // ──────────────────────────────────────────────────────────────────────────
@@ -147,7 +147,7 @@ public sealed class PermissionsEndpointTests(AccountWebApplicationFactory factor
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var body = await response.Content.ReadFromJsonAsync<RoleResponse>();
         body.Should().NotBeNull();
-        body!.Name.Should().Be("Project Manager");
+        body.Name.Should().Be("Project Manager");
         body.IsSystem.Should().BeFalse();
         body.MemberCount.Should().Be(0);
         body.Permissions.Should().HaveCount(1);
@@ -207,14 +207,14 @@ public sealed class PermissionsEndpointTests(AccountWebApplicationFactory factor
         InsertMembership(DatabaseSeeder.Tenant1Owner.Id, orgId, MembershipRole.Owner);
         SetActorToken(DatabaseSeeder.Tenant1Owner.Id, DatabaseSeeder.Tenant1.Id, orgId);
 
-        var createResp = await AnonymousHttpClient.PostAsJsonAsync(RolesUrl, ValidCreatePayload("Custom Role"));
+        var createResp = await AnonymousHttpClient.PostAsJsonAsync(RolesUrl, ValidCreatePayload());
         var created = await createResp.Content.ReadFromJsonAsync<RoleResponse>();
 
         var listResp = await AnonymousHttpClient.GetAsync(RolesUrl);
         var list = await listResp.Content.ReadFromJsonAsync<List<RoleResponse>>();
 
         list.Should().NotBeNull();
-        list!.Should().Contain(r => r.Id == created!.Id && r.Name == "Custom Role" && !r.IsSystem);
+        list.Should().Contain(r => r.Id == created!.Id && r.Name == "Custom Role" && !r.IsSystem);
         list.Should().Contain(r => r.IsSystem); // system roles included
     }
 
@@ -437,12 +437,12 @@ public sealed class PermissionsEndpointTests(AccountWebApplicationFactory factor
                 ("role", role.ToString()),
                 ("accepted", true),
                 ("accepted_at", now),
-                ("invited_by", (object?)null),
-                ("invite_token", (object?)null),
+                ("invited_by", null),
+                ("invite_token", null),
                 ("disable_impersonation", false),
-                ("custom_role_id", (object?)null),
+                ("custom_role_id", null),
                 ("created_at", now),
-                ("modified_at", (object?)null)
+                ("modified_at", null)
             ]
         );
         return id;
@@ -480,12 +480,12 @@ public sealed class PermissionsEndpointTests(AccountWebApplicationFactory factor
                 ("role", role.ToString()),
                 ("accepted", true),
                 ("accepted_at", now),
-                ("invited_by", (object?)null),
-                ("invite_token", (object?)null),
+                ("invited_by", null),
+                ("invite_token", null),
                 ("disable_impersonation", false),
-                ("custom_role_id", (object?)null),
+                ("custom_role_id", null),
                 ("created_at", now),
-                ("modified_at", (object?)null)
+                ("modified_at", null)
             ]
         );
     }
@@ -532,6 +532,8 @@ public sealed class PermissionsEndpointTests(AccountWebApplicationFactory factor
         return orgId;
     }
 
-    private static object ValidCreatePayload(string name = "Custom Role") =>
-        new { Name = name, Description = (string?)null, Permissions = new[] { "member.read" } };
+    private static object ValidCreatePayload(string name = "Custom Role")
+    {
+        return new { Name = name, Description = (string?)null, Permissions = new[] { "member.read" } };
+    }
 }

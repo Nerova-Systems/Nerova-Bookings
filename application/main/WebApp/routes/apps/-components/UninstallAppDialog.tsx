@@ -50,8 +50,8 @@ export function UninstallAppDialog({
           </AlertDialogTitle>
           <AlertDialogDescription>
             <Trans>
-              Your stored connection will be removed. Existing bookings keep their location and calendar
-              destination, but new bookings will no longer use this app.
+              Your stored connection will be removed. Existing bookings keep their location and calendar destination,
+              but new bookings will no longer use this app.
             </Trans>
           </AlertDialogDescription>
         </AlertDialogHeader>

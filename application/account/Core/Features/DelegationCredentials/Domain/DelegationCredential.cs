@@ -86,7 +86,7 @@ public sealed class DelegationCredential : AggregateRoot<DelegationCredentialId>
 
     public UserId CreatedByUserId { get; private set; } = null!;
 
-    public TenantId TenantId { get; private set; } = null!;
+    public TenantId TenantId { get; private init; } = null!;
 
     // ─── Factory ──────────────────────────────────────────────────────────────
 
