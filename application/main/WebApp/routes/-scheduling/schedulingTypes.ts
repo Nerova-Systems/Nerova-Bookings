@@ -212,11 +212,11 @@ export function getEventTypeSettings(payload: EventTypePayload): EventTypeSettin
       agentConfig: settings?.aiVoiceAgent?.agentConfig ?? null
     },
     teamAssignment: {
-      assignRRMembersUsingSegment: settings?.teamAssignment?.assignRRMembersUsingSegment ?? false,
+      assignRrMembersUsingSegment: settings?.teamAssignment?.assignRrMembersUsingSegment ?? false,
       rrSegmentQueryValue: settings?.teamAssignment?.rrSegmentQueryValue ?? null,
-      isRRWeightsEnabled: settings?.teamAssignment?.isRRWeightsEnabled ?? false,
+      isRrWeightsEnabled: settings?.teamAssignment?.isRrWeightsEnabled ?? false,
       maxLeadThreshold: settings?.teamAssignment?.maxLeadThreshold ?? null,
-      includeNoShowInRRCalculation: settings?.teamAssignment?.includeNoShowInRRCalculation ?? false,
+      includeNoShowInRrCalculation: settings?.teamAssignment?.includeNoShowInRrCalculation ?? false,
       rescheduleWithSameRoundRobinHost: settings?.teamAssignment?.rescheduleWithSameRoundRobinHost ?? false,
       rrHostSubsetEnabled: settings?.teamAssignment?.rrHostSubsetEnabled ?? false,
       hostGroups: settings?.teamAssignment?.hostGroups ?? []

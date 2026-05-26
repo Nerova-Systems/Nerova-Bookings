@@ -19,7 +19,7 @@ namespace Account.Features.AttributeSync.Commands.UpdateAttributeSyncRule;
 public sealed record UpdateAttributeSyncRuleCommand : ICommand, IRequest<Result<AttributeSyncRuleResponse>>
 {
     [JsonIgnore] // Removes this property from the API contract
-    public required AttributeSyncRuleId RuleId { get; init; }
+    public AttributeSyncRuleId RuleId { get; init; } = null!;
 
     public required AttributeId AttributeId { get; init; }
 

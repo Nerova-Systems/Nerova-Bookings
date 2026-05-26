@@ -16,7 +16,8 @@ namespace Account.Features.Permissions.Commands.DeleteRole;
 [RequirePermission(PermissionResource.Role, PermissionAction.Delete)]
 public sealed record DeleteRoleCommand : ICommand, IRequest<Result>
 {
-    public required RoleId RoleId { get; init; }
+    [JsonIgnore] // Removes this property from the API contract
+    public RoleId RoleId { get; init; } = null!;
 }
 
 public sealed class DeleteRoleHandler(

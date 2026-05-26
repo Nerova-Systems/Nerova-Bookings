@@ -17,7 +17,7 @@ namespace Account.Features.AttributeSync.Commands.DeleteAttributeSyncRule;
 public sealed record DeleteAttributeSyncRuleCommand : ICommand, IRequest<Result>
 {
     [JsonIgnore] // Removes this property from the API contract
-    public required AttributeSyncRuleId RuleId { get; init; }
+    public AttributeSyncRuleId RuleId { get; init; } = null!;
 }
 
 public sealed class DeleteAttributeSyncRuleHandler(

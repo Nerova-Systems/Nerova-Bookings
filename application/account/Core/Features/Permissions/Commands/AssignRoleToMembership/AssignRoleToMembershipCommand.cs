@@ -16,7 +16,8 @@ namespace Account.Features.Permissions.Commands.AssignRoleToMembership;
 [RequirePermission(PermissionResource.Member, PermissionAction.Update)]
 public sealed record AssignRoleToMembershipCommand : ICommand, IRequest<Result>
 {
-    public required MembershipId MembershipId { get; init; }
+    [JsonIgnore] // Removes this property from the API contract
+    public MembershipId MembershipId { get; init; } = null!;
 
     /// <summary>
     ///     The custom role to assign. When <see langword="null" />, the membership's custom role

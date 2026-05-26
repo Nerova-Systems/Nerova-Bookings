@@ -17,7 +17,8 @@ namespace Account.Features.Permissions.Commands.UpdateRole;
 [RequirePermission(PermissionResource.Role, PermissionAction.Update)]
 public sealed record UpdateRoleCommand : ICommand, IRequest<Result<RoleResponse>>
 {
-    public required RoleId RoleId { get; init; }
+    [JsonIgnore] // Removes this property from the API contract
+    public RoleId RoleId { get; init; } = null!;
 
     public required string Name { get; init; }
 

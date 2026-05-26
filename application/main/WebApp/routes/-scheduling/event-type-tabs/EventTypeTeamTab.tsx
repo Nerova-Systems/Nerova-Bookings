@@ -8,9 +8,10 @@ import { TextField } from "@repo/ui/components/TextField";
 import type { EventTypeTabProps } from "./EventTypeTabTypes";
 
 import { getEventTypeSettings, updateEventTypeSettingsSection } from "../schedulingTypes";
-import { DisabledFeatureRow, EventTypeTabSection } from "./EventTypeTabSection";
+import { EventTypeHostPicker } from "./EventTypeHostPicker";
+import { EventTypeTabSection } from "./EventTypeTabSection";
 
-export function EventTypeTeamTab({ value, onChange, error }: EventTypeTabProps) {
+export function EventTypeTeamTab({ eventTypeId, value, onChange, error }: EventTypeTabProps) {
   const settings = getEventTypeSettings(value);
   const teamAssignment = settings.teamAssignment;
   const updateTeamAssignment = (partial: Partial<typeof teamAssignment>) => {
@@ -31,16 +32,16 @@ export function EventTypeTeamTab({ value, onChange, error }: EventTypeTabProps) 
         >
           <div className="grid gap-4 md:grid-cols-2">
             <SwitchField
-              name="isRRWeightsEnabled"
+              name="isRrWeightsEnabled"
               label={t`Use weights`}
-              checked={teamAssignment.isRRWeightsEnabled}
-              onCheckedChange={(isRRWeightsEnabled) => updateTeamAssignment({ isRRWeightsEnabled })}
+              checked={teamAssignment.isRrWeightsEnabled}
+              onCheckedChange={(isRrWeightsEnabled) => updateTeamAssignment({ isRrWeightsEnabled })}
             />
             <SwitchField
-              name="includeNoShowInRRCalculation"
+              name="includeNoShowInRrCalculation"
               label={t`Count no-shows`}
-              checked={teamAssignment.includeNoShowInRRCalculation}
-              onCheckedChange={(includeNoShowInRRCalculation) => updateTeamAssignment({ includeNoShowInRRCalculation })}
+              checked={teamAssignment.includeNoShowInRrCalculation}
+              onCheckedChange={(includeNoShowInRrCalculation) => updateTeamAssignment({ includeNoShowInRrCalculation })}
             />
             <SwitchField
               name="rescheduleWithSameRoundRobinHost"
@@ -67,15 +68,15 @@ export function EventTypeTeamTab({ value, onChange, error }: EventTypeTabProps) 
         >
           <div className="grid gap-4">
             <SwitchField
-              name="assignRRMembersUsingSegment"
+              name="assignRrMembersUsingSegment"
               label={t`Use segment query`}
-              checked={teamAssignment.assignRRMembersUsingSegment}
-              onCheckedChange={(assignRRMembersUsingSegment) => updateTeamAssignment({ assignRRMembersUsingSegment })}
+              checked={teamAssignment.assignRrMembersUsingSegment}
+              onCheckedChange={(assignRrMembersUsingSegment) => updateTeamAssignment({ assignRrMembersUsingSegment })}
             />
             <TextField
               name="rrSegmentQueryValue"
               label={t`Segment query`}
-              disabled={!teamAssignment.assignRRMembersUsingSegment}
+              disabled={!teamAssignment.assignRrMembersUsingSegment}
               value={teamAssignment.rrSegmentQueryValue ?? ""}
               onChange={(rrSegmentQueryValue) =>
                 updateTeamAssignment({ rrSegmentQueryValue: rrSegmentQueryValue || null })
@@ -93,10 +94,10 @@ export function EventTypeTeamTab({ value, onChange, error }: EventTypeTabProps) 
           title={<Trans>Hosts</Trans>}
           description={<Trans>Add, remove, and weight individual hosts and host groups.</Trans>}
         >
-          {/* TODO: Wave 4.5 - host picker bound to /api/event-types/{id}/team-assignment with full HostGroup management. */}
-          <DisabledFeatureRow
-            title={<Trans>Host picker</Trans>}
-            description={<Trans>Host group editing is not yet wired up. Use the team admin UI to manage hosts.</Trans>}
+          <EventTypeHostPicker
+            eventTypeId={eventTypeId}
+            hostGroups={teamAssignment.hostGroups}
+            onChange={(hostGroups) => updateTeamAssignment({ hostGroups })}
           />
         </EventTypeTabSection>
       </div>

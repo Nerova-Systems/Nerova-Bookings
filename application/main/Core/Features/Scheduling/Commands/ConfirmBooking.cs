@@ -3,6 +3,7 @@ using Main.Features.Permissions.Domain;
 using Main.Features.Permissions.Pipeline;
 using Main.Features.Scheduling.Domain;
 using Main.Features.Scheduling.Notifications;
+using Main.Features.Webhooks.Domain;
 using SharedKernel.Cqrs;
 using SharedKernel.ExecutionContext;
 
@@ -17,6 +18,7 @@ public sealed class ConfirmBookingHandler(
     IBookingHistoryEntryRepository bookingHistoryEntryRepository,
     IExecutionContext executionContext,
     TimeProvider timeProvider,
+    IBookingWebhookNotifier webhookNotifier,
     IBookingNotificationDispatcher bookingNotificationDispatcher
 ) : IRequestHandler<ConfirmBookingCommand, Result>
 {
@@ -51,6 +53,18 @@ public sealed class ConfirmBookingHandler(
             ownerUserId
         );
         await bookingHistoryEntryRepository.AddAsync(entry, cancellationToken);
+
+        // Host accepted a pending booking — mirrors cal.com which fires BOOKING_CREATED on host
+        // confirmation since the booking only becomes "real" at this point. Best-effort: failures
+        // are logged inside the notifier, never bubble up.
+        await webhookNotifier.NotifyAsync(
+            WebhookEventType.BookingCreated,
+            item.Booking,
+            item.EventType,
+            null,
+            null,
+            cancellationToken
+        );
 
         // Confirmed booking transitions Pending → Accepted. Send the host-confirmed email to let the
         // booker know their slot has been accepted. Mirrors cal.com's host-confirmed notification.

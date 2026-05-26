@@ -14,7 +14,8 @@ namespace Account.Features.Permissions.Queries.GetRoleById;
 [RequirePermission(PermissionResource.Role, PermissionAction.Read)]
 public sealed record GetRoleByIdQuery : IRequest<Result<RoleResponse>>
 {
-    public required RoleId RoleId { get; init; }
+    [JsonIgnore] // Removes this property from the API contract
+    public RoleId RoleId { get; init; } = null!;
 }
 
 public sealed class GetRoleByIdHandler(

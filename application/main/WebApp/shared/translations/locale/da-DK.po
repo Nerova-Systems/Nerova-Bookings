@@ -187,6 +187,9 @@ msgstr "Tilgængelighed"
 msgid "Availability troubleshoot"
 msgstr "Fejlfinding af tilgængelighed"
 
+msgid "Available hosts"
+msgstr "Tilgængelige værter"
+
 msgid "Available times"
 msgstr "Tilgængelige tider"
 
@@ -810,14 +813,8 @@ msgstr "Skjul kalendernoter"
 msgid "History"
 msgstr "Historik"
 
-msgid "Host group editing is not yet wired up. Use the team admin UI to manage hosts."
-msgstr "Redigering af værtsgrupper er endnu ikke tilkoblet. Brug teamadministrationen til at administrere værter."
-
 msgid "Host no-show"
 msgstr "Vært udeblev"
-
-msgid "Host picker"
-msgstr "Værtsvælger"
 
 msgid "Host segmentation"
 msgstr "Værtssegmentering"
@@ -927,6 +924,9 @@ msgstr "Indlæser begivenhedstype..."
 
 msgid "Loading event types..."
 msgstr "Indlæser aftaletyper..."
+
+msgid "Loading hosts…"
+msgstr "Indlæser værter…"
 
 msgid "Loading private links…"
 msgstr "Indlæser private links…"
@@ -1135,6 +1135,12 @@ msgstr "Ingen filtre"
 msgid "No history entries yet."
 msgstr "Ingen historik endnu."
 
+msgid "No hosts available to assign."
+msgstr "Ingen tilgængelige værter at tildele."
+
+msgid "No hosts selected. Pick team members below to assign them to this event type."
+msgstr "Ingen værter valgt. Vælg teammedlemmer nedenfor for at tildele dem til denne begivenhedstype."
+
 msgid "No internal notes yet."
 msgstr "Ingen interne noter endnu."
 
@@ -1152,6 +1158,9 @@ msgstr "Ingen specifik plan"
 
 msgid "No steps yet"
 msgstr "Endnu ingen trin"
+
+msgid "No team members match your search."
+msgstr "Ingen teammedlemmer matcher din søgning."
 
 msgid "No times available on this date."
 msgstr "Ingen tider er tilgængelige på denne dato."
@@ -1364,6 +1373,10 @@ msgstr "Fjern datoundtagelse"
 msgid "Remove guest"
 msgstr "Fjern gæst"
 
+#. placeholder {0}: chip.displayName
+msgid "Remove host {0}"
+msgstr "Fjern vært {0}"
+
 msgid "Remove link"
 msgstr "Fjern link"
 
@@ -1490,8 +1503,14 @@ msgstr "Søg"
 msgid "Search bookings"
 msgstr "Søg i bookinger"
 
+msgid "Search by name or email"
+msgstr "Søg efter navn eller e-mail"
+
 msgid "Search event types"
 msgstr "Søg i begivenhedstyper"
+
+msgid "Search team members"
+msgstr "Søg i teammedlemmer"
 
 msgid "Seat capacity"
 msgstr "Seat capacity"
@@ -1534,6 +1553,9 @@ msgstr "Vælg tidsplan"
 
 msgid "Select week"
 msgstr "Vælg uge"
+
+msgid "Selected hosts"
+msgstr "Valgte værter"
 
 msgid "Send a signed HTTP POST to your endpoint when the selected events occur."
 msgstr "Send en signeret HTTP POST til dit endpoint, når de valgte hændelser indtræffer."

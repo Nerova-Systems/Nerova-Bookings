@@ -187,6 +187,9 @@ msgstr "Availability"
 msgid "Availability troubleshoot"
 msgstr "Availability troubleshoot"
 
+msgid "Available hosts"
+msgstr "Available hosts"
+
 msgid "Available times"
 msgstr "Available times"
 
@@ -810,14 +813,8 @@ msgstr "Hide calendar notes"
 msgid "History"
 msgstr "History"
 
-msgid "Host group editing is not yet wired up. Use the team admin UI to manage hosts."
-msgstr "Host group editing is not yet wired up. Use the team admin UI to manage hosts."
-
 msgid "Host no-show"
 msgstr "Host no-show"
-
-msgid "Host picker"
-msgstr "Host picker"
 
 msgid "Host segmentation"
 msgstr "Host segmentation"
@@ -927,6 +924,9 @@ msgstr "Loading event type..."
 
 msgid "Loading event types..."
 msgstr "Loading event types..."
+
+msgid "Loading hosts…"
+msgstr "Loading hosts…"
 
 msgid "Loading private links…"
 msgstr "Loading private links…"
@@ -1135,6 +1135,12 @@ msgstr "No filters"
 msgid "No history entries yet."
 msgstr "No history entries yet."
 
+msgid "No hosts available to assign."
+msgstr "No hosts available to assign."
+
+msgid "No hosts selected. Pick team members below to assign them to this event type."
+msgstr "No hosts selected. Pick team members below to assign them to this event type."
+
 msgid "No internal notes yet."
 msgstr "No internal notes yet."
 
@@ -1152,6 +1158,9 @@ msgstr "No specific schedule"
 
 msgid "No steps yet"
 msgstr "No steps yet"
+
+msgid "No team members match your search."
+msgstr "No team members match your search."
 
 msgid "No times available on this date."
 msgstr "No times available on this date."
@@ -1364,6 +1373,10 @@ msgstr "Remove date override"
 msgid "Remove guest"
 msgstr "Remove guest"
 
+#. placeholder {0}: chip.displayName
+msgid "Remove host {0}"
+msgstr "Remove host {0}"
+
 msgid "Remove link"
 msgstr "Remove link"
 
@@ -1490,8 +1503,14 @@ msgstr "Search"
 msgid "Search bookings"
 msgstr "Search bookings"
 
+msgid "Search by name or email"
+msgstr "Search by name or email"
+
 msgid "Search event types"
 msgstr "Search event types"
+
+msgid "Search team members"
+msgstr "Search team members"
 
 msgid "Seat capacity"
 msgstr "Seat capacity"
@@ -1534,6 +1553,9 @@ msgstr "Select schedule"
 
 msgid "Select week"
 msgstr "Select week"
+
+msgid "Selected hosts"
+msgstr "Selected hosts"
 
 msgid "Send a signed HTTP POST to your endpoint when the selected events occur."
 msgstr "Send a signed HTTP POST to your endpoint when the selected events occur."

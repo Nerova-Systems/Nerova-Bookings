@@ -60,7 +60,7 @@ export function TeamMembersTab({ teamId, canManage }: Readonly<TeamMembersTabPro
     await assignRoleMutation.mutateAsync(
       {
         params: { path: { id: member.membershipId } },
-        body: { membershipId: member.membershipId, roleId }
+        body: { roleId }
       },
       {
         onSuccess: async () => {
