@@ -30,7 +30,8 @@ public sealed class BookingConfiguration : IEntityTypeConfiguration<Booking>
         builder.Property(booking => booking.CancelledByUserUid).HasMaxLength(64);
         builder.Property(booking => booking.RescheduledByUserUid).HasMaxLength(64);
         builder.Property(booking => booking.SmsReminderNumber).HasMaxLength(40);
-        builder.Property(booking => booking.ICalUid).HasMaxLength(255);
+        builder.Property(booking => booking.CalUid).HasMaxLength(255).HasColumnName("i_cal_uid");
+        builder.Property(booking => booking.CalSequence).HasColumnName("i_cal_sequence");
         builder.Property(booking => booking.RatingFeedback).HasMaxLength(2000);
         builder.Property(booking => booking.OneTimePassword).HasMaxLength(64);
         builder.Property(booking => booking.CustomInputsJson).HasColumnType("jsonb");
@@ -47,6 +48,6 @@ public sealed class BookingConfiguration : IEntityTypeConfiguration<Booking>
         builder.HasIndex(booking => new { booking.TenantId, booking.OwnerUserId, booking.StartTime, booking.EndTime });
         builder.HasIndex(booking => new { booking.TenantId, booking.EventTypeId, booking.StartTime, booking.EndTime });
         builder.HasIndex(booking => booking.TeamId);
-        builder.HasIndex(booking => new { booking.TenantId, booking.ICalUid }).IsUnique();
+        builder.HasIndex(booking => new { booking.TenantId, booking.CalUid }).IsUnique().HasDatabaseName("ix_bookings_tenant_id_i_cal_uid");
     }
 }

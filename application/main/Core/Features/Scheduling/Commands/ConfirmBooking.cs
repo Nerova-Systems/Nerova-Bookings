@@ -1,9 +1,8 @@
-using System.Text.Json;
-using FluentValidation;
 using JetBrains.Annotations;
 using Main.Features.Permissions.Domain;
 using Main.Features.Permissions.Pipeline;
 using Main.Features.Scheduling.Domain;
+using Main.Features.Scheduling.Notifications;
 using SharedKernel.Cqrs;
 using SharedKernel.ExecutionContext;
 
@@ -17,7 +16,8 @@ public sealed class ConfirmBookingHandler(
     IBookingRepository bookingRepository,
     IBookingHistoryEntryRepository bookingHistoryEntryRepository,
     IExecutionContext executionContext,
-    TimeProvider timeProvider
+    TimeProvider timeProvider,
+    IBookingNotificationDispatcher bookingNotificationDispatcher
 ) : IRequestHandler<ConfirmBookingCommand, Result>
 {
     public async Task<Result> Handle(ConfirmBookingCommand command, CancellationToken cancellationToken)
@@ -51,6 +51,10 @@ public sealed class ConfirmBookingHandler(
             ownerUserId
         );
         await bookingHistoryEntryRepository.AddAsync(entry, cancellationToken);
+
+        // Confirmed booking transitions Pending → Accepted. Send the host-confirmed email to let the
+        // booker know their slot has been accepted. Mirrors cal.com's host-confirmed notification.
+        await bookingNotificationDispatcher.DispatchAsync(item.Booking, item.EventType, BookingNotificationKind.Created, cancellationToken);
 
         return Result.Success();
     }

@@ -24,6 +24,6 @@ public sealed record GoogleCredentialBlob(
     public static GoogleCredentialBlob FromJson(string json)
     {
         return JsonSerializer.Deserialize<GoogleCredentialBlob>(json, JsonOptions)
-            ?? throw new InvalidOperationException("Google credential blob deserialized to null.");
+               ?? throw new InvalidOperationException("Google credential blob deserialized to null.");
     }
 }

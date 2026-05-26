@@ -1,8 +1,8 @@
 using JetBrains.Annotations;
-using Main.Features.Permissions.Domain;
-using Main.Features.Permissions.Pipeline;
 using Main.Features.EventTypes.Domain;
 using Main.Features.EventTypes.Shared;
+using Main.Features.Permissions.Domain;
+using Main.Features.Permissions.Pipeline;
 using SharedKernel.Cqrs;
 using SharedKernel.ExecutionContext;
 

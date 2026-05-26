@@ -7,19 +7,18 @@ using Main.Features.Apps.Connectors.Zoom;
 using Main.Features.Apps.Domain;
 using Main.Features.Apps.Infrastructure;
 using Main.Features.EventTypes.Domain;
-using Main.Features.Scheduling.Domain;
 using Main.Features.Insights.Shared;
 using Main.Features.ManagedEventTypes.EventHandlers;
 using Main.Features.ManagedEventTypes.Services;
 using Main.Features.Permissions.Pipeline;
 using Main.Features.Permissions.Services;
+using Main.Features.Scheduling.Domain;
 using Main.Features.Scheduling.Notifications;
 using Main.Features.Scheduling.Shared;
 using Main.Features.TeamMembers.Domain;
 using Main.Features.TeamMembers.Infrastructure;
 using Main.Features.Webhooks.Infrastructure;
 using Main.Features.Webhooks.Jobs;
-using Main.Features.Workflows.Domain;
 using Main.Features.Workflows.EventHandlers;
 using Main.Features.Workflows.Infrastructure;
 using Main.Features.Workflows.Jobs;
@@ -30,6 +29,7 @@ using Microsoft.Extensions.Hosting;
 using SharedKernel.Configuration;
 using SharedKernel.Emails;
 using TickerQ.DependencyInjection;
+using TickerQ.EntityFrameworkCore.Customizer;
 using TickerQ.EntityFrameworkCore.DependencyInjection;
 
 namespace Main;
@@ -100,10 +100,11 @@ public static class Configuration
                 // built on demand by the factory (scoped) so token refresh persistence flows
                 // through the request-scoped ICredentialRepository.
                 .Configure<GoogleCalendarOptions>(opts =>
-                {
-                    opts.ClientId = Environment.GetEnvironmentVariable("GOOGLE_CALENDAR_CLIENT_ID") ?? string.Empty;
-                    opts.ClientSecret = Environment.GetEnvironmentVariable("GOOGLE_CALENDAR_CLIENT_SECRET") ?? string.Empty;
-                })
+                    {
+                        opts.ClientId = Environment.GetEnvironmentVariable("GOOGLE_CALENDAR_CLIENT_ID") ?? string.Empty;
+                        opts.ClientSecret = Environment.GetEnvironmentVariable("GOOGLE_CALENDAR_CLIENT_SECRET") ?? string.Empty;
+                    }
+                )
                 .AddSingleton<IAppInstaller, GoogleCalendarInstaller>()
                 .AddScoped<GoogleCalendarServiceFactory>()
                 .AddScoped<IExternalBusyTimeProvider, GoogleCalendarBusyTimeProvider>()
@@ -112,12 +113,13 @@ public static class Configuration
                 // per-request state), scoped service factory + busy-time provider so the
                 // refresh-token persistence flows through the request-scoped repository.
                 .Configure<Office365CalendarOptions>(opts =>
-                {
-                    opts.ClientId = Environment.GetEnvironmentVariable("OFFICE365_CALENDAR_CLIENT_ID") ?? string.Empty;
-                    opts.ClientSecret = Environment.GetEnvironmentVariable("OFFICE365_CALENDAR_CLIENT_SECRET") ?? string.Empty;
-                    var tenantId = Environment.GetEnvironmentVariable("OFFICE365_CALENDAR_TENANT_ID");
-                    if (!string.IsNullOrWhiteSpace(tenantId)) opts.TenantId = tenantId;
-                })
+                    {
+                        opts.ClientId = Environment.GetEnvironmentVariable("OFFICE365_CALENDAR_CLIENT_ID") ?? string.Empty;
+                        opts.ClientSecret = Environment.GetEnvironmentVariable("OFFICE365_CALENDAR_CLIENT_SECRET") ?? string.Empty;
+                        var tenantId = Environment.GetEnvironmentVariable("OFFICE365_CALENDAR_TENANT_ID");
+                        if (!string.IsNullOrWhiteSpace(tenantId)) opts.TenantId = tenantId;
+                    }
+                )
                 .AddSingleton<IAppInstaller, Office365CalendarInstaller>()
                 .AddScoped<Office365CalendarServiceFactory>()
                 .AddScoped<IExternalBusyTimeProvider, Office365CalendarBusyTimeProvider>()
@@ -128,10 +130,11 @@ public static class Configuration
                 // scoped factory + provider so the per-credential service flows through the
                 // request-scoped ICredentialRepository when persisting refreshed tokens.
                 .Configure<ZoomOptions>(opts =>
-                {
-                    opts.ClientId = Environment.GetEnvironmentVariable("ZOOM_CLIENT_ID") ?? string.Empty;
-                    opts.ClientSecret = Environment.GetEnvironmentVariable("ZOOM_CLIENT_SECRET") ?? string.Empty;
-                })
+                    {
+                        opts.ClientId = Environment.GetEnvironmentVariable("ZOOM_CLIENT_ID") ?? string.Empty;
+                        opts.ClientSecret = Environment.GetEnvironmentVariable("ZOOM_CLIENT_SECRET") ?? string.Empty;
+                    }
+                )
                 .AddSingleton<IAppInstaller, ZoomInstaller>()
                 .AddScoped<ZoomServiceFactory>()
                 .AddScoped<IConferenceLinkProvider, ZoomConferenceLinkProvider>()
@@ -188,16 +191,18 @@ public static class Configuration
                 // from the factory on each call). When env vars are missing the providers short-circuit
                 // with NotConfigured so the worker keeps ticking in dev / unconfigured environments.
                 .Configure<TwilioOptions>(opts =>
-                {
-                    opts.AccountSid = Environment.GetEnvironmentVariable("TWILIO_ACCOUNT_SID") ?? string.Empty;
-                    opts.AuthToken = Environment.GetEnvironmentVariable("TWILIO_AUTH_TOKEN") ?? string.Empty;
-                    opts.FromNumber = Environment.GetEnvironmentVariable("TWILIO_FROM_NUMBER") ?? string.Empty;
-                })
+                    {
+                        opts.AccountSid = Environment.GetEnvironmentVariable("TWILIO_ACCOUNT_SID") ?? string.Empty;
+                        opts.AuthToken = Environment.GetEnvironmentVariable("TWILIO_AUTH_TOKEN") ?? string.Empty;
+                        opts.FromNumber = Environment.GetEnvironmentVariable("TWILIO_FROM_NUMBER") ?? string.Empty;
+                    }
+                )
                 .Configure<MetaWhatsAppOptions>(opts =>
-                {
-                    opts.PhoneNumberId = Environment.GetEnvironmentVariable("META_WABA_PHONE_NUMBER_ID") ?? string.Empty;
-                    opts.AccessToken = Environment.GetEnvironmentVariable("META_WABA_ACCESS_TOKEN") ?? string.Empty;
-                })
+                    {
+                        opts.PhoneNumberId = Environment.GetEnvironmentVariable("META_WABA_PHONE_NUMBER_ID") ?? string.Empty;
+                        opts.AccessToken = Environment.GetEnvironmentVariable("META_WABA_ACCESS_TOKEN") ?? string.Empty;
+                    }
+                )
                 .AddSingleton<ISmsProvider, TwilioSmsProvider>()
                 .AddSingleton<IWhatsAppProvider, MetaWhatsAppProvider>()
                 // Cross-SCS host lookup (account-database). Scoped because it opens an Npgsql
@@ -208,11 +213,12 @@ public static class Configuration
 
             // TickerQ with EF Core persistence (tables added to MainDbContext via model customizer)
             services.AddTickerQ(opt =>
-            {
-                opt.AddOperationalStore(ef =>
-                ef.UseApplicationDbContext<MainDbContext>(TickerQ.EntityFrameworkCore.Customizer.ConfigurationType.UseModelCustomizer)
-                );
-            });
+                {
+                    opt.AddOperationalStore(ef =>
+                        ef.UseApplicationDbContext<MainDbContext>(ConfigurationType.UseModelCustomizer)
+                    );
+                }
+            );
 
             // Register cron jobs — run every 60 seconds
             services.MapTicker<WorkflowSchedulerJob>()

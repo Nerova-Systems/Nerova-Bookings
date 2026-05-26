@@ -42,17 +42,17 @@ public sealed class RoundRobinSlotCalculatorTests
             "Round Robin Meeting",
             "rr-meeting",
             null,
-            durationMinutes: 30,
-            hidden: false,
+            30,
+            false,
             WorkWeekSchedule.Id,
-            beforeEventBufferMinutes: 0,
-            afterEventBufferMinutes: 0,
-            slotIntervalMinutes: 30,
-            minimumBookingNoticeMinutes: 0,
+            0,
+            0,
+            30,
+            0,
             null,
             null,
             null,
-            teamId: new TenantId(99)
+            new TenantId(99)
         );
         _eventType.SetSchedulingType(SchedulingType.RoundRobin);
     }
@@ -63,7 +63,7 @@ public sealed class RoundRobinSlotCalculatorTests
     public void GetSlots_WhenNoHosts_ShouldReturnAllScheduleSlots()
     {
         var start = new DateTimeOffset(2026, 1, 12, 7, 0, 0, TimeSpan.Zero); // Monday 09:00 SAST
-        var end = new DateTimeOffset(2026, 1, 12, 15, 0, 0, TimeSpan.Zero);  // Monday 17:00 SAST
+        var end = new DateTimeOffset(2026, 1, 12, 15, 0, 0, TimeSpan.Zero); // Monday 17:00 SAST
 
         var slots = _calculator.GetSlots(
             _eventType,
@@ -271,15 +271,16 @@ public sealed class RoundRobinSlotCalculatorTests
     public void SelectRoundRobinHost_WithPriorityTiers_ShouldAlwaysPickFromTopTier()
     {
         // host1 has priority 0 (top tier), host2 has priority 1 (lower tier)
-        var host1 = CreateRotatingHost(priority: 0);
-        var host2 = CreateRotatingHost(priority: 1);
+        var host1 = CreateRotatingHost();
+        var host2 = CreateRotatingHost(1);
         var candidateStart = new DateTimeOffset(2026, 1, 12, 9, 0, 0, TimeSpan.Zero);
 
         // Give host1 many bookings and host2 zero — host1 should still be selected (higher priority)
         var bookings = Enumerable.Range(0, 5).Select(i =>
             CreateBooking(host1.UserId,
                 new DateTimeOffset(2026, 1, 5 + i, 7, 0, 0, TimeSpan.Zero),
-                new DateTimeOffset(2026, 1, 5 + i, 7, 30, 0, TimeSpan.Zero))
+                new DateTimeOffset(2026, 1, 5 + i, 7, 30, 0, TimeSpan.Zero)
+            )
         ).ToArray();
 
         var hostBookings = new Dictionary<UserId, Booking[]>
@@ -295,8 +296,8 @@ public sealed class RoundRobinSlotCalculatorTests
     [Fact]
     public void SelectRoundRobinHost_WhenTopPriorityHostBusy_ShouldFallToNextTier()
     {
-        var host1 = CreateRotatingHost(priority: 0); // top tier, busy
-        var host2 = CreateRotatingHost(priority: 1); // lower tier, free
+        var host1 = CreateRotatingHost(); // top tier, busy
+        var host2 = CreateRotatingHost(1); // lower tier, free
         var candidateStart = new DateTimeOffset(2026, 1, 12, 7, 0, 0, TimeSpan.Zero);
 
         var hostBookings = new Dictionary<UserId, Booking[]>
@@ -353,12 +354,12 @@ public sealed class RoundRobinSlotCalculatorTests
 
     private Host CreateRotatingHost(int priority = 0, int weight = 100)
     {
-        return Host.Create(new TenantId(1), _eventType.Id, UserId.NewId(), isFixed: false, priority, weight);
+        return Host.Create(new TenantId(1), _eventType.Id, UserId.NewId(), false, priority, weight);
     }
 
     private Host CreateFixedHost()
     {
-        return Host.Create(new TenantId(1), _eventType.Id, UserId.NewId(), isFixed: true, priority: 0, weight: 100);
+        return Host.Create(new TenantId(1), _eventType.Id, UserId.NewId(), true, 0, 100);
     }
 
     private Booking CreateBooking(UserId owner, DateTimeOffset startTime, DateTimeOffset endTime)
@@ -370,8 +371,8 @@ public sealed class RoundRobinSlotCalculatorTests
             _eventType.Id,
             startTime,
             durationMinutes,
-            beforeEventBufferMinutes: 0,
-            afterEventBufferMinutes: 0,
+            0,
+            0,
             "Test Booker",
             "booker@example.com",
             "UTC", BookingStatus.Accepted,
@@ -381,6 +382,9 @@ public sealed class RoundRobinSlotCalculatorTests
 
     private sealed class FixedTimeProvider(DateTimeOffset fixedTime) : TimeProvider
     {
-        public override DateTimeOffset GetUtcNow() => fixedTime;
+        public override DateTimeOffset GetUtcNow()
+        {
+            return fixedTime;
+        }
     }
 }

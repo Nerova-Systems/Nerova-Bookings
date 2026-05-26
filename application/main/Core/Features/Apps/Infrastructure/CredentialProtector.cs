@@ -9,15 +9,10 @@ namespace Main.Features.Apps.Infrastructure;
 ///     <c>SmtpCredentialProtector</c> / <c>MicrosoftSsoSecretProtector</c> pattern used in the
 ///     account SCS.
 /// </summary>
-public sealed class CredentialProtector
+public sealed class CredentialProtector(IDataProtectionProvider provider)
 {
     private const string DataProtectionPurpose = "main.apps.credentials";
-    private readonly IDataProtector _protector;
-
-    public CredentialProtector(IDataProtectionProvider provider)
-    {
-        _protector = provider.CreateProtector(DataProtectionPurpose);
-    }
+    private readonly IDataProtector _protector = provider.CreateProtector(DataProtectionPurpose);
 
     public string Protect(string plaintext)
     {

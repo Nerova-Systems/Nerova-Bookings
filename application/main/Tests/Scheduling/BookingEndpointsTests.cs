@@ -303,7 +303,9 @@ public sealed class BookingEndpointsTests : EndpointBaseTest<MainDbContext>
     }
 
     private async Task UpdateSchedulingProfileAsync(string handle)
-        => await UpdateSchedulingProfileAsync(AuthenticatedOwnerHttpClient, handle, "Owner Name");
+    {
+        await UpdateSchedulingProfileAsync(AuthenticatedOwnerHttpClient, handle, "Owner Name");
+    }
 
     private static async Task UpdateSchedulingProfileAsync(HttpClient client, string handle, string displayName)
     {
@@ -314,7 +316,10 @@ public sealed class BookingEndpointsTests : EndpointBaseTest<MainDbContext>
         response.EnsureSuccessStatusCode();
     }
 
-    private Task<ScheduleResponse> CreateScheduleAsync() => CreateScheduleAsync(AuthenticatedOwnerHttpClient);
+    private Task<ScheduleResponse> CreateScheduleAsync()
+    {
+        return CreateScheduleAsync(AuthenticatedOwnerHttpClient);
+    }
 
     private static async Task<ScheduleResponse> CreateScheduleAsync(HttpClient client)
     {
@@ -336,7 +341,9 @@ public sealed class BookingEndpointsTests : EndpointBaseTest<MainDbContext>
     }
 
     private Task<EventTypeResponse> CreateEventTypeAsync(string scheduleId, string title, string slug, object? settings = null)
-        => CreateEventTypeAsync(AuthenticatedOwnerHttpClient, scheduleId, title, slug, settings);
+    {
+        return CreateEventTypeAsync(AuthenticatedOwnerHttpClient, scheduleId, title, slug, settings);
+    }
 
     private static async Task<EventTypeResponse> CreateEventTypeAsync(HttpClient client, string scheduleId, string title, string slug, object? settings = null)
     {
@@ -364,7 +371,9 @@ public sealed class BookingEndpointsTests : EndpointBaseTest<MainDbContext>
     }
 
     private Task<CreatePublicBookingResponse> CreateBookingAsync(string eventSlug, string startTime, string bookerName, string bookerEmail)
-        => CreateBookingAsync("owner", eventSlug, startTime, bookerName, bookerEmail);
+    {
+        return CreateBookingAsync("owner", eventSlug, startTime, bookerName, bookerEmail);
+    }
 
     private async Task<CreatePublicBookingResponse> CreateBookingAsync(string handle, string eventSlug, string startTime, string bookerName, string bookerEmail)
     {
@@ -421,5 +430,12 @@ public sealed class BookingEndpointsTests : EndpointBaseTest<MainDbContext>
     private sealed record BookingReportsListResponse(int TotalCount, int PageOffset, int PageSize, BookingReportListItem[] Reports);
 
     [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
-    private sealed record BookingReportListItem(string Id, string BookingId, string ReportedByUserId, string ReasonCode, string? Notes, DateTimeOffset CreatedAt);
+    private sealed record BookingReportListItem(
+        string Id,
+        string BookingId,
+        string ReportedByUserId,
+        string ReasonCode,
+        string? Notes,
+        DateTimeOffset CreatedAt
+    );
 }

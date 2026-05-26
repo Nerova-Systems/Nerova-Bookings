@@ -43,8 +43,6 @@ public sealed class Credential : AggregateRoot<CredentialId>, ITenantScopedEntit
         EncryptedKey = encryptedKey;
     }
 
-    public TenantId TenantId { get; } = new(0);
-
     public UserId UserId { get; private set; }
 
     public AppSlug AppSlug { get; private set; }
@@ -55,6 +53,8 @@ public sealed class Credential : AggregateRoot<CredentialId>, ITenantScopedEntit
     ///     only component permitted to read this column as plaintext.
     /// </summary>
     public string EncryptedKey { get; private set; }
+
+    public TenantId TenantId { get; } = new(0);
 
     public static Credential Create(TenantId tenantId, UserId userId, AppSlug appSlug, string encryptedKey)
     {

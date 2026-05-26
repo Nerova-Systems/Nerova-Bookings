@@ -68,7 +68,7 @@ public sealed class WebhookEndpointsTests : EndpointBaseTest<MainDbContext>
         var updateBody = new UpdateWebhookRequest(
             "https://example.test/hooks/v2",
             [WebhookEventType.BookingCreated],
-            Active: false
+            false
         );
         var updateResponse = await _ownerWithFlag.PutAsJsonAsync($"/api/webhooks/{created.Id}", updateBody);
         updateResponse.EnsureSuccessStatusCode();
@@ -78,7 +78,7 @@ public sealed class WebhookEndpointsTests : EndpointBaseTest<MainDbContext>
         updated.EventSubscriptions.Should().BeEquivalentTo(updateBody.EventSubscriptions);
 
         // TEST-FIRE — should enqueue exactly one Pending delivery
-        var testResponse = await _ownerWithFlag.PostAsync($"/api/webhooks/{created.Id}/test", content: null);
+        var testResponse = await _ownerWithFlag.PostAsync($"/api/webhooks/{created.Id}/test", null);
         testResponse.EnsureSuccessStatusCode();
         var test = await testResponse.DeserializeResponse<TestWebhookResponse>();
         test!.DeliveryId.Should().NotBeNull();
@@ -158,11 +158,14 @@ public sealed class WebhookEndpointsTests : EndpointBaseTest<MainDbContext>
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }
 
-    private static object NewMinimalCreateBody() => new
+    private static object NewMinimalCreateBody()
     {
-        TargetUrl = "https://example.test/hook",
-        EventSubscriptions = new[] { WebhookEventType.BookingCreated },
-        Active = true,
-        EventTypeId = (string?)null
-    };
+        return new
+        {
+            TargetUrl = "https://example.test/hook",
+            EventSubscriptions = new[] { WebhookEventType.BookingCreated },
+            Active = true,
+            EventTypeId = (string?)null
+        };
+    }
 }

@@ -1,6 +1,5 @@
 using JetBrains.Annotations;
 using Main.Features.Apps.Domain;
-using SharedKernel.Domain;
 
 namespace Main.Features.Apps.Shared;
 

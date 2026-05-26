@@ -1,5 +1,6 @@
 using System.Net;
 using System.Text.Json;
+using System.Web;
 using FluentAssertions;
 using Main.Features.Apps.Connectors.Office365Calendar;
 using Main.Features.Apps.Domain;
@@ -20,7 +21,7 @@ public sealed class Office365CalendarInstallerTests
     [Fact]
     public async Task BeginInstallAsync_WhenConfigured_ShouldBuildAuthorizeUrlWithExpectedParameters()
     {
-        var installer = BuildInstaller(handler: new RecordingHandler(_ => new HttpResponseMessage(HttpStatusCode.OK)));
+        var installer = BuildInstaller(new RecordingHandler(_ => new HttpResponseMessage(HttpStatusCode.OK)));
 
         var result = await installer.BeginInstallAsync(
             new AppInstallContext(
@@ -36,7 +37,7 @@ public sealed class Office365CalendarInstallerTests
         result.State.Should().Be("state-456");
         var uri = new Uri(result.AuthorizeUrl);
         uri.AbsoluteUri.Should().StartWith("https://login.microsoftonline.com/common/oauth2/v2.0/authorize");
-        var query = System.Web.HttpUtility.ParseQueryString(uri.Query);
+        var query = HttpUtility.ParseQueryString(uri.Query);
         query["client_id"].Should().Be("client-abc");
         query["redirect_uri"].Should().Be("https://app.test/api/apps/office365-calendar/callback");
         query["response_type"].Should().Be("code");
@@ -53,9 +54,9 @@ public sealed class Office365CalendarInstallerTests
     public async Task BeginInstallAsync_WhenNotConfigured_ShouldThrowNotConfigured()
     {
         var installer = BuildInstaller(
-            handler: new RecordingHandler(_ => new HttpResponseMessage(HttpStatusCode.OK)),
-            clientId: "",
-            clientSecret: ""
+            new RecordingHandler(_ => new HttpResponseMessage(HttpStatusCode.OK)),
+            "",
+            ""
         );
 
         var act = async () => await installer.BeginInstallAsync(
@@ -73,20 +74,22 @@ public sealed class Office365CalendarInstallerTests
         HttpMethod? capturedMethod = null;
         Uri? capturedUri = null;
         var handler = new RecordingHandler(request =>
-        {
-            capturedMethod = request.Method;
-            capturedUri = request.RequestUri;
-            capturedFormBody = request.Content!.ReadAsStringAsync().GetAwaiter().GetResult();
-            var json = JsonSerializer.Serialize(new
             {
-                access_token = "atk",
-                refresh_token = "rtk",
-                expires_in = 3600,
-                scope = "offline_access Calendars.ReadWrite",
-                token_type = "Bearer"
-            });
-            return new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent(json) };
-        });
+                capturedMethod = request.Method;
+                capturedUri = request.RequestUri;
+                capturedFormBody = request.Content!.ReadAsStringAsync().GetAwaiter().GetResult();
+                var json = JsonSerializer.Serialize(new
+                    {
+                        access_token = "atk",
+                        refresh_token = "rtk",
+                        expires_in = 3600,
+                        scope = "offline_access Calendars.ReadWrite",
+                        token_type = "Bearer"
+                    }
+                );
+                return new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent(json) };
+            }
+        );
 
         var (installer, protector) = BuildInstallerWithProtector(handler);
 
@@ -122,10 +125,11 @@ public sealed class Office365CalendarInstallerTests
     public async Task CompleteInstallAsync_WhenRefreshTokenMissing_ShouldThrow()
     {
         var handler = new RecordingHandler(_ =>
-        {
-            var json = JsonSerializer.Serialize(new { access_token = "atk", expires_in = 3600 });
-            return new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent(json) };
-        });
+            {
+                var json = JsonSerializer.Serialize(new { access_token = "atk", expires_in = 3600 });
+                return new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent(json) };
+            }
+        );
         var (installer, _) = BuildInstallerWithProtector(handler);
 
         var act = async () => await installer.CompleteInstallAsync(
@@ -141,12 +145,13 @@ public sealed class Office365CalendarInstallerTests
     {
         var calls = 0;
         var handler = new RecordingHandler(_ =>
-        {
-            calls++;
-            return new HttpResponseMessage(HttpStatusCode.OK);
-        });
+            {
+                calls++;
+                return new HttpResponseMessage(HttpStatusCode.OK);
+            }
+        );
         var (installer, protector) = BuildInstallerWithProtector(handler);
-        var blob = new Office365CredentialBlob("atk", "rtk", Now.AddHours(1), "scope", null);
+        var blob = new Office365CredentialBlob("atk", "rtk", Now.AddHours(1), "scope");
         var encrypted = protector.Protect(blob.ToJson());
 
         await installer.UninstallAsync(new TenantId(1), new UserId("u"), encrypted, CancellationToken.None);
@@ -173,12 +178,13 @@ public sealed class Office365CalendarInstallerTests
     {
         var options = Substitute.For<IOptionsMonitor<Office365CalendarOptions>>();
         options.CurrentValue.Returns(new Office365CalendarOptions
-        {
-            ClientId = clientId,
-            ClientSecret = clientSecret
-            // Leave TenantId default ("common") and the Authorize/Token URLs derived from it
-            // so the test pins the real Microsoft endpoint shape.
-        });
+            {
+                ClientId = clientId,
+                ClientSecret = clientSecret
+                // Leave TenantId default ("common") and the Authorize/Token URLs derived from it
+                // so the test pins the real Microsoft endpoint shape.
+            }
+        );
 
         var factory = Substitute.For<IHttpClientFactory>();
         factory.CreateClient(Office365CalendarSlug.HttpClientName).Returns(_ => new HttpClient(handler));

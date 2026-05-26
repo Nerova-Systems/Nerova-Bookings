@@ -58,8 +58,14 @@ public sealed class InMemoryOAuthStateStoreTests
     {
         private DateTimeOffset _now = start;
 
-        public override DateTimeOffset GetUtcNow() => _now;
+        public override DateTimeOffset GetUtcNow()
+        {
+            return _now;
+        }
 
-        public void Advance(TimeSpan delta) => _now = _now.Add(delta);
+        public void Advance(TimeSpan delta)
+        {
+            _now = _now.Add(delta);
+        }
     }
 }

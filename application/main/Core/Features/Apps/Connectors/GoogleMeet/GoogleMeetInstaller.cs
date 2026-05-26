@@ -56,7 +56,7 @@ public sealed class GoogleMeetInstaller(IServiceScopeFactory scopeFactory) : IAp
         // No fresh credential to persist: Google Meet reuses the Google Calendar credential.
         // The platform's CompleteAppInstallHandler reads PersistCredential=false and creates
         // only the AppInstallation row.
-        return new AppInstallCallbackResult(string.Empty, PersistCredential: false);
+        return new AppInstallCallbackResult(string.Empty, false);
     }
 
     public Task UninstallAsync(TenantId tenantId, UserId userId, string encryptedKey, CancellationToken cancellationToken)

@@ -3,6 +3,7 @@ using System.Net.Http.Json;
 using FluentAssertions;
 using JetBrains.Annotations;
 using Main.Database;
+using Main.Features.EventTypes.Domain;
 using SharedKernel.Tests;
 using SharedKernel.Validation;
 using Xunit;
@@ -636,80 +637,6 @@ public sealed class EventTypeEndpointsTests : EndpointBaseTest<MainDbContext>
         };
     }
 
-    [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
-    private sealed record EventTypesResponse(EventTypeResponse[] EventTypes);
-
-    [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
-    private sealed record EventTypeResponse(
-        string Id,
-        string Title,
-        string Slug,
-        string? Description,
-        int DurationMinutes,
-        bool Hidden,
-        string ScheduleId,
-        int BeforeEventBufferMinutes,
-        int AfterEventBufferMinutes,
-        int SlotIntervalMinutes,
-        int MinimumBookingNoticeMinutes,
-        string? LocationType,
-        string? LocationValue,
-        EventTypeSettingsResponse Settings
-    );
-
-    [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
-    private sealed record ScheduleResponse(string Id);
-
-    [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
-    private sealed record EventTypeSettingsResponse(
-        int[] DurationOptions,
-        EventTypeLocationResponse[] Locations,
-        EventTypeBookingFieldResponse[] BookingFields,
-        string BookerLayout,
-        string? EventColor,
-        EventTypeBookingWindowResponse BookingWindow,
-        EventTypeLimitsResponse Limits,
-        EventTypeConfirmationPolicyResponse ConfirmationPolicy,
-        EventTypeRecurrenceResponse? Recurrence,
-        EventTypeSeatsResponse Seats,
-        string[] PrivateLinks,
-        EventTypeCancellationPolicyResponse CancellationPolicy,
-        EventTypeReschedulePolicyResponse ReschedulePolicy,
-        EventTypeRedirectsResponse Redirects,
-        string? InterfaceLanguage,
-        Dictionary<string, string> Metadata
-    );
-
-    [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
-    private sealed record EventTypeLocationResponse(string Type, string? Value);
-
-    [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
-    private sealed record EventTypeBookingFieldResponse(string Name, string Label, string Type, bool Required, string[] Options);
-
-    [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
-    private sealed record EventTypeBookingWindowResponse(int? RollingWindowDays, DateOnly? FixedStartDate, DateOnly? FixedEndDate);
-
-    [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
-    private sealed record EventTypeLimitsResponse(int? MaxBookingsPerDay, int? MaxBookingDurationMinutesPerDay, int? MaxActiveBookingsPerBooker, int? FirstAvailableSlotMinutes, int? OffsetStartMinutes);
-
-    [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
-    private sealed record EventTypeConfirmationPolicyResponse(bool RequiresConfirmation, bool RequiresBookerEmailVerification);
-
-    [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
-    private sealed record EventTypeRecurrenceResponse(string Frequency, int Interval, int? Count);
-
-    [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
-    private sealed record EventTypeSeatsResponse(bool Enabled, int? Capacity, bool ShowAttendeeInfo);
-
-    [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
-    private sealed record EventTypeCancellationPolicyResponse(bool AllowCancellation, int? MinimumNoticeMinutes);
-
-    [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
-    private sealed record EventTypeReschedulePolicyResponse(bool AllowReschedule, int? MinimumNoticeMinutes);
-
-    [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
-    private sealed record EventTypeRedirectsResponse(string? SuccessUrl, string? CancellationUrl);
-
     [Fact]
     public async Task GetEventTypesByViewer_WhenOwnerHasEventTypes_ShouldReturnPersonalGroup()
     {
@@ -845,7 +772,7 @@ public sealed class EventTypeEndpointsTests : EndpointBaseTest<MainDbContext>
         var schedule = await CreateScheduleAsync();
         var first = await CreateEventTypeAsync(schedule.Id, "Intro call", "intro-call");
 
-        var unknownId = Main.Features.EventTypes.Domain.EventTypeId.NewId().Value;
+        var unknownId = EventTypeId.NewId().Value;
         var request = new
         {
             items = new[]
@@ -864,6 +791,80 @@ public sealed class EventTypeEndpointsTests : EndpointBaseTest<MainDbContext>
         refreshed!.LocationType.Should().Be("link");
         refreshed.LocationValue.Should().Be("https://example.com/meet");
     }
+
+    [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
+    private sealed record EventTypesResponse(EventTypeResponse[] EventTypes);
+
+    [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
+    private sealed record EventTypeResponse(
+        string Id,
+        string Title,
+        string Slug,
+        string? Description,
+        int DurationMinutes,
+        bool Hidden,
+        string ScheduleId,
+        int BeforeEventBufferMinutes,
+        int AfterEventBufferMinutes,
+        int SlotIntervalMinutes,
+        int MinimumBookingNoticeMinutes,
+        string? LocationType,
+        string? LocationValue,
+        EventTypeSettingsResponse Settings
+    );
+
+    [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
+    private sealed record ScheduleResponse(string Id);
+
+    [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
+    private sealed record EventTypeSettingsResponse(
+        int[] DurationOptions,
+        EventTypeLocationResponse[] Locations,
+        EventTypeBookingFieldResponse[] BookingFields,
+        string BookerLayout,
+        string? EventColor,
+        EventTypeBookingWindowResponse BookingWindow,
+        EventTypeLimitsResponse Limits,
+        EventTypeConfirmationPolicyResponse ConfirmationPolicy,
+        EventTypeRecurrenceResponse? Recurrence,
+        EventTypeSeatsResponse Seats,
+        string[] PrivateLinks,
+        EventTypeCancellationPolicyResponse CancellationPolicy,
+        EventTypeReschedulePolicyResponse ReschedulePolicy,
+        EventTypeRedirectsResponse Redirects,
+        string? InterfaceLanguage,
+        Dictionary<string, string> Metadata
+    );
+
+    [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
+    private sealed record EventTypeLocationResponse(string Type, string? Value);
+
+    [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
+    private sealed record EventTypeBookingFieldResponse(string Name, string Label, string Type, bool Required, string[] Options);
+
+    [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
+    private sealed record EventTypeBookingWindowResponse(int? RollingWindowDays, DateOnly? FixedStartDate, DateOnly? FixedEndDate);
+
+    [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
+    private sealed record EventTypeLimitsResponse(int? MaxBookingsPerDay, int? MaxBookingDurationMinutesPerDay, int? MaxActiveBookingsPerBooker, int? FirstAvailableSlotMinutes, int? OffsetStartMinutes);
+
+    [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
+    private sealed record EventTypeConfirmationPolicyResponse(bool RequiresConfirmation, bool RequiresBookerEmailVerification);
+
+    [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
+    private sealed record EventTypeRecurrenceResponse(string Frequency, int Interval, int? Count);
+
+    [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
+    private sealed record EventTypeSeatsResponse(bool Enabled, int? Capacity, bool ShowAttendeeInfo);
+
+    [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
+    private sealed record EventTypeCancellationPolicyResponse(bool AllowCancellation, int? MinimumNoticeMinutes);
+
+    [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
+    private sealed record EventTypeReschedulePolicyResponse(bool AllowReschedule, int? MinimumNoticeMinutes);
+
+    [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
+    private sealed record EventTypeRedirectsResponse(string? SuccessUrl, string? CancellationUrl);
 
     [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
     private sealed record EventTypesByViewerResponse(EventTypeGroupResponse[] Groups);

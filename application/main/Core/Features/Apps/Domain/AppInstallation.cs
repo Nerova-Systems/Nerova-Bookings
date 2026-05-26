@@ -38,13 +38,13 @@ public sealed class AppInstallation : AggregateRoot<AppInstallationId>, ITenantS
         InstalledAt = installedAt;
     }
 
-    public TenantId TenantId { get; } = new(0);
-
     public AppSlug AppSlug { get; private set; }
 
     public UserId InstalledByUserId { get; private set; }
 
     public DateTimeOffset InstalledAt { get; private set; }
+
+    public TenantId TenantId { get; } = new(0);
 
     public static AppInstallation Create(TenantId tenantId, AppSlug appSlug, UserId installedByUserId, DateTimeOffset installedAt)
     {

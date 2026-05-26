@@ -27,6 +27,6 @@ public sealed record Office365CredentialBlob(
     public static Office365CredentialBlob FromJson(string json)
     {
         return JsonSerializer.Deserialize<Office365CredentialBlob>(json, JsonOptions)
-            ?? throw new InvalidOperationException("Office 365 credential blob deserialized to null.");
+               ?? throw new InvalidOperationException("Office 365 credential blob deserialized to null.");
     }
 }

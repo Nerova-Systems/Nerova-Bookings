@@ -31,7 +31,10 @@ public sealed class AppEndpoints : IEndpoints
         // Callback is hit by the OAuth provider — the user is still authenticated via the cookie,
         // so RequireAuthorization() applies. The state token provides CSRF protection.
         group.MapGet("/{slug}/callback", async Task<ApiResult<AppCallbackResponse>> (
-                AppSlug slug, string code, string state, IMediator mediator)
+                AppSlug slug,
+                string code,
+                string state,
+                IMediator mediator)
             => await mediator.Send(new CompleteAppInstallCommand(slug, code, state))
         ).Produces<AppCallbackResponse>();
 

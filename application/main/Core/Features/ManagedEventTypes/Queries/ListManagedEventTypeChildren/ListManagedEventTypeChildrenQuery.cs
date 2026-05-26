@@ -22,14 +22,20 @@ public sealed class ListManagedEventTypeChildrenHandler(
         var userInfo = executionContext.UserInfo;
 
         if (!ManagedEventTypeAuthorization.HasManagedEventTypesFeature(userInfo))
+        {
             return Result<ManagedEventTypeChildrenResponse>.Forbidden(ManagedEventTypeAuthorization.ManagedEventTypesFeatureDisabledMessage);
+        }
 
         if (!ManagedEventTypeAuthorization.CanManageManagedEventTypes(userInfo))
+        {
             return Result<ManagedEventTypeChildrenResponse>.Forbidden(ManagedEventTypeAuthorization.ManageManagedEventTypesForbiddenMessage);
+        }
 
         var parent = await eventTypeRepository.GetByIdAsync(query.ParentId, cancellationToken);
         if (parent is null)
+        {
             return Result<ManagedEventTypeChildrenResponse>.NotFound($"Event type '{query.ParentId}' was not found.");
+        }
 
         var children = await eventTypeRepository.GetChildrenAsync(query.ParentId, cancellationToken);
         return new ManagedEventTypeChildrenResponse(

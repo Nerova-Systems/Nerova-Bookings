@@ -4,7 +4,6 @@ using FluentAssertions;
 using Main.Database;
 using Main.Features.Schedules.Shared;
 using SharedKernel.Tests;
-using SharedKernel.Validation;
 using Xunit;
 
 namespace Main.Tests.Schedules;

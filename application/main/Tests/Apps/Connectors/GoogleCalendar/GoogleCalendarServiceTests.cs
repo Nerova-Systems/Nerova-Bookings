@@ -2,8 +2,6 @@ using System.Net;
 using System.Text.Json;
 using FluentAssertions;
 using Main.Features.Apps.Connectors.GoogleCalendar;
-using Microsoft.Extensions.Logging.Abstractions;
-using Microsoft.Extensions.Options;
 using NSubstitute;
 using Xunit;
 
@@ -12,23 +10,22 @@ namespace Main.Tests.Apps.Connectors.GoogleCalendar;
 public sealed class GoogleCalendarServiceTests
 {
     private static readonly DateTimeOffset Now = new(2026, 1, 1, 12, 0, 0, TimeSpan.Zero);
-    private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web);
 
     [Fact]
     public async Task GetBusyTimesAsync_WhenGoogleReturnsBusyArray_ShouldParseIntervals()
     {
         const string body = """
-            {
-              "calendars": {
-                "primary": {
-                  "busy": [
-                    { "start": "2026-01-02T09:00:00Z", "end": "2026-01-02T10:00:00Z" },
-                    { "start": "2026-01-02T13:00:00Z", "end": "2026-01-02T14:30:00Z" }
-                  ]
-                }
-              }
-            }
-            """;
+                            {
+                              "calendars": {
+                                "primary": {
+                                  "busy": [
+                                    { "start": "2026-01-02T09:00:00Z", "end": "2026-01-02T10:00:00Z" },
+                                    { "start": "2026-01-02T13:00:00Z", "end": "2026-01-02T14:30:00Z" }
+                                  ]
+                                }
+                              }
+                            }
+                            """;
 
         var handler = new RecordingHandler(_ => Response(HttpStatusCode.OK, body));
         var service = BuildService(handler, NewBlob());
@@ -47,24 +44,25 @@ public sealed class GoogleCalendarServiceTests
         HttpRequestMessage? captured = null;
         string? capturedBody = null;
         var handler = new RecordingHandler(request =>
-        {
-            captured = request;
-            capturedBody = request.Content!.ReadAsStringAsync().GetAwaiter().GetResult();
-            return Response(HttpStatusCode.OK, """{"id":"abc123"}""");
-        });
+            {
+                captured = request;
+                capturedBody = request.Content!.ReadAsStringAsync().GetAwaiter().GetResult();
+                return Response(HttpStatusCode.OK, """{"id":"abc123"}""");
+            }
+        );
         var service = BuildService(handler, NewBlob());
 
         var input = new BookingEvent(
-            Title: "Discovery Call",
-            Description: "Intro chat",
-            StartTime: new DateTimeOffset(2026, 1, 5, 15, 0, 0, TimeSpan.Zero),
-            EndTime: new DateTimeOffset(2026, 1, 5, 15, 30, 0, TimeSpan.Zero),
-            TimeZone: "Europe/Copenhagen",
-            OrganizerEmail: "host@example.com",
-            OrganizerName: "Host Person",
-            Attendees: [new BookingEventAttendee("guest@example.com", "Guest")],
-            Location: "https://meet.example/abc",
-            ICalUid: "uid-1"
+            "Discovery Call",
+            "Intro chat",
+            new DateTimeOffset(2026, 1, 5, 15, 0, 0, TimeSpan.Zero),
+            new DateTimeOffset(2026, 1, 5, 15, 30, 0, TimeSpan.Zero),
+            "Europe/Copenhagen",
+            "host@example.com",
+            "Host Person",
+            [new BookingEventAttendee("guest@example.com", "Guest")],
+            "https://meet.example/abc",
+            "uid-1"
         );
 
         var id = await service.CreateEventAsync(input, CancellationToken.None);
@@ -101,36 +99,39 @@ public sealed class GoogleCalendarServiceTests
         var seenBearers = new List<string?>();
         var freeBusyCount = 0;
         var handler = new RecordingHandler(request =>
-        {
-            if (request.RequestUri!.AbsoluteUri.EndsWith("/freeBusy"))
             {
-                freeBusyCount++;
-                seenBearers.Add(request.Headers.Authorization?.Parameter);
-                if (freeBusyCount == 1) return Response(HttpStatusCode.Unauthorized, "expired");
-                return Response(HttpStatusCode.OK, """{"calendars":{"primary":{"busy":[]}}}""");
-            }
-
-            if (request.RequestUri!.AbsoluteUri.EndsWith("/token"))
-            {
-                var json = JsonSerializer.Serialize(new
+                if (request.RequestUri!.AbsoluteUri.EndsWith("/freeBusy"))
                 {
-                    access_token = "access-2",
-                    expires_in = 3600,
-                    scope = "scope-1",
-                    token_type = "Bearer"
-                });
-                return Response(HttpStatusCode.OK, json);
-            }
+                    freeBusyCount++;
+                    seenBearers.Add(request.Headers.Authorization?.Parameter);
+                    if (freeBusyCount == 1) return Response(HttpStatusCode.Unauthorized, "expired");
+                    return Response(HttpStatusCode.OK, """{"calendars":{"primary":{"busy":[]}}}""");
+                }
 
-            return Response(HttpStatusCode.NotFound, "");
-        });
+                if (request.RequestUri!.AbsoluteUri.EndsWith("/token"))
+                {
+                    var json = JsonSerializer.Serialize(new
+                        {
+                            access_token = "access-2",
+                            expires_in = 3600,
+                            scope = "scope-1",
+                            token_type = "Bearer"
+                        }
+                    );
+                    return Response(HttpStatusCode.OK, json);
+                }
+
+                return Response(HttpStatusCode.NotFound, "");
+            }
+        );
 
         var persisted = new List<string>();
         var service = BuildService(handler, NewBlob(), (json, _) =>
-        {
-            persisted.Add(json);
-            return Task.CompletedTask;
-        });
+            {
+                persisted.Add(json);
+                return Task.CompletedTask;
+            }
+        );
 
         var busy = await service.GetBusyTimesAsync(Now, Now.AddDays(1), CancellationToken.None);
 

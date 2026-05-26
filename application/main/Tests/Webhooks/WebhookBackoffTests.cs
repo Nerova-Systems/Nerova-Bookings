@@ -7,17 +7,17 @@ namespace Main.Tests.Webhooks;
 public sealed class WebhookBackoffTests
 {
     [Theory]
-    [InlineData(1, 1)]      //  1m after attempt 1
-    [InlineData(2, 5)]      //  5m after attempt 2
-    [InlineData(3, 30)]     // 30m after attempt 3
-    [InlineData(4, 60)]     //  1h after attempt 4
-    [InlineData(5, 360)]    //  6h after attempt 5
+    [InlineData(1, 1)] //  1m after attempt 1
+    [InlineData(2, 5)] //  5m after attempt 2
+    [InlineData(3, 30)] // 30m after attempt 3
+    [InlineData(4, 60)] //  1h after attempt 4
+    [InlineData(5, 360)] //  6h after attempt 5
     public void GetDelayAfterAttempt_ShouldReturnExpectedDelay(int attemptCount, int expectedMinutes)
     {
         var delay = WebhookBackoff.GetDelayAfterAttempt(attemptCount);
 
         delay.Should().NotBeNull();
-        delay!.Value.Should().Be(TimeSpan.FromMinutes(expectedMinutes));
+        delay.Value.Should().Be(TimeSpan.FromMinutes(expectedMinutes));
     }
 
     [Fact]

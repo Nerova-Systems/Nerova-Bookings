@@ -70,7 +70,7 @@ public sealed record EventTypeSettings
             ? [durationMinutes]
             : source.DurationOptions.Distinct().Order().ToArray();
         var locations = source.Locations.Length == 0 && !string.IsNullOrWhiteSpace(locationType)
-            ? [new EventTypeLocation(locationType.Trim(), string.IsNullOrWhiteSpace(locationValue) ? null : locationValue.Trim(), false)]
+            ? [new EventTypeLocation(locationType.Trim(), string.IsNullOrWhiteSpace(locationValue) ? null : locationValue.Trim())]
             : source.Locations.Select(location => new EventTypeLocation(location.Type.Trim(), string.IsNullOrWhiteSpace(location.Value) ? null : location.Value.Trim(), location.DisplayLocationPubliclyToTeam)).ToArray();
 
         return source with
@@ -438,15 +438,15 @@ public sealed record EventTypeAiVoiceAgent
 
 public sealed record EventTypeTeamAssignment
 {
-    public bool AssignRRMembersUsingSegment { get; init; }
+    public bool AssignRrMembersUsingSegment { get; init; }
 
     public string? RrSegmentQueryValue { get; init; }
 
-    public bool IsRRWeightsEnabled { get; init; }
+    public bool IsRrWeightsEnabled { get; init; }
 
     public int? MaxLeadThreshold { get; init; }
 
-    public bool IncludeNoShowInRRCalculation { get; init; }
+    public bool IncludeNoShowInRrCalculation { get; init; }
 
     public bool RescheduleWithSameRoundRobinHost { get; init; }
 

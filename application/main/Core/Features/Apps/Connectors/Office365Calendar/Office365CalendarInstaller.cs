@@ -65,21 +65,20 @@ public sealed class Office365CalendarInstaller(
         if (!opts.IsConfigured) throw new Office365CalendarNotConfiguredException();
 
         var client = httpClientFactory.CreateClient(Office365CalendarSlug.HttpClientName);
-        using var request = new HttpRequestMessage(HttpMethod.Post, opts.TokenUrl)
-        {
-            Content = new FormUrlEncodedContent(new Dictionary<string, string>
-                {
-                    ["code"] = context.Code,
-                    ["client_id"] = opts.ClientId,
-                    ["client_secret"] = opts.ClientSecret,
-                    ["redirect_uri"] = context.RedirectUri,
-                    ["grant_type"] = "authorization_code",
-                    // Microsoft requires scope on the token exchange to mirror the authorize
-                    // call; omitting it returns a partial scope set.
-                    ["scope"] = string.Join(' ', opts.Scopes)
-                }
-            )
-        };
+        var content = new FormUrlEncodedContent(new Dictionary<string, string>
+            {
+                ["code"] = context.Code,
+                ["client_id"] = opts.ClientId,
+                ["client_secret"] = opts.ClientSecret,
+                ["redirect_uri"] = context.RedirectUri,
+                ["grant_type"] = "authorization_code",
+                // Microsoft requires scope on the token exchange to mirror the authorize
+                // call; omitting it returns a partial scope set.
+                ["scope"] = string.Join(' ', opts.Scopes)
+            }
+        );
+        using var request = new HttpRequestMessage(HttpMethod.Post, opts.TokenUrl);
+        request.Content = content;
 
         using var response = await client.SendAsync(request, cancellationToken);
         var body = await response.Content.ReadAsStringAsync(cancellationToken);
@@ -91,7 +90,7 @@ public sealed class Office365CalendarInstaller(
         }
 
         var token = JsonSerializer.Deserialize<Office365TokenResponse>(body, Office365TokenResponse.JsonOptions)
-            ?? throw new InvalidOperationException("Microsoft token response was empty.");
+                    ?? throw new InvalidOperationException("Microsoft token response was empty.");
         if (string.IsNullOrEmpty(token.AccessToken) || string.IsNullOrEmpty(token.RefreshToken))
         {
             throw new InvalidOperationException("Microsoft token response missing access_token or refresh_token.");
@@ -101,10 +100,9 @@ public sealed class Office365CalendarInstaller(
             token.AccessToken,
             token.RefreshToken,
             timeProvider.GetUtcNow().AddSeconds(Math.Max(token.ExpiresIn - 60, 60)),
-            token.Scope ?? string.Join(' ', opts.Scopes),
+            token.Scope ?? string.Join(' ', opts.Scopes)
             // We don't have the user principal name from the token response itself; the
             // service layer falls back to the /me endpoint on first event create if needed.
-            UserPrincipalName: null
         );
         var encrypted = protector.Protect(blob.ToJson());
         return new AppInstallCallbackResult(encrypted);
@@ -133,11 +131,15 @@ public sealed class Office365CalendarNotConfiguredException()
     : InvalidOperationException("Microsoft Office 365 Calendar OAuth client credentials are not configured.");
 
 internal sealed record Office365TokenResponse(
-    [property: JsonPropertyName("access_token")] string AccessToken,
-    [property: JsonPropertyName("refresh_token")] string? RefreshToken,
-    [property: JsonPropertyName("expires_in")] int ExpiresIn,
+    [property: JsonPropertyName("access_token")]
+    string AccessToken,
+    [property: JsonPropertyName("refresh_token")]
+    string? RefreshToken,
+    [property: JsonPropertyName("expires_in")]
+    int ExpiresIn,
     [property: JsonPropertyName("scope")] string? Scope,
-    [property: JsonPropertyName("token_type")] string? TokenType
+    [property: JsonPropertyName("token_type")]
+    string? TokenType
 )
 {
     public static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web);

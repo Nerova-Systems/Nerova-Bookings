@@ -16,13 +16,17 @@ namespace Main.Tests.Apps.Connectors.MsTeams;
 ///     credential:
 ///     <list type="bullet">
 ///         <item>No Office 365 credential ⇒ <see cref="MsTeamsPrerequisiteMissingException" />.</item>
-///         <item>Office 365 credential exists but its stored scope blob does NOT include
+///         <item>
+///             Office 365 credential exists but its stored scope blob does NOT include
 ///             <c>OnlineMeetings.ReadWrite</c> (user installed Calendar before the scope was
 ///             requested) ⇒ <see cref="MsTeamsPrerequisiteMissingException" /> — surfaces a
-///             "reconnect Calendar" hint rather than silently failing meeting creation later.</item>
-///         <item>Credential exists with the scope ⇒ <c>BeginInstall</c> returns a stub callback
+///             "reconnect Calendar" hint rather than silently failing meeting creation later.
+///         </item>
+///         <item>
+///             Credential exists with the scope ⇒ <c>BeginInstall</c> returns a stub callback
 ///             URL; <c>CompleteInstall</c> returns <c>PersistCredential=false</c> with an empty
-///             encrypted key — platform handler creates the AppInstallation only.</item>
+///             encrypted key — platform handler creates the AppInstallation only.
+///         </item>
 ///         <item>Uninstall is a no-op and never touches the Office 365 credential.</item>
 ///     </list>
 ///     Mirrors <c>GoogleMeetInstallerTests</c>: a tiny real <see cref="ServiceCollection" />
@@ -37,7 +41,7 @@ public sealed class MsTeamsInstallerTests
     [Fact]
     public async Task BeginInstallAsync_WhenOffice365CalendarNotInstalled_ShouldThrowPrerequisiteMissing()
     {
-        var (installer, _) = BuildInstaller(scope: null);
+        var (installer, _) = BuildInstaller(null);
 
         var act = async () => await installer.BeginInstallAsync(
             new AppInstallContext(new TenantId(1), new UserId("usr_1"), "u@x", "https://r/callback", "state-1"),
@@ -53,7 +57,7 @@ public sealed class MsTeamsInstallerTests
         // User installed Office 365 Calendar BEFORE we started requesting OnlineMeetings.ReadWrite —
         // we can't silently upgrade consent (Microsoft requires a fresh authorize round trip), so
         // we surface a clean "reconnect" error instead of letting meeting creation fail at runtime.
-        var (installer, _) = BuildInstaller(scope: "offline_access Calendars.ReadWrite");
+        var (installer, _) = BuildInstaller("offline_access Calendars.ReadWrite");
 
         var act = async () => await installer.BeginInstallAsync(
             new AppInstallContext(new TenantId(1), new UserId("usr_1"), "u@x", "https://r/callback", "state-1"),
@@ -66,7 +70,7 @@ public sealed class MsTeamsInstallerTests
     [Fact]
     public async Task BeginInstallAsync_WhenOffice365CredentialGrantsOnlineMeetings_ShouldReturnStubCallback()
     {
-        var (installer, _) = BuildInstaller(scope: "offline_access Calendars.ReadWrite OnlineMeetings.ReadWrite");
+        var (installer, _) = BuildInstaller("offline_access Calendars.ReadWrite OnlineMeetings.ReadWrite");
 
         var result = await installer.BeginInstallAsync(
             new AppInstallContext(new TenantId(1), new UserId("usr_1"), "u@x", "https://r/callback", "state-xyz"),
@@ -82,7 +86,7 @@ public sealed class MsTeamsInstallerTests
     [Fact]
     public async Task CompleteInstallAsync_WhenPrerequisitesSatisfied_ShouldReturnNoPersistResult()
     {
-        var (installer, _) = BuildInstaller(scope: "offline_access Calendars.ReadWrite OnlineMeetings.ReadWrite");
+        var (installer, _) = BuildInstaller("offline_access Calendars.ReadWrite OnlineMeetings.ReadWrite");
 
         var result = await installer.CompleteInstallAsync(
             new AppInstallCallbackContext(new TenantId(1), new UserId("usr_1"), "code", "https://r/callback"),
@@ -96,16 +100,16 @@ public sealed class MsTeamsInstallerTests
     [Fact]
     public async Task UninstallAsync_ShouldBeNoOpAndNotTouchOffice365Credential()
     {
-        var (installer, repo) = BuildInstaller(scope: null);
+        var (installer, repo) = BuildInstaller(null);
 
         var act = async () => await installer.UninstallAsync(
-            new TenantId(1), new UserId("usr_1"), encryptedKey: "anything", CancellationToken.None
+            new TenantId(1), new UserId("usr_1"), "anything", CancellationToken.None
         );
 
         await act.Should().NotThrowAsync();
         // Critically: uninstall must NEVER touch the office365-calendar credential — Calendar
         // may still be in active use independently.
-        repo.DidNotReceiveWithAnyArgs().Remove(default!);
+        repo.DidNotReceiveWithAnyArgs().Remove(null!);
     }
 
     [Theory]
@@ -131,7 +135,7 @@ public sealed class MsTeamsInstallerTests
         Credential? credential = null;
         if (scope is not null)
         {
-            var blob = new Office365CredentialBlob("atk", "rtk", Now.AddHours(1), scope, UserPrincipalName: null);
+            var blob = new Office365CredentialBlob("atk", "rtk", Now.AddHours(1), scope);
             credential = Credential.Create(new TenantId(1), new UserId("usr_1"), Office365CalendarSlug.Slug, protector.Protect(blob.ToJson()));
         }
 

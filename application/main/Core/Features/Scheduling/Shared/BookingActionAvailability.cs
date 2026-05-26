@@ -79,6 +79,7 @@ public static class BookingActionAvailability
         {
             return new BookingActionResponse(true, true, null);
         }
+
         return Disabled("Only awaiting-confirmation bookings can be confirmed.");
     }
 
@@ -88,6 +89,7 @@ public static class BookingActionAvailability
         {
             return new BookingActionResponse(true, true, null);
         }
+
         return Disabled("Only awaiting-confirmation bookings can be rejected.");
     }
 
@@ -97,10 +99,12 @@ public static class BookingActionAvailability
         {
             return Disabled("Closed bookings cannot be rescheduled.");
         }
+
         if (booking.EndTime <= now)
         {
             return Disabled("Past bookings cannot be rescheduled.");
         }
+
         return new BookingActionResponse(true, true, null);
     }
 
@@ -110,6 +114,7 @@ public static class BookingActionAvailability
         {
             return Disabled("Closed bookings cannot have their location edited.");
         }
+
         return new BookingActionResponse(true, true, null);
     }
 
@@ -119,10 +124,12 @@ public static class BookingActionAvailability
         {
             return Disabled("Closed bookings cannot have guests added.");
         }
+
         if (booking.EndTime <= now)
         {
             return Disabled("Past bookings cannot have guests added.");
         }
+
         return new BookingActionResponse(true, true, null);
     }
 
@@ -132,6 +139,7 @@ public static class BookingActionAvailability
         {
             return Disabled("No-show can only be recorded after the booking has ended.");
         }
+
         return new BookingActionResponse(true, true, null);
     }
 
@@ -141,10 +149,12 @@ public static class BookingActionAvailability
         {
             return Disabled("Only accepted bookings can be rated.");
         }
+
         if (booking.EndTime > now)
         {
             return Disabled("Bookings can only be rated after they end.");
         }
+
         return new BookingActionResponse(true, true, null);
     }
 
@@ -154,6 +164,7 @@ public static class BookingActionAvailability
         {
             return Disabled("Closed bookings cannot be reassigned.");
         }
+
         return new BookingActionResponse(true, true, null);
     }
 

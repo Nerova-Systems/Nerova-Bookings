@@ -43,17 +43,17 @@ public sealed class CollectiveSlotCalculatorTests
             "Team Meeting",
             "team-meeting",
             null,
-            durationMinutes: 30,
-            hidden: false,
+            30,
+            false,
             WorkWeekSchedule.Id,
-            beforeEventBufferMinutes: 0,
-            afterEventBufferMinutes: 0,
-            slotIntervalMinutes: 30,
-            minimumBookingNoticeMinutes: 0,
+            0,
+            0,
+            30,
+            0,
             null,
             null,
             null,
-            teamId: new TenantId(99)
+            new TenantId(99)
         );
         _eventType.SetSchedulingType(SchedulingType.Collective);
     }
@@ -64,7 +64,7 @@ public sealed class CollectiveSlotCalculatorTests
     public void GetSlots_WhenNoHosts_ShouldReturnAllScheduleSlots()
     {
         var start = new DateTimeOffset(2026, 1, 12, 7, 0, 0, TimeSpan.Zero); // Monday 09:00 SAST
-        var end = new DateTimeOffset(2026, 1, 12, 15, 0, 0, TimeSpan.Zero);  // Monday 17:00 SAST
+        var end = new DateTimeOffset(2026, 1, 12, 15, 0, 0, TimeSpan.Zero); // Monday 17:00 SAST
 
         var slots = _calculator.GetSlots(
             _eventType,
@@ -226,12 +226,11 @@ public sealed class CollectiveSlotCalculatorTests
 
         // Booking 09:00–09:30 SAST + 30-min after buffer → effective end 10:00 SAST (08:00 UTC)
         var bookingStart = new DateTimeOffset(2026, 1, 12, 7, 0, 0, TimeSpan.Zero);
-        var bookingEnd = bookingStart.AddMinutes(30);
         var booking = Booking.Create(
             new TenantId(1), hostUserId, _eventType.Id,
             bookingStart, 30,
-            beforeEventBufferMinutes: 0,
-            afterEventBufferMinutes: 30,
+            0,
+            30,
             "Booker", "booker@example.com", "UTC", BookingStatus.Accepted,
             new Dictionary<string, string>()
         );
@@ -259,8 +258,8 @@ public sealed class CollectiveSlotCalculatorTests
             _eventType.Id,
             startTime,
             durationMinutes,
-            beforeEventBufferMinutes: 0,
-            afterEventBufferMinutes: 0,
+            0,
+            0,
             "Test Booker",
             "booker@example.com",
             "UTC", BookingStatus.Accepted,
@@ -270,6 +269,9 @@ public sealed class CollectiveSlotCalculatorTests
 
     private sealed class FixedTimeProvider(DateTimeOffset fixedTime) : TimeProvider
     {
-        public override DateTimeOffset GetUtcNow() => fixedTime;
+        public override DateTimeOffset GetUtcNow()
+        {
+            return fixedTime;
+        }
     }
 }

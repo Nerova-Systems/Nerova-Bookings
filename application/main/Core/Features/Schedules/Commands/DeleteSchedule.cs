@@ -1,7 +1,7 @@
 using JetBrains.Annotations;
+using Main.Features.EventTypes.Domain;
 using Main.Features.Permissions.Domain;
 using Main.Features.Permissions.Pipeline;
-using Main.Features.EventTypes.Domain;
 using Main.Features.Schedules.Domain;
 using Main.Features.Schedules.Shared;
 using Main.Features.Scheduling.Shared;

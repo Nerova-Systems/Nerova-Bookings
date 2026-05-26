@@ -19,7 +19,7 @@ public sealed class EventTypeUpdatedManagedSyncHandlerTests
         return EventType.Create(
             TenantId.NewId(), UserId.NewId(), "Parent", "parent", null, 30, false,
             ScheduleId.NewId(), 0, 0, 30, 60, null, null, null,
-            teamId: TenantId.NewId()
+            TenantId.NewId()
         );
     }
 

@@ -122,6 +122,7 @@ public sealed class EventTypeRepository(MainDbContext mainDbContext)
     public async Task<EventType[]> GetByIdsAsync(EventTypeId[] ids, CancellationToken cancellationToken)
     {
         if (ids.Length == 0) return [];
-        return await DbSet.Where(eventType => ids.Contains(eventType.Id)).ToArrayAsync(cancellationToken);
+        var idList = ids.ToList();
+        return await DbSet.Where(eventType => idList.Contains(eventType.Id)).ToArrayAsync(cancellationToken);
     }
 }

@@ -4,7 +4,6 @@ using FluentAssertions;
 using JetBrains.Annotations;
 using Main.Database;
 using Main.Features.Workflows.Domain;
-using Main.Features.Workflows.Shared;
 using SharedKernel.Authentication;
 using SharedKernel.Tests;
 using Xunit;
@@ -45,7 +44,7 @@ public sealed class WorkflowEndpointsTests : EndpointBaseTest<MainDbContext>
         var created = await createResponse.DeserializeResponse<WorkflowResponse>();
 
         created.Should().NotBeNull();
-        created!.Name.Should().Be("Follow-up sequence");
+        created.Name.Should().Be("Follow-up sequence");
         created.Trigger.Should().Be(WorkflowTrigger.NewEvent);
         created.Steps.Should().BeEmpty();
 
@@ -156,7 +155,7 @@ public sealed class WorkflowEndpointsTests : EndpointBaseTest<MainDbContext>
         var step = await addResponse.DeserializeResponse<WorkflowStepResponse>();
 
         step.Should().NotBeNull();
-        step!.Action.Should().Be(WorkflowAction.EmailAttendee);
+        step.Action.Should().Be(WorkflowAction.EmailAttendee);
         step.Template.Should().Be(WorkflowReminderTemplate.Custom);
         step.EmailSubject.Should().Be("Hello");
         step.EmailBody.Should().Be("Welcome!");
@@ -211,7 +210,7 @@ public sealed class WorkflowEndpointsTests : EndpointBaseTest<MainDbContext>
         var binding = await bindResponse.DeserializeResponse<WorkflowEventTypeBindingResponse>();
 
         binding.Should().NotBeNull();
-        binding!.WorkflowId.Should().Be(workflow.Id);
+        binding.WorkflowId.Should().Be(workflow.Id);
         binding.EventTypeId.Should().Be(eventType.Id);
     }
 
@@ -268,31 +267,35 @@ public sealed class WorkflowEndpointsTests : EndpointBaseTest<MainDbContext>
     private async Task<EventTypeResponse> CreateEventTypeAsync()
     {
         var scheduleResponse = await AuthenticatedOwnerHttpClient.PostAsJsonAsync("/api/schedules", new
-        {
-            name = "Default Schedule",
-            timeZone = "America/New_York",
-            isDefault = true,
-            availabilityWindows = new[] { new { days = new[] { 1, 2, 3, 4, 5 }, startMinute = 540, endMinute = 1020 } }
-        });
+            {
+                name = "Default Schedule",
+                timeZone = "America/New_York",
+                isDefault = true,
+                availabilityWindows = new[] { new { days = new[] { 1, 2, 3, 4, 5 }, startMinute = 540, endMinute = 1020 } }
+            }
+        );
         scheduleResponse.EnsureSuccessStatusCode();
         var schedule = (await scheduleResponse.DeserializeResponse<ScheduleResponse>())!;
 
         var eventTypeResponse = await AuthenticatedOwnerHttpClient.PostAsJsonAsync("/api/event-types", new
-        {
-            title = $"Event Type {Guid.NewGuid():N}",
-            slug = $"et-{Guid.NewGuid():N}",
-            durationMinutes = 30,
-            slotIntervalMinutes = 30,
-            scheduleId = schedule.Id,
-            locationType = "link",
-            locationValue = "https://example.com/meet"
-        });
+            {
+                title = $"Event Type {Guid.NewGuid():N}",
+                slug = $"et-{Guid.NewGuid():N}",
+                durationMinutes = 30,
+                slotIntervalMinutes = 30,
+                scheduleId = schedule.Id,
+                locationType = "link",
+                locationValue = "https://example.com/meet"
+            }
+        );
         eventTypeResponse.EnsureSuccessStatusCode();
         return (await eventTypeResponse.DeserializeResponse<EventTypeResponse>())!;
     }
 
     private static object NewWorkflowRequest(string name, string trigger)
-        => new { name, trigger };
+    {
+        return new { name, trigger };
+    }
 
     private static object NewStepRequest(
         string action,
@@ -302,7 +305,10 @@ public sealed class WorkflowEndpointsTests : EndpointBaseTest<MainDbContext>
         string? sendTo = null,
         string? emailSubject = null,
         string? emailBody = null
-    ) => new { action, template, reminderTime, timeUnit, sendTo, emailSubject, emailBody };
+    )
+    {
+        return new { action, template, reminderTime, timeUnit, sendTo, emailSubject, emailBody };
+    }
 
     [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
     private sealed record WorkflowResponse(string Id, string Name, WorkflowTrigger Trigger, WorkflowStepResponse[] Steps);
@@ -311,8 +317,16 @@ public sealed class WorkflowEndpointsTests : EndpointBaseTest<MainDbContext>
     private sealed record WorkflowsResponse(WorkflowResponse[] Workflows);
 
     [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
-    private sealed record WorkflowStepResponse(string Id, WorkflowAction Action, WorkflowReminderTemplate Template,
-        int? ReminderTime, string? TimeUnit, string? SendTo, string? EmailSubject, string? EmailBody);
+    private sealed record WorkflowStepResponse(
+        string Id,
+        WorkflowAction Action,
+        WorkflowReminderTemplate Template,
+        int? ReminderTime,
+        string? TimeUnit,
+        string? SendTo,
+        string? EmailSubject,
+        string? EmailBody
+    );
 
     [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
     private sealed record WorkflowEventTypeBindingResponse(string Id, string WorkflowId, string EventTypeId);

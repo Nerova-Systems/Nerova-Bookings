@@ -24,6 +24,6 @@ public sealed record ZoomCredentialBlob(
     public static ZoomCredentialBlob FromJson(string json)
     {
         return JsonSerializer.Deserialize<ZoomCredentialBlob>(json, JsonOptions)
-            ?? throw new InvalidOperationException("Zoom credential blob deserialized to null.");
+               ?? throw new InvalidOperationException("Zoom credential blob deserialized to null.");
     }
 }

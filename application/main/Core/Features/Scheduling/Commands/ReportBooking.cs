@@ -66,8 +66,8 @@ public sealed class ReportBookingHandler(
             WebhookEventType.BookingReported,
             booking,
             eventType,
-            attendees: null,
-            report: report,
+            null,
+            report,
             cancellationToken
         );
 

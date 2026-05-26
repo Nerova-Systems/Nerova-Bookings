@@ -19,33 +19,18 @@ namespace Main.Features.Apps.Connectors.GoogleCalendar;
 ///         be registered as a long-lived singleton.
 ///     </para>
 /// </summary>
-public sealed class GoogleCalendarService
+public sealed class GoogleCalendarService(
+    HttpClient httpClient,
+    GoogleCalendarOptions options,
+    GoogleCredentialBlob initialBlob,
+    Func<string, CancellationToken, Task> persistRefreshedBlobAsync,
+    TimeProvider timeProvider
+)
 {
     private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web);
 
-    private readonly HttpClient _httpClient;
-    private readonly GoogleCalendarOptions _options;
-    private readonly Func<string, CancellationToken, Task> _persistRefreshedBlobAsync;
-    private readonly TimeProvider _timeProvider;
-    private GoogleCredentialBlob _blob;
-
-    public GoogleCalendarService(
-        HttpClient httpClient,
-        GoogleCalendarOptions options,
-        GoogleCredentialBlob initialBlob,
-        Func<string, CancellationToken, Task> persistRefreshedBlobAsync,
-        TimeProvider timeProvider
-    )
-    {
-        _httpClient = httpClient;
-        _options = options;
-        _blob = initialBlob;
-        _persistRefreshedBlobAsync = persistRefreshedBlobAsync;
-        _timeProvider = timeProvider;
-    }
-
     /// <summary>Snapshot of the in-memory credential — exposed for tests and the busy-time provider.</summary>
-    public GoogleCredentialBlob CurrentBlob => _blob;
+    public GoogleCredentialBlob CurrentBlob { get; private set; } = initialBlob;
 
     // ─── Free-busy ───────────────────────────────────────────────────────────
 
@@ -65,7 +50,7 @@ public sealed class GoogleCalendarService
         using var response = await SendWithRefreshAsync(
             () =>
             {
-                var request = new HttpRequestMessage(HttpMethod.Post, $"{_options.ApiBaseUrl}/freeBusy")
+                var request = new HttpRequestMessage(HttpMethod.Post, $"{options.ApiBaseUrl}/freeBusy")
                 {
                     Content = JsonContent.Create(payload, options: JsonOptions)
                 };
@@ -99,7 +84,7 @@ public sealed class GoogleCalendarService
         var body = BuildEventBody(input);
 
         using var response = await SendWithRefreshAsync(
-            () => new HttpRequestMessage(HttpMethod.Post, $"{_options.ApiBaseUrl}/calendars/primary/events")
+            () => new HttpRequestMessage(HttpMethod.Post, $"{options.ApiBaseUrl}/calendars/primary/events")
             {
                 Content = JsonContent.Create(body, options: JsonOptions)
             },
@@ -110,7 +95,7 @@ public sealed class GoogleCalendarService
         await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
         var json = await JsonNode.ParseAsync(stream, cancellationToken: cancellationToken);
         return json?["id"]?.GetValue<string>()
-            ?? throw new InvalidOperationException("Google events.insert response missing 'id'.");
+               ?? throw new InvalidOperationException("Google events.insert response missing 'id'.");
     }
 
     /// <summary>
@@ -127,7 +112,7 @@ public sealed class GoogleCalendarService
         var body = BuildEventBodyWithMeet(input);
 
         using var response = await SendWithRefreshAsync(
-            () => new HttpRequestMessage(HttpMethod.Post, $"{_options.ApiBaseUrl}/calendars/primary/events?conferenceDataVersion=1")
+            () => new HttpRequestMessage(HttpMethod.Post, $"{options.ApiBaseUrl}/calendars/primary/events?conferenceDataVersion=1")
             {
                 Content = JsonContent.Create(body, options: JsonOptions)
             },
@@ -137,12 +122,12 @@ public sealed class GoogleCalendarService
         await EnsureSuccessAsync(response, "events.insert", cancellationToken);
         await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
         var json = await JsonNode.ParseAsync(stream, cancellationToken: cancellationToken)
-            ?? throw new InvalidOperationException("Google events.insert response was empty.");
+                   ?? throw new InvalidOperationException("Google events.insert response was empty.");
         var eventId = json["id"]?.GetValue<string>()
-            ?? throw new InvalidOperationException("Google events.insert response missing 'id'.");
+                      ?? throw new InvalidOperationException("Google events.insert response missing 'id'.");
         var joinUrl = json["hangoutLink"]?.GetValue<string>()
-            ?? json["conferenceData"]?["entryPoints"]?.AsArray().FirstOrDefault()?["uri"]?.GetValue<string>()
-            ?? throw new InvalidOperationException("Google events.insert response missing 'hangoutLink' / conferenceData entry point — was conferenceData.createRequest accepted?");
+                      ?? json["conferenceData"]?["entryPoints"]?.AsArray().FirstOrDefault()?["uri"]?.GetValue<string>()
+                      ?? throw new InvalidOperationException("Google events.insert response missing 'hangoutLink' / conferenceData entry point — was conferenceData.createRequest accepted?");
         return (eventId, joinUrl);
     }
 
@@ -151,7 +136,7 @@ public sealed class GoogleCalendarService
         var body = BuildEventBody(input);
 
         using var response = await SendWithRefreshAsync(
-            () => new HttpRequestMessage(HttpMethod.Put, $"{_options.ApiBaseUrl}/calendars/primary/events/{Uri.EscapeDataString(externalEventId)}")
+            () => new HttpRequestMessage(HttpMethod.Put, $"{options.ApiBaseUrl}/calendars/primary/events/{Uri.EscapeDataString(externalEventId)}")
             {
                 Content = JsonContent.Create(body, options: JsonOptions)
             },
@@ -164,7 +149,7 @@ public sealed class GoogleCalendarService
     public async Task CancelEventAsync(string externalEventId, CancellationToken cancellationToken)
     {
         using var response = await SendWithRefreshAsync(
-            () => new HttpRequestMessage(HttpMethod.Delete, $"{_options.ApiBaseUrl}/calendars/primary/events/{Uri.EscapeDataString(externalEventId)}"),
+            () => new HttpRequestMessage(HttpMethod.Delete, $"{options.ApiBaseUrl}/calendars/primary/events/{Uri.EscapeDataString(externalEventId)}"),
             cancellationToken
         );
 
@@ -184,7 +169,7 @@ public sealed class GoogleCalendarService
             summary = input.Title,
             description = input.Description,
             location = input.Location,
-            iCalUID = input.ICalUid,
+            iCalUID = input.CalUid,
             start = new { dateTime = input.StartTime.ToUniversalTime().ToString("o"), timeZone = input.TimeZone },
             end = new { dateTime = input.EndTime.ToUniversalTime().ToString("o"), timeZone = input.TimeZone },
             organizer = new { email = input.OrganizerEmail, displayName = input.OrganizerName },
@@ -198,14 +183,14 @@ public sealed class GoogleCalendarService
         // Per Google Calendar API: a unique requestId scopes the createRequest so retried inserts
         // don't generate multiple conferences. We use the iCalUid when supplied (stable for a
         // booking) and fall back to a fresh GUID.
-        var requestId = string.IsNullOrEmpty(input.ICalUid) ? Guid.NewGuid().ToString("N") : input.ICalUid;
+        var requestId = string.IsNullOrEmpty(input.CalUid) ? Guid.NewGuid().ToString("N") : input.CalUid;
 
         return new
         {
             summary = input.Title,
             description = input.Description,
             location = input.Location,
-            iCalUID = input.ICalUid,
+            iCalUID = input.CalUid,
             start = new { dateTime = input.StartTime.ToUniversalTime().ToString("o"), timeZone = input.TimeZone },
             end = new { dateTime = input.EndTime.ToUniversalTime().ToString("o"), timeZone = input.TimeZone },
             organizer = new { email = input.OrganizerEmail, displayName = input.OrganizerName },
@@ -237,32 +222,31 @@ public sealed class GoogleCalendarService
     )
     {
         var first = buildRequest();
-        GoogleCalendarInstaller.ApplyBearer(first, _blob.AccessToken);
-        var response = await _httpClient.SendAsync(first, cancellationToken);
+        GoogleCalendarInstaller.ApplyBearer(first, CurrentBlob.AccessToken);
+        var response = await httpClient.SendAsync(first, cancellationToken);
         if (response.StatusCode != HttpStatusCode.Unauthorized) return response;
 
         response.Dispose();
         await RefreshAccessTokenAsync(cancellationToken);
 
         var retry = buildRequest();
-        GoogleCalendarInstaller.ApplyBearer(retry, _blob.AccessToken);
-        return await _httpClient.SendAsync(retry, cancellationToken);
+        GoogleCalendarInstaller.ApplyBearer(retry, CurrentBlob.AccessToken);
+        return await httpClient.SendAsync(retry, cancellationToken);
     }
 
     private async Task RefreshAccessTokenAsync(CancellationToken cancellationToken)
     {
-        using var request = new HttpRequestMessage(HttpMethod.Post, _options.TokenUrl)
-        {
-            Content = new FormUrlEncodedContent(new Dictionary<string, string>
-                {
-                    ["client_id"] = _options.ClientId,
-                    ["client_secret"] = _options.ClientSecret,
-                    ["refresh_token"] = _blob.RefreshToken,
-                    ["grant_type"] = "refresh_token"
-                }
-            )
-        };
-        using var response = await _httpClient.SendAsync(request, cancellationToken);
+        var content = new FormUrlEncodedContent(new Dictionary<string, string>
+            {
+                ["client_id"] = options.ClientId,
+                ["client_secret"] = options.ClientSecret,
+                ["refresh_token"] = CurrentBlob.RefreshToken,
+                ["grant_type"] = "refresh_token"
+            }
+        );
+        using var request = new HttpRequestMessage(HttpMethod.Post, options.TokenUrl);
+        request.Content = content;
+        using var response = await httpClient.SendAsync(request, cancellationToken);
         var body = await response.Content.ReadAsStringAsync(cancellationToken);
         if (!response.IsSuccessStatusCode)
         {
@@ -272,18 +256,18 @@ public sealed class GoogleCalendarService
         }
 
         var token = JsonSerializer.Deserialize<GoogleTokenResponse>(body, GoogleTokenResponse.JsonOptions)
-            ?? throw new InvalidOperationException("Google token refresh response was empty.");
+                    ?? throw new InvalidOperationException("Google token refresh response was empty.");
         if (string.IsNullOrEmpty(token.AccessToken)) throw new InvalidOperationException("Google token refresh response missing access_token.");
 
-        _blob = new GoogleCredentialBlob(
+        CurrentBlob = new GoogleCredentialBlob(
             token.AccessToken,
             // Refresh responses normally omit refresh_token — keep the existing one.
-            string.IsNullOrEmpty(token.RefreshToken) ? _blob.RefreshToken : token.RefreshToken,
-            _timeProvider.GetUtcNow().AddSeconds(Math.Max(token.ExpiresIn - 60, 60)),
-            token.Scope ?? _blob.Scope
+            string.IsNullOrEmpty(token.RefreshToken) ? CurrentBlob.RefreshToken : token.RefreshToken,
+            timeProvider.GetUtcNow().AddSeconds(Math.Max(token.ExpiresIn - 60, 60)),
+            token.Scope ?? CurrentBlob.Scope
         );
 
-        await _persistRefreshedBlobAsync(_blob.ToJson(), cancellationToken);
+        await persistRefreshedBlobAsync(CurrentBlob.ToJson(), cancellationToken);
     }
 
     private static async Task EnsureSuccessAsync(HttpResponseMessage response, string operation, CancellationToken cancellationToken)

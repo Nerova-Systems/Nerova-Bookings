@@ -2,7 +2,6 @@ using System.Net;
 using System.Text.Json;
 using FluentAssertions;
 using Main.Features.Apps.Connectors.GoogleCalendar;
-using Microsoft.Extensions.Options;
 using NSubstitute;
 using Xunit;
 
@@ -26,33 +25,34 @@ public sealed class GoogleMeetServiceTests
         HttpRequestMessage? captured = null;
         string? capturedBody = null;
         var handler = new RecordingHandler(request =>
-        {
-            captured = request;
-            capturedBody = request.Content!.ReadAsStringAsync().GetAwaiter().GetResult();
-            const string response = """
-                {
-                  "id": "evt-abc",
-                  "hangoutLink": "https://meet.google.com/abc-defg-hij",
-                  "conferenceData": {
-                    "entryPoints": [ { "uri": "https://meet.google.com/abc-defg-hij" } ]
-                  }
-                }
-                """;
-            return Response(HttpStatusCode.OK, response);
-        });
+            {
+                captured = request;
+                capturedBody = request.Content!.ReadAsStringAsync().GetAwaiter().GetResult();
+                const string response = """
+                                        {
+                                          "id": "evt-abc",
+                                          "hangoutLink": "https://meet.google.com/abc-defg-hij",
+                                          "conferenceData": {
+                                            "entryPoints": [ { "uri": "https://meet.google.com/abc-defg-hij" } ]
+                                          }
+                                        }
+                                        """;
+                return Response(HttpStatusCode.OK, response);
+            }
+        );
         var service = BuildService(handler);
 
         var input = new BookingEvent(
-            Title: "Discovery Call",
-            Description: "Intro chat",
-            StartTime: new DateTimeOffset(2026, 1, 5, 15, 0, 0, TimeSpan.Zero),
-            EndTime: new DateTimeOffset(2026, 1, 5, 15, 30, 0, TimeSpan.Zero),
-            TimeZone: "Europe/Copenhagen",
-            OrganizerEmail: "host@example.com",
-            OrganizerName: "Host Person",
-            Attendees: [new BookingEventAttendee("guest@example.com", "Guest")],
-            Location: null,
-            ICalUid: "uid-1"
+            "Discovery Call",
+            "Intro chat",
+            new DateTimeOffset(2026, 1, 5, 15, 0, 0, TimeSpan.Zero),
+            new DateTimeOffset(2026, 1, 5, 15, 30, 0, TimeSpan.Zero),
+            "Europe/Copenhagen",
+            "host@example.com",
+            "Host Person",
+            [new BookingEventAttendee("guest@example.com", "Guest")],
+            null,
+            "uid-1"
         );
 
         var (eventId, joinUrl) = await service.CreateEventWithMeetLinkAsync(input, CancellationToken.None);
@@ -79,13 +79,13 @@ public sealed class GoogleMeetServiceTests
     public async Task CreateEventWithMeetLinkAsync_WhenHangoutLinkMissing_ShouldFallBackToEntryPointUri()
     {
         const string response = """
-            {
-              "id": "evt-xyz",
-              "conferenceData": {
-                "entryPoints": [ { "uri": "https://meet.google.com/fallback-uri" } ]
-              }
-            }
-            """;
+                                {
+                                  "id": "evt-xyz",
+                                  "conferenceData": {
+                                    "entryPoints": [ { "uri": "https://meet.google.com/fallback-uri" } ]
+                                  }
+                                }
+                                """;
         var handler = new RecordingHandler(_ => Response(HttpStatusCode.OK, response));
         var service = BuildService(handler);
 

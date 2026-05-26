@@ -1,4 +1,3 @@
-using System.Text.Json.Serialization;
 using JetBrains.Annotations;
 using Main.Database;
 using Microsoft.EntityFrameworkCore;
@@ -43,9 +42,9 @@ public sealed class BookingInternalNote : AggregateRoot<BookingInternalNoteId>, 
         Body = body.Trim();
     }
 
-    public BookingId BookingId { get; private set; }
+    public BookingId BookingId { get; init; }
 
-    public UserId AuthorUserId { get; private set; }
+    public UserId AuthorUserId { get; init; }
 
     public string Body { get; private set; }
 

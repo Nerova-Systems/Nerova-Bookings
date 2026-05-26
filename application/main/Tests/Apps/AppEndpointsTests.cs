@@ -1,10 +1,8 @@
 using System.Net;
-using System.Net.Http.Json;
 using FluentAssertions;
 using Main.Database;
 using Main.Features.Apps.Domain;
 using Main.Features.Apps.Shared;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using SharedKernel.Tests;
 using Xunit;
@@ -21,7 +19,7 @@ public sealed class AppEndpointsTests : EndpointBaseTest<MainDbContext>
         using var scope = Provider.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<MainDbContext>();
         db.Set<App>().Add(App.Create(ActiveSlug, "Test App", AppCategory.Calendar, "desc", "https://logo"));
-        db.Set<App>().Add(App.Create(InactiveSlug, "Inactive", AppCategory.Other, "", "", isActive: false));
+        db.Set<App>().Add(App.Create(InactiveSlug, "Inactive", AppCategory.Other, "", "", false));
         db.SaveChanges();
     }
 
@@ -40,7 +38,7 @@ public sealed class AppEndpointsTests : EndpointBaseTest<MainDbContext>
     public async Task InstallApp_FullLifecycle_ShouldConnectAndDisconnect()
     {
         // Install: returns a stub authorize URL containing the state token
-        var installResponse = await AuthenticatedMemberHttpClient.PostAsync($"/api/apps/{ActiveSlug.Value}/install", content: null);
+        var installResponse = await AuthenticatedMemberHttpClient.PostAsync($"/api/apps/{ActiveSlug.Value}/install", null);
         installResponse.EnsureSuccessStatusCode();
         var install = await installResponse.DeserializeResponse<InstallAppResponse>();
         install!.State.Should().NotBeNullOrWhiteSpace();
@@ -73,14 +71,14 @@ public sealed class AppEndpointsTests : EndpointBaseTest<MainDbContext>
     [Fact]
     public async Task InstallApp_WhenSlugIsUnknown_ShouldReturnNotFound()
     {
-        var response = await AuthenticatedMemberHttpClient.PostAsync("/api/apps/missing/install", content: null);
+        var response = await AuthenticatedMemberHttpClient.PostAsync("/api/apps/missing/install", null);
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
     }
 
     [Fact]
     public async Task InstallApp_WhenAppIsInactive_ShouldReturnBadRequest()
     {
-        var response = await AuthenticatedMemberHttpClient.PostAsync($"/api/apps/{InactiveSlug.Value}/install", content: null);
+        var response = await AuthenticatedMemberHttpClient.PostAsync($"/api/apps/{InactiveSlug.Value}/install", null);
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }
 
@@ -97,7 +95,7 @@ public sealed class AppEndpointsTests : EndpointBaseTest<MainDbContext>
     public async Task Callback_WhenStateBelongsToDifferentSlug_ShouldReturnBadRequest()
     {
         // Issue a state for ActiveSlug, then attempt to use it on InactiveSlug
-        var install = await (await AuthenticatedMemberHttpClient.PostAsync($"/api/apps/{ActiveSlug.Value}/install", content: null))
+        var install = await (await AuthenticatedMemberHttpClient.PostAsync($"/api/apps/{ActiveSlug.Value}/install", null))
             .DeserializeResponse<InstallAppResponse>();
 
         var response = await AuthenticatedMemberHttpClient.GetAsync(

@@ -33,7 +33,7 @@ public sealed class InsightsScopeResolverTests
         var scope = _sut.TryResolve();
 
         scope.Should().NotBeNull();
-        scope!.TenantId.Should().Be(tenantId);
+        scope.TenantId.Should().Be(tenantId);
         scope.UserId.Should().Be(userId);
         scope.TeamId.Should().BeNull();
     }
@@ -76,10 +76,11 @@ public sealed class InsightsScopeResolverTests
     public void HasInsightsAccess_WhenFlagEnabled_ShouldReturnTrue()
     {
         _context.UserInfo.Returns(new UserInfo
-        {
-            IsAuthenticated = true,
-            FeatureFlags = new HashSet<string> { InsightsAuthorization.InsightsFeatureFlagKey }
-        });
+            {
+                IsAuthenticated = true,
+                FeatureFlags = new HashSet<string> { InsightsAuthorization.InsightsFeatureFlagKey }
+            }
+        );
 
         _sut.HasInsightsAccess().Should().BeTrue();
     }

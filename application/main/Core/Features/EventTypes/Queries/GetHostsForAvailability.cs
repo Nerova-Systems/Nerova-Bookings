@@ -1,9 +1,9 @@
 using FluentValidation;
 using JetBrains.Annotations;
-using Main.Features.Permissions.Domain;
-using Main.Features.Permissions.Pipeline;
 using Main.Features.EventTypes.Domain;
 using Main.Features.EventTypes.Shared;
+using Main.Features.Permissions.Domain;
+using Main.Features.Permissions.Pipeline;
 using Main.Features.Schedules.Domain;
 using SharedKernel.Cqrs;
 using SharedKernel.ExecutionContext;
@@ -56,7 +56,7 @@ public sealed class GetHostsForAvailabilityHandler(
         var schedule = await scheduleRepository.GetByIdAsync(eventType.ScheduleId, cancellationToken);
 
         var availability = new List<HostAvailabilityResponse>();
-        var fallbackUserIds = hosts.Length == 0 ? new[] { eventType.OwnerUserId } : hosts.Select(host => host.UserId).Distinct().ToArray();
+        var fallbackUserIds = hosts.Length == 0 ? [eventType.OwnerUserId] : hosts.Select(host => host.UserId).Distinct().ToArray();
 
         foreach (var userId in fallbackUserIds)
         {

@@ -1,8 +1,8 @@
 using System.Text.Json;
 using JetBrains.Annotations;
+using Main.Features.EventTypes.Domain;
 using Main.Features.Permissions.Domain;
 using Main.Features.Permissions.Pipeline;
-using Main.Features.EventTypes.Domain;
 using Main.Features.Scheduling.Domain;
 using Main.Features.Scheduling.Shared;
 using SharedKernel.Cqrs;
@@ -44,8 +44,8 @@ public sealed record BookingDetailsResponse(
     string? CancelledByUserUid,
     string? RescheduledByUserUid,
     string? SmsReminderNumber,
-    string? ICalUid,
-    int ICalSequence,
+    string? CalUid,
+    int CalSequence,
     int? Rating,
     string? RatingFeedback,
     bool? NoShowHost,
@@ -59,7 +59,14 @@ public sealed record BookingDetailsResponse(
 );
 
 [PublicAPI]
-public sealed record BookingAttendeeResponse(BookingAttendeeId Id, string Name, string Email, string TimeZone, string Locale, bool NoShow);
+public sealed record BookingAttendeeResponse(
+    BookingAttendeeId Id,
+    string Name,
+    string Email,
+    string TimeZone,
+    string Locale,
+    bool NoShow
+);
 
 [PublicAPI]
 public sealed record BookingSeatResponse(BookingSeatId Id, BookingAttendeeId AttendeeId, string ReferenceUid);
@@ -130,8 +137,8 @@ public sealed class GetBookingDetailsHandler(
             booking.CancelledByUserUid,
             booking.RescheduledByUserUid,
             booking.SmsReminderNumber,
-            booking.ICalUid,
-            booking.ICalSequence,
+            booking.CalUid,
+            booking.CalSequence,
             booking.Rating,
             booking.RatingFeedback,
             booking.NoShowHost,

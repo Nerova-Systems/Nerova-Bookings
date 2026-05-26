@@ -1,5 +1,6 @@
 using System.Net;
 using System.Text.Json;
+using System.Web;
 using FluentAssertions;
 using Main.Features.Apps.Connectors.GoogleCalendar;
 using Main.Features.Apps.Domain;
@@ -20,7 +21,7 @@ public sealed class GoogleCalendarInstallerTests
     [Fact]
     public async Task BeginInstallAsync_WhenConfigured_ShouldBuildAuthorizeUrlWithExpectedParameters()
     {
-        var installer = BuildInstaller(handler: new RecordingHandler(_ => new HttpResponseMessage(HttpStatusCode.OK)));
+        var installer = BuildInstaller(new RecordingHandler(_ => new HttpResponseMessage(HttpStatusCode.OK)));
 
         var result = await installer.BeginInstallAsync(
             new AppInstallContext(
@@ -35,7 +36,7 @@ public sealed class GoogleCalendarInstallerTests
 
         result.State.Should().Be("state-123");
         var uri = new Uri(result.AuthorizeUrl);
-        var query = System.Web.HttpUtility.ParseQueryString(uri.Query);
+        var query = HttpUtility.ParseQueryString(uri.Query);
         query["client_id"].Should().Be("client-abc");
         query["redirect_uri"].Should().Be("https://app.test/api/apps/google-calendar/callback");
         query["response_type"].Should().Be("code");
@@ -50,9 +51,9 @@ public sealed class GoogleCalendarInstallerTests
     public async Task BeginInstallAsync_WhenNotConfigured_ShouldThrowNotConfigured()
     {
         var installer = BuildInstaller(
-            handler: new RecordingHandler(_ => new HttpResponseMessage(HttpStatusCode.OK)),
-            clientId: "",
-            clientSecret: ""
+            new RecordingHandler(_ => new HttpResponseMessage(HttpStatusCode.OK)),
+            "",
+            ""
         );
 
         var act = async () => await installer.BeginInstallAsync(
@@ -69,19 +70,21 @@ public sealed class GoogleCalendarInstallerTests
         string? capturedFormBody = null;
         HttpMethod? capturedMethod = null;
         var handler = new RecordingHandler(request =>
-        {
-            capturedMethod = request.Method;
-            capturedFormBody = request.Content!.ReadAsStringAsync().GetAwaiter().GetResult();
-            var json = JsonSerializer.Serialize(new
             {
-                access_token = "atk",
-                refresh_token = "rtk",
-                expires_in = 3600,
-                scope = "https://www.googleapis.com/auth/calendar.events",
-                token_type = "Bearer"
-            });
-            return new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent(json) };
-        });
+                capturedMethod = request.Method;
+                capturedFormBody = request.Content!.ReadAsStringAsync().GetAwaiter().GetResult();
+                var json = JsonSerializer.Serialize(new
+                    {
+                        access_token = "atk",
+                        refresh_token = "rtk",
+                        expires_in = 3600,
+                        scope = "https://www.googleapis.com/auth/calendar.events",
+                        token_type = "Bearer"
+                    }
+                );
+                return new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent(json) };
+            }
+        );
 
         var (installer, protector) = BuildInstallerWithProtector(handler);
 
@@ -115,10 +118,11 @@ public sealed class GoogleCalendarInstallerTests
     public async Task CompleteInstallAsync_WhenRefreshTokenMissing_ShouldThrow()
     {
         var handler = new RecordingHandler(_ =>
-        {
-            var json = JsonSerializer.Serialize(new { access_token = "atk", expires_in = 3600 });
-            return new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent(json) };
-        });
+            {
+                var json = JsonSerializer.Serialize(new { access_token = "atk", expires_in = 3600 });
+                return new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent(json) };
+            }
+        );
         var (installer, _) = BuildInstallerWithProtector(handler);
 
         var act = async () => await installer.CompleteInstallAsync(
@@ -148,14 +152,15 @@ public sealed class GoogleCalendarInstallerTests
     {
         var options = Substitute.For<IOptionsMonitor<GoogleCalendarOptions>>();
         options.CurrentValue.Returns(new GoogleCalendarOptions
-        {
-            ClientId = clientId,
-            ClientSecret = clientSecret,
-            AuthorizeUrl = "https://oauth.test/authorize",
-            TokenUrl = "https://oauth.test/token",
-            RevokeUrl = "https://oauth.test/revoke",
-            ApiBaseUrl = "https://calendar.test"
-        });
+            {
+                ClientId = clientId,
+                ClientSecret = clientSecret,
+                AuthorizeUrl = "https://oauth.test/authorize",
+                TokenUrl = "https://oauth.test/token",
+                RevokeUrl = "https://oauth.test/revoke",
+                ApiBaseUrl = "https://calendar.test"
+            }
+        );
 
         var factory = Substitute.For<IHttpClientFactory>();
         factory.CreateClient(GoogleCalendarSlug.HttpClientName).Returns(_ => new HttpClient(handler));

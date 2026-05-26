@@ -1,7 +1,6 @@
 using FluentAssertions;
 using Main.Features.EventTypes.Domain;
 using Main.Features.ManagedEventTypes.Services;
-using Main.Features.ManagedEventTypes.Shared;
 using Main.Features.Schedules.Domain;
 using NSubstitute;
 using SharedKernel.Domain;
@@ -16,7 +15,7 @@ public sealed class ManagedEventTypePropagatorTests
         var parent = EventType.Create(
             TenantId.NewId(), UserId.NewId(), "Parent", "parent", null, 30, false,
             ScheduleId.NewId(), 0, 0, 30, 60, null, null, null,
-            teamId: TenantId.NewId()
+            TenantId.NewId()
         );
         parent.UpdateUnlockedFields(unlockedFields ?? []);
         return parent;

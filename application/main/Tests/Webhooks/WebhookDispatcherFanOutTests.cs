@@ -4,8 +4,6 @@ using Main.Features.Webhooks.Domain;
 using Main.Features.Webhooks.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using SharedKernel.Domain;
-using SharedKernel.Tests;
 using Xunit;
 
 namespace Main.Tests.Webhooks;
@@ -28,11 +26,13 @@ public sealed class WebhookDispatcherFanOutTests : EndpointBaseTest<MainDbContex
         for (var i = 0; i < 3; i++)
         {
             db.Set<Webhook>().Add(Webhook.Create(
-                tenantId, userId: null, eventTypeId: null,
-                targetUrl: $"https://example.test/hook-{i}",
-                eventSubscriptions: [WebhookEventType.BookingCreated]
-            ));
+                    tenantId, null, null,
+                    $"https://example.test/hook-{i}",
+                    [WebhookEventType.BookingCreated]
+                )
+            );
         }
+
         await db.SaveChangesAsync();
 
         var dispatcher = CreateDispatcher(db);
@@ -41,7 +41,8 @@ public sealed class WebhookDispatcherFanOutTests : EndpointBaseTest<MainDbContex
         await db.SaveChangesAsync();
 
         deliveryIds.Should().HaveCount(3);
-        var stored = await db.Set<WebhookDelivery>().IgnoreQueryFilters().Where(d => deliveryIds.Contains(d.Id)).ToListAsync();
+        var idList = deliveryIds.ToList();
+        var stored = await db.Set<WebhookDelivery>().IgnoreQueryFilters().Where(d => idList.Contains(d.Id)).ToListAsync();
         stored.Should().HaveCount(3).And.OnlyContain(d => d.Status == WebhookDeliveryStatus.Pending && d.EventType == WebhookEventType.BookingCreated);
     }
 
@@ -53,9 +54,11 @@ public sealed class WebhookDispatcherFanOutTests : EndpointBaseTest<MainDbContex
         var tenantId = DatabaseSeeder.TenantId;
 
         var active = Webhook.Create(tenantId, null, null, "https://example.test/active",
-            [WebhookEventType.BookingCancelled]);
+            [WebhookEventType.BookingCancelled]
+        );
         var inactive = Webhook.Create(tenantId, null, null, "https://example.test/inactive",
-            [WebhookEventType.BookingCancelled], active: false);
+            [WebhookEventType.BookingCancelled], false
+        );
         db.Set<Webhook>().AddRange(active, inactive);
         await db.SaveChangesAsync();
 
@@ -78,9 +81,11 @@ public sealed class WebhookDispatcherFanOutTests : EndpointBaseTest<MainDbContex
 
         // Only subscribes to BookingCreated — should NOT receive a BookingReported delivery.
         var unrelated = Webhook.Create(tenantId, null, null, "https://example.test/unrelated",
-            [WebhookEventType.BookingCreated]);
+            [WebhookEventType.BookingCreated]
+        );
         var reportSubscriber = Webhook.Create(tenantId, null, null, "https://example.test/reports",
-            [WebhookEventType.BookingReported]);
+            [WebhookEventType.BookingReported]
+        );
         db.Set<Webhook>().AddRange(unrelated, reportSubscriber);
         await db.SaveChangesAsync();
 

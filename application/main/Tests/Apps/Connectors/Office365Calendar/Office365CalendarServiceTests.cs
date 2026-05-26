@@ -2,7 +2,6 @@ using System.Net;
 using System.Text.Json;
 using FluentAssertions;
 using Main.Features.Apps.Connectors.Office365Calendar;
-using Microsoft.Extensions.Options;
 using NSubstitute;
 using Xunit;
 
@@ -16,31 +15,32 @@ public sealed class Office365CalendarServiceTests
     public async Task GetBusyTimesAsync_WhenGraphReturnsScheduleItems_ShouldParseBusyIntervals()
     {
         const string body = """
-            {
-              "value": [
-                {
-                  "scheduleId": "host@contoso.com",
-                  "availabilityView": "0220",
-                  "scheduleItems": [
-                    { "status": "busy",      "start": { "dateTime": "2026-01-02T09:00:00.0000000", "timeZone": "UTC" }, "end": { "dateTime": "2026-01-02T10:00:00.0000000", "timeZone": "UTC" } },
-                    { "status": "tentative", "start": { "dateTime": "2026-01-02T13:00:00.0000000", "timeZone": "UTC" }, "end": { "dateTime": "2026-01-02T14:30:00.0000000", "timeZone": "UTC" } },
-                    { "status": "free",      "start": { "dateTime": "2026-01-02T15:00:00.0000000", "timeZone": "UTC" }, "end": { "dateTime": "2026-01-02T16:00:00.0000000", "timeZone": "UTC" } }
-                  ]
-                }
-              ]
-            }
-            """;
+                            {
+                              "value": [
+                                {
+                                  "scheduleId": "host@contoso.com",
+                                  "availabilityView": "0220",
+                                  "scheduleItems": [
+                                    { "status": "busy",      "start": { "dateTime": "2026-01-02T09:00:00.0000000", "timeZone": "UTC" }, "end": { "dateTime": "2026-01-02T10:00:00.0000000", "timeZone": "UTC" } },
+                                    { "status": "tentative", "start": { "dateTime": "2026-01-02T13:00:00.0000000", "timeZone": "UTC" }, "end": { "dateTime": "2026-01-02T14:30:00.0000000", "timeZone": "UTC" } },
+                                    { "status": "free",      "start": { "dateTime": "2026-01-02T15:00:00.0000000", "timeZone": "UTC" }, "end": { "dateTime": "2026-01-02T16:00:00.0000000", "timeZone": "UTC" } }
+                                  ]
+                                }
+                              ]
+                            }
+                            """;
 
         var handler = new RecordingHandler(request =>
-        {
-            if (request.RequestUri!.AbsoluteUri.EndsWith("/me/calendar/getSchedule"))
             {
-                return Response(HttpStatusCode.OK, body);
-            }
+                if (request.RequestUri!.AbsoluteUri.EndsWith("/me/calendar/getSchedule"))
+                {
+                    return Response(HttpStatusCode.OK, body);
+                }
 
-            // /me lookup for the user principal name (the seed blob has none).
-            return Response(HttpStatusCode.OK, """{"mail":"host@contoso.com","userPrincipalName":"host@contoso.com"}""");
-        });
+                // /me lookup for the user principal name (the seed blob has none).
+                return Response(HttpStatusCode.OK, """{"mail":"host@contoso.com","userPrincipalName":"host@contoso.com"}""");
+            }
+        );
 
         var service = BuildService(handler, NewBlob());
 
@@ -58,24 +58,25 @@ public sealed class Office365CalendarServiceTests
         HttpRequestMessage? captured = null;
         string? capturedBody = null;
         var handler = new RecordingHandler(request =>
-        {
-            captured = request;
-            capturedBody = request.Content!.ReadAsStringAsync().GetAwaiter().GetResult();
-            return Response(HttpStatusCode.Created, """{"id":"AAMkAGI2..."}""");
-        });
+            {
+                captured = request;
+                capturedBody = request.Content!.ReadAsStringAsync().GetAwaiter().GetResult();
+                return Response(HttpStatusCode.Created, """{"id":"AAMkAGI2..."}""");
+            }
+        );
         var service = BuildService(handler, NewBlob());
 
         var input = new BookingEvent(
-            Title: "Discovery Call",
-            Description: "Intro chat",
-            StartTime: new DateTimeOffset(2026, 1, 5, 15, 0, 0, TimeSpan.Zero),
-            EndTime: new DateTimeOffset(2026, 1, 5, 15, 30, 0, TimeSpan.Zero),
-            TimeZone: "Europe/Copenhagen",
-            OrganizerEmail: "host@contoso.com",
-            OrganizerName: "Host Person",
-            Attendees: [new BookingEventAttendee("guest@example.com", "Guest")],
-            Location: "https://meet.example/abc",
-            ICalUid: "uid-1"
+            "Discovery Call",
+            "Intro chat",
+            new DateTimeOffset(2026, 1, 5, 15, 0, 0, TimeSpan.Zero),
+            new DateTimeOffset(2026, 1, 5, 15, 30, 0, TimeSpan.Zero),
+            "Europe/Copenhagen",
+            "host@contoso.com",
+            "Host Person",
+            [new BookingEventAttendee("guest@example.com", "Guest")],
+            "https://meet.example/abc",
+            "uid-1"
         );
 
         var id = await service.CreateEventAsync(input, CancellationToken.None);
@@ -104,10 +105,11 @@ public sealed class Office365CalendarServiceTests
     {
         HttpRequestMessage? captured = null;
         var handler = new RecordingHandler(request =>
-        {
-            captured = request;
-            return Response(HttpStatusCode.OK, "{}");
-        });
+            {
+                captured = request;
+                return Response(HttpStatusCode.OK, "{}");
+            }
+        );
         var service = BuildService(handler, NewBlob());
 
         var input = new BookingEvent(
@@ -147,23 +149,24 @@ public sealed class Office365CalendarServiceTests
         HttpRequestMessage? captured = null;
         string? capturedBody = null;
         var handler = new RecordingHandler(request =>
-        {
-            captured = request;
-            capturedBody = request.Content!.ReadAsStringAsync().GetAwaiter().GetResult();
-            return Response(HttpStatusCode.Created, """{"id":"mtg-1","joinWebUrl":"https://teams.microsoft.com/l/meetup-join/abc","joinUrl":"https://teams.microsoft.com/l/meetup-join/legacy"}""");
-        });
+            {
+                captured = request;
+                capturedBody = request.Content!.ReadAsStringAsync().GetAwaiter().GetResult();
+                return Response(HttpStatusCode.Created, """{"id":"mtg-1","joinWebUrl":"https://teams.microsoft.com/l/meetup-join/abc","joinUrl":"https://teams.microsoft.com/l/meetup-join/legacy"}""");
+            }
+        );
         var service = BuildService(handler, NewBlob());
 
         var input = new BookingEvent(
-            Title: "Sync",
-            Description: "ignored",
+            "Sync",
+            "ignored",
             // 15:00 local in +02:00 = 13:00 UTC — proves we normalize to UTC before emitting.
-            StartTime: new DateTimeOffset(2026, 1, 5, 15, 0, 0, TimeSpan.FromHours(2)),
-            EndTime: new DateTimeOffset(2026, 1, 5, 15, 30, 0, TimeSpan.FromHours(2)),
-            TimeZone: "Europe/Copenhagen",
-            OrganizerEmail: "host@contoso.com",
-            OrganizerName: null,
-            Attendees: []
+            new DateTimeOffset(2026, 1, 5, 15, 0, 0, TimeSpan.FromHours(2)),
+            new DateTimeOffset(2026, 1, 5, 15, 30, 0, TimeSpan.FromHours(2)),
+            "Europe/Copenhagen",
+            "host@contoso.com",
+            null,
+            []
         );
 
         var (id, joinUrl) = await service.CreateOnlineMeetingAsync(input, CancellationToken.None);
@@ -201,10 +204,11 @@ public sealed class Office365CalendarServiceTests
     {
         HttpRequestMessage? captured = null;
         var handler = new RecordingHandler(request =>
-        {
-            captured = request;
-            return Response(HttpStatusCode.OK, """{"id":"mtg-3","joinWebUrl":"https://teams.microsoft.com/l/meetup-join/new"}""");
-        });
+            {
+                captured = request;
+                return Response(HttpStatusCode.OK, """{"id":"mtg-3","joinWebUrl":"https://teams.microsoft.com/l/meetup-join/new"}""");
+            }
+        );
         var service = BuildService(handler, NewBlob());
 
         var (_, joinUrl) = await service.UpdateOnlineMeetingAsync("mtg-3", NewMeetingInput(), CancellationToken.None);
@@ -235,29 +239,33 @@ public sealed class Office365CalendarServiceTests
         var attempts = 0;
         var seenBearers = new List<string?>();
         var handler = new RecordingHandler(request =>
-        {
-            if (request.RequestUri!.AbsoluteUri.EndsWith("/oauth2/v2.0/token"))
             {
-                var json = JsonSerializer.Serialize(new
+                if (request.RequestUri!.AbsoluteUri.EndsWith("/oauth2/v2.0/token"))
                 {
-                    access_token = "access-2",
-                    refresh_token = "refresh-2",
-                    expires_in = 3600,
-                    scope = "offline_access Calendars.ReadWrite OnlineMeetings.ReadWrite",
-                    token_type = "Bearer"
-                });
-                return Response(HttpStatusCode.OK, json);
+                    var json = JsonSerializer.Serialize(new
+                        {
+                            access_token = "access-2",
+                            refresh_token = "refresh-2",
+                            expires_in = 3600,
+                            scope = "offline_access Calendars.ReadWrite OnlineMeetings.ReadWrite",
+                            token_type = "Bearer"
+                        }
+                    );
+                    return Response(HttpStatusCode.OK, json);
+                }
+
+                if (request.RequestUri.AbsoluteUri.EndsWith("/me/onlineMeetings"))
+                {
+                    attempts++;
+                    seenBearers.Add(request.Headers.Authorization?.Parameter);
+                    return attempts == 1
+                        ? Response(HttpStatusCode.Unauthorized, "expired")
+                        : Response(HttpStatusCode.Created, """{"id":"mtg-r","joinWebUrl":"https://teams.microsoft.com/l/meetup-join/r"}""");
+                }
+
+                return Response(HttpStatusCode.NotFound, "");
             }
-            if (request.RequestUri.AbsoluteUri.EndsWith("/me/onlineMeetings"))
-            {
-                attempts++;
-                seenBearers.Add(request.Headers.Authorization?.Parameter);
-                return attempts == 1
-                    ? Response(HttpStatusCode.Unauthorized, "expired")
-                    : Response(HttpStatusCode.Created, """{"id":"mtg-r","joinWebUrl":"https://teams.microsoft.com/l/meetup-join/r"}""");
-            }
-            return Response(HttpStatusCode.NotFound, "");
-        });
+        );
         var service = BuildService(handler, NewBlob());
 
         var (id, _) = await service.CreateOnlineMeetingAsync(NewMeetingInput(), CancellationToken.None);
@@ -288,42 +296,45 @@ public sealed class Office365CalendarServiceTests
         var seenBearers = new List<string?>();
         var meCount = 0;
         var handler = new RecordingHandler(request =>
-        {
-            if (request.RequestUri!.AbsoluteUri.Contains("/me?"))
             {
-                meCount++;
-                seenBearers.Add(request.Headers.Authorization?.Parameter);
-                if (meCount == 1) return Response(HttpStatusCode.Unauthorized, "expired");
-                return Response(HttpStatusCode.OK, """{"mail":"host@contoso.com","userPrincipalName":"host@contoso.com"}""");
-            }
-
-            if (request.RequestUri!.AbsoluteUri.EndsWith("/oauth2/v2.0/token"))
-            {
-                var json = JsonSerializer.Serialize(new
+                if (request.RequestUri!.AbsoluteUri.Contains("/me?"))
                 {
-                    access_token = "access-2",
-                    refresh_token = "refresh-2",
-                    expires_in = 3600,
-                    scope = "offline_access Calendars.ReadWrite",
-                    token_type = "Bearer"
-                });
-                return Response(HttpStatusCode.OK, json);
-            }
+                    meCount++;
+                    seenBearers.Add(request.Headers.Authorization?.Parameter);
+                    if (meCount == 1) return Response(HttpStatusCode.Unauthorized, "expired");
+                    return Response(HttpStatusCode.OK, """{"mail":"host@contoso.com","userPrincipalName":"host@contoso.com"}""");
+                }
 
-            if (request.RequestUri!.AbsoluteUri.EndsWith("/me/calendar/getSchedule"))
-            {
-                return Response(HttpStatusCode.OK, """{"value":[]}""");
-            }
+                if (request.RequestUri!.AbsoluteUri.EndsWith("/oauth2/v2.0/token"))
+                {
+                    var json = JsonSerializer.Serialize(new
+                        {
+                            access_token = "access-2",
+                            refresh_token = "refresh-2",
+                            expires_in = 3600,
+                            scope = "offline_access Calendars.ReadWrite",
+                            token_type = "Bearer"
+                        }
+                    );
+                    return Response(HttpStatusCode.OK, json);
+                }
 
-            return Response(HttpStatusCode.NotFound, "");
-        });
+                if (request.RequestUri!.AbsoluteUri.EndsWith("/me/calendar/getSchedule"))
+                {
+                    return Response(HttpStatusCode.OK, """{"value":[]}""");
+                }
+
+                return Response(HttpStatusCode.NotFound, "");
+            }
+        );
 
         var persisted = new List<string>();
         var service = BuildService(handler, NewBlob(), (json, _) =>
-        {
-            persisted.Add(json);
-            return Task.CompletedTask;
-        });
+            {
+                persisted.Add(json);
+                return Task.CompletedTask;
+            }
+        );
 
         var busy = await service.GetBusyTimesAsync(Now, Now.AddDays(1), CancellationToken.None);
 
@@ -346,7 +357,7 @@ public sealed class Office365CalendarServiceTests
     {
         // Leave UserPrincipalName null on purpose so the GetBusyTimes test covers the
         // /me fallback path; the SendWithRefresh test exercises that fallback too.
-        return new Office365CredentialBlob("access-1", "refresh-1", Now.AddHours(1), "scope-1", UserPrincipalName: null);
+        return new Office365CredentialBlob("access-1", "refresh-1", Now.AddHours(1), "scope-1");
     }
 
     private static Office365CalendarService BuildService(

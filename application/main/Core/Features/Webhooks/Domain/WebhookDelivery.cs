@@ -1,4 +1,3 @@
-using System.Text.Json.Serialization;
 using JetBrains.Annotations;
 using SharedKernel.Domain;
 using SharedKernel.StronglyTypedIds;
@@ -9,7 +8,10 @@ namespace Main.Features.Webhooks.Domain;
 [JsonConverter(typeof(StronglyTypedIdJsonConverter<string, WebhookDeliveryId>))]
 public sealed record WebhookDeliveryId(string Value) : StronglyTypedUlid<WebhookDeliveryId>(Value)
 {
-    public override string ToString() => Value;
+    public override string ToString()
+    {
+        return Value;
+    }
 }
 
 [PublicAPI]
@@ -70,8 +72,6 @@ public sealed class WebhookDelivery : AggregateRoot<WebhookDeliveryId>, ITenantS
         NextAttemptAt = firstAttemptAt;
     }
 
-    public TenantId TenantId { get; } = new(0);
-
     public WebhookId WebhookId { get; private set; }
 
     public WebhookEventType EventType { get; private set; }
@@ -96,6 +96,8 @@ public sealed class WebhookDelivery : AggregateRoot<WebhookDeliveryId>, ITenantS
     public int? ResponseStatusCode { get; private set; }
 
     public string? ResponseBody { get; private set; }
+
+    public TenantId TenantId { get; } = new(0);
 
     public static WebhookDelivery Create(
         TenantId tenantId,

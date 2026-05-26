@@ -53,6 +53,8 @@ public static class SystemRoles
         new(PermissionResource.App, PermissionAction.Delete)
     };
 
+    private static readonly IReadOnlySet<Permission> FrozenEmpty = new HashSet<Permission>();
+
     /// <summary>
     ///     Resolves the permission set for the given role string. Unknown role strings (including
     ///     <see langword="null" />) yield the empty set — i.e., no permissions, fail-closed.
@@ -67,8 +69,6 @@ public static class SystemRoles
             _ => FrozenEmpty
         };
     }
-
-    private static readonly IReadOnlySet<Permission> FrozenEmpty = new HashSet<Permission>();
 
     private static HashSet<Permission> BuildAll()
     {

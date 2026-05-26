@@ -14,16 +14,31 @@ public interface ISmsProvider
 ///         <see cref="Sent" /> — the provider accepted the message and returned a message id.
 ///         <see cref="NotConfigured" /> — required credentials are missing; the dispatcher should
 ///         skip the reminder gracefully without retrying (config has to change first).
-///         <see cref="TransientFailure" /> — network / 5xx / rate-limit; safe to retry.
-///         <see cref="PermanentFailure" /> — 4xx other than 429; do not retry.
+///         <see cref="SmsResultStatus.TransientFailure" /> — network / 5xx / rate-limit; safe to retry.
+///         <see cref="SmsResultStatus.PermanentFailure" /> — 4xx other than 429; do not retry.
 ///     </para>
 /// </summary>
 public sealed record SmsResult(SmsResultStatus Status, string? MessageId, string? ErrorReason)
 {
-    public static SmsResult Sent(string messageId) => new(SmsResultStatus.Sent, messageId, null);
-    public static SmsResult NotConfigured(string reason) => new(SmsResultStatus.NotConfigured, null, reason);
-    public static SmsResult Transient(string reason) => new(SmsResultStatus.TransientFailure, null, reason);
-    public static SmsResult Permanent(string reason) => new(SmsResultStatus.PermanentFailure, null, reason);
+    public static SmsResult Sent(string messageId)
+    {
+        return new SmsResult(SmsResultStatus.Sent, messageId, null);
+    }
+
+    public static SmsResult NotConfigured(string reason)
+    {
+        return new SmsResult(SmsResultStatus.NotConfigured, null, reason);
+    }
+
+    public static SmsResult Transient(string reason)
+    {
+        return new SmsResult(SmsResultStatus.TransientFailure, null, reason);
+    }
+
+    public static SmsResult Permanent(string reason)
+    {
+        return new SmsResult(SmsResultStatus.PermanentFailure, null, reason);
+    }
 }
 
 public enum SmsResultStatus

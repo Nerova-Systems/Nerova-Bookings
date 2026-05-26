@@ -31,7 +31,7 @@ public sealed class GoogleMeetConferenceLinkProvider(GoogleCalendarServiceFactor
         var (eventId, joinUrl) = await service.CreateEventWithMeetLinkAsync(ToGCal(input), cancellationToken);
         // Google Meet does not return a separate password — the link itself carries the access
         // token. Surface as null so downstream UI doesn't render an empty "Password:" line.
-        return new ConferenceLink(eventId, joinUrl, Password: null);
+        return new ConferenceLink(eventId, joinUrl, null);
     }
 
     public async Task<ConferenceLink> UpdateAsync(Credential credential, string externalId, DomainBookingEvent input, CancellationToken cancellationToken)
@@ -41,7 +41,7 @@ public sealed class GoogleMeetConferenceLinkProvider(GoogleCalendarServiceFactor
         // The hangout link is stable across event updates — we can't easily re-read it without
         // an extra GET. Returning the externalId with an empty join URL is intentional: the
         // scheduling layer reuses the persisted BookingReference.LinkUrl when updates succeed.
-        return new ConferenceLink(externalId, JoinUrl: string.Empty, Password: null);
+        return new ConferenceLink(externalId, string.Empty, null);
     }
 
     public Task CancelAsync(Credential credential, string externalId, CancellationToken cancellationToken)
@@ -64,8 +64,8 @@ public sealed class GoogleMeetConferenceLinkProvider(GoogleCalendarServiceFactor
             input.OrganizerEmail,
             input.OrganizerName,
             attendees,
-            Location: null,
-            ICalUid: input.ICalUid
+            null,
+            input.CalUid
         );
     }
 }

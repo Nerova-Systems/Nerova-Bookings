@@ -55,7 +55,7 @@ public sealed class MsTeamsInstaller(IServiceScopeFactory scopeFactory) : IAppIn
         await EnsureOffice365PrerequisiteAsync(context.UserId, cancellationToken);
 
         // No fresh credential to persist — MS Teams reuses the office365-calendar credential.
-        return new AppInstallCallbackResult(string.Empty, PersistCredential: false);
+        return new AppInstallCallbackResult(string.Empty, false);
     }
 
     public Task UninstallAsync(TenantId tenantId, UserId userId, string encryptedKey, CancellationToken cancellationToken)
@@ -120,6 +120,7 @@ public sealed class MsTeamsInstaller(IServiceScopeFactory scopeFactory) : IAppIn
                 return true;
             }
         }
+
         return false;
     }
 }
@@ -129,7 +130,8 @@ public sealed class MsTeamsInstaller(IServiceScopeFactory scopeFactory) : IAppIn
 ///     prerequisite — either the calendar is not installed at all, or it was installed before
 ///     the <c>OnlineMeetings.ReadWrite</c> scope was added and must be reconnected. Surfaces
 ///     as a 412 Precondition Failed at the API boundary once the platform install handler
-///     grows explicit prerequisite mapping (deferral mirrors <see cref="GoogleMeet.GoogleMeetPrerequisiteMissingException" />).
+///     grows explicit prerequisite mapping (deferral mirrors
+///     <see cref="GoogleMeet.GoogleMeetPrerequisiteMissingException" />).
 /// </summary>
 public sealed class MsTeamsPrerequisiteMissingException(string? message = null)
     : InvalidOperationException(message ?? "Microsoft Office 365 Calendar must be installed before Microsoft Teams — Teams reuses the Office 365 credential.");

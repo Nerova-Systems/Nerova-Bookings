@@ -41,7 +41,7 @@ public sealed class BookingWebhookNotifierTests
         _dispatcher.FanOutAsync(booking.TenantId, triggerEvent, Arg.Any<string>(), Arg.Any<CancellationToken>())
             .Returns(Task.FromResult(Array.Empty<WebhookDeliveryId>()));
 
-        await notifier.NotifyAsync(triggerEvent, booking, eventType: null, attendees: null, report: null, CancellationToken.None);
+        await notifier.NotifyAsync(triggerEvent, booking, null, null, null, CancellationToken.None);
 
         await _dispatcher.Received(1).FanOutAsync(
             booking.TenantId,
@@ -63,7 +63,7 @@ public sealed class BookingWebhookNotifierTests
             .Returns(Task.FromResult(Array.Empty<WebhookDeliveryId>()));
 
         await notifier.NotifyAsync(
-            WebhookEventType.BookingReported, booking, eventType: null, attendees: null, report: report, CancellationToken.None
+            WebhookEventType.BookingReported, booking, null, null, report, CancellationToken.None
         );
 
         await _dispatcher.Received(1).FanOutAsync(
@@ -83,7 +83,7 @@ public sealed class BookingWebhookNotifierTests
             .Throws(new InvalidOperationException("subscriber lookup blew up"));
 
         var act = () => notifier.NotifyAsync(
-            WebhookEventType.BookingCreated, booking, eventType: null, attendees: null, report: null, CancellationToken.None
+            WebhookEventType.BookingCreated, booking, null, null, null, CancellationToken.None
         );
 
         await act.Should().NotThrowAsync();
@@ -97,18 +97,18 @@ public sealed class BookingWebhookNotifierTests
     private static Booking CreateBooking()
     {
         return Booking.Create(
-            tenantId: new TenantId(1),
-            ownerUserId: UserId.NewId(),
-            eventTypeId: EventTypeId.NewId(),
-            startTime: new DateTimeOffset(2026, 6, 15, 14, 30, 0, TimeSpan.Zero),
-            durationMinutes: 30,
-            beforeEventBufferMinutes: 0,
-            afterEventBufferMinutes: 0,
-            bookerName: "Bob Booker",
-            bookerEmail: "booker@example.com",
-            timeZone: "UTC",
-            status: BookingStatus.Accepted,
-            responses: new Dictionary<string, string>()
+            new TenantId(1),
+            UserId.NewId(),
+            EventTypeId.NewId(),
+            new DateTimeOffset(2026, 6, 15, 14, 30, 0, TimeSpan.Zero),
+            30,
+            0,
+            0,
+            "Bob Booker",
+            "booker@example.com",
+            "UTC",
+            BookingStatus.Accepted,
+            new Dictionary<string, string>()
         );
     }
 
@@ -134,6 +134,9 @@ public sealed class BookingWebhookNotifierTests
 
     private sealed class FixedTimeProvider(DateTimeOffset now) : TimeProvider
     {
-        public override DateTimeOffset GetUtcNow() => now;
+        public override DateTimeOffset GetUtcNow()
+        {
+            return now;
+        }
     }
 }

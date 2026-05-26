@@ -12,13 +12,17 @@ namespace Main.Tests.Apps.Connectors.GoogleMeet;
 /// <summary>
 ///     Verifies the Google Meet installer's piggy-back semantics:
 ///     <list type="bullet">
-///         <item>If the user has not installed Google Calendar, Begin/CompleteInstall throw a
+///         <item>
+///             If the user has not installed Google Calendar, Begin/CompleteInstall throw a
 ///             <see cref="GoogleMeetPrerequisiteMissingException" /> (to be mapped to HTTP 412
-///             once the platform install handler grows that translation).</item>
-///         <item>If the calendar credential exists, CompleteInstall returns
+///             once the platform install handler grows that translation).
+///         </item>
+///         <item>
+///             If the calendar credential exists, CompleteInstall returns
 ///             <c>PersistCredential = false</c> with an empty encrypted key — the platform
 ///             handler creates the AppInstallation row but skips writing a duplicate
-///             <see cref="Credential" />.</item>
+///             <see cref="Credential" />.
+///         </item>
 ///     </list>
 ///     We mock <see cref="IServiceScopeFactory" /> to hand back a substituted
 ///     <see cref="ICredentialRepository" /> — the installer is a singleton and resolves the
@@ -29,7 +33,7 @@ public sealed class GoogleMeetInstallerTests
     [Fact]
     public async Task BeginInstallAsync_WhenGoogleCalendarNotInstalled_ShouldThrowPrerequisiteMissing()
     {
-        var (installer, _) = BuildInstaller(calendarCredential: null);
+        var (installer, _) = BuildInstaller(null);
 
         var act = async () => await installer.BeginInstallAsync(
             new AppInstallContext(new TenantId(1), new UserId("usr_1"), "u@x", "https://r/callback", "state-1"),
@@ -59,7 +63,7 @@ public sealed class GoogleMeetInstallerTests
     [Fact]
     public async Task CompleteInstallAsync_WhenGoogleCalendarNotInstalled_ShouldThrowPrerequisiteMissing()
     {
-        var (installer, _) = BuildInstaller(calendarCredential: null);
+        var (installer, _) = BuildInstaller(null);
 
         var act = async () => await installer.CompleteInstallAsync(
             new AppInstallCallbackContext(new TenantId(1), new UserId("usr_1"), "code", "https://r/callback"),
@@ -87,16 +91,16 @@ public sealed class GoogleMeetInstallerTests
     [Fact]
     public async Task UninstallAsync_ShouldBeNoOp()
     {
-        var (installer, repo) = BuildInstaller(calendarCredential: null);
+        var (installer, repo) = BuildInstaller(null);
 
         var act = async () => await installer.UninstallAsync(
-            new TenantId(1), new UserId("usr_1"), encryptedKey: "anything", CancellationToken.None
+            new TenantId(1), new UserId("usr_1"), "anything", CancellationToken.None
         );
 
         await act.Should().NotThrowAsync();
         // Crucially: uninstall must NEVER touch the google-calendar credential — Calendar may
         // still be in active use independently.
-        repo.DidNotReceiveWithAnyArgs().Remove(default!);
+        repo.DidNotReceiveWithAnyArgs().Remove(null!);
     }
 
     private static (GoogleMeetInstaller Installer, ICredentialRepository Repository) BuildInstaller(Credential? calendarCredential)

@@ -131,18 +131,18 @@ public sealed class EventType : SoftDeletableAggregateRoot<EventTypeId>, ITenant
     /// </summary>
     public TenantId? TeamId { get; private set; }
 
-    public TenantId TenantId { get; } = new(0);
-
     /// <summary>
     ///     When non-null, this event type is a child replica managed by a parent template.
     /// </summary>
-    public EventTypeId? ParentEventTypeId { get; private set; }
+    public EventTypeId? ParentEventTypeId { get; }
 
     /// <summary>
     ///     Field names that the assigned member is allowed to override on their child replica.
     ///     Fields NOT in this list are locked and propagated from the parent template.
     /// </summary>
     public string[] UnlockedFields { get; private set; } = [];
+
+    public TenantId TenantId { get; } = new(0);
 
     /// <summary>
     ///     Changes the scheduling type of this event type.
@@ -261,7 +261,9 @@ public sealed class EventType : SoftDeletableAggregateRoot<EventTypeId>, ITenant
     }
 
     private static bool IsLocked(string[] unlocked, string fieldName)
-        => !unlocked.Contains(fieldName, StringComparer.OrdinalIgnoreCase);
+    {
+        return !unlocked.Contains(fieldName, StringComparer.OrdinalIgnoreCase);
+    }
 
     public static EventType Create(
         TenantId tenantId,

@@ -28,6 +28,7 @@ public sealed class CancelBookingHandler(
     IBookingHistoryEntryRepository bookingHistoryEntryRepository,
     IExecutionContext executionContext,
     IBookingWebhookNotifier webhookNotifier,
+    IBookingNotificationDispatcher bookingNotificationDispatcher,
     TimeProvider timeProvider
 ) : IRequestHandler<CancelBookingCommand, Result>
 {
@@ -81,10 +82,12 @@ public sealed class CancelBookingHandler(
             WebhookEventType.BookingCancelled,
             item.Booking,
             item.EventType,
-            attendees: null,
-            report: null,
+            null,
+            null,
             cancellationToken
         );
+
+        await bookingNotificationDispatcher.DispatchAsync(item.Booking, item.EventType, BookingNotificationKind.Cancelled, cancellationToken);
 
         return Result.Success();
     }

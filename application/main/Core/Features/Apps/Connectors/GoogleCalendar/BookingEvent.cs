@@ -17,7 +17,7 @@ public sealed record BookingEvent(
     string? OrganizerName,
     IReadOnlyList<BookingEventAttendee> Attendees,
     string? Location = null,
-    string? ICalUid = null
+    string? CalUid = null
 );
 
 public sealed record BookingEventAttendee(string Email, string? Name);

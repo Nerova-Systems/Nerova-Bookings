@@ -16,16 +16,16 @@ public sealed class GoogleCalendarOptions
     public bool IsConfigured => !string.IsNullOrWhiteSpace(ClientId) && !string.IsNullOrWhiteSpace(ClientSecret);
 
     /// <summary>OAuth authorize endpoint.</summary>
-    public string AuthorizeUrl { get; set; } = "https://accounts.google.com/o/oauth2/v2/auth";
+    public string AuthorizeUrl { get; init; } = "https://accounts.google.com/o/oauth2/v2/auth";
 
     /// <summary>OAuth token endpoint (code exchange + refresh).</summary>
-    public string TokenUrl { get; set; } = "https://oauth2.googleapis.com/token";
+    public string TokenUrl { get; init; } = "https://oauth2.googleapis.com/token";
 
     /// <summary>OAuth token revocation endpoint.</summary>
-    public string RevokeUrl { get; set; } = "https://oauth2.googleapis.com/revoke";
+    public string RevokeUrl { get; init; } = "https://oauth2.googleapis.com/revoke";
 
     /// <summary>Google Calendar API base URL.</summary>
-    public string ApiBaseUrl { get; set; } = "https://www.googleapis.com/calendar/v3";
+    public string ApiBaseUrl { get; init; } = "https://www.googleapis.com/calendar/v3";
 
     /// <summary>Scopes requested at authorize time.</summary>
     public string[] Scopes { get; set; } =

@@ -56,7 +56,7 @@ public sealed class Booking : AggregateRoot<BookingId>, ITenantScopedEntity
         TimeZone = timeZone.Trim();
         Status = status;
         ResponsesJson = JsonSerializer.Serialize(responses);
-        ICalUid = $"{Id.Value}@nerova";
+        CalUid = $"{Id.Value}@nerova";
     }
 
     public UserId OwnerUserId { get; private set; }
@@ -99,7 +99,8 @@ public sealed class Booking : AggregateRoot<BookingId>, ITenantScopedEntity
 
     public bool Rescheduled { get; private set; }
 
-    public string? FromRescheduleUid { get; private set; }
+    [UsedImplicitly]
+    public string? FromRescheduleUid { get; init; }
 
     public string? CancelledByUserUid { get; private set; }
 
@@ -108,10 +109,10 @@ public sealed class Booking : AggregateRoot<BookingId>, ITenantScopedEntity
     public string? SmsReminderNumber { get; private set; }
 
     /// <summary>iCalendar UID. Set on creation and preserved across reschedules.</summary>
-    public string? ICalUid { get; private set; }
+    public string? CalUid { get; private set; }
 
     /// <summary>iCalendar sequence number. Incremented on each reschedule.</summary>
-    public int ICalSequence { get; private set; }
+    public int CalSequence { get; private set; }
 
     public int? Rating { get; private set; }
 
@@ -169,7 +170,7 @@ public sealed class Booking : AggregateRoot<BookingId>, ITenantScopedEntity
     {
         Rescheduled = true;
         RescheduledByUserUid = rescheduledByUserUid;
-        ICalSequence += 1;
+        CalSequence += 1;
     }
 
     public void Reassign(UserId newOwnerUserId, string? reason = null, UserId? reassignByUserId = null)

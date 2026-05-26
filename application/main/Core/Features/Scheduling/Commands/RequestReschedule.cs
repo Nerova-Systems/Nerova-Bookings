@@ -85,8 +85,8 @@ public sealed class RequestRescheduleHandler(
             WebhookEventType.BookingRescheduled,
             item.Booking,
             item.EventType,
-            attendees: null,
-            report: null,
+            null,
+            null,
             cancellationToken
         );
 

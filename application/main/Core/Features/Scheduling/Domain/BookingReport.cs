@@ -1,4 +1,3 @@
-using System.Text.Json.Serialization;
 using JetBrains.Annotations;
 using Main.Database;
 using Microsoft.EntityFrameworkCore;
@@ -60,13 +59,13 @@ public sealed class BookingReport : AggregateRoot<BookingReportId>, ITenantScope
         Notes = string.IsNullOrWhiteSpace(notes) ? null : notes.Trim();
     }
 
-    public BookingId BookingId { get; private set; }
+    public BookingId BookingId { get; init; }
 
-    public UserId ReportedByUserId { get; private set; }
+    public UserId ReportedByUserId { get; init; }
 
-    public BookingReportReasonCode ReasonCode { get; private set; }
+    public BookingReportReasonCode ReasonCode { get; init; }
 
-    public string? Notes { get; private set; }
+    public string? Notes { get; init; }
 
     public TenantId TenantId { get; } = new(0);
 

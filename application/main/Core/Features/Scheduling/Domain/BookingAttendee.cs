@@ -1,4 +1,3 @@
-using System.Text.Json.Serialization;
 using JetBrains.Annotations;
 using Main.Database;
 using Microsoft.EntityFrameworkCore;
@@ -48,15 +47,15 @@ public sealed class BookingAttendee : AggregateRoot<BookingAttendeeId>, ITenantS
         Locale = locale.Trim();
     }
 
-    public BookingId BookingId { get; private set; }
+    public BookingId BookingId { get; init; }
 
-    public string Name { get; private set; }
+    public string Name { get; init; }
 
-    public string Email { get; private set; }
+    public string Email { get; init; }
 
-    public string TimeZone { get; private set; }
+    public string TimeZone { get; init; }
 
-    public string Locale { get; private set; }
+    public string Locale { get; init; }
 
     public bool NoShow { get; private set; }
 
@@ -113,8 +112,9 @@ public sealed class BookingAttendeeRepository(MainDbContext mainDbContext)
     public async Task<BookingAttendee[]> GetForBookingsAsync(BookingId[] bookingIds, CancellationToken cancellationToken)
     {
         if (bookingIds.Length == 0) return [];
+        var idList = bookingIds.ToList();
         return await DbSet.AsNoTracking()
-            .Where(attendee => bookingIds.Contains(attendee.BookingId))
+            .Where(attendee => idList.Contains(attendee.BookingId))
             .OrderBy(attendee => attendee.Id)
             .ToArrayAsync(cancellationToken);
     }

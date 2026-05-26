@@ -1,6 +1,6 @@
 using FluentAssertions;
-using Main.Features.Scheduling.Shared;
 using Main.Features.Schedules.Domain;
+using Main.Features.Scheduling.Shared;
 using SharedKernel.Domain;
 using Xunit;
 

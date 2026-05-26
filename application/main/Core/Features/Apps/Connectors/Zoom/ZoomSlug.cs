@@ -7,7 +7,7 @@ public static class ZoomSlug
 {
     public const string Value = "zoom";
 
-    public static readonly AppSlug Slug = new(Value);
-
     public const string HttpClientName = "zoom";
+
+    public static readonly AppSlug Slug = new(Value);
 }

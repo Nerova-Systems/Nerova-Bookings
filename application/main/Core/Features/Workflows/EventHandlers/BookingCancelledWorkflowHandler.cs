@@ -1,7 +1,7 @@
 using Main.Features.Scheduling.Domain;
 using Main.Features.Workflows.Domain;
 using Main.Features.Workflows.Services;
-using SharedKernel.Persistence;
+using Main.Features.Workflows.Infrastructure;
 
 namespace Main.Features.Workflows.EventHandlers;
 

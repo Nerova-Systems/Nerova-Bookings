@@ -27,10 +27,11 @@ public sealed class BookingNotificationDispatcherTests
     {
         _emailRenderer.RenderEmail(Arg.Any<EmailTemplateBase>())
             .Returns(call =>
-            {
-                var template = call.Arg<EmailTemplateBase>();
-                return new EmailRenderResult($"subject-{template.Name}-{template.Locale}", "<html></html>", "text");
-            });
+                {
+                    var template = call.Arg<EmailTemplateBase>();
+                    return new EmailRenderResult($"subject-{template.Name}-{template.Locale}", "<html></html>", "text");
+                }
+            );
     }
 
     [Fact]
@@ -44,7 +45,7 @@ public sealed class BookingNotificationDispatcherTests
         var dispatcher = CreateDispatcher();
 
         // Act
-        await dispatcher.DispatchAsync(booking, eventType: null, BookingNotificationKind.Created, CancellationToken.None);
+        await dispatcher.DispatchAsync(booking, null, BookingNotificationKind.Created, CancellationToken.None);
 
         // Assert: attendee gets en-US confirmation, host gets da-DK confirmation
         await _emailClient.Received(1).SendAsync(
@@ -66,7 +67,7 @@ public sealed class BookingNotificationDispatcherTests
 
         var dispatcher = CreateDispatcher();
 
-        await dispatcher.DispatchAsync(booking, eventType: null, BookingNotificationKind.Cancelled, CancellationToken.None);
+        await dispatcher.DispatchAsync(booking, null, BookingNotificationKind.Cancelled, CancellationToken.None);
 
         await _emailClient.Received(1).SendAsync(
             Arg.Is<EmailMessage>(m => m.Recipient == "booker@example.com"),
@@ -85,7 +86,7 @@ public sealed class BookingNotificationDispatcherTests
 
         var dispatcher = CreateDispatcher();
 
-        await dispatcher.DispatchAsync(booking, eventType: null, BookingNotificationKind.Rescheduled, CancellationToken.None);
+        await dispatcher.DispatchAsync(booking, null, BookingNotificationKind.Rescheduled, CancellationToken.None);
 
         // Host also gets en-US when locale is blank
         await _emailClient.Received(1).SendAsync(
@@ -125,18 +126,18 @@ public sealed class BookingNotificationDispatcherTests
     private static Booking CreateBooking()
     {
         return Booking.Create(
-            tenantId: new TenantId(1),
-            ownerUserId: UserId.NewId(),
-            eventTypeId: new EventTypeId("evt_test"),
-            startTime: DateTimeOffset.UtcNow.AddHours(2),
-            durationMinutes: 30,
-            beforeEventBufferMinutes: 0,
-            afterEventBufferMinutes: 0,
-            bookerName: "Bob Booker",
-            bookerEmail: "booker@example.com",
-            timeZone: "UTC",
-            status: BookingStatus.Accepted,
-            responses: new Dictionary<string, string>()
+            new TenantId(1),
+            UserId.NewId(),
+            new EventTypeId("evt_test"),
+            DateTimeOffset.UtcNow.AddHours(2),
+            30,
+            0,
+            0,
+            "Bob Booker",
+            "booker@example.com",
+            "UTC",
+            BookingStatus.Accepted,
+            new Dictionary<string, string>()
         );
     }
 }

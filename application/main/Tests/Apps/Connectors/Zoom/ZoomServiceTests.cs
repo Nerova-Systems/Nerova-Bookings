@@ -3,7 +3,6 @@ using System.Text.Json;
 using FluentAssertions;
 using Main.Features.Apps.Connectors.Zoom;
 using Main.Features.Apps.Domain;
-using Microsoft.Extensions.Logging.Abstractions;
 using NSubstitute;
 using Xunit;
 
@@ -19,28 +18,30 @@ public sealed class ZoomServiceTests
         HttpRequestMessage? captured = null;
         string? capturedBody = null;
         var handler = new RecordingHandler(request =>
-        {
-            captured = request;
-            capturedBody = request.Content!.ReadAsStringAsync().GetAwaiter().GetResult();
-            var json = JsonSerializer.Serialize(new
             {
-                id = 81234567890L,
-                join_url = "https://zoom.us/j/81234567890?pwd=abc",
-                password = "abc"
-            });
-            return Response(HttpStatusCode.Created, json);
-        });
+                captured = request;
+                capturedBody = request.Content!.ReadAsStringAsync().GetAwaiter().GetResult();
+                var json = JsonSerializer.Serialize(new
+                    {
+                        id = 81234567890L,
+                        join_url = "https://zoom.us/j/81234567890?pwd=abc",
+                        password = "abc"
+                    }
+                );
+                return Response(HttpStatusCode.Created, json);
+            }
+        );
         var service = BuildService(handler, NewBlob());
 
         var input = new BookingEvent(
-            Title: "Discovery Call",
-            Description: "Intro chat",
-            StartTime: new DateTimeOffset(2026, 1, 5, 15, 0, 0, TimeSpan.Zero),
-            EndTime: new DateTimeOffset(2026, 1, 5, 15, 30, 0, TimeSpan.Zero),
-            TimeZone: "Europe/Copenhagen",
-            OrganizerEmail: "host@example.com",
-            OrganizerName: "Host",
-            Attendees: [new BookingEventAttendee("guest@example.com", "Guest")]
+            "Discovery Call",
+            "Intro chat",
+            new DateTimeOffset(2026, 1, 5, 15, 0, 0, TimeSpan.Zero),
+            new DateTimeOffset(2026, 1, 5, 15, 30, 0, TimeSpan.Zero),
+            "Europe/Copenhagen",
+            "host@example.com",
+            "Host",
+            [new BookingEventAttendee("guest@example.com", "Guest")]
         );
 
         var link = await service.CreateMeetingAsync(input, CancellationToken.None);
@@ -83,46 +84,50 @@ public sealed class ZoomServiceTests
         var createCount = 0;
         var tokenRequests = new List<(string? AuthScheme, string Body)>();
         var handler = new RecordingHandler(request =>
-        {
-            var url = request.RequestUri!.AbsoluteUri;
-            if (url.EndsWith("/users/me/meetings"))
             {
-                createCount++;
-                seenBearers.Add(request.Headers.Authorization?.Parameter);
-                if (createCount == 1) return Response(HttpStatusCode.Unauthorized, "expired");
-                var json = JsonSerializer.Serialize(new
+                var url = request.RequestUri!.AbsoluteUri;
+                if (url.EndsWith("/users/me/meetings"))
                 {
-                    id = 999L,
-                    join_url = "https://zoom.us/j/999",
-                    password = (string?)null
-                });
-                return Response(HttpStatusCode.Created, json);
-            }
+                    createCount++;
+                    seenBearers.Add(request.Headers.Authorization?.Parameter);
+                    if (createCount == 1) return Response(HttpStatusCode.Unauthorized, "expired");
+                    var json = JsonSerializer.Serialize(new
+                        {
+                            id = 999L,
+                            join_url = "https://zoom.us/j/999",
+                            password = (string?)null
+                        }
+                    );
+                    return Response(HttpStatusCode.Created, json);
+                }
 
-            if (url.EndsWith("/oauth/token"))
-            {
-                var body = request.Content!.ReadAsStringAsync().GetAwaiter().GetResult();
-                tokenRequests.Add((request.Headers.Authorization?.Scheme, body));
-                var json = JsonSerializer.Serialize(new
+                if (url.EndsWith("/oauth/token"))
                 {
-                    access_token = "access-2",
-                    refresh_token = "refresh-2",
-                    expires_in = 3600,
-                    scope = "meeting:write",
-                    token_type = "bearer"
-                });
-                return Response(HttpStatusCode.OK, json);
-            }
+                    var body = request.Content!.ReadAsStringAsync().GetAwaiter().GetResult();
+                    tokenRequests.Add((request.Headers.Authorization?.Scheme, body));
+                    var json = JsonSerializer.Serialize(new
+                        {
+                            access_token = "access-2",
+                            refresh_token = "refresh-2",
+                            expires_in = 3600,
+                            scope = "meeting:write",
+                            token_type = "bearer"
+                        }
+                    );
+                    return Response(HttpStatusCode.OK, json);
+                }
 
-            return Response(HttpStatusCode.NotFound, "");
-        });
+                return Response(HttpStatusCode.NotFound, "");
+            }
+        );
 
         var persisted = new List<string>();
         var service = BuildService(handler, NewBlob(), (json, _) =>
-        {
-            persisted.Add(json);
-            return Task.CompletedTask;
-        });
+            {
+                persisted.Add(json);
+                return Task.CompletedTask;
+            }
+        );
 
         var input = new BookingEvent(
             "T", null,

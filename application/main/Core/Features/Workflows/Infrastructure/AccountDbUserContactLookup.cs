@@ -1,6 +1,5 @@
 using Main.Features.Workflows.Senders;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging;
 using Npgsql;
 using SharedKernel.Domain;
 
@@ -41,11 +40,11 @@ public sealed class AccountDbUserContactLookup(
 
         await using var command = connection.CreateCommand();
         command.CommandText = """
-            SELECT email, locale, first_name, last_name
-            FROM users
-            WHERE id = @id AND deleted_at IS NULL
-            LIMIT 1
-            """;
+                              SELECT email, locale, first_name, last_name
+                              FROM users
+                              WHERE id = @id AND deleted_at IS NULL
+                              LIMIT 1
+                              """;
         command.Parameters.AddWithValue("id", userId.Value);
 
         await using var reader = await command.ExecuteReaderAsync(cancellationToken);

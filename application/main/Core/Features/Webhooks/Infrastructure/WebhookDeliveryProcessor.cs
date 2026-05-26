@@ -2,7 +2,6 @@ using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
 using Main.Features.Webhooks.Domain;
-using Microsoft.Extensions.Logging;
 
 namespace Main.Features.Webhooks.Infrastructure;
 
@@ -94,7 +93,7 @@ public sealed class WebhookDeliveryProcessor(
         // nextAttemptNumber == AttemptCount after this failure is recorded. Backoff returns the
         // delay to wait BEFORE attempting again. Null → dead-letter.
         var delay = WebhookBackoff.GetDelayAfterAttempt(nextAttemptNumber);
-        return delay is null ? null : attemptAt + delay.Value;
+        return attemptAt + delay;
     }
 
     private static async Task<string?> SafeReadAsync(HttpResponseMessage response, CancellationToken cancellationToken)

@@ -37,10 +37,11 @@ public sealed class GetCancellationReasonsQueryTests : InsightsEndpointBaseTest
         // Create at a future weekday slot; Connection.Update moves it to the analytics date range
         var b = await CreateBookingAsync("consult", "2026-06-01T07:00:00Z");
         Connection.Update("bookings", "id", b.Id, [
-            ("start_time", DateTimeOffset.Parse("2025-06-01T07:00:00Z")),
-            ("end_time", DateTimeOffset.Parse("2025-06-01T07:30:00Z")),
-            ("status", "Cancelled")
-        ]);
+                ("start_time", DateTimeOffset.Parse("2025-06-01T07:00:00Z")),
+                ("end_time", DateTimeOffset.Parse("2025-06-01T07:30:00Z")),
+                ("status", "Cancelled")
+            ]
+        );
 
         // Act
         var response = await InsightsClient.GetAsync(Url);
@@ -64,17 +65,19 @@ public sealed class GetCancellationReasonsQueryTests : InsightsEndpointBaseTest
         var b1 = await CreateBookingAsync("consult", "2026-06-01T07:00:00Z");
         var b2 = await CreateBookingAsync("consult", "2026-06-01T09:00:00Z");
         Connection.Update("bookings", "id", b1.Id, [
-            ("start_time", DateTimeOffset.Parse("2025-06-01T07:00:00Z")),
-            ("end_time", DateTimeOffset.Parse("2025-06-01T07:30:00Z")),
-            ("status", "Cancelled"),
-            ("responses_json", """{"cancellationReason":"Schedule conflict"}""")
-        ]);
+                ("start_time", DateTimeOffset.Parse("2025-06-01T07:00:00Z")),
+                ("end_time", DateTimeOffset.Parse("2025-06-01T07:30:00Z")),
+                ("status", "Cancelled"),
+                ("responses_json", """{"cancellationReason":"Schedule conflict"}""")
+            ]
+        );
         Connection.Update("bookings", "id", b2.Id, [
-            ("start_time", DateTimeOffset.Parse("2025-06-01T09:00:00Z")),
-            ("end_time", DateTimeOffset.Parse("2025-06-01T09:30:00Z")),
-            ("status", "Cancelled"),
-            ("responses_json", """{"cancellationReason":"Schedule conflict"}""")
-        ]);
+                ("start_time", DateTimeOffset.Parse("2025-06-01T09:00:00Z")),
+                ("end_time", DateTimeOffset.Parse("2025-06-01T09:30:00Z")),
+                ("status", "Cancelled"),
+                ("responses_json", """{"cancellationReason":"Schedule conflict"}""")
+            ]
+        );
 
         // Act
         var response = await InsightsClient.GetAsync(Url);

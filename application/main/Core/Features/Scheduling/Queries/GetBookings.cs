@@ -1,9 +1,9 @@
 using System.Text.Json;
 using FluentValidation;
 using JetBrains.Annotations;
+using Main.Features.EventTypes.Domain;
 using Main.Features.Permissions.Domain;
 using Main.Features.Permissions.Pipeline;
-using Main.Features.EventTypes.Domain;
 using Main.Features.Scheduling.Domain;
 using Main.Features.Scheduling.Shared;
 using SharedKernel.Cqrs;
@@ -124,6 +124,7 @@ public sealed class GetBookingsHandler(IBookingRepository bookingRepository, IBo
                 var notes = await bookingInternalNoteRepository.GetForBookingAsync(bookingId, cancellationToken);
                 if (notes.Length > 0) bookingsWithNotes.Add(bookingId);
             }
+
             filtered = preFiltered.Where(item => bookingsWithNotes.Contains(item.Booking.Id)).ToArray();
         }
 

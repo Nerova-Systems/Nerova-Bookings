@@ -63,14 +63,14 @@ public sealed class GetBookingKpisHandler(
         var priorAccepted = priorData.Count(b => b.Status == BookingStatus.Accepted);
 
         return new BookingKpisResponse(
-            TotalCount: current.Count,
-            AcceptedCount: accepted,
-            PendingCount: pending,
-            CancelledCount: cancelled,
-            CompletedCount: completed,
-            PriorPeriodTotalCount: priorData.Count,
-            PriorPeriodAcceptedCount: priorAccepted,
-            PriorPeriodCancelledCount: priorCancelled
+            current.Count,
+            accepted,
+            pending,
+            cancelled,
+            completed,
+            priorData.Count,
+            priorAccepted,
+            priorCancelled
         );
     }
 }

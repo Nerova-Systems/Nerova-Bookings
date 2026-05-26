@@ -3,7 +3,6 @@ using Main.Features.EventTypes.Domain;
 using Main.Features.Scheduling.Domain;
 using Main.Features.Webhooks.Domain;
 using Main.Features.Webhooks.Infrastructure;
-using Microsoft.Extensions.Logging;
 
 namespace Main.Features.Scheduling.Notifications;
 

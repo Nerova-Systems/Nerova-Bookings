@@ -3,7 +3,6 @@ using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
 using Main.Features.Workflows.Senders;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 namespace Main.Features.Workflows.Infrastructure;
@@ -43,12 +42,13 @@ public sealed class TwilioSmsProvider(
         var basic = Convert.ToBase64String(Encoding.ASCII.GetBytes($"{_options.AccountSid}:{_options.AuthToken}"));
         request.Headers.Authorization = new AuthenticationHeaderValue("Basic", basic);
 
-        request.Content = new FormUrlEncodedContent(new[]
-        {
-            new KeyValuePair<string, string>("To", toE164),
-            new KeyValuePair<string, string>("From", _options.FromNumber),
-            new KeyValuePair<string, string>("Body", body)
-        });
+        request.Content = new FormUrlEncodedContent(
+            [
+                new KeyValuePair<string, string>("To", toE164),
+                new KeyValuePair<string, string>("From", _options.FromNumber),
+                new KeyValuePair<string, string>("Body", body)
+            ]
+        );
 
         HttpResponseMessage response;
         try

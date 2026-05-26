@@ -28,7 +28,7 @@ public sealed class BookingWebhookPayloadBuilderTests
             WebhookEventType.BookingCreated,
             FixedCreatedAt,
             booking,
-            eventType: null
+            null
         );
 
         using var doc = JsonDocument.Parse(json);
@@ -38,7 +38,7 @@ public sealed class BookingWebhookPayloadBuilderTests
 
         var payload = root.GetProperty("payload");
         payload.GetProperty("id").GetString().Should().Be(booking.Id.Value);
-        payload.GetProperty("uid").GetString().Should().Be(booking.ICalUid);
+        payload.GetProperty("uid").GetString().Should().Be(booking.CalUid);
         payload.GetProperty("status").GetString().Should().Be("Accepted");
         payload.GetProperty("startTime").GetString().Should().Be("2026-06-15T14:30:00+00:00");
         payload.GetProperty("endTime").GetString().Should().Be("2026-06-15T15:00:00+00:00");
@@ -61,7 +61,8 @@ public sealed class BookingWebhookPayloadBuilderTests
         var booking = CreateBooking();
 
         var json = BookingWebhookPayloadBuilder.Build(
-            WebhookEventType.BookingCreated, FixedCreatedAt, booking, eventType: null);
+            WebhookEventType.BookingCreated, FixedCreatedAt, booking, null
+        );
 
         using var doc = JsonDocument.Parse(json);
         var payload = doc.RootElement.GetProperty("payload");
@@ -79,7 +80,8 @@ public sealed class BookingWebhookPayloadBuilderTests
         );
 
         var json = BookingWebhookPayloadBuilder.Build(
-            WebhookEventType.BookingReported, FixedCreatedAt, booking, eventType: null, attendees: null, report: report);
+            WebhookEventType.BookingReported, FixedCreatedAt, booking, null, null, report
+        );
 
         using var doc = JsonDocument.Parse(json);
         var reportNode = doc.RootElement.GetProperty("payload").GetProperty("report");
@@ -99,7 +101,8 @@ public sealed class BookingWebhookPayloadBuilderTests
         var extra = BookingAttendee.Create(new TenantId(1), booking.Id, "Carol Guest", "carol@example.com", "Europe/Copenhagen", "da-DK");
 
         var json = BookingWebhookPayloadBuilder.Build(
-            WebhookEventType.BookingCreated, FixedCreatedAt, booking, eventType: null, attendees: [duplicate, extra]);
+            WebhookEventType.BookingCreated, FixedCreatedAt, booking, null, [duplicate, extra]
+        );
 
         using var doc = JsonDocument.Parse(json);
         var attendees = doc.RootElement.GetProperty("payload").GetProperty("attendees");
@@ -115,9 +118,11 @@ public sealed class BookingWebhookPayloadBuilderTests
         var booking = CreateBooking();
 
         var first = BookingWebhookPayloadBuilder.Build(
-            WebhookEventType.BookingCreated, FixedCreatedAt, booking, eventType: null);
+            WebhookEventType.BookingCreated, FixedCreatedAt, booking, null
+        );
         var second = BookingWebhookPayloadBuilder.Build(
-            WebhookEventType.BookingCreated, FixedCreatedAt, booking, eventType: null);
+            WebhookEventType.BookingCreated, FixedCreatedAt, booking, null
+        );
 
         first.Should().Be(second);
     }
@@ -125,18 +130,18 @@ public sealed class BookingWebhookPayloadBuilderTests
     private static Booking CreateBooking()
     {
         return Booking.Create(
-            tenantId: new TenantId(1),
-            ownerUserId: new UserId("usr_01HV0000000000000000000000"),
-            eventTypeId: new EventTypeId("evt_test"),
-            startTime: FixedStart,
-            durationMinutes: 30,
-            beforeEventBufferMinutes: 0,
-            afterEventBufferMinutes: 0,
-            bookerName: "Bob Booker",
-            bookerEmail: "booker@example.com",
-            timeZone: "UTC",
-            status: BookingStatus.Accepted,
-            responses: new Dictionary<string, string>()
+            new TenantId(1),
+            new UserId("usr_01HV0000000000000000000000"),
+            new EventTypeId("evt_test"),
+            FixedStart,
+            30,
+            0,
+            0,
+            "Bob Booker",
+            "booker@example.com",
+            "UTC",
+            BookingStatus.Accepted,
+            new Dictionary<string, string>()
         );
     }
 }

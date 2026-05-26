@@ -44,19 +44,22 @@ public sealed class GetBookingFunnelQueryTests : InsightsEndpointBaseTest
         var cancelled = await CreateBookingAsync("consult", "2026-06-01T11:00:00Z");
 
         Connection.Update("bookings", "id", completed.Id, [
-            ("start_time", DateTimeOffset.Parse("2025-06-02T07:00:00Z")),
-            ("end_time", DateTimeOffset.Parse("2025-06-02T07:30:00Z"))
-        ]);
+                ("start_time", DateTimeOffset.Parse("2025-06-02T07:00:00Z")),
+                ("end_time", DateTimeOffset.Parse("2025-06-02T07:30:00Z"))
+            ]
+        );
         // end_time set to far future so it is NOT yet completed
         Connection.Update("bookings", "id", accepted.Id, [
-            ("start_time", DateTimeOffset.Parse("2025-06-02T09:00:00Z")),
-            ("end_time", DateTimeOffset.Parse("2027-06-02T09:30:00Z"))
-        ]);
+                ("start_time", DateTimeOffset.Parse("2025-06-02T09:00:00Z")),
+                ("end_time", DateTimeOffset.Parse("2027-06-02T09:30:00Z"))
+            ]
+        );
         Connection.Update("bookings", "id", cancelled.Id, [
-            ("start_time", DateTimeOffset.Parse("2025-06-02T11:00:00Z")),
-            ("end_time", DateTimeOffset.Parse("2025-06-02T11:30:00Z")),
-            ("status", "Cancelled")
-        ]);
+                ("start_time", DateTimeOffset.Parse("2025-06-02T11:00:00Z")),
+                ("end_time", DateTimeOffset.Parse("2025-06-02T11:30:00Z")),
+                ("status", "Cancelled")
+            ]
+        );
 
         // Act
         var response = await InsightsClient.GetAsync(Url);
@@ -65,7 +68,7 @@ public sealed class GetBookingFunnelQueryTests : InsightsEndpointBaseTest
         response.ShouldBeSuccessfulGetRequest();
         var result = await response.DeserializeResponse<BookingFunnelResponse>();
         result!.Created.Should().Be(3);
-        result.Accepted.Should().Be(2);    // completed + accepted (both status=="accepted")
-        result.Completed.Should().Be(1);   // completed has end_time in past
+        result.Accepted.Should().Be(2); // completed + accepted (both status=="accepted")
+        result.Completed.Should().Be(1); // completed has end_time in past
     }
 }

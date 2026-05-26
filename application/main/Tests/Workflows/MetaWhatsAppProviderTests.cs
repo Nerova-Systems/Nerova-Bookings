@@ -35,18 +35,20 @@ public sealed class MetaWhatsAppProviderTests
         HttpRequestMessage? captured = null;
         string? capturedBody = null;
         var handler = new RecordingHandler(request =>
-        {
-            captured = request;
-            capturedBody = request.Content!.ReadAsStringAsync().GetAwaiter().GetResult();
-            return new HttpResponseMessage(HttpStatusCode.OK)
             {
-                Content = new StringContent("""
-                    { "messaging_product":"whatsapp",
-                      "contacts":[{"input":"15551234567","wa_id":"15551234567"}],
-                      "messages":[{"id":"wamid.HBgL..."}] }
-                """)
-            };
-        });
+                captured = request;
+                capturedBody = request.Content!.ReadAsStringAsync().GetAwaiter().GetResult();
+                return new HttpResponseMessage(HttpStatusCode.OK)
+                {
+                    Content = new StringContent("""
+                                                    { "messaging_product":"whatsapp",
+                                                      "contacts":[{"input":"15551234567","wa_id":"15551234567"}],
+                                                      "messages":[{"id":"wamid.HBgL..."}] }
+                                                """
+                    )
+                };
+            }
+        );
         var options = new MetaWhatsAppOptions
         {
             PhoneNumberId = "111222333",
@@ -99,9 +101,10 @@ public sealed class MetaWhatsAppProviderTests
     public async Task SendAsync_WhenServerErrors_ShouldReturnTransient()
     {
         var handler = new RecordingHandler(_ => new HttpResponseMessage(HttpStatusCode.BadGateway)
-        {
-            Content = new StringContent("upstream")
-        });
+            {
+                Content = new StringContent("upstream")
+            }
+        );
         var provider = BuildProvider(handler, ConfiguredOptions());
 
         var result = await provider.SendAsync(
@@ -118,9 +121,10 @@ public sealed class MetaWhatsAppProviderTests
     public async Task SendAsync_When401_ShouldReturnPermanent()
     {
         var handler = new RecordingHandler(_ => new HttpResponseMessage(HttpStatusCode.Unauthorized)
-        {
-            Content = new StringContent("{\"error\":{\"message\":\"Invalid OAuth token\"}}")
-        });
+            {
+                Content = new StringContent("{\"error\":{\"message\":\"Invalid OAuth token\"}}")
+            }
+        );
         var provider = BuildProvider(handler, ConfiguredOptions());
 
         var result = await provider.SendAsync(
@@ -134,12 +138,15 @@ public sealed class MetaWhatsAppProviderTests
         result.ErrorReason.Should().Contain("401");
     }
 
-    private static MetaWhatsAppOptions ConfiguredOptions() => new()
+    private static MetaWhatsAppOptions ConfiguredOptions()
     {
-        PhoneNumberId = "111222333",
-        AccessToken = "TOKEN_xyz",
-        ApiBaseUrl = "https://graph.test/v18.0"
-    };
+        return new MetaWhatsAppOptions
+        {
+            PhoneNumberId = "111222333",
+            AccessToken = "TOKEN_xyz",
+            ApiBaseUrl = "https://graph.test/v18.0"
+        };
+    }
 
     private static MetaWhatsAppProvider BuildProvider(HttpMessageHandler handler, MetaWhatsAppOptions options)
     {

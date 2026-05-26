@@ -18,10 +18,25 @@ public interface IWhatsAppProvider
 
 public sealed record WhatsAppResult(WhatsAppResultStatus Status, string? MessageId, string? ErrorReason)
 {
-    public static WhatsAppResult Sent(string messageId) => new(WhatsAppResultStatus.Sent, messageId, null);
-    public static WhatsAppResult NotConfigured(string reason) => new(WhatsAppResultStatus.NotConfigured, null, reason);
-    public static WhatsAppResult Transient(string reason) => new(WhatsAppResultStatus.TransientFailure, null, reason);
-    public static WhatsAppResult Permanent(string reason) => new(WhatsAppResultStatus.PermanentFailure, null, reason);
+    public static WhatsAppResult Sent(string messageId)
+    {
+        return new WhatsAppResult(WhatsAppResultStatus.Sent, messageId, null);
+    }
+
+    public static WhatsAppResult NotConfigured(string reason)
+    {
+        return new WhatsAppResult(WhatsAppResultStatus.NotConfigured, null, reason);
+    }
+
+    public static WhatsAppResult Transient(string reason)
+    {
+        return new WhatsAppResult(WhatsAppResultStatus.TransientFailure, null, reason);
+    }
+
+    public static WhatsAppResult Permanent(string reason)
+    {
+        return new WhatsAppResult(WhatsAppResultStatus.PermanentFailure, null, reason);
+    }
 }
 
 public enum WhatsAppResultStatus

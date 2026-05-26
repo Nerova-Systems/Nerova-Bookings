@@ -2,6 +2,7 @@ using FluentValidation;
 using JetBrains.Annotations;
 using Main.Features.Apps.Domain;
 using Main.Features.EventTypes.Domain;
+using Main.Features.Schedules.Domain;
 using Main.Features.Scheduling.Domain;
 using Main.Features.Scheduling.Notifications;
 using Main.Features.Scheduling.Shared;
@@ -45,7 +46,10 @@ public sealed class CreatePublicBookingHandler(
     CollectiveSlotCalculator collectiveSlotCalculator,
     RoundRobinSlotCalculator roundRobinSlotCalculator,
     ConferenceLinkOrchestrator conferenceLinkOrchestrator,
-    IBookingWebhookNotifier webhookNotifier
+    IBookingWebhookNotifier webhookNotifier,
+    ITravelScheduleRepository travelScheduleRepository,
+    IOutOfOfficeRepository outOfOfficeRepository,
+    IBookingNotificationDispatcher bookingNotificationDispatcher
 ) : IRequestHandler<CreatePublicBookingCommand, Result<CreatePublicBookingResponse>>
 {
     public async Task<Result<CreatePublicBookingResponse>> Handle(CreatePublicBookingCommand command, CancellationToken cancellationToken)
@@ -64,8 +68,18 @@ public sealed class CreatePublicBookingHandler(
 
         var endTime = command.StartTime.AddMinutes(command.Duration);
 
+        var adjustmentsRangeStart = DateOnly.FromDateTime(command.StartTime.UtcDateTime).AddDays(-1);
+        var adjustmentsRangeEnd = DateOnly.FromDateTime(endTime.UtcDateTime).AddDays(1);
+        var travelSchedules = await travelScheduleRepository.GetActiveForUserUnfilteredAsync(
+            context.Profile.TenantId, context.Profile.OwnerUserId, adjustmentsRangeStart, adjustmentsRangeEnd, cancellationToken
+        );
+        var outOfOffices = await outOfOfficeRepository.GetActiveForUserUnfilteredAsync(
+            context.Profile.TenantId, context.Profile.OwnerUserId, adjustmentsRangeStart, adjustmentsRangeEnd, cancellationToken
+        );
+        var adjustments = new ScheduleAdjustments(travelSchedules, outOfOffices);
+
         bool slotAvailable;
-        UserId ownerUserId = context.Profile.OwnerUserId;
+        var ownerUserId = context.Profile.OwnerUserId;
 
         if (context.EventType.SchedulingType == SchedulingType.Collective)
         {
@@ -77,10 +91,11 @@ public sealed class CreatePublicBookingHandler(
                     hostUserIds,
                     command.StartTime.AddDays(-1),
                     endTime.AddDays(1),
-                    cancellationToken)
-                : (IReadOnlyDictionary<UserId, Booking[]>)new Dictionary<UserId, Booking[]>();
+                    cancellationToken
+                )
+                : new Dictionary<UserId, Booking[]>();
 
-            slotAvailable = collectiveSlotCalculator.IsSlotAvailable(context.EventType, context.Schedule, hostBookings, command.StartTime, command.Duration, command.TimeZone);
+            slotAvailable = collectiveSlotCalculator.IsSlotAvailable(context.EventType, context.Schedule, hostBookings, command.StartTime, command.Duration, command.TimeZone, adjustments);
         }
         else if (context.EventType.SchedulingType == SchedulingType.RoundRobin)
         {
@@ -92,10 +107,11 @@ public sealed class CreatePublicBookingHandler(
                     hostUserIds,
                     command.StartTime.AddDays(-1),
                     endTime.AddDays(1),
-                    cancellationToken)
-                : (IReadOnlyDictionary<UserId, Booking[]>)new Dictionary<UserId, Booking[]>();
+                    cancellationToken
+                )
+                : new Dictionary<UserId, Booking[]>();
 
-            slotAvailable = roundRobinSlotCalculator.IsSlotAvailable(context.EventType, context.Schedule, hostBookings, hosts, command.StartTime, command.Duration, command.TimeZone);
+            slotAvailable = roundRobinSlotCalculator.IsSlotAvailable(context.EventType, context.Schedule, hostBookings, hosts, command.StartTime, command.Duration, command.TimeZone, adjustments);
 
             if (slotAvailable)
             {
@@ -105,7 +121,8 @@ public sealed class CreatePublicBookingHandler(
                     command.StartTime,
                     command.Duration,
                     context.EventType.BeforeEventBufferMinutes,
-                    context.EventType.AfterEventBufferMinutes);
+                    context.EventType.AfterEventBufferMinutes
+                );
 
                 if (selectedHost is not null)
                 {
@@ -122,7 +139,7 @@ public sealed class CreatePublicBookingHandler(
                 endTime.AddDays(1),
                 cancellationToken
             );
-            slotAvailable = publicSlotCalculator.IsSlotAvailable(context.EventType, context.Schedule, bookings, command.StartTime, command.Duration, command.TimeZone);
+            slotAvailable = publicSlotCalculator.IsSlotAvailable(context.EventType, context.Schedule, bookings, command.StartTime, command.Duration, command.TimeZone, adjustments);
         }
 
         if (!slotAvailable)
@@ -170,10 +187,14 @@ public sealed class CreatePublicBookingHandler(
             WebhookEventType.BookingCreated,
             booking,
             context.EventType,
-            attendees: null,
-            report: null,
+            null,
+            null,
             cancellationToken
         );
+
+        // Send booking confirmation email to booker and host. Best-effort: exceptions are swallowed
+        // inside the dispatcher (not here) so a broken email config cannot fail the booking.
+        await bookingNotificationDispatcher.DispatchAsync(booking, context.EventType, BookingNotificationKind.Created, cancellationToken);
 
         return new CreatePublicBookingResponse(booking.Id, booking.StartTime, booking.EndTime, status.ToString());
     }

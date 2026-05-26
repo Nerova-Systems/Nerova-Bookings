@@ -8,9 +8,9 @@ namespace Main.Features.Apps.Domain;
 /// </summary>
 public interface IAppRegistry
 {
-    IAppInstaller? Resolve(AppSlug slug);
-
     IEnumerable<AppSlug> RegisteredSlugs { get; }
+
+    IAppInstaller? Resolve(AppSlug slug);
 }
 
 /// <summary>

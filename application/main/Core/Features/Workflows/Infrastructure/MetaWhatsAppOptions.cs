@@ -14,10 +14,10 @@ public sealed class MetaWhatsAppOptions
     public string AccessToken { get; set; } = string.Empty;
 
     /// <summary>Graph API base URL — overridable for tests.</summary>
-    public string ApiBaseUrl { get; set; } = "https://graph.facebook.com/v18.0";
+    public string ApiBaseUrl { get; init; } = "https://graph.facebook.com/v18.0";
 
     /// <summary>Language tag for the approved template (e.g. "en", "en_US").</summary>
-    public string DefaultLanguageCode { get; set; } = "en";
+    public string DefaultLanguageCode { get; init; } = "en";
 
     public bool IsConfigured =>
         !string.IsNullOrWhiteSpace(PhoneNumberId) && !string.IsNullOrWhiteSpace(AccessToken);

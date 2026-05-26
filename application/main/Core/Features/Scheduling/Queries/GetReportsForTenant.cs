@@ -31,7 +31,14 @@ public sealed class GetReportsForTenantQueryValidator : AbstractValidator<GetRep
 public sealed record BookingReportsResponse(int TotalCount, int PageOffset, int PageSize, BookingReportResponse[] Reports);
 
 [PublicAPI]
-public sealed record BookingReportResponse(BookingReportId Id, BookingId BookingId, UserId ReportedByUserId, BookingReportReasonCode ReasonCode, string? Notes, DateTimeOffset CreatedAt);
+public sealed record BookingReportResponse(
+    BookingReportId Id,
+    BookingId BookingId,
+    UserId ReportedByUserId,
+    BookingReportReasonCode ReasonCode,
+    string? Notes,
+    DateTimeOffset CreatedAt
+);
 
 public sealed class GetReportsForTenantHandler(IBookingReportRepository bookingReportRepository, IExecutionContext executionContext)
     : IRequestHandler<GetReportsForTenantQuery, Result<BookingReportsResponse>>

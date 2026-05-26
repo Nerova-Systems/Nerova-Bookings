@@ -1,9 +1,9 @@
 using FluentValidation;
 using JetBrains.Annotations;
-using Main.Features.Permissions.Domain;
-using Main.Features.Permissions.Pipeline;
 using Main.Features.EventTypes.Domain;
 using Main.Features.EventTypes.Shared;
+using Main.Features.Permissions.Domain;
+using Main.Features.Permissions.Pipeline;
 using Main.Features.Scheduling.Shared;
 using SharedKernel.Cqrs;
 using SharedKernel.ExecutionContext;
@@ -22,10 +22,11 @@ public sealed class BulkApplyLocationsValidator : AbstractValidator<BulkApplyLoc
     {
         RuleFor(command => command.Items).NotEmpty();
         RuleForEach(command => command.Items).ChildRules(item =>
-        {
-            item.RuleFor(value => value.LocationType).MaximumLength(80);
-            item.RuleFor(value => value.LocationValue).MaximumLength(500);
-        });
+            {
+                item.RuleFor(value => value.LocationType).MaximumLength(80);
+                item.RuleFor(value => value.LocationValue).MaximumLength(500);
+            }
+        );
     }
 }
 

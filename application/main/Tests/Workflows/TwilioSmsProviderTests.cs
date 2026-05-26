@@ -29,14 +29,15 @@ public sealed class TwilioSmsProviderTests
         HttpRequestMessage? captured = null;
         string? capturedBody = null;
         var handler = new RecordingHandler(request =>
-        {
-            captured = request;
-            capturedBody = request.Content!.ReadAsStringAsync().GetAwaiter().GetResult();
-            return new HttpResponseMessage(HttpStatusCode.Created)
             {
-                Content = new StringContent("{\"sid\":\"SM_abc123\",\"status\":\"queued\"}")
-            };
-        });
+                captured = request;
+                capturedBody = request.Content!.ReadAsStringAsync().GetAwaiter().GetResult();
+                return new HttpResponseMessage(HttpStatusCode.Created)
+                {
+                    Content = new StringContent("{\"sid\":\"SM_abc123\",\"status\":\"queued\"}")
+                };
+            }
+        );
         var options = new TwilioOptions
         {
             AccountSid = "AC_test",
@@ -55,7 +56,7 @@ public sealed class TwilioSmsProviderTests
         captured!.Method.Should().Be(HttpMethod.Post);
         captured.RequestUri!.AbsoluteUri.Should().Be("https://twilio.test/2010-04-01/Accounts/AC_test/Messages.json");
         captured.Headers.Authorization!.Scheme.Should().Be("Basic");
-        var expectedBasic = Convert.ToBase64String(System.Text.Encoding.ASCII.GetBytes("AC_test:secret"));
+        var expectedBasic = Convert.ToBase64String("AC_test:secret"u8);
         captured.Headers.Authorization.Parameter.Should().Be(expectedBasic);
         captured.Content!.Headers.ContentType!.MediaType.Should().Be("application/x-www-form-urlencoded");
 
@@ -68,9 +69,10 @@ public sealed class TwilioSmsProviderTests
     public async Task SendAsync_When5xx_ShouldReturnTransient()
     {
         var handler = new RecordingHandler(_ => new HttpResponseMessage(HttpStatusCode.ServiceUnavailable)
-        {
-            Content = new StringContent("temporarily down")
-        });
+            {
+                Content = new StringContent("temporarily down")
+            }
+        );
         var provider = BuildProvider(handler, ConfiguredOptions());
 
         var result = await provider.SendAsync("+15551234567", "body", CancellationToken.None);
@@ -83,9 +85,10 @@ public sealed class TwilioSmsProviderTests
     public async Task SendAsync_When429_ShouldReturnTransient()
     {
         var handler = new RecordingHandler(_ => new HttpResponseMessage((HttpStatusCode)429)
-        {
-            Content = new StringContent("rate limited")
-        });
+            {
+                Content = new StringContent("rate limited")
+            }
+        );
         var provider = BuildProvider(handler, ConfiguredOptions());
 
         var result = await provider.SendAsync("+15551234567", "body", CancellationToken.None);
@@ -97,9 +100,10 @@ public sealed class TwilioSmsProviderTests
     public async Task SendAsync_When400_ShouldReturnPermanent()
     {
         var handler = new RecordingHandler(_ => new HttpResponseMessage(HttpStatusCode.BadRequest)
-        {
-            Content = new StringContent("{\"message\":\"Invalid 'To' Phone Number\"}")
-        });
+            {
+                Content = new StringContent("{\"message\":\"Invalid 'To' Phone Number\"}")
+            }
+        );
         var provider = BuildProvider(handler, ConfiguredOptions());
 
         var result = await provider.SendAsync("+0", "body", CancellationToken.None);
@@ -120,13 +124,16 @@ public sealed class TwilioSmsProviderTests
         result.ErrorReason.Should().Contain("connection reset");
     }
 
-    private static TwilioOptions ConfiguredOptions() => new()
+    private static TwilioOptions ConfiguredOptions()
     {
-        AccountSid = "AC_test",
-        AuthToken = "secret",
-        FromNumber = "+15550000000",
-        ApiBaseUrl = "https://twilio.test/2010-04-01"
-    };
+        return new TwilioOptions
+        {
+            AccountSid = "AC_test",
+            AuthToken = "secret",
+            FromNumber = "+15550000000",
+            ApiBaseUrl = "https://twilio.test/2010-04-01"
+        };
+    }
 
     private static TwilioSmsProvider BuildProvider(HttpMessageHandler handler, TwilioOptions options)
     {

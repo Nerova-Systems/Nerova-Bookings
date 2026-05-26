@@ -87,7 +87,13 @@ internal readonly struct WebhookAccessGate<TResponse>
 
     public Result<TResponse>? Failure { get; }
 
-    public static WebhookAccessGate<TResponse> Ok(TenantId tenantId, UserId userId) => new(tenantId, userId, null);
+    public static WebhookAccessGate<TResponse> Ok(TenantId tenantId, UserId userId)
+    {
+        return new WebhookAccessGate<TResponse>(tenantId, userId, null);
+    }
 
-    public static WebhookAccessGate<TResponse> Fail(Result<TResponse> failure) => new(new TenantId(0), new UserId(string.Empty), failure);
+    public static WebhookAccessGate<TResponse> Fail(Result<TResponse> failure)
+    {
+        return new WebhookAccessGate<TResponse>(new TenantId(0), new UserId(string.Empty), failure);
+    }
 }

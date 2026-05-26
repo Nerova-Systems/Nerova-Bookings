@@ -24,7 +24,7 @@ public sealed class HashedLinkEndpointsTests : EndpointBaseTest<MainDbContext>
         response.EnsureSuccessStatusCode();
         var created = await response.DeserializeResponse<HashedLinkTestResponse>();
         created.Should().NotBeNull();
-        created!.Hash.Should().Be("abc123def456");
+        created.Hash.Should().Be("abc123def456");
         created.ExpiresAfterUses.Should().Be(5);
         created.EventTypeId.Should().Be(eventType.Id);
 
@@ -77,7 +77,7 @@ public sealed class HashedLinkEndpointsTests : EndpointBaseTest<MainDbContext>
         var listing = await response.DeserializeResponse<HashedLinksTestResponse>();
 
         listing!.HashedLinks.Should().HaveCount(2);
-        listing.HashedLinks.Select(l => l.Hash).Should().BeEquivalentTo(["hash-1", "hash-2"]);
+        listing.HashedLinks.Select(l => l.Hash).Should().BeEquivalentTo("hash-1", "hash-2");
     }
 
     [Fact]
@@ -139,7 +139,7 @@ public sealed class HashedLinkEndpointsTests : EndpointBaseTest<MainDbContext>
         var updated = await response.DeserializeResponse<EventTypeTestResponse>();
 
         updated!.AssignAllTeamMembers.Should().BeTrue();
-        updated.Settings.TeamAssignment.IsRRWeightsEnabled.Should().BeTrue();
+        updated.Settings.TeamAssignment.IsRrWeightsEnabled.Should().BeTrue();
         updated.Settings.TeamAssignment.MaxLeadThreshold.Should().Be(3);
         TelemetryEventsCollectorSpy.CollectedEvents.Should().ContainSingle(e => e.GetType().Name == "TeamAssignmentUpdated");
     }
@@ -196,5 +196,5 @@ public sealed class HashedLinkEndpointsTests : EndpointBaseTest<MainDbContext>
     private sealed record EventTypeSettingsTestResponse(EventTypeTeamAssignmentTestResponse TeamAssignment);
 
     [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
-    private sealed record EventTypeTeamAssignmentTestResponse(bool IsRRWeightsEnabled, int? MaxLeadThreshold);
+    private sealed record EventTypeTeamAssignmentTestResponse(bool IsRrWeightsEnabled, int? MaxLeadThreshold);
 }

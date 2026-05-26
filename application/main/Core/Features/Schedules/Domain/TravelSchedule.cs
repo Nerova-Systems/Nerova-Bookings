@@ -42,8 +42,6 @@ public sealed class TravelSchedule : AggregateRoot<TravelScheduleId>, ITenantSco
         ScheduleId = scheduleId;
     }
 
-    public TenantId TenantId { get; } = new(0);
-
     public UserId UserId { get; private set; }
 
     public DateOnly StartDate { get; private set; }
@@ -53,6 +51,8 @@ public sealed class TravelSchedule : AggregateRoot<TravelScheduleId>, ITenantSco
     public string TimeZone { get; private set; }
 
     public ScheduleId? ScheduleId { get; private set; }
+
+    public TenantId TenantId { get; } = new(0);
 
     public static TravelSchedule Create(TenantId tenantId, UserId userId, DateOnly startDate, DateOnly endDate, string timeZone, ScheduleId? scheduleId = null)
     {

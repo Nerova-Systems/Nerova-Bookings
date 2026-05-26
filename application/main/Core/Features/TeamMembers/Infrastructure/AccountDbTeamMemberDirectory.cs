@@ -1,6 +1,5 @@
 using Main.Features.TeamMembers.Domain;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging;
 using Npgsql;
 using SharedKernel.Domain;
 
@@ -43,13 +42,13 @@ public sealed class AccountDbTeamMemberDirectory(
         await using var command = connection.CreateCommand();
         var hasQuery = !string.IsNullOrWhiteSpace(query);
         command.CommandText = $$"""
-            SELECT id, email, first_name, last_name
-            FROM users
-            WHERE tenant_id = @tenant_id AND deleted_at IS NULL
-            {{(hasQuery ? "AND (email ILIKE @q OR first_name ILIKE @q OR last_name ILIKE @q)" : string.Empty)}}
-            ORDER BY first_name NULLS LAST, last_name NULLS LAST, email
-            LIMIT @limit
-            """;
+                                SELECT id, email, first_name, last_name
+                                FROM users
+                                WHERE tenant_id = @tenant_id AND deleted_at IS NULL
+                                {{(hasQuery ? "AND (email ILIKE @q OR first_name ILIKE @q OR last_name ILIKE @q)" : string.Empty)}}
+                                ORDER BY first_name NULLS LAST, last_name NULLS LAST, email
+                                LIMIT @limit
+                                """;
         command.Parameters.AddWithValue("tenant_id", tenantId.Value);
         command.Parameters.AddWithValue("limit", Math.Clamp(limit, 1, 100));
         if (hasQuery) command.Parameters.AddWithValue("q", $"%{query}%");

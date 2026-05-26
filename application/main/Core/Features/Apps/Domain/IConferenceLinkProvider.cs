@@ -16,7 +16,7 @@ public sealed record BookingEvent(
     string OrganizerEmail,
     string? OrganizerName,
     IReadOnlyList<BookingEventAttendee> Attendees,
-    string? ICalUid = null
+    string? CalUid = null
 );
 
 public sealed record BookingEventAttendee(string Email, string? Name);
@@ -43,8 +43,10 @@ public sealed record ConferenceLink(string ExternalId, string JoinUrl, string? P
 /// </summary>
 public interface IConferenceLinkProvider
 {
-    /// <summary>The <see cref="AppSlug" /> this provider handles. Used by callers to look up
-    ///     the right provider from the registered set.</summary>
+    /// <summary>
+    ///     The <see cref="AppSlug" /> this provider handles. Used by callers to look up
+    ///     the right provider from the registered set.
+    /// </summary>
     AppSlug Slug { get; }
 
     /// <summary>

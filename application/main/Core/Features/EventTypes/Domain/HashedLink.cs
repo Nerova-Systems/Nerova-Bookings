@@ -34,15 +34,15 @@ public sealed class HashedLink : AggregateRoot<HashedLinkId>, ITenantScopedEntit
         ExpiresAt = expiresAt;
     }
 
-    public TenantId TenantId { get; } = new(0);
-
     public EventTypeId EventTypeId { get; private set; }
 
     public string Hash { get; private set; }
 
     public int? ExpiresAfterUses { get; private set; }
 
-    public DateTimeOffset? ExpiresAt { get; private set; }
+    public DateTimeOffset? ExpiresAt { get; }
+
+    public TenantId TenantId { get; } = new(0);
 
     public static HashedLink Create(TenantId tenantId, EventTypeId eventTypeId, string hash, int? expiresAfterUses, DateTimeOffset? expiresAt)
     {

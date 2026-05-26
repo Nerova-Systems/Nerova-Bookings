@@ -7,7 +7,7 @@ public static class GoogleCalendarSlug
 {
     public const string Value = "google-calendar";
 
-    public static readonly AppSlug Slug = new(Value);
-
     public const string HttpClientName = "google-calendar";
+
+    public static readonly AppSlug Slug = new(Value);
 }

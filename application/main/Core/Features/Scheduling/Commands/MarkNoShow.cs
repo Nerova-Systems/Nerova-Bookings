@@ -1,5 +1,4 @@
 using System.Text.Json;
-using FluentValidation;
 using JetBrains.Annotations;
 using Main.Features.Permissions.Domain;
 using Main.Features.Permissions.Pipeline;
@@ -53,6 +52,7 @@ public sealed class MarkNoShowHandler(
             {
                 return Result.Success();
             }
+
             item.Booking.SetNoShowHost(command.NoShow);
             bookingRepository.Update(item.Booking);
             subject = "host";
@@ -64,10 +64,12 @@ public sealed class MarkNoShowHandler(
             {
                 return Result.NotFound($"Attendee '{command.AttendeeId}' was not found.");
             }
+
             if (attendee.NoShow == command.NoShow)
             {
                 return Result.Success();
             }
+
             attendee.MarkNoShow(command.NoShow);
             bookingAttendeeRepository.Update(attendee);
             subject = command.AttendeeId.Value;

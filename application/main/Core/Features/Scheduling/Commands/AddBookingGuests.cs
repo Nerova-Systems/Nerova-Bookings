@@ -5,7 +5,6 @@ using Main.Features.Permissions.Domain;
 using Main.Features.Permissions.Pipeline;
 using Main.Features.Scheduling.Domain;
 using SharedKernel.Cqrs;
-using SharedKernel.Domain;
 using SharedKernel.ExecutionContext;
 
 namespace Main.Features.Scheduling.Commands;
@@ -23,12 +22,13 @@ public sealed class AddBookingGuestsValidator : AbstractValidator<AddBookingGues
     {
         RuleFor(command => command.Guests).NotEmpty();
         RuleForEach(command => command.Guests).ChildRules(guest =>
-        {
-            guest.RuleFor(g => g.Name).NotEmpty().MaximumLength(120);
-            guest.RuleFor(g => g.Email).NotEmpty().EmailAddress().MaximumLength(320);
-            guest.RuleFor(g => g.TimeZone).NotEmpty().MaximumLength(100);
-            guest.RuleFor(g => g.Locale).MaximumLength(20);
-        });
+            {
+                guest.RuleFor(g => g.Name).NotEmpty().MaximumLength(120);
+                guest.RuleFor(g => g.Email).NotEmpty().EmailAddress().MaximumLength(320);
+                guest.RuleFor(g => g.TimeZone).NotEmpty().MaximumLength(100);
+                guest.RuleFor(g => g.Locale).MaximumLength(20);
+            }
+        );
     }
 }
 

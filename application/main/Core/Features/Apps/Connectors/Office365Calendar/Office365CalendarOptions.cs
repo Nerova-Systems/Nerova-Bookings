@@ -14,6 +14,14 @@ namespace Main.Features.Apps.Connectors.Office365Calendar;
 /// </summary>
 public sealed class Office365CalendarOptions
 {
+    /// <summary>
+    ///     The Microsoft Graph scope required for the MS Teams conferencing connector. Exposed
+    ///     as a constant so the MS Teams installer can verify the existing credential's stored
+    ///     scope string includes it (otherwise the user installed Office 365 before this scope
+    ///     was requested and must reconnect).
+    /// </summary>
+    public const string OnlineMeetingsScope = "OnlineMeetings.ReadWrite";
+
     /// <summary>OAuth 2.0 application (client) id (from Microsoft Entra ID → App registrations).</summary>
     public string ClientId { get; set; } = string.Empty;
 
@@ -32,7 +40,7 @@ public sealed class Office365CalendarOptions
     public string TokenUrl => $"https://login.microsoftonline.com/{TenantId}/oauth2/v2.0/token";
 
     /// <summary>Microsoft Graph API base URL.</summary>
-    public string ApiBaseUrl { get; set; } = "https://graph.microsoft.com/v1.0";
+    public string ApiBaseUrl { get; init; } = "https://graph.microsoft.com/v1.0";
 
     /// <summary>
     ///     Scopes requested at authorize time. <c>offline_access</c> is required for refresh
@@ -48,12 +56,4 @@ public sealed class Office365CalendarOptions
         "Calendars.ReadWrite",
         "OnlineMeetings.ReadWrite"
     ];
-
-    /// <summary>
-    ///     The Microsoft Graph scope required for the MS Teams conferencing connector. Exposed
-    ///     as a constant so the MS Teams installer can verify the existing credential's stored
-    ///     scope string includes it (otherwise the user installed Office 365 before this scope
-    ///     was requested and must reconnect).
-    /// </summary>
-    public const string OnlineMeetingsScope = "OnlineMeetings.ReadWrite";
 }

@@ -20,40 +20,25 @@ namespace Main.Features.Apps.Connectors.Zoom;
 ///         be registered as a long-lived singleton.
 ///     </para>
 /// </summary>
-public sealed class ZoomService
+public sealed class ZoomService(
+    HttpClient httpClient,
+    ZoomOptions options,
+    ZoomCredentialBlob initialBlob,
+    Func<string, CancellationToken, Task> persistRefreshedBlobAsync,
+    TimeProvider timeProvider
+)
 {
     private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web);
 
-    private readonly HttpClient _httpClient;
-    private readonly ZoomOptions _options;
-    private readonly Func<string, CancellationToken, Task> _persistRefreshedBlobAsync;
-    private readonly TimeProvider _timeProvider;
-    private ZoomCredentialBlob _blob;
-
-    public ZoomService(
-        HttpClient httpClient,
-        ZoomOptions options,
-        ZoomCredentialBlob initialBlob,
-        Func<string, CancellationToken, Task> persistRefreshedBlobAsync,
-        TimeProvider timeProvider
-    )
-    {
-        _httpClient = httpClient;
-        _options = options;
-        _blob = initialBlob;
-        _persistRefreshedBlobAsync = persistRefreshedBlobAsync;
-        _timeProvider = timeProvider;
-    }
-
     /// <summary>Snapshot of the in-memory credential — exposed for tests.</summary>
-    public ZoomCredentialBlob CurrentBlob => _blob;
+    public ZoomCredentialBlob CurrentBlob { get; private set; } = initialBlob;
 
     public async Task<ConferenceLink> CreateMeetingAsync(BookingEvent input, CancellationToken cancellationToken)
     {
         var body = BuildMeetingBody(input);
 
         using var response = await SendWithRefreshAsync(
-            () => new HttpRequestMessage(HttpMethod.Post, $"{_options.ApiBaseUrl}/users/me/meetings")
+            () => new HttpRequestMessage(HttpMethod.Post, $"{options.ApiBaseUrl}/users/me/meetings")
             {
                 Content = JsonContent.Create(body, options: JsonOptions)
             },
@@ -69,7 +54,7 @@ public sealed class ZoomService
         var body = BuildMeetingBody(input);
 
         using var response = await SendWithRefreshAsync(
-            () => new HttpRequestMessage(new HttpMethod("PATCH"), $"{_options.ApiBaseUrl}/meetings/{Uri.EscapeDataString(meetingId)}")
+            () => new HttpRequestMessage(new HttpMethod("PATCH"), $"{options.ApiBaseUrl}/meetings/{Uri.EscapeDataString(meetingId)}")
             {
                 Content = JsonContent.Create(body, options: JsonOptions)
             },
@@ -81,7 +66,7 @@ public sealed class ZoomService
         await EnsureSuccessAsync(response, "meetings.update", cancellationToken);
 
         using var getResponse = await SendWithRefreshAsync(
-            () => new HttpRequestMessage(HttpMethod.Get, $"{_options.ApiBaseUrl}/meetings/{Uri.EscapeDataString(meetingId)}"),
+            () => new HttpRequestMessage(HttpMethod.Get, $"{options.ApiBaseUrl}/meetings/{Uri.EscapeDataString(meetingId)}"),
             cancellationToken
         );
         await EnsureSuccessAsync(getResponse, "meetings.get", cancellationToken);
@@ -91,7 +76,7 @@ public sealed class ZoomService
     public async Task CancelMeetingAsync(string meetingId, CancellationToken cancellationToken)
     {
         using var response = await SendWithRefreshAsync(
-            () => new HttpRequestMessage(HttpMethod.Delete, $"{_options.ApiBaseUrl}/meetings/{Uri.EscapeDataString(meetingId)}"),
+            () => new HttpRequestMessage(HttpMethod.Delete, $"{options.ApiBaseUrl}/meetings/{Uri.EscapeDataString(meetingId)}"),
             cancellationToken
         );
 
@@ -145,34 +130,33 @@ public sealed class ZoomService
     )
     {
         var first = buildRequest();
-        ZoomInstaller.ApplyBearer(first, _blob.AccessToken);
-        var response = await _httpClient.SendAsync(first, cancellationToken);
+        ZoomInstaller.ApplyBearer(first, CurrentBlob.AccessToken);
+        var response = await httpClient.SendAsync(first, cancellationToken);
         if (response.StatusCode != HttpStatusCode.Unauthorized) return response;
 
         response.Dispose();
         await RefreshAccessTokenAsync(cancellationToken);
 
         var retry = buildRequest();
-        ZoomInstaller.ApplyBearer(retry, _blob.AccessToken);
-        return await _httpClient.SendAsync(retry, cancellationToken);
+        ZoomInstaller.ApplyBearer(retry, CurrentBlob.AccessToken);
+        return await httpClient.SendAsync(retry, cancellationToken);
     }
 
     private async Task RefreshAccessTokenAsync(CancellationToken cancellationToken)
     {
-        using var request = new HttpRequestMessage(HttpMethod.Post, _options.TokenUrl)
-        {
-            Content = new FormUrlEncodedContent(new Dictionary<string, string>
-                {
-                    ["grant_type"] = "refresh_token",
-                    ["refresh_token"] = _blob.RefreshToken
-                }
-            )
-        };
+        var content = new FormUrlEncodedContent(new Dictionary<string, string>
+            {
+                ["grant_type"] = "refresh_token",
+                ["refresh_token"] = CurrentBlob.RefreshToken
+            }
+        );
+        using var request = new HttpRequestMessage(HttpMethod.Post, options.TokenUrl);
+        request.Content = content;
         // Zoom requires HTTP Basic auth (client_id:client_secret) on the token endpoint for
         // both the initial code exchange and refresh.
-        ZoomInstaller.ApplyBasicAuth(request, _options.ClientId, _options.ClientSecret);
+        ZoomInstaller.ApplyBasicAuth(request, options.ClientId, options.ClientSecret);
 
-        using var response = await _httpClient.SendAsync(request, cancellationToken);
+        using var response = await httpClient.SendAsync(request, cancellationToken);
         var body = await response.Content.ReadAsStringAsync(cancellationToken);
         if (!response.IsSuccessStatusCode)
         {
@@ -182,26 +166,26 @@ public sealed class ZoomService
         }
 
         var token = JsonSerializer.Deserialize<ZoomTokenResponse>(body, ZoomTokenResponse.JsonOptions)
-            ?? throw new InvalidOperationException("Zoom token refresh response was empty.");
+                    ?? throw new InvalidOperationException("Zoom token refresh response was empty.");
         if (string.IsNullOrEmpty(token.AccessToken)) throw new InvalidOperationException("Zoom token refresh response missing access_token.");
 
-        _blob = new ZoomCredentialBlob(
+        CurrentBlob = new ZoomCredentialBlob(
             token.AccessToken,
             // Zoom does rotate the refresh token on every refresh — when present, replace it;
             // otherwise keep the existing token so a malformed response doesn't strand us.
-            string.IsNullOrEmpty(token.RefreshToken) ? _blob.RefreshToken : token.RefreshToken,
-            _timeProvider.GetUtcNow().AddSeconds(Math.Max(token.ExpiresIn - 60, 60)),
-            token.Scope ?? _blob.Scope
+            string.IsNullOrEmpty(token.RefreshToken) ? CurrentBlob.RefreshToken : token.RefreshToken,
+            timeProvider.GetUtcNow().AddSeconds(Math.Max(token.ExpiresIn - 60, 60)),
+            token.Scope ?? CurrentBlob.Scope
         );
 
-        await _persistRefreshedBlobAsync(_blob.ToJson(), cancellationToken);
+        await persistRefreshedBlobAsync(CurrentBlob.ToJson(), cancellationToken);
     }
 
     private static async Task<ConferenceLink> ParseLinkAsync(HttpResponseMessage response, CancellationToken cancellationToken)
     {
         await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
         var root = await JsonNode.ParseAsync(stream, cancellationToken: cancellationToken)
-            ?? throw new InvalidOperationException("Zoom meeting response was empty.");
+                   ?? throw new InvalidOperationException("Zoom meeting response was empty.");
 
         // Zoom returns `id` as a number; serialize to string so the BookingReference can carry
         // it without coupling its column to a numeric type.
@@ -214,7 +198,7 @@ public sealed class ZoomService
         };
 
         var joinUrl = root["join_url"]?.GetValue<string>()
-            ?? throw new InvalidOperationException("Zoom meeting response missing 'join_url'.");
+                      ?? throw new InvalidOperationException("Zoom meeting response missing 'join_url'.");
         var password = root["password"]?.GetValue<string>();
         return new ConferenceLink(externalId, joinUrl, string.IsNullOrEmpty(password) ? null : password);
     }

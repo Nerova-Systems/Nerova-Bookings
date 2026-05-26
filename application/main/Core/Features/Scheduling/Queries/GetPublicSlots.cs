@@ -55,9 +55,11 @@ public sealed class GetPublicSlotsHandler(
         var adjustmentsRangeStart = DateOnly.FromDateTime(query.StartTime.UtcDateTime).AddDays(-1);
         var adjustmentsRangeEnd = DateOnly.FromDateTime(query.EndTime.UtcDateTime).AddDays(1);
         var travelSchedules = await travelScheduleRepository.GetActiveForUserUnfilteredAsync(
-            context.Profile.TenantId, context.Profile.OwnerUserId, adjustmentsRangeStart, adjustmentsRangeEnd, cancellationToken);
+            context.Profile.TenantId, context.Profile.OwnerUserId, adjustmentsRangeStart, adjustmentsRangeEnd, cancellationToken
+        );
         var outOfOffices = await outOfOfficeRepository.GetActiveForUserUnfilteredAsync(
-            context.Profile.TenantId, context.Profile.OwnerUserId, adjustmentsRangeStart, adjustmentsRangeEnd, cancellationToken);
+            context.Profile.TenantId, context.Profile.OwnerUserId, adjustmentsRangeStart, adjustmentsRangeEnd, cancellationToken
+        );
         var adjustments = new ScheduleAdjustments(travelSchedules, outOfOffices);
 
         Dictionary<string, PublicSlotResponse[]> slots;
@@ -72,8 +74,9 @@ public sealed class GetPublicSlotsHandler(
                     hostUserIds,
                     query.StartTime.AddDays(-1),
                     query.EndTime.AddDays(1),
-                    cancellationToken)
-                : (IReadOnlyDictionary<UserId, Booking[]>)new Dictionary<UserId, Booking[]>();
+                    cancellationToken
+                )
+                : new Dictionary<UserId, Booking[]>();
 
             slots = collectiveSlotCalculator.GetSlots(context.EventType, context.Schedule, hostBookings, query.StartTime, query.EndTime, query.TimeZone, duration, adjustments);
         }
@@ -87,8 +90,9 @@ public sealed class GetPublicSlotsHandler(
                     hostUserIds,
                     query.StartTime.AddDays(-1),
                     query.EndTime.AddDays(1),
-                    cancellationToken)
-                : (IReadOnlyDictionary<UserId, Booking[]>)new Dictionary<UserId, Booking[]>();
+                    cancellationToken
+                )
+                : new Dictionary<UserId, Booking[]>();
 
             slots = roundRobinSlotCalculator.GetSlots(context.EventType, context.Schedule, hostBookings, hosts, query.StartTime, query.EndTime, query.TimeZone, duration, adjustments);
         }

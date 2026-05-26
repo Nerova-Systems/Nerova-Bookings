@@ -4,6 +4,7 @@ using Main.Features.Workflows.Shared;
 using SharedKernel.Cqrs;
 using SharedKernel.ExecutionContext;
 using SharedKernel.Telemetry;
+using Main.Features.Workflows.Infrastructure;
 
 namespace Main.Features.Workflows.Commands;
 

@@ -51,16 +51,15 @@ public sealed class ZoomInstaller(
         if (!opts.IsConfigured) throw new ZoomNotConfiguredException();
 
         var client = httpClientFactory.CreateClient(ZoomSlug.HttpClientName);
-        using var request = new HttpRequestMessage(HttpMethod.Post, opts.TokenUrl)
-        {
-            Content = new FormUrlEncodedContent(new Dictionary<string, string>
-                {
-                    ["grant_type"] = "authorization_code",
-                    ["code"] = context.Code,
-                    ["redirect_uri"] = context.RedirectUri
-                }
-            )
-        };
+        var content = new FormUrlEncodedContent(new Dictionary<string, string>
+            {
+                ["grant_type"] = "authorization_code",
+                ["code"] = context.Code,
+                ["redirect_uri"] = context.RedirectUri
+            }
+        );
+        using var request = new HttpRequestMessage(HttpMethod.Post, opts.TokenUrl);
+        request.Content = content;
         ApplyBasicAuth(request, opts.ClientId, opts.ClientSecret);
 
         using var response = await client.SendAsync(request, cancellationToken);
@@ -73,7 +72,7 @@ public sealed class ZoomInstaller(
         }
 
         var token = JsonSerializer.Deserialize<ZoomTokenResponse>(body, ZoomTokenResponse.JsonOptions)
-            ?? throw new InvalidOperationException("Zoom token response was empty.");
+                    ?? throw new InvalidOperationException("Zoom token response was empty.");
         if (string.IsNullOrEmpty(token.AccessToken) || string.IsNullOrEmpty(token.RefreshToken))
         {
             throw new InvalidOperationException("Zoom token response missing access_token or refresh_token.");
@@ -108,14 +107,13 @@ public sealed class ZoomInstaller(
         try
         {
             var client = httpClientFactory.CreateClient(ZoomSlug.HttpClientName);
-            using var request = new HttpRequestMessage(HttpMethod.Post, opts.RevokeUrl)
-            {
-                Content = new FormUrlEncodedContent(new Dictionary<string, string>
-                    {
-                        ["token"] = blob.AccessToken
-                    }
-                )
-            };
+            var revokeContent = new FormUrlEncodedContent(new Dictionary<string, string>
+                {
+                    ["token"] = blob.AccessToken
+                }
+            );
+            using var request = new HttpRequestMessage(HttpMethod.Post, opts.RevokeUrl);
+            request.Content = revokeContent;
             // Revoke also uses Basic auth with the client credentials.
             ApplyBasicAuth(request, opts.ClientId, opts.ClientSecret);
             using var response = await client.SendAsync(request, cancellationToken);
@@ -151,11 +149,15 @@ public sealed class ZoomNotConfiguredException()
     : InvalidOperationException("Zoom OAuth client credentials are not configured.");
 
 internal sealed record ZoomTokenResponse(
-    [property: JsonPropertyName("access_token")] string AccessToken,
-    [property: JsonPropertyName("refresh_token")] string? RefreshToken,
-    [property: JsonPropertyName("expires_in")] int ExpiresIn,
+    [property: JsonPropertyName("access_token")]
+    string AccessToken,
+    [property: JsonPropertyName("refresh_token")]
+    string? RefreshToken,
+    [property: JsonPropertyName("expires_in")]
+    int ExpiresIn,
     [property: JsonPropertyName("scope")] string? Scope,
-    [property: JsonPropertyName("token_type")] string? TokenType
+    [property: JsonPropertyName("token_type")]
+    string? TokenType
 )
 {
     public static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web);

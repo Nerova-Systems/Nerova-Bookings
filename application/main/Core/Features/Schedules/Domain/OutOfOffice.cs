@@ -41,9 +41,7 @@ public sealed class OutOfOffice : AggregateRoot<OutOfOfficeId>, ITenantScopedEnt
         Notes = notes?.Trim();
     }
 
-    public TenantId TenantId { get; } = new(0);
-
-    public UserId UserId { get; private set; }
+    public UserId UserId { get; }
 
     public DateOnly StartDate { get; private set; }
 
@@ -54,6 +52,8 @@ public sealed class OutOfOffice : AggregateRoot<OutOfOfficeId>, ITenantScopedEnt
     public string? Reason { get; private set; }
 
     public string? Notes { get; private set; }
+
+    public TenantId TenantId { get; } = new(0);
 
     public static OutOfOffice Create(TenantId tenantId, UserId userId, DateOnly startDate, DateOnly endDate, UserId? toUserId = null, string? reason = null, string? notes = null)
     {

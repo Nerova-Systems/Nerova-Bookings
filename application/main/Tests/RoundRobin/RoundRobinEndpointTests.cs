@@ -7,7 +7,6 @@ using Main.Features;
 using Main.Features.EventTypes.Domain;
 using Main.Features.RoundRobin.Shared;
 using SharedKernel.Authentication;
-using SharedKernel.Domain;
 using SharedKernel.Tests;
 using Xunit;
 
@@ -172,12 +171,12 @@ public sealed class RoundRobinEndpointTests : EndpointBaseTest<MainDbContext>
 
         await _rrClient.PostAsJsonAsync(
             $"/api/round-robin/{eventType.Id}/hosts",
-            new AddRoundRobinHostRequest(memberId, IsFixed: false, Priority: 0, Weight: 100)
+            new AddRoundRobinHostRequest(memberId)
         );
 
         var updateResponse = await _rrClient.PutAsJsonAsync(
             $"/api/round-robin/{eventType.Id}/hosts/{memberId}",
-            new UpdateRoundRobinHostRequest(IsFixed: true, Priority: 1, Weight: 200)
+            new UpdateRoundRobinHostRequest(true, 1, 200)
         );
 
         updateResponse.EnsureSuccessStatusCode();
@@ -200,7 +199,7 @@ public sealed class RoundRobinEndpointTests : EndpointBaseTest<MainDbContext>
 
         var response = await _rrClient.PutAsJsonAsync(
             $"/api/round-robin/{eventType.Id}/hosts/{memberId}",
-            new UpdateRoundRobinHostRequest(IsFixed: false, Priority: 0, Weight: 100)
+            new UpdateRoundRobinHostRequest(false, 0, 100)
         );
 
         await response.ShouldHaveErrorStatusCode(HttpStatusCode.NotFound, $"User '{memberId}' is not a host for this event type.");
@@ -271,17 +270,18 @@ public sealed class RoundRobinEndpointTests : EndpointBaseTest<MainDbContext>
     private async Task<EventTypeIdResponse> CreateSoloEventTypeAsync(string scheduleId)
     {
         var response = await AuthenticatedOwnerHttpClient.PostAsJsonAsync("/api/event-types", new
-        {
-            title = "Solo event",
-            slug = $"solo-{Guid.NewGuid():N}",
-            durationMinutes = 30,
-            hidden = false,
-            scheduleId,
-            beforeEventBufferMinutes = 0,
-            afterEventBufferMinutes = 0,
-            slotIntervalMinutes = 30,
-            minimumBookingNoticeMinutes = 0
-        });
+            {
+                title = "Solo event",
+                slug = $"solo-{Guid.NewGuid():N}",
+                durationMinutes = 30,
+                hidden = false,
+                scheduleId,
+                beforeEventBufferMinutes = 0,
+                afterEventBufferMinutes = 0,
+                slotIntervalMinutes = 30,
+                minimumBookingNoticeMinutes = 0
+            }
+        );
         response.EnsureSuccessStatusCode();
         return (await response.DeserializeResponse<EventTypeIdResponse>())!;
     }
@@ -289,12 +289,13 @@ public sealed class RoundRobinEndpointTests : EndpointBaseTest<MainDbContext>
     private async Task<ScheduleIdResponse> CreateScheduleAsync()
     {
         var response = await AuthenticatedOwnerHttpClient.PostAsJsonAsync("/api/schedules", new
-        {
-            name = "Work Hours",
-            timeZone = "Africa/Johannesburg",
-            isDefault = true,
-            availabilityWindows = new[] { new { days = new[] { 1, 2, 3, 4, 5 }, startMinute = 540, endMinute = 1020 } }
-        });
+            {
+                name = "Work Hours",
+                timeZone = "Africa/Johannesburg",
+                isDefault = true,
+                availabilityWindows = new[] { new { days = new[] { 1, 2, 3, 4, 5 }, startMinute = 540, endMinute = 1020 } }
+            }
+        );
         response.EnsureSuccessStatusCode();
         return (await response.DeserializeResponse<ScheduleIdResponse>())!;
     }
@@ -319,17 +320,18 @@ public sealed class RoundRobinEndpointTests : EndpointBaseTest<MainDbContext>
     private async Task<EventTypeIdResponse> CreateTeamEventTypeViaClientAsync(HttpClient client, string scheduleId)
     {
         var response = await client.PostAsJsonAsync("/api/event-types", new
-        {
-            title = "RR event",
-            slug = $"rr-{Guid.NewGuid():N}",
-            durationMinutes = 30,
-            hidden = false,
-            scheduleId,
-            beforeEventBufferMinutes = 0,
-            afterEventBufferMinutes = 0,
-            slotIntervalMinutes = 30,
-            minimumBookingNoticeMinutes = 0
-        });
+            {
+                title = "RR event",
+                slug = $"rr-{Guid.NewGuid():N}",
+                durationMinutes = 30,
+                hidden = false,
+                scheduleId,
+                beforeEventBufferMinutes = 0,
+                afterEventBufferMinutes = 0,
+                slotIntervalMinutes = 30,
+                minimumBookingNoticeMinutes = 0
+            }
+        );
         response.EnsureSuccessStatusCode();
         return (await response.DeserializeResponse<EventTypeIdResponse>())!;
     }

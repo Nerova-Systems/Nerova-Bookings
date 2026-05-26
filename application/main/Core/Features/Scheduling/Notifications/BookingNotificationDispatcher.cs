@@ -2,7 +2,6 @@ using Main.Features.EventTypes.Domain;
 using Main.Features.Scheduling.Domain;
 using Main.Features.Scheduling.EmailTemplates;
 using Main.Features.Workflows.Senders;
-using Microsoft.Extensions.Logging;
 using SharedKernel.Emails;
 using SharedKernel.Integrations.Email;
 
@@ -63,7 +62,7 @@ public sealed class BookingNotificationDispatcher(
             kind,
             DefaultLocale,
             booking.BookerEmail,
-            recipientName: booking.BookerName,
+            booking.BookerName,
             booking,
             hostName,
             eventTitle,
@@ -85,7 +84,7 @@ public sealed class BookingNotificationDispatcher(
             kind,
             ResolveLocale(host.Locale),
             host.Email,
-            recipientName: host.DisplayName,
+            host.DisplayName,
             booking,
             hostName,
             eventTitle,
@@ -105,15 +104,15 @@ public sealed class BookingNotificationDispatcher(
     )
     {
         var model = new BookingEmailModel(
-            RecipientName: recipientName,
-            BookerName: booking.BookerName,
-            HostName: hostName,
-            EventTitle: eventTitle,
-            StartTime: booking.StartTime,
-            EndTime: booking.EndTime,
-            TimeZone: booking.TimeZone,
-            Location: booking.LocationValue,
-            Reason: booking.CancellationReason
+            recipientName,
+            booking.BookerName,
+            hostName,
+            eventTitle,
+            booking.StartTime,
+            booking.EndTime,
+            booking.TimeZone,
+            booking.LocationValue,
+            booking.CancellationReason
         );
 
         EmailTemplateBase template = kind switch

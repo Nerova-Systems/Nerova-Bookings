@@ -60,18 +60,17 @@ public sealed class GoogleCalendarInstaller(
         if (!opts.IsConfigured) throw new GoogleCalendarNotConfiguredException();
 
         var client = httpClientFactory.CreateClient(GoogleCalendarSlug.HttpClientName);
-        using var request = new HttpRequestMessage(HttpMethod.Post, opts.TokenUrl)
-        {
-            Content = new FormUrlEncodedContent(new Dictionary<string, string>
-                {
-                    ["code"] = context.Code,
-                    ["client_id"] = opts.ClientId,
-                    ["client_secret"] = opts.ClientSecret,
-                    ["redirect_uri"] = context.RedirectUri,
-                    ["grant_type"] = "authorization_code"
-                }
-            )
-        };
+        var content = new FormUrlEncodedContent(new Dictionary<string, string>
+            {
+                ["code"] = context.Code,
+                ["client_id"] = opts.ClientId,
+                ["client_secret"] = opts.ClientSecret,
+                ["redirect_uri"] = context.RedirectUri,
+                ["grant_type"] = "authorization_code"
+            }
+        );
+        using var request = new HttpRequestMessage(HttpMethod.Post, opts.TokenUrl);
+        request.Content = content;
 
         using var response = await client.SendAsync(request, cancellationToken);
         var body = await response.Content.ReadAsStringAsync(cancellationToken);
@@ -83,7 +82,7 @@ public sealed class GoogleCalendarInstaller(
         }
 
         var token = JsonSerializer.Deserialize<GoogleTokenResponse>(body, GoogleTokenResponse.JsonOptions)
-            ?? throw new InvalidOperationException("Google token response was empty.");
+                    ?? throw new InvalidOperationException("Google token response was empty.");
         if (string.IsNullOrEmpty(token.AccessToken) || string.IsNullOrEmpty(token.RefreshToken))
         {
             throw new InvalidOperationException("Google token response missing access_token or refresh_token.");
@@ -120,14 +119,13 @@ public sealed class GoogleCalendarInstaller(
         try
         {
             var client = httpClientFactory.CreateClient(GoogleCalendarSlug.HttpClientName);
-            using var request = new HttpRequestMessage(HttpMethod.Post, opts.RevokeUrl)
-            {
-                Content = new FormUrlEncodedContent(new Dictionary<string, string>
-                    {
-                        ["token"] = blob.RefreshToken
-                    }
-                )
-            };
+            var revokeContent = new FormUrlEncodedContent(new Dictionary<string, string>
+                {
+                    ["token"] = blob.RefreshToken
+                }
+            );
+            using var request = new HttpRequestMessage(HttpMethod.Post, opts.RevokeUrl);
+            request.Content = revokeContent;
             using var response = await client.SendAsync(request, cancellationToken);
             if (!response.IsSuccessStatusCode)
             {
@@ -154,11 +152,15 @@ public sealed class GoogleCalendarNotConfiguredException()
     : InvalidOperationException("Google Calendar OAuth client credentials are not configured.");
 
 internal sealed record GoogleTokenResponse(
-    [property: JsonPropertyName("access_token")] string AccessToken,
-    [property: JsonPropertyName("refresh_token")] string? RefreshToken,
-    [property: JsonPropertyName("expires_in")] int ExpiresIn,
+    [property: JsonPropertyName("access_token")]
+    string AccessToken,
+    [property: JsonPropertyName("refresh_token")]
+    string? RefreshToken,
+    [property: JsonPropertyName("expires_in")]
+    int ExpiresIn,
     [property: JsonPropertyName("scope")] string? Scope,
-    [property: JsonPropertyName("token_type")] string? TokenType
+    [property: JsonPropertyName("token_type")]
+    string? TokenType
 )
 {
     public static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web);

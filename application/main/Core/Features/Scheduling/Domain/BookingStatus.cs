@@ -1,4 +1,3 @@
-using System.Text.Json.Serialization;
 using JetBrains.Annotations;
 
 namespace Main.Features.Scheduling.Domain;

@@ -1,4 +1,3 @@
-using System.Text.Json.Serialization;
 using JetBrains.Annotations;
 using Main.Database;
 using Microsoft.EntityFrameworkCore;
@@ -45,15 +44,15 @@ public sealed class BookingHistoryEntry : AggregateRoot<BookingHistoryEntryId>, 
         OccurredAt = occurredAt;
     }
 
-    public BookingId BookingId { get; private set; }
+    public BookingId BookingId { get; init; }
 
-    public BookingHistoryEventType EventType { get; private set; }
+    public BookingHistoryEventType EventType { get; init; }
 
-    public UserId? ActorUserId { get; private set; }
+    public UserId? ActorUserId { get; init; }
 
-    public string? PayloadJson { get; private set; }
+    public string? PayloadJson { get; init; }
 
-    public DateTimeOffset OccurredAt { get; private set; }
+    public DateTimeOffset OccurredAt { get; init; }
 
     public TenantId TenantId { get; } = new(0);
 

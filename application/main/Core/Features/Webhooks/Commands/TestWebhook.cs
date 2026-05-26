@@ -32,12 +32,13 @@ public sealed class TestWebhookHandler(
         if (webhook is null) return Result<TestWebhookResponse>.NotFound($"Webhook '{command.Id}' was not found.");
 
         var payload = JsonSerializer.Serialize(new
-        {
-            triggerEvent = WebhookEventType.Ping.ToString(),
-            createdAt = timeProvider.GetUtcNow(),
-            webhookId = webhook.Id.Value,
-            message = "Ping from Nerova webhook test-fire"
-        });
+            {
+                triggerEvent = nameof(WebhookEventType.Ping),
+                createdAt = timeProvider.GetUtcNow(),
+                webhookId = webhook.Id.Value,
+                message = "Ping from Nerova webhook test-fire"
+            }
+        );
 
         var deliveryId = await dispatcher.EnqueueAsync(webhook.Id, WebhookEventType.Ping, payload, cancellationToken);
         return new TestWebhookResponse(deliveryId);

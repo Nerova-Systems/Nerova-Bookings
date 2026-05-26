@@ -1,9 +1,10 @@
 using Main.Database;
+using Main.Features.Workflows.Domain;
 using Microsoft.EntityFrameworkCore;
 using SharedKernel.Domain;
 using SharedKernel.Persistence;
 
-namespace Main.Features.Workflows.Domain;
+namespace Main.Features.Workflows.Infrastructure;
 
 public interface IWorkflowRepository : ICrudRepository<Workflow, WorkflowId>, ISoftDeletableRepository<Workflow, WorkflowId>
 {
@@ -46,7 +47,10 @@ public sealed class WorkflowRepository(MainDbContext context)
         entry.Property("workflow_id").CurrentValue = workflow.Id;
     }
 
-    public void TrackRemovedStep(WorkflowStep step) => Context.Entry(step).State = EntityState.Deleted;
+    public void TrackRemovedStep(WorkflowStep step)
+    {
+        Context.Entry(step).State = EntityState.Deleted;
+    }
 
     public async Task<Workflow[]> GetForOwnerAsync(UserId ownerUserId, CancellationToken cancellationToken)
     {

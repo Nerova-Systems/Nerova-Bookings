@@ -1,4 +1,3 @@
-using System.Text.Json.Serialization;
 using JetBrains.Annotations;
 using Main.Database;
 using Microsoft.EntityFrameworkCore;
@@ -44,13 +43,13 @@ public sealed class BookingSeat : AggregateRoot<BookingSeatId>, ITenantScopedEnt
         Data = data;
     }
 
-    public BookingId BookingId { get; private set; }
+    public BookingId BookingId { get; init; }
 
-    public BookingAttendeeId AttendeeId { get; private set; }
+    public BookingAttendeeId AttendeeId { get; init; }
 
-    public string ReferenceUid { get; private set; }
+    public string ReferenceUid { get; init; }
 
-    public string? Data { get; private set; }
+    public string? Data { get; init; }
 
     public TenantId TenantId { get; } = new(0);
 

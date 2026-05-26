@@ -14,7 +14,8 @@ public sealed class WorkflowReminderScheduler
 
     /// <summary>
     ///     Calculates the scheduled dispatch date for a workflow reminder.
-    ///     Returns null when the trigger does not support time-based scheduling (e.g. NewEvent, EventCancelled, RescheduleEvent).
+    ///     Returns null when the trigger does not support time-based scheduling (e.g. NewEvent, EventCancelled,
+    ///     RescheduleEvent).
     /// </summary>
     public DateTimeOffset? CalculateScheduledDate(
         WorkflowTrigger trigger,

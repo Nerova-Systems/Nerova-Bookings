@@ -11,7 +11,10 @@ namespace Main.Features.Webhooks.Domain;
 [JsonConverter(typeof(StronglyTypedIdJsonConverter<string, WebhookId>))]
 public sealed record WebhookId(string Value) : StronglyTypedUlid<WebhookId>(Value)
 {
-    public override string ToString() => Value;
+    public override string ToString()
+    {
+        return Value;
+    }
 }
 
 /// <summary>
@@ -49,8 +52,6 @@ public sealed class Webhook : AggregateRoot<WebhookId>, ITenantScopedEntity
         Active = active;
     }
 
-    public TenantId TenantId { get; } = new(0);
-
     public UserId? UserId { get; private set; }
 
     public EventTypeId? EventTypeId { get; private set; }
@@ -66,6 +67,8 @@ public sealed class Webhook : AggregateRoot<WebhookId>, ITenantScopedEntity
     public bool Active { get; private set; } = true;
 
     public IReadOnlyCollection<WebhookEventType> EventSubscriptions => DeserializeSubscriptions(EventSubscriptionsJson);
+
+    public TenantId TenantId { get; } = new(0);
 
     public static Webhook Create(
         TenantId tenantId,
@@ -107,7 +110,10 @@ public sealed class Webhook : AggregateRoot<WebhookId>, ITenantScopedEntity
         Active = active;
     }
 
-    public bool IsSubscribedTo(WebhookEventType eventType) => EventSubscriptions.Contains(eventType);
+    public bool IsSubscribedTo(WebhookEventType eventType)
+    {
+        return EventSubscriptions.Contains(eventType);
+    }
 
     /// <summary>Generates a 32-byte random secret encoded as lowercase hex (64 characters).</summary>
     public static string GenerateSecret()

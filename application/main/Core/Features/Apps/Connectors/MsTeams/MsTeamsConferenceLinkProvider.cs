@@ -26,14 +26,14 @@ public sealed class MsTeamsConferenceLinkProvider(Office365CalendarServiceFactor
         var service = factory.Create(credential);
         var (id, joinUrl) = await service.CreateOnlineMeetingAsync(ToO365(input), cancellationToken);
         // Teams meetings carry no separate password — the joinUrl itself is the access token.
-        return new ConferenceLink(id, joinUrl, Password: null);
+        return new ConferenceLink(id, joinUrl, null);
     }
 
     public async Task<ConferenceLink> UpdateAsync(Credential credential, string externalId, DomainBookingEvent input, CancellationToken cancellationToken)
     {
         var service = factory.Create(credential);
         var (id, joinUrl) = await service.UpdateOnlineMeetingAsync(externalId, ToO365(input), cancellationToken);
-        return new ConferenceLink(id, joinUrl, Password: null);
+        return new ConferenceLink(id, joinUrl, null);
     }
 
     public Task CancelAsync(Credential credential, string externalId, CancellationToken cancellationToken)
@@ -58,8 +58,8 @@ public sealed class MsTeamsConferenceLinkProvider(Office365CalendarServiceFactor
             input.OrganizerEmail,
             input.OrganizerName,
             attendees,
-            Location: null,
-            ICalUid: input.ICalUid
+            null,
+            input.CalUid
         );
     }
 }

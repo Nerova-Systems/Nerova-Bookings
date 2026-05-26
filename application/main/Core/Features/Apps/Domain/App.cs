@@ -1,4 +1,3 @@
-using System.Text.Json.Serialization;
 using JetBrains.Annotations;
 using SharedKernel.Domain;
 using SharedKernel.StronglyTypedIds;
@@ -76,7 +75,7 @@ public sealed class App : AggregateRoot<AppSlug>
         if (string.IsNullOrWhiteSpace(slug.Value)) throw new ArgumentException("App slug is required.", nameof(slug));
         if (string.IsNullOrWhiteSpace(name)) throw new ArgumentException("App name is required.", nameof(name));
 
-        return new App(slug, name, category, description ?? string.Empty, logoUrl ?? string.Empty, isActive);
+        return new App(slug, name, category, description, logoUrl, isActive);
     }
 
     public void Update(string name, AppCategory category, string description, string logoUrl, bool isActive)
@@ -85,8 +84,8 @@ public sealed class App : AggregateRoot<AppSlug>
 
         Name = name.Trim();
         Category = category;
-        Description = (description ?? string.Empty).Trim();
-        LogoUrl = (logoUrl ?? string.Empty).Trim();
+        Description = description.Trim();
+        LogoUrl = logoUrl.Trim();
         IsActive = isActive;
     }
 

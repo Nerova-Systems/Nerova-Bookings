@@ -18,7 +18,8 @@ namespace Main.Features.Scheduling.Shared;
 /// </param>
 public sealed record ScheduleAdjustments(
     IReadOnlyList<TravelSchedule> TravelSchedules,
-    IReadOnlyList<OutOfOffice> OutOfOffices)
+    IReadOnlyList<OutOfOffice> OutOfOffices
+)
 {
     public static readonly ScheduleAdjustments Empty = new([], []);
 
@@ -29,9 +30,8 @@ public sealed record ScheduleAdjustments(
     /// </summary>
     public TimeZoneInfo GetEffectiveTimeZone(DateOnly date, TimeZoneInfo defaultTimeZone)
     {
-        for (var index = 0; index < TravelSchedules.Count; index++)
+        foreach (var travel in TravelSchedules)
         {
-            var travel = TravelSchedules[index];
             if (!travel.Covers(date)) continue;
             try
             {
@@ -52,9 +52,9 @@ public sealed record ScheduleAdjustments(
 
     public bool IsOutOfOffice(DateOnly date)
     {
-        for (var index = 0; index < OutOfOffices.Count; index++)
+        foreach (var outOfOffice in OutOfOffices)
         {
-            if (OutOfOffices[index].Covers(date)) return true;
+            if (outOfOffice.Covers(date)) return true;
         }
 
         return false;

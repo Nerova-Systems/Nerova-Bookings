@@ -3,6 +3,7 @@ using System.Net.Http.Json;
 using FluentAssertions;
 using JetBrains.Annotations;
 using Main.Database;
+using Main.Features.Schedules.Domain;
 using SharedKernel.Tests;
 using SharedKernel.Validation;
 using Xunit;
@@ -349,7 +350,7 @@ public sealed class ScheduleEndpointsTests : EndpointBaseTest<MainDbContext>
     [Fact]
     public async Task DuplicateSchedule_WhenSourceNotFound_ShouldReturnNotFound()
     {
-        var missingId = Main.Features.Schedules.Domain.ScheduleId.NewId();
+        var missingId = ScheduleId.NewId();
         var response = await AuthenticatedOwnerHttpClient.PostAsJsonAsync($"/api/schedules/{missingId}/duplicate", new { name = "Copy" });
 
         await response.ShouldHaveErrorStatusCode(HttpStatusCode.NotFound, $"Schedule '{missingId}' was not found.");

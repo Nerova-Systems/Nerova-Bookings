@@ -1,4 +1,3 @@
-using System.Text.Json.Serialization;
 using JetBrains.Annotations;
 using Main.Database;
 using Main.Features.Apps.Domain;
@@ -52,15 +51,15 @@ public sealed class BookingReference : AggregateRoot<BookingReferenceId>, ITenan
         ExternalUrl = externalUrl;
     }
 
-    public TenantId TenantId { get; } = new(0);
+    public BookingId BookingId { get; init; }
 
-    public BookingId BookingId { get; private set; }
-
-    public AppSlug AppSlug { get; private set; }
+    public AppSlug AppSlug { get; init; }
 
     public string ExternalId { get; private set; }
 
     public string? ExternalUrl { get; private set; }
+
+    public TenantId TenantId { get; } = new(0);
 
     public static BookingReference Create(TenantId tenantId, BookingId bookingId, AppSlug appSlug, string externalId, string? externalUrl = null)
     {

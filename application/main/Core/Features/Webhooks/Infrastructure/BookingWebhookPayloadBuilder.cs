@@ -1,5 +1,4 @@
 using System.Text.Json;
-using System.Text.Json.Serialization;
 using JetBrains.Annotations;
 using Main.Features.EventTypes.Domain;
 using Main.Features.Scheduling.Domain;
@@ -45,39 +44,39 @@ public static class BookingWebhookPayloadBuilder
     )
     {
         var payload = new BookingWebhookPayload(
-            Id: booking.Id.Value,
-            Uid: booking.ICalUid ?? booking.Id.Value,
-            Title: eventType?.Title ?? string.Empty,
-            EventTypeSlug: eventType?.Slug,
-            EventTypeId: eventType?.Id.Value,
-            StartTime: booking.StartTime,
-            EndTime: booking.EndTime,
-            TimeZone: booking.TimeZone,
-            Status: booking.Status.ToString(),
-            LocationType: booking.LocationType,
-            Location: booking.LocationValue,
-            CancellationReason: booking.CancellationReason,
-            Rescheduled: booking.Rescheduled ? true : null,
-            ICalSequence: booking.ICalSequence,
-            Organizer: new BookingWebhookOrganizer(
-                Id: booking.OwnerUserId.Value,
-                TenantId: booking.TenantId.Value
+            booking.Id.Value,
+            booking.CalUid ?? booking.Id.Value,
+            eventType?.Title ?? string.Empty,
+            eventType?.Slug,
+            eventType?.Id.Value,
+            booking.StartTime,
+            booking.EndTime,
+            booking.TimeZone,
+            booking.Status.ToString(),
+            booking.LocationType,
+            booking.LocationValue,
+            booking.CancellationReason,
+            booking.Rescheduled ? true : null,
+            booking.CalSequence,
+            new BookingWebhookOrganizer(
+                booking.OwnerUserId.Value,
+                booking.TenantId.Value
             ),
-            Attendees: BuildAttendees(booking, attendees),
-            Report: report is null
+            BuildAttendees(booking, attendees),
+            report is null
                 ? null
                 : new BookingWebhookReport(
-                    Id: report.Id.Value,
-                    ReasonCode: report.ReasonCode.ToString(),
-                    Notes: report.Notes,
-                    ReportedByUserId: report.ReportedByUserId.Value
+                    report.Id.Value,
+                    report.ReasonCode.ToString(),
+                    report.Notes,
+                    report.ReportedByUserId.Value
                 )
         );
 
         var envelope = new BookingWebhookEnvelope(
-            TriggerEvent: triggerEvent,
-            CreatedAt: createdAt,
-            Payload: payload
+            triggerEvent,
+            createdAt,
+            payload
         );
 
         return JsonSerializer.Serialize(envelope, JsonOptions);
@@ -94,10 +93,10 @@ public static class BookingWebhookPayloadBuilder
         var result = new List<BookingWebhookAttendee>(1 + (extras?.Count ?? 0))
         {
             new(
-                Name: booking.BookerName,
-                Email: booking.BookerEmail,
-                TimeZone: booking.TimeZone,
-                Locale: null
+                booking.BookerName,
+                booking.BookerEmail,
+                booking.TimeZone,
+                null
             )
         };
 
@@ -109,11 +108,12 @@ public static class BookingWebhookPayloadBuilder
                 // row too). Case-insensitive compare on email — that is the booker key cal.com uses.
                 if (string.Equals(attendee.Email, booking.BookerEmail, StringComparison.OrdinalIgnoreCase)) continue;
                 result.Add(new BookingWebhookAttendee(
-                    Name: attendee.Name,
-                    Email: attendee.Email,
-                    TimeZone: attendee.TimeZone,
-                    Locale: string.IsNullOrWhiteSpace(attendee.Locale) ? null : attendee.Locale
-                ));
+                        attendee.Name,
+                        attendee.Email,
+                        attendee.TimeZone,
+                        string.IsNullOrWhiteSpace(attendee.Locale) ? null : attendee.Locale
+                    )
+                );
             }
         }
 
@@ -141,7 +141,7 @@ internal sealed record BookingWebhookPayload(
     string? Location,
     string? CancellationReason,
     bool? Rescheduled,
-    int ICalSequence,
+    int CalSequence,
     BookingWebhookOrganizer Organizer,
     IReadOnlyList<BookingWebhookAttendee> Attendees,
     BookingWebhookReport? Report

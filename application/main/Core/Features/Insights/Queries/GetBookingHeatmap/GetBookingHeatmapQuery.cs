@@ -22,17 +22,18 @@ public sealed class GetBookingHeatmapQueryValidator : AbstractValidator<GetBooki
         RuleFor(q => q.TimeZone)
             .NotEmpty()
             .Must(tz =>
-            {
-                try
                 {
-                    TimeZoneInfo.FindSystemTimeZoneById(tz);
-                    return true;
+                    try
+                    {
+                        TimeZoneInfo.FindSystemTimeZoneById(tz);
+                        return true;
+                    }
+                    catch
+                    {
+                        return false;
+                    }
                 }
-                catch
-                {
-                    return false;
-                }
-            })
+            )
             .WithMessage("'TimeZone' must be a valid IANA or Windows timezone identifier.");
     }
 }
@@ -68,7 +69,7 @@ public sealed class GetBookingHeatmapHandler(
 
         var cells = startTimes
             .Select(startTime => TimeZoneInfo.ConvertTime(startTime, tz))
-            .GroupBy(local => new { DayOfWeek = (int)local.DayOfWeek, Hour = local.Hour })
+            .GroupBy(local => new { DayOfWeek = (int)local.DayOfWeek, local.Hour })
             .Select(g => new HeatmapCell(g.Key.DayOfWeek, g.Key.Hour, g.Count()))
             .OrderBy(c => c.DayOfWeek).ThenBy(c => c.Hour)
             .ToArray();

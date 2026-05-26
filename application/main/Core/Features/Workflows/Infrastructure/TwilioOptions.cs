@@ -17,7 +17,7 @@ public sealed class TwilioOptions
     public string FromNumber { get; set; } = string.Empty;
 
     /// <summary>API base URL — overridable for tests.</summary>
-    public string ApiBaseUrl { get; set; } = "https://api.twilio.com/2010-04-01";
+    public string ApiBaseUrl { get; init; } = "https://api.twilio.com/2010-04-01";
 
     public bool IsConfigured =>
         !string.IsNullOrWhiteSpace(AccountSid)

@@ -74,9 +74,9 @@ public sealed class AddCollectiveHostHandler(
             eventType.TenantId,
             command.EventTypeId,
             command.UserId,
-            isFixed: true,
-            priority: 0,
-            weight: 100
+            true,
+            0,
+            100
         );
         await hostRepository.AddAsync(host, cancellationToken);
         events.CollectEvent(new CollectiveHostAdded(command.EventTypeId, command.UserId));
