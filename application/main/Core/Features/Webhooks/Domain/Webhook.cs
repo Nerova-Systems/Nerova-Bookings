@@ -110,6 +110,16 @@ public sealed class Webhook : AggregateRoot<WebhookId>, ITenantScopedEntity
         Active = active;
     }
 
+    /// <summary>
+    ///     Rotates the shared HMAC secret to a freshly generated value. Used by PUT
+    ///     /api/webhooks/{id}?regenerateSecret=true. The cleartext is returned once via the
+    ///     response and then masked on every subsequent read.
+    /// </summary>
+    public void RegenerateSecret()
+    {
+        Secret = GenerateSecret();
+    }
+
     public bool IsSubscribedTo(WebhookEventType eventType)
     {
         return EventSubscriptions.Contains(eventType);

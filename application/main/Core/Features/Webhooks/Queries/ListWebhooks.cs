@@ -30,6 +30,6 @@ public sealed class ListWebhooksHandler(
         }
 
         var webhooks = await webhookRepository.GetForTenantAsync(cancellationToken);
-        return new WebhooksResponse(webhooks.Select(WebhookResponse.From).ToArray());
+        return new WebhooksResponse(webhooks.Select(webhook => WebhookResponse.From(webhook, false)).ToArray());
     }
 }

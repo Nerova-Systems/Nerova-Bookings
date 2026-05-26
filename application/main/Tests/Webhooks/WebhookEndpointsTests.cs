@@ -42,7 +42,7 @@ public sealed class WebhookEndpointsTests : EndpointBaseTest<MainDbContext>
     [Fact]
     public async Task FullLifecycle_ShouldCreateListUpdateTestAndDelete()
     {
-        // CREATE
+        // CREATE — POST returns the cleartext secret exactly once (cal.com fidelity).
         var createBody = new
         {
             TargetUrl = "https://example.test/hooks/bookings",
@@ -55,16 +55,27 @@ public sealed class WebhookEndpointsTests : EndpointBaseTest<MainDbContext>
         var created = await createResponse.DeserializeResponse<WebhookResponse>();
         created!.TargetUrl.Should().Be(createBody.TargetUrl);
         created.EventSubscriptions.Should().BeEquivalentTo(createBody.EventSubscriptions);
-        created.Secret.Should().NotBeNullOrWhiteSpace();
+        // Generator emits 64 hex chars with no project prefix; cleartext must not be the masked form.
+        created.Secret.Should().HaveLength(64).And.MatchRegex("^[0-9a-f]{64}$");
+        created.Secret.Should().NotContain(WebhookResponse.SecretMaskPrefix);
         created.Active.Should().BeTrue();
+        var originalLast4 = created.Secret[^4..];
 
-        // LIST
+        // LIST — secret is masked.
         var listResponse = await _ownerWithFlag.GetAsync("/api/webhooks");
         listResponse.ShouldBeSuccessfulGetRequest();
         var list = await listResponse.DeserializeResponse<WebhooksResponse>();
-        list!.Webhooks.Should().ContainSingle(webhook => webhook.Id == created.Id);
+        var listed = list!.Webhooks.Should().ContainSingle(webhook => webhook.Id == created.Id).Subject;
+        listed.Secret.Should().StartWith(WebhookResponse.SecretMaskPrefix).And.EndWith($"-{originalLast4}");
 
-        // UPDATE
+        // GET single — secret is masked.
+        var getResponse = await _ownerWithFlag.GetAsync($"/api/webhooks/{created.Id}");
+        getResponse.ShouldBeSuccessfulGetRequest();
+        var fetched = await getResponse.DeserializeResponse<WebhookResponse>();
+        fetched!.Secret.Should().StartWith(WebhookResponse.SecretMaskPrefix).And.EndWith($"-{originalLast4}");
+        fetched.Secret.Should().NotContain(created.Secret);
+
+        // UPDATE without regenerateSecret — masked response, DB row's secret unchanged.
         var updateBody = new UpdateWebhookRequest(
             "https://example.test/hooks/v2",
             [WebhookEventType.BookingCreated],
@@ -76,6 +87,29 @@ public sealed class WebhookEndpointsTests : EndpointBaseTest<MainDbContext>
         updated!.TargetUrl.Should().Be(updateBody.TargetUrl);
         updated.Active.Should().BeFalse();
         updated.EventSubscriptions.Should().BeEquivalentTo(updateBody.EventSubscriptions);
+        updated.Secret.Should().StartWith(WebhookResponse.SecretMaskPrefix).And.EndWith($"-{originalLast4}");
+
+        using (var scope = Provider.CreateScope())
+        {
+            var db = scope.ServiceProvider.GetRequiredService<MainDbContext>();
+            var persisted = await db.Set<Webhook>().IgnoreQueryFilters().SingleAsync(w => w.Id == created.Id);
+            persisted.Secret.Should().Be(created.Secret);
+        }
+
+        // UPDATE with regenerateSecret=true — fresh cleartext, different last4.
+        var rotateResponse = await _ownerWithFlag.PutAsJsonAsync($"/api/webhooks/{created.Id}?regenerateSecret=true", updateBody);
+        rotateResponse.EnsureSuccessStatusCode();
+        var rotated = await rotateResponse.DeserializeResponse<WebhookResponse>();
+        rotated!.Secret.Should().HaveLength(64).And.MatchRegex("^[0-9a-f]{64}$");
+        rotated.Secret.Should().NotBe(created.Secret);
+        var newLast4 = rotated.Secret[^4..];
+        newLast4.Should().NotBe(originalLast4);
+
+        // Follow-up GET — masked with the new last-4.
+        var afterRotateGet = await _ownerWithFlag.GetAsync($"/api/webhooks/{created.Id}");
+        afterRotateGet.ShouldBeSuccessfulGetRequest();
+        var afterRotated = await afterRotateGet.DeserializeResponse<WebhookResponse>();
+        afterRotated!.Secret.Should().StartWith(WebhookResponse.SecretMaskPrefix).And.EndWith($"-{newLast4}");
 
         // TEST-FIRE — should enqueue exactly one Pending delivery
         var testResponse = await _ownerWithFlag.PostAsync($"/api/webhooks/{created.Id}/test", null);

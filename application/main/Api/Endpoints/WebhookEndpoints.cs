@@ -24,12 +24,16 @@ public sealed class WebhookEndpoints : IEndpoints
             => await mediator.Send(new ListWebhooksQuery())
         ).Produces<WebhooksResponse>();
 
+        group.MapGet("/{id}", async Task<ApiResult<WebhookResponse>> (WebhookId id, IMediator mediator)
+            => await mediator.Send(new GetWebhookQuery(id))
+        ).Produces<WebhookResponse>();
+
         group.MapPost("/", async Task<ApiResult<WebhookResponse>> (CreateWebhookCommand command, IMediator mediator)
             => await mediator.Send(command)
         ).Produces<WebhookResponse>();
 
-        group.MapPut("/{id}", async Task<ApiResult<WebhookResponse>> (WebhookId id, UpdateWebhookRequest body, IMediator mediator)
-            => await mediator.Send(new UpdateWebhookCommand(id, body.TargetUrl, body.EventSubscriptions, body.Active))
+        group.MapPut("/{id}", async Task<ApiResult<WebhookResponse>> (WebhookId id, UpdateWebhookRequest body, IMediator mediator, bool regenerateSecret = false)
+            => await mediator.Send(new UpdateWebhookCommand(id, body.TargetUrl, body.EventSubscriptions, body.Active, regenerateSecret))
         ).Produces<WebhookResponse>();
 
         group.MapDelete("/{id}", async Task<ApiResult> (WebhookId id, IMediator mediator)

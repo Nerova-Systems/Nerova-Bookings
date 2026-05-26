@@ -13,7 +13,8 @@ public sealed record UpdateWebhookCommand(
     WebhookId Id,
     string TargetUrl,
     WebhookEventType[] EventSubscriptions,
-    bool Active
+    bool Active,
+    bool RegenerateSecret
 ) : ICommand, IRequest<Result<WebhookResponse>>;
 
 public sealed class UpdateWebhookValidator : AbstractValidator<UpdateWebhookCommand>
@@ -43,8 +44,9 @@ public sealed class UpdateWebhookHandler(
         if (webhook is null) return Result<WebhookResponse>.NotFound($"Webhook '{command.Id}' was not found.");
 
         webhook.Update(command.TargetUrl, command.EventSubscriptions.Distinct().ToArray(), command.Active);
+        if (command.RegenerateSecret) webhook.RegenerateSecret();
         webhookRepository.Update(webhook);
         events.CollectEvent(new WebhookUpdated(webhook.Id));
-        return WebhookResponse.From(webhook);
+        return WebhookResponse.From(webhook, command.RegenerateSecret);
     }
 }

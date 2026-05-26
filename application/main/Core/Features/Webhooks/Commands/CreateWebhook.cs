@@ -55,6 +55,6 @@ public sealed class CreateWebhookHandler(
 
         await webhookRepository.AddAsync(webhook, cancellationToken);
         events.CollectEvent(new WebhookCreated(webhook.Id));
-        return WebhookResponse.From(webhook);
+        return WebhookResponse.From(webhook, true);
     }
 }
