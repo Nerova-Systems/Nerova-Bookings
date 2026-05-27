@@ -1,3 +1,4 @@
+/* eslint-disable max-lines */
 import type { ReactNode } from "react";
 
 import { t } from "@lingui/core/macro";
@@ -18,6 +19,7 @@ import {
   FileClockIcon,
   HomeIcon,
   LandmarkIcon,
+  MessageCircleIcon,
   MonitorSmartphoneIcon,
   ShieldCheckIcon,
   SlidersHorizontalIcon,
@@ -199,6 +201,13 @@ export function AccountGroup(props: Readonly<AccountGroupProps>) {
               isActive={isActive("/account/billing", true)}
             />
           )}
+          <AccountNavItem
+            to="/whatsapp"
+            icon={<MessageCircleIcon />}
+            label={<Trans>WhatsApp</Trans>}
+            tooltip={t`WhatsApp`}
+            isActive={isActive("/whatsapp", true)}
+          />
         </SidebarMenu>
       </SidebarGroupContent>
     </SidebarGroup>

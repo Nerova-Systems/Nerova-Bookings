@@ -79,11 +79,17 @@ msgstr "1 TB storage"
 msgid "1 user permanently deleted"
 msgstr "1 user permanently deleted"
 
+msgid "1. Connect WhatsApp Business Account"
+msgstr "1. Connect WhatsApp Business Account"
+
 msgid "10 GB storage"
 msgstr "10 GB storage"
 
 msgid "10 users"
 msgstr "10 users"
+
+msgid "10-digit South African bank account"
+msgstr "10-digit South African bank account"
 
 msgid "100 GB storage"
 msgstr "100 GB storage"
@@ -107,6 +113,9 @@ msgstr "14 h 30 min logged"
 msgid "2 hours ago"
 msgstr "2 hours ago"
 
+msgid "2. Phone number registered"
+msgstr "2. Phone number registered"
+
 msgid "24 hour"
 msgstr "24 hour"
 
@@ -115,6 +124,12 @@ msgstr "2X large"
 
 msgid "3 minutes ago"
 msgstr "3 minutes ago"
+
+msgid "3. Generate encryption key pair"
+msgstr "3. Generate encryption key pair"
+
+msgid "4. Connect Paystack subaccount"
+msgstr "4. Connect Paystack subaccount"
 
 msgid "5 active co-cooks"
 msgstr "5 active co-cooks"
@@ -181,6 +196,9 @@ msgstr "Account name"
 
 msgid "Account not found"
 msgstr "Account not found"
+
+msgid "Account number"
+msgstr "Account number"
 
 msgid "Account overview"
 msgstr "Account overview"
@@ -304,6 +322,9 @@ msgstr "Alex Taylor"
 
 msgid "All modifiers"
 msgstr "All modifiers"
+
+msgid "All steps complete. Configure your booking flow to start accepting WhatsApp bookings."
+msgstr "All steps complete. Configure your booking flow to start accepting WhatsApp bookings."
 
 msgid "All users"
 msgstr "All users"
@@ -455,6 +476,9 @@ msgstr "Back to signup"
 msgid "Badges"
 msgstr "Badges"
 
+msgid "Bank"
+msgstr "Bank"
+
 msgid "Banners"
 msgstr "Banners"
 
@@ -550,6 +574,9 @@ msgstr "Built on <0>PlatformPlatform<1/></0> - an open-source platform by indust
 
 msgid "Built with"
 msgstr "Built with"
+
+msgid "Business name"
+msgstr "Business name"
 
 msgid "Butter chicken"
 msgstr "Butter chicken"
@@ -800,6 +827,9 @@ msgstr "Compliance"
 msgid "Components"
 msgstr "Components"
 
+msgid "Configure your booking flow"
+msgstr "Configure your booking flow"
+
 msgid "Confirm action"
 msgstr "Confirm action"
 
@@ -808,6 +838,15 @@ msgstr "Confirm downgrade"
 
 msgid "Confirm team name"
 msgstr "Confirm team name"
+
+msgid "Connect Paystack"
+msgstr "Connect Paystack"
+
+msgid "Connect WhatsApp"
+msgstr "Connect WhatsApp"
+
+msgid "Connect WhatsApp and Paystack to start taking bookings."
+msgstr "Connect WhatsApp and Paystack to start taking bookings."
 
 msgid "Contact support"
 msgstr "Contact support"
@@ -1416,6 +1455,9 @@ msgstr "GDPR Compliant"
 msgid "General"
 msgstr "General"
 
+msgid "Generate key pair"
+msgstr "Generate key pair"
+
 msgid "Ghost"
 msgstr "Ghost"
 
@@ -1647,6 +1689,9 @@ msgstr "Keep downgrade"
 msgid "Keep subscription"
 msgstr "Keep subscription"
 
+msgid "Key pair generated"
+msgstr "Key pair generated"
+
 msgid "Keyboard accessible"
 msgstr "Keyboard accessible"
 
@@ -1742,6 +1787,9 @@ msgstr "Link underline"
 
 msgid "Link variants"
 msgstr "Link variants"
+
+msgid "Link your WABA to enable WhatsApp bookings."
+msgstr "Link your WABA to enable WhatsApp bookings."
 
 msgid "LinkedIn"
 msgstr "LinkedIn"
@@ -2236,11 +2284,17 @@ msgstr "Payment method"
 msgid "Payment method updated"
 msgstr "Payment method updated"
 
+msgid "Paystack subaccount connected"
+msgstr "Paystack subaccount connected"
+
 msgid "Pedro Duarte"
 msgstr "Pedro Duarte"
 
 msgid "Pending"
 msgstr "Pending"
+
+msgid "Pending — complete step 1 first"
+msgstr "Pending — complete step 1 first"
 
 msgid "Pending payment completed"
 msgstr "Pending payment completed"
@@ -2462,6 +2516,9 @@ msgstr "Rebase and merge"
 msgid "Receipt"
 msgstr "Receipt"
 
+msgid "Receive booking payments via Paystack."
+msgstr "Receive booking payments via Paystack."
+
 msgid "Recipe"
 msgstr "Recipe"
 
@@ -2551,6 +2608,9 @@ msgstr "Reply-to email"
 
 msgid "Request a new code"
 msgstr "Request a new code"
+
+msgid "Required for end-to-end encrypted WhatsApp Flows."
+msgstr "Required for end-to-end encrypted WhatsApp Flows."
 
 msgid "Resizable app shell"
 msgstr "Resizable app shell"
@@ -3556,6 +3616,15 @@ msgstr "Wednesday"
 msgid "What's at the market this week"
 msgstr "What's at the market this week"
 
+msgid "WhatsApp"
+msgstr "WhatsApp"
+
+msgid "WhatsApp Business Account connected"
+msgstr "WhatsApp Business Account connected"
+
+msgid "WhatsApp setup"
+msgstr "WhatsApp setup"
+
 msgid "When to use Accordion"
 msgstr "When to use Accordion"
 
@@ -3609,6 +3678,9 @@ msgstr "You have unsaved changes. If you leave now, your changes will be lost."
 msgid "You were logged out from another browser tab."
 msgstr "You were logged out from another browser tab."
 
+msgid "You're all set!"
+msgstr "You're all set!"
+
 #. placeholder {0}: getPlanLabel(currentPlan)
 msgid "Your {0} subscription has been cancelled and will end on {formattedPeriodEnd}."
 msgstr "Your {0} subscription has been cancelled and will end on {formattedPeriodEnd}."
@@ -3654,6 +3726,9 @@ msgstr "Your payment card is expiring soon. Update your payment method to avoid 
 
 msgid "Your personal cookbook library."
 msgstr "Your personal cookbook library."
+
+msgid "Your phone number must be registered with WhatsApp."
+msgstr "Your phone number must be registered with WhatsApp."
 
 msgid "Your plan has been upgraded."
 msgstr "Your plan has been upgraded."

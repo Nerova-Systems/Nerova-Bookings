@@ -80,11 +80,17 @@ msgstr "1 TB lagerplads"
 msgid "1 user permanently deleted"
 msgstr "1 bruger slettet permanent"
 
+msgid "1. Connect WhatsApp Business Account"
+msgstr "1. Connect WhatsApp Business Account"
+
 msgid "10 GB storage"
 msgstr "10 GB lagerplads"
 
 msgid "10 users"
 msgstr "10 brugere"
+
+msgid "10-digit South African bank account"
+msgstr "10-digit South African bank account"
 
 msgid "100 GB storage"
 msgstr "100 GB lagerplads"
@@ -98,7 +104,7 @@ msgstr "12 timer"
 msgid ""
 "123 Example Street\n"
 "Anytown, AA 12345"
-msgstr ""
+msgstr "12 hour"
 "123 Example Street\n"
 "Anytown, AA 12345"
 
@@ -108,6 +114,9 @@ msgstr "14 t 30 min logget"
 msgid "2 hours ago"
 msgstr "For 2 timer siden"
 
+msgid "2. Phone number registered"
+msgstr "2. Phone number registered"
+
 msgid "24 hour"
 msgstr "24 timer"
 
@@ -116,6 +125,12 @@ msgstr "2X stor"
 
 msgid "3 minutes ago"
 msgstr "For 3 minutter siden"
+
+msgid "3. Generate encryption key pair"
+msgstr "3. Generate encryption key pair"
+
+msgid "4. Connect Paystack subaccount"
+msgstr "4. Connect Paystack subaccount"
 
 msgid "5 active co-cooks"
 msgstr "5 aktive medkokke"
@@ -183,6 +198,9 @@ msgstr "Kontonavn"
 
 msgid "Account not found"
 msgstr "Konto ikke fundet"
+
+msgid "Account number"
+msgstr "Account number"
 
 msgid "Account overview"
 msgstr "Kontooversigt"
@@ -309,6 +327,9 @@ msgstr "Alex Taylor"
 
 msgid "All modifiers"
 msgstr "Alle modifikatorer"
+
+msgid "All steps complete. Configure your booking flow to start accepting WhatsApp bookings."
+msgstr "All steps complete. Configure your booking flow to start accepting WhatsApp bookings."
 
 msgid "All users"
 msgstr "Alle brugere"
@@ -464,6 +485,9 @@ msgstr "Tilbage til tilmelding"
 msgid "Badges"
 msgstr "Badges"
 
+msgid "Bank"
+msgstr "Bank"
+
 msgid "Banners"
 msgstr "Bannere"
 
@@ -559,6 +583,9 @@ msgstr "Bygget på <0>PlatformPlatform<1/></0> - en open-source platform af bran
 
 msgid "Built with"
 msgstr "Bygget med"
+
+msgid "Business name"
+msgstr "Business name"
 
 msgid "Butter chicken"
 msgstr "Butter chicken"
@@ -812,6 +839,9 @@ msgstr "Compliance"
 msgid "Components"
 msgstr "Komponenter"
 
+msgid "Configure your booking flow"
+msgstr "Configure your booking flow"
+
 msgid "Confirm action"
 msgstr "Bekræft handling"
 
@@ -821,6 +851,15 @@ msgstr "Bekræft nedgradering"
 #, fuzzy
 msgid "Confirm team name"
 msgstr "Confirm team name"
+
+msgid "Connect Paystack"
+msgstr "Connect Paystack"
+
+msgid "Connect WhatsApp"
+msgstr "Connect WhatsApp"
+
+msgid "Connect WhatsApp and Paystack to start taking bookings."
+msgstr "Connect WhatsApp and Paystack to start taking bookings."
 
 msgid "Contact support"
 msgstr "Kontakt support"
@@ -1456,6 +1495,9 @@ msgstr "GDPR-kompatibel"
 msgid "General"
 msgstr "General"
 
+msgid "Generate key pair"
+msgstr "Generate key pair"
+
 msgid "Ghost"
 msgstr "Gennemsigtig"
 
@@ -1705,6 +1747,9 @@ msgstr "Behold nedgradering"
 msgid "Keep subscription"
 msgstr "Behold abonnement"
 
+msgid "Key pair generated"
+msgstr "Key pair generated"
+
 msgid "Keyboard accessible"
 msgstr "Tilgængelig via tastatur"
 
@@ -1801,6 +1846,9 @@ msgstr "Linkunderstregning"
 
 msgid "Link variants"
 msgstr "Linkvarianter"
+
+msgid "Link your WABA to enable WhatsApp bookings."
+msgstr "Link your WABA to enable WhatsApp bookings."
 
 msgid "LinkedIn"
 msgstr "LinkedIn"
@@ -2326,11 +2374,17 @@ msgstr "Betalingsmetode"
 msgid "Payment method updated"
 msgstr "Betalingsmetode opdateret"
 
+msgid "Paystack subaccount connected"
+msgstr "Paystack subaccount connected"
+
 msgid "Pedro Duarte"
 msgstr "Pedro Duarte"
 
 msgid "Pending"
 msgstr "Afventer"
+
+msgid "Pending — complete step 1 first"
+msgstr "Pending — complete step 1 first"
 
 msgid "Pending payment completed"
 msgstr "Afventende betaling gennemført"
@@ -2559,6 +2613,9 @@ msgstr "Rebase og flet"
 msgid "Receipt"
 msgstr "Kvittering"
 
+msgid "Receive booking payments via Paystack."
+msgstr "Receive booking payments via Paystack."
+
 msgid "Recipe"
 msgstr "Opskrift"
 
@@ -2652,6 +2709,9 @@ msgstr "Svar-til-e-mail"
 
 msgid "Request a new code"
 msgstr "Anmod om en ny kode"
+
+msgid "Required for end-to-end encrypted WhatsApp Flows."
+msgstr "Required for end-to-end encrypted WhatsApp Flows."
 
 msgid "Resizable app shell"
 msgstr "Justerbar app-skal"
@@ -3697,6 +3757,15 @@ msgstr "Onsdag"
 msgid "What's at the market this week"
 msgstr "Hvad er på markedet denne uge"
 
+msgid "WhatsApp"
+msgstr "WhatsApp"
+
+msgid "WhatsApp Business Account connected"
+msgstr "WhatsApp Business Account connected"
+
+msgid "WhatsApp setup"
+msgstr "WhatsApp setup"
+
 msgid "When to use Accordion"
 msgstr "Hvornår skal Accordion bruges"
 
@@ -3752,6 +3821,9 @@ msgstr "Du har ugemte ændringer. Hvis du forlader nu, vil dine ændringer gå t
 msgid "You were logged out from another browser tab."
 msgstr "Du blev logget ud fra en anden browsertab."
 
+msgid "You're all set!"
+msgstr "You're all set!"
+
 #. placeholder {0}: getPlanLabel(currentPlan)
 msgid "Your {0} subscription has been cancelled and will end on {formattedPeriodEnd}."
 msgstr "Dit {0}-abonnement er blevet opsagt og udløber den {formattedPeriodEnd}."
@@ -3797,6 +3869,9 @@ msgstr "Dit betalingskort udløber snart. Opdater din betalingsmetode for at und
 
 msgid "Your personal cookbook library."
 msgstr "Dit personlige kogebogsbibliotek."
+
+msgid "Your phone number must be registered with WhatsApp."
+msgstr "Your phone number must be registered with WhatsApp."
 
 msgid "Your plan has been upgraded."
 msgstr "Dit abonnement er blevet opgraderet."
