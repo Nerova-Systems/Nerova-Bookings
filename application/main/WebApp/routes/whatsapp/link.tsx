@@ -16,10 +16,12 @@ export const Route = createFileRoute("/whatsapp/link")({
 });
 
 function LinkPage() {
-  // TODO(phase-5-followup): pull display phone number from account onboarding status (cross-SCS contract needed)
-  const { data: _config } = api.useQuery("get", "/api/whatsapp-flows/config");
+  const { data: config } = api.useQuery("get", "/api/whatsapp-flows/config");
 
-  const phoneDigits = "27000000000";
+  // wabaPhoneNumber is the canonical E.164 string supplied by the account SCS (e.g.
+  // "+27811234567"). wa.me needs digits-only.
+  const wabaPhoneNumber = config?.wabaPhoneNumber ?? null;
+  const phoneDigits = wabaPhoneNumber?.replace(/\D/g, "") ?? "27000000000";
   const waUrl = `https://wa.me/${phoneDigits}?text=${encodeURIComponent("Book")}`;
 
   const handleCopy = () => {

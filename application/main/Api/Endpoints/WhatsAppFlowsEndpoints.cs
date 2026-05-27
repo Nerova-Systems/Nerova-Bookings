@@ -33,5 +33,9 @@ public sealed class WhatsAppFlowsEndpoints : IEndpoints
         group.MapPost("/publish", async Task<ApiResult<PublishFlowResponse>> (PublishFlowCommand command, IMediator mediator)
             => await mediator.Send(command)
         ).Produces<PublishFlowResponse>();
+
+        group.MapGet("/preview", async Task<ApiResult<FlowPreviewLinkResponse>> (IMediator mediator)
+            => await mediator.Send(new GetFlowPreviewQuery())
+        ).Produces<FlowPreviewLinkResponse>();
     }
 }

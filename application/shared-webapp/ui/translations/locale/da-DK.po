@@ -90,7 +90,7 @@ msgid "Bold"
 msgstr "Fed"
 
 msgid "Book customers through a native WhatsApp Flow instead of the public booking page."
-msgstr ""
+msgstr "Book kunder gennem et native WhatsApp Flow i stedet for den offentlige bookingside."
 
 msgid "Breadcrumb"
 msgstr "Brødkrumme"
@@ -446,7 +446,7 @@ msgid "View {name} in marketplace"
 msgstr "Se {name} i markedsplads"
 
 msgid "WhatsApp Flows"
-msgstr ""
+msgstr "WhatsApp Flows"
 
 msgid "Workflows"
 msgstr "Arbejdsflows"

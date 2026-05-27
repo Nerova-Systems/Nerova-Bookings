@@ -1,5 +1,6 @@
 using JetBrains.Annotations;
 using Main.Features.WhatsAppFlows.Domain;
+using Main.Features.WhatsAppFlows.Infrastructure;
 using Main.Features.WhatsAppFlows.Shared;
 using SharedKernel.Cqrs;
 using SharedKernel.ExecutionContext;
@@ -11,6 +12,7 @@ public sealed record GetTenantFlowConfigQuery : IRequest<Result<TenantFlowConfig
 
 public sealed class GetTenantFlowConfigHandler(
     ITenantFlowConfigRepository repository,
+    IWhatsAppFlowProfileSync profileSync,
     IExecutionContext executionContext
 ) : IRequestHandler<GetTenantFlowConfigQuery, Result<TenantFlowConfigResponse>>
 {
@@ -20,8 +22,13 @@ public sealed class GetTenantFlowConfigHandler(
         if (tenantId is null) return Result<TenantFlowConfigResponse>.Unauthorized("Authentication is required.");
 
         var config = await repository.GetByTenantIdAsync(tenantId, cancellationToken);
-        return config is null
-            ? Result<TenantFlowConfigResponse>.NotFound("Tenant flow configuration has not been created yet.")
-            : TenantFlowConfigResponse.From(config);
+        if (config is null) return Result<TenantFlowConfigResponse>.NotFound("Tenant flow configuration has not been created yet.");
+
+        // The display phone is owned by the account SCS; the sync is best-effort here — the
+        // questionnaire UI still functions if the cross-SCS lookup fails, the link page just
+        // won't have a real number to show.
+        var profile = await profileSync.GetByTenantId(tenantId, cancellationToken);
+        return TenantFlowConfigResponse.From(config, profile?.DisplayPhoneNumber);
     }
 }
+
