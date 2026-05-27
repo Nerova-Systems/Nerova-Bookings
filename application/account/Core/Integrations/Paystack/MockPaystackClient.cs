@@ -79,6 +79,34 @@ public sealed class MockPaystackClient(IConfiguration configuration, TimeProvide
         );
     }
 
+    public Task<IReadOnlyList<PaystackBankDto>> GetBanksAsync(string country, CancellationToken cancellationToken)
+    {
+        EnsureEnabled();
+        IReadOnlyList<PaystackBankDto> banks =
+        [
+            new PaystackBankDto("044", "Access Bank"),
+            new PaystackBankDto("063", "Access Bank (Diamond)"),
+            new PaystackBankDto("023", "Citibank Nigeria"),
+            new PaystackBankDto("050", "EcoBank Nigeria"),
+            new PaystackBankDto("011", "First Bank of Nigeria"),
+            new PaystackBankDto("214", "First City Monument Bank"),
+            new PaystackBankDto("070", "Fidelity Bank"),
+            new PaystackBankDto("058", "Guaranty Trust Bank"),
+            new PaystackBankDto("030", "Heritage Bank"),
+            new PaystackBankDto("082", "Keystone Bank"),
+            new PaystackBankDto("014", "MainStreet Bank"),
+            new PaystackBankDto("076", "Polaris Bank"),
+            new PaystackBankDto("039", "Stanbic IBTC Bank"),
+            new PaystackBankDto("232", "Sterling Bank"),
+            new PaystackBankDto("032", "Union Bank of Nigeria"),
+            new PaystackBankDto("033", "United Bank for Africa"),
+            new PaystackBankDto("215", "Unity Bank"),
+            new PaystackBankDto("035", "Wema Bank"),
+            new PaystackBankDto("057", "Zenith Bank")
+        ];
+        return Task.FromResult(banks);
+    }
+
     public PaystackWebhookEventResult? VerifyWebhookSignature(string payload, string signatureHeader)
     {
         EnsureEnabled();

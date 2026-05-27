@@ -1,3 +1,4 @@
+using Account.Features.Payments.Queries;
 using Account.Features.WhatsApp.Domain;
 using Account.Features.WhatsApp.Infrastructure;
 using JetBrains.Annotations;
@@ -20,7 +21,8 @@ public sealed record ConnectPaystackSubaccountResponse(string SubaccountCode);
 
 public sealed class ConnectPaystackSubaccountHandler(
     IWabaConfigurationRepository repository,
-    IPaystackSubaccountService paystackSubaccountService
+    IPaystackSubaccountService paystackSubaccountService,
+    IMediator mediator
 ) : IRequestHandler<ConnectPaystackSubaccountCommand, Result<ConnectPaystackSubaccountResponse>>
 {
     public async Task<Result<ConnectPaystackSubaccountResponse>> Handle(
@@ -31,6 +33,16 @@ public sealed class ConnectPaystackSubaccountHandler(
         if (config is null)
         {
             return Result<ConnectPaystackSubaccountResponse>.NotFound("WhatsApp configuration not found for this tenant.");
+        }
+
+        var banksResult = await mediator.Send(new GetPaystackBanksQuery("ZA"), cancellationToken);
+        if (banksResult.IsSuccess && banksResult.Value!.Banks.Length > 0)
+        {
+            var validCodes = banksResult.Value.Banks.Select(b => b.Code).ToHashSet(StringComparer.OrdinalIgnoreCase);
+            if (!validCodes.Contains(command.BankCode))
+            {
+                return Result<ConnectPaystackSubaccountResponse>.BadRequest($"Bank code '{command.BankCode}' is not a valid ZA bank code.");
+            }
         }
 
         var createResult = await paystackSubaccountService.CreateSubaccount(

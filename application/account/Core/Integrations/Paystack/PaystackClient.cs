@@ -123,6 +123,24 @@ public sealed class PaystackClient(IConfiguration configuration, IHttpClientFact
         return new[] { standard, premium }.OfType<PriceCatalogItem>().ToArray();
     }
 
+    public async Task<IReadOnlyList<PaystackBankDto>> GetBanksAsync(string country, CancellationToken cancellationToken)
+    {
+        var response = await SendAsync(HttpMethod.Get, $"/bank?country={Uri.EscapeDataString(country)}&use_cursor=false&perPage=100", null, cancellationToken);
+        if (response is null) return [];
+
+        if (!TryGet(response.RootElement, ["data"], out var data) || data.ValueKind != JsonValueKind.Array) return [];
+
+        var banks = new List<PaystackBankDto>();
+        foreach (var bank in data.EnumerateArray())
+        {
+            var code = GetString(bank, "code");
+            var name = GetString(bank, "name");
+            if (code is not null && name is not null) banks.Add(new PaystackBankDto(code, name));
+        }
+
+        return banks;
+    }
+
     public PaystackWebhookEventResult? VerifyWebhookSignature(string payload, string signatureHeader)
     {
         if (string.IsNullOrWhiteSpace(_secretKey))

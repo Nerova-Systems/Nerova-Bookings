@@ -37,6 +37,12 @@ public sealed class UnconfiguredPaystackClient(ILogger<UnconfiguredPaystackClien
         return Task.FromResult<PriceCatalogItem[]>([]);
     }
 
+    public Task<IReadOnlyList<PaystackBankDto>> GetBanksAsync(string country, CancellationToken cancellationToken)
+    {
+        logger.LogWarning("Paystack is not configured. Cannot get bank list for country '{Country}'", country);
+        return Task.FromResult<IReadOnlyList<PaystackBankDto>>([]);
+    }
+
     public PaystackWebhookEventResult? VerifyWebhookSignature(string payload, string signatureHeader)
     {
         logger.LogWarning("Paystack is not configured. Cannot verify webhook signature");
