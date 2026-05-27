@@ -70,17 +70,6 @@ public sealed class DatabaseSeeder
         ExperimentalUiFlag.Activate(now);
         accountDbContext.Set<FeatureFlag>().Add(ExperimentalUiFlag);
 
-        // Pre-seed the plan-source override for `whatsapp-flows-enabled` so the PlanBasedFeatureFlagEvaluator
-        // (which runs during every UserInfoFactory call) finds an existing active row and does NOT emit a
-        // FeatureFlagPlanOverrideActivated event on first login. The flag is gated at PlanTier.Free, so the
-        // default Basis-plan seed tenant would otherwise auto-activate it on the first login and add an
-        // extra telemetry event that breaks unrelated event-count assertions in login/auth tests.
-        var whatsAppFlowsOverride = FeatureFlag.CreateTenantOverride(
-            "whatsapp-flows-enabled", Tenant1.Id, FeatureFlagScope.Tenant, FeatureFlagSource.Plan
-        );
-        whatsAppFlowsOverride.Activate(now);
-        accountDbContext.Set<FeatureFlag>().Add(whatsAppFlowsOverride);
-
         // System roles: EnsureCreated() does not execute migrations (including InsertData),
         // so we seed them explicitly here for the test environment.
         OwnerRole = SystemRoles.CreateOwnerRole();

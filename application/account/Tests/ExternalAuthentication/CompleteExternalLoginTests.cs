@@ -29,9 +29,10 @@ public sealed class CompleteExternalLoginTests : ExternalAuthenticationTestBase
         response.StatusCode.Should().Be(HttpStatusCode.Redirect);
         response.Headers.Location!.ToString().Should().Be("/dashboard");
 
-        TelemetryEventsCollectorSpy.CollectedEvents.Count.Should().Be(2);
-        TelemetryEventsCollectorSpy.CollectedEvents[0].GetType().Name.Should().Be("SessionCreated");
-        TelemetryEventsCollectorSpy.CollectedEvents[1].GetType().Name.Should().Be("ExternalLoginCompleted");
+        TelemetryEventsCollectorSpy.CollectedEvents.Count.Should().Be(3);
+        TelemetryEventsCollectorSpy.CollectedEvents[0].GetType().Name.Should().Be("FeatureFlagPlanOverrideActivated");
+        TelemetryEventsCollectorSpy.CollectedEvents[1].GetType().Name.Should().Be("SessionCreated");
+        TelemetryEventsCollectorSpy.CollectedEvents[2].GetType().Name.Should().Be("ExternalLoginCompleted");
         TelemetryEventsCollectorSpy.AreAllEventsDispatched.Should().BeTrue();
     }
 
@@ -236,9 +237,10 @@ public sealed class CompleteExternalLoginTests : ExternalAuthenticationTestBase
         );
         externalIdentities.Should().Contain(MockOAuthProvider.MockProviderUserId);
 
-        TelemetryEventsCollectorSpy.CollectedEvents.Count.Should().Be(2);
-        TelemetryEventsCollectorSpy.CollectedEvents[0].GetType().Name.Should().Be("SessionCreated");
-        TelemetryEventsCollectorSpy.CollectedEvents[1].GetType().Name.Should().Be("ExternalLoginCompleted");
+        TelemetryEventsCollectorSpy.CollectedEvents.Count.Should().Be(3);
+        TelemetryEventsCollectorSpy.CollectedEvents[0].GetType().Name.Should().Be("FeatureFlagPlanOverrideActivated");
+        TelemetryEventsCollectorSpy.CollectedEvents[1].GetType().Name.Should().Be("SessionCreated");
+        TelemetryEventsCollectorSpy.CollectedEvents[2].GetType().Name.Should().Be("ExternalLoginCompleted");
         TelemetryEventsCollectorSpy.AreAllEventsDispatched.Should().BeTrue();
     }
 
@@ -595,10 +597,11 @@ public sealed class CompleteExternalLoginTests : ExternalAuthenticationTestBase
         response.StatusCode.Should().Be(HttpStatusCode.Redirect);
         response.Headers.Location!.ToString().Should().Be("/");
 
-        TelemetryEventsCollectorSpy.CollectedEvents.Count.Should().Be(2);
-        TelemetryEventsCollectorSpy.CollectedEvents[0].GetType().Name.Should().Be("SessionCreated");
-        TelemetryEventsCollectorSpy.CollectedEvents[1].GetType().Name.Should().Be("ExternalLoginCompleted");
-        TelemetryEventsCollectorSpy.CollectedEvents[1].Properties["event.user_id"].Should().Be(userId);
+        TelemetryEventsCollectorSpy.CollectedEvents.Count.Should().Be(3);
+        TelemetryEventsCollectorSpy.CollectedEvents[0].GetType().Name.Should().Be("FeatureFlagPlanOverrideActivated");
+        TelemetryEventsCollectorSpy.CollectedEvents[1].GetType().Name.Should().Be("SessionCreated");
+        TelemetryEventsCollectorSpy.CollectedEvents[2].GetType().Name.Should().Be("ExternalLoginCompleted");
+        TelemetryEventsCollectorSpy.CollectedEvents[2].Properties["event.user_id"].Should().Be(userId);
     }
 
     [Fact]
@@ -630,9 +633,10 @@ public sealed class CompleteExternalLoginTests : ExternalAuthenticationTestBase
         response.StatusCode.Should().Be(HttpStatusCode.Redirect);
         response.Headers.Location!.ToString().Should().Be("/");
 
-        TelemetryEventsCollectorSpy.CollectedEvents.Count.Should().Be(2);
-        TelemetryEventsCollectorSpy.CollectedEvents[0].GetType().Name.Should().Be("SessionCreated");
-        TelemetryEventsCollectorSpy.CollectedEvents[1].GetType().Name.Should().Be("ExternalLoginCompleted");
-        TelemetryEventsCollectorSpy.CollectedEvents[1].Properties["event.user_id"].Should().Be(userId);
+        TelemetryEventsCollectorSpy.CollectedEvents.Count.Should().Be(3);
+        TelemetryEventsCollectorSpy.CollectedEvents[0].GetType().Name.Should().Be("FeatureFlagPlanOverrideActivated");
+        TelemetryEventsCollectorSpy.CollectedEvents[1].GetType().Name.Should().Be("SessionCreated");
+        TelemetryEventsCollectorSpy.CollectedEvents[2].GetType().Name.Should().Be("ExternalLoginCompleted");
+        TelemetryEventsCollectorSpy.CollectedEvents[2].Properties["event.user_id"].Should().Be(userId);
     }
 }

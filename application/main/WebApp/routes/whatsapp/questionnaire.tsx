@@ -1,4 +1,4 @@
-// TODO(phase-5-followup): tier-based option locks require backend subscription endpoint in main SCS — currently all options unlocked; server enforces in Phase 6.
+// TODO(phase-6): tier-based option locks wired to useWhatsAppFlowTierLimits; full per-tier granularity pending GET /api/whatsapp-flows/tier-limits endpoint in main SCS.
 /* eslint-disable max-lines-per-function */
 import { t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
@@ -13,6 +13,7 @@ import { SidebarInset, SidebarProvider } from "@repo/ui/components/Sidebar";
 import { SwitchField } from "@repo/ui/components/SwitchField";
 import { TextAreaField } from "@repo/ui/components/TextAreaField";
 import { TextField } from "@repo/ui/components/TextField";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@repo/ui/components/Tooltip";
 import { mutationSubmitter } from "@repo/ui/forms/mutationSubmitter";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
@@ -20,14 +21,40 @@ import { useState } from "react";
 import { MainSideMenu } from "@/shared/components/MainSideMenu";
 import { api, BusinessVertical, PaymentTiming, StaffAssignment } from "@/shared/lib/api/client";
 
+import { useWhatsAppFlowTierLimits } from "./-useWhatsAppFlowTierLimits";
+
 export const Route = createFileRoute("/whatsapp/questionnaire")({
   staticData: { trackingTitle: "WhatsApp questionnaire" },
   component: QuestionnairePage
 });
 
+function TierGatedOption({
+  locked,
+  children
+}: Readonly<{
+  locked: boolean;
+  children: React.ReactNode;
+}>) {
+  if (!locked) return <>{children}</>;
+  return (
+    <Tooltip>
+      <TooltipTrigger render={<div className="cursor-not-allowed opacity-60" />}>{children}</TooltipTrigger>
+      <TooltipContent>
+        <Trans>
+          <a href="/account/billing" className="underline underline-offset-4">
+            Upgrade your plan
+          </a>{" "}
+          to unlock this option.
+        </Trans>
+      </TooltipContent>
+    </Tooltip>
+  );
+}
+
 function QuestionnairePage() {
   const navigate = useNavigate();
   const [paymentTiming, setPaymentTiming] = useState<string>("");
+  const tierLimits = useWhatsAppFlowTierLimits();
 
   const submitMutation = api.useMutation("post", "/api/whatsapp-flows/config", {
     onSuccess: () => {
@@ -130,7 +157,13 @@ function QuestionnairePage() {
               <h3>
                 <Trans>3. Multiple services</Trans>
               </h3>
-              <SwitchField name="hasMultipleServices" label={t`Offer multiple services`} />
+              <TierGatedOption locked={!tierLimits.multipleServicesInFlow}>
+                <SwitchField
+                  name="hasMultipleServices"
+                  label={t`Offer multiple services`}
+                  disabled={!tierLimits.multipleServicesInFlow}
+                />
+              </TierGatedOption>
             </div>
 
             <Separator />
@@ -162,8 +195,13 @@ function QuestionnairePage() {
                   </SelectValue>
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value={StaffAssignment.SpecificStaff}>
+                  <SelectItem value={StaffAssignment.SpecificStaff} disabled={!tierLimits.staffSelectionInFlow}>
                     <Trans>Specific staff</Trans>
+                    {!tierLimits.staffSelectionInFlow && (
+                      <span className="ml-auto text-xs text-muted-foreground">
+                        <Trans>Upgrade</Trans>
+                      </span>
+                    )}
                   </SelectItem>
                   <SelectItem value={StaffAssignment.FirstAvailable}>
                     <Trans>First available</Trans>
@@ -202,9 +240,21 @@ function QuestionnairePage() {
               <h3>
                 <Trans>7. Custom pre-booking questions</Trans>
               </h3>
-              <p className="text-sm text-muted-foreground">
-                <Trans>Custom pre-booking questions can be added after publishing — coming soon.</Trans>
-              </p>
+              {tierLimits.maxCustomPreBookingQuestions === 0 ? (
+                <p className="text-sm text-muted-foreground">
+                  <Trans>
+                    Custom pre-booking questions require an upgraded plan —{" "}
+                    <a href="/account/billing" className="underline underline-offset-4">
+                      upgrade your plan
+                    </a>{" "}
+                    to unlock this option.
+                  </Trans>
+                </p>
+              ) : (
+                <p className="text-sm text-muted-foreground">
+                  <Trans>Custom pre-booking questions can be added after publishing — coming soon.</Trans>
+                </p>
+              )}
             </div>
 
             <Separator />
@@ -240,11 +290,24 @@ function QuestionnairePage() {
                   <SelectItem value={PaymentTiming.AfterSession}>
                     <Trans>After session</Trans>
                   </SelectItem>
-                  <SelectItem value={PaymentTiming.BeforeBooking}>
+                  <SelectItem
+                    value={PaymentTiming.BeforeBooking}
+                    disabled={tierLimits.paymentTimingChoice === "AfterOnly"}
+                  >
                     <Trans>Before booking</Trans>
+                    {tierLimits.paymentTimingChoice === "AfterOnly" && (
+                      <span className="ml-auto text-xs text-muted-foreground">
+                        <Trans>Upgrade</Trans>
+                      </span>
+                    )}
                   </SelectItem>
-                  <SelectItem value={PaymentTiming.Deposit}>
+                  <SelectItem value={PaymentTiming.Deposit} disabled={tierLimits.paymentTimingChoice === "AfterOnly"}>
                     <Trans>Deposit</Trans>
+                    {tierLimits.paymentTimingChoice === "AfterOnly" && (
+                      <span className="ml-auto text-xs text-muted-foreground">
+                        <Trans>Upgrade</Trans>
+                      </span>
+                    )}
                   </SelectItem>
                 </SelectContent>
               </SelectField>

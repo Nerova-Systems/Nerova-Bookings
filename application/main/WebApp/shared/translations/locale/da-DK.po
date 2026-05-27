@@ -13,6 +13,9 @@ msgstr ""
 "Plural-Forms: \n"
 "X-Generator: @lingui/cli\n"
 
+msgid "<0>Upgrade your plan</0> to unlock this option."
+msgstr "<0>Opgrader din plan</0> for at låse denne mulighed op."
+
 #. placeholder {0}: getBookingEmptyDescription(status)
 #. placeholder {0}: getBookingStatusLabel(bookingStatus)
 msgid "{0}"
@@ -589,6 +592,9 @@ msgstr "Brugerdefineret begivenhedsnavn"
 
 msgid "Custom pre-booking questions can be added after publishing — coming soon."
 msgstr "Custom pre-booking questions can be added after publishing — coming soon."
+
+msgid "Custom pre-booking questions require an upgraded plan — <0>upgrade your plan</0> to unlock this option."
+msgstr "Tilpassede spørgsmål inden booking kræver en opgraderet plan — <0>opgrader din plan</0> for at låse denne mulighed op."
 
 msgid "Custom reply-to email"
 msgstr "Brugerdefineret svar-til-e-mail"
@@ -1977,6 +1983,9 @@ msgstr "Brug denne signeringshemmelighed til at verificere HMAC-signaturen på i
 
 msgid "Use weights"
 msgstr "Brug vægte"
+
+msgid "Upgrade"
+msgstr "Opgrader"
 
 msgid "user_..."
 msgstr "user_..."

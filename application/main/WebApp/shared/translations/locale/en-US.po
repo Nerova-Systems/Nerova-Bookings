@@ -13,6 +13,9 @@ msgstr ""
 "Language-Team: \n"
 "Plural-Forms: \n"
 
+msgid "<0>Upgrade your plan</0> to unlock this option."
+msgstr "<0>Upgrade your plan</0> to unlock this option."
+
 #. placeholder {0}: getBookingEmptyDescription(status)
 #. placeholder {0}: getBookingStatusLabel(bookingStatus)
 msgid "{0}"
@@ -589,6 +592,9 @@ msgstr "Custom event name"
 
 msgid "Custom pre-booking questions can be added after publishing — coming soon."
 msgstr "Custom pre-booking questions can be added after publishing — coming soon."
+
+msgid "Custom pre-booking questions require an upgraded plan — <0>upgrade your plan</0> to unlock this option."
+msgstr "Custom pre-booking questions require an upgraded plan — <0>upgrade your plan</0> to unlock this option."
 
 msgid "Custom reply-to email"
 msgstr "Custom reply-to email"
@@ -1977,6 +1983,9 @@ msgstr "Use this signing secret to verify the HMAC signature on incoming webhook
 
 msgid "Use weights"
 msgstr "Use weights"
+
+msgid "Upgrade"
+msgstr "Upgrade"
 
 msgid "user_..."
 msgstr "user_..."
