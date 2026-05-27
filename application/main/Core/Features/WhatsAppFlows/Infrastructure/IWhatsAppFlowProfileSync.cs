@@ -29,5 +29,7 @@ public interface IWhatsAppFlowProfileSync
 {
     Task<WhatsAppFlowProfile?> GetByTenantId(TenantId tenantId, CancellationToken cancellationToken);
 
+    Task<WhatsAppFlowProfile?> GetByPhoneNumberId(string phoneNumberId, CancellationToken cancellationToken);
+
     Task<bool> UpdateFlowStatus(TenantId tenantId, string flowId, string status, string? generatedFlowJson, CancellationToken cancellationToken);
 }

@@ -9,6 +9,8 @@ namespace Account.Features.WhatsApp.Domain;
 public interface IWabaConfigurationRepository : ICrudRepository<WabaConfiguration, WabaConfigurationId>
 {
     Task<WabaConfiguration?> GetByTenantIdAsync(TenantId tenantId, CancellationToken cancellationToken);
+
+    Task<WabaConfiguration?> GetByPhoneNumberIdAsync(string phoneNumberId, CancellationToken cancellationToken);
 }
 
 public sealed class WabaConfigurationRepository(AccountDbContext dbContext)
@@ -17,5 +19,10 @@ public sealed class WabaConfigurationRepository(AccountDbContext dbContext)
     public Task<WabaConfiguration?> GetByTenantIdAsync(TenantId tenantId, CancellationToken cancellationToken)
     {
         return DbSet.SingleOrDefaultAsync(w => w.TenantId == tenantId, cancellationToken);
+    }
+
+    public Task<WabaConfiguration?> GetByPhoneNumberIdAsync(string phoneNumberId, CancellationToken cancellationToken)
+    {
+        return DbSet.SingleOrDefaultAsync(w => w.PhoneNumberId == phoneNumberId, cancellationToken);
     }
 }

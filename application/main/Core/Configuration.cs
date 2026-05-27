@@ -20,6 +20,7 @@ using Main.Features.TeamMembers.Infrastructure;
 using Main.Features.Webhooks.Infrastructure;
 using Main.Features.Webhooks.Jobs;
 using Main.Features.WhatsAppFlows.Domain;
+using Main.Features.WhatsAppFlows.Endpoint;
 using Main.Features.WhatsAppFlows.Infrastructure;
 using Main.Features.Workflows.EventHandlers;
 using Main.Features.Workflows.Infrastructure;
@@ -190,6 +191,15 @@ public static class Configuration
                 .AddScoped<IMetaFlowsApiClient, MetaFlowsApiClient>()
                 .AddScoped<IWhatsAppFlowProfileSync, HttpWhatsAppFlowProfileSync>()
                 .AddScoped<ITierService, DefaultTierService>()
+                .AddScoped<IWabaFlowDataCipher, WabaFlowDataCipher>()
+                .AddScoped<IWhatsAppFlowDispatcher, WhatsAppFlowDispatcher>()
+                .AddScoped<IFlowScreenHandler, WelcomeScreenHandler>()
+                .AddScoped<IFlowScreenHandler, SelectServiceScreenHandler>()
+                .AddScoped<IFlowScreenHandler, SelectStaffScreenHandler>()
+                .AddScoped<IFlowScreenHandler, SelectDateScreenHandler>()
+                .AddScoped<IFlowScreenHandler, SelectTimeScreenHandler>()
+                .AddScoped<IFlowScreenHandler, CustomQuestionsScreenHandler>()
+                .AddScoped<IFlowScreenHandler, ConfirmBookingScreenHandler>()
                 .AddHttpClient()
                 .AddEmailRendering("WebApp")
                 .AddSharedServices<MainDbContext>([Assembly]);

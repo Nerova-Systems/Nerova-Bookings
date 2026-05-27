@@ -43,6 +43,30 @@ public sealed class HttpWhatsAppFlowProfileSync(
         }
     }
 
+    public async Task<WhatsAppFlowProfile?> GetByPhoneNumberId(string phoneNumberId, CancellationToken cancellationToken)
+    {
+        var client = CreateClient();
+        if (client is null) return null;
+
+        var url = $"api/whatsapp/internal/profile/by-phone-number/{Uri.EscapeDataString(phoneNumberId)}";
+        try
+        {
+            var response = await client.GetAsync(url, cancellationToken);
+            if (!response.IsSuccessStatusCode)
+            {
+                logger.LogWarning("Account profile sync returned HTTP {Status} for phone number {PhoneNumberId}", (int)response.StatusCode, phoneNumberId);
+                return null;
+            }
+
+            return await response.Content.ReadFromJsonAsync<WhatsAppFlowProfile>(cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            logger.LogWarning(ex, "Account profile sync failed for phone number {PhoneNumberId}", phoneNumberId);
+            return null;
+        }
+    }
+
     public async Task<bool> UpdateFlowStatus(TenantId tenantId, string flowId, string status, string? generatedFlowJson, CancellationToken cancellationToken)
     {
         var client = CreateClient();

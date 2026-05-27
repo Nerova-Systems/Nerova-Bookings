@@ -30,18 +30,34 @@ public sealed class WhatsAppInternalEndpoints : IEndpoints
             .AllowAnonymous();
 
         group.MapGet("/profile", async Task<ApiResult<WhatsAppFlowProfileDto>> (
-            [FromQuery] long tenantId,
-            HttpContext httpContext,
-            IMediator mediator,
-            Microsoft.Extensions.Configuration.IConfiguration configuration
-        ) =>
-        {
-            if (!IsAuthorized(httpContext, configuration)) return Result<WhatsAppFlowProfileDto>.Unauthorized("Invalid internal API key");
-            var result = await mediator.Send(new GetWhatsAppFlowProfileQuery(new TenantId(tenantId)));
-            return result is null
-                ? Result<WhatsAppFlowProfileDto>.NotFound("Profile not found")
-                : Result<WhatsAppFlowProfileDto>.Success(result);
-        });
+                [FromQuery] long tenantId,
+                HttpContext httpContext,
+                IMediator mediator,
+                Microsoft.Extensions.Configuration.IConfiguration configuration
+            ) =>
+            {
+                if (!IsAuthorized(httpContext, configuration)) return Result<WhatsAppFlowProfileDto>.Unauthorized("Invalid internal API key");
+                var result = await mediator.Send(new GetWhatsAppFlowProfileQuery(new TenantId(tenantId)));
+                return result is null
+                    ? Result<WhatsAppFlowProfileDto>.NotFound("Profile not found")
+                    : Result<WhatsAppFlowProfileDto>.Success(result);
+            }
+        );
+
+        group.MapGet("/profile/by-phone-number/{phoneNumberId}", async Task<ApiResult<WhatsAppFlowProfileDto>> (
+                string phoneNumberId,
+                HttpContext httpContext,
+                IMediator mediator,
+                Microsoft.Extensions.Configuration.IConfiguration configuration
+            ) =>
+            {
+                if (!IsAuthorized(httpContext, configuration)) return Result<WhatsAppFlowProfileDto>.Unauthorized("Invalid internal API key");
+                var result = await mediator.Send(new GetWhatsAppFlowProfileByPhoneNumberIdQuery(phoneNumberId));
+                return result is null
+                    ? Result<WhatsAppFlowProfileDto>.NotFound("Profile not found")
+                    : Result<WhatsAppFlowProfileDto>.Success(result);
+            }
+        );
 
         group.MapPost("/flow-status", async Task<ApiResult> (
             [FromQuery] long tenantId,
