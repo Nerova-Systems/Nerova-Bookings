@@ -1,4 +1,6 @@
+using System.Net.Http.Json;
 using Account.Database;
+using Account.Features.Tenants.Queries;
 using FluentAssertions;
 using NJsonSchema;
 using SharedKernel.Tests;
@@ -28,9 +30,11 @@ public sealed class GetCurrentTenantTests(AccountWebApplicationFactory factory) 
                     'name': {'type': 'string', 'minLength': 0, 'maxLength': 30},
                     'state': {'type': 'string', 'minLength': 1, 'maxLength':20},
                     'suspensionReason': {'type': ['null', 'string']},
-                    'logoUrl': {'type': ['null', 'string']}
+                    'logoUrl': {'type': ['null', 'string']},
+                    'wabaVerifiedName': {'type': ['null', 'string']},
+                    'brandVertical': {'type': ['null', 'string']}
                 },
-                'required': ['id', 'createdAt', 'modifiedAt', 'name', 'state', 'suspensionReason', 'logoUrl'],
+                'required': ['id', 'createdAt', 'modifiedAt', 'name', 'state', 'suspensionReason', 'logoUrl', 'wabaVerifiedName', 'brandVertical'],
                 'additionalProperties': false
             }
             """
@@ -38,5 +42,17 @@ public sealed class GetCurrentTenantTests(AccountWebApplicationFactory factory) 
 
         var responseBody = await response.Content.ReadAsStringAsync();
         schema.Validate(responseBody).Should().BeEmpty();
+    }
+
+    [Fact]
+    public async Task GetCurrentTenant_WhenTenantHasNoBrandProfile_ReturnsBrandVerticalNull()
+    {
+        var response = await AuthenticatedOwnerHttpClient.GetAsync("/api/account/tenants/current");
+
+        response.ShouldBeSuccessfulGetRequest();
+
+        var tenantResponse = await response.Content.ReadFromJsonAsync<TenantResponse>();
+        tenantResponse!.BrandVertical.Should().BeNull();
+        tenantResponse.WabaVerifiedName.Should().BeNull();
     }
 }

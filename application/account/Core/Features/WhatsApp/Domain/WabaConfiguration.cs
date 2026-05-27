@@ -302,4 +302,29 @@ public sealed class WabaConfiguration : AggregateRoot<WabaConfigurationId>
         VerifiedName = verifiedName;
         DisplayNameLastCheckedAt = now;
     }
+
+    /// <summary>
+    ///     Attempts to copy <see cref="VerifiedName" /> back to the tenant's
+    ///     <see cref="Tenants.Domain.BrandProfile.BusinessDisplayName" />. The sync is guarded by two
+    ///     conditions:
+    ///     <list type="bullet">
+    ///         <item>The display-name review must have reached <see cref="WabaDisplayNameStatus.Approved" />.</item>
+    ///         <item>
+    ///             The brand profile's <see cref="Tenants.Domain.BrandProfile.BusinessDisplayName" /> must still
+    ///             equal <see cref="RequestedDisplayName" /> — if the tenant edited it locally in the meantime
+    ///             their version is left intact.
+    ///         </item>
+    ///     </list>
+    ///     Returns the updated <see cref="Tenants.Domain.BrandProfile" /> when a sync is warranted, or
+    ///     <see langword="null" /> when the conditions are not met.
+    /// </summary>
+    public Tenants.Domain.BrandProfile? TrySyncVerifiedNameToBrandProfile(Tenants.Domain.BrandProfile? brandProfile)
+    {
+        if (DisplayNameStatus != WabaDisplayNameStatus.Approved) return null;
+        if (VerifiedName is null) return null;
+        if (brandProfile is null) return null;
+        if (brandProfile.BusinessDisplayName != RequestedDisplayName) return null;
+
+        return brandProfile.WithBusinessDisplayName(VerifiedName);
+    }
 }

@@ -1,4 +1,5 @@
 using Account.Database;
+using Account.Features.Tenants.Domain;
 using Account.Features.WhatsApp.Domain;
 using Microsoft.ApplicationInsights;
 using SharedKernel.Telemetry;
@@ -18,6 +19,7 @@ namespace Account.Features.WhatsApp.Infrastructure;
 /// </summary>
 public sealed class WabaDisplayNameReviewPoller(
     IWabaConfigurationRepository wabaConfigurationRepository,
+    ITenantRepository tenantRepository,
     IWhatsAppCloudApiClient cloudApiClient,
     AccountDbContext accountDbContext,
     TimeProvider timeProvider,
@@ -68,6 +70,17 @@ public sealed class WabaDisplayNameReviewPoller(
                             telemetryEventsCollector.CollectEvent(new WabaDisplayNameApproved(
                                 waba.TenantId, waba.PhoneNumberId, remote.VerifiedName ?? requested
                             ));
+                            var tenant = await tenantRepository.GetByIdUnfilteredAsync(waba.TenantId, cancellationToken);
+                            if (tenant is not null)
+                            {
+                                var updatedProfile = waba.TrySyncVerifiedNameToBrandProfile(tenant.BrandProfile);
+                                if (updatedProfile is not null)
+                                {
+                                    tenant.UpdateBrandProfile(updatedProfile);
+                                    tenantRepository.Update(tenant);
+                                }
+                            }
+
                             break;
                         case WabaDisplayNameStatus.Declined:
                             telemetryEventsCollector.CollectEvent(new WabaDisplayNameDeclined(

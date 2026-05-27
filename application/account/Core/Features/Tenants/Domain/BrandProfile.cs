@@ -177,6 +177,15 @@ public sealed record BrandProfile
         }
     }
 
+    /// <summary>
+    ///     Returns a copy of this profile with <see cref="BusinessDisplayName" /> replaced by
+    ///     <paramref name="name" />. Called by
+    ///     <see cref="Account.Features.WhatsApp.Domain.WabaConfiguration.TrySyncVerifiedNameToBrandProfile" />
+    ///     when Meta approves the requested display name and the tenant has not edited it locally since
+    ///     the request was submitted.
+    /// </summary>
+    internal BrandProfile WithBusinessDisplayName(string? name) => this with { BusinessDisplayName = name };
+
     private static bool IsValidEmail(string email)
     {
         try
