@@ -8,12 +8,16 @@ import { Form } from "@repo/ui/components/Form";
 import { SelectContent, SelectItem, SelectTrigger, SelectValue } from "@repo/ui/components/Select";
 import { SelectField } from "@repo/ui/components/SelectField";
 import { TextField } from "@repo/ui/components/TextField";
-import { createFileRoute } from "@tanstack/react-router";
+import { useMutation } from "@tanstack/react-query";
+import { createFileRoute, Link as RouterLink } from "@tanstack/react-router";
 import { CheckCircle2Icon } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
-import { api } from "@/shared/lib/api/client";
+import type { FBEmbeddedSignupData } from "@/shared/utils/metaSDK";
+
+import { EmbeddedSignupButton } from "@/shared/components/EmbeddedSignupButton";
+import { api, MetaBusinessVertical, type Schemas } from "@/shared/lib/api/client";
 
 export const Route = createFileRoute("/whatsapp/")({
   staticData: { trackingTitle: "WhatsApp setup" },
@@ -34,8 +38,20 @@ const SA_BANKS = [
   { code: "462", name: "Bidvest Bank" }
 ];
 
+const VERTICAL_LABELS: Record<MetaBusinessVertical, string> = {
+  [MetaBusinessVertical.Beauty]: t`Beauty`,
+  [MetaBusinessVertical.Education]: t`Education`,
+  [MetaBusinessVertical.Health]: t`Health`,
+  [MetaBusinessVertical.ProfessionalServices]: t`Professional services`,
+  [MetaBusinessVertical.Retail]: t`Retail`,
+  [MetaBusinessVertical.Restaurant]: t`Restaurant`,
+  [MetaBusinessVertical.Travel]: t`Travel`,
+  [MetaBusinessVertical.Other]: t`Other`
+};
+
 function WhatsappSetupPage() {
   const { data: status, refetch: refetchStatus } = api.useQuery("get", "/api/whatsapp/onboarding-status");
+  const { data: tenant } = api.useQuery("get", "/api/account/tenants/current");
 
   const linkWabaMutation = api.useMutation("post", "/api/whatsapp/link-waba", {
     onSuccess: () => {
@@ -43,6 +59,66 @@ function WhatsappSetupPage() {
       toast.success(t`WhatsApp Business Account connected`);
     }
   });
+
+  /**
+   * WABA data captured from the Meta `WA_EMBEDDED_SIGNUP` window message event.
+   * This fires during the FB.login popup, before the onSuccess code callback.
+   *
+   * NOTE: The current `/api/whatsapp/link-waba` endpoint requires `wabaId`,
+   * `phoneNumberId`, and `displayPhoneNumber` explicitly.  Once the backend is
+   * updated to accept the OAuth `code` directly (and perform the Graph API
+   * lookup internally), this ref can be removed.
+   */
+  const pendingWabaData = useRef<FBEmbeddedSignupData | null>(null);
+
+  useEffect(() => {
+    const handleMessage = (event: MessageEvent) => {
+      if (event.origin !== "https://www.facebook.com") return;
+
+      const payload = event.data as {
+        type?: string;
+        data?: FBEmbeddedSignupData;
+      };
+      if (payload.type === "WA_EMBEDDED_SIGNUP" && payload.data) {
+        pendingWabaData.current = payload.data;
+      }
+    };
+
+    window.addEventListener("message", handleMessage);
+    return () => {
+      window.removeEventListener("message", handleMessage);
+    };
+  }, []);
+
+  const handleEmbeddedSignupSuccess = (_code: string) => {
+    const wabaData = pendingWabaData.current;
+    if (!wabaData) {
+      toast.error(t`WhatsApp connection failed. Please try again.`);
+      return;
+    }
+
+    linkWabaMutation.mutate({
+      body: {
+        wabaId: wabaData.waba_id,
+        phoneNumberId: wabaData.phone_number_id,
+        // displayPhoneNumber is not reliably provided by the Embedded Signup SDK.
+        // It will be updated by the backend when the verified phone number is synced.
+        displayPhoneNumber: wabaData.display_phone_number ?? ""
+      }
+    });
+
+    pendingWabaData.current = null;
+  };
+
+  const handleEmbeddedSignupCancel = () => {
+    pendingWabaData.current = null;
+    toast.info(t`WhatsApp connection was cancelled.`);
+  };
+
+  const handleEmbeddedSignupError = (_error: unknown) => {
+    pendingWabaData.current = null;
+    toast.error(t`WhatsApp sign-up failed. Please try again.`);
+  };
 
   const generateKeyPairMutation = api.useMutation("post", "/api/whatsapp/generate-key-pair", {
     onSuccess: () => {
@@ -60,13 +136,27 @@ function WhatsappSetupPage() {
   });
 
   const [subaccountCode, setSubaccountCode] = useState<string | null>(null);
+  const [brandStepDone, setBrandStepDone] = useState(false);
+  const [brandStepSkipped, setBrandStepSkipped] = useState(false);
 
-  const handleConnectWaba = () => {
-    // TODO(phase-5-followup): integrate Meta Embedded Signup SDK (PUBLIC_META_APP_ID) instead of placeholder values
-    linkWabaMutation.mutate({
-      body: { wabaId: "stub-waba-id", phoneNumberId: "stub-phone-id", displayPhoneNumber: "+27000000000" }
-    });
-  };
+  /**
+   * TODO: Replace with real API mutation once backend wires up UpdateTenantBrandProfileCommand.
+   * Expected endpoint: PUT /api/account/tenants/current/brand-profile
+   */
+  const saveBrandProfileMutation = useMutation<
+    void,
+    Schemas["HttpValidationProblemDetails"],
+    { businessDisplayName: string; brandVertical: MetaBusinessVertical | "" }
+  >({
+    mutationFn: async (_values) => {
+      // TODO: call PUT /api/account/tenants/current/brand-profile when available
+      await Promise.resolve();
+    },
+    onSuccess: () => {
+      setBrandStepDone(true);
+      toast.success(t`Brand profile saved`);
+    }
+  });
 
   const fingerprintShort = status?.publicKeyFingerprint ? status.publicKeyFingerprint.slice(0, 16) + "…" : null;
 
@@ -103,9 +193,13 @@ function WhatsappSetupPage() {
           </CardHeader>
           <CardContent>
             {!status?.wabaLinked && (
-              <Button onClick={handleConnectWaba} isPending={linkWabaMutation.isPending}>
-                <Trans>Connect WhatsApp</Trans>
-              </Button>
+              <EmbeddedSignupButton
+                onSuccess={handleEmbeddedSignupSuccess}
+                onCancel={handleEmbeddedSignupCancel}
+                onError={handleEmbeddedSignupError}
+                disabled={linkWabaMutation.isPending}
+                businessName={tenant?.name}
+              />
             )}
           </CardContent>
         </Card>
@@ -256,8 +350,98 @@ function WhatsappSetupPage() {
           </CardContent>
         </Card>
 
+        {/* Step 5: Customise your brand */}
+        {status?.paystackConnected && !brandStepDone && !brandStepSkipped && (
+          <Card>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle>
+                    <Trans>5. Customise your brand</Trans>
+                  </CardTitle>
+                  <CardDescription>
+                    <Trans>Add your business details to personalise your WhatsApp profile.</Trans>
+                  </CardDescription>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <Form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  const formData = new FormData(e.currentTarget);
+                  saveBrandProfileMutation.mutate({
+                    businessDisplayName: String(formData.get("businessDisplayName") ?? ""),
+                    brandVertical: (formData.get("brandVertical") ?? "") as MetaBusinessVertical | ""
+                  });
+                }}
+                validationErrors={saveBrandProfileMutation.error?.errors}
+                validationBehavior="aria"
+                className="flex flex-col gap-4"
+              >
+                <TextField name="businessDisplayName" label={t`Business display name`} required={true} />
+                <SelectField name="brandVertical" label={t`Business category`}>
+                  <SelectTrigger>
+                    <SelectValue>
+                      {(v: MetaBusinessVertical | null) =>
+                        v ? VERTICAL_LABELS[v] : <span className="text-muted-foreground">{t`Select category`}</span>
+                      }
+                    </SelectValue>
+                  </SelectTrigger>
+                  <SelectContent>
+                    {Object.values(MetaBusinessVertical).map((v) => (
+                      <SelectItem key={v} value={v}>
+                        {VERTICAL_LABELS[v]}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </SelectField>
+                <div className="flex gap-2">
+                  <Button type="submit" isPending={saveBrandProfileMutation.isPending}>
+                    <Trans>Save &amp; continue</Trans>
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    onClick={() => setBrandStepSkipped(true)}
+                    disabled={saveBrandProfileMutation.isPending}
+                  >
+                    <Trans>Skip for now</Trans>
+                  </Button>
+                </div>
+              </Form>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Brand step complete indicator */}
+        {status?.paystackConnected && brandStepDone && (
+          <Card>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle>
+                    <Trans>5. Customise your brand</Trans>
+                  </CardTitle>
+                  <CardDescription>
+                    <Trans>Your brand profile has been saved.</Trans>
+                  </CardDescription>
+                </div>
+                <div className="flex items-center gap-2 text-sm text-green-600">
+                  <CheckCircle2Icon className="size-4" />
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <RouterLink to="/account/settings/brand" className="text-sm text-primary underline underline-offset-4">
+                <Trans>Edit brand profile</Trans>
+              </RouterLink>
+            </CardContent>
+          </Card>
+        )}
+
         {/* All steps complete */}
-        {status?.canPublishFlow && (
+        {status?.canPublishFlow && (brandStepDone || brandStepSkipped) && (
           <Card className="border-green-200 bg-green-50 dark:border-green-800 dark:bg-green-950">
             <CardHeader>
               <div className="flex items-center gap-2">

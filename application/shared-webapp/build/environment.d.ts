@@ -45,6 +45,11 @@ export declare global {
      * Whether subscription/billing is enabled (payment provider configured)
      **/
     PUBLIC_SUBSCRIPTION_ENABLED: string;
+    /**
+     * Meta (Facebook) App ID for WhatsApp Business Embedded Signup.
+     * Empty string when the feature is not configured.
+     **/
+    PUBLIC_META_APP_ID: string;
   }
 
   export interface UserInfoEnv {

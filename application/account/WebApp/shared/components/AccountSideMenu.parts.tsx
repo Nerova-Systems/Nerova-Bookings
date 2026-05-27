@@ -23,6 +23,7 @@ import {
   MonitorSmartphoneIcon,
   ShieldCheckIcon,
   SlidersHorizontalIcon,
+  SparklesIcon,
   UserIcon,
   UsersIcon,
   UsersRoundIcon
@@ -207,6 +208,13 @@ export function AccountGroup(props: Readonly<AccountGroupProps>) {
             label={<Trans>WhatsApp</Trans>}
             tooltip={t`WhatsApp`}
             isActive={isActive("/whatsapp", true)}
+          />
+          <AccountNavItem
+            to="/account/settings/brand"
+            icon={<SparklesIcon />}
+            label={<Trans>Brand profile</Trans>}
+            tooltip={t`Brand profile`}
+            isActive={isActive("/account/settings/brand", true)}
           />
         </SidebarMenu>
       </SidebarGroupContent>
