@@ -60,6 +60,19 @@ public interface IBookingRepository : IAppendRepository<Booking, BookingId>
     ///     intentionally unfiltered so it works without an execution context.
     /// </summary>
     Task<Booking[]> GetExpiredUnpaidBookingsUnfilteredAsync(DateTimeOffset cutoff, CancellationToken cancellationToken);
+
+    /// <summary>
+    ///     Polls for pending after-session payments whose payment-state-changed timestamp is
+    ///     older than the supplied cutoff and which have not yet been reminded. Used by the
+    ///     payment-reminder job; intentionally unfiltered so it works without an execution context.
+    /// </summary>
+    Task<Booking[]> GetPendingPaymentsForReminderUnfilteredAsync(DateTimeOffset cutoff, CancellationToken cancellationToken);
+
+    /// <summary>
+    ///     Cross-tenant lookup by id. Used by anonymous / background callers (WhatsApp Flow
+    ///     dispatcher + TickerQ payment jobs) that do not carry tenant context.
+    /// </summary>
+    Task<Booking?> GetByIdUnfilteredAsync(BookingId bookingId, CancellationToken cancellationToken);
 }
 
 public sealed record BookingWithEventType(Booking Booking, EventType EventType);
@@ -209,5 +222,25 @@ public sealed class BookingRepository(MainDbContext mainDbContext)
                         && b.PaymentStateChangedAt != null
                         && b.PaymentStateChangedAt < cutoff)
             .ToArrayAsync(cancellationToken);
+    }
+
+    public async Task<Booking[]> GetPendingPaymentsForReminderUnfilteredAsync(DateTimeOffset cutoff, CancellationToken cancellationToken)
+    {
+        return await DbSet
+            .IgnoreQueryFilters()
+            .AsTracking()
+            .Where(b => b.PaymentStatus == BookingPaymentStatus.Pending
+                        && b.PaymentReminderSentAt == null
+                        && b.PaymentStateChangedAt != null
+                        && b.PaymentStateChangedAt < cutoff)
+            .ToArrayAsync(cancellationToken);
+    }
+
+    public async Task<Booking?> GetByIdUnfilteredAsync(BookingId bookingId, CancellationToken cancellationToken)
+    {
+        return await DbSet
+            .IgnoreQueryFilters()
+            .AsTracking()
+            .SingleOrDefaultAsync(b => b.Id == bookingId, cancellationToken);
     }
 }

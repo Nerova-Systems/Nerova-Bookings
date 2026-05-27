@@ -11,6 +11,7 @@ using Main.Features.Insights.Shared;
 using Main.Features.ManagedEventTypes.EventHandlers;
 using Main.Features.ManagedEventTypes.Services;
 using Main.Features.Payments.Infrastructure;
+using Main.Features.Payments.Jobs;
 using Main.Features.Payments.Paystack;
 using Main.Features.Permissions.Pipeline;
 using Main.Features.Permissions.Services;
@@ -276,6 +277,16 @@ public static class Configuration
             services.AddScoped<WebhookDeliveryProcessor>();
 
             services.MapTicker<WebhookDeliveryJob>()
+                .WithCron("*/1 * * * *");
+
+            // ─── Phase 4b: booking-payment lifecycle jobs ─────────────────
+            // Both jobs are cron-poll (the only TickerQ pattern in this codebase). Release fires
+            // when the payment-pending hold expires; reminder nudges After-Session pending payments
+            // that have been outstanding for ReminderWindow.
+            services.MapTicker<ReleaseUnpaidBookingJob>()
+                .WithCron("*/1 * * * *");
+
+            services.MapTicker<SendPaymentReminderJob>()
                 .WithCron("*/1 * * * *");
 
             return services;

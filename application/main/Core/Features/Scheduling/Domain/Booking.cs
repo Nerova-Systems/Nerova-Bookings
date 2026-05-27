@@ -150,6 +150,12 @@ public sealed class Booking : AggregateRoot<BookingId>, ITenantScopedEntity
     /// <summary>UTC timestamp of the last payment-state transition. Drives release/reminder windows.</summary>
     public DateTimeOffset? PaymentStateChangedAt { get; private set; }
 
+    /// <summary>
+    ///     UTC timestamp when a post-session payment-reminder WhatsApp was last dispatched.
+    ///     Used by <c>SendPaymentReminderJob</c> as a re-entrancy guard so we don't spam the booker.
+    /// </summary>
+    public DateTimeOffset? PaymentReminderSentAt { get; private set; }
+
     public TenantId TenantId { get; } = new(0);
 
     public void AssignToTeam(TenantId teamId)
@@ -274,6 +280,23 @@ public sealed class Booking : AggregateRoot<BookingId>, ITenantScopedEntity
         PaymentStateChangedAt = now;
         Status = BookingStatus.Cancelled;
         CancellationReason = "Payment not received within hold window.";
+    }
+
+    /// <summary>
+    ///     Marks the booking as completed (session occurred). The after-session payment
+    ///     dispatcher is notified by the command handler (not via a domain event) because the
+    ///     dispatcher performs external I/O (Paystack + WhatsApp) and must run after
+    ///     unit-of-work commit.
+    /// </summary>
+    public void MarkCompleted()
+    {
+        Status = BookingStatus.Completed;
+    }
+
+    /// <summary>Records that a post-session payment-reminder WhatsApp was just dispatched.</summary>
+    public void MarkPaymentReminderSent(DateTimeOffset now)
+    {
+        PaymentReminderSentAt = now;
     }
 
     public static Booking Create(

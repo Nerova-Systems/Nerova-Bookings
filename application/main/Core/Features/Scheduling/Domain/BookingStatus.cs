@@ -24,5 +24,11 @@ public enum BookingStatus
     Cancelled,
 
     /// <summary>The host explicitly rejected the booking request.</summary>
-    Rejected
+    Rejected,
+
+    /// <summary>
+    ///     The session has occurred and was marked completed by the host. Triggers the
+    ///     after-session payment dispatch when <c>PaymentTiming = AfterSession</c>.
+    /// </summary>
+    Completed
 }

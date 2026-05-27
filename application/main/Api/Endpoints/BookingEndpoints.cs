@@ -38,6 +38,10 @@ public sealed class BookingEndpoints : IEndpoints
             => await mediator.Send(new ConfirmBookingCommand(id))
         );
 
+        group.MapPost("/{id}/complete", async Task<ApiResult> (BookingId id, IMediator mediator)
+            => await mediator.Send(new MarkBookingCompletedCommand(id))
+        );
+
         group.MapPost("/{id}/reject", async Task<ApiResult> (BookingId id, RejectBookingCommand command, IMediator mediator)
             => await mediator.Send(command with { Id = id })
         );

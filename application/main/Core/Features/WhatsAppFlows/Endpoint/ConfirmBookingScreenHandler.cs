@@ -12,7 +12,7 @@ namespace Main.Features.WhatsAppFlows.Endpoint;
 ///     fields stashed by the earlier screens. On success advances to <see cref="FlowScreens.Success" />;
 ///     on validation failure returns an error data object that the dispatcher will surface to Meta.
 /// </summary>
-public sealed class ConfirmBookingScreenHandler(IMediator mediator) : IFlowScreenHandler
+public sealed class ConfirmBookingScreenHandler(IMediator mediator, IPublisher publisher) : IFlowScreenHandler
 {
     public string ScreenId => FlowScreens.ConfirmBooking;
 
@@ -59,6 +59,20 @@ public sealed class ConfirmBookingScreenHandler(IMediator mediator) : IFlowScree
         {
             return Error(result.GetErrorSummary());
         }
+
+        // Fan out to the post-flow messaging dispatcher so the booker gets a confirmation
+        // summary and (when payment-timing = BeforeBooking) a Paystack payment link via WhatsApp.
+        // The booker WaId is captured from the encrypted flow payload (Meta does not enrich the
+        // request with the originating phone number out of the box — clients pass it through as a
+        // hidden "wa_id" field on the confirm screen). Falls back to email if missing so the
+        // dispatcher can decide whether it has enough information to dispatch.
+        var bookerWaId = TryGetString(request.Data, "wa_id")
+                         ?? TryGetString(request.Data, "phone_number")
+                         ?? bookerEmail;
+        await publisher.Publish(
+            new BookingCreatedViaFlowEvent(result.Value.Id, config.TenantId, bookerWaId, bookerName),
+            cancellationToken
+        );
 
         return new FlowScreenResponse(FlowScreens.Success, new JsonObject
             {

@@ -25,7 +25,8 @@ public sealed class GetWhatsAppFlowProfileByPhoneNumberIdHandler(IWabaConfigurat
             config.WabaAccessToken,
             config.EncryptedPrivateKey,
             config.PrivateKeyIv,
-            config.PublicKeyFingerprint
+            config.PublicKeyFingerprint,
+            config.SubaccountCode
         );
     }
 }

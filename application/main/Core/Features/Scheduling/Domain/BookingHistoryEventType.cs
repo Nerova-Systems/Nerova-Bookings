@@ -20,5 +20,6 @@ public enum BookingHistoryEventType
     Reassigned,
     Rated,
     SeatReserved,
-    SeatReleased
+    SeatReleased,
+    Completed
 }

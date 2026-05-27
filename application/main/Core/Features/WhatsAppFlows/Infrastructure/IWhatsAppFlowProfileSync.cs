@@ -19,7 +19,8 @@ public sealed record WhatsAppFlowProfile(
     string? WabaAccessToken,
     string? EncryptedPrivateKey,
     string? PrivateKeyIv,
-    string? PublicKeyFingerprint
+    string? PublicKeyFingerprint,
+    string? PaystackSubaccountCode = null
 )
 {
     public bool IsOnboardingComplete => string.Equals(OnboardingGateStatus, "Complete", StringComparison.OrdinalIgnoreCase);

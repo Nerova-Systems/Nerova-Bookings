@@ -17,7 +17,8 @@ public sealed record WhatsAppFlowProfileDto(
     string? WabaAccessToken,
     string? EncryptedPrivateKey,
     string? PrivateKeyIv,
-    string? PublicKeyFingerprint
+    string? PublicKeyFingerprint,
+    string? PaystackSubaccountCode
 );
 
 [PublicAPI]
@@ -41,7 +42,8 @@ public sealed class GetWhatsAppFlowProfileHandler(IWabaConfigurationRepository r
             config.WabaAccessToken,
             config.EncryptedPrivateKey,
             config.PrivateKeyIv,
-            config.PublicKeyFingerprint
+            config.PublicKeyFingerprint,
+            config.SubaccountCode
         );
     }
 }
