@@ -33,6 +33,14 @@ public sealed class Tenant : SoftDeletableAggregateRoot<TenantId>
     public AbInclusionPin? AbInclusionPin { get; private set; }
 
     /// <summary>
+    ///     The tenant's WhatsApp-facing brand profile. <see langword="null" /> until the tenant
+    ///     calls <see cref="Commands.UpdateTenantBrandProfileCommand" />. Persisted as an EF
+    ///     owned-type stored in a single <c>jsonb</c> column (<c>brand_profile</c>) for
+    ///     forward-compatibility with future profile fields.
+    /// </summary>
+    public BrandProfile? BrandProfile { get; private set; }
+
+    /// <summary>
     ///     URL-friendly identifier used for team and organization profile pages.
     ///     Null for <see cref="TenantKind.Solo" /> tenants, which have no shared booking page.
     ///     Unique among organizations globally; unique within a parent organization for teams.
@@ -263,6 +271,16 @@ public sealed class Tenant : SoftDeletableAggregateRoot<TenantId>
     public void SetAbInclusionPin(AbInclusionPin? abInclusionPin)
     {
         AbInclusionPin = abInclusionPin;
+    }
+
+    /// <summary>
+    ///     Replaces the entire <see cref="BrandProfile" />. Callers are expected to construct the
+    ///     value object via <see cref="Domain.BrandProfile.Create" /> first, so all validation has
+    ///     already passed by the time this is called.
+    /// </summary>
+    public void UpdateBrandProfile(BrandProfile brandProfile)
+    {
+        BrandProfile = brandProfile;
     }
 }
 

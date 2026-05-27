@@ -384,6 +384,9 @@ public sealed class TenantSwitched(TenantId fromTenantId, TenantId toTenantId, U
 public sealed class TenantUpdated
     : TelemetryEvent;
 
+public sealed class TenantBrandProfileUpdated(string vertical)
+    : TelemetryEvent(("vertical", vertical));
+
 public sealed class TeamCreated(TenantId teamId, TenantId orgId)
     : TelemetryEvent(("team_id", teamId), ("org_id", orgId));
 

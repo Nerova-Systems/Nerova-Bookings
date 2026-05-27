@@ -92,6 +92,11 @@ public static class Configuration
                 }
             );
 
+            services.AddHttpClient<Account.Features.WhatsApp.Infrastructure.WhatsAppCloudApiClient>(
+                Account.Features.WhatsApp.Infrastructure.WhatsAppCloudApiClient.HttpClientName,
+                client => { client.Timeout = TimeSpan.FromSeconds(30); }
+            );
+
             services.AddEmailRendering("WebApp");
 
             services.AddMemoryCache();
@@ -144,6 +149,8 @@ public static class Configuration
                 .AddScoped<IAuditLogEmitter, AuditLogEmitter>()
                 .AddScoped<IApiKeyValidator, ApiKeyValidator>()
                 .AddScoped<IWabaConfigurationRepository, WabaConfigurationRepository>()
+                .AddScoped<IWabaProfileSyncOutboxRepository, WabaProfileSyncOutboxRepository>()
+                .AddScoped<Account.Features.WhatsApp.Infrastructure.IWhatsAppCloudApiClient, Account.Features.WhatsApp.Infrastructure.WhatsAppCloudApiClient>()
                 .AddScoped<IWabaEncryptionService, WabaEncryptionService>()
                 .AddScoped<IPaystackSubaccountService, PaystackSubaccountService>()
                 .AddApiKeyAuthentication();

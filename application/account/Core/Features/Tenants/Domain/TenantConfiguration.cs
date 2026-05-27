@@ -13,6 +13,10 @@ public sealed class TenantConfiguration : IEntityTypeConfiguration<Tenant>
 
         builder.OwnsOne(t => t.Logo, b => b.ToJson());
 
+        // Brand profile is also serialized as a single jsonb column so adding new fields later
+        // is a Tenant-aggregate-only change (no per-field migrations).
+        builder.OwnsOne(t => t.BrandProfile, b => b.ToJson());
+
         // MapStronglyTypedNullableLongId is required because ParentTenantId is a nullable strongly-typed long.
         builder.MapStronglyTypedNullableLongId<Tenant, TenantId>(t => t.ParentTenantId);
 
