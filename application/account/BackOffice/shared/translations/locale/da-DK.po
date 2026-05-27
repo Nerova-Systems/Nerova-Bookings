@@ -435,7 +435,7 @@ msgid "Feature flag rollouts reset to default for {entityLabel}"
 msgstr "Feature flag-udrulninger nulstillet til standard for {entityLabel}"
 
 msgid "Feature flags"
-msgstr "Feature flags"
+msgstr ""
 
 msgid "Feature flags are defined in code. This view controls their activation and rollout. It takes up to 5 minutes for changes to reach all users."
 msgstr "Feature flags er defineret i koden. Denne visning styrer deres aktivering og udrulning. Det tager op til 5 minutter, før ændringer når alle brugere."
