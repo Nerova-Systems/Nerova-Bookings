@@ -13,8 +13,8 @@ msgstr ""
 "Plural-Forms: \n"
 "X-Generator: @lingui/cli\n"
 
-msgid "<0>Upgrade your plan</0> to unlock this option."
-msgstr "<0>Opgrader din plan</0> for at låse denne mulighed op."
+msgid "{{customerName}}, {{bookingTime}}, {{businessName}} placeholders supported"
+msgstr "{{customerName}}, {{bookingTime}}, {{businessName}} pladsholdere understøttet"
 
 #. placeholder {0}: getBookingEmptyDescription(status)
 #. placeholder {0}: getBookingStatusLabel(bookingStatus)
@@ -46,35 +46,8 @@ msgstr "{totalCount} {0} bookinger"
 msgid "{value} stars and up"
 msgstr "{value} stjerner og op"
 
-msgid "1. Business vertical"
-msgstr "1. Business vertical"
-
-msgid "10. Confirmation message template"
-msgstr "10. Confirmation message template"
-
-msgid "2. Default session length"
-msgstr "2. Default session length"
-
-msgid "3. Multiple services"
-msgstr "3. Multiple services"
-
-msgid "4. Staff assignment"
-msgstr "4. Staff assignment"
-
-msgid "5. Booking window"
-msgstr "5. Booking window"
-
-msgid "6. Same-day bookings"
-msgstr "6. Same-day bookings"
-
-msgid "7. Custom pre-booking questions"
-msgstr "7. Custom pre-booking questions"
-
-msgid "8. Payment timing"
-msgstr "8. Payment timing"
-
-msgid "9. Cancellation contact"
-msgstr "9. Cancellation contact"
+msgid "<0>Upgrade your plan</0> to unlock this option."
+msgstr "<0>Opgrader din plan</0> for at låse denne mulighed op."
 
 msgid "A confirmation will be sent to the email address you provided."
 msgstr "En bekræftelse sendes til den e-mailadresse, du har angivet."
@@ -130,8 +103,14 @@ msgstr "Tilføj ny tidsplan"
 msgid "Add note"
 msgstr "Tilføj note"
 
+msgid "Add option"
+msgstr "Tilføj mulighed"
+
 msgid "Add override"
 msgstr "Tilføj undtagelse"
+
+msgid "Add question"
+msgstr "Tilføj spørgsmål"
 
 msgid "Add step"
 msgstr "Tilføj trin"
@@ -337,6 +316,9 @@ msgstr "Bookingvolumen"
 msgid "Booking window (days)"
 msgstr "Booking window (days)"
 
+msgid "Booking windows & durations"
+msgstr "Bookingvinduer og varigheder"
+
 msgid "Bookings"
 msgstr "Bookinger"
 
@@ -493,9 +475,6 @@ msgstr "Tilsluttede kalendere"
 msgid "Continue"
 msgstr "Fortsæt"
 
-msgid "Continue to preview"
-msgstr "Continue to preview"
-
 msgid "Control how soon bookings can be made and how the schedule is divided into slots."
 msgstr "Styr, hvor tidligt bookinger kan foretages, og hvordan tidsplanen opdeles i tider."
 
@@ -589,9 +568,6 @@ msgstr "Brugerdefineret"
 
 msgid "Custom event name"
 msgstr "Brugerdefineret begivenhedsnavn"
-
-msgid "Custom pre-booking questions can be added after publishing — coming soon."
-msgstr "Custom pre-booking questions can be added after publishing — coming soon."
 
 msgid "Custom pre-booking questions require an upgraded plan — <0>upgrade your plan</0> to unlock this option."
 msgstr "Tilpassede spørgsmål inden booking kræver en opgraderet plan — <0>opgrader din plan</0> for at låse denne mulighed op."
@@ -830,6 +806,9 @@ msgstr "Filtrer"
 
 msgid "Filter bookings"
 msgstr "Filtrer bookinger"
+
+msgid "Final details"
+msgstr "Afsluttende detaljer"
 
 msgid "First available"
 msgstr "First available"
@@ -1174,6 +1153,9 @@ msgstr "Flyt aftaletyper til en anden tidsplan, før du sletter denne."
 msgid "Move this booking to a different host. The new host will be notified."
 msgstr "Flyt denne booking til en anden vært. Den nye vært vil blive underrettet."
 
+msgid "Multiple choice"
+msgstr "Flervalg"
+
 msgid "Multiple services"
 msgstr "Multiple services"
 
@@ -1367,6 +1349,15 @@ msgstr "Vis kun første ledige tidspunkt"
 msgid "Open preview (coming soon)"
 msgstr "Open preview (coming soon)"
 
+#. placeholder {0}: optionIndex + 1
+msgid "Option {0}"
+msgstr "Mulighed {0}"
+
+#. placeholder {0}: optionIndex + 1
+#. placeholder {1}: index + 1
+msgid "Option {0} for question {1}"
+msgstr "Mulighed {0} til spørgsmål {1}"
+
 msgid "Other"
 msgstr "Andet"
 
@@ -1388,6 +1379,9 @@ msgstr "Pausede webhooks modtager ikke leveringer, før de genaktiveres."
 
 msgid "Payment"
 msgstr "Betaling"
+
+msgid "Payment setup"
+msgstr "Betalingsopsætning"
 
 msgid "Payment timing"
 msgstr "Payment timing"
@@ -1447,7 +1441,26 @@ msgid "Public link copied"
 msgstr "Offentligt link kopieret"
 
 msgid "Publish flow"
-msgstr "Publish flow"
+msgstr "Udgiv flow"
+
+msgid "Publish my flow"
+msgstr "Udgiv mit flow"
+
+#. placeholder {0}: index + 1
+msgid "Question {0}"
+msgstr "Spørgsmål {0}"
+
+msgid "Question text"
+msgstr "Spørgsmålstekst"
+
+msgid "Question text is required."
+msgstr "Spørgsmålstekst er påkrævet."
+
+msgid "Question text must be at least {MIN_QUESTION_TEXT_LENGTH} characters."
+msgstr "Spørgsmålstekst skal være mindst {MIN_QUESTION_TEXT_LENGTH} tegn."
+
+msgid "Question type"
+msgstr "Spørgsmålstype"
 
 msgid "Rate {value} of 5"
 msgstr "Vurdér {value} af 5"
@@ -1527,6 +1540,20 @@ msgstr "Fjern vært {0}"
 
 msgid "Remove link"
 msgstr "Fjern link"
+
+msgid "Remove option"
+msgstr "Fjern mulighed"
+
+#. placeholder {0}: optionIndex + 1
+msgid "Remove option {0}"
+msgstr "Fjern mulighed {0}"
+
+msgid "Remove question"
+msgstr "Fjern spørgsmål"
+
+#. placeholder {0}: index + 1
+msgid "Remove question {0}"
+msgstr "Fjern spørgsmål {0}"
 
 msgid "Remove time"
 msgstr "Fjern tid"
@@ -1729,6 +1756,9 @@ msgstr "Send testhændelse"
 msgid "Send to"
 msgstr "Send til"
 
+msgid "Services & team"
+msgstr "Ydelser og team"
+
 msgid "Set as default"
 msgstr "Angiv som standard"
 
@@ -1755,6 +1785,9 @@ msgstr "Del engangsbookinglinks der omgår den offentlige plan."
 
 msgid "Share your booking link"
 msgstr "Share your booking link"
+
+msgid "Short text answer"
+msgstr "Kort tekst svar"
 
 msgid "Show attendee info"
 msgstr "Show attendee info"
@@ -1804,6 +1837,9 @@ msgstr "Status"
 msgid "Status breakdown"
 msgstr "Statusfordeling"
 
+msgid "Step {current} of {total}"
+msgstr "Trin {current} af {total}"
+
 msgid "Step {stepNumber}"
 msgstr "Trin {stepNumber}"
 
@@ -1836,6 +1872,9 @@ msgstr "Mål-URL"
 
 msgid "Team"
 msgstr "Team"
+
+msgid "Tell us about your business"
+msgstr "Fortæl os om din virksomhed"
 
 msgid "Template"
 msgstr "Skabelon"
@@ -1972,6 +2011,9 @@ msgstr "Enhed"
 msgid "Untitled workflow"
 msgstr "Workflow uden titel"
 
+msgid "Upgrade"
+msgstr "Opgrader"
+
 msgid "Use booker timezone for organizer"
 msgstr "Brug bookerens tidszone til arrangør"
 
@@ -1983,9 +2025,6 @@ msgstr "Brug denne signeringshemmelighed til at verificere HMAC-signaturen på i
 
 msgid "Use weights"
 msgstr "Brug vægte"
-
-msgid "Upgrade"
-msgstr "Opgrader"
 
 msgid "user_..."
 msgstr "user_..."
@@ -2013,6 +2052,9 @@ msgstr "Vis sessionsdetaljer"
 
 msgid "Visibility"
 msgstr "Synlighed"
+
+msgid "We'll use this to set up your booking flow the right way."
+msgstr "Vi bruger dette til at sætte dit bookingflow op på den rigtige måde."
 
 msgid "Webhook"
 msgstr "Webhook"
@@ -2106,6 +2148,12 @@ msgstr "Yearly"
 
 msgid "Yes"
 msgstr "Ja"
+
+msgid "Yes / No"
+msgstr "Ja / Nej"
+
+msgid "You have reached the maximum of {maxQuestions} questions."
+msgstr "Du har nået maksimum på {maxQuestions} spørgsmål."
 
 msgid "You successfully deployed PlatformPlatform! 🎉"
 msgstr "Du har installeret PlatformPlatform med succes! 🎉"

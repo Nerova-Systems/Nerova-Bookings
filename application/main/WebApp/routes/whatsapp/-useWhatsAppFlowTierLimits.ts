@@ -39,11 +39,11 @@ export function useWhatsAppFlowTierLimits(): WhatsAppFlowTierLimits {
   }
 
   // TODO(phase-6): fetch real tier limits from GET /api/whatsapp-flows/tier-limits.
-  // Returning all-unlocked defaults until that endpoint is available.
+  // Using 3 as the Professional tier limit for custom pre-booking questions until the endpoint is available.
   return {
     staffSelectionInFlow: true,
     paymentTimingChoice: "Both",
     multipleServicesInFlow: true,
-    maxCustomPreBookingQuestions: -1
+    maxCustomPreBookingQuestions: 3
   };
 }

@@ -13,8 +13,8 @@ msgstr ""
 "Language-Team: \n"
 "Plural-Forms: \n"
 
-msgid "<0>Upgrade your plan</0> to unlock this option."
-msgstr "<0>Upgrade your plan</0> to unlock this option."
+msgid "{{customerName}}, {{bookingTime}}, {{businessName}} placeholders supported"
+msgstr "{{customerName}}, {{bookingTime}}, {{businessName}} placeholders supported"
 
 #. placeholder {0}: getBookingEmptyDescription(status)
 #. placeholder {0}: getBookingStatusLabel(bookingStatus)
@@ -46,35 +46,8 @@ msgstr "{totalCount} {0} bookings"
 msgid "{value} stars and up"
 msgstr "{value} stars and up"
 
-msgid "1. Business vertical"
-msgstr "1. Business vertical"
-
-msgid "10. Confirmation message template"
-msgstr "10. Confirmation message template"
-
-msgid "2. Default session length"
-msgstr "2. Default session length"
-
-msgid "3. Multiple services"
-msgstr "3. Multiple services"
-
-msgid "4. Staff assignment"
-msgstr "4. Staff assignment"
-
-msgid "5. Booking window"
-msgstr "5. Booking window"
-
-msgid "6. Same-day bookings"
-msgstr "6. Same-day bookings"
-
-msgid "7. Custom pre-booking questions"
-msgstr "7. Custom pre-booking questions"
-
-msgid "8. Payment timing"
-msgstr "8. Payment timing"
-
-msgid "9. Cancellation contact"
-msgstr "9. Cancellation contact"
+msgid "<0>Upgrade your plan</0> to unlock this option."
+msgstr "<0>Upgrade your plan</0> to unlock this option."
 
 msgid "A confirmation will be sent to the email address you provided."
 msgstr "A confirmation will be sent to the email address you provided."
@@ -130,8 +103,14 @@ msgstr "Add new schedule"
 msgid "Add note"
 msgstr "Add note"
 
+msgid "Add option"
+msgstr "Add option"
+
 msgid "Add override"
 msgstr "Add override"
+
+msgid "Add question"
+msgstr "Add question"
 
 msgid "Add step"
 msgstr "Add step"
@@ -337,6 +316,9 @@ msgstr "Booking volume"
 msgid "Booking window (days)"
 msgstr "Booking window (days)"
 
+msgid "Booking windows & durations"
+msgstr "Booking windows & durations"
+
 msgid "Bookings"
 msgstr "Bookings"
 
@@ -493,9 +475,6 @@ msgstr "Connected calendars"
 msgid "Continue"
 msgstr "Continue"
 
-msgid "Continue to preview"
-msgstr "Continue to preview"
-
 msgid "Control how soon bookings can be made and how the schedule is divided into slots."
 msgstr "Control how soon bookings can be made and how the schedule is divided into slots."
 
@@ -589,9 +568,6 @@ msgstr "Custom"
 
 msgid "Custom event name"
 msgstr "Custom event name"
-
-msgid "Custom pre-booking questions can be added after publishing — coming soon."
-msgstr "Custom pre-booking questions can be added after publishing — coming soon."
 
 msgid "Custom pre-booking questions require an upgraded plan — <0>upgrade your plan</0> to unlock this option."
 msgstr "Custom pre-booking questions require an upgraded plan — <0>upgrade your plan</0> to unlock this option."
@@ -830,6 +806,9 @@ msgstr "Filter"
 
 msgid "Filter bookings"
 msgstr "Filter bookings"
+
+msgid "Final details"
+msgstr "Final details"
 
 msgid "First available"
 msgstr "First available"
@@ -1174,6 +1153,9 @@ msgstr "Move event types to another schedule before deleting this one."
 msgid "Move this booking to a different host. The new host will be notified."
 msgstr "Move this booking to a different host. The new host will be notified."
 
+msgid "Multiple choice"
+msgstr "Multiple choice"
+
 msgid "Multiple services"
 msgstr "Multiple services"
 
@@ -1367,6 +1349,15 @@ msgstr "Only show first available slot"
 msgid "Open preview (coming soon)"
 msgstr "Open preview (coming soon)"
 
+#. placeholder {0}: optionIndex + 1
+msgid "Option {0}"
+msgstr "Option {0}"
+
+#. placeholder {0}: optionIndex + 1
+#. placeholder {1}: index + 1
+msgid "Option {0} for question {1}"
+msgstr "Option {0} for question {1}"
+
 msgid "Other"
 msgstr "Other"
 
@@ -1388,6 +1379,9 @@ msgstr "Paused webhooks stop receiving deliveries until reactivated."
 
 msgid "Payment"
 msgstr "Payment"
+
+msgid "Payment setup"
+msgstr "Payment setup"
 
 msgid "Payment timing"
 msgstr "Payment timing"
@@ -1448,6 +1442,25 @@ msgstr "Public link copied"
 
 msgid "Publish flow"
 msgstr "Publish flow"
+
+msgid "Publish my flow"
+msgstr "Publish my flow"
+
+#. placeholder {0}: index + 1
+msgid "Question {0}"
+msgstr "Question {0}"
+
+msgid "Question text"
+msgstr "Question text"
+
+msgid "Question text is required."
+msgstr "Question text is required."
+
+msgid "Question text must be at least {MIN_QUESTION_TEXT_LENGTH} characters."
+msgstr "Question text must be at least {MIN_QUESTION_TEXT_LENGTH} characters."
+
+msgid "Question type"
+msgstr "Question type"
 
 msgid "Rate {value} of 5"
 msgstr "Rate {value} of 5"
@@ -1527,6 +1540,20 @@ msgstr "Remove host {0}"
 
 msgid "Remove link"
 msgstr "Remove link"
+
+msgid "Remove option"
+msgstr "Remove option"
+
+#. placeholder {0}: optionIndex + 1
+msgid "Remove option {0}"
+msgstr "Remove option {0}"
+
+msgid "Remove question"
+msgstr "Remove question"
+
+#. placeholder {0}: index + 1
+msgid "Remove question {0}"
+msgstr "Remove question {0}"
 
 msgid "Remove time"
 msgstr "Remove time"
@@ -1729,6 +1756,9 @@ msgstr "Send test event"
 msgid "Send to"
 msgstr "Send to"
 
+msgid "Services & team"
+msgstr "Services & team"
+
 msgid "Set as default"
 msgstr "Set as default"
 
@@ -1755,6 +1785,9 @@ msgstr "Share one-off booking links that bypass the public schedule."
 
 msgid "Share your booking link"
 msgstr "Share your booking link"
+
+msgid "Short text answer"
+msgstr "Short text answer"
 
 msgid "Show attendee info"
 msgstr "Show attendee info"
@@ -1804,6 +1837,9 @@ msgstr "Status"
 msgid "Status breakdown"
 msgstr "Status breakdown"
 
+msgid "Step {current} of {total}"
+msgstr "Step {current} of {total}"
+
 msgid "Step {stepNumber}"
 msgstr "Step {stepNumber}"
 
@@ -1836,6 +1872,9 @@ msgstr "Target URL"
 
 msgid "Team"
 msgstr "Team"
+
+msgid "Tell us about your business"
+msgstr "Tell us about your business"
 
 msgid "Template"
 msgstr "Template"
@@ -1972,6 +2011,9 @@ msgstr "Unit"
 msgid "Untitled workflow"
 msgstr "Untitled workflow"
 
+msgid "Upgrade"
+msgstr "Upgrade"
+
 msgid "Use booker timezone for organizer"
 msgstr "Use booker timezone for organizer"
 
@@ -1983,9 +2025,6 @@ msgstr "Use this signing secret to verify the HMAC signature on incoming webhook
 
 msgid "Use weights"
 msgstr "Use weights"
-
-msgid "Upgrade"
-msgstr "Upgrade"
 
 msgid "user_..."
 msgstr "user_..."
@@ -2013,6 +2052,9 @@ msgstr "View session details"
 
 msgid "Visibility"
 msgstr "Visibility"
+
+msgid "We'll use this to set up your booking flow the right way."
+msgstr "We'll use this to set up your booking flow the right way."
 
 msgid "Webhook"
 msgstr "Webhook"
@@ -2106,6 +2148,12 @@ msgstr "Yearly"
 
 msgid "Yes"
 msgstr "Yes"
+
+msgid "Yes / No"
+msgstr "Yes / No"
+
+msgid "You have reached the maximum of {maxQuestions} questions."
+msgstr "You have reached the maximum of {maxQuestions} questions."
 
 msgid "You successfully deployed PlatformPlatform! 🎉"
 msgstr "You successfully deployed PlatformPlatform! 🎉"
