@@ -49,6 +49,13 @@ public sealed class WabaProfileSyncOutbox : AggregateRoot<WabaProfileSyncOutboxI
 {
     private const int MaxLastErrorLength = 2000;
 
+    /// <summary>
+    ///     Maximum number of times the Phase 7b sync job will retry a row before declaring it
+    ///     terminally failed (left in <see cref="WabaProfileSyncStatus.Failed" /> with
+    ///     <see cref="NextAttemptAt" /> set to <see langword="null" />).
+    /// </summary>
+    public const int MaxAttempts = 5;
+
     private WabaProfileSyncOutbox(
         TenantId tenantId,
         string phoneNumberId,
@@ -139,6 +146,20 @@ public sealed class WabaProfileSyncOutbox : AggregateRoot<WabaProfileSyncOutboxI
         }
 
         LogoUploadHandle = uploadHandle;
+        Status = WabaProfileSyncStatus.Posting;
+    }
+
+    /// <summary>
+    ///     Advances a logo-less row directly to <see cref="WabaProfileSyncStatus.Posting" /> without
+    ///     a Meta upload handle. Phase 7b sync job calls this when <see cref="BrandLogoUrl" /> is
+    ///     <see langword="null" /> so the business profile is still posted to Meta even though
+    ///     there is nothing to upload.
+    /// </summary>
+    public void MarkPostingWithoutLogo()
+    {
+        EnsureTransitionAllowed(WabaProfileSyncStatus.Posting, [WabaProfileSyncStatus.Pending]);
+        Attempts++;
+        LogoUploadHandle = null;
         Status = WabaProfileSyncStatus.Posting;
     }
 

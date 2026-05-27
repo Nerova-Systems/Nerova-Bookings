@@ -46,6 +46,42 @@ public enum WabaFlowStatus
 }
 
 /// <summary>
+///     Local domain projection of the Meta WABA display-name review status. Maps the wire-level
+///     <see cref="MetaNameStatus" /> values to a smaller set of states we care about: the
+///     terminal-but-distinct results (<see cref="Approved" />, <see cref="Declined" />,
+///     <see cref="Expired" />), the only state that blocks new requests
+///     (<see cref="PendingReview" />), and a default <see cref="None" /> for tenants that have
+///     never requested a change.
+/// </summary>
+[PublicAPI]
+[JsonConverter(typeof(JsonStringEnumConverter))]
+public enum WabaDisplayNameStatus
+{
+    None,
+    PendingReview,
+    Approved,
+    Declined,
+    Expired
+}
+
+/// <summary>
+///     Wire-level <c>name_status</c> returned by Meta on
+///     <c>GET /{phone-number-id}?fields=name_status,verified_name</c>. The names match Meta's
+///     string codes so the API client can do an exact case-sensitive parse.
+/// </summary>
+[PublicAPI]
+[JsonConverter(typeof(JsonStringEnumConverter))]
+public enum MetaNameStatus
+{
+    APPROVED,
+    AVAILABLE_WITHOUT_REVIEW,
+    DECLINED,
+    EXPIRED,
+    PENDING_REVIEW,
+    NONE
+}
+
+/// <summary>
 ///     Stores a tenant's WhatsApp Business Account (WABA) configuration, RSA key pair material,
 ///     Paystack subaccount code, and onboarding gate progress. One record per tenant.
 /// </summary>
@@ -187,5 +223,83 @@ public sealed class WabaConfiguration : AggregateRoot<WabaConfigurationId>
     public void SetGeneratedFlowJson(string flowJson)
     {
         GeneratedFlowJson = flowJson;
+    }
+
+    // ─── Display-name review state (Phase 7c) ────────────────────────────
+    // Meta reviews display-name changes for 1–3 business days. The fields below track the
+    // in-flight request so callers can render the pending banner, and the poller can detect a
+    // terminal transition (APPROVED / DECLINED / EXPIRED) without losing the requested name on
+    // restart.
+
+    /// <summary>The display name we asked Meta to assign on the most recent request.</summary>
+    public string? RequestedDisplayName { get; private set; }
+
+    /// <summary>
+    ///     Local projection of Meta's <c>name_status</c>. Defaults to <see cref="WabaDisplayNameStatus.None" />
+    ///     for tenants that have never requested a change.
+    /// </summary>
+    public WabaDisplayNameStatus DisplayNameStatus { get; private set; }
+
+    /// <summary>When the tenant submitted the most recent display-name change request.</summary>
+    public DateTimeOffset? DisplayNameReviewRequestedAt { get; private set; }
+
+    /// <summary>When the poller last asked Meta for the current <c>name_status</c>.</summary>
+    public DateTimeOffset? DisplayNameLastCheckedAt { get; private set; }
+
+    /// <summary>
+    ///     Meta's <c>verified_name</c> — the currently-displayed name on WhatsApp, which trails
+    ///     <see cref="RequestedDisplayName" /> until Meta approves the change.
+    /// </summary>
+    public string? VerifiedName { get; private set; }
+
+    /// <summary>
+    ///     Records a new display-name change request and moves the aggregate to
+    ///     <see cref="WabaDisplayNameStatus.PendingReview" />. Meta forbids submitting a new
+    ///     request while a previous one is in review, so we enforce the same invariant locally to
+    ///     avoid the round-trip and the 4xx that would follow.
+    /// </summary>
+    /// <param name="requested">The name to submit to Meta. Caller must validate format first.</param>
+    /// <param name="now">Timestamp for the request — supplied for deterministic tests.</param>
+    public void RequestDisplayNameChange(string requested, DateTimeOffset now)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(requested);
+
+        if (DisplayNameStatus == WabaDisplayNameStatus.PendingReview)
+        {
+            throw new InvalidOperationException(
+                "Cannot request a new display name while the previous request is pending review."
+            );
+        }
+
+        RequestedDisplayName = requested;
+        DisplayNameStatus = WabaDisplayNameStatus.PendingReview;
+        DisplayNameReviewRequestedAt = now;
+    }
+
+    /// <summary>
+    ///     Applies a poller result. Maps the wire-level <see cref="MetaNameStatus" /> into the
+    ///     local <see cref="WabaDisplayNameStatus" /> and refreshes
+    ///     <see cref="VerifiedName" /> + <see cref="DisplayNameLastCheckedAt" />.
+    ///     <para>
+    ///         <c>APPROVED</c> and <c>AVAILABLE_WITHOUT_REVIEW</c> both collapse to
+    ///         <see cref="WabaDisplayNameStatus.Approved" />: the latter is what Meta returns when
+    ///         a brand exemption skipped the review queue, and downstream consumers treat the two
+    ///         states identically.
+    ///     </para>
+    /// </summary>
+    public void MarkDisplayNameReviewResult(MetaNameStatus metaStatus, string? verifiedName, DateTimeOffset now)
+    {
+        DisplayNameStatus = metaStatus switch
+        {
+            MetaNameStatus.APPROVED or MetaNameStatus.AVAILABLE_WITHOUT_REVIEW => WabaDisplayNameStatus.Approved,
+            MetaNameStatus.DECLINED => WabaDisplayNameStatus.Declined,
+            MetaNameStatus.EXPIRED => WabaDisplayNameStatus.Expired,
+            MetaNameStatus.PENDING_REVIEW => WabaDisplayNameStatus.PendingReview,
+            MetaNameStatus.NONE => WabaDisplayNameStatus.None,
+            _ => DisplayNameStatus
+        };
+
+        VerifiedName = verifiedName;
+        DisplayNameLastCheckedAt = now;
     }
 }

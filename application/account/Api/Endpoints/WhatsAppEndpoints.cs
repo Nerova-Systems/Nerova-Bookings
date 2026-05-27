@@ -63,6 +63,23 @@ public sealed class WhatsAppEndpoints : IEndpoints
                 ? Result<WabaOnboardingStatusResponse?>.NotFound("WhatsApp configuration not found for this tenant.")
                 : Result<WabaOnboardingStatusResponse?>.Success(result);
         }).Produces<WabaOnboardingStatusResponse?>();
+
+        group.MapPost("/display-name", async Task<ApiResult> (
+            [PublicAPI] RequestWabaDisplayNameChangeRequest request,
+            IMediator mediator
+        ) => await mediator.Send(new RequestWabaDisplayNameChangeCommand(request.RequestedDisplayName)));
+
+        group.MapGet("/display-name", async Task<ApiResult<WabaDisplayNameStatusResponse?>> (
+            IMediator mediator,
+            IExecutionContext executionContext
+        ) =>
+        {
+            var tenantId = executionContext.TenantId!;
+            var result = await mediator.Send(new GetWabaDisplayNameStatusQuery(tenantId));
+            return result is null
+                ? Result<WabaDisplayNameStatusResponse?>.NotFound("WhatsApp configuration not found for this tenant.")
+                : Result<WabaDisplayNameStatusResponse?>.Success(result);
+        }).Produces<WabaDisplayNameStatusResponse?>();
     }
 }
 
@@ -71,3 +88,6 @@ public sealed record LinkWabaAccountRequest(string WabaId, string PhoneNumberId,
 
 [PublicAPI]
 public sealed record ConnectPaystackRequest(string BusinessName, string BankCode, string AccountNumber, decimal PercentageFee);
+
+[PublicAPI]
+public sealed record RequestWabaDisplayNameChangeRequest(string RequestedDisplayName);

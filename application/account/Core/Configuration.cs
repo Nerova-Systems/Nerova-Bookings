@@ -151,6 +151,9 @@ public static class Configuration
                 .AddScoped<IWabaConfigurationRepository, WabaConfigurationRepository>()
                 .AddScoped<IWabaProfileSyncOutboxRepository, WabaProfileSyncOutboxRepository>()
                 .AddScoped<Account.Features.WhatsApp.Infrastructure.IWhatsAppCloudApiClient, Account.Features.WhatsApp.Infrastructure.WhatsAppCloudApiClient>()
+                .AddScoped<Account.Features.WhatsApp.Infrastructure.WabaProfileSyncProcessor>()
+                .AddScoped<Account.Features.WhatsApp.Infrastructure.WabaProfileDriftDetector>()
+                .AddScoped<Account.Features.WhatsApp.Infrastructure.WabaDisplayNameReviewPoller>()
                 .AddScoped<IWabaEncryptionService, WabaEncryptionService>()
                 .AddScoped<IPaystackSubaccountService, PaystackSubaccountService>()
                 .AddApiKeyAuthentication();

@@ -61,6 +61,41 @@ public interface IWhatsAppCloudApiClient
         string serializedPayload,
         CancellationToken cancellationToken
     );
+
+    /// <summary>
+    ///     GETs the current <c>whatsapp_business_profile</c> from Meta. Used by the Phase 7b drift
+    ///     detector to compare Meta's view against the tenant's local <c>BrandProfile</c>. The
+    ///     wire response is shaped as <c>{ "data": [ { ... } ] }</c>; this method unwraps the
+    ///     envelope and returns the single profile object (or a failed <see cref="Result" /> when
+    ///     the envelope is empty/malformed).
+    /// </summary>
+    Task<Result<RemoteWabaProfileDto>> GetBusinessProfileAsync(
+        string phoneNumberId,
+        string accessToken,
+        CancellationToken cancellationToken
+    );
+
+    /// <summary>
+    ///     POSTs a new display-name change request to
+    ///     <c>POST /{phone-number-id}/display_name</c>. Meta reviews the change for 1–3 business
+    ///     days; the result is read back via <see cref="GetDisplayNameStatusAsync" />.
+    /// </summary>
+    Task<Result> RequestDisplayNameChangeAsync(
+        string phoneNumberId,
+        string accessToken,
+        string requestedName,
+        CancellationToken cancellationToken
+    );
+
+    /// <summary>
+    ///     GETs <c>name_status</c> + <c>verified_name</c> for a phone number. Used by the Phase
+    ///     7c poller to advance a pending-review aggregate to its terminal state.
+    /// </summary>
+    Task<Result<RemoteWabaDisplayNameStatusDto>> GetDisplayNameStatusAsync(
+        string phoneNumberId,
+        string accessToken,
+        CancellationToken cancellationToken
+    );
 }
 
 /// <summary>
@@ -159,6 +194,101 @@ public sealed class WhatsAppCloudApiClient(
         return Result.BadRequest($"Failed to update WhatsApp business profile: HTTP {(int)response.StatusCode}");
     }
 
+    public async Task<Result<RemoteWabaProfileDto>> GetBusinessProfileAsync(
+        string phoneNumberId,
+        string accessToken,
+        CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(phoneNumberId);
+        ArgumentException.ThrowIfNullOrWhiteSpace(accessToken);
+
+        var client = CreateClient(accessToken);
+        // Explicit field projection — the default response omits most fields.
+        var url = $"{phoneNumberId}/whatsapp_business_profile?fields=about,address,description,email,profile_picture_url,vertical,websites";
+
+        using var response = await client.GetAsync(url, cancellationToken);
+        if (!response.IsSuccessStatusCode)
+        {
+            var raw = await response.Content.ReadAsStringAsync(cancellationToken);
+            logger.LogWarning("WhatsApp business profile fetch failed: HTTP {Status} {Body}", (int)response.StatusCode, raw);
+            return Result<RemoteWabaProfileDto>.BadRequest($"Failed to fetch WhatsApp business profile: HTTP {(int)response.StatusCode}");
+        }
+
+        var envelope = await response.Content.ReadFromJsonAsync<RemoteWabaProfileEnvelope>(cancellationToken: cancellationToken);
+        var first = envelope?.Data?.FirstOrDefault();
+        if (first is null)
+        {
+            return Result<RemoteWabaProfileDto>.BadRequest("WhatsApp business profile fetch returned no data.");
+        }
+
+        return Result<RemoteWabaProfileDto>.Success(first);
+    }
+
+    public async Task<Result> RequestDisplayNameChangeAsync(
+        string phoneNumberId,
+        string accessToken,
+        string requestedName,
+        CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(phoneNumberId);
+        ArgumentException.ThrowIfNullOrWhiteSpace(accessToken);
+        ArgumentException.ThrowIfNullOrWhiteSpace(requestedName);
+
+        var client = CreateClient(accessToken);
+        var url = $"{phoneNumberId}/display_name";
+
+        // The Graph endpoint accepts the requested name as form-encoded data on the body. We send
+        // the same field name Meta documents ("display_name") rather than masquerading as JSON so
+        // future Graph versions that tighten content-type validation continue to work.
+        using var content = new FormUrlEncodedContent(new[]
+            {
+                new KeyValuePair<string, string>("display_name", requestedName)
+            }
+        );
+        using var response = await client.PostAsync(url, content, cancellationToken);
+        if (response.IsSuccessStatusCode) return Result.Success();
+
+        var raw = await response.Content.ReadAsStringAsync(cancellationToken);
+        logger.LogWarning(
+            "WhatsApp display-name change request failed: HTTP {Status} {Body}",
+            (int)response.StatusCode, raw
+        );
+        return Result.BadRequest($"Failed to request display-name change: HTTP {(int)response.StatusCode}");
+    }
+
+    public async Task<Result<RemoteWabaDisplayNameStatusDto>> GetDisplayNameStatusAsync(
+        string phoneNumberId,
+        string accessToken,
+        CancellationToken cancellationToken)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(phoneNumberId);
+        ArgumentException.ThrowIfNullOrWhiteSpace(accessToken);
+
+        var client = CreateClient(accessToken);
+        var url = $"{phoneNumberId}?fields=name_status,verified_name";
+
+        using var response = await client.GetAsync(url, cancellationToken);
+        if (!response.IsSuccessStatusCode)
+        {
+            var raw = await response.Content.ReadAsStringAsync(cancellationToken);
+            logger.LogWarning(
+                "WhatsApp display-name status fetch failed: HTTP {Status} {Body}",
+                (int)response.StatusCode, raw
+            );
+            return Result<RemoteWabaDisplayNameStatusDto>.BadRequest(
+                $"Failed to fetch display-name status: HTTP {(int)response.StatusCode}"
+            );
+        }
+
+        var body = await response.Content.ReadFromJsonAsync<RemoteWabaDisplayNameStatusDto>(cancellationToken: cancellationToken);
+        if (body is null)
+        {
+            return Result<RemoteWabaDisplayNameStatusDto>.BadRequest("Display-name status fetch returned no body.");
+        }
+
+        return Result<RemoteWabaDisplayNameStatusDto>.Success(body);
+    }
+
     private HttpClient CreateClient(string accessToken)
     {
         var client = httpClientFactory.CreateClient(HttpClientName);
@@ -174,4 +304,47 @@ public sealed class WhatsAppCloudApiClient(
     private sealed record UploadSessionResponse(string? Id);
 
     private sealed record UploadHandleResponse([property: System.Text.Json.Serialization.JsonPropertyName("h")] string? Handle);
+
+    private sealed record RemoteWabaProfileEnvelope(
+        [property: System.Text.Json.Serialization.JsonPropertyName("data")]
+        IReadOnlyList<RemoteWabaProfileDto>? Data
+    );
 }
+
+/// <summary>
+///     Wire shape of the Meta <c>GET /{phone_number_id}/whatsapp_business_profile</c> response
+///     payload (the inner object inside the <c>data</c> array). Note the GET surface uses
+///     <c>profile_picture_url</c> rather than <c>profile_picture_handle</c>: Meta exposes the
+///     hosted CDN URL on read but only accepts an opaque resumable-upload handle on write.
+/// </summary>
+[PublicAPI]
+public sealed record RemoteWabaProfileDto(
+    [property: System.Text.Json.Serialization.JsonPropertyName("about")]
+    string? About,
+    [property: System.Text.Json.Serialization.JsonPropertyName("address")]
+    string? Address,
+    [property: System.Text.Json.Serialization.JsonPropertyName("description")]
+    string? Description,
+    [property: System.Text.Json.Serialization.JsonPropertyName("email")]
+    string? Email,
+    [property: System.Text.Json.Serialization.JsonPropertyName("vertical")]
+    string? Vertical,
+    [property: System.Text.Json.Serialization.JsonPropertyName("websites")]
+    IReadOnlyList<string>? Websites,
+    [property: System.Text.Json.Serialization.JsonPropertyName("profile_picture_url")]
+    string? ProfilePictureUrl
+);
+
+/// <summary>
+///     Wire shape of <c>GET /{phone-number-id}?fields=name_status,verified_name</c>. The Graph
+///     response is a flat object (no <c>data</c> envelope), and <c>name_status</c> is one of the
+///     <see cref="Account.Features.WhatsApp.Domain.MetaNameStatus" /> codes — parsed by the
+///     System.Text.Json string-enum converter applied to the enum.
+/// </summary>
+[PublicAPI]
+public sealed record RemoteWabaDisplayNameStatusDto(
+    [property: System.Text.Json.Serialization.JsonPropertyName("name_status")]
+    Account.Features.WhatsApp.Domain.MetaNameStatus NameStatus,
+    [property: System.Text.Json.Serialization.JsonPropertyName("verified_name")]
+    string? VerifiedName
+);
