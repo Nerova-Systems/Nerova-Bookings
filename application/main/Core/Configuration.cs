@@ -10,6 +10,8 @@ using Main.Features.EventTypes.Domain;
 using Main.Features.Insights.Shared;
 using Main.Features.ManagedEventTypes.EventHandlers;
 using Main.Features.ManagedEventTypes.Services;
+using Main.Features.Payments.Infrastructure;
+using Main.Features.Payments.Paystack;
 using Main.Features.Permissions.Pipeline;
 using Main.Features.Permissions.Services;
 using Main.Features.Scheduling.Domain;
@@ -80,6 +82,12 @@ public static class Configuration
             // WhatsApp Flows: outbound to Meta Graph API + cross-SCS sync to the account SCS.
             services.AddHttpClient(MetaFlowsApiClient.HttpClientName);
             services.AddHttpClient(HttpWhatsAppFlowProfileSync.HttpClientName);
+
+            // Phase 4 — WhatsApp Cloud API (post-flow outbound text/template messaging) +
+            // Paystack booking-payment link service. Separate named clients so they don't share
+            // the WhatsApp Flows or account-SCS Paystack client configuration.
+            services.AddHttpClient(WhatsAppCloudApiClient.HttpClientName);
+            services.AddHttpClient(PaystackPaymentLinkService.HttpClientName);
 
             return services
                 .AddScoped<IPermissionCheckService, PermissionCheckService>()
@@ -200,6 +208,13 @@ public static class Configuration
                 .AddScoped<IFlowScreenHandler, SelectTimeScreenHandler>()
                 .AddScoped<IFlowScreenHandler, CustomQuestionsScreenHandler>()
                 .AddScoped<IFlowScreenHandler, ConfirmBookingScreenHandler>()
+                // ─── Phase 4: post-flow messaging + booking payments ──────
+                // Meta Cloud API for outbound text/template; Paystack booking-payment link service;
+                // booking-payment webhook verifier + idempotency repository.
+                .AddScoped<IWhatsAppCloudApiClient, WhatsAppCloudApiClient>()
+                .AddScoped<IPaystackPaymentLinkService, PaystackPaymentLinkService>()
+                .AddScoped<IPaystackWebhookVerifier, PaystackWebhookVerifier>()
+                .AddScoped<IProcessedPaymentEventRepository, ProcessedPaymentEventRepository>()
                 .AddHttpClient()
                 .AddEmailRendering("WebApp")
                 .AddSharedServices<MainDbContext>([Assembly]);

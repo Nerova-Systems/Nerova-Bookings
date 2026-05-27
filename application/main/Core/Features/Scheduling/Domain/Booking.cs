@@ -136,6 +136,20 @@ public sealed class Booking : AggregateRoot<BookingId>, ITenantScopedEntity
     /// <summary>Per-booking location value override (URL, address, phone number, etc.).</summary>
     public string? LocationValue { get; private set; }
 
+    // --- WhatsApp Flows + Paystack payment tracking (Phase 4) ---
+
+    /// <summary>Paystack transaction reference (one-to-one with the dispatched payment link).</summary>
+    public string? PaymentReference { get; private set; }
+
+    /// <summary>Current payment lifecycle state — see <see cref="BookingPaymentStatus" />.</summary>
+    public BookingPaymentStatus PaymentStatus { get; private set; } = BookingPaymentStatus.NotRequired;
+
+    /// <summary>The last Paystack hosted-checkout URL we dispatched to the booker.</summary>
+    public string? PaymentLinkUrl { get; private set; }
+
+    /// <summary>UTC timestamp of the last payment-state transition. Drives release/reminder windows.</summary>
+    public DateTimeOffset? PaymentStateChangedAt { get; private set; }
+
     public TenantId TenantId { get; } = new(0);
 
     public void AssignToTeam(TenantId teamId)
@@ -220,6 +234,46 @@ public sealed class Booking : AggregateRoot<BookingId>, ITenantScopedEntity
     {
         LocationType = string.IsNullOrWhiteSpace(locationType) ? null : locationType.Trim();
         LocationValue = string.IsNullOrWhiteSpace(locationValue) ? null : locationValue.Trim();
+    }
+
+    // --- Payment state transitions (Phase 4) ---
+
+    /// <summary>
+    ///     Records that a Paystack payment link has been dispatched. Booking is now waiting for the
+    ///     <c>charge.success</c> webhook. Slot remains held until either confirmation or release.
+    /// </summary>
+    public void MarkPaymentPending(string reference, string paymentLinkUrl, DateTimeOffset now)
+    {
+        PaymentReference = reference.Trim();
+        PaymentLinkUrl = paymentLinkUrl.Trim();
+        PaymentStatus = BookingPaymentStatus.Pending;
+        PaymentStateChangedAt = now;
+    }
+
+    /// <summary>Paystack confirmed the charge. Booking remains in its current scheduling status.</summary>
+    public void MarkPaymentPaid(DateTimeOffset now)
+    {
+        PaymentStatus = BookingPaymentStatus.Paid;
+        PaymentStateChangedAt = now;
+    }
+
+    /// <summary>Paystack returned <c>charge.failed</c>. Caller is expected to release the slot.</summary>
+    public void MarkPaymentFailed(DateTimeOffset now)
+    {
+        PaymentStatus = BookingPaymentStatus.Failed;
+        PaymentStateChangedAt = now;
+    }
+
+    /// <summary>
+    ///     Releases the held slot when payment did not arrive within the configured window.
+    ///     Cancels the underlying booking — the slot is now available for re-booking.
+    /// </summary>
+    public void ReleaseForUnpaidPayment(DateTimeOffset now)
+    {
+        PaymentStatus = BookingPaymentStatus.Released;
+        PaymentStateChangedAt = now;
+        Status = BookingStatus.Cancelled;
+        CancellationReason = "Payment not received within hold window.";
     }
 
     public static Booking Create(
