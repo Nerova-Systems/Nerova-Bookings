@@ -95,7 +95,7 @@ public sealed class DeleteTenantTests(AccountWebApplicationFactory factory) : En
 
         TelemetryEventsCollectorSpy.CollectedEvents.Should().ContainSingle(e => e.GetType().Name == "TenantDeleted");
         var tenantDeleted = TelemetryEventsCollectorSpy.CollectedEvents.Single(e => e.GetType().Name == "TenantDeleted");
-        tenantDeleted.Properties["event.feature_flag_rows_removed"].Should().Be("2");
+        tenantDeleted.Properties["event.feature_flag_rows_removed"].Should().Be("3");
     }
 
     private void InsertTenantFeatureFlagOverride(string flagKey, TenantId tenantId, string source)

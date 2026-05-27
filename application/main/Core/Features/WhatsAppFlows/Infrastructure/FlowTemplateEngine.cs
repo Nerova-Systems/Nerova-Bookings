@@ -7,7 +7,17 @@ namespace Main.Features.WhatsAppFlows.Infrastructure;
 
 public interface IFlowTemplateEngine
 {
-    string GenerateFlowJson(TenantFlowConfig config, string businessName);
+    /// <summary>
+    ///     Generates the Meta Flow JSON. The <paramref name="tier" /> parameter applies a
+    ///     defensive second layer of tier gating on top of the questionnaire-time enforcement —
+    ///     if a tier-restricted feature (staff selection, multiple services, custom questions)
+    ///     is present in <paramref name="config" /> but the tenant's current tier no longer
+    ///     allows it (e.g. they downgraded after configuring), the engine omits/truncates it
+    ///     rather than producing JSON the tenant can't actually use. Defaults to
+    ///     <see cref="TenantTier.Enterprise" /> for unit tests / call sites without a tier
+    ///     context.
+    /// </summary>
+    string GenerateFlowJson(TenantFlowConfig config, string businessName, TenantTier tier = TenantTier.Enterprise);
 }
 
 /// <summary>
@@ -31,33 +41,44 @@ public sealed class FlowTemplateEngine(IConfiguration configuration) : IFlowTemp
         WriteIndented = true
     };
 
-    public string GenerateFlowJson(TenantFlowConfig config, string businessName)
+    public string GenerateFlowJson(TenantFlowConfig config, string businessName, TenantTier tier = TenantTier.Enterprise)
     {
         var endpointUri = $"{(configuration["WhatsApp:EndpointBaseUrl"] ?? string.Empty).TrimEnd('/')}/api/whatsapp/flows/v1";
+
+        // Defensive tier gating — see interface XML doc. Compute effective flags rather than
+        // mutating the config so the persisted record remains a record of intent.
+        var includeMultipleServices = config.HasMultipleServices && TierLimits.MultipleServicesInFlow(tier);
+        var includeStaffSelection = config.StaffAssignment == StaffAssignment.SpecificStaff && TierLimits.StaffSelectionInFlow(tier);
+        var customQuestionLimit = TierLimits.MaxCustomPreBookingQuestions(tier);
+        var customQuestions = config.CustomPreBookingQuestions.OrderBy(q => q.Order).ToList();
+        if (customQuestionLimit != -1 && customQuestions.Count > customQuestionLimit)
+        {
+            customQuestions = customQuestions.Take(customQuestionLimit).ToList();
+        }
 
         var screens = new List<FlowScreen>();
         var routing = new Dictionary<string, string[]>();
 
         // ── Build screens ───────────────────────────────────────────────────
-        screens.Add(BuildWelcomeScreen(businessName, config));
+        screens.Add(BuildWelcomeScreen(businessName, includeMultipleServices));
 
-        if (config.HasMultipleServices)
+        if (includeMultipleServices)
         {
             screens.Add(BuildSelectServiceScreen(endpointUri));
         }
 
         screens.Add(BuildSelectDateScreen(config));
 
-        if (config.StaffAssignment == StaffAssignment.SpecificStaff)
+        if (includeStaffSelection)
         {
             screens.Add(BuildSelectStaffScreen(endpointUri));
         }
 
         screens.Add(BuildSelectTimeScreen(endpointUri));
 
-        if (config.CustomPreBookingQuestions.Count > 0)
+        if (customQuestions.Count > 0)
         {
-            screens.Add(BuildCustomQuestionsScreen(config));
+            screens.Add(BuildCustomQuestionsScreen(customQuestions));
         }
 
         if (config.PaymentTiming is PaymentTiming.BeforeBooking or PaymentTiming.Deposit)
@@ -79,7 +100,7 @@ public sealed class FlowTemplateEngine(IConfiguration configuration) : IFlowTemp
         return JsonSerializer.Serialize(document, JsonOptions);
     }
 
-    private static FlowScreen BuildWelcomeScreen(string businessName, TenantFlowConfig config)
+    private static FlowScreen BuildWelcomeScreen(string businessName, bool includeMultipleServices)
     {
         return new FlowScreen(
             Id: "WELCOME",
@@ -90,7 +111,7 @@ public sealed class FlowTemplateEngine(IConfiguration configuration) : IFlowTemp
                 [
                     Heading($"Welcome to {businessName}"),
                     Body("Book your appointment in just a few steps."),
-                    Footer("Get Started", Action: "navigate", NextName: NextScreenAfterWelcome(config), Payload: null)
+                    Footer("Get Started", Action: "navigate", NextName: includeMultipleServices ? "SELECT_SERVICE" : "SELECT_DATE", Payload: null)
                 ]
             )
         );
@@ -213,10 +234,10 @@ public sealed class FlowTemplateEngine(IConfiguration configuration) : IFlowTemp
         );
     }
 
-    private static FlowScreen BuildCustomQuestionsScreen(TenantFlowConfig config)
+    private static FlowScreen BuildCustomQuestionsScreen(List<CustomQuestion> questions)
     {
         var children = new List<object> { Heading("A few quick questions") };
-        foreach (var q in config.CustomPreBookingQuestions.OrderBy(q => q.Order))
+        foreach (var q in questions)
         {
             children.Add(q.QuestionType switch
                 {
@@ -320,6 +341,8 @@ public sealed class FlowTemplateEngine(IConfiguration configuration) : IFlowTemp
 
     private static string NextScreenAfterWelcome(TenantFlowConfig config)
     {
+        // Retained for API compatibility / unit tests that may exist; production rendering
+        // path now uses the effective includeMultipleServices flag computed against tier.
         return config.HasMultipleServices ? "SELECT_SERVICE" : "SELECT_DATE";
     }
 

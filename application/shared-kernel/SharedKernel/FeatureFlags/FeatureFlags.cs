@@ -389,4 +389,23 @@ public static partial class FeatureFlags
         true,
         "tier-enterprise"
     );
+
+    // -----------------------------------------------------------------------------------------
+    // WhatsApp Flows
+    //
+    // Master gate for the WhatsApp Flows booking experience. Available on every paid plan
+    // (PlanTier.Free is the lowest plan tier — Basis — in this codebase), so the plan-based
+    // evaluator auto-activates the flag for any subscribed tenant. Per-tier *value* limits
+    // (max custom questions, multiple-services toggle, payment timing options, phone-number
+    // count, analytics depth) are not modelled as feature flags because they are non-boolean —
+    // they live in <c>Main.Features.WhatsAppFlows.Infrastructure.TierLimits</c> alongside the
+    // existing tier limits and are enforced via <c>ITierService</c>.
+    // -----------------------------------------------------------------------------------------
+    public static readonly FeatureFlagDefinition WhatsAppFlowsEnabled = new PlanGatedTenantFlag(
+        "whatsapp-flows-enabled",
+        "WhatsApp Flows",
+        "Book customers through a native WhatsApp Flow instead of the public booking page.",
+        PlanTier.Free,
+        true
+    );
 }

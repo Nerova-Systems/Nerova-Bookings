@@ -28,6 +28,7 @@ public sealed class PublishFlowHandler(
     IFlowTemplateEngine templateEngine,
     IMetaFlowsApiClient metaClient,
     IWhatsAppFlowProfileSync profileSync,
+    ITierService tierService,
     IExecutionContext executionContext,
     ILogger<PublishFlowHandler> logger
 ) : IRequestHandler<PublishFlowCommand, Result<PublishFlowResponse>>
@@ -45,7 +46,8 @@ public sealed class PublishFlowHandler(
         if (!profile.IsOnboardingComplete) return Result<PublishFlowResponse>.BadRequest("WhatsApp onboarding is not yet complete.");
         if (string.IsNullOrWhiteSpace(profile.WabaAccessToken)) return Result<PublishFlowResponse>.BadRequest("WABA access token is missing on the profile.");
 
-        var flowJson = templateEngine.GenerateFlowJson(config, command.BusinessName ?? "your business");
+        var tier = await tierService.GetTierAsync(tenantId, cancellationToken);
+        var flowJson = templateEngine.GenerateFlowJson(config, command.BusinessName ?? "your business", tier);
 
         var flowId = profile.FlowId;
         if (string.IsNullOrWhiteSpace(flowId))

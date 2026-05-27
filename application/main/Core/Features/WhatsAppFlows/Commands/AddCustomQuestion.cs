@@ -42,8 +42,8 @@ public sealed class AddCustomQuestionHandler(
         if (config is null) return Result<CustomQuestionResponse>.NotFound("Tenant flow configuration has not been created yet.");
 
         var tier = await tierService.GetTierAsync(tenantId, cancellationToken);
-        var limit = TierLimits.MaxCustomQuestions(tier);
-        if (config.CustomPreBookingQuestions.Count >= limit)
+        var limit = TierLimits.MaxCustomPreBookingQuestions(tier);
+        if (limit != -1 && config.CustomPreBookingQuestions.Count >= limit)
         {
             return Result<CustomQuestionResponse>.BadRequest($"Tier {tier} allows at most {limit} custom question(s).");
         }

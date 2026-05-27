@@ -1,3 +1,4 @@
+using Account.Features.Subscriptions.Domain;
 using Account.Features.WhatsApp.Commands;
 using Account.Features.WhatsApp.Domain;
 using Account.Features.WhatsApp.Queries;
@@ -70,6 +71,22 @@ public sealed class WhatsAppInternalEndpoints : IEndpoints
             if (!IsAuthorized(httpContext, configuration)) return Result.Unauthorized("Invalid internal API key");
             return await mediator.Send(new UpdateFlowStatusInternalCommand(new TenantId(tenantId), body.FlowId, body.Status, body.GeneratedFlowJson));
         });
+
+        // Subscription plan lookup — consumed by main SCS ITierService to resolve the WhatsApp
+        // Flows tier (null = no subscription = Starter tier).
+        group.MapGet("/subscription", async Task<ApiResult<SubscriptionLookupResponse>> (
+                [FromQuery] long tenantId,
+                HttpContext httpContext,
+                ISubscriptionRepository subscriptionRepository,
+                Microsoft.Extensions.Configuration.IConfiguration configuration,
+                CancellationToken cancellationToken
+            ) =>
+            {
+                if (!IsAuthorized(httpContext, configuration)) return Result<SubscriptionLookupResponse>.Unauthorized("Invalid internal API key");
+                var subscription = await subscriptionRepository.GetByTenantIdUnfilteredAsync(new TenantId(tenantId), cancellationToken);
+                return Result<SubscriptionLookupResponse>.Success(new SubscriptionLookupResponse(subscription?.Plan.ToString()));
+            }
+        );
     }
 
     private static bool IsAuthorized(HttpContext httpContext, Microsoft.Extensions.Configuration.IConfiguration configuration)
@@ -86,3 +103,6 @@ public sealed class WhatsAppInternalEndpoints : IEndpoints
 
 [PublicAPI]
 public sealed record UpdateFlowStatusInternalRequest(string FlowId, string Status, string? GeneratedFlowJson);
+
+[PublicAPI]
+public sealed record SubscriptionLookupResponse(string? Plan);

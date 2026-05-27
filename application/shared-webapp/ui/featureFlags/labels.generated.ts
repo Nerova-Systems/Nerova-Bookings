@@ -118,6 +118,10 @@ function getKnownFeatureFlagLabels(): Record<string, FeatureFlagLabel> {
     "cap-insights": {
       name: t`Insights`,
       description: t`Analytics dashboard: booking volume, event-type performance, and member load metrics. Ports cal.com insights. Requires g3-insights.`
+    },
+    "whatsapp-flows-enabled": {
+      name: t`WhatsApp Flows`,
+      description: t`Book customers through a native WhatsApp Flow instead of the public booking page.`
     }
   };
 }

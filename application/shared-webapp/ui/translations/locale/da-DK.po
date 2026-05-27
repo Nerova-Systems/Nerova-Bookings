@@ -89,6 +89,9 @@ msgstr "Beta-funktioner"
 msgid "Bold"
 msgstr "Fed"
 
+msgid "Book customers through a native WhatsApp Flow instead of the public booking page."
+msgstr ""
+
 msgid "Breadcrumb"
 msgstr "Brødkrumme"
 
@@ -441,6 +444,9 @@ msgstr "Upload bannerbillede"
 
 msgid "View {name} in marketplace"
 msgstr "Se {name} i markedsplads"
+
+msgid "WhatsApp Flows"
+msgstr ""
 
 msgid "Workflows"
 msgstr "Arbejdsflows"

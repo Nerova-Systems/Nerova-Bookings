@@ -83,6 +83,7 @@ public static class Configuration
             // WhatsApp Flows: outbound to Meta Graph API + cross-SCS sync to the account SCS.
             services.AddHttpClient(MetaFlowsApiClient.HttpClientName);
             services.AddHttpClient(HttpWhatsAppFlowProfileSync.HttpClientName);
+            services.AddHttpClient(HttpWhatsAppSubscriptionLookup.HttpClientName);
 
             // Phase 4 — WhatsApp Cloud API (post-flow outbound text/template messaging) +
             // Paystack booking-payment link service. Separate named clients so they don't share
@@ -199,6 +200,8 @@ public static class Configuration
                 .AddScoped<IFlowTemplateEngine, FlowTemplateEngine>()
                 .AddScoped<IMetaFlowsApiClient, MetaFlowsApiClient>()
                 .AddScoped<IWhatsAppFlowProfileSync, HttpWhatsAppFlowProfileSync>()
+                .AddScoped<IWhatsAppSubscriptionLookup, HttpWhatsAppSubscriptionLookup>()
+                .AddMemoryCache()
                 .AddScoped<ITierService, DefaultTierService>()
                 .AddScoped<IWabaFlowDataCipher, WabaFlowDataCipher>()
                 .AddScoped<IWhatsAppFlowDispatcher, WhatsAppFlowDispatcher>()

@@ -1,6 +1,7 @@
 using FluentValidation;
 using JetBrains.Annotations;
 using Main.Features.WhatsAppFlows.Domain;
+using Main.Features.WhatsAppFlows.Infrastructure;
 using Main.Features.WhatsAppFlows.Shared;
 using SharedKernel.Cqrs;
 using SharedKernel.ExecutionContext;
@@ -42,13 +43,49 @@ public sealed class SubmitQuestionnaireValidator : AbstractValidator<SubmitQuest
 
 public sealed class SubmitQuestionnaireHandler(
     ITenantFlowConfigRepository repository,
+    ITierService tierService,
     IExecutionContext executionContext
 ) : IRequestHandler<SubmitQuestionnaireCommand, Result<TenantFlowConfigResponse>>
 {
+    /// <summary>
+    ///     Default confirmation template applied by <c>TenantFlowConfig.ApplyVerticalDefaults</c>.
+    ///     Tenants on a tier without <see cref="TierLimits.CustomConfirmationMessage" /> may only
+    ///     submit this exact value.
+    /// </summary>
+    public const string DefaultConfirmationMessageTemplate =
+        "Hi {name}, your booking for {service} on {time} with {staff} is confirmed.";
+
     public async Task<Result<TenantFlowConfigResponse>> Handle(SubmitQuestionnaireCommand command, CancellationToken cancellationToken)
     {
         var tenantId = executionContext.TenantId;
         if (tenantId is null) return Result<TenantFlowConfigResponse>.Unauthorized("Authentication is required.");
+
+        // ─── Tier gating ──────────────────────────────────────────────────
+        // We evaluate per-tier limits before persisting so the questionnaire submission is rejected
+        // atomically with a clear 403. Bool-valued capabilities are enforced as
+        // "your tier doesn't allow X, switch to Y" rather than silently downgrading the input.
+        var tier = await tierService.GetTierAsync(tenantId, cancellationToken);
+
+        if (command.StaffAssignment != StaffAssignment.AutoAssign && !TierLimits.StaffSelectionInFlow(tier))
+        {
+            return Result<TenantFlowConfigResponse>.Forbidden("Staff selection in the booking flow is not available on your current plan.");
+        }
+
+        if (command.PaymentTiming != PaymentTiming.AfterSession && TierLimits.PaymentTimingChoice(tier) == PaymentTimingChoice.AfterOnly)
+        {
+            return Result<TenantFlowConfigResponse>.Forbidden("Pre-booking and deposit payments are not available on your current plan.");
+        }
+
+        if (command.HasMultipleServices && !TierLimits.MultipleServicesInFlow(tier))
+        {
+            return Result<TenantFlowConfigResponse>.Forbidden("Multiple services in the booking flow are not available on your current plan.");
+        }
+
+        if (!string.Equals(command.ConfirmationMessageTemplate, DefaultConfirmationMessageTemplate, StringComparison.Ordinal)
+            && !TierLimits.CustomConfirmationMessage(tier))
+        {
+            return Result<TenantFlowConfigResponse>.Forbidden("Custom confirmation messages are not available on your current plan.");
+        }
 
         var existing = await repository.GetByTenantIdAsync(tenantId, cancellationToken);
         if (existing is null)

@@ -441,6 +441,25 @@ public sealed class CompleteExternalLoginTests : ExternalAuthenticationTestBase
             ]
         );
 
+        // Pre-create the plan-source override row for `whatsapp-flows-enabled` so the
+        // PlanBasedFeatureFlagEvaluator finds an existing active row and does not emit an
+        // extra FeatureFlagPlanOverrideActivated event that would change the asserted count.
+        Connection.Insert("feature_flags", [
+                ("id", Account.Features.FeatureFlags.Domain.FeatureFlagId.NewId().ToString()),
+                ("created_at", TimeProvider.GetUtcNow()),
+                ("modified_at", null),
+                ("flag_key", "whatsapp-flows-enabled"),
+                ("tenant_id", tenant2Id.Value),
+                ("user_id", null),
+                ("enabled_at", TimeProvider.GetUtcNow()),
+                ("disabled_at", null),
+                ("bucket_start", null),
+                ("bucket_end", null),
+                ("source", "Plan"),
+                ("scope", "Tenant")
+            ]
+        );
+
         var identities = JsonSerializer.Serialize(new[] { new { Provider = nameof(ExternalProviderType.Google), ProviderUserId = MockOAuthProvider.MockProviderUserId } });
         Connection.Insert("users", [
                 ("tenant_id", DatabaseSeeder.Tenant1.Id.ToString()),

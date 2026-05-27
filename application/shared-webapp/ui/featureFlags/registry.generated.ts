@@ -9,7 +9,7 @@
 // `useFeatureFlag(deletedKey)` and `getFeatureFlagLabel(deletedKey)` callsite into a TS compile
 // error after the next backend build regenerates this file.
 
-export type FeatureFlagKey = "google-oauth" | "subscriptions" | "beta-features" | "sso" | "account-overview" | "compact-view" | "experimental-ui" | "tier-teams" | "tier-organizations" | "tier-enterprise" | "cap-managed-event-types" | "cap-round-robin" | "cap-collective" | "cap-attributes" | "cap-custom-smtp" | "cap-org-billing" | "cap-delegation-credentials" | "cap-sso-microsoft" | "cap-sso-google" | "cap-integration-attribute-sync" | "cap-audit-log" | "cap-workflows" | "cap-api-keys" | "cap-impersonation" | "cap-insights";
+export type FeatureFlagKey = "google-oauth" | "subscriptions" | "beta-features" | "sso" | "account-overview" | "compact-view" | "experimental-ui" | "tier-teams" | "tier-organizations" | "tier-enterprise" | "cap-managed-event-types" | "cap-round-robin" | "cap-collective" | "cap-attributes" | "cap-custom-smtp" | "cap-org-billing" | "cap-delegation-credentials" | "cap-sso-microsoft" | "cap-sso-google" | "cap-integration-attribute-sync" | "cap-audit-log" | "cap-workflows" | "cap-api-keys" | "cap-impersonation" | "cap-insights" | "whatsapp-flows-enabled";
 
 type FeatureFlagScope = "system" | "tenant" | "user";
 type FeatureFlagAdminLevel = "systemAdmin" | "tenantOwner" | "user";
@@ -210,6 +210,13 @@ const featureFlagRegistry: Record<FeatureFlagKey, FeatureFlagDefinition> = {
       adminLevel: "systemAdmin",
       parentDependency: "tier-enterprise",
       description: "Analytics dashboard: booking volume, event-type performance, and member load metrics. Ports cal.com insights. Requires g3-insights."
+    },
+    "whatsapp-flows-enabled": {
+      key: "whatsapp-flows-enabled",
+      scope: "tenant",
+      adminLevel: "systemAdmin",
+      parentDependency: null,
+      description: "Book customers through a native WhatsApp Flow instead of the public booking page."
     }
 };
 

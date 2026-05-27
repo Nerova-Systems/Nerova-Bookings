@@ -98,4 +98,56 @@ public sealed class FlowTemplateEngineTests
 
         json.Should().Contain("https://api.test.example.com/api/whatsapp/flows/v1");
     }
+
+    // ─── Phase 6: tier gating (defensive layer) ─────────────────────────────
+
+    [Fact]
+    public void GenerateFlowJson_StarterTier_OmitsSelectStaffEvenIfConfigured()
+    {
+        var engine = BuildEngine();
+        // HairSalon defaults to SpecificStaff (i.e. config says: show SELECT_STAFF)
+        var config = TenantFlowConfig.Create(TenantId, BusinessVertical.HairSalon);
+
+        var json = engine.GenerateFlowJson(config, "Acme Salon", TenantTier.Starter);
+
+        // Tier overrides — Starter doesn't get StaffSelectionInFlow.
+        json.Should().NotContain("SELECT_STAFF");
+    }
+
+    [Fact]
+    public void GenerateFlowJson_StarterTier_OmitsSelectServiceEvenIfConfigured()
+    {
+        var engine = BuildEngine();
+        var config = TenantFlowConfig.Create(TenantId, BusinessVertical.Other);
+        config.UpdateBusinessProfile(
+            BusinessVertical.Other,
+            StaffAssignment.AutoAssign,
+            PaymentTiming.AfterSession,
+            depositAmountCents: null,
+            bookingWindowDays: 30,
+            defaultSessionMinutes: 30,
+            hasMultipleServices: true,
+            allowSameDayBookings: true,
+            confirmationMessageTemplate: "x",
+            cancellationContact: "y"
+        );
+
+        var json = engine.GenerateFlowJson(config, "Acme", TenantTier.Starter);
+
+        json.Should().NotContain("SELECT_SERVICE");
+    }
+
+    [Fact]
+    public void GenerateFlowJson_StarterTier_TruncatesCustomQuestionsToZero()
+    {
+        var engine = BuildEngine();
+        var config = TenantFlowConfig.Create(TenantId, BusinessVertical.Other);
+        config.AddCustomQuestion("Q1?", CustomQuestionType.Text, true, null);
+
+        var json = engine.GenerateFlowJson(config, "Acme", TenantTier.Starter);
+
+        // Starter = 0 custom questions allowed, so the screen is omitted entirely.
+        json.Should().NotContain("CUSTOM_QUESTIONS");
+        json.Should().NotContain("Q1?");
+    }
 }
