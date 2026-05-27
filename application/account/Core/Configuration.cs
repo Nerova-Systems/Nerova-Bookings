@@ -156,6 +156,7 @@ public static class Configuration
                 .AddScoped<Account.Features.WhatsApp.Infrastructure.WabaDisplayNameReviewPoller>()
                 .AddScoped<IWabaEncryptionService, WabaEncryptionService>()
                 .AddScoped<IPaystackSubaccountService, PaystackSubaccountService>()
+                .AddScoped<IWhatsAppInternalApiKeyValidator, WhatsAppInternalApiKeyValidator>()
                 .AddApiKeyAuthentication();
         }
 

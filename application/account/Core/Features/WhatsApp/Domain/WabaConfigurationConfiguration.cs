@@ -21,5 +21,9 @@ public sealed class WabaConfigurationConfiguration : IEntityTypeConfiguration<Wa
         builder.HasIndex(w => w.WabaId)
             .IsUnique()
             .HasDatabaseName("uix_waba_configurations_waba_id");
+
+        // Cached Meta Flow JSON — stored as jsonb so the column type matches the migration and
+        // Npgsql can use native jsonb operators if queries ever filter on flow content.
+        builder.Property(w => w.GeneratedFlowJson).HasColumnType("jsonb");
     }
 }
