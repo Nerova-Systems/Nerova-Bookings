@@ -94,6 +94,19 @@ public sealed class WabaConfiguration : AggregateRoot<WabaConfigurationId>
 
     public WabaOnboardingStatus OnboardingGateStatus { get; private set; }
 
+    /// <summary>
+    ///     Long-lived WABA system-user access token used to call the Meta Graph API on behalf of
+    ///     this tenant (flow create/upload/publish). Stored encrypted at rest in a future
+    ///     iteration — currently held in plaintext on the configuration record.
+    /// </summary>
+    public string? WabaAccessToken { get; private set; }
+
+    /// <summary>
+    ///     Most recent Flow JSON published to Meta. Cached so the questionnaire screen can render
+    ///     a deterministic preview without re-running the template engine.
+    /// </summary>
+    public string? GeneratedFlowJson { get; private set; }
+
     public static WabaConfiguration Create(TenantId tenantId, string wabaId, string? phoneNumberId, string? displayPhoneNumber)
     {
         var config = new WabaConfiguration(tenantId, wabaId)
@@ -154,5 +167,25 @@ public sealed class WabaConfiguration : AggregateRoot<WabaConfigurationId>
         OnboardingGateStatus = allOtherGatesDone
             ? WabaOnboardingStatus.Complete
             : WabaOnboardingStatus.PaystackConnected;
+    }
+
+    public void SetWabaAccessToken(string accessToken)
+    {
+        WabaAccessToken = accessToken;
+    }
+
+    public void SetFlowId(string flowId)
+    {
+        FlowId = flowId;
+    }
+
+    public void SetFlowStatus(WabaFlowStatus status)
+    {
+        FlowStatus = status;
+    }
+
+    public void SetGeneratedFlowJson(string flowJson)
+    {
+        GeneratedFlowJson = flowJson;
     }
 }
