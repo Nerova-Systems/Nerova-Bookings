@@ -21,7 +21,7 @@ import type { EventTypeTabProps } from "./EventTypeTabTypes";
 
 import { getEventTypeSettings, updateEventTypeSettings, updateEventTypeSettingsSection } from "../schedulingTypes";
 import { EventTypePrivateLinksSection } from "./EventTypePrivateLinksSection";
-import { EventTypeTabSection } from "./EventTypeTabSection";
+import { DisabledFeatureRow, EventTypeTabSection } from "./EventTypeTabSection";
 
 export function EventTypeAdvancedTab({ eventTypeId, value, onChange, error }: EventTypeTabProps) {
   const settings = getEventTypeSettings(value);

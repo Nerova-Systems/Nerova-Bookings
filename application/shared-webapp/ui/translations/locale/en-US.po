@@ -1,15 +1,13 @@
 msgid ""
 msgstr ""
-"POT-Creation-Date: 2026-04-26 17:39+0200\n"
-"MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: @lingui/cli\n"
-"Language: en-US\n"
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: \n"
 "PO-Revision-Date: \n"
 "Last-Translator: \n"
+"Language: \n"
 "Language-Team: \n"
 "Plural-Forms: \n"
 
@@ -227,6 +225,9 @@ msgstr "Immutable record of all significant system events across every SCS, writ
 msgid "Impersonation"
 msgstr "Impersonation"
 
+msgid "In-app support ticket creation, inbox, and back-office support tabs"
+msgstr "In-app support ticket creation, inbox, and back-office support tabs"
+
 msgid "Increase"
 msgstr "Increase"
 
@@ -402,6 +403,9 @@ msgstr "Stripe-powered subscription billing and plan management"
 
 msgid "Subscriptions"
 msgstr "Subscriptions"
+
+msgid "Support system"
+msgstr "Support system"
 
 msgid "Team-owned event types with locked fields that members inherit. Ports cal.com managed-event-types."
 msgstr "Team-owned event types with locked fields that members inherit. Ports cal.com managed-event-types."

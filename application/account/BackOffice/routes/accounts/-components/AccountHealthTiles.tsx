@@ -8,13 +8,14 @@ import { CalendarIcon } from "lucide-react";
 
 import type { components } from "@/shared/lib/api/client";
 
-import { api } from "@/shared/lib/api/client";
+import { api, SupportTicketStatus } from "@/shared/lib/api/client";
 
-type AccountDetailTab = "users" | "invoices" | "billing-events";
+type AccountDetailTab = "users" | "invoices" | "billing-events" | "support-tickets";
 
 type TenantDetailResponse = components["schemas"]["TenantDetailResponse"];
 
 const isSubscriptionEnabled = import.meta.runtime_env.PUBLIC_SUBSCRIPTION_ENABLED === "true";
+const isSupportSystemEnabled = import.meta.runtime_env.PUBLIC_SUPPORT_SYSTEM_ENABLED === "true";
 
 interface AccountHealthTilesProps {
   tenant: TenantDetailResponse | undefined;
@@ -35,6 +36,22 @@ export function AccountHealthTiles({ tenant, tenantId, isLoading }: Readonly<Acc
     params: { path: { id: tenantId } }
   });
   const userCounts = userCountsQuery.data;
+
+  // PageSize is requested at the validator-enforced cap of 100 so the chip count and the tab list
+  // share one TanStack Query cache entry. For tenants with more than 100 tickets the chip undercounts
+  // until a dedicated count endpoint exists; the v1 surface intentionally accepts that trade-off.
+  // Skip the request entirely when the support system is gated off; the tile is hidden anyway.
+  const supportTicketsQuery = api.useQuery(
+    "get",
+    "/api/back-office/support-tickets",
+    { params: { query: { TenantId: tenantId, PageSize: 100 } } },
+    { enabled: isSupportSystemEnabled }
+  );
+  const supportTicketsLoading = supportTicketsQuery.isLoading;
+  const openTicketCount = supportTicketsQuery.data?.tickets.filter(
+    (ticket) => ticket.status !== SupportTicketStatus.Resolved && ticket.status !== SupportTicketStatus.Closed
+  ).length;
+  const totalTicketCount = supportTicketsQuery.data?.totalCount;
   const totalUsers = userCounts?.totalUsers ?? 0;
   const activeUsers = userCounts?.activeUsers ?? 0;
   const pendingUsers = userCounts?.pendingUsers ?? 0;
@@ -110,6 +127,20 @@ export function AccountHealthTiles({ tenant, tenantId, isLoading }: Readonly<Acc
           }
         >
           <MrrAmount tenant={tenant} />
+        </HealthTile>
+      )}
+
+      {isSupportSystemEnabled && (
+        <HealthTile
+          label={t`Support tickets`}
+          loading={supportTicketsLoading}
+          tenantId={tenantId}
+          tab="support-tickets"
+          subtitle={totalTicketCount !== undefined ? <Trans>{totalTicketCount} total</Trans> : undefined}
+        >
+          <span className="text-2xl font-semibold tabular-nums">
+            {openTicketCount !== undefined ? openTicketCount : "-"}
+          </span>
         </HealthTile>
       )}
     </div>

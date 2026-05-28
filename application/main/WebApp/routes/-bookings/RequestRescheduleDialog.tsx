@@ -78,7 +78,7 @@ function RequestRescheduleDialogBody({
       onSubmit={() => {
         mutation.mutate({
           params: { path: { id: booking.id } },
-          body: { id: booking.id, reason: reason.trim() || null }
+          body: { rescheduleReason: reason.trim() || null }
         });
       }}
     >

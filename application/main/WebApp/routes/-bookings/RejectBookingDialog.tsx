@@ -75,7 +75,7 @@ function RejectBookingDialogBody({
         if (reason.trim().length === 0) return;
         rejectMutation.mutate({
           params: { path: { id: booking.id } },
-          body: { id: booking.id, reason: reason.trim() }
+          body: { rejectionReason: reason.trim() }
         });
       }}
     >

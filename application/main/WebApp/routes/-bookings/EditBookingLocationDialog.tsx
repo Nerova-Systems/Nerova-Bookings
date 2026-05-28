@@ -64,7 +64,7 @@ function EditBookingLocationDialogBody({
 }: Readonly<{ booking: BookingListItem; onClose: () => void; onSaved?: () => void }>) {
   const [locationType, setLocationType] = useState(booking.locationType ?? "link");
   const [locationValue, setLocationValue] = useState(booking.locationValue ?? "");
-  const mutation = api.useMutation("post", "/api/bookings/{id}/location", {
+  const mutation = api.useMutation("put", "/api/bookings/{id}/location", {
     onSuccess: () => {
       toast.success(t`Location updated`);
       void queryClient.invalidateQueries();
@@ -80,7 +80,6 @@ function EditBookingLocationDialogBody({
         mutation.mutate({
           params: { path: { id: booking.id } },
           body: {
-            id: booking.id,
             locationType: locationType || null,
             locationValue: locationValue.trim() || null
           }

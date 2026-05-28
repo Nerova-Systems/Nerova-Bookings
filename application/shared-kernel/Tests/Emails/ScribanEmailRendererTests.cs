@@ -1,6 +1,7 @@
 using FluentAssertions;
 using Scriban.Runtime;
 using SharedKernel.Emails;
+using SharedKernel.Platform;
 using Xunit;
 
 namespace SharedKernel.Tests.Emails;
@@ -193,6 +194,51 @@ public sealed class ScribanEmailRendererTests
     }
 
     [Fact]
+    public void RenderEmail_WhenHtmlEscapeHelperUsed_ShouldEscapeInHtmlButLeavePlaintextRaw()
+    {
+        // Scriban does no auto-escaping, so untrusted text interpolated into the HTML body must be
+        // piped through html_escape. The same {{ field | html_escape }} appears in both the HTML and
+        // plaintext sources (the Value JSX helper emits to both), so the renderer must escape only the
+        // HTML pass and leave the plaintext raw — otherwise legitimate text like "you & me" would show
+        // as "you &amp; me" in the .txt body.
+        var html = "<html><head><title>Re: {{ subject | html_escape }}</title></head><body><span>{{ body | html_escape }}</span></body></html>";
+        var plainText = "{{ body | html_escape }}";
+        var renderer = CreateRenderer(html, plainText);
+        var template = new TestTemplate("support", "en-US", new
+            {
+                subject = "Help</title><h1>Spoofed</h1>",
+                body = "<script>alert('xss')</script> you & me"
+            }
+        );
+
+        // Act
+        var result = renderer.RenderEmail(template);
+
+        // Assert
+        result.HtmlBody.Should().Contain("&lt;script&gt;alert(&#39;xss&#39;)&lt;/script&gt; you &amp; me");
+        result.HtmlBody.Should().NotContain("<script>alert");
+        result.HtmlBody.Should().NotContain("</title><h1>Spoofed</h1>");
+        result.Subject.Should().Be("Re: Help</title><h1>Spoofed</h1>");
+        result.PlainTextBody.Should().Be("<script>alert('xss')</script> you & me");
+    }
+
+    [Fact]
+    public void RenderEmail_WhenEHelperUsed_ShouldEscapeInHtmlButLeavePlaintextRaw()
+    {
+        // `e` is the short alias for html_escape; it must behave identically.
+        var html = "<html><head><title>t</title></head><body><span>{{ body | e }}</span></body></html>";
+        var renderer = CreateRenderer(html, "{{ body | e }}");
+        var template = new TestTemplate("alias", "en-US", new { body = "<b>x</b> & y" });
+
+        // Act
+        var result = renderer.RenderEmail(template);
+
+        // Assert
+        result.HtmlBody.Should().Contain("&lt;b&gt;x&lt;/b&gt; &amp; y");
+        result.PlainTextBody.Should().Be("<b>x</b> & y");
+    }
+
+    [Fact]
     public void RenderEmail_WhenTitleMissing_ShouldThrow()
     {
         // Arrange
@@ -294,6 +340,37 @@ public sealed class ScribanEmailRendererTests
 
         result.HtmlBody.Should().Contain("https://app.platformplatform.net/legal/terms");
         result.HtmlBody.Should().NotContain("//legal/terms");
+    }
+
+    [Fact]
+    public void RenderEmail_WhenTemplateReferencesTagline_ShouldUseMailTaglineForTemplateLocale()
+    {
+        // The mail-channel tagline is locale-specific (each locale can have its own copy), so the
+        // renderer pushes {{ Tagline }} as a per-call global rather than baking it into the shared
+        // helpers ScriptObject. Verify both supported PP locales resolve to their own mail tagline.
+        var html = "<html><head><title>t</title></head><body>{{ Tagline }}</body></html>";
+        var renderer = CreateRenderer(html, "{{ Tagline }}");
+        var expectedEnglish = Settings.Current.Branding.Tagline.Mail["en-US"];
+        var expectedDanish = Settings.Current.Branding.Tagline.Mail["da-DK"];
+
+        var english = renderer.RenderEmail(new TestTemplate("tagline-en", "en-US", new { }));
+        var danish = renderer.RenderEmail(new TestTemplate("tagline-da", "da-DK", new { }));
+
+        english.PlainTextBody.Should().Be(expectedEnglish);
+        danish.PlainTextBody.Should().Be(expectedDanish);
+    }
+
+    [Fact]
+    public void RenderEmail_WhenTemplateLocaleHasNoMailTagline_ShouldThrowWithDiagnostic()
+    {
+        // Guards against silently falling back to en-US for unknown locales -- a missing mail tagline
+        // for a locale is a misconfiguration in platform-settings.jsonc and should surface immediately.
+        var html = "<html><head><title>t</title></head><body>{{ Tagline }}</body></html>";
+        var renderer = CreateRenderer(html, "{{ Tagline }}");
+
+        var act = () => renderer.RenderEmail(new TestTemplate("tagline-missing", "fr-FR", new { }));
+
+        act.Should().Throw<InvalidOperationException>().WithMessage("*branding.tagline.mail*fr-FR*");
     }
 
     [Fact]

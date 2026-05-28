@@ -171,7 +171,7 @@ function renderEventTypeTab(
     case "recurring":
       return <EventTypeRecurringTab {...tabProps} />;
     case "apps":
-      return <EventTypeAppsTab />;
+      return <EventTypeAppsTab {...tabProps} />;
     case "workflows":
       return <EventTypeWorkflowsTab eventTypeId={eventTypeId} />;
     case "webhooks":

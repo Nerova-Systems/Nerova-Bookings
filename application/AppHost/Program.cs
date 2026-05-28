@@ -6,6 +6,11 @@ using Projects;
 using SharedKernel.Authentication.MockEasyAuth;
 using SharedKernel.Configuration;
 
+// Docker volume name prefix, derived from branding.productName in platform-settings.jsonc so the
+// AppHost and the developer CLI's stop command resolve the same value with no hardcoded literal in
+// either. A rebrand flows through automatically when productName changes.
+var dockerVolumePrefix = DockerVolumeNaming.ResolveVolumePrefix();
+
 // Read the port allocation before CreateBuilder so we can set Aspire's dashboard env vars
 // (ASPNETCORE_URLS, DOTNET_DASHBOARD_OTLP_ENDPOINT_URL, etc.) before Aspire reads them.
 var ports = PortAllocation.Load();
@@ -40,7 +45,7 @@ var paystackFullyConfigured = paystackConfigured
 
 var postgresPassword = builder.CreateStablePassword("postgres-password");
 var postgres = builder.AddPostgres("postgres", password: postgresPassword, port: ports.Postgres)
-    .WithDataVolume($"platform-platform{ports.VolumeNameInfix}-postgres-data")
+    .WithDataVolume($"{dockerVolumePrefix}{ports.VolumeNameInfix}-postgres-data")
     .WithLifetime(ContainerLifetime.Persistent)
     .WithArgs("-c", "wal_level=logical");
 
@@ -48,7 +53,7 @@ var azureStorage = builder
     .AddAzureStorage("azure-storage")
     .RunAsEmulator(resourceBuilder =>
         {
-            resourceBuilder.WithDataVolume($"platform-platform{ports.VolumeNameInfix}-azure-storage-data");
+            resourceBuilder.WithDataVolume($"{dockerVolumePrefix}{ports.VolumeNameInfix}-azure-storage-data");
             resourceBuilder.WithBlobPort(ports.Blob);
             resourceBuilder.WithLifetime(ContainerLifetime.Persistent);
         }
@@ -71,6 +76,8 @@ builder
 
 CreateBlobContainer("avatars");
 CreateBlobContainer("logos");
+CreateBlobContainer("support-tickets");
+CreateBlobContainer("support-staff");
 
 var frontendBuild = builder
     .AddJavaScriptApp("frontend-build", "../")
@@ -134,6 +141,7 @@ var accountApi = builder
     // Force-on so newcomers see the back-office billing UI without Paystack configured. Set to "false" (or
     // change back to `paystackFullyConfigured ? "true" : "false"`) to hide all billing/revenue/Paystack data.
     .WithEnvironment("PUBLIC_SUBSCRIPTION_ENABLED", "true")
+    .WithEnvironment("PUBLIC_SUPPORT_SYSTEM_ENABLED", Environment.GetEnvironmentVariable("PUBLIC_SUPPORT_SYSTEM_ENABLED") ?? "true")
     .WaitFor(accountWorkers);
 
 var mainDatabase = postgres
@@ -171,6 +179,7 @@ var mainApi = builder
     .WithReference(azureStorage)
     .WithEnvironment("PUBLIC_GOOGLE_OAUTH_ENABLED", googleOAuthConfigured ? "true" : "false")
     .WithEnvironment("PUBLIC_SUBSCRIPTION_ENABLED", paystackFullyConfigured ? "true" : "false")
+    .WithEnvironment("PUBLIC_SUPPORT_SYSTEM_ENABLED", Environment.GetEnvironmentVariable("PUBLIC_SUPPORT_SYSTEM_ENABLED") ?? "true")
     .WaitFor(mainWorkers);
 
 builder

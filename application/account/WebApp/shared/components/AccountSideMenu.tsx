@@ -1,13 +1,29 @@
 import { t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 import { useUserInfo } from "@repo/infrastructure/auth/hooks";
 import { useFeatureFlag } from "@repo/infrastructure/featureFlags/useFeatureFlag";
-import { collapsedContext, Sidebar, SidebarContent, SidebarHeader, SidebarRail } from "@repo/ui/components/Sidebar";
-import { useRouter } from "@tanstack/react-router";
+import {
+  collapsedContext,
+  Sidebar,
+  SidebarContent,
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarGroupLabel,
+  SidebarHeader,
+  SidebarMenu,
+  SidebarMenuBadge,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  SidebarRail
+} from "@repo/ui/components/Sidebar";
+import { Link as RouterLink, useRouter } from "@tanstack/react-router";
+import { LifeBuoyIcon } from "lucide-react";
 import { use } from "react";
 
 import MobileMenu from "@/federated-modules/sideMenu/MobileMenu";
 import UserMenu from "@/federated-modules/userMenu/UserMenu";
 import { useMainNavigation } from "@/shared/hooks/useMainNavigation";
+import { api } from "@/shared/lib/api/client";
 
 import { AccountGroup, UserGroup } from "./AccountSideMenu.parts";
 
@@ -30,6 +46,16 @@ export function AccountSideMenu() {
   const { enabled: isTierTeamsEnabled } = useFeatureFlag("tier-teams");
   const { enabled: isTierOrganizationsEnabled } = useFeatureFlag("tier-organizations");
   const { enabled: isAuditLogEnabled } = useFeatureFlag("cap-audit-log");
+  const { enabled: isSupportSystemEnabled } = useFeatureFlag("support-system");
+  // The /api/account/support-tickets endpoint is gone when the support system is disabled, so the
+  // query must be conditionally enabled to avoid a guaranteed 404 on every page load.
+  const { data: myTickets } = api.useQuery(
+    "get",
+    "/api/account/support-tickets",
+    {},
+    { enabled: isSupportSystemEnabled }
+  );
+  const awaitingUserCount = myTickets?.awaitingUserCount ?? 0;
 
   const isActive = (target: string, matchPrefix = false) => {
     const normalized = normalizePath(target);
@@ -60,9 +86,37 @@ export function AccountSideMenu() {
             showAuditLog={showAuditLog}
             showBilling={showBilling}
           />
+          {isSupportSystemEnabled && (
+            <SupportSidebarGroup isActive={isActive("/support/tickets", true)} awaitingUserCount={awaitingUserCount} />
+          )}
         </SidebarContent>
       </nav>
       <SidebarRail />
     </Sidebar>
+  );
+}
+
+function SupportSidebarGroup({ isActive, awaitingUserCount }: { isActive: boolean; awaitingUserCount: number }) {
+  return (
+    <SidebarGroup>
+      <SidebarGroupLabel>
+        <Trans>Support</Trans>
+      </SidebarGroupLabel>
+      <SidebarGroupContent>
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton asChild={true} isActive={isActive} tooltip={t`My tickets`}>
+              <RouterLink to="/support/tickets">
+                <LifeBuoyIcon />
+                <span>
+                  <Trans>My tickets</Trans>
+                </span>
+              </RouterLink>
+            </SidebarMenuButton>
+            {awaitingUserCount > 0 && <SidebarMenuBadge>{awaitingUserCount}</SidebarMenuBadge>}
+          </SidebarMenuItem>
+        </SidebarMenu>
+      </SidebarGroupContent>
+    </SidebarGroup>
   );
 }

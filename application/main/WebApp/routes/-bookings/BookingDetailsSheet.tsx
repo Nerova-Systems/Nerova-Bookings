@@ -36,9 +36,6 @@ export function BookingDetailsSheet({
     </Sheet>
   );
 }
-<<<<<<< HEAD
-=======
-
 function BookingDetailsSheetBody({ booking, onClose }: Readonly<{ booking: BookingListItem; onClose: () => void }>) {
   const { hour12 } = preferencesToTimeFormatOptions(useUserPreferences());
   const { data: details, isPending } = api.useQuery("get", "/api/bookings/{id}", {
@@ -161,4 +158,3 @@ function BookingDetailsSheetBody({ booking, onClose }: Readonly<{ booking: Booki
     </>
   );
 }
->>>>>>> 8bbffd68b3d3daf7ae4eb45c2e9a08472699e0a6

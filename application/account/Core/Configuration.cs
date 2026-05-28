@@ -21,6 +21,7 @@ using Account.Features.SsoGoogle.Infrastructure;
 using Account.Features.SsoMicrosoft;
 using Account.Features.SsoMicrosoft.Infrastructure;
 using Account.Features.Subscriptions.Shared;
+using Account.Features.SupportTickets.Shared;
 using Account.Features.Users.Shared;
 using Account.Features.WhatsApp.Domain;
 using Account.Features.WhatsApp.Infrastructure;
@@ -157,6 +158,8 @@ public static class Configuration
                 .AddScoped<IWabaEncryptionService, WabaEncryptionService>()
                 .AddScoped<IPaystackSubaccountService, PaystackSubaccountService>()
                 .AddScoped<IWhatsAppInternalApiKeyValidator, WhatsAppInternalApiKeyValidator>()
+                .AddScoped<SupportAttachmentUploader>()
+                .AddScoped<BackOfficeStaffContext>()
                 .AddApiKeyAuthentication();
         }
 

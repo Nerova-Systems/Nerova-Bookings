@@ -133,12 +133,12 @@ export function AddGuestsDialog({ booking, isOpen, onOpenChange, onCompleted }: 
             mutation.mutate({
               params: { path: { id: booking.id } },
               body: {
+                id: booking.id,
                 guests: [
                   {
                     name: String(formData.get("guestName") ?? ""),
                     email: String(formData.get("guestEmail") ?? ""),
                     timeZone: booking.timeZone,
-                    phoneNumber: nullableString(formData.get("guestPhone")),
                     locale: null
                   }
                 ]
@@ -158,7 +158,6 @@ export function AddGuestsDialog({ booking, isOpen, onOpenChange, onCompleted }: 
             <GeneralApiErrors error={mutation.error} />
             <TextField name="guestName" label={t`Attendee name`} required={true} />
             <TextField name="guestEmail" label={t`Attendee email`} type="email" required={true} />
-            <TextField name="guestPhone" label={t`Phone`} />
           </DialogBody>
           <DialogFooter>
             <DialogClose render={<Button type="button" variant="outline" disabled={mutation.isPending} />}>

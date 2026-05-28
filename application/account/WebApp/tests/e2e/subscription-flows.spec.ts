@@ -3,6 +3,14 @@ import { test } from "@shared/e2e/fixtures/page-auth";
 import { createTestContext, expectToastMessage, selectOption } from "@shared/e2e/utils/test-assertions";
 import { step } from "@shared/e2e/utils/test-step-wrapper";
 
+// Route handlers are not unrouted between steps — Playwright resolves `page.route` LIFO, so each
+// later step's `ownerPage.route(url, ...)` shadows any earlier handler for the same URL pattern.
+// Adding a new step that hits a URL routed by an earlier step REQUIRES re-routing that URL with a
+// fresh handler in the new step; otherwise the stale handler will fulfil the request. Explicit
+// `page.unroute()` was previously called for hygiene but triggered a firefox-only CDP race
+// (NS_BINDING_ABORTED) when intercepted requests were still in flight — removing it is the
+// deterministic fix.
+
 test.beforeEach(async ({ ownerPage }) => {
   await ownerPage.goto("/account");
   const isSubscriptionEnabled = await ownerPage.evaluate(() => {
@@ -238,9 +246,6 @@ test.describe("@smoke", () => {
       await ownerPage.getByRole("button", { name: "Pay and upgrade" }).click();
 
       await expectToastMessage(context, "Your plan has been upgraded.");
-      await ownerPage.unroute("**/api/account/subscriptions/upgrade-preview**");
-      await ownerPage.unroute("**/api/account/subscriptions/upgrade");
-      await ownerPage.unroute("**/api/account/subscriptions/current");
     })();
 
     // === DOWNGRADE FLOW (MOCKED PREMIUM STATE) ===
@@ -290,8 +295,6 @@ test.describe("@smoke", () => {
       await ownerPage.getByRole("button", { name: "Confirm downgrade" }).click();
 
       await expectToastMessage(context, "Your downgrade has been scheduled.");
-      await ownerPage.unroute("**/api/account/subscriptions/schedule-downgrade");
-      await ownerPage.unroute("**/api/account/subscriptions/current");
     })();
 
     // === CANCEL SUBSCRIPTION ===
@@ -342,8 +345,6 @@ test.describe("@smoke", () => {
       await dialog.getByRole("button", { name: "Cancel subscription" }).click();
 
       await expectToastMessage(context, "Your subscription has been cancelled.");
-      await ownerPage.unroute("**/api/account/subscriptions/cancel");
-      await ownerPage.unroute("**/api/account/subscriptions/current");
     })();
 
     // === CANCELLING STATE (MOCKED) ===
@@ -395,8 +396,6 @@ test.describe("@smoke", () => {
       await ownerPage.getByRole("alertdialog").getByRole("button", { name: "Reactivate" }).click();
 
       await expectToastMessage(context, "Your subscription has been reactivated.");
-      await ownerPage.unroute("**/api/account/subscriptions/reactivate");
-      await ownerPage.unroute("**/api/account/subscriptions/current");
     })();
 
     // === PAYMENT FAILED BANNER (MOCKED SUBSCRIPTION STATE) ===
@@ -432,8 +431,6 @@ test.describe("@smoke", () => {
       ).toBeVisible();
       await expect(ownerPage.getByRole("button", { name: "Retry payment" })).toBeVisible();
       await expect(ownerPage.getByRole("button", { name: "Update payment method" }).first()).toBeVisible();
-
-      await ownerPage.unroute("**/api/account/subscriptions/current");
     })();
 
     // === SUSPENDED STATE (MOCKED TENANT STATE) ===
@@ -466,8 +463,6 @@ test.describe("@smoke", () => {
     await step("Navigate to billing page while Suspended & verify access is allowed")(async () => {
       await ownerPage.goto("/account/billing");
       await expect(ownerPage.getByRole("heading", { name: "Billing", exact: true })).toBeVisible();
-
-      await ownerPage.unroute("**/api/account/tenants/current");
     })();
 
     // === PAYSTACK UNCONFIGURED STATE ===
@@ -486,8 +481,6 @@ test.describe("@smoke", () => {
       await expect(
         ownerPage.getByText("Billing is not configured. Please contact support to enable payment processing.")
       ).toBeVisible();
-
-      await ownerPage.unroute("**/api/account/subscriptions/pricing-catalog");
     })();
   });
 
@@ -543,8 +536,6 @@ test.describe("@smoke", () => {
         ownerPage.getByText("Your account has been suspended. Please contact the account owner to restore access.")
       ).toBeVisible();
       await expect(ownerPage.getByRole("button", { name: "Manage subscription" })).not.toBeVisible();
-
-      await ownerPage.unroute("**/api/account/tenants/current");
     })();
   });
 });
@@ -650,9 +641,6 @@ test.describe("@comprehensive", () => {
     await step("Scroll to invoices section & verify empty state message")(async () => {
       await expect(ownerPage.getByRole("heading", { name: "Invoices" })).toBeVisible();
       await expect(ownerPage.getByText("No payment history available.")).toBeVisible();
-
-      await ownerPage.unroute("**/api/account/billing/payment-history**");
-      await ownerPage.unroute("**/api/account/subscriptions/current");
     })();
 
     // === PAYMENT HISTORY WITH REFUNDED TRANSACTION AND CREDIT NOTE ===
@@ -719,9 +707,6 @@ test.describe("@comprehensive", () => {
       const receiptLinks = ownerPage.getByRole("link", { name: "Receipt" });
       await expect(receiptLinks.first()).toBeVisible();
       await expect(ownerPage.getByRole("link", { name: "Credit note" })).toBeVisible();
-
-      await ownerPage.unroute("**/api/account/billing/payment-history**");
-      await ownerPage.unroute("**/api/account/subscriptions/current");
     })();
 
     // === SCHEDULED DOWNGRADE BANNER ON OVERVIEW ===
@@ -776,9 +761,6 @@ test.describe("@comprehensive", () => {
       await ownerPage.getByRole("alertdialog").getByRole("button", { name: "Cancel downgrade" }).click();
 
       await expectToastMessage(context, "Your scheduled downgrade has been cancelled.");
-      await ownerPage.unroute("**/api/account/subscriptions/cancel-downgrade");
-      await ownerPage.unroute("**/api/account/subscriptions/current");
-      await ownerPage.unroute("**/api/account/billing/payment-history**");
     })();
   });
 });

@@ -522,12 +522,18 @@ const visualEventType = {
   beforeEventBufferMinutes: 0,
   bookingFields: [],
   bookingWindow: { fixedEndDate: null, fixedStartDate: null, rollingWindowDays: 30 },
-  confirmationPolicy: { requiresBookerEmailVerification: false, requiresConfirmation: false },
+  confirmationPolicy: {
+    requiresBookerEmailVerification: false,
+    requiresConfirmation: false,
+    blockSlotWhilePending: false,
+    requiresCancellationReason: false,
+    requiresConfirmationForFreeEmail: false
+  },
   description: "A focused product consultation to review goals, constraints, and next actions.",
   durationMinutes: 30,
   durationOptions: [30, 45, 60],
   handle: "visual",
-  locations: [{ type: "link", value: "Cal Video" }],
+  locations: [{ type: "link", value: "Cal Video", displayLocationPubliclyToTeam: false }],
   locationType: "link",
   locationValue: "Cal Video",
   minimumBookingNoticeMinutes: 60,
@@ -571,7 +577,13 @@ const visualEventTypeSettings = {
   ],
   bookingWindow: { fixedEndDate: null, fixedStartDate: null, rollingWindowDays: 30 },
   cancellationPolicy: { allowCancellation: true, minimumNoticeMinutes: 120 },
-  confirmationPolicy: { requiresBookerEmailVerification: false, requiresConfirmation: true },
+  confirmationPolicy: {
+    requiresBookerEmailVerification: false,
+    requiresConfirmation: true,
+    blockSlotWhilePending: false,
+    requiresCancellationReason: false,
+    requiresConfirmationForFreeEmail: false
+  },
   defaultConferencing: null,
   destinationCalendar: null,
   durationOptions: [30, 45, 60],
@@ -582,16 +594,53 @@ const visualEventTypeSettings = {
     maxActiveBookingsPerBooker: 2,
     maxBookingDurationMinutesPerDay: 120,
     maxBookingsPerDay: 6,
-    offsetStartMinutes: 0
+    offsetStartMinutes: 0,
+    maxActiveBookingPerBookerOfferReschedule: false,
+    maxBookingDurationPerDay: null,
+    maxBookingDurationPerMonth: null,
+    maxBookingDurationPerWeek: null,
+    maxBookingDurationPerYear: null,
+    maxBookingsPerMonth: null,
+    maxBookingsPerWeek: null,
+    maxBookingsPerYear: null,
+    onlyShowFirstAvailableSlot: false,
+    showOptimizedSlots: false
   },
-  locations: [{ type: "link", value: "Cal Video" }],
+  locations: [{ type: "link", value: "Cal Video", displayLocationPubliclyToTeam: false }],
   metadata: {},
   privateLinks: [{ expiresAt: "2026-07-01T00:00:00.000Z", link: "vip", maxUsageCount: 10, usageCount: 2 }],
   recurrence: null,
   redirects: { cancellationUrl: null, successUrl: "https://example.com/thanks" },
-  reschedulePolicy: { allowReschedule: true, minimumNoticeMinutes: 180 },
+  reschedulePolicy: {
+    allowReschedule: true,
+    minimumNoticeMinutes: 180,
+    allowReschedulingCancelledBookings: false,
+    allowReschedulingPastBookings: false
+  },
   seats: { capacity: 4, enabled: true, showAttendeeInfo: true },
-  selectedCalendars: [{ credentialId: null, externalId: "primary", integration: "google-calendar" }]
+  selectedCalendars: [{ credentialId: null, externalId: "primary", integration: "google-calendar" }],
+  aiVoiceAgent: { enabled: false, agentConfig: null },
+  email: { eventName: null, customReplyToEmail: null },
+  enablePerHostLocations: false,
+  instantMeeting: { expiryTimeOffsetInSeconds: null, instantMeetingScheduleId: null, parameters: null },
+  privacy: { disableGuests: false, hideCalendarNotes: false, hideCalendarEventDetails: false },
+  teamAssignment: {
+    assignRrMembersUsingSegment: false,
+    rrSegmentQueryValue: null,
+    isRrWeightsEnabled: false,
+    maxLeadThreshold: null,
+    includeNoShowInRrCalculation: false,
+    rescheduleWithSameRoundRobinHost: false,
+    rrHostSubsetEnabled: false,
+    hostGroups: []
+  },
+  timezone: {
+    timeZone: null,
+    lockTimeZoneToggleOnBookingPage: false,
+    lockedTimeZone: null,
+    useBookerTimezone: false,
+    restrictionScheduleId: null
+  }
 } satisfies EventType["settings"];
 
 const visualEditorEventType = {
@@ -608,7 +657,12 @@ const visualEditorEventType = {
   settings: visualEventTypeSettings,
   slotIntervalMinutes: 30,
   slug: "product-consultation",
-  title: "Product Consultation"
+  title: "Product Consultation",
+  assignAllTeamMembers: false,
+  bookingRequiresAuthentication: false,
+  hideOrganizerEmail: false,
+  isInstantEvent: false,
+  secondaryEmailUserId: null
 } satisfies EventType;
 
 const visualSchedules = [
@@ -632,7 +686,10 @@ const visualBookingsSearch = {
   pageOffset: 0,
   search: undefined,
   view: "list",
-  weekStart: "2026-06-15"
+  weekStart: "2026-06-15",
+  noShowOnly: undefined,
+  hasInternalNote: undefined,
+  minRating: undefined
 } satisfies BookingsRouteSearch;
 
 const visualUpcomingBookings = [
@@ -770,7 +827,7 @@ function visualBooking({
     listingStatus,
     locationType: "link",
     locationValue: "https://cal.video/visual-product",
-    locations: [{ type: "link", value: "https://cal.video/visual-product" }],
+    locations: [{ type: "link", value: "https://cal.video/visual-product", displayLocationPubliclyToTeam: false }],
     metadata: { source: "cal-com-ui-parity" },
     references: [],
     rejectionReason,
@@ -809,6 +866,8 @@ function visualBookingActions(status: string) {
       enabledMutable,
       enabledMutable ? null : "Cancelled bookings cannot be rescheduled."
     ),
+    rate: action(true, false, "Rating is not implemented yet."),
+    reassign: action(true, false, "Reassignment is not implemented yet."),
     reschedule: action(true, enabledMutable, enabledMutable ? null : "Cancelled bookings cannot be rescheduled."),
     viewRecordings: action(true, false, "Recordings are not available until conferencing is ported."),
     viewSessionDetails: action(true, false, "Session details are not available until conferencing is ported.")

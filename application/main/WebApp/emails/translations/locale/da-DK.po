@@ -13,9 +13,6 @@ msgstr ""
 "Language-Team: \n"
 "Plural-Forms: \n"
 
-msgid "An open-source platform for building enterprise-grade, multi-tenant B2B SaaS products."
-msgstr "Open source-platform til at bygge enterprise-grade, multi-tenant B2B-SaaS-produkter."
-
 msgid "Booked by <0/>."
 msgstr "Bestilt af <0/>."
 
