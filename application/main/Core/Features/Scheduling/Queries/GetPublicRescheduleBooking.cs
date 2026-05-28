@@ -71,7 +71,7 @@ public sealed class GetPublicRescheduleBookingHandler(
             JsonSerializer.Deserialize<Dictionary<string, string>>(item.Booking.ResponsesJson) ?? [],
             item.Booking.StartTime,
             item.Booking.EndTime,
-            item.Booking.Status,
+            item.Booking.Status.ToString(),
             action.Enabled,
             action.DisabledReason
         );

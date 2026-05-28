@@ -302,7 +302,7 @@ public sealed class CreatePublicBookingHandler(
 
     private static bool IsActiveBooking(Booking booking, DateTimeOffset now)
     {
-        return booking.StartTime >= now && booking.Status.Trim().Equals("accepted", StringComparison.OrdinalIgnoreCase);
+        return booking.StartTime >= now && booking.Status == BookingStatus.Accepted;
     }
 
     private static bool IsMissingRequiredField(EventTypeBookingField field, string? value)

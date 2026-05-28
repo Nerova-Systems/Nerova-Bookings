@@ -4,8 +4,6 @@ using Main.Features.Scheduling.Domain;
 namespace Main.Features.Scheduling.Shared;
 
 public sealed record BookingActionsResponse(
-    BookingActionResponse Confirm,
-    BookingActionResponse Reject,
     BookingActionResponse Cancel,
     BookingActionResponse Reschedule,
     BookingActionResponse RequestReschedule,
@@ -28,8 +26,6 @@ public static class BookingActionAvailability
     public static BookingActionsResponse Resolve(Booking booking, EventType eventType, DateTimeOffset now)
     {
         return new BookingActionsResponse(
-            ResolvePendingBookingAction(booking),
-            ResolvePendingBookingAction(booking),
             ResolveCancel(booking, eventType, now),
             Disabled("Reschedule booking is not implemented yet."),
             ResolveRequestReschedule(booking, now),
@@ -95,6 +91,21 @@ public static class BookingActionAvailability
         }
 
         return Disabled("Only awaiting-confirmation bookings can be rejected.");
+    }
+
+    public static BookingActionResponse ResolveReschedule(Booking booking, EventType eventType, DateTimeOffset now)
+    {
+        if (booking.Status is BookingStatus.Cancelled or BookingStatus.Rejected)
+        {
+            return Disabled("Closed bookings cannot be rescheduled.");
+        }
+
+        if (booking.EndTime <= now)
+        {
+            return Disabled("Past bookings cannot be rescheduled.");
+        }
+
+        return new BookingActionResponse(true, true, null);
     }
 
     public static BookingActionResponse ResolveRequestReschedule(Booking booking, DateTimeOffset now)

@@ -93,8 +93,8 @@ public sealed record BookingListItemResponse(
     EventTypeLocation[] Locations,
     Dictionary<string, string> Responses,
     Dictionary<string, string> Metadata,
-    BookingAttendee[] Attendees,
-    BookingReference[] References,
+    BookingCalAttendee[] Attendees,
+    BookingCalReference[] References,
     BookingSeatReference[] SeatReferences,
     string? CancellationReason,
     string? RejectionReason,
@@ -109,10 +109,9 @@ public sealed record BookingListItemResponse(
 public sealed class GetBookingsHandler(
     IBookingRepository bookingRepository,
     ISchedulingProfileRepository schedulingProfileRepository,
+    IBookingInternalNoteRepository bookingInternalNoteRepository,
     IExecutionContext executionContext,
-    TimeProvider timeProvider
-),
-public sealed class GetBookingsHandler(IBookingRepository bookingRepository, IBookingInternalNoteRepository bookingInternalNoteRepository, IExecutionContext executionContext, TimeProvider timeProvider)
+    TimeProvider timeProvider)
     : IRequestHandler<GetBookingsQuery, Result<BookingsResponse>>
 {
     public async Task<Result<BookingsResponse>> Handle(GetBookingsQuery query, CancellationToken cancellationToken)

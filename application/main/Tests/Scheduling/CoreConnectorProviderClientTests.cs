@@ -217,7 +217,7 @@ public sealed class CoreConnectorProviderClientTests
 
         // Assert
         reference.Should().Be(
-            new BookingReference(
+            new BookingCalReference(
                 CoreConnectorConstants.GoogleCalendar,
                 "google-event-123",
                 "google-event-123",
@@ -263,7 +263,7 @@ public sealed class CoreConnectorProviderClientTests
             ExternalId = "primary",
             CredentialId = "cred_google"
         };
-        var existingReference = new BookingReference(CoreConnectorConstants.GoogleCalendar, "google-event-123", null, null, null, "primary", false);
+        var existingReference = new BookingCalReference(CoreConnectorConstants.GoogleCalendar, "google-event-123", null, null, null, "primary", false);
 
         // Act
         var reference = await provider.UpdateCalendarEventAsync(
@@ -293,7 +293,7 @@ public sealed class CoreConnectorProviderClientTests
             new StaticHttpClientFactory(new HttpClient(httpHandler)),
             new StaticCoreConnectorAccessTokenProvider("google-access-token")
         );
-        var existingReference = new BookingReference(CoreConnectorConstants.GoogleCalendar, "google-event-123", null, null, null, "primary", false);
+        var existingReference = new BookingCalReference(CoreConnectorConstants.GoogleCalendar, "google-event-123", null, null, null, "primary", false);
 
         // Act
         var act = async () => await provider.DeleteCalendarEventAsync(
@@ -342,7 +342,7 @@ public sealed class CoreConnectorProviderClientTests
 
         // Assert
         reference.Should().Be(
-            new BookingReference(
+            new BookingCalReference(
                 CoreConnectorConstants.Office365Calendar,
                 "office-event-123",
                 "office-event-123",
@@ -385,7 +385,7 @@ public sealed class CoreConnectorProviderClientTests
             CreateCredential("cred_office", CoreConnectorConstants.Office365Calendar),
             CreateBooking(),
             new EventTypeDestinationCalendar { Integration = CoreConnectorConstants.Office365Calendar, ExternalId = "calendar", CredentialId = "cred_office" },
-            new BookingReference(CoreConnectorConstants.Office365Calendar, "office-event-123", null, null, null, "calendar", false),
+            new BookingCalReference(CoreConnectorConstants.Office365Calendar, "office-event-123", null, null, null, "calendar", false),
             new EventTypeDefaultConferencing { App = CoreConnectorConstants.Office365Video, CredentialId = "cred_office" },
             CancellationToken.None
         );
@@ -414,7 +414,7 @@ public sealed class CoreConnectorProviderClientTests
             CreateCredential("cred_office", CoreConnectorConstants.Office365Calendar),
             CreateBooking(),
             new EventTypeDestinationCalendar { Integration = CoreConnectorConstants.Office365Calendar, ExternalId = "calendar", CredentialId = "cred_office" },
-            new BookingReference(CoreConnectorConstants.Office365Calendar, "office-event-123", null, null, null, "calendar", false),
+            new BookingCalReference(CoreConnectorConstants.Office365Calendar, "office-event-123", null, null, null, "calendar", false),
             CancellationToken.None
         );
 
@@ -453,7 +453,7 @@ public sealed class CoreConnectorProviderClientTests
 
         // Assert
         reference.Should().Be(
-            new BookingReference(
+            new BookingCalReference(
                 CoreConnectorConstants.ZoomVideo,
                 "987654321",
                 "987654321",
@@ -495,7 +495,7 @@ public sealed class CoreConnectorProviderClientTests
         var reference = await provider.UpdateMeetingAsync(
             CreateCredential("cred_zoom", CoreConnectorConstants.ZoomVideo),
             CreateBooking(),
-            new BookingReference(CoreConnectorConstants.ZoomVideo, "987654321", "987654321", null, null, null, false),
+            new BookingCalReference(CoreConnectorConstants.ZoomVideo, "987654321", "987654321", null, null, null, false),
             new EventTypeDefaultConferencing { App = CoreConnectorConstants.ZoomVideo, CredentialId = "cred_zoom" },
             CancellationToken.None
         );
@@ -522,7 +522,7 @@ public sealed class CoreConnectorProviderClientTests
         var act = async () => await provider.DeleteMeetingAsync(
             CreateCredential("cred_zoom", CoreConnectorConstants.ZoomVideo),
             CreateBooking(),
-            new BookingReference(CoreConnectorConstants.ZoomVideo, "987654321", "987654321", null, null, null, false),
+            new BookingCalReference(CoreConnectorConstants.ZoomVideo, "987654321", "987654321", null, null, null, false),
             new EventTypeDefaultConferencing { App = CoreConnectorConstants.ZoomVideo, CredentialId = "cred_zoom" },
             CancellationToken.None
         );
@@ -550,7 +550,7 @@ public sealed class CoreConnectorProviderClientTests
             "Ada Lovelace",
             "ada@example.com",
             "Africa/Johannesburg",
-            "accepted",
+            BookingStatus.Accepted,
             new Dictionary<string, string>(StringComparer.Ordinal)
         );
     }

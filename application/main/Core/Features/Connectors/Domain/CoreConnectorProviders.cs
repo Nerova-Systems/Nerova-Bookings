@@ -24,7 +24,7 @@ public interface ICoreConnectorProvider
 
 public interface ICoreCalendarConnectorProvider : ICoreConnectorProvider
 {
-    Task<BookingReference> CreateCalendarEventAsync(
+    Task<BookingCalReference> CreateCalendarEventAsync(
         ConnectorCredential credential,
         Booking booking,
         EventTypeDestinationCalendar destinationCalendar,
@@ -32,11 +32,11 @@ public interface ICoreCalendarConnectorProvider : ICoreConnectorProvider
         CancellationToken cancellationToken
     );
 
-    Task<BookingReference> UpdateCalendarEventAsync(
+    Task<BookingCalReference> UpdateCalendarEventAsync(
         ConnectorCredential credential,
         Booking booking,
         EventTypeDestinationCalendar destinationCalendar,
-        BookingReference existingReference,
+        BookingCalReference existingReference,
         EventTypeDefaultConferencing? conferencing,
         CancellationToken cancellationToken
     );
@@ -45,7 +45,7 @@ public interface ICoreCalendarConnectorProvider : ICoreConnectorProvider
         ConnectorCredential credential,
         Booking booking,
         EventTypeDestinationCalendar destinationCalendar,
-        BookingReference existingReference,
+        BookingCalReference existingReference,
         CancellationToken cancellationToken
     );
 }
@@ -54,17 +54,17 @@ public interface ICoreConferencingConnectorProvider
 {
     bool SupportsConferencing(string app);
 
-    Task<BookingReference> CreateMeetingAsync(
+    Task<BookingCalReference> CreateMeetingAsync(
         ConnectorCredential credential,
         Booking booking,
         EventTypeDefaultConferencing conferencing,
         CancellationToken cancellationToken
     );
 
-    Task<BookingReference> UpdateMeetingAsync(
+    Task<BookingCalReference> UpdateMeetingAsync(
         ConnectorCredential credential,
         Booking booking,
-        BookingReference existingReference,
+        BookingCalReference existingReference,
         EventTypeDefaultConferencing conferencing,
         CancellationToken cancellationToken
     );
@@ -72,7 +72,7 @@ public interface ICoreConferencingConnectorProvider
     Task DeleteMeetingAsync(
         ConnectorCredential credential,
         Booking booking,
-        BookingReference existingReference,
+        BookingCalReference existingReference,
         EventTypeDefaultConferencing conferencing,
         CancellationToken cancellationToken
     );
@@ -104,7 +104,7 @@ public sealed class GoogleCalendarCoreConnectorProvider(IHttpClientFactory httpC
         return integration.Equals(CoreConnectorConstants.GoogleCalendar, StringComparison.OrdinalIgnoreCase);
     }
 
-    public async Task<BookingReference> CreateCalendarEventAsync(
+    public async Task<BookingCalReference> CreateCalendarEventAsync(
         ConnectorCredential credential,
         Booking booking,
         EventTypeDestinationCalendar destinationCalendar,
@@ -128,11 +128,11 @@ public sealed class GoogleCalendarCoreConnectorProvider(IHttpClientFactory httpC
         );
     }
 
-    public async Task<BookingReference> UpdateCalendarEventAsync(
+    public async Task<BookingCalReference> UpdateCalendarEventAsync(
         ConnectorCredential credential,
         Booking booking,
         EventTypeDestinationCalendar destinationCalendar,
-        BookingReference existingReference,
+        BookingCalReference existingReference,
         EventTypeDefaultConferencing? conferencing,
         CancellationToken cancellationToken
     )
@@ -157,7 +157,7 @@ public sealed class GoogleCalendarCoreConnectorProvider(IHttpClientFactory httpC
         ConnectorCredential credential,
         Booking booking,
         EventTypeDestinationCalendar destinationCalendar,
-        BookingReference existingReference,
+        BookingCalReference existingReference,
         CancellationToken cancellationToken
     )
     {
@@ -281,14 +281,14 @@ public sealed class GoogleCalendarCoreConnectorProvider(IHttpClientFactory httpC
         return basePayload;
     }
 
-    private static BookingReference MapGoogleReference(GoogleCalendarEventResponse? response, string calendarId)
+    private static BookingCalReference MapGoogleReference(GoogleCalendarEventResponse? response, string calendarId)
     {
         if (string.IsNullOrWhiteSpace(response?.Id))
         {
             throw new JsonException("Google Calendar event response did not include an event id.");
         }
 
-        return new BookingReference(
+        return new BookingCalReference(
             CoreConnectorConstants.GoogleCalendar,
             response.Id,
             string.IsNullOrWhiteSpace(response.HangoutLink) ? null : response.Id,
@@ -354,7 +354,7 @@ public sealed class Office365CalendarCoreConnectorProvider(IHttpClientFactory ht
         return integration.Equals(CoreConnectorConstants.Office365Calendar, StringComparison.OrdinalIgnoreCase);
     }
 
-    public async Task<BookingReference> CreateCalendarEventAsync(
+    public async Task<BookingCalReference> CreateCalendarEventAsync(
         ConnectorCredential credential,
         Booking booking,
         EventTypeDestinationCalendar destinationCalendar,
@@ -378,11 +378,11 @@ public sealed class Office365CalendarCoreConnectorProvider(IHttpClientFactory ht
         );
     }
 
-    public async Task<BookingReference> UpdateCalendarEventAsync(
+    public async Task<BookingCalReference> UpdateCalendarEventAsync(
         ConnectorCredential credential,
         Booking booking,
         EventTypeDestinationCalendar destinationCalendar,
-        BookingReference existingReference,
+        BookingCalReference existingReference,
         EventTypeDefaultConferencing? conferencing,
         CancellationToken cancellationToken
     )
@@ -407,7 +407,7 @@ public sealed class Office365CalendarCoreConnectorProvider(IHttpClientFactory ht
         ConnectorCredential credential,
         Booking booking,
         EventTypeDestinationCalendar destinationCalendar,
-        BookingReference existingReference,
+        BookingCalReference existingReference,
         CancellationToken cancellationToken
     )
     {
@@ -530,14 +530,14 @@ public sealed class Office365CalendarCoreConnectorProvider(IHttpClientFactory ht
         return payload;
     }
 
-    private static BookingReference MapOffice365Reference(Office365CalendarEventResponse? response, string calendarId)
+    private static BookingCalReference MapOffice365Reference(Office365CalendarEventResponse? response, string calendarId)
     {
         if (string.IsNullOrWhiteSpace(response?.Id))
         {
             throw new JsonException("Office 365 Calendar event response did not include an event id.");
         }
 
-        return new BookingReference(
+        return new BookingCalReference(
             CoreConnectorConstants.Office365Calendar,
             response.Id,
             string.IsNullOrWhiteSpace(response.OnlineMeeting?.JoinUrl) ? null : response.Id,
@@ -632,7 +632,7 @@ public sealed class ZoomCoreConnectorProvider(IHttpClientFactory httpClientFacto
         return app.Equals(CoreConnectorConstants.ZoomVideo, StringComparison.OrdinalIgnoreCase);
     }
 
-    public async Task<BookingReference> CreateMeetingAsync(
+    public async Task<BookingCalReference> CreateMeetingAsync(
         ConnectorCredential credential,
         Booking booking,
         EventTypeDefaultConferencing conferencing,
@@ -646,10 +646,10 @@ public sealed class ZoomCoreConnectorProvider(IHttpClientFactory httpClientFacto
         return MapZoomReference(await response.Content.ReadFromJsonAsync<ZoomMeetingResponse>(JsonSerializerOptions, cancellationToken));
     }
 
-    public async Task<BookingReference> UpdateMeetingAsync(
+    public async Task<BookingCalReference> UpdateMeetingAsync(
         ConnectorCredential credential,
         Booking booking,
-        BookingReference existingReference,
+        BookingCalReference existingReference,
         EventTypeDefaultConferencing conferencing,
         CancellationToken cancellationToken
     )
@@ -679,7 +679,7 @@ public sealed class ZoomCoreConnectorProvider(IHttpClientFactory httpClientFacto
     public async Task DeleteMeetingAsync(
         ConnectorCredential credential,
         Booking booking,
-        BookingReference existingReference,
+        BookingCalReference existingReference,
         EventTypeDefaultConferencing conferencing,
         CancellationToken cancellationToken
     )
@@ -727,7 +727,7 @@ public sealed class ZoomCoreConnectorProvider(IHttpClientFactory httpClientFacto
         };
     }
 
-    private static BookingReference MapZoomReference(ZoomMeetingResponse? response)
+    private static BookingCalReference MapZoomReference(ZoomMeetingResponse? response)
     {
         if (response?.Id is null)
         {
@@ -735,7 +735,7 @@ public sealed class ZoomCoreConnectorProvider(IHttpClientFactory httpClientFacto
         }
 
         var meetingId = response.Id.Value.ToString();
-        return new BookingReference(
+        return new BookingCalReference(
             CoreConnectorConstants.ZoomVideo,
             meetingId,
             meetingId,

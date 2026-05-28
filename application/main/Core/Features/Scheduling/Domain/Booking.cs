@@ -76,7 +76,7 @@ public sealed class Booking : AggregateRoot<BookingId>, ITenantScopedEntity
         ResponsesJson = JsonSerializer.Serialize(responses, JsonSerializerOptions);
         MetadataJson = metadata is null ? null : JsonSerializer.Serialize(metadata, JsonSerializerOptions);
         AttendeesJson = JsonSerializer.Serialize(
-            new[] { new BookingAttendee(BookerName, BookerEmail, TimeZone, null, null, false) },
+            new[] { new BookingCalAttendee(BookerName, BookerEmail, TimeZone, null, null, false) },
             JsonSerializerOptions
         );
         ReferencesJson = "[]";
@@ -137,10 +137,10 @@ public sealed class Booking : AggregateRoot<BookingId>, ITenantScopedEntity
     public string? RescheduledBy { get; private set; }
 
     [NotMapped]
-    public BookingAttendee[] Attendees => JsonSerializer.Deserialize<BookingAttendee[]>(AttendeesJson, JsonSerializerOptions) ?? [];
+    public BookingCalAttendee[] Attendees => JsonSerializer.Deserialize<BookingCalAttendee[]>(AttendeesJson, JsonSerializerOptions) ?? [];
 
     [NotMapped]
-    public BookingReference[] References => JsonSerializer.Deserialize<BookingReference[]>(ReferencesJson, JsonSerializerOptions) ?? [];
+    public BookingCalReference[] References => JsonSerializer.Deserialize<BookingCalReference[]>(ReferencesJson, JsonSerializerOptions) ?? [];
 
     [NotMapped]
     public BookingSeatReference[] SeatReferences => JsonSerializer.Deserialize<BookingSeatReference[]>(SeatReferencesJson, JsonSerializerOptions) ?? [];
@@ -232,7 +232,7 @@ public sealed class Booking : AggregateRoot<BookingId>, ITenantScopedEntity
         RaiseSideEffectEvent(BookingSideEffectConstants.BookingLocationChanged);
     }
 
-    public void AddGuests(BookingAttendee[] guests)
+    public void AddGuests(BookingCalAttendee[] guests)
     {
         var attendees = Attendees.ToList();
         foreach (var guest in guests)
@@ -255,7 +255,7 @@ public sealed class Booking : AggregateRoot<BookingId>, ITenantScopedEntity
         RaiseSideEffectEvent(BookingSideEffectConstants.BookingGuestsAdded);
     }
 
-    public void UpsertReference(BookingReference reference)
+    public void UpsertReference(BookingCalReference reference)
     {
         var references = References
             .Where(existing => !IsSameReference(existing, reference))
@@ -406,14 +406,14 @@ public sealed class Booking : AggregateRoot<BookingId>, ITenantScopedEntity
                 BookerEmail,
                 StartTime,
                 EndTime,
-                Status,
+                Status.ToString(),
                 LocationType,
                 LocationValue
             )
         );
     }
 
-    private static bool IsSameReference(BookingReference existing, BookingReference replacement)
+    private static bool IsSameReference(BookingCalReference existing, BookingCalReference replacement)
     {
         if (!existing.Type.Equals(replacement.Type, StringComparison.OrdinalIgnoreCase)) return false;
         if (!string.IsNullOrWhiteSpace(existing.ExternalCalendarId) || !string.IsNullOrWhiteSpace(replacement.ExternalCalendarId))
@@ -425,7 +425,7 @@ public sealed class Booking : AggregateRoot<BookingId>, ITenantScopedEntity
     }
 }
 
-public sealed record BookingAttendee(
+public sealed record BookingCalAttendee(
     string Name,
     string Email,
     string TimeZone,
@@ -434,7 +434,7 @@ public sealed record BookingAttendee(
     bool NoShow
 );
 
-public sealed record BookingReference(
+public sealed record BookingCalReference(
     string Type,
     string Uid,
     string? MeetingId,

@@ -16,14 +16,14 @@ public interface ICoreConnectorClient
         CancellationToken cancellationToken
     );
 
-    Task<BookingReference> CreateCalendarEventAsync(
+    Task<BookingCalReference> CreateCalendarEventAsync(
         Booking booking,
         EventTypeDestinationCalendar destinationCalendar,
         EventTypeDefaultConferencing? conferencing,
         CancellationToken cancellationToken
     );
 
-    Task<BookingReference> UpdateCalendarEventAsync(
+    Task<BookingCalReference> UpdateCalendarEventAsync(
         Booking booking,
         EventTypeDestinationCalendar destinationCalendar,
         EventTypeDefaultConferencing? conferencing,
@@ -32,9 +32,9 @@ public interface ICoreConnectorClient
 
     Task DeleteCalendarEventAsync(Booking booking, EventTypeDestinationCalendar destinationCalendar, CancellationToken cancellationToken);
 
-    Task<BookingReference> CreateMeetingAsync(Booking booking, EventTypeDefaultConferencing conferencing, CancellationToken cancellationToken);
+    Task<BookingCalReference> CreateMeetingAsync(Booking booking, EventTypeDefaultConferencing conferencing, CancellationToken cancellationToken);
 
-    Task<BookingReference> UpdateMeetingAsync(Booking booking, EventTypeDefaultConferencing conferencing, CancellationToken cancellationToken);
+    Task<BookingCalReference> UpdateMeetingAsync(Booking booking, EventTypeDefaultConferencing conferencing, CancellationToken cancellationToken);
 
     Task DeleteMeetingAsync(Booking booking, EventTypeDefaultConferencing conferencing, CancellationToken cancellationToken);
 }
@@ -81,7 +81,7 @@ public sealed class CoreConnectorClient(
             .ToArray();
     }
 
-    public async Task<BookingReference> CreateCalendarEventAsync(
+    public async Task<BookingCalReference> CreateCalendarEventAsync(
         Booking booking,
         EventTypeDestinationCalendar destinationCalendar,
         EventTypeDefaultConferencing? conferencing,
@@ -94,7 +94,7 @@ public sealed class CoreConnectorClient(
             : await providerContext.Provider.CreateCalendarEventAsync(providerContext.Credential, booking, destinationCalendar, conferencing, cancellationToken);
     }
 
-    public async Task<BookingReference> UpdateCalendarEventAsync(
+    public async Task<BookingCalReference> UpdateCalendarEventAsync(
         Booking booking,
         EventTypeDestinationCalendar destinationCalendar,
         EventTypeDefaultConferencing? conferencing,
@@ -128,7 +128,7 @@ public sealed class CoreConnectorClient(
         await providerContext.Provider.DeleteCalendarEventAsync(providerContext.Credential, booking, destinationCalendar, existingReference, cancellationToken);
     }
 
-    public async Task<BookingReference> CreateMeetingAsync(Booking booking, EventTypeDefaultConferencing conferencing, CancellationToken cancellationToken)
+    public async Task<BookingCalReference> CreateMeetingAsync(Booking booking, EventTypeDefaultConferencing conferencing, CancellationToken cancellationToken)
     {
         var providerContext = await ResolveConferencingProviderAsync(booking, conferencing, cancellationToken);
         return providerContext is null
@@ -136,7 +136,7 @@ public sealed class CoreConnectorClient(
             : await providerContext.Provider.CreateMeetingAsync(providerContext.Credential, booking, conferencing, cancellationToken);
     }
 
-    public async Task<BookingReference> UpdateMeetingAsync(Booking booking, EventTypeDefaultConferencing conferencing, CancellationToken cancellationToken)
+    public async Task<BookingCalReference> UpdateMeetingAsync(Booking booking, EventTypeDefaultConferencing conferencing, CancellationToken cancellationToken)
     {
         var existingReference = FindActiveReference(booking, conferencing.App, null);
         if (existingReference is null)
@@ -207,7 +207,7 @@ public sealed class CoreConnectorClient(
         return new ConferencingProviderContext(provider, credential);
     }
 
-    private static BookingReference? FindActiveReference(Booking booking, string type, string? externalCalendarId)
+    private static BookingCalReference? FindActiveReference(Booking booking, string type, string? externalCalendarId)
     {
         return booking.References.FirstOrDefault(reference =>
             !reference.Deleted &&
@@ -252,7 +252,7 @@ public sealed class FakeCoreConnectorClient
         return Task.FromResult(busyWindows);
     }
 
-    public Task<BookingReference> CreateCalendarEventAsync(
+    public Task<BookingCalReference> CreateCalendarEventAsync(
         Booking booking,
         EventTypeDestinationCalendar destinationCalendar,
         EventTypeDefaultConferencing? conferencing,
@@ -262,7 +262,7 @@ public sealed class FakeCoreConnectorClient
         var integration = destinationCalendar.Integration.Trim();
         var uid = $"{integration}-{booking.Id.Value}";
         return Task.FromResult(
-            new BookingReference(
+            new BookingCalReference(
                 integration,
                 uid,
                 IsCalendarConferencing(integration, conferencing) ? uid : null,
@@ -274,7 +274,7 @@ public sealed class FakeCoreConnectorClient
         );
     }
 
-    public Task<BookingReference> UpdateCalendarEventAsync(
+    public Task<BookingCalReference> UpdateCalendarEventAsync(
         Booking booking,
         EventTypeDestinationCalendar destinationCalendar,
         EventTypeDefaultConferencing? conferencing,
@@ -289,12 +289,12 @@ public sealed class FakeCoreConnectorClient
         return Task.CompletedTask;
     }
 
-    public Task<BookingReference> CreateMeetingAsync(Booking booking, EventTypeDefaultConferencing conferencing, CancellationToken cancellationToken)
+    public Task<BookingCalReference> CreateMeetingAsync(Booking booking, EventTypeDefaultConferencing conferencing, CancellationToken cancellationToken)
     {
         var app = conferencing.App.Trim();
         var meetingId = $"{app}-{booking.Id.Value}";
         return Task.FromResult(
-            new BookingReference(
+            new BookingCalReference(
                 app,
                 meetingId,
                 meetingId,
@@ -306,7 +306,7 @@ public sealed class FakeCoreConnectorClient
         );
     }
 
-    public Task<BookingReference> UpdateMeetingAsync(Booking booking, EventTypeDefaultConferencing conferencing, CancellationToken cancellationToken)
+    public Task<BookingCalReference> UpdateMeetingAsync(Booking booking, EventTypeDefaultConferencing conferencing, CancellationToken cancellationToken)
     {
         return CreateMeetingAsync(booking, conferencing, cancellationToken);
     }

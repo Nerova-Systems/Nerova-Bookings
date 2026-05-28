@@ -105,7 +105,7 @@ public sealed class GetPublicSlotsHandler(
                 query.EndTime.AddDays(1),
                 cancellationToken
             );
-            slots = publicSlotCalculator.GetSlots(context.EventType, context.Schedule, bookings, query.StartTime, query.EndTime, query.TimeZone, duration, adjustments);
+            slots = publicSlotCalculator.GetSlots(context.EventType, context.Schedule, bookings, [], query.StartTime, query.EndTime, query.TimeZone, duration, adjustments);
         }
 
         return new PublicSlotsResponse(slots);
