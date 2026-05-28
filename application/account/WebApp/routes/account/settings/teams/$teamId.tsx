@@ -30,6 +30,7 @@ function TeamDetailPage() {
   const [isDeleteOpen, setDeleteOpen] = useState(false);
 
   const canManage = userInfo?.role === "Owner" || userInfo?.role === "Admin";
+  const canDelete = userInfo?.role === "Owner";
 
   const { data: team, isLoading } = api.useQuery("get", "/api/account/teams/{id}", {
     params: { path: { id: teamId } }
@@ -58,7 +59,12 @@ function TeamDetailPage() {
           </TabsList>
 
           <TabsContent value="general">
-            <TeamGeneralTab team={team} canManage={canManage} onDelete={() => setDeleteOpen(true)} />
+            <TeamGeneralTab
+              team={team}
+              canManage={canManage}
+              canDelete={canDelete}
+              onDelete={() => setDeleteOpen(true)}
+            />
           </TabsContent>
 
           <TabsContent value="members">

@@ -113,7 +113,7 @@ public sealed class AttributeEndpointTests(AccountWebApplicationFactory factory)
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var body = await response.Content.ReadFromJsonAsync<AttributeResponse>();
         body.Should().NotBeNull();
-        body!.Name.Should().Be("Department");
+        body.Name.Should().Be("Department");
         body.Slug.Should().Be("department");
         body.Type.Should().Be(AttributeType.Text);
         body.Enabled.Should().BeTrue();
@@ -263,7 +263,8 @@ public sealed class AttributeEndpointTests(AccountWebApplicationFactory factory)
         SetActorToken(DatabaseSeeder.Tenant1Owner.Id, DatabaseSeeder.Tenant1.Id, orgId);
 
         var createResp = await AnonymousHttpClient.PostAsJsonAsync(OrgAttributesUrl,
-            new { Name = "Role", Type = "SingleSelect" });
+            new { Name = "Role", Type = "SingleSelect" }
+        );
         var created = await createResp.Content.ReadFromJsonAsync<AttributeResponse>();
 
         var optResp = await AnonymousHttpClient.PostAsJsonAsync(
@@ -345,7 +346,8 @@ public sealed class AttributeEndpointTests(AccountWebApplicationFactory factory)
         SetActorToken(DatabaseSeeder.Tenant1Owner.Id, DatabaseSeeder.Tenant1.Id, orgId);
 
         var createResp = await AnonymousHttpClient.PostAsJsonAsync(OrgAttributesUrl,
-            new { Name = "Skill", Type = "SingleSelect" });
+            new { Name = "Skill", Type = "SingleSelect" }
+        );
         var created = await createResp.Content.ReadFromJsonAsync<AttributeResponse>();
 
         var optResp = await AnonymousHttpClient.PostAsJsonAsync(
@@ -428,12 +430,12 @@ public sealed class AttributeEndpointTests(AccountWebApplicationFactory factory)
                 ("role", role.ToString()),
                 ("accepted", true),
                 ("accepted_at", now),
-                ("invited_by", (object?)null),
-                ("invite_token", (object?)null),
+                ("invited_by", null),
+                ("invite_token", null),
                 ("disable_impersonation", false),
-                ("custom_role_id", (object?)null),
+                ("custom_role_id", null),
                 ("created_at", now),
-                ("modified_at", (object?)null)
+                ("modified_at", null)
             ]
         );
         return id;
@@ -471,12 +473,12 @@ public sealed class AttributeEndpointTests(AccountWebApplicationFactory factory)
                 ("role", role.ToString()),
                 ("accepted", true),
                 ("accepted_at", now),
-                ("invited_by", (object?)null),
-                ("invite_token", (object?)null),
+                ("invited_by", null),
+                ("invite_token", null),
                 ("disable_impersonation", false),
-                ("custom_role_id", (object?)null),
+                ("custom_role_id", null),
                 ("created_at", now),
-                ("modified_at", (object?)null)
+                ("modified_at", null)
             ]
         );
     }
@@ -523,6 +525,8 @@ public sealed class AttributeEndpointTests(AccountWebApplicationFactory factory)
         return orgId;
     }
 
-    private static object ValidCreatePayload(string name = "My Attribute") =>
-        new { Name = name, Type = "Text" };
+    private static object ValidCreatePayload(string name = "My Attribute")
+    {
+        return new { Name = name, Type = "Text" };
+    }
 }

@@ -48,7 +48,7 @@ export function getBookingEmptyDescription(status: BookingStatusView) {
 }
 
 export function getActiveBookingFiltersCount(search: BookingFilterState) {
-  return [
+  const baseFilters = [
     search.search,
     search.eventTypeId,
     search.attendeeName,
@@ -57,8 +57,20 @@ export function getActiveBookingFiltersCount(search: BookingFilterState) {
     search.dateFrom,
     search.dateTo
   ].filter((value) => value !== undefined && value !== "").length;
+
+  const toggleFilters =
+    (search.noShowOnly ? 1 : 0) +
+    (search.hasInternalNote ? 1 : 0) +
+    (search.minRating !== undefined && search.minRating > 0 ? 1 : 0);
+
+  return baseFilters + toggleFilters;
 }
 
+/**
+ * Rounds `date` down to the beginning of its containing week. `weekStartsOn` accepts a Sunday-zero
+ * index (0=Sun..6=Sat). Defaults to Monday to preserve historical behaviour for callers that
+ * have not yet been wired to {@link useUserPreferences}.
+ */
 export function getWeekStartDate(date: Date, weekStartsOn = 1) {
   const nextDate = new Date(date);
   const diff = (nextDate.getDay() - weekStartsOn + 7) % 7;
@@ -71,7 +83,12 @@ export function toDateInputValue(date: Date) {
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
 }
 
-export function formatBookingDateRange(booking: BookingListItem) {
+/**
+ * Formats a booking's date range. Accepts an explicit `hour12` so callers can wire the user's
+ * {@link useUserPreferences} `timeFormat`; defaults to the browser's locale convention when
+ * unspecified (kept for any legacy caller, but new call sites should pass the preference).
+ */
+export function formatBookingDateRange(booking: BookingListItem, hour12?: boolean) {
   const start = new Date(booking.startTime);
   const end = new Date(booking.endTime);
   const dateFormatter = new Intl.DateTimeFormat(undefined, {
@@ -83,10 +100,23 @@ export function formatBookingDateRange(booking: BookingListItem) {
   const timeFormatter = new Intl.DateTimeFormat(undefined, {
     hour: "numeric",
     minute: "2-digit",
-    timeZone: booking.timeZone
+    timeZone: booking.timeZone,
+    ...(hour12 === undefined ? {} : { hour12 })
   });
 
   return `${dateFormatter.format(start)}, ${timeFormatter.format(start)} - ${timeFormatter.format(end)}`;
+}
+
+export function formatBookingDuration(booking: BookingListItem) {
+  const start = new Date(booking.startTime).getTime();
+  const end = new Date(booking.endTime).getTime();
+  const minutes = Math.max(0, Math.round((end - start) / 60_000));
+  if (minutes < 60) {
+    return `${minutes}m`;
+  }
+  const hours = Math.floor(minutes / 60);
+  const remaining = minutes % 60;
+  return remaining === 0 ? `${hours}h` : `${hours}h ${remaining}m`;
 }
 
 export interface BookingFilterState {
@@ -97,6 +127,9 @@ export interface BookingFilterState {
   bookingUid?: string;
   dateFrom?: string;
   dateTo?: string;
+  noShowOnly?: boolean;
+  hasInternalNote?: boolean;
+  minRating?: number;
 }
 
 export function getStatusVariant(status: string): "default" | "secondary" | "destructive" | "outline" {

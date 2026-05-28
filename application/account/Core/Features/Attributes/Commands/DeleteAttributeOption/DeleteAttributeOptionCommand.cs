@@ -13,8 +13,11 @@ namespace Account.Features.Attributes.Commands.DeleteAttributeOption;
 [RequirePermission(PermissionResource.Attribute, PermissionAction.Delete, PermissionScope.Organization)]
 public sealed record DeleteAttributeOptionCommand : ICommand, IRequest<Result>
 {
-    public required AttributeId AttributeId { get; init; }
-    public required AttributeOptionId OptionId { get; init; }
+    [JsonIgnore] // Removes this property from the API contract
+    public AttributeId AttributeId { get; init; } = null!;
+
+    [JsonIgnore] // Removes this property from the API contract
+    public AttributeOptionId OptionId { get; init; } = null!;
 }
 
 public sealed class DeleteAttributeOptionHandler(
@@ -26,19 +29,27 @@ public sealed class DeleteAttributeOptionHandler(
     public async Task<Result> Handle(DeleteAttributeOptionCommand command, CancellationToken cancellationToken)
     {
         if (!executionContext.UserInfo.IsFeatureFlagEnabled(FeatureFlagDefinitions.CapAttributes.Key))
+        {
             return Result.Forbidden("The attributes feature is not enabled for this organization.");
+        }
 
         var orgId = executionContext.ActiveOrgId!;
 
         var attribute = await attributeRepository.GetByIdUnfilteredAsync(command.AttributeId, cancellationToken);
         if (attribute is null)
+        {
             return Result.NotFound($"Attribute '{command.AttributeId}' not found.");
+        }
 
         if (attribute.TenantId != orgId)
+        {
             return Result.Forbidden("You do not have access to this attribute.");
+        }
 
         if (!attribute.RemoveOption(command.OptionId))
+        {
             return Result.NotFound($"Option '{command.OptionId}' not found on attribute '{command.AttributeId}'.");
+        }
 
         attributeRepository.Update(attribute);
 

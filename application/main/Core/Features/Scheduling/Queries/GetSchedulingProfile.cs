@@ -1,4 +1,6 @@
 using JetBrains.Annotations;
+using Main.Features.Permissions.Domain;
+using Main.Features.Permissions.Pipeline;
 using Main.Features.Scheduling.Domain;
 using Main.Features.Scheduling.Shared;
 using SharedKernel.Cqrs;
@@ -8,6 +10,7 @@ using SharedKernel.ExecutionContext;
 namespace Main.Features.Scheduling.Queries;
 
 [PublicAPI]
+[RequirePermission(PermissionResource.EventType, PermissionAction.Read)]
 public sealed record GetSchedulingProfileQuery : ICommand, IRequest<Result<SchedulingProfileResponse>>;
 
 public sealed class GetSchedulingProfileHandler(ISchedulingProfileRepository schedulingProfileRepository, IExecutionContext executionContext)

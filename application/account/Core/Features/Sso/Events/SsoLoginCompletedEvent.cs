@@ -1,7 +1,6 @@
 using System.Text.Json;
 using Account.Features.AttributeSync.Domain;
 using Account.Features.Memberships.Domain;
-using MediatR;
 using SharedKernel.Domain;
 
 namespace Account.Features.Sso.Events;

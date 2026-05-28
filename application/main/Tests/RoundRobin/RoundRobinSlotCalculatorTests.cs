@@ -271,7 +271,7 @@ public sealed class RoundRobinSlotCalculatorTests
     public void SelectRoundRobinHost_WithPriorityTiers_ShouldAlwaysPickFromTopTier()
     {
         // host1 has priority 0 (top tier), host2 has priority 1 (lower tier)
-        var host1 = CreateRotatingHost(0);
+        var host1 = CreateRotatingHost();
         var host2 = CreateRotatingHost(1);
         var candidateStart = new DateTimeOffset(2026, 1, 12, 9, 0, 0, TimeSpan.Zero);
 
@@ -296,7 +296,7 @@ public sealed class RoundRobinSlotCalculatorTests
     [Fact]
     public void SelectRoundRobinHost_WhenTopPriorityHostBusy_ShouldFallToNextTier()
     {
-        var host1 = CreateRotatingHost(0); // top tier, busy
+        var host1 = CreateRotatingHost(); // top tier, busy
         var host2 = CreateRotatingHost(1); // lower tier, free
         var candidateStart = new DateTimeOffset(2026, 1, 12, 7, 0, 0, TimeSpan.Zero);
 
@@ -375,8 +375,7 @@ public sealed class RoundRobinSlotCalculatorTests
             0,
             "Test Booker",
             "booker@example.com",
-            "UTC",
-            "accepted",
+            "UTC", BookingStatus.Accepted,
             new Dictionary<string, string>()
         );
     }

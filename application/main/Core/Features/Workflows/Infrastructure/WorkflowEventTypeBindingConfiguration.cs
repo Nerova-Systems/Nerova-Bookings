@@ -1,10 +1,11 @@
 using Main.Features.EventTypes.Domain;
+using Main.Features.Workflows.Domain;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using SharedKernel.Domain;
 using SharedKernel.EntityFramework;
 
-namespace Main.Features.Workflows.Domain;
+namespace Main.Features.Workflows.Infrastructure;
 
 public sealed class WorkflowEventTypeBindingConfiguration : IEntityTypeConfiguration<WorkflowEventTypeBinding>
 {

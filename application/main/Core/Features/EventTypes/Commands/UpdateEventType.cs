@@ -4,6 +4,8 @@ using JetBrains.Annotations;
 using Main.Features.EventTypes.Domain;
 using Main.Features.EventTypes.Shared;
 using Main.Features.ManagedEventTypes.Shared;
+using Main.Features.Permissions.Domain;
+using Main.Features.Permissions.Pipeline;
 using Main.Features.Schedules.Domain;
 using Main.Features.Scheduling.Shared;
 using SharedKernel.Cqrs;
@@ -13,6 +15,7 @@ using SharedKernel.Telemetry;
 namespace Main.Features.EventTypes.Commands;
 
 [PublicAPI]
+[RequirePermission(PermissionResource.EventType, PermissionAction.Update)]
 public sealed record UpdateEventTypeCommand(
     EventTypeId Id,
     string Title,

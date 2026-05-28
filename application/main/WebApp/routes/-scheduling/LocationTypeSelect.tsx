@@ -2,14 +2,26 @@ import { t } from "@lingui/core/macro";
 import { SelectContent, SelectItem, SelectTrigger, SelectValue } from "@repo/ui/components/Select";
 import { SelectField } from "@repo/ui/components/SelectField";
 
+import { AppCategory, api } from "@/shared/lib/api/client";
+
 export function LocationTypeSelect({
   value,
   onChange
 }: Readonly<{ value: string | null | undefined; onChange: (locationType: string) => void }>) {
+  // Installed conferencing connectors (Google Meet, MS Teams, Zoom, ...) appear as additional
+  // location choices once the user has connected them on /apps/installed. The location string
+  // stored on the event type matches the app slug so back-end booking handlers can resolve the
+  // matching IConferenceLinkProvider when the meeting is created.
+  const { data: appsData } = api.useQuery("get", "/api/apps");
+  const conferencingApps = (appsData?.apps ?? []).filter(
+    (app) => app.category === AppCategory.Conferencing && app.isConnectedForUser
+  );
+
   const locationTypes = [
     { value: "link", label: t`Link` },
     { value: "phone", label: t`Phone` },
-    { value: "in-person", label: t`In person` }
+    { value: "in-person", label: t`In person` },
+    ...conferencingApps.map((app) => ({ value: app.slug, label: app.name }))
   ];
 
   return (

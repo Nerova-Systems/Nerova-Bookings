@@ -2,7 +2,6 @@ using Account.Features.Memberships.Domain;
 using Account.Features.Tenants.Domain;
 using JetBrains.Annotations;
 using SharedKernel.Cqrs;
-using SharedKernel.Domain;
 using SharedKernel.ExecutionContext;
 using SharedKernel.Telemetry;
 using FeatureFlagDefinitions = SharedKernel.FeatureFlags.FeatureFlags;
@@ -27,11 +26,19 @@ public sealed class RemoveMembershipHandler(
     public async Task<Result> Handle(RemoveMembershipCommand command, CancellationToken cancellationToken)
     {
         if (!executionContext.UserInfo.IsFeatureFlagEnabled(FeatureFlagDefinitions.TierTeams.Key))
+        {
             return Result.Forbidden("The teams feature is not enabled for this organization.");
+        }
+
         if (executionContext.ActiveOrgId is null)
+        {
             return Result.Forbidden("An active organization is required to remove memberships.");
+        }
+
         if (executionContext.UserInfo.Id is null)
+        {
             return Result.Unauthorized("User is not authenticated.");
+        }
 
         var orgId = executionContext.ActiveOrgId;
         var userId = executionContext.UserInfo.Id;
@@ -44,24 +51,32 @@ public sealed class RemoveMembershipHandler(
         {
             var team = await tenantRepository.GetByIdUnfilteredAsync(target.TenantId, cancellationToken);
             if (team is null || team.Kind != TenantKind.Team || team.ParentTenantId != orgId)
+            {
                 return Result.Forbidden("This membership does not belong to your organization.");
+            }
         }
 
         var caller = await membershipRepository.GetByUserAndTenantAsync(userId, orgId, cancellationToken);
         if (caller is null || !caller.Accepted)
+        {
             return Result.Forbidden("You are not a member of this organization.");
+        }
 
         // Self-leave is always allowed (subject to last-owner protection). Otherwise need Owner/Admin in org.
         var isSelf = target.UserId == userId;
         if (!isSelf && caller.Role == MembershipRole.Member)
+        {
             return Result.Forbidden("Only organization owners and admins can remove other members.");
+        }
 
         // Last-owner protection
         if (target.Role == MembershipRole.Owner)
         {
             var ownerCount = await membershipRepository.CountOwnersAsync(target.TenantId, cancellationToken);
             if (ownerCount <= 1)
+            {
                 return Result.BadRequest("Cannot remove the last Owner of a tenant.");
+            }
         }
 
         membershipRepository.Remove(target);

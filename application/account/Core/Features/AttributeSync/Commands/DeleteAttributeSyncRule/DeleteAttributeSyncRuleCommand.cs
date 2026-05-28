@@ -1,5 +1,5 @@
-using Account.Features.AuditLog.Domain;
 using Account.Features.AttributeSync.Domain;
+using Account.Features.AuditLog.Domain;
 using Account.Features.Permissions.Domain;
 using Account.Features.Permissions.Pipeline;
 using JetBrains.Annotations;
@@ -17,7 +17,7 @@ namespace Account.Features.AttributeSync.Commands.DeleteAttributeSyncRule;
 public sealed record DeleteAttributeSyncRuleCommand : ICommand, IRequest<Result>
 {
     [JsonIgnore] // Removes this property from the API contract
-    public AttributeSyncRuleId RuleId { get; init; } = default!;
+    public AttributeSyncRuleId RuleId { get; init; } = null!;
 }
 
 public sealed class DeleteAttributeSyncRuleHandler(
@@ -31,29 +31,36 @@ public sealed class DeleteAttributeSyncRuleHandler(
     public async Task<Result> Handle(DeleteAttributeSyncRuleCommand command, CancellationToken cancellationToken)
     {
         if (!executionContext.UserInfo.IsFeatureFlagEnabled(FeatureFlagDefinitions.CapIntegrationAttributeSync.Key))
+        {
             return Result.Forbidden("The IdP attribute sync feature is not enabled for this organization.");
+        }
 
         var orgId = executionContext.ActiveOrgId!;
 
         var rule = await ruleRepository.GetByIdUnfilteredAsync(command.RuleId, cancellationToken);
         if (rule is null)
+        {
             return Result.NotFound($"Attribute sync rule '{command.RuleId}' not found.");
+        }
 
         if (rule.TenantId != orgId)
+        {
             return Result.Forbidden("You do not have access to this rule.");
+        }
 
         ruleRepository.Remove(rule);
 
         await auditLogEmitter.EmitAsync(new AuditLogEvent(
-            TenantId: orgId,
-            ActorId: executionContext.UserInfo.Id!,
-            ActorEmail: executionContext.UserInfo.Email ?? string.Empty,
-            Resource: AuditResource.Attribute.ToString(),
-            Action: AuditAction.Deleted.ToString(),
-            ResourceId: rule.Id.ToString(),
-            IpAddress: httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
-            UserAgent: httpContextAccessor.HttpContext?.Request.Headers.UserAgent.ToString()
-        ), cancellationToken);
+                orgId,
+                executionContext.UserInfo.Id!,
+                executionContext.UserInfo.Email ?? string.Empty,
+                nameof(AuditResource.Attribute),
+                nameof(AuditAction.Deleted),
+                rule.Id.ToString(),
+                IpAddress: httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
+                UserAgent: httpContextAccessor.HttpContext?.Request.Headers.UserAgent.ToString()
+            ), cancellationToken
+        );
 
         events.CollectEvent(new AttributeSyncRuleDeleted(rule.Id, orgId));
 

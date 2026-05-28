@@ -104,11 +104,12 @@ public sealed class AttributeEndpoints : IEndpoints
                 AttributeOptionId? optionId,
                 IMediator mediator)
             => await mediator.Send(new UnassignAttributeCommand
-            {
-                MembershipId = membershipId,
-                AttributeId = attributeId,
-                OptionId = optionId
-            })
+                {
+                    MembershipId = membershipId,
+                    AttributeId = attributeId,
+                    OptionId = optionId
+                }
+            )
         );
     }
 }

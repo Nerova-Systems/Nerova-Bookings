@@ -21,7 +21,7 @@ public sealed record MembershipId(string Value) : StronglyTypedUlid<MembershipId
 }
 
 /// <summary>
-///     Models the explicit membership of a <see cref="Users.Domain.UserId" /> in a
+///     Models the explicit membership of a <c>UserId</c> in a
 ///     <see cref="Account.Features.Tenants.Domain.TenantKind.Team" /> or
 ///     <see cref="Account.Features.Tenants.Domain.TenantKind.Organization" /> tenant.
 ///     Every EE feature — PBAC, OrgProfile, audit, and billing — reads from this aggregate.
@@ -35,7 +35,7 @@ public sealed record MembershipId(string Value) : StronglyTypedUlid<MembershipId
 ///         in their Solo personal tenant can be a member of many Team/Org tenants — so the EF
 ///         query-filter would either produce wrong results or require constant filter suppression on
 ///         cross-tenant queries (e.g., "all teams I belong to"). All repository methods accept explicit
-///         <see cref="Tenants.Domain.TenantId" /> or <see cref="Users.Domain.UserId" /> parameters
+///         <c>TenantId</c> or <c>UserId</c> parameters
 ///         instead.
 ///     </para>
 /// </summary>

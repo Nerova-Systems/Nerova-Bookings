@@ -1,8 +1,9 @@
 using Main.Database;
 using Main.Features.Scheduling.Domain;
+using Main.Features.Workflows.Domain;
 using Microsoft.EntityFrameworkCore;
 
-namespace Main.Features.Workflows.Domain;
+namespace Main.Features.Workflows.Infrastructure;
 
 /// <summary>
 ///     Read-only cross-tenant booking reader for the workflow scheduler job.
@@ -26,14 +27,14 @@ public sealed class WorkflowBookingReader(MainDbContext context)
                 (b, _) => b.EventTypeId
             )
             .Distinct()
-            .ToArrayAsync(ct);
+            .ToListAsync(ct);
 
-        if (activeEventTypeIds.Length == 0) return [];
+        if (activeEventTypeIds.Count == 0) return [];
 
         var newBookings = await context.Set<Booking>()
             .IgnoreQueryFilters()
             .Where(b => activeEventTypeIds.Contains(b.EventTypeId))
-            .Where(b => b.Status != "cancelled" && b.Status != "rejected")
+            .Where(b => b.Status != BookingStatus.Cancelled && b.Status != BookingStatus.Rejected)
             .Where(b => !context.Set<WorkflowReminder>()
                 .IgnoreQueryFilters()
                 .Any(r => r.BookingId == b.Id)
@@ -56,14 +57,14 @@ public sealed class WorkflowBookingReader(MainDbContext context)
             .Where(r => r.Status == WorkflowReminderStatus.Pending)
             .Select(r => r.BookingId)
             .Distinct()
-            .ToArrayAsync(ct);
+            .ToListAsync(ct);
 
-        if (bookingIdsWithPendingReminders.Length == 0) return [];
+        if (bookingIdsWithPendingReminders.Count == 0) return [];
 
         return await context.Set<Booking>()
             .IgnoreQueryFilters()
             .Where(b => bookingIdsWithPendingReminders.Contains(b.Id))
-            .Where(b => b.Status == "cancelled")
+            .Where(b => b.Status == BookingStatus.Cancelled)
             .Take(BatchSize)
             .ToArrayAsync(ct);
     }
@@ -82,12 +83,12 @@ public sealed class WorkflowBookingReader(MainDbContext context)
 
         if (pendingReminderData.Length == 0) return [];
 
-        var bookingIds = pendingReminderData.Select(r => r.BookingId).Distinct().ToArray();
+        var bookingIds = pendingReminderData.Select(r => r.BookingId).Distinct().ToList();
 
         var bookings = await context.Set<Booking>()
             .IgnoreQueryFilters()
             .Where(b => bookingIds.Contains(b.Id))
-            .Where(b => b.Status != "cancelled")
+            .Where(b => b.Status != BookingStatus.Cancelled)
             .ToArrayAsync(ct);
 
         var bookingById = bookings.ToDictionary(b => b.Id);
@@ -110,7 +111,7 @@ public sealed class WorkflowBookingReader(MainDbContext context)
 
     private async Task<BookingWithWorkflows[]> EnrichWithWorkflows(Booking[] bookings, CancellationToken ct)
     {
-        var eventTypeIds = bookings.Select(b => b.EventTypeId).Distinct().ToArray();
+        var eventTypeIds = bookings.Select(b => b.EventTypeId).Distinct().ToList();
 
         var bindingsWithWorkflows = await context.Set<WorkflowEventTypeBinding>()
             .IgnoreQueryFilters()

@@ -51,8 +51,8 @@ public sealed class EnableDelegationCredentialHandler(
                 orgId,
                 executionContext.UserInfo.Id!,
                 executionContext.UserInfo.Email ?? string.Empty,
-                AuditResource.DelegationCredential.ToString(),
-                AuditAction.Enabled.ToString(),
+                nameof(AuditResource.DelegationCredential),
+                nameof(AuditAction.Enabled),
                 credential.Id.ToString(),
                 IpAddress: httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
                 UserAgent: httpContextAccessor.HttpContext?.Request.Headers.UserAgent.ToString()

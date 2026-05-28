@@ -20,9 +20,10 @@ import { api, type Schemas } from "@/shared/lib/api/client";
 import type { EventTypeTabProps } from "./EventTypeTabTypes";
 
 import { getEventTypeSettings, updateEventTypeSettings, updateEventTypeSettingsSection } from "../schedulingTypes";
-import { DisabledFeatureRow, EventTypeTabSection } from "./EventTypeTabSection";
+import { EventTypePrivateLinksSection } from "./EventTypePrivateLinksSection";
+import { EventTypeTabSection } from "./EventTypeTabSection";
 
-export function EventTypeAdvancedTab({ value, onChange, error }: EventTypeTabProps) {
+export function EventTypeAdvancedTab({ eventTypeId, value, onChange, error }: EventTypeTabProps) {
   const settings = getEventTypeSettings(value);
   const coreConnectorAccountsQuery = api.useQuery("get", "/api/connectors/core/accounts");
   const interfaceLanguages = [
@@ -99,6 +100,16 @@ export function EventTypeAdvancedTab({ value, onChange, error }: EventTypeTabPro
       ? metadata.requiresCancellationReason
       : "mandatory-host-only";
   const canSendCalVideoTranscriptionEmails = metadata.canSendCalVideoTranscriptionEmails === "true";
+
+const updatePrivacy = (privacy: Partial<ReturnType<typeof getEventTypeSettings>["privacy"]>) => {
+    onChange(updateEventTypeSettingsSection(value, "privacy", (current) => ({ ...current, ...privacy })));
+  };
+  const updateEmail = (email: Partial<ReturnType<typeof getEventTypeSettings>["email"]>) => {
+    onChange(updateEventTypeSettingsSection(value, "email", (current) => ({ ...current, ...email })));
+  };
+  const updateTimezone = (timezone: Partial<ReturnType<typeof getEventTypeSettings>["timezone"]>) => {
+    onChange(updateEventTypeSettingsSection(value, "timezone", (current) => ({ ...current, ...timezone })));
+  };
 
   return (
     <FormValidationContext.Provider value={error?.errors ?? {}}>
@@ -283,6 +294,76 @@ export function EventTypeAdvancedTab({ value, onChange, error }: EventTypeTabPro
           />
         </EventTypeTabSection>
         <EventTypeTabSection
+          title={<Trans>Event name</Trans>}
+          description={<Trans>Customize the calendar event title and the reply-to address bookers see.</Trans>}
+        >
+          <div className="grid gap-4 md:grid-cols-2">
+            <TextField
+              name="eventName"
+              label={t`Custom event name`}
+              value={settings.email.eventName ?? ""}
+              onChange={(eventName) => updateEmail({ eventName: eventName || null })}
+            />
+            <TextField
+              name="customReplyToEmail"
+              label={t`Custom reply-to email`}
+              value={settings.email.customReplyToEmail ?? ""}
+              onChange={(customReplyToEmail) => updateEmail({ customReplyToEmail: customReplyToEmail || null })}
+            />
+          </div>
+        </EventTypeTabSection>
+        <EventTypeTabSection
+          title={<Trans>Privacy</Trans>}
+          description={<Trans>Hide booker information from external calendars and disable guests.</Trans>}
+        >
+          <div className="grid gap-4 md:grid-cols-2">
+            <SwitchField
+              name="disableGuests"
+              label={t`Disable guests`}
+              checked={settings.privacy.disableGuests}
+              onCheckedChange={(disableGuests) => updatePrivacy({ disableGuests })}
+            />
+            <SwitchField
+              name="hideCalendarNotes"
+              label={t`Hide calendar notes`}
+              checked={settings.privacy.hideCalendarNotes}
+              onCheckedChange={(hideCalendarNotes) => updatePrivacy({ hideCalendarNotes })}
+            />
+            <SwitchField
+              name="hideCalendarEventDetails"
+              label={t`Hide calendar event details`}
+              checked={settings.privacy.hideCalendarEventDetails}
+              onCheckedChange={(hideCalendarEventDetails) => updatePrivacy({ hideCalendarEventDetails })}
+            />
+          </div>
+        </EventTypeTabSection>
+        <EventTypeTabSection
+          title={<Trans>Timezone</Trans>}
+          description={<Trans>Lock the booking page timezone or follow the booker.</Trans>}
+        >
+          <div className="grid gap-4 md:grid-cols-2">
+            <SwitchField
+              name="lockTimeZoneToggleOnBookingPage"
+              label={t`Lock timezone on booking page`}
+              checked={settings.timezone.lockTimeZoneToggleOnBookingPage}
+              onCheckedChange={(lockTimeZoneToggleOnBookingPage) => updateTimezone({ lockTimeZoneToggleOnBookingPage })}
+            />
+            <TextField
+              name="lockedTimeZone"
+              label={t`Locked timezone`}
+              disabled={!settings.timezone.lockTimeZoneToggleOnBookingPage}
+              value={settings.timezone.lockedTimeZone ?? ""}
+              onChange={(lockedTimeZone) => updateTimezone({ lockedTimeZone: lockedTimeZone || null })}
+            />
+            <SwitchField
+              name="useBookerTimezone"
+              label={t`Use booker timezone for organizer`}
+              checked={settings.timezone.useBookerTimezone}
+              onCheckedChange={(useBookerTimezone) => updateTimezone({ useBookerTimezone })}
+            />
+          </div>
+        </EventTypeTabSection>
+        <EventTypeTabSection
           title={<Trans>Confirmation</Trans>}
           description={<Trans>Control manual approval and booker email checks.</Trans>}
         >
@@ -300,6 +381,26 @@ export function EventTypeAdvancedTab({ value, onChange, error }: EventTypeTabPro
               onCheckedChange={(requiresBookerEmailVerification) =>
                 updateConfirmationPolicy({ requiresBookerEmailVerification })
               }
+            />
+            <SwitchField
+              name="blockSlotWhilePending"
+              label={t`Block slot while pending`}
+              checked={settings.confirmationPolicy.blockSlotWhilePending}
+              onCheckedChange={(blockSlotWhilePending) => updateConfirmationPolicy({ blockSlotWhilePending })}
+            />
+            <SwitchField
+              name="requiresConfirmationForFreeEmail"
+              label={t`Confirm free-email bookers`}
+              checked={settings.confirmationPolicy.requiresConfirmationForFreeEmail}
+              onCheckedChange={(requiresConfirmationForFreeEmail) =>
+                updateConfirmationPolicy({ requiresConfirmationForFreeEmail })
+              }
+            />
+            <SwitchField
+              name="requiresCancellationReason"
+              label={t`Require cancellation reason`}
+              checked={settings.confirmationPolicy.requiresCancellationReason}
+              onCheckedChange={(requiresCancellationReason) => updateConfirmationPolicy({ requiresCancellationReason })}
             />
           </div>
         </EventTypeTabSection>
@@ -340,6 +441,22 @@ export function EventTypeAdvancedTab({ value, onChange, error }: EventTypeTabPro
               value={settings.reschedulePolicy.minimumNoticeMinutes ?? undefined}
               onChange={(minimumNoticeMinutes) => updateReschedulePolicy({ minimumNoticeMinutes })}
             />
+            <SwitchField
+              name="allowReschedulingPastBookings"
+              label={t`Allow rescheduling past bookings`}
+              checked={settings.reschedulePolicy.allowReschedulingPastBookings}
+              onCheckedChange={(allowReschedulingPastBookings) =>
+                updateReschedulePolicy({ allowReschedulingPastBookings })
+              }
+            />
+            <SwitchField
+              name="allowReschedulingCancelledBookings"
+              label={t`Allow rescheduling cancelled bookings`}
+              checked={settings.reschedulePolicy.allowReschedulingCancelledBookings}
+              onCheckedChange={(allowReschedulingCancelledBookings) =>
+                updateReschedulePolicy({ allowReschedulingCancelledBookings })
+              }
+            />
           </div>
         </EventTypeTabSection>
         <EventTypeTabSection
@@ -362,8 +479,8 @@ export function EventTypeAdvancedTab({ value, onChange, error }: EventTypeTabPro
           </div>
         </EventTypeTabSection>
         <EventTypeTabSection
-          title={<Trans>Access</Trans>}
-          description={<Trans>Set language and private booking links.</Trans>}
+          title={<Trans>Language</Trans>}
+          description={<Trans>Choose which language the public booking page renders in.</Trans>}
         >
           <SelectField
             name="interfaceLanguage"
@@ -392,19 +509,12 @@ export function EventTypeAdvancedTab({ value, onChange, error }: EventTypeTabPro
               ))}
             </SelectContent>
           </SelectField>
-          <PrivateLinksEditor
-            value={settings.privateLinks}
-            onChange={(privateLinks) => updateSettings((nextSettings) => ({ ...nextSettings, privateLinks }))}
-          />
         </EventTypeTabSection>
         <EventTypeTabSection
-          title={<Trans>Booking fields</Trans>}
-          description={<Trans>Collect Cal.com-compatible custom answers from bookers.</Trans>}
+          title={<Trans>Private links</Trans>}
+          description={<Trans>Share one-off booking links that bypass the public schedule.</Trans>}
         >
-          <BookingFieldsEditor
-            value={settings.bookingFields}
-            onChange={(bookingFields) => updateSettings((nextSettings) => ({ ...nextSettings, bookingFields }))}
-          />
+          <EventTypePrivateLinksSection eventTypeId={eventTypeId} />
         </EventTypeTabSection>
         <EventTypeTabSection
           title={<Trans>Seats</Trans>}

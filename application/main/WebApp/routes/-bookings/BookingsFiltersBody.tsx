@@ -13,6 +13,7 @@ import type { EventType } from "../-scheduling/schedulingTypes";
 import type { BookingFilterSearch } from "./BookingsFilters";
 
 import { getActiveBookingFiltersCount } from "./bookingTypes";
+import { FacetedFilters } from "./FacetedFilters";
 
 const emptyBookingFilterSearch: BookingFilterSearch = {
   search: undefined,
@@ -21,7 +22,10 @@ const emptyBookingFilterSearch: BookingFilterSearch = {
   attendeeEmail: undefined,
   bookingUid: undefined,
   dateFrom: undefined,
-  dateTo: undefined
+  dateTo: undefined,
+  noShowOnly: undefined,
+  hasInternalNote: undefined,
+  minRating: undefined
 };
 
 export function BookingsFiltersBody({
@@ -121,6 +125,9 @@ export function BookingsFiltersBody({
             value={draftSearch.dateTo ?? ""}
             onChange={(value) => updateSearch({ dateTo: value || undefined })}
           />
+        </div>
+        <div className="mt-4 flex flex-col gap-3 border-t pt-4">
+          <FacetedFilters draftSearch={draftSearch} updateSearch={updateSearch} />
         </div>
       </DialogBody>
       <DialogFooter>

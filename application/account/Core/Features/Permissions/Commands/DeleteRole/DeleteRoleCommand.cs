@@ -13,10 +13,11 @@ using FeatureFlagDefinitions = SharedKernel.FeatureFlags.FeatureFlags;
 namespace Account.Features.Permissions.Commands.DeleteRole;
 
 [PublicAPI]
-[RequirePermission(PermissionResource.Role, PermissionAction.Delete, PermissionScope.Organization)]
+[RequirePermission(PermissionResource.Role, PermissionAction.Delete)]
 public sealed record DeleteRoleCommand : ICommand, IRequest<Result>
 {
-    public required RoleId RoleId { get; init; }
+    [JsonIgnore] // Removes this property from the API contract
+    public RoleId RoleId { get; init; } = null!;
 }
 
 public sealed class DeleteRoleHandler(
@@ -31,19 +32,28 @@ public sealed class DeleteRoleHandler(
     public async Task<Result> Handle(DeleteRoleCommand command, CancellationToken cancellationToken)
     {
         if (!executionContext.UserInfo.IsFeatureFlagEnabled(FeatureFlagDefinitions.TierEnterprise.Key))
+        {
             return Result.Forbidden("The custom roles feature is not enabled for this organization.");
+        }
 
-        var orgId = executionContext.ActiveOrgId!;
+        var tenantId = executionContext.ActiveOrgId ?? executionContext.TenantId;
+        if (tenantId is null) return Result.Unauthorized("User is not associated with a tenant.");
 
         var role = await roleRepository.GetByIdWithPermissionsAsync(command.RoleId, cancellationToken);
         if (role is null)
+        {
             return Result.NotFound($"Role '{command.RoleId}' not found.");
+        }
 
         if (role.IsSystem)
+        {
             return Result.BadRequest("System roles cannot be deleted.");
+        }
 
-        if (role.TenantId != orgId)
+        if (role.TenantId != tenantId)
+        {
             return Result.Forbidden("You do not have access to this role.");
+        }
 
         // Cascade-unassign the custom role from every membership that references it. The custom role
         // override is then cleared, reverting affected members to the permissions of their system role.
@@ -57,17 +67,18 @@ public sealed class DeleteRoleHandler(
         roleRepository.Remove(role);
 
         await auditLogEmitter.EmitAsync(new AuditLogEvent(
-            TenantId: orgId,
-            ActorId: executionContext.UserInfo.Id!,
-            ActorEmail: executionContext.UserInfo.Email ?? string.Empty,
-            Resource: AuditResource.Role.ToString(),
-            Action: AuditAction.Deleted.ToString(),
-            ResourceId: role.Id.ToString(),
-            IpAddress: httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
-            UserAgent: httpContextAccessor.HttpContext?.Request.Headers.UserAgent.ToString()
-        ), cancellationToken);
+                tenantId,
+                executionContext.UserInfo.Id!,
+                executionContext.UserInfo.Email ?? string.Empty,
+                nameof(AuditResource.Role),
+                nameof(AuditAction.Deleted),
+                role.Id.ToString(),
+                IpAddress: httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
+                UserAgent: httpContextAccessor.HttpContext?.Request.Headers.UserAgent.ToString()
+            ), cancellationToken
+        );
 
-        events.CollectEvent(new RoleDeleted(role.Id, orgId, assignedMembers.Length));
+        events.CollectEvent(new RoleDeleted(role.Id, tenantId, assignedMembers.Length));
 
         return Result.Success();
     }

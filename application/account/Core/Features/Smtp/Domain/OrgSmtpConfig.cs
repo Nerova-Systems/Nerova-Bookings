@@ -60,7 +60,7 @@ public sealed class OrgSmtpConfig : AggregateRoot<OrgSmtpConfigId>, ITenantScope
     /// </summary>
     public bool IsEnabled { get; private set; }
 
-    public TenantId TenantId { get; private set; } = null!;
+    public TenantId TenantId { get; private init; } = null!;
 
     // ─── Factory ──────────────────────────────────────────────────────────────
 

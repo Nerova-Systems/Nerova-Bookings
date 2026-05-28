@@ -9,7 +9,14 @@ import { Button } from "@repo/ui/components/Button";
 import { overlayContext } from "@repo/ui/components/Sidebar";
 import { useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
-import { ChevronDownIcon, LogOutIcon, MonitorSmartphoneIcon, SlidersHorizontalIcon, UserIcon } from "lucide-react";
+import {
+  ChevronDownIcon,
+  ClockIcon,
+  LogOutIcon,
+  MonitorSmartphoneIcon,
+  SlidersHorizontalIcon,
+  UserIcon
+} from "lucide-react";
 import { useContext, useState } from "react";
 
 import { logoutApi, type TenantInfo } from "../common/tenantUtils";
@@ -98,6 +105,17 @@ export function MobileMenuContent({
                   <UserIcon className="size-5 stroke-current" />
                 </div>
                 <Trans>Profile</Trans>
+              </Button>
+              <Button
+                variant="ghost"
+                onClick={() => navigateTo("/user/general")}
+                className={menuItemClassName(pathname, "/user/general")}
+                aria-label={t`General`}
+              >
+                <div className="flex size-6 shrink-0 items-center justify-center">
+                  <ClockIcon className="size-5 stroke-current" />
+                </div>
+                <Trans>General</Trans>
               </Button>
               <Button
                 variant="ghost"

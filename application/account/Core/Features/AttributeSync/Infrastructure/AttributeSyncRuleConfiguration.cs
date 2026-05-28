@@ -1,5 +1,5 @@
-using Account.Features.AttributeSync.Domain;
 using Account.Features.Attributes.Domain;
+using Account.Features.AttributeSync.Domain;
 using Account.Features.Tenants.Domain;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;

@@ -39,7 +39,7 @@ public sealed class UnitOfWorkTests : IDisposable
 
         // Assert
         newTestAggregate.CreatedAt.Should().NotBe(default);
-        newTestAggregate.ModifiedAt.Should().BeNull();
+        newTestAggregate.ModifiedAt.Should().Be(newTestAggregate.CreatedAt);
     }
 
     [Fact]
@@ -58,7 +58,7 @@ public sealed class UnitOfWorkTests : IDisposable
 
         // Assert
         newTestAggregate.ModifiedAt.Should().NotBeNull();
-        newTestAggregate.ModifiedAt.Should().BeAfter(initialCreatedAt);
+        newTestAggregate.ModifiedAt.Should().BeOnOrAfter(initialCreatedAt);
         newTestAggregate.CreatedAt.Should().Be(initialCreatedAt);
     }
 

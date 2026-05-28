@@ -60,8 +60,8 @@ public sealed class GetTopEventTypesHandler(
             .Select(g =>
                 {
                     var total = g.Count();
-                    var cancelled = g.Count(x => x.Booking.Status.Equals(BookingStatuses.Cancelled, StringComparison.OrdinalIgnoreCase)
-                                                 || x.Booking.Status.Equals(BookingStatuses.Rejected, StringComparison.OrdinalIgnoreCase)
+                    var cancelled = g.Count(x => x.Booking.Status == BookingStatus.Cancelled
+                                                 || x.Booking.Status == BookingStatus.Rejected
                     );
                     return new EventTypeInsights(
                         g.Key.Id,

@@ -51,8 +51,8 @@ public sealed class DeleteDelegationCredentialHandler(
                 orgId,
                 executionContext.UserInfo.Id!,
                 executionContext.UserInfo.Email ?? string.Empty,
-                AuditResource.DelegationCredential.ToString(),
-                AuditAction.Deleted.ToString(),
+                nameof(AuditResource.DelegationCredential),
+                nameof(AuditAction.Deleted),
                 credentialId,
                 IpAddress: httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
                 UserAgent: httpContextAccessor.HttpContext?.Request.Headers.UserAgent.ToString()

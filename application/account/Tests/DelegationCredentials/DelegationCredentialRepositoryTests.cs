@@ -13,7 +13,7 @@ namespace Account.Tests.DelegationCredentials;
 /// <summary>
 ///     Database round-trip tests for <see cref="IDelegationCredentialRepository" />.
 ///     <para>
-///         All operations use the base <see cref="Provider" /> (no HTTP context → execution-context
+///         All operations use the base <c>Provider</c> (no HTTP context → execution-context
 ///         TenantId is null). Both repository queries use <c>IgnoreQueryFilters(Tenant)</c>, so no
 ///         tenant-scoped provider is needed.
 ///     </para>
@@ -53,7 +53,7 @@ public sealed class DelegationCredentialRepositoryTests(AccountWebApplicationFac
 
         // Assert
         loaded.Should().NotBeNull();
-        loaded!.Id.Should().Be(credential.Id);
+        loaded.Id.Should().Be(credential.Id);
         loaded.TenantId.Should().Be(orgTenant.Id);
         loaded.Platform.Should().Be(WorkspacePlatform.Google);
         loaded.Domain.Should().Be("acme.com");
@@ -85,7 +85,7 @@ public sealed class DelegationCredentialRepositoryTests(AccountWebApplicationFac
 
         // Assert
         result.Should().NotBeNull();
-        result!.Id.Should().Be(credential.Id);
+        result.Id.Should().Be(credential.Id);
     }
 
     [Fact]

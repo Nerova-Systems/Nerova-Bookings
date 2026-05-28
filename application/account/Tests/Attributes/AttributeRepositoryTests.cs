@@ -7,7 +7,6 @@ using Account.Features.Users.Domain;
 using FluentAssertions;
 using Microsoft.Extensions.DependencyInjection;
 using SharedKernel.Domain;
-using SharedKernel.Tests.Persistence;
 using Xunit;
 using OrgAttribute = Account.Features.Attributes.Domain.Attribute;
 
@@ -91,7 +90,7 @@ public sealed class AttributeRepositoryTests(AccountWebApplicationFactory factor
         var loaded = await repo.GetByIdUnfilteredAsync(attribute.Id, CancellationToken.None);
 
         loaded.Should().NotBeNull();
-        loaded!.Options.Should().HaveCount(2);
+        loaded.Options.Should().HaveCount(2);
         loaded.Options.Should().Contain(o => o.Value == "Engineer");
         loaded.Options.Should().Contain(o => o.Value == "Designer");
     }
@@ -197,10 +196,11 @@ public sealed class AttributeRepositoryTests(AccountWebApplicationFactory factor
         await db.SaveChangesAsync();
 
         var found = await assignRepo.GetByMembershipAttributeOptionAsync(
-            membershipId, attribute.Id, option.Id, CancellationToken.None);
+            membershipId, attribute.Id, option.Id, CancellationToken.None
+        );
 
         found.Should().NotBeNull();
-        found!.AttributeOptionId.Should().Be(option.Id);
+        found.AttributeOptionId.Should().Be(option.Id);
     }
 
     // ──────────────────────────────────────────────────────────────────────────

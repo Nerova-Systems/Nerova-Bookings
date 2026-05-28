@@ -31,9 +31,7 @@ public sealed class Booking : AggregateRoot<BookingId>, ITenantScopedEntity
         BookerName = string.Empty;
         BookerEmail = string.Empty;
         TimeZone = string.Empty;
-        Status = string.Empty;
         ResponsesJson = "{}";
-        MetadataJson = "{}";
         AttendeesJson = "[]";
         ReferencesJson = "[]";
         SeatReferencesJson = "[]";
@@ -55,7 +53,7 @@ public sealed class Booking : AggregateRoot<BookingId>, ITenantScopedEntity
         string bookerName,
         string bookerEmail,
         string timeZone,
-        string status,
+        BookingStatus status,
         Dictionary<string, string> responses,
         Dictionary<string, string>? metadata
     ) : base(BookingId.NewId())
@@ -74,15 +72,16 @@ public sealed class Booking : AggregateRoot<BookingId>, ITenantScopedEntity
         BookerName = bookerName.Trim();
         BookerEmail = bookerEmail.Trim().ToLowerInvariant();
         TimeZone = timeZone.Trim();
-        Status = status.Trim();
+        Status = status;
         ResponsesJson = JsonSerializer.Serialize(responses, JsonSerializerOptions);
-        MetadataJson = JsonSerializer.Serialize(metadata ?? new Dictionary<string, string>(StringComparer.Ordinal), JsonSerializerOptions);
+        MetadataJson = metadata is null ? null : JsonSerializer.Serialize(metadata, JsonSerializerOptions);
         AttendeesJson = JsonSerializer.Serialize(
             new[] { new BookingAttendee(BookerName, BookerEmail, TimeZone, null, null, false) },
             JsonSerializerOptions
         );
         ReferencesJson = "[]";
         SeatReferencesJson = "[]";
+        CalUid = $"{Id.Value}@nerova";
         FromReschedule = null;
     }
 
@@ -112,11 +111,10 @@ public sealed class Booking : AggregateRoot<BookingId>, ITenantScopedEntity
 
     public string TimeZone { get; }
 
-    public string Status { get; private set; }
+    public BookingStatus Status { get; private set; }
 
     public string ResponsesJson { get; private set; }
 
-    public string MetadataJson { get; }
 
     public string AttendeesJson { get; private set; }
 
@@ -148,7 +146,7 @@ public sealed class Booking : AggregateRoot<BookingId>, ITenantScopedEntity
     public BookingSeatReference[] SeatReferences => JsonSerializer.Deserialize<BookingSeatReference[]>(SeatReferencesJson, JsonSerializerOptions) ?? [];
 
     [NotMapped]
-    public Dictionary<string, string> Metadata => JsonSerializer.Deserialize<Dictionary<string, string>>(MetadataJson, JsonSerializerOptions) ?? [];
+    public Dictionary<string, string> Metadata => string.IsNullOrEmpty(MetadataJson) ? [] : JsonSerializer.Deserialize<Dictionary<string, string>>(MetadataJson, JsonSerializerOptions) ?? [];
 
     /// <summary>
     ///     When non-null, references a Tenant of TenantKind.Team. When null, the aggregate is owned by the existing
@@ -156,24 +154,51 @@ public sealed class Booking : AggregateRoot<BookingId>, ITenantScopedEntity
     /// </summary>
     public TenantId? TeamId { get; private set; }
 
+    // --- cal.com parity fields (state, audit, rating, iCal, recording, instant-meeting) ---
+
+    public string? ReassignReason { get; private set; }
+
+    public UserId? ReassignByUserId { get; private set; }
+
+    [UsedImplicitly]
+    public string? FromRescheduleUid { get; init; }
+
+    public string? CancelledByUserUid { get; private set; }
+
+    public string? RescheduledByUserUid { get; private set; }
+
+    public string? SmsReminderNumber { get; private set; }
+
+    /// <summary>iCalendar UID. Set on creation and preserved across reschedules.</summary>
+    public string? CalUid { get; private set; }
+
+    /// <summary>iCalendar sequence number. Incremented on each reschedule.</summary>
+    public int CalSequence { get; private set; }
+
+    public int? Rating { get; private set; }
+
+    public string? RatingFeedback { get; private set; }
+
+    public bool? NoShowHost { get; private set; }
+
+    public string? OneTimePassword { get; private set; }
+
+    public bool IsRecorded { get; private set; }
+
+    /// <summary>Cal.com <c>customInputs</c> legacy field responses as a JSON blob.</summary>
+    public string? CustomInputsJson { get; private set; }
+
+    /// <summary>Arbitrary metadata blob mirroring cal.com <c>metadata</c>.</summary>
+    public string? MetadataJson { get; private set; }
+
+
     public TenantId TenantId { get; } = new(0);
 
-    /// <summary>
-    ///     Assigns this booking to a team.
-    /// </summary>
-    /// <remarks>
-    ///     The command layer is responsible for verifying that <paramref name="teamId" /> references a Tenant of
-    ///     TenantKind.Team. This aggregate cannot verify TenantKind itself.
-    /// </remarks>
     public void AssignToTeam(TenantId teamId)
     {
-        // Command layer must ensure teamId refers to a TenantKind.Team tenant.
         TeamId = teamId;
     }
 
-    /// <summary>
-    ///     Removes the team association, reverting the booking to user/solo scope.
-    /// </summary>
     public void RemoveFromTeam()
     {
         TeamId = null;
@@ -184,31 +209,9 @@ public sealed class Booking : AggregateRoot<BookingId>, ITenantScopedEntity
         RaiseSideEffectEvent(BookingSideEffectConstants.BookingCreated);
     }
 
-    public void Confirm()
-    {
-        Status = "accepted";
-        RejectionReason = null;
-        RaiseSideEffectEvent(BookingSideEffectConstants.BookingConfirmed);
-    }
-
-    public void Reject(string? rejectionReason)
-    {
-        Status = "rejected";
-        RejectionReason = string.IsNullOrWhiteSpace(rejectionReason) ? null : rejectionReason.Trim();
-        RaiseSideEffectEvent(BookingSideEffectConstants.BookingRejected);
-    }
-
-    public void Cancel(string? cancellationReason = null, string? cancelledBy = null)
-    {
-        Status = "cancelled";
-        CancellationReason = string.IsNullOrWhiteSpace(cancellationReason) ? null : cancellationReason.Trim();
-        CancelledBy = string.IsNullOrWhiteSpace(cancelledBy) ? null : cancelledBy.Trim().ToLowerInvariant();
-        RaiseSideEffectEvent(BookingSideEffectConstants.BookingCancelled);
-    }
-
     public void RequestReschedule(string? rescheduleReason, string? rescheduledBy)
     {
-        Status = "cancelled";
+        Status = BookingStatus.Cancelled;
         Rescheduled = true;
         RescheduleReason = string.IsNullOrWhiteSpace(rescheduleReason) ? null : rescheduleReason.Trim();
         CancellationReason = RescheduleReason;
@@ -271,10 +274,78 @@ public sealed class Booking : AggregateRoot<BookingId>, ITenantScopedEntity
         ReferencesJson = JsonSerializer.Serialize(references, JsonSerializerOptions);
     }
 
-    /// <summary>Reassigns this booking to a different host (round-robin reassignment).</summary>
-    public void Reassign(UserId newOwnerUserId)
+    public void Cancel(string? reason = null, string? cancelledByUserUid = null)
+    {
+        Status = BookingStatus.Cancelled;
+        CancellationReason = reason?.Trim();
+        CancelledByUserUid = cancelledByUserUid;
+    }
+
+    public void Confirm()
+    {
+        Status = BookingStatus.Accepted;
+    }
+
+    public void Reject(string reason)
+    {
+        Status = BookingStatus.Rejected;
+        RejectionReason = reason.Trim();
+    }
+
+    public void MarkRescheduled(string? rescheduledByUserUid = null)
+    {
+        Rescheduled = true;
+        RescheduledByUserUid = rescheduledByUserUid;
+        CalSequence += 1;
+    }
+
+    public void Reassign(UserId newOwnerUserId, string? reason = null, UserId? reassignByUserId = null)
     {
         OwnerUserId = newOwnerUserId;
+        ReassignReason = reason?.Trim();
+        ReassignByUserId = reassignByUserId;
+    }
+
+    public void Rate(int rating, string? feedback)
+    {
+        Rating = rating;
+        RatingFeedback = feedback?.Trim();
+    }
+
+    public void SetNoShowHost(bool value)
+    {
+        NoShowHost = value;
+    }
+
+    public void MarkRecorded()
+    {
+        IsRecorded = true;
+    }
+
+    public void SetOneTimePassword(string oneTimePassword)
+    {
+        OneTimePassword = oneTimePassword;
+    }
+
+    public void SetSmsReminderNumber(string? number)
+    {
+        SmsReminderNumber = string.IsNullOrWhiteSpace(number) ? null : number.Trim();
+    }
+
+    public void SetCustomInputsJson(string? customInputsJson)
+    {
+        CustomInputsJson = customInputsJson;
+    }
+
+    public void SetMetadataJson(string? metadataJson)
+    {
+        MetadataJson = metadataJson;
+    }
+
+    public void SetLocation(string? locationType, string? locationValue)
+    {
+        LocationType = string.IsNullOrWhiteSpace(locationType) ? null : locationType.Trim();
+        LocationValue = string.IsNullOrWhiteSpace(locationValue) ? null : locationValue.Trim();
     }
 
     public static Booking Create(
@@ -288,7 +359,7 @@ public sealed class Booking : AggregateRoot<BookingId>, ITenantScopedEntity
         string bookerName,
         string bookerEmail,
         string timeZone,
-        string status,
+        BookingStatus status,
         Dictionary<string, string> responses,
         TenantId? teamId = null
     )
@@ -311,7 +382,7 @@ public sealed class Booking : AggregateRoot<BookingId>, ITenantScopedEntity
         string bookerName,
         string bookerEmail,
         string timeZone,
-        string status,
+        BookingStatus status,
         Dictionary<string, string> responses,
         TenantId? teamId = null
     )

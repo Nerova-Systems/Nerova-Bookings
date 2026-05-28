@@ -118,7 +118,7 @@ public sealed class CollectiveBookingFlowTests : EndpointBaseTest<MainDbContext>
         response.EnsureSuccessStatusCode();
         var booking = await response.DeserializeResponse<CreatePublicBookingResponse>();
         booking!.StartTime.Should().Be(DateTimeOffset.Parse(FreeSlotTimeUtc));
-        booking.Status.Should().Be("accepted");
+        booking.Status.Should().Be(BookingStatus.Accepted);
     }
 
     // ─── Booking fails when host is busy ─────────────────────────────────────
@@ -210,8 +210,7 @@ public sealed class CollectiveBookingFlowTests : EndpointBaseTest<MainDbContext>
             0,
             "Host Event",
             "host@example.com",
-            "UTC",
-            "accepted",
+            "UTC", BookingStatus.Accepted,
             new Dictionary<string, string>()
         );
         dbContext.Set<Booking>().Add(booking);
@@ -295,5 +294,5 @@ public sealed class CollectiveBookingFlowTests : EndpointBaseTest<MainDbContext>
     private sealed record PublicSlotResponse(DateTimeOffset Time, DateTimeOffset EndTime);
 
     [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
-    private sealed record CreatePublicBookingResponse(string Id, DateTimeOffset StartTime, DateTimeOffset EndTime, string Status);
+    private sealed record CreatePublicBookingResponse(string Id, DateTimeOffset StartTime, DateTimeOffset EndTime, BookingStatus Status);
 }

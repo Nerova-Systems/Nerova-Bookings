@@ -20,7 +20,9 @@ public sealed class ListOrgAttributesHandler(
     public async Task<Result<AttributeResponse[]>> Handle(ListOrgAttributesQuery query, CancellationToken cancellationToken)
     {
         if (!executionContext.UserInfo.IsFeatureFlagEnabled(FeatureFlagDefinitions.CapAttributes.Key))
+        {
             return Result<AttributeResponse[]>.Forbidden("The attributes feature is not enabled for this organization.");
+        }
 
         var orgId = executionContext.ActiveOrgId!;
         var attributes = await attributeRepository.GetByOrgUnfilteredAsync(orgId, cancellationToken);

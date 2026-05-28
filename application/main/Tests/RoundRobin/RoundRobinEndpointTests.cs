@@ -171,7 +171,7 @@ public sealed class RoundRobinEndpointTests : EndpointBaseTest<MainDbContext>
 
         await _rrClient.PostAsJsonAsync(
             $"/api/round-robin/{eventType.Id}/hosts",
-            new AddRoundRobinHostRequest(memberId, false, 0, 100)
+            new AddRoundRobinHostRequest(memberId)
         );
 
         var updateResponse = await _rrClient.PutAsJsonAsync(

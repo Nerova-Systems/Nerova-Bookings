@@ -8,7 +8,7 @@ namespace Account.Features.AuditLog.Infrastructure;
 /// <summary>
 ///     Append-only repository for <see cref="AuditLogEntry" /> aggregates.
 ///     All reads are automatically scoped to the current tenant via the
-///     <see cref="ITenantScopedEntity" /> query filter.
+///     <c>ITenantScopedEntity</c> query filter.
 /// </summary>
 public sealed class AuditLogRepository(AccountDbContext context)
     : RepositoryBase<AuditLogEntry, AuditLogEntryId>(context), IAuditLogRepository

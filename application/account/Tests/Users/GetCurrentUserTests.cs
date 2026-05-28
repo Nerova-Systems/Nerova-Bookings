@@ -23,6 +23,7 @@ public sealed class GetCurrentUserTests(AccountWebApplicationFactory factory) : 
                 'type': 'object',
                 'properties': {
                     'id': {'type': 'string', 'pattern': '^usr_[A-Z0-9]{26}$'},
+                    'tenantId': {'type': 'string', 'pattern': '^[0-9]+$'},
                     'createdAt': {'type': 'string', 'format': 'date-time'},
                     'modifiedAt': {'type': ['null', 'string'], 'format': 'date-time'},
                     'email': {'type': 'string', 'maxLength': 100},
@@ -32,8 +33,19 @@ public sealed class GetCurrentUserTests(AccountWebApplicationFactory factory) : 
                     'role': {'type': 'string', 'minLength': 1, 'maxLength': 20},
                     'emailConfirmed': {'type': 'boolean'},
                     'avatarUrl': {'type': ['null', 'string'], 'maxLength': 100},
+                    'preferences': {
+                        'type': 'object',
+                        'properties': {
+                            'timeFormat': {'type': 'string', 'enum': ['TwelveHour', 'TwentyFourHour']},
+                            'weekStart': {'type': 'string'},
+                            'language': {'type': 'string'},
+                            'timeZone': {'type': 'string'}
+                        },
+                        'required': ['timeFormat', 'weekStart', 'language', 'timeZone'],
+                        'additionalProperties': false
+                    }
                 },
-                'required': ['id', 'createdAt', 'modifiedAt', 'email', 'role'],
+                'required': ['id', 'tenantId', 'createdAt', 'modifiedAt', 'email', 'role', 'preferences'],
                 'additionalProperties': false
             }
             """

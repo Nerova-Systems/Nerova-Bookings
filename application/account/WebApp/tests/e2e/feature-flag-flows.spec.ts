@@ -37,17 +37,31 @@ async function getAntiforgeryHeaders(page: Page): Promise<{ "x-xsrf-token": stri
 // in which case rollout alone produces an empty Accounts table.
 async function activateAndPinRollout(page: Page, flagKey: string, rolloutPercentage: number): Promise<void> {
   const headers = await getAntiforgeryHeaders(page);
-  const activateResponse = await page.request.put(
-    `${BACK_OFFICE_BASE_URL}/api/back-office/feature-flags/${flagKey}/activate`,
-    { headers }
+  const activateOk = await page.evaluate(
+    async ({ url, headers }) => {
+      const r = await fetch(url, { method: "PUT", headers });
+      return r.ok;
+    },
+    { url: `${BACK_OFFICE_BASE_URL}/api/back-office/feature-flags/${flagKey}/activate`, headers }
   );
-  expect(activateResponse.ok()).toBe(true);
+  expect(activateOk).toBe(true);
 
-  const rolloutResponse = await page.request.put(
-    `${BACK_OFFICE_BASE_URL}/api/back-office/feature-flags/${flagKey}/rollout-percentage`,
-    { data: { rolloutPercentage }, headers }
+  const rolloutOk = await page.evaluate(
+    async ({ url, headers, rolloutPercentage }) => {
+      const r = await fetch(url, {
+        method: "PUT",
+        headers: { ...headers, "content-type": "application/json" },
+        body: JSON.stringify({ rolloutPercentage })
+      });
+      return r.ok;
+    },
+    {
+      url: `${BACK_OFFICE_BASE_URL}/api/back-office/feature-flags/${flagKey}/rollout-percentage`,
+      headers,
+      rolloutPercentage
+    }
   );
-  expect(rolloutResponse.ok()).toBe(true);
+  expect(rolloutOk).toBe(true);
 }
 
 // Globally activate a kill-switch flag via the back-office API. The reconciler creates kill-switch
@@ -56,11 +70,14 @@ async function activateAndPinRollout(page: Page, flagKey: string, rolloutPercent
 // idempotent — calling it on an already-active flag just refreshes EnabledAt.
 async function activateKillSwitchFlag(page: Page, flagKey: string): Promise<void> {
   const headers = await getAntiforgeryHeaders(page);
-  const activateResponse = await page.request.put(
-    `${BACK_OFFICE_BASE_URL}/api/back-office/feature-flags/${flagKey}/activate`,
-    { headers }
+  const ok = await page.evaluate(
+    async ({ url, headers }) => {
+      const r = await fetch(url, { method: "PUT", headers });
+      return r.ok;
+    },
+    { url: `${BACK_OFFICE_BASE_URL}/api/back-office/feature-flags/${flagKey}/activate`, headers }
   );
-  expect(activateResponse.ok()).toBe(true);
+  expect(ok).toBe(true);
 }
 
 // Remove every tenant-override on `flagKey` across the entire database. The override toggles in
@@ -76,21 +93,32 @@ async function removeAllTenantOverrides(page: Page, flagKey: string): Promise<vo
   // remaining 150 returns rows 200-249 of the original, leaving rows 100-199 untouched).
   const pageSize = 100;
   while (true) {
-    const response = await page.request.get(
-      `${BACK_OFFICE_BASE_URL}/api/back-office/feature-flags/${flagKey}/tenants?HasOverride=true&PageSize=${pageSize}&PageOffset=0`
+    const { ok, tenants } = await page.evaluate(
+      async ({ url }) => {
+        const r = await fetch(url);
+        const body = r.ok ? await r.json() : { tenants: [] };
+        return { ok: r.ok, tenants: (body.tenants ?? []) as { id: string }[] };
+      },
+      {
+        url: `${BACK_OFFICE_BASE_URL}/api/back-office/feature-flags/${flagKey}/tenants?HasOverride=true&PageSize=${pageSize}&PageOffset=0`
+      }
     );
-    expect(response.ok()).toBe(true);
-    const body = await response.json();
-    const tenants = body.tenants as { id: string }[];
+    expect(ok).toBe(true);
     if (tenants.length === 0) return;
 
     for (const tenant of tenants) {
-      const deleteResponse = await page.request.delete(
-        `${BACK_OFFICE_BASE_URL}/api/back-office/feature-flags/${flagKey}/tenant-override?tenantId=${tenant.id}`,
-        { headers }
+      const status = await page.evaluate(
+        async ({ url, headers }) => {
+          const r = await fetch(url, { method: "DELETE", headers });
+          return r.status;
+        },
+        {
+          url: `${BACK_OFFICE_BASE_URL}/api/back-office/feature-flags/${flagKey}/tenant-override?tenantId=${tenant.id}`,
+          headers
+        }
       );
       // 200 = override existed and was removed; 404 = override raced away (e.g., concurrent worker).
-      expect([200, 404]).toContain(deleteResponse.status());
+      expect([200, 404]).toContain(status);
     }
     if (tenants.length < pageSize) return;
   }

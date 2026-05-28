@@ -1,4 +1,5 @@
 import { t } from "@lingui/core/macro";
+import { getWeekStartIndex, useUserPreferences } from "@repo/infrastructure/userPreferences/UserPreferencesContext";
 import { Button } from "@repo/ui/components/Button";
 import { Calendar } from "@repo/ui/components/Calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@repo/ui/components/Popover";
@@ -15,6 +16,7 @@ export function WeekPicker({
   onWeekStartChange: (weekStart: Date) => void;
 }>) {
   const [isOpen, setIsOpen] = useState(false);
+  const weekStartsOn = getWeekStartIndex(useUserPreferences());
   const weekEnd = new Date(weekStart);
   weekEnd.setDate(weekEnd.getDate() + 6);
   const weekRange = formatWeekRange(weekStart, weekEnd);
@@ -36,7 +38,7 @@ export function WeekPicker({
           defaultMonth={weekStart}
           onSelect={(date) => {
             if (!date) return;
-            onWeekStartChange(getWeekStartDate(date));
+            onWeekStartChange(getWeekStartDate(date, weekStartsOn));
             setIsOpen(false);
           }}
         />

@@ -13,7 +13,7 @@ namespace Account.Features.Attributes.Queries.GetMembershipAttributes;
 [RequirePermission(PermissionResource.Attribute, PermissionAction.Read, PermissionScope.Organization)]
 public sealed record GetMembershipAttributesQuery : IRequest<Result<AttributeAssignmentResponse[]>>
 {
-    public MembershipId MembershipId { get; init; } = default!;
+    public required MembershipId MembershipId { get; init; }
 }
 
 public sealed class GetMembershipAttributesHandler(
@@ -27,17 +27,23 @@ public sealed class GetMembershipAttributesHandler(
         CancellationToken cancellationToken)
     {
         if (!executionContext.UserInfo.IsFeatureFlagEnabled(FeatureFlagDefinitions.CapAttributes.Key))
+        {
             return Result<AttributeAssignmentResponse[]>.Forbidden("The attributes feature is not enabled for this organization.");
+        }
 
         var orgId = executionContext.ActiveOrgId!;
 
         // Verify the membership belongs to this org.
         var membership = await membershipRepository.GetByIdAsync(query.MembershipId, cancellationToken);
         if (membership is null)
+        {
             return Result<AttributeAssignmentResponse[]>.NotFound($"Membership '{query.MembershipId}' not found.");
+        }
 
         if (membership.TenantId != orgId)
+        {
             return Result<AttributeAssignmentResponse[]>.Forbidden("You do not have access to this membership.");
+        }
 
         var assignments = await assignmentRepository.GetByMembershipAsync(query.MembershipId, cancellationToken);
 

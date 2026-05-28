@@ -149,6 +149,10 @@ var mainWorkers = builder
     .WithEnvironment("Connectors__Core__OAuth__Zoom__ClientId", coreConnectorOAuth.ZoomClientId)
     .WithEnvironment("Connectors__Core__OAuth__Zoom__ClientSecret", coreConnectorOAuth.ZoomClientSecret)
     .WithReference(mainDatabase)
+    // Workers resolve host (booking owner) email/locale by reading the account-database users table.
+    // Cross-SCS read-only lookup; no cross-write. Booking notification emails depend on this; without
+    // it, host-side notifications and EmailHost workflow reminders would silently no-op.
+    .WithReference(accountDatabase)
     .WithReference(azureStorage)
     .WaitFor(mainDatabase);
 

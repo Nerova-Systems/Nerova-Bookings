@@ -34,7 +34,7 @@ public sealed class SaveChangesInterceptorTests : IDisposable
 
         // Assert
         newTestAggregate.CreatedAt.Should().NotBe(default);
-        newTestAggregate.ModifiedAt.Should().BeNull();
+        newTestAggregate.ModifiedAt.Should().Be(newTestAggregate.CreatedAt);
     }
 
     [Fact]

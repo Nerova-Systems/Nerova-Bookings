@@ -1,6 +1,8 @@
+using Main.Features.Apps.Domain;
 using Main.Features.EventTypes.Domain;
 using Main.Features.Schedules.Domain;
 using Main.Features.Scheduling.Domain;
+using Main.Features.Webhooks.Domain;
 using Main.Features.Workflows.Domain;
 using SharedKernel.Domain;
 using SharedKernel.Telemetry;
@@ -21,6 +23,27 @@ public sealed class ScheduleUpdated(ScheduleId scheduleId)
 
 public sealed class ScheduleDeleted(ScheduleId scheduleId)
     : TelemetryEvent(("schedule_id", scheduleId));
+
+public sealed class ScheduleDuplicated(ScheduleId sourceScheduleId, ScheduleId duplicateScheduleId)
+    : TelemetryEvent(("source_schedule_id", sourceScheduleId), ("schedule_id", duplicateScheduleId));
+
+public sealed class TravelScheduleCreated(TravelScheduleId travelScheduleId)
+    : TelemetryEvent(("travel_schedule_id", travelScheduleId));
+
+public sealed class TravelScheduleUpdated(TravelScheduleId travelScheduleId)
+    : TelemetryEvent(("travel_schedule_id", travelScheduleId));
+
+public sealed class TravelScheduleDeleted(TravelScheduleId travelScheduleId)
+    : TelemetryEvent(("travel_schedule_id", travelScheduleId));
+
+public sealed class OutOfOfficeCreated(OutOfOfficeId outOfOfficeId)
+    : TelemetryEvent(("out_of_office_id", outOfOfficeId));
+
+public sealed class OutOfOfficeUpdated(OutOfOfficeId outOfOfficeId)
+    : TelemetryEvent(("out_of_office_id", outOfOfficeId));
+
+public sealed class OutOfOfficeDeleted(OutOfOfficeId outOfOfficeId)
+    : TelemetryEvent(("out_of_office_id", outOfOfficeId));
 
 public sealed class EventTypeCreated(EventTypeId eventTypeId)
     : TelemetryEvent(("event_type_id", eventTypeId));
@@ -99,3 +122,36 @@ public sealed class RoundRobinHostUpdated(EventTypeId eventTypeId, UserId userId
 
 public sealed class RoundRobinBookingReassigned(BookingId bookingId, UserId newOwnerUserId)
     : TelemetryEvent(("booking_id", bookingId), ("new_owner_user_id", newOwnerUserId));
+
+public sealed class HashedLinkCreated(EventTypeId eventTypeId, HashedLinkId hashedLinkId)
+    : TelemetryEvent(("event_type_id", eventTypeId), ("hashed_link_id", hashedLinkId));
+
+public sealed class HashedLinkDeleted(EventTypeId eventTypeId, HashedLinkId hashedLinkId)
+    : TelemetryEvent(("event_type_id", eventTypeId), ("hashed_link_id", hashedLinkId));
+
+public sealed class TeamAssignmentUpdated(EventTypeId eventTypeId, bool assignAllTeamMembers)
+    : TelemetryEvent(("event_type_id", eventTypeId), ("assign_all_team_members", assignAllTeamMembers));
+
+public sealed class AppInstallStarted(AppSlug slug)
+    : TelemetryEvent(("app_slug", slug));
+
+public sealed class AppInstallCompleted(AppSlug slug)
+    : TelemetryEvent(("app_slug", slug));
+
+public sealed class AppUninstalled(AppSlug slug)
+    : TelemetryEvent(("app_slug", slug));
+
+public sealed class WebhookCreated(WebhookId webhookId)
+    : TelemetryEvent(("webhook_id", webhookId));
+
+public sealed class WebhookUpdated(WebhookId webhookId)
+    : TelemetryEvent(("webhook_id", webhookId));
+
+public sealed class WebhookDeleted(WebhookId webhookId)
+    : TelemetryEvent(("webhook_id", webhookId));
+
+public sealed class WebhookDelivered(WebhookId webhookId, string eventType)
+    : TelemetryEvent(("webhook_id", webhookId), ("event_type", eventType));
+
+public sealed class WebhookDeliveryDeadLettered(WebhookId webhookId, string eventType)
+    : TelemetryEvent(("webhook_id", webhookId), ("event_type", eventType));

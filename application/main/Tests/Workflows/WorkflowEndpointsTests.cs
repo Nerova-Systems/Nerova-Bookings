@@ -44,7 +44,7 @@ public sealed class WorkflowEndpointsTests : EndpointBaseTest<MainDbContext>
         var created = await createResponse.DeserializeResponse<WorkflowResponse>();
 
         created.Should().NotBeNull();
-        created!.Name.Should().Be("Follow-up sequence");
+        created.Name.Should().Be("Follow-up sequence");
         created.Trigger.Should().Be(WorkflowTrigger.NewEvent);
         created.Steps.Should().BeEmpty();
 
@@ -155,7 +155,7 @@ public sealed class WorkflowEndpointsTests : EndpointBaseTest<MainDbContext>
         var step = await addResponse.DeserializeResponse<WorkflowStepResponse>();
 
         step.Should().NotBeNull();
-        step!.Action.Should().Be(WorkflowAction.EmailAttendee);
+        step.Action.Should().Be(WorkflowAction.EmailAttendee);
         step.Template.Should().Be(WorkflowReminderTemplate.Custom);
         step.EmailSubject.Should().Be("Hello");
         step.EmailBody.Should().Be("Welcome!");
@@ -210,7 +210,7 @@ public sealed class WorkflowEndpointsTests : EndpointBaseTest<MainDbContext>
         var binding = await bindResponse.DeserializeResponse<WorkflowEventTypeBindingResponse>();
 
         binding.Should().NotBeNull();
-        binding!.WorkflowId.Should().Be(workflow.Id);
+        binding.WorkflowId.Should().Be(workflow.Id);
         binding.EventTypeId.Should().Be(eventType.Id);
     }
 

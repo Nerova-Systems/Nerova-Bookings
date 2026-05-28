@@ -12,7 +12,10 @@ namespace Account.Features.Attributes.Domain;
 [JsonConverter(typeof(StronglyTypedIdJsonConverter<string, AttributeOptionId>))]
 public sealed record AttributeOptionId(string Value) : StronglyTypedUlid<AttributeOptionId>(Value)
 {
-    public override string ToString() => Value;
+    public override string ToString()
+    {
+        return Value;
+    }
 }
 
 /// <summary>
@@ -24,7 +27,9 @@ public sealed record AttributeOptionId(string Value) : StronglyTypedUlid<Attribu
 public sealed class AttributeOption
 {
     // Private constructor for factory + EF materialisation.
-    private AttributeOption() { }
+    private AttributeOption()
+    {
+    }
 
     /// <summary>Unique identifier; auto-generated ULID with <c>atop_</c> prefix.</summary>
     public AttributeOptionId Id { get; private set; } = null!;
@@ -78,6 +83,8 @@ public sealed class AttributeOption
 
     // ─── Helpers ──────────────────────────────────────────────────────────────
 
-    private static string GenerateSlug(string value) =>
-        value.ToLowerInvariant().Trim().Replace(' ', '-').Replace("_", "-");
+    private static string GenerateSlug(string value)
+    {
+        return value.ToLowerInvariant().Trim().Replace(' ', '-').Replace("_", "-");
+    }
 }

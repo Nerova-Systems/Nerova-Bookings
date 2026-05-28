@@ -56,11 +56,13 @@ public sealed class TeamsEndpointTests(AccountWebApplicationFactory factory)
     }
 
     [Fact]
-    public async Task GetTeams_WhenNoActiveOrg_ShouldReturnForbidden()
+    public async Task GetTeams_WhenNoActiveOrg_ShouldReturnEmptyArrayForSoloTenant()
     {
-        SetActorToken(DatabaseSeeder.Tenant1Owner.Id, DatabaseSeeder.Tenant1.Id, activeOrgId: null);
+        SetActorToken(DatabaseSeeder.Tenant1Owner.Id, DatabaseSeeder.Tenant1.Id, null);
         var response = await AnonymousHttpClient.GetAsync(TeamsUrl);
-        response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        var teams = await response.DeserializeResponse<TeamResponse[]>();
+        teams.Should().BeEmpty();
     }
 
     // ──────────────────────────────────────────────────────────────────────────
@@ -81,7 +83,7 @@ public sealed class TeamsEndpointTests(AccountWebApplicationFactory factory)
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var teams = await response.Content.ReadFromJsonAsync<TeamResponse[]>();
         teams.Should().NotBeNull();
-        teams!.Should().ContainSingle(t => t.Id == teamId);
+        teams.Should().ContainSingle(t => t.Id == teamId);
         teams[0].Name.Should().Be("Engineering");
         teams[0].MemberCount.Should().Be(1);
     }
@@ -129,7 +131,7 @@ public sealed class TeamsEndpointTests(AccountWebApplicationFactory factory)
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var team = await response.Content.ReadFromJsonAsync<TeamResponse>();
         team.Should().NotBeNull();
-        team!.Name.Should().Be("Engineering");
+        team.Name.Should().Be("Engineering");
         team.Slug.Should().Be("engineering");
         team.ParentOrgId.Should().Be(orgId);
         team.MemberCount.Should().Be(1);
@@ -140,7 +142,7 @@ public sealed class TeamsEndpointTests(AccountWebApplicationFactory factory)
     {
         var orgId = InsertOrgTenant();
         InsertMembership(DatabaseSeeder.Tenant1Owner.Id, orgId, MembershipRole.Owner);
-        InsertTeamTenant(orgId, "Other", slug: "engineering");
+        InsertTeamTenant(orgId, "Other", "engineering");
         SetActorToken(DatabaseSeeder.Tenant1Owner.Id, DatabaseSeeder.Tenant1.Id, orgId);
 
         var response = await AnonymousHttpClient.PostAsJsonAsync(TeamsUrl, new { Name = "Engineering", Slug = "engineering" });
@@ -257,7 +259,8 @@ public sealed class TeamsEndpointTests(AccountWebApplicationFactory factory)
         SetActorToken(DatabaseSeeder.Tenant1Owner.Id, DatabaseSeeder.Tenant1.Id, orgId);
 
         var response = await AnonymousHttpClient.PutAsJsonAsync($"{TeamsUrl}/{teamId}",
-            new { Name = "New", Slug = "new", Bio = "Hi", HideBranding = true });
+            new { Name = "New", Slug = "new", Bio = "Hi", HideBranding = true }
+        );
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var team = await response.Content.ReadFromJsonAsync<TeamResponse>();
@@ -272,12 +275,13 @@ public sealed class TeamsEndpointTests(AccountWebApplicationFactory factory)
     {
         var orgId = InsertOrgTenant();
         InsertMembership(DatabaseSeeder.Tenant1Owner.Id, orgId, MembershipRole.Owner);
-        InsertTeamTenant(orgId, "Sibling", slug: "taken");
-        var teamId = InsertTeamTenant(orgId, "Mine", slug: "mine");
+        InsertTeamTenant(orgId, "Sibling", "taken");
+        var teamId = InsertTeamTenant(orgId, "Mine", "mine");
         SetActorToken(DatabaseSeeder.Tenant1Owner.Id, DatabaseSeeder.Tenant1.Id, orgId);
 
         var response = await AnonymousHttpClient.PutAsJsonAsync($"{TeamsUrl}/{teamId}",
-            new { Name = "Mine", Slug = "taken" });
+            new { Name = "Mine", Slug = "taken" }
+        );
 
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }
@@ -291,7 +295,8 @@ public sealed class TeamsEndpointTests(AccountWebApplicationFactory factory)
         SetActorToken(DatabaseSeeder.Tenant1Member.Id, DatabaseSeeder.Tenant1.Id, orgId);
 
         var response = await AnonymousHttpClient.PutAsJsonAsync($"{TeamsUrl}/{teamId}",
-            new { Name = "New" });
+            new { Name = "New" }
+        );
 
         response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
     }
@@ -385,7 +390,8 @@ public sealed class TeamsEndpointTests(AccountWebApplicationFactory factory)
         SetActorToken(DatabaseSeeder.Tenant1Owner.Id, DatabaseSeeder.Tenant1.Id, orgId);
 
         var response = await AnonymousHttpClient.PostAsJsonAsync($"{TeamsUrl}/{teamId}/invitations",
-            new { Email = "nobody@example.com", Role = nameof(MembershipRole.Member) });
+            new { Email = "nobody@example.com", Role = nameof(MembershipRole.Member) }
+        );
 
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
         var body = await response.Content.ReadAsStringAsync();
@@ -401,7 +407,8 @@ public sealed class TeamsEndpointTests(AccountWebApplicationFactory factory)
         SetActorToken(DatabaseSeeder.Tenant1Owner.Id, DatabaseSeeder.Tenant1.Id, orgId);
 
         var response = await AnonymousHttpClient.PostAsJsonAsync($"{TeamsUrl}/{teamId}/invitations",
-            new { Email = DatabaseSeeder.Tenant1Member.Email, Role = nameof(MembershipRole.Member) });
+            new { DatabaseSeeder.Tenant1Member.Email, Role = nameof(MembershipRole.Member) }
+        );
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
     }
@@ -416,7 +423,8 @@ public sealed class TeamsEndpointTests(AccountWebApplicationFactory factory)
         SetActorToken(DatabaseSeeder.Tenant1Owner.Id, DatabaseSeeder.Tenant1.Id, orgId);
 
         var response = await AnonymousHttpClient.PostAsJsonAsync($"{TeamsUrl}/{teamId}/invitations",
-            new { Email = DatabaseSeeder.Tenant1Member.Email, Role = nameof(MembershipRole.Member) });
+            new { DatabaseSeeder.Tenant1Member.Email, Role = nameof(MembershipRole.Member) }
+        );
 
         response.StatusCode.Should().Be(HttpStatusCode.Conflict);
     }
@@ -430,7 +438,8 @@ public sealed class TeamsEndpointTests(AccountWebApplicationFactory factory)
         SetActorToken(DatabaseSeeder.Tenant1Member.Id, DatabaseSeeder.Tenant1.Id, orgId);
 
         var response = await AnonymousHttpClient.PostAsJsonAsync($"{TeamsUrl}/{teamId}/invitations",
-            new { Email = "any@test.com", Role = nameof(MembershipRole.Member) });
+            new { Email = "any@test.com", Role = nameof(MembershipRole.Member) }
+        );
 
         response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
     }
@@ -581,7 +590,7 @@ public sealed class TeamsEndpointTests(AccountWebApplicationFactory factory)
                 ("rollout_bucket", 7),
                 ("kind", nameof(TenantKind.Team)),
                 ("parent_tenant_id", parentOrgId.Value),
-                ("slug", (object?)slug)
+                ("slug", slug)
             ]
         );
         return teamId;
@@ -597,12 +606,12 @@ public sealed class TeamsEndpointTests(AccountWebApplicationFactory factory)
                 ("role", role.ToString()),
                 ("accepted", true),
                 ("accepted_at", now),
-                ("invited_by", (object?)null),
-                ("invite_token", (object?)null),
+                ("invited_by", null),
+                ("invite_token", null),
                 ("disable_impersonation", false),
-                ("custom_role_id", (object?)null),
+                ("custom_role_id", null),
                 ("created_at", now),
-                ("modified_at", (object?)null)
+                ("modified_at", null)
             ]
         );
     }
@@ -618,12 +627,12 @@ public sealed class TeamsEndpointTests(AccountWebApplicationFactory factory)
                 ("role", role.ToString()),
                 ("accepted", true),
                 ("accepted_at", now),
-                ("invited_by", (object?)null),
-                ("invite_token", (object?)null),
+                ("invited_by", null),
+                ("invite_token", null),
                 ("disable_impersonation", false),
-                ("custom_role_id", (object?)null),
+                ("custom_role_id", null),
                 ("created_at", now),
-                ("modified_at", (object?)null)
+                ("modified_at", null)
             ]
         );
         return id;

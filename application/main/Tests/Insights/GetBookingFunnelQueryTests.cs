@@ -57,7 +57,7 @@ public sealed class GetBookingFunnelQueryTests : InsightsEndpointBaseTest
         Connection.Update("bookings", "id", cancelled.Id, [
                 ("start_time", DateTimeOffset.Parse("2025-06-02T11:00:00Z")),
                 ("end_time", DateTimeOffset.Parse("2025-06-02T11:30:00Z")),
-                ("status", "cancelled")
+                ("status", "Cancelled")
             ]
         );
 

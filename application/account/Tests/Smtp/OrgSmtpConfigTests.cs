@@ -1,7 +1,6 @@
 using Account.Features.Smtp.Domain;
 using Account.Features.Tenants.Domain;
 using FluentAssertions;
-using SharedKernel.Domain;
 using Xunit;
 
 namespace Account.Tests.Smtp;
@@ -12,7 +11,6 @@ namespace Account.Tests.Smtp;
 /// </summary>
 public sealed class OrgSmtpConfigTests
 {
-    private static readonly TenantId SomeOrgId = TenantId.NewId();
     private static readonly Tenant OrgTenant = Tenant.CreateOrganization("owner@acme.com", 0);
     private static readonly Tenant SoloTenant = Tenant.Create("solo@example.com", 0);
 

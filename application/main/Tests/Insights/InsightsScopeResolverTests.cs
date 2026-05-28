@@ -33,7 +33,7 @@ public sealed class InsightsScopeResolverTests
         var scope = _sut.TryResolve();
 
         scope.Should().NotBeNull();
-        scope!.TenantId.Should().Be(tenantId);
+        scope.TenantId.Should().Be(tenantId);
         scope.UserId.Should().Be(userId);
         scope.TeamId.Should().BeNull();
     }

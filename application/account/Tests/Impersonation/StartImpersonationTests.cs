@@ -120,7 +120,7 @@ public sealed class StartImpersonationTests(AccountWebApplicationFactory factory
 
     private void SetActorToken(UserId actorId, TenantId actorTenantId, TenantId activeOrgId, string role = "Owner")
     {
-        SetActorTokenInternal(actorId, actorTenantId, activeOrgId, role, new HashSet<string> { FeatureFlagDefinitions.CapImpersonation.Key });
+        SetActorTokenInternal(actorId, actorTenantId, activeOrgId, role, [FeatureFlagDefinitions.CapImpersonation.Key]);
     }
 
     private void SetActorTokenWithoutCapFlag(UserId actorId, TenantId actorTenantId, TenantId activeOrgId, string role = "Owner")

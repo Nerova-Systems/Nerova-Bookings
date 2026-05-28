@@ -149,7 +149,7 @@ public sealed class DelegationCredentialEndpointTests(AccountWebApplicationFacto
 
         var results = await response.DeserializeResponse<DelegationCredentialResponse[]>();
         results.Should().NotBeNull();
-        results!.Should().ContainSingle();
+        results.Should().ContainSingle();
         results[0].Platform.Should().Be(WorkspacePlatform.Google);
         results[0].Domain.Should().Be("acme.com");
         results[0].Status.Should().Be(DelegationCredentialStatus.Active);
@@ -367,7 +367,7 @@ public sealed class DelegationCredentialEndpointTests(AccountWebApplicationFacto
         response.ShouldBeSuccessfulGetRequest();
         var result = await response.DeserializeResponse<TestDelegationCredentialResultResponse>();
         result.Should().NotBeNull();
-        result!.Success.Should().BeFalse(); // stub always returns false until Wave 3
+        result.Success.Should().BeFalse(); // stub always returns false until Wave 3
     }
 
     // ──────────────────────────────────────────────────────────────────────────
@@ -386,7 +386,7 @@ public sealed class DelegationCredentialEndpointTests(AccountWebApplicationFacto
 
         var results = await response.DeserializeResponse<DelegationCredentialResponse[]>();
         results.Should().NotBeNull();
-        results!.Should().BeEmpty();
+        results.Should().BeEmpty();
     }
 
     // ──────────────────────────────────────────────────────────────────────────
@@ -496,5 +496,6 @@ public sealed class DelegationCredentialEndpointTests(AccountWebApplicationFacto
     }
 
     /// <summary>Minimal deserialization shape for the test result response body.</summary>
-    private sealed record TestDelegationCredentialResultResponse(bool Success, string? ErrorMessage);
+    // ReSharper disable once ClassNeverInstantiated.Local
+    private sealed record TestDelegationCredentialResultResponse(bool Success);
 }

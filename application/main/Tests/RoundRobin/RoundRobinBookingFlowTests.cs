@@ -147,7 +147,7 @@ public sealed class RoundRobinBookingFlowTests : EndpointBaseTest<MainDbContext>
         response.EnsureSuccessStatusCode();
         var booking = await response.DeserializeResponse<CreatePublicBookingResponse>();
         booking!.StartTime.Should().Be(DateTimeOffset.Parse(FreeSlotTimeUtc));
-        booking.Status.Should().Be("accepted");
+        booking.Status.Should().Be(BookingStatus.Accepted);
 
         // Verify the booking was assigned to the rotating host (member), not the owner
         using var scope = Provider.CreateScope();
@@ -213,7 +213,7 @@ public sealed class RoundRobinBookingFlowTests : EndpointBaseTest<MainDbContext>
         using var scope = Provider.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<MainDbContext>();
         var savedBooking = await db.Set<Booking>().IgnoreQueryFilters().FirstAsync(b => b.Id == new BookingId(created.Id));
-        savedBooking!.OwnerUserId.Should().Be(DatabaseSeeder.Tenant1Owner.Id!);
+        savedBooking.OwnerUserId.Should().Be(DatabaseSeeder.Tenant1Owner.Id!);
     }
 
     [Fact]
@@ -263,7 +263,7 @@ public sealed class RoundRobinBookingFlowTests : EndpointBaseTest<MainDbContext>
         // Add member as a rotating (non-fixed) host
         var addHostResponse = await _rrClient.PostAsJsonAsync(
             $"/api/round-robin/{eventType.Id}/hosts",
-            new AddRoundRobinHostRequest(DatabaseSeeder.Tenant1Member.Id!, false, 0, 100)
+            new AddRoundRobinHostRequest(DatabaseSeeder.Tenant1Member.Id!)
         );
         addHostResponse.EnsureSuccessStatusCode();
 
@@ -272,7 +272,7 @@ public sealed class RoundRobinBookingFlowTests : EndpointBaseTest<MainDbContext>
             // Owner also becomes a rotating host for tests that need two rotating hosts
             var ownerAsHost = await _rrClient.PostAsJsonAsync(
                 $"/api/round-robin/{eventType.Id}/hosts",
-                new AddRoundRobinHostRequest(DatabaseSeeder.Tenant1Owner.Id!, false, 0, 100)
+                new AddRoundRobinHostRequest(DatabaseSeeder.Tenant1Owner.Id!)
             );
             ownerAsHost.EnsureSuccessStatusCode();
         }
@@ -291,13 +291,13 @@ public sealed class RoundRobinBookingFlowTests : EndpointBaseTest<MainDbContext>
         // Owner as fixed host (always attends)
         await _rrClient.PostAsJsonAsync(
             $"/api/round-robin/{eventType.Id}/hosts",
-            new AddRoundRobinHostRequest(DatabaseSeeder.Tenant1Owner.Id!, true, 0, 100)
+            new AddRoundRobinHostRequest(DatabaseSeeder.Tenant1Owner.Id!, true)
         );
 
         // Member as rotating host
         await _rrClient.PostAsJsonAsync(
             $"/api/round-robin/{eventType.Id}/hosts",
-            new AddRoundRobinHostRequest(DatabaseSeeder.Tenant1Member.Id!, false, 0, 100)
+            new AddRoundRobinHostRequest(DatabaseSeeder.Tenant1Member.Id!)
         );
 
         return (handle, eventType);
@@ -318,8 +318,7 @@ public sealed class RoundRobinBookingFlowTests : EndpointBaseTest<MainDbContext>
             0,
             "Host Event",
             "host@example.com",
-            "UTC",
-            "accepted",
+            "UTC", BookingStatus.Accepted,
             new Dictionary<string, string>()
         );
         dbContext.Set<Booking>().Add(booking);
@@ -403,5 +402,5 @@ public sealed class RoundRobinBookingFlowTests : EndpointBaseTest<MainDbContext>
     private sealed record PublicSlotResponse(DateTimeOffset Time, DateTimeOffset EndTime);
 
     [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
-    private sealed record CreatePublicBookingResponse(string Id, DateTimeOffset StartTime, DateTimeOffset EndTime, string Status);
+    private sealed record CreatePublicBookingResponse(string Id, DateTimeOffset StartTime, DateTimeOffset EndTime, BookingStatus Status);
 }

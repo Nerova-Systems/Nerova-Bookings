@@ -1,5 +1,8 @@
 using System.CommandLine;
 using System.Diagnostics;
+using System.Net;
+using System.Net.Security;
+using System.Net.Sockets;
 using System.Text.RegularExpressions;
 using DeveloperCli.Installation;
 using DeveloperCli.Utilities;
@@ -14,10 +17,23 @@ public partial class End2EndCommand : Command
     // Get available self-contained systems
     private static readonly string[] AvailableSelfContainedSystems = SelfContainedSystemHelper.GetAvailableSelfContainedSystems();
 
-    private static readonly HttpClient HttpClient = new(new HttpClientHandler
+    // *.localhost subdomains (e.g. app.dev.localhost) don't resolve via the Windows DNS stub resolver,
+    // but RFC 6761 guarantees they map to loopback. Use a ConnectCallback to bypass DNS for these hosts.
+    private static readonly HttpClient HttpClient = new(new SocketsHttpHandler
         {
             AllowAutoRedirect = true,
-            ServerCertificateCustomValidationCallback = (_, _, _, _) => true
+            SslOptions = new SslClientAuthenticationOptions { RemoteCertificateValidationCallback = (_, _, _, _) => true },
+            ConnectCallback = async (context, cancellationToken) =>
+            {
+                var host = context.DnsEndPoint.Host;
+                var port = context.DnsEndPoint.Port;
+                var address = host.EndsWith(".localhost", StringComparison.OrdinalIgnoreCase)
+                    ? IPAddress.IPv6Loopback
+                    : (await Dns.GetHostAddressesAsync(host, cancellationToken))[0];
+                var socket = new Socket(address.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
+                await socket.ConnectAsync(address, port, cancellationToken);
+                return new NetworkStream(socket, ownsSocket: true);
+            }
         }
     ) { Timeout = TimeSpan.FromSeconds(5) };
 
@@ -339,7 +355,7 @@ public partial class End2EndCommand : Command
 
         // Write a temporary combined Playwright config
         var combinedConfigPath = Path.Combine(Configuration.ApplicationFolder, "playwright.combined.config.ts");
-        var testMatchEntries = string.Join(", ", testDirs.Select(dir => $"\"{dir}/**/*.spec.ts\""));
+        var testMatchEntries = string.Join(", ", testDirs.Select(dir => $"\"{dir.Replace('\\', '/')}/**/*.spec.ts\""));
         var configContent = $$"""
                               import { defineConfig } from "@playwright/test";
                               import baseConfig from "./shared-webapp/tests/e2e/playwright.config";
@@ -415,7 +431,6 @@ public partial class End2EndCommand : Command
         }
         finally
         {
-            // Clean up the temporary config
             if (File.Exists(combinedConfigPath)) File.Delete(combinedConfigPath);
         }
     }

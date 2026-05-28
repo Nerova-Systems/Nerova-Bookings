@@ -22,7 +22,9 @@ public sealed class ListAttributeSyncRulesHandler(
         CancellationToken cancellationToken)
     {
         if (!executionContext.UserInfo.IsFeatureFlagEnabled(FeatureFlagDefinitions.CapIntegrationAttributeSync.Key))
+        {
             return Result<AttributeSyncRuleResponse[]>.Forbidden("The IdP attribute sync feature is not enabled for this organization.");
+        }
 
         var orgId = executionContext.ActiveOrgId!;
         var rules = await ruleRepository.GetByOrgUnfilteredAsync(orgId, cancellationToken);

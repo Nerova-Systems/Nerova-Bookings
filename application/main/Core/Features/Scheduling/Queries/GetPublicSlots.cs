@@ -1,5 +1,6 @@
 using JetBrains.Annotations;
 using Main.Features.EventTypes.Domain;
+using Main.Features.Schedules.Domain;
 using Main.Features.Scheduling.Domain;
 using Main.Features.Scheduling.Shared;
 using SharedKernel.Cqrs;
@@ -22,6 +23,8 @@ public sealed class GetPublicSlotsHandler(
     PublicSchedulingResolver publicSchedulingResolver,
     IBookingRepository bookingRepository,
     IHostRepository hostRepository,
+    ITravelScheduleRepository travelScheduleRepository,
+    IOutOfOfficeRepository outOfOfficeRepository,
     PublicSlotCalculator publicSlotCalculator,
     CollectiveSlotCalculator collectiveSlotCalculator,
     RoundRobinSlotCalculator roundRobinSlotCalculator
@@ -47,6 +50,18 @@ public sealed class GetPublicSlotsHandler(
             return Result<PublicSlotsResponse>.BadRequest("Duration is not available for this event type.");
         }
 
+        // Pre-fetch schedule-owner adjustments (TravelSchedule + OutOfOffice) covering the request range.
+        // Use a one-day buffer on either side to match the booking pre-fetch window.
+        var adjustmentsRangeStart = DateOnly.FromDateTime(query.StartTime.UtcDateTime).AddDays(-1);
+        var adjustmentsRangeEnd = DateOnly.FromDateTime(query.EndTime.UtcDateTime).AddDays(1);
+        var travelSchedules = await travelScheduleRepository.GetActiveForUserUnfilteredAsync(
+            context.Profile.TenantId, context.Profile.OwnerUserId, adjustmentsRangeStart, adjustmentsRangeEnd, cancellationToken
+        );
+        var outOfOffices = await outOfOfficeRepository.GetActiveForUserUnfilteredAsync(
+            context.Profile.TenantId, context.Profile.OwnerUserId, adjustmentsRangeStart, adjustmentsRangeEnd, cancellationToken
+        );
+        var adjustments = new ScheduleAdjustments(travelSchedules, outOfOffices);
+
         Dictionary<string, PublicSlotResponse[]> slots;
 
         if (context.EventType.SchedulingType == SchedulingType.Collective)
@@ -63,7 +78,7 @@ public sealed class GetPublicSlotsHandler(
                 )
                 : new Dictionary<UserId, Booking[]>();
 
-            slots = collectiveSlotCalculator.GetSlots(context.EventType, context.Schedule, hostBookings, query.StartTime, query.EndTime, query.TimeZone, duration);
+            slots = collectiveSlotCalculator.GetSlots(context.EventType, context.Schedule, hostBookings, query.StartTime, query.EndTime, query.TimeZone, duration, adjustments);
         }
         else if (context.EventType.SchedulingType == SchedulingType.RoundRobin)
         {
@@ -79,7 +94,7 @@ public sealed class GetPublicSlotsHandler(
                 )
                 : new Dictionary<UserId, Booking[]>();
 
-            slots = roundRobinSlotCalculator.GetSlots(context.EventType, context.Schedule, hostBookings, hosts, query.StartTime, query.EndTime, query.TimeZone, duration);
+            slots = roundRobinSlotCalculator.GetSlots(context.EventType, context.Schedule, hostBookings, hosts, query.StartTime, query.EndTime, query.TimeZone, duration, adjustments);
         }
         else
         {
@@ -90,7 +105,7 @@ public sealed class GetPublicSlotsHandler(
                 query.EndTime.AddDays(1),
                 cancellationToken
             );
-            slots = publicSlotCalculator.GetSlots(context.EventType, context.Schedule, bookings, [], query.StartTime, query.EndTime, query.TimeZone, duration);
+            slots = publicSlotCalculator.GetSlots(context.EventType, context.Schedule, bookings, query.StartTime, query.EndTime, query.TimeZone, duration, adjustments);
         }
 
         return new PublicSlotsResponse(slots);

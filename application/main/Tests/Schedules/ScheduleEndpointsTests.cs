@@ -3,6 +3,7 @@ using System.Net.Http.Json;
 using FluentAssertions;
 using JetBrains.Annotations;
 using Main.Database;
+using Main.Features.Schedules.Domain;
 using SharedKernel.Tests;
 using SharedKernel.Validation;
 using Xunit;
@@ -301,6 +302,109 @@ public sealed class ScheduleEndpointsTests : EndpointBaseTest<MainDbContext>
 
         var getResponse = await AuthenticatedOwnerHttpClient.GetAsync($"/api/schedules/{schedule.Id}");
         await getResponse.ShouldHaveErrorStatusCode(HttpStatusCode.NotFound, $"Schedule '{schedule.Id}' was not found.");
+    }
+
+    [Fact]
+    public async Task DuplicateSchedule_WhenOwnerDuplicatesSchedule_ShouldProduceIndependentCopyWithWindowsAndOverrides()
+    {
+        var source = await CreateScheduleAsync("Working hours", true);
+        var updateCommand = new
+        {
+            name = source.Name,
+            timeZone = source.TimeZone,
+            isDefault = true,
+            availabilityWindows = new[]
+            {
+                new { days = new[] { 1, 2, 3, 4, 5 }, startMinute = 540, endMinute = 1020 }
+            },
+            dateOverrides = new[]
+            {
+                new
+                {
+                    date = "2026-06-01",
+                    windows = new[] { new { startMinute = 600, endMinute = 720 } }
+                }
+            }
+        };
+        var updateResponse = await AuthenticatedOwnerHttpClient.PutAsJsonAsync($"/api/schedules/{source.Id}", updateCommand);
+        updateResponse.EnsureSuccessStatusCode();
+
+        var duplicateResponse = await AuthenticatedOwnerHttpClient.PostAsJsonAsync($"/api/schedules/{source.Id}/duplicate", new { name = "Working hours (copy)" });
+        duplicateResponse.EnsureSuccessStatusCode();
+        var duplicate = (await duplicateResponse.DeserializeResponse<ScheduleResponse>())!;
+
+        duplicate.Id.Should().NotBe(source.Id);
+        duplicate.Name.Should().Be("Working hours (copy)");
+        duplicate.IsDefault.Should().BeFalse();
+        duplicate.TimeZone.Should().Be(source.TimeZone);
+        duplicate.AvailabilityWindows.Should().ContainSingle();
+        duplicate.AvailabilityWindows[0].Days.Should().BeEquivalentTo([1, 2, 3, 4, 5]);
+        duplicate.AvailabilityWindows[0].StartMinute.Should().Be(540);
+        duplicate.AvailabilityWindows[0].EndMinute.Should().Be(1020);
+        duplicate.DateOverrides.Should().ContainSingle();
+        duplicate.DateOverrides[0].Date.Should().Be(new DateOnly(2026, 6, 1));
+        duplicate.DateOverrides[0].Windows[0].StartMinute.Should().Be(600);
+        duplicate.DateOverrides[0].Windows[0].EndMinute.Should().Be(720);
+    }
+
+    [Fact]
+    public async Task DuplicateSchedule_WhenSourceNotFound_ShouldReturnNotFound()
+    {
+        var missingId = ScheduleId.NewId();
+        var response = await AuthenticatedOwnerHttpClient.PostAsJsonAsync($"/api/schedules/{missingId}/duplicate", new { name = "Copy" });
+
+        await response.ShouldHaveErrorStatusCode(HttpStatusCode.NotFound, $"Schedule '{missingId}' was not found.");
+    }
+
+    [Fact]
+    public async Task DuplicateSchedule_WhenMemberCallsEndpoint_ShouldReturnForbidden()
+    {
+        var source = await CreateScheduleAsync("Working hours", true);
+
+        var response = await AuthenticatedMemberHttpClient.PostAsJsonAsync($"/api/schedules/{source.Id}/duplicate", new { name = "Copy" });
+
+        await response.ShouldHaveErrorStatusCode(HttpStatusCode.Forbidden, "Only owners and admins can manage schedules.");
+    }
+
+    [Fact]
+    public async Task DuplicateSchedule_WhenNameMissing_ShouldReturnValidationError()
+    {
+        var source = await CreateScheduleAsync("Working hours", true);
+
+        var response = await AuthenticatedOwnerHttpClient.PostAsJsonAsync($"/api/schedules/{source.Id}/duplicate", new { name = "" });
+
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+    }
+
+    [Fact]
+    public async Task DuplicateSchedule_WhenOriginalChangesAfterCopy_ShouldNotAffectCopy()
+    {
+        var source = await CreateScheduleAsync("Working hours", true);
+
+        var duplicateResponse = await AuthenticatedOwnerHttpClient.PostAsJsonAsync($"/api/schedules/{source.Id}/duplicate", new { name = "Copy" });
+        duplicateResponse.EnsureSuccessStatusCode();
+        var duplicate = (await duplicateResponse.DeserializeResponse<ScheduleResponse>())!;
+
+        var updateOriginal = new
+        {
+            name = "Updated original",
+            timeZone = "Europe/Copenhagen",
+            isDefault = true,
+            availabilityWindows = new[]
+            {
+                new { days = new[] { 0, 6 }, startMinute = 0, endMinute = 60 }
+            }
+        };
+        var updateResponse = await AuthenticatedOwnerHttpClient.PutAsJsonAsync($"/api/schedules/{source.Id}", updateOriginal);
+        updateResponse.EnsureSuccessStatusCode();
+
+        var getDuplicate = await AuthenticatedOwnerHttpClient.GetAsync($"/api/schedules/{duplicate.Id}");
+        getDuplicate.EnsureSuccessStatusCode();
+        var fetched = (await getDuplicate.DeserializeResponse<ScheduleResponse>())!;
+
+        fetched.Name.Should().Be("Copy");
+        fetched.TimeZone.Should().Be("Africa/Johannesburg");
+        fetched.AvailabilityWindows[0].Days.Should().BeEquivalentTo([1, 2, 3, 4, 5]);
     }
 
     private async Task<ScheduleResponse> CreateScheduleAsync(string name, bool isDefault)

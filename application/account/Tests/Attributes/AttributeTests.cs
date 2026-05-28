@@ -9,7 +9,8 @@ using OrgAttribute = Account.Features.Attributes.Domain.Attribute;
 namespace Account.Tests.Attributes;
 
 /// <summary>
-///     Unit tests for <see cref="Attribute" /> and <see cref="AttributeAssignment" /> aggregate invariants.
+///     Unit tests for <see cref="System.Attribute" /> and <see cref="Features.Attributes.Domain.AttributeAssignment" />
+///     aggregate invariants.
 ///     Pure in-memory — no database required.
 /// </summary>
 public sealed class AttributeTests
@@ -75,7 +76,7 @@ public sealed class AttributeTests
     {
         var attribute = OrgAttribute.Create(OrgTenantId, TenantKind.Organization, "Old Name", AttributeType.Text);
 
-        attribute.Update("New Name", isLocked: true, isWeightsEnabled: true, enabled: false);
+        attribute.Update("New Name", true, true, false);
 
         attribute.Name.Should().Be("New Name");
         attribute.IsLocked.Should().BeTrue();
@@ -121,7 +122,7 @@ public sealed class AttributeTests
         var attribute = OrgAttribute.Create(OrgTenantId, TenantKind.Organization, "Role", AttributeType.SingleSelect);
         var option = attribute.AddOption("Old Value");
 
-        var result = attribute.UpdateOption(option.Id, "New Value", isGroup: true, contains: ["child-a"]);
+        var result = attribute.UpdateOption(option.Id, "New Value", true, ["child-a"]);
 
         result.Should().BeTrue();
         attribute.Options.Single(o => o.Id == option.Id).Value.Should().Be("New Value");

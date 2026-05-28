@@ -164,14 +164,15 @@ public sealed class RoleAggregateTests(AccountWebApplicationFactory factory)
     }
 
     [Fact]
-    public void CreateCustom_ForSoloTenant_ShouldThrowInvalidOperationException()
+    public void CreateCustom_ForSoloTenant_ShouldSucceed()
     {
         var soloTenantId = DatabaseSeeder.Tenant1.Id;
 
-        var act = () => Role.CreateCustom(soloTenantId, TenantKind.Solo, "Editor", null);
+        var role = Role.CreateCustom(soloTenantId, TenantKind.Solo, "Editor", null);
 
-        act.Should().Throw<InvalidOperationException>()
-            .WithMessage("*Solo*");
+        role.TenantId.Should().Be(soloTenantId);
+        role.IsSystem.Should().BeFalse();
+        role.Name.Should().Be("Editor");
     }
 
     [Fact]
@@ -337,7 +338,7 @@ public sealed class RoleAggregateTests(AccountWebApplicationFactory factory)
         var ownerRole = await repository.GetByIdAsync(SystemRoles.OwnerId, CancellationToken.None);
 
         ownerRole.Should().NotBeNull();
-        ownerRole!.Permissions.Should().HaveCount(Permission.All.Count);
+        ownerRole.Permissions.Should().HaveCount(Permission.All.Count);
     }
 
     [Fact]
@@ -371,7 +372,7 @@ public sealed class RoleAggregateTests(AccountWebApplicationFactory factory)
 
         // Assert
         loaded.Should().NotBeNull();
-        loaded!.Name.Should().Be("Editor");
+        loaded.Name.Should().Be("Editor");
         loaded.TenantId.Should().Be(org.Id);
         loaded.IsSystem.Should().BeFalse();
         loaded.Permissions.Should().HaveCount(3);
@@ -427,7 +428,7 @@ public sealed class RoleAggregateTests(AccountWebApplicationFactory factory)
 
         // Assert
         found.Should().NotBeNull();
-        found!.Id.Should().Be(role.Id);
+        found.Id.Should().Be(role.Id);
     }
 
     [Fact]

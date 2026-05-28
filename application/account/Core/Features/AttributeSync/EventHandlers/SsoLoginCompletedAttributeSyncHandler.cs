@@ -1,6 +1,5 @@
 using Account.Features.AttributeSync.Infrastructure;
 using Account.Features.Sso.Events;
-using MediatR;
 
 namespace Account.Features.AttributeSync.EventHandlers;
 

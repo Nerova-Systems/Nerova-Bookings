@@ -1,4 +1,6 @@
 using JetBrains.Annotations;
+using Main.Features.Permissions.Domain;
+using Main.Features.Permissions.Pipeline;
 using Main.Features.Schedules.Domain;
 using Main.Features.Schedules.Shared;
 using SharedKernel.Cqrs;
@@ -7,6 +9,7 @@ using SharedKernel.ExecutionContext;
 namespace Main.Features.Schedules.Queries;
 
 [PublicAPI]
+[RequirePermission(PermissionResource.Schedule, PermissionAction.Read)]
 public sealed record GetScheduleQuery(ScheduleId Id) : IRequest<Result<ScheduleResponse>>;
 
 public sealed class GetScheduleHandler(IScheduleRepository scheduleRepository, IExecutionContext executionContext)
@@ -21,7 +24,7 @@ public sealed class GetScheduleHandler(IScheduleRepository scheduleRepository, I
         }
 
         var schedule = await scheduleRepository.GetByIdAsync(query.Id, cancellationToken);
-        if (schedule is null || schedule.OwnerUserId != ownerUserId)
+        if (schedule is null || !ScheduleAccess.HasAccess(schedule, ownerUserId, executionContext.ActiveTeamId))
         {
             return Result<ScheduleResponse>.NotFound($"Schedule '{query.Id}' was not found.");
         }

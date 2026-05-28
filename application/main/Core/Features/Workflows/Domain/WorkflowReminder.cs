@@ -101,6 +101,7 @@ public sealed class WorkflowReminder : AggregateRoot<WorkflowReminderId>, ITenan
     {
         Status = WorkflowReminderStatus.Dispatched;
         ReferenceId = referenceId;
+        ErrorMessage = null;
     }
 
     public void MarkCancelled()
@@ -108,6 +109,23 @@ public sealed class WorkflowReminder : AggregateRoot<WorkflowReminderId>, ITenan
         Status = WorkflowReminderStatus.Cancelled;
     }
 
+    /// <summary>
+    ///     Records a transient failure: bumps <see cref="RetryCount" />, keeps the reminder
+    ///     <see cref="WorkflowReminderStatus.Pending" /> so a later tick can try again, and
+    ///     stores the most recent error for diagnostics. When the new retry count meets or
+    ///     exceeds <paramref name="maxRetries" /> the reminder is moved to
+    ///     <see cref="WorkflowReminderStatus.Failed" /> terminally.
+    /// </summary>
+    public void RecordFailedAttempt(string errorMessage, int maxRetries)
+    {
+        RetryCount++;
+        ErrorMessage = errorMessage;
+        Status = RetryCount >= maxRetries
+            ? WorkflowReminderStatus.Failed
+            : WorkflowReminderStatus.Pending;
+    }
+
+    /// <summary>Terminal failure — bypasses retry counting (use for non-retryable errors).</summary>
     public void MarkFailed(string errorMessage)
     {
         Status = WorkflowReminderStatus.Failed;

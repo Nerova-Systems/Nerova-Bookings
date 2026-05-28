@@ -45,7 +45,7 @@ public sealed class StartImpersonationHandler(
             return Result.NotFound($"User '{command.TargetUserId}' not found in this organization.");
         }
 
-        var membership = await membershipRepository.GetByUserAndTenantAsync(command.TargetUserId, activeOrgId!, cancellationToken);
+        var membership = await membershipRepository.GetByUserAndTenantAsync(command.TargetUserId, activeOrgId, cancellationToken);
         if (membership is null)
         {
             return Result.NotFound($"User '{command.TargetUserId}' is not a member of this organization.");
@@ -75,7 +75,7 @@ public sealed class StartImpersonationHandler(
         authenticationTokenService.SetImpersonationAccessToken(userInfoResult.Value!);
 
         await auditLogEmitter.EmitAsync(new AuditLogEvent(
-                activeOrgId!,
+                activeOrgId,
                 actorId,
                 actorEmail,
                 "User",
@@ -91,7 +91,7 @@ public sealed class StartImpersonationHandler(
             ), cancellationToken
         );
 
-        events.CollectEvent(new ImpersonationStarted(actorId, command.TargetUserId, activeOrgId!));
+        events.CollectEvent(new ImpersonationStarted(actorId, command.TargetUserId, activeOrgId));
 
         return Result.Success();
     }

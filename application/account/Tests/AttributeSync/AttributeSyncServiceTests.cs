@@ -1,8 +1,8 @@
 using System.Text.Json;
 using Account.Database;
+using Account.Features.Attributes.Domain;
 using Account.Features.AttributeSync.Domain;
 using Account.Features.AttributeSync.Infrastructure;
-using Account.Features.Attributes.Domain;
 using Account.Features.Memberships.Domain;
 using Account.Features.Subscriptions.Domain;
 using Account.Features.Tenants.Domain;
@@ -10,7 +10,6 @@ using Account.Features.Users.Domain;
 using FluentAssertions;
 using Microsoft.Extensions.DependencyInjection;
 using SharedKernel.Domain;
-using SharedKernel.Telemetry;
 using Xunit;
 using OrgAttribute = Account.Features.Attributes.Domain.Attribute;
 
@@ -103,10 +102,11 @@ public sealed class AttributeSyncServiceTests(AccountWebApplicationFactory facto
         await db.SaveChangesAsync();
 
         var updated = await assignRepo.GetByMembershipAttributeOptionAsync(
-            membershipId, attribute.Id, null, CancellationToken.None);
+            membershipId, attribute.Id, null, CancellationToken.None
+        );
 
         updated.Should().NotBeNull();
-        updated!.Value.Should().Be("New Value");
+        updated.Value.Should().Be("New Value");
     }
 
     // ──────────────────────────────────────────────────────────────────────────
@@ -189,7 +189,8 @@ public sealed class AttributeSyncServiceTests(AccountWebApplicationFactory facto
         var assignments = await assignRepo.GetByMembershipAsync(membershipId, CancellationToken.None);
 
         assignments.Should().ContainSingle(a =>
-            a.AttributeId == attribute.Id && a.AttributeOptionId == option.Id);
+            a.AttributeId == attribute.Id && a.AttributeOptionId == option.Id
+        );
     }
 
     [Fact]
@@ -199,7 +200,7 @@ public sealed class AttributeSyncServiceTests(AccountWebApplicationFactory facto
         var sp = scope.ServiceProvider;
         var (orgId, membershipId, attribute) = await SeedBaseAsync(sp, AttributeType.SingleSelect);
 
-        var rule = AttributeSyncRule.Create(orgId, attribute.Id, "department", ClaimMappingMode.Lookup, autoCreateOptions: false);
+        var rule = AttributeSyncRule.Create(orgId, attribute.Id, "department", ClaimMappingMode.Lookup, false);
         await SeedRuleAsync(sp, rule);
 
         TelemetryEventsCollectorSpy.Reset();
@@ -220,7 +221,7 @@ public sealed class AttributeSyncServiceTests(AccountWebApplicationFactory facto
         var sp = scope.ServiceProvider;
         var (orgId, membershipId, attribute) = await SeedBaseAsync(sp, AttributeType.SingleSelect);
 
-        var rule = AttributeSyncRule.Create(orgId, attribute.Id, "department", ClaimMappingMode.Lookup, autoCreateOptions: true);
+        var rule = AttributeSyncRule.Create(orgId, attribute.Id, "department", ClaimMappingMode.Lookup, true);
         await SeedRuleAsync(sp, rule);
 
         var service = sp.GetRequiredService<AttributeSyncService>();
@@ -322,7 +323,7 @@ public sealed class AttributeSyncServiceTests(AccountWebApplicationFactory facto
         var sp = scope.ServiceProvider;
         var (orgId, membershipId, attribute) = await SeedBaseAsync(sp, AttributeType.MultiSelect);
 
-        var rule = AttributeSyncRule.Create(orgId, attribute.Id, "groups", ClaimMappingMode.Group, autoCreateOptions: true);
+        var rule = AttributeSyncRule.Create(orgId, attribute.Id, "groups", ClaimMappingMode.Group, true);
         await SeedRuleAsync(sp, rule);
 
         var service = sp.GetRequiredService<AttributeSyncService>();
@@ -447,15 +448,19 @@ public sealed class AttributeSyncServiceTests(AccountWebApplicationFactory facto
         await db.SaveChangesAsync();
     }
 
-    private static IReadOnlyDictionary<string, JsonElement> MakeClaims(string key, string value) =>
-        new Dictionary<string, JsonElement>
+    private static IReadOnlyDictionary<string, JsonElement> MakeClaims(string key, string value)
+    {
+        return new Dictionary<string, JsonElement>
         {
             [key] = JsonSerializer.SerializeToElement(value)
         };
+    }
 
-    private static IReadOnlyDictionary<string, JsonElement> MakeArrayClaims(string key, string[] values) =>
-        new Dictionary<string, JsonElement>
+    private static IReadOnlyDictionary<string, JsonElement> MakeArrayClaims(string key, string[] values)
+    {
+        return new Dictionary<string, JsonElement>
         {
             [key] = JsonSerializer.SerializeToElement(values)
         };
+    }
 }

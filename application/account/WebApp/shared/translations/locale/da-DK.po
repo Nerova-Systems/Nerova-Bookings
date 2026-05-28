@@ -92,6 +92,9 @@ msgstr "100 GB lagerplads"
 msgid "100% Security Score"
 msgstr "100% sikkerhedsscore"
 
+msgid "12 hour"
+msgstr "12 timer"
+
 msgid ""
 "123 Example Street\n"
 "Anytown, AA 12345"
@@ -104,6 +107,9 @@ msgstr "14 t 30 min logget"
 
 msgid "2 hours ago"
 msgstr "For 2 timer siden"
+
+msgid "24 hour"
+msgstr "24 timer"
 
 msgid "2X large"
 msgstr "2X stor"
@@ -482,6 +488,9 @@ msgstr "Basal support"
 msgid "Basis"
 msgstr "Basis"
 
+msgid "Becomes part of your team's public URLs. Leave blank to auto-generate later."
+msgstr "Bliver en del af dit teams offentlige URL'er. Lad stå tomt for at autogenerere senere."
+
 msgid "Bill to"
 msgstr "Faktureres til"
 
@@ -708,6 +717,9 @@ msgstr "Choose a name and select the permissions this role grants."
 msgid "Choose a plan to get started."
 msgstr "Vælg en plan for at komme i gang."
 
+msgid "Choose between a 12-hour or 24-hour clock display."
+msgstr "V├ªlg mellem 12-timers eller 24-timers visning."
+
 msgid "Choose how the application looks to you on this device."
 msgstr "Vælg hvordan applikationen ser ud for dig på denne enhed."
 
@@ -852,6 +864,9 @@ msgstr "Madlavningstid"
 
 msgid "Coq au vin"
 msgstr "Coq au vin"
+
+msgid "Could not save preferences. Please try again."
+msgstr "Indstillingerne kunne ikke gemmes. Pr├╕v igen."
 
 msgid "Country"
 msgstr "Land"
@@ -1261,6 +1276,9 @@ msgstr "Enchiladas verdes"
 msgid "Encrypt SMTP connection with SSL/TLS."
 msgstr "Kryptér SMTP-forbindelsen med SSL/TLS."
 
+msgid "Enter a valid IANA time zone (e.g. Europe/Copenhagen)."
+msgstr "Indtast en gyldig IANA-tidszone (f.eks. Europe/Copenhagen)."
+
 #, fuzzy
 msgid "Enter SMTP password"
 msgstr "Indtast SMTP-adgangskode"
@@ -1345,10 +1363,6 @@ msgid "Failed to create role. Please try again."
 msgstr "Failed to create role. Please try again."
 
 #, fuzzy
-msgid "Failed to create team. Please try again."
-msgstr "Failed to create team. Please try again."
-
-#, fuzzy
 msgid "Failed to update role. Please try again."
 msgstr "Failed to update role. Please try again."
 
@@ -1396,6 +1410,9 @@ msgstr "Gratis, open-source .NET og React startpakke til at bygge moderne SaaS-a
 
 msgid "French"
 msgstr "Fransk"
+
+msgid "Friday"
+msgstr "Fredag"
 
 msgid "friend@example.com"
 msgstr "friend@example.com"
@@ -1661,6 +1678,9 @@ msgstr "Januar - juni 2024"
 msgid "Japanese"
 msgstr "Japansk"
 
+msgid "Joined"
+msgstr "Tilmeldt"
+
 msgid "Joined March 2024"
 msgstr "Tilmeldt marts 2024"
 
@@ -1853,6 +1873,9 @@ msgstr "Administrer"
 msgid "Manage {0}"
 msgstr "Manage {0}"
 
+msgid "Manage how dates, times, and language are presented across the app."
+msgstr "Administrer hvordan datoer, tidspunkter og sprog vises i appen."
+
 msgid "Manage subscription"
 msgstr "Administrer abonnement"
 
@@ -1984,6 +2007,9 @@ msgstr "Modifikator-kombination"
 
 msgid "Mole poblano"
 msgstr "Mole poblano"
+
+msgid "Monday"
+msgstr "Mandag"
 
 msgid "More export options"
 msgstr "Flere eksportmuligheder"
@@ -2332,9 +2358,8 @@ msgstr "Vælg et diagram"
 msgid "Pick a date"
 msgstr "Vælg en dato"
 
-#, fuzzy
-msgid "Pick a name and a unique URL slug. You can configure branding and invite members after creating the team."
-msgstr "Pick a name and a unique URL slug. You can configure branding and invite members after creating the team."
+msgid "Pick a name and a URL slug. You can configure branding and invite members after creating the team."
+msgstr "Vælg et navn og en URL-slug. Du kan konfigurere branding og invitere medlemmer efter oprettelse af teamet."
 
 msgid "Pick a recipe"
 msgstr "Vælg en opskrift"
@@ -2413,6 +2438,9 @@ msgstr "Præference opdateret succesfuldt"
 
 msgid "Preferences"
 msgstr "Præferencer"
+
+msgid "Preferences saved"
+msgstr "Indstillinger gemt"
 
 msgid "Premium"
 msgstr "Premium"
@@ -2672,6 +2700,10 @@ msgstr "Gennemgå enhver væsentlig handling udført i din organisation."
 msgid "Revoke"
 msgstr "Tilbagekald"
 
+#. placeholder {0}: member.email
+msgid "Revoke invitation for {0}"
+msgstr "Tilbagekald invitation til {0}"
+
 msgid "Revoke session"
 msgstr "Tilbagekald session"
 
@@ -2736,6 +2768,9 @@ msgstr "Roles"
 
 msgid "Safari"
 msgstr "Safari"
+
+msgid "Saturday"
+msgstr "L├╕rdag"
 
 msgid "Save"
 msgstr "Gem"
@@ -3084,6 +3119,9 @@ msgstr "Standard"
 msgid "Standard user access"
 msgstr "Standard brugeradgang"
 
+msgid "Start of week"
+msgstr "Ugens f├╕rste dag"
+
 msgid "State / Province"
 msgstr "Stat / Region"
 
@@ -3120,6 +3158,9 @@ msgstr "Diskret baggrund til grupperede rækker i et panel."
 
 msgid "Suggestions"
 msgstr "Forslag"
+
+msgid "Sunday"
+msgstr "S├╕ndag"
 
 msgid "Suspended"
 msgstr "Suspenderet"
@@ -3229,8 +3270,14 @@ msgstr "Aftalen der styrer din brug af vores service, inklusive acceptabel brug 
 msgid "The authentication request was invalid. Please try again."
 msgstr "Godkendelsesanmodningen var ugyldig. Prøv venligst igen."
 
+msgid "The first day shown in calendar views and weekly schedules."
+msgstr "Den f├╕rste dag der vises i kalendervisninger og ugeplaner."
+
 msgid "The item will be moved to the archive. You can restore it later from the archive."
 msgstr "Elementet flyttes til arkivet. Du kan gendanne det senere fra arkivet."
+
+msgid "The language used throughout the application."
+msgstr "Det sprog der anvendes i hele applikationen."
 
 msgid "The name of your account, shown to users and in email notifications"
 msgstr "Navnet på din konto, vist til brugere og i e-mail-notifikationer"
@@ -3241,10 +3288,6 @@ msgstr "Organisationsnavnet vises overalt i produktet og i udgående e-mails."
 
 msgid "The page you are looking for does not exist or was moved."
 msgstr "Siden du leder efter findes ikke eller er blevet flyttet."
-
-#, fuzzy
-msgid "The slug becomes part of your team's public URLs. Leave blank to auto-generate later."
-msgstr "The slug becomes part of your team's public URLs. Leave blank to auto-generate later."
 
 #, fuzzy
 msgid "The user must already have an account. Pick the role they will hold in this team."
@@ -3298,6 +3341,12 @@ msgstr "Dette vil permanent slette <0>{totalDeletedUsersCount} brugere</0> i pap
 
 msgid "This will permanently delete <0>1 user</0> in the recycle bin."
 msgstr "Dette vil permanent slette <0>1 bruger</0> i papirkurven."
+
+msgid "Thursday"
+msgstr "Torsdag"
+
+msgid "Time format"
+msgstr "Tidsformat"
 
 msgid "Time zone"
 msgstr "Tidszone"
@@ -3397,6 +3446,9 @@ msgstr "Prøv igen"
 
 msgid "Try clearing or adjusting the filters to see more results."
 msgstr "Prøv at rydde eller justere filtrene for at se flere resultater."
+
+msgid "Tuesday"
+msgstr "Tirsdag"
 
 msgid "Two-factor authentication"
 msgstr "Tofaktor-godkendelse"
@@ -3501,6 +3553,9 @@ msgstr "Brug SSL"
 #, fuzzy
 msgid "Use SSL/TLS"
 msgstr "Brug SSL/TLS"
+
+msgid "Used to display booking times in your local time."
+msgstr "Bruges til at vise bookingtider i din lokale tid."
 
 msgid "User"
 msgstr "Bruger"
@@ -3635,6 +3690,9 @@ msgstr "Advarselsbesked"
 
 msgid "We detected a security issue with your login attempt. Please try again."
 msgstr "Vi opdagede et sikkerhedsproblem med dit loginforsøg. Prøv venligst igen."
+
+msgid "Wednesday"
+msgstr "Onsdag"
 
 msgid "What's at the market this week"
 msgstr "Hvad er på markedet denne uge"

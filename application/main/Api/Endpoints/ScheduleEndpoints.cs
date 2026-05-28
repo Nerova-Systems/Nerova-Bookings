@@ -31,6 +31,10 @@ public sealed class ScheduleEndpoints : IEndpoints
             => await mediator.Send(command)
         ).Produces<ScheduleResponse>();
 
+        group.MapPost("/{id}/duplicate", async Task<ApiResult<ScheduleResponse>> (ScheduleId id, DuplicateScheduleRequest request, IMediator mediator)
+            => await mediator.Send(new DuplicateScheduleCommand(id, request.Name))
+        ).Produces<ScheduleResponse>();
+
         group.MapPut("/{id}", async Task<ApiResult<ScheduleResponse>> (ScheduleId id, UpdateScheduleCommand command, IMediator mediator)
             => await mediator.Send(command with { Id = id })
         ).Produces<ScheduleResponse>();

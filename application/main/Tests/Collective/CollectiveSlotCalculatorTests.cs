@@ -226,13 +226,12 @@ public sealed class CollectiveSlotCalculatorTests
 
         // Booking 09:00–09:30 SAST + 30-min after buffer → effective end 10:00 SAST (08:00 UTC)
         var bookingStart = new DateTimeOffset(2026, 1, 12, 7, 0, 0, TimeSpan.Zero);
-        var bookingEnd = bookingStart.AddMinutes(30);
         var booking = Booking.Create(
             new TenantId(1), hostUserId, _eventType.Id,
             bookingStart, 30,
             0,
             30,
-            "Booker", "booker@example.com", "UTC", "accepted",
+            "Booker", "booker@example.com", "UTC", BookingStatus.Accepted,
             new Dictionary<string, string>()
         );
 
@@ -263,8 +262,7 @@ public sealed class CollectiveSlotCalculatorTests
             0,
             "Test Booker",
             "booker@example.com",
-            "UTC",
-            "accepted",
+            "UTC", BookingStatus.Accepted,
             new Dictionary<string, string>()
         );
     }

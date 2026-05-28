@@ -26,6 +26,16 @@ public sealed class AzureEmailClient(SecretClient secretClient) : IEmailClient
             }
         }
 
+        if (message.Enclosures is not null)
+        {
+            foreach (var enclosure in message.Enclosures)
+            {
+                azureMessage.Attachments.Add(
+                    new EmailAttachment(enclosure.FileName, enclosure.ContentType, BinaryData.FromBytes(enclosure.ContentBytes))
+                );
+            }
+        }
+
         await emailClient.SendAsync(WaitUntil.Started, azureMessage, cancellationToken);
     }
 }

@@ -63,13 +63,13 @@ public sealed class GetBookingKpisQueryTests : InsightsEndpointBaseTest
             ]
         );
         Connection.Update("bookings", "id", cancelled.Id, [
-                ("status", "cancelled"),
+                ("status", "Cancelled"),
                 ("start_time", DateTimeOffset.Parse("2025-06-02T09:00:00Z")),
                 ("end_time", DateTimeOffset.Parse("2025-06-02T09:30:00Z"))
             ]
         );
         Connection.Update("bookings", "id", pending.Id, [
-                ("status", "pending"),
+                ("status", "Pending"),
                 ("start_time", DateTimeOffset.Parse("2025-06-02T11:00:00Z")),
                 ("end_time", DateTimeOffset.Parse("2025-06-02T11:30:00Z"))
             ]

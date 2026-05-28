@@ -3,9 +3,9 @@ using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text.Json;
 using Account.Database;
+using Account.Features.Attributes.Domain;
 using Account.Features.AttributeSync;
 using Account.Features.AttributeSync.Domain;
-using Account.Features.Attributes.Domain;
 using Account.Features.Memberships.Domain;
 using Account.Features.Subscriptions.Domain;
 using Account.Features.Tenants.Domain;
@@ -163,7 +163,7 @@ public sealed class AttributeSyncEndpointTests(AccountWebApplicationFactory fact
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var body = await response.Content.ReadFromJsonAsync<AttributeSyncRuleResponse>();
         body.Should().NotBeNull();
-        body!.ClaimPath.Should().Be("department");
+        body.ClaimPath.Should().Be("department");
         body.Mode.Should().Be(ClaimMappingMode.Direct);
         body.IsEnabled.Should().BeTrue();
         body.AutoCreateOptions.Should().BeFalse();
@@ -177,7 +177,8 @@ public sealed class AttributeSyncEndpointTests(AccountWebApplicationFactory fact
         SetActorToken(DatabaseSeeder.Tenant1Owner.Id, DatabaseSeeder.Tenant1.Id, orgId);
 
         var response = await AnonymousHttpClient.PostAsJsonAsync(RulesUrl,
-            new { AttributeId = attrId.ToString(), ClaimPath = "", Mode = "Direct" });
+            new { AttributeId = attrId.ToString(), ClaimPath = "", Mode = "Direct" }
+        );
 
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }
@@ -190,7 +191,8 @@ public sealed class AttributeSyncEndpointTests(AccountWebApplicationFactory fact
         SetActorToken(DatabaseSeeder.Tenant1Owner.Id, DatabaseSeeder.Tenant1.Id, orgId);
 
         var response = await AnonymousHttpClient.PostAsJsonAsync(RulesUrl,
-            ValidCreatePayload("department", AttributeId.NewId()));
+            ValidCreatePayload("department", AttributeId.NewId())
+        );
 
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
     }
@@ -208,7 +210,8 @@ public sealed class AttributeSyncEndpointTests(AccountWebApplicationFactory fact
         SetActorToken(DatabaseSeeder.Tenant1Owner.Id, DatabaseSeeder.Tenant1.Id, org2Id);
 
         var response = await AnonymousHttpClient.PostAsJsonAsync(RulesUrl,
-            ValidCreatePayload("department", attr1Id));
+            ValidCreatePayload("department", attr1Id)
+        );
 
         response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
     }
@@ -225,7 +228,8 @@ public sealed class AttributeSyncEndpointTests(AccountWebApplicationFactory fact
         await AnonymousHttpClient.PostAsJsonAsync(RulesUrl, ValidCreatePayload("department", attrId));
 
         TelemetryEventsCollectorSpy.CollectedEvents.Should().ContainSingle(e =>
-            e.GetType().Name == "AttributeSyncRuleCreated");
+            e.GetType().Name == "AttributeSyncRuleCreated"
+        );
     }
 
     // ──────────────────────────────────────────────────────────────────────────
@@ -306,7 +310,8 @@ public sealed class AttributeSyncEndpointTests(AccountWebApplicationFactory fact
         await AnonymousHttpClient.PutAsJsonAsync($"{RulesUrl}/{created!.Id}", ValidUpdatePayload("updated-claim", attrId));
 
         TelemetryEventsCollectorSpy.CollectedEvents.Should().ContainSingle(e =>
-            e.GetType().Name == "AttributeSyncRuleUpdated");
+            e.GetType().Name == "AttributeSyncRuleUpdated"
+        );
     }
 
     // ──────────────────────────────────────────────────────────────────────────
@@ -379,7 +384,8 @@ public sealed class AttributeSyncEndpointTests(AccountWebApplicationFactory fact
         await AnonymousHttpClient.DeleteAsync($"{RulesUrl}/{created!.Id}");
 
         TelemetryEventsCollectorSpy.CollectedEvents.Should().ContainSingle(e =>
-            e.GetType().Name == "AttributeSyncRuleDeleted");
+            e.GetType().Name == "AttributeSyncRuleDeleted"
+        );
     }
 
     // ──────────────────────────────────────────────────────────────────────────
@@ -406,7 +412,8 @@ public sealed class AttributeSyncEndpointTests(AccountWebApplicationFactory fact
         SetActorToken(DatabaseSeeder.Tenant1Owner.Id, DatabaseSeeder.Tenant1.Id, orgId);
 
         var response = await AnonymousHttpClient.PostAsJsonAsync(ApplyUrl,
-            ValidApplyPayload(MembershipId.NewId()));
+            ValidApplyPayload(MembershipId.NewId())
+        );
 
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
     }
@@ -467,7 +474,7 @@ public sealed class AttributeSyncEndpointTests(AccountWebApplicationFactory fact
                 ("enabled", true),
                 ("is_locked", false),
                 ("created_at", now),
-                ("modified_at", (object?)null)
+                ("modified_at", null)
             ]
         );
 
@@ -506,12 +513,12 @@ public sealed class AttributeSyncEndpointTests(AccountWebApplicationFactory fact
                 ("role", role.ToString()),
                 ("accepted", true),
                 ("accepted_at", now),
-                ("invited_by", (object?)null),
-                ("invite_token", (object?)null),
+                ("invited_by", null),
+                ("invite_token", null),
                 ("disable_impersonation", false),
-                ("custom_role_id", (object?)null),
+                ("custom_role_id", null),
                 ("created_at", now),
-                ("modified_at", (object?)null)
+                ("modified_at", null)
             ]
         );
     }
@@ -527,12 +534,12 @@ public sealed class AttributeSyncEndpointTests(AccountWebApplicationFactory fact
                 ("role", role.ToString()),
                 ("accepted", true),
                 ("accepted_at", now),
-                ("invited_by", (object?)null),
-                ("invite_token", (object?)null),
+                ("invited_by", null),
+                ("invite_token", null),
                 ("disable_impersonation", false),
-                ("custom_role_id", (object?)null),
+                ("custom_role_id", null),
                 ("created_at", now),
-                ("modified_at", (object?)null)
+                ("modified_at", null)
             ]
         );
         return id;
@@ -580,17 +587,20 @@ public sealed class AttributeSyncEndpointTests(AccountWebApplicationFactory fact
         return orgId;
     }
 
-    private object ValidCreatePayload(string claimPath, AttributeId? attributeId = null) =>
-        new
+    private object ValidCreatePayload(string claimPath, AttributeId? attributeId = null)
+    {
+        return new
         {
             AttributeId = (attributeId ?? AttributeId.NewId()).ToString(),
             ClaimPath = claimPath,
             Mode = "Direct",
             AutoCreateOptions = false
         };
+    }
 
-    private object ValidUpdatePayload(string claimPath, AttributeId? attributeId = null) =>
-        new
+    private object ValidUpdatePayload(string claimPath, AttributeId? attributeId = null)
+    {
+        return new
         {
             AttributeId = (attributeId ?? AttributeId.NewId()).ToString(),
             ClaimPath = claimPath,
@@ -598,9 +608,11 @@ public sealed class AttributeSyncEndpointTests(AccountWebApplicationFactory fact
             AutoCreateOptions = false,
             IsEnabled = true
         };
+    }
 
-    private static object ValidApplyPayload(MembershipId membershipId) =>
-        new
+    private static object ValidApplyPayload(MembershipId membershipId)
+    {
+        return new
         {
             MembershipId = membershipId.ToString(),
             Claims = new Dictionary<string, JsonElement>
@@ -608,4 +620,5 @@ public sealed class AttributeSyncEndpointTests(AccountWebApplicationFactory fact
                 ["department"] = JsonSerializer.SerializeToElement("Engineering")
             }
         };
+    }
 }

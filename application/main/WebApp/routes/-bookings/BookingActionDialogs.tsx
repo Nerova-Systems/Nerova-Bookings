@@ -1,72 +1,60 @@
-import type { Dispatch, SetStateAction } from "react";
-
 import type { BookingListItem } from "./bookingTypes";
 
-import { ConfirmBookingDialog, RejectBookingDialog } from "./BookingApprovalDialogs";
-import { AddGuestsDialog, EditBookingLocationDialog, RequestRescheduleDialog } from "./BookingUpdateDialogs";
+import { AddBookingGuestsDialog } from "./AddBookingGuestsDialog";
+import { AddBookingInternalNoteDialog } from "./AddBookingInternalNoteDialog";
 import { CancelBookingDialog } from "./CancelBookingDialog";
+import { ConfirmBookingDialog } from "./ConfirmBookingDialog";
+import { EditBookingLocationDialog } from "./EditBookingLocationDialog";
+import { MarkNoShowDialog } from "./MarkNoShowDialog";
+import { RateBookingDialog } from "./RateBookingDialog";
+import { ReassignBookingDialog } from "./ReassignBookingDialog";
+import { RejectBookingDialog } from "./RejectBookingDialog";
+import { RequestRescheduleDialog } from "./RequestRescheduleDialog";
 
-type DialogState = Readonly<{
-  confirm: boolean;
-  reject: boolean;
-  requestReschedule: boolean;
-  editLocation: boolean;
-  addGuests: boolean;
-  cancel: boolean;
-}>;
+export type BookingDialogKind =
+  | "confirm"
+  | "reject"
+  | "cancel"
+  | "requestReschedule"
+  | "editLocation"
+  | "addGuests"
+  | "markNoShow"
+  | "rate"
+  | "addNote"
+  | "reassign"
+  | null;
 
 export function BookingActionDialogs({
   booking,
-  dialogState,
-  setDialogState,
+  active,
+  onClose,
   onActionComplete
 }: Readonly<{
   booking: BookingListItem;
-  dialogState: DialogState;
-  setDialogState: Dispatch<SetStateAction<DialogState>>;
+  active: BookingDialogKind;
+  onClose: () => void;
   onActionComplete?: () => void;
 }>) {
-  const setOpen = (key: keyof DialogState) => (isOpen: boolean) =>
-    setDialogState((current) => ({ ...current, [key]: isOpen }));
+  const dialogProps = <T extends Exclude<BookingDialogKind, null>>(kind: T) => ({
+    booking: active === kind ? booking : null,
+    isOpen: active === kind,
+    onOpenChange: (open: boolean) => {
+      if (!open) onClose();
+    }
+  });
 
   return (
     <>
-      <ConfirmBookingDialog
-        booking={booking}
-        isOpen={dialogState.confirm}
-        onOpenChange={setOpen("confirm")}
-        onCompleted={onActionComplete}
-      />
-      <RejectBookingDialog
-        booking={booking}
-        isOpen={dialogState.reject}
-        onOpenChange={setOpen("reject")}
-        onCompleted={onActionComplete}
-      />
-      <RequestRescheduleDialog
-        booking={booking}
-        isOpen={dialogState.requestReschedule}
-        onOpenChange={setOpen("requestReschedule")}
-        onCompleted={onActionComplete}
-      />
-      <EditBookingLocationDialog
-        booking={booking}
-        isOpen={dialogState.editLocation}
-        onOpenChange={setOpen("editLocation")}
-        onCompleted={onActionComplete}
-      />
-      <AddGuestsDialog
-        booking={booking}
-        isOpen={dialogState.addGuests}
-        onOpenChange={setOpen("addGuests")}
-        onCompleted={onActionComplete}
-      />
-      <CancelBookingDialog
-        booking={booking}
-        isOpen={dialogState.cancel}
-        onOpenChange={setOpen("cancel")}
-        onCancelled={onActionComplete}
-      />
+      <ConfirmBookingDialog {...dialogProps("confirm")} onConfirmed={onActionComplete} />
+      <RejectBookingDialog {...dialogProps("reject")} onRejected={onActionComplete} />
+      <CancelBookingDialog {...dialogProps("cancel")} onCancelled={onActionComplete} />
+      <RequestRescheduleDialog {...dialogProps("requestReschedule")} onRequested={onActionComplete} />
+      <EditBookingLocationDialog {...dialogProps("editLocation")} onSaved={onActionComplete} />
+      <AddBookingGuestsDialog {...dialogProps("addGuests")} onAdded={onActionComplete} />
+      <MarkNoShowDialog {...dialogProps("markNoShow")} onMarked={onActionComplete} />
+      <RateBookingDialog {...dialogProps("rate")} onRated={onActionComplete} />
+      <AddBookingInternalNoteDialog {...dialogProps("addNote")} onAdded={onActionComplete} />
+      <ReassignBookingDialog {...dialogProps("reassign")} onReassigned={onActionComplete} />
     </>
   );
 }

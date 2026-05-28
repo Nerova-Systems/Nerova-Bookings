@@ -1,5 +1,7 @@
 using JetBrains.Annotations;
 using Main.Features.EventTypes.Domain;
+using Main.Features.Permissions.Domain;
+using Main.Features.Permissions.Pipeline;
 using Main.Features.Scheduling.Shared;
 using SharedKernel.Cqrs;
 using SharedKernel.ExecutionContext;
@@ -8,6 +10,7 @@ using SharedKernel.Telemetry;
 namespace Main.Features.EventTypes.Commands;
 
 [PublicAPI]
+[RequirePermission(PermissionResource.EventType, PermissionAction.Delete)]
 public sealed record DeleteEventTypeCommand(EventTypeId Id) : ICommand, IRequest<Result>;
 
 public sealed class DeleteEventTypeHandler(

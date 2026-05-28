@@ -1,9 +1,10 @@
 using Main.Database;
+using Main.Features.Workflows.Domain;
 using Microsoft.EntityFrameworkCore;
 using SharedKernel.Domain;
 using SharedKernel.Persistence;
 
-namespace Main.Features.Workflows.Domain;
+namespace Main.Features.Workflows.Infrastructure;
 
 public interface IWorkflowRepository : ICrudRepository<Workflow, WorkflowId>, ISoftDeletableRepository<Workflow, WorkflowId>
 {

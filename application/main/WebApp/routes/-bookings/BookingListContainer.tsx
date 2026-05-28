@@ -1,13 +1,17 @@
+import type { RowKey } from "@repo/ui/components/Table";
+
 import { t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
 import { Badge } from "@repo/ui/components/Badge";
 import { Button } from "@repo/ui/components/Button";
-import { BookmarkIcon } from "lucide-react";
-import { useState } from "react";
+import { BookmarkIcon, DownloadIcon } from "lucide-react";
+import { useMemo, useState } from "react";
+import { toast } from "sonner";
 
 import type { EventType } from "../-scheduling/schedulingTypes";
 
 import { ActiveBookingFilters } from "./ActiveBookingFilters";
+import { BookingBulkActionBar } from "./BookingBulkActionBar";
 import { BookingDetailsSheet } from "./BookingDetailsSheet";
 import { BookingsFilters, type BookingFilterSearch } from "./BookingsFilters";
 import { BookingsList } from "./BookingsList";
@@ -20,6 +24,7 @@ import {
   getBookingStatusLabel
 } from "./bookingTypes";
 import { BookingViewToggleButton } from "./BookingViewToggleButton";
+import { downloadBookingsCsv } from "./exportBookingsCsv";
 
 export function BookingListContainer({
   status,
@@ -47,6 +52,11 @@ export function BookingListContainer({
   onPageOffsetChange: (pageOffset: number) => void;
 }>) {
   const [selectedBooking, setSelectedBooking] = useState<BookingListItem | null>(null);
+  const [selectedKeys, setSelectedKeys] = useState<ReadonlySet<RowKey>>(() => new Set<RowKey>());
+  const selectedBookings = useMemo(
+    () => bookings.filter((booking) => selectedKeys.has(booking.id)),
+    [bookings, selectedKeys]
+  );
   const pageOffset = search.pageOffset;
   const canGoPrevious = pageOffset > 0;
   const canGoNext = pageOffset + pageSize < totalCount;
@@ -60,7 +70,21 @@ export function BookingListContainer({
         </div>
         <BookingsFilters eventTypes={eventTypes} search={search} onSearchChange={onSearchChange} />
         <div className="hidden grow md:block" />
-        <Button type="button" variant="secondary" size="sm" disabled title={t`Saved segments are not implemented yet.`}>
+        <Button
+          type="button"
+          variant="secondary"
+          size="sm"
+          disabled={bookings.length === 0}
+          onClick={() => {
+            const filename = `bookings-${status}-${new Date().toISOString().slice(0, 10)}.csv`;
+            downloadBookingsCsv(bookings, filename);
+            toast.success(t`Exported ${bookings.length} bookings`);
+          }}
+        >
+          <DownloadIcon />
+          <Trans>Export CSV</Trans>
+        </Button>
+        <Button type="button" variant="secondary" size="sm" disabled title={t`Saved filters are not implemented yet.`}>
           <BookmarkIcon />
           <Trans>Saved segments</Trans>
           {activeFilterCount > 0 ? <Badge variant="secondary">{activeFilterCount}</Badge> : null}
@@ -95,13 +119,17 @@ export function BookingListContainer({
           </Button>
         </div>
       </div>
-      <BookingsList
-        bookings={bookings}
-        status={status}
-        isLoading={isLoading}
-        selectedBookingId={selectedBooking?.id ?? null}
-        onSelectBooking={setSelectedBooking}
-      />
+      <div className="mt-4">
+        <BookingsList
+          bookings={bookings}
+          status={status}
+          isLoading={isLoading}
+          selectedKeys={selectedKeys}
+          onSelectionChange={setSelectedKeys}
+          onActivate={setSelectedBooking}
+        />
+      </div>
+      <BookingBulkActionBar selectedBookings={selectedBookings} onClear={() => setSelectedKeys(new Set<RowKey>())} />
       <BookingDetailsSheet
         booking={selectedBooking}
         isOpen={selectedBooking !== null}

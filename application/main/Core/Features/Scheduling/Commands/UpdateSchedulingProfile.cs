@@ -1,5 +1,7 @@
 using FluentValidation;
 using JetBrains.Annotations;
+using Main.Features.Permissions.Domain;
+using Main.Features.Permissions.Pipeline;
 using Main.Features.Scheduling.Domain;
 using Main.Features.Scheduling.Shared;
 using SharedKernel.Cqrs;
@@ -8,6 +10,7 @@ using SharedKernel.ExecutionContext;
 namespace Main.Features.Scheduling.Commands;
 
 [PublicAPI]
+[RequirePermission(PermissionResource.EventType, PermissionAction.Update)]
 public sealed record UpdateSchedulingProfileCommand(string Handle, string DisplayName, string? AvatarUrl) : ICommand, IRequest<Result<SchedulingProfileResponse>>;
 
 public sealed class UpdateSchedulingProfileValidator : AbstractValidator<UpdateSchedulingProfileCommand>

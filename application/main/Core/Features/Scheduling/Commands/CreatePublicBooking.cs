@@ -1,9 +1,12 @@
 using FluentValidation;
 using JetBrains.Annotations;
+using Main.Features.Apps.Domain;
 using Main.Features.EventTypes.Domain;
 using Main.Features.Schedules.Domain;
 using Main.Features.Scheduling.Domain;
+using Main.Features.Scheduling.Notifications;
 using Main.Features.Scheduling.Shared;
+using Main.Features.Webhooks.Domain;
 using SharedKernel.Cqrs;
 using SharedKernel.Domain;
 
@@ -48,7 +51,12 @@ public sealed class CreatePublicBookingHandler(
     PublicSlotCalculator publicSlotCalculator,
     CollectiveSlotCalculator collectiveSlotCalculator,
     RoundRobinSlotCalculator roundRobinSlotCalculator,
-    TimeProvider timeProvider
+    TimeProvider timeProvider,
+    ConferenceLinkOrchestrator conferenceLinkOrchestrator,
+    IBookingWebhookNotifier webhookNotifier,
+    ITravelScheduleRepository travelScheduleRepository,
+    IOutOfOfficeRepository outOfOfficeRepository,
+    IBookingNotificationDispatcher bookingNotificationDispatcher
 ) : IRequestHandler<CreatePublicBookingCommand, Result<CreatePublicBookingResponse>>
 {
     public async Task<Result<CreatePublicBookingResponse>> Handle(CreatePublicBookingCommand command, CancellationToken cancellationToken)
@@ -79,6 +87,16 @@ public sealed class CreatePublicBookingHandler(
 
         var endTime = command.StartTime.AddMinutes(command.Duration);
 
+        var adjustmentsRangeStart = DateOnly.FromDateTime(command.StartTime.UtcDateTime).AddDays(-1);
+        var adjustmentsRangeEnd = DateOnly.FromDateTime(endTime.UtcDateTime).AddDays(1);
+        var travelSchedules = await travelScheduleRepository.GetActiveForUserUnfilteredAsync(
+            context.Profile.TenantId, context.Profile.OwnerUserId, adjustmentsRangeStart, adjustmentsRangeEnd, cancellationToken
+        );
+        var outOfOffices = await outOfOfficeRepository.GetActiveForUserUnfilteredAsync(
+            context.Profile.TenantId, context.Profile.OwnerUserId, adjustmentsRangeStart, adjustmentsRangeEnd, cancellationToken
+        );
+        var adjustments = new ScheduleAdjustments(travelSchedules, outOfOffices);
+
         bool slotAvailable;
         var ownerUserId = context.Profile.OwnerUserId;
 
@@ -96,7 +114,7 @@ public sealed class CreatePublicBookingHandler(
                 )
                 : new Dictionary<UserId, Booking[]>();
 
-            slotAvailable = collectiveSlotCalculator.IsSlotAvailable(context.EventType, context.Schedule, hostBookings, command.StartTime, command.Duration, command.TimeZone);
+            slotAvailable = collectiveSlotCalculator.IsSlotAvailable(context.EventType, context.Schedule, hostBookings, command.StartTime, command.Duration, command.TimeZone, adjustments);
         }
         else if (context.EventType.SchedulingType == SchedulingType.RoundRobin)
         {
@@ -112,7 +130,7 @@ public sealed class CreatePublicBookingHandler(
                 )
                 : new Dictionary<UserId, Booking[]>();
 
-            slotAvailable = roundRobinSlotCalculator.IsSlotAvailable(context.EventType, context.Schedule, hostBookings, hosts, command.StartTime, command.Duration, command.TimeZone);
+            slotAvailable = roundRobinSlotCalculator.IsSlotAvailable(context.EventType, context.Schedule, hostBookings, hosts, command.StartTime, command.Duration, command.TimeZone, adjustments);
 
             if (slotAvailable)
             {
@@ -140,7 +158,7 @@ public sealed class CreatePublicBookingHandler(
                 endTime.AddDays(1),
                 cancellationToken
             );
-            slotAvailable = publicSlotCalculator.IsSlotAvailable(context.EventType, context.Schedule, bookings, [], command.StartTime, command.Duration, command.TimeZone);
+            slotAvailable = publicSlotCalculator.IsSlotAvailable(context.EventType, context.Schedule, bookings, command.StartTime, command.Duration, command.TimeZone, adjustments);
         }
 
         if (!slotAvailable)
@@ -160,7 +178,7 @@ public sealed class CreatePublicBookingHandler(
             return Result<CreatePublicBookingResponse>.From(rulesResult);
         }
 
-        var status = context.EventType.Settings.ConfirmationPolicy.RequiresConfirmation ? "pending" : "accepted";
+        var status = context.EventType.Settings.ConfirmationPolicy.RequiresConfirmation ? BookingStatus.Pending : BookingStatus.Accepted;
         var booking = Booking.Create(
             context.Profile.TenantId,
             ownerUserId,
@@ -196,7 +214,29 @@ public sealed class CreatePublicBookingHandler(
         await bookingRepository.AddAsync(booking, cancellationToken);
         booking.RecordCreated();
 
-        return new CreatePublicBookingResponse(booking.Id, booking.StartTime, booking.EndTime, status);
+        // Conferencing integration (Zoom, …): if the event type declares an integration
+        // location and the owner has the matching credential, create the upstream meeting and
+        // stamp the join URL onto the booking. Soft-fails if anything is missing — see
+        // ConferenceLinkOrchestrator XML docs.
+        await conferenceLinkOrchestrator.ApplyAsync(booking, context.EventType, context.Profile.TenantId, ownerUserId, cancellationToken);
+
+        // Booking is persisted (and conferencing-stamped) — fan out a BookingCreated webhook to
+        // every subscribed endpoint for this tenant. Best-effort: failures are logged, never
+        // bubble up. See BookingWebhookNotifier.
+        await webhookNotifier.NotifyAsync(
+            WebhookEventType.BookingCreated,
+            booking,
+            context.EventType,
+            null,
+            null,
+            cancellationToken
+        );
+
+        // Send booking confirmation email to booker and host. Best-effort: exceptions are swallowed
+        // inside the dispatcher (not here) so a broken email config cannot fail the booking.
+        await bookingNotificationDispatcher.DispatchAsync(booking, context.EventType, BookingNotificationKind.Created, cancellationToken);
+
+        return new CreatePublicBookingResponse(booking.Id, booking.StartTime, booking.EndTime, status.ToString());
     }
 
     private static Result ValidateBookingRules(

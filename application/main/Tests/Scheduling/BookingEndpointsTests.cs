@@ -34,9 +34,9 @@ public sealed class BookingEndpointsTests : EndpointBaseTest<MainDbContext>
         var recurring = await CreateBookingAsync("weekly-sync", "2026-06-02T07:00:00Z", "Alan Turing", "alan@example.com");
         var past = await CreateBookingAsync("intro-call", "2026-06-03T07:00:00Z", "Katherine Johnson", "katherine@example.com");
         var cancelled = await CreateBookingAsync("intro-call", "2026-06-03T08:00:00Z", "Margaret Hamilton", "margaret@example.com");
-        Connection.Update("bookings", "id", pending.Id, [("status", "pending")]);
+        Connection.Update("bookings", "id", pending.Id, [("status", "Pending")]);
         Connection.Update("bookings", "id", past.Id, [("start_time", DateTimeOffset.Parse("2026-05-01T07:00:00Z")), ("end_time", DateTimeOffset.Parse("2026-05-01T07:30:00Z"))]);
-        Connection.Update("bookings", "id", cancelled.Id, [("status", "cancelled")]);
+        Connection.Update("bookings", "id", cancelled.Id, [("status", "Cancelled")]);
 
         // Act
         var upcomingResponse = await AuthenticatedOwnerHttpClient.GetAsync($"/api/bookings?status=upcoming&eventTypeId={introEventType.Id}&attendeeEmail=ada");
@@ -124,10 +124,10 @@ public sealed class BookingEndpointsTests : EndpointBaseTest<MainDbContext>
         var past = await CreateBookingAsync("intro-call", "2026-06-03T07:00:00Z", "Katherine Johnson", "katherine@example.com");
         var cancelled = await CreateBookingAsync("intro-call", "2026-06-03T08:00:00Z", "Margaret Hamilton", "margaret@example.com");
         var rejected = await CreateBookingAsync("intro-call", "2026-06-03T09:00:00Z", "Dorothy Vaughan", "dorothy@example.com");
-        Connection.Update("bookings", "id", pending.Id, [("status", "pending")]);
+        Connection.Update("bookings", "id", pending.Id, [("status", "Pending")]);
         Connection.Update("bookings", "id", past.Id, [("start_time", DateTimeOffset.Parse("2026-05-01T07:00:00Z")), ("end_time", DateTimeOffset.Parse("2026-05-01T07:30:00Z"))]);
-        Connection.Update("bookings", "id", cancelled.Id, [("status", "cancelled")]);
-        Connection.Update("bookings", "id", rejected.Id, [("status", "rejected")]);
+        Connection.Update("bookings", "id", cancelled.Id, [("status", "Cancelled")]);
+        Connection.Update("bookings", "id", rejected.Id, [("status", "Rejected")]);
 
         // Act
         var response = await AuthenticatedOwnerHttpClient.GetAsync(
@@ -143,7 +143,8 @@ public sealed class BookingEndpointsTests : EndpointBaseTest<MainDbContext>
         actionsByBookingId[past.Id].Cancel.Should().Be(new BookingActionResponse(true, false, "Past bookings cannot be cancelled."));
         actionsByBookingId[cancelled.Id].Cancel.Should().Be(new BookingActionResponse(true, false, "Cancelled bookings cannot be cancelled."));
         actionsByBookingId[rejected.Id].Cancel.Should().Be(new BookingActionResponse(true, false, "Rejected bookings cannot be cancelled."));
-        actionsByBookingId[upcoming.Id].Reschedule.Enabled.Should().BeTrue();
+actionsByBookingId[upcoming.Id].Reschedule.Enabled.Should().BeFalse();
+            actionsByBookingId[upcoming.Id].Reschedule.Enabled.Should().BeTrue();
         actionsByBookingId[upcoming.Id].RequestReschedule.Enabled.Should().BeTrue();
         actionsByBookingId[upcoming.Id].AddGuests.Enabled.Should().BeTrue();
         actionsByBookingId[upcoming.Id].Report.Enabled.Should().BeFalse();
@@ -173,7 +174,7 @@ public sealed class BookingEndpointsTests : EndpointBaseTest<MainDbContext>
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        Connection.ExecuteScalar<string>("SELECT status FROM bookings WHERE id = @id", [new { id = booking.Id }]).Should().Be("cancelled");
+        Connection.ExecuteScalar<string>("SELECT status FROM bookings WHERE id = @id", [new { id = booking.Id }]).Should().Be("Cancelled");
     }
 
     [Fact]
@@ -191,7 +192,7 @@ public sealed class BookingEndpointsTests : EndpointBaseTest<MainDbContext>
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-        Connection.ExecuteScalar<string>("SELECT status FROM bookings WHERE id = @id", [new { id = past.Id }]).Should().Be("accepted");
+        Connection.ExecuteScalar<string>("SELECT status FROM bookings WHERE id = @id", [new { id = past.Id }]).Should().Be("Accepted");
     }
 
     [Fact]
@@ -208,7 +209,7 @@ public sealed class BookingEndpointsTests : EndpointBaseTest<MainDbContext>
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-        Connection.ExecuteScalar<string>("SELECT status FROM bookings WHERE id = @id", [new { id = booking.Id }]).Should().Be("accepted");
+        Connection.ExecuteScalar<string>("SELECT status FROM bookings WHERE id = @id", [new { id = booking.Id }]).Should().Be("Accepted");
     }
 
     [Fact]
@@ -225,7 +226,82 @@ public sealed class BookingEndpointsTests : EndpointBaseTest<MainDbContext>
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
-        Connection.ExecuteScalar<string>("SELECT status FROM bookings WHERE id = @id", [new { id = booking.Id }]).Should().Be("accepted");
+        Connection.ExecuteScalar<string>("SELECT status FROM bookings WHERE id = @id", [new { id = booking.Id }]).Should().Be("Accepted");
+    }
+
+    [Fact]
+    public async Task CancelBooking_WhenOwnerCancelsMemberBooking_ShouldCancelBooking()
+    {
+        // Arrange — booking is created via Owner's handle then reassigned to Member directly in
+        // the database, so cancellation by the Owner must go through the tenant-scoped lookup
+        // (Admin/Owner can act on any booking in their tenant; Member is restricted to their own).
+        await UpdateSchedulingProfileAsync("owner");
+        var schedule = await CreateScheduleAsync();
+        await CreateEventTypeAsync(schedule.Id, "Intro call", "intro-call");
+        var booking = await CreateBookingAsync("intro-call", "2026-06-01T07:00:00Z", "Ada Lovelace", "ada@example.com");
+        Connection.Update("bookings", "id", booking.Id, [("owner_user_id", DatabaseSeeder.Tenant1Member.Id!.ToString())]);
+
+        // Act
+        var response = await AuthenticatedOwnerHttpClient.PostAsync($"/api/bookings/{booking.Id}/cancel", null);
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        Connection.ExecuteScalar<string>("SELECT status FROM bookings WHERE id = @id", [new { id = booking.Id }]).Should().Be("Cancelled");
+    }
+
+    [Fact]
+    public async Task ReportBooking_WhenMemberReportsBooking_ShouldCreateReport()
+    {
+        // Arrange
+        await UpdateSchedulingProfileAsync(AuthenticatedOwnerHttpClient, "owner", "Owner Name");
+        var schedule = await CreateScheduleAsync(AuthenticatedOwnerHttpClient);
+        await CreateEventTypeAsync(AuthenticatedOwnerHttpClient, schedule.Id, "Intro call", "intro-call");
+        var booking = await CreateBookingAsync("owner", "intro-call", "2026-06-01T07:00:00Z", "Ada Lovelace", "ada@example.com");
+
+        // Act
+        var response = await AuthenticatedMemberHttpClient.PostAsJsonAsync(
+            $"/api/bookings/{booking.Id}/report",
+            new { reasonCode = "Spam", notes = "Looks fishy" }
+        );
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        Connection.ExecuteScalar<long>("SELECT COUNT(*) FROM booking_reports WHERE booking_id = @id", [new { id = booking.Id }]).Should().Be(1);
+    }
+
+    [Fact]
+    public async Task GetReports_WhenMember_ShouldReturnForbidden()
+    {
+        // Act
+        var response = await AuthenticatedMemberHttpClient.GetAsync("/api/bookings/reports");
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
+    }
+
+    [Fact]
+    public async Task GetReports_WhenOwner_ShouldReturnTenantReports()
+    {
+        // Arrange
+        await UpdateSchedulingProfileAsync(AuthenticatedOwnerHttpClient, "owner", "Owner Name");
+        var schedule = await CreateScheduleAsync(AuthenticatedOwnerHttpClient);
+        await CreateEventTypeAsync(AuthenticatedOwnerHttpClient, schedule.Id, "Intro call", "intro-call");
+        var booking = await CreateBookingAsync("owner", "intro-call", "2026-06-01T07:00:00Z", "Ada Lovelace", "ada@example.com");
+        await AuthenticatedMemberHttpClient.PostAsJsonAsync(
+            $"/api/bookings/{booking.Id}/report",
+            new { reasonCode = "Abuse", notes = (string?)null }
+        );
+
+        // Act
+        var response = await AuthenticatedOwnerHttpClient.GetAsync("/api/bookings/reports");
+
+        // Assert
+        response.ShouldBeSuccessfulGetRequest();
+        var reports = await response.DeserializeResponse<BookingReportsListResponse>();
+        reports!.TotalCount.Should().Be(1);
+        reports.Reports.Should().HaveCount(1);
+        reports.Reports[0].BookingId.Should().Be(booking.Id);
+        reports.Reports[0].ReasonCode.Should().Be("Abuse");
     }
 
     [Fact]
@@ -476,14 +552,24 @@ public sealed class BookingEndpointsTests : EndpointBaseTest<MainDbContext>
 
     private async Task UpdateSchedulingProfileAsync(string handle)
     {
-        var response = await AuthenticatedOwnerHttpClient.PutAsJsonAsync(
+        await UpdateSchedulingProfileAsync(AuthenticatedOwnerHttpClient, handle, "Owner Name");
+    }
+
+    private static async Task UpdateSchedulingProfileAsync(HttpClient client, string handle, string displayName)
+    {
+        var response = await client.PutAsJsonAsync(
             "/api/scheduling/profile",
-            new { handle, displayName = "Owner Name", avatarUrl = "https://example.com/avatar.png" }
+            new { handle, displayName, avatarUrl = "https://example.com/avatar.png" }
         );
         response.EnsureSuccessStatusCode();
     }
 
-    private async Task<ScheduleResponse> CreateScheduleAsync()
+    private Task<ScheduleResponse> CreateScheduleAsync()
+    {
+        return CreateScheduleAsync(AuthenticatedOwnerHttpClient);
+    }
+
+    private static async Task<ScheduleResponse> CreateScheduleAsync(HttpClient client)
     {
         var command = new
         {
@@ -497,14 +583,19 @@ public sealed class BookingEndpointsTests : EndpointBaseTest<MainDbContext>
             dateOverrides = Array.Empty<object>()
         };
 
-        var response = await AuthenticatedOwnerHttpClient.PostAsJsonAsync("/api/schedules", command);
+        var response = await client.PostAsJsonAsync("/api/schedules", command);
         response.EnsureSuccessStatusCode();
         return (await response.DeserializeResponse<ScheduleResponse>())!;
     }
 
-    private async Task<EventTypeResponse> CreateEventTypeAsync(string scheduleId, string title, string slug, object? settings = null)
+    private Task<EventTypeResponse> CreateEventTypeAsync(string scheduleId, string title, string slug, object? settings = null)
     {
-        var response = await AuthenticatedOwnerHttpClient.PostAsJsonAsync(
+        return CreateEventTypeAsync(AuthenticatedOwnerHttpClient, scheduleId, title, slug, settings);
+    }
+
+    private static async Task<EventTypeResponse> CreateEventTypeAsync(HttpClient client, string scheduleId, string title, string slug, object? settings = null)
+    {
+        var response = await client.PostAsJsonAsync(
             "/api/event-types",
             new
             {
@@ -527,13 +618,18 @@ public sealed class BookingEndpointsTests : EndpointBaseTest<MainDbContext>
         return (await response.DeserializeResponse<EventTypeResponse>())!;
     }
 
-    private async Task<CreatePublicBookingResponse> CreateBookingAsync(string eventSlug, string startTime, string bookerName, string bookerEmail)
+    private Task<CreatePublicBookingResponse> CreateBookingAsync(string eventSlug, string startTime, string bookerName, string bookerEmail)
+    {
+        return CreateBookingAsync("owner", eventSlug, startTime, bookerName, bookerEmail);
+    }
+
+    private async Task<CreatePublicBookingResponse> CreateBookingAsync(string handle, string eventSlug, string startTime, string bookerName, string bookerEmail)
     {
         var response = await AnonymousHttpClient.PostAsJsonAsync(
             "/api/public/bookings",
             new
             {
-                handle = "owner",
+                handle,
                 eventSlug,
                 startTime,
                 duration = 30,
@@ -602,4 +698,17 @@ public sealed class BookingEndpointsTests : EndpointBaseTest<MainDbContext>
 
     [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
     private sealed record BookingActionResponse(bool Visible, bool Enabled, string? DisabledReason);
+
+    [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
+    private sealed record BookingReportsListResponse(int TotalCount, int PageOffset, int PageSize, BookingReportListItem[] Reports);
+
+    [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
+    private sealed record BookingReportListItem(
+        string Id,
+        string BookingId,
+        string ReportedByUserId,
+        string ReasonCode,
+        string? Notes,
+        DateTimeOffset CreatedAt
+    );
 }

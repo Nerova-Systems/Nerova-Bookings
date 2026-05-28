@@ -70,14 +70,15 @@ internal sealed class GetSwitchableScopesQueryHandler(
             if (tenant.Kind != TenantKind.Solo) continue;
 
             scopes.Add(new SwitchableScopeInfo(
-                tenant.Id,
-                tenant.Name,
-                tenant.Logo.Url,
-                tenant.Kind,
-                ParentOrgId: null,
-                IsCurrent: tenant.Id == currentTenantId,
-                IsPending: !user.EmailConfirmed
-            ));
+                    tenant.Id,
+                    tenant.Name,
+                    tenant.Logo.Url,
+                    tenant.Kind,
+                    null,
+                    tenant.Id == currentTenantId,
+                    !user.EmailConfirmed
+                )
+            );
         }
 
         // Team / Org scopes — driven by memberships so we can surface unaccepted invites.
@@ -87,14 +88,15 @@ internal sealed class GetSwitchableScopesQueryHandler(
             if (tenant.Kind == TenantKind.Solo) continue;
 
             scopes.Add(new SwitchableScopeInfo(
-                tenant.Id,
-                tenant.Name,
-                tenant.Logo.Url,
-                tenant.Kind,
-                tenant.ParentTenantId,
-                IsCurrent: tenant.Id == currentTenantId,
-                IsPending: !membership.Accepted
-            ));
+                    tenant.Id,
+                    tenant.Name,
+                    tenant.Logo.Url,
+                    tenant.Kind,
+                    tenant.ParentTenantId,
+                    tenant.Id == currentTenantId,
+                    !membership.Accepted
+                )
+            );
         }
 
         return new GetSwitchableScopesResponse(scopes.ToArray());

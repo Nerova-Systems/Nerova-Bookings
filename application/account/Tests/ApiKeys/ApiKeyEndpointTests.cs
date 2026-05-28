@@ -125,7 +125,7 @@ public sealed class ApiKeyEndpointTests(AccountWebApplicationFactory factory)
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var body = await response.Content.ReadFromJsonAsync<CreateApiKeyResponse>();
         body.Should().NotBeNull();
-        body!.PlainText.Should().StartWith("nerova_user_");
+        body.PlainText.Should().StartWith("nerova_user_");
         body.KeyPrefix.Should().NotBeNullOrEmpty();
         body.Id.ToString().Should().StartWith("key_");
     }
@@ -203,7 +203,7 @@ public sealed class ApiKeyEndpointTests(AccountWebApplicationFactory factory)
         var keys = await listResponse.Content.ReadFromJsonAsync<List<ApiKeyResponse>>();
         var revokedKey = keys!.FirstOrDefault(k => k.Id == created.Id);
         revokedKey.Should().NotBeNull();
-        revokedKey!.RevokedAt.Should().NotBeNull();
+        revokedKey.RevokedAt.Should().NotBeNull();
     }
 
     [Fact]

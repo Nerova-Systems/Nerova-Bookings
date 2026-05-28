@@ -17,11 +17,14 @@ import {
 import type { ApiValidationError, EventTypePayload, Schedule } from "../schedulingTypes";
 
 import { EventTypeAdvancedTab } from "../event-type-tabs/EventTypeAdvancedTab";
+import { EventTypeAiVoiceAgentTab } from "../event-type-tabs/EventTypeAiVoiceAgentTab";
 import { EventTypeAppsTab } from "../event-type-tabs/EventTypeAppsTab";
 import { EventTypeAvailabilityTab } from "../event-type-tabs/EventTypeAvailabilityTab";
+import { EventTypeInstantMeetingTab } from "../event-type-tabs/EventTypeInstantMeetingTab";
 import { EventTypeLimitsTab } from "../event-type-tabs/EventTypeLimitsTab";
 import { EventTypeRecurringTab } from "../event-type-tabs/EventTypeRecurringTab";
 import { EventTypeSetupTab } from "../event-type-tabs/EventTypeSetupTab";
+import { EventTypeTeamTab } from "../event-type-tabs/EventTypeTeamTab";
 import { type EventTypeTabProps } from "../event-type-tabs/EventTypeTabTypes";
 import { EventTypeWebhooksTab } from "../event-type-tabs/EventTypeWebhooksTab";
 import { EventTypeWorkflowsTab } from "../event-type-tabs/EventTypeWorkflowsTab";
@@ -51,7 +54,7 @@ export function EventTypeEditorTabs({
   onSubmit
 }: EventTypeEditorTabsProps) {
   const navigate = useNavigate();
-  const tabProps = { value: draft, schedules, onChange, error };
+  const tabProps = { eventTypeId, value: draft, schedules, onChange, error };
   const activeTabName = tabName === "dependencies" ? "apps" : tabName;
   const tabs = getEventTypeTabs(draft, schedules);
   const contentClassName = "min-w-0 rounded-lg border bg-background p-4 md:p-6";

@@ -30,7 +30,8 @@ public sealed record TeamResponse(
     string? TimeZone,
     string? WeekStart,
     int MemberCount,
-    DateTimeOffset CreatedAt);
+    DateTimeOffset CreatedAt
+);
 
 /// <summary>Serialisable representation of a single member of a team.</summary>
 [PublicAPI]
@@ -45,29 +46,33 @@ public sealed record TeamMemberResponse(
     RoleId? CustomRoleId,
     bool Accepted,
     DateTimeOffset? AcceptedAt,
-    DateTimeOffset InvitedAt);
+    DateTimeOffset InvitedAt
+);
 
 /// <summary>Shared mapping helpers for team responses.</summary>
 public static class TeamMappings
 {
-    public static TeamResponse ToResponse(this Tenant team, int memberCount) =>
-        new(
-            Id: team.Id,
-            ParentOrgId: team.ParentTenantId,
-            Name: team.Name,
-            Slug: team.Slug,
-            Bio: team.Bio,
-            LogoUrl: team.Logo.Url,
-            Theme: team.Theme,
-            BrandColor: team.BrandColor,
-            DarkBrandColor: team.DarkBrandColor,
-            HideBranding: team.HideBranding,
-            HideTeamProfileLink: team.HideTeamProfileLink,
-            IsPrivate: team.IsPrivate,
-            HideBookATeamMember: team.HideBookATeamMember,
-            TimeFormat: team.TimeFormat,
-            TimeZone: team.TimeZone,
-            WeekStart: team.WeekStart,
-            MemberCount: memberCount,
-            CreatedAt: team.CreatedAt);
+    public static TeamResponse ToResponse(this Tenant team, int memberCount)
+    {
+        return new TeamResponse(
+            team.Id,
+            team.ParentTenantId,
+            team.Name,
+            team.Slug,
+            team.Bio,
+            team.Logo.Url,
+            team.Theme,
+            team.BrandColor,
+            team.DarkBrandColor,
+            team.HideBranding,
+            team.HideTeamProfileLink,
+            team.IsPrivate,
+            team.HideBookATeamMember,
+            team.TimeFormat,
+            team.TimeZone,
+            team.WeekStart,
+            memberCount,
+            team.CreatedAt
+        );
+    }
 }

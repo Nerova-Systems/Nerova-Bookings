@@ -61,7 +61,7 @@ public sealed class ManagedEventTypeDomainTests
 
         child.ParentEventTypeId.Should().Be(parent.Id);
         child.OwnerUserId.Should().Be(memberId);
-        child.TeamId.Should().Be(parent.TeamId);
+        child.TeamId.Should().Be(parent.TeamId!);
         child.Title.Should().Be(parent.Title);
         child.Slug.Should().Be(parent.Slug);
         child.DurationMinutes.Should().Be(parent.DurationMinutes);

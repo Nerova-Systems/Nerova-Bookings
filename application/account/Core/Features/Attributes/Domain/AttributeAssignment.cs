@@ -1,7 +1,6 @@
 using Account.Features.Memberships.Domain;
 using JetBrains.Annotations;
 using SharedKernel.Domain;
-using SharedKernel.Persistence;
 using SharedKernel.StronglyTypedIds;
 
 namespace Account.Features.Attributes.Domain;
@@ -15,7 +14,10 @@ namespace Account.Features.Attributes.Domain;
 [JsonConverter(typeof(StronglyTypedIdJsonConverter<string, AttributeAssignmentId>))]
 public sealed record AttributeAssignmentId(string Value) : StronglyTypedUlid<AttributeAssignmentId>(Value)
 {
-    public override string ToString() => Value;
+    public override string ToString()
+    {
+        return Value;
+    }
 }
 
 /// <summary>
@@ -28,13 +30,9 @@ public sealed record AttributeAssignmentId(string Value) : StronglyTypedUlid<Att
 /// </summary>
 public sealed class AttributeAssignment : AggregateRoot<AttributeAssignmentId>, ITenantScopedEntity
 {
-    private AttributeAssignment(AttributeAssignmentId id) : base(id) { }
-
-    /// <summary>
-    ///     The org tenant this assignment belongs to. Stored explicitly for efficient filtering
-    ///     without joining through <see cref="Attribute" /> or <see cref="Membership" />.
-    /// </summary>
-    public TenantId TenantId { get; private set; } = null!;
+    private AttributeAssignment(AttributeAssignmentId id) : base(id)
+    {
+    }
 
     /// <summary>The membership (org member) this assignment targets.</summary>
     public MembershipId MembershipId { get; private set; } = null!;
@@ -59,6 +57,12 @@ public sealed class AttributeAssignment : AggregateRoot<AttributeAssignmentId>, 
     ///     <c>IsWeightsEnabled = true</c>.
     /// </summary>
     public int? Weight { get; private set; }
+
+    /// <summary>
+    ///     The org tenant this assignment belongs to. Stored explicitly for efficient filtering
+    ///     without joining through <see cref="Attribute" /> or <see cref="Membership" />.
+    /// </summary>
+    public TenantId TenantId { get; private init; } = null!;
 
     // ─── Factory ──────────────────────────────────────────────────────────────
 

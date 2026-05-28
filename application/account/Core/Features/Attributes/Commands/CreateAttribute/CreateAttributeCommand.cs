@@ -1,5 +1,5 @@
-using Account.Features.AuditLog.Domain;
 using Account.Features.Attributes.Domain;
+using Account.Features.AuditLog.Domain;
 using Account.Features.Permissions.Domain;
 using Account.Features.Permissions.Pipeline;
 using Account.Features.Tenants.Domain;
@@ -10,6 +10,7 @@ using SharedKernel.AuditLog;
 using SharedKernel.Cqrs;
 using SharedKernel.ExecutionContext;
 using SharedKernel.Telemetry;
+using Attribute = Account.Features.Attributes.Domain.Attribute;
 using FeatureFlagDefinitions = SharedKernel.FeatureFlags.FeatureFlags;
 
 namespace Account.Features.Attributes.Commands.CreateAttribute;
@@ -19,6 +20,7 @@ namespace Account.Features.Attributes.Commands.CreateAttribute;
 public sealed record CreateAttributeCommand : ICommand, IRequest<Result<AttributeResponse>>
 {
     public required string Name { get; init; }
+
     public required AttributeType Type { get; init; }
 }
 
@@ -45,35 +47,44 @@ public sealed class CreateAttributeHandler(
     public async Task<Result<AttributeResponse>> Handle(CreateAttributeCommand command, CancellationToken cancellationToken)
     {
         if (!executionContext.UserInfo.IsFeatureFlagEnabled(FeatureFlagDefinitions.CapAttributes.Key))
+        {
             return Result<AttributeResponse>.Forbidden("The attributes feature is not enabled for this organization.");
+        }
 
         var orgId = executionContext.ActiveOrgId!;
 
         var tenant = await tenantRepository.GetByIdAsync(orgId, cancellationToken);
         if (tenant is null)
+        {
             return Result<AttributeResponse>.NotFound($"Organization '{orgId}' not found.");
+        }
 
         if (tenant.Kind != TenantKind.Organization)
+        {
             return Result<AttributeResponse>.BadRequest("Attributes can only be created in organization tenants.");
+        }
 
         // Pre-check slug uniqueness to give a friendly error before hitting the DB constraint.
-        var slug = Domain.Attribute.GenerateSlug(command.Name);
+        var slug = Attribute.GenerateSlug(command.Name);
         if (await attributeRepository.SlugExistsUnfilteredAsync(orgId, slug, cancellationToken))
+        {
             return Result<AttributeResponse>.BadRequest($"An attribute with slug '{slug}' already exists in this organization.");
+        }
 
-        var attribute = Domain.Attribute.Create(tenant.Id, tenant.Kind, command.Name, command.Type);
+        var attribute = Attribute.Create(tenant.Id, tenant.Kind, command.Name, command.Type);
         await attributeRepository.AddAsync(attribute, cancellationToken);
 
         await auditLogEmitter.EmitAsync(new AuditLogEvent(
-            TenantId: orgId,
-            ActorId: executionContext.UserInfo.Id!,
-            ActorEmail: executionContext.UserInfo.Email ?? string.Empty,
-            Resource: AuditResource.Attribute.ToString(),
-            Action: AuditAction.Created.ToString(),
-            ResourceId: attribute.Id.ToString(),
-            IpAddress: httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
-            UserAgent: httpContextAccessor.HttpContext?.Request.Headers.UserAgent.ToString()
-        ), cancellationToken);
+                orgId,
+                executionContext.UserInfo.Id!,
+                executionContext.UserInfo.Email ?? string.Empty,
+                nameof(AuditResource.Attribute),
+                nameof(AuditAction.Created),
+                attribute.Id.ToString(),
+                IpAddress: httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
+                UserAgent: httpContextAccessor.HttpContext?.Request.Headers.UserAgent.ToString()
+            ), cancellationToken
+        );
 
         events.CollectEvent(new AttributeCreated(attribute.Id, orgId));
 

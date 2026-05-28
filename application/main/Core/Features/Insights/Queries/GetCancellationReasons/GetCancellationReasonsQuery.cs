@@ -45,8 +45,8 @@ public sealed class GetCancellationReasonsHandler(
         var all = await bookingRepository.GetForScopeAsync(scope.TenantId, scope.UserId, scope.TeamId, cancellationToken);
         var cancellations = all
             .Where(b => b.StartTime >= query.From && b.StartTime < query.To)
-            .Where(b => b.Status.Equals(BookingStatuses.Cancelled, StringComparison.OrdinalIgnoreCase)
-                        || b.Status.Equals(BookingStatuses.Rejected, StringComparison.OrdinalIgnoreCase)
+            .Where(b => b.Status == BookingStatus.Cancelled
+                        || b.Status == BookingStatus.Rejected
             )
             .Select(b => b.ResponsesJson);
 

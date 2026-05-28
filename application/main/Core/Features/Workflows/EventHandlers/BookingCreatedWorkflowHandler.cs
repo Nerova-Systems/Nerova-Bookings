@@ -1,5 +1,6 @@
 using Main.Features.Scheduling.Domain;
 using Main.Features.Workflows.Domain;
+using Main.Features.Workflows.Infrastructure;
 using Main.Features.Workflows.Services;
 
 namespace Main.Features.Workflows.EventHandlers;

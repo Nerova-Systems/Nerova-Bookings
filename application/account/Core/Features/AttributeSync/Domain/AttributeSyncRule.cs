@@ -1,8 +1,6 @@
 using Account.Features.Attributes.Domain;
-using Account.Features.Tenants.Domain;
 using JetBrains.Annotations;
 using SharedKernel.Domain;
-using SharedKernel.Persistence;
 using SharedKernel.StronglyTypedIds;
 
 namespace Account.Features.AttributeSync.Domain;
@@ -16,7 +14,10 @@ namespace Account.Features.AttributeSync.Domain;
 [JsonConverter(typeof(StronglyTypedIdJsonConverter<string, AttributeSyncRuleId>))]
 public sealed record AttributeSyncRuleId(string Value) : StronglyTypedUlid<AttributeSyncRuleId>(Value)
 {
-    public override string ToString() => Value;
+    public override string ToString()
+    {
+        return Value;
+    }
 }
 
 /// <summary>
@@ -29,10 +30,9 @@ public sealed record AttributeSyncRuleId(string Value) : StronglyTypedUlid<Attri
 /// </summary>
 public sealed class AttributeSyncRule : AggregateRoot<AttributeSyncRuleId>, ITenantScopedEntity
 {
-    private AttributeSyncRule(AttributeSyncRuleId id) : base(id) { }
-
-    /// <summary>The org tenant this rule belongs to.</summary>
-    public TenantId TenantId { get; private set; } = null!;
+    private AttributeSyncRule(AttributeSyncRuleId id) : base(id)
+    {
+    }
 
     /// <summary>The attribute whose assignments this rule manages.</summary>
     public AttributeId AttributeId { get; private set; } = null!;
@@ -57,6 +57,9 @@ public sealed class AttributeSyncRule : AggregateRoot<AttributeSyncRuleId>, ITen
 
     /// <summary>When <see langword="false" /> the rule is skipped during sync.</summary>
     public bool IsEnabled { get; private set; }
+
+    /// <summary>The org tenant this rule belongs to.</summary>
+    public TenantId TenantId { get; private init; } = null!;
 
     // ─── Factory ──────────────────────────────────────────────────────────────
 

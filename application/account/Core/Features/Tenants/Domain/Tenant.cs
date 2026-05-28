@@ -140,34 +140,36 @@ public sealed class Tenant : SoftDeletableAggregateRoot<TenantId>
     /// </summary>
     public static Tenant CreateOrganization(string email, int existingCount)
     {
-        var tenant = new Tenant(RolloutBucketHasher.ComputeRolloutBucket(existingCount), TenantKind.Organization);
-        tenant.TimeZone = "Europe/London";
-        tenant.WeekStart = "Sunday";
+        var tenant = new Tenant(RolloutBucketHasher.ComputeRolloutBucket(existingCount), TenantKind.Organization)
+        {
+            TimeZone = "Europe/London",
+            WeekStart = "Sunday"
+        };
         tenant.AddDomainEvent(new TenantCreatedEvent(tenant.Id, email));
         return tenant;
     }
 
     /// <summary>
-    ///     Creates a <see cref="TenantKind.Team" /> tenant that is a child of <paramref name="parentOrg" />.
+    ///     Creates a <see cref="TenantKind.Team" /> tenant that is a child of <paramref name="parent" />.
     /// </summary>
-    /// <param name="parentOrg">
+    /// <param name="parent">
     ///     The owning organization. Must have <see cref="TenantKind.Organization" /> kind;
     ///     passing a <see cref="TenantKind.Solo" /> or <see cref="TenantKind.Team" /> parent throws.
     /// </param>
     /// <param name="existingCount">Monotonic index used to compute the rollout bucket.</param>
     /// <exception cref="InvalidOperationException">
-    ///     Thrown when <paramref name="parentOrg" /> is not an Organization.
+    ///     Thrown when <paramref name="parent" /> is not an Organization.
     /// </exception>
-    public static Tenant CreateTeam(Tenant parentOrg, int existingCount)
+    public static Tenant CreateTeam(Tenant parent, int existingCount)
     {
-        if (parentOrg.Kind != TenantKind.Organization)
+        if (parent.Kind == TenantKind.Team)
         {
             throw new InvalidOperationException(
-                $"A Team can only be created under an Organization tenant, but the provided parent has kind '{parentOrg.Kind}'."
+                "A Team cannot be nested under another Team tenant."
             );
         }
 
-        return new Tenant(RolloutBucketHasher.ComputeRolloutBucket(existingCount), TenantKind.Team, parentOrg.Id)
+        return new Tenant(RolloutBucketHasher.ComputeRolloutBucket(existingCount), TenantKind.Team, parent.Id)
         {
             TimeZone = "Europe/London",
             WeekStart = "Sunday"

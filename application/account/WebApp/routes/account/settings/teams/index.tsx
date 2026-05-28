@@ -40,11 +40,7 @@ function TeamsPage() {
     >
       {canManageTeams && (
         <div className="flex justify-end">
-          <Link
-            to="/account/settings/teams/new"
-            className={buttonVariants({ variant: "default" })}
-            aria-label={t`New team`}
-          >
+          <Link to="/account/settings/teams/new" className={buttonVariants({})} aria-label={t`New team`}>
             <PlusIcon />
             <Trans>New team</Trans>
           </Link>
@@ -66,11 +62,7 @@ function TeamsPage() {
           </EmptyHeader>
           {canManageTeams && (
             <EmptyContent>
-              <Link
-                to="/account/settings/teams/new"
-                className={buttonVariants({ variant: "default" })}
-                aria-label={t`Create a team`}
-              >
+              <Link to="/account/settings/teams/new" className={buttonVariants({})} aria-label={t`Create a team`}>
                 <PlusIcon />
                 <Trans>Create a team</Trans>
               </Link>

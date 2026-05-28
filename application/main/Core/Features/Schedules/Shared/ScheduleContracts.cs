@@ -72,3 +72,6 @@ public sealed record ScheduleResponse(
 
 [PublicAPI]
 public sealed record SchedulesResponse(ScheduleResponse[] Schedules);
+
+[PublicAPI]
+public sealed record DuplicateScheduleRequest(string Name);

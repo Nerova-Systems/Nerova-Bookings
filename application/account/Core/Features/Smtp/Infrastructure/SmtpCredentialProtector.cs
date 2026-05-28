@@ -6,14 +6,9 @@ namespace Account.Features.Smtp.Infrastructure;
 ///     Encrypts and decrypts SMTP passwords using ASP.NET Core Data Protection.
 ///     Stored passwords are never readable without the application's key ring.
 /// </summary>
-public sealed class SmtpCredentialProtector
+public sealed class SmtpCredentialProtector(IDataProtectionProvider provider)
 {
-    private readonly IDataProtector _protector;
-
-    public SmtpCredentialProtector(IDataProtectionProvider provider)
-    {
-        _protector = provider.CreateProtector("org-smtp-credentials");
-    }
+    private readonly IDataProtector _protector = provider.CreateProtector("org-smtp-credentials");
 
     public string Protect(string plaintext)
     {

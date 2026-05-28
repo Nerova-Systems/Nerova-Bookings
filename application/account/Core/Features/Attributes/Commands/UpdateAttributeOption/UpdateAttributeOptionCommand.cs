@@ -14,10 +14,16 @@ namespace Account.Features.Attributes.Commands.UpdateAttributeOption;
 [RequirePermission(PermissionResource.Attribute, PermissionAction.Update, PermissionScope.Organization)]
 public sealed record UpdateAttributeOptionCommand : ICommand, IRequest<Result<AttributeOptionResponse>>
 {
-    public AttributeId AttributeId { get; init; } = default!;
-    public AttributeOptionId OptionId { get; init; } = default!;
+    [JsonIgnore] // Removes this property from the API contract
+    public AttributeId AttributeId { get; init; } = null!;
+
+    [JsonIgnore] // Removes this property from the API contract
+    public AttributeOptionId OptionId { get; init; } = null!;
+
     public required string Value { get; init; }
+
     public bool IsGroup { get; init; }
+
     public string[] Contains { get; init; } = [];
 }
 
@@ -41,19 +47,27 @@ public sealed class UpdateAttributeOptionHandler(
     public async Task<Result<AttributeOptionResponse>> Handle(UpdateAttributeOptionCommand command, CancellationToken cancellationToken)
     {
         if (!executionContext.UserInfo.IsFeatureFlagEnabled(FeatureFlagDefinitions.CapAttributes.Key))
+        {
             return Result<AttributeOptionResponse>.Forbidden("The attributes feature is not enabled for this organization.");
+        }
 
         var orgId = executionContext.ActiveOrgId!;
 
         var attribute = await attributeRepository.GetByIdUnfilteredAsync(command.AttributeId, cancellationToken);
         if (attribute is null)
+        {
             return Result<AttributeOptionResponse>.NotFound($"Attribute '{command.AttributeId}' not found.");
+        }
 
         if (attribute.TenantId != orgId)
+        {
             return Result<AttributeOptionResponse>.Forbidden("You do not have access to this attribute.");
+        }
 
         if (!attribute.UpdateOption(command.OptionId, command.Value, command.IsGroup, command.Contains))
+        {
             return Result<AttributeOptionResponse>.NotFound($"Option '{command.OptionId}' not found on attribute '{command.AttributeId}'.");
+        }
 
         attributeRepository.Update(attribute);
 

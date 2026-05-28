@@ -6,14 +6,9 @@ namespace Account.Features.DelegationCredentials.Infrastructure;
 ///     Encrypts and decrypts delegation credential key blobs using ASP.NET Core Data Protection.
 ///     Stored key blobs are never readable without the application's key ring.
 /// </summary>
-public sealed class DelegationCredentialEncryption
+public sealed class DelegationCredentialEncryption(IDataProtectionProvider provider)
 {
-    private readonly IDataProtector _protector;
-
-    public DelegationCredentialEncryption(IDataProtectionProvider provider)
-    {
-        _protector = provider.CreateProtector("delegation-credential");
-    }
+    private readonly IDataProtector _protector = provider.CreateProtector("delegation-credential");
 
     public string Protect(string plaintext)
     {

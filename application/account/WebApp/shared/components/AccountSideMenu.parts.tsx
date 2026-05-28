@@ -13,6 +13,7 @@ import {
 import { Link as RouterLink } from "@tanstack/react-router";
 import {
   Building2Icon,
+  ClockIcon,
   CreditCardIcon,
   FileClockIcon,
   HomeIcon,
@@ -62,6 +63,16 @@ export function UserGroup({ isActive }: Readonly<{ isActive: IsActiveFn }>) {
                 <UserIcon />
                 <span>
                   <Trans>Profile</Trans>
+                </span>
+              </RouterLink>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+          <SidebarMenuItem>
+            <SidebarMenuButton asChild={true} isActive={isActive("/user/general")} tooltip={t`General`}>
+              <RouterLink to="/user/general" aria-label={t`General`}>
+                <ClockIcon />
+                <span>
+                  <Trans>General</Trans>
                 </span>
               </RouterLink>
             </SidebarMenuButton>

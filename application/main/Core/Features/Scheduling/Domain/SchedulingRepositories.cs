@@ -22,6 +22,14 @@ public interface IBookingRepository : IAppendRepository<Booking, BookingId>
     Task<BookingWithEventType?> GetForOwnerWithEventTypeAsync(TenantId tenantId, UserId ownerUserId, TenantId? teamId, BookingId bookingId, CancellationToken cancellationToken);
 
     /// <summary>
+    ///     Tenant-scoped lookup of a single booking joined with its event type. Unlike
+    ///     <see cref="GetForOwnerWithEventTypeAsync" /> this method does not filter by owner or
+    ///     team and is intended for callers (Admin/Owner) authorised to operate on any booking
+    ///     within their tenant.
+    /// </summary>
+    Task<BookingWithEventType?> GetByIdInTenantWithEventTypeAsync(TenantId tenantId, BookingId bookingId, CancellationToken cancellationToken);
+
+    /// <summary>
     ///     Returns all bookings for the specified scope (solo or team) without date filtering.
     ///     Date-range narrowing is performed in memory by callers (SQLite EF Core cannot translate
     ///     <see cref="DateTimeOffset" /> range comparisons to SQL).
@@ -120,6 +128,19 @@ public sealed class BookingRepository(MainDbContext mainDbContext)
             : DbSet.AsTracking().Where(booking => booking.TenantId == tenantId && booking.OwnerUserId == ownerUserId && booking.TeamId == null && booking.Id == bookingId);
 
         return await query
+            .Join(
+                Context.Set<EventType>().IgnoreQueryFilters().AsNoTracking(),
+                booking => booking.EventTypeId,
+                eventType => eventType.Id,
+                (booking, eventType) => new BookingWithEventType(booking, eventType)
+            )
+            .SingleOrDefaultAsync(cancellationToken);
+    }
+
+    public async Task<BookingWithEventType?> GetByIdInTenantWithEventTypeAsync(TenantId tenantId, BookingId bookingId, CancellationToken cancellationToken)
+    {
+        return await DbSet.AsTracking()
+            .Where(booking => booking.TenantId == tenantId && booking.Id == bookingId)
             .Join(
                 Context.Set<EventType>().IgnoreQueryFilters().AsNoTracking(),
                 booking => booking.EventTypeId,

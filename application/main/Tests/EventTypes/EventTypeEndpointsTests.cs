@@ -3,6 +3,7 @@ using System.Net.Http.Json;
 using FluentAssertions;
 using JetBrains.Annotations;
 using Main.Database;
+using Main.Features.EventTypes.Domain;
 using SharedKernel.Tests;
 using SharedKernel.Validation;
 using Xunit;
@@ -636,7 +637,7 @@ public sealed class EventTypeEndpointsTests : EndpointBaseTest<MainDbContext>
         var response = await AuthenticatedMemberHttpClient.DeleteAsync($"/api/event-types/{eventType.Id}");
 
         // Assert
-        await response.ShouldHaveErrorStatusCode(HttpStatusCode.Forbidden, "Only owners and admins can manage event types.");
+        await response.ShouldHaveErrorStatusCode(HttpStatusCode.Forbidden, "You do not have permission to perform this action.");
     }
 
     [Fact]
@@ -739,6 +740,161 @@ public sealed class EventTypeEndpointsTests : EndpointBaseTest<MainDbContext>
         };
     }
 
+    [Fact]
+    public async Task GetEventTypesByViewer_WhenOwnerHasEventTypes_ShouldReturnPersonalGroup()
+    {
+        var schedule = await CreateScheduleAsync();
+        await CreateEventTypeAsync(schedule.Id, "Intro call", "intro-call");
+
+        var response = await AuthenticatedOwnerHttpClient.GetAsync("/api/event-types/by-viewer");
+        response.ShouldBeSuccessfulGetRequest();
+        var result = await response.DeserializeResponse<EventTypesByViewerResponse>();
+
+        result!.Groups.Should().ContainSingle(group => group.Kind == "personal");
+        result.Groups[0].EventTypes.Should().ContainSingle(eventType => eventType.Slug == "intro-call");
+    }
+
+    [Fact]
+    public async Task GetEventTypesByViewer_WhenAnonymous_ShouldReturnUnauthorized()
+    {
+        var response = await AnonymousHttpClient.GetAsync("/api/event-types/by-viewer");
+
+        response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
+    }
+
+    [Fact]
+    public async Task GetEventTypeGroups_WhenOwnerHasEventTypes_ShouldReturnPersonalGroupCount()
+    {
+        var schedule = await CreateScheduleAsync();
+        await CreateEventTypeAsync(schedule.Id, "Intro call", "intro-call");
+        await CreateEventTypeAsync(schedule.Id, "Zoom consult", "zoom-consult");
+
+        var response = await AuthenticatedOwnerHttpClient.GetAsync("/api/event-types/groups");
+        response.ShouldBeSuccessfulGetRequest();
+        var result = await response.DeserializeResponse<EventTypeGroupsResponse>();
+
+        result!.Groups.Should().ContainSingle(group => group.Kind == "personal" && group.Count == 2);
+    }
+
+    [Fact]
+    public async Task GetHostsForAssignment_WhenSoloEventType_ShouldReturnOwnerOnly()
+    {
+        var schedule = await CreateScheduleAsync();
+        var eventType = await CreateEventTypeAsync(schedule.Id, "Intro call", "intro-call");
+
+        var response = await AuthenticatedOwnerHttpClient.GetAsync($"/api/event-types/{eventType.Id}/assignment-candidates");
+        response.ShouldBeSuccessfulGetRequest();
+        var result = await response.DeserializeResponse<HostsForAssignmentResponse>();
+
+        result!.Candidates.Should().ContainSingle();
+    }
+
+    [Fact]
+    public async Task GetHostsForAssignment_WhenMemberRequestsOwnerEventType_ShouldReturnNotFound()
+    {
+        var schedule = await CreateScheduleAsync();
+        var eventType = await CreateEventTypeAsync(schedule.Id, "Intro call", "intro-call");
+
+        var response = await AuthenticatedMemberHttpClient.GetAsync($"/api/event-types/{eventType.Id}/assignment-candidates");
+
+        await response.ShouldHaveErrorStatusCode(HttpStatusCode.NotFound, $"Event type '{eventType.Id}' was not found.");
+    }
+
+    [Fact]
+    public async Task GetHostsForAvailability_WhenScheduleHasWindows_ShouldReturnScheduleWindowsForOwner()
+    {
+        var schedule = await CreateScheduleAsync();
+        var eventType = await CreateEventTypeAsync(schedule.Id, "Intro call", "intro-call");
+
+        var response = await AuthenticatedOwnerHttpClient.GetAsync($"/api/event-types/{eventType.Id}/availability?from=2026-01-05&to=2026-01-11");
+        response.ShouldBeSuccessfulGetRequest();
+        var result = await response.DeserializeResponse<HostsForAvailabilityResponse>();
+
+        result!.Hosts.Should().ContainSingle();
+        result.Hosts[0].TimeZone.Should().Be("Africa/Johannesburg");
+        result.Hosts[0].AvailabilityWindows.Should().ContainSingle(window => window.StartMinute == 540 && window.EndMinute == 1020);
+    }
+
+    [Fact]
+    public async Task GetHostsForAvailability_WhenFromAfterTo_ShouldReturnBadRequest()
+    {
+        var schedule = await CreateScheduleAsync();
+        var eventType = await CreateEventTypeAsync(schedule.Id, "Intro call", "intro-call");
+
+        var response = await AuthenticatedOwnerHttpClient.GetAsync($"/api/event-types/{eventType.Id}/availability?from=2026-02-10&to=2026-02-01");
+
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+    }
+
+    [Fact]
+    public async Task BulkApplyLocations_WhenOwnerAppliesValidLocations_ShouldPersistAllChanges()
+    {
+        var schedule = await CreateScheduleAsync();
+        var first = await CreateEventTypeAsync(schedule.Id, "Intro call", "intro-call");
+        var second = await CreateEventTypeAsync(schedule.Id, "Zoom consult", "zoom-consult");
+
+        var request = new
+        {
+            items = new[]
+            {
+                new { eventTypeId = first.Id, locationType = "phone", locationValue = "+1-555-0100" },
+                new { eventTypeId = second.Id, locationType = "phone", locationValue = "+1-555-0101" }
+            }
+        };
+
+        var response = await AuthenticatedOwnerHttpClient.PostAsJsonAsync("/api/event-types/bulk-apply-locations", request);
+        response.EnsureSuccessStatusCode();
+
+        var refreshedFirst = await (await AuthenticatedOwnerHttpClient.GetAsync($"/api/event-types/{first.Id}")).DeserializeResponse<EventTypeResponse>();
+        var refreshedSecond = await (await AuthenticatedOwnerHttpClient.GetAsync($"/api/event-types/{second.Id}")).DeserializeResponse<EventTypeResponse>();
+        refreshedFirst!.LocationType.Should().Be("phone");
+        refreshedFirst.LocationValue.Should().Be("+1-555-0100");
+        refreshedSecond!.LocationType.Should().Be("phone");
+        refreshedSecond.LocationValue.Should().Be("+1-555-0101");
+    }
+
+    [Fact]
+    public async Task BulkApplyLocations_WhenMember_ShouldReturnForbidden()
+    {
+        var schedule = await CreateScheduleAsync();
+        var eventType = await CreateEventTypeAsync(schedule.Id, "Intro call", "intro-call");
+
+        var request = new
+        {
+            items = new[] { new { eventTypeId = eventType.Id, locationType = "phone", locationValue = "+1-555-0100" } }
+        };
+
+        var response = await AuthenticatedMemberHttpClient.PostAsJsonAsync("/api/event-types/bulk-apply-locations", request);
+
+        response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
+    }
+
+    [Fact]
+    public async Task BulkApplyLocations_WhenAnyItemNotFound_ShouldAbortEntireBatch()
+    {
+        var schedule = await CreateScheduleAsync();
+        var first = await CreateEventTypeAsync(schedule.Id, "Intro call", "intro-call");
+
+        var unknownId = EventTypeId.NewId().Value;
+        var request = new
+        {
+            items = new[]
+            {
+                new { eventTypeId = first.Id, locationType = "phone", locationValue = "+1-555-0100" },
+                new { eventTypeId = unknownId, locationType = "phone", locationValue = "+1-555-0101" }
+            }
+        };
+
+        var response = await AuthenticatedOwnerHttpClient.PostAsJsonAsync("/api/event-types/bulk-apply-locations", request);
+
+        response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+
+        // Verify the first item was NOT persisted (atomic rollback).
+        var refreshed = await (await AuthenticatedOwnerHttpClient.GetAsync($"/api/event-types/{first.Id}")).DeserializeResponse<EventTypeResponse>();
+        refreshed!.LocationType.Should().Be("link");
+        refreshed.LocationValue.Should().Be("https://example.com/meet");
+    }
+
     [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
     private sealed record EventTypesResponse(EventTypeResponse[] EventTypes);
 
@@ -836,4 +992,31 @@ public sealed class EventTypeEndpointsTests : EndpointBaseTest<MainDbContext>
 
     [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
     private sealed record EventTypeRedirectsResponse(string? SuccessUrl, string? CancellationUrl);
+
+    [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
+    private sealed record EventTypesByViewerResponse(EventTypeGroupResponse[] Groups);
+
+    [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
+    private sealed record EventTypeGroupResponse(string Kind, string? TeamId, EventTypeResponse[] EventTypes);
+
+    [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
+    private sealed record EventTypeGroupsResponse(EventTypeGroupSummaryResponse[] Groups);
+
+    [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
+    private sealed record EventTypeGroupSummaryResponse(string Kind, string? TeamId, int Count);
+
+    [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
+    private sealed record HostsForAssignmentResponse(HostCandidateResponse[] Candidates);
+
+    [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
+    private sealed record HostCandidateResponse(string UserId);
+
+    [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
+    private sealed record HostsForAvailabilityResponse(HostAvailabilityResponse[] Hosts);
+
+    [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
+    private sealed record HostAvailabilityResponse(string UserId, string TimeZone, HostAvailabilityWindowResponse[] AvailabilityWindows);
+
+    [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
+    private sealed record HostAvailabilityWindowResponse(int[] Days, int StartMinute, int EndMinute);
 }

@@ -22,9 +22,19 @@ msgstr "{0}"
 msgid "{0} steps"
 msgstr "{0} steps"
 
+#. placeholder {0}: workflow.steps.length
+msgid "{0} steps"
+msgstr "{0} steps"
+
 #. placeholder {0}: schedule.availabilityWindows.length
 msgid "{0} windows"
 msgstr "{0} windows"
+
+msgid "{count} selected"
+msgstr "{count} selected"
+
+msgid "{rating} stars and up"
+msgstr "{rating} stars and up"
 
 #. placeholder {0}: getBookingStatusLabel(status).toLowerCase()
 msgid "{totalCount} {0} bookings"
@@ -36,14 +46,23 @@ msgstr "0 active"
 msgid "0 apps, 0 active"
 msgstr "0 apps, 0 active"
 
+msgid "{value} stars and up"
+msgstr "{value} stars and up"
+
 msgid "A confirmation will be sent to the email address you provided."
 msgstr "A confirmation will be sent to the email address you provided."
 
 msgid "Accepted"
 msgstr "Accepted"
 
-msgid "Access"
-msgstr "Access"
+msgid "Action"
+msgstr "Action"
+
+msgid "Active"
+msgstr "Active"
+
+msgid "Active (coming soon)"
+msgstr "Active (coming soon)"
 
 msgid "Action"
 msgstr "Action"
@@ -78,6 +97,12 @@ msgstr "Add another attendee to this booking."
 msgid "Add booking field"
 msgstr "Add booking field"
 
+msgid "Add an internal note"
+msgstr "Add an internal note"
+
+msgid "Add another guest"
+msgstr "Add another guest"
+
 msgid "Add date override"
 msgstr "Add date override"
 
@@ -86,6 +111,9 @@ msgstr "Add dates when your availability changes from your daily hours."
 
 msgid "Add guests"
 msgstr "Add guests"
+
+msgid "Add internal note"
+msgstr "Add internal note"
 
 msgid "Add new event type"
 msgstr "Add new event type"
@@ -96,12 +124,14 @@ msgstr "Add new schedule"
 msgid "Add option"
 msgstr "Add option"
 
+msgid "Add note"
+msgstr "Add note"
+
 msgid "Add override"
 msgstr "Add override"
 
 msgid "Add private link"
 msgstr "Add private link"
-
 msgid "Add step"
 msgstr "Add step"
 
@@ -117,6 +147,9 @@ msgstr "Add webhook"
 msgid "Add workflow"
 msgstr "Add workflow"
 
+msgid "Add, remove, and weight individual hosts and host groups."
+msgstr "Add, remove, and weight individual hosts and host groups."
+
 msgid "Additional notes"
 msgstr "Additional notes"
 
@@ -131,12 +164,14 @@ msgstr "After event"
 
 msgid "After the event ends"
 msgstr "After the event ends"
-
 msgid "AI"
 msgstr "AI"
 
-msgid "AI settings are not connected to this editor yet."
-msgstr "AI settings are not connected to this editor yet."
+msgid "Agent configuration"
+msgstr "Agent configuration"
+
+msgid "AI voice agent"
+msgstr "AI voice agent"
 
 msgid "All event types"
 msgstr "All event types"
@@ -147,14 +182,32 @@ msgstr "Allow cancellation"
 msgid "Allow reschedule"
 msgstr "Allow reschedule"
 
+msgid "Allow rescheduling cancelled bookings"
+msgstr "Allow rescheduling cancelled bookings"
+
+msgid "Allow rescheduling past bookings"
+msgstr "Allow rescheduling past bookings"
+
+msgid "Any rating"
+msgstr "Any rating"
+
+msgid "App uninstalled"
+msgstr "App uninstalled"
+
 msgid "Apply filters"
 msgstr "Apply filters"
 
 msgid "Approval"
 msgstr "Approval"
 
+msgid "Apply to all"
+msgstr "Apply to all"
+
 msgid "Apps"
 msgstr "Apps"
+
+msgid "Apps installed for your account are available to this event type. Conferencing apps appear as location choices on the Setup tab, and connected calendars are used to check availability."
+msgstr "Apps installed for your account are available to this event type. Conferencing apps appear as location choices on the Setup tab, and connected calendars are used to check availability."
 
 msgid "At least one schedule exists"
 msgstr "At least one schedule exists"
@@ -177,6 +230,9 @@ msgstr "Automate reminders and follow-up messages for this event type."
 msgid "Automate reminders, follow-ups, and notifications for your bookings."
 msgstr "Automate reminders, follow-ups, and notifications for your bookings."
 
+msgid "Automate reminders, follow-ups, and notifications for your bookings."
+msgstr "Automate reminders, follow-ups, and notifications for your bookings."
+
 msgid "Availability"
 msgstr "Availability"
 
@@ -185,6 +241,9 @@ msgstr "Availability troubleshoot"
 
 msgid "Available apps"
 msgstr "Available apps"
+
+msgid "Available hosts"
+msgstr "Available hosts"
 
 msgid "Available times"
 msgstr "Available times"
@@ -213,8 +272,20 @@ msgstr "Before the event starts"
 msgid "Blocks other event types"
 msgstr "Blocks other event types"
 
+msgid "Block slot while pending"
+msgstr "Block slot while pending"
+
 msgid "Booked minutes per day"
 msgstr "Booked minutes per day"
+
+msgid "Booked minutes per month"
+msgstr "Booked minutes per month"
+
+msgid "Booked minutes per week"
+msgstr "Booked minutes per week"
+
+msgid "Booked minutes per year"
+msgstr "Booked minutes per year"
 
 msgid "Booker layout"
 msgstr "Booker layout"
@@ -231,6 +302,9 @@ msgstr "Booking cancelled"
 msgid "Booking confirmed"
 msgstr "Booking confirmed"
 
+msgid "Booking created"
+msgstr "Booking created"
+
 msgid "Booking details"
 msgstr "Booking details"
 
@@ -243,6 +317,9 @@ msgstr "Booking ID"
 msgid "Booking limits"
 msgstr "Booking limits"
 
+msgid "Booking link copied"
+msgstr "Booking link copied"
+
 msgid "Booking page"
 msgstr "Booking page"
 
@@ -252,9 +329,23 @@ msgstr "Booking page unavailable"
 msgid "Booking questions"
 msgstr "Booking questions"
 
+msgid "Booking paid"
+msgstr "Booking paid"
+
+msgid "Booking reassigned"
+msgstr "Booking reassigned"
+
 msgid "Booking rejected"
 msgstr "Booking rejected"
 
+=======
+msgid "Booking reported"
+msgstr "Booking reported"
+
+msgid "Booking rescheduled"
+msgstr "Booking rescheduled"
+
+>>>>>>> 8bbffd68b3d3daf7ae4eb45c2e9a08472699e0a6
 msgid "Booking volume"
 msgstr "Booking volume"
 
@@ -275,6 +366,15 @@ msgstr "Boolean"
 
 msgid "Browse app store"
 msgstr "Browse app store"
+
+msgid "Bookings per month"
+msgstr "Bookings per month"
+
+msgid "Bookings per week"
+msgstr "Bookings per week"
+
+msgid "Bookings per year"
+msgstr "Bookings per year"
 
 msgid "Browser default"
 msgstr "Browser default"
@@ -309,11 +409,22 @@ msgstr "Calendar grid"
 msgid "Calendar settings & more..."
 msgstr "Calendar settings & more..."
 
+#. placeholder {0}: entry.actorUserId
+msgid "By {0}"
+msgstr "By {0}"
+
+msgid "Calendar"
+msgstr "Calendar"
+
 msgid "Calendar view"
 msgstr "Calendar view"
 
 msgid "Cancel"
 msgstr "Cancel"
+
+#. placeholder {0}: bookings.length
+msgid "Cancel {0} bookings?"
+msgstr "Cancel {0} bookings?"
 
 msgid "Cancel booking"
 msgstr "Cancel booking"
@@ -323,6 +434,9 @@ msgstr "Cancel event"
 
 msgid "Cancel event?"
 msgstr "Cancel event?"
+
+msgid "Cancel selected"
+msgstr "Cancel selected"
 
 msgid "Cancellation and reschedule"
 msgstr "Cancellation and reschedule"
@@ -339,6 +453,10 @@ msgstr "Cancellation URL"
 msgid "Cancelled"
 msgstr "Cancelled"
 
+#. placeholder {0}: bookings.length
+msgid "Cancelled {0} bookings"
+msgstr "Cancelled {0} bookings"
+
 msgid "Capacity limits"
 msgstr "Capacity limits"
 
@@ -350,6 +468,9 @@ msgstr "Choose the booker layout and accent color for this event type."
 
 msgid "Choose the core calendar and conferencing apps used by this event type."
 msgstr "Choose the core calendar and conferencing apps used by this event type."
+
+msgid "Choose which language the public booking page renders in."
+msgstr "Choose which language the public booking page renders in."
 
 msgid "Choose which schedule controls when this event type can be booked."
 msgstr "Choose which schedule controls when this event type can be booked."
@@ -375,11 +496,23 @@ msgstr "Configuration required"
 msgid "Configure different events for people to book on your calendar."
 msgstr "Configure different events for people to book on your calendar."
 
+msgid "Configuration"
+msgstr "Configuration"
+
+msgid "Configure the appointment types clients can book."
+msgstr "Configure the appointment types clients can book."
+
 msgid "Confirm booking"
 msgstr "Confirm booking"
 
 msgid "Confirm booking?"
 msgstr "Confirm booking?"
+
+msgid "Confirm free-email bookers"
+msgstr "Confirm free-email bookers"
+
+msgid "Confirm this booking?"
+msgstr "Confirm this booking?"
 
 msgid "Confirmation"
 msgstr "Confirmation"
@@ -405,6 +538,18 @@ msgstr "Connect Zoom"
 msgid "Connected features"
 msgstr "Connected features"
 
+msgid "Confirmed"
+msgstr "Confirmed"
+
+msgid "Connect your calendars and conferencing tools so bookings sync automatically and meeting links are created for you."
+msgstr "Connect your calendars and conferencing tools so bookings sync automatically and meeting links are created for you."
+
+msgid "Connected"
+msgstr "Connected"
+
+msgid "Connected calendars"
+msgstr "Connected calendars"
+
 msgid "Connecting..."
 msgstr "Connecting..."
 
@@ -429,8 +574,17 @@ msgstr "Control manual approval and booker email checks."
 msgid "Control whether this booking page is listed publicly."
 msgstr "Control whether this booking page is listed publicly."
 
-msgid "Coordinate event type dependencies without calling unavailable APIs."
-msgstr "Coordinate event type dependencies without calling unavailable APIs."
+msgid "Copied"
+msgstr "Copied"
+
+msgid "Copy"
+msgstr "Copy"
+
+msgid "Copy and store this secret now — you won't be able to see it again."
+msgstr "Copy and store this secret now — you won't be able to see it again."
+
+msgid "Copy booking link"
+msgstr "Copy booking link"
 
 msgid "Copy link"
 msgstr "Copy link"
@@ -442,6 +596,9 @@ msgstr "Copy of {0}"
 msgid "Copy public link"
 msgstr "Copy public link"
 
+msgid "Copy signing secret"
+msgstr "Copy signing secret"
+
 msgid "Copy times"
 msgstr "Copy times"
 
@@ -451,11 +608,17 @@ msgstr "Could not disconnect connector account."
 msgid "Could not start connector setup."
 msgstr "Could not start connector setup."
 
+msgid "Count no-shows"
+msgstr "Count no-shows"
+
 msgid "Create"
 msgstr "Create"
 
 msgid "Create a private setup event type before opening public booking."
 msgstr "Create a private setup event type before opening public booking."
+
+msgid "Create a webhook to forward booking events to your own services."
+msgstr "Create a webhook to forward booking events to your own services."
 
 msgid "Create a weekly schedule before publishing event types."
 msgstr "Create a weekly schedule before publishing event types."
@@ -475,12 +638,17 @@ msgstr "Create duplicate"
 msgid "Create event type"
 msgstr "Create event type"
 
+msgid "Create private link"
+msgstr "Create private link"
+
 msgid "Create schedule"
 msgstr "Create schedule"
 
 msgid "Create the booking page basics now, then finish setup on the next screen."
 msgstr "Create the booking page basics now, then finish setup on the next screen."
 
+msgid "Create webhook"
+msgstr "Create webhook"
 msgid "Create workflow"
 msgstr "Create workflow"
 
@@ -492,6 +660,18 @@ msgstr "Custom"
 
 msgid "Customize the questions asked on the booking page. Learn more"
 msgstr "Customize the questions asked on the booking page. Learn more"
+
+msgid "Created"
+msgstr "Created"
+
+msgid "Custom event name"
+msgstr "Custom event name"
+
+msgid "Custom reply-to email"
+msgstr "Custom reply-to email"
+
+msgid "Customize the calendar event title and the reply-to address bookers see."
+msgstr "Customize the calendar event title and the reply-to address bookers see."
 
 msgid "Daily"
 msgstr "Daily"
@@ -535,6 +715,9 @@ msgstr "Delete event type"
 msgid "Delete event type?"
 msgstr "Delete event type?"
 
+msgid "Delete note"
+msgstr "Delete note"
+
 msgid "Delete schedule"
 msgstr "Delete schedule"
 
@@ -547,14 +730,29 @@ msgstr "Delete workflow?"
 msgid "Dependencies"
 msgstr "Dependencies"
 
-msgid "Dependency rules are placeholders until event type relationships are supported."
-msgstr "Dependency rules are placeholders until event type relationships are supported."
+msgid "Delete webhook"
+msgstr "Delete webhook"
+
+msgid "Delete webhook?"
+msgstr "Delete webhook?"
+
+msgid "Delete workflow"
+msgstr "Delete workflow"
+
+msgid "Delete workflow?"
+msgstr "Delete workflow?"
 
 msgid "Description"
 msgstr "Description"
 
-msgid "Destination calendar"
-msgstr "Destination calendar"
+msgid "Details"
+msgstr "Details"
+
+msgid "Disable guests"
+msgstr "Disable guests"
+
+msgid "Distribute bookings across hosts based on weighting and lead history."
+msgstr "Distribute bookings across hosts based on weighting and lead history."
 
 msgid "Disable cancelling"
 msgstr "Disable cancelling"
@@ -582,6 +780,9 @@ msgstr "Disconnecting..."
 
 msgid "Distribution of bookings by status."
 msgstr "Distribution of bookings by status."
+
+msgid "Done"
+msgstr "Done"
 
 msgid "Duplicate"
 msgstr "Duplicate"
@@ -627,7 +828,6 @@ msgstr "Email body"
 
 msgid "email step"
 msgstr "email step"
-
 msgid "Email subject"
 msgstr "Email subject"
 
@@ -646,6 +846,9 @@ msgstr "Email verification"
 msgid "Embed"
 msgstr "Embed"
 
+msgid "Enable AI voice agent"
+msgstr "Enable AI voice agent"
+
 msgid "Enabling and disabling workflows is coming soon."
 msgstr "Enabling and disabling workflows is coming soon."
 
@@ -658,11 +861,20 @@ msgstr "End time must be after start time."
 msgid "English"
 msgstr "English"
 
+msgid "Enter a valid http(s) URL."
+msgstr "Enter a valid http(s) URL."
+
 msgid "Enter your details"
 msgstr "Enter your details"
 
 msgid "Event color"
 msgstr "Event color"
+
+msgid "Event name"
+msgstr "Event name"
+
+msgid "Event subscriptions"
+msgstr "Event subscriptions"
 
 msgid "Event type"
 msgstr "Event type"
@@ -715,6 +927,31 @@ msgstr "Failed"
 msgid "Field enabled"
 msgstr "Field enabled"
 
+msgid "Explain why this booking is being rejected"
+msgstr "Explain why this booking is being rejected"
+
+msgid "Export CSV"
+msgstr "Export CSV"
+
+#. placeholder {0}: bookings.length
+msgid "Exported {0} bookings"
+msgstr "Exported {0} bookings"
+
+msgid "Exported {count} bookings"
+msgstr "Exported {count} bookings"
+
+msgid "Failed to copy secret"
+msgstr "Failed to copy secret"
+
+msgid "Failed to queue test event"
+msgstr "Failed to queue test event"
+
+msgid "Failed to start install. Please try again."
+msgstr "Failed to start install. Please try again."
+
+msgid "Feedback (optional)"
+msgstr "Feedback (optional)"
+
 msgid "Filter"
 msgstr "Filter"
 
@@ -723,6 +960,12 @@ msgstr "Filter bookings"
 
 msgid "First slot only"
 msgstr "First slot only"
+
+msgid "For security, the signing secret is only shown once — right after the webhook is created. If you've lost it, delete this webhook and create a new one to receive a fresh secret."
+msgstr "For security, the signing secret is only shown once — right after the webhook is created. If you've lost it, delete this webhook and create a new one to receive a fresh secret."
+
+msgid "Form submitted"
+msgstr "Form submitted"
 
 msgid "Frequency"
 msgstr "Frequency"
@@ -735,6 +978,9 @@ msgstr "Friday"
 
 msgid "From"
 msgstr "From"
+
+msgid "Generate one-off links that bypass the public schedule and expire after use."
+msgstr "Generate one-off links that bypass the public schedule and expire after use."
 
 msgid "Get started"
 msgstr "Get started"
@@ -772,9 +1018,20 @@ msgstr "Google Meet"
 msgid "Guest"
 msgstr "Guest"
 
+msgid "Guest added"
+msgstr "Guest added"
+
 msgid "Guests added"
 msgstr "Guests added"
 
+=======
+msgid "Guests will receive an invite for this booking."
+msgstr "Guests will receive an invite for this booking."
+
+msgid "Has internal note"
+msgstr "Has internal note"
+
+>>>>>>> 8bbffd68b3d3daf7ae4eb45c2e9a08472699e0a6
 msgid "Here's your overview of what's happening."
 msgstr "Here's your overview of what's happening."
 
@@ -787,26 +1044,71 @@ msgstr "Hide event type from profile"
 msgid "Hide from profile"
 msgstr "Hide from profile"
 
+msgid "Hide booker information from external calendars and disable guests."
+msgstr "Hide booker information from external calendars and disable guests."
+
+msgid "Hide calendar event details"
+msgstr "Hide calendar event details"
+
+msgid "Hide calendar notes"
+msgstr "Hide calendar notes"
+
+msgid "History"
+msgstr "History"
+
+msgid "Host no-show"
+msgstr "Host no-show"
+
+msgid "Host segmentation"
+msgstr "Host segmentation"
+
+msgid "Host subset rotation"
+msgstr "Host subset rotation"
+
+msgid "Hosts"
+msgstr "Hosts"
+
 msgid "Hours"
 msgstr "Hours"
 
 msgid "How often you can be booked"
 msgstr "How often you can be booked"
-
 msgid "In person"
 msgstr "In person"
 
 msgid "Insights"
 msgstr "Insights"
 
+msgid "Install"
+msgstr "Install"
+
+#. placeholder {0}: missingPrerequisite.name
+msgid "Install {0} first — this app reuses its connection."
+msgstr "Install {0} first — this app reuses its connection."
+
+msgid "Install a calendar or conferencing app to use it with this event type."
+msgstr "Install a calendar or conferencing app to use it with this event type."
+
+msgid "Installed"
+msgstr "Installed"
+
+msgid "Installed apps"
+msgstr "Installed apps"
+
+msgid "Instant meeting"
+msgstr "Instant meeting"
+
+msgid "Instant meeting schedule"
+msgstr "Instant meeting schedule"
+
 msgid "Interface language"
 msgstr "Interface language"
 
+msgid "Internal notes"
+msgstr "Internal notes"
+
 msgid "Interval"
 msgstr "Interval"
-
-msgid "Join meeting"
-msgstr "Join meeting"
 
 msgid "Keep booking"
 msgstr "Keep booking"
@@ -814,23 +1116,53 @@ msgstr "Keep booking"
 msgid "Label"
 msgstr "Label"
 
+msgid "Keep bookings"
+msgstr "Keep bookings"
+
+msgid "Language"
+msgstr "Language"
+
 msgid "Launch troubleshooter"
 msgstr "Launch troubleshooter"
 
 msgid "Layout"
 msgstr "Layout"
 
+msgid "Let an AI voice agent answer booker calls, qualify them, and place them on this event type's calendar."
+msgstr "Let an AI voice agent answer booker calls, qualify them, and place them on this event type's calendar."
+
+msgid "Let attendees know why these bookings are being cancelled"
+msgstr "Let attendees know why these bookings are being cancelled"
+
 msgid "Let bookers reserve a series of repeated bookings."
 msgstr "Let bookers reserve a series of repeated bookings."
 
+msgid "Let qualified bookers start a meeting immediately. Hosts get an instant alert and have a short window to accept before the request expires."
+msgstr "Let qualified bookers start a meeting immediately. Hosts get an instant alert and have a short window to accept before the request expires."
+
+msgid "Let the attendee know why this booking is being cancelled"
+msgstr "Let the attendee know why this booking is being cancelled"
+
+msgid "Let the attendee know why you need to reschedule"
+msgstr "Let the attendee know why you need to reschedule"
+
 msgid "Limit booking volume across the event type and individual bookers."
 msgstr "Limit booking volume across the event type and individual bookers."
+
+msgid "Limit deliveries to bookings for a single event type, or leave unscoped to receive everything."
+msgstr "Limit deliveries to bookings for a single event type, or leave unscoped to receive everything."
+
+msgid "Limit which hosts can be assigned using a segment expression."
+msgstr "Limit which hosts can be assigned using a segment expression."
 
 msgid "Limits"
 msgstr "Limits"
 
 msgid "Link"
 msgstr "Link"
+
+msgid "Link copied"
+msgstr "Link copied"
 
 msgid "List view"
 msgstr "List view"
@@ -841,15 +1173,26 @@ msgstr "Loading connected accounts..."
 msgid "Loading deliveries..."
 msgstr "Loading deliveries..."
 
+msgid "Loading apps..."
+msgstr "Loading apps..."
+
 msgid "Loading event type..."
 msgstr "Loading event type..."
 
 msgid "Loading event types..."
 msgstr "Loading event types..."
 
+msgid "Loading hosts…"
+msgstr "Loading hosts…"
+
+msgid "Loading private links…"
+msgstr "Loading private links…"
+
 msgid "Loading schedules..."
 msgstr "Loading schedules..."
 
+msgid "Loading webhook..."
+msgstr "Loading webhook..."
 msgid "Loading webhooks..."
 msgstr "Loading webhooks..."
 
@@ -865,6 +1208,9 @@ msgstr "Loading..."
 msgid "Location"
 msgstr "Location"
 
+msgid "Location changed"
+msgstr "Location changed"
+
 msgid "Location list"
 msgstr "Location list"
 
@@ -876,6 +1222,15 @@ msgstr "Location updated"
 
 msgid "Locations"
 msgstr "Locations"
+
+msgid "Lock the booking page timezone or follow the booker."
+msgstr "Lock the booking page timezone or follow the booker."
+
+msgid "Lock timezone on booking page"
+msgstr "Lock timezone on booking page"
+
+msgid "Locked timezone"
+msgstr "Locked timezone"
 
 msgid "Log in"
 msgstr "Log in"
@@ -889,14 +1244,15 @@ msgstr "Main navigation"
 msgid "Make another schedule default before deleting this one."
 msgstr "Make another schedule default before deleting this one."
 
-msgid "Make this event type available only after a related booking exists."
-msgstr "Make this event type available only after a related booking exists."
+msgid "Manage apps"
+msgstr "Manage apps"
 
 msgid "Manage weekly schedules for booking availability."
 msgstr "Manage weekly schedules for booking availability."
 
-msgid "Managed relationship rules"
-msgstr "Managed relationship rules"
+#. placeholder {0}: bookings.length
+msgid "Mark {0} bookings as no-show?"
+msgstr "Mark {0} bookings as no-show?"
 
 msgid "Mandatory for attendee only"
 msgstr "Mandatory for attendee only"
@@ -916,6 +1272,28 @@ msgstr "Max uses"
 msgid "Maximum length"
 msgstr "Maximum length"
 
+msgid "Mark as no-show?"
+msgstr "Mark as no-show?"
+
+#. placeholder {0}: bookings.length
+msgid "Marked {0} bookings as no-show"
+msgstr "Marked {0} bookings as no-show"
+
+msgid "Marked as no-show"
+msgstr "Marked as no-show"
+
+msgid "Max lead threshold"
+msgstr "Max lead threshold"
+
+msgid "Meeting ended"
+msgstr "Meeting ended"
+
+msgid "Meeting link, address, or phone number"
+msgstr "Meeting link, address, or phone number"
+
+msgid "Meeting started"
+msgstr "Meeting started"
+
 msgid "Members handling the most bookings."
 msgstr "Members handling the most bookings."
 
@@ -924,6 +1302,12 @@ msgstr "Message"
 
 msgid "Minimum length"
 msgstr "Minimum length"
+
+msgid "Message (optional)"
+msgstr "Message (optional)"
+
+msgid "Minimum rating"
+msgstr "Minimum rating"
 
 msgid "Minutes"
 msgstr "Minutes"
@@ -961,6 +1345,9 @@ msgstr "Multiple emails"
 msgid "Multiple Emails"
 msgstr "Multiple Emails"
 
+msgid "Move this booking to a different host. The new host will be notified."
+msgstr "Move this booking to a different host. The new host will be notified."
+
 msgid "Name"
 msgstr "Name"
 
@@ -976,12 +1363,17 @@ msgstr "Needs attention"
 msgid "New"
 msgstr "New"
 
+msgid "New host user ID"
+msgstr "New host user ID"
+
 msgid "New schedule"
 msgstr "New schedule"
 
 msgid "New step"
 msgstr "New step"
 
+msgid "New webhook"
+msgstr "New webhook"
 msgid "New workflow"
 msgstr "New workflow"
 
@@ -992,6 +1384,8 @@ msgstr "Next"
 msgid "No {0} bookings yet"
 msgstr "No {0} bookings yet"
 
+msgid "No apps available"
+msgstr "No apps available"
 msgid "No apps installed"
 msgstr "No apps installed"
 
@@ -1013,6 +1407,15 @@ msgstr "No connector accounts are connected yet."
 msgid "No custom booking fields yet."
 msgstr "No custom booking fields yet."
 
+msgid "No calendars connected. Install one so availability checks include external events."
+msgstr "No calendars connected. Install one so availability checks include external events."
+
+msgid "No conferencing apps connected. Install one to add it as a location."
+msgstr "No conferencing apps connected. Install one to add it as a location."
+
+msgid "No connectors are registered yet. Check back once integrations are enabled."
+msgstr "No connectors are registered yet. Check back once integrations are enabled."
+
 msgid "No custom responses were captured."
 msgstr "No custom responses were captured."
 
@@ -1027,7 +1430,6 @@ msgstr "No destination calendar"
 
 msgid "No destination calendar selected"
 msgstr "No destination calendar selected"
-
 msgid "No event types available."
 msgstr "No event types available."
 
@@ -1040,6 +1442,20 @@ msgstr "No event types yet"
 msgid "No filters"
 msgstr "No filters"
 
+=======
+msgid "No history entries yet."
+msgstr "No history entries yet."
+
+msgid "No hosts available to assign."
+msgstr "No hosts available to assign."
+
+msgid "No hosts selected. Pick team members below to assign them to this event type."
+msgstr "No hosts selected. Pick team members below to assign them to this event type."
+
+msgid "No internal notes yet."
+msgstr "No internal notes yet."
+
+>>>>>>> 8bbffd68b3d3daf7ae4eb45c2e9a08472699e0a6
 msgid "No private links yet."
 msgstr "No private links yet."
 
@@ -1058,6 +1474,15 @@ msgstr "No times available on this date."
 msgid "No webhooks configured."
 msgstr "No webhooks configured."
 
+msgid "No specific schedule"
+msgstr "No specific schedule"
+
+msgid "No team members match your search."
+msgstr "No team members match your search."
+
+msgid "No webhooks yet"
+msgstr "No webhooks yet"
+
 msgid "No weekly availability"
 msgstr "No weekly availability"
 
@@ -1070,8 +1495,31 @@ msgstr "No workflows configured."
 msgid "No workflows yet"
 msgstr "No workflows yet"
 
+msgid "No workflows yet. Create one to send automated booker messages."
+msgstr "No workflows yet. Create one to send automated booker messages."
+
+msgid "No-show"
+msgstr "No-show"
+
+msgid "No-show only"
+msgstr "No-show only"
 msgid "Not available"
 msgstr "Not available"
+
+msgid "Not installed"
+msgstr "Not installed"
+
+msgid "Note"
+msgstr "Note"
+
+msgid "Note added"
+msgstr "Note added"
+
+msgid "Note deleted"
+msgstr "Note deleted"
+
+msgid "Notes are only visible to your team"
+msgstr "Notes are only visible to your team"
 
 msgid "Notice"
 msgstr "Notice"
@@ -1081,12 +1529,14 @@ msgstr "Notify external systems when bookings change."
 
 msgid "Number"
 msgstr "Number"
-
 msgid "Occurrences"
 msgstr "Occurrences"
 
 msgid "Offer multiple seats for each available time."
 msgstr "Offer multiple seats for each available time."
+
+msgid "Offer reschedule when at limit"
+msgstr "Offer reschedule when at limit"
 
 msgid "Offer seats"
 msgstr "Offer seats"
@@ -1121,6 +1571,21 @@ msgstr "Optional for both"
 msgid "Options"
 msgstr "Options"
 
+msgid "Only show bookings where the attendee did not join."
+msgstr "Only show bookings where the attendee did not join."
+
+msgid "Only show bookings with at least one internal note."
+msgstr "Only show bookings with at least one internal note."
+
+msgid "Only show first available slot"
+msgstr "Only show first available slot"
+
+msgid "Other"
+msgstr "Other"
+
+msgid "Outgoing webhooks"
+msgstr "Outgoing webhooks"
+
 #. placeholder {0}: schedule.dateOverrides.length
 msgid "Overrides: {0}"
 msgstr "Overrides: {0}"
@@ -1128,8 +1593,20 @@ msgstr "Overrides: {0}"
 msgid "Passed"
 msgstr "Passed"
 
+msgid "Paused"
+msgstr "Paused"
+
+msgid "Paused webhooks stop receiving deliveries until reactivated."
+msgstr "Paused webhooks stop receiving deliveries until reactivated."
+
+msgid "Payment"
+msgstr "Payment"
+
 msgid "Pending"
 msgstr "Pending"
+
+msgid "Per-event-type calendar destination is not yet configurable — connected calendars are used for availability only."
+msgstr "Per-event-type calendar destination is not yet configurable — connected calendars are used for availability only."
 
 msgid "Phone"
 msgstr "Phone"
@@ -1145,6 +1622,9 @@ msgstr "Placeholder"
 
 msgid "Prevent selected event types from being booked when this one is active."
 msgstr "Prevent selected event types from being booked when this one is active."
+
+msgid "Ping"
+msgstr "Ping"
 
 msgid "Preview"
 msgstr "Preview"
@@ -1164,6 +1644,18 @@ msgstr "Primary location"
 msgid "Private link"
 msgstr "Private link"
 
+msgid "Privacy"
+msgstr "Privacy"
+
+msgid "Private link created"
+msgstr "Private link created"
+
+msgid "Private link removed"
+msgstr "Private link removed"
+
+msgid "Private links"
+msgstr "Private links"
+
 msgid "Public booking"
 msgstr "Public booking"
 
@@ -1176,6 +1668,21 @@ msgstr "Question"
 msgid "Radio"
 msgstr "Radio"
 
+msgid "Rate {value} of 5"
+msgstr "Rate {value} of 5"
+
+msgid "Rate booking"
+msgstr "Rate booking"
+
+msgid "Rate this booking"
+msgstr "Rate this booking"
+
+msgid "Rated"
+msgstr "Rated"
+
+msgid "Rating"
+msgstr "Rating"
+
 msgid "Rating request"
 msgstr "Rating request"
 
@@ -1187,6 +1694,24 @@ msgstr "Reason for reschedule"
 
 msgid "Recent deliveries"
 msgstr "Recent deliveries"
+
+msgid "Rating saved"
+msgstr "Rating saved"
+
+msgid "Reason (optional)"
+msgstr "Reason (optional)"
+
+msgid "Reassign"
+msgstr "Reassign"
+
+msgid "Reassign host"
+msgstr "Reassign host"
+
+msgid "Reassigned"
+msgstr "Reassigned"
+
+msgid "Recording ready"
+msgstr "Recording ready"
 
 msgid "Recurring"
 msgstr "Recurring"
@@ -1215,6 +1740,9 @@ msgstr "Rejection"
 msgid "Rejection reason"
 msgstr "Rejection reason"
 
+msgid "Rejected"
+msgstr "Rejected"
+
 msgid "Reminder"
 msgstr "Reminder"
 
@@ -1233,6 +1761,16 @@ msgstr "Remove option"
 msgid "Remove private link"
 msgstr "Remove private link"
 
+msgid "Remove guest"
+msgstr "Remove guest"
+
+#. placeholder {0}: chip.displayName
+msgid "Remove host {0}"
+msgstr "Remove host {0}"
+
+msgid "Remove link"
+msgstr "Remove link"
+
 msgid "Remove time"
 msgstr "Remove time"
 
@@ -1242,12 +1780,14 @@ msgstr "Replace this sample page with your own product information and branding.
 msgid "Report booking"
 msgstr "Report booking"
 
+msgid "Request expires after"
+msgstr "Request expires after"
+
 msgid "Request reschedule"
 msgstr "Request reschedule"
 
 msgid "Require cancellation reason"
 msgstr "Require cancellation reason"
-
 msgid "Require emails"
 msgstr "Require emails"
 
@@ -1275,6 +1815,8 @@ msgstr "Reschedule reason"
 msgid "Reschedule requested"
 msgstr "Reschedule requested"
 
+msgid "Reschedule with same host"
+msgstr "Reschedule with same host"
 msgid "Rescheduled"
 msgstr "Rescheduled"
 
@@ -1299,6 +1841,9 @@ msgstr "Review the selected schedule before saving this event type."
 msgid "Rolling window"
 msgstr "Rolling window"
 
+msgid "Round robin"
+msgstr "Round robin"
+
 msgid "Sat"
 msgstr "Sat"
 
@@ -1307,6 +1852,15 @@ msgstr "Saturday"
 
 msgid "Save"
 msgstr "Save"
+
+msgid "Save changes"
+msgstr "Save changes"
+
+msgid "Save location"
+msgstr "Save location"
+
+msgid "Save rating"
+msgstr "Save rating"
 
 msgid "Save schedule"
 msgstr "Save schedule"
@@ -1356,14 +1910,34 @@ msgstr "Schedule unavailable"
 msgid "Schedule updated"
 msgstr "Schedule updated"
 
+msgid "Scope"
+msgstr "Scope"
+
 msgid "Search"
 msgstr "Search"
 
 msgid "Search bookings"
 msgstr "Search bookings"
 
+=======
+msgid "Search by name or email"
+msgstr "Search by name or email"
+
+msgid "Search event types"
+msgstr "Search event types"
+
+msgid "Search team members"
+msgstr "Search team members"
+
+>>>>>>> 8bbffd68b3d3daf7ae4eb45c2e9a08472699e0a6
 msgid "Seat capacity"
 msgstr "Seat capacity"
+
+msgid "Seat released"
+msgstr "Seat released"
+
+msgid "Seat reserved"
+msgstr "Seat reserved"
 
 msgid "Seats"
 msgstr "Seats"
@@ -1376,6 +1950,15 @@ msgstr "Secret"
 
 msgid "Select"
 msgstr "Select"
+
+msgid "Secret copied to clipboard"
+msgstr "Secret copied to clipboard"
+
+msgid "Secret hidden"
+msgstr "Secret hidden"
+
+msgid "Segment query"
+msgstr "Segment query"
 
 msgid "Select a date and time"
 msgstr "Select a date and time"
@@ -1404,6 +1987,12 @@ msgstr "Select week"
 msgid "Selected calendars"
 msgstr "Selected calendars"
 
+msgid "Selected hosts"
+msgstr "Selected hosts"
+
+msgid "Send a signed HTTP POST to your endpoint when the selected events occur."
+msgstr "Send a signed HTTP POST to your endpoint when the selected events occur."
+
 msgid "Send bookers to a custom page after success or cancellation."
 msgstr "Send bookers to a custom page after success or cancellation."
 
@@ -1419,12 +2008,23 @@ msgstr "Send Cal.com-compatible booking lifecycle payloads to external systems."
 msgid "Send emails with the transcription of the Cal Video after the meeting ends. Requires a paid plan."
 msgstr "Send emails with the transcription of the Cal Video after the meeting ends. Requires a paid plan."
 
+msgid "Send HTTP requests to external systems when bookings on this event type are created, cancelled, or rescheduled."
+msgstr "Send HTTP requests to external systems when bookings on this event type are created, cancelled, or rescheduled."
+
+msgid "Send request"
+msgstr "Send request"
+
+msgid "Send signed HTTP notifications to your services when booking lifecycle events occur."
+msgstr "Send signed HTTP notifications to your services when booking lifecycle events occur."
+
+msgid "Send test event"
+msgstr "Send test event"
+
 msgid "Send to"
 msgstr "Send to"
 
 msgid "Sent"
 msgstr "Sent"
-
 msgid "Set as default"
 msgstr "Set as default"
 
@@ -1433,9 +2033,6 @@ msgstr "Set custom availability for one date."
 
 msgid "Set how long this booking reserves on the calendar."
 msgstr "Set how long this booking reserves on the calendar."
-
-msgid "Set language and private booking links."
-msgstr "Set language and private booking links."
 
 msgid "Set the primary location and optional alternatives shown to bookers."
 msgstr "Set the primary location and optional alternatives shown to bookers."
@@ -1452,6 +2049,12 @@ msgstr "Setup"
 msgid "Short Text"
 msgstr "Short Text"
 
+msgid "Share how this meeting went. Your feedback is private to your team."
+msgstr "Share how this meeting went. Your feedback is private to your team."
+
+msgid "Share one-off booking links that bypass the public schedule."
+msgstr "Share one-off booking links that bypass the public schedule."
+
 msgid "Show attendee info"
 msgstr "Show attendee info"
 
@@ -1460,6 +2063,15 @@ msgstr "Show event type on profile"
 
 msgid "Show on profile"
 msgstr "Show on profile"
+
+msgid "Show optimized slots"
+msgstr "Show optimized slots"
+
+msgid "Signing secret"
+msgstr "Signing secret"
+
+msgid "Slot display"
+msgstr "Slot display"
 
 msgid "Slot interval"
 msgstr "Slot interval"
@@ -1479,8 +2091,14 @@ msgstr "Something doesn't look right?"
 msgid "Start"
 msgstr "Start"
 
+msgid "Start time"
+msgstr "Start time"
+
 msgid "Start with a weekly schedule, then refine availability on the next screen."
 msgstr "Start with a weekly schedule, then refine availability on the next screen."
+
+msgid "Status"
+msgstr "Status"
 
 msgid "Status breakdown"
 msgstr "Status breakdown"
@@ -1502,7 +2120,6 @@ msgstr "Steps"
 
 msgid "Subscriber URL"
 msgstr "Subscriber URL"
-
 msgid "Success URL"
 msgstr "Success URL"
 
@@ -1542,19 +2159,59 @@ msgstr "The list-bindings endpoint is on the backlog. Toggle to link or unlink."
 msgid "The trigger can't be changed after the workflow is created."
 msgstr "The trigger can't be changed after the workflow is created."
 
-msgid "this attendee"
-msgstr "this attendee"
+msgid "Target URL"
+msgstr "Target URL"
+
+msgid "Team"
+msgstr "Team"
 
 msgid "This booking was marked for reschedule."
 msgstr "This booking was marked for reschedule."
 
-#. placeholder {0}: booking?.bookerName ?? t`this attendee`
+#. placeholder {0}: booking.bookerName
 msgid "This cancels the booking with {0}."
 msgstr "This cancels the booking with {0}."
 
 #. placeholder {0}: booking?.bookerName ?? t`this attendee`
 msgid "This confirms the booking with {0}."
 msgstr "This confirms the booking with {0}."
+
+msgid "Template"
+msgstr "Template"
+
+msgid "Test event queued for delivery"
+msgstr "Test event queued for delivery"
+
+msgid "Thank you"
+msgstr "Thank you"
+
+msgid "The attendee will be asked to pick a new time. Add an optional message."
+msgstr "The attendee will be asked to pick a new time. Add an optional message."
+
+msgid "The attendee will be notified that their booking has been rejected."
+msgstr "The attendee will be notified that their booking has been rejected."
+
+msgid "The attendee will be notified that their booking is confirmed."
+msgstr "The attendee will be notified that their booking is confirmed."
+
+#. placeholder {0}: truncateUrl(webhook?.targetUrl ?? "", 80)
+msgid "The endpoint <0>{0}</0> will stop receiving deliveries. This cannot be undone."
+msgstr "The endpoint <0>{0}</0> will stop receiving deliveries. This cannot be undone."
+
+msgid "The event type scope is locked once a webhook is created."
+msgstr "The event type scope is locked once a webhook is created."
+
+msgid "The list-bindings endpoint is on the backlog. Toggle to link or unlink."
+msgstr "The list-bindings endpoint is on the backlog. Toggle to link or unlink."
+
+msgid "The trigger can't be changed after the workflow is created."
+msgstr "The trigger can't be changed after the workflow is created."
+
+msgid "This action applies to every selected booking."
+msgstr "This action applies to every selected booking."
+
+msgid "This cancels the booking."
+msgstr "This cancels the booking."
 
 msgid "this event type"
 msgstr "this event type"
@@ -1578,6 +2235,8 @@ msgstr "This removes the booking page for {deleteSubject}."
 msgid "This removes the workflow \"{expectedName}\" and every reminder it schedules. Type the workflow name to confirm."
 msgstr "This removes the workflow \"{expectedName}\" and every reminder it schedules. Type the workflow name to confirm."
 
+msgid "This will record that the attendee did not show up for the meeting."
+msgstr "This will record that the attendee did not show up for the meeting."
 msgid "This window overlaps another window on the same day."
 msgstr "This window overlaps another window on the same day."
 
@@ -1592,7 +2251,6 @@ msgstr "Time before/after event"
 
 msgid "Time slots"
 msgstr "Time slots"
-
 msgid "Time zone"
 msgstr "Time zone"
 
@@ -1625,7 +2283,6 @@ msgstr "Trigger"
 
 msgid "Triggers"
 msgstr "Triggers"
-
 msgid "Tue"
 msgstr "Tue"
 
@@ -1634,6 +2291,9 @@ msgstr "Tuesday"
 
 msgid "Type"
 msgstr "Type"
+
+msgid "Tune how the schedule presents available slots to bookers."
+msgstr "Tune how the schedule presents available slots to bookers."
 
 msgid "Unavailable"
 msgstr "Unavailable"
@@ -1655,6 +2315,31 @@ msgstr "URL"
 
 msgid "Used"
 msgstr "Used"
+
+msgid "Uninstall"
+msgstr "Uninstall"
+
+#. placeholder {0}: app?.name ?? ""
+msgid "Uninstall {0}?"
+msgstr "Uninstall {0}?"
+
+msgid "Uninstall app"
+msgstr "Uninstall app"
+
+msgid "Use booker timezone for organizer"
+msgstr "Use booker timezone for organizer"
+
+msgid "Use segment query"
+msgstr "Use segment query"
+
+msgid "Use this signing secret to verify the HMAC signature on incoming webhook deliveries."
+msgstr "Use this signing secret to verify the HMAC signature on incoming webhook deliveries."
+
+msgid "Use weights"
+msgstr "Use weights"
+
+msgid "user_..."
+msgstr "user_..."
 
 msgid "Variables like {EVENT_NAME} and {ATTENDEE_NAME} are replaced at send time."
 msgstr "Variables like {EVENT_NAME} and {ATTENDEE_NAME} are replaced at send time."
@@ -1695,6 +2380,15 @@ msgstr "Webhook deleted"
 msgid "Webhook saved"
 msgstr "Webhook saved"
 
+msgid "Webhook created"
+msgstr "Webhook created"
+
+msgid "Webhook subscriptions will be available in a future release."
+msgstr "Webhook subscriptions will be available in a future release."
+
+msgid "Webhook updated"
+msgstr "Webhook updated"
+
 msgid "Webhooks"
 msgstr "Webhooks"
 
@@ -1725,6 +2419,9 @@ msgstr "What is this meeting about?"
 msgid "What your booker should provide to receive confirmations"
 msgstr "What your booker should provide to receive confirmations"
 
+msgid "What went well, what could improve?"
+msgstr "What went well, what could improve?"
+
 msgid "WhatsApp to a specific number"
 msgstr "WhatsApp to a specific number"
 
@@ -1743,6 +2440,8 @@ msgstr "When a booking is rescheduled"
 msgid "When a new booking is created"
 msgstr "When a new booking is created"
 
+msgid "Why is this booking being reassigned?"
+msgstr "Why is this booking being reassigned?"
 msgid "Workflow"
 msgstr "Workflow"
 
@@ -1758,6 +2457,7 @@ msgstr "Workflow name"
 msgid "Workflow renamed"
 msgstr "Workflow renamed"
 
+<<<<<<< HEAD
 msgid "Workflow saved"
 msgstr "Workflow saved"
 
@@ -1769,6 +2469,12 @@ msgstr "Yearly"
 
 msgid "You can select multiple and your bookers can switch views."
 msgstr "You can select multiple and your bookers can switch views."
+
+msgid "Workflows automate booking confirmations, reminders, and follow-up messages. Bind a workflow to this event type from the workflow editor."
+msgstr "Workflows automate booking confirmations, reminders, and follow-up messages. Bind a workflow to this event type from the workflow editor."
+
+msgid "Yes"
+msgstr "Yes"
 
 msgid "You successfully deployed PlatformPlatform! 🎉"
 msgstr "You successfully deployed PlatformPlatform! 🎉"
@@ -1784,3 +2490,6 @@ msgstr "Your dashboard is empty"
 
 msgid "Your name"
 msgstr "Your name"
+
+msgid "Your stored connection will be removed. Existing bookings keep their location and calendar destination, but new bookings will no longer use this app."
+msgstr "Your stored connection will be removed. Existing bookings keep their location and calendar destination, but new bookings will no longer use this app."

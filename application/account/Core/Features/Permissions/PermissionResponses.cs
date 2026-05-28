@@ -8,7 +8,8 @@ namespace Account.Features.Permissions;
 public sealed record PermissionResponse(
     PermissionResource Resource,
     PermissionAction Action,
-    string Key);
+    string Key
+);
 
 /// <summary>Serialisable representation of a <see cref="Role" /> as returned by the API.</summary>
 [PublicAPI]
@@ -18,7 +19,8 @@ public sealed record RoleResponse(
     string? Description,
     bool IsSystem,
     int MemberCount,
-    PermissionResponse[] Permissions);
+    PermissionResponse[] Permissions
+);
 
 /// <summary>
 ///     Catalog of every <see cref="Permission" /> grouped by <see cref="PermissionResource" />.
@@ -27,20 +29,26 @@ public sealed record RoleResponse(
 [PublicAPI]
 public sealed record PermissionGroupResponse(
     PermissionResource Resource,
-    PermissionResponse[] Permissions);
+    PermissionResponse[] Permissions
+);
 
 /// <summary>Mapping helpers shared across PBAC command and query handlers.</summary>
 public static class PermissionMappings
 {
-    public static PermissionResponse ToResponse(this Permission permission) =>
-        new(permission.Resource, permission.Action, permission.ToString());
+    public static PermissionResponse ToResponse(this Permission permission)
+    {
+        return new PermissionResponse(permission.Resource, permission.Action, permission.ToString());
+    }
 
-    public static RoleResponse ToResponse(this Role role, int memberCount) =>
-        new(
-            Id: role.Id,
-            Name: role.Name,
-            Description: role.Description,
-            IsSystem: role.IsSystem,
-            MemberCount: memberCount,
-            Permissions: role.Permissions.Select(p => p.ToResponse()).ToArray());
+    public static RoleResponse ToResponse(this Role role, int memberCount)
+    {
+        return new RoleResponse(
+            role.Id,
+            role.Name,
+            role.Description,
+            role.IsSystem,
+            memberCount,
+            role.Permissions.Select(p => p.ToResponse()).ToArray()
+        );
+    }
 }

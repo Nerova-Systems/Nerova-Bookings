@@ -1,7 +1,6 @@
 using Account.Features.Tenants.Domain;
 using JetBrains.Annotations;
 using SharedKernel.Domain;
-using SharedKernel.Persistence;
 using SharedKernel.StronglyTypedIds;
 
 namespace Account.Features.Attributes.Domain;
@@ -15,7 +14,10 @@ namespace Account.Features.Attributes.Domain;
 [JsonConverter(typeof(StronglyTypedIdJsonConverter<string, AttributeId>))]
 public sealed record AttributeId(string Value) : StronglyTypedUlid<AttributeId>(Value)
 {
-    public override string ToString() => Value;
+    public override string ToString()
+    {
+        return Value;
+    }
 }
 
 /// <summary>
@@ -36,13 +38,9 @@ public sealed class Attribute : AggregateRoot<AttributeId>, ITenantScopedEntity
     // backing field during OwnsMany materialisation. Uniqueness enforced by DB index.
     private readonly List<AttributeOption> _options = [];
 
-    private Attribute(AttributeId id) : base(id) { }
-
-    /// <summary>
-    ///     The organisation this attribute belongs to (maps to an <see cref="TenantKind.Organization" />
-    ///     tenant). Never changes after creation.
-    /// </summary>
-    public TenantId TenantId { get; private set; } = null!;
+    private Attribute(AttributeId id) : base(id)
+    {
+    }
 
     /// <summary>Human-readable display name (e.g. <c>"Department"</c>).</summary>
     public string Name { get; private set; } = null!;
@@ -80,6 +78,12 @@ public sealed class Attribute : AggregateRoot<AttributeId>, ITenantScopedEntity
     /// </summary>
     public IReadOnlyCollection<AttributeOption> Options => _options.AsReadOnly();
 
+    /// <summary>
+    ///     The organisation this attribute belongs to (maps to an <see cref="TenantKind.Organization" />
+    ///     tenant). Never changes after creation.
+    /// </summary>
+    public TenantId TenantId { get; private init; } = null!;
+
     // ─── Factory ──────────────────────────────────────────────────────────────
 
     /// <summary>
@@ -88,10 +92,13 @@ public sealed class Attribute : AggregateRoot<AttributeId>, ITenantScopedEntity
     /// <exception cref="InvalidOperationException">
     ///     Thrown when <paramref name="tenantKind" /> is not <see cref="TenantKind.Organization" />.
     /// </exception>
+    // ReSharper disable once ParameterOnlyUsedForPreconditionCheck.Global
     public static Attribute Create(TenantId orgTenantId, TenantKind tenantKind, string name, AttributeType type)
     {
         if (tenantKind != TenantKind.Organization)
+        {
             throw new InvalidOperationException("Attributes can only be created for organization tenants.");
+        }
 
         ArgumentException.ThrowIfNullOrWhiteSpace(name);
 
@@ -156,8 +163,10 @@ public sealed class Attribute : AggregateRoot<AttributeId>, ITenantScopedEntity
 
     // ─── Helpers ──────────────────────────────────────────────────────────────
 
-    public static string GenerateSlug(string name) =>
-        name.ToLowerInvariant().Trim().Replace(' ', '-').Replace("_", "-");
+    public static string GenerateSlug(string name)
+    {
+        return name.ToLowerInvariant().Trim().Replace(' ', '-').Replace("_", "-");
+    }
 }
 
 /// <summary>
