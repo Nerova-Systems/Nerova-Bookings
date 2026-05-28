@@ -4,7 +4,7 @@ import { AppLayout } from "@repo/ui/components/AppLayout";
 import { SidebarInset, SidebarProvider } from "@repo/ui/components/Sidebar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@repo/ui/components/Tabs";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { Building2Icon, FlagIcon, KeyIcon, MonitorIcon } from "lucide-react";
+import { Building2Icon, FlagIcon, KeyIcon, LifeBuoyIcon, MonitorIcon } from "lucide-react";
 import { useCallback } from "react";
 import { z } from "zod";
 
@@ -17,12 +17,15 @@ import { getUserDisplayName } from "./-components/userDisplay";
 import { UserFeatureFlagsSection } from "./-components/UserFeatureFlagsSection";
 import { UserLoginHistorySection } from "./-components/UserLoginHistorySection";
 import { UserSessionsSection } from "./-components/UserSessionsSection";
+import { UserSupportTicketsSection } from "./-components/UserSupportTicketsSection";
 import { UserTenantsSection } from "./-components/UserTenantsSection";
 
-type UserDetailTab = "overview" | "sessions" | "logins" | "feature-flags";
+const isSupportSystemEnabled = import.meta.runtime_env.PUBLIC_SUPPORT_SYSTEM_ENABLED === "true";
+
+type UserDetailTab = "overview" | "sessions" | "logins" | "feature-flags" | "support-tickets";
 
 const userDetailSearchSchema = z.object({
-  tab: z.enum(["overview", "sessions", "logins", "feature-flags"]).optional()
+  tab: z.enum(["overview", "sessions", "logins", "feature-flags", "support-tickets"]).optional()
 });
 
 export const Route = createFileRoute("/users/$userId")({
@@ -82,6 +85,12 @@ function UserDetailPage() {
                   <FlagIcon className="size-4" />
                   <Trans>Feature flags</Trans>
                 </TabsTrigger>
+                {isSupportSystemEnabled && (
+                  <TabsTrigger value="support-tickets">
+                    <LifeBuoyIcon className="size-4" aria-hidden={true} />
+                    <Trans>Support tickets</Trans>
+                  </TabsTrigger>
+                )}
               </TabsList>
               <TabsContent value="overview">
                 <UserTenantsSection user={user} />
@@ -95,6 +104,11 @@ function UserDetailPage() {
               <TabsContent value="feature-flags">
                 <UserFeatureFlagsSection userId={userId} />
               </TabsContent>
+              {isSupportSystemEnabled && (
+                <TabsContent value="support-tickets">
+                  <UserSupportTicketsSection userId={userId} />
+                </TabsContent>
+              )}
             </Tabs>
           </div>
         </AppLayout>

@@ -6,6 +6,7 @@ import { useUserInfo } from "@repo/infrastructure/auth/hooks";
 import { hasPermission } from "@repo/infrastructure/auth/routeGuards";
 import { createLoginUrlWithReturnPath } from "@repo/infrastructure/auth/util";
 import { productName } from "@repo/infrastructure/branding";
+import { useFeatureFlag } from "@repo/infrastructure/featureFlags/useFeatureFlag";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from "@repo/ui/components/DropdownMenu";
 import { collapsedContext, overlayContext } from "@repo/ui/components/Sidebar";
 import { TenantLogo } from "@repo/ui/components/TenantLogo";
@@ -42,6 +43,7 @@ export default function UserMenu({ isCollapsed: isCollapsedProp }: Readonly<User
 
   const sidebarWidth = useSidebarWidth(isCollapsed);
   const canAccessAccountSettings = hasPermission({ allowedRoles: ["Owner", "Admin"] });
+  const { enabled: isSupportSystemEnabled } = useFeatureFlag("support-system");
 
   useTrackOpen("User menu", "menu", isMenuOpen);
 
@@ -75,11 +77,15 @@ export default function UserMenu({ isCollapsed: isCollapsedProp }: Readonly<User
     }
   };
 
-  const handleShowSupport = () => {
+  const handleContactSupport = () => {
     closeMenuAndOverlay();
-    setTimeout(() => {
-      setIsSupportDialogOpen(true);
-    }, 100);
+    if (isSupportSystemEnabled) {
+      navigate({ to: "/support/tickets" });
+      return;
+    }
+    // Legacy fallback: when the support system flag is off, restore the mailto-style dialog that
+    // surfaces the configured support email so users still have a way to reach support.
+    setIsSupportDialogOpen(true);
   };
 
   const handleNavigateToAccountSettings = () => {
@@ -157,15 +163,15 @@ export default function UserMenu({ isCollapsed: isCollapsedProp }: Readonly<User
             onNavigateToPreferences={handleNavigateToPreferences}
             onNavigateToAccountSettings={handleNavigateToAccountSettings}
             onLogout={handleLogout}
-            onShowSupport={handleShowSupport}
+            onContactSupport={handleContactSupport}
             onTenantSwitch={handleTenantSwitch}
           />
         </DropdownMenuContent>
       </DropdownMenu>
 
-      <SupportDialog isOpen={isSupportDialogOpen} onOpenChange={setIsSupportDialogOpen} />
       {isSwitching && <SwitchingAccountLoader />}
       <MobileMenuDialogs />
+      {!isSupportSystemEnabled && <SupportDialog isOpen={isSupportDialogOpen} onOpenChange={setIsSupportDialogOpen} />}
     </div>
   );
 }

@@ -71,6 +71,8 @@ builder
 
 CreateBlobContainer("avatars");
 CreateBlobContainer("logos");
+CreateBlobContainer("support-tickets");
+CreateBlobContainer("support-staff");
 
 var frontendBuild = builder
     .AddJavaScriptApp("frontend-build", "../")
@@ -131,6 +133,7 @@ var accountApi = builder
     // Force-on so newcomers see the back-office billing UI without Stripe configured. Set to "false" (or
     // change back to `stripeFullyConfigured ? "true" : "false"`) to hide all billing/revenue/Stripe data.
     .WithEnvironment("PUBLIC_SUBSCRIPTION_ENABLED", "true")
+    .WithEnvironment("PUBLIC_SUPPORT_SYSTEM_ENABLED", Environment.GetEnvironmentVariable("PUBLIC_SUPPORT_SYSTEM_ENABLED") ?? "true")
     .WaitFor(accountWorkers);
 
 var mainDatabase = postgres
@@ -151,6 +154,7 @@ var mainApi = builder
     .WithReference(azureStorage)
     .WithEnvironment("PUBLIC_GOOGLE_OAUTH_ENABLED", googleOAuthConfigured ? "true" : "false")
     .WithEnvironment("PUBLIC_SUBSCRIPTION_ENABLED", stripeFullyConfigured ? "true" : "false")
+    .WithEnvironment("PUBLIC_SUPPORT_SYSTEM_ENABLED", Environment.GetEnvironmentVariable("PUBLIC_SUPPORT_SYSTEM_ENABLED") ?? "true")
     .WaitFor(mainWorkers);
 
 builder
