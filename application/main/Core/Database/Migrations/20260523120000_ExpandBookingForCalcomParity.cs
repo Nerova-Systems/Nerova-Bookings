@@ -9,37 +9,33 @@ public sealed class ExpandBookingForCalcomParity : Migration
 {
     protected override void Up(MigrationBuilder migrationBuilder)
     {
-        // --- 1. New columns on bookings (cal.com parity) ---
-
-        migrationBuilder.AddColumn<string>("cancellation_reason", "bookings", "text", nullable: true);
-        migrationBuilder.AddColumn<string>("rejection_reason", "bookings", "text", nullable: true);
-        migrationBuilder.AddColumn<string>("reassign_reason", "bookings", "text", nullable: true);
-        migrationBuilder.AddColumn<string>("reassign_by_user_id", "bookings", "text", nullable: true);
-        migrationBuilder.AddColumn<bool>("rescheduled", "bookings", "boolean", nullable: false, defaultValue: false);
-        migrationBuilder.AddColumn<string>("from_reschedule_uid", "bookings", "text", nullable: true);
-        migrationBuilder.AddColumn<string>("cancelled_by_user_uid", "bookings", "text", nullable: true);
-        migrationBuilder.AddColumn<string>("rescheduled_by_user_uid", "bookings", "text", nullable: true);
-        migrationBuilder.AddColumn<string>("sms_reminder_number", "bookings", "text", nullable: true);
-        migrationBuilder.AddColumn<string>("i_cal_uid", "bookings", "text", nullable: true);
-        migrationBuilder.AddColumn<int>("i_cal_sequence", "bookings", "integer", nullable: false, defaultValue: 0);
-        migrationBuilder.AddColumn<int>("rating", "bookings", "integer", nullable: true);
-        migrationBuilder.AddColumn<string>("rating_feedback", "bookings", "text", nullable: true);
-        migrationBuilder.AddColumn<bool>("no_show_host", "bookings", "boolean", nullable: true);
-        migrationBuilder.AddColumn<string>("one_time_password", "bookings", "text", nullable: true);
-        migrationBuilder.AddColumn<bool>("is_recorded", "bookings", "boolean", nullable: false, defaultValue: false);
-        migrationBuilder.AddColumn<string>("custom_inputs_json", "bookings", "jsonb", nullable: true);
-        migrationBuilder.AddColumn<string>("metadata_json", "bookings", "jsonb", nullable: true);
-        migrationBuilder.AddColumn<string>("location_type", "bookings", "text", nullable: true);
-        migrationBuilder.AddColumn<string>("location_value", "bookings", "text", nullable: true);
+        // --- 1. New columns on bookings (cal.com parity) -- idempotent via IF NOT EXISTS ---
+        migrationBuilder.Sql("ALTER TABLE bookings ADD COLUMN IF NOT EXISTS cancellation_reason text");
+        migrationBuilder.Sql("ALTER TABLE bookings ADD COLUMN IF NOT EXISTS rejection_reason text");
+        migrationBuilder.Sql("ALTER TABLE bookings ADD COLUMN IF NOT EXISTS reassign_reason text");
+        migrationBuilder.Sql("ALTER TABLE bookings ADD COLUMN IF NOT EXISTS reassign_by_user_id text");
+        migrationBuilder.Sql("ALTER TABLE bookings ADD COLUMN IF NOT EXISTS rescheduled boolean NOT NULL DEFAULT FALSE");
+        migrationBuilder.Sql("ALTER TABLE bookings ADD COLUMN IF NOT EXISTS from_reschedule_uid text");
+        migrationBuilder.Sql("ALTER TABLE bookings ADD COLUMN IF NOT EXISTS cancelled_by_user_uid text");
+        migrationBuilder.Sql("ALTER TABLE bookings ADD COLUMN IF NOT EXISTS rescheduled_by_user_uid text");
+        migrationBuilder.Sql("ALTER TABLE bookings ADD COLUMN IF NOT EXISTS sms_reminder_number text");
+        migrationBuilder.Sql("ALTER TABLE bookings ADD COLUMN IF NOT EXISTS i_cal_uid text");
+        migrationBuilder.Sql("ALTER TABLE bookings ADD COLUMN IF NOT EXISTS i_cal_sequence integer NOT NULL DEFAULT 0");
+        migrationBuilder.Sql("ALTER TABLE bookings ADD COLUMN IF NOT EXISTS rating integer");
+        migrationBuilder.Sql("ALTER TABLE bookings ADD COLUMN IF NOT EXISTS rating_feedback text");
+        migrationBuilder.Sql("ALTER TABLE bookings ADD COLUMN IF NOT EXISTS no_show_host boolean");
+        migrationBuilder.Sql("ALTER TABLE bookings ADD COLUMN IF NOT EXISTS one_time_password text");
+        migrationBuilder.Sql("ALTER TABLE bookings ADD COLUMN IF NOT EXISTS is_recorded boolean NOT NULL DEFAULT FALSE");
+        migrationBuilder.Sql("ALTER TABLE bookings ADD COLUMN IF NOT EXISTS custom_inputs_json jsonb");
+        migrationBuilder.Sql("ALTER TABLE bookings ADD COLUMN IF NOT EXISTS metadata_json jsonb");
+        migrationBuilder.Sql("ALTER TABLE bookings ADD COLUMN IF NOT EXISTS location_type text");
+        migrationBuilder.Sql("ALTER TABLE bookings ADD COLUMN IF NOT EXISTS location_value text");
 
         // Backfill iCalUid for existing bookings so the unique index can be built.
         migrationBuilder.Sql("UPDATE bookings SET i_cal_uid = id || '@nerova' WHERE i_cal_uid IS NULL");
 
-        migrationBuilder.CreateIndex(
-            "ix_bookings_tenant_id_i_cal_uid",
-            "bookings",
-            ["tenant_id", "i_cal_uid"],
-            unique: true
+        migrationBuilder.Sql(
+            "CREATE UNIQUE INDEX IF NOT EXISTS ix_bookings_tenant_id_i_cal_uid ON bookings (tenant_id, i_cal_uid)"
         );
 
         // --- 2. booking_attendees table ---
