@@ -12,6 +12,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging.Abstractions;
 using NSubstitute;
+using SharedKernel.Authentication;
 using SharedKernel.Integrations.Email;
 using SharedKernel.Tests;
 using SharedKernel.Tests.Persistence;
@@ -21,6 +22,25 @@ namespace Main.Tests.Scheduling;
 
 public sealed class BookingSideEffectsTests : EndpointBaseTest<MainDbContext>
 {
+    private readonly HttpClient _sideEffectsClient;
+
+    public BookingSideEffectsTests()
+    {
+        var ownerWithFlag = new UserInfo
+        {
+            Email = DatabaseSeeder.Tenant1Owner.Email,
+            FirstName = DatabaseSeeder.Tenant1Owner.FirstName,
+            LastName = DatabaseSeeder.Tenant1Owner.LastName,
+            Id = DatabaseSeeder.Tenant1Owner.Id,
+            IsAuthenticated = true,
+            Locale = DatabaseSeeder.Tenant1Owner.Locale,
+            Role = DatabaseSeeder.Tenant1Owner.Role,
+            TenantId = DatabaseSeeder.Tenant1Owner.TenantId,
+            FeatureFlags = new HashSet<string> { "cap-workflows" }
+        };
+        _sideEffectsClient = CreateAuthenticatedHttpClient(ownerWithFlag);
+    }
+
     [Fact]
     public async Task CreateWorkflow_WhenValid_ShouldPersistEmailWorkflow()
     {
@@ -30,7 +50,7 @@ public sealed class BookingSideEffectsTests : EndpointBaseTest<MainDbContext>
         var eventType = await CreateEventTypeAsync(schedule.Id, "Intro call", "intro-call");
 
         // Act
-        var response = await AuthenticatedOwnerHttpClient.PostAsJsonAsync(
+        var response = await _sideEffectsClient.PostAsJsonAsync(
             $"/api/event-types/{eventType.Id}/workflows",
             new
             {
@@ -60,7 +80,7 @@ public sealed class BookingSideEffectsTests : EndpointBaseTest<MainDbContext>
         var eventType = await CreateEventTypeAsync(schedule.Id, "Intro call", "intro-call");
 
         // Act
-        var response = await AuthenticatedOwnerHttpClient.PostAsJsonAsync(
+        var response = await _sideEffectsClient.PostAsJsonAsync(
             $"/api/event-types/{eventType.Id}/webhooks",
             new
             {
@@ -200,7 +220,7 @@ public sealed class BookingSideEffectsTests : EndpointBaseTest<MainDbContext>
         referencesJson.Should().Contain("google-calendar");
         referencesJson.Should().Contain("https://meet.google.com");
 
-        var deliveriesResponse = await AuthenticatedOwnerHttpClient.GetAsync($"/api/bookings/{booking.Id}/side-effects");
+        var deliveriesResponse = await _sideEffectsClient.GetAsync($"/api/bookings/{booking.Id}/side-effects");
         deliveriesResponse.ShouldBeSuccessfulGetRequest();
         var deliveries = await deliveriesResponse.DeserializeResponse<BookingSideEffectDeliveriesResponse>();
         deliveries!.Deliveries.Should().ContainSingle(delivery => delivery.Kind == "calendar" && delivery.Operation == "create");
@@ -232,7 +252,7 @@ public sealed class BookingSideEffectsTests : EndpointBaseTest<MainDbContext>
 
         // Assert
         response.ShouldBeSuccessfulGetRequest();
-        var deliveriesResponse = await AuthenticatedOwnerHttpClient.GetAsync($"/api/bookings/{booking.Id}/side-effects");
+        var deliveriesResponse = await _sideEffectsClient.GetAsync($"/api/bookings/{booking.Id}/side-effects");
         deliveriesResponse.ShouldBeSuccessfulGetRequest();
         var deliveries = await deliveriesResponse.DeserializeResponse<BookingSideEffectDeliveriesResponse>();
         deliveries!.Deliveries.Should().Contain(delivery => delivery.Trigger == "BOOKING_CREATED" && delivery.Kind == "calendar" && delivery.Operation == "create");
@@ -273,7 +293,7 @@ public sealed class BookingSideEffectsTests : EndpointBaseTest<MainDbContext>
         response.EnsureSuccessStatusCode();
         processedDeletes.Should().Be(2);
 
-        var deliveriesResponse = await AuthenticatedOwnerHttpClient.GetAsync($"/api/bookings/{booking.Id}/side-effects");
+        var deliveriesResponse = await _sideEffectsClient.GetAsync($"/api/bookings/{booking.Id}/side-effects");
         deliveriesResponse.ShouldBeSuccessfulGetRequest();
         var deliveries = await deliveriesResponse.DeserializeResponse<BookingSideEffectDeliveriesResponse>();
         deliveries!.Deliveries.Should().Contain(delivery => delivery.Trigger == "BOOKING_CANCELLED" && delivery.Kind == "calendar" && delivery.Operation == "delete");
@@ -348,7 +368,7 @@ public sealed class BookingSideEffectsTests : EndpointBaseTest<MainDbContext>
         var booking = await CreateBookingAsync("intro-call", "2026-06-01T07:00:00Z", "Ada Lovelace", "ada@example.com");
 
         // Act
-        var response = await AuthenticatedOwnerHttpClient.GetAsync($"/api/event-types/{eventType.Id}/side-effect-deliveries");
+        var response = await _sideEffectsClient.GetAsync($"/api/event-types/{eventType.Id}/side-effect-deliveries");
 
         // Assert
         response.ShouldBeSuccessfulGetRequest();
@@ -370,7 +390,7 @@ public sealed class BookingSideEffectsTests : EndpointBaseTest<MainDbContext>
         var expectedBooking = await CreateBookingAsync("intro-call", "2026-06-02T07:00:00Z", "Grace Hopper", "grace@example.com");
 
         // Act
-        var response = await AuthenticatedOwnerHttpClient.GetAsync($"/api/bookings/{expectedBooking.Id}/side-effects");
+        var response = await _sideEffectsClient.GetAsync($"/api/bookings/{expectedBooking.Id}/side-effects");
 
         // Assert
         response.ShouldBeSuccessfulGetRequest();
@@ -419,7 +439,7 @@ public sealed class BookingSideEffectsTests : EndpointBaseTest<MainDbContext>
         // Assert
         firstRun.Should().Be(1);
         secondRun.Should().Be(0);
-        await EmailClient.Received(1).SendAsync(Arg.Any<EmailMessage>(), Arg.Any<CancellationToken>());
+        await EmailClient.Received(1).SendAsync(Arg.Is<EmailMessage>(message => message.Subject == "Booking created for Intro call"), Arg.Any<CancellationToken>());
     }
 
     [Fact]
@@ -494,7 +514,7 @@ public sealed class BookingSideEffectsTests : EndpointBaseTest<MainDbContext>
         var eventType = await CreateEventTypeAsync(schedule.Id, "Intro call", "intro-call");
 
         // Act
-        var response = await AuthenticatedOwnerHttpClient.PostAsJsonAsync(
+        var response = await _sideEffectsClient.PostAsJsonAsync(
             $"/api/event-types/{eventType.Id}/webhooks",
             new
             {
@@ -625,7 +645,7 @@ public sealed class BookingSideEffectsTests : EndpointBaseTest<MainDbContext>
 
     private async Task<WorkflowResponse> CreateWorkflowAsync(string eventTypeId, string trigger, bool active = true)
     {
-        var response = await AuthenticatedOwnerHttpClient.PostAsJsonAsync(
+        var response = await _sideEffectsClient.PostAsJsonAsync(
             $"/api/event-types/{eventTypeId}/workflows",
             new
             {
@@ -642,7 +662,7 @@ public sealed class BookingSideEffectsTests : EndpointBaseTest<MainDbContext>
 
     private async Task<WebhookSubscriptionResponse> CreateWebhookAsync(string eventTypeId, string trigger, bool active = true, string subscriberUrl = "https://example.com/cal/webhook")
     {
-        var response = await AuthenticatedOwnerHttpClient.PostAsJsonAsync(
+        var response = await _sideEffectsClient.PostAsJsonAsync(
             $"/api/event-types/{eventTypeId}/webhooks",
             new
             {

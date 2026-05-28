@@ -118,6 +118,38 @@ public static class ModelBuilderExtensions
     extension(ModelBuilder modelBuilder)
     {
         /// <summary>
+        ///     Stores all DateTimeOffset properties as Unix milliseconds (long) in the database.
+        ///     Required for SQLite, which does not support DateTimeOffset in ORDER BY clauses.
+        /// </summary>
+        public ModelBuilder UseDateTimeOffsetAsLong()
+        {
+            foreach (var entityType in modelBuilder.Model.GetEntityTypes())
+            {
+                foreach (var property in entityType.GetProperties())
+                {
+                    if (property.GetValueConverter() is not null) continue;
+
+                    if (property.ClrType == typeof(DateTimeOffset))
+                    {
+                        property.SetValueConverter(new ValueConverter<DateTimeOffset, long>(
+                            v => v.ToUnixTimeMilliseconds(),
+                            v => DateTimeOffset.FromUnixTimeMilliseconds(v)
+                        ));
+                    }
+                    else if (property.ClrType == typeof(DateTimeOffset?))
+                    {
+                        property.SetValueConverter(new ValueConverter<DateTimeOffset?, long?>(
+                            v => v.HasValue ? v.Value.ToUnixTimeMilliseconds() : null,
+                            v => v.HasValue ? DateTimeOffset.FromUnixTimeMilliseconds(v.Value) : null
+                        ));
+                    }
+                }
+            }
+
+            return modelBuilder;
+        }
+
+        /// <summary>
         ///     This method is used to tell Entity Framework to store all enum properties as strings in the database.
         /// </summary>
         public ModelBuilder UseStringForEnums()

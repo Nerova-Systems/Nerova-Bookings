@@ -46,6 +46,7 @@ public sealed class CreatePublicBookingValidator : AbstractValidator<CreatePubli
 public sealed class CreatePublicBookingHandler(
     PublicSchedulingResolver publicSchedulingResolver,
     IBookingRepository bookingRepository,
+    IBookingAttendeeRepository bookingAttendeeRepository,
     IEventTypeRepository eventTypeRepository,
     IHostRepository hostRepository,
     PublicSlotCalculator publicSlotCalculator,
@@ -158,7 +159,10 @@ public sealed class CreatePublicBookingHandler(
                 endTime.AddDays(1),
                 cancellationToken
             );
-            slotAvailable = publicSlotCalculator.IsSlotAvailable(context.EventType, context.Schedule, bookings, command.StartTime, command.Duration, command.TimeZone, adjustments);
+            var bookingsForSlot = originalBooking is not null
+                ? bookings.Where(b => b.Id != originalBooking.Id).ToArray()
+                : bookings;
+            slotAvailable = publicSlotCalculator.IsSlotAvailable(context.EventType, context.Schedule, bookingsForSlot, command.StartTime, command.Duration, command.TimeZone, adjustments);
         }
 
         if (!slotAvailable)
@@ -213,6 +217,9 @@ public sealed class CreatePublicBookingHandler(
 
         await bookingRepository.AddAsync(booking, cancellationToken);
         booking.RecordCreated();
+
+        var bookerAttendee = BookingAttendee.Create(context.Profile.TenantId, booking.Id, booking.BookerName, booking.BookerEmail, booking.TimeZone, string.Empty);
+        await bookingAttendeeRepository.AddAsync(bookerAttendee, cancellationToken);
 
         // Conferencing integration (Zoom, …): if the event type declares an integration
         // location and the owner has the matching credential, create the upstream meeting and

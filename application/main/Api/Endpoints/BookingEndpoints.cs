@@ -1,6 +1,7 @@
 using Main.Features.Scheduling.Commands;
 using Main.Features.Scheduling.Domain;
 using Main.Features.Scheduling.Queries;
+using Main.Features.Scheduling.Shared;
 using SharedKernel.ApiResults;
 using SharedKernel.Endpoints;
 
@@ -34,25 +35,25 @@ public sealed class BookingEndpoints : IEndpoints
             => await mediator.Send(new CancelBookingCommand(id, reason))
         );
 
-        group.MapPost("/{id}/confirm", async Task<ApiResult> (BookingId id, IMediator mediator)
+        group.MapPost("/{id}/confirm", async Task<ApiResult<BookingLifecycleResponse>> (BookingId id, IMediator mediator)
             => await mediator.Send(new ConfirmBookingCommand(id))
-        );
+        ).Produces<BookingLifecycleResponse>();
 
-        group.MapPost("/{id}/reject", async Task<ApiResult> (BookingId id, RejectBookingCommand command, IMediator mediator)
-            => await mediator.Send(command with { Id = id })
-        );
+        group.MapPost("/{id}/reject", async Task<ApiResult<BookingLifecycleResponse>> (BookingId id, RejectBookingRequest request, IMediator mediator)
+            => await mediator.Send(new RejectBookingCommand(id, request.RejectionReason))
+        ).Produces<BookingLifecycleResponse>();
 
-        group.MapPost("/{id}/request-reschedule", async Task<ApiResult> (BookingId id, RequestRescheduleCommand command, IMediator mediator)
-            => await mediator.Send(command with { Id = id })
-        );
+        group.MapPost("/{id}/request-reschedule", async Task<ApiResult<BookingLifecycleResponse>> (BookingId id, RequestRescheduleRequest request, IMediator mediator)
+            => await mediator.Send(new RequestRescheduleCommand(id, request.RescheduleReason))
+        ).Produces<BookingLifecycleResponse>();
 
-        group.MapPost("/{id}/location", async Task<ApiResult> (BookingId id, EditBookingLocationCommand command, IMediator mediator)
-            => await mediator.Send(command with { Id = id })
-        );
+        group.MapPut("/{id}/location", async Task<ApiResult<BookingLifecycleResponse>> (BookingId id, EditBookingLocationRequest request, IMediator mediator)
+            => await mediator.Send(new EditBookingLocationCommand(id, request.LocationType, request.LocationValue))
+        ).Produces<BookingLifecycleResponse>();
 
-        group.MapPost("/{id}/guests", async Task<ApiResult> (BookingId id, AddBookingGuestsCommand command, IMediator mediator)
+        group.MapPost("/{id}/guests", async Task<ApiResult<BookingLifecycleResponse>> (BookingId id, AddBookingGuestsCommand command, IMediator mediator)
             => await mediator.Send(command with { Id = id })
-        );
+        ).Produces<BookingLifecycleResponse>();
 
         group.MapPost("/{id}/no-show", async Task<ApiResult> (BookingId id, MarkNoShowCommand command, IMediator mediator)
             => await mediator.Send(command with { Id = id })
@@ -97,3 +98,4 @@ public sealed record RejectBookingRequest(string? RejectionReason = null);
 public sealed record RequestRescheduleRequest(string? RescheduleReason = null);
 
 public sealed record EditBookingLocationRequest(string? LocationType, string? LocationValue);
+

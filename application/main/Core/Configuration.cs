@@ -7,6 +7,7 @@ using Main.Features.Apps.Connectors.Zoom;
 using Main.Features.Apps.Domain;
 using Main.Features.Apps.Infrastructure;
 using Main.Features.BookingSideEffects.Workers;
+using Main.Features.Connectors.Domain;
 using Main.Features.EventTypes.Domain;
 using Main.Features.Insights.Shared;
 using Main.Features.ManagedEventTypes.EventHandlers;
@@ -164,7 +165,28 @@ public static class Configuration
                 // OnlineMeetings.ReadWrite scope.
                 .AddSingleton<IAppInstaller, MsTeamsInstaller>()
                 .AddScoped<IConferenceLinkProvider, MsTeamsConferenceLinkProvider>()
-                // Scheduling → conferencing bridge. Resolves the right IConferenceLinkProvider
+                // ─── Core connector domain ──────────────────────────────────────
+                // OAuth provider registry (singleton: slug → provider mapping, no per-request state).
+                .AddSingleton<ICoreConnectorOAuthProvider, GoogleCalendarOAuthProvider>()
+                .AddSingleton<ICoreConnectorOAuthProvider, Office365CalendarOAuthProvider>()
+                .AddSingleton<ICoreConnectorOAuthProvider, ZoomOAuthProvider>()
+                .AddSingleton<CoreConnectorOAuthProviderRegistry>()
+                // Token store: persists and retrieves encrypted OAuth tokens (scoped: uses MainDbContext).
+                .AddScoped<IConnectorTokenStore, ProtectedConnectorTokenStore>()
+                // Access token provider: refreshes tokens via the OAuth provider registry.
+                .AddScoped<ICoreConnectorAccessTokenProvider, ProtectedCoreConnectorAccessTokenProvider>()
+                // Calendar provider implementations (implement both ICoreConnectorProvider and ICoreCalendarConnectorProvider).
+                .AddScoped<ICoreConnectorProvider, GoogleCalendarCoreConnectorProvider>()
+                .AddScoped<ICoreCalendarConnectorProvider, GoogleCalendarCoreConnectorProvider>()
+                .AddScoped<ICoreConnectorProvider, Office365CalendarCoreConnectorProvider>()
+                .AddScoped<ICoreCalendarConnectorProvider, Office365CalendarCoreConnectorProvider>()
+                // Conferencing provider implementation.
+                .AddScoped<ICoreConferencingConnectorProvider, ZoomCoreConnectorProvider>()
+                // Fake client (no external calls; selected when credential IDs carry the fake prefix).
+                .AddScoped<FakeCoreConnectorClient>()
+                // Core connector client: orchestrates calendar + conferencing provider calls.
+                .AddScoped<ICoreConnectorClient, CoreConnectorClient>()
+                // Scheduling → conferencing bridge.Resolves the right IConferenceLinkProvider
                 // for an event type's location and stamps the join URL + BookingReference
                 // onto the persisted booking.
                 .AddScoped<ConferenceLinkOrchestrator>()

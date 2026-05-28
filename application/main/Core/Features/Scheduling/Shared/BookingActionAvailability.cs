@@ -27,7 +27,7 @@ public static class BookingActionAvailability
     {
         return new BookingActionsResponse(
             ResolveCancel(booking, eventType, now),
-            Disabled("Reschedule booking is not implemented yet."),
+            ResolveReschedule(booking, eventType, now),
             ResolveRequestReschedule(booking, now),
             ResolveEditLocation(booking),
             ResolveAddGuests(booking, now),
@@ -103,6 +103,11 @@ public static class BookingActionAvailability
         if (booking.EndTime <= now)
         {
             return Disabled("Past bookings cannot be rescheduled.");
+        }
+
+        if (!eventType.Settings.ReschedulePolicy.AllowReschedule)
+        {
+            return Disabled("Rescheduling is disabled for this event type.");
         }
 
         return new BookingActionResponse(true, true, null);

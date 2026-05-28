@@ -58,6 +58,10 @@ public abstract class SharedKernelDbContext<TContext>(DbContextOptions<TContext>
         // Ensures that all enum properties are stored as strings in the database.
         modelBuilder.UseStringForEnums();
 
+        // SQLite does not support DateTimeOffset in ORDER BY clauses — store as Unix milliseconds.
+        if (Database.ProviderName == "Microsoft.EntityFrameworkCore.Sqlite")
+            modelBuilder.UseDateTimeOffsetAsLong();
+
         ApplyNamedQueryFilters(modelBuilder);
 
         base.OnModelCreating(modelBuilder);

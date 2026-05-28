@@ -279,17 +279,19 @@ public sealed class Booking : AggregateRoot<BookingId>, ITenantScopedEntity
         Status = BookingStatus.Cancelled;
         CancellationReason = reason?.Trim();
         CancelledByUserUid = cancelledByUserUid;
+        RaiseSideEffectEvent(BookingSideEffectConstants.BookingCancelled);
     }
 
     public void Confirm()
     {
         Status = BookingStatus.Accepted;
+        RaiseSideEffectEvent(BookingSideEffectConstants.BookingConfirmed);
     }
 
-    public void Reject(string reason)
+    public void Reject(string? reason)
     {
         Status = BookingStatus.Rejected;
-        RejectionReason = reason.Trim();
+        RejectionReason = string.IsNullOrWhiteSpace(reason) ? null : reason.Trim();
     }
 
     public void MarkRescheduled(string? rescheduledByUserUid = null)

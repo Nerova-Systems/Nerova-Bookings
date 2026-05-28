@@ -2,7 +2,6 @@ using Bogus;
 using Main.Database;
 using SharedKernel.Authentication;
 using SharedKernel.Domain;
-using FeatureFlagRegistry = SharedKernel.FeatureFlags.FeatureFlags;
 
 namespace Main.Tests;
 
@@ -27,27 +26,7 @@ public sealed class DatabaseSeeder
             Locale = "en-US",
             Role = "Owner",
             TenantId = TenantId,
-            FeatureFlags = new HashSet<string>
-            {
-                FeatureFlagRegistry.TierTeams.Key,
-                FeatureFlagRegistry.TierOrganizations.Key,
-                FeatureFlagRegistry.TierEnterprise.Key,
-                FeatureFlagRegistry.CapManagedEventTypes.Key,
-                FeatureFlagRegistry.CapRoundRobin.Key,
-                FeatureFlagRegistry.CapCollective.Key,
-                FeatureFlagRegistry.CapAttributes.Key,
-                FeatureFlagRegistry.CapCustomSmtp.Key,
-                FeatureFlagRegistry.CapOrgBilling.Key,
-                FeatureFlagRegistry.CapDelegationCredentials.Key,
-                FeatureFlagRegistry.CapSsoMicrosoft.Key,
-                FeatureFlagRegistry.CapSsoGoogle.Key,
-                FeatureFlagRegistry.CapIntegrationAttributeSync.Key,
-                FeatureFlagRegistry.CapAuditLog.Key,
-                FeatureFlagRegistry.CapWorkflows.Key,
-                FeatureFlagRegistry.CapApiKeys.Key,
-                FeatureFlagRegistry.CapImpersonation.Key,
-                FeatureFlagRegistry.CapInsights.Key
-            }
+            FeatureFlags = new HashSet<string>()
         };
 
         Tenant1Member = new UserInfo
@@ -60,27 +39,7 @@ public sealed class DatabaseSeeder
             Locale = "en-US",
             Role = "Member",
             TenantId = TenantId,
-            FeatureFlags = new HashSet<string>
-            {
-                FeatureFlagRegistry.TierTeams.Key,
-                FeatureFlagRegistry.TierOrganizations.Key,
-                FeatureFlagRegistry.TierEnterprise.Key,
-                FeatureFlagRegistry.CapManagedEventTypes.Key,
-                FeatureFlagRegistry.CapRoundRobin.Key,
-                FeatureFlagRegistry.CapCollective.Key,
-                FeatureFlagRegistry.CapAttributes.Key,
-                FeatureFlagRegistry.CapCustomSmtp.Key,
-                FeatureFlagRegistry.CapOrgBilling.Key,
-                FeatureFlagRegistry.CapDelegationCredentials.Key,
-                FeatureFlagRegistry.CapSsoMicrosoft.Key,
-                FeatureFlagRegistry.CapSsoGoogle.Key,
-                FeatureFlagRegistry.CapIntegrationAttributeSync.Key,
-                FeatureFlagRegistry.CapAuditLog.Key,
-                FeatureFlagRegistry.CapWorkflows.Key,
-                FeatureFlagRegistry.CapApiKeys.Key,
-                FeatureFlagRegistry.CapImpersonation.Key,
-                FeatureFlagRegistry.CapInsights.Key
-            }
+            FeatureFlags = new HashSet<string>()
         };
 
         mainDbContext.SaveChanges();

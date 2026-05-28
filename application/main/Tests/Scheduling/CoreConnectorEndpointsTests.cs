@@ -8,6 +8,7 @@ using Main.Features.Connectors.Domain;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using SharedKernel.Authentication;
 using SharedKernel.Tests;
 using SharedKernel.Tests.Persistence;
 using Xunit;
@@ -16,6 +17,27 @@ namespace Main.Tests.Scheduling;
 
 public sealed class CoreConnectorEndpointsTests : EndpointBaseTest<MainDbContext>
 {
+    private readonly HttpClient _connectorsClient;
+    private readonly HttpClient _noRedirectConnectorsClient;
+
+    public CoreConnectorEndpointsTests()
+    {
+        var ownerWithFlag = new UserInfo
+        {
+            Email = DatabaseSeeder.Tenant1Owner.Email,
+            FirstName = DatabaseSeeder.Tenant1Owner.FirstName,
+            LastName = DatabaseSeeder.Tenant1Owner.LastName,
+            Id = DatabaseSeeder.Tenant1Owner.Id,
+            IsAuthenticated = true,
+            Locale = DatabaseSeeder.Tenant1Owner.Locale,
+            Role = DatabaseSeeder.Tenant1Owner.Role,
+            TenantId = DatabaseSeeder.Tenant1Owner.TenantId,
+            FeatureFlags = new HashSet<string> { "cap-delegation-credentials" }
+        };
+        _connectorsClient = CreateAuthenticatedHttpClient(ownerWithFlag);
+        _noRedirectConnectorsClient = CreateNoRedirectAuthenticatedHttpClient(ownerWithFlag);
+    }
+
     [Fact]
     public async Task GetCoreConnectorAccounts_WhenAccountsExist_ShouldReturnOnlyGoogleMicrosoftAndZoom()
     {
@@ -26,7 +48,7 @@ public sealed class CoreConnectorEndpointsTests : EndpointBaseTest<MainDbContext
         await SeedConnectorCredentialAsync("cred_daily", "dailyvideo", "daily-account", "owner@daily.example", "Owner Daily");
 
         // Act
-        var response = await AuthenticatedOwnerHttpClient.GetAsync("/api/connectors/core/accounts");
+        var response = await _connectorsClient.GetAsync("/api/connectors/core/accounts");
 
         // Assert
         response.EnsureSuccessStatusCode();
@@ -59,7 +81,7 @@ public sealed class CoreConnectorEndpointsTests : EndpointBaseTest<MainDbContext
         await SeedConnectorCredentialAsync("cred_zoom", "zoom-video", "zoom-account", "owner@zoom.example", "Owner Zoom");
 
         // Act
-        var selectedResponse = await AuthenticatedOwnerHttpClient.PutAsJsonAsync(
+        var selectedResponse = await _connectorsClient.PutAsJsonAsync(
             $"/api/event-types/{eventType.Id}/connector-settings/selected-calendars",
             new
             {
@@ -69,11 +91,11 @@ public sealed class CoreConnectorEndpointsTests : EndpointBaseTest<MainDbContext
                 }
             }
         );
-        var destinationResponse = await AuthenticatedOwnerHttpClient.PutAsJsonAsync(
+        var destinationResponse = await _connectorsClient.PutAsJsonAsync(
             $"/api/event-types/{eventType.Id}/connector-settings/destination-calendar",
             new { destinationCalendar = new { integration = "google-calendar", externalId = "team", credentialId = "cred_google" } }
         );
-        var conferencingResponse = await AuthenticatedOwnerHttpClient.PutAsJsonAsync(
+        var conferencingResponse = await _connectorsClient.PutAsJsonAsync(
             $"/api/event-types/{eventType.Id}/connector-settings/default-conferencing",
             new { defaultConferencing = new { app = "zoom-video", credentialId = "cred_zoom" } }
         );
@@ -83,7 +105,7 @@ public sealed class CoreConnectorEndpointsTests : EndpointBaseTest<MainDbContext
         destinationResponse.ShouldBeSuccessfulGetRequest();
         conferencingResponse.ShouldBeSuccessfulGetRequest();
 
-        var eventTypeResponse = await AuthenticatedOwnerHttpClient.GetAsync($"/api/event-types/{eventType.Id}");
+        var eventTypeResponse = await _connectorsClient.GetAsync($"/api/event-types/{eventType.Id}");
         eventTypeResponse.ShouldBeSuccessfulGetRequest();
         var updatedEventType = await eventTypeResponse.DeserializeResponse<EventTypeResponse>();
         updatedEventType!.Settings.SelectedCalendars.Should().ContainSingle().Which.ExternalId.Should().Be("primary");
@@ -99,11 +121,11 @@ public sealed class CoreConnectorEndpointsTests : EndpointBaseTest<MainDbContext
         var busyEndTime = DateTimeOffset.Parse("2026-06-01T07:30:00Z");
 
         // Act
-        var response = await AuthenticatedOwnerHttpClient.PostAsJsonAsync(
+        var response = await _connectorsClient.PostAsJsonAsync(
             "/api/connectors/core/test-fixtures",
             new { busyStartTime, busyEndTime }
         );
-        var repeatedResponse = await AuthenticatedOwnerHttpClient.PostAsJsonAsync(
+        var repeatedResponse = await _connectorsClient.PostAsJsonAsync(
             "/api/connectors/core/test-fixtures",
             new { busyStartTime, busyEndTime }
         );
@@ -128,7 +150,7 @@ public sealed class CoreConnectorEndpointsTests : EndpointBaseTest<MainDbContext
         var busyEndTime = DateTimeOffset.Parse("2026-06-01T07:00:00Z");
 
         // Act
-        var response = await AuthenticatedOwnerHttpClient.PostAsJsonAsync(
+        var response = await _connectorsClient.PostAsJsonAsync(
             "/api/connectors/core/test-fixtures",
             new { busyStartTime, busyEndTime }
         );
@@ -141,7 +163,7 @@ public sealed class CoreConnectorEndpointsTests : EndpointBaseTest<MainDbContext
     public async Task GetAuthorizationUrl_WhenGoogleCalendarIsConfigured_ShouldReturnCalComShapedAuthorizationUrl()
     {
         // Act
-        var response = await AuthenticatedOwnerHttpClient.GetAsync("/api/connectors/core/google-calendar/authorization-url?returnTo=/event-types");
+        var response = await _connectorsClient.GetAsync("/api/connectors/core/google-calendar/authorization-url?returnTo=/event-types");
 
         // Assert
         response.EnsureSuccessStatusCode();
@@ -161,19 +183,19 @@ public sealed class CoreConnectorEndpointsTests : EndpointBaseTest<MainDbContext
     public async Task CompleteOAuthCallback_WhenGoogleMockCodeIsValid_ShouldCreateCredentialAndProtectedToken()
     {
         // Arrange
-        var authorizationUrlResponse = await AuthenticatedOwnerHttpClient.GetAsync("/api/connectors/core/google-calendar/authorization-url?returnTo=/event-types");
+        var authorizationUrlResponse = await _connectorsClient.GetAsync("/api/connectors/core/google-calendar/authorization-url?returnTo=/event-types");
         authorizationUrlResponse.ShouldBeSuccessfulGetRequest();
         var authorizationUrl = await authorizationUrlResponse.DeserializeResponse<CoreConnectorAuthorizationUrlResponse>();
         var state = HttpUtility.ParseQueryString(new Uri(authorizationUrl!.Url).Query)["state"];
 
         // Act
-        var response = await NoRedirectAuthenticatedOwnerHttpClient.GetAsync($"/api/connectors/core/google-calendar/callback?code=mock-google-success&state={Uri.EscapeDataString(state!)}");
+        var response = await _noRedirectConnectorsClient.GetAsync($"/api/connectors/core/google-calendar/callback?code=mock-google-success&state={Uri.EscapeDataString(state!)}");
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.Redirect);
         response.Headers.Location!.ToString().Should().Be("/event-types?connector=google-calendar");
 
-        var accountsResponse = await AuthenticatedOwnerHttpClient.GetAsync("/api/connectors/core/accounts");
+        var accountsResponse = await _connectorsClient.GetAsync("/api/connectors/core/accounts");
         accountsResponse.ShouldBeSuccessfulGetRequest();
         var accounts = await accountsResponse.DeserializeResponse<CoreConnectorAccountsResponse>();
         var googleAccount = accounts!.Accounts.Should().ContainSingle(account => account.Integration == "google-calendar").Which;
@@ -196,7 +218,7 @@ public sealed class CoreConnectorEndpointsTests : EndpointBaseTest<MainDbContext
     public async Task CompleteOAuthCallback_WhenStateIsInvalid_ShouldRedirectWithoutCreatingCredential()
     {
         // Act
-        var response = await NoRedirectAuthenticatedOwnerHttpClient.GetAsync("/api/connectors/core/google-calendar/callback?code=mock-google-success&state=invalid-state");
+        var response = await _noRedirectConnectorsClient.GetAsync("/api/connectors/core/google-calendar/callback?code=mock-google-success&state=invalid-state");
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.Redirect);
@@ -208,13 +230,13 @@ public sealed class CoreConnectorEndpointsTests : EndpointBaseTest<MainDbContext
     public async Task CompleteOAuthCallback_WhenProviderRejectsCode_ShouldRedirectWithoutCreatingCredential()
     {
         // Arrange
-        var authorizationUrlResponse = await AuthenticatedOwnerHttpClient.GetAsync("/api/connectors/core/zoom-video/authorization-url?returnTo=/event-types");
+        var authorizationUrlResponse = await _connectorsClient.GetAsync("/api/connectors/core/zoom-video/authorization-url?returnTo=/event-types");
         authorizationUrlResponse.ShouldBeSuccessfulGetRequest();
         var authorizationUrl = await authorizationUrlResponse.DeserializeResponse<CoreConnectorAuthorizationUrlResponse>();
         var state = HttpUtility.ParseQueryString(new Uri(authorizationUrl!.Url).Query)["state"];
 
         // Act
-        var response = await NoRedirectAuthenticatedOwnerHttpClient.GetAsync($"/api/connectors/core/zoom-video/callback?code=mock-provider-error&state={Uri.EscapeDataString(state!)}");
+        var response = await _noRedirectConnectorsClient.GetAsync($"/api/connectors/core/zoom-video/callback?code=mock-provider-error&state={Uri.EscapeDataString(state!)}");
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.Redirect);
@@ -272,16 +294,16 @@ public sealed class CoreConnectorEndpointsTests : EndpointBaseTest<MainDbContext
     public async Task DeleteConnectorAccount_WhenOwned_ShouldRemoveCredentialAndToken()
     {
         // Arrange
-        var authorizationUrlResponse = await AuthenticatedOwnerHttpClient.GetAsync("/api/connectors/core/zoom-video/authorization-url?returnTo=/event-types");
+        var authorizationUrlResponse = await _connectorsClient.GetAsync("/api/connectors/core/zoom-video/authorization-url?returnTo=/event-types");
         authorizationUrlResponse.ShouldBeSuccessfulGetRequest();
         var authorizationUrl = await authorizationUrlResponse.DeserializeResponse<CoreConnectorAuthorizationUrlResponse>();
         var state = HttpUtility.ParseQueryString(new Uri(authorizationUrl!.Url).Query)["state"];
-        var callbackResponse = await NoRedirectAuthenticatedOwnerHttpClient.GetAsync($"/api/connectors/core/zoom-video/callback?code=mock-zoom-success&state={Uri.EscapeDataString(state!)}");
+        var callbackResponse = await _noRedirectConnectorsClient.GetAsync($"/api/connectors/core/zoom-video/callback?code=mock-zoom-success&state={Uri.EscapeDataString(state!)}");
         callbackResponse.StatusCode.Should().Be(HttpStatusCode.Redirect);
         var accountId = Connection.ExecuteScalar<string>("SELECT id FROM connector_credentials WHERE integration = 'zoom-video'", []);
 
         // Act
-        var response = await AuthenticatedOwnerHttpClient.DeleteAsync($"/api/connectors/core/accounts/{accountId}");
+        var response = await _connectorsClient.DeleteAsync($"/api/connectors/core/accounts/{accountId}");
 
         // Assert
         response.EnsureSuccessStatusCode();
@@ -299,7 +321,7 @@ public sealed class CoreConnectorEndpointsTests : EndpointBaseTest<MainDbContext
         var response = await AuthenticatedMemberHttpClient.DeleteAsync("/api/connectors/core/accounts/cred_google");
 
         // Assert
-        await response.ShouldHaveErrorStatusCode(HttpStatusCode.Forbidden, "Only owners and admins can manage event types.");
+        await response.ShouldHaveErrorStatusCode(HttpStatusCode.Forbidden, "Cal.com apps connectors are disabled for this tenant.");
         Connection.ExecuteScalar<long>("SELECT COUNT(*) FROM connector_credentials WHERE id = 'cred_google'", []).Should().Be(1);
     }
 
@@ -312,7 +334,7 @@ public sealed class CoreConnectorEndpointsTests : EndpointBaseTest<MainDbContext
         var eventType = await CreateEventTypeAsync(schedule.Id, "Intro call", "intro-call");
 
         // Act
-        var response = await AuthenticatedOwnerHttpClient.PutAsJsonAsync(
+        var response = await _connectorsClient.PutAsJsonAsync(
             $"/api/event-types/{eventType.Id}/connector-settings/destination-calendar",
             new { destinationCalendar = new { integration = "google-calendar", externalId = "primary", credentialId = "missing_google" } }
         );
@@ -323,7 +345,7 @@ public sealed class CoreConnectorEndpointsTests : EndpointBaseTest<MainDbContext
 
     private async Task UpdateSchedulingProfileAsync(string handle)
     {
-        var response = await AuthenticatedOwnerHttpClient.PutAsJsonAsync(
+        var response = await _connectorsClient.PutAsJsonAsync(
             "/api/scheduling/profile",
             new { handle, displayName = "Owner Name", avatarUrl = "https://example.com/avatar.png" }
         );
@@ -332,7 +354,7 @@ public sealed class CoreConnectorEndpointsTests : EndpointBaseTest<MainDbContext
 
     private async Task<ScheduleResponse> CreateScheduleAsync()
     {
-        var response = await AuthenticatedOwnerHttpClient.PostAsJsonAsync(
+        var response = await _connectorsClient.PostAsJsonAsync(
             "/api/schedules",
             new
             {
@@ -349,7 +371,7 @@ public sealed class CoreConnectorEndpointsTests : EndpointBaseTest<MainDbContext
 
     private async Task<EventTypeResponse> CreateEventTypeAsync(string scheduleId, string title, string slug)
     {
-        var response = await AuthenticatedOwnerHttpClient.PostAsJsonAsync(
+        var response = await _connectorsClient.PostAsJsonAsync(
             "/api/event-types",
             new
             {
@@ -445,13 +467,32 @@ public sealed class CoreConnectorEndpointsTests : EndpointBaseTest<MainDbContext
     private sealed record EventTypeDefaultConferencingResponse(string App, string? CredentialId);
 }
 
-public sealed class CoreConnectorProductionEndpointsTests() : EndpointBaseTest<MainDbContext>(Environments.Production)
+public sealed class CoreConnectorProductionEndpointsTests : EndpointBaseTest<MainDbContext>
 {
+    private readonly HttpClient _connectorsClient;
+
+    public CoreConnectorProductionEndpointsTests() : base(Environments.Production)
+    {
+        var ownerWithFlag = new UserInfo
+        {
+            Email = DatabaseSeeder.Tenant1Owner.Email,
+            FirstName = DatabaseSeeder.Tenant1Owner.FirstName,
+            LastName = DatabaseSeeder.Tenant1Owner.LastName,
+            Id = DatabaseSeeder.Tenant1Owner.Id,
+            IsAuthenticated = true,
+            Locale = DatabaseSeeder.Tenant1Owner.Locale,
+            Role = DatabaseSeeder.Tenant1Owner.Role,
+            TenantId = DatabaseSeeder.Tenant1Owner.TenantId,
+            FeatureFlags = new HashSet<string> { "cap-delegation-credentials" }
+        };
+        _connectorsClient = CreateAuthenticatedHttpClient(ownerWithFlag);
+    }
+
     [Fact]
     public async Task GetCoreConnectorAccounts_WhenProviderKeysAreMissing_ShouldReturnUnconfiguredIntegrations()
     {
         // Act
-        var response = await AuthenticatedOwnerHttpClient.GetAsync("/api/connectors/core/accounts");
+        var response = await _connectorsClient.GetAsync("/api/connectors/core/accounts");
 
         // Assert
         response.EnsureSuccessStatusCode();
@@ -470,7 +511,7 @@ public sealed class CoreConnectorProductionEndpointsTests() : EndpointBaseTest<M
         var busyEndTime = DateTimeOffset.Parse("2026-06-01T07:30:00Z");
 
         // Act
-        var response = await AuthenticatedOwnerHttpClient.PostAsJsonAsync(
+        var response = await _connectorsClient.PostAsJsonAsync(
             "/api/connectors/core/test-fixtures",
             new { busyStartTime, busyEndTime }
         );

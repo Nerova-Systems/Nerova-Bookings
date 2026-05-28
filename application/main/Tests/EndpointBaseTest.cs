@@ -183,6 +183,14 @@ public abstract class EndpointBaseTest<TContext> : IDisposable where TContext : 
         return client;
     }
 
+    protected HttpClient CreateNoRedirectAuthenticatedHttpClient(UserInfo userInfo)
+    {
+        var token = AccessTokenGenerator.Generate(userInfo);
+        var client = _webApplicationFactory.CreateClient(new WebApplicationFactoryClientOptions { AllowAutoRedirect = false });
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        return client;
+    }
+
     protected void RegisterMockLoggers(IServiceCollection services)
     {
     }

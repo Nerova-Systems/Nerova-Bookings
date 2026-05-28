@@ -143,7 +143,6 @@ public sealed class BookingEndpointsTests : EndpointBaseTest<MainDbContext>
         actionsByBookingId[past.Id].Cancel.Should().Be(new BookingActionResponse(true, false, "Past bookings cannot be cancelled."));
         actionsByBookingId[cancelled.Id].Cancel.Should().Be(new BookingActionResponse(true, false, "Cancelled bookings cannot be cancelled."));
         actionsByBookingId[rejected.Id].Cancel.Should().Be(new BookingActionResponse(true, false, "Rejected bookings cannot be cancelled."));
-actionsByBookingId[upcoming.Id].Reschedule.Enabled.Should().BeFalse();
             actionsByBookingId[upcoming.Id].Reschedule.Enabled.Should().BeTrue();
         actionsByBookingId[upcoming.Id].RequestReschedule.Enabled.Should().BeTrue();
         actionsByBookingId[upcoming.Id].AddGuests.Enabled.Should().BeTrue();
@@ -319,8 +318,8 @@ actionsByBookingId[upcoming.Id].Reschedule.Enabled.Should().BeFalse();
         // Assert
         response.ShouldBeSuccessfulGetRequest();
         var lifecycle = await response.DeserializeResponse<BookingLifecycleResponse>();
-        lifecycle!.Status.Should().Be("accepted");
-        Connection.ExecuteScalar<string>("SELECT status FROM bookings WHERE id = @id", [new { id = booking.Id }]).Should().Be("accepted");
+        lifecycle!.Status.Should().Be("Accepted");
+        Connection.ExecuteScalar<string>("SELECT status FROM bookings WHERE id = @id", [new { id = booking.Id }]).Should().Be("Accepted");
     }
 
     [Fact]
@@ -338,8 +337,8 @@ actionsByBookingId[upcoming.Id].Reschedule.Enabled.Should().BeFalse();
         // Assert
         response.ShouldBeSuccessfulGetRequest();
         var lifecycle = await response.DeserializeResponse<BookingLifecycleResponse>();
-        lifecycle!.Status.Should().Be("rejected");
-        Connection.ExecuteScalar<string>("SELECT status FROM bookings WHERE id = @id", [new { id = booking.Id }]).Should().Be("rejected");
+        lifecycle!.Status.Should().Be("Rejected");
+        Connection.ExecuteScalar<string>("SELECT status FROM bookings WHERE id = @id", [new { id = booking.Id }]).Should().Be("Rejected");
         Connection.ExecuteScalar<string>("SELECT rejection_reason FROM bookings WHERE id = @id", [new { id = booking.Id }]).Should().Be("Not a fit");
     }
 
@@ -357,7 +356,7 @@ actionsByBookingId[upcoming.Id].Reschedule.Enabled.Should().BeFalse();
 
         // Assert
         response.ShouldBeSuccessfulGetRequest();
-        Connection.ExecuteScalar<string>("SELECT status FROM bookings WHERE id = @id", [new { id = booking.Id }]).Should().Be("cancelled");
+        Connection.ExecuteScalar<string>("SELECT status FROM bookings WHERE id = @id", [new { id = booking.Id }]).Should().Be("Cancelled");
         Connection.ExecuteScalar<long>("SELECT rescheduled FROM bookings WHERE id = @id", [new { id = booking.Id }]).Should().Be(1);
         Connection.ExecuteScalar<string>("SELECT reschedule_reason FROM bookings WHERE id = @id", [new { id = booking.Id }]).Should().Be("Need another time");
         Connection.ExecuteScalar<string>("SELECT cancelled_by FROM bookings WHERE id = @id", [new { id = booking.Id }]).Should().Be("owner@tenant-1.com");
@@ -478,7 +477,7 @@ actionsByBookingId[upcoming.Id].Reschedule.Enabled.Should().BeFalse();
         response.EnsureSuccessStatusCode();
         var replacement = await response.DeserializeResponse<CreatePublicBookingResponse>();
         replacement!.Id.Should().NotBe(originalBooking.Id);
-        Connection.ExecuteScalar<string>("SELECT status FROM bookings WHERE id = @id", [new { id = originalBooking.Id }]).Should().Be("cancelled");
+        Connection.ExecuteScalar<string>("SELECT status FROM bookings WHERE id = @id", [new { id = originalBooking.Id }]).Should().Be("Cancelled");
         Connection.ExecuteScalar<long>("SELECT rescheduled FROM bookings WHERE id = @id", [new { id = originalBooking.Id }]).Should().Be(1);
         Connection.ExecuteScalar<string>("SELECT reschedule_reason FROM bookings WHERE id = @id", [new { id = originalBooking.Id }]).Should().Be("Need a later time");
         Connection.ExecuteScalar<string>("SELECT rescheduled_by FROM bookings WHERE id = @id", [new { id = originalBooking.Id }]).Should().Be("owner@tenant-1.com");
@@ -547,7 +546,7 @@ actionsByBookingId[upcoming.Id].Reschedule.Enabled.Should().BeFalse();
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-        Connection.ExecuteScalar<string>("SELECT status FROM bookings WHERE id = @id", [new { id = originalBooking.Id }]).Should().Be("accepted");
+        Connection.ExecuteScalar<string>("SELECT status FROM bookings WHERE id = @id", [new { id = originalBooking.Id }]).Should().Be("Accepted");
     }
 
     private async Task UpdateSchedulingProfileAsync(string handle)
