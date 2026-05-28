@@ -22,6 +22,8 @@ using Account.Features.SsoMicrosoft;
 using Account.Features.SsoMicrosoft.Infrastructure;
 using Account.Features.Subscriptions.Shared;
 using Account.Features.Users.Shared;
+using Account.Features.WhatsApp.Domain;
+using Account.Features.WhatsApp.Infrastructure;
 using Account.Integrations.Gravatar;
 using Account.Integrations.OAuth;
 using Account.Integrations.OAuth.Google;
@@ -83,6 +85,17 @@ public static class Configuration
 
             services.AddHttpClient("microsoft-sso", client => { client.Timeout = TimeSpan.FromSeconds(30); });
             services.AddHttpClient("google-sso", client => { client.Timeout = TimeSpan.FromSeconds(30); });
+            services.AddHttpClient("Paystack", client =>
+                {
+                    client.BaseAddress = new Uri("https://api.paystack.co");
+                    client.Timeout = TimeSpan.FromSeconds(30);
+                }
+            );
+
+            services.AddHttpClient<Account.Features.WhatsApp.Infrastructure.WhatsAppCloudApiClient>(
+                Account.Features.WhatsApp.Infrastructure.WhatsAppCloudApiClient.HttpClientName,
+                client => { client.Timeout = TimeSpan.FromSeconds(30); }
+            );
 
             services.AddEmailRendering("WebApp");
 
@@ -135,6 +148,15 @@ public static class Configuration
                 .AddScoped<IAuditLogRepository, AuditLogRepository>()
                 .AddScoped<IAuditLogEmitter, AuditLogEmitter>()
                 .AddScoped<IApiKeyValidator, ApiKeyValidator>()
+                .AddScoped<IWabaConfigurationRepository, WabaConfigurationRepository>()
+                .AddScoped<IWabaProfileSyncOutboxRepository, WabaProfileSyncOutboxRepository>()
+                .AddScoped<Account.Features.WhatsApp.Infrastructure.IWhatsAppCloudApiClient, Account.Features.WhatsApp.Infrastructure.WhatsAppCloudApiClient>()
+                .AddScoped<Account.Features.WhatsApp.Infrastructure.WabaProfileSyncProcessor>()
+                .AddScoped<Account.Features.WhatsApp.Infrastructure.WabaProfileDriftDetector>()
+                .AddScoped<Account.Features.WhatsApp.Infrastructure.WabaDisplayNameReviewPoller>()
+                .AddScoped<IWabaEncryptionService, WabaEncryptionService>()
+                .AddScoped<IPaystackSubaccountService, PaystackSubaccountService>()
+                .AddScoped<IWhatsAppInternalApiKeyValidator, WhatsAppInternalApiKeyValidator>()
                 .AddApiKeyAuthentication();
         }
 

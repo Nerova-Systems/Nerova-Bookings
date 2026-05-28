@@ -1,6 +1,6 @@
 using Account.Features.Tenants.Domain;
+using Account.Features.WhatsApp.Domain;
 using JetBrains.Annotations;
-using Mapster;
 using SharedKernel.Authentication;
 using SharedKernel.Cqrs;
 using SharedKernel.Domain;
@@ -18,10 +18,12 @@ public sealed record TenantResponse(
     string Name,
     TenantState State,
     SuspensionReason? SuspensionReason,
-    string? LogoUrl
+    string? LogoUrl,
+    string? WabaVerifiedName,
+    string? BrandVertical
 );
 
-public sealed class GetTenantHandler(ITenantRepository tenantRepository)
+public sealed class GetTenantHandler(ITenantRepository tenantRepository, IWabaConfigurationRepository wabaConfigurationRepository)
     : IRequestHandler<GetCurrentTenantQuery, Result<TenantResponse>>
 {
     public async Task<Result<TenantResponse>> Handle(GetCurrentTenantQuery query, CancellationToken cancellationToken)
@@ -36,6 +38,18 @@ public sealed class GetTenantHandler(ITenantRepository tenantRepository)
             );
         }
 
-        return tenant.Adapt<TenantResponse>();
+        var waba = await wabaConfigurationRepository.GetByTenantIdAsync(tenant.Id, cancellationToken);
+
+        return new TenantResponse(
+            Id: tenant.Id,
+            CreatedAt: tenant.CreatedAt,
+            ModifiedAt: tenant.ModifiedAt,
+            Name: tenant.Name,
+            State: tenant.State,
+            SuspensionReason: tenant.SuspensionReason,
+            LogoUrl: tenant.Logo.Url,
+            WabaVerifiedName: waba?.VerifiedName,
+            BrandVertical: tenant.BrandProfile?.BrandVertical.ToString()
+        );
     }
 }

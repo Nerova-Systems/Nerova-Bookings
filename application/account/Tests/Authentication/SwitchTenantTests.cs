@@ -400,5 +400,25 @@ public sealed class SwitchTenantTests(AccountWebApplicationFactory factory) : En
                 ("drift_discrepancies", "[]")
             ]
         );
+
+        // Pre-create the plan-source override row for `whatsapp-flows-enabled` so the
+        // PlanBasedFeatureFlagEvaluator finds an existing active row when minting the JWT
+        // for this tenant and does not emit an extra FeatureFlagPlanOverrideActivated event
+        // that breaks unrelated event-count assertions in auth tests.
+        Connection.Insert("feature_flags", [
+                ("id", Account.Features.FeatureFlags.Domain.FeatureFlagId.NewId().ToString()),
+                ("created_at", TimeProvider.GetUtcNow()),
+                ("modified_at", null),
+                ("flag_key", "whatsapp-flows-enabled"),
+                ("tenant_id", tenantId.Value),
+                ("user_id", null),
+                ("enabled_at", TimeProvider.GetUtcNow()),
+                ("disabled_at", null),
+                ("bucket_start", null),
+                ("bucket_end", null),
+                ("source", "Plan"),
+                ("scope", "Tenant")
+            ]
+        );
     }
 }

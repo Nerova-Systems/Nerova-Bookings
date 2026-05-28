@@ -40,6 +40,10 @@ public sealed class TenantEndpoints : IEndpoints
             => await mediator.Send(new RemoveTenantLogoCommand())
         );
 
+        group.MapPut("/current/brand-profile", async Task<ApiResult> (UpdateTenantBrandProfileCommand command, IMediator mediator)
+            => await mediator.Send(command)
+        );
+
         // Internal-only endpoint reachable backend-to-backend via the cluster's localhost address.
         routes.MapDelete("/internal-api/account/tenants/{id}", async Task<ApiResult> (TenantId id, IMediator mediator)
             => await mediator.Send(new DeleteTenantCommand(id))

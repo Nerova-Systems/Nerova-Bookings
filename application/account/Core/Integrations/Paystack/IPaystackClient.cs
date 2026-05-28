@@ -7,6 +7,8 @@ public interface IPaystackClient
 {
     Task<PaystackCustomerId?> CreateCustomerAsync(string tenantName, string email, long tenantId, CancellationToken cancellationToken);
 
+    Task<IReadOnlyList<PaystackBankDto>> GetBanksAsync(string country, CancellationToken cancellationToken);
+
     Task<CheckoutSessionResult?> CreateCheckoutSessionAsync(PaystackCustomerId paystackCustomerId, string email, SubscriptionPlan plan, PaystackPaymentPurpose purpose, CancellationToken cancellationToken);
 
     Task<AuthorizationChargeResult?> ChargeAuthorizationAsync(
@@ -99,6 +101,8 @@ public sealed record PriceCatalogItem(
     int IntervalCount,
     bool TaxInclusive
 );
+
+public sealed record PaystackBankDto(string Code, string Name);
 
 [PublicAPI]
 [JsonConverter(typeof(JsonStringEnumConverter))]

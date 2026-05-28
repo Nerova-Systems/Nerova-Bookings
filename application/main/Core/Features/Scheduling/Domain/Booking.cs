@@ -192,6 +192,26 @@ public sealed class Booking : AggregateRoot<BookingId>, ITenantScopedEntity
     public string? MetadataJson { get; private set; }
 
 
+    // --- WhatsApp Flows + Paystack payment tracking (Phase 4) ---
+
+    /// <summary>Paystack transaction reference (one-to-one with the dispatched payment link).</summary>
+    public string? PaymentReference { get; private set; }
+
+    /// <summary>Current payment lifecycle state — see <see cref="BookingPaymentStatus" />.</summary>
+    public BookingPaymentStatus PaymentStatus { get; private set; } = BookingPaymentStatus.NotRequired;
+
+    /// <summary>The last Paystack hosted-checkout URL we dispatched to the booker.</summary>
+    public string? PaymentLinkUrl { get; private set; }
+
+    /// <summary>UTC timestamp of the last payment-state transition. Drives release/reminder windows.</summary>
+    public DateTimeOffset? PaymentStateChangedAt { get; private set; }
+
+    /// <summary>
+    ///     UTC timestamp when a post-session payment-reminder WhatsApp was last dispatched.
+    ///     Used by <c>SendPaymentReminderJob</c> as a re-entrancy guard so we don't spam the booker.
+    /// </summary>
+    public DateTimeOffset? PaymentReminderSentAt { get; private set; }
+
     public TenantId TenantId { get; } = new(0);
 
     public void AssignToTeam(TenantId teamId)
@@ -348,6 +368,63 @@ public sealed class Booking : AggregateRoot<BookingId>, ITenantScopedEntity
     {
         LocationType = string.IsNullOrWhiteSpace(locationType) ? null : locationType.Trim();
         LocationValue = string.IsNullOrWhiteSpace(locationValue) ? null : locationValue.Trim();
+    }
+
+    // --- Payment state transitions (Phase 4) ---
+
+    /// <summary>
+    ///     Records that a Paystack payment link has been dispatched. Booking is now waiting for the
+    ///     <c>charge.success</c> webhook. Slot remains held until either confirmation or release.
+    /// </summary>
+    public void MarkPaymentPending(string reference, string paymentLinkUrl, DateTimeOffset now)
+    {
+        PaymentReference = reference.Trim();
+        PaymentLinkUrl = paymentLinkUrl.Trim();
+        PaymentStatus = BookingPaymentStatus.Pending;
+        PaymentStateChangedAt = now;
+    }
+
+    /// <summary>Paystack confirmed the charge. Booking remains in its current scheduling status.</summary>
+    public void MarkPaymentPaid(DateTimeOffset now)
+    {
+        PaymentStatus = BookingPaymentStatus.Paid;
+        PaymentStateChangedAt = now;
+    }
+
+    /// <summary>Paystack returned <c>charge.failed</c>. Caller is expected to release the slot.</summary>
+    public void MarkPaymentFailed(DateTimeOffset now)
+    {
+        PaymentStatus = BookingPaymentStatus.Failed;
+        PaymentStateChangedAt = now;
+    }
+
+    /// <summary>
+    ///     Releases the held slot when payment did not arrive within the configured window.
+    ///     Cancels the underlying booking — the slot is now available for re-booking.
+    /// </summary>
+    public void ReleaseForUnpaidPayment(DateTimeOffset now)
+    {
+        PaymentStatus = BookingPaymentStatus.Released;
+        PaymentStateChangedAt = now;
+        Status = BookingStatus.Cancelled;
+        CancellationReason = "Payment not received within hold window.";
+    }
+
+    /// <summary>
+    ///     Marks the booking as completed (session occurred). The after-session payment
+    ///     dispatcher is notified by the command handler (not via a domain event) because the
+    ///     dispatcher performs external I/O (Paystack + WhatsApp) and must run after
+    ///     unit-of-work commit.
+    /// </summary>
+    public void MarkCompleted()
+    {
+        Status = BookingStatus.Completed;
+    }
+
+    /// <summary>Records that a post-session payment-reminder WhatsApp was just dispatched.</summary>
+    public void MarkPaymentReminderSent(DateTimeOffset now)
+    {
+        PaymentReminderSentAt = now;
     }
 
     public static Booking Create(

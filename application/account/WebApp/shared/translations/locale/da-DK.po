@@ -30,9 +30,8 @@ msgid "{0} hours ago"
 msgstr "for {0} timer siden"
 
 #. placeholder {0}: role.memberCount
-#, fuzzy
 msgid "{0} members assigned"
-msgstr "{0} members assigned"
+msgstr ""
 
 #. placeholder {0}: smartDate.value
 msgid "{0} minutes ago"
@@ -74,17 +73,29 @@ msgstr "© {currentYear} PlatformPlatform. Alle rettigheder forbeholdes."
 msgid "+39 06 555 0000"
 msgstr "+39 06 555 0000"
 
+msgid "<0>Upgrade your plan</0> to add a second website."
+msgstr "<0>Opgrader din plan</0> for at tilføje et andet websted."
+
+msgid "<0>Upgrade your plan</0> to unlock this feature."
+msgstr "<0>Opgrader din plan</0> for at låse denne funktion op."
+
 msgid "1 TB storage"
 msgstr "1 TB lagerplads"
 
 msgid "1 user permanently deleted"
 msgstr "1 bruger slettet permanent"
 
+msgid "1. Connect WhatsApp Business Account"
+msgstr ""
+
 msgid "10 GB storage"
 msgstr "10 GB lagerplads"
 
 msgid "10 users"
 msgstr "10 brugere"
+
+msgid "10-digit South African bank account"
+msgstr ""
 
 msgid "100 GB storage"
 msgstr "100 GB lagerplads"
@@ -99,7 +110,7 @@ msgid ""
 "123 Example Street\n"
 "Anytown, AA 12345"
 msgstr ""
-"123 Example Street\n"
+"12 hour123 Example Street\n"
 "Anytown, AA 12345"
 
 msgid "14 h 30 min logged"
@@ -107,6 +118,9 @@ msgstr "14 t 30 min logget"
 
 msgid "2 hours ago"
 msgstr "For 2 timer siden"
+
+msgid "2. Phone number registered"
+msgstr ""
 
 msgid "24 hour"
 msgstr "24 timer"
@@ -117,11 +131,20 @@ msgstr "2X stor"
 msgid "3 minutes ago"
 msgstr "For 3 minutter siden"
 
+msgid "3. Generate encryption key pair"
+msgstr ""
+
+msgid "4. Connect Paystack subaccount"
+msgstr ""
+
 msgid "5 active co-cooks"
 msgstr "5 aktive medkokke"
 
 msgid "5 users"
 msgstr "5 brugere"
+
+msgid "5. Customise your brand"
+msgstr "5. Tilpas dit brand"
 
 msgid "75% of quota used"
 msgstr "75% af kvoten brugt"
@@ -129,18 +152,30 @@ msgstr "75% af kvoten brugt"
 msgid "A different user logged in from another browser tab."
 msgstr "En anden bruger loggede ind fra en anden browsertab."
 
+msgid "A longer description of your business"
+msgstr "En længere beskrivelse af din virksomhed"
+
+#. placeholder {0}: currentStatus?.requestedDisplayName
+msgid "A name change request is already pending review: <0>“{0}”</0>. Submitting a new request will replace it."
+msgstr "En navneændringsanmodning afventer allerede gennemgang: <0>“{0}”</0>. Indsendelse af en ny anmodning erstatter den."
+
 msgid "A new verification code has been sent to your email."
 msgstr "En ny bekræftelseskode er blevet sendt til din e-mail."
 
 msgid "A quick summary of your account activity."
 msgstr "Et hurtigt overblik over din kontoaktivitet."
 
+msgid "A short tagline shown on your WhatsApp profile (max 139 characters)"
+msgstr "En kort tagline vist på din WhatsApp-profil (maks. 139 tegn)"
+
 msgid "A small selection of chart variants built on recharts."
 msgstr "Et lille udvalg af diagramvarianter bygget på recharts."
 
-#, fuzzy
 msgid "About"
-msgstr "About"
+msgstr ""
+
+msgid "About / tagline"
+msgstr "Om / tagline"
 
 msgid "About this feature"
 msgstr "Om denne funktion"
@@ -158,10 +193,10 @@ msgid "Access until {formattedPeriodEndLong}"
 msgstr "Adgang indtil {formattedPeriodEndLong}"
 
 msgid "Accordion"
-msgstr "Accordion"
+msgstr ""
 
 msgid "Accordion vs Collapsible"
-msgstr "Accordion vs Collapsible"
+msgstr ""
 
 msgid "Account"
 msgstr "Konto"
@@ -183,6 +218,9 @@ msgstr "Kontonavn"
 
 msgid "Account not found"
 msgstr "Konto ikke fundet"
+
+msgid "Account number"
+msgstr ""
 
 msgid "Account overview"
 msgstr "Kontooversigt"
@@ -262,11 +300,17 @@ msgstr "Tilføj opskrift"
 msgid "Add to favorites"
 msgstr "Tilføj til favoritter"
 
+msgid "Add website"
+msgstr "Tilføj websted"
+
 msgid "Add your account name"
 msgstr "Tilføj dit kontonavn"
 
 msgid "Add your account name and logo."
 msgstr "Tilføj dit kontonavn og logo."
+
+msgid "Add your business details to personalise your WhatsApp profile."
+msgstr "Tilføj dine virksomhedsoplysninger for at personalisere din WhatsApp-profil."
 
 msgid "Add your first recipe to start building your personal cookbook."
 msgstr "Tilføj din første opskrift for at begynde at opbygge din personlige kogebog."
@@ -295,6 +339,9 @@ msgstr "Avancerede indstillinger"
 msgid "Advanced techniques, over 60 minutes"
 msgstr "Avancerede teknikker, over 60 minutter"
 
+msgid "After approval, your WhatsApp display name will update automatically. Meta's review typically takes 1–3 business days."
+msgstr "Efter godkendelse opdateres dit WhatsApp-visningsnavn automatisk. Metas gennemgang tager typisk 1–3 hverdage."
+
 msgid "Alert dialogs"
 msgstr "Advarselsdialoger"
 
@@ -309,6 +356,9 @@ msgstr "Alex Taylor"
 
 msgid "All modifiers"
 msgstr "Alle modifikatorer"
+
+msgid "All steps complete. Configure your booking flow to start accepting WhatsApp bookings."
+msgstr ""
 
 msgid "All users"
 msgstr "Alle brugere"
@@ -365,6 +415,9 @@ msgstr "Enhver status"
 msgid "Apply filters"
 msgstr "Anvend filtre"
 
+msgid "Approved"
+msgstr "Godkendt"
+
 msgid "Archive"
 msgstr "Arkiver"
 
@@ -379,9 +432,8 @@ msgid "Are you sure you want to delete <0>{0} users</0>?"
 msgstr "Er du sikker på, at du vil slette <0>{0} brugere</0>?"
 
 #. placeholder {0}: role.name
-#, fuzzy
 msgid "Are you sure you want to delete <0>{0}</0>? Members assigned to this role will lose its permissions."
-msgstr "Are you sure you want to delete <0>{0}</0>? Members assigned to this role will lose its permissions."
+msgstr ""
 
 msgid "Are you sure you want to delete <0>{userDisplayName}</0>?"
 msgstr "Er du sikker på, at du vil slette <0>{userDisplayName}</0>?"
@@ -405,9 +457,8 @@ msgstr "Arealdiagram - Interaktivt"
 msgid "Aspect ratio"
 msgstr "Billedformat"
 
-#, fuzzy
 msgid "Attributes"
-msgstr "Attributes"
+msgstr ""
 
 msgid "Audit log"
 msgstr "Revisionslog"
@@ -462,7 +513,10 @@ msgid "Back to signup"
 msgstr "Tilbage til tilmelding"
 
 msgid "Badges"
-msgstr "Badges"
+msgstr ""
+
+msgid "Bank"
+msgstr "Bank"
 
 msgid "Banners"
 msgstr "Bannere"
@@ -476,6 +530,9 @@ msgstr "Søjlediagram - Interaktivt"
 msgid "Bar Chart - Stacked + Legend"
 msgstr "Søjlediagram - Stablet + Forklaring"
 
+msgid "Basic information shown on your WhatsApp profile."
+msgstr "Grundlæggende oplysninger vist på din WhatsApp-profil."
+
 msgid "Basic recipe information and cover photo."
 msgstr "Grundlæggende opskriftsinformation og forsidebillede."
 
@@ -487,6 +544,9 @@ msgstr "Basal support"
 
 msgid "Basis"
 msgstr "Basis"
+
+msgid "Beauty"
+msgstr "Skønhed"
 
 msgid "Becomes part of your team's public URLs. Leave blank to auto-generate later."
 msgstr "Bliver en del af dit teams offentlige URL'er. Lad stå tomt for at autogenerere senere."
@@ -542,6 +602,18 @@ msgstr "Bunddrawer"
 msgid "Bottom sheet"
 msgstr "Bundsheet"
 
+msgid "Brand profile"
+msgstr "Brandprofil"
+
+msgid "Brand profile nudge"
+msgstr "Brandprofil-påmindelse"
+
+msgid "Brand profile saved"
+msgstr "Brandprofil gemt"
+
+msgid "Brand profile updated successfully"
+msgstr "Brandprofil opdateret succesfuldt"
+
 msgid "Breadcrumb — custom separator"
 msgstr "Brødkrumme — brugerdefineret skilletegn"
 
@@ -559,6 +631,27 @@ msgstr "Bygget på <0>PlatformPlatform<1/></0> - en open-source platform af bran
 
 msgid "Built with"
 msgstr "Bygget med"
+
+msgid "Business address"
+msgstr "Virksomhedsadresse"
+
+msgid "Business category"
+msgstr "Virksomhedskategori"
+
+msgid "Business description"
+msgstr "Virksomhedsbeskrivelse"
+
+msgid "Business display name"
+msgstr "Virksomhedens visningsnavn"
+
+msgid "Business email"
+msgstr "Virksomhedens e-mail"
+
+msgid "Business identity"
+msgstr "Virksomhedsidentitet"
+
+msgid "Business name"
+msgstr ""
 
 msgid "Butter chicken"
 msgstr "Butter chicken"
@@ -710,9 +803,8 @@ msgstr "Chicken katsu"
 msgid "Chiles rellenos"
 msgstr "Chiles rellenos"
 
-#, fuzzy
 msgid "Choose a name and select the permissions this role grants."
-msgstr "Choose a name and select the permissions this role grants."
+msgstr ""
 
 msgid "Choose a plan to get started."
 msgstr "Vælg en plan for at komme i gang."
@@ -777,7 +869,7 @@ msgid "Collapse Examples"
 msgstr "Fold Eksempler sammen"
 
 msgid "Collapsible"
-msgstr "Collapsible"
+msgstr ""
 
 msgid "Collapsible is the unstyled single-section primitive behind Accordion. Use it when you need one trigger and one panel."
 msgstr "Collapsible er den ustylede enkelt-sektion primitiv bag Accordion. Brug den når du kun har én trigger og ét panel."
@@ -798,10 +890,16 @@ msgid "Comfort in a bowl"
 msgstr "Hygge i en skål"
 
 msgid "Command"
-msgstr "Command"
+msgstr ""
 
 msgid "Command palette"
 msgstr "Kommandopalette"
+
+msgid "Complete profile"
+msgstr "Udfyld profil"
+
+msgid "Complete your brand profile to publish your WhatsApp flow."
+msgstr "Udfyld din brandprofil for at publicere dit WhatsApp-flow."
 
 msgid "Complete your payment to activate your subscription."
 msgstr "Gennemfør din betaling for at aktivere dit abonnement."
@@ -812,15 +910,29 @@ msgstr "Compliance"
 msgid "Components"
 msgstr "Komponenter"
 
+msgid "Configure your booking flow"
+msgstr ""
+
 msgid "Confirm action"
 msgstr "Bekræft handling"
 
 msgid "Confirm downgrade"
 msgstr "Bekræft nedgradering"
 
-#, fuzzy
 msgid "Confirm team name"
-msgstr "Confirm team name"
+msgstr ""
+
+msgid "Connect Paystack"
+msgstr ""
+
+msgid "Connect WhatsApp and Paystack to start taking bookings."
+msgstr ""
+
+msgid "Connect WhatsApp Business"
+msgstr "Tilslut WhatsApp Business"
+
+msgid "Connect WhatsApp Business Account via Meta Embedded Signup"
+msgstr "Tilslut WhatsApp Business-konto via Meta Embedded Signup"
 
 msgid "Contact support"
 msgstr "Kontakt support"
@@ -837,9 +949,8 @@ msgstr "Kontekstmenu"
 msgid "Continue"
 msgstr "Fortsæt"
 
-#, fuzzy
 msgid "Control how your team appears to bookers."
-msgstr "Control how your team appears to bookers."
+msgstr ""
 
 msgid "Controls"
 msgstr "Kontroller"
@@ -874,21 +985,17 @@ msgstr "Land"
 msgid "Create"
 msgstr "Opret"
 
-#, fuzzy
 msgid "Create a custom role to grant members the exact permissions they need."
-msgstr "Create a custom role to grant members the exact permissions they need."
+msgstr ""
 
-#, fuzzy
 msgid "Create a role"
-msgstr "Create a role"
+msgstr ""
 
-#, fuzzy
 msgid "Create a team"
-msgstr "Create a team"
+msgstr ""
 
-#, fuzzy
 msgid "Create a team to collaborate on event types and bookings with your colleagues."
-msgstr "Create a team to collaborate on event types and bookings with your colleagues."
+msgstr ""
 
 msgid "Create new account"
 msgstr "Opret ny konto"
@@ -899,20 +1006,17 @@ msgstr "Opret ny organisation"
 msgid "Create new team"
 msgstr "Opret nyt team"
 
-#, fuzzy
 msgid "Create role"
-msgstr "Create role"
+msgstr ""
 
 msgid "Create shortcut..."
 msgstr "Opret genvej..."
 
-#, fuzzy
 msgid "Create team"
-msgstr "Create team"
+msgstr ""
 
-#, fuzzy
 msgid "Create teams to group members and share event types, schedules, and bookings."
-msgstr "Create teams to group members and share event types, schedules, and bookings."
+msgstr ""
 
 msgid "Create your account"
 msgstr "Opret din konto"
@@ -920,9 +1024,8 @@ msgstr "Opret din konto"
 msgid "Created"
 msgstr "Oprettet"
 
-#, fuzzy
 msgid "Creating..."
-msgstr "Creating..."
+msgstr ""
 
 msgid "Credit note"
 msgstr "Kreditnota"
@@ -948,13 +1051,11 @@ msgstr "Nuværende side"
 msgid "Current plan"
 msgstr "Nuværende plan"
 
-#, fuzzy
 msgid "Custom role"
-msgstr "Custom role"
+msgstr ""
 
-#, fuzzy
 msgid "Custom role updated"
-msgstr "Custom role updated"
+msgstr ""
 
 #, fuzzy
 msgid "Custom SMTP"
@@ -962,6 +1063,9 @@ msgstr "Brugerdefineret SMTP"
 
 msgid "Customer deleted"
 msgstr "Kunde slettet"
+
+msgid "Customise the details shown on your WhatsApp Business profile."
+msgstr "Tilpas oplysningerne vist på din WhatsApp Business-profil."
 
 msgid "Customize which optional features are enabled for your account."
 msgstr "Tilpas hvilke valgfri funktioner der er aktiveret for din konto."
@@ -1020,6 +1124,9 @@ msgstr "Datoer og personlige noter om denne opskrift."
 msgid "Decline"
 msgstr "Afslå"
 
+msgid "Declined"
+msgstr "Afvist"
+
 msgid "Declining..."
 msgstr "Afslår..."
 
@@ -1029,17 +1136,15 @@ msgstr "Standard"
 msgid "Default alert"
 msgstr "Standardadvarsel"
 
-#, fuzzy
 msgid "Define custom roles and assign permissions to control what your members can do."
-msgstr "Define custom roles and assign permissions to control what your members can do."
+msgstr ""
 
 msgid "Delete"
 msgstr "Slet"
 
 #. placeholder {0}: role.name
-#, fuzzy
 msgid "Delete {0}"
-msgstr "Delete {0}"
+msgstr ""
 
 #. placeholder {0}: selectedUsers.length
 msgid "Delete {0} users"
@@ -1057,15 +1162,14 @@ msgstr "Slet permanent"
 msgid "Delete recipe"
 msgstr "Slet opskrift"
 
-#, fuzzy
 msgid "Delete role"
-msgstr "Delete role"
+msgstr ""
 
 msgid "Delete selected recipes"
 msgstr "Slet valgte opskrifter"
 
 msgid "Delete team"
-msgstr "Delete team"
+msgstr ""
 
 msgid "Delete this item?"
 msgstr "Slet dette element?"
@@ -1092,13 +1196,11 @@ msgid "Deleted users will appear here for recovery"
 msgstr "Slettede brugere vil blive vist her til gendannelse"
 
 #. placeholder {0}: team.name
-#, fuzzy
 msgid "Deleting <0>{0}</0> will remove all memberships and is irreversible. Type the team name to confirm."
-msgstr "Deleting <0>{0}</0> will remove all memberships and is irreversible. Type the team name to confirm."
+msgstr ""
 
-#, fuzzy
 msgid "Deleting a team is permanent and cannot be undone."
-msgstr "Deleting a team is permanent and cannot be undone."
+msgstr ""
 
 msgid "Description"
 msgstr "Beskrivelse"
@@ -1149,6 +1251,12 @@ msgstr "Rettens navn"
 msgid "Dish name is required"
 msgstr "Rettens navn er påkrævet"
 
+msgid "Dismiss brand profile banner"
+msgstr "Afvis brandprofil-banner"
+
+msgid "Display name change request submitted"
+msgstr "Anmodning om navneændring indsendt"
+
 msgid "Do you already have an account?"
 msgstr "Har du allerede en konto?"
 
@@ -1171,7 +1279,7 @@ msgid "Drag-and-drop or click to browse. Previews use AspectRatio to keep thumbn
 msgstr "Træk og slip, eller klik for at vælge. Previews bruger AspectRatio for at holde miniaturer justerede."
 
 msgid "Drawer"
-msgstr "Drawer"
+msgstr ""
 
 msgid "Drop an image into any card — AspectRatio keeps the slot size fixed regardless of content."
 msgstr "Slip et billede i et vilkårligt kort — AspectRatio holder feltet fast uanset indhold."
@@ -1183,7 +1291,7 @@ msgid "Drop your filter controls here. The sheet handles scrolling and dismissal
 msgstr "Placér dine filterkontroller her. Sheet håndterer scrolling og lukning."
 
 msgid "Dropzone"
-msgstr "Dropzone"
+msgstr ""
 
 msgid "Duplicate"
 msgstr "Dupliker"
@@ -1222,12 +1330,14 @@ msgid "Edit"
 msgstr "Rediger"
 
 #. placeholder {0}: role.name
-#, fuzzy
 msgid "Edit {0}"
-msgstr "Edit {0}"
+msgstr ""
 
 msgid "Edit billing information"
 msgstr "Rediger faktureringsoplysninger"
+
+msgid "Edit brand profile"
+msgstr "Rediger brandprofil"
 
 msgid "Edit profile"
 msgstr "Rediger profil"
@@ -1240,6 +1350,9 @@ msgstr "Rediger brugerprofil"
 
 msgid "Editor's picks"
 msgstr "Redaktørens valg"
+
+msgid "Education"
+msgstr "Uddannelse"
 
 msgid "Email"
 msgstr "E-mail"
@@ -1331,6 +1444,9 @@ msgstr "Vis detaljer"
 msgid "Expand Examples"
 msgstr "Fold Eksempler ud"
 
+msgid "Expired"
+msgstr "Udløbet"
+
 msgid "expires"
 msgstr "udløber"
 
@@ -1358,13 +1474,11 @@ msgstr "Ekstra lille"
 msgid "Failed"
 msgstr "Mislykket"
 
-#, fuzzy
 msgid "Failed to create role. Please try again."
-msgstr "Failed to create role. Please try again."
+msgstr ""
 
-#, fuzzy
 msgid "Failed to update role. Please try again."
-msgstr "Failed to update role. Please try again."
+msgstr ""
 
 msgid "Feature preferences"
 msgstr "Funktionspræferencer"
@@ -1452,9 +1566,11 @@ msgstr "GDPR-kompatibel"
 msgid "GDPR Compliant"
 msgstr "GDPR-kompatibel"
 
-#, fuzzy
 msgid "General"
-msgstr "General"
+msgstr ""
+
+msgid "Generate key pair"
+msgstr ""
 
 msgid "Ghost"
 msgstr "Gennemsigtig"
@@ -1512,38 +1628,35 @@ msgstr "Gruppér medlemmer i teams for at dele begivenhedstyper, kalendere og ro
 msgid "Hard"
 msgstr "Svær"
 
+msgid "Health"
+msgstr "Sundhed"
+
 msgid "Help your team recognize your invites"
 msgstr "Hjælp dit team med at genkende dine invitationer"
 
 msgid "Hi! Welcome back"
 msgstr "Hej! Velkommen tilbage"
 
-#, fuzzy
 msgid "Hide \"Book a team member\""
-msgstr "Hide \"Book a team member\""
+msgstr ""
 
-#, fuzzy
 msgid "Hide branding"
-msgstr "Hide branding"
+msgstr ""
 
 msgid "Hide details"
 msgstr "Skjul detaljer"
 
-#, fuzzy
 msgid "Hide team profile link"
-msgstr "Hide team profile link"
+msgstr ""
 
-#, fuzzy
 msgid "Hide the \"Powered by\" footer on booking pages."
-msgstr "Hide the \"Powered by\" footer on booking pages."
+msgstr ""
 
-#, fuzzy
 msgid "Hide the option to book any available member from the team profile page."
-msgstr "Hide the option to book any available member from the team profile page."
+msgstr ""
 
-#, fuzzy
 msgid "Hide the team's member list and profile page from public visitors."
-msgstr "Hide the team's member list and profile page from public visitors."
+msgstr ""
 
 msgid "Home"
 msgstr "Hjem"
@@ -1601,7 +1714,7 @@ msgid "Inline keyboard hint. Use it to call out shortcuts in tooltips, menus, an
 msgstr "Inline tastaturhint. Brug det til at fremhæve genveje i værktøjstips, menuer og kommandopaletter. Kombinér flere taster med KbdGroup så hver tast beholder sin egen visuelle chip."
 
 msgid "Inline tip:"
-msgstr "Inline tip:"
+msgstr ""
 
 msgid "Invalid request"
 msgstr "Ugyldig anmodning"
@@ -1609,20 +1722,17 @@ msgstr "Ugyldig anmodning"
 msgid "Invitation pending"
 msgstr "Invitation afventer"
 
-#, fuzzy
 msgid "Invitation sent"
-msgstr "Invitation sent"
+msgstr ""
 
 msgid "Invite"
 msgstr "Inviter"
 
-#, fuzzy
 msgid "Invite member"
-msgstr "Invite member"
+msgstr ""
 
-#, fuzzy
 msgid "Invite team member"
-msgstr "Invite team member"
+msgstr ""
 
 msgid "Invite user"
 msgstr "Inviter bruger"
@@ -1704,6 +1814,9 @@ msgstr "Behold nedgradering"
 
 msgid "Keep subscription"
 msgstr "Behold abonnement"
+
+msgid "Key pair generated"
+msgstr ""
 
 msgid "Keyboard accessible"
 msgstr "Tilgængelig via tastatur"
@@ -1802,15 +1915,20 @@ msgstr "Linkunderstregning"
 msgid "Link variants"
 msgstr "Linkvarianter"
 
+msgid "Link your WABA to enable WhatsApp bookings."
+msgstr ""
+
 msgid "LinkedIn"
 msgstr "LinkedIn"
 
-#, fuzzy
 msgid "Loading permissions..."
-msgstr "Loading permissions..."
+msgstr ""
 
 msgid "Loading..."
 msgstr "Indlæser..."
+
+msgid "Loading…"
+msgstr "Indlæser…"
 
 msgid "Local seasonal"
 msgstr "Lokalt og sæsonbestemt"
@@ -1869,9 +1987,8 @@ msgid "Manage"
 msgstr "Administrer"
 
 #. placeholder {0}: team.name
-#, fuzzy
 msgid "Manage {0}"
-msgstr "Manage {0}"
+msgstr ""
 
 msgid "Manage how dates, times, and language are presented across the app."
 msgstr "Administrer hvordan datoer, tidspunkter og sprog vises i appen."
@@ -1905,6 +2022,9 @@ msgstr "Administrerede identiteter"
 msgid "Masala dosa"
 msgstr "Masala dosa"
 
+msgid "Max 75 characters. Allowed: letters, digits, spaces, and ' . , & - ( ) /"
+msgstr "Maks. 75 tegn. Tilladte: bogstaver, cifre, mellemrum og ' . , & - ( ) /"
+
 msgid "Meal plan period"
 msgstr "Måltidsplanperiode"
 
@@ -1920,27 +2040,26 @@ msgstr "Mødenoter fra sidste uge"
 msgid "Member"
 msgstr "Medlem"
 
-#, fuzzy
 msgid "Member attributes are coming soon."
-msgstr "Member attributes are coming soon."
+msgstr ""
 
-#, fuzzy
 msgid "Member removed"
-msgstr "Member removed"
+msgstr ""
 
-#, fuzzy
 msgid "Members"
-msgstr "Members"
+msgstr ""
 
-#, fuzzy
 msgid "Membership role"
-msgstr "Membership role"
+msgstr ""
 
 msgid "Merge"
 msgstr "Flet"
 
 msgid "Merge commit"
 msgstr "Flet commit"
+
+msgid "Meta reviews display name changes. Approval typically takes 1–3 business days. Only one pending request is allowed at a time."
+msgstr "Meta gennemgår ændringer af visningsnavn. Godkendelse tager typisk 1–3 hverdage. Kun én afventende anmodning er tilladt ad gangen."
 
 msgid "Metadata"
 msgstr "Metadata"
@@ -2074,13 +2193,11 @@ msgstr "Aldrig understreget"
 msgid "New document"
 msgstr "Nyt dokument"
 
-#, fuzzy
 msgid "New role"
-msgstr "New role"
+msgstr ""
 
-#, fuzzy
 msgid "New team"
-msgstr "New team"
+msgstr ""
 
 msgid "Next"
 msgstr "Næste"
@@ -2103,9 +2220,8 @@ msgstr "Ingen revisionsposter endnu"
 msgid "No billing information on file"
 msgstr "Ingen faktureringsoplysninger registreret"
 
-#, fuzzy
 msgid "No custom roles available"
-msgstr "No custom roles available"
+msgstr ""
 
 msgid "No entries match your filters"
 msgstr "Ingen poster matcher dine filtre"
@@ -2117,9 +2233,8 @@ msgstr "Ikke længere nødvendigt"
 msgid "No members in this organization yet."
 msgstr "Ingen medlemmer i denne organisation endnu."
 
-#, fuzzy
 msgid "No members yet. Invite your first teammate to get started."
-msgstr "No members yet. Invite your first teammate to get started."
+msgstr ""
 
 msgid "No payment history available."
 msgstr "Ingen betalingshistorik tilgængelig."
@@ -2136,13 +2251,11 @@ msgstr "Ingen resultater fundet"
 msgid "No results found."
 msgstr "Ingen resultater fundet."
 
-#, fuzzy
 msgid "No roles yet"
-msgstr "No roles yet"
+msgstr ""
 
-#, fuzzy
 msgid "No teams yet"
-msgstr "No teams yet"
+msgstr ""
 
 #, fuzzy
 msgid "No teams yet. Create your first team to start collaborating."
@@ -2151,8 +2264,14 @@ msgstr "Ingen teams endnu. Opret dit første team for at begynde at samarbejde."
 msgid "No users found"
 msgstr "Ingen brugere fundet"
 
+msgid "No verified name"
+msgstr "Intet verificeret navn"
+
 msgid "None"
 msgstr "Ingen"
+
+msgid "Not set"
+msgstr "Ikke angivet"
 
 msgid "Not yet"
 msgstr "Ikke endnu"
@@ -2260,7 +2379,7 @@ msgid "Outline"
 msgstr "Kontur"
 
 msgid "Overlays"
-msgstr "Overlays"
+msgstr ""
 
 msgid "Overview"
 msgstr "Overblik"
@@ -2284,7 +2403,7 @@ msgid "Palak paneer"
 msgstr "Palak paneer"
 
 msgid "Passkeys"
-msgstr "Passkeys"
+msgstr ""
 
 #, fuzzy
 msgid "Password"
@@ -2326,14 +2445,23 @@ msgstr "Betalingsmetode"
 msgid "Payment method updated"
 msgstr "Betalingsmetode opdateret"
 
+msgid "Paystack subaccount connected"
+msgstr ""
+
 msgid "Pedro Duarte"
 msgstr "Pedro Duarte"
 
 msgid "Pending"
 msgstr "Afventer"
 
+msgid "Pending — complete step 1 first"
+msgstr ""
+
 msgid "Pending payment completed"
 msgstr "Afventende betaling gennemført"
+
+msgid "Pending review"
+msgstr "Afventer gennemgang"
 
 msgid "People"
 msgstr "Mennesker"
@@ -2348,9 +2476,8 @@ msgstr "Slet bruger permanent"
 msgid "Permanently delete users"
 msgstr "Slet brugere permanent"
 
-#, fuzzy
 msgid "Permissions"
-msgstr "Permissions"
+msgstr ""
 
 msgid "Pick a chart"
 msgstr "Vælg et diagram"
@@ -2428,7 +2555,7 @@ msgid "Postal code"
 msgstr "Postnummer"
 
 msgid "Powered by"
-msgstr "Powered by"
+msgstr ""
 
 msgid "Pozole rojo"
 msgstr "Pozole rojo"
@@ -2475,9 +2602,8 @@ msgstr "Fortrolighedspolitikker"
 msgid "Privacy Policy"
 msgstr "Privatlivspolitik"
 
-#, fuzzy
 msgid "Private team"
-msgstr "Private team"
+msgstr ""
 
 msgid "Processing payment..."
 msgstr "Behandler betaling..."
@@ -2485,12 +2611,17 @@ msgstr "Behandler betaling..."
 msgid "Processing..."
 msgstr "Behandler..."
 
-#, fuzzy
+msgid "Professional services"
+msgstr "Professionelle tjenester"
+
 msgid "Profile"
-msgstr "Profile"
+msgstr ""
 
 msgid "Profile avatar"
 msgstr "Profilavatar"
+
+msgid "Profile logo"
+msgstr "Profillogo"
 
 msgid "Profile photo"
 msgstr "Profilbillede"
@@ -2504,9 +2635,8 @@ msgstr "Profil opdateret succesfuldt"
 msgid "Progress"
 msgstr "Fremskridt"
 
-#, fuzzy
 msgid "Public information shown on your team's booking pages."
-msgstr "Public information shown on your team's booking pages."
+msgstr ""
 
 msgid "Publish now"
 msgstr "Udgiv nu"
@@ -2558,6 +2688,9 @@ msgstr "Rebase og flet"
 
 msgid "Receipt"
 msgstr "Kvittering"
+
+msgid "Receive booking payments via Paystack."
+msgstr ""
 
 msgid "Recipe"
 msgstr "Opskrift"
@@ -2625,9 +2758,8 @@ msgid "Remove {0}"
 msgstr "Fjern {0}"
 
 #. placeholder {0}: memberToRemove.email
-#, fuzzy
 msgid "Remove <0>{0}</0> from this team? They will lose access to team event types and bookings."
-msgstr "Remove <0>{0}</0> from this team? They will lose access to team event types and bookings."
+msgstr ""
 
 msgid "Remove image from {label}"
 msgstr "Fjern billede fra {label}"
@@ -2635,16 +2767,17 @@ msgstr "Fjern billede fra {label}"
 msgid "Remove logo"
 msgstr "Fjern logo"
 
-#, fuzzy
 msgid "Remove member"
-msgstr "Remove member"
+msgstr ""
 
 msgid "Remove profile picture"
 msgstr "Fjern profilbillede"
 
-#, fuzzy
 msgid "Remove the link back to the team profile from individual member pages."
-msgstr "Remove the link back to the team profile from individual member pages."
+msgstr ""
+
+msgid "Remove website"
+msgstr "Fjern websted"
 
 #, fuzzy
 msgid "Reply-to email"
@@ -2653,15 +2786,30 @@ msgstr "Svar-til-e-mail"
 msgid "Request a new code"
 msgstr "Anmod om en ny kode"
 
+msgid "Request display name change"
+msgstr "Anmod om navneændring"
+
+msgid "Request name change"
+msgstr "Anmod om navneændring"
+
+msgid "Requested display name"
+msgstr "Ønsket visningsnavn"
+
+#. placeholder {0}: displayNameStatus.requestedDisplayName
+msgid "Requested: {0}"
+msgstr "Ønsket: {0}"
+
+msgid "Required for end-to-end encrypted WhatsApp Flows."
+msgstr ""
+
 msgid "Resizable app shell"
 msgstr "Justerbar app-skal"
 
 msgid "Resizable panels"
 msgstr "Justerbare paneler"
 
-#, fuzzy
 msgid "Resource"
-msgstr "Resource"
+msgstr ""
 
 msgid "Resource ID"
 msgstr "Ressource-ID"
@@ -2671,6 +2819,9 @@ msgstr "Ressourcetype"
 
 msgid "Responsive layout"
 msgstr "Responsivt layout"
+
+msgid "Restaurant"
+msgstr "Restaurant"
 
 msgid "Restaurant phone"
 msgstr "Restauranttelefon"
@@ -2687,6 +2838,9 @@ msgstr "Gendan bruger"
 
 msgid "Restoring..."
 msgstr "Gendanner..."
+
+msgid "Retail"
+msgstr "Detailhandel"
 
 msgid "Retry payment"
 msgstr "Prøv betaling igen"
@@ -2735,22 +2889,19 @@ msgid "Role"
 msgstr "Rolle"
 
 #. placeholder {0}: created.name
-#, fuzzy
 msgid "Role created: {0}"
-msgstr "Role created: {0}"
+msgstr ""
 
 #. placeholder {0}: role.name
 #, fuzzy
 msgid "Role deleted: {0}"
 msgstr "Role deleted: {0}\"#, fuzzy"
 
-#, fuzzy
 msgid "Role description"
-msgstr "Role description"
+msgstr ""
 
-#, fuzzy
 msgid "Role name"
-msgstr "Role name"
+msgstr ""
 
 #. placeholder {0}: user.email
 #, fuzzy
@@ -2758,13 +2909,11 @@ msgid "Role updated for {0}"
 msgstr "Rolle opdateret for {0}"
 
 #. placeholder {0}: updated.name
-#, fuzzy
 msgid "Role updated: {0}"
-msgstr "Role updated: {0}"
+msgstr ""
 
-#, fuzzy
 msgid "Roles"
-msgstr "Roles"
+msgstr ""
 
 msgid "Safari"
 msgstr "Safari"
@@ -2774,6 +2923,9 @@ msgstr "L├╕rdag"
 
 msgid "Save"
 msgstr "Gem"
+
+msgid "Save & continue"
+msgstr "Gem og fortsæt"
 
 msgid "Save and close"
 msgstr "Gem og luk"
@@ -2853,6 +3005,9 @@ msgstr "Vælg alle rækker på denne side"
 msgid "Select all users"
 msgstr "Vælg alle brugere"
 
+msgid "Select category"
+msgstr "Vælg kategori"
+
 msgid "Select charts"
 msgstr "Vælg diagrammer"
 
@@ -2861,6 +3016,9 @@ msgstr "Vælg land"
 
 msgid "Select dates"
 msgstr "Vælg datoer"
+
+msgid "Select the category that best describes your business."
+msgstr "Vælg den kategori, der bedst beskriver din virksomhed."
 
 msgid "Select with groups"
 msgstr "Vælg med grupper"
@@ -2871,9 +3029,8 @@ msgstr "Vælg dit foretrukne sprog. Gemt på din profil."
 msgid "Selected recipes"
 msgstr "Valgte opskrifter"
 
-#, fuzzy
 msgid "Selecting <0>Manage</0> for a resource implicitly grants Create, Read, Update, and Delete."
-msgstr "Selecting <0>Manage</0> for a resource implicitly grants Create, Read, Update, and Delete."
+msgstr ""
 
 #, fuzzy
 msgid "Send a test email to this address"
@@ -2882,9 +3039,8 @@ msgstr "Send en test-e-mail til denne adresse"
 msgid "Send invite"
 msgstr "Send invitation"
 
-#, fuzzy
 msgid "Send test"
-msgstr "Send test"
+msgstr ""
 
 #, fuzzy
 msgid "Send transactional emails from your own SMTP server."
@@ -2897,7 +3053,7 @@ msgid "Sending..."
 msgstr "Sender..."
 
 msgid "Separator"
-msgstr "Separator"
+msgstr ""
 
 msgid "Session ended"
 msgstr "Session afsluttet"
@@ -2933,7 +3089,7 @@ msgid "Sharing..."
 msgstr "Deler..."
 
 msgid "Sheet"
-msgstr "Sheet"
+msgstr ""
 
 msgid "Short date"
 msgstr "Kort dato"
@@ -3028,6 +3184,9 @@ msgstr "Enkelt-udfoldning vs multi-udfoldning"
 msgid "Skeleton"
 msgstr "Skelet"
 
+msgid "Skip for now"
+msgstr "Spring over for nu"
+
 msgid "SLA"
 msgstr "SLA"
 
@@ -3101,7 +3260,7 @@ msgid "Spaghetti carbonara"
 msgstr "Spaghetti carbonara"
 
 msgid "Spinner"
-msgstr "Spinner"
+msgstr ""
 
 msgid "Split buttons"
 msgstr "Delte knapper"
@@ -3143,6 +3302,12 @@ msgstr "Vejnavn"
 msgid "Strict separation prevents production data from leaking to other environments"
 msgstr "Streng adskillelse forhindrer produktionsdata i at lække til andre miljøer"
 
+msgid "Submit request"
+msgstr "Indsend anmodning"
+
+msgid "Submitting..."
+msgstr "Indsender..."
+
 msgid "Subscribe"
 msgstr "Abonner"
 
@@ -3177,9 +3342,8 @@ msgstr "Skifter konto..."
 msgid "System"
 msgstr "System"
 
-#, fuzzy
 msgid "System roles cannot be edited. The permission set is fixed."
-msgstr "System roles cannot be edited. The permission set is fixed."
+msgstr ""
 
 msgid "Tables and side pane"
 msgstr "Tabeller og sidepanel"
@@ -3205,26 +3369,21 @@ msgid "Team created: {0}"
 msgstr "Team oprettet: {0}"
 
 #. placeholder {0}: team.name
-#, fuzzy
 msgid "Team deleted: {0}"
-msgstr "Team deleted: {0}"
+msgstr ""
 
-#, fuzzy
 msgid "Team description"
-msgstr "Team description"
+msgstr ""
 
-#, fuzzy
 msgid "Team name"
-msgstr "Team name"
+msgstr ""
 
-#, fuzzy
 msgid "Team slug"
-msgstr "Team slug"
+msgstr ""
 
 #. placeholder {0}: updated.name
-#, fuzzy
 msgid "Team updated: {0}"
-msgstr "Team updated: {0}"
+msgstr ""
 
 msgid "Teams"
 msgstr "Teams"
@@ -3282,6 +3441,9 @@ msgstr "Det sprog der anvendes i hele applikationen."
 msgid "The name of your account, shown to users and in email notifications"
 msgstr "Navnet på din konto, vist til brugere og i e-mail-notifikationer"
 
+msgid "The name shown on your WhatsApp Business profile"
+msgstr "Det navn, der vises på din WhatsApp Business-profil"
+
 #, fuzzy
 msgid "The organization name appears throughout the product and in outgoing emails."
 msgstr "Organisationsnavnet vises overalt i produktet og i udgående e-mails."
@@ -3289,9 +3451,11 @@ msgstr "Organisationsnavnet vises overalt i produktet og i udgående e-mails."
 msgid "The page you are looking for does not exist or was moved."
 msgstr "Siden du leder efter findes ikke eller er blevet flyttet."
 
-#, fuzzy
 msgid "The user must already have an account. Pick the role they will hold in this team."
-msgstr "The user must already have an account. Pick the role they will hold in this team."
+msgstr ""
+
+msgid "The verified name shown to users in WhatsApp. Changes require Meta review."
+msgstr "Det verificerede navn vist for brugere i WhatsApp. Ændringer kræver Meta-gennemgang."
 
 msgid "Theme"
 msgstr "Tema"
@@ -3403,7 +3567,7 @@ msgid "Top center"
 msgstr "Top midt"
 
 msgid "Top drawer"
-msgstr "Top drawer"
+msgstr ""
 
 msgid "Top left"
 msgstr "Top venstre"
@@ -3412,7 +3576,7 @@ msgid "Top right"
 msgstr "Top højre"
 
 msgid "Top sheet"
-msgstr "Top sheet"
+msgstr ""
 
 msgid "Total"
 msgstr "Total"
@@ -3428,6 +3592,9 @@ msgstr "Totalt antal brugere"
 
 msgid "Transparency, security, and privacy are at the core of how we operate. Review our policies and learn how we protect your data."
 msgstr "Gennemsigtighed, sikkerhed og privatliv er kernen i hvordan vi opererer. Gennemgå vores politikker og lær hvordan vi beskytter dine data."
+
+msgid "Travel"
+msgstr "Rejser"
 
 msgid "Trending up by 5.2% this month"
 msgstr "Stiger med 5,2% denne måned"
@@ -3498,9 +3665,8 @@ msgstr "Opdater betalingsmetode"
 msgid "Update the billing details associated with your subscription."
 msgstr "Opdater faktureringsoplysningerne tilknyttet dit abonnement."
 
-#, fuzzy
 msgid "Update the role's permissions or description."
-msgstr "Update the role's permissions or description."
+msgstr ""
 
 msgid "Update your personal information and profile photo."
 msgstr "Opdater dine personlige oplysninger og profilbillede."
@@ -3532,13 +3698,19 @@ msgid "Upload images"
 msgstr "Upload billeder"
 
 msgid "Upload logo"
-msgstr "Upload logo"
+msgstr ""
 
 msgid "Upload photo"
 msgstr "Upload foto"
 
 msgid "Upload profile picture"
 msgstr "Upload profilbillede"
+
+msgid "URLs shown on your WhatsApp profile. Your plan supports 1 website."
+msgstr "URL'er vist på din WhatsApp-profil. Din plan understøtter 1 websted."
+
+msgid "URLs shown on your WhatsApp profile. Your plan supports up to 2 websites."
+msgstr "URL'er vist på din WhatsApp-profil. Din plan understøtter op til 2 websteder."
 
 msgid "Use a horizontal separator to group related sections in a column layout."
 msgstr "Brug en vandret separator til at gruppere relaterede sektioner i en kolonnelayout."
@@ -3675,9 +3847,8 @@ msgstr "Vis profilbekræftelse"
 msgid "View users"
 msgstr "Se brugere"
 
-#, fuzzy
 msgid "Visibility & branding"
-msgstr "Visibility & branding"
+msgstr ""
 
 msgid "Visitors"
 msgstr "Besøgende"
@@ -3691,11 +3862,38 @@ msgstr "Advarselsbesked"
 msgid "We detected a security issue with your login attempt. Please try again."
 msgstr "Vi opdagede et sikkerhedsproblem med dit loginforsøg. Prøv venligst igen."
 
+msgid "Website URL"
+msgstr "Websteds-URL"
+
+msgid "Websites"
+msgstr "Websteder"
+
 msgid "Wednesday"
 msgstr "Onsdag"
 
 msgid "What's at the market this week"
 msgstr "Hvad er på markedet denne uge"
+
+msgid "WhatsApp"
+msgstr "WhatsApp"
+
+msgid "WhatsApp Business Account connected"
+msgstr ""
+
+msgid "WhatsApp connection failed. Please try again."
+msgstr "WhatsApp-tilslutning mislykkedes. Prøv igen."
+
+msgid "WhatsApp connection was cancelled."
+msgstr "WhatsApp-tilslutning blev annulleret."
+
+msgid "WhatsApp display name"
+msgstr "WhatsApp-visningsnavn"
+
+msgid "WhatsApp setup"
+msgstr ""
+
+msgid "WhatsApp sign-up failed. Please try again."
+msgstr "WhatsApp-tilmelding mislykkedes. Prøv igen."
 
 msgid "When to use Accordion"
 msgstr "Hvornår skal Accordion bruges"
@@ -3752,6 +3950,9 @@ msgstr "Du har ugemte ændringer. Hvis du forlader nu, vil dine ændringer gå t
 msgid "You were logged out from another browser tab."
 msgstr "Du blev logget ud fra en anden browsertab."
 
+msgid "You're all set!"
+msgstr ""
+
 #. placeholder {0}: getPlanLabel(currentPlan)
 msgid "Your {0} subscription has been cancelled and will end on {formattedPeriodEnd}."
 msgstr "Dit {0}-abonnement er blevet opsagt og udløber den {formattedPeriodEnd}."
@@ -3770,6 +3971,12 @@ msgstr "Din konto blev skiftet i en anden browsertab."
 
 msgid "Your account was switched to <0>{newTenantName}</0> in another browser tab."
 msgstr "Din konto blev skiftet til <0>{newTenantName}</0> i en anden browsertab."
+
+msgid "Your brand profile has been saved."
+msgstr "Din brandprofil er blevet gemt."
+
+msgid "Your business logo shown on WhatsApp."
+msgstr "Dit virksomhedslogo vist på WhatsApp."
 
 msgid "Your cancellation will be reversed and your {planName} subscription will remain active."
 msgstr "Din opsigelse vil blive fortrudt, og dit {planName}-abonnement vil forblive aktivt."
@@ -3797,6 +4004,9 @@ msgstr "Dit betalingskort udløber snart. Opdater din betalingsmetode for at und
 
 msgid "Your personal cookbook library."
 msgstr "Dit personlige kogebogsbibliotek."
+
+msgid "Your phone number must be registered with WhatsApp."
+msgstr ""
 
 msgid "Your plan has been upgraded."
 msgstr "Dit abonnement er blevet opgraderet."

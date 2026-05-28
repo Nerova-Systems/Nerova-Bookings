@@ -12,6 +12,9 @@ using Main.Features.EventTypes.Domain;
 using Main.Features.Insights.Shared;
 using Main.Features.ManagedEventTypes.EventHandlers;
 using Main.Features.ManagedEventTypes.Services;
+using Main.Features.Payments.Infrastructure;
+using Main.Features.Payments.Jobs;
+using Main.Features.Payments.Paystack;
 using Main.Features.Permissions.Pipeline;
 using Main.Features.Permissions.Services;
 using Main.Features.Scheduling.Domain;
@@ -21,6 +24,9 @@ using Main.Features.TeamMembers.Domain;
 using Main.Features.TeamMembers.Infrastructure;
 using Main.Features.Webhooks.Infrastructure;
 using Main.Features.Webhooks.Jobs;
+using Main.Features.WhatsAppFlows.Domain;
+using Main.Features.WhatsAppFlows.Endpoint;
+using Main.Features.WhatsAppFlows.Infrastructure;
 using Main.Features.Workflows.EventHandlers;
 using Main.Features.Workflows.Infrastructure;
 using Main.Features.Workflows.Jobs;
@@ -81,6 +87,17 @@ public static class Configuration
             // Registered here so the API + worker contexts both get the IHttpClientFactory bindings.
             services.AddHttpClient(TwilioSmsProvider.HttpClientName);
             services.AddHttpClient(MetaWhatsAppProvider.HttpClientName);
+
+            // WhatsApp Flows: outbound to Meta Graph API + cross-SCS sync to the account SCS.
+            services.AddHttpClient(MetaFlowsApiClient.HttpClientName);
+            services.AddHttpClient(HttpWhatsAppFlowProfileSync.HttpClientName);
+            services.AddHttpClient(HttpWhatsAppSubscriptionLookup.HttpClientName);
+
+            // Phase 4 — WhatsApp Cloud API (post-flow outbound text/template messaging) +
+            // Paystack booking-payment link service. Separate named clients so they don't share
+            // the WhatsApp Flows or account-SCS Paystack client configuration.
+            services.AddHttpClient(WhatsAppCloudApiClient.HttpClientName);
+            services.AddHttpClient(PaystackPaymentLinkService.HttpClientName);
 
             return services
                 .AddScoped<IPermissionCheckService, PermissionCheckService>()
@@ -205,6 +222,33 @@ public static class Configuration
                 // calls AddMainServices first, so this registration is shared.
                 .AddScoped<IUserContactLookup, AccountDbUserContactLookup>()
                 .AddScoped<IBookingNotificationDispatcher, BookingNotificationDispatcher>()
+                // ─── WhatsApp Flows ────────────────────────────────────────
+                // Repository + template engine + Meta Graph client + cross-SCS profile sync +
+                // tier service. All scoped because the repo participates in the request-scoped
+                // unit of work; engine/client are stateless but kept scoped for symmetry.
+                .AddScoped<ITenantFlowConfigRepository, TenantFlowConfigRepository>()
+                .AddScoped<IFlowTemplateEngine, FlowTemplateEngine>()
+                .AddScoped<IMetaFlowsApiClient, MetaFlowsApiClient>()
+                .AddScoped<IWhatsAppFlowProfileSync, HttpWhatsAppFlowProfileSync>()
+                .AddScoped<IWhatsAppSubscriptionLookup, HttpWhatsAppSubscriptionLookup>()
+                .AddMemoryCache()
+                .AddScoped<ITierService, DefaultTierService>()
+                .AddScoped<IWabaFlowDataCipher, WabaFlowDataCipher>()
+                .AddScoped<IWhatsAppFlowDispatcher, WhatsAppFlowDispatcher>()
+                .AddScoped<IFlowScreenHandler, WelcomeScreenHandler>()
+                .AddScoped<IFlowScreenHandler, SelectServiceScreenHandler>()
+                .AddScoped<IFlowScreenHandler, SelectStaffScreenHandler>()
+                .AddScoped<IFlowScreenHandler, SelectDateScreenHandler>()
+                .AddScoped<IFlowScreenHandler, SelectTimeScreenHandler>()
+                .AddScoped<IFlowScreenHandler, CustomQuestionsScreenHandler>()
+                .AddScoped<IFlowScreenHandler, ConfirmBookingScreenHandler>()
+                // ─── Phase 4: post-flow messaging + booking payments ──────
+                // Meta Cloud API for outbound text/template; Paystack booking-payment link service;
+                // booking-payment webhook verifier + idempotency repository.
+                .AddScoped<IWhatsAppCloudApiClient, WhatsAppCloudApiClient>()
+                .AddScoped<IPaystackPaymentLinkService, PaystackPaymentLinkService>()
+                .AddScoped<IPaystackWebhookVerifier, PaystackWebhookVerifier>()
+                .AddScoped<IProcessedPaymentEventRepository, ProcessedPaymentEventRepository>()
                 .AddHttpClient()
                 .AddEmailRendering("WebApp")
                 .AddSharedServices<MainDbContext>([Assembly]);
@@ -266,6 +310,16 @@ public static class Configuration
             services.AddScoped<WebhookDeliveryProcessor>();
 
             services.MapTicker<WebhookDeliveryJob>()
+                .WithCron("*/1 * * * *");
+
+            // ─── Phase 4b: booking-payment lifecycle jobs ─────────────────
+            // Both jobs are cron-poll (the only TickerQ pattern in this codebase). Release fires
+            // when the payment-pending hold expires; reminder nudges After-Session pending payments
+            // that have been outstanding for ReminderWindow.
+            services.MapTicker<ReleaseUnpaidBookingJob>()
+                .WithCron("*/1 * * * *");
+
+            services.MapTicker<SendPaymentReminderJob>()
                 .WithCron("*/1 * * * *");
 
             return services;

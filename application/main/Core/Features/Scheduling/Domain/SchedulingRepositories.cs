@@ -49,6 +49,32 @@ public interface IBookingRepository : IAppendRepository<Booking, BookingId>
     ///     availability across all hosts simultaneously.
     /// </summary>
     Task<IReadOnlyDictionary<UserId, Booking[]>> GetForMultipleOwnersRangeAsync(TenantId tenantId, IReadOnlyList<UserId> ownerUserIds, DateTimeOffset startTime, DateTimeOffset endTime, CancellationToken cancellationToken);
+
+    /// <summary>
+    ///     Cross-tenant lookup for the Paystack webhook handler — the webhook is anonymous and
+    ///     does not carry tenant context, so we resolve the booking via its globally-unique
+    ///     payment reference. Tenant scoping is then derived from <see cref="Booking.TenantId" />.
+    /// </summary>
+    Task<Booking?> GetByPaymentReferenceUnfilteredAsync(string paymentReference, CancellationToken cancellationToken);
+
+    /// <summary>
+    ///     Polls for bookings whose payment-pending hold has expired. Used by the release job;
+    ///     intentionally unfiltered so it works without an execution context.
+    /// </summary>
+    Task<Booking[]> GetExpiredUnpaidBookingsUnfilteredAsync(DateTimeOffset cutoff, CancellationToken cancellationToken);
+
+    /// <summary>
+    ///     Polls for pending after-session payments whose payment-state-changed timestamp is
+    ///     older than the supplied cutoff and which have not yet been reminded. Used by the
+    ///     payment-reminder job; intentionally unfiltered so it works without an execution context.
+    /// </summary>
+    Task<Booking[]> GetPendingPaymentsForReminderUnfilteredAsync(DateTimeOffset cutoff, CancellationToken cancellationToken);
+
+    /// <summary>
+    ///     Cross-tenant lookup by id. Used by anonymous / background callers (WhatsApp Flow
+    ///     dispatcher + TickerQ payment jobs) that do not carry tenant context.
+    /// </summary>
+    Task<Booking?> GetByIdUnfilteredAsync(BookingId bookingId, CancellationToken cancellationToken);
 }
 
 public sealed record BookingWithEventType(Booking Booking, EventType EventType);
@@ -193,5 +219,44 @@ public sealed class BookingRepository(MainDbContext mainDbContext)
             .Where(booking => booking.StartTime < endTime && booking.EndTime > startTime)
             .GroupBy(booking => booking.OwnerUserId)
             .ToDictionary(group => group.Key, group => group.OrderBy(b => b.StartTime).ToArray());
+    }
+
+    public async Task<Booking?> GetByPaymentReferenceUnfilteredAsync(string paymentReference, CancellationToken cancellationToken)
+    {
+        return await DbSet
+            .IgnoreQueryFilters()
+            .AsTracking()
+            .SingleOrDefaultAsync(b => b.PaymentReference == paymentReference, cancellationToken);
+    }
+
+    public async Task<Booking[]> GetExpiredUnpaidBookingsUnfilteredAsync(DateTimeOffset cutoff, CancellationToken cancellationToken)
+    {
+        return await DbSet
+            .IgnoreQueryFilters()
+            .AsTracking()
+            .Where(b => b.PaymentStatus == BookingPaymentStatus.Pending
+                        && b.PaymentStateChangedAt != null
+                        && b.PaymentStateChangedAt < cutoff)
+            .ToArrayAsync(cancellationToken);
+    }
+
+    public async Task<Booking[]> GetPendingPaymentsForReminderUnfilteredAsync(DateTimeOffset cutoff, CancellationToken cancellationToken)
+    {
+        return await DbSet
+            .IgnoreQueryFilters()
+            .AsTracking()
+            .Where(b => b.PaymentStatus == BookingPaymentStatus.Pending
+                        && b.PaymentReminderSentAt == null
+                        && b.PaymentStateChangedAt != null
+                        && b.PaymentStateChangedAt < cutoff)
+            .ToArrayAsync(cancellationToken);
+    }
+
+    public async Task<Booking?> GetByIdUnfilteredAsync(BookingId bookingId, CancellationToken cancellationToken)
+    {
+        return await DbSet
+            .IgnoreQueryFilters()
+            .AsTracking()
+            .SingleOrDefaultAsync(b => b.Id == bookingId, cancellationToken);
     }
 }

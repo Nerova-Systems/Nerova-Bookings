@@ -384,6 +384,36 @@ public sealed class TenantSwitched(TenantId fromTenantId, TenantId toTenantId, U
 public sealed class TenantUpdated
     : TelemetryEvent;
 
+public sealed class TenantBrandProfileUpdated(string vertical)
+    : TelemetryEvent(("vertical", vertical));
+
+public sealed class WabaProfileSyncSucceeded(TenantId tenantId, string phoneNumberId, int attempts)
+    : TelemetryEvent(("tenant_id", tenantId), ("phone_number_id", phoneNumberId), ("attempts", attempts));
+
+public sealed class WabaProfileSyncFailed(TenantId tenantId, string phoneNumberId, int attempts, string error, bool terminal)
+    : TelemetryEvent(
+        ("tenant_id", tenantId),
+        ("phone_number_id", phoneNumberId),
+        ("attempts", attempts),
+        ("error", error),
+        ("terminal", terminal)
+    );
+
+public sealed class WabaProfileDriftDetected(TenantId tenantId, string phoneNumberId, string driftedFields)
+    : TelemetryEvent(("tenant_id", tenantId), ("phone_number_id", phoneNumberId), ("drifted_fields", driftedFields));
+
+public sealed class WabaDisplayNameChangeRequested(TenantId tenantId, string phoneNumberId, string requestedName)
+    : TelemetryEvent(("tenant_id", tenantId), ("phone_number_id", phoneNumberId), ("requested_name", requestedName));
+
+public sealed class WabaDisplayNameApproved(TenantId tenantId, string phoneNumberId, string verifiedName)
+    : TelemetryEvent(("tenant_id", tenantId), ("phone_number_id", phoneNumberId), ("verified_name", verifiedName));
+
+public sealed class WabaDisplayNameDeclined(TenantId tenantId, string phoneNumberId, string requestedName)
+    : TelemetryEvent(("tenant_id", tenantId), ("phone_number_id", phoneNumberId), ("requested_name", requestedName));
+
+public sealed class WabaDisplayNameExpired(TenantId tenantId, string phoneNumberId, string requestedName)
+    : TelemetryEvent(("tenant_id", tenantId), ("phone_number_id", phoneNumberId), ("requested_name", requestedName));
+
 public sealed class TeamCreated(TenantId teamId, TenantId orgId)
     : TelemetryEvent(("team_id", teamId), ("org_id", orgId));
 

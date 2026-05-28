@@ -52,6 +52,10 @@ public sealed class BookingConfiguration : IEntityTypeConfiguration<Booking>
         builder.Property(booking => booking.MetadataJson).HasColumnType("jsonb");
         builder.Property(booking => booking.LocationType).HasMaxLength(80);
         builder.Property(booking => booking.LocationValue).HasMaxLength(2000);
+        builder.Property(booking => booking.PaymentReference).HasMaxLength(120);
+        builder.Property(booking => booking.PaymentLinkUrl).HasMaxLength(2000);
+        builder.Property(booking => booking.PaymentStatus).HasMaxLength(40).HasConversion<string>();
+        builder.Property(booking => booking.PaymentReminderSentAt).HasColumnType("timestamptz");
 
         builder.HasOne<EventType>()
             .WithMany()

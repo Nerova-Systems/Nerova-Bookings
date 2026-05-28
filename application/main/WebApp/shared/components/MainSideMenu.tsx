@@ -22,6 +22,7 @@ import {
   CalendarCheckIcon,
   CalendarDaysIcon,
   LayoutDashboardIcon,
+  MessageCircleIcon,
   TimerIcon,
   ZapIcon
 } from "lucide-react";
@@ -163,6 +164,20 @@ export function MainSideMenu() {
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                 )}
+                <SidebarMenuItem>
+                  <SidebarMenuButton
+                    asChild={true}
+                    isActive={currentPath.startsWith("/whatsapp")}
+                    tooltip={t`WhatsApp`}
+                  >
+                    <RouterLink to="/whatsapp/questionnaire">
+                      <MessageCircleIcon />
+                      <span>
+                        <Trans>WhatsApp</Trans>
+                      </span>
+                    </RouterLink>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
               </SidebarMenu>
             </SidebarGroupContent>
           </SidebarGroup>
