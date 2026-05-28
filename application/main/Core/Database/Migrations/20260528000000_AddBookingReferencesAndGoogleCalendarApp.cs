@@ -44,24 +44,19 @@ public sealed class AddBookingReferencesAndGoogleCalendarApp : Migration
         migrationBuilder.CreateIndex("ix_booking_references_app_slug", "booking_references", "app_slug");
 
         // Seed the google-calendar app row so it appears in GET /api/apps.
-        migrationBuilder.InsertData(
-            "apps",
-            ["id", "created_at", "name", "category", "description", "logo_url", "is_active"],
-            [
-                "google-calendar",
-                new DateTimeOffset(2026, 5, 28, 0, 0, 0, TimeSpan.Zero),
-                "Google Calendar",
-                "Calendar",
-                "Sync bookings to a connected Google Calendar and respect existing busy time when offering availability.",
-                "/apps/google-calendar/logo.svg",
-                true
-            ]
-        );
+        migrationBuilder.Sql(
+            """
+            INSERT INTO apps (id, created_at, name, category, description, logo_url, is_active)
+            VALUES ('google-calendar', '2026-05-28 00:00:00+00', 'Google Calendar', 'Calendar',
+                    'Sync bookings to a connected Google Calendar and respect existing busy time when offering availability.',
+                    '/apps/google-calendar/logo.svg', true)
+            ON CONFLICT (id) DO NOTHING;
+            """);
     }
 
     protected override void Down(MigrationBuilder migrationBuilder)
     {
-        migrationBuilder.DeleteData("apps", "id", "google-calendar");
+        migrationBuilder.Sql("DELETE FROM apps WHERE id = 'google-calendar';");
         migrationBuilder.DropTable("booking_references");
     }
 }

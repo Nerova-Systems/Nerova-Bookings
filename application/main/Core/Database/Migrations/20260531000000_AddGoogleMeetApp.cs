@@ -12,23 +12,18 @@ public sealed class AddGoogleMeetApp : Migration
         // Seed the google-meet app row so it appears in GET /api/apps. No new credentials table:
         // Google Meet piggy-backs on the google-calendar credential (see GoogleMeetInstaller),
         // so the connector creates an AppInstallation row only — no Credential row is written.
-        migrationBuilder.InsertData(
-            "apps",
-            ["id", "created_at", "name", "category", "description", "logo_url", "is_active"],
-            [
-                "google-meet",
-                new DateTimeOffset(2026, 5, 31, 0, 0, 0, TimeSpan.Zero),
-                "Google Meet",
-                "Conferencing",
-                "Generate a Google Meet link for every booking — reuses your Google Calendar connection (no separate sign-in).",
-                "/apps/google-meet/logo.svg",
-                true
-            ]
-        );
+        migrationBuilder.Sql(
+            """
+            INSERT INTO apps (id, created_at, name, category, description, logo_url, is_active)
+            VALUES ('google-meet', '2026-05-31 00:00:00+00', 'Google Meet', 'Conferencing',
+                    'Generate a Google Meet link for every booking — reuses your Google Calendar connection (no separate sign-in).',
+                    '/apps/google-meet/logo.svg', true)
+            ON CONFLICT (id) DO NOTHING;
+            """);
     }
 
     protected override void Down(MigrationBuilder migrationBuilder)
     {
-        migrationBuilder.DeleteData("apps", "id", "google-meet");
+        migrationBuilder.Sql("DELETE FROM apps WHERE id = 'google-meet';");
     }
 }

@@ -13,23 +13,18 @@ public sealed class AddMsTeamsApp : Migration
         // Microsoft Teams piggy-backs on the office365-calendar credential (see
         // MsTeamsInstaller), so the connector creates an AppInstallation row only — no
         // Credential row is written.
-        migrationBuilder.InsertData(
-            "apps",
-            ["id", "created_at", "name", "category", "description", "logo_url", "is_active"],
-            [
-                "ms-teams",
-                new DateTimeOffset(2026, 6, 1, 0, 0, 0, TimeSpan.Zero),
-                "Microsoft Teams",
-                "Conferencing",
-                "Generate a Microsoft Teams meeting link for every booking — reuses your Office 365 connection (no separate sign-in).",
-                "/apps/ms-teams/logo.svg",
-                true
-            ]
-        );
+        migrationBuilder.Sql(
+            """
+            INSERT INTO apps (id, created_at, name, category, description, logo_url, is_active)
+            VALUES ('ms-teams', '2026-06-01 00:00:00+00', 'Microsoft Teams', 'Conferencing',
+                    'Generate a Microsoft Teams meeting link for every booking — reuses your Office 365 connection (no separate sign-in).',
+                    '/apps/ms-teams/logo.svg', true)
+            ON CONFLICT (id) DO NOTHING;
+            """);
     }
 
     protected override void Down(MigrationBuilder migrationBuilder)
     {
-        migrationBuilder.DeleteData("apps", "id", "ms-teams");
+        migrationBuilder.Sql("DELETE FROM apps WHERE id = 'ms-teams';");
     }
 }
