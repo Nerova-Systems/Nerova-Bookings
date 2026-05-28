@@ -101,7 +101,7 @@ export function EventTypeAdvancedTab({ eventTypeId, value, onChange, error }: Ev
       : "mandatory-host-only";
   const canSendCalVideoTranscriptionEmails = metadata.canSendCalVideoTranscriptionEmails === "true";
 
-const updatePrivacy = (privacy: Partial<ReturnType<typeof getEventTypeSettings>["privacy"]>) => {
+  const updatePrivacy = (privacy: Partial<ReturnType<typeof getEventTypeSettings>["privacy"]>) => {
     onChange(updateEventTypeSettingsSection(value, "privacy", (current) => ({ ...current, ...privacy })));
   };
   const updateEmail = (email: Partial<ReturnType<typeof getEventTypeSettings>["email"]>) => {

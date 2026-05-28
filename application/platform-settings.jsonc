@@ -17,7 +17,7 @@
 
   "branding": {
     // Product/platform name displayed throughout the application.
-    "productName": "PlatformPlatform",
+    "productName": "Nerova",
 
     // PWA chrome colors. "themeColor.light/dark" tints the mobile browser/PWA toolbar (the iOS
     // Dynamic Island "tint band") -- the frontend swaps the `<meta name="theme-color">` value at
@@ -26,9 +26,9 @@
     // baked into manifest.json. PWA spec allows hex only, no oklch.
     "themeColor": {
       "light": "#eef0f2",
-      "dark": "#151b23"
+      "dark": "#010102"
     },
-    "backgroundColor": "#ffffff",
+    "backgroundColor": "#010102",
 
     // Background color of the brand band at the top of every transactional email (the band that
     // sits behind the transparent logo-1200x184.png). A single value used in both light- and
@@ -42,10 +42,10 @@
     // to white-with-brand-text in dark mode). The "*Foreground" pair is the text/icon color used on
     // top of the primary, so contrast must be a deliberate choice by the brand owner.
     "primaryColor": {
-      "light": "oklch(0.2 0.02 264)",
-      "lightForeground": "oklch(0.97 0.003 264)",
-      "dark": "oklch(0.95 0.003 264)",
-      "darkForeground": "oklch(0.18 0 0)"
+      "light": "#5e6ad2",
+      "lightForeground": "#ffffff",
+      "dark": "#5e6ad2",
+      "darkForeground": "#f7f8f8"
     },
 
     // One-line product description shown in the landing page footer and the email footer.

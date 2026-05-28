@@ -1,48 +1,59 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap");
+
 :root,
 .light {
     color-scheme: light;
-    --background: oklch(0.97 0.003 264);
-    --foreground: oklch(0.13 0.028 261.692);
-    --card: oklch(1 0 0);
-    --card-foreground: oklch(0.13 0.028 261.692);
-    --popover: oklch(1 0 0);
-    --popover-foreground: oklch(0.13 0.028 261.692);
-    /* --brand-primary / --brand-primary-foreground are injected per HTML template from
-       platform-settings.jsonc; theme.css reads them so a rebrand changes the button color from
-       configuration alone. The values are undefined if the inline <style> in index.html is missing,
-       which is a build misconfiguration and fails visibly. */
-    --primary: var(--brand-primary);
-    --primary-foreground: var(--brand-primary-foreground);
-    --secondary: oklch(0.95 0.003 264);
-    --secondary-foreground: oklch(0.21 0.006 285.885);
-    --muted: oklch(0.95 0.003 264);
-    --muted-foreground: oklch(0.45 0.027 264.364);
-    --accent: oklch(0.95 0.003 264);
-    --accent-foreground: oklch(0.21 0.034 264.665);
+    --background: #f8f9fa; /* {colors.canvas} soft light canvas */
+    --foreground: #0f172a; /* {colors.ink} clean dark slate text */
+
+    --card: #ffffff; /* {colors.surface-1} pure white cards */
+    --card-foreground: #0f172a;
+
+    --popover: #ffffff;
+    --popover-foreground: #0f172a;
+
+    /* Lavender accent mapped dynamically via backoffice */
+    --primary: var(--brand-primary, #5e6ad2);
+    --primary-foreground: var(--brand-primary-foreground, #ffffff);
+
+    --secondary: #ffffff;
+    --secondary-foreground: #0f172a;
+
+    --muted: #f1f5f9;
+    --muted-foreground: #475569;
+
+    --accent: #f1f5f9;
+    --accent-foreground: #0f172a;
+
     --destructive: oklch(0.58 0.19 22);
     --destructive-foreground: oklch(1 0 0);
-    --border: oklch(0.9 0.006 264);
-    --input: oklch(0.9 0.006 264);
-    --ring: oklch(0.8 0.022 261.325);
+
+    --border: #e2e8f0; /* {colors.hairline} clean light hairline */
+    --input: #e2e8f0;
+    --ring: #5e6ad2;
+
     --chart-1: oklch(0.88 0.15 92);
     --chart-2: oklch(0.77 0.16 70);
     --chart-3: oklch(0.67 0.16 58);
     --chart-4: oklch(0.56 0.15 49);
     --chart-5: oklch(0.47 0.12 46);
-    --sidebar: oklch(0.92 0.003 264);
-    --sidebar-foreground: oklch(0.13 0.028 261.692);
-    --sidebar-primary: var(--brand-primary);
-    --sidebar-primary-foreground: var(--brand-primary-foreground);
-    --sidebar-accent: oklch(0.95 0.003 264);
-    --sidebar-accent-foreground: oklch(0.21 0.034 264.665);
-    --sidebar-border: oklch(0.9 0.006 264);
-    --sidebar-ring: oklch(0.707 0.022 261.325);
-    --radius: 0.625rem;
-    /* Custom variables */
-    --hover-background: oklch(0.95 0.003 264);
-    --active-background: oklch(1 0 0);
-    --selected-hover-background: oklch(0.95 0.003 264);
-    --input-background: oklch(1 0 0);
+
+    --sidebar: #f8f9fa;
+    --sidebar-foreground: #0f172a;
+    --sidebar-primary: var(--brand-primary, #5e6ad2);
+    --sidebar-primary-foreground: var(--brand-primary-foreground, #ffffff);
+    --sidebar-accent: #f1f5f9;
+    --sidebar-accent-foreground: #0f172a;
+    --sidebar-border: #e2e8f0;
+    --sidebar-ring: #5e6ad2;
+
+    --radius: 0.5rem; /* {rounded.md} 8px default radius */
+
+    /* Custom spacing & elevation controls */
+    --hover-background: #f1f5f9;
+    --active-background: #e2e8f0;
+    --selected-hover-background: #f1f5f9;
+    --input-background: #ffffff;
     --danger: var(--destructive);
     --danger-foreground: var(--destructive-foreground);
     --success: oklch(0.45 0.15 145);
@@ -52,17 +63,23 @@
     --info: oklch(0.55 0.2 260);
     --info-foreground: oklch(0.13 0.028 261.692);
     --panel-opacity: 0.5;
-    /* Control heights - interactive elements (buttons, inputs, selects, toggles) */
-    /* Desktop defaults; mobile override below bumps to Apple HIG 44px touch targets */
+
+    /* Control heights - interactive elements */
     --control-height-xs: 1.5rem; /* 24px */
     --control-height-sm: 2rem; /* 32px */
     --control-height: 2.375rem; /* 38px */
     --control-height-lg: 2.75rem; /* 44px */
+
+    /* Typography Font stacks */
+    --font-sans: "Outfit", "Inter", -apple-system, system-ui, sans-serif;
+    --font-mono: "JetBrains Mono", ui-monospace, monospace;
 }
 
 /* Mobile: Apple HIG 44px minimum touch targets */
 @media (max-width: 640px) {
-    :root {
+    :root,
+    .light,
+    .dark {
         --control-height-xs: 1.75rem; /* 28px */
         --control-height-sm: 2.25rem; /* 36px */
         --control-height: 2.75rem; /* 44px */
@@ -72,44 +89,56 @@
 
 .dark {
     color-scheme: dark;
-    --background: oklch(0.22 0 0);
-    --foreground: oklch(0.985 0 0);
-    --card: oklch(0.25 0 0);
-    --card-foreground: oklch(0.985 0 0);
-    --popover: oklch(0.22 0 0);
-    --popover-foreground: oklch(0.985 0 0);
-    --primary: var(--brand-primary);
-    --primary-foreground: var(--brand-primary-foreground);
-    --secondary: oklch(0.36 0 0);
-    --secondary-foreground: oklch(0.985 0 0);
-    --muted: oklch(0.27 0 0);
-    --muted-foreground: oklch(0.7 0 0);
-    --accent: oklch(0.27 0 0);
-    --accent-foreground: oklch(0.985 0 0);
+    --background: #010102; /* {colors.canvas} deep near-black canvas */
+    --foreground: #f7f8f8; /* {colors.ink} high-contrast light gray text */
+
+    --card: #090a0f; /* {colors.surface-1} lifted card layer */
+    --card-foreground: #f7f8f8;
+
+    --popover: #090a0f;
+    --popover-foreground: #f7f8f8;
+
+    --primary: var(--brand-primary, #5e6ad2);
+    --primary-foreground: var(--brand-primary-foreground, #f7f8f8);
+
+    --secondary: #090a0f;
+    --secondary-foreground: #f7f8f8;
+
+    --muted: #13141b;
+    --muted-foreground: #8a8f98; /* {colors.ink-subtle} secondary type */
+
+    --accent: #13141b; /* {colors.surface-2} active list item */
+    --accent-foreground: #f7f8f8;
+
     --destructive: oklch(0.64 0.21 22);
     --destructive-foreground: oklch(1 0 0);
-    --border: oklch(1 0 0 / 10%);
-    --input: oklch(1 0 0 / 15%);
-    --ring: oklch(1 0 0 / 15%);
+
+    --border: #23252a; /* {colors.hairline} dark hairline cards/rules */
+    --input: #23252a;
+    --ring: #5e69d1; /* {colors.primary-focus} focused border */
+
     --chart-1: oklch(0.88 0.15 92);
     --chart-2: oklch(0.77 0.16 70);
     --chart-3: oklch(0.67 0.16 58);
     --chart-4: oklch(0.56 0.15 49);
     --chart-5: oklch(0.47 0.12 46);
-    --sidebar: oklch(0.2 0 0);
-    --sidebar-foreground: oklch(0.985 0 0);
-    --sidebar-primary: var(--brand-primary);
-    --sidebar-primary-foreground: var(--brand-primary-foreground);
-    --sidebar-accent: oklch(0.27 0 0);
-    --sidebar-accent-foreground: oklch(0.985 0 0);
-    --sidebar-border: oklch(1 0 0 / 10%);
-    --sidebar-ring: oklch(0.55 0 0);
-    --radius: 0.625rem;
-    /* Custom variables */
-    --hover-background: oklch(0.28 0 0);
-    --active-background: oklch(0.15 0 0);
-    --selected-hover-background: oklch(0.25 0 0);
-    --input-background: oklch(0.25 0 0);
+
+    --sidebar: #010102;
+    --sidebar-foreground: #f7f8f8;
+    --sidebar-primary: var(--brand-primary, #5e6ad2);
+    --sidebar-primary-foreground: var(--brand-primary-foreground, #f7f8f8);
+    --sidebar-accent: #13141b;
+    --sidebar-accent-foreground: #f7f8f8;
+    --sidebar-border: #23252a;
+    --sidebar-ring: #5e69d1;
+
+    --radius: 0.5rem; /* {rounded.md} 8px default radius */
+
+    /* Custom spacing & elevation controls */
+    --hover-background: #13141b; /* surface-2 */
+    --active-background: #1a1c24; /* surface-3 */
+    --selected-hover-background: #13141b;
+    --input-background: #090a0f;
     --danger: var(--destructive);
     --danger-foreground: var(--destructive-foreground);
     --success: oklch(0.5 0.15 145);
@@ -119,4 +148,60 @@
     --info: oklch(0.65 0.2 260);
     --info-foreground: oklch(0.985 0 0);
     --panel-opacity: 0.5;
+}
+
+/* Global Font and Layout defaults */
+body {
+    font-family: var(--font-sans);
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+}
+
+/* Linear-inspired negative tracking utilities */
+.tracking-display-xl {
+    letter-spacing: -3px;
+    font-weight: 600;
+}
+.tracking-display-lg {
+    letter-spacing: -1.8px;
+    font-weight: 600;
+}
+.tracking-display-md {
+    letter-spacing: -1px;
+    font-weight: 600;
+}
+.tracking-headline {
+    letter-spacing: -0.6px;
+    font-weight: 600;
+}
+.tracking-card-title {
+    letter-spacing: -0.4px;
+    font-weight: 500;
+}
+.tracking-subhead {
+    letter-spacing: -0.2px;
+}
+.tracking-body-lg {
+    letter-spacing: -0.1px;
+}
+.tracking-body {
+    letter-spacing: -0.05px;
+}
+.tracking-eyebrow {
+    letter-spacing: 0.4px;
+    font-weight: 500;
+    text-transform: uppercase;
+}
+
+/* Tactile Border Highlights for Lifted Cards */
+.linear-card {
+    background-color: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.05);
+}
+
+.light .linear-card {
+    box-shadow:
+        0 1px 3px 0 rgba(0, 0, 0, 0.02),
+        0 1px 2px -1px rgba(0, 0, 0, 0.02);
 }

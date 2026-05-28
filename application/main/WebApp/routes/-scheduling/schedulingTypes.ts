@@ -245,7 +245,7 @@ export function getEventTypeSettings(payload: EventTypePayload): EventTypeSettin
     enablePerHostLocations: settings?.enablePerHostLocations ?? false,
     selectedCalendars: settings?.selectedCalendars ?? [],
     destinationCalendar: settings?.destinationCalendar ?? null,
-    defaultConferencing: settings?.defaultConferencing ?? null,
+    defaultConferencing: settings?.defaultConferencing ?? null
   };
 }
 

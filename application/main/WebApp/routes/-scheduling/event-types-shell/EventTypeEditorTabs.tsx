@@ -24,8 +24,8 @@ import { EventTypeInstantMeetingTab } from "../event-type-tabs/EventTypeInstantM
 import { EventTypeLimitsTab } from "../event-type-tabs/EventTypeLimitsTab";
 import { EventTypeRecurringTab } from "../event-type-tabs/EventTypeRecurringTab";
 import { EventTypeSetupTab } from "../event-type-tabs/EventTypeSetupTab";
-import { EventTypeTeamTab } from "../event-type-tabs/EventTypeTeamTab";
 import { type EventTypeTabProps } from "../event-type-tabs/EventTypeTabTypes";
+import { EventTypeTeamTab } from "../event-type-tabs/EventTypeTeamTab";
 import { EventTypeWebhooksTab } from "../event-type-tabs/EventTypeWebhooksTab";
 import { EventTypeWorkflowsTab } from "../event-type-tabs/EventTypeWorkflowsTab";
 import { eventTypeTabNames, getEventTypeTabLabel, type EventTypeTabName } from "./eventTypeShellTypes";
