@@ -542,7 +542,8 @@ const visualEventType = {
   seats: { capacity: null, enabled: false, showAttendeeInfo: false },
   slotIntervalMinutes: 30,
   slug: "product-consultation",
-  title: "Product Consultation"
+  title: "Product Consultation",
+  wabaPhoneNumber: null
 } satisfies PublicEventType;
 
 const visualEventTypeSettings = {
@@ -662,7 +663,8 @@ const visualEditorEventType = {
   bookingRequiresAuthentication: false,
   hideOrganizerEmail: false,
   isInstantEvent: false,
-  secondaryEmailUserId: null
+  secondaryEmailUserId: null,
+  teamId: null
 } satisfies EventType;
 
 const visualSchedules = [

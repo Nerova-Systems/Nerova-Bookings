@@ -286,6 +286,9 @@ msgstr "Før eventet starter"
 msgid "Block slot while pending"
 msgstr "Bloker tidspunkt mens afventer"
 
+msgid "Book Instantly on WhatsApp"
+msgstr ""
+
 msgid "Booked minutes per day"
 msgstr ""
 
@@ -329,6 +332,9 @@ msgid "Booking link copied"
 msgstr "Booking-link kopieret"
 
 msgid "Booking page"
+msgstr ""
+
+msgid "Booking Page Not Found"
 msgstr ""
 
 msgid "Booking page unavailable"
@@ -1217,7 +1223,10 @@ msgstr ""
 msgid "List view"
 msgstr "Listevisning"
 
-msgid "Live preview is not yet available. Publish your flow to test it on your WhatsApp number."
+msgid "Live preview is not yet available. Click 'Publish Flow' first to register it on Meta and get a live test link."
+msgstr ""
+
+msgid "Live Preview Unavailable"
 msgstr ""
 
 msgid "Loading apps..."
@@ -1368,6 +1377,9 @@ msgstr "Minimumsvurdering"
 
 msgid "Minutes"
 msgstr "Minutter"
+
+msgid "Minutes duration"
+msgstr ""
 
 msgid "Mon"
 msgstr "Man"
@@ -1634,7 +1646,7 @@ msgstr "Vis kun bookinger med mindst én intern note."
 msgid "Only show first available slot"
 msgstr "Vis kun første ledige tidspunkt"
 
-msgid "Open preview (coming soon)"
+msgid "Opening secure booking portal..."
 msgstr ""
 
 msgid "Option"
@@ -2011,6 +2023,12 @@ msgstr "Gemte segmenter"
 msgid "Saving..."
 msgstr "Gemmer..."
 
+msgid "Scan QR code or click below"
+msgstr ""
+
+msgid "Scan with your phone's camera to book instantly inside WhatsApp."
+msgstr ""
+
 msgid "Schedule"
 msgstr "Tidsplan"
 
@@ -2073,6 +2091,9 @@ msgstr "Hemmelighed kopieret til udklipsholderen"
 
 msgid "Secret hidden"
 msgstr "Hemmelighed skjult"
+
+msgid "Secure end-to-end encrypted appointment scheduling powered by Nerova."
+msgstr ""
 
 msgid "Segment query"
 msgstr "Segmentforespørgsel"
@@ -2287,6 +2308,9 @@ msgstr "Test"
 msgid "Test event queued for delivery"
 msgstr "Testhændelse sat i kø til levering"
 
+msgid "Test Live Flow Preview"
+msgstr ""
+
 msgid "Test the flow"
 msgstr ""
 
@@ -2310,6 +2334,9 @@ msgstr "Deltageren vil blive underrettet om, at deres booking er blevet afvist."
 
 msgid "The attendee will be notified that their booking is confirmed."
 msgstr "Deltageren vil blive underrettet om, at deres booking er bekræftet."
+
+msgid "The booking link you followed might have expired, or the business might have moved it."
+msgstr ""
 
 msgid "The booking needs to be manually confirmed before it is pushed to your calendar and a confirmation is sent. Learn more"
 msgstr "Bookingen skal bekræftes manuelt, før den sendes til din kalender, og en bekræftelse sendes. Lær mere"
@@ -2335,6 +2362,9 @@ msgstr ""
 
 msgid "This booking was marked for reschedule."
 msgstr "Denne booking blev markeret til ny tid."
+
+msgid "This business is currently configuring their secure WhatsApp booking line. Please try again shortly!"
+msgstr ""
 
 #. placeholder {0}: booking.bookerName
 msgid "This cancels the booking with {0}."
@@ -2565,6 +2595,12 @@ msgstr "Hvad din booker skal angive for at modtage bekræftelser"
 msgid "WhatsApp"
 msgstr "WhatsApp"
 
+msgid "WhatsApp Booking First"
+msgstr ""
+
+msgid "WhatsApp Connection Pending"
+msgstr ""
+
 msgid "WhatsApp to a specific number"
 msgstr "WhatsApp til et bestemt nummer"
 
@@ -2633,6 +2669,9 @@ msgstr "Din booking er bekræftet."
 
 msgid "Your dashboard is empty"
 msgstr "Dit dashboard er tomt"
+
+msgid "Your live WhatsApp Flow preview is ready. Click the button to test it on Meta's Business Suite."
+msgstr ""
 
 msgid "Your name"
 msgstr "Dit navn"

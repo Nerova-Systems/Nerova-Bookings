@@ -23,8 +23,6 @@ export const eventTypeTabNames: EventTypeTabName[] = [
   "advanced",
   "recurring",
   "team",
-  "instant-meeting",
-  "ai-voice-agent",
   "workflows",
   "webhooks",
   "apps"

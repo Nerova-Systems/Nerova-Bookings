@@ -139,19 +139,7 @@ function WhatsappSetupPage() {
   const [brandStepDone, setBrandStepDone] = useState(false);
   const [brandStepSkipped, setBrandStepSkipped] = useState(false);
 
-  /**
-   * TODO: Replace with real API mutation once backend wires up UpdateTenantBrandProfileCommand.
-   * Expected endpoint: PUT /api/account/tenants/current/brand-profile
-   */
-  const saveBrandProfileMutation = useMutation<
-    void,
-    Schemas["HttpValidationProblemDetails"],
-    { businessDisplayName: string; brandVertical: MetaBusinessVertical | "" }
-  >({
-    mutationFn: async (_values) => {
-      // TODO: call PUT /api/account/tenants/current/brand-profile when available
-      await Promise.resolve();
-    },
+  const saveBrandProfileMutation = api.useMutation("put", "/api/account/tenants/current/brand-profile", {
     onSuccess: () => {
       setBrandStepDone(true);
       toast.success(t`Brand profile saved`);
@@ -296,7 +284,7 @@ function WhatsappSetupPage() {
                       businessName: String(formData.get("businessName") ?? ""),
                       bankCode: String(formData.get("bankCode") ?? ""),
                       accountNumber: String(formData.get("accountNumber") ?? ""),
-                      percentageFee: 5
+                      percentageFee: 1
                     }
                   });
                 }}
@@ -371,8 +359,16 @@ function WhatsappSetupPage() {
                   e.preventDefault();
                   const formData = new FormData(e.currentTarget);
                   saveBrandProfileMutation.mutate({
-                    businessDisplayName: String(formData.get("businessDisplayName") ?? ""),
-                    brandVertical: (formData.get("brandVertical") ?? "") as MetaBusinessVertical | ""
+                    body: {
+                      businessDisplayName: String(formData.get("businessDisplayName") ?? ""),
+                      brandVertical: (formData.get("brandVertical") || "Other") as MetaBusinessVertical,
+                      brandAboutText: null,
+                      brandAddress: null,
+                      brandDescription: null,
+                      brandEmail: null,
+                      brandLogoUrl: null,
+                      brandWebsites: null
+                    }
                   });
                 }}
                 validationErrors={saveBrandProfileMutation.error?.errors}

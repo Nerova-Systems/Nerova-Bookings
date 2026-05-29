@@ -18,8 +18,8 @@ export const Route = createFileRoute("/whatsapp/preview")({
 function PreviewPage() {
   const navigate = useNavigate();
   const { data: config } = api.useQuery("get", "/api/whatsapp-flows/config");
+  const { data: previewData } = api.useQuery("get", "/api/whatsapp-flows/preview", {}, { retry: false });
 
-  // TODO(phase-5-followup): wire to GET /api/whatsapp-flows/preview once backend adds it
   const publishMutation = api.useMutation("post", "/api/whatsapp-flows/publish", {
     onSuccess: () => {
       toast.success(t`Flow published`);
@@ -77,11 +77,26 @@ function PreviewPage() {
           )}
 
           <div className="mt-6 flex flex-col gap-4">
-            <Button variant="secondary" disabled={true}>
-              <Trans>Open preview (coming soon)</Trans>
-            </Button>
+            {previewData?.previewUrl ? (
+              <a
+                href={previewData.previewUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex h-9 items-center justify-center rounded-md bg-secondary text-secondary-foreground shadow-xs hover:bg-secondary/80 px-4 py-2 text-sm font-medium transition-colors w-fit"
+              >
+                <Trans>Test Live Flow Preview</Trans>
+              </a>
+            ) : (
+              <Button variant="secondary" disabled={true} className="w-fit">
+                <Trans>Live Preview Unavailable</Trans>
+              </Button>
+            )}
             <p className="text-sm text-muted-foreground">
-              <Trans>Live preview is not yet available. Publish your flow to test it on your WhatsApp number.</Trans>
+              {previewData?.previewUrl ? (
+                <Trans>Your live WhatsApp Flow preview is ready. Click the button to test it on Meta's Business Suite.</Trans>
+              ) : (
+                <Trans>Live preview is not yet available. Click 'Publish Flow' first to register it on Meta and get a live test link.</Trans>
+              )}
             </p>
 
             {publishResponse && (

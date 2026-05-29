@@ -104,6 +104,7 @@ function getEventTypeTabs(draft: EventTypePayload, schedules: Schedule[]): Verti
   const scheduleName = schedules.find((schedule) => schedule.id === draft.scheduleId)?.name ?? "Working hours";
   const filteredTabNames = eventTypeTabNames.filter((tabName) => {
     if (tabName === "team") return !!draft.teamId;
+    if (tabName === "instant-meeting" || tabName === "ai-voice-agent") return false;
     return true;
   });
   return filteredTabNames.map((tabName) => ({

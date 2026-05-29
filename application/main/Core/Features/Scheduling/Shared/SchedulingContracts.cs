@@ -33,10 +33,11 @@ public sealed record PublicEventTypeResponse(
     EventTypeConfirmationPolicy ConfirmationPolicy,
     EventTypeRecurrence? Recurrence,
     EventTypeSeats Seats,
+    string? WabaPhoneNumber,
     PublicSchedulingProfileResponse Profile
 )
 {
-    public static PublicEventTypeResponse From(SchedulingProfile profile, EventType eventType)
+    public static PublicEventTypeResponse From(SchedulingProfile profile, EventType eventType, string? wabaPhoneNumber = null)
     {
         return new PublicEventTypeResponse(
             profile.Handle,
@@ -57,6 +58,7 @@ public sealed record PublicEventTypeResponse(
             eventType.Settings.ConfirmationPolicy,
             eventType.Settings.Recurrence,
             eventType.Settings.Seats,
+            wabaPhoneNumber,
             PublicSchedulingProfileResponse.From(profile)
         );
     }

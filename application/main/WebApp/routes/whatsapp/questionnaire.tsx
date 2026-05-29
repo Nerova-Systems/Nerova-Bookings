@@ -18,7 +18,7 @@ import { TextField } from "@repo/ui/components/TextField";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@repo/ui/components/Tooltip";
 import { mutationSubmitter } from "@repo/ui/forms/mutationSubmitter";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import type { CustomQuestionType } from "@/shared/lib/api/client";
 
@@ -66,6 +66,25 @@ function QuestionnairePage() {
   const [paymentTiming, setPaymentTiming] = useState<string>("");
   const [customQuestions, setCustomQuestions] = useState<CustomQuestion[]>([]);
   const tierLimits = useWhatsAppFlowTierLimits();
+
+  const { data: config } = api.useQuery("get", "/api/whatsapp-flows/config");
+
+  useEffect(() => {
+    if (config) {
+      if (config.paymentTiming) {
+        setPaymentTiming(config.paymentTiming);
+      }
+      if (config.customPreBookingQuestions) {
+        setCustomQuestions(
+          config.customPreBookingQuestions.map((q) => ({
+            text: q.questionText,
+            type: q.questionType as "Text" | "MultipleChoice" | "YesNo",
+            options: q.choices ?? undefined
+          }))
+        );
+      }
+    }
+  }, [config]);
 
   const addQuestionMutation = api.useMutation("post", "/api/whatsapp-flows/config/questions");
   const submitMutation = api.useMutation("post", "/api/whatsapp-flows/config", {
@@ -136,6 +155,7 @@ function QuestionnairePage() {
                 <SelectField
                   name="businessVertical"
                   label={t`Business vertical`}
+                  defaultValue={config?.businessVertical}
                   items={[
                     { value: BusinessVertical.HairSalon, label: t`Hair Salon` },
                     { value: BusinessVertical.BarberShop, label: t`Barber Shop` },
@@ -187,15 +207,16 @@ function QuestionnairePage() {
             {/* Step 2: Booking Preferences */}
             {currentStep === 1 && (
               <div className="flex flex-col gap-4">
-                <NumberField name="bookingWindowDays" label={t`Booking window (days)`} minValue={1} maxValue={365} />
+                 <NumberField name="bookingWindowDays" label={t`Booking window (days)`} defaultValue={config?.bookingWindowDays ?? 30} minValue={1} maxValue={365} />
                 <NumberField
                   name="defaultSessionMinutes"
                   label={t`Default session length (minutes)`}
+                  defaultValue={config?.defaultSessionMinutes ?? 60}
                   minValue={15}
                   maxValue={480}
                   step={5}
                 />
-                <SwitchField name="allowSameDayBookings" label={t`Allow same-day bookings`} />
+                 <SwitchField name="allowSameDayBookings" label={t`Allow same-day bookings`} defaultChecked={config?.allowSameDayBookings ?? true} />
               </div>
             )}
 
@@ -205,6 +226,7 @@ function QuestionnairePage() {
                 <SelectField
                   name="staffAssignment"
                   label={t`Staff assignment`}
+                  defaultValue={config?.staffAssignment}
                   items={[
                     { value: StaffAssignment.SpecificStaff, label: t`Specific staff` },
                     { value: StaffAssignment.FirstAvailable, label: t`First available` },
@@ -241,11 +263,12 @@ function QuestionnairePage() {
                   </SelectContent>
                 </SelectField>
                 <TierGatedOption locked={!tierLimits.multipleServicesInFlow}>
-                  <SwitchField
-                    name="hasMultipleServices"
-                    label={t`Offer multiple services`}
-                    disabled={!tierLimits.multipleServicesInFlow}
-                  />
+                    <SwitchField
+                     name="hasMultipleServices"
+                     label={t`Offer multiple services`}
+                     defaultChecked={config?.hasMultipleServices ?? false}
+                     disabled={!tierLimits.multipleServicesInFlow}
+                   />
                 </TierGatedOption>
               </div>
             )}
@@ -256,6 +279,7 @@ function QuestionnairePage() {
                 <SelectField
                   name="paymentTiming"
                   label={t`Payment timing`}
+                  defaultValue={config?.paymentTiming}
                   items={[
                     { value: PaymentTiming.AfterSession, label: t`After session` },
                     { value: PaymentTiming.BeforeBooking, label: t`Before booking` },
@@ -301,10 +325,11 @@ function QuestionnairePage() {
                   </SelectContent>
                 </SelectField>
                 {paymentTiming === PaymentTiming.Deposit && (
-                  <NumberField
+                   <NumberField
                     name="depositAmountCents"
                     label={t`Deposit amount`}
                     description={t`Amount in cents`}
+                    defaultValue={config?.depositAmountCents ?? 0}
                     minValue={0}
                   />
                 )}
@@ -333,15 +358,17 @@ function QuestionnairePage() {
                   />
                 )}
                 <Separator />
-                <TextAreaField
+                 <TextAreaField
                   name="confirmationMessageTemplate"
                   label={t`Confirmation message template`}
+                  defaultValue={config?.confirmationMessageTemplate ?? "Hi {name}, your booking for {service} on {time} with {staff} is confirmed."}
                   description={t`{{customerName}}, {{bookingTime}}, {{businessName}} placeholders supported`}
                 />
                 <Separator />
                 <TextField
                   name="cancellationContact"
                   label={t`Cancellation contact`}
+                  defaultValue={config?.cancellationContact ?? ""}
                   description={t`Phone or email customers should use to cancel`}
                 />
               </div>
