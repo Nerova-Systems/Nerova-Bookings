@@ -99,17 +99,11 @@ msgstr "1 TB storage"
 msgid "1 user permanently deleted"
 msgstr "1 user permanently deleted"
 
-msgid "1. Connect WhatsApp Business Account"
-msgstr "1. Connect WhatsApp Business Account"
-
 msgid "10 GB storage"
 msgstr "10 GB storage"
 
 msgid "10 users"
 msgstr "10 users"
-
-msgid "10-digit South African bank account"
-msgstr "10-digit South African bank account"
 
 msgid "100 GB storage"
 msgstr "100 GB storage"
@@ -120,29 +114,26 @@ msgstr "100% Security Score"
 msgid "12 hour"
 msgstr "12 hour"
 
-msgid "2. Phone number registered"
-msgstr "2. Phone number registered"
-
 msgid "24 hour"
 msgstr "24 hour"
-
-msgid "3. Generate encryption key pair"
-msgstr "3. Generate encryption key pair"
-
-msgid "4. Connect Paystack subaccount"
-msgstr "4. Connect Paystack subaccount"
 
 msgid "5 users"
 msgstr "5 users"
 
-msgid "5. Customise your brand"
-msgstr "5. Customise your brand"
+msgid "A 1% platform fee applies to all bookings processed through Nerova."
+msgstr "A 1% platform fee applies to all bookings processed through Nerova."
+
+msgid "A 2048-bit RSA key pair will be generated. The private key never leaves our servers."
+msgstr "A 2048-bit RSA key pair will be generated. The private key never leaves our servers."
 
 msgid "A different user logged in from another browser tab."
 msgstr "A different user logged in from another browser tab."
 
 msgid "A longer description of your business"
 msgstr "A longer description of your business"
+
+msgid "A longer description of your business (max 512 characters)"
+msgstr "A longer description of your business (max 512 characters)"
 
 #. placeholder {0}: currentStatus?.requestedDisplayName
 msgid "A name change request is already pending review: <0>“{0}”</0>. Submitting a new request will replace it."
@@ -289,8 +280,8 @@ msgstr "Add your account name"
 msgid "Add your account name and logo."
 msgstr "Add your account name and logo."
 
-msgid "Add your business details to personalise your WhatsApp profile."
-msgstr "Add your business details to personalise your WhatsApp profile."
+msgid "Add-on workflows"
+msgstr "Add-on workflows"
 
 msgid "Address"
 msgstr "Address"
@@ -306,9 +297,6 @@ msgstr "Advanced analytics"
 
 msgid "After approval, your WhatsApp display name will update automatically. Meta's review typically takes 1–3 business days."
 msgstr "After approval, your WhatsApp display name will update automatically. Meta's review typically takes 1–3 business days."
-
-msgid "All steps complete. Configure your booking flow to start accepting WhatsApp bookings."
-msgstr "All steps complete. Configure your booking flow to start accepting WhatsApp bookings."
 
 msgid "All tickets"
 msgstr "All tickets"
@@ -418,6 +406,12 @@ msgstr "Authentication is shared across all tabs. To use multiple accounts simul
 msgid "Authentication was cancelled or denied. Please try again if you want to continue."
 msgstr "Authentication was cancelled or denied. Please try again if you want to continue."
 
+msgid "Automatically identifies returning clients by phone number. New clients are onboarded with email verification and contact details. Returning clients with a new phone number verify via email OTP."
+msgstr "Automatically identifies returning clients by phone number. New clients are onboarded with email verification and contact details. Returning clients with a new phone number verify via email OTP."
+
+msgid "Automatically registered once step 1 is complete."
+msgstr "Automatically registered once step 1 is complete."
+
 msgid "Awaiting your reply"
 msgstr "Awaiting your reply"
 
@@ -444,6 +438,9 @@ msgstr "Back to signup"
 
 msgid "Bank"
 msgstr "Bank"
+
+msgid "Basic information shown on your WhatsApp Business profile."
+msgstr "Basic information shown on your WhatsApp Business profile."
 
 msgid "Basic information shown on your WhatsApp profile."
 msgstr "Basic information shown on your WhatsApp profile."
@@ -490,11 +487,20 @@ msgstr "Billing tabs"
 msgid "billing@company.com"
 msgstr "billing@company.com"
 
+msgid "Booking confirmation"
+msgstr "Booking confirmation"
+
+msgid "Booking confirmations, reminders, status updates."
+msgstr "Booking confirmations, reminders, status updates."
+
+msgid "Booking flow"
+msgstr "Booking flow"
+
+msgid "Booking reminders"
+msgstr "Booking reminders"
+
 msgid "Brand profile nudge"
 msgstr "Brand profile nudge"
-
-msgid "Brand profile saved"
-msgstr "Brand profile saved"
 
 msgid "Brand profile updated successfully"
 msgstr "Brand profile updated successfully"
@@ -523,8 +529,8 @@ msgstr "Business email"
 msgid "Business identity"
 msgstr "Business identity"
 
-msgid "Business name"
-msgstr "Business name"
+msgid "Business trading name"
+msgstr "Business trading name"
 
 msgid "By continuing, you accept our policies"
 msgstr "By continuing, you accept our policies"
@@ -628,6 +634,9 @@ msgstr "Clear search"
 msgid "Client ID"
 msgstr "Client ID"
 
+msgid "Client identification"
+msgstr "Client identification"
+
 msgid "Client secret"
 msgstr "Client secret"
 
@@ -662,9 +671,6 @@ msgstr "Complete your payment to activate your subscription."
 msgid "Compliance"
 msgstr "Compliance"
 
-msgid "Configure your booking flow"
-msgstr "Configure your booking flow"
-
 msgid "Confirm downgrade"
 msgstr "Confirm downgrade"
 
@@ -674,11 +680,14 @@ msgstr "Confirm team name"
 msgid "Connect Paystack"
 msgstr "Connect Paystack"
 
-msgid "Connect WhatsApp and Paystack to start taking bookings."
-msgstr "Connect WhatsApp and Paystack to start taking bookings."
+msgid "Connect Paystack for payments"
+msgstr "Connect Paystack for payments"
 
 msgid "Connect WhatsApp Business"
 msgstr "Connect WhatsApp Business"
+
+msgid "Connect WhatsApp Business Account"
+msgstr "Connect WhatsApp Business Account"
 
 msgid "Connect WhatsApp Business Account via Meta Embedded Signup"
 msgstr "Connect WhatsApp Business Account via Meta Embedded Signup"
@@ -697,6 +706,9 @@ msgstr "Continue"
 
 msgid "Control how your team appears to bookers."
 msgstr "Control how your team appears to bookers."
+
+msgid "Core flows"
+msgstr "Core flows"
 
 msgid "Could not save preferences. Please try again."
 msgstr "Could not save preferences. Please try again."
@@ -922,9 +934,6 @@ msgstr "Edit {0}"
 msgid "Edit billing information"
 msgstr "Edit billing information"
 
-msgid "Edit brand profile"
-msgstr "Edit brand profile"
-
 msgid "Edit general settings"
 msgstr "Edit general settings"
 
@@ -978,6 +987,9 @@ msgstr "Enter your email below to log in"
 msgid "Enter your new payment details below."
 msgstr "Enter your new payment details below."
 
+msgid "Enter your SA bank details to receive booking payments."
+msgstr "Enter your SA bank details to receive booking payments."
+
 msgid "Enter your verification code"
 msgstr "Enter your verification code"
 
@@ -989,6 +1001,9 @@ msgstr "Entry ID"
 
 msgid "Environment isolation"
 msgstr "Environment isolation"
+
+msgid "Estimated message costs"
+msgstr "Estimated message costs"
 
 msgid "Estimated next bill: {targetFormattedPrice}"
 msgstr "Estimated next bill: {targetFormattedPrice}"
@@ -1044,6 +1059,9 @@ msgstr "Filters"
 msgid "First name"
 msgstr "First name"
 
+msgid "Follow-ups, promotions, review requests. Coming soon."
+msgstr "Follow-ups, promotions, review requests. Coming soon."
+
 msgid "For detailed compliance certifications and audit reports, visit Microsoft's official resources."
 msgstr "For detailed compliance certifications and audit reports, visit Microsoft's official resources."
 
@@ -1068,6 +1086,9 @@ msgstr "Full access except changing user roles and account settings"
 msgid "Full access including user roles and account settings"
 msgstr "Full access including user roles and account settings"
 
+msgid "Full message usage analytics, cost breakdowns, and delivery reports are being built. In the meantime, here's what you need to know about WhatsApp messaging costs."
+msgstr "Full message usage analytics, cost breakdowns, and delivery reports are being built. In the meantime, here's what you need to know about WhatsApp messaging costs."
+
 msgid "Fully managed infrastructure"
 msgstr "Fully managed infrastructure"
 
@@ -1082,6 +1103,9 @@ msgstr "GDPR Compliant"
 
 msgid "General"
 msgstr "General"
+
+msgid "Generate encryption key pair"
+msgstr "Generate encryption key pair"
 
 msgid "Generate key pair"
 msgstr "Generate key pair"
@@ -1272,9 +1296,6 @@ msgstr "Let's set up your profile"
 msgid "Light"
 msgstr "Light"
 
-msgid "Link your WABA to enable WhatsApp bookings."
-msgstr "Link your WABA to enable WhatsApp bookings."
-
 msgid "LinkedIn"
 msgstr "LinkedIn"
 
@@ -1357,6 +1378,9 @@ msgstr "Manage your subscription plan."
 msgid "Manage your users and permissions here."
 msgstr "Manage your users and permissions here."
 
+msgid "Manage your WhatsApp Business Account, configure your profile, and control booking workflows."
+msgstr "Manage your WhatsApp Business Account, configure your profile, and control booking workflows."
+
 msgid "Managed identities"
 msgstr "Managed identities"
 
@@ -1365,6 +1389,9 @@ msgstr "Mark as resolved"
 
 msgid "Marked as solved"
 msgstr "Marked as solved"
+
+msgid "Marketing messages"
+msgstr "Marketing messages"
 
 msgid "Max 75 characters. Allowed: letters, digits, spaces, and ' . , & - ( ) /"
 msgstr "Max 75 characters. Allowed: letters, digits, spaces, and ' . , & - ( ) /"
@@ -1558,6 +1585,9 @@ msgstr "Only trusted personnel access data through Azure AD authentication"
 msgid "Open your first ticket"
 msgstr "Open your first ticket"
 
+msgid "Opens a Meta-hosted popup to connect your WABA in a few clicks."
+msgstr "Opens a Meta-hosted popup to connect your WABA in a few clicks."
+
 msgid "or"
 msgstr "or"
 
@@ -1612,6 +1642,9 @@ msgstr "Pay and upgrade"
 msgid "Payment authentication failed."
 msgstr "Payment authentication failed."
 
+msgid "Payment before booking"
+msgstr "Payment before booking"
+
 msgid "Payment completed but no Paystack reference was returned."
 msgstr "Payment completed but no Paystack reference was returned."
 
@@ -1639,14 +1672,14 @@ msgstr "Paystack subaccount connected"
 msgid "Pending"
 msgstr "Pending"
 
-msgid "Pending — complete step 1 first"
-msgstr "Pending — complete step 1 first"
-
 msgid "Pending payment completed"
 msgstr "Pending payment completed"
 
 msgid "Pending review"
 msgstr "Pending review"
+
+msgid "per message (ZAR)"
+msgstr "per message (ZAR)"
 
 #. placeholder {0}: selectedUsers.length
 msgid "Permanently delete {0} users"
@@ -1660,6 +1693,9 @@ msgstr "Permanently delete users"
 
 msgid "Permissions"
 msgstr "Permissions"
+
+msgid "Phone number verified"
+msgstr "Phone number verified"
 
 msgid "Pick a name and a URL slug. You can configure branding and invite members after creating the team."
 msgstr "Pick a name and a URL slug. You can configure branding and invite members after creating the team."
@@ -1718,6 +1754,9 @@ msgstr "Premium"
 msgid "Previous"
 msgstr "Previous"
 
+msgid "Prices are approximate and based on Meta's current ZAR pricing. Actual costs may vary based on message category and Meta's pricing updates. Booking flow interactions within WhatsApp Flows do not incur per-message charges."
+msgstr "Prices are approximate and based on Meta's current ZAR pricing. Actual costs may vary based on message category and Meta's pricing updates. Booking flow interactions within WhatsApp Flows do not incur per-message charges."
+
 msgid "Priority support"
 msgstr "Priority support"
 
@@ -1771,9 +1810,6 @@ msgstr "Reactivate subscription"
 
 msgid "Receipt"
 msgstr "Receipt"
-
-msgid "Receive booking payments via Paystack."
-msgstr "Receive booking payments via Paystack."
 
 msgid "Recycle bin"
 msgstr "Recycle bin"
@@ -1847,6 +1883,9 @@ msgstr "Requested display name"
 #. placeholder {0}: displayNameStatus.requestedDisplayName
 msgid "Requested: {0}"
 msgstr "Requested: {0}"
+
+msgid "Require payment or a deposit before confirming the booking. Adds a payment link page to the booking flow. Requires Paystack to be connected."
+msgstr "Require payment or a deposit before confirming the booking. Adds a payment link page to the booking flow. Requires Paystack to be connected."
 
 msgid "Required for end-to-end encrypted WhatsApp Flows."
 msgstr "Required for end-to-end encrypted WhatsApp Flows."
@@ -1935,9 +1974,6 @@ msgstr "Saturday"
 msgid "Save"
 msgstr "Save"
 
-msgid "Save & continue"
-msgstr "Save & continue"
-
 msgid "Save changes"
 msgstr "Save changes"
 
@@ -1958,6 +1994,9 @@ msgstr "Search by name, email, or title"
 
 msgid "Search users"
 msgstr "Search users"
+
+msgid "Secure Meta Embedded Signup"
+msgstr "Secure Meta Embedded Signup"
 
 msgid "Security, privacy, and compliance information"
 msgstr "Security, privacy, and compliance information"
@@ -1996,6 +2035,12 @@ msgstr "Send"
 
 msgid "Send a test email to this address"
 msgstr "Send a test email to this address"
+
+msgid "Send a WhatsApp confirmation message after a booking is completed. Includes booking details, staff name, and cancellation contact. Sent as a utility message."
+msgstr "Send a WhatsApp confirmation message after a booking is completed. Includes booking details, staff name, and cancellation contact. Sent as a utility message."
+
+msgid "Send an automated WhatsApp reminder before the appointment. Reduces no-shows by up to 40%. Sent as a utility message."
+msgstr "Send an automated WhatsApp reminder before the appointment. Reduces no-shows by up to 40%. Sent as a utility message."
 
 msgid "Send invite"
 msgstr "Send invite"
@@ -2039,6 +2084,12 @@ msgstr "Sessions"
 msgid "Settings"
 msgstr "Settings"
 
+msgid "Setup"
+msgstr "Setup"
+
+msgid "Setup complete 🎉"
+msgstr "Setup complete 🎉"
+
 msgid "Show details"
 msgstr "Show details"
 
@@ -2050,6 +2101,9 @@ msgstr "Shown across booking pages and email notifications for this organization
 
 msgid "Sign in with Google accounts from your workspace domain."
 msgstr "Sign in with Google accounts from your workspace domain."
+
+msgid "Sign in with Meta to link your WhatsApp Business number."
+msgstr "Sign in with Meta to link your WhatsApp Business number."
 
 msgid "Sign in with Microsoft accounts from your Azure tenant."
 msgstr "Sign in with Microsoft accounts from your Azure tenant."
@@ -2074,9 +2128,6 @@ msgstr "Signup verification code"
 
 msgid "Skip"
 msgstr "Skip"
-
-msgid "Skip for now"
-msgstr "Skip for now"
 
 msgid "SLA"
 msgstr "SLA"
@@ -2146,6 +2197,9 @@ msgstr "Street address"
 
 msgid "Strict separation prevents production data from leaking to other environments"
 msgstr "Strict separation prevents production data from leaking to other environments"
+
+msgid "Structured booking experience: service selection → date → time → summary → confirm. Multi-location tenants automatically see department/team selection. Service details (duration, cost, description) shown via info drawer."
+msgstr "Structured booking experience: service selection → date → time → summary → confirm. Multi-location tenants automatically see department/team selection. Service details (duration, cost, description) shown via info drawer."
 
 msgid "Subject"
 msgstr "Subject"
@@ -2307,6 +2361,9 @@ msgstr "The verified name shown to users in WhatsApp. Changes require Meta revie
 msgid "Theme"
 msgstr "Theme"
 
+msgid "These flows are always active and handle core booking functionality."
+msgstr "These flows are always active and handle core booking functionality."
+
 msgid "This account is linked to a different Google identity."
 msgstr "This account is linked to a different Google identity."
 
@@ -2357,6 +2414,9 @@ msgstr "To delete your account, please contact our support team."
 
 msgid "Toggle features available to your account."
 msgstr "Toggle features available to your account."
+
+msgid "Toggle these workflows to extend your booking experience. Each adds a utility message to the flow."
+msgstr "Toggle these workflows to extend your booking experience. Each adds a utility message to the flow."
 
 msgid "Too expensive"
 msgstr "Too expensive"
@@ -2461,6 +2521,12 @@ msgstr "URLs shown on your WhatsApp profile. Your plan supports 1 website."
 msgid "URLs shown on your WhatsApp profile. Your plan supports up to 2 websites."
 msgstr "URLs shown on your WhatsApp profile. Your plan supports up to 2 websites."
 
+msgid "Usage"
+msgstr "Usage"
+
+msgid "Usage tracking coming soon"
+msgstr "Usage tracking coming soon"
+
 msgid "Use SSL"
 msgstr "Use SSL"
 
@@ -2542,6 +2608,12 @@ msgstr "Users loading"
 msgid "Users who haven't confirmed their email"
 msgstr "Users who haven't confirmed their email"
 
+msgid "Utility messages"
+msgstr "Utility messages"
+
+msgid "Utility messages (reminders, confirmations) are billed at WhatsApp's utility rate. Marketing messages (follow-ups, promotions) are coming soon and will be billed at a separate rate."
+msgstr "Utility messages (reminders, confirmations) are billed at WhatsApp's utility rate. Marketing messages (follow-ups, promotions) are coming soon and will be billed at a separate rate."
+
 msgid "VAT number"
 msgstr "VAT number"
 
@@ -2608,8 +2680,8 @@ msgstr "What's happening?"
 msgid "WhatsApp"
 msgstr "WhatsApp"
 
-msgid "WhatsApp Brand"
-msgstr "WhatsApp Brand"
+msgid "WhatsApp Business"
+msgstr "WhatsApp Business"
 
 msgid "WhatsApp Business Account connected"
 msgstr "WhatsApp Business Account connected"
@@ -2623,9 +2695,6 @@ msgstr "WhatsApp connection was cancelled."
 msgid "WhatsApp display name"
 msgstr "WhatsApp display name"
 
-msgid "WhatsApp setup"
-msgstr "WhatsApp setup"
-
 msgid "WhatsApp sign-up failed. Please try again."
 msgstr "WhatsApp sign-up failed. Please try again."
 
@@ -2634,6 +2703,9 @@ msgstr "When you accept this invitation, your profile information (name, title, 
 
 msgid "When you ask the team for help, your conversations will live here. We typically reply within a business day."
 msgstr "When you ask the team for help, your conversations will live here. We typically reply within a business day."
+
+msgid "Workflows"
+msgstr "Workflows"
 
 msgid "Workspace domain"
 msgstr "Workspace domain"
@@ -2679,9 +2751,6 @@ msgstr "You have unsaved changes. If you leave now, your changes will be lost."
 msgid "You were logged out from another browser tab."
 msgstr "You were logged out from another browser tab."
 
-msgid "You're all set!"
-msgstr "You're all set!"
-
 #. placeholder {0}: getPlanLabel(currentPlan)
 msgid "Your {0} subscription has been cancelled and will end on {formattedPeriodEnd}."
 msgstr "Your {0} subscription has been cancelled and will end on {formattedPeriodEnd}."
@@ -2701,17 +2770,20 @@ msgstr "Your account was switched in another browser tab."
 msgid "Your account was switched to <0>{newTenantName}</0> in another browser tab."
 msgstr "Your account was switched to <0>{newTenantName}</0> in another browser tab."
 
-msgid "Your brand profile has been saved."
-msgstr "Your brand profile has been saved."
-
 msgid "Your business logo shown on WhatsApp."
 msgstr "Your business logo shown on WhatsApp."
+
+msgid "Your business photo shown on WhatsApp. Changes sync to the Graph API."
+msgstr "Your business photo shown on WhatsApp. Changes sync to the Graph API."
 
 msgid "Your cancellation will be reversed and your {planName} subscription will remain active."
 msgstr "Your cancellation will be reversed and your {planName} subscription will remain active."
 
 msgid "Your changes may take a moment to appear."
 msgstr "Your changes may take a moment to appear."
+
+msgid "Your credentials are handled securely by Meta"
+msgstr "Your credentials are handled securely by Meta"
 
 msgid "Your data stays in the Azure region you select at signup"
 msgstr "Your data stays in the Azure region you select at signup"
@@ -2722,14 +2794,15 @@ msgstr "Your downgrade has been scheduled."
 msgid "Your email address cannot be changed. An owner must delete your account and reinvite you with the new email address."
 msgstr "Your email address cannot be changed. An owner must delete your account and reinvite you with the new email address."
 
+#. placeholder {0}: status.displayPhoneNumber
+msgid "Your number {0} is registered and active."
+msgstr "Your number {0} is registered and active."
+
 msgid "Your payment card is expired or expiring soon. Please update your payment method to avoid service interruption."
 msgstr "Your payment card is expired or expiring soon. Please update your payment method to avoid service interruption."
 
 msgid "Your payment card is expiring soon. Update your payment method to avoid interruption."
 msgstr "Your payment card is expiring soon. Update your payment method to avoid interruption."
-
-msgid "Your phone number must be registered with WhatsApp."
-msgstr "Your phone number must be registered with WhatsApp."
 
 msgid "Your plan has been upgraded."
 msgstr "Your plan has been upgraded."
@@ -2792,6 +2865,9 @@ msgstr "Your verification code has expired"
 
 msgid "Your verification code is valid for {expiresInString}"
 msgstr "Your verification code is valid for {expiresInString}"
+
+msgid "Your WhatsApp Business Account is connected and ready. Configure your business profile in the Profile tab."
+msgstr "Your WhatsApp Business Account is connected and ready. Configure your business profile in the Profile tab."
 
 msgid "yourname@example.com"
 msgstr "yourname@example.com"

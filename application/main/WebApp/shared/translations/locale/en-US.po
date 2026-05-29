@@ -11,17 +11,10 @@ msgstr ""
 "Language-Team: \n"
 "Plural-Forms: \n"
 
-msgid "{{customerName}}, {{bookingTime}}, {{businessName}} placeholders supported"
-msgstr "{{customerName}}, {{bookingTime}}, {{businessName}} placeholders supported"
-
 #. placeholder {0}: getBookingEmptyDescription(status)
 #. placeholder {0}: getBookingStatusLabel(bookingStatus)
 msgid "{0}"
 msgstr "{0}"
-
-#. placeholder {0}: workflow.steps.length
-msgid "{0} steps"
-msgstr "{0} steps"
 
 #. placeholder {0}: schedule.availabilityWindows.length
 msgid "{0} windows"
@@ -40,9 +33,6 @@ msgstr "{totalCount} {0} bookings"
 msgid "{value} stars and up"
 msgstr "{value} stars and up"
 
-msgid "<0>Upgrade your plan</0> to unlock this option."
-msgstr "<0>Upgrade your plan</0> to unlock this option."
-
 msgid "0 active"
 msgstr "0 active"
 
@@ -55,26 +45,14 @@ msgstr "A confirmation will be sent to the email address you provided."
 msgid "Accepted"
 msgstr "Accepted"
 
-msgid "Action"
-msgstr "Action"
-
 msgid "Active"
 msgstr "Active"
-
-msgid "Active (coming soon)"
-msgstr "Active (coming soon)"
 
 msgid "Active bookings per booker"
 msgstr "Active bookings per booker"
 
-msgid "Active on event types"
-msgstr "Active on event types"
-
 msgid "Add a question"
 msgstr "Add a question"
-
-msgid "Add a step to send a reminder, email, or message."
-msgstr "Add a step to send a reminder, email, or message."
 
 msgid "Add an internal note"
 msgstr "Add an internal note"
@@ -121,12 +99,6 @@ msgstr "Add override"
 msgid "Add private link"
 msgstr "Add private link"
 
-msgid "Add question"
-msgstr "Add question"
-
-msgid "Add step"
-msgstr "Add step"
-
 msgid "Add time"
 msgstr "Add time"
 
@@ -135,9 +107,6 @@ msgstr "Add to calendar"
 
 msgid "Add webhook"
 msgstr "Add webhook"
-
-msgid "Add workflow"
-msgstr "Add workflow"
 
 msgid "Add, remove, and weight individual hosts and host groups."
 msgstr "Add, remove, and weight individual hosts and host groups."
@@ -153,12 +122,6 @@ msgstr "After buffer"
 
 msgid "After event"
 msgstr "After event"
-
-msgid "After session"
-msgstr "After session"
-
-msgid "After the event ends"
-msgstr "After the event ends"
 
 msgid "Agent configuration"
 msgstr "Agent configuration"
@@ -186,15 +149,6 @@ msgstr "Allow rescheduling cancelled bookings"
 
 msgid "Allow rescheduling past bookings"
 msgstr "Allow rescheduling past bookings"
-
-msgid "Allow same-day bookings"
-msgstr "Allow same-day bookings"
-
-msgid "Amount in cents"
-msgstr "Amount in cents"
-
-msgid "Answer 10 questions to publish your WhatsApp booking flow."
-msgstr "Answer 10 questions to publish your WhatsApp booking flow."
 
 msgid "Any rating"
 msgstr "Any rating"
@@ -232,14 +186,8 @@ msgstr "Attendee name"
 msgid "Attendees"
 msgstr "Attendees"
 
-msgid "Auto assign"
-msgstr "Auto assign"
-
 msgid "Automate reminders and follow-up messages for this event type."
 msgstr "Automate reminders and follow-up messages for this event type."
-
-msgid "Automate reminders, follow-ups, and notifications for your bookings."
-msgstr "Automate reminders, follow-ups, and notifications for your bookings."
 
 msgid "Availability"
 msgstr "Availability"
@@ -262,26 +210,14 @@ msgstr "Back to availability"
 msgid "Back to dates"
 msgstr "Back to dates"
 
-msgid "Back to questionnaire"
-msgstr "Back to questionnaire"
-
 msgid "Back to times"
 msgstr "Back to times"
-
-msgid "Barber Shop"
-msgstr "Barber Shop"
 
 msgid "Basics"
 msgstr "Basics"
 
-msgid "Before booking"
-msgstr "Before booking"
-
 msgid "Before buffer"
 msgstr "Before buffer"
-
-msgid "Before the event starts"
-msgstr "Before the event starts"
 
 msgid "Block slot while pending"
 msgstr "Block slot while pending"
@@ -361,12 +297,6 @@ msgstr "Booking rescheduled"
 msgid "Booking volume"
 msgstr "Booking volume"
 
-msgid "Booking window (days)"
-msgstr "Booking window (days)"
-
-msgid "Booking windows & durations"
-msgstr "Booking windows & durations"
-
 msgid "Bookings"
 msgstr "Bookings"
 
@@ -402,9 +332,6 @@ msgstr "Burning the midnight oil, {firstName}?"
 
 msgid "Burning the midnight oil?"
 msgstr "Burning the midnight oil?"
-
-msgid "Business vertical"
-msgstr "Business vertical"
 
 msgid "By"
 msgstr "By"
@@ -453,9 +380,6 @@ msgstr "Cancel selected"
 msgid "Cancellation and reschedule"
 msgstr "Cancellation and reschedule"
 
-msgid "Cancellation contact"
-msgstr "Cancellation contact"
-
 msgid "Cancellation notice"
 msgstr "Cancellation notice"
 
@@ -493,9 +417,6 @@ msgstr "Choose which schedule controls when this event type can be booked."
 msgid "Clear"
 msgstr "Clear"
 
-msgid "Clinic"
-msgstr "Clinic"
-
 msgid "Column"
 msgstr "Column"
 
@@ -520,9 +441,6 @@ msgstr "Configure instant booking alerts"
 msgid "Configure qualification AI agent"
 msgstr "Configure qualification AI agent"
 
-msgid "Configure your booking flow"
-msgstr "Configure your booking flow"
-
 msgid "Confirm booking"
 msgstr "Confirm booking"
 
@@ -537,12 +455,6 @@ msgstr "Confirm this booking?"
 
 msgid "Confirmation"
 msgstr "Confirmation"
-
-msgid "Confirmation message template"
-msgstr "Confirmation message template"
-
-msgid "Confirmation template"
-msgstr "Confirmation template"
 
 msgid "Confirmed"
 msgstr "Confirmed"
@@ -635,9 +547,6 @@ msgstr "Could not start connector setup."
 msgid "Count no-shows"
 msgstr "Count no-shows"
 
-msgid "Create"
-msgstr "Create"
-
 msgid "Create a private setup event type before opening public booking."
 msgstr "Create a private setup event type before opening public booking."
 
@@ -674,23 +583,11 @@ msgstr "Create the booking page basics now, then finish setup on the next screen
 msgid "Create webhook"
 msgstr "Create webhook"
 
-msgid "Create workflow"
-msgstr "Create workflow"
-
-msgid "Create your first workflow to automate reminders and notifications."
-msgstr "Create your first workflow to automate reminders and notifications."
-
 msgid "Created"
 msgstr "Created"
 
-msgid "Custom"
-msgstr "Custom"
-
 msgid "Custom event name"
 msgstr "Custom event name"
-
-msgid "Custom pre-booking questions require an upgraded plan — <0>upgrade your plan</0> to unlock this option."
-msgstr "Custom pre-booking questions require an upgraded plan — <0>upgrade your plan</0> to unlock this option."
 
 msgid "Custom reply-to email"
 msgstr "Custom reply-to email"
@@ -719,20 +616,11 @@ msgstr "Date overrides"
 msgid "Date range"
 msgstr "Date range"
 
-msgid "Days"
-msgstr "Days"
-
 msgid "Default"
 msgstr "Default"
 
 msgid "Default conferencing"
 msgstr "Default conferencing"
-
-msgid "Default session (min)"
-msgstr "Default session (min)"
-
-msgid "Default session length (minutes)"
-msgstr "Default session length (minutes)"
 
 msgid "Default view"
 msgstr "Default view"
@@ -760,18 +648,6 @@ msgstr "Delete webhook"
 
 msgid "Delete webhook?"
 msgstr "Delete webhook?"
-
-msgid "Delete workflow"
-msgstr "Delete workflow"
-
-msgid "Delete workflow?"
-msgstr "Delete workflow?"
-
-msgid "Deposit"
-msgstr "Deposit"
-
-msgid "Deposit amount"
-msgstr "Deposit amount"
 
 msgid "Description"
 msgstr "Description"
@@ -845,35 +721,11 @@ msgstr "Edit location"
 msgid "Edit webhook"
 msgstr "Edit webhook"
 
-msgid "Edit workflow"
-msgstr "Edit workflow"
-
 msgid "Email"
 msgstr "Email"
 
 msgid "Email address"
 msgstr "Email address"
-
-msgid "Email address or phone number depending on the action."
-msgstr "Email address or phone number depending on the action."
-
-msgid "Email body"
-msgstr "Email body"
-
-msgid "email step"
-msgstr "email step"
-
-msgid "Email subject"
-msgstr "Email subject"
-
-msgid "Email to a specific address"
-msgstr "Email to a specific address"
-
-msgid "Email to attendee"
-msgstr "Email to attendee"
-
-msgid "Email to host"
-msgstr "Email to host"
 
 msgid "Email verification"
 msgstr "Email verification"
@@ -883,9 +735,6 @@ msgstr "Embed"
 
 msgid "Enable AI voice agent"
 msgstr "Enable AI voice agent"
-
-msgid "Enabling and disabling workflows is coming soon."
-msgstr "Enabling and disabling workflows is coming soon."
 
 msgid "End"
 msgstr "End"
@@ -926,12 +775,6 @@ msgstr "Event type deleted"
 msgid "Event type duplicated"
 msgstr "Event type duplicated"
 
-msgid "Event type linked"
-msgstr "Event type linked"
-
-msgid "Event type unlinked"
-msgstr "Event type unlinked"
-
 msgid "Event type updated"
 msgstr "Event type updated"
 
@@ -949,9 +792,6 @@ msgstr "Exactly one default schedule exists"
 
 msgid "Exclude emails"
 msgstr "Exclude emails"
-
-msgid "Existing links are not displayed yet."
-msgstr "Existing links are not displayed yet."
 
 msgid "Expires"
 msgstr "Expires"
@@ -993,21 +833,8 @@ msgstr "Filter"
 msgid "Filter bookings"
 msgstr "Filter bookings"
 
-msgid "Final details"
-msgstr "Final details"
-
-msgid "First available"
-msgstr "First available"
-
 msgid "First slot only"
 msgstr "First slot only"
-
-msgid "Flow published"
-msgstr "Flow published"
-
-#. placeholder {0}: publishResponse.flowId
-msgid "Flow published — ID: {0}"
-msgstr "Flow published — ID: {0}"
 
 msgid "For security, the signing secret is only shown once — right after the webhook is created. If you've lost it, delete this webhook and create a new one to receive a fresh secret."
 msgstr "For security, the signing secret is only shown once — right after the webhook is created. If you've lost it, delete this webhook and create a new one to receive a fresh secret."
@@ -1075,9 +902,6 @@ msgstr "Guests added"
 msgid "Guests will receive an invite for this booking."
 msgstr "Guests will receive an invite for this booking."
 
-msgid "Hair Salon"
-msgstr "Hair Salon"
-
 msgid "Has internal note"
 msgstr "Has internal note"
 
@@ -1116,9 +940,6 @@ msgstr "Host subset rotation"
 
 msgid "Hosts"
 msgstr "Hosts"
-
-msgid "Hours"
-msgstr "Hours"
 
 msgid "How often you can be booked"
 msgstr "How often you can be booked"
@@ -1217,17 +1038,8 @@ msgstr "Link"
 msgid "Link copied"
 msgstr "Link copied"
 
-msgid "Link copied!"
-msgstr "Link copied!"
-
 msgid "List view"
 msgstr "List view"
-
-msgid "Live preview is not yet available. Click 'Publish Flow' first to register it on Meta and get a live test link."
-msgstr "Live preview is not yet available. Click 'Publish Flow' first to register it on Meta and get a live test link."
-
-msgid "Live Preview Unavailable"
-msgstr "Live Preview Unavailable"
 
 msgid "Loading apps..."
 msgstr "Loading apps..."
@@ -1258,12 +1070,6 @@ msgstr "Loading webhook..."
 
 msgid "Loading webhooks..."
 msgstr "Loading webhooks..."
-
-msgid "Loading workflow..."
-msgstr "Loading workflow..."
-
-msgid "Loading workflows..."
-msgstr "Loading workflows..."
 
 msgid "Loading..."
 msgstr "Loading..."
@@ -1363,9 +1169,6 @@ msgstr "Meeting started"
 msgid "Members handling the most bookings."
 msgstr "Members handling the most bookings."
 
-msgid "Message"
-msgstr "Message"
-
 msgid "Message (optional)"
 msgstr "Message (optional)"
 
@@ -1374,9 +1177,6 @@ msgstr "Minimum length"
 
 msgid "Minimum rating"
 msgstr "Minimum rating"
-
-msgid "Minutes"
-msgstr "Minutes"
 
 msgid "Minutes duration"
 msgstr "Minutes duration"
@@ -1411,26 +1211,14 @@ msgstr "Move this booking to a different host. The new host will be notified."
 msgid "Multi-select"
 msgstr "Multi-select"
 
-msgid "Multiple choice"
-msgstr "Multiple choice"
-
 msgid "Multiple emails"
 msgstr "Multiple emails"
 
 msgid "Multiple Emails"
 msgstr "Multiple Emails"
 
-msgid "Multiple services"
-msgstr "Multiple services"
-
-msgid "N/A"
-msgstr "N/A"
-
 msgid "Name"
 msgstr "Name"
-
-msgid "Name your workflow and pick the trigger that schedules its reminders."
-msgstr "Name your workflow and pick the trigger that schedules its reminders."
 
 msgid "Navigation"
 msgstr "Navigation"
@@ -1447,20 +1235,11 @@ msgstr "New host user ID"
 msgid "New schedule"
 msgstr "New schedule"
 
-msgid "New step"
-msgstr "New step"
-
 msgid "New webhook"
 msgstr "New webhook"
 
-msgid "New workflow"
-msgstr "New workflow"
-
 msgid "Next"
 msgstr "Next"
-
-msgid "No"
-msgstr "No"
 
 #. placeholder {0}: getBookingStatusLabel(status).toLowerCase()
 msgid "No {0} bookings yet"
@@ -1514,9 +1293,6 @@ msgstr "No destination calendar"
 msgid "No destination calendar selected"
 msgstr "No destination calendar selected"
 
-msgid "No event types available."
-msgstr "No event types available."
-
 msgid "No event types match your search."
 msgstr "No event types match your search."
 
@@ -1550,9 +1326,6 @@ msgstr "No settings available yet."
 msgid "No specific schedule"
 msgstr "No specific schedule"
 
-msgid "No steps yet"
-msgstr "No steps yet"
-
 msgid "No team members match your search."
 msgstr "No team members match your search."
 
@@ -1570,12 +1343,6 @@ msgstr "No weekly availability"
 
 msgid "No weekly hours"
 msgstr "No weekly hours"
-
-msgid "No workflows configured."
-msgstr "No workflows configured."
-
-msgid "No workflows yet"
-msgstr "No workflows yet"
 
 msgid "No-show"
 msgstr "No-show"
@@ -1616,9 +1383,6 @@ msgstr "Occurrences"
 msgid "Offer multiple seats for each available time."
 msgstr "Offer multiple seats for each available time."
 
-msgid "Offer multiple services"
-msgstr "Offer multiple services"
-
 msgid "Offer reschedule when at limit"
 msgstr "Offer reschedule when at limit"
 
@@ -1651,15 +1415,6 @@ msgstr "Opening secure booking portal..."
 
 msgid "Option"
 msgstr "Option"
-
-#. placeholder {0}: optionIndex + 1
-msgid "Option {0}"
-msgstr "Option {0}"
-
-#. placeholder {0}: optionIndex + 1
-#. placeholder {1}: index + 1
-msgid "Option {0} for question {1}"
-msgstr "Option {0} for question {1}"
 
 msgid "Option label"
 msgstr "Option label"
@@ -1695,20 +1450,11 @@ msgstr "Paused webhooks stop receiving deliveries until reactivated."
 msgid "Payment"
 msgstr "Payment"
 
-msgid "Payment setup"
-msgstr "Payment setup"
-
-msgid "Payment timing"
-msgstr "Payment timing"
-
 msgid "Pending"
 msgstr "Pending"
 
 msgid "Per-event-type calendar destination is not yet configurable — connected calendars are used for availability only."
 msgstr "Per-event-type calendar destination is not yet configurable — connected calendars are used for availability only."
-
-msgid "Personal Trainer"
-msgstr "Personal Trainer"
 
 msgid "Phone"
 msgstr "Phone"
@@ -1718,9 +1464,6 @@ msgstr "Phone call"
 
 msgid "Phone number"
 msgstr "Phone number"
-
-msgid "Phone or email customers should use to cancel"
-msgstr "Phone or email customers should use to cancel"
 
 msgid "Ping"
 msgstr "Ping"
@@ -1733,9 +1476,6 @@ msgstr "Preview"
 
 msgid "Preview booking page"
 msgstr "Preview booking page"
-
-msgid "Preview your flow"
-msgstr "Preview your flow"
 
 msgid "Previous"
 msgstr "Previous"
@@ -1767,30 +1507,8 @@ msgstr "Public booking"
 msgid "Public link copied"
 msgstr "Public link copied"
 
-msgid "Publish flow"
-msgstr "Publish flow"
-
-msgid "Publish my flow"
-msgstr "Publish my flow"
-
 msgid "Question"
 msgstr "Question"
-
-#. placeholder {0}: index + 1
-msgid "Question {0}"
-msgstr "Question {0}"
-
-msgid "Question text"
-msgstr "Question text"
-
-msgid "Question text is required."
-msgstr "Question text is required."
-
-msgid "Question text must be at least {MIN_QUESTION_TEXT_LENGTH} characters."
-msgstr "Question text must be at least {MIN_QUESTION_TEXT_LENGTH} characters."
-
-msgid "Question type"
-msgstr "Question type"
 
 msgid "Radio"
 msgstr "Radio"
@@ -1809,9 +1527,6 @@ msgstr "Rated"
 
 msgid "Rating"
 msgstr "Rating"
-
-msgid "Rating request"
-msgstr "Rating request"
 
 msgid "Rating saved"
 msgstr "Rating saved"
@@ -1870,12 +1585,6 @@ msgstr "Rejection"
 msgid "Rejection reason"
 msgstr "Rejection reason"
 
-msgid "Reminder"
-msgstr "Reminder"
-
-msgid "Remove"
-msgstr "Remove"
-
 msgid "Remove date override"
 msgstr "Remove date override"
 
@@ -1895,19 +1604,8 @@ msgstr "Remove link"
 msgid "Remove option"
 msgstr "Remove option"
 
-#. placeholder {0}: optionIndex + 1
-msgid "Remove option {0}"
-msgstr "Remove option {0}"
-
 msgid "Remove private link"
 msgstr "Remove private link"
-
-msgid "Remove question"
-msgstr "Remove question"
-
-#. placeholder {0}: index + 1
-msgid "Remove question {0}"
-msgstr "Remove question {0}"
 
 msgid "Remove time"
 msgstr "Remove time"
@@ -1981,9 +1679,6 @@ msgstr "Rolling window"
 msgid "Round robin"
 msgstr "Round robin"
 
-msgid "Same-day bookings"
-msgstr "Same-day bookings"
-
 msgid "Sat"
 msgstr "Sat"
 
@@ -2007,9 +1702,6 @@ msgstr "Save schedule"
 
 msgid "Save webhook"
 msgstr "Save webhook"
-
-msgid "Save workflow"
-msgstr "Save workflow"
 
 msgid "Saved filters"
 msgstr "Saved filters"
@@ -2140,9 +1832,6 @@ msgstr "Send bookers to a custom page after success or cancellation."
 msgid "Send Cal Video transcription emails"
 msgstr "Send Cal Video transcription emails"
 
-msgid "Send Cal.com-compatible booking emails when lifecycle events happen."
-msgstr "Send Cal.com-compatible booking emails when lifecycle events happen."
-
 msgid "Send Cal.com-compatible booking lifecycle payloads to external systems."
 msgstr "Send Cal.com-compatible booking lifecycle payloads to external systems."
 
@@ -2158,14 +1847,8 @@ msgstr "Send signed HTTP notifications to your services when booking lifecycle e
 msgid "Send test event"
 msgstr "Send test event"
 
-msgid "Send to"
-msgstr "Send to"
-
 msgid "Sent"
 msgstr "Sent"
-
-msgid "Services & team"
-msgstr "Services & team"
 
 msgid "Set as default"
 msgstr "Set as default"
@@ -2194,14 +1877,8 @@ msgstr "Share how this meeting went. Your feedback is private to your team."
 msgid "Share one-off booking links that bypass the public schedule."
 msgstr "Share one-off booking links that bypass the public schedule."
 
-msgid "Share your booking link"
-msgstr "Share your booking link"
-
 msgid "Short Text"
 msgstr "Short Text"
-
-msgid "Short text answer"
-msgstr "Short text answer"
 
 msgid "Show attendee info"
 msgstr "Show attendee info"
@@ -2227,20 +1904,8 @@ msgstr "Slot interval"
 msgid "Slug"
 msgstr "Slug"
 
-msgid "SMS to a specific number"
-msgstr "SMS to a specific number"
-
-msgid "SMS to attendee"
-msgstr "SMS to attendee"
-
 msgid "Something doesn't look right?"
 msgstr "Something doesn't look right?"
-
-msgid "Specific staff"
-msgstr "Specific staff"
-
-msgid "Staff assignment"
-msgstr "Staff assignment"
 
 msgid "Start"
 msgstr "Start"
@@ -2256,24 +1921,6 @@ msgstr "Status"
 
 msgid "Status breakdown"
 msgstr "Status breakdown"
-
-msgid "Step {current} of {total}"
-msgstr "Step {current} of {total}"
-
-msgid "Step {stepNumber}"
-msgstr "Step {stepNumber}"
-
-msgid "Step added"
-msgstr "Step added"
-
-msgid "Step removed"
-msgstr "Step removed"
-
-msgid "Step updated"
-msgstr "Step updated"
-
-msgid "Steps"
-msgstr "Steps"
 
 msgid "Subscriber URL"
 msgstr "Subscriber URL"
@@ -2296,23 +1943,11 @@ msgstr "Target URL"
 msgid "Team"
 msgstr "Team"
 
-msgid "Tell us about your business"
-msgstr "Tell us about your business"
-
-msgid "Template"
-msgstr "Template"
-
 msgid "Test"
 msgstr "Test"
 
 msgid "Test event queued for delivery"
 msgstr "Test event queued for delivery"
-
-msgid "Test Live Flow Preview"
-msgstr "Test Live Flow Preview"
-
-msgid "Test the flow"
-msgstr "Test the flow"
 
 msgid "Test webhook queued"
 msgstr "Test webhook queued"
@@ -2322,9 +1957,6 @@ msgstr "Text"
 
 msgid "Textarea"
 msgstr "Textarea"
-
-msgid "Thank you"
-msgstr "Thank you"
 
 msgid "The attendee will be asked to pick a new time. Add an optional message."
 msgstr "The attendee will be asked to pick a new time. Add an optional message."
@@ -2347,12 +1979,6 @@ msgstr "The endpoint <0>{0}</0> will stop receiving deliveries. This cannot be u
 
 msgid "The event type scope is locked once a webhook is created."
 msgstr "The event type scope is locked once a webhook is created."
-
-msgid "The list-bindings endpoint is on the backlog. Toggle to link or unlink."
-msgstr "The list-bindings endpoint is on the backlog. Toggle to link or unlink."
-
-msgid "The trigger can't be changed after the workflow is created."
-msgstr "The trigger can't be changed after the workflow is created."
 
 msgid "This action applies to every selected booking."
 msgstr "This action applies to every selected booking."
@@ -2396,9 +2022,6 @@ msgstr "This rejects the pending booking with {0}."
 msgid "This removes the booking page for {deleteSubject}."
 msgstr "This removes the booking page for {deleteSubject}."
 
-msgid "This removes the workflow \"{expectedName}\" and every reminder it schedules. Type the workflow name to confirm."
-msgstr "This removes the workflow \"{expectedName}\" and every reminder it schedules. Type the workflow name to confirm."
-
 msgid "This will record that the attendee did not show up for the meeting."
 msgstr "This will record that the attendee did not show up for the meeting."
 
@@ -2410,9 +2033,6 @@ msgstr "Thu"
 
 msgid "Thursday"
 msgstr "Thursday"
-
-msgid "Time before/after event"
-msgstr "Time before/after event"
 
 msgid "Time slots"
 msgstr "Time slots"
@@ -2444,9 +2064,6 @@ msgstr "Top hosts"
 msgid "Total bookings"
 msgstr "Total bookings"
 
-msgid "Trigger"
-msgstr "Trigger"
-
 msgid "Triggers"
 msgstr "Triggers"
 
@@ -2458,9 +2075,6 @@ msgstr "Tuesday"
 
 msgid "Tune how the schedule presents available slots to bookers."
 msgstr "Tune how the schedule presents available slots to bookers."
-
-msgid "Tutor"
-msgstr "Tutor"
 
 msgid "Type"
 msgstr "Type"
@@ -2478,20 +2092,11 @@ msgstr "Uninstall {0}?"
 msgid "Uninstall app"
 msgstr "Uninstall app"
 
-msgid "Unit"
-msgstr "Unit"
-
 msgid "Untitled field"
 msgstr "Untitled field"
 
-msgid "Untitled workflow"
-msgstr "Untitled workflow"
-
 msgid "Update where this booking takes place."
 msgstr "Update where this booking takes place."
-
-msgid "Upgrade"
-msgstr "Upgrade"
 
 msgid "URL"
 msgstr "URL"
@@ -2513,9 +2118,6 @@ msgstr "Used"
 
 msgid "user_..."
 msgstr "user_..."
-
-msgid "Variables like {EVENT_NAME} and {ATTENDEE_NAME} are replaced at send time."
-msgstr "Variables like {EVENT_NAME} and {ATTENDEE_NAME} are replaced at send time."
 
 msgid "Video call"
 msgstr "Video call"
@@ -2540,9 +2142,6 @@ msgstr "Visibility"
 
 msgid "We will display this email address as the organizer, and send confirmation emails here."
 msgstr "We will display this email address as the organizer, and send confirmation emails here."
-
-msgid "We'll use this to set up your booking flow the right way."
-msgstr "We'll use this to set up your booking flow the right way."
 
 msgid "Webhook"
 msgstr "Webhook"
@@ -2577,9 +2176,6 @@ msgstr "Weekly"
 msgid "Weekly hours"
 msgstr "Weekly hours"
 
-msgid "Weeks"
-msgstr "Weeks"
-
 msgid "Welcome to {productName}"
 msgstr "Welcome to {productName}"
 
@@ -2592,53 +2188,17 @@ msgstr "What went well, what could improve?"
 msgid "What your booker should provide to receive confirmations"
 msgstr "What your booker should provide to receive confirmations"
 
-msgid "WhatsApp"
-msgstr "WhatsApp"
-
 msgid "WhatsApp Booking First"
 msgstr "WhatsApp Booking First"
 
 msgid "WhatsApp Connection Pending"
 msgstr "WhatsApp Connection Pending"
 
-msgid "WhatsApp to a specific number"
-msgstr "WhatsApp to a specific number"
-
-msgid "WhatsApp to attendee"
-msgstr "WhatsApp to attendee"
-
 msgid "When"
 msgstr "When"
 
-msgid "When a booking is cancelled"
-msgstr "When a booking is cancelled"
-
-msgid "When a booking is rescheduled"
-msgstr "When a booking is rescheduled"
-
-msgid "When a new booking is created"
-msgstr "When a new booking is created"
-
 msgid "Why is this booking being reassigned?"
 msgstr "Why is this booking being reassigned?"
-
-msgid "Workflow"
-msgstr "Workflow"
-
-msgid "Workflow created"
-msgstr "Workflow created"
-
-msgid "Workflow deleted"
-msgstr "Workflow deleted"
-
-msgid "Workflow name"
-msgstr "Workflow name"
-
-msgid "Workflow renamed"
-msgstr "Workflow renamed"
-
-msgid "Workflow saved"
-msgstr "Workflow saved"
 
 msgid "Workflows"
 msgstr "Workflows"
@@ -2649,14 +2209,8 @@ msgstr "Yearly"
 msgid "Yes"
 msgstr "Yes"
 
-msgid "Yes / No"
-msgstr "Yes / No"
-
 msgid "You can select multiple and your bookers can switch views."
 msgstr "You can select multiple and your bookers can switch views."
-
-msgid "You have reached the maximum of {maxQuestions} questions."
-msgstr "You have reached the maximum of {maxQuestions} questions."
 
 msgid "You successfully deployed {productName}! 🎉"
 msgstr "You successfully deployed {productName}! 🎉"
@@ -2670,14 +2224,8 @@ msgstr "Your booking is confirmed."
 msgid "Your dashboard is empty"
 msgstr "Your dashboard is empty"
 
-msgid "Your live WhatsApp Flow preview is ready. Click the button to test it on Meta's Business Suite."
-msgstr "Your live WhatsApp Flow preview is ready. Click the button to test it on Meta's Business Suite."
-
 msgid "Your name"
 msgstr "Your name"
 
 msgid "Your stored connection will be removed. Existing bookings keep their location and calendar destination, but new bookings will no longer use this app."
 msgstr "Your stored connection will be removed. Existing bookings keep their location and calendar destination, but new bookings will no longer use this app."
-
-msgid "Your WhatsApp booking link"
-msgstr "Your WhatsApp booking link"
