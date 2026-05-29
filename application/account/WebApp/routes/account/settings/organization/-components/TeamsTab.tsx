@@ -25,7 +25,7 @@ export function OrgTeamsTab() {
           )}
         </p>
         <Link
-          to="/account/settings/teams"
+          to="/account/teams"
           className={buttonVariants({ variant: "default" })}
           aria-label={t`Manage teams`}
         >

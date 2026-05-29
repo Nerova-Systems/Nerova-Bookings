@@ -2,10 +2,12 @@ import type { FileUploadMutation } from "@repo/ui/types/FileUpload";
 
 import { t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
+import { useFeatureFlag } from "@repo/infrastructure/featureFlags/useFeatureFlag";
 import { AppLayout } from "@repo/ui/components/AppLayout";
 import { Button } from "@repo/ui/components/Button";
 import { Form } from "@repo/ui/components/Form";
 import { Separator } from "@repo/ui/components/Separator";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@repo/ui/components/Tabs";
 import { mutationSubmitter } from "@repo/ui/forms/mutationSubmitter";
 import { useUnsavedChangesGuard } from "@repo/ui/hooks/useUnsavedChangesGuard";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -19,8 +21,11 @@ import { UnsavedChangesDialog } from "@/shared/components/UnsavedChangesDialog";
 import { api, type Schemas, UserRole } from "@/shared/lib/api/client";
 
 import { AccountInfoFields } from "./-components/AccountInfoFields";
+import { BrandProfileTab } from "./-components/BrandProfileTab";
 import DeleteAccountConfirmation from "./-components/DeleteAccountConfirmation";
 import { FeaturesSection } from "./-components/FeaturesSection";
+import { OrgSmtpTab } from "./organization/-components/SmtpTab";
+import { OrgSsoTab } from "./organization/-components/SsoTab";
 
 export const Route = createFileRoute("/account/settings/")({
   staticData: { trackingTitle: "Account settings" },
@@ -28,7 +33,7 @@ export const Route = createFileRoute("/account/settings/")({
 });
 
 // Danger zone component
-function DangerZone({ setIsDeleteModalOpen }: { setIsDeleteModalOpen: (open: boolean) => void }) {
+function DangerZone({ setIsDeleteModalOpen }: Readonly<{ setIsDeleteModalOpen: (open: boolean) => void }>) {
   return (
     <div className="mt-12 flex flex-col gap-4">
       <h3>
@@ -56,6 +61,9 @@ export function AccountSettings() {
   const [isFormDirty, setIsFormDirty] = useState(false);
   const queryClient = useQueryClient();
 
+  const { enabled: isSsoEnabled } = useFeatureFlag("sso");
+  const { enabled: isSmtpEnabled } = useFeatureFlag("cap-custom-smtp");
+
   const { data: tenant, isLoading: tenantLoading } = api.useQuery("get", "/api/account/tenants/current");
   const { data: currentUser, isLoading: userLoading } = api.useQuery("get", "/api/account/users/me");
   const updateCurrentTenantMutation = api.useMutation("put", "/api/account/tenants/current");
@@ -63,6 +71,7 @@ export function AccountSettings() {
   const removeTenantLogoMutation = api.useMutation("delete", "/api/account/tenants/current/remove-logo");
 
   const isOwner = currentUser?.role === UserRole.Owner;
+  const canManage = currentUser?.role === UserRole.Owner || currentUser?.role === UserRole.Admin;
 
   const saveMutation = useMutation<
     void,
@@ -105,7 +114,7 @@ export function AccountSettings() {
     hasUnsavedChanges: isFormDirty && isOwner
   });
 
-  if (tenantLoading || userLoading) {
+  if (tenantLoading || userLoading || !tenant) {
     return null;
   }
 
@@ -115,43 +124,82 @@ export function AccountSettings() {
         variant="center"
         maxWidth="64rem"
         balanceWidth="16rem"
-        title={t`Account settings`}
-        subtitle={t`Manage your account here.`}
+        title={tenant.name}
+        subtitle={t`Account settings`}
       >
-        <Form
-          onSubmit={isOwner ? mutationSubmitter(saveMutation) : undefined}
-          validationErrors={isOwner ? saveMutation.error?.errors : undefined}
-          validationBehavior="aria"
-          className="flex flex-col gap-4"
-          onChange={() => setIsFormDirty(true)}
-        >
-          <AccountFields
-            layout="horizontal"
-            tenant={tenant}
-            isPending={saveMutation.isPending}
-            onLogoFileSelect={handleLogoFileSelect}
-            onLogoRemove={handleLogoRemove}
-            readOnly={!isOwner}
-            tooltip={isOwner ? t`The name of your account, shown to users and in email notifications` : undefined}
-            description={!isOwner ? t`Only account owners can modify the account name` : undefined}
-            onChange={() => setIsFormDirty(true)}
-            infoFields={<AccountInfoFields tenant={tenant} />}
-          />
+        <Tabs defaultValue="profile">
+          <TabsList className="mb-4">
+            <TabsTrigger value="profile">
+              <Trans>Profile</Trans>
+            </TabsTrigger>
+            <TabsTrigger value="brand">
+              <Trans>WhatsApp Brand</Trans>
+            </TabsTrigger>
+            {isSsoEnabled && (
+              <TabsTrigger value="sso">
+                <Trans>SSO</Trans>
+              </TabsTrigger>
+            )}
+            {isSmtpEnabled && (
+              <TabsTrigger value="smtp">
+                <Trans>SMTP</Trans>
+              </TabsTrigger>
+            )}
+          </TabsList>
 
-          {isOwner && (
-            <div className="mt-4 md:grid md:grid-cols-[8.5rem_1fr] md:gap-8">
-              <div />
-              <div className="flex sm:justify-end">
-                <Button type="submit" isPending={saveMutation.isPending}>
-                  {saveMutation.isPending ? <Trans>Saving...</Trans> : <Trans>Save changes</Trans>}
-                </Button>
-              </div>
-            </div>
+          <TabsContent value="profile">
+            <Form
+              onSubmit={isOwner ? mutationSubmitter(saveMutation) : undefined}
+              validationErrors={isOwner ? saveMutation.error?.errors : undefined}
+              validationBehavior="aria"
+              className="flex flex-col gap-4 pt-4"
+              onChange={() => setIsFormDirty(true)}
+            >
+              <AccountFields
+                layout="horizontal"
+                tenant={tenant}
+                isPending={saveMutation.isPending}
+                onLogoFileSelect={handleLogoFileSelect}
+                onLogoRemove={handleLogoRemove}
+                readOnly={!isOwner}
+                tooltip={isOwner ? t`The name of your account, shown to users and in email notifications` : undefined}
+                description={!isOwner ? t`Only account owners can modify the account name` : undefined}
+                onChange={() => setIsFormDirty(true)}
+                infoFields={<AccountInfoFields tenant={tenant} />}
+              />
+
+              {isOwner && (
+                <div className="mt-4 md:grid md:grid-cols-[8.5rem_1fr] md:gap-8">
+                  <div />
+                  <div className="flex sm:justify-end">
+                    <Button type="submit" isPending={saveMutation.isPending}>
+                      {saveMutation.isPending ? <Trans>Saving...</Trans> : <Trans>Save changes</Trans>}
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </Form>
+
+            {isOwner && <FeaturesSection />}
+            {isOwner && <DangerZone setIsDeleteModalOpen={setIsDeleteModalOpen} />}
+          </TabsContent>
+
+          <TabsContent value="brand">
+            <BrandProfileTab />
+          </TabsContent>
+
+          {isSsoEnabled && (
+            <TabsContent value="sso">
+              <OrgSsoTab canManage={canManage} />
+            </TabsContent>
           )}
-        </Form>
 
-        {isOwner && <FeaturesSection />}
-        {isOwner && <DangerZone setIsDeleteModalOpen={setIsDeleteModalOpen} />}
+          {isSmtpEnabled && (
+            <TabsContent value="smtp">
+              <OrgSmtpTab canManage={canManage} />
+            </TabsContent>
+          )}
+        </Tabs>
       </AppLayout>
 
       <DeleteAccountConfirmation isOpen={isDeleteModalOpen} onOpenChange={setIsDeleteModalOpen} />

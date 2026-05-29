@@ -25,7 +25,8 @@ public sealed record EventTypeResponse(
     bool AssignAllTeamMembers,
     bool HideOrganizerEmail,
     bool BookingRequiresAuthentication,
-    UserId? SecondaryEmailUserId
+    UserId? SecondaryEmailUserId,
+    TenantId? TeamId
 )
 {
     public static EventTypeResponse From(EventType eventType)
@@ -49,7 +50,8 @@ public sealed record EventTypeResponse(
             eventType.AssignAllTeamMembers,
             eventType.HideOrganizerEmail,
             eventType.BookingRequiresAuthentication,
-            eventType.SecondaryEmailUserId
+            eventType.SecondaryEmailUserId,
+            eventType.TeamId
         );
     }
 }

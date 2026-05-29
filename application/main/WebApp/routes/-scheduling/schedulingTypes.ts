@@ -7,7 +7,7 @@ export type AvailabilityWindow = Schemas["AvailabilityWindowRequest"];
 export type AvailabilityDateOverride = NonNullable<SchedulePayload["dateOverrides"]>[number];
 export type AvailabilityOverrideWindow = AvailabilityDateOverride["windows"][number];
 export type EventType = Schemas["EventTypeResponse"];
-export type EventTypePayload = Schemas["CreateEventTypeCommand"];
+export type EventTypePayload = Schemas["CreateEventTypeCommand"] & { teamId?: string | null };
 export type EventTypeUpdatePayload = Schemas["UpdateEventTypeCommand"];
 export type CoreConnectorCalendar = { integration: string; externalId: string; credentialId?: string | null };
 export type CoreConnectorConferencing = { app: string; credentialId?: string | null };
@@ -112,7 +112,8 @@ export function eventTypeToPayload(eventType: EventType): EventTypePayload {
     minimumBookingNoticeMinutes: eventType.minimumBookingNoticeMinutes,
     locationType: eventType.locationType,
     locationValue: eventType.locationValue,
-    settings: eventType.settings
+    settings: eventType.settings,
+    teamId: (eventType as any).teamId
   };
 }
 

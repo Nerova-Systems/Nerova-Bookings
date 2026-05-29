@@ -32,9 +32,10 @@ function suggestSlug(name: string): string {
 interface CreateTeamDialogProps {
   isOpen: boolean;
   onOpenChange: (isOpen: boolean) => void;
+  onSuccessRedirect?: (createdTeamId: string) => void;
 }
 
-export function CreateTeamDialog({ isOpen, onOpenChange }: Readonly<CreateTeamDialogProps>) {
+export function CreateTeamDialog({ isOpen, onOpenChange, onSuccessRedirect }: Readonly<CreateTeamDialogProps>) {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
@@ -83,7 +84,11 @@ export function CreateTeamDialog({ isOpen, onOpenChange }: Readonly<CreateTeamDi
           });
           toast.success(t`Team created: ${created.name}`);
           onOpenChange(false);
-          navigate({ to: "/account/settings/teams/$teamId", params: { teamId: created.id } });
+          if (onSuccessRedirect) {
+            onSuccessRedirect(created.id);
+          } else {
+            navigate({ to: "/account/teams", search: { teamId: created.id } });
+          }
         }
       }
     );

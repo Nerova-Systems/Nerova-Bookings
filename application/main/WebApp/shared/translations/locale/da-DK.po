@@ -508,6 +508,12 @@ msgstr "Konfiguration påkrævet"
 msgid "Configure different events for people to book on your calendar."
 msgstr "Konfigurer forskellige events, som folk kan booke i din kalender."
 
+msgid "Configure instant booking alerts"
+msgstr ""
+
+msgid "Configure qualification AI agent"
+msgstr ""
+
 msgid "Configure your booking flow"
 msgstr ""
 
@@ -1294,6 +1300,9 @@ msgstr "Gør en anden tidsplan til standard, før du sletter denne."
 
 msgid "Manage apps"
 msgstr "Administrer apps"
+
+msgid "Manage team hosts & round-robin"
+msgstr ""
 
 msgid "Manage weekly schedules for booking availability."
 msgstr "Administrer ugentlige tidsplaner for bookingtilgængelighed."

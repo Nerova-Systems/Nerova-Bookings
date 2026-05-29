@@ -58,7 +58,7 @@ export function BrandProfileNudgeBanner() {
       <span className="flex-1 text-info-foreground">
         <Trans>Complete your brand profile to publish your WhatsApp flow.</Trans>
       </span>
-      <Button variant="default" size="sm" render={<RouterLink to="/account/settings/brand" />}>
+      <Button variant="default" size="sm" render={<RouterLink to="/account/settings" />}>
         <Trans>Complete profile</Trans>
       </Button>
       <button

@@ -109,7 +109,6 @@ export function UserGroup({ isActive }: Readonly<{ isActive: IsActiveFn }>) {
 export type AccountGroupProps = {
   isActive: IsActiveFn;
   isAccountOverviewEnabled: boolean;
-  showOrganization: boolean;
   showTeams: boolean;
   showRoles: boolean;
   showAuditLog: boolean;
@@ -157,22 +156,14 @@ export function AccountGroup(props: Readonly<AccountGroupProps>) {
               </RouterLink>
             </SidebarMenuButton>
           </SidebarMenuItem>
-          {props.showOrganization && (
-            <AccountNavItem
-              to="/account/settings/organization"
-              icon={<LandmarkIcon />}
-              label={<Trans>Organization</Trans>}
-              tooltip={t`Organization`}
-              isActive={isActive("/account/settings/organization", true)}
-            />
-          )}
+
           {props.showTeams && (
             <AccountNavItem
-              to="/account/settings/teams"
+              to="/account/teams"
               icon={<TeamsIcon />}
               label={<Trans>Teams</Trans>}
               tooltip={t`Teams`}
-              isActive={isActive("/account/settings/teams", true)}
+              isActive={isActive("/account/teams", true)}
             />
           )}
           {props.showRoles && (
@@ -209,13 +200,7 @@ export function AccountGroup(props: Readonly<AccountGroupProps>) {
             tooltip={t`WhatsApp`}
             isActive={isActive("/whatsapp", true)}
           />
-          <AccountNavItem
-            to="/account/settings/brand"
-            icon={<SparklesIcon />}
-            label={<Trans>Brand profile</Trans>}
-            tooltip={t`Brand profile`}
-            isActive={isActive("/account/settings/brand", true)}
-          />
+
         </SidebarMenu>
       </SidebarGroupContent>
     </SidebarGroup>

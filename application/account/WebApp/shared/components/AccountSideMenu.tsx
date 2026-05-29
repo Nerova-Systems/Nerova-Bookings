@@ -66,7 +66,6 @@ export function AccountSideMenu() {
   const showBilling = userInfo?.role === "Owner" && isSubscriptionEnabled;
   const showRoles = isPrivileged && isTierEnterpriseEnabled;
   const showTeams = isPrivileged && isTierTeamsEnabled;
-  const showOrganization = isPrivileged && isTierOrganizationsEnabled;
   const showAuditLog = isPrivileged && isAuditLogEnabled;
 
   return (
@@ -80,7 +79,6 @@ export function AccountSideMenu() {
           <AccountGroup
             isActive={isActive}
             isAccountOverviewEnabled={isAccountOverviewEnabled}
-            showOrganization={showOrganization}
             showTeams={showTeams}
             showRoles={showRoles}
             showAuditLog={showAuditLog}

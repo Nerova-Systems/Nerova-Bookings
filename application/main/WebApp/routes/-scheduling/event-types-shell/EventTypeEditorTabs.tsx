@@ -11,7 +11,9 @@ import {
   RefreshCcwIcon,
   SlidersHorizontalIcon,
   WebhookIcon,
-  ZapIcon
+  ZapIcon,
+  UsersIcon,
+  BotIcon
 } from "lucide-react";
 
 import type { ApiValidationError, EventTypePayload, Schedule } from "../schedulingTypes";
@@ -100,7 +102,11 @@ export function EventTypeEditorTabs({
 
 function getEventTypeTabs(draft: EventTypePayload, schedules: Schedule[]): VerticalTabItem[] {
   const scheduleName = schedules.find((schedule) => schedule.id === draft.scheduleId)?.name ?? "Working hours";
-  return eventTypeTabNames.map((tabName) => ({
+  const filteredTabNames = eventTypeTabNames.filter((tabName) => {
+    if (tabName === "team") return !!draft.teamId;
+    return true;
+  });
+  return filteredTabNames.map((tabName) => ({
     value: tabName,
     label: getEventTypeTabLabel(tabName),
     description: getEventTypeTabDescription(tabName, draft, scheduleName),
@@ -120,6 +126,12 @@ function getEventTypeTabDescription(tabName: EventTypeTabName, draft: EventTypeP
       return t`Calendar settings & more...`;
     case "recurring":
       return t`Set up a repeating schedule`;
+    case "team":
+      return t`Manage team hosts & round-robin`;
+    case "instant-meeting":
+      return t`Configure instant booking alerts`;
+    case "ai-voice-agent":
+      return t`Configure qualification AI agent`;
     case "apps":
       return t`0 apps, 0 active`;
     case "workflows":
@@ -143,6 +155,12 @@ function getEventTypeTabIcon(tabName: EventTypeTabName) {
       return <SlidersHorizontalIcon />;
     case "recurring":
       return <RefreshCcwIcon />;
+    case "team":
+      return <UsersIcon />;
+    case "instant-meeting":
+      return <ZapIcon />;
+    case "ai-voice-agent":
+      return <BotIcon />;
     case "apps":
       return <Grid3X3Icon />;
     case "workflows":
@@ -170,6 +188,12 @@ function renderEventTypeTab(
       return <EventTypeAdvancedTab {...tabProps} />;
     case "recurring":
       return <EventTypeRecurringTab {...tabProps} />;
+    case "team":
+      return <EventTypeTeamTab {...tabProps} />;
+    case "instant-meeting":
+      return <EventTypeInstantMeetingTab {...tabProps} />;
+    case "ai-voice-agent":
+      return <EventTypeAiVoiceAgentTab {...tabProps} />;
     case "apps":
       return <EventTypeAppsTab {...tabProps} />;
     case "workflows":

@@ -433,7 +433,7 @@ function WhatsappSetupPage() {
               </div>
             </CardHeader>
             <CardContent>
-              <RouterLink to="/account/settings/brand" className="text-sm text-primary underline underline-offset-4">
+              <RouterLink to="/account/settings" className="text-sm text-primary underline underline-offset-4">
                 <Trans>Edit brand profile</Trans>
               </RouterLink>
             </CardContent>

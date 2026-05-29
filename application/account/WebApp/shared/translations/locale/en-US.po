@@ -397,9 +397,6 @@ msgstr "Attach"
 msgid "Attachments"
 msgstr "Attachments"
 
-msgid "Attributes"
-msgstr "Attributes"
-
 msgid "Audit log"
 msgstr "Audit log"
 
@@ -492,9 +489,6 @@ msgstr "Billing tabs"
 
 msgid "billing@company.com"
 msgstr "billing@company.com"
-
-msgid "Brand profile"
-msgstr "Brand profile"
 
 msgid "Brand profile nudge"
 msgstr "Brand profile nudge"
@@ -640,6 +634,9 @@ msgstr "Client secret"
 msgid "Close"
 msgstr "Close"
 
+msgid "Close team details"
+msgstr "Close team details"
+
 msgid "Close user profile"
 msgstr "Close user profile"
 
@@ -734,9 +731,6 @@ msgstr "Create role"
 msgid "Create team"
 msgstr "Create team"
 
-msgid "Create teams to group members and share event types, schedules, and bookings."
-msgstr "Create teams to group members and share event types, schedules, and bookings."
-
 msgid "Create your account"
 msgstr "Create your account"
 
@@ -766,9 +760,6 @@ msgstr "Custom SMTP"
 
 msgid "Customer deleted"
 msgstr "Customer deleted"
-
-msgid "Customise the details shown on your WhatsApp Business profile."
-msgstr "Customise the details shown on your WhatsApp Business profile."
 
 msgid "Customize which optional features are enabled for your account."
 msgstr "Customize which optional features are enabled for your account."
@@ -934,8 +925,15 @@ msgstr "Edit billing information"
 msgid "Edit brand profile"
 msgstr "Edit brand profile"
 
+msgid "Edit general settings"
+msgstr "Edit general settings"
+
 msgid "Edit profile"
 msgstr "Edit profile"
+
+#. placeholder {0}: team.name
+msgid "Edit team - {0}"
+msgstr "Edit team - {0}"
 
 #. placeholder {0}: team.name
 msgid "Edit team members - {0}"
@@ -1280,6 +1278,9 @@ msgstr "Link your WABA to enable WhatsApp bookings."
 msgid "LinkedIn"
 msgstr "LinkedIn"
 
+msgid "Loading members..."
+msgstr "Loading members..."
+
 msgid "Loading permissions..."
 msgstr "Loading permissions..."
 
@@ -1344,9 +1345,6 @@ msgstr "Manage subscription"
 msgid "Manage teams"
 msgstr "Manage teams"
 
-msgid "Manage your account here."
-msgstr "Manage your account here."
-
 msgid "Manage your organization's subscription and invoices."
 msgstr "Manage your organization's subscription and invoices."
 
@@ -1373,9 +1371,6 @@ msgstr "Max 75 characters. Allowed: letters, digits, spaces, and ' . , & - ( ) /
 
 msgid "Member"
 msgstr "Member"
-
-msgid "Member attributes are coming soon."
-msgstr "Member attributes are coming soon."
 
 msgid "Member removed"
 msgstr "Member removed"
@@ -1494,6 +1489,9 @@ msgstr "No longer needed"
 msgid "No members in this organization yet."
 msgstr "No members in this organization yet."
 
+msgid "No members yet."
+msgstr "No members yet."
+
 msgid "No members yet. Invite your first teammate to get started."
 msgstr "No members yet. Invite your first teammate to get started."
 
@@ -1563,17 +1561,11 @@ msgstr "Open your first ticket"
 msgid "or"
 msgstr "or"
 
-msgid "Organization"
-msgstr "Organization"
-
 msgid "Organization name"
 msgstr "Organization name"
 
 msgid "Organization profile updated"
 msgstr "Organization profile updated"
-
-msgid "Organization settings"
-msgstr "Organization settings"
 
 msgid "Organization-level billing controls are coming soon. In the meantime, you can manage your subscription from the main billing page."
 msgstr "Organization-level billing controls are coming soon. In the meantime, you can manage your subscription from the main billing page."
@@ -2224,6 +2216,9 @@ msgstr "Team deleted: {0}"
 msgid "Team description"
 msgstr "Team description"
 
+msgid "Team details"
+msgstr "Team details"
+
 msgid "Team members"
 msgstr "Team members"
 
@@ -2435,6 +2430,9 @@ msgstr "Update the billing details associated with your subscription."
 msgid "Update the role's permissions or description."
 msgstr "Update the role's permissions or description."
 
+msgid "Update the team's profile information, visibility, and branding settings."
+msgstr "Update the team's profile information, visibility, and branding settings."
+
 msgid "Update your profile picture and personal details here."
 msgstr "Update your profile picture and personal details here."
 
@@ -2610,6 +2608,9 @@ msgstr "What's happening?"
 msgid "WhatsApp"
 msgstr "WhatsApp"
 
+msgid "WhatsApp Brand"
+msgstr "WhatsApp Brand"
+
 msgid "WhatsApp Business Account connected"
 msgstr "WhatsApp Business Account connected"
 
@@ -2660,9 +2661,6 @@ msgstr "You closed this ticket · just now"
 
 msgid "You do not have permission to access this page."
 msgstr "You do not have permission to access this page."
-
-msgid "You don't have permission to view organization settings."
-msgstr "You don't have permission to view organization settings."
 
 msgid "You don't have permission to view the audit log."
 msgstr "You don't have permission to view the audit log."

@@ -397,9 +397,6 @@ msgstr "Vedhæft"
 msgid "Attachments"
 msgstr "Vedhæftede filer"
 
-msgid "Attributes"
-msgstr ""
-
 msgid "Audit log"
 msgstr "Revisionslog"
 
@@ -492,9 +489,6 @@ msgstr "Faktureringsfaner"
 
 msgid "billing@company.com"
 msgstr "fakturering@firma.dk"
-
-msgid "Brand profile"
-msgstr "Brandprofil"
 
 msgid "Brand profile nudge"
 msgstr "Brandprofil-påmindelse"
@@ -640,6 +634,9 @@ msgstr "Klienthemmelighed"
 msgid "Close"
 msgstr "Luk"
 
+msgid "Close team details"
+msgstr ""
+
 msgid "Close user profile"
 msgstr "Luk brugerprofil"
 
@@ -734,9 +731,6 @@ msgstr ""
 msgid "Create team"
 msgstr ""
 
-msgid "Create teams to group members and share event types, schedules, and bookings."
-msgstr ""
-
 msgid "Create your account"
 msgstr "Opret din konto"
 
@@ -766,9 +760,6 @@ msgstr "Brugerdefineret SMTP"
 
 msgid "Customer deleted"
 msgstr "Kunde slettet"
-
-msgid "Customise the details shown on your WhatsApp Business profile."
-msgstr "Tilpas oplysningerne vist på din WhatsApp Business-profil."
 
 msgid "Customize which optional features are enabled for your account."
 msgstr "Tilpas hvilke valgfri funktioner der er aktiveret for din konto."
@@ -934,8 +925,15 @@ msgstr "Rediger faktureringsoplysninger"
 msgid "Edit brand profile"
 msgstr "Rediger brandprofil"
 
+msgid "Edit general settings"
+msgstr ""
+
 msgid "Edit profile"
 msgstr "Rediger profil"
+
+#. placeholder {0}: team.name
+msgid "Edit team - {0}"
+msgstr ""
 
 #. placeholder {0}: team.name
 msgid "Edit team members - {0}"
@@ -1280,6 +1278,9 @@ msgstr ""
 msgid "LinkedIn"
 msgstr "LinkedIn"
 
+msgid "Loading members..."
+msgstr ""
+
 msgid "Loading permissions..."
 msgstr ""
 
@@ -1344,9 +1345,6 @@ msgstr "Administrer abonnement"
 msgid "Manage teams"
 msgstr "Administrer teams"
 
-msgid "Manage your account here."
-msgstr "Administrer din konto her."
-
 msgid "Manage your organization's subscription and invoices."
 msgstr "Administrer din organisations abonnement og fakturaer."
 
@@ -1373,9 +1371,6 @@ msgstr "Maks. 75 tegn. Tilladte: bogstaver, cifre, mellemrum og ' . , & - ( ) /"
 
 msgid "Member"
 msgstr "Medlem"
-
-msgid "Member attributes are coming soon."
-msgstr ""
 
 msgid "Member removed"
 msgstr ""
@@ -1494,6 +1489,9 @@ msgstr "Ikke længere nødvendigt"
 msgid "No members in this organization yet."
 msgstr "Ingen medlemmer i denne organisation endnu."
 
+msgid "No members yet."
+msgstr ""
+
 msgid "No members yet. Invite your first teammate to get started."
 msgstr ""
 
@@ -1563,17 +1561,11 @@ msgstr "Opret din første sag"
 msgid "or"
 msgstr "eller"
 
-msgid "Organization"
-msgstr "Organisation"
-
 msgid "Organization name"
 msgstr "Organisationsnavn"
 
 msgid "Organization profile updated"
 msgstr "Organisationsprofil opdateret"
-
-msgid "Organization settings"
-msgstr "Organisationsindstillinger"
 
 msgid "Organization-level billing controls are coming soon. In the meantime, you can manage your subscription from the main billing page."
 msgstr "Faktureringskontrol på organisationsniveau kommer snart. I mellemtiden kan du administrere dit abonnement på hovedfaktureringssiden."
@@ -2224,6 +2216,9 @@ msgstr ""
 msgid "Team description"
 msgstr ""
 
+msgid "Team details"
+msgstr ""
+
 msgid "Team members"
 msgstr ""
 
@@ -2435,6 +2430,9 @@ msgstr "Opdater faktureringsoplysningerne tilknyttet dit abonnement."
 msgid "Update the role's permissions or description."
 msgstr ""
 
+msgid "Update the team's profile information, visibility, and branding settings."
+msgstr ""
+
 msgid "Update your profile picture and personal details here."
 msgstr "Opdater dit profilbillede og personlige oplysninger her."
 
@@ -2610,6 +2608,9 @@ msgstr "Hvad sker der?"
 msgid "WhatsApp"
 msgstr "WhatsApp"
 
+msgid "WhatsApp Brand"
+msgstr ""
+
 msgid "WhatsApp Business Account connected"
 msgstr ""
 
@@ -2660,9 +2661,6 @@ msgstr "Du lukkede denne sag · lige nu"
 
 msgid "You do not have permission to access this page."
 msgstr "Du har ikke tilladelse til at tilgå denne side."
-
-msgid "You don't have permission to view organization settings."
-msgstr "Du har ikke tilladelse til at se organisationsindstillinger."
 
 msgid "You don't have permission to view the audit log."
 msgstr "Du har ikke tilladelse til at se revisionsloggen."
