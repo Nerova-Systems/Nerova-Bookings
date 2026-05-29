@@ -49,30 +49,44 @@ export function EmbeddedSignupButton({
   onErrorRef.current = onError;
 
   useEffect(() => {
-    if (!appId) return;
+    if (!appId) {
+      console.warn("EmbeddedSignupButton: PUBLIC_META_APP_ID is not configured or empty.");
+      return;
+    }
 
+    console.log("EmbeddedSignupButton: Loading Meta JS SDK with App ID:", appId);
     loadMetaSDK(appId)
       .then(() => {
+        console.log("EmbeddedSignupButton: Meta JS SDK loaded successfully!");
         setIsSdkReady(true);
       })
       .catch((error: unknown) => {
+        console.error("EmbeddedSignupButton: Failed to load Meta JS SDK:", error);
         setSdkError(true);
         onErrorRef.current?.(error);
       });
   }, [appId]);
 
   const handleClick = useCallback(async () => {
-    if (!appId || !isSdkReady) return;
+    console.log("EmbeddedSignupButton: Clicked! isSdkReady:", isSdkReady, "appId:", appId);
+    if (!appId || !isSdkReady) {
+      console.warn("EmbeddedSignupButton: Cannot launch signup. App ID or SDK is not ready.");
+      return;
+    }
 
     setIsLaunching(true);
     try {
+      console.log("EmbeddedSignupButton: Launching Meta Embedded Signup popup...");
       const response = await launchEmbeddedSignup({ appId, businessName });
+      console.log("EmbeddedSignupButton: Meta Embedded Signup response:", response);
       if (response?.code) {
         onSuccess(response.code);
       } else {
+        console.warn("EmbeddedSignupButton: Signup cancelled or returned no code.");
         onCancel?.();
       }
     } catch (error: unknown) {
+      console.error("EmbeddedSignupButton: Error launching Embedded Signup:", error);
       onError?.(error);
     } finally {
       setIsLaunching(false);

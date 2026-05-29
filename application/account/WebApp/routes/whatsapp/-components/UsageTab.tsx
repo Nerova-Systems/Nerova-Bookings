@@ -15,8 +15,8 @@ export function UsageTab() {
           </h3>
           <p className="mx-auto mt-2 max-w-md text-sm text-muted-foreground">
             <Trans>
-              Full message usage analytics, cost breakdowns, and delivery reports are being built. In
-              the meantime, here's what you need to know about WhatsApp messaging costs.
+              Full message usage analytics, cost breakdowns, and delivery reports are being built. In the meantime,
+              here's what you need to know about WhatsApp messaging costs.
             </Trans>
           </p>
         </div>
@@ -24,7 +24,7 @@ export function UsageTab() {
 
       {/* Cost breakdown */}
       <div>
-        <h3 className="mb-3 text-sm font-bold uppercase tracking-wider text-muted-foreground">
+        <h3 className="mb-3 text-sm font-bold tracking-wider text-muted-foreground uppercase">
           <Trans>Estimated message costs</Trans>
         </h3>
 
@@ -74,9 +74,9 @@ export function UsageTab() {
       {/* Note */}
       <div className="rounded-lg border border-border bg-muted/30 p-4 text-xs text-muted-foreground">
         <Trans>
-          Prices are approximate and based on Meta's current ZAR pricing. Actual costs may vary based on
-          message category and Meta's pricing updates. Booking flow interactions within WhatsApp Flows do
-          not incur per-message charges.
+          Prices are approximate and based on Meta's current ZAR pricing. Actual costs may vary based on message
+          category and Meta's pricing updates. Booking flow interactions within WhatsApp Flows do not incur per-message
+          charges.
         </Trans>
       </div>
     </div>

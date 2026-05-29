@@ -15,8 +15,8 @@ import { DirtyDialog } from "@repo/ui/components/DirtyDialog";
 import { useDialogSetDirty } from "@repo/ui/components/DirtyDialogContext";
 import { Input } from "@repo/ui/components/Input";
 import { Label } from "@repo/ui/components/Label";
-import { Textarea } from "@repo/ui/components/Textarea";
 import { SettingsToggle } from "@repo/ui/components/SettingsToggle";
+import { Textarea } from "@repo/ui/components/Textarea";
 import { useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -103,7 +103,7 @@ function EditTeamDialogBody({ team, onClose }: { team: TeamResponse; onClose: ()
 
   return (
     <DialogForm onSubmit={handleSubmit} validationErrors={updateMutation.error?.errors}>
-      <DialogBody className="flex flex-col gap-4 max-h-[30rem] overflow-y-auto pr-1">
+      <DialogBody className="flex max-h-[30rem] flex-col gap-4 overflow-y-auto pr-1">
         <div className="flex flex-col gap-2">
           <Label htmlFor="edit-team-name">
             <Trans>Name</Trans>
@@ -151,7 +151,7 @@ function EditTeamDialogBody({ team, onClose }: { team: TeamResponse; onClose: ()
           />
         </div>
 
-        <div className="border-t border-border/50 pt-4 flex flex-col gap-4">
+        <div className="flex flex-col gap-4 border-t border-border/50 pt-4">
           <h4 className="text-sm font-semibold tracking-tight text-foreground">
             <Trans>Visibility & branding</Trans>
           </h4>

@@ -4,6 +4,7 @@ using Main.Features.Apps.Connectors.GoogleMeet;
 using Main.Features.Apps.Connectors.MsTeams;
 using Main.Features.Apps.Connectors.Office365Calendar;
 using Main.Features.Apps.Connectors.Zoom;
+using Main.Features.Apps.Connectors.WhatsApp;
 using Main.Features.Apps.Domain;
 using Main.Features.Apps.Infrastructure;
 using Main.Features.BookingSideEffects.Workers;
@@ -171,6 +172,7 @@ public static class Configuration
                 // the other installers and the registry's lifetime); it scope-resolves
                 // ICredentialRepository on each call to check the prerequisite.
                 .AddSingleton<IAppInstaller, GoogleMeetInstaller>()
+                .AddSingleton<IAppInstaller, WhatsAppInstaller>()
                 .AddScoped<IConferenceLinkProvider, GoogleMeetConferenceLinkProvider>()
                 // ─── Microsoft Teams connector ─────────────────────────────
                 // Conferencing connector that piggy-backs on the office365-calendar credential —

@@ -6,20 +6,14 @@ import { Form } from "@repo/ui/components/Form";
 import { SelectContent, SelectItem, SelectTrigger, SelectValue } from "@repo/ui/components/Select";
 import { SelectField } from "@repo/ui/components/SelectField";
 import { TextField } from "@repo/ui/components/TextField";
-import {
-  CheckCircle2Icon,
-  KeyRoundIcon,
-  MessageSquareIcon,
-  ShieldCheckIcon,
-  WalletIcon,
-} from "lucide-react";
+import { CheckCircle2Icon, KeyRoundIcon, MessageSquareIcon, ShieldCheckIcon, WalletIcon } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
 import type { FBEmbeddedSignupData } from "@/shared/utils/metaSDK";
 
 import { EmbeddedSignupButton } from "@/shared/components/EmbeddedSignupButton";
-import { api, MetaBusinessVertical } from "@/shared/lib/api/client";
+import { api, queryClient, MetaBusinessVertical } from "@/shared/lib/api/client";
 
 // TODO: verify Paystack ZA bank codes against latest API
 const SA_BANKS = [
@@ -94,9 +88,7 @@ function StepCard({
 
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">
-            <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
-              Step {step}
-            </span>
+            <span className="text-xs font-bold tracking-wider text-muted-foreground uppercase">Step {step}</span>
             {isComplete && (
               <span className="rounded-full bg-green-100 px-2 py-0.5 text-xs font-semibold text-green-700 dark:bg-green-900/50 dark:text-green-400">
                 ✓ Done
@@ -114,9 +106,7 @@ function StepCard({
         )}
       </div>
 
-      {children && !isComplete && !isLocked && (
-        <div className="border-t border-border p-5">{children}</div>
-      )}
+      {children && !isComplete && !isLocked && <div className="border-t border-border p-5">{children}</div>}
     </div>
   );
 }
@@ -127,9 +117,16 @@ export function SetupTab() {
   const { data: status, refetch: refetchStatus } = api.useQuery("get", "/api/whatsapp/onboarding-status");
   const { data: tenant } = api.useQuery("get", "/api/account/tenants/current");
 
-  const linkWabaMutation = api.useMutation("post", "/api/whatsapp/link-waba", {
+  const installMutation = (api as any).useMutation("post", "/api/apps/{slug}/install", {
     onSuccess: () => {
       void refetchStatus();
+      void queryClient.invalidateQueries();
+    }
+  });
+
+  const linkWabaMutation = api.useMutation("post", "/api/whatsapp/link-waba", {
+    onSuccess: () => {
+      (installMutation as any).mutate({ params: { path: { slug: "whatsapp" } } });
       toast.success(t`WhatsApp Business Account connected`);
     }
   });
@@ -145,7 +142,9 @@ export function SetupTab() {
       }
     };
     window.addEventListener("message", handleMessage);
-    return () => { window.removeEventListener("message", handleMessage); };
+    return () => {
+      window.removeEventListener("message", handleMessage);
+    };
   }, []);
 
   const handleEmbeddedSignupSuccess = (_code: string) => {
@@ -191,9 +190,7 @@ export function SetupTab() {
 
   const [subaccountCode, setSubaccountCode] = useState<string | null>(null);
 
-  const fingerprintShort = status?.publicKeyFingerprint
-    ? status.publicKeyFingerprint.slice(0, 16) + "…"
-    : null;
+  const fingerprintShort = status?.publicKeyFingerprint ? status.publicKeyFingerprint.slice(0, 16) + "…" : null;
   const paystackSubaccountMasked = subaccountCode ? subaccountCode.slice(0, 6) + "****" : null;
 
   return (
@@ -240,9 +237,11 @@ export function SetupTab() {
         icon={<CheckCircle2Icon className="size-5" />}
         title={<Trans>Phone number verified</Trans>}
         description={
-          status?.phoneRegistered
-            ? <Trans>Your number {status.displayPhoneNumber} is registered and active.</Trans>
-            : <Trans>Automatically registered once step 1 is complete.</Trans>
+          status?.phoneRegistered ? (
+            <Trans>Your number {status.displayPhoneNumber} is registered and active.</Trans>
+          ) : (
+            <Trans>Automatically registered once step 1 is complete.</Trans>
+          )
         }
         isComplete={Boolean(status?.phoneRegistered)}
         isLocked={!status?.wabaLinked}
@@ -337,11 +336,7 @@ export function SetupTab() {
           <div className="rounded-lg border border-green-200 bg-green-50/50 p-2.5 text-xs text-muted-foreground dark:border-green-900 dark:bg-green-950/30">
             💡 <Trans>A 1% platform fee applies to all bookings processed through Nerova.</Trans>
           </div>
-          <Button
-            type="submit"
-            isPending={connectPaystackMutation.isPending}
-            disabled={!status?.keyPairGenerated}
-          >
+          <Button type="submit" isPending={connectPaystackMutation.isPending} disabled={!status?.keyPairGenerated}>
             <WalletIcon className="size-4" />
             <Trans>Connect Paystack</Trans>
           </Button>
@@ -357,7 +352,10 @@ export function SetupTab() {
               <Trans>Setup complete 🎉</Trans>
             </h3>
             <p className="mt-1 text-sm text-muted-foreground">
-              <Trans>Your WhatsApp Business Account is connected and ready. Configure your business profile in the Profile tab.</Trans>
+              <Trans>
+                Your WhatsApp Business Account is connected and ready. Configure your business profile in the Profile
+                tab.
+              </Trans>
             </p>
           </div>
         </div>

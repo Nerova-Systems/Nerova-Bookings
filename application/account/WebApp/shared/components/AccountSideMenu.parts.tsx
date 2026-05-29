@@ -11,6 +11,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem
 } from "@repo/ui/components/Sidebar";
+import { TeamsIcon } from "@repo/ui/icons/TeamsIcon";
 import { Link as RouterLink } from "@tanstack/react-router";
 import {
   Building2Icon,
@@ -27,7 +28,6 @@ import {
   UserIcon,
   UsersIcon
 } from "lucide-react";
-import { TeamsIcon } from "@repo/ui/icons/TeamsIcon";
 
 export type IsActiveFn = (target: string, matchPrefix?: boolean) => boolean;
 
@@ -200,7 +200,6 @@ export function AccountGroup(props: Readonly<AccountGroupProps>) {
             tooltip={t`WhatsApp`}
             isActive={isActive("/whatsapp", true)}
           />
-
         </SidebarMenu>
       </SidebarGroupContent>
     </SidebarGroup>

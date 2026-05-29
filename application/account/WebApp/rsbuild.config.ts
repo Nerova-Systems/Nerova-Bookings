@@ -66,6 +66,10 @@ export default defineConfig({
         "./SuspendedPage": "./federated-modules/subscription/SuspendedPage.tsx",
         "./TenantStateGuard": "./federated-modules/subscription/TenantStateGuard.tsx",
         "./UserMenu": "./federated-modules/userMenu/UserMenu.tsx",
+        "./whatsapp/SetupTab": "./routes/whatsapp/-components/SetupTab.tsx",
+        "./whatsapp/ProfileTab": "./routes/whatsapp/-components/ProfileTab.tsx",
+        "./whatsapp/WorkflowsTab": "./routes/whatsapp/-components/WorkflowsTab.tsx",
+        "./whatsapp/UsageTab": "./routes/whatsapp/-components/UsageTab.tsx",
         "./translations/da-DK": "./shared/translations/locale/da-DK.ts",
         "./translations/en-US": "./shared/translations/locale/en-US.ts"
       }

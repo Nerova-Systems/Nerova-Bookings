@@ -83,9 +83,16 @@ let sdkLoading: Promise<void> | null = null;
  */
 export function loadMetaSDK(appId: string): Promise<void> {
   if (typeof window === "undefined") return Promise.resolve();
-  if (window.FB) return Promise.resolve();
-  if (sdkLoading) return sdkLoading;
+  if (window.FB) {
+    console.log("metaSDK: window.FB already exists, skipping injection.");
+    return Promise.resolve();
+  }
+  if (sdkLoading) {
+    console.log("metaSDK: SDK is already loading, returning existing promise.");
+    return sdkLoading;
+  }
 
+  console.log("metaSDK: Injecting connect.facebook.net/en_US/sdk.js script tag...");
   sdkLoading = new Promise<void>((resolve, reject) => {
     const script = document.createElement("script");
     script.src = "https://connect.facebook.net/en_US/sdk.js";
@@ -93,16 +100,24 @@ export function loadMetaSDK(appId: string): Promise<void> {
     script.crossOrigin = "anonymous";
 
     script.onload = () => {
+      console.log(
+        "metaSDK: Script tag onload triggered, initialising FB SDK with version:",
+        FB_API_VERSION,
+        "App ID:",
+        appId
+      );
       window.FB.init({
         appId,
         version: FB_API_VERSION,
         xfbml: false,
         cookie: false
       });
+      console.log("metaSDK: FB SDK initialised successfully!");
       resolve();
     };
 
     script.onerror = () => {
+      console.error("metaSDK: Script tag onerror triggered. FB SDK failed to load (blocked by ad-blocker?)");
       sdkLoading = null;
       reject(new Error("Failed to load Meta SDK."));
     };
@@ -125,10 +140,19 @@ export function loadMetaSDK(appId: string): Promise<void> {
  */
 export function launchEmbeddedSignup(options: EmbeddedSignupOptions): Promise<FBAuthResponse | null> {
   if (typeof window === "undefined") return Promise.resolve(null);
+  console.log("metaSDK: launchEmbeddedSignup called with options:", options);
 
   return new Promise((resolve) => {
+    if (!window.FB) {
+      console.error("metaSDK: window.FB is not defined when attempting to launch signup!");
+      resolve(null);
+      return;
+    }
+
+    console.log("metaSDK: Calling window.FB.login synchronously...");
     window.FB.login(
       (response) => {
+        console.log("metaSDK: window.FB.login callback triggered. Status:", response.status, "Response:", response);
         if (response.status === "connected" && response.authResponse) {
           resolve(response.authResponse);
         } else {

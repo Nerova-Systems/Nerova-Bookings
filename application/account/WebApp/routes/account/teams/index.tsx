@@ -41,7 +41,7 @@ function TeamsPage() {
   const userInfo = useUserInfo();
   const navigate = useNavigate({ from: Route.fullPath });
   const { teamId } = Route.useSearch();
-  
+
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [teamToEdit, setTeamToEdit] = useState<Team | null>(null);
   const [teamToEditMembers, setTeamToEditMembers] = useState<Team | null>(null);
@@ -83,7 +83,7 @@ function TeamsPage() {
         sidePane={sidePane}
       >
         {canManageTeams && teams && teams.length > 0 && (
-          <div className="flex justify-end mb-4">
+          <div className="mb-4 flex justify-end">
             <button
               onClick={() => setIsCreateOpen(true)}
               className={buttonVariants({ variant: "default" })}
@@ -127,19 +127,19 @@ function TeamsPage() {
               <div
                 key={team.id}
                 onClick={() => openDetails(team)}
-                className="linear-card flex flex-col justify-between p-6 transition-all hover:border-muted-foreground/30 hover:bg-muted/10 group relative cursor-pointer"
+                className="linear-card group relative flex cursor-pointer flex-col justify-between p-6 transition-all hover:border-muted-foreground/30 hover:bg-muted/10"
               >
                 <div>
                   <div className="flex items-start justify-between">
                     <div className="flex items-center gap-3">
                       <Avatar className="size-10 border border-border">
                         {team.logoUrl && <AvatarImage src={team.logoUrl} alt={team.name} />}
-                        <AvatarFallback className="bg-brand/10 text-brand font-semibold text-sm">
+                        <AvatarFallback className="bg-brand/10 text-brand text-sm font-semibold">
                           {team.name.charAt(0).toUpperCase()}
                         </AvatarFallback>
                       </Avatar>
                       <div>
-                        <h4 className="font-semibold text-foreground tracking-tight transition-colors group-hover:text-brand">
+                        <h4 className="group-hover:text-brand font-semibold tracking-tight text-foreground transition-colors">
                           {team.name}
                         </h4>
                         <span className="text-xs text-muted-foreground">/{team.slug ?? "—"}</span>
@@ -147,19 +147,15 @@ function TeamsPage() {
                     </div>
                   </div>
 
-                  {team.bio && (
-                    <p className="mt-4 text-sm text-muted-foreground line-clamp-2">
-                      {team.bio}
-                    </p>
-                  )}
+                  {team.bio && <p className="mt-4 line-clamp-2 text-sm text-muted-foreground">{team.bio}</p>}
                 </div>
 
                 <div className="mt-6 flex items-center justify-between border-t border-border/50 pt-4">
                   <div className="flex flex-col">
-                    <span className="text-[10px] text-muted-foreground uppercase tracking-wider font-semibold">
+                    <span className="text-[10px] font-semibold tracking-wider text-muted-foreground uppercase">
                       <Trans>Members</Trans>
                     </span>
-                    <span className="font-mono text-xl font-bold tracking-tight text-foreground mt-0.5">
+                    <span className="mt-0.5 font-mono text-xl font-bold tracking-tight text-foreground">
                       {team.memberCount}
                     </span>
                   </div>

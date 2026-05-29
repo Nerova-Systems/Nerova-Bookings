@@ -3,7 +3,15 @@ import { Trans } from "@lingui/react/macro";
 import { Avatar, AvatarFallback, AvatarImage } from "@repo/ui/components/Avatar";
 import { Badge } from "@repo/ui/components/Badge";
 import { Button } from "@repo/ui/components/Button";
-import { Item, ItemActions, ItemContent, ItemDescription, ItemMedia, ItemTitle, ItemGroup } from "@repo/ui/components/Item";
+import {
+  Item,
+  ItemActions,
+  ItemContent,
+  ItemDescription,
+  ItemMedia,
+  ItemTitle,
+  ItemGroup
+} from "@repo/ui/components/Item";
 import { Separator } from "@repo/ui/components/Separator";
 import { SidePane, SidePaneBody, SidePaneFooter, SidePaneHeader } from "@repo/ui/components/SidePane";
 import { useFormatDate } from "@repo/ui/hooks/useSmartDate";
@@ -58,7 +66,7 @@ export function TeamDetailsPane({
         <div className="mb-6 flex flex-col gap-1">
           <h3 className="text-xl font-bold tracking-tight text-foreground">{team.name}</h3>
           <span className="text-xs text-muted-foreground">/{team.slug ?? "—"}</span>
-          {team.bio && <p className="mt-3 text-sm text-muted-foreground line-clamp-3">{team.bio}</p>}
+          {team.bio && <p className="mt-3 line-clamp-3 text-sm text-muted-foreground">{team.bio}</p>}
         </div>
 
         <ItemGroup>
@@ -80,7 +88,7 @@ export function TeamDetailsPane({
               </ItemTitle>
             </ItemContent>
             <ItemActions>
-              <span className="text-sm font-semibold text-brand font-mono">{memberCount}</span>
+              <span className="text-brand font-mono text-sm font-semibold">{memberCount}</span>
             </ItemActions>
           </Item>
         </ItemGroup>
@@ -135,20 +143,20 @@ export function TeamDetailsPane({
 function TeamMemberRow({ member }: { member: TeamMemberResponse }) {
   const displayName = [member.firstName, member.lastName].filter(Boolean).join(" ") || member.email;
   return (
-    <Item size="sm" className="hover:bg-muted/10 rounded-md p-2">
+    <Item size="sm" className="rounded-md p-2 hover:bg-muted/10">
       <ItemMedia variant="image" className="size-9">
         <Avatar className="size-9">
           {member.avatarUrl && <AvatarImage src={member.avatarUrl} alt={member.email} />}
-          <AvatarFallback className="text-xs font-semibold uppercase bg-brand/10 text-brand">
+          <AvatarFallback className="bg-brand/10 text-brand text-xs font-semibold uppercase">
             {member.email.charAt(0).toUpperCase()}
           </AvatarFallback>
         </Avatar>
       </ItemMedia>
       <ItemContent>
-        <ItemTitle className="text-sm font-medium text-foreground flex items-center gap-1.5">
+        <ItemTitle className="flex items-center gap-1.5 text-sm font-medium text-foreground">
           {displayName}
           {member.role === "Owner" && (
-            <Badge variant="secondary" className="text-[10px] py-0 px-1.5 uppercase font-mono">
+            <Badge variant="secondary" className="px-1.5 py-0 font-mono text-[10px] uppercase">
               <Trans>Owner</Trans>
             </Badge>
           )}
@@ -157,11 +165,14 @@ function TeamMemberRow({ member }: { member: TeamMemberResponse }) {
       </ItemContent>
       <ItemActions>
         {member.accepted ? (
-          <Badge variant="outline" className="text-[10px] py-0 px-1 text-success border-success/30 bg-success/5 font-mono">
+          <Badge
+            variant="outline"
+            className="border-success/30 bg-success/5 px-1 py-0 font-mono text-[10px] text-success"
+          >
             <Trans>Active</Trans>
           </Badge>
         ) : (
-          <Badge variant="secondary" className="text-[10px] py-0 px-1 font-mono">
+          <Badge variant="secondary" className="px-1 py-0 font-mono text-[10px]">
             <Trans>Pending</Trans>
           </Badge>
         )}

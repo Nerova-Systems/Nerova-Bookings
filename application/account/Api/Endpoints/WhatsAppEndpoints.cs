@@ -33,6 +33,15 @@ public sealed class WhatsAppEndpoints : IEndpoints
             return await mediator.Send(new LinkWabaAccountCommand(tenantId, request.WabaId, request.PhoneNumberId, request.DisplayPhoneNumber));
         });
 
+        group.MapDelete("/disconnect", async Task<ApiResult> (
+            IMediator mediator,
+            IExecutionContext executionContext
+        ) =>
+        {
+            var tenantId = executionContext.TenantId!;
+            return await mediator.Send(new DisconnectWabaCommand(tenantId));
+        });
+
         group.MapPost("/generate-key-pair", async Task<ApiResult<GenerateWabaKeyPairResponse>> (
             IMediator mediator,
             IExecutionContext executionContext

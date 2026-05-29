@@ -24,11 +24,7 @@ export function OrgTeamsTab() {
             <Trans>This organization has {count} team(s).</Trans>
           )}
         </p>
-        <Link
-          to="/account/teams"
-          className={buttonVariants({ variant: "default" })}
-          aria-label={t`Manage teams`}
-        >
+        <Link to="/account/teams" className={buttonVariants({ variant: "default" })} aria-label={t`Manage teams`}>
           <Trans>Manage teams</Trans>
           <ArrowRightIcon />
         </Link>

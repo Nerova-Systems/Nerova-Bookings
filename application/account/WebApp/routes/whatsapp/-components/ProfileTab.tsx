@@ -289,7 +289,9 @@ export function ProfileTab() {
             name="brandVertical"
             label={t`Business category`}
             value={formValues.brandVertical}
-            onValueChange={(v) => setFormValues((prev) => ({ ...prev, brandVertical: v as MetaBusinessVertical | null }))}
+            onValueChange={(v) =>
+              setFormValues((prev) => ({ ...prev, brandVertical: v as MetaBusinessVertical | null }))
+            }
             disabled={readOnly}
           >
             <SelectTrigger>

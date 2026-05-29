@@ -180,8 +180,6 @@ export function AccountSettings() {
             {isOwner && <DangerZone setIsDeleteModalOpen={setIsDeleteModalOpen} />}
           </TabsContent>
 
-
-
           {isSsoEnabled && (
             <TabsContent value="sso">
               <OrgSsoTab canManage={canManage} />

@@ -36,6 +36,18 @@ declare module "account/TenantStateGuard" {
 declare module "account/UserMenu" {
   export default ReactNode;
 }
+declare module "account/whatsapp/SetupTab" {
+  export default ReactNode;
+}
+declare module "account/whatsapp/ProfileTab" {
+  export default ReactNode;
+}
+declare module "account/whatsapp/WorkflowsTab" {
+  export default ReactNode;
+}
+declare module "account/whatsapp/UsageTab" {
+  export default ReactNode;
+}
 declare module "account/translations/da-DK" {
   import type { Messages } from "@lingui/core";
   export const messages: Messages;

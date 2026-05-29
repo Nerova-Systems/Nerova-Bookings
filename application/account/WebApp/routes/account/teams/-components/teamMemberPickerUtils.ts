@@ -1,4 +1,5 @@
-import { type Schemas, MembershipRole } from "@/shared/lib/api/client";
+import type { MembershipRole } from "@/shared/lib/api/client";
+import { type Schemas } from "@/shared/lib/api/client";
 
 type TeamMember = Schemas["TeamMemberResponse"];
 

@@ -9,6 +9,7 @@ public sealed class RouteConfigurationTests(AppGatewayApplicationFactory factory
 {
     [Theory]
     [InlineData("account-api")]
+    [InlineData("whatsapp-api")]
     [InlineData("account-federation")]
     [InlineData("account-static")]
     [InlineData("account-hmr")]
