@@ -14,7 +14,8 @@ const ACCOUNT_PREFIXES = [
   "/signup",
   "/support",
   "/user",
-  "/welcome"
+  "/welcome",
+  "/whatsapp"
 ];
 
 export function AccountRouteBridge() {

@@ -61,7 +61,8 @@ var runtimeEnvironment = new Dictionary<string, string>
     ["PUBLIC_SUBSCRIPTION_ENABLED"] = Environment.GetEnvironmentVariable("PUBLIC_SUBSCRIPTION_ENABLED") ?? "false",
     // Support system defaults to true so the in-app support surface is on out of the box; set the env
     // var to "false" to gate the entire feature off (legacy "Contact support" mailto dialog returns).
-    ["PUBLIC_SUPPORT_SYSTEM_ENABLED"] = Environment.GetEnvironmentVariable("PUBLIC_SUPPORT_SYSTEM_ENABLED") ?? "true"
+    ["PUBLIC_SUPPORT_SYSTEM_ENABLED"] = Environment.GetEnvironmentVariable("PUBLIC_SUPPORT_SYSTEM_ENABLED") ?? "true",
+    ["PUBLIC_META_APP_ID"] = app.Configuration["WhatsApp:MetaAppId"] ?? Environment.GetEnvironmentVariable("PUBLIC_META_APP_ID") ?? string.Empty
 };
 
 // The /login picker is the dev-only MockEasyAuth identity selector. In Azure-deployed instances the
