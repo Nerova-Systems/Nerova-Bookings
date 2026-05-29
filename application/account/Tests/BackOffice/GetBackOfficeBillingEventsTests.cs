@@ -133,7 +133,7 @@ public sealed class GetBackOfficeBillingEventsTests(BackOfficeWebApplicationFact
     {
         // three events at now-3h, now-2h, now-1h. With OccurredFrom=now-2h we expect the latter two.
         // Arrange
-        var now = DateTimeOffset.UtcNow;
+        var now = DateTimeOffset.FromUnixTimeMilliseconds(DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
         var tenant = SeedTenant("Acme");
         var subscriptionId = SubscriptionId.NewId();
         SeedBillingEvent(tenant, subscriptionId, BillingEventType.SubscriptionCreated, now.AddHours(-3), "evt_old", toPlan: SubscriptionPlan.Standard);
@@ -246,7 +246,7 @@ public sealed class GetBackOfficeBillingEventsTests(BackOfficeWebApplicationFact
         var tenantId = TenantId.NewId();
         Connection.Insert("tenants", [
                 ("id", tenantId.Value),
-                ("created_at", DateTimeOffset.UtcNow.AddDays(-30)),
+                ("created_at", DateTimeOffset.UtcNow.AddDays(-30).ToUnixTimeMilliseconds()),
                 ("modified_at", null),
                 ("name", name),
                 ("state", nameof(TenantState.Active)),
@@ -257,7 +257,7 @@ public sealed class GetBackOfficeBillingEventsTests(BackOfficeWebApplicationFact
         );
         return tenantId;
     }
-
+ 
     private void SeedBillingEvent(
         TenantId tenantId,
         SubscriptionId subscriptionId,
@@ -274,7 +274,7 @@ public sealed class GetBackOfficeBillingEventsTests(BackOfficeWebApplicationFact
                 ("tenant_id", tenantId.Value),
                 ("id", BillingEventId.NewId().Value),
                 ("subscription_id", subscriptionId.Value),
-                ("created_at", DateTimeOffset.UtcNow),
+                ("created_at", DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()),
                 ("modified_at", null),
                 ("provider_event_id", paystackReference),
                 ("event_type", eventType.ToString()),
@@ -285,7 +285,7 @@ public sealed class GetBackOfficeBillingEventsTests(BackOfficeWebApplicationFact
                 ("amount_delta", amountDelta),
                 ("committed_mrr", 0m),
                 ("currency", currency),
-                ("occurred_at", occurredAt),
+                ("occurred_at", occurredAt.ToUnixTimeMilliseconds()),
                 ("cancellation_reason", null),
                 ("suspension_reason", null)
             ]

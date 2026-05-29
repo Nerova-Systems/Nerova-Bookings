@@ -217,8 +217,9 @@ public class SinglePageAppConfiguration
         {
             $"script-src {trustedHosts} 'nonce-{{NONCE_PLACEHOLDER}}' 'strict-dynamic' https:",
             $"script-src-elem {trustedHosts} https://js.paystack.co 'nonce-{{NONCE_PLACEHOLDER}}'",
-            $"style-src {trustedHosts} 'nonce-{{NONCE_PLACEHOLDER}}'",
-            $"style-src-elem {trustedHosts} 'nonce-{{NONCE_PLACEHOLDER}}'",
+            $"style-src {trustedHosts} https://fonts.googleapis.com 'nonce-{{NONCE_PLACEHOLDER}}'",
+            $"style-src-elem {trustedHosts} https://fonts.googleapis.com 'nonce-{{NONCE_PLACEHOLDER}}'",
+            $"font-src {trustedHosts} https://fonts.gstatic.com data:",
             $"default-src {trustedHosts}",
             $"connect-src {trustedHosts} https://js.paystack.co https://api.paystack.co https://checkout.paystack.com data:",
             $"frame-src {trustedHosts} https://js.paystack.co https://checkout.paystack.com",

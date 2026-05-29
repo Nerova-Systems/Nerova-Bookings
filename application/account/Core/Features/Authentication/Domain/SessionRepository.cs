@@ -97,7 +97,7 @@ public sealed class SessionRepository(AccountDbContext accountDbContext, IServic
 
         var isSqlite = accountDbContext.Database.ProviderName is "Microsoft.EntityFrameworkCore.Sqlite";
         AddParameter(command, "@newJti", newJti.Value);
-        AddParameter(command, "@now", isSqlite ? now.ToString("O") : now);
+        AddParameter(command, "@now", isSqlite ? now.ToUnixTimeMilliseconds() : now);
         AddParameter(command, "@sessionId", sessionId.Value);
         AddParameter(command, "@currentJti", currentJti.Value);
         AddParameter(command, "@currentVersion", currentVersion);

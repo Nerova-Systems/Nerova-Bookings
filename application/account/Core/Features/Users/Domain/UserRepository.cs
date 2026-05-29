@@ -237,7 +237,7 @@ public sealed class UserRepository(AccountDbContext accountDbContext, IExecution
                       """;
 
             var result = await accountDbContext.Database
-                .SqlQueryRaw<UserSummaryResult>(sql, thirtyDaysAgo.ToString("O"), executionContext.TenantId!.Value.ToString())
+                .SqlQueryRaw<UserSummaryResult>(sql, thirtyDaysAgo.ToUnixTimeMilliseconds(), executionContext.TenantId!.Value.ToString())
                 .SingleAsync(cancellationToken);
 
             return (result.TotalUsers, result.ActiveUsers, result.PendingUsers);

@@ -13,29 +13,32 @@ import {
 } from "@repo/ui/components/AlertDialog";
 import { Button } from "@repo/ui/components/Button";
 import { useQueryClient } from "@tanstack/react-query";
-import { Trash2Icon, UserPlusIcon } from "lucide-react";
+import { Trash2Icon, UserPlusIcon, UsersIcon } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
 import { api, type Schemas } from "@/shared/lib/api/client";
 
+import { EditTeamMembersDialog } from "./EditTeamMembersDialog";
 import { InviteTeamMemberDialog } from "./InviteTeamMemberDialog";
 import { MembersTable } from "./MembersTable";
 
 type TeamMemberResponse = Schemas["TeamMemberResponse"];
+type TeamResponse = Schemas["TeamResponse"];
 
 interface TeamMembersTabProps {
-  teamId: string;
+  team: TeamResponse;
   canManage: boolean;
 }
 
-export function TeamMembersTab({ teamId, canManage }: Readonly<TeamMembersTabProps>) {
+export function TeamMembersTab({ team, canManage }: Readonly<TeamMembersTabProps>) {
   const queryClient = useQueryClient();
   const [isInviteOpen, setInviteOpen] = useState(false);
+  const [isEditMembersOpen, setEditMembersOpen] = useState(false);
   const [memberToRemove, setMemberToRemove] = useState<TeamMemberResponse | null>(null);
 
   const { data: members, isLoading } = api.useQuery("get", "/api/account/teams/{id}/members", {
-    params: { path: { id: teamId } }
+    params: { path: { id: team.id } }
   });
 
   const { data: roles } = api.useQuery("get", "/api/account/roles");
@@ -90,7 +93,11 @@ export function TeamMembersTab({ teamId, canManage }: Readonly<TeamMembersTabPro
   return (
     <div className="flex flex-col gap-4">
       {canManage && (
-        <div className="flex justify-end">
+        <div className="flex justify-end gap-2">
+          <Button variant="outline" onClick={() => setEditMembersOpen(true)}>
+            <UsersIcon />
+            <Trans>Manage members</Trans>
+          </Button>
           <Button onClick={() => setInviteOpen(true)}>
             <UserPlusIcon />
             <Trans>Invite member</Trans>
@@ -108,7 +115,9 @@ export function TeamMembersTab({ teamId, canManage }: Readonly<TeamMembersTabPro
         onRequestRemove={setMemberToRemove}
       />
 
-      <InviteTeamMemberDialog teamId={teamId} isOpen={isInviteOpen} onOpenChange={setInviteOpen} />
+      <InviteTeamMemberDialog teamId={team.id} isOpen={isInviteOpen} onOpenChange={setInviteOpen} />
+
+      <EditTeamMembersDialog team={team} isOpen={isEditMembersOpen} onOpenChange={setEditMembersOpen} />
 
       <AlertDialog
         open={memberToRemove !== null}

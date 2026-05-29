@@ -268,8 +268,17 @@ msgstr "Add file"
 msgid "Add more in the Users menu"
 msgstr "Add more in the Users menu"
 
+msgid "Add or remove users to manage who belongs to this team."
+msgstr "Add or remove users to manage who belongs to this team."
+
 msgid "Add profile picture"
 msgstr "Add profile picture"
+
+msgid "Add selected users to team"
+msgstr "Add selected users to team"
+
+msgid "Add users from the left to get started."
+msgstr "Add users from the left to get started."
 
 msgid "Add website"
 msgstr "Add website"
@@ -928,6 +937,10 @@ msgstr "Edit brand profile"
 msgid "Edit profile"
 msgstr "Edit profile"
 
+#. placeholder {0}: team.name
+msgid "Edit team members - {0}"
+msgstr "Edit team members - {0}"
+
 msgid "Edit user profile"
 msgstr "Edit user profile"
 
@@ -981,6 +994,9 @@ msgstr "Environment isolation"
 
 msgid "Estimated next bill: {targetFormattedPrice}"
 msgstr "Estimated next bill: {targetFormattedPrice}"
+
+msgid "Everyone is already a member."
+msgstr "Everyone is already a member."
 
 msgid "Excl. tax"
 msgstr "Excl. tax"
@@ -1319,6 +1335,9 @@ msgstr "Manage {0}"
 msgid "Manage how dates, times, and language are presented across the app."
 msgstr "Manage how dates, times, and language are presented across the app."
 
+msgid "Manage members"
+msgstr "Manage members"
+
 msgid "Manage subscription"
 msgstr "Manage subscription"
 
@@ -1487,6 +1506,9 @@ msgstr "No payment method on file"
 msgid "No roles yet"
 msgstr "No roles yet"
 
+msgid "No team members"
+msgstr "No team members"
+
 msgid "No teams yet"
 msgstr "No teams yet"
 
@@ -1498,6 +1520,9 @@ msgstr "No tickets yet"
 
 msgid "No users found"
 msgstr "No users found"
+
+msgid "No users to add"
+msgstr "No users to add"
 
 msgid "No verified name"
 msgstr "No verified name"
@@ -1800,6 +1825,9 @@ msgstr "Remove member"
 msgid "Remove profile picture"
 msgstr "Remove profile picture"
 
+msgid "Remove selected users from team"
+msgstr "Remove selected users from team"
+
 msgid "Remove the link back to the team profile from individual member pages."
 msgstr "Remove the link back to the team profile from individual member pages."
 
@@ -1932,6 +1960,12 @@ msgstr "Screenshots of the dashboard project with desktop and mobile versions"
 
 msgid "Search"
 msgstr "Search"
+
+msgid "Search by name, email, or title"
+msgstr "Search by name, email, or title"
+
+msgid "Search users"
+msgstr "Search users"
 
 msgid "Security, privacy, and compliance information"
 msgstr "Security, privacy, and compliance information"
@@ -2190,6 +2224,12 @@ msgstr "Team deleted: {0}"
 msgid "Team description"
 msgstr "Team description"
 
+msgid "Team members"
+msgstr "Team members"
+
+msgid "Team members updated successfully"
+msgstr "Team members updated successfully"
+
 msgid "Team name"
 msgstr "Team name"
 
@@ -2343,6 +2383,9 @@ msgstr "Trust Center"
 
 msgid "Trust Center (opens in new window)"
 msgstr "Trust Center (opens in new window)"
+
+msgid "Try a different search."
+msgstr "Try a different search."
 
 msgid "Try adjusting your search or filters"
 msgstr "Try adjusting your search or filters"

@@ -226,11 +226,20 @@ public sealed class ReconcileTenantWithPaystackTests(BackOfficeWebApplicationFac
             .Should().Be(29.00m);
         Connection.ExecuteScalar<string>("SELECT currency FROM billing_events WHERE provider_event_id = @providerEventId", [new { providerEventId }])
             .Should().Be(MockPaystackClient.MockStandardCurrency);
-        DateTimeOffset.Parse(Connection.ExecuteScalar<string>("SELECT occurred_at FROM billing_events WHERE provider_event_id = @providerEventId", [new { providerEventId }]), CultureInfo.InvariantCulture)
+        ParseDbDateTimeOffset(Connection.ExecuteScalar<string>("SELECT occurred_at FROM billing_events WHERE provider_event_id = @providerEventId", [new { providerEventId }]))
             .Should().BeCloseTo(completedAt, TimeSpan.FromSeconds(1));
 
-        var subscribedSince = DateTimeOffset.Parse(Connection.ExecuteScalar<string>("SELECT subscribed_since FROM subscriptions WHERE tenant_id = @tenantId", [new { tenantId = DatabaseSeeder.Tenant1.Id.Value }]), CultureInfo.InvariantCulture);
+        var subscribedSince = ParseDbDateTimeOffset(Connection.ExecuteScalar<string>("SELECT subscribed_since FROM subscriptions WHERE tenant_id = @tenantId", [new { tenantId = DatabaseSeeder.Tenant1.Id.Value }]));
         subscribedSince.Should().BeCloseTo(completedAt, TimeSpan.FromSeconds(1));
+    }
+
+    private static DateTimeOffset ParseDbDateTimeOffset(string value)
+    {
+        if (long.TryParse(value, out var unixMs))
+        {
+            return DateTimeOffset.FromUnixTimeMilliseconds(unixMs);
+        }
+        return DateTimeOffset.Parse(value, CultureInfo.InvariantCulture);
     }
 
     [Fact]

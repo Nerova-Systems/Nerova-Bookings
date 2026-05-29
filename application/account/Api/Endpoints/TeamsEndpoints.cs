@@ -51,6 +51,10 @@ public sealed class TeamsEndpoints : IEndpoints
             => await mediator.Send(new DeleteTeamCommand(id))
         );
 
+        group.MapPut("/{id}/members", async Task<ApiResult> (TenantId id, UpdateTeamMembersCommand command, IMediator mediator)
+            => await mediator.Send(command with { TeamId = id })
+        );
+
         group.MapPost("/{id}/invitations", async Task<ApiResult<MembershipId>> (TenantId id, InviteTeamMemberCommand command, IMediator mediator)
             => await mediator.Send(command with { TeamId = id })
         ).Produces<MembershipId>();

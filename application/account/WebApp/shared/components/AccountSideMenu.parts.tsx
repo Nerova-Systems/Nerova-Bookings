@@ -25,9 +25,9 @@ import {
   SlidersHorizontalIcon,
   SparklesIcon,
   UserIcon,
-  UsersIcon,
-  UsersRoundIcon
+  UsersIcon
 } from "lucide-react";
+import { TeamsIcon } from "@repo/ui/icons/TeamsIcon";
 
 export type IsActiveFn = (target: string, matchPrefix?: boolean) => boolean;
 
@@ -169,7 +169,7 @@ export function AccountGroup(props: Readonly<AccountGroupProps>) {
           {props.showTeams && (
             <AccountNavItem
               to="/account/settings/teams"
-              icon={<UsersRoundIcon />}
+              icon={<TeamsIcon />}
               label={<Trans>Teams</Trans>}
               tooltip={t`Teams`}
               isActive={isActive("/account/settings/teams", true)}

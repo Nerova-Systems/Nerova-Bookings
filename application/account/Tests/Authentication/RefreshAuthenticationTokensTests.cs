@@ -185,7 +185,7 @@ public sealed class RefreshAuthenticationTokensTests : EndpointBaseTest<AccountD
                 ("tenant_id", tenantId),
                 ("id", sessionId.ToString()),
                 ("user_id", userId),
-                ("created_at", now),
+                ("created_at", now.ToUnixTimeMilliseconds()),
                 ("modified_at", null),
                 ("refresh_token_jti", jti.ToString()),
                 ("previous_refresh_token_jti", null),
@@ -194,7 +194,7 @@ public sealed class RefreshAuthenticationTokensTests : EndpointBaseTest<AccountD
                 ("device_type", nameof(DeviceType.Desktop)),
                 ("user_agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"),
                 ("ip_address", "127.0.0.1"),
-                ("revoked_at", isRevoked ? now : null),
+                ("revoked_at", isRevoked ? now.ToUnixTimeMilliseconds() : null),
                 ("revoked_reason", null)
             ]
         );
@@ -208,8 +208,8 @@ public sealed class RefreshAuthenticationTokensTests : EndpointBaseTest<AccountD
                 ("tenant_id", tenantId),
                 ("id", sessionId.ToString()),
                 ("user_id", userId),
-                ("created_at", now),
-                ("modified_at", modifiedAt),
+                ("created_at", now.ToUnixTimeMilliseconds()),
+                ("modified_at", modifiedAt.ToUnixTimeMilliseconds()),
                 ("refresh_token_jti", currentJti.ToString()),
                 ("previous_refresh_token_jti", previousJti?.ToString()),
                 ("refresh_token_version", currentVersion),

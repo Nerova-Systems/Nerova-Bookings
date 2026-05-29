@@ -68,7 +68,7 @@ function TeamDetailPage() {
           </TabsContent>
 
           <TabsContent value="members">
-            <TeamMembersTab teamId={team.id} canManage={canManage} />
+            <TeamMembersTab team={team} canManage={canManage} />
           </TabsContent>
 
           {isAttributesEnabled && (

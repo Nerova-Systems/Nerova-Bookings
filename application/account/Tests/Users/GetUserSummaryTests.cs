@@ -20,13 +20,13 @@ public sealed class GetUserSummaryTests(AccountWebApplicationFactory factory) : 
         var thirtyOneDaysAgo = now.AddDays(-31);
 
         // Set the seeded owner user as active (LastSeenAt within 30 days)
-        Connection.Update("users", "id", DatabaseSeeder.Tenant1Owner.Id.ToString(), [("last_seen_at", now)]);
+        Connection.Update("users", "id", DatabaseSeeder.Tenant1Owner.Id.ToString(), [("last_seen_at", now.ToUnixTimeMilliseconds())]);
 
         // Insert an active user (LastSeenAt within 30 days, confirmed)
         Connection.Insert("users", [
                 ("tenant_id", DatabaseSeeder.Tenant1.Id.ToString()),
                 ("id", UserId.NewId().ToString()),
-                ("created_at", now.AddMinutes(-10)),
+                ("created_at", now.AddMinutes(-10).ToUnixTimeMilliseconds()),
                 ("modified_at", null),
                 ("email", "active@example.com"),
                 ("first_name", "Active"),
@@ -34,7 +34,7 @@ public sealed class GetUserSummaryTests(AccountWebApplicationFactory factory) : 
                 ("title", null),
                 ("role", nameof(UserRole.Member)),
                 ("email_confirmed", true),
-                ("last_seen_at", now.AddDays(-5)),
+                ("last_seen_at", now.AddDays(-5).ToUnixTimeMilliseconds()),
                 ("avatar", JsonSerializer.Serialize(new Avatar())),
                 ("locale", "en-US"),
                 ("external_identities", "[]"),
@@ -46,7 +46,7 @@ public sealed class GetUserSummaryTests(AccountWebApplicationFactory factory) : 
         Connection.Insert("users", [
                 ("tenant_id", DatabaseSeeder.Tenant1.Id.ToString()),
                 ("id", UserId.NewId().ToString()),
-                ("created_at", now.AddDays(-60)),
+                ("created_at", now.AddDays(-60).ToUnixTimeMilliseconds()),
                 ("modified_at", null),
                 ("email", "inactive@example.com"),
                 ("first_name", "Inactive"),
@@ -54,7 +54,7 @@ public sealed class GetUserSummaryTests(AccountWebApplicationFactory factory) : 
                 ("title", null),
                 ("role", nameof(UserRole.Member)),
                 ("email_confirmed", true),
-                ("last_seen_at", thirtyOneDaysAgo),
+                ("last_seen_at", thirtyOneDaysAgo.ToUnixTimeMilliseconds()),
                 ("avatar", JsonSerializer.Serialize(new Avatar())),
                 ("locale", "en-US"),
                 ("external_identities", "[]"),
@@ -66,7 +66,7 @@ public sealed class GetUserSummaryTests(AccountWebApplicationFactory factory) : 
         Connection.Insert("users", [
                 ("tenant_id", DatabaseSeeder.Tenant1.Id.ToString()),
                 ("id", UserId.NewId().ToString()),
-                ("created_at", now.AddMinutes(-5)),
+                ("created_at", now.AddMinutes(-5).ToUnixTimeMilliseconds()),
                 ("modified_at", null),
                 ("email", "pending@example.com"),
                 ("first_name", null),

@@ -30,6 +30,7 @@ public sealed class TierFlagsTests
         "cap-delegation-credentials",
         "cap-sso-microsoft",
         "cap-sso-google",
+        "cap-integration-attribute-sync",
         // tier-enterprise
         "cap-audit-log",
         "cap-workflows",
@@ -46,18 +47,18 @@ public sealed class TierFlagsTests
     }
 
     [Fact]
-    public void Registry_ShouldContainAllFourteenCapabilityFlags()
+    public void Registry_ShouldContainAllFifteenCapabilityFlags()
     {
         var registeredKeys = AllFlags.Select(f => f.Key).ToHashSet();
-        CapabilityKeys.Should().HaveCount(14);
+        CapabilityKeys.Should().HaveCount(15);
         CapabilityKeys.Should().AllSatisfy(key => registeredKeys.Should().Contain(key));
     }
 
     [Fact]
     public void Registry_TotalFlagCount_ShouldBeSeventeenPlusExistingFlags()
     {
-        // 7 pre-existing flags + 3 tier + 14 capability + 1 integration + 1 WhatsApp Flows = 26 total.
-        AllFlags.Should().HaveCount(26);
+        // 7 pre-existing flags + 3 tier + 15 capability + 1 integration + 1 WhatsApp Flows = 27 total.
+        AllFlags.Should().HaveCount(27);
     }
 
     [Theory]
@@ -73,6 +74,7 @@ public sealed class TierFlagsTests
     [InlineData("cap-delegation-credentials")]
     [InlineData("cap-sso-microsoft")]
     [InlineData("cap-sso-google")]
+    [InlineData("cap-integration-attribute-sync")]
     [InlineData("cap-audit-log")]
     [InlineData("cap-workflows")]
     [InlineData("cap-api-keys")]
@@ -98,6 +100,7 @@ public sealed class TierFlagsTests
     [InlineData("cap-delegation-credentials")]
     [InlineData("cap-sso-microsoft")]
     [InlineData("cap-sso-google")]
+    [InlineData("cap-integration-attribute-sync")]
     [InlineData("cap-audit-log")]
     [InlineData("cap-workflows")]
     [InlineData("cap-api-keys")]
@@ -123,6 +126,7 @@ public sealed class TierFlagsTests
     [InlineData("cap-delegation-credentials")]
     [InlineData("cap-sso-microsoft")]
     [InlineData("cap-sso-google")]
+    [InlineData("cap-integration-attribute-sync")]
     [InlineData("cap-audit-log")]
     [InlineData("cap-workflows")]
     [InlineData("cap-api-keys")]
@@ -169,6 +173,7 @@ public sealed class TierFlagsTests
     [InlineData("cap-delegation-credentials")]
     [InlineData("cap-sso-microsoft")]
     [InlineData("cap-sso-google")]
+    [InlineData("cap-integration-attribute-sync")]
     public void CapabilityFlagsOnTierOrganizations_ShouldDependOnTierOrganizations(string key)
     {
         FeatureFlagRegistry.Get(key)!.ParentDependency.Should().Be("tier-organizations", $"flag '{key}' must be gated on tier-organizations");

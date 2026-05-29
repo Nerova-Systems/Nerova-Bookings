@@ -125,6 +125,8 @@ public static class ModelBuilderExtensions
         {
             foreach (var entityType in modelBuilder.Model.GetEntityTypes())
             {
+                if (entityType.IsOwned()) continue;
+
                 foreach (var property in entityType.GetProperties())
                 {
                     if (property.GetValueConverter() is not null) continue;

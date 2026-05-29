@@ -34,7 +34,11 @@ public sealed class SupportTicketConfiguration : IEntityTypeConfiguration<Suppor
                 value => JsonSerializer.Deserialize<BackOfficeStaffRef>(value, JsonSerializerOptions)
             );
 
-        builder.OwnsOne(t => t.Csat, b => b.ToJson());
+        builder.OwnsOne(t => t.Csat, b =>
+        {
+            b.ToJson();
+            b.Property(c => c.Score).HasConversion<string>();
+        });
 
         builder.Property(t => t.Messages)
             .HasColumnType("jsonb")

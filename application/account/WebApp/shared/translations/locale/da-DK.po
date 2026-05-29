@@ -268,8 +268,17 @@ msgstr "Tilføj fil"
 msgid "Add more in the Users menu"
 msgstr "Tilføj flere i Brugere menuen"
 
+msgid "Add or remove users to manage who belongs to this team."
+msgstr ""
+
 msgid "Add profile picture"
 msgstr "Tilføj profilbillede"
+
+msgid "Add selected users to team"
+msgstr ""
+
+msgid "Add users from the left to get started."
+msgstr ""
 
 msgid "Add website"
 msgstr "Tilføj websted"
@@ -928,6 +937,10 @@ msgstr "Rediger brandprofil"
 msgid "Edit profile"
 msgstr "Rediger profil"
 
+#. placeholder {0}: team.name
+msgid "Edit team members - {0}"
+msgstr ""
+
 msgid "Edit user profile"
 msgstr "Rediger brugerprofil"
 
@@ -981,6 +994,9 @@ msgstr "Miljøisolering"
 
 msgid "Estimated next bill: {targetFormattedPrice}"
 msgstr "Forventet næste regning: {targetFormattedPrice}"
+
+msgid "Everyone is already a member."
+msgstr ""
 
 msgid "Excl. tax"
 msgstr "Ekskl. moms"
@@ -1319,6 +1335,9 @@ msgstr ""
 msgid "Manage how dates, times, and language are presented across the app."
 msgstr "Administrer hvordan datoer, tidspunkter og sprog vises i appen."
 
+msgid "Manage members"
+msgstr ""
+
 msgid "Manage subscription"
 msgstr "Administrer abonnement"
 
@@ -1487,6 +1506,9 @@ msgstr "Ingen betalingsmetode registreret"
 msgid "No roles yet"
 msgstr ""
 
+msgid "No team members"
+msgstr ""
+
 msgid "No teams yet"
 msgstr ""
 
@@ -1498,6 +1520,9 @@ msgstr "Ingen sager endnu"
 
 msgid "No users found"
 msgstr "Ingen brugere fundet"
+
+msgid "No users to add"
+msgstr ""
 
 msgid "No verified name"
 msgstr "Intet verificeret navn"
@@ -1800,6 +1825,9 @@ msgstr ""
 msgid "Remove profile picture"
 msgstr "Fjern profilbillede"
 
+msgid "Remove selected users from team"
+msgstr ""
+
 msgid "Remove the link back to the team profile from individual member pages."
 msgstr ""
 
@@ -1932,6 +1960,12 @@ msgstr "Skærmbilleder af dashboard-projektet med desktop- og mobilversioner"
 
 msgid "Search"
 msgstr "Søg"
+
+msgid "Search by name, email, or title"
+msgstr ""
+
+msgid "Search users"
+msgstr ""
 
 msgid "Security, privacy, and compliance information"
 msgstr "Sikkerheds-, privatlivs- og overholdelsesoplysninger"
@@ -2190,6 +2224,12 @@ msgstr ""
 msgid "Team description"
 msgstr ""
 
+msgid "Team members"
+msgstr ""
+
+msgid "Team members updated successfully"
+msgstr ""
+
 msgid "Team name"
 msgstr ""
 
@@ -2343,6 +2383,9 @@ msgstr "Tillidscenter"
 
 msgid "Trust Center (opens in new window)"
 msgstr "Tillidscenter (åbner i nyt vindue)"
+
+msgid "Try a different search."
+msgstr ""
 
 msgid "Try adjusting your search or filters"
 msgstr "Prøv at justere din søgning eller filtre"

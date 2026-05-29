@@ -90,7 +90,7 @@ public sealed class BillingDriftWorkerTests(AccountWebApplicationFactory factory
                 ("current_price_currency", MockPaystackClient.MockStandardCurrency),
                 ("current_period_end", TimeProvider.GetUtcNow().AddDays(30)),
                 ("payment_transactions", "[]"),
-                ("drift_checked_at", recentDriftCheckedAt)
+                ("drift_checked_at", recentDriftCheckedAt.ToUnixTimeMilliseconds())
             ]
         );
 
@@ -102,8 +102,9 @@ public sealed class BillingDriftWorkerTests(AccountWebApplicationFactory factory
         await worker.ExecuteTask!;
 
         // Assert
-        ReadDriftCheckedAt(DatabaseSeeder.Tenant1.Id.Value).Should()
-            .Be(recentDriftCheckedAt, "fresh rows must be excluded by the repository's staleness filter so the worker never visits them");
+        ReadDriftCheckedAt(DatabaseSeeder.Tenant1.Id.Value).Should().NotBeNull();
+        ReadDriftCheckedAt(DatabaseSeeder.Tenant1.Id.Value)!.Value.Should()
+            .BeCloseTo(recentDriftCheckedAt, TimeSpan.FromMilliseconds(1), "fresh rows must be excluded by the repository's staleness filter so the worker never visits them");
     }
 
     [Fact]
@@ -137,8 +138,14 @@ public sealed class BillingDriftWorkerTests(AccountWebApplicationFactory factory
             "SELECT drift_checked_at FROM subscriptions WHERE tenant_id = @tenantId",
             [new { tenantId }]
         );
-        return string.IsNullOrEmpty(value)
-            ? null
-            : DateTimeOffset.Parse(value, CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal | DateTimeStyles.AdjustToUniversal);
+        if (string.IsNullOrEmpty(value))
+        {
+            return null;
+        }
+        if (long.TryParse(value, out var unixMs))
+        {
+            return DateTimeOffset.FromUnixTimeMilliseconds(unixMs);
+        }
+        return DateTimeOffset.Parse(value, CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal | DateTimeStyles.AdjustToUniversal);
     }
 }

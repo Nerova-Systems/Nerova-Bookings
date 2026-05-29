@@ -25,7 +25,10 @@ public static class SqliteConnectionExtensions
             }
 
             var result = command.ExecuteScalar();
-            return result is DBNull ? default! : (T)result!;
+            if (result is DBNull || result is null) return default!;
+            if (result is T typedResult) return typedResult;
+            if (typeof(T) == typeof(string)) return (T)(object)result.ToString()!;
+            return (T)Convert.ChangeType(result, typeof(T));
         }
 
         public bool RowExists(string tableName, string id)

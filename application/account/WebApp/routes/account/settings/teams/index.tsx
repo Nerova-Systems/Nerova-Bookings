@@ -70,51 +70,59 @@ function TeamsPage() {
           )}
         </Empty>
       ) : (
-        <Table rowSize="compact">
-          <TableHeader>
-            <TableRow>
-              <TableHead>
-                <Trans>Name</Trans>
-              </TableHead>
-              <TableHead>
-                <Trans>Slug</Trans>
-              </TableHead>
-              <TableHead className="w-32">
-                <Trans>Members</Trans>
-              </TableHead>
-              <TableHead className="w-px text-right" />
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {teams.map((team) => (
-              <TableRow key={team.id}>
-                <TableCell>
-                  <div className="flex items-center gap-2">
-                    <Avatar className="size-8">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {teams.map((team) => (
+            <div
+              key={team.id}
+              className="linear-card flex flex-col justify-between p-6 transition-all hover:border-muted-foreground/30 hover:bg-muted/10 group relative"
+            >
+              <div>
+                <div className="flex items-start justify-between">
+                  <div className="flex items-center gap-3">
+                    <Avatar className="size-10 border border-border">
                       {team.logoUrl && <AvatarImage src={team.logoUrl} alt={team.name} />}
-                      <AvatarFallback>{team.name.charAt(0).toUpperCase()}</AvatarFallback>
+                      <AvatarFallback className="bg-brand/10 text-brand font-semibold text-sm">
+                        {team.name.charAt(0).toUpperCase()}
+                      </AvatarFallback>
                     </Avatar>
-                    <span className="font-medium">{team.name}</span>
+                    <div>
+                      <h4 className="font-semibold text-foreground tracking-tight transition-colors group-hover:text-brand">
+                        {team.name}
+                      </h4>
+                      <span className="text-xs text-muted-foreground">/{team.slug ?? "—"}</span>
+                    </div>
                   </div>
-                </TableCell>
-                <TableCell className="text-muted-foreground">{team.slug ?? "—"}</TableCell>
-                <TableCell>
-                  <Badge variant="outline">{team.memberCount}</Badge>
-                </TableCell>
-                <TableCell className="text-right">
-                  <Link
-                    to="/account/settings/teams/$teamId"
-                    params={{ teamId: team.id }}
-                    className={buttonVariants({ variant: "ghost", size: "sm" })}
-                    aria-label={t`Manage ${team.name}`}
-                  >
-                    <Trans>Manage</Trans>
-                  </Link>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+                </div>
+
+                {team.bio && (
+                  <p className="mt-4 text-sm text-muted-foreground line-clamp-2">
+                    {team.bio}
+                  </p>
+                )}
+              </div>
+
+              <div className="mt-6 flex items-center justify-between border-t border-border/50 pt-4">
+                <div className="flex flex-col">
+                  <span className="text-[10px] text-muted-foreground uppercase tracking-wider font-semibold">
+                    <Trans>Members</Trans>
+                  </span>
+                  <span className="font-mono text-xl font-bold tracking-tight text-foreground mt-0.5">
+                    {team.memberCount}
+                  </span>
+                </div>
+
+                <Link
+                  to="/account/settings/teams/$teamId"
+                  params={{ teamId: team.id }}
+                  className={buttonVariants({ variant: "ghost", size: "sm" })}
+                  aria-label={t`Manage ${team.name}`}
+                >
+                  <Trans>Manage</Trans>
+                </Link>
+              </div>
+            </div>
+          ))}
+        </div>
       )}
     </AppLayout>
   );

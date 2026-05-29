@@ -29,7 +29,7 @@ public sealed class ProcessSubscriptionBillingTests(AccountWebApplicationFactory
         Connection.ExecuteScalar<string>("SELECT plan FROM subscriptions WHERE tenant_id = @tenantId", [new { tenantId = DatabaseSeeder.Tenant1.Id.Value }]).Should().Be(nameof(SubscriptionPlan.Standard));
         decimal.Parse(Connection.ExecuteScalar<string>("SELECT current_price_amount FROM subscriptions WHERE tenant_id = @tenantId", [new { tenantId = DatabaseSeeder.Tenant1.Id.Value }]), CultureInfo.InvariantCulture).Should().Be(29.00m);
         Connection.ExecuteScalar<string?>("SELECT first_payment_failed_at FROM subscriptions WHERE tenant_id = @tenantId", [new { tenantId = DatabaseSeeder.Tenant1.Id.Value }]).Should().BeNull();
-        DateTimeOffset.Parse(Connection.ExecuteScalar<string>("SELECT next_billing_at FROM subscriptions WHERE tenant_id = @tenantId", [new { tenantId = DatabaseSeeder.Tenant1.Id.Value }]), CultureInfo.InvariantCulture).Should().BeAfter(now.AddDays(25));
+        ParseDbDateTimeOffset(Connection.ExecuteScalar<string>("SELECT next_billing_at FROM subscriptions WHERE tenant_id = @tenantId", [new { tenantId = DatabaseSeeder.Tenant1.Id.Value }])).Should().BeAfter(now.AddDays(25));
         Connection.ExecuteScalar<long>("SELECT COUNT(*) FROM paystack_payment_attempts WHERE purpose = @purpose AND status = @status", [new { purpose = nameof(PaystackPaymentPurpose.Renewal), status = nameof(PaystackPaymentAttemptStatus.Succeeded) }]).Should().Be(1);
         Connection.ExecuteScalar<string>("SELECT payment_transactions FROM subscriptions WHERE tenant_id = @tenantId", [new { tenantId = DatabaseSeeder.Tenant1.Id.Value }]).Should().Contain("\"Status\":\"Succeeded\"");
     }
@@ -164,14 +164,23 @@ public sealed class ProcessSubscriptionBillingTests(AccountWebApplicationFactory
                 ("paystack_authorization_signature", "SIG_mock_12345"),
                 ("current_price_amount", currentPriceAmount),
                 ("current_price_currency", "USD"),
-                ("current_period_start", currentPeriodStart),
-                ("current_period_end", currentPeriodEnd),
-                ("next_billing_at", nextBillingAt),
+                ("current_period_start", currentPeriodStart.ToUnixTimeMilliseconds()),
+                ("current_period_end", currentPeriodEnd.ToUnixTimeMilliseconds()),
+                ("next_billing_at", nextBillingAt.ToUnixTimeMilliseconds()),
                 ("cancel_at_period_end", cancelAtPeriodEnd),
-                ("first_payment_failed_at", firstPaymentFailedAt),
+                ("first_payment_failed_at", firstPaymentFailedAt?.ToUnixTimeMilliseconds()),
                 ("payment_method", """{"Brand":"visa","Last4":"4242","ExpMonth":12,"ExpYear":2026}"""),
                 ("billing_info", """{"Name":"Test Organization","Address":{"Line1":"Vestergade 12","PostalCode":"1456","City":"Copenhagen","Country":"DK"},"Email":"billing@example.com"}""")
             ]
         );
+    }
+
+    private static DateTimeOffset ParseDbDateTimeOffset(string value)
+    {
+        if (long.TryParse(value, out var unixMs))
+        {
+            return DateTimeOffset.FromUnixTimeMilliseconds(unixMs);
+        }
+        return DateTimeOffset.Parse(value, CultureInfo.InvariantCulture);
     }
 }
