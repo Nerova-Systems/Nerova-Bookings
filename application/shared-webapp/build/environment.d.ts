@@ -116,6 +116,10 @@ export declare global {
      **/
     PUBLIC_META_APP_ID: string;
     /**
+     * Meta Configuration ID for Facebook Login for Business.
+     **/
+    PUBLIC_META_CONFIG_ID: string;
+    /**
      * Whether the in-app support system (ticket inbox + back-office support tabs) is enabled. When
      * disabled, the legacy "Contact support" mailto dialog is shown from the user menu instead.
      **/

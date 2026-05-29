@@ -20,7 +20,9 @@ builder.Services
             ["PUBLIC_SUBSCRIPTION_ENABLED"] = Environment.GetEnvironmentVariable("PUBLIC_SUBSCRIPTION_ENABLED") ?? "false",
             // Support system defaults to true so the in-app support surface is on out of the box; set the env
             // var to "false" to gate the entire feature off (legacy "Contact support" mailto dialog returns).
-            ["PUBLIC_SUPPORT_SYSTEM_ENABLED"] = Environment.GetEnvironmentVariable("PUBLIC_SUPPORT_SYSTEM_ENABLED") ?? "true"
+            ["PUBLIC_SUPPORT_SYSTEM_ENABLED"] = Environment.GetEnvironmentVariable("PUBLIC_SUPPORT_SYSTEM_ENABLED") ?? "true",
+            ["PUBLIC_META_APP_ID"] = builder.Configuration["WhatsApp:MetaAppId"] ?? Environment.GetEnvironmentVariable("PUBLIC_META_APP_ID") ?? string.Empty,
+            ["PUBLIC_META_CONFIG_ID"] = builder.Configuration["WhatsApp:MetaConfigId"] ?? Environment.GetEnvironmentVariable("PUBLIC_META_CONFIG_ID") ?? string.Empty
         }
     );
 

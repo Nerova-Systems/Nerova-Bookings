@@ -42,6 +42,9 @@ export function EmbeddedSignupButton({
   const [isLaunching, setIsLaunching] = useState(false);
 
   const appId = import.meta.runtime_env.PUBLIC_META_APP_ID;
+  const configId = import.meta.runtime_env.PUBLIC_META_CONFIG_ID;
+  const isAppIdConfigured = Boolean(appId && appId !== "not-configured" && appId.trim().length > 0);
+  const isConfigIdConfigured = Boolean(configId && configId !== "not-configured" && configId.trim().length > 0);
 
   // Stable ref to onError — prevents the SDK load effect from re-firing on
   // every render when the parent passes an inline callback.
@@ -49,7 +52,7 @@ export function EmbeddedSignupButton({
   onErrorRef.current = onError;
 
   useEffect(() => {
-    if (!appId) {
+    if (!isAppIdConfigured) {
       console.warn("EmbeddedSignupButton: PUBLIC_META_APP_ID is not configured or empty.");
       return;
     }
@@ -61,55 +64,92 @@ export function EmbeddedSignupButton({
         setIsSdkReady(true);
       })
       .catch((error: unknown) => {
-        console.error("EmbeddedSignupButton: Failed to load Meta JS SDK:", error);
+        console.error("EmbeddedSignupButton: Failed to load Meta JS SDK (falling back to direct popup mode):", error);
         setSdkError(true);
         onErrorRef.current?.(error);
       });
-  }, [appId]);
+  }, [appId, isAppIdConfigured]);
 
-  const handleClick = useCallback(async () => {
-    console.log("EmbeddedSignupButton: Clicked! isSdkReady:", isSdkReady, "appId:", appId);
-    if (!appId || !isSdkReady) {
-      console.warn("EmbeddedSignupButton: Cannot launch signup. App ID or SDK is not ready.");
+  const handleClick = useCallback(() => {
+    console.log(
+      "EmbeddedSignupButton: Clicked! isSdkReady:",
+      isSdkReady,
+      "sdkError:",
+      sdkError,
+      "appId:",
+      appId,
+      "configId:",
+      configId
+    );
+    if (!isAppIdConfigured || !isConfigIdConfigured) {
+      console.warn("EmbeddedSignupButton: Cannot launch signup. App ID or Config ID is not configured.");
       return;
     }
 
     setIsLaunching(true);
-    try {
-      console.log("EmbeddedSignupButton: Launching Meta Embedded Signup popup...");
-      const response = await launchEmbeddedSignup({ appId, businessName });
-      console.log("EmbeddedSignupButton: Meta Embedded Signup response:", response);
-      if (response?.code) {
-        onSuccess(response.code);
-      } else {
-        console.warn("EmbeddedSignupButton: Signup cancelled or returned no code.");
-        onCancel?.();
-      }
-    } catch (error: unknown) {
-      console.error("EmbeddedSignupButton: Error launching Embedded Signup:", error);
-      onError?.(error);
-    } finally {
-      setIsLaunching(false);
-    }
-  }, [appId, businessName, isSdkReady, onCancel, onError, onSuccess]);
+    console.log("EmbeddedSignupButton: Launching Meta Embedded Signup popup...");
+    launchEmbeddedSignup({ appId, configId, businessName })
+      .then((response) => {
+        console.log("EmbeddedSignupButton: Meta Embedded Signup response:", response);
+        if (response?.code) {
+          onSuccess(response.code);
+        } else {
+          console.warn("EmbeddedSignupButton: Signup cancelled or returned no code.");
+          onCancel?.();
+        }
+      })
+      .catch((error: unknown) => {
+        console.error("EmbeddedSignupButton: Error launching Embedded Signup:", error);
+        onError?.(error);
+      })
+      .finally(() => {
+        setIsLaunching(false);
+      });
+  }, [appId, configId, isAppIdConfigured, isSdkReady, sdkError, businessName, onCancel, onError, onSuccess]);
 
-  const isSdkLoading = !isSdkReady && !sdkError && Boolean(appId);
+  const isSdkLoading = !isSdkReady && !sdkError && isAppIdConfigured && isConfigIdConfigured;
 
   return (
-    <Button
-      onClick={() => void handleClick()}
-      disabled={disabled || isSdkLoading || sdkError}
-      isPending={isLaunching}
-      aria-label={t`Connect WhatsApp Business Account via Meta Embedded Signup`}
-    >
-      {isSdkLoading ? (
-        <>
-          <Spinner className="size-4" />
-          <Trans>Loading…</Trans>
-        </>
-      ) : (
-        <Trans>Connect WhatsApp Business</Trans>
+    <div className="flex w-full flex-col items-center gap-3">
+      {!isAppIdConfigured && (
+        <div className="max-w-sm rounded-md border border-amber-500/30 bg-amber-500/5 p-3 text-center text-xs text-amber-600">
+          <Trans>
+            <strong>App ID required:</strong> The Meta App ID is not configured. Please configure{" "}
+            <code>whatsapp-meta-app-id</code> in your secrets or settings and restart the stack.
+          </Trans>
+        </div>
       )}
-    </Button>
+      {isAppIdConfigured && !isConfigIdConfigured && (
+        <div className="max-w-sm rounded-md border border-amber-500/30 bg-amber-500/5 p-3 text-center text-xs text-amber-600">
+          <Trans>
+            <strong>Configuration ID required:</strong> The Facebook Login for Business Configuration ID is not
+            configured. Please configure <code>whatsapp-meta-config-id</code> in your secrets and restart the stack.
+          </Trans>
+        </div>
+      )}
+      {isAppIdConfigured && isConfigIdConfigured && sdkError && (
+        <div className="max-w-sm rounded-md border border-amber-500/30 bg-amber-500/5 p-3 text-center text-xs text-amber-600">
+          <Trans>
+            <strong>Brave/Ad-Blocker detected:</strong> The Facebook SDK script was blocked, but we've activated a
+            secure direct-popup fallback. Click the button below to connect WhatsApp!
+          </Trans>
+        </div>
+      )}
+      <Button
+        onClick={handleClick}
+        disabled={disabled || isSdkLoading || !isAppIdConfigured || !isConfigIdConfigured}
+        isPending={isLaunching}
+        aria-label={t`Connect WhatsApp Business Account via Meta Embedded Signup`}
+      >
+        {isSdkLoading ? (
+          <>
+            <Spinner className="size-4" />
+            <Trans>Loading…</Trans>
+          </>
+        ) : (
+          <Trans>Connect WhatsApp Business</Trans>
+        )}
+      </Button>
+    </div>
   );
 }

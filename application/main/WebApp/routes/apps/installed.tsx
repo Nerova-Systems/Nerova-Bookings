@@ -35,8 +35,8 @@ function InstalledAppsPage() {
   const navigate = useNavigate({ from: Route.fullPath });
   const { data, isLoading } = api.useQuery("get", "/api/apps");
   const apps = data?.apps ?? [];
-  const installedApps = apps.filter(
-    (app) => (app.slug === "whatsapp" ? app.isInstalledForTenant : app.isConnectedForUser)
+  const installedApps = apps.filter((app) =>
+    app.slug === "whatsapp" ? app.isInstalledForTenant : app.isConnectedForUser
   );
 
   const [selectedApp, setSelectedApp] = useState<App | null>(null);

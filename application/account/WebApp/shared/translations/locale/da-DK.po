@@ -84,6 +84,15 @@ msgstr "<0>{0}</0> markerede denne sag som løst"
 msgid "<0>{0}</0> reopened this ticket"
 msgstr "<0>{0}</0> genåbnede denne sag"
 
+msgid "<0>App ID required:</0> The Meta App ID is not configured. Please configure <1>whatsapp-meta-app-id</1> in your secrets or settings and restart the stack."
+msgstr ""
+
+msgid "<0>Brave/Ad-Blocker detected:</0> The Facebook SDK script was blocked, but we've activated a secure direct-popup fallback. Click the button below to connect WhatsApp!"
+msgstr ""
+
+msgid "<0>Configuration ID required:</0> The Facebook Login for Business Configuration ID is not configured. Please configure <1>whatsapp-meta-config-id</1> in your secrets and restart the stack."
+msgstr ""
+
 msgid "<0>Upgrade your plan</0> to add a second website."
 msgstr "<0>Opgrader din plan</0> for at tilføje et andet websted."
 

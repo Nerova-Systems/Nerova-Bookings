@@ -43,7 +43,7 @@ var paystackFullyConfigured = paystackConfigured
                               && builder.Configuration["Parameters:paystack-standard-plan-code"] is not null and not "not-configured"
                               && builder.Configuration["Parameters:paystack-premium-plan-code"] is not null and not "not-configured";
 
-var (whatsappConfigured, whatsappMetaAppId, whatsappMetaAppSecret) = ConfigureWhatsAppParameters();
+var (whatsappConfigured, whatsappMetaAppId, whatsappMetaAppSecret, whatsappMetaConfigId) = ConfigureWhatsAppParameters();
 
 var postgresPassword = builder.CreateStablePassword("postgres-password");
 var postgres = builder.AddPostgres("postgres", password: postgresPassword, port: ports.Postgres)
@@ -148,6 +148,7 @@ var accountApi = builder
     .WithEnvironment("PUBLIC_SUPPORT_SYSTEM_ENABLED", Environment.GetEnvironmentVariable("PUBLIC_SUPPORT_SYSTEM_ENABLED") ?? "true")
     .WithEnvironment("WhatsApp__MetaAppId", whatsappMetaAppId)
     .WithEnvironment("WhatsApp__MetaAppSecret", whatsappMetaAppSecret)
+    .WithEnvironment("WhatsApp__MetaConfigId", whatsappMetaConfigId)
     .WaitFor(accountWorkers);
 
 var mainDatabase = postgres
@@ -186,6 +187,9 @@ var mainApi = builder
     .WithEnvironment("PUBLIC_GOOGLE_OAUTH_ENABLED", googleOAuthConfigured ? "true" : "false")
     .WithEnvironment("PUBLIC_SUBSCRIPTION_ENABLED", paystackFullyConfigured ? "true" : "false")
     .WithEnvironment("PUBLIC_SUPPORT_SYSTEM_ENABLED", Environment.GetEnvironmentVariable("PUBLIC_SUPPORT_SYSTEM_ENABLED") ?? "true")
+    .WithEnvironment("WhatsApp__MetaAppId", whatsappMetaAppId)
+    .WithEnvironment("WhatsApp__MetaAppSecret", whatsappMetaAppSecret)
+    .WithEnvironment("WhatsApp__MetaConfigId", whatsappMetaConfigId)
     .WaitFor(mainWorkers);
 
 builder
@@ -365,7 +369,7 @@ CoreConnectorOAuthParameters ConfigureCoreConnectorOAuthParameters()
     );
 }
 
-(bool Configured, IResourceBuilder<ParameterResource> MetaAppId, IResourceBuilder<ParameterResource> MetaAppSecret) ConfigureWhatsAppParameters()
+(bool Configured, IResourceBuilder<ParameterResource> MetaAppId, IResourceBuilder<ParameterResource> MetaAppSecret, IResourceBuilder<ParameterResource> MetaConfigId) ConfigureWhatsAppParameters()
 {
     _ = builder.AddParameter("whatsapp-enabled")
         .WithDescription("""
@@ -396,13 +400,20 @@ CoreConnectorOAuthParameters ConfigureCoreConnectorOAuthParameters()
                              """, true
             );
 
-        return (configured, metaAppId, metaAppSecret);
+        var metaConfigId = builder.AddParameter("whatsapp-meta-config-id", true)
+            .WithDescription("""
+                             Meta Configuration ID from the Facebook Login for Business Configurations dashboard.
+                             """, true
+            );
+
+        return (configured, metaAppId, metaAppSecret, metaConfigId);
     }
 
     return (
         configured,
         builder.CreateResourceBuilder(new ParameterResource("whatsapp-meta-app-id", _ => "not-configured", true)),
-        builder.CreateResourceBuilder(new ParameterResource("whatsapp-meta-app-secret", _ => "not-configured", true))
+        builder.CreateResourceBuilder(new ParameterResource("whatsapp-meta-app-secret", _ => "not-configured", true)),
+        builder.CreateResourceBuilder(new ParameterResource("whatsapp-meta-config-id", _ => "not-configured", true))
     );
 }
 
