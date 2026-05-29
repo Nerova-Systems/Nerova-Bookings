@@ -13,8 +13,7 @@ export type EventTypeTabName =
   | "instant-meeting"
   | "recurring"
   | "team"
-  | "webhooks"
-  | "workflows";
+  | "webhooks";
 
 export const eventTypeTabNames: EventTypeTabName[] = [
   "setup",
@@ -23,7 +22,6 @@ export const eventTypeTabNames: EventTypeTabName[] = [
   "advanced",
   "recurring",
   "team",
-  "workflows",
   "webhooks",
   "apps"
 ];
@@ -40,8 +38,6 @@ export function getEventTypeTabLabel(tabName: EventTypeTabName) {
       return t`Advanced`;
     case "apps":
       return t`Apps`;
-    case "workflows":
-      return t`Workflows`;
     case "webhooks":
       return t`Webhooks`;
     case "recurring":
@@ -52,12 +48,6 @@ export function getEventTypeTabLabel(tabName: EventTypeTabName) {
       return t`Instant meeting`;
     case "ai-voice-agent":
       return t`AI voice agent`;
-    case "workflows":
-      return t`Workflows`;
-    case "webhooks":
-      return t`Webhooks`;
-    case "apps":
-      return t`Apps`;
   }
 }
 

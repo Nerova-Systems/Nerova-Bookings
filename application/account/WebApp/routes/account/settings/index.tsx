@@ -21,7 +21,6 @@ import { UnsavedChangesDialog } from "@/shared/components/UnsavedChangesDialog";
 import { api, type Schemas, UserRole } from "@/shared/lib/api/client";
 
 import { AccountInfoFields } from "./-components/AccountInfoFields";
-import { BrandProfileTab } from "./-components/BrandProfileTab";
 import DeleteAccountConfirmation from "./-components/DeleteAccountConfirmation";
 import { FeaturesSection } from "./-components/FeaturesSection";
 import { OrgSmtpTab } from "./organization/-components/SmtpTab";
@@ -132,9 +131,6 @@ export function AccountSettings() {
             <TabsTrigger value="profile">
               <Trans>Profile</Trans>
             </TabsTrigger>
-            <TabsTrigger value="brand">
-              <Trans>WhatsApp Brand</Trans>
-            </TabsTrigger>
             {isSsoEnabled && (
               <TabsTrigger value="sso">
                 <Trans>SSO</Trans>
@@ -184,9 +180,7 @@ export function AccountSettings() {
             {isOwner && <DangerZone setIsDeleteModalOpen={setIsDeleteModalOpen} />}
           </TabsContent>
 
-          <TabsContent value="brand">
-            <BrandProfileTab />
-          </TabsContent>
+
 
           {isSsoEnabled && (
             <TabsContent value="sso">

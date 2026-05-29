@@ -29,7 +29,6 @@ import { EventTypeSetupTab } from "../event-type-tabs/EventTypeSetupTab";
 import { type EventTypeTabProps } from "../event-type-tabs/EventTypeTabTypes";
 import { EventTypeTeamTab } from "../event-type-tabs/EventTypeTeamTab";
 import { EventTypeWebhooksTab } from "../event-type-tabs/EventTypeWebhooksTab";
-import { EventTypeWorkflowsTab } from "../event-type-tabs/EventTypeWorkflowsTab";
 import { eventTypeTabNames, getEventTypeTabLabel, type EventTypeTabName } from "./eventTypeShellTypes";
 
 export const eventTypeFormId = "event-type-editor-form";
@@ -135,8 +134,6 @@ function getEventTypeTabDescription(tabName: EventTypeTabName, draft: EventTypeP
       return t`Configure qualification AI agent`;
     case "apps":
       return t`0 apps, 0 active`;
-    case "workflows":
-      return t`0 active`;
     case "webhooks":
       return t`0 active`;
     case "dependencies":
@@ -164,8 +161,6 @@ function getEventTypeTabIcon(tabName: EventTypeTabName) {
       return <BotIcon />;
     case "apps":
       return <Grid3X3Icon />;
-    case "workflows":
-      return <ZapIcon />;
     case "webhooks":
       return <WebhookIcon />;
     case "dependencies":
@@ -197,8 +192,6 @@ function renderEventTypeTab(
       return <EventTypeAiVoiceAgentTab {...tabProps} />;
     case "apps":
       return <EventTypeAppsTab {...tabProps} />;
-    case "workflows":
-      return <EventTypeWorkflowsTab eventTypeId={eventTypeId} />;
     case "webhooks":
       return <EventTypeWebhooksTab eventTypeId={eventTypeId} />;
   }

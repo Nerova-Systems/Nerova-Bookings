@@ -22,9 +22,7 @@ import {
   CalendarCheckIcon,
   CalendarDaysIcon,
   LayoutDashboardIcon,
-  MessageCircleIcon,
-  TimerIcon,
-  ZapIcon
+  TimerIcon
 } from "lucide-react";
 import { use } from "react";
 
@@ -44,7 +42,6 @@ export function MainSideMenu() {
   const currentPath = normalizePath(router.state.location.pathname);
   const navigate = useNavigate();
   const { enabled: isInsightsEnabled } = useFeatureFlag("cap-insights");
-  const { enabled: isWorkflowsEnabled } = useFeatureFlag("cap-workflows");
   const handleNavigate = (path: string) => {
     navigate({ to: path });
   };
@@ -148,36 +145,7 @@ export function MainSideMenu() {
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                 )}
-                {isWorkflowsEnabled && (
-                  <SidebarMenuItem>
-                    <SidebarMenuButton
-                      asChild={true}
-                      isActive={currentPath.startsWith("/workflows")}
-                      tooltip={t`Workflows`}
-                    >
-                      <RouterLink to="/workflows">
-                        <ZapIcon />
-                        <span>
-                          <Trans>Workflows</Trans>
-                        </span>
-                      </RouterLink>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                )}
-                <SidebarMenuItem>
-                  <SidebarMenuButton
-                    asChild={true}
-                    isActive={currentPath.startsWith("/whatsapp")}
-                    tooltip={t`WhatsApp`}
-                  >
-                    <RouterLink to="/whatsapp/questionnaire">
-                      <MessageCircleIcon />
-                      <span>
-                        <Trans>WhatsApp</Trans>
-                      </span>
-                    </RouterLink>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
+
               </SidebarMenu>
             </SidebarGroupContent>
           </SidebarGroup>
