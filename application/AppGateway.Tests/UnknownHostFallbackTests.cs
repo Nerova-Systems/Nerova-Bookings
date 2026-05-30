@@ -31,7 +31,7 @@ public sealed class UnknownHostFallbackTests(AppGatewayApplicationFactory factor
         problemDetails.GetProperty("detail").GetString().Should().Contain(unknownHost);
 
         var canonicalUrls = problemDetails.GetProperty("canonicalUrls").EnumerateArray().Select(e => e.GetString()).ToArray();
-        canonicalUrls.Should().Contain(url => url!.Contains("app.dev.localhost"));
+        canonicalUrls.Should().Contain(url => url!.Contains("app.nerovasystems.com"));
         canonicalUrls.Should().NotContain(url => url!.Contains("back-office.dev.localhost"));
     }
 
@@ -56,7 +56,7 @@ public sealed class UnknownHostFallbackTests(AppGatewayApplicationFactory factor
     {
         // Arrange
         var client = factory.CreateClient(new WebApplicationFactoryClientOptions { AllowAutoRedirect = false });
-        var request = new HttpRequestMessage(HttpMethod.Get, "http://app.dev.localhost/openapi");
+        var request = new HttpRequestMessage(HttpMethod.Get, "http://app.nerovasystems.com/openapi");
 
         // Act
         var response = await client.SendAsync(request);

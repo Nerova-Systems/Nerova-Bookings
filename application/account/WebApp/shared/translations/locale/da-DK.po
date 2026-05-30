@@ -84,13 +84,13 @@ msgstr "<0>{0}</0> markerede denne sag som løst"
 msgid "<0>{0}</0> reopened this ticket"
 msgstr "<0>{0}</0> genåbnede denne sag"
 
-msgid "<0>App ID required:</0> The Meta App ID is not configured. Please configure <1>whatsapp-meta-app-id</1> in your secrets or settings and restart the stack."
+msgid "<0>Ad-Blocker detected:</0> Using secure direct-popup fallback."
 msgstr ""
 
-msgid "<0>Brave/Ad-Blocker detected:</0> The Facebook SDK script was blocked, but we've activated a secure direct-popup fallback. Click the button below to connect WhatsApp!"
+msgid "<0>App ID required:</0> Please configure <1>whatsapp-meta-app-id</1> and restart the stack."
 msgstr ""
 
-msgid "<0>Configuration ID required:</0> The Facebook Login for Business Configuration ID is not configured. Please configure <1>whatsapp-meta-config-id</1> in your secrets and restart the stack."
+msgid "<0>Configuration ID required:</0> Please configure <1>whatsapp-meta-config-id</1> and restart the stack."
 msgstr ""
 
 msgid "<0>Upgrade your plan</0> to add a second website."
@@ -1594,9 +1594,6 @@ msgstr "Kun betroet personale får adgang til data gennem Azure AD autentificeri
 msgid "Open your first ticket"
 msgstr "Opret din første sag"
 
-msgid "Opens a Meta-hosted popup to connect your WABA in a few clicks."
-msgstr ""
-
 msgid "or"
 msgstr "eller"
 
@@ -2004,7 +2001,7 @@ msgstr ""
 msgid "Search users"
 msgstr ""
 
-msgid "Secure Meta Embedded Signup"
+msgid "Secured by Meta"
 msgstr ""
 
 msgid "Security, privacy, and compliance information"
@@ -2790,9 +2787,6 @@ msgstr "Din opsigelse vil blive fortrudt, og dit {planName}-abonnement vil forbl
 
 msgid "Your changes may take a moment to appear."
 msgstr "Dine ændringer kan tage et øjeblik at blive vist."
-
-msgid "Your credentials are handled securely by Meta"
-msgstr ""
 
 msgid "Your data stays in the Azure region you select at signup"
 msgstr "Dine data forbliver i den Azure region du vælger ved tilmelding"

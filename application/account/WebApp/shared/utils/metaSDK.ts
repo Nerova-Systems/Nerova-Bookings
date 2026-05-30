@@ -156,7 +156,8 @@ export function launchEmbeddedSignup(options: EmbeddedSignupOptions): Promise<FB
       console.warn("metaSDK: window.FB is not defined. Falling back to ad-blocker-safe direct window.open popup!");
 
       const extras = {
-        feature: "whatsapp_embedded_signup",
+        featureType: "whatsapp_business_app_onboarding",
+        version: "v4",
         sessionInfoVersion: "3",
         setup: options.businessName
           ? {
@@ -220,7 +221,8 @@ export function launchEmbeddedSignup(options: EmbeddedSignupOptions): Promise<FB
       response_type: "code",
       override_default_response_type: true,
       extras: {
-        feature: "whatsapp_embedded_signup",
+        featureType: "whatsapp_business_app_onboarding",
+        version: "v4",
         sessionInfoVersion: "3",
         setup: options.businessName
           ? {

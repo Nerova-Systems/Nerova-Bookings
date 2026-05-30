@@ -154,7 +154,7 @@ export function AppDetailsSheet({ app, allApps, isOpen, onOpenChange, onUninstal
                   </TabsTrigger>
                 </TabsList>
 
-                <div className="min-h-[400px] flex-1 rounded-xl border border-border bg-card/30 p-5">
+                <div className="min-h-[400px] flex-1 py-2">
                   <Suspense
                     fallback={
                       <div className="flex h-48 w-full items-center justify-center">

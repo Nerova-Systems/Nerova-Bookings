@@ -8,7 +8,7 @@ namespace AppGateway.Tests;
 
 public sealed class HostMatchConfigFilterTests
 {
-    private const string AppHost = "app.dev.localhost";
+    private const string AppHost = "app.nerovasystems.com";
 
     private readonly HostMatchConfigFilter _filter = new(Options.Create(new HostnamesOptions { App = AppHost }));
 

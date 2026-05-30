@@ -18,7 +18,7 @@ public sealed class LocalhostRedirectTests(AppGatewayApplicationFactory factory)
         // Arrange
         using var scope = factory.Services.CreateScope();
         var port = scope.ServiceProvider.GetRequiredService<PortAllocation>().AppGateway;
-        var expectedLocation = $"https://app.dev.localhost:{port}{expectedPathAndQuery}";
+        var expectedLocation = $"https://app.nerovasystems.com:{port}{expectedPathAndQuery}";
         var client = factory.CreateClient(new WebApplicationFactoryClientOptions { AllowAutoRedirect = false });
         var request = new HttpRequestMessage(HttpMethod.Get, $"http://localhost:{port}{pathAndQuery}");
 

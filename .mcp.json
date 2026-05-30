@@ -4,6 +4,9 @@
       "command": "npx",
       "args": ["-y", "shadcn@latest", "mcp"]
     },
+    "cloudflare-api": {
+      "url": "https://mcp.cloudflare.com/mcp"
+    },
     "aspire": {
       "command": "aspire",
       "args": ["agent", "mcp"]

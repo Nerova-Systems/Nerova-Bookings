@@ -112,26 +112,23 @@ export function EmbeddedSignupButton({
   return (
     <div className="flex w-full flex-col items-center gap-3">
       {!isAppIdConfigured && (
-        <div className="max-w-sm rounded-md border border-amber-500/30 bg-amber-500/5 p-3 text-center text-xs text-amber-600">
+        <div className="text-center text-xs text-amber-600 font-medium">
           <Trans>
-            <strong>App ID required:</strong> The Meta App ID is not configured. Please configure{" "}
-            <code>whatsapp-meta-app-id</code> in your secrets or settings and restart the stack.
+            <strong>App ID required:</strong> Please configure <code>whatsapp-meta-app-id</code> and restart the stack.
           </Trans>
         </div>
       )}
       {isAppIdConfigured && !isConfigIdConfigured && (
-        <div className="max-w-sm rounded-md border border-amber-500/30 bg-amber-500/5 p-3 text-center text-xs text-amber-600">
+        <div className="text-center text-xs text-amber-600 font-medium">
           <Trans>
-            <strong>Configuration ID required:</strong> The Facebook Login for Business Configuration ID is not
-            configured. Please configure <code>whatsapp-meta-config-id</code> in your secrets and restart the stack.
+            <strong>Configuration ID required:</strong> Please configure <code>whatsapp-meta-config-id</code> and restart the stack.
           </Trans>
         </div>
       )}
       {isAppIdConfigured && isConfigIdConfigured && sdkError && (
-        <div className="max-w-sm rounded-md border border-amber-500/30 bg-amber-500/5 p-3 text-center text-xs text-amber-600">
+        <div className="text-center text-xs text-amber-600 font-medium">
           <Trans>
-            <strong>Brave/Ad-Blocker detected:</strong> The Facebook SDK script was blocked, but we've activated a
-            secure direct-popup fallback. Click the button below to connect WhatsApp!
+            <strong>Ad-Blocker detected:</strong> Using secure direct-popup fallback.
           </Trans>
         </div>
       )}

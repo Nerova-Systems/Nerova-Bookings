@@ -84,14 +84,14 @@ msgstr "<0>{0}</0> marked this ticket as resolved"
 msgid "<0>{0}</0> reopened this ticket"
 msgstr "<0>{0}</0> reopened this ticket"
 
-msgid "<0>App ID required:</0> The Meta App ID is not configured. Please configure <1>whatsapp-meta-app-id</1> in your secrets or settings and restart the stack."
-msgstr "<0>App ID required:</0> The Meta App ID is not configured. Please configure <1>whatsapp-meta-app-id</1> in your secrets or settings and restart the stack."
+msgid "<0>Ad-Blocker detected:</0> Using secure direct-popup fallback."
+msgstr "<0>Ad-Blocker detected:</0> Using secure direct-popup fallback."
 
-msgid "<0>Brave/Ad-Blocker detected:</0> The Facebook SDK script was blocked, but we've activated a secure direct-popup fallback. Click the button below to connect WhatsApp!"
-msgstr "<0>Brave/Ad-Blocker detected:</0> The Facebook SDK script was blocked, but we've activated a secure direct-popup fallback. Click the button below to connect WhatsApp!"
+msgid "<0>App ID required:</0> Please configure <1>whatsapp-meta-app-id</1> and restart the stack."
+msgstr "<0>App ID required:</0> Please configure <1>whatsapp-meta-app-id</1> and restart the stack."
 
-msgid "<0>Configuration ID required:</0> The Facebook Login for Business Configuration ID is not configured. Please configure <1>whatsapp-meta-config-id</1> in your secrets and restart the stack."
-msgstr "<0>Configuration ID required:</0> The Facebook Login for Business Configuration ID is not configured. Please configure <1>whatsapp-meta-config-id</1> in your secrets and restart the stack."
+msgid "<0>Configuration ID required:</0> Please configure <1>whatsapp-meta-config-id</1> and restart the stack."
+msgstr "<0>Configuration ID required:</0> Please configure <1>whatsapp-meta-config-id</1> and restart the stack."
 
 msgid "<0>Upgrade your plan</0> to add a second website."
 msgstr "<0>Upgrade your plan</0> to add a second website."
@@ -1594,9 +1594,6 @@ msgstr "Only trusted personnel access data through Azure AD authentication"
 msgid "Open your first ticket"
 msgstr "Open your first ticket"
 
-msgid "Opens a Meta-hosted popup to connect your WABA in a few clicks."
-msgstr "Opens a Meta-hosted popup to connect your WABA in a few clicks."
-
 msgid "or"
 msgstr "or"
 
@@ -2004,8 +2001,8 @@ msgstr "Search by name, email, or title"
 msgid "Search users"
 msgstr "Search users"
 
-msgid "Secure Meta Embedded Signup"
-msgstr "Secure Meta Embedded Signup"
+msgid "Secured by Meta"
+msgstr "Secured by Meta"
 
 msgid "Security, privacy, and compliance information"
 msgstr "Security, privacy, and compliance information"
@@ -2790,9 +2787,6 @@ msgstr "Your cancellation will be reversed and your {planName} subscription will
 
 msgid "Your changes may take a moment to appear."
 msgstr "Your changes may take a moment to appear."
-
-msgid "Your credentials are handled securely by Meta"
-msgstr "Your credentials are handled securely by Meta"
 
 msgid "Your data stays in the Azure region you select at signup"
 msgstr "Your data stays in the Azure region you select at signup"

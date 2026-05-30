@@ -205,18 +205,7 @@ export function SetupTab() {
         isLocked={false}
         completedBadge={status?.displayPhoneNumber}
       >
-        <div className="flex flex-col items-center gap-4 rounded-lg border border-dashed border-border bg-muted/30 p-6 text-center">
-          <div className="flex size-14 items-center justify-center rounded-full bg-green-500 shadow-lg shadow-green-500/30">
-            <MessageSquareIcon className="size-7 text-white" />
-          </div>
-          <div>
-            <div className="mb-1 text-sm font-semibold">
-              <Trans>Secure Meta Embedded Signup</Trans>
-            </div>
-            <div className="text-xs text-muted-foreground">
-              <Trans>Opens a Meta-hosted popup to connect your WABA in a few clicks.</Trans>
-            </div>
-          </div>
+        <div className="flex flex-col items-center gap-3 py-1 text-center">
           <EmbeddedSignupButton
             onSuccess={handleEmbeddedSignupSuccess}
             onCancel={handleEmbeddedSignupCancel}
@@ -224,9 +213,9 @@ export function SetupTab() {
             disabled={linkWabaMutation.isPending}
             businessName={tenant?.name}
           />
-          <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-            <ShieldCheckIcon className="size-3" />
-            <Trans>Your credentials are handled securely by Meta</Trans>
+          <div className="flex items-center gap-1 text-[11px] text-muted-foreground">
+            <ShieldCheckIcon className="size-3 text-emerald-600 dark:text-emerald-400" />
+            <Trans>Secured by Meta</Trans>
           </div>
         </div>
       </StepCard>
