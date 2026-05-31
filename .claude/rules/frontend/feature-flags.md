@@ -1,4 +1,5 @@
 ---
+paths: application/**/WebApp/**/*.tsx,application/**/WebApp/**/*.ts,application/**/BackOffice/**/*.tsx,application/**/BackOffice/**/*.ts,application/shared-webapp/**/*.tsx,application/shared-webapp/**/*.ts
 description: Non-obvious behaviour of the feature flag system on the frontend (hook, codegen, propagation timing)
 ---
 

@@ -1,4 +1,5 @@
 ---
+paths: application/**/*.cs,application/**/*.json
 description: Non-obvious behaviour of the feature flag system on the backend (declaration, evaluation, lifecycle, ownership)
 ---
 

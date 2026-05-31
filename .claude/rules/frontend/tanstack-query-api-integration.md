@@ -1,5 +1,5 @@
 ---
-paths: **/*.tsx
+paths: application/**/WebApp/**/*.tsx,application/**/BackOffice/**/*.tsx,application/shared-webapp/**/*.tsx
 description: Rules for using TanStack Query with backend APIs
 ---
 

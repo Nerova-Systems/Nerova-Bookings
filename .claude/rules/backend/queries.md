@@ -1,5 +1,5 @@
 ---
-paths: **/Queries/*.cs
+paths: application/**/Queries/**/*.cs
 description: Rules for CQRS queries, including structure, validation, response types, and mapping
 ---
 

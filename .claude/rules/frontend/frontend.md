@@ -1,5 +1,5 @@
 ---
-paths: **/*.tsx,**/*.ts,**/*.json,**/*.esproj,.editorconfig
+paths: application/**/WebApp/**/*.tsx,application/**/WebApp/**/*.ts,application/**/WebApp/**/*.json,application/**/WebApp/**/*.esproj,application/**/BackOffice/**/*.tsx,application/**/BackOffice/**/*.ts,application/**/BackOffice/**/*.json,application/**/BackOffice/**/*.esproj,application/shared-webapp/**/*.tsx,application/shared-webapp/**/*.ts,application/shared-webapp/**/*.json,application/shared-webapp/**/*.esproj,.editorconfig
 description: Core rules for frontend TypeScript and React development
 ---
 

@@ -1,5 +1,5 @@
 ---
-paths: **/Tests/*.cs
+paths: application/**/Tests/**/*.cs
 description: Rules for writing backend API tests
 ---
 

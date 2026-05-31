@@ -1,5 +1,5 @@
 ---
-paths: **/*.tsx
+paths: application/**/WebApp/**/*.tsx,application/**/BackOffice/**/*.tsx,application/shared-webapp/**/*.tsx
 description: Rules for forms with validation using ShadCN 2.0 components
 ---
 

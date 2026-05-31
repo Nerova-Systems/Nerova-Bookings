@@ -1,5 +1,5 @@
 ---
-paths: **/tests/e2e/**
+paths: application/**/tests/e2e/**
 description: Rules for end-to-end tests
 ---
 

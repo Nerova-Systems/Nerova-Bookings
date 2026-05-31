@@ -1,5 +1,5 @@
 ---
-paths: **/Domain/*.cs
+paths: application/**/Domain/**/*.cs
 description: Rules for creating strongly typed IDs for DDD aggregates and entities
 ---
 

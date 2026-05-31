@@ -1,5 +1,5 @@
 ---
-paths: **/Commands/*.cs
+paths: application/**/Commands/**/*.cs
 description: Rules for implementing CQRS commands, validation, handlers, and structure
 ---
 
