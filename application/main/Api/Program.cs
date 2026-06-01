@@ -17,7 +17,11 @@ builder.Services
     .AddSinglePageAppFallback(new Dictionary<string, string>
         {
             ["PUBLIC_GOOGLE_OAUTH_ENABLED"] = Environment.GetEnvironmentVariable("PUBLIC_GOOGLE_OAUTH_ENABLED") ?? "false",
-            ["PUBLIC_SUBSCRIPTION_ENABLED"] = Environment.GetEnvironmentVariable("PUBLIC_SUBSCRIPTION_ENABLED") ?? "false"
+            ["PUBLIC_SUBSCRIPTION_ENABLED"] = Environment.GetEnvironmentVariable("PUBLIC_SUBSCRIPTION_ENABLED") ?? "false",
+            ["PUBLIC_META_APP_ID"] = builder.Configuration["Meta:AppId"] ?? "",
+            ["PUBLIC_META_CONFIG_ID"] = builder.Configuration["Meta:ConfigId"] ?? "",
+            ["PUBLIC_APP_URL"] = builder.Configuration["Meta:PublicUrl"] ?? "https://app.nerovasystems.com",
+            ["PUBLIC_WHATSAPP_SIGNUP_ENABLED"] = Environment.GetEnvironmentVariable("PUBLIC_WHATSAPP_SIGNUP_ENABLED") ?? "false"
         }
     );
 
