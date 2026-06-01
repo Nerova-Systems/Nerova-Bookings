@@ -16,10 +16,8 @@ import {
 import { Link as RouterLink, useNavigate, useRouter } from "@tanstack/react-router";
 import MobileMenu from "account/MobileMenu";
 import UserMenu from "account/UserMenu";
-import { LayoutDashboardIcon, MessageCircleIcon } from "lucide-react";
+import { LayoutDashboardIcon } from "lucide-react";
 import { use } from "react";
-
-import { isWhatsAppSignupEnabled } from "@/shared/lib/whatsapp/whatsAppConfig";
 
 const normalizePath = (path: string): string => path.replace(/\/$/, "") || "/";
 
@@ -60,22 +58,6 @@ export function MainSideMenu() {
                     </RouterLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
-                {isWhatsAppSignupEnabled && (
-                  <SidebarMenuItem>
-                    <SidebarMenuButton
-                      asChild={true}
-                      isActive={currentPath === "/dashboard/whatsapp"}
-                      tooltip={t`WhatsApp`}
-                    >
-                      <RouterLink to="/dashboard/whatsapp">
-                        <MessageCircleIcon />
-                        <span>
-                          <Trans>WhatsApp</Trans>
-                        </span>
-                      </RouterLink>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                )}
               </SidebarMenu>
             </SidebarGroupContent>
           </SidebarGroup>

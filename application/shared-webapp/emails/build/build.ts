@@ -108,9 +108,7 @@ async function buildTarget(target: BuildTarget): Promise<void> {
 }
 
 function runLingui(target: BuildTarget, args: string[]): void {
-  // shell:true is required on Windows so the `npx` command (resolved as npx.cmd) is found; without it
-  // spawnSync fails to launch the process and returns status null, breaking the emails build.
-  const result = spawnSync("npx", ["lingui", ...args], { cwd: target.configRoot, stdio: "inherit", shell: true });
+  const result = spawnSync("npx", ["lingui", ...args], { cwd: target.configRoot, stdio: "inherit" });
   if (result.status !== 0) {
     throw new Error(`lingui ${args[0]} failed for ${target.label} with exit code ${result.status}.`);
   }

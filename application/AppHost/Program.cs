@@ -24,13 +24,6 @@ CheckPortAvailability(ports);
 var appHostname = builder.Configuration["Hostnames:App"] ?? "app.dev.localhost";
 var backOfficeHostname = builder.Configuration["Hostnames:BackOffice"] ?? "back-office.dev.localhost";
 
-// Public-facing gateway port. Defaults to the local Aspire gateway port, but a tunnelled dev session
-// that fronts the app on a public domain (e.g. https://app.nerovasystems.com on 443) sets
-// Hostnames:AppPort=443 so the browser-facing PUBLIC_URL/CDN_URL render without a port suffix.
-var appPublicPort = int.TryParse(builder.Configuration["Hostnames:AppPort"], out var configuredAppPort)
-    ? configuredAppPort
-    : ports.AppGateway;
-
 var appBaseUrl = $"https://{appHostname}:{ports.AppGateway}";
 // Localhost mirrors the Azure post-split topology: back-office traffic bypasses AppGateway and
 // hits the consolidated account-api process directly on a dedicated Kestrel port.
@@ -44,8 +37,6 @@ var (googleOAuthConfigured, googleOAuthClientId, googleOAuthClientSecret) = Conf
 
 var (stripeConfigured, stripePublishableKey, stripeApiKey, stripeWebhookSecret) = ConfigureStripeParameters();
 var stripeFullyConfigured = stripeConfigured && builder.Configuration["Parameters:stripe-webhook-secret"] is not null and not "not-configured";
-
-var (metaConfigured, metaAppId, metaAppSecret, metaConfigId, metaWebhookVerifyToken) = ConfigureMetaParameters();
 
 var postgresPassword = builder.CreateStablePassword("postgres-password");
 var postgres = builder.AddPostgres("postgres", password: postgresPassword, port: ports.Postgres)
@@ -118,7 +109,7 @@ var accountApi = builder
     // Back-office bundle URLs target the dedicated Kestrel port directly (no AppGateway).
     .WithEnvironment("BACK_OFFICE_PUBLIC_URL", backOfficeBaseUrl)
     .WithEnvironment("BACK_OFFICE_CDN_URL", backOfficeBaseUrl)
-    .WithUrlConfiguration(appHostname, appPublicPort, "/account")
+    .WithUrlConfiguration(appHostname, ports.AppGateway, "/account")
     // Google OAuth's redirect_uri whitelist requires literal 'localhost', not subdomains like
     // 'app.dev.localhost'. The callback then 301's via LocalhostRedirectMiddleware back to the
     // canonical 'app.dev.localhost' so OAuth-state session cookies flow with the redirected request.
@@ -155,17 +146,11 @@ var mainWorkers = builder
 var mainApi = builder
     .AddProject<Main_Api>("main-api")
     .WithEnvironment("KESTREL_PORT", ports.MainApi.ToString())
-    .WithUrlConfiguration(appHostname, appPublicPort, "")
+    .WithUrlConfiguration(appHostname, ports.AppGateway, "")
     .WithReference(mainDatabase)
     .WithReference(azureStorage)
     .WithEnvironment("PUBLIC_GOOGLE_OAUTH_ENABLED", googleOAuthConfigured ? "true" : "false")
     .WithEnvironment("PUBLIC_SUBSCRIPTION_ENABLED", stripeFullyConfigured ? "true" : "false")
-    .WithEnvironment("Meta__AppId", metaAppId)
-    .WithEnvironment("Meta__AppSecret", metaAppSecret)
-    .WithEnvironment("Meta__ConfigId", metaConfigId)
-    .WithEnvironment("Meta__WebhookVerifyToken", metaWebhookVerifyToken)
-    .WithEnvironment("Meta__AllowMockProvider", "true")
-    .WithEnvironment("PUBLIC_WHATSAPP_SIGNUP_ENABLED", "true")
     .WaitFor(mainWorkers);
 
 builder
@@ -307,46 +292,6 @@ void AddStripeCliContainer()
         builder.CreateResourceBuilder(new ParameterResource("stripe-publishable-key", _ => "not-configured", true)),
         builder.CreateResourceBuilder(new ParameterResource("stripe-api-key", _ => "not-configured", true)),
         builder.CreateResourceBuilder(new ParameterResource("stripe-webhook-secret", _ => "not-configured", true))
-    );
-}
-
-(bool Configured, IResourceBuilder<ParameterResource> AppId, IResourceBuilder<ParameterResource> AppSecret, IResourceBuilder<ParameterResource> ConfigId, IResourceBuilder<ParameterResource> WebhookVerifyToken) ConfigureMetaParameters()
-{
-    _ = builder.AddParameter("meta-enabled")
-        .WithDescription("""
-                         **Meta WhatsApp Integration** -- Enables WhatsApp Business Account onboarding via Meta Embedded Signup.
-
-                         **Important**: Create a Meta App with WhatsApp and Embedded Signup configured **before** enabling this.
-
-                         - Enter `true` to enable Meta, or `false` to skip. This can be changed later.
-                         - When disabled (or left unconfigured) the app boots with a mock Meta provider so onboarding works locally without any Meta secrets.
-
-                         See **README.md** for full setup instructions.
-                         """, true
-        );
-
-    var configured = builder.Configuration["Parameters:meta-enabled"] == "true";
-
-    if (configured)
-    {
-        var appId = builder.AddParameter("meta-app-id", true)
-            .WithDescription("Meta App ID from the [Meta App Dashboard](https://developers.facebook.com/apps).", true);
-        var appSecret = builder.AddParameter("meta-app-secret", true)
-            .WithDescription("Meta App Secret from the [Meta App Dashboard](https://developers.facebook.com/apps).", true);
-        var configId = builder.AddParameter("meta-config-id", true)
-            .WithDescription("Meta Embedded Signup configuration ID from the WhatsApp configuration in the [Meta App Dashboard](https://developers.facebook.com/apps).", true);
-        var webhookVerifyToken = builder.AddParameter("meta-webhook-verify-token", true)
-            .WithDescription("Webhook verify token you choose; enter the exact same value in the WhatsApp webhook configuration in the [Meta App Dashboard](https://developers.facebook.com/apps) so inbound webhook verification succeeds.", true);
-
-        return (configured, appId, appSecret, configId, webhookVerifyToken);
-    }
-
-    return (
-        configured,
-        builder.CreateResourceBuilder(new ParameterResource("meta-app-id", _ => "not-configured", true)),
-        builder.CreateResourceBuilder(new ParameterResource("meta-app-secret", _ => "not-configured", true)),
-        builder.CreateResourceBuilder(new ParameterResource("meta-config-id", _ => "not-configured", true)),
-        builder.CreateResourceBuilder(new ParameterResource("meta-webhook-verify-token", _ => "not-configured", true))
     );
 }
 
