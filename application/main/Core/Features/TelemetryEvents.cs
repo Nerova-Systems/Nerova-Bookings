@@ -5,4 +5,19 @@
 // are collected with each telemetry event. Since missing or bad data cannot be fixed, it is important to have a good
 // data quality from the start.
 
+using Main.Features.WhatsAppMessaging.Domain;
+using Main.Features.WhatsAppOnboarding.Domain;
+using SharedKernel.Telemetry;
+
+namespace Main.Features;
+
+public sealed class WhatsAppBusinessAccountOnboarded(WhatsAppBusinessAccountId whatsAppBusinessAccountId)
+    : TelemetryEvent(("whats_app_business_account_id", whatsAppBusinessAccountId));
+
+public sealed class WhatsAppMessageReceived(WhatsAppMessageId whatsAppMessageId)
+    : TelemetryEvent(("whats_app_message_id", whatsAppMessageId));
+
+public sealed class WhatsAppMessageSent(WhatsAppMessageId whatsAppMessageId)
+    : TelemetryEvent(("whats_app_message_id", whatsAppMessageId));
+
 
