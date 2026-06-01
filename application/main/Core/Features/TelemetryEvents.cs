@@ -3,6 +3,8 @@ using Main.Features.EventTypes.Domain;
 using Main.Features.Schedules.Domain;
 using Main.Features.Scheduling.Domain;
 using Main.Features.Webhooks.Domain;
+using Main.Features.WhatsAppMessaging.Domain;
+using Main.Features.WhatsAppOnboarding.Domain;
 using Main.Features.Workflows.Domain;
 using SharedKernel.Domain;
 using SharedKernel.Telemetry;
@@ -20,6 +22,15 @@ public sealed class ScheduleCreated(ScheduleId scheduleId)
 
 public sealed class ScheduleUpdated(ScheduleId scheduleId)
     : TelemetryEvent(("schedule_id", scheduleId));
+
+public sealed class WhatsAppBusinessAccountOnboarded(WhatsAppBusinessAccountId whatsAppBusinessAccountId)
+    : TelemetryEvent(("whats_app_business_account_id", whatsAppBusinessAccountId));
+
+public sealed class WhatsAppMessageReceived(WhatsAppMessageId whatsAppMessageId)
+    : TelemetryEvent(("whats_app_message_id", whatsAppMessageId));
+
+public sealed class WhatsAppMessageSent(WhatsAppMessageId whatsAppMessageId)
+    : TelemetryEvent(("whats_app_message_id", whatsAppMessageId));
 
 public sealed class ScheduleDeleted(ScheduleId scheduleId)
     : TelemetryEvent(("schedule_id", scheduleId));
