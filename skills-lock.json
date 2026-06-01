@@ -37,6 +37,12 @@
       "skillPath": "skills/web-perf/SKILL.md",
       "computedHash": "a411d7a1d052e39069ad7c898d6b7e22100945a3f104794e0b76e3af480d3f44"
     },
+    "whatsapp-cloud-api": {
+      "source": "sickn33/antigravity-awesome-skills",
+      "sourceType": "github",
+      "skillPath": "skills/whatsapp-cloud-api/SKILL.md",
+      "computedHash": "f70a66d36a4acc9957b531f3bd4a743ae41822ab1d40a0a1967c43ecf22472d5"
+    },
     "workers-best-practices": {
       "source": "cloudflare/skills",
       "sourceType": "github",
