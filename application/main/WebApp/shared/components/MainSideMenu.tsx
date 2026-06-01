@@ -17,11 +17,12 @@ import {
 import { Link as RouterLink, useNavigate, useRouter } from "@tanstack/react-router";
 import MobileMenu from "account/MobileMenu";
 import UserMenu from "account/UserMenu";
-import { BarChart3Icon, CalendarCheckIcon, CalendarDaysIcon, LayoutDashboardIcon, TimerIcon } from "lucide-react";
+import { BarChart3Icon, CalendarCheckIcon, CalendarDaysIcon, LayoutDashboardIcon, MessageCircleIcon, TimerIcon } from "lucide-react";
 import { use } from "react";
 
 import { getWeekStartDate } from "@/routes/-bookings/bookingTypes";
 import { formatWeekStartSearchValue } from "@/routes/-bookings/WeekPicker";
+import { isWhatsAppSignupEnabled } from "@/shared/lib/whatsapp/whatsAppConfig";
 
 const normalizePath = (path: string): string => path.replace(/\/$/, "") || "/";
 
@@ -139,6 +140,22 @@ export function MainSideMenu() {
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                 )}
+                {isWhatsAppSignupEnabled && (
+                  <SidebarMenuItem>
+                    <SidebarMenuButton
+                      asChild={true}
+                      isActive={currentPath === "/dashboard/whatsapp"}
+                      tooltip={t`WhatsApp`}
+                    >
+                      <RouterLink to="/dashboard/whatsapp">
+                        <MessageCircleIcon />
+                        <span>
+                          <Trans>WhatsApp</Trans>
+                        </span>
+                      </RouterLink>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                )}
               </SidebarMenu>
             </SidebarGroupContent>
           </SidebarGroup>
@@ -148,3 +165,4 @@ export function MainSideMenu() {
     </Sidebar>
   );
 }
+
