@@ -110,6 +110,22 @@ export declare global {
      * Whether subscription/billing is enabled (Stripe configured)
      **/
     PUBLIC_SUBSCRIPTION_ENABLED: string;
+    /**
+     * Whether WhatsApp Business onboarding via Meta Embedded Signup is enabled
+     **/
+    PUBLIC_WHATSAPP_SIGNUP_ENABLED: string;
+    /**
+     * Meta (Facebook) App ID used by the Facebook JS SDK for Embedded Signup
+     **/
+    PUBLIC_META_APP_ID: string;
+    /**
+     * Meta Embedded Signup configuration ID passed to FB.login
+     **/
+    PUBLIC_META_CONFIG_ID: string;
+    /**
+     * Public application URL (the origin Meta accepts for Embedded Signup)
+     **/
+    PUBLIC_APP_URL: string;
   }
 
   export interface UserInfoEnv {
