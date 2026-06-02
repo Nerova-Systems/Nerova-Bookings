@@ -112,21 +112,22 @@ export function EmbeddedSignupButton({
   return (
     <div className="flex w-full flex-col items-center gap-3">
       {!isAppIdConfigured && (
-        <div className="text-center text-xs text-amber-600 font-medium">
+        <div className="text-center text-xs font-medium text-amber-600">
           <Trans>
             <strong>App ID required:</strong> Please configure <code>whatsapp-meta-app-id</code> and restart the stack.
           </Trans>
         </div>
       )}
       {isAppIdConfigured && !isConfigIdConfigured && (
-        <div className="text-center text-xs text-amber-600 font-medium">
+        <div className="text-center text-xs font-medium text-amber-600">
           <Trans>
-            <strong>Configuration ID required:</strong> Please configure <code>whatsapp-meta-config-id</code> and restart the stack.
+            <strong>Configuration ID required:</strong> Please configure <code>whatsapp-meta-config-id</code> and
+            restart the stack.
           </Trans>
         </div>
       )}
       {isAppIdConfigured && isConfigIdConfigured && sdkError && (
-        <div className="text-center text-xs text-amber-600 font-medium">
+        <div className="text-center text-xs font-medium text-amber-600">
           <Trans>
             <strong>Ad-Blocker detected:</strong> Using secure direct-popup fallback.
           </Trans>

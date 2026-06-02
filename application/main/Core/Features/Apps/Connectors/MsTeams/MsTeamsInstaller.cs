@@ -38,6 +38,8 @@ public sealed class MsTeamsInstaller(IServiceScopeFactory scopeFactory) : IAppIn
 {
     public AppSlug Slug => MsTeamsSlug.Slug;
 
+    public IReadOnlyList<AppPermission> Permissions => MsTeamsPermissions.All;
+
     public async Task<AppInstallStartResult> BeginInstallAsync(AppInstallContext context, CancellationToken cancellationToken)
     {
         await EnsureOffice365PrerequisiteAsync(context.UserId, cancellationToken);

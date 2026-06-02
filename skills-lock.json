@@ -43,6 +43,12 @@
       "skillPath": "skills/whatsapp-cloud-api/SKILL.md",
       "computedHash": "f70a66d36a4acc9957b531f3bd4a743ae41822ab1d40a0a1967c43ecf22472d5"
     },
+    "whatsapp-templates": {
+      "source": "zavudev/zavu-skills",
+      "sourceType": "github",
+      "skillPath": "skills/whatsapp-templates/SKILL.md",
+      "computedHash": "f4fbd403f156ed6cf4564bf2f5d8ad64da63d515666211b3a0179e956ee8c974"
+    },
     "workers-best-practices": {
       "source": "cloudflare/skills",
       "sourceType": "github",

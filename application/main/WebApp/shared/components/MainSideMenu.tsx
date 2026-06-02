@@ -17,7 +17,14 @@ import {
 import { Link as RouterLink, useNavigate, useRouter } from "@tanstack/react-router";
 import MobileMenu from "account/MobileMenu";
 import UserMenu from "account/UserMenu";
-import { BarChart3Icon, CalendarCheckIcon, CalendarDaysIcon, LayoutDashboardIcon, TimerIcon } from "lucide-react";
+import {
+  BarChart3Icon,
+  CalendarCheckIcon,
+  CalendarDaysIcon,
+  LayoutDashboardIcon,
+  MessageCircleIcon,
+  TimerIcon
+} from "lucide-react";
 import { use } from "react";
 
 import { getWeekStartDate } from "@/routes/-bookings/bookingTypes";
@@ -139,6 +146,20 @@ export function MainSideMenu() {
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                 )}
+                <SidebarMenuItem>
+                  <SidebarMenuButton
+                    asChild={true}
+                    isActive={currentPath.startsWith("/channels")}
+                    tooltip={t`Channels`}
+                  >
+                    <RouterLink to="/channels/$" params={{ _splat: "overview" }}>
+                      <MessageCircleIcon />
+                      <span>
+                        <Trans>Channels</Trans>
+                      </span>
+                    </RouterLink>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
               </SidebarMenu>
             </SidebarGroupContent>
           </SidebarGroup>

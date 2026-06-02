@@ -42,9 +42,8 @@ msgstr "0 apps, 0 aktive"
 msgid "A confirmation will be sent to the email address you provided."
 msgstr "En bekræftelse sendes til den e-mailadresse, du har angivet."
 
-#. placeholder {0}: app.name
-msgid "About {0}"
-msgstr ""
+msgid "About"
+msgstr "Om"
 
 msgid "Accepted"
 msgstr "Accepteret"
@@ -139,8 +138,11 @@ msgstr ""
 msgid "AI voice agent"
 msgstr "AI-stemmeagent"
 
-msgid "All Apps"
-msgstr ""
+msgid "All"
+msgstr "Alle"
+
+msgid "All apps"
+msgstr "Alle apps"
 
 msgid "All event types"
 msgstr "Alle aftaletyper"
@@ -159,6 +161,9 @@ msgstr "Tillad omplanlægning af tidligere bookinger"
 
 msgid "Any rating"
 msgstr "Enhver vurdering"
+
+msgid "App categories"
+msgstr "App-kategorier"
 
 msgid "App Store"
 msgstr ""
@@ -368,9 +373,6 @@ msgstr "Kalenderindstillinger og mere..."
 msgid "Calendar view"
 msgstr "Kalendervisning"
 
-msgid "Calendars"
-msgstr ""
-
 msgid "Cancel"
 msgstr "Annuller"
 
@@ -412,6 +414,9 @@ msgstr "{0} bookinger annulleret"
 msgid "Capacity limits"
 msgstr ""
 
+msgid "Channels"
+msgstr "Kanaler"
+
 msgid "Checkbox"
 msgstr "Afkrydsningsfelt"
 
@@ -445,9 +450,6 @@ msgstr "Konfiguration"
 msgid "Configuration required"
 msgstr "Konfiguration påkrævet"
 
-msgid "Configure"
-msgstr ""
-
 msgid "Configure different events for people to book on your calendar."
 msgstr "Konfigurer forskellige events, som folk kan booke i din kalender."
 
@@ -457,17 +459,14 @@ msgstr ""
 msgid "Configure qualification AI agent"
 msgstr ""
 
-msgid "Configure your active integrations, calendar destinations, and business messaging accounts in one unified dashboard."
-msgstr ""
+msgid "Configure your active integrations and calendar destinations in one unified dashboard."
+msgstr "Konfigurer dine aktive integrationer og kalenderdestinationer på ét samlet dashboard."
 
 msgid "Confirm booking"
 msgstr "Bekræft booking"
 
 msgid "Confirm booking?"
 msgstr "Bekræft booking?"
-
-msgid "Confirm Disconnection"
-msgstr ""
 
 msgid "Confirm free-email bookers"
 msgstr "Bekræft bookere med gratis e-mail"
@@ -481,8 +480,8 @@ msgstr ""
 msgid "Confirmed"
 msgstr "Bekræftet"
 
-msgid "Connect Account"
-msgstr ""
+msgid "Connect"
+msgstr "Forbind"
 
 msgid "Connect Google"
 msgstr "Forbind Google"
@@ -495,9 +494,6 @@ msgstr "Connect installed apps to this event type."
 
 msgid "Connect Microsoft"
 msgstr "Forbind Microsoft"
-
-msgid "Connect WhatsApp Business Account to power up booking messages and workflows directly to customers. Customers can receive instant confirmation, reminders, feedback collection, and process secure payments inside SA's favorite messaging app."
-msgstr ""
 
 msgid "Connect Zoom"
 msgstr "Forbind Zoom"
@@ -827,11 +823,8 @@ msgstr "Udløber"
 msgid "Explain why this booking is being rejected"
 msgstr "Forklar hvorfor denne booking afvises"
 
-msgid "Explore"
-msgstr ""
-
-msgid "Explore and connect powerful app extensions, calendar sync options, and messaging workflows to automate bookings."
-msgstr ""
+msgid "Explore and connect powerful app extensions and calendar sync options to automate bookings."
+msgstr "Udforsk og forbind effektive app-udvidelser og kalendersynkroniseringsmuligheder for at automatisere bookinger."
 
 msgid "Explore App Store"
 msgstr ""
@@ -852,17 +845,11 @@ msgstr "Mislykket"
 msgid "Failed to copy secret"
 msgstr "Kunne ikke kopiere hemmelighed"
 
-msgid "Failed to disconnect WhatsApp Business completely."
-msgstr ""
-
 msgid "Failed to queue test event"
 msgstr "Kunne ikke sætte testhændelse i kø"
 
 msgid "Failed to start install. Please try again."
 msgstr "Kunne ikke starte installation. Prøv igen."
-
-msgid "Failed to uninstall app."
-msgstr ""
 
 msgid "Feedback (optional)"
 msgstr "Feedback (valgfrit)"
@@ -990,24 +977,17 @@ msgstr "Hvor ofte du kan bookes"
 msgid "In person"
 msgstr "Fysisk"
 
-msgid "Included in Plan"
-msgstr ""
-
 msgid "Insights"
 msgstr "Indsigt"
 
 msgid "Install"
 msgstr "Installer"
 
-#. placeholder {0}: missingPrerequisite.name
-msgid "Install {0} first — this app reuses its connection."
-msgstr "Installer {0} først — denne app genbruger dens forbindelse."
-
 msgid "Install a calendar or conferencing app to use it with this event type."
 msgstr "Installer en kalender- eller konferenceringsapp for at bruge den med denne begivenhedstype."
 
-msgid "Install App"
-msgstr ""
+msgid "Install app"
+msgstr "Installer app"
 
 msgid "Installed"
 msgstr "Installeret"
@@ -1017,10 +997,6 @@ msgstr "Øjeblikkeligt møde"
 
 msgid "Instant meeting schedule"
 msgstr "Plan for øjeblikkelige møder"
-
-#. placeholder {0}: app.name
-msgid "Integrate {0} with your Nerova platform to synchronize your availability, automatically copy bookings to your workspace schedule, and spin up direct video conferencing links for all scheduled appointments."
-msgstr ""
 
 msgid "Interface language"
 msgstr ""
@@ -1222,9 +1198,6 @@ msgstr "Medlemmer der håndterer flest bookinger."
 msgid "Message (optional)"
 msgstr "Besked (valgfrit)"
 
-msgid "Messaging & Other"
-msgstr ""
-
 msgid "Minimum length"
 msgstr "Minimumslængde"
 
@@ -1279,9 +1252,6 @@ msgstr "Navigation"
 msgid "Needs attention"
 msgstr "Kræver opmærksomhed"
 
-msgid "Nerova Systems"
-msgstr ""
-
 msgid "New"
 msgstr "Ny"
 
@@ -1300,9 +1270,6 @@ msgstr "Næste"
 #. placeholder {0}: getBookingStatusLabel(status).toLowerCase()
 msgid "No {0} bookings yet"
 msgstr "Ingen {0} bookinger endnu"
-
-msgid "No active integrations"
-msgstr ""
 
 msgid "No apps found"
 msgstr ""
@@ -1367,6 +1334,9 @@ msgstr "Ingen tilgængelige værter at tildele."
 msgid "No hosts selected. Pick team members below to assign them to this event type."
 msgstr "Ingen værter valgt. Vælg teammedlemmer nedenfor for at tildele dem til denne begivenhedstype."
 
+msgid "No installed apps"
+msgstr "Ingen installerede apps"
+
 msgid "No internal notes yet."
 msgstr "Ingen interne noter endnu."
 
@@ -1378,6 +1348,9 @@ msgstr "Ingen tidsplaner endnu"
 
 msgid "No settings available yet."
 msgstr "Ingen indstillinger er tilgængelige endnu."
+
+msgid "No special permissions"
+msgstr "Ingen særlige tilladelser"
 
 msgid "No specific schedule"
 msgstr "Ingen specifik plan"
@@ -1409,8 +1382,8 @@ msgstr "Kun udeblevne"
 msgid "Not available"
 msgstr "Ikke tilgængelig"
 
-msgid "Not installed"
-msgstr "Ikke installeret"
+msgid "Not connected"
+msgstr "Ikke forbundet"
 
 msgid "Note"
 msgstr "Note"
@@ -1506,14 +1479,14 @@ msgstr "Pausede webhooks modtager ikke leveringer, før de genaktiveres."
 msgid "Payment"
 msgstr "Betaling"
 
-msgid "Payments"
-msgstr ""
-
 msgid "Pending"
 msgstr "Afventer"
 
 msgid "Per-event-type calendar destination is not yet configurable — connected calendars are used for availability only."
 msgstr "Kalenderdestinat per begivenhedstype er endnu ikke konfigurerbart — tilsluttede kalendere bruges kun til tilgængelighed."
+
+msgid "Permissions"
+msgstr "Tilladelser"
 
 msgid "Phone"
 msgstr "Telefon"
@@ -1530,8 +1503,8 @@ msgstr "Ping"
 msgid "Placeholder"
 msgstr "Pladsholder"
 
-msgid "Prerequisite Required"
-msgstr ""
+msgid "Prerequisite required"
+msgstr "Forudsætning kræves"
 
 msgid "Preview"
 msgstr "Forhåndsvisning"
@@ -1563,17 +1536,11 @@ msgstr "Privat link fjernet"
 msgid "Private links"
 msgstr ""
 
-msgid "Profile"
-msgstr ""
-
 msgid "Public booking"
 msgstr "Offentlig booking"
 
 msgid "Public link copied"
 msgstr "Offentligt link kopieret"
-
-msgid "Publisher"
-msgstr ""
 
 msgid "Question"
 msgstr "Spørgsmål"
@@ -1699,9 +1666,6 @@ msgstr "Kræv e-mails"
 msgid "Required"
 msgstr "Påkrævet"
 
-msgid "Requires authorization permission"
-msgstr ""
-
 msgid "Requires confirmation"
 msgstr "Kræver bekræftelse"
 
@@ -1822,8 +1786,8 @@ msgstr "Omfang"
 msgid "Search"
 msgstr "Søg"
 
-msgid "Search app integrations..."
-msgstr ""
+msgid "Search apps..."
+msgstr "Søg apps..."
 
 msgid "Search bookings"
 msgstr "Søg i bookinger"
@@ -1966,6 +1930,10 @@ msgstr "Vis på profil"
 msgid "Show optimized slots"
 msgstr "Vis optimerede tidspunkter"
 
+#. placeholder {0}: app.name
+msgid "Show permissions for {0}"
+msgstr "Vis tilladelser for {0}"
+
 msgid "Signing secret"
 msgstr "Signeringshemmelighed"
 
@@ -2057,6 +2025,9 @@ msgstr "Hændelsestypens omfang er låst, når webhooken er oprettet."
 msgid "This action applies to every selected booking."
 msgstr "Denne handling gælder for alle valgte bookinger."
 
+msgid "This app does not request access to any of your data."
+msgstr "Denne app anmoder ikke om adgang til nogen af dine data."
+
 msgid "this attendee"
 msgstr ""
 
@@ -2095,9 +2066,6 @@ msgstr "Dette afviser den afventende booking med {0}."
 
 msgid "This removes the booking page for {deleteSubject}."
 msgstr "Dette fjerner bookingsiden for {deleteSubject}."
-
-msgid "This will delete your WhatsApp Business details, RSA key pair, and Paystack links completely. Existing bookings will not be altered, but new bookings will no longer run WhatsApp flows."
-msgstr ""
 
 msgid "This will record that the attendee did not show up for the meeting."
 msgstr "Dette registrerer, at deltageren ikke mødte op til mødet."
@@ -2172,12 +2140,6 @@ msgstr "Afinstaller {0}?"
 msgid "Uninstall app"
 msgstr "Afinstaller app"
 
-msgid "Uninstall App"
-msgstr ""
-
-msgid "Uninstall WhatsApp Business"
-msgstr ""
-
 msgid "Untitled field"
 msgstr "Felt uden titel"
 
@@ -2186,9 +2148,6 @@ msgstr "Opdater hvor denne booking finder sted."
 
 msgid "URL"
 msgstr "URL"
-
-msgid "Usage"
-msgstr ""
 
 msgid "Use booker timezone for organizer"
 msgstr "Brug bookerens tidszone til arrangør"
@@ -2280,9 +2239,6 @@ msgstr "Hvad din booker skal angive for at modtage bekræftelser"
 msgid "WhatsApp Booking First"
 msgstr ""
 
-msgid "WhatsApp Business integration completely disconnected."
-msgstr ""
-
 msgid "WhatsApp Connection Pending"
 msgstr ""
 
@@ -2300,9 +2256,6 @@ msgstr ""
 
 msgid "Yes"
 msgstr "Ja"
-
-msgid "Yes, Disconnect"
-msgstr ""
 
 msgid "You can select multiple and your bookers can switch views."
 msgstr "Du kan vælge flere, og dine bookere kan skifte visning."

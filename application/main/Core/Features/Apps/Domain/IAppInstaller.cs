@@ -55,6 +55,15 @@ public interface IAppInstaller
     AppSlug Slug { get; }
 
     /// <summary>
+    ///     The real OAuth scopes / permissions this connector requests from (or relies on at) the
+    ///     third-party provider, surfaced through the Apps API for a truthful per-app permissions
+    ///     screen. Every entry must map to an actual scope the connector uses — no fabricated
+    ///     values. Default implementation returns an empty list so connectors that request no
+    ///     scopes (e.g. client-side configured connectors) do not have to override it.
+    /// </summary>
+    IReadOnlyList<AppPermission> Permissions => [];
+
+    /// <summary>
     ///     Build the provider authorize URL the caller should be redirected to. Receives the
     ///     opaque <see cref="AppInstallContext.State" /> token to embed in the redirect for CSRF
     ///     protection — implementations must include it verbatim in the URL.

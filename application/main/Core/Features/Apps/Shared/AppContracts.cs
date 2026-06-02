@@ -12,10 +12,16 @@ public sealed record AppResponse(
     string LogoUrl,
     bool IsActive,
     bool IsInstalledForTenant,
-    bool IsConnectedForUser
+    bool IsConnectedForUser,
+    AppPermission[] Permissions
 )
 {
-    public static AppResponse From(App app, bool isInstalledForTenant, bool isConnectedForUser)
+    public static AppResponse From(
+        App app,
+        bool isInstalledForTenant,
+        bool isConnectedForUser,
+        AppPermission[] permissions
+    )
     {
         return new AppResponse(
             app.Id,
@@ -25,7 +31,8 @@ public sealed record AppResponse(
             app.LogoUrl,
             app.IsActive,
             isInstalledForTenant,
-            isConnectedForUser
+            isConnectedForUser,
+            permissions
         );
     }
 }

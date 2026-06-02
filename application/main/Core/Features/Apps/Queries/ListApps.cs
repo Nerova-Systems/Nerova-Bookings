@@ -16,6 +16,7 @@ public sealed class ListAppsHandler(
     IAppRepository appRepository,
     IAppInstallationRepository installationRepository,
     ICredentialRepository credentialRepository,
+    IAppRegistry appRegistry,
     IExecutionContext executionContext
 ) : IRequestHandler<ListAppsQuery, Result<AppsResponse>>
 {
@@ -34,7 +35,13 @@ public sealed class ListAppsHandler(
         var connectedSlugs = userCredentials.Select(credential => credential.AppSlug).ToHashSet();
 
         var responses = apps
-            .Select(app => AppResponse.From(app, installedSlugs.Contains(app.Id), connectedSlugs.Contains(app.Id)))
+            .Select(app => AppResponse.From(
+                    app,
+                    installedSlugs.Contains(app.Id),
+                    connectedSlugs.Contains(app.Id),
+                    appRegistry.Resolve(app.Id)?.Permissions.ToArray() ?? []
+                )
+            )
             .ToArray();
 
         return new AppsResponse(responses);

@@ -8,6 +8,16 @@ namespace Main.Features.Apps.Connectors.Zoom;
 /// </summary>
 public sealed class ZoomOptions
 {
+    /// <summary>
+    ///     The Zoom Marketplace scope required to create and delete meetings via the
+    ///     <c>https://api.zoom.us/v2/users/{userId}/meetings</c> endpoints. Zoom does not accept
+    ///     a <c>scope</c> parameter on the authorize call — granted scopes are configured on the
+    ///     Zoom Marketplace app itself — so this constant documents the real scope the Marketplace
+    ///     app must be granted for the connector to function. It is surfaced through the Apps API
+    ///     so users see the exact permission the integration relies on.
+    /// </summary>
+    public const string MeetingWriteScope = "meeting:write";
+
     /// <summary>OAuth 2.0 client id (from Zoom Marketplace → Your App → Credentials).</summary>
     public string ClientId { get; set; } = string.Empty;
 

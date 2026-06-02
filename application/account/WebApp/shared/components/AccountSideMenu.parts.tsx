@@ -19,12 +19,10 @@ import {
   CreditCardIcon,
   FileClockIcon,
   HomeIcon,
-  LandmarkIcon,
   MessageCircleIcon,
   MonitorSmartphoneIcon,
   ShieldCheckIcon,
   SlidersHorizontalIcon,
-  SparklesIcon,
   UserIcon,
   UsersIcon
 } from "lucide-react";
@@ -194,11 +192,11 @@ export function AccountGroup(props: Readonly<AccountGroupProps>) {
             />
           )}
           <AccountNavItem
-            to="/whatsapp"
+            to="/channels/overview"
             icon={<MessageCircleIcon />}
-            label={<Trans>WhatsApp</Trans>}
-            tooltip={t`WhatsApp`}
-            isActive={isActive("/whatsapp", true)}
+            label={<Trans>Channels</Trans>}
+            tooltip={t`Channels`}
+            isActive={isActive("/channels", true)}
           />
         </SidebarMenu>
       </SidebarGroupContent>

@@ -2,21 +2,31 @@ import { t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
 import { Badge } from "@repo/ui/components/Badge";
 import { Button } from "@repo/ui/components/Button";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@repo/ui/components/Collapsible";
+import { ChevronDownIcon } from "lucide-react";
+import { useState } from "react";
 import { toast } from "sonner";
 
 import { api } from "@/shared/lib/api/client";
 
 import type { App } from "./appsTypes";
 
-import { getAppCategoryLabel, getMissingPrerequisite } from "./appsTypes";
+import { AppPermissionsList } from "./AppPermissionsList";
+import { getAppCategoryLabel, getAppIconSrc } from "./appsTypes";
 
 interface AppRowProps {
   app: App;
-  allApps: readonly App[];
   onUninstall: (app: App) => void;
 }
 
-export function AppRow({ app, allApps, onUninstall }: Readonly<AppRowProps>) {
+/**
+ * Installed-app list item. Mirrors cal.com's AppList card: an app header row that expands (toggle) to
+ * reveal the per-app permissions screen, rendered from the app's real OAuth scopes. Shows the user's
+ * connection state and the Uninstall action.
+ */
+export function AppRow({ app, onUninstall }: Readonly<AppRowProps>) {
+  const [expanded, setExpanded] = useState<boolean>(false);
+
   const installMutation = api.useMutation("post", "/api/apps/{slug}/install", {
     onSuccess: (response) => {
       window.location.href = response.authorizeUrl;
@@ -27,66 +37,71 @@ export function AppRow({ app, allApps, onUninstall }: Readonly<AppRowProps>) {
     }
   });
 
-  const missingPrerequisite = getMissingPrerequisite(app, allApps);
-  const isInstalled = app.isConnectedForUser;
-  const canInstall = app.isActive && missingPrerequisite === null && !isInstalled;
+  const isConnected = app.isConnectedForUser;
 
   return (
-    <div className="flex flex-wrap items-start gap-4 border-b p-4 last:border-b-0 hover:bg-muted/60">
-      <AppIcon app={app} />
-      <div className="min-w-0 flex-1">
-        <div className="flex flex-wrap items-center gap-2">
-          <span className="font-medium">{app.name}</span>
-          <Badge variant="outline">{getAppCategoryLabel(app.category)}</Badge>
-          {isInstalled ? (
-            <Badge>
-              <Trans>Installed</Trans>
+    <Collapsible open={expanded} onOpenChange={setExpanded} render={<li />}>
+      <div className="flex flex-wrap items-start gap-x-3 gap-y-2 px-4 py-4 sm:px-6">
+        <img
+          src={getAppIconSrc(app)}
+          alt=""
+          className="size-10 shrink-0 rounded-md border bg-background object-contain p-1"
+        />
+        <div className="flex min-w-0 grow flex-col gap-y-1">
+          <div className="flex flex-wrap items-center gap-2">
+            <h3 className="truncate text-sm font-semibold text-foreground">{app.name}</h3>
+            <Badge variant="outline" className="text-[10px] font-semibold text-muted-foreground uppercase">
+              {getAppCategoryLabel(app.category)}
             </Badge>
+          </div>
+          {app.description && <p className="line-clamp-2 text-sm text-muted-foreground">{app.description}</p>}
+          {isConnected ? (
+            <span className="mt-0.5 inline-flex items-center gap-1.5 text-xs font-medium text-emerald-600 dark:text-emerald-400">
+              <span className="size-2 rounded-full bg-emerald-500" />
+              <Trans>Connected</Trans>
+            </span>
           ) : (
-            <Badge variant="secondary">
-              <Trans>Not installed</Trans>
-            </Badge>
+            <span className="mt-0.5 inline-flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
+              <span className="size-2 rounded-full bg-muted-foreground/50" />
+              <Trans>Not connected</Trans>
+            </span>
           )}
         </div>
-        {app.description && <p className="mt-1 text-sm text-muted-foreground">{app.description}</p>}
-        {missingPrerequisite && !isInstalled && (
-          <p className="mt-2 text-sm text-amber-700 dark:text-amber-400">
-            <Trans>Install {missingPrerequisite.name} first — this app reuses its connection.</Trans>
-          </p>
-        )}
-      </div>
-      <div className="flex shrink-0 gap-2">
-        {isInstalled ? (
-          <Button variant="outline" size="sm" onClick={() => onUninstall(app)}>
-            <Trans>Uninstall</Trans>
-          </Button>
-        ) : (
-          <Button
-            size="sm"
-            disabled={!canInstall}
-            isPending={installMutation.isPending}
-            onClick={() => installMutation.mutate({ params: { path: { slug: app.slug } } })}
-          >
-            <Trans>Install</Trans>
-          </Button>
-        )}
-      </div>
-    </div>
-  );
-}
 
-function AppIcon({ app }: Readonly<{ app: App }>) {
-  if (app.logoUrl) {
-    return (
-      <img src={app.logoUrl} alt="" className="h-10 w-10 shrink-0 rounded-md border bg-background object-contain p-1" />
-    );
-  }
-  return (
-    <div
-      aria-hidden="true"
-      className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md border bg-muted text-sm font-semibold text-muted-foreground"
-    >
-      {app.name.slice(0, 1).toUpperCase()}
-    </div>
+        <div className="flex shrink-0 items-center gap-2">
+          <CollapsibleTrigger
+            render={
+              <Button variant="ghost" size="sm" aria-label={t`Show permissions for ${app.name}`}>
+                <Trans>Permissions</Trans>
+                <ChevronDownIcon className={`size-4 transition-transform ${expanded ? "rotate-180" : ""}`} />
+              </Button>
+            }
+          />
+          {isConnected ? (
+            <Button variant="outline" size="sm" onClick={() => onUninstall(app)}>
+              <Trans>Uninstall</Trans>
+            </Button>
+          ) : (
+            <Button
+              size="sm"
+              disabled={!app.isActive}
+              isPending={installMutation.isPending}
+              onClick={() => installMutation.mutate({ params: { path: { slug: app.slug } } })}
+            >
+              <Trans>Connect</Trans>
+            </Button>
+          )}
+        </div>
+      </div>
+
+      <CollapsibleContent>
+        <div className="border-t border-border px-4 py-5 sm:px-6">
+          <h4 className="mb-3 text-xs font-semibold tracking-wider text-muted-foreground uppercase">
+            <Trans>Permissions</Trans>
+          </h4>
+          <AppPermissionsList app={app} className="flex flex-col gap-4" />
+        </div>
+      </CollapsibleContent>
+    </Collapsible>
   );
 }

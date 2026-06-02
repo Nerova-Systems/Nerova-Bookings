@@ -25,6 +25,8 @@ public sealed class GoogleCalendarInstaller(
 {
     public AppSlug Slug => GoogleCalendarSlug.Slug;
 
+    public IReadOnlyList<AppPermission> Permissions => GoogleCalendarPermissions.All;
+
     public Task<AppInstallStartResult> BeginInstallAsync(AppInstallContext context, CancellationToken cancellationToken)
     {
         var opts = options.CurrentValue;

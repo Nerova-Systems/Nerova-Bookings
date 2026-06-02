@@ -1,80 +1,93 @@
+import { t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
 import { Badge } from "@repo/ui/components/Badge";
-import { CheckCircle2Icon } from "lucide-react";
+import { Button } from "@repo/ui/components/Button";
+import { CheckCircle2Icon, PlusIcon } from "lucide-react";
+import { toast } from "sonner";
+
+import { api } from "@/shared/lib/api/client";
 
 import type { App } from "./appsTypes";
 
-import { getAppCategoryLabel } from "./appsTypes";
+import { getAppCategoryLabel, getAppIconSrc, getMissingPrerequisite } from "./appsTypes";
 
 interface AppStoreCardProps {
   app: App;
-  onClick: () => void;
+  allApps: readonly App[];
+  onDetails: () => void;
 }
 
-export function AppStoreCard({ app, onClick }: Readonly<AppStoreCardProps>) {
-  const isInstalled = app.slug === "whatsapp" ? app.isInstalledForTenant : app.isConnectedForUser;
+/**
+ * App Store gallery card. Layout mirrors cal.com `AppCard`: a fixed-height card with the logo, name,
+ * a clamped multi-line description, and a bottom action row with a "Details" button plus the primary
+ * Install/Connect action. An "Installed" badge sits in the top-right corner when connected.
+ */
+export function AppStoreCard({ app, allApps, onDetails }: Readonly<AppStoreCardProps>) {
+  const installMutation = api.useMutation("post", "/api/apps/{slug}/install", {
+    onSuccess: (response) => {
+      window.location.href = response.authorizeUrl;
+    },
+    onError: (error) => {
+      const detail = (error as { detail?: string } | null | undefined)?.detail;
+      toast.error(detail ?? t`Failed to start install. Please try again.`);
+    }
+  });
+
+  const isInstalled = app.isConnectedForUser;
+  const missingPrerequisite = getMissingPrerequisite(app, allApps);
+  const canInstall = app.isActive && missingPrerequisite === null && !isInstalled;
 
   return (
-    <div
-      onClick={onClick}
-      role="button"
-      tabIndex={0}
-      onKeyDown={(e) => {
-        if (e.key === "Enter" || e.key === " ") {
-          onClick();
-        }
-      }}
-      className="group relative flex cursor-pointer flex-col justify-between overflow-hidden rounded-xl border border-border bg-card p-5 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-primary/20 hover:shadow-md"
-    >
-      <div className="flex items-start gap-4">
-        <AppIcon app={app} />
-        <div className="min-w-0 flex-1">
-          <div className="flex flex-wrap items-center gap-1.5">
-            <span className="font-semibold text-foreground transition-colors duration-200 group-hover:text-primary">
-              {app.name}
-            </span>
-          </div>
-          <p className="mt-1 line-clamp-2 min-h-[2rem] text-xs text-muted-foreground">{app.description}</p>
-        </div>
+    <div className="relative flex h-64 flex-col rounded-md border border-border bg-card p-5">
+      <div className="absolute top-4 right-4 flex flex-wrap justify-end gap-1">
+        {isInstalled && (
+          <Badge className="flex items-center gap-1 border-emerald-500/20 bg-emerald-500/10 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400">
+            <CheckCircle2Icon className="size-3" />
+            <Trans>Installed</Trans>
+          </Badge>
+        )}
       </div>
 
-      <div className="mt-4 flex items-center justify-between border-t pt-3">
-        <Badge variant="outline" className="text-[10px] font-semibold tracking-wider text-muted-foreground uppercase">
-          {getAppCategoryLabel(app.category)}
-        </Badge>
-        <div>
-          {isInstalled ? (
-            <Badge className="flex items-center gap-1 border-emerald-500/20 bg-emerald-500/10 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400">
-              <CheckCircle2Icon className="size-3" />
-              <Trans>Installed</Trans>
-            </Badge>
-          ) : (
-            <Badge variant="secondary" className="text-muted-foreground">
-              <Trans>Explore</Trans>
-            </Badge>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function AppIcon({ app }: Readonly<{ app: App }>) {
-  if (app.logoUrl) {
-    return (
       <img
-        src={app.logoUrl}
+        src={getAppIconSrc(app)}
         alt=""
-        className="h-12 w-12 shrink-0 rounded-xl border bg-background object-contain p-2 shadow-sm transition-transform duration-300 group-hover:scale-105"
+        className="mb-4 size-12 rounded-sm border bg-background object-contain p-1"
       />
-    );
-  }
-  return (
-    <div
-      aria-hidden="true"
-      className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border bg-muted text-lg font-bold text-muted-foreground shadow-sm transition-transform duration-300 group-hover:scale-105"
-    >
-      {app.name.slice(0, 1).toUpperCase()}
+
+      <div className="flex items-center gap-2">
+        <h3 className="font-medium text-foreground">{app.name}</h3>
+      </div>
+      <Badge
+        variant="outline"
+        className="mt-2 text-[10px] font-semibold tracking-wider text-muted-foreground uppercase"
+      >
+        {getAppCategoryLabel(app.category)}
+      </Badge>
+
+      <p className="mt-2 line-clamp-3 text-sm text-muted-foreground">{app.description}</p>
+
+      <div className="mt-auto flex max-w-full flex-row justify-between gap-2">
+        <Button variant="secondary" size="sm" className="grow justify-center" onClick={onDetails}>
+          <Trans>Details</Trans>
+        </Button>
+        {isInstalled ? (
+          <Button variant="outline" size="sm" disabled className="justify-center">
+            <CheckCircle2Icon className="size-4" />
+            <Trans>Connected</Trans>
+          </Button>
+        ) : (
+          <Button
+            size="sm"
+            className="justify-center"
+            disabled={!canInstall}
+            isPending={installMutation.isPending}
+            onClick={() => installMutation.mutate({ params: { path: { slug: app.slug } } })}
+          >
+            <PlusIcon className="size-4" />
+            <Trans>Install</Trans>
+          </Button>
+        )}
+      </div>
     </div>
   );
 }

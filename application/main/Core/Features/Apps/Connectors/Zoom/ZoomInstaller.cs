@@ -27,6 +27,8 @@ public sealed class ZoomInstaller(
 {
     public AppSlug Slug => ZoomSlug.Slug;
 
+    public IReadOnlyList<AppPermission> Permissions => ZoomPermissions.All;
+
     public Task<AppInstallStartResult> BeginInstallAsync(AppInstallContext context, CancellationToken cancellationToken)
     {
         var opts = options.CurrentValue;

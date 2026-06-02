@@ -34,6 +34,8 @@ public sealed class GoogleMeetInstaller(IServiceScopeFactory scopeFactory) : IAp
 {
     public AppSlug Slug => GoogleMeetSlug.Slug;
 
+    public IReadOnlyList<AppPermission> Permissions => GoogleMeetPermissions.All;
+
     public async Task<AppInstallStartResult> BeginInstallAsync(AppInstallContext context, CancellationToken cancellationToken)
     {
         await EnsureGoogleCalendarInstalledAsync(context.UserId, cancellationToken);

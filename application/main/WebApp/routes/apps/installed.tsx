@@ -1,198 +1,136 @@
 import { t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
-import { Badge } from "@repo/ui/components/Badge";
 import { Button } from "@repo/ui/components/Button";
 import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@repo/ui/components/Empty";
-import { createFileRoute, Link as RouterLink, useNavigate } from "@tanstack/react-router";
-import { BlocksIcon, Settings2Icon } from "lucide-react";
-import { useEffect, useState } from "react";
+import { HorizontalTabs } from "@repo/ui/components/HorizontalTabs";
+import { VerticalTabs, type VerticalTabItem } from "@repo/ui/components/VerticalTabs";
+import { createFileRoute, Link as RouterLink } from "@tanstack/react-router";
+import { BlocksIcon, CalendarIcon, CreditCardIcon, Grid3x3Icon, LayoutGridIcon, VideoIcon } from "lucide-react";
+import { useMemo, useState } from "react";
 
-import { api } from "@/shared/lib/api/client";
+import { AppCategory, api } from "@/shared/lib/api/client";
 
 import type { App } from "./-components/appsTypes";
 
-import { AppDetailsSheet } from "./-components/AppDetailsSheet";
+import { AppRow } from "./-components/AppRow";
 import { AppsPageShell } from "./-components/AppsPageShell";
-import { getAppCategoryLabel } from "./-components/appsTypes";
+import { APP_CATEGORY_ORDER, getAppCategoryLabel, getVisibleApps } from "./-components/appsTypes";
 import { UninstallAppDialog } from "./-components/UninstallAppDialog";
-
-interface AppsInstalledSearchQuery {
-  open?: string;
-}
 
 export const Route = createFileRoute("/apps/installed")({
   staticData: { trackingTitle: "Connected Apps" },
-  validateSearch: (search: Record<string, unknown>): AppsInstalledSearchQuery => {
-    return {
-      open: typeof search.open === "string" ? search.open : undefined
-    };
-  },
+  // `open` is accepted for backwards compatibility with deep links (e.g. the /whatsapp redirect).
+  // WhatsApp now lives in its own section, so it is filtered out and the param is otherwise unused.
+  validateSearch: (search: Record<string, unknown>): { open?: string } => ({
+    open: typeof search.open === "string" ? search.open : undefined
+  }),
   component: InstalledAppsPage
 });
 
+const ALL_TAB = "all";
+
+const CATEGORY_ICON: Readonly<Record<AppCategory, React.ReactNode>> = {
+  [AppCategory.Calendar]: <CalendarIcon className="size-4" />,
+  [AppCategory.Conferencing]: <VideoIcon className="size-4" />,
+  [AppCategory.Payment]: <CreditCardIcon className="size-4" />,
+  [AppCategory.Other]: <Grid3x3Icon className="size-4" />
+};
+
 function InstalledAppsPage() {
-  const { open } = Route.useSearch();
-  const navigate = useNavigate({ from: Route.fullPath });
   const { data, isLoading } = api.useQuery("get", "/api/apps");
-  const apps = data?.apps ?? [];
-  const installedApps = apps.filter((app) =>
-    app.slug === "whatsapp" ? app.isInstalledForTenant : app.isConnectedForUser
+  const installedApps = useMemo(
+    () => getVisibleApps(data?.apps ?? []).filter((app) => app.isInstalledForTenant),
+    [data?.apps]
   );
 
-  const [selectedApp, setSelectedApp] = useState<App | null>(null);
   const [appToUninstall, setAppToUninstall] = useState<App | null>(null);
+  const [selectedTab, setSelectedTab] = useState<string>(ALL_TAB);
 
-  // Sync state with open slug in query parameters
-  useEffect(() => {
-    if (open && apps.length > 0) {
-      const matched = apps.find((a) => a.slug === open);
-      if (matched) {
-        setSelectedApp(matched);
-      }
-    } else {
-      setSelectedApp(null);
-    }
-  }, [open, apps]);
+  // Only show category tabs that actually have installed apps.
+  const availableCategories = useMemo(
+    () => APP_CATEGORY_ORDER.filter((category) => installedApps.some((app) => app.category === category)),
+    [installedApps]
+  );
 
-  const handleOpenDetails = (app: App) => {
-    setSelectedApp(app);
-    void navigate({ search: { open: app.slug } });
-  };
+  const tabs: VerticalTabItem[] = useMemo(
+    () => [
+      { value: ALL_TAB, label: t`All apps`, icon: <LayoutGridIcon className="size-4" /> },
+      ...availableCategories.map((category) => ({
+        value: category,
+        label: getAppCategoryLabel(category),
+        icon: CATEGORY_ICON[category]
+      }))
+    ],
+    [availableCategories]
+  );
 
-  const handleCloseDetails = () => {
-    setSelectedApp(null);
-    void navigate({ search: { open: undefined } });
-  };
+  // Keep the active tab valid as the installed set changes.
+  const activeTab =
+    selectedTab !== ALL_TAB && !availableCategories.includes(selectedTab as AppCategory) ? ALL_TAB : selectedTab;
+
+  const visibleApps = activeTab === ALL_TAB ? installedApps : installedApps.filter((app) => app.category === activeTab);
 
   return (
     <AppsPageShell
       title={t`Connected Apps`}
-      subtitle={t`Configure your active integrations, calendar destinations, and business messaging accounts in one unified dashboard.`}
+      subtitle={t`Configure your active integrations and calendar destinations in one unified dashboard.`}
     >
-      <section className="flex min-w-0 flex-col gap-6">
-        {isLoading ? (
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            {[...Array(2)].map((_, i) => (
-              <div
-                key={`installed-shimmer-${i}`}
-                className="h-[120px] animate-pulse rounded-xl border border-border bg-card/40 p-5"
-              />
-            ))}
+      {isLoading ? (
+        <div className="grid grid-cols-1 gap-4">
+          {[...Array(3)].map((_, i) => (
+            <div
+              key={`installed-shimmer-${i}`}
+              className="h-20 animate-pulse rounded-md border border-border bg-card/40"
+            />
+          ))}
+        </div>
+      ) : installedApps.length === 0 ? (
+        <Empty className="min-h-64 rounded-2xl border bg-card/30">
+          <EmptyHeader>
+            <EmptyMedia variant="icon">
+              <BlocksIcon className="size-8" />
+            </EmptyMedia>
+            <EmptyTitle>
+              <Trans>No installed apps</Trans>
+            </EmptyTitle>
+            <EmptyDescription>
+              <Trans>You haven't connected any apps yet. Go to the App Store to search for extensions.</Trans>
+            </EmptyDescription>
+            <div className="mt-4">
+              <Button render={<RouterLink to="/apps" />}>
+                <Trans>Explore App Store</Trans>
+              </Button>
+            </div>
+          </EmptyHeader>
+        </Empty>
+      ) : (
+        /* Category navigation: VerticalTabs on desktop (xl), HorizontalTabs on mobile (mirrors cal.com AppCategoryNavigation). */
+        <div className="flex flex-col gap-6 xl:flex-row xl:gap-6">
+          <div className="hidden xl:block xl:w-56 xl:shrink-0">
+            <VerticalTabs tabs={tabs} value={activeTab} onValueChange={setSelectedTab} className="sticky top-6" />
           </div>
-        ) : installedApps.length === 0 ? (
-          <Empty className="min-h-64 rounded-2xl border bg-card/30">
-            <EmptyHeader>
-              <EmptyMedia variant="icon">
-                <BlocksIcon className="size-8" />
-              </EmptyMedia>
-              <EmptyTitle>
-                <Trans>No active integrations</Trans>
-              </EmptyTitle>
-              <EmptyDescription>
-                <Trans>You haven't connected any apps yet. Go to the App Store to search for extensions.</Trans>
-              </EmptyDescription>
-              <div className="mt-4">
-                <Button render={<RouterLink to="/apps" />}>
-                  <Trans>Explore App Store</Trans>
-                </Button>
-              </div>
-            </EmptyHeader>
-          </Empty>
-        ) : (
-          <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
-            {installedApps.map((app) => (
-              <div
-                key={app.slug}
-                onClick={() => handleOpenDetails(app)}
-                role="button"
-                tabIndex={0}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" || e.key === " ") {
-                    handleOpenDetails(app);
-                  }
-                }}
-                className="group relative flex cursor-pointer flex-col justify-between overflow-hidden rounded-xl border border-border bg-card p-5 shadow-sm transition-all duration-300 hover:border-primary/20 hover:shadow-md"
-              >
-                <div className="flex items-start gap-4">
-                  <AppIcon app={app} />
-                  <div className="min-w-0 flex-1">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <span className="font-semibold text-foreground transition-colors duration-200 group-hover:text-primary">
-                        {app.name}
-                      </span>
-                      <Badge variant="outline" className="text-[10px] font-semibold text-muted-foreground uppercase">
-                        {getAppCategoryLabel(app.category)}
-                      </Badge>
-                    </div>
-                    {app.description && (
-                      <p className="mt-1 line-clamp-2 text-xs text-muted-foreground">{app.description}</p>
-                    )}
-                  </div>
-                </div>
-
-                <div className="mt-5 flex items-center justify-between border-t pt-3">
-                  <span className="inline-flex items-center gap-1.5 text-xs font-medium text-emerald-600 dark:text-emerald-400">
-                    <span className="size-2 animate-pulse rounded-full bg-emerald-500" />
-                    <Trans>Connected</Trans>
-                  </span>
-                  <Button
-                    size="xs"
-                    variant="outline"
-                    className="flex items-center gap-1 transition-all duration-200 group-hover:border-primary group-hover:bg-primary group-hover:text-primary-foreground"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleOpenDetails(app);
-                    }}
-                  >
-                    <Settings2Icon className="size-3" />
-                    <Trans>Configure</Trans>
-                  </Button>
-                </div>
-              </div>
-            ))}
+          <div className="block xl:hidden">
+            <HorizontalTabs tabs={tabs} value={activeTab} onValueChange={setSelectedTab} />
           </div>
-        )}
-      </section>
 
-      {/* Slide-out details drawer */}
-      <AppDetailsSheet
-        app={selectedApp}
-        allApps={apps}
-        isOpen={selectedApp !== null}
-        onOpenChange={(open) => {
-          if (!open) handleCloseDetails();
-        }}
-        onUninstall={setAppToUninstall}
-      />
+          <main className="min-w-0 flex-1">
+            <ul className="divide-y divide-border overflow-hidden rounded-md border border-border bg-card">
+              {visibleApps.map((app) => (
+                <AppRow key={app.slug} app={app} onUninstall={setAppToUninstall} />
+              ))}
+            </ul>
+          </main>
+        </div>
+      )}
 
-      {/* Platform uninstallation confirmation dialog */}
+      {/* Uninstall confirmation dialog */}
       <UninstallAppDialog
         app={appToUninstall}
         isOpen={appToUninstall !== null}
-        onOpenChange={(open) => {
-          if (!open) setAppToUninstall(null);
+        onOpenChange={(isOpen) => {
+          if (!isOpen) setAppToUninstall(null);
         }}
       />
     </AppsPageShell>
-  );
-}
-
-function AppIcon({ app }: Readonly<{ app: App }>) {
-  if (app.logoUrl) {
-    return (
-      <img
-        src={app.logoUrl}
-        alt=""
-        className="h-10 w-10 shrink-0 rounded-xl border bg-background object-contain p-1.5 shadow-sm"
-      />
-    );
-  }
-  return (
-    <div
-      aria-hidden="true"
-      className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border bg-muted text-base font-bold text-muted-foreground shadow-sm"
-    >
-      {app.name.slice(0, 1).toUpperCase()}
-    </div>
   );
 }

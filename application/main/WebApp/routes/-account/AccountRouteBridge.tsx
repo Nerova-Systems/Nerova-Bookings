@@ -6,6 +6,7 @@ const NotFoundPage = lazy(() => import("account/NotFoundPage"));
 
 const ACCOUNT_PREFIXES = [
   "/account",
+  "/channels",
   "/components",
   "/error",
   "/legal",

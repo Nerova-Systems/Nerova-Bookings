@@ -7,6 +7,18 @@ namespace Main.Features.Apps.Connectors.GoogleCalendar;
 /// </summary>
 public sealed class GoogleCalendarOptions
 {
+    /// <summary>
+    ///     Read-only access to the user's calendars and events — used for free/busy lookups so
+    ///     bookings never double-book an existing event.
+    /// </summary>
+    public const string CalendarReadonlyScope = "https://www.googleapis.com/auth/calendar.readonly";
+
+    /// <summary>
+    ///     Read/write access to calendar events — used to create, update, and cancel the events
+    ///     backing confirmed bookings (and to attach Google Meet conferencing).
+    /// </summary>
+    public const string CalendarEventsScope = "https://www.googleapis.com/auth/calendar.events";
+
     /// <summary>OAuth 2.0 client id (from Google Cloud Console → Credentials).</summary>
     public string ClientId { get; set; } = string.Empty;
 
@@ -30,7 +42,7 @@ public sealed class GoogleCalendarOptions
     /// <summary>Scopes requested at authorize time.</summary>
     public string[] Scopes { get; set; } =
     [
-        "https://www.googleapis.com/auth/calendar.readonly",
-        "https://www.googleapis.com/auth/calendar.events"
+        CalendarReadonlyScope,
+        CalendarEventsScope
     ];
 }

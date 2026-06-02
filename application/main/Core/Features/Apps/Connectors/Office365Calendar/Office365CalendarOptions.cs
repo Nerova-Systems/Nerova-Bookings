@@ -22,6 +22,18 @@ public sealed class Office365CalendarOptions
     /// </summary>
     public const string OnlineMeetingsScope = "OnlineMeetings.ReadWrite";
 
+    /// <summary>
+    ///     Required for refresh tokens so the connector can keep accessing Microsoft Graph
+    ///     without forcing the user to re-consent.
+    /// </summary>
+    public const string OfflineAccessScope = "offline_access";
+
+    /// <summary>
+    ///     Read/write access to the user's calendars — covers free/busy lookups (via
+    ///     <c>getSchedule</c>) and event create/update/cancel for bookings.
+    /// </summary>
+    public const string CalendarsReadWriteScope = "Calendars.ReadWrite";
+
     /// <summary>OAuth 2.0 application (client) id (from Microsoft Entra ID → App registrations).</summary>
     public string ClientId { get; set; } = string.Empty;
 
@@ -52,8 +64,8 @@ public sealed class Office365CalendarOptions
     /// </summary>
     public string[] Scopes { get; set; } =
     [
-        "offline_access",
-        "Calendars.ReadWrite",
-        "OnlineMeetings.ReadWrite"
+        OfflineAccessScope,
+        CalendarsReadWriteScope,
+        OnlineMeetingsScope
     ];
 }

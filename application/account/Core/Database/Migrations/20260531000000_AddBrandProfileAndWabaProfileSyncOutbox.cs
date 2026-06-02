@@ -12,7 +12,7 @@ namespace Account.Database.Migrations;
 ///             <c>OwnsOne(...).ToJson()</c> in <c>TenantConfiguration</c>.
 ///         </item>
 ///         <item>
-///             Creates <c>waba_profile_sync_outbox</c>, an append-only outbox table written by the
+///             Creates <c>waba_profile_sync_outboxes</c>, an append-only outbox table written by the
 ///             <c>UpdateTenantBrandProfileCommand</c> and drained by the Phase 7b TickerQ sync job
 ///             that pushes the brand profile to Meta. Polling index is on
 ///             <c>(status, next_attempt_at)</c> to match the sync job's "next due" query.
@@ -33,7 +33,7 @@ public sealed class AddBrandProfileAndWabaProfileSyncOutbox : Migration
         );
 
         migrationBuilder.CreateTable(
-            "waba_profile_sync_outbox",
+            "waba_profile_sync_outboxes",
             table => new
             {
                 id = table.Column<long>("bigint", nullable: false),
@@ -53,9 +53,9 @@ public sealed class AddBrandProfileAndWabaProfileSyncOutbox : Migration
             },
             constraints: table =>
             {
-                table.PrimaryKey("pk_waba_profile_sync_outbox", x => x.id);
+                table.PrimaryKey("pk_waba_profile_sync_outboxes", x => x.id);
                 table.ForeignKey(
-                    "fk_waba_profile_sync_outbox_tenants_tenant_id",
+                    "fk_waba_profile_sync_outboxes_tenants_tenant_id",
                     x => x.tenant_id,
                     "tenants",
                     "id",
@@ -66,8 +66,8 @@ public sealed class AddBrandProfileAndWabaProfileSyncOutbox : Migration
 
         // Polling index for the Phase 7b sync job: "pending rows whose NextAttemptAt has elapsed".
         migrationBuilder.CreateIndex(
-            "ix_waba_profile_sync_outbox_status_next_attempt_at",
-            "waba_profile_sync_outbox",
+            "ix_waba_profile_sync_outboxes_status_next_attempt_at",
+            "waba_profile_sync_outboxes",
             new[] { "status", "next_attempt_at" }
         );
     }

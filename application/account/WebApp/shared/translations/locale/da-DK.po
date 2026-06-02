@@ -613,6 +613,9 @@ msgstr "Skift brugerrolle for {0}"
 msgid "Changing to {0} {1} on {formattedPeriodEndLong}"
 msgstr "Skifter til {0} {1} den {formattedPeriodEndLong}"
 
+msgid "Channels"
+msgstr "Kanaler"
+
 msgid "Check your spam folder."
 msgstr "Tjek din spammappe."
 
@@ -686,6 +689,9 @@ msgstr "Bekræft nedgradering"
 msgid "Confirm team name"
 msgstr ""
 
+msgid "Connect and manage the messaging channels your customers book through."
+msgstr "Forbind og administrer de beskedkanaler, dine kunder booker igennem."
+
 msgid "Connect Paystack"
 msgstr ""
 
@@ -700,6 +706,9 @@ msgstr ""
 
 msgid "Connect WhatsApp Business Account via Meta Embedded Signup"
 msgstr "Tilslut WhatsApp Business-konto via Meta Embedded Signup"
+
+msgid "Connected"
+msgstr "Forbundet"
 
 msgid "Contact support"
 msgstr "Kontakt support"
@@ -899,6 +908,9 @@ msgstr "Deaktiveret"
 msgid "Dismiss brand profile banner"
 msgstr "Afvis brandprofil-banner"
 
+msgid "Display name"
+msgstr "Visningsnavn"
+
 msgid "Display name change request submitted"
 msgstr "Anmodning om navneændring indsendt"
 
@@ -980,6 +992,9 @@ msgstr "Aktiveret"
 
 msgid "Encrypt SMTP connection with SSL/TLS."
 msgstr "Kryptér SMTP-forbindelsen med SSL/TLS."
+
+msgid "Encryption keys generated"
+msgstr "Krypteringsnøgler genereret"
 
 msgid "Enter a valid IANA time zone (e.g. Europe/Copenhagen)."
 msgstr "Indtast en gyldig IANA-tidszone (f.eks. Europe/Copenhagen)."
@@ -1115,6 +1130,9 @@ msgstr ""
 
 msgid "Generate encryption key pair"
 msgstr ""
+
+msgid "Generate encryption keys"
+msgstr "Generér krypteringsnøgler"
 
 msgid "Generate key pair"
 msgstr ""
@@ -1305,6 +1323,9 @@ msgstr "Lad os opsætte din profil"
 msgid "Light"
 msgstr "Lys"
 
+msgid "Link WhatsApp Business Account"
+msgstr "Forbind WhatsApp Business-konto"
+
 msgid "LinkedIn"
 msgstr "LinkedIn"
 
@@ -1374,6 +1395,9 @@ msgstr "Administrer abonnement"
 
 msgid "Manage teams"
 msgstr "Administrer teams"
+
+msgid "Manage WhatsApp"
+msgstr "Administrer WhatsApp"
 
 msgid "Manage your organization's subscription and invoices."
 msgstr "Administrer din organisations abonnement og fakturaer."
@@ -1564,6 +1588,9 @@ msgstr "Intet verificeret navn"
 msgid "None"
 msgstr "Ingen"
 
+msgid "Not connected"
+msgstr "Ikke forbundet"
+
 msgid "Not great"
 msgstr "Ikke godt"
 
@@ -1672,6 +1699,9 @@ msgstr "Betalingsmetode"
 msgid "Payment method updated"
 msgstr "Betalingsmetode opdateret"
 
+msgid "Paystack connected"
+msgstr "Paystack forbundet"
+
 msgid "Paystack subaccount connected"
 msgstr ""
 
@@ -1699,6 +1729,9 @@ msgstr "Slet brugere permanent"
 
 msgid "Permissions"
 msgstr ""
+
+msgid "Phone number registered"
+msgstr "Telefonnummer registreret"
 
 msgid "Phone number verified"
 msgstr ""
@@ -1832,6 +1865,9 @@ msgstr "Reference-ID: {id}"
 msgid "Refunded"
 msgstr "Refunderet"
 
+msgid "Register phone number"
+msgstr "Registrér telefonnummer"
+
 msgid "Regulatory standards and certifications"
 msgstr "Lovgivningsmæssige standarder og certificeringer"
 
@@ -1892,6 +1928,9 @@ msgstr "Ønsket: {0}"
 
 msgid "Require payment or a deposit before confirming the booking. Adds a payment link page to the booking flow. Requires Paystack to be connected."
 msgstr ""
+
+msgid "Required actions"
+msgstr "Påkrævede handlinger"
 
 msgid "Required for end-to-end encrypted WhatsApp Flows."
 msgstr ""
@@ -2095,6 +2134,9 @@ msgstr ""
 
 msgid "Setup complete 🎉"
 msgstr ""
+
+msgid "Setup in progress"
+msgstr "Opsætning i gang"
 
 msgid "Show details"
 msgstr "Vis detaljer"
@@ -2692,6 +2734,9 @@ msgstr ""
 msgid "WhatsApp Business Account connected"
 msgstr ""
 
+msgid "WhatsApp Business Account linked"
+msgstr "WhatsApp Business-konto forbundet"
+
 msgid "WhatsApp connection failed. Please try again."
 msgstr "WhatsApp-tilslutning mislykkedes. Prøv igen."
 
@@ -2871,6 +2916,9 @@ msgstr "Din bekræftelseskode er gyldig i {expiresInString}"
 
 msgid "Your WhatsApp Business Account is connected and ready. Configure your business profile in the Profile tab."
 msgstr ""
+
+msgid "Your WhatsApp channel is fully connected and ready."
+msgstr "Din WhatsApp-kanal er fuldt forbundet og klar."
 
 msgid "yourname@example.com"
 msgstr "ditnavn@eksempel.com"

@@ -42,9 +42,8 @@ msgstr "0 apps, 0 active"
 msgid "A confirmation will be sent to the email address you provided."
 msgstr "A confirmation will be sent to the email address you provided."
 
-#. placeholder {0}: app.name
-msgid "About {0}"
-msgstr "About {0}"
+msgid "About"
+msgstr "About"
 
 msgid "Accepted"
 msgstr "Accepted"
@@ -139,8 +138,11 @@ msgstr "AI settings are not connected to this editor yet."
 msgid "AI voice agent"
 msgstr "AI voice agent"
 
-msgid "All Apps"
-msgstr "All Apps"
+msgid "All"
+msgstr "All"
+
+msgid "All apps"
+msgstr "All apps"
 
 msgid "All event types"
 msgstr "All event types"
@@ -159,6 +161,9 @@ msgstr "Allow rescheduling past bookings"
 
 msgid "Any rating"
 msgstr "Any rating"
+
+msgid "App categories"
+msgstr "App categories"
 
 msgid "App Store"
 msgstr "App Store"
@@ -368,9 +373,6 @@ msgstr "Calendar settings & more..."
 msgid "Calendar view"
 msgstr "Calendar view"
 
-msgid "Calendars"
-msgstr "Calendars"
-
 msgid "Cancel"
 msgstr "Cancel"
 
@@ -412,6 +414,9 @@ msgstr "Cancelled {0} bookings"
 msgid "Capacity limits"
 msgstr "Capacity limits"
 
+msgid "Channels"
+msgstr "Channels"
+
 msgid "Checkbox"
 msgstr "Checkbox"
 
@@ -445,9 +450,6 @@ msgstr "Configuration"
 msgid "Configuration required"
 msgstr "Configuration required"
 
-msgid "Configure"
-msgstr "Configure"
-
 msgid "Configure different events for people to book on your calendar."
 msgstr "Configure different events for people to book on your calendar."
 
@@ -457,17 +459,14 @@ msgstr "Configure instant booking alerts"
 msgid "Configure qualification AI agent"
 msgstr "Configure qualification AI agent"
 
-msgid "Configure your active integrations, calendar destinations, and business messaging accounts in one unified dashboard."
-msgstr "Configure your active integrations, calendar destinations, and business messaging accounts in one unified dashboard."
+msgid "Configure your active integrations and calendar destinations in one unified dashboard."
+msgstr "Configure your active integrations and calendar destinations in one unified dashboard."
 
 msgid "Confirm booking"
 msgstr "Confirm booking"
 
 msgid "Confirm booking?"
 msgstr "Confirm booking?"
-
-msgid "Confirm Disconnection"
-msgstr "Confirm Disconnection"
 
 msgid "Confirm free-email bookers"
 msgstr "Confirm free-email bookers"
@@ -481,8 +480,8 @@ msgstr "Confirmation"
 msgid "Confirmed"
 msgstr "Confirmed"
 
-msgid "Connect Account"
-msgstr "Connect Account"
+msgid "Connect"
+msgstr "Connect"
 
 msgid "Connect Google"
 msgstr "Connect Google"
@@ -495,9 +494,6 @@ msgstr "Connect installed apps to this event type."
 
 msgid "Connect Microsoft"
 msgstr "Connect Microsoft"
-
-msgid "Connect WhatsApp Business Account to power up booking messages and workflows directly to customers. Customers can receive instant confirmation, reminders, feedback collection, and process secure payments inside SA's favorite messaging app."
-msgstr "Connect WhatsApp Business Account to power up booking messages and workflows directly to customers. Customers can receive instant confirmation, reminders, feedback collection, and process secure payments inside SA's favorite messaging app."
 
 msgid "Connect Zoom"
 msgstr "Connect Zoom"
@@ -827,11 +823,8 @@ msgstr "Expires"
 msgid "Explain why this booking is being rejected"
 msgstr "Explain why this booking is being rejected"
 
-msgid "Explore"
-msgstr "Explore"
-
-msgid "Explore and connect powerful app extensions, calendar sync options, and messaging workflows to automate bookings."
-msgstr "Explore and connect powerful app extensions, calendar sync options, and messaging workflows to automate bookings."
+msgid "Explore and connect powerful app extensions and calendar sync options to automate bookings."
+msgstr "Explore and connect powerful app extensions and calendar sync options to automate bookings."
 
 msgid "Explore App Store"
 msgstr "Explore App Store"
@@ -852,17 +845,11 @@ msgstr "Failed"
 msgid "Failed to copy secret"
 msgstr "Failed to copy secret"
 
-msgid "Failed to disconnect WhatsApp Business completely."
-msgstr "Failed to disconnect WhatsApp Business completely."
-
 msgid "Failed to queue test event"
 msgstr "Failed to queue test event"
 
 msgid "Failed to start install. Please try again."
 msgstr "Failed to start install. Please try again."
-
-msgid "Failed to uninstall app."
-msgstr "Failed to uninstall app."
 
 msgid "Feedback (optional)"
 msgstr "Feedback (optional)"
@@ -990,24 +977,17 @@ msgstr "How often you can be booked"
 msgid "In person"
 msgstr "In person"
 
-msgid "Included in Plan"
-msgstr "Included in Plan"
-
 msgid "Insights"
 msgstr "Insights"
 
 msgid "Install"
 msgstr "Install"
 
-#. placeholder {0}: missingPrerequisite.name
-msgid "Install {0} first — this app reuses its connection."
-msgstr "Install {0} first — this app reuses its connection."
-
 msgid "Install a calendar or conferencing app to use it with this event type."
 msgstr "Install a calendar or conferencing app to use it with this event type."
 
-msgid "Install App"
-msgstr "Install App"
+msgid "Install app"
+msgstr "Install app"
 
 msgid "Installed"
 msgstr "Installed"
@@ -1017,10 +997,6 @@ msgstr "Instant meeting"
 
 msgid "Instant meeting schedule"
 msgstr "Instant meeting schedule"
-
-#. placeholder {0}: app.name
-msgid "Integrate {0} with your Nerova platform to synchronize your availability, automatically copy bookings to your workspace schedule, and spin up direct video conferencing links for all scheduled appointments."
-msgstr "Integrate {0} with your Nerova platform to synchronize your availability, automatically copy bookings to your workspace schedule, and spin up direct video conferencing links for all scheduled appointments."
 
 msgid "Interface language"
 msgstr "Interface language"
@@ -1222,9 +1198,6 @@ msgstr "Members handling the most bookings."
 msgid "Message (optional)"
 msgstr "Message (optional)"
 
-msgid "Messaging & Other"
-msgstr "Messaging & Other"
-
 msgid "Minimum length"
 msgstr "Minimum length"
 
@@ -1279,9 +1252,6 @@ msgstr "Navigation"
 msgid "Needs attention"
 msgstr "Needs attention"
 
-msgid "Nerova Systems"
-msgstr "Nerova Systems"
-
 msgid "New"
 msgstr "New"
 
@@ -1300,9 +1270,6 @@ msgstr "Next"
 #. placeholder {0}: getBookingStatusLabel(status).toLowerCase()
 msgid "No {0} bookings yet"
 msgstr "No {0} bookings yet"
-
-msgid "No active integrations"
-msgstr "No active integrations"
 
 msgid "No apps found"
 msgstr "No apps found"
@@ -1367,6 +1334,9 @@ msgstr "No hosts available to assign."
 msgid "No hosts selected. Pick team members below to assign them to this event type."
 msgstr "No hosts selected. Pick team members below to assign them to this event type."
 
+msgid "No installed apps"
+msgstr "No installed apps"
+
 msgid "No internal notes yet."
 msgstr "No internal notes yet."
 
@@ -1378,6 +1348,9 @@ msgstr "No schedules yet"
 
 msgid "No settings available yet."
 msgstr "No settings available yet."
+
+msgid "No special permissions"
+msgstr "No special permissions"
 
 msgid "No specific schedule"
 msgstr "No specific schedule"
@@ -1409,8 +1382,8 @@ msgstr "No-show only"
 msgid "Not available"
 msgstr "Not available"
 
-msgid "Not installed"
-msgstr "Not installed"
+msgid "Not connected"
+msgstr "Not connected"
 
 msgid "Note"
 msgstr "Note"
@@ -1506,14 +1479,14 @@ msgstr "Paused webhooks stop receiving deliveries until reactivated."
 msgid "Payment"
 msgstr "Payment"
 
-msgid "Payments"
-msgstr "Payments"
-
 msgid "Pending"
 msgstr "Pending"
 
 msgid "Per-event-type calendar destination is not yet configurable — connected calendars are used for availability only."
 msgstr "Per-event-type calendar destination is not yet configurable — connected calendars are used for availability only."
+
+msgid "Permissions"
+msgstr "Permissions"
 
 msgid "Phone"
 msgstr "Phone"
@@ -1530,8 +1503,8 @@ msgstr "Ping"
 msgid "Placeholder"
 msgstr "Placeholder"
 
-msgid "Prerequisite Required"
-msgstr "Prerequisite Required"
+msgid "Prerequisite required"
+msgstr "Prerequisite required"
 
 msgid "Preview"
 msgstr "Preview"
@@ -1563,17 +1536,11 @@ msgstr "Private link removed"
 msgid "Private links"
 msgstr "Private links"
 
-msgid "Profile"
-msgstr "Profile"
-
 msgid "Public booking"
 msgstr "Public booking"
 
 msgid "Public link copied"
 msgstr "Public link copied"
-
-msgid "Publisher"
-msgstr "Publisher"
 
 msgid "Question"
 msgstr "Question"
@@ -1699,9 +1666,6 @@ msgstr "Require emails"
 msgid "Required"
 msgstr "Required"
 
-msgid "Requires authorization permission"
-msgstr "Requires authorization permission"
-
 msgid "Requires confirmation"
 msgstr "Requires confirmation"
 
@@ -1822,8 +1786,8 @@ msgstr "Scope"
 msgid "Search"
 msgstr "Search"
 
-msgid "Search app integrations..."
-msgstr "Search app integrations..."
+msgid "Search apps..."
+msgstr "Search apps..."
 
 msgid "Search bookings"
 msgstr "Search bookings"
@@ -1966,6 +1930,10 @@ msgstr "Show on profile"
 msgid "Show optimized slots"
 msgstr "Show optimized slots"
 
+#. placeholder {0}: app.name
+msgid "Show permissions for {0}"
+msgstr "Show permissions for {0}"
+
 msgid "Signing secret"
 msgstr "Signing secret"
 
@@ -2057,6 +2025,9 @@ msgstr "The event type scope is locked once a webhook is created."
 msgid "This action applies to every selected booking."
 msgstr "This action applies to every selected booking."
 
+msgid "This app does not request access to any of your data."
+msgstr "This app does not request access to any of your data."
+
 msgid "this attendee"
 msgstr "this attendee"
 
@@ -2095,9 +2066,6 @@ msgstr "This rejects the pending booking with {0}."
 
 msgid "This removes the booking page for {deleteSubject}."
 msgstr "This removes the booking page for {deleteSubject}."
-
-msgid "This will delete your WhatsApp Business details, RSA key pair, and Paystack links completely. Existing bookings will not be altered, but new bookings will no longer run WhatsApp flows."
-msgstr "This will delete your WhatsApp Business details, RSA key pair, and Paystack links completely. Existing bookings will not be altered, but new bookings will no longer run WhatsApp flows."
 
 msgid "This will record that the attendee did not show up for the meeting."
 msgstr "This will record that the attendee did not show up for the meeting."
@@ -2172,12 +2140,6 @@ msgstr "Uninstall {0}?"
 msgid "Uninstall app"
 msgstr "Uninstall app"
 
-msgid "Uninstall App"
-msgstr "Uninstall App"
-
-msgid "Uninstall WhatsApp Business"
-msgstr "Uninstall WhatsApp Business"
-
 msgid "Untitled field"
 msgstr "Untitled field"
 
@@ -2186,9 +2148,6 @@ msgstr "Update where this booking takes place."
 
 msgid "URL"
 msgstr "URL"
-
-msgid "Usage"
-msgstr "Usage"
 
 msgid "Use booker timezone for organizer"
 msgstr "Use booker timezone for organizer"
@@ -2280,9 +2239,6 @@ msgstr "What your booker should provide to receive confirmations"
 msgid "WhatsApp Booking First"
 msgstr "WhatsApp Booking First"
 
-msgid "WhatsApp Business integration completely disconnected."
-msgstr "WhatsApp Business integration completely disconnected."
-
 msgid "WhatsApp Connection Pending"
 msgstr "WhatsApp Connection Pending"
 
@@ -2300,9 +2256,6 @@ msgstr "Yearly"
 
 msgid "Yes"
 msgstr "Yes"
-
-msgid "Yes, Disconnect"
-msgstr "Yes, Disconnect"
 
 msgid "You can select multiple and your bookers can switch views."
 msgstr "You can select multiple and your bookers can switch views."

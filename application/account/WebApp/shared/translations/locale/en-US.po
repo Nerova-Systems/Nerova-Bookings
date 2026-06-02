@@ -613,6 +613,9 @@ msgstr "Change user role for {0}"
 msgid "Changing to {0} {1} on {formattedPeriodEndLong}"
 msgstr "Changing to {0} {1} on {formattedPeriodEndLong}"
 
+msgid "Channels"
+msgstr "Channels"
+
 msgid "Check your spam folder."
 msgstr "Check your spam folder."
 
@@ -686,6 +689,9 @@ msgstr "Confirm downgrade"
 msgid "Confirm team name"
 msgstr "Confirm team name"
 
+msgid "Connect and manage the messaging channels your customers book through."
+msgstr "Connect and manage the messaging channels your customers book through."
+
 msgid "Connect Paystack"
 msgstr "Connect Paystack"
 
@@ -700,6 +706,9 @@ msgstr "Connect WhatsApp Business Account"
 
 msgid "Connect WhatsApp Business Account via Meta Embedded Signup"
 msgstr "Connect WhatsApp Business Account via Meta Embedded Signup"
+
+msgid "Connected"
+msgstr "Connected"
 
 msgid "Contact support"
 msgstr "Contact support"
@@ -899,6 +908,9 @@ msgstr "Disabled"
 msgid "Dismiss brand profile banner"
 msgstr "Dismiss brand profile banner"
 
+msgid "Display name"
+msgstr "Display name"
+
 msgid "Display name change request submitted"
 msgstr "Display name change request submitted"
 
@@ -980,6 +992,9 @@ msgstr "Enabled"
 
 msgid "Encrypt SMTP connection with SSL/TLS."
 msgstr "Encrypt SMTP connection with SSL/TLS."
+
+msgid "Encryption keys generated"
+msgstr "Encryption keys generated"
 
 msgid "Enter a valid IANA time zone (e.g. Europe/Copenhagen)."
 msgstr "Enter a valid IANA time zone (e.g. Europe/Copenhagen)."
@@ -1115,6 +1130,9 @@ msgstr "General"
 
 msgid "Generate encryption key pair"
 msgstr "Generate encryption key pair"
+
+msgid "Generate encryption keys"
+msgstr "Generate encryption keys"
 
 msgid "Generate key pair"
 msgstr "Generate key pair"
@@ -1305,6 +1323,9 @@ msgstr "Let's set up your profile"
 msgid "Light"
 msgstr "Light"
 
+msgid "Link WhatsApp Business Account"
+msgstr "Link WhatsApp Business Account"
+
 msgid "LinkedIn"
 msgstr "LinkedIn"
 
@@ -1374,6 +1395,9 @@ msgstr "Manage subscription"
 
 msgid "Manage teams"
 msgstr "Manage teams"
+
+msgid "Manage WhatsApp"
+msgstr "Manage WhatsApp"
 
 msgid "Manage your organization's subscription and invoices."
 msgstr "Manage your organization's subscription and invoices."
@@ -1564,6 +1588,9 @@ msgstr "No verified name"
 msgid "None"
 msgstr "None"
 
+msgid "Not connected"
+msgstr "Not connected"
+
 msgid "Not great"
 msgstr "Not great"
 
@@ -1672,6 +1699,9 @@ msgstr "Payment method"
 msgid "Payment method updated"
 msgstr "Payment method updated"
 
+msgid "Paystack connected"
+msgstr "Paystack connected"
+
 msgid "Paystack subaccount connected"
 msgstr "Paystack subaccount connected"
 
@@ -1699,6 +1729,9 @@ msgstr "Permanently delete users"
 
 msgid "Permissions"
 msgstr "Permissions"
+
+msgid "Phone number registered"
+msgstr "Phone number registered"
 
 msgid "Phone number verified"
 msgstr "Phone number verified"
@@ -1832,6 +1865,9 @@ msgstr "Reference ID: {id}"
 msgid "Refunded"
 msgstr "Refunded"
 
+msgid "Register phone number"
+msgstr "Register phone number"
+
 msgid "Regulatory standards and certifications"
 msgstr "Regulatory standards and certifications"
 
@@ -1892,6 +1928,9 @@ msgstr "Requested: {0}"
 
 msgid "Require payment or a deposit before confirming the booking. Adds a payment link page to the booking flow. Requires Paystack to be connected."
 msgstr "Require payment or a deposit before confirming the booking. Adds a payment link page to the booking flow. Requires Paystack to be connected."
+
+msgid "Required actions"
+msgstr "Required actions"
 
 msgid "Required for end-to-end encrypted WhatsApp Flows."
 msgstr "Required for end-to-end encrypted WhatsApp Flows."
@@ -2095,6 +2134,9 @@ msgstr "Setup"
 
 msgid "Setup complete 🎉"
 msgstr "Setup complete 🎉"
+
+msgid "Setup in progress"
+msgstr "Setup in progress"
 
 msgid "Show details"
 msgstr "Show details"
@@ -2692,6 +2734,9 @@ msgstr "WhatsApp Business"
 msgid "WhatsApp Business Account connected"
 msgstr "WhatsApp Business Account connected"
 
+msgid "WhatsApp Business Account linked"
+msgstr "WhatsApp Business Account linked"
+
 msgid "WhatsApp connection failed. Please try again."
 msgstr "WhatsApp connection failed. Please try again."
 
@@ -2871,6 +2916,9 @@ msgstr "Your verification code is valid for {expiresInString}"
 
 msgid "Your WhatsApp Business Account is connected and ready. Configure your business profile in the Profile tab."
 msgstr "Your WhatsApp Business Account is connected and ready. Configure your business profile in the Profile tab."
+
+msgid "Your WhatsApp channel is fully connected and ready."
+msgstr "Your WhatsApp channel is fully connected and ready."
 
 msgid "yourname@example.com"
 msgstr "yourname@example.com"

@@ -28,6 +28,8 @@ public sealed class Office365CalendarInstaller(
 {
     public AppSlug Slug => Office365CalendarSlug.Slug;
 
+    public IReadOnlyList<AppPermission> Permissions => Office365CalendarPermissions.All;
+
     public Task<AppInstallStartResult> BeginInstallAsync(AppInstallContext context, CancellationToken cancellationToken)
     {
         var opts = options.CurrentValue;

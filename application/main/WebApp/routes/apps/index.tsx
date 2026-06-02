@@ -2,9 +2,12 @@ import { t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
 import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@repo/ui/components/Empty";
 import { Input } from "@repo/ui/components/Input";
+import { cn } from "@repo/ui/utils";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { BlocksIcon, SearchIcon } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+
+import type { AppCategory } from "@/shared/lib/api/client";
 
 import { api } from "@/shared/lib/api/client";
 
@@ -13,6 +16,7 @@ import type { App } from "./-components/appsTypes";
 import { AppDetailsSheet } from "./-components/AppDetailsSheet";
 import { AppsPageShell } from "./-components/AppsPageShell";
 import { AppStoreCard } from "./-components/AppStoreCard";
+import { APP_CATEGORY_ORDER, getAppCategoryLabel, getVisibleApps } from "./-components/appsTypes";
 import { UninstallAppDialog } from "./-components/UninstallAppDialog";
 
 interface AppsSearchQuery {
@@ -33,20 +37,18 @@ function AppStoreGalleryPage() {
   const { open } = Route.useSearch();
   const navigate = useNavigate({ from: Route.fullPath });
   const { data, isLoading } = api.useQuery("get", "/api/apps");
-  const apps = data?.apps ?? [];
+  const apps = useMemo(() => getVisibleApps(data?.apps ?? []), [data?.apps]);
 
   const [selectedApp, setSelectedApp] = useState<App | null>(null);
   const [appToUninstall, setAppToUninstall] = useState<App | null>(null);
   const [searchQuery, setSearchQuery] = useState<string>("");
-  const [selectedCategory, setSelectedCategory] = useState<string>("all");
+  const [selectedCategory, setSelectedCategory] = useState<AppCategory | null>(null);
 
-  // Sync state with open slug in query parameters
+  // Sync the open details drawer with the `open` slug in query parameters.
   useEffect(() => {
     if (open && apps.length > 0) {
       const matched = apps.find((a) => a.slug === open);
-      if (matched) {
-        setSelectedApp(matched);
-      }
+      setSelectedApp(matched ?? null);
     } else {
       setSelectedApp(null);
     }
@@ -62,81 +64,77 @@ function AppStoreGalleryPage() {
     void navigate({ search: { open: undefined } });
   };
 
-  const filteredApps = apps.filter((app) => {
-    const matchesSearch =
-      app.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (app.description?.toLowerCase().includes(searchQuery.toLowerCase()) ?? false);
+  // Only show category tabs that actually have apps.
+  const availableCategories = useMemo(
+    () => APP_CATEGORY_ORDER.filter((category) => apps.some((app) => app.category === category)),
+    [apps]
+  );
 
-    const matchesCategory = selectedCategory === "all" || app.category.toLowerCase() === selectedCategory.toLowerCase();
-
-    return matchesSearch && matchesCategory;
-  });
-
-  const categories = [
-    { value: "all", label: t`All Apps` },
-    { value: "calendar", label: t`Calendars` },
-    { value: "conferencing", label: t`Conferencing` },
-    { value: "payment", label: t`Payments` },
-    { value: "other", label: t`Messaging & Other` }
-  ];
+  const normalizedSearch = searchQuery.trim().toLowerCase();
+  const filteredApps = apps
+    .filter((app) => (selectedCategory === null ? true : app.category === selectedCategory))
+    .filter((app) =>
+      normalizedSearch
+        ? app.name.toLowerCase().includes(normalizedSearch) || app.description.toLowerCase().includes(normalizedSearch)
+        : true
+    )
+    .sort((a, b) => a.name.localeCompare(b.name));
 
   return (
     <AppsPageShell
       title={t`App Store`}
-      subtitle={t`Explore and connect powerful app extensions, calendar sync options, and messaging workflows to automate bookings.`}
+      subtitle={t`Explore and connect powerful app extensions and calendar sync options to automate bookings.`}
     >
       <div className="flex flex-col gap-6">
-        {/* Search and Category filters */}
-        <div className="flex flex-col items-stretch justify-between gap-4 border-b pb-6 md:flex-row md:items-center">
-          <div className="relative max-w-md flex-1">
-            <SearchIcon className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              type="search"
-              placeholder={t`Search app integrations...`}
-              className="h-10 w-full rounded-xl bg-muted/30 pl-9 transition-colors focus-visible:bg-background"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-          </div>
-
-          <div className="no-scrollbar flex flex-wrap items-center gap-1.5 overflow-x-auto">
-            {categories.map((cat) => (
-              <button
-                key={cat.value}
-                type="button"
-                onClick={() => setSelectedCategory(cat.value)}
-                className={`rounded-lg border px-3 py-1.5 text-xs font-semibold transition-all duration-200 ${
-                  selectedCategory === cat.value
-                    ? "border-primary bg-primary text-primary-foreground shadow-sm shadow-primary/20"
-                    : "border-border bg-card text-muted-foreground hover:bg-muted/50 hover:text-foreground"
-                }`}
-              >
-                {cat.label}
-              </button>
-            ))}
-          </div>
+        {/* Search */}
+        <div className="relative max-w-md">
+          <SearchIcon className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            type="search"
+            placeholder={t`Search apps...`}
+            className="pl-9"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
         </div>
 
-        {/* Gallery Grid */}
+        {/* Category pill tabs (mirrors cal.com AllApps CategoryTab) */}
+        <div className="flex flex-col justify-between gap-3 lg:flex-row lg:items-center">
+          <h2 className="text-base font-semibold text-foreground">
+            {normalizedSearch ? (
+              <Trans>Search</Trans>
+            ) : selectedCategory === null ? (
+              <Trans>All apps</Trans>
+            ) : (
+              getAppCategoryLabel(selectedCategory)
+            )}
+          </h2>
+          <ul
+            className="no-scrollbar flex max-w-full gap-1 overflow-x-auto"
+            role="tablist"
+            aria-label={t`App categories`}
+          >
+            <CategoryPill
+              label={t`All`}
+              isActive={selectedCategory === null}
+              onClick={() => setSelectedCategory(null)}
+            />
+            {availableCategories.map((category) => (
+              <CategoryPill
+                key={category}
+                label={getAppCategoryLabel(category)}
+                isActive={selectedCategory === category}
+                onClick={() => setSelectedCategory(selectedCategory === category ? null : category)}
+              />
+            ))}
+          </ul>
+        </div>
+
+        {/* Gallery grid */}
         {isLoading ? (
-          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {[...Array(6)].map((_, i) => (
-              <div
-                key={`shimmer-${i}`}
-                className="flex h-[140px] animate-pulse flex-col justify-between rounded-xl border border-border bg-card/40 p-5"
-              >
-                <div className="flex items-start gap-4">
-                  <div className="size-12 animate-pulse rounded-xl bg-muted" />
-                  <div className="flex-1 space-y-2">
-                    <div className="h-4 w-1/2 animate-pulse rounded bg-muted" />
-                    <div className="h-3 w-3/4 animate-pulse rounded bg-muted" />
-                  </div>
-                </div>
-                <div className="flex items-center justify-between border-t pt-3">
-                  <div className="h-4 w-1/4 animate-pulse rounded bg-muted" />
-                  <div className="h-4 w-1/4 animate-pulse rounded bg-muted" />
-                </div>
-              </div>
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            {[...Array(8)].map((_, i) => (
+              <div key={`shimmer-${i}`} className="h-64 animate-pulse rounded-md border border-border bg-card/40" />
             ))}
           </div>
         ) : filteredApps.length === 0 ? (
@@ -154,9 +152,9 @@ function AppStoreGalleryPage() {
             </EmptyHeader>
           </Empty>
         ) : (
-          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {filteredApps.map((app) => (
-              <AppStoreCard key={app.slug} app={app} onClick={() => handleOpenDetails(app)} />
+              <AppStoreCard key={app.slug} app={app} allApps={apps} onDetails={() => handleOpenDetails(app)} />
             ))}
           </div>
         )}
@@ -167,20 +165,43 @@ function AppStoreGalleryPage() {
         app={selectedApp}
         allApps={apps}
         isOpen={selectedApp !== null}
-        onOpenChange={(open) => {
-          if (!open) handleCloseDetails();
+        onOpenChange={(isOpen) => {
+          if (!isOpen) handleCloseDetails();
         }}
         onUninstall={setAppToUninstall}
       />
 
-      {/* Platform uninstallation confirmation dialog */}
+      {/* Uninstall confirmation dialog */}
       <UninstallAppDialog
         app={appToUninstall}
         isOpen={appToUninstall !== null}
-        onOpenChange={(open) => {
-          if (!open) setAppToUninstall(null);
+        onOpenChange={(isOpen) => {
+          if (!isOpen) setAppToUninstall(null);
         }}
       />
     </AppsPageShell>
+  );
+}
+
+function CategoryPill({
+  label,
+  isActive,
+  onClick
+}: Readonly<{ label: string; isActive: boolean; onClick: () => void }>) {
+  return (
+    <li>
+      <button
+        type="button"
+        role="tab"
+        aria-selected={isActive}
+        onClick={onClick}
+        className={cn(
+          "min-w-max rounded-md px-4 py-2 text-sm font-medium whitespace-nowrap outline-ring transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2",
+          isActive ? "bg-primary text-primary-foreground" : "bg-muted text-foreground hover:bg-muted/70"
+        )}
+      >
+        {label}
+      </button>
+    </li>
   );
 }
