@@ -28,11 +28,14 @@ using Main.Features.Webhooks.Jobs;
 using Main.Features.WhatsAppFlows.Domain;
 using Main.Features.WhatsAppFlows.Endpoint;
 using Main.Features.WhatsAppFlows.Infrastructure;
+using Main.Features.WhatsAppMessaging.Shared;
+using Main.Features.WhatsAppOnboarding.Shared;
 using Main.Features.Workflows.EventHandlers;
 using Main.Features.Workflows.Infrastructure;
 using Main.Features.Workflows.Jobs;
 using Main.Features.Workflows.Senders;
 using Main.Features.Workflows.Services;
+using Main.Integrations.Meta;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -99,6 +102,19 @@ public static class Configuration
             // the WhatsApp Flows or account-SCS Paystack client configuration.
             services.AddHttpClient(WhatsAppCloudApiClient.HttpClientName);
             services.AddHttpClient(PaystackPaymentLinkService.HttpClientName);
+
+            // Meta Graph API client for WhatsApp Embedded Signup onboarding + messaging.
+            services.AddHttpClient<MetaGraphClient>(client =>
+                {
+                    client.BaseAddress = new Uri("https://graph.facebook.com/");
+                    client.Timeout = TimeSpan.FromSeconds(10);
+                }
+            );
+            services.AddKeyedScoped<IMetaGraphClient>("meta", (serviceProvider, _) => serviceProvider.GetRequiredService<MetaGraphClient>());
+            services.AddKeyedScoped<IMetaGraphClient, MockMetaGraphClient>("mock-meta");
+            services.AddScoped<MetaGraphClientFactory>();
+            services.AddScoped<WhatsAppAccessTokenProtector>();
+            services.AddScoped<ProcessPendingWhatsAppEvents>();
 
             return services
                 .AddScoped<IPermissionCheckService, PermissionCheckService>()

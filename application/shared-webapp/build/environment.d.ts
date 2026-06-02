@@ -111,14 +111,21 @@ export declare global {
      **/
     PUBLIC_SUBSCRIPTION_ENABLED: string;
     /**
-     * Meta (Facebook) App ID for WhatsApp Business Embedded Signup.
-     * Empty string when the feature is not configured.
+     * Whether WhatsApp Business onboarding via Meta Embedded Signup is enabled
+     **/
+    PUBLIC_WHATSAPP_SIGNUP_ENABLED: string;
+    /**
+     * Meta (Facebook) App ID used by the Facebook JS SDK for Embedded Signup
      **/
     PUBLIC_META_APP_ID: string;
     /**
-     * Meta Configuration ID for Facebook Login for Business.
+     * Meta Embedded Signup configuration ID passed to FB.login
      **/
     PUBLIC_META_CONFIG_ID: string;
+    /**
+     * Public application URL (the origin Meta accepts for Embedded Signup)
+     **/
+    PUBLIC_APP_URL: string;
     /**
      * Whether the in-app support system (ticket inbox + back-office support tabs) is enabled. When
      * disabled, the legacy "Contact support" mailto dialog is shown from the user menu instead.
