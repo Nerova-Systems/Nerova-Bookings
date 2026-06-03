@@ -1,7 +1,7 @@
-using System.Net;
 using Account.Features.Payments.Queries;
 using Account.Integrations.Paystack;
 using FluentAssertions;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -14,18 +14,18 @@ public sealed class GetPaystackBanksHandlerTests
 {
     private static readonly IReadOnlyList<PaystackBankDto> SampleBanks =
     [
-        new PaystackBankDto("044", "Access Bank"),
-        new PaystackBankDto("058", "Guaranty Trust Bank")
+        new("044", "Access Bank"),
+        new("058", "Guaranty Trust Bank")
     ];
 
     [Fact]
     public async Task Handle_WhenApiReturnsData_ShouldReturnBanks()
     {
         // Arrange
-        var (handler, _, _) = BuildHandler(SampleBanks);
+        var (handler, _) = BuildHandler(SampleBanks);
 
         // Act
-        var result = await handler.Handle(new GetPaystackBanksQuery("ZA"), CancellationToken.None);
+        var result = await handler.Handle(new GetPaystackBanksQuery(), CancellationToken.None);
 
         // Assert
         result.IsSuccess.Should().BeTrue();
@@ -38,8 +38,8 @@ public sealed class GetPaystackBanksHandlerTests
     public async Task Handle_WhenCalledTwice_ShouldOnlyCallApiOnce()
     {
         // Arrange
-        var (handler, paystackClient, _) = BuildHandler(SampleBanks);
-        var query = new GetPaystackBanksQuery("ZA");
+        var (handler, paystackClient) = BuildHandler(SampleBanks);
+        var query = new GetPaystackBanksQuery();
 
         // Act
         await handler.Handle(query, CancellationToken.None);
@@ -53,10 +53,10 @@ public sealed class GetPaystackBanksHandlerTests
     public async Task Handle_WhenApiReturnsEmptyList_ShouldReturnEmptyBanks()
     {
         // Arrange
-        var (handler, _, _) = BuildHandler([]);
+        var (handler, _) = BuildHandler([]);
 
         // Act
-        var result = await handler.Handle(new GetPaystackBanksQuery("ZA"), CancellationToken.None);
+        var result = await handler.Handle(new GetPaystackBanksQuery(), CancellationToken.None);
 
         // Assert
         result.IsSuccess.Should().BeTrue();
@@ -71,10 +71,10 @@ public sealed class GetPaystackBanksHandlerTests
         paystackClient.GetBanksAsync("ZA", Arg.Any<CancellationToken>()).Returns(SampleBanks);
         paystackClient.GetBanksAsync("NG", Arg.Any<CancellationToken>()).Returns(new List<PaystackBankDto> { new("033", "UBA") });
 
-        var (handler, _, _) = BuildHandler(paystackClient);
+        var (handler, _) = BuildHandler(paystackClient);
 
         // Act
-        var zaResult = await handler.Handle(new GetPaystackBanksQuery("ZA"), CancellationToken.None);
+        var zaResult = await handler.Handle(new GetPaystackBanksQuery(), CancellationToken.None);
         var ngResult = await handler.Handle(new GetPaystackBanksQuery("NG"), CancellationToken.None);
 
         // Assert
@@ -83,7 +83,7 @@ public sealed class GetPaystackBanksHandlerTests
         ngResult.Value.Banks[0].Code.Should().Be("033");
     }
 
-    private static (GetPaystackBanksHandler handler, IPaystackClient paystackClient, IMemoryCache memoryCache) BuildHandler(
+    private static (GetPaystackBanksHandler handler, IPaystackClient paystackClient) BuildHandler(
         IReadOnlyList<PaystackBankDto> bankResponse)
     {
         var paystackClient = Substitute.For<IPaystackClient>();
@@ -91,7 +91,7 @@ public sealed class GetPaystackBanksHandlerTests
         return BuildHandler(paystackClient);
     }
 
-    private static (GetPaystackBanksHandler handler, IPaystackClient paystackClient, IMemoryCache memoryCache) BuildHandler(
+    private static (GetPaystackBanksHandler handler, IPaystackClient paystackClient) BuildHandler(
         IPaystackClient paystackClient)
     {
         var services = new ServiceCollection();
@@ -108,13 +108,13 @@ public sealed class GetPaystackBanksHandlerTests
                 .Build()
         );
         services.AddKeyedScoped<IPaystackClient>("paystack", (_, _) => paystackClient);
-        services.AddSingleton(Substitute.For<Microsoft.AspNetCore.Http.IHttpContextAccessor>());
+        services.AddSingleton(Substitute.For<IHttpContextAccessor>());
         services.AddScoped<PaystackClientFactory>();
 
         var provider = services.BuildServiceProvider();
         var factory = provider.GetRequiredService<PaystackClientFactory>();
         var memoryCache = provider.GetRequiredService<IMemoryCache>();
 
-        return (new GetPaystackBanksHandler(factory, memoryCache), paystackClient, memoryCache);
+        return (new GetPaystackBanksHandler(factory, memoryCache), paystackClient);
     }
 }

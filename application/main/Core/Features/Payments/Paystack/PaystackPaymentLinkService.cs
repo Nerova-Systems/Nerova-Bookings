@@ -31,7 +31,7 @@ public interface IPaystackPaymentLinkService
 
 /// <summary>
 ///     Booking-payment-specific Paystack client. Lives in <c>main</c> SCS because booking-level
-///     payments are a main-SCS concern (the <c>account</c> SCS's <see cref="Account.Integrations.Paystack.PaystackClient" />
+///     payments are a main-SCS concern (the <c>account</c> SCS's <c>PaystackClient</c>
 ///     handles subscription billing, which is a different domain with different references/metadata).
 /// </summary>
 public sealed class PaystackPaymentLinkService(
@@ -115,10 +115,7 @@ public sealed class PaystackPaymentLinkService(
     private HttpClient CreateClient()
     {
         var client = httpClientFactory.CreateClient(HttpClientName);
-        if (client.BaseAddress is null)
-        {
-            client.BaseAddress = new Uri(BaseUrl.EndsWith('/') ? BaseUrl : BaseUrl + "/");
-        }
+        client.BaseAddress ??= new Uri(BaseUrl.EndsWith('/') ? BaseUrl : BaseUrl + "/");
 
         client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", SecretKey);
         return client;

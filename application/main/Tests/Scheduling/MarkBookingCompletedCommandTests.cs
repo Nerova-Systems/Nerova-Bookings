@@ -1,13 +1,12 @@
 using FluentAssertions;
 using Main.Features.EventTypes.Domain;
 using Main.Features.Permissions.Domain;
+using Main.Features.Schedules.Domain;
 using Main.Features.Scheduling.Commands;
 using Main.Features.Scheduling.Domain;
 using Main.Features.Scheduling.Notifications;
-using Main.Features.Schedules.Domain;
 using NSubstitute;
 using SharedKernel.Authentication;
-using SharedKernel.Cqrs;
 using SharedKernel.Domain;
 using SharedKernel.ExecutionContext;
 using Xunit;
@@ -65,42 +64,53 @@ public sealed class MarkBookingCompletedCommandTests
     }
 
     private static Booking CreateBooking()
-        => Booking.Create(
-            tenantId: Tenant,
-            ownerUserId: Owner,
-            eventTypeId: EventTypeId.NewId(),
-            startTime: Now.AddHours(-1),
-            durationMinutes: 30,
-            beforeEventBufferMinutes: 0,
-            afterEventBufferMinutes: 0,
-            bookerName: "Alice",
-            bookerEmail: "alice@example.com",
-            timeZone: "UTC",
-            status: BookingStatus.Accepted,
-            responses: new Dictionary<string, string>()
+    {
+        return Booking.Create(
+            Tenant,
+            Owner,
+            EventTypeId.NewId(),
+            Now.AddHours(-1),
+            30,
+            0,
+            0,
+            "Alice",
+            "alice@example.com",
+            "UTC",
+            BookingStatus.Accepted,
+            new Dictionary<string, string>()
         );
+    }
 
     private static EventType CreateEventType()
-        => EventType.Create(Tenant, Owner, "Hair", "hair", null, 30, false, ScheduleId.NewId(), 0, 0, 0, 0, null, null, null);
+    {
+        return EventType.Create(Tenant, Owner, "Hair", "hair", null, 30, false, ScheduleId.NewId(), 0, 0, 0, 0, null, null, null);
+    }
 
     private sealed class Context
     {
-        public IBookingRepository Bookings { get; } = Substitute.For<IBookingRepository>();
-        public IBookingHistoryEntryRepository History { get; } = Substitute.For<IBookingHistoryEntryRepository>();
-        public IExecutionContext Execution { get; } = Substitute.For<IExecutionContext>();
-        public IPublisher Publisher { get; } = Substitute.For<IPublisher>();
-        public MarkBookingCompletedHandler Sut { get; }
-
         public Context(string role)
         {
             Execution.UserInfo.Returns(new UserInfo { TenantId = Tenant, Id = Owner, Role = role, IsAuthenticated = true });
             Execution.ActiveTeamId.Returns((TenantId?)null);
             Sut = new MarkBookingCompletedHandler(Bookings, History, Execution, new FakeTimeProvider(Now), Publisher);
         }
+
+        public IBookingRepository Bookings { get; } = Substitute.For<IBookingRepository>();
+
+        private IBookingHistoryEntryRepository History { get; } = Substitute.For<IBookingHistoryEntryRepository>();
+
+        private IExecutionContext Execution { get; } = Substitute.For<IExecutionContext>();
+
+        public IPublisher Publisher { get; } = Substitute.For<IPublisher>();
+
+        public MarkBookingCompletedHandler Sut { get; }
     }
 
     private sealed class FakeTimeProvider(DateTimeOffset now) : TimeProvider
     {
-        public override DateTimeOffset GetUtcNow() => now;
+        public override DateTimeOffset GetUtcNow()
+        {
+            return now;
+        }
     }
 }

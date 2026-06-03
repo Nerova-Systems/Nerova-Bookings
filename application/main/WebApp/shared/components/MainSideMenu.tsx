@@ -152,7 +152,7 @@ export function MainSideMenu() {
                     isActive={currentPath.startsWith("/channels")}
                     tooltip={t`Channels`}
                   >
-                    <RouterLink to="/channels/$" params={{ _splat: "overview" }}>
+                    <RouterLink to="/channels/whatsapp">
                       <MessageCircleIcon />
                       <span>
                         <Trans>Channels</Trans>

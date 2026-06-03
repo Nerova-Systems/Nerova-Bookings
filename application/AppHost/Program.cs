@@ -50,9 +50,7 @@ var paystackFullyConfigured = paystackConfigured
                               && builder.Configuration["Parameters:paystack-standard-plan-code"] is not null and not "not-configured"
                               && builder.Configuration["Parameters:paystack-premium-plan-code"] is not null and not "not-configured";
 
-var (whatsappConfigured, whatsappMetaAppId, whatsappMetaAppSecret, whatsappMetaConfigId) = ConfigureWhatsAppParameters();
-
-var (metaConfigured, metaAppId, metaAppSecret, metaConfigId, metaWebhookVerifyToken) = ConfigureMetaParameters();
+var (_, metaAppId, metaAppSecret, metaConfigId, metaWebhookVerifyToken) = ConfigureMetaParameters();
 
 var postgresPassword = builder.CreateStablePassword("postgres-password");
 var postgres = builder.AddPostgres("postgres", password: postgresPassword, port: ports.Postgres)
@@ -114,8 +112,6 @@ var accountWorkers = builder
     .WithEnvironment("Paystack__PremiumPlanCode", paystackPremiumPlanCode)
     .WithEnvironment("Paystack__CardAuthorizationAmountSubunit", paystackCardAuthorizationAmountSubunit)
     .WithEnvironment("Paystack__AllowMockProvider", "true")
-    .WithEnvironment("WhatsApp__MetaAppId", whatsappMetaAppId)
-    .WithEnvironment("WhatsApp__MetaAppSecret", whatsappMetaAppSecret)
     .WaitFor(accountDatabase);
 
 var accountApi = builder
@@ -155,9 +151,6 @@ var accountApi = builder
     // change back to `paystackFullyConfigured ? "true" : "false"`) to hide all billing/revenue/Paystack data.
     .WithEnvironment("PUBLIC_SUBSCRIPTION_ENABLED", "true")
     .WithEnvironment("PUBLIC_SUPPORT_SYSTEM_ENABLED", Environment.GetEnvironmentVariable("PUBLIC_SUPPORT_SYSTEM_ENABLED") ?? "true")
-    .WithEnvironment("WhatsApp__MetaAppId", whatsappMetaAppId)
-    .WithEnvironment("WhatsApp__MetaAppSecret", whatsappMetaAppSecret)
-    .WithEnvironment("WhatsApp__MetaConfigId", whatsappMetaConfigId)
     .WaitFor(accountWorkers);
 
 var mainDatabase = postgres
@@ -380,54 +373,6 @@ CoreConnectorOAuthParameters ConfigureCoreConnectorOAuthParameters()
         builder.CreateResourceBuilder(new ParameterResource("paystack-standard-plan-code", _ => "not-configured", true)),
         builder.CreateResourceBuilder(new ParameterResource("paystack-premium-plan-code", _ => "not-configured", true)),
         builder.CreateResourceBuilder(new ParameterResource("paystack-card-authorization-amount-subunit", _ => "100", true))
-    );
-}
-
-(bool Configured, IResourceBuilder<ParameterResource> MetaAppId, IResourceBuilder<ParameterResource> MetaAppSecret, IResourceBuilder<ParameterResource> MetaConfigId) ConfigureWhatsAppParameters()
-{
-    _ = builder.AddParameter("whatsapp-enabled")
-        .WithDescription("""
-                         **WhatsApp Integration** -- Enables secure Meta Embedded Signup, WhatsApp Business Profile configuration, and pre-built booking workflows.
-
-                         - Enter `true` to enable WhatsApp Integration, or `false` to skip. This can be changed later.
-                         - Setup requires your Meta App ID from the Meta Developer Portal.
-
-                         See **README.md** for full setup instructions.
-                         """, true
-        );
-
-    var configured = builder.Configuration["Parameters:whatsapp-enabled"] == "true";
-
-    if (configured)
-    {
-        var metaAppId = builder.AddParameter("whatsapp-meta-app-id", true)
-            .WithDescription("""
-                             Meta App ID from the [Meta Developer Portal](https://developers.facebook.com/).
-
-                             **After entering this, restart Aspire to apply the configuration.**
-                             """, true
-            );
-
-        var metaAppSecret = builder.AddParameter("whatsapp-meta-app-secret", true)
-            .WithDescription("""
-                             Meta App Secret from the [Meta Developer Portal](https://developers.facebook.com/).
-                             """, true
-            );
-
-        var metaConfigId = builder.AddParameter("whatsapp-meta-config-id", true)
-            .WithDescription("""
-                             Meta Configuration ID from the Facebook Login for Business Configurations dashboard.
-                             """, true
-            );
-
-        return (configured, metaAppId, metaAppSecret, metaConfigId);
-    }
-
-    return (
-        configured,
-        builder.CreateResourceBuilder(new ParameterResource("whatsapp-meta-app-id", _ => "not-configured", true)),
-        builder.CreateResourceBuilder(new ParameterResource("whatsapp-meta-app-secret", _ => "not-configured", true)),
-        builder.CreateResourceBuilder(new ParameterResource("whatsapp-meta-config-id", _ => "not-configured", true))
     );
 }
 

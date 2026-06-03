@@ -9,10 +9,9 @@ namespace Main.Features.Payments.Jobs;
 ///     Polls for bookings whose payment-pending hold has exceeded the configured timeout
 ///     (default 30 minutes from <see cref="Booking.PaymentStateChangedAt" />) and releases the
 ///     slot via <see cref="Booking.ReleaseForUnpaidPayment" />.
-///
 ///     Implemented as a cron-poll job (the only TickerQ pattern in this codebase) rather than a
 ///     schedule-with-input job. The webhook-driven path
-///     (<see cref="ReleaseBookingPaymentCommand" />) is reserved for explicit Paystack
+///     (<c>ReleaseBookingPaymentCommand</c>) is reserved for explicit Paystack
 ///     <c>charge.expired</c> events; this job covers the case where no terminal webhook arrives.
 /// </summary>
 public sealed class ReleaseUnpaidBookingJob(

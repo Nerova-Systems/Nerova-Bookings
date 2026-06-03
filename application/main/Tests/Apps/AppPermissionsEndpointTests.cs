@@ -42,7 +42,7 @@ public sealed class AppPermissionsEndpointTests : EndpointBaseTest<MainDbContext
         var payload = await response.DeserializeResponse<AppsResponse>();
         payload.Should().NotBeNull();
 
-        ScopesFor(payload!, GoogleCalendarSlug.Slug).Should().Equal(
+        ScopesFor(payload, GoogleCalendarSlug.Slug).Should().Equal(
             GoogleCalendarOptions.CalendarReadonlyScope,
             GoogleCalendarOptions.CalendarEventsScope
         );

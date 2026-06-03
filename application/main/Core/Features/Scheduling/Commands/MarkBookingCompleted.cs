@@ -10,7 +10,7 @@ namespace Main.Features.Scheduling.Commands;
 
 /// <summary>
 ///     Marks a booking as <see cref="BookingStatus.Completed" /> (the session has occurred).
-///     Raises <see cref="BookingCompletedEvent" /> which the after-session payment dispatcher
+///     Raises <c>BookingCompletedEvent</c> which the after-session payment dispatcher
 ///     reacts to for tenants whose <c>PaymentTiming = AfterSession</c>.
 /// </summary>
 [PublicAPI]

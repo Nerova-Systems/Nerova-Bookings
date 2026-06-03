@@ -57,8 +57,8 @@ public sealed class TierFlagsTests
     [Fact]
     public void Registry_TotalFlagCount_ShouldBeSeventeenPlusExistingFlags()
     {
-        // 7 pre-existing flags + 3 tier + 15 capability + 1 integration + 1 WhatsApp Flows = 27 total.
-        AllFlags.Should().HaveCount(27);
+        // 7 pre-existing flags + 3 tier + 15 capability + 1 integration = 26 total.
+        AllFlags.Should().HaveCount(26);
     }
 
     [Theory]

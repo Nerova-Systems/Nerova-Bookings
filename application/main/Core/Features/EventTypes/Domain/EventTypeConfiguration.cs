@@ -13,7 +13,7 @@ public sealed class EventTypeConfiguration : IEntityTypeConfiguration<EventType>
     private static readonly JsonSerializerOptions JsonSerializerOptions = JsonSerializerOptions.Default;
 
     private static readonly ValueComparer<string[]> StringArrayComparer = new(
-        (left, right) => left != null && right != null && left.SequenceEqual(right),
+        (left, right) => left != null && right != null && Enumerable.SequenceEqual(left, right),
         value => value.Aggregate(0, (hash, item) => HashCode.Combine(hash, item.GetHashCode(StringComparison.Ordinal))),
         value => value.ToArray()
     );

@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { createPortal } from "react-dom";
 
-import { BrandProfileNudgeBanner } from "./BrandProfileNudgeBanner";
 import ExpiringCardBanner from "./ExpiringCardBanner";
 import InvitationBanner from "./InvitationBanner";
 import PaymentFailedBanner from "./PaymentFailedBanner";
@@ -19,7 +18,6 @@ export default function Banners() {
       <InvitationBanner />
       <PaymentFailedBanner />
       <ExpiringCardBanner />
-      <BrandProfileNudgeBanner />
     </>,
     target
   );

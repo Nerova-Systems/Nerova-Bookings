@@ -1,6 +1,5 @@
 using Main.Features.WhatsAppMessaging.Commands;
 using Main.Features.WhatsAppMessaging.Shared;
-using Microsoft.Extensions.Configuration;
 using SharedKernel.ApiResults;
 using SharedKernel.Endpoints;
 using Result = SharedKernel.Cqrs.Result;
@@ -17,20 +16,21 @@ public sealed class WhatsAppWebhookEndpoints : IEndpoints
 
         // Webhook verification: Meta sends a GET with hub.mode=subscribe and hub.verify_token to confirm the endpoint
         group.MapGet("/", (HttpRequest request, IConfiguration configuration) =>
-        {
-            var mode = request.Query["hub.mode"].ToString();
-            var token = request.Query["hub.verify_token"].ToString();
-            var challenge = request.Query["hub.challenge"].ToString();
-
-            var configuredToken = configuration["Meta:WebhookVerifyToken"] ?? string.Empty;
-
-            if (mode == "subscribe" && token == configuredToken)
             {
-                return Results.Content(challenge, "text/plain");
-            }
+                var mode = request.Query["hub.mode"].ToString();
+                var token = request.Query["hub.verify_token"].ToString();
+                var challenge = request.Query["hub.challenge"].ToString();
 
-            return Results.Forbid();
-        }).AllowAnonymous().DisableAntiforgery();
+                var configuredToken = configuration["Meta:WebhookVerifyToken"] ?? string.Empty;
+
+                if (mode == "subscribe" && token == configuredToken)
+                {
+                    return Results.Content(challenge, "text/plain");
+                }
+
+                return Results.Forbid();
+            }
+        ).AllowAnonymous().DisableAntiforgery();
 
         // Two-phase webhook processing with pessimistic locking requires inline logic beyond 3-line convention
         group.MapPost("/", async Task<ApiResult> (HttpRequest request, IMediator mediator, ProcessPendingWhatsAppEvents processPendingWhatsAppEvents) =>

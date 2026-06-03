@@ -11,12 +11,12 @@ public static class GoogleCalendarPermissions
 {
     public static readonly IReadOnlyList<AppPermission> All =
     [
-        new AppPermission(
+        new(
             GoogleCalendarOptions.CalendarReadonlyScope,
             "View your calendars",
             "Reads your calendars and existing events to check availability and prevent double-booking."
         ),
-        new AppPermission(
+        new(
             GoogleCalendarOptions.CalendarEventsScope,
             "Manage calendar events",
             "Creates, updates, and cancels calendar events on your behalf for confirmed bookings."

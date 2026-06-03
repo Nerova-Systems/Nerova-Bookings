@@ -84,15 +84,6 @@ msgstr "<0>{0}</0> markerede denne sag som løst"
 msgid "<0>{0}</0> reopened this ticket"
 msgstr "<0>{0}</0> genåbnede denne sag"
 
-msgid "<0>Ad-Blocker detected:</0> Using secure direct-popup fallback."
-msgstr ""
-
-msgid "<0>App ID required:</0> Please configure <1>whatsapp-meta-app-id</1> and restart the stack."
-msgstr ""
-
-msgid "<0>Configuration ID required:</0> Please configure <1>whatsapp-meta-config-id</1> and restart the stack."
-msgstr ""
-
 msgid "<0>Upgrade your plan</0> to add a second website."
 msgstr "<0>Opgrader din plan</0> for at tilføje et andet websted."
 
@@ -129,24 +120,11 @@ msgstr "24 timer"
 msgid "5 users"
 msgstr "5 brugere"
 
-msgid "A 1% platform fee applies to all bookings processed through Nerova."
-msgstr ""
-
-msgid "A 2048-bit RSA key pair will be generated. The private key never leaves our servers."
-msgstr ""
-
 msgid "A different user logged in from another browser tab."
 msgstr "En anden bruger loggede ind fra en anden browsertab."
 
 msgid "A longer description of your business"
 msgstr "En længere beskrivelse af din virksomhed"
-
-msgid "A longer description of your business (max 512 characters)"
-msgstr ""
-
-#. placeholder {0}: currentStatus?.requestedDisplayName
-msgid "A name change request is already pending review: <0>“{0}”</0>. Submitting a new request will replace it."
-msgstr "En navneændringsanmodning afventer allerede gennemgang: <0>“{0}”</0>. Indsendelse af en ny anmodning erstatter den."
 
 msgid "A new verification code has been sent to your email."
 msgstr "En ny bekræftelseskode er blevet sendt til din e-mail."
@@ -204,9 +182,6 @@ msgstr "Kontonavn"
 
 msgid "Account not found"
 msgstr "Konto ikke fundet"
-
-msgid "Account number"
-msgstr ""
 
 msgid "Account overview"
 msgstr "Kontooversigt"
@@ -289,9 +264,6 @@ msgstr "Tilføj dit kontonavn"
 msgid "Add your account name and logo."
 msgstr "Tilføj dit kontonavn og logo."
 
-msgid "Add-on workflows"
-msgstr ""
-
 msgid "Address"
 msgstr "Adresse"
 
@@ -303,9 +275,6 @@ msgstr "Admin"
 
 msgid "Advanced analytics"
 msgstr "Avanceret analyse"
-
-msgid "After approval, your WhatsApp display name will update automatically. Meta's review typically takes 1–3 business days."
-msgstr "Efter godkendelse opdateres dit WhatsApp-visningsnavn automatisk. Metas gennemgang tager typisk 1–3 hverdage."
 
 msgid "All tickets"
 msgstr "Alle sager"
@@ -361,9 +330,6 @@ msgstr "Enhver status"
 msgid "Anything you want to add?"
 msgstr "Er der noget, du vil tilføje?"
 
-msgid "Approved"
-msgstr "Godkendt"
-
 #. placeholder {0}: users.length
 msgid "Are you sure you want to delete <0>{0} users</0>?"
 msgstr "Er du sikker på, at du vil slette <0>{0} brugere</0>?"
@@ -415,12 +381,6 @@ msgstr "Autentificering deles på tværs af alle faner. For at bruge flere konti
 msgid "Authentication was cancelled or denied. Please try again if you want to continue."
 msgstr "Godkendelse blev annulleret eller afvist. Prøv venligst igen, hvis du vil fortsætte."
 
-msgid "Automatically identifies returning clients by phone number. New clients are onboarded with email verification and contact details. Returning clients with a new phone number verify via email OTP."
-msgstr ""
-
-msgid "Automatically registered once step 1 is complete."
-msgstr ""
-
 msgid "Awaiting your reply"
 msgstr "Afventer dit svar"
 
@@ -444,12 +404,6 @@ msgstr "Tilbage til Mine sager"
 
 msgid "Back to signup"
 msgstr "Tilbage til tilmelding"
-
-msgid "Bank"
-msgstr "Bank"
-
-msgid "Basic information shown on your WhatsApp Business profile."
-msgstr ""
 
 msgid "Basic information shown on your WhatsApp profile."
 msgstr "Grundlæggende oplysninger vist på din WhatsApp-profil."
@@ -496,21 +450,6 @@ msgstr "Faktureringsfaner"
 msgid "billing@company.com"
 msgstr "fakturering@firma.dk"
 
-msgid "Booking confirmation"
-msgstr ""
-
-msgid "Booking confirmations, reminders, status updates."
-msgstr ""
-
-msgid "Booking flow"
-msgstr ""
-
-msgid "Booking reminders"
-msgstr ""
-
-msgid "Brand profile nudge"
-msgstr "Brandprofil-påmindelse"
-
 msgid "Brand profile updated successfully"
 msgstr "Brandprofil opdateret succesfuldt"
 
@@ -537,9 +476,6 @@ msgstr "Virksomhedens e-mail"
 
 msgid "Business identity"
 msgstr "Virksomhedsidentitet"
-
-msgid "Business trading name"
-msgstr ""
 
 msgid "By continuing, you accept our policies"
 msgstr "Ved at fortsætte accepterer du vores vilkår"
@@ -646,9 +582,6 @@ msgstr "Ryd søgning"
 msgid "Client ID"
 msgstr "Klient-ID"
 
-msgid "Client identification"
-msgstr ""
-
 msgid "Client secret"
 msgstr "Klienthemmelighed"
 
@@ -671,12 +604,6 @@ msgstr "Lukkede ({0})"
 msgid "Collapse details"
 msgstr "Skjul detaljer"
 
-msgid "Complete profile"
-msgstr "Udfyld profil"
-
-msgid "Complete your brand profile to publish your WhatsApp flow."
-msgstr "Udfyld din brandprofil for at publicere dit WhatsApp-flow."
-
 msgid "Complete your payment to activate your subscription."
 msgstr "Gennemfør din betaling for at aktivere dit abonnement."
 
@@ -688,27 +615,6 @@ msgstr "Bekræft nedgradering"
 
 msgid "Confirm team name"
 msgstr ""
-
-msgid "Connect and manage the messaging channels your customers book through."
-msgstr "Forbind og administrer de beskedkanaler, dine kunder booker igennem."
-
-msgid "Connect Paystack"
-msgstr ""
-
-msgid "Connect Paystack for payments"
-msgstr ""
-
-msgid "Connect WhatsApp Business"
-msgstr "Tilslut WhatsApp Business"
-
-msgid "Connect WhatsApp Business Account"
-msgstr ""
-
-msgid "Connect WhatsApp Business Account via Meta Embedded Signup"
-msgstr "Tilslut WhatsApp Business-konto via Meta Embedded Signup"
-
-msgid "Connected"
-msgstr "Forbundet"
 
 msgid "Contact support"
 msgstr "Kontakt support"
@@ -723,9 +629,6 @@ msgid "Continue"
 msgstr "Fortsæt"
 
 msgid "Control how your team appears to bookers."
-msgstr ""
-
-msgid "Core flows"
 msgstr ""
 
 msgid "Could not save preferences. Please try again."
@@ -824,9 +727,6 @@ msgstr "Datointerval"
 msgid "Decline"
 msgstr "Afslå"
 
-msgid "Declined"
-msgstr "Afvist"
-
 msgid "Declining..."
 msgstr "Afslår..."
 
@@ -904,15 +804,6 @@ msgstr "Deaktiver"
 
 msgid "Disabled"
 msgstr "Deaktiveret"
-
-msgid "Dismiss brand profile banner"
-msgstr "Afvis brandprofil-banner"
-
-msgid "Display name"
-msgstr "Visningsnavn"
-
-msgid "Display name change request submitted"
-msgstr "Anmodning om navneændring indsendt"
 
 msgid "Do you already have an account?"
 msgstr "Har du allerede en konto?"
@@ -993,9 +884,6 @@ msgstr "Aktiveret"
 msgid "Encrypt SMTP connection with SSL/TLS."
 msgstr "Kryptér SMTP-forbindelsen med SSL/TLS."
 
-msgid "Encryption keys generated"
-msgstr "Krypteringsnøgler genereret"
-
 msgid "Enter a valid IANA time zone (e.g. Europe/Copenhagen)."
 msgstr "Indtast en gyldig IANA-tidszone (f.eks. Europe/Copenhagen)."
 
@@ -1011,9 +899,6 @@ msgstr "Indtast din e-mail nedenfor for at logge ind"
 msgid "Enter your new payment details below."
 msgstr "Indtast dine nye betalingsoplysninger nedenfor."
 
-msgid "Enter your SA bank details to receive booking payments."
-msgstr ""
-
 msgid "Enter your verification code"
 msgstr "Indtast din bekræftelseskode"
 
@@ -1026,9 +911,6 @@ msgstr "Post-ID"
 msgid "Environment isolation"
 msgstr "Miljøisolering"
 
-msgid "Estimated message costs"
-msgstr ""
-
 msgid "Estimated next bill: {targetFormattedPrice}"
 msgstr "Forventet næste regning: {targetFormattedPrice}"
 
@@ -1040,9 +922,6 @@ msgstr "Ekskl. moms"
 
 msgid "Expand details"
 msgstr "Vis detaljer"
-
-msgid "Expired"
-msgstr "Udløbet"
 
 msgid "expires"
 msgstr "udløber"
@@ -1083,9 +962,6 @@ msgstr "Filtre"
 msgid "First name"
 msgstr "Fornavn"
 
-msgid "Follow-ups, promotions, review requests. Coming soon."
-msgstr ""
-
 msgid "For detailed compliance certifications and audit reports, visit Microsoft's official resources."
 msgstr "For detaljerede certificeringer og revisionsrapporter, besøg Microsofts officielle ressourcer."
 
@@ -1110,9 +986,6 @@ msgstr "Fuld adgang undtagen ændring af brugerroller og kontoindstillinger"
 msgid "Full access including user roles and account settings"
 msgstr "Fuld adgang inklusive brugerroller og kontoindstillinger"
 
-msgid "Full message usage analytics, cost breakdowns, and delivery reports are being built. In the meantime, here's what you need to know about WhatsApp messaging costs."
-msgstr ""
-
 msgid "Fully managed infrastructure"
 msgstr "Fuldt administreret infrastruktur"
 
@@ -1126,15 +999,6 @@ msgid "GDPR Compliant"
 msgstr "GDPR-kompatibel"
 
 msgid "General"
-msgstr ""
-
-msgid "Generate encryption key pair"
-msgstr ""
-
-msgid "Generate encryption keys"
-msgstr "Generér krypteringsnøgler"
-
-msgid "Generate key pair"
 msgstr ""
 
 msgid "GitHub"
@@ -1284,9 +1148,6 @@ msgstr "Behold nedgradering"
 msgid "Keep subscription"
 msgstr "Behold abonnement"
 
-msgid "Key pair generated"
-msgstr ""
-
 msgid "Language"
 msgstr "Sprog"
 
@@ -1323,9 +1184,6 @@ msgstr "Lad os opsætte din profil"
 msgid "Light"
 msgstr "Lys"
 
-msgid "Link WhatsApp Business Account"
-msgstr "Forbind WhatsApp Business-konto"
-
 msgid "LinkedIn"
 msgstr "LinkedIn"
 
@@ -1337,9 +1195,6 @@ msgstr ""
 
 msgid "Loading..."
 msgstr "Indlæser..."
-
-msgid "Loading…"
-msgstr "Indlæser…"
 
 msgid "Log in"
 msgstr "Log ind"
@@ -1396,9 +1251,6 @@ msgstr "Administrer abonnement"
 msgid "Manage teams"
 msgstr "Administrer teams"
 
-msgid "Manage WhatsApp"
-msgstr "Administrer WhatsApp"
-
 msgid "Manage your organization's subscription and invoices."
 msgstr "Administrer din organisations abonnement og fakturaer."
 
@@ -1411,9 +1263,6 @@ msgstr "Administrer dit abonnement."
 msgid "Manage your users and permissions here."
 msgstr "Administrer dine brugere og tilladelser her."
 
-msgid "Manage your WhatsApp Business Account, configure your profile, and control booking workflows."
-msgstr ""
-
 msgid "Managed identities"
 msgstr "Administrerede identiteter"
 
@@ -1422,12 +1271,6 @@ msgstr "Marker som løst"
 
 msgid "Marked as solved"
 msgstr "Markeret som løst"
-
-msgid "Marketing messages"
-msgstr ""
-
-msgid "Max 75 characters. Allowed: letters, digits, spaces, and ' . , & - ( ) /"
-msgstr "Maks. 75 tegn. Tilladte: bogstaver, cifre, mellemrum og ' . , & - ( ) /"
 
 msgid "Member"
 msgstr "Medlem"
@@ -1440,9 +1283,6 @@ msgstr ""
 
 msgid "Membership role"
 msgstr ""
-
-msgid "Meta reviews display name changes. Approval typically takes 1–3 business days. Only one pending request is allowed at a time."
-msgstr "Meta gennemgår ændringer af visningsnavn. Godkendelse tager typisk 1–3 hverdage. Kun én afventende anmodning er tilladt ad gangen."
 
 msgid "Metadata"
 msgstr "Metadata"
@@ -1582,20 +1422,11 @@ msgstr "Ingen brugere fundet"
 msgid "No users to add"
 msgstr ""
 
-msgid "No verified name"
-msgstr "Intet verificeret navn"
-
 msgid "None"
 msgstr "Ingen"
 
-msgid "Not connected"
-msgstr "Ikke forbundet"
-
 msgid "Not great"
 msgstr "Ikke godt"
-
-msgid "Not set"
-msgstr "Ikke angivet"
 
 msgid "OK"
 msgstr "OK"
@@ -1675,9 +1506,6 @@ msgstr "Betal og opgrader"
 msgid "Payment authentication failed."
 msgstr "Betalingsgodkendelse mislykkedes."
 
-msgid "Payment before booking"
-msgstr ""
-
 msgid "Payment completed but no Paystack reference was returned."
 msgstr "Betalingen blev gennemført, men der blev ikke returneret en Paystack-reference."
 
@@ -1699,23 +1527,11 @@ msgstr "Betalingsmetode"
 msgid "Payment method updated"
 msgstr "Betalingsmetode opdateret"
 
-msgid "Paystack connected"
-msgstr "Paystack forbundet"
-
-msgid "Paystack subaccount connected"
-msgstr ""
-
 msgid "Pending"
 msgstr "Afventer"
 
 msgid "Pending payment completed"
 msgstr "Afventende betaling gennemført"
-
-msgid "Pending review"
-msgstr "Afventer gennemgang"
-
-msgid "per message (ZAR)"
-msgstr ""
 
 #. placeholder {0}: selectedUsers.length
 msgid "Permanently delete {0} users"
@@ -1728,12 +1544,6 @@ msgid "Permanently delete users"
 msgstr "Slet brugere permanent"
 
 msgid "Permissions"
-msgstr ""
-
-msgid "Phone number registered"
-msgstr "Telefonnummer registreret"
-
-msgid "Phone number verified"
 msgstr ""
 
 msgid "Pick a name and a URL slug. You can configure branding and invite members after creating the team."
@@ -1792,9 +1602,6 @@ msgstr "Premium"
 
 msgid "Previous"
 msgstr "Forrige"
-
-msgid "Prices are approximate and based on Meta's current ZAR pricing. Actual costs may vary based on message category and Meta's pricing updates. Booking flow interactions within WhatsApp Flows do not incur per-message charges."
-msgstr ""
 
 msgid "Priority support"
 msgstr "Prioriteret support"
@@ -1865,9 +1672,6 @@ msgstr "Reference-ID: {id}"
 msgid "Refunded"
 msgstr "Refunderet"
 
-msgid "Register phone number"
-msgstr "Registrér telefonnummer"
-
 msgid "Regulatory standards and certifications"
 msgstr "Lovgivningsmæssige standarder og certificeringer"
 
@@ -1912,28 +1716,6 @@ msgstr "Svar-til-e-mail"
 
 msgid "Request a new code"
 msgstr "Anmod om en ny kode"
-
-msgid "Request display name change"
-msgstr "Anmod om navneændring"
-
-msgid "Request name change"
-msgstr "Anmod om navneændring"
-
-msgid "Requested display name"
-msgstr "Ønsket visningsnavn"
-
-#. placeholder {0}: displayNameStatus.requestedDisplayName
-msgid "Requested: {0}"
-msgstr "Ønsket: {0}"
-
-msgid "Require payment or a deposit before confirming the booking. Adds a payment link page to the booking flow. Requires Paystack to be connected."
-msgstr ""
-
-msgid "Required actions"
-msgstr "Påkrævede handlinger"
-
-msgid "Required for end-to-end encrypted WhatsApp Flows."
-msgstr ""
 
 msgid "Resource"
 msgstr ""
@@ -2040,9 +1822,6 @@ msgstr ""
 msgid "Search users"
 msgstr ""
 
-msgid "Secured by Meta"
-msgstr ""
-
 msgid "Security, privacy, and compliance information"
 msgstr "Sikkerheds-, privatlivs- og overholdelsesoplysninger"
 
@@ -2080,12 +1859,6 @@ msgstr "Send"
 
 msgid "Send a test email to this address"
 msgstr "Send en test-e-mail til denne adresse"
-
-msgid "Send a WhatsApp confirmation message after a booking is completed. Includes booking details, staff name, and cancellation contact. Sent as a utility message."
-msgstr ""
-
-msgid "Send an automated WhatsApp reminder before the appointment. Reduces no-shows by up to 40%. Sent as a utility message."
-msgstr ""
 
 msgid "Send invite"
 msgstr "Send invitation"
@@ -2129,15 +1902,6 @@ msgstr "Sessioner"
 msgid "Settings"
 msgstr "Indstillinger"
 
-msgid "Setup"
-msgstr ""
-
-msgid "Setup complete 🎉"
-msgstr ""
-
-msgid "Setup in progress"
-msgstr "Opsætning i gang"
-
 msgid "Show details"
 msgstr "Vis detaljer"
 
@@ -2149,9 +1913,6 @@ msgstr "Vises på bookingsider og i e-mail-notifikationer for denne organisation
 
 msgid "Sign in with Google accounts from your workspace domain."
 msgstr "Log ind med Google-konti fra dit workspace-domæne."
-
-msgid "Sign in with Meta to link your WhatsApp Business number."
-msgstr ""
 
 msgid "Sign in with Microsoft accounts from your Azure tenant."
 msgstr "Log ind med Microsoft-konti fra dit Azure-tenant."
@@ -2246,17 +2007,11 @@ msgstr "Vejnavn"
 msgid "Strict separation prevents production data from leaking to other environments"
 msgstr "Streng adskillelse forhindrer produktionsdata i at lække til andre miljøer"
 
-msgid "Structured booking experience: service selection → date → time → summary → confirm. Multi-location tenants automatically see department/team selection. Service details (duration, cost, description) shown via info drawer."
-msgstr ""
-
 msgid "Subject"
 msgstr "Emne"
 
 msgid "Submit feedback"
 msgstr "Send feedback"
-
-msgid "Submit request"
-msgstr "Indsend anmodning"
 
 msgid "Submitting..."
 msgstr "Indsender..."
@@ -2403,14 +2158,8 @@ msgstr "Siden du leder efter findes ikke eller er blevet flyttet."
 msgid "The user must already have an account. Pick the role they will hold in this team."
 msgstr ""
 
-msgid "The verified name shown to users in WhatsApp. Changes require Meta review."
-msgstr "Det verificerede navn vist for brugere i WhatsApp. Ændringer kræver Meta-gennemgang."
-
 msgid "Theme"
 msgstr "Tema"
-
-msgid "These flows are always active and handle core booking functionality."
-msgstr ""
 
 msgid "This account is linked to a different Google identity."
 msgstr "Denne konto er knyttet til en anden Google-identitet."
@@ -2462,9 +2211,6 @@ msgstr "For at slette din konto bedes du kontakte vores supportteam."
 
 msgid "Toggle features available to your account."
 msgstr "Skift funktioner tilgængelige for din konto."
-
-msgid "Toggle these workflows to extend your booking experience. Each adds a utility message to the flow."
-msgstr ""
 
 msgid "Too expensive"
 msgstr "For dyrt"
@@ -2569,12 +2315,6 @@ msgstr "URL'er vist på din WhatsApp-profil. Din plan understøtter 1 websted."
 msgid "URLs shown on your WhatsApp profile. Your plan supports up to 2 websites."
 msgstr "URL'er vist på din WhatsApp-profil. Din plan understøtter op til 2 websteder."
 
-msgid "Usage"
-msgstr ""
-
-msgid "Usage tracking coming soon"
-msgstr ""
-
 msgid "Use SSL"
 msgstr "Brug SSL"
 
@@ -2656,12 +2396,6 @@ msgstr "Brugere indlæses"
 msgid "Users who haven't confirmed their email"
 msgstr "Brugere, der ikke har bekræftet deres e-mail"
 
-msgid "Utility messages"
-msgstr ""
-
-msgid "Utility messages (reminders, confirmations) are billed at WhatsApp's utility rate. Marketing messages (follow-ups, promotions) are coming soon and will be billed at a separate rate."
-msgstr ""
-
 msgid "VAT number"
 msgstr "CVR-nummer"
 
@@ -2725,38 +2459,11 @@ msgstr "Hvad fungerede godt?"
 msgid "What's happening?"
 msgstr "Hvad sker der?"
 
-msgid "WhatsApp"
-msgstr "WhatsApp"
-
-msgid "WhatsApp Business"
-msgstr ""
-
-msgid "WhatsApp Business Account connected"
-msgstr ""
-
-msgid "WhatsApp Business Account linked"
-msgstr "WhatsApp Business-konto forbundet"
-
-msgid "WhatsApp connection failed. Please try again."
-msgstr "WhatsApp-tilslutning mislykkedes. Prøv igen."
-
-msgid "WhatsApp connection was cancelled."
-msgstr "WhatsApp-tilslutning blev annulleret."
-
-msgid "WhatsApp display name"
-msgstr "WhatsApp-visningsnavn"
-
-msgid "WhatsApp sign-up failed. Please try again."
-msgstr "WhatsApp-tilmelding mislykkedes. Prøv igen."
-
 msgid "When you accept this invitation, your profile information (name, title, and avatar) from your current account will be copied to the new account."
 msgstr "Når du accepterer denne invitation, vil dine profiloplysninger (navn, titel og avatar) fra din nuværende konto blive kopieret til den nye konto."
 
 msgid "When you ask the team for help, your conversations will live here. We typically reply within a business day."
 msgstr "Når du beder teamet om hjælp, vil dine samtaler bo her. Vi svarer normalt inden for en hverdag."
-
-msgid "Workflows"
-msgstr ""
 
 msgid "Workspace domain"
 msgstr "Workspace-domæne"
@@ -2824,9 +2531,6 @@ msgstr "Din konto blev skiftet til <0>{newTenantName}</0> i en anden browsertab.
 msgid "Your business logo shown on WhatsApp."
 msgstr "Dit virksomhedslogo vist på WhatsApp."
 
-msgid "Your business photo shown on WhatsApp. Changes sync to the Graph API."
-msgstr ""
-
 msgid "Your cancellation will be reversed and your {planName} subscription will remain active."
 msgstr "Din opsigelse vil blive fortrudt, og dit {planName}-abonnement vil forblive aktivt."
 
@@ -2841,10 +2545,6 @@ msgstr "Din nedgradering er blevet planlagt."
 
 msgid "Your email address cannot be changed. An owner must delete your account and reinvite you with the new email address."
 msgstr "Din e-mailadresse kan ikke ændres. En ejer skal slette din konto og invitere dig igen med den nye e-mailadresse."
-
-#. placeholder {0}: status.displayPhoneNumber
-msgid "Your number {0} is registered and active."
-msgstr ""
 
 msgid "Your payment card is expired or expiring soon. Please update your payment method to avoid service interruption."
 msgstr "Dit betalingskort er udløbet eller udløber snart. Opdater venligst din betalingsmetode for at undgå afbrydelse af tjenesten."
@@ -2913,12 +2613,6 @@ msgstr "Din bekræftelseskode er udløbet"
 
 msgid "Your verification code is valid for {expiresInString}"
 msgstr "Din bekræftelseskode er gyldig i {expiresInString}"
-
-msgid "Your WhatsApp Business Account is connected and ready. Configure your business profile in the Profile tab."
-msgstr ""
-
-msgid "Your WhatsApp channel is fully connected and ready."
-msgstr "Din WhatsApp-kanal er fuldt forbundet og klar."
 
 msgid "yourname@example.com"
 msgstr "ditnavn@eksempel.com"

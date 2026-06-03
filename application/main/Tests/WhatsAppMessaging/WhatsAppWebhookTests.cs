@@ -2,10 +2,9 @@ using System.Net;
 using System.Net.Http.Json;
 using System.Security.Cryptography;
 using System.Text;
+using FluentAssertions;
 using Main.Database;
 using Main.Features.WhatsAppMessaging.Domain;
-using Main.Integrations.Meta;
-using FluentAssertions;
 using SharedKernel.Tests;
 using SharedKernel.Tests.Persistence;
 using Xunit;
@@ -235,7 +234,7 @@ public sealed class WhatsAppWebhookTests : EndpointBaseTest<MainDbContext>
         metaMessageId.Should().StartWith("wamid.MOCK_");
 
         // Act — deliver a status update webhook for this message
-        var payload = BuildStatusPayload(metaMessageId!, "delivered");
+        var payload = BuildStatusPayload(metaMessageId, "delivered");
         var signature = ComputeValidSignature(payload);
         var request = new HttpRequestMessage(HttpMethod.Post, WebhookUrl)
         {

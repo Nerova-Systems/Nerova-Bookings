@@ -15,17 +15,17 @@ public static class MsTeamsPermissions
 {
     public static readonly IReadOnlyList<AppPermission> All =
     [
-        new AppPermission(
+        new(
             Office365CalendarOptions.OnlineMeetingsScope,
             "Manage Teams meetings",
             "Uses your Office 365 connection to create Microsoft Teams meeting links for your bookings."
         ),
-        new AppPermission(
+        new(
             Office365CalendarOptions.OfflineAccessScope,
             "Stay connected",
             "Uses your Office 365 connection to refresh access in the background without repeated sign-in."
         ),
-        new AppPermission(
+        new(
             Office365CalendarOptions.CalendarsReadWriteScope,
             "Read and manage calendars",
             "Uses your Office 365 Calendar connection to read availability and manage booking events."

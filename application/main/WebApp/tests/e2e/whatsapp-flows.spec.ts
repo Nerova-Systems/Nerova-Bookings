@@ -16,10 +16,10 @@ test.describe("@smoke", () => {
   /**
    * WhatsApp onboarding entry point tests.
    * Covers:
-   * - The /dashboard/whatsapp route is accessible when PUBLIC_WHATSAPP_SIGNUP_ENABLED=true
+   * - The /channels/whatsapp route is accessible when PUBLIC_WHATSAPP_SIGNUP_ENABLED=true
    * - Page heading and WhatsApp Business connection card render correctly
    * - "Connect WhatsApp" button is present (disabled in test env — no FB SDK loaded)
-   * - WhatsApp navigation link appears in the main sidebar
+   * - Channels navigation link appears in the main sidebar
    *
    * Uses a fresh tenant via signup to guarantee the disconnected state regardless of
    * previous test runs (ownerPage reuses a cached tenant that may already be connected).
@@ -33,9 +33,9 @@ test.describe("@smoke", () => {
     })();
 
     await step(
-      "Navigate to /dashboard/whatsapp & verify page heading, card title, connect button and sidebar nav link"
+      "Navigate to /channels/whatsapp & verify page heading, card title, connect button and sidebar nav link"
     )(async () => {
-      await page.goto("/dashboard/whatsapp");
+      await page.goto("/channels/whatsapp");
 
       await expect(page.getByRole("heading", { name: "WhatsApp", level: 1 })).toBeVisible();
       // CardTitle renders as <div data-slot="card-title">, not a heading element.
@@ -43,7 +43,7 @@ test.describe("@smoke", () => {
       await expect(page.getByText("WhatsApp Business", { exact: true })).toBeVisible();
       await expect(page.getByRole("button", { name: "Connect WhatsApp" })).toBeVisible();
       await expect(
-        page.getByRole("navigation", { name: "Main navigation" }).getByRole("link", { name: "WhatsApp" })
+        page.getByRole("navigation", { name: "Main navigation" }).getByRole("link", { name: "Channels" })
       ).toBeVisible();
     })();
   });
@@ -61,8 +61,8 @@ test.describe("@comprehensive", () => {
   test("should complete WhatsApp onboarding and send a message via mock provider", async ({ ownerPage }) => {
     const context = createTestContext(ownerPage);
 
-    await step("Navigate to /dashboard/whatsapp & verify page heading renders")(async () => {
-      await ownerPage.goto("/dashboard/whatsapp");
+    await step("Navigate to /channels/whatsapp & verify page heading renders")(async () => {
+      await ownerPage.goto("/channels/whatsapp");
 
       await expect(ownerPage.getByRole("heading", { name: "WhatsApp", level: 1 })).toBeVisible();
     })();
@@ -91,7 +91,7 @@ test.describe("@comprehensive", () => {
 
     await step("Reload WhatsApp page & verify connected state, mock business details and send message form")(
       async () => {
-        await ownerPage.goto("/dashboard/whatsapp");
+        await ownerPage.goto("/channels/whatsapp");
 
         await expect(ownerPage.getByText("Your account is connected to WhatsApp.")).toBeVisible();
         await expect(ownerPage.getByText("Mock WhatsApp Business")).toBeVisible();

@@ -11,7 +11,7 @@ public static class ZoomPermissions
 {
     public static readonly IReadOnlyList<AppPermission> All =
     [
-        new AppPermission(
+        new(
             ZoomOptions.MeetingWriteScope,
             "Create Zoom meetings",
             "Creates and deletes Zoom meetings on your behalf to generate join links for your bookings."

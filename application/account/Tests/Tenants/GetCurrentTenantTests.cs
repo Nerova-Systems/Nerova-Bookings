@@ -31,10 +31,9 @@ public sealed class GetCurrentTenantTests(AccountWebApplicationFactory factory) 
                     'state': {'type': 'string', 'minLength': 1, 'maxLength':20},
                     'suspensionReason': {'type': ['null', 'string']},
                     'logoUrl': {'type': ['null', 'string']},
-                    'wabaVerifiedName': {'type': ['null', 'string']},
                     'brandVertical': {'type': ['null', 'string']}
                 },
-                'required': ['id', 'createdAt', 'modifiedAt', 'name', 'state', 'suspensionReason', 'logoUrl', 'wabaVerifiedName', 'brandVertical'],
+                'required': ['id', 'createdAt', 'modifiedAt', 'name', 'state', 'suspensionReason', 'logoUrl', 'brandVertical'],
                 'additionalProperties': false
             }
             """
@@ -53,6 +52,5 @@ public sealed class GetCurrentTenantTests(AccountWebApplicationFactory factory) 
 
         var tenantResponse = await response.Content.ReadFromJsonAsync<TenantResponse>();
         tenantResponse!.BrandVertical.Should().BeNull();
-        tenantResponse.WabaVerifiedName.Should().BeNull();
     }
 }

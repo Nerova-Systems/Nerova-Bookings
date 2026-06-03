@@ -6,7 +6,6 @@ using Microsoft.Extensions.Logging.Abstractions;
 using NSubstitute;
 using SharedKernel.Domain;
 using SharedKernel.Persistence;
-using TickerQ.Utilities.Base;
 using Xunit;
 
 namespace Main.Tests.Payments;
@@ -24,7 +23,7 @@ public sealed class ReleaseUnpaidBookingJobTests
         var uow = Substitute.For<IUnitOfWork>();
         var job = new ReleaseUnpaidBookingJob(repo, new FakeTimeProvider(Now), uow, NullLogger<ReleaseUnpaidBookingJob>.Instance);
 
-        await job.ExecuteAsync(default!, CancellationToken.None);
+        await job.ExecuteAsync(null!, CancellationToken.None);
 
         await uow.DidNotReceive().CommitAsync(Arg.Any<CancellationToken>());
     }
@@ -37,11 +36,11 @@ public sealed class ReleaseUnpaidBookingJobTests
 
         var repo = Substitute.For<IBookingRepository>();
         repo.GetExpiredUnpaidBookingsUnfilteredAsync(Arg.Any<DateTimeOffset>(), Arg.Any<CancellationToken>())
-            .Returns(new[] { booking });
+            .Returns([booking]);
         var uow = Substitute.For<IUnitOfWork>();
         var job = new ReleaseUnpaidBookingJob(repo, new FakeTimeProvider(Now), uow, NullLogger<ReleaseUnpaidBookingJob>.Instance);
 
-        await job.ExecuteAsync(default!, CancellationToken.None);
+        await job.ExecuteAsync(null!, CancellationToken.None);
 
         booking.PaymentStatus.Should().Be(BookingPaymentStatus.Released);
         booking.Status.Should().Be(BookingStatus.Cancelled);
@@ -50,23 +49,28 @@ public sealed class ReleaseUnpaidBookingJobTests
     }
 
     private static Booking CreateBooking()
-        => Booking.Create(
-            tenantId: new TenantId(1),
-            ownerUserId: UserId.NewId(),
-            eventTypeId: EventTypeId.NewId(),
-            startTime: Now.AddHours(2),
-            durationMinutes: 30,
-            beforeEventBufferMinutes: 0,
-            afterEventBufferMinutes: 0,
-            bookerName: "Alice",
-            bookerEmail: "alice@example.com",
-            timeZone: "UTC",
-            status: BookingStatus.Accepted,
-            responses: new Dictionary<string, string>()
+    {
+        return Booking.Create(
+            new TenantId(1),
+            UserId.NewId(),
+            EventTypeId.NewId(),
+            Now.AddHours(2),
+            30,
+            0,
+            0,
+            "Alice",
+            "alice@example.com",
+            "UTC",
+            BookingStatus.Accepted,
+            new Dictionary<string, string>()
         );
+    }
 
     private sealed class FakeTimeProvider(DateTimeOffset now) : TimeProvider
     {
-        public override DateTimeOffset GetUtcNow() => now;
+        public override DateTimeOffset GetUtcNow()
+        {
+            return now;
+        }
     }
 }

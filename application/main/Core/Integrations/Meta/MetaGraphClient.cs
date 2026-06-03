@@ -1,5 +1,7 @@
+using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text.Json;
+using JetBrains.Annotations;
 using Microsoft.Extensions.Configuration;
 
 namespace Main.Integrations.Meta;
@@ -22,11 +24,12 @@ public sealed class MetaGraphClient(HttpClient httpClient, IConfiguration config
         try
         {
             using var formContent = new FormUrlEncodedContent(new Dictionary<string, string>
-            {
-                ["client_id"] = _appId,
-                ["client_secret"] = _appSecret,
-                ["code"] = code
-            });
+                {
+                    ["client_id"] = _appId,
+                    ["client_secret"] = _appSecret,
+                    ["code"] = code
+                }
+            );
             var response = await httpClient.PostAsync($"{_graphApiVersion}/oauth/access_token", formContent, cancellationToken);
             if (!response.IsSuccessStatusCode)
             {
@@ -55,11 +58,9 @@ public sealed class MetaGraphClient(HttpClient httpClient, IConfiguration config
         try
         {
             var pin = Random.Shared.Next(0, 1_000_000).ToString("D6");
-            using var request = new HttpRequestMessage(HttpMethod.Post, $"{_graphApiVersion}/{phoneNumberId}/register")
-            {
-                Content = JsonContent.Create(new MetaRegisterPhoneNumberRequest("whatsapp", pin), options: JsonSerializerOptions)
-            };
-            request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", accessToken);
+            using var request = new HttpRequestMessage(HttpMethod.Post, $"{_graphApiVersion}/{phoneNumberId}/register");
+            request.Content = JsonContent.Create(new MetaRegisterPhoneNumberRequest("whatsapp", pin), options: JsonSerializerOptions);
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
 
             var response = await httpClient.SendAsync(request, cancellationToken);
             if (!response.IsSuccessStatusCode)
@@ -83,7 +84,7 @@ public sealed class MetaGraphClient(HttpClient httpClient, IConfiguration config
         try
         {
             using var request = new HttpRequestMessage(HttpMethod.Post, $"{_graphApiVersion}/{wabaId}/subscribed_apps");
-            request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", accessToken);
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
 
             var response = await httpClient.SendAsync(request, cancellationToken);
             if (!response.IsSuccessStatusCode)
@@ -107,7 +108,7 @@ public sealed class MetaGraphClient(HttpClient httpClient, IConfiguration config
         try
         {
             using var request = new HttpRequestMessage(HttpMethod.Get, $"{_graphApiVersion}/{wabaId}?fields=id,name");
-            request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", accessToken);
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
 
             var response = await httpClient.SendAsync(request, cancellationToken);
             if (!response.IsSuccessStatusCode)
@@ -137,7 +138,7 @@ public sealed class MetaGraphClient(HttpClient httpClient, IConfiguration config
         try
         {
             using var request = new HttpRequestMessage(HttpMethod.Get, $"{_graphApiVersion}/{wabaId}/phone_numbers?fields=id,display_phone_number,verified_name");
-            request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", accessToken);
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
 
             var response = await httpClient.SendAsync(request, cancellationToken);
             if (!response.IsSuccessStatusCode)
@@ -166,14 +167,12 @@ public sealed class MetaGraphClient(HttpClient httpClient, IConfiguration config
     {
         try
         {
-            using var request = new HttpRequestMessage(HttpMethod.Post, $"{_graphApiVersion}/{phoneNumberId}/messages")
-            {
-                Content = JsonContent.Create(
-                    new MetaSendMessageRequest("whatsapp", toPhoneNumber, "text", new MetaTextContent(text)),
-                    options: JsonSerializerOptions
-                )
-            };
-            request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", accessToken);
+            using var request = new HttpRequestMessage(HttpMethod.Post, $"{_graphApiVersion}/{phoneNumberId}/messages");
+            request.Content = JsonContent.Create(
+                new MetaSendMessageRequest("whatsapp", toPhoneNumber, "text", new MetaTextContent(text)),
+                options: JsonSerializerOptions
+            );
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
 
             var response = await httpClient.SendAsync(request, cancellationToken);
             if (!response.IsSuccessStatusCode)
@@ -201,6 +200,7 @@ public sealed class MetaGraphClient(HttpClient httpClient, IConfiguration config
 
     private sealed record MetaTokenResponse(string? AccessToken);
 
+    [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
     private sealed record MetaRegisterPhoneNumberRequest(string MessagingProduct, string Pin);
 
     private sealed record MetaSuccessResponse(bool Success);
@@ -209,13 +209,17 @@ public sealed class MetaGraphClient(HttpClient httpClient, IConfiguration config
 
     private sealed record MetaPhoneNumbersResponse(MetaPhoneNumberData[]? Data);
 
+    [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
     private sealed record MetaPhoneNumberData(string Id, string? DisplayPhoneNumber, string? VerifiedName);
 
+    [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
     private sealed record MetaSendMessageRequest(string MessagingProduct, string To, string Type, MetaTextContent Text);
 
+    [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
     private sealed record MetaTextContent(string Body);
 
     private sealed record MetaSendMessageResponse(MetaSentMessageId[]? Messages);
 
+    [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
     private sealed record MetaSentMessageId(string? Id);
 }

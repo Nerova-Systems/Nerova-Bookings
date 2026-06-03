@@ -14,12 +14,12 @@ public static class GoogleMeetPermissions
 {
     public static readonly IReadOnlyList<AppPermission> All =
     [
-        new AppPermission(
+        new(
             GoogleCalendarOptions.CalendarReadonlyScope,
             "View your calendars",
             "Uses your Google Calendar connection to read calendars and check availability."
         ),
-        new AppPermission(
+        new(
             GoogleCalendarOptions.CalendarEventsScope,
             "Manage calendar events",
             "Uses your Google Calendar connection to create events with Google Meet conferencing links."

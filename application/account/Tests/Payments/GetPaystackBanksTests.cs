@@ -21,7 +21,7 @@ public sealed class GetPaystackBanksTests(AccountWebApplicationFactory factory)
         response.ShouldBeSuccessfulGetRequest();
         var result = await response.Content.ReadFromJsonAsync<GetPaystackBanksResponse>();
         result.Should().NotBeNull();
-        result!.Banks.Should().NotBeEmpty();
+        result.Banks.Should().NotBeEmpty();
         result.Banks.Should().AllSatisfy(b =>
             {
                 b.Code.Should().NotBeNullOrEmpty();

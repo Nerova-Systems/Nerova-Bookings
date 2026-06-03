@@ -348,6 +348,9 @@ msgstr "Burning the midnight oil, {firstName}?"
 msgid "Burning the midnight oil?"
 msgstr "Burning the midnight oil?"
 
+msgid "Business name"
+msgstr "Business name"
+
 msgid "By"
 msgstr "By"
 
@@ -494,6 +497,15 @@ msgstr "Connect installed apps to this event type."
 
 msgid "Connect Microsoft"
 msgstr "Connect Microsoft"
+
+msgid "Connect WhatsApp"
+msgstr "Connect WhatsApp"
+
+msgid "Connect your WhatsApp Business account to send and receive messages."
+msgstr "Connect your WhatsApp Business account to send and receive messages."
+
+msgid "Connect your WhatsApp Business account to start messaging."
+msgstr "Connect your WhatsApp Business account to start messaging."
 
 msgid "Connect Zoom"
 msgstr "Connect Zoom"
@@ -845,6 +857,9 @@ msgstr "Failed"
 msgid "Failed to copy secret"
 msgstr "Failed to copy secret"
 
+msgid "Failed to load messages."
+msgstr "Failed to load messages."
+
 msgid "Failed to queue test event"
 msgstr "Failed to queue test event"
 
@@ -1195,8 +1210,17 @@ msgstr "Meeting started"
 msgid "Members handling the most bookings."
 msgstr "Members handling the most bookings."
 
+msgid "Message"
+msgstr "Message"
+
 msgid "Message (optional)"
 msgstr "Message (optional)"
+
+msgid "Message sent"
+msgstr "Message sent"
+
+msgid "Messages"
+msgstr "Messages"
 
 msgid "Minimum length"
 msgstr "Minimum length"
@@ -1339,6 +1363,9 @@ msgstr "No installed apps"
 
 msgid "No internal notes yet."
 msgstr "No internal notes yet."
+
+msgid "No messages yet"
+msgstr "No messages yet"
 
 msgid "No private links yet."
 msgstr "No private links yet."
@@ -1586,6 +1613,9 @@ msgstr "Reassigned"
 
 msgid "Recent deliveries"
 msgstr "Recent deliveries"
+
+msgid "Recipient"
+msgstr "Recipient"
 
 msgid "Recording ready"
 msgstr "Recording ready"
@@ -1861,6 +1891,9 @@ msgstr "Selected calendars"
 msgid "Selected hosts"
 msgstr "Selected hosts"
 
+msgid "Send a message"
+msgstr "Send a message"
+
 msgid "Send a signed HTTP POST to your endpoint when the selected events occur."
 msgstr "Send a signed HTTP POST to your endpoint when the selected events occur."
 
@@ -1876,6 +1909,9 @@ msgstr "Send Cal.com-compatible booking lifecycle payloads to external systems."
 msgid "Send emails with the transcription of the Cal Video after the meeting ends. Requires a paid plan."
 msgstr "Send emails with the transcription of the Cal Video after the meeting ends. Requires a paid plan."
 
+msgid "Send message"
+msgstr "Send message"
+
 msgid "Send request"
 msgstr "Send request"
 
@@ -1884,6 +1920,12 @@ msgstr "Send signed HTTP notifications to your services when booking lifecycle e
 
 msgid "Send test event"
 msgstr "Send test event"
+
+msgid "Send your first message using the form below."
+msgstr "Send your first message using the form below."
+
+msgid "Sending..."
+msgstr "Sending..."
 
 msgid "Sent"
 msgstr "Sent"
@@ -2236,8 +2278,17 @@ msgstr "What went well, what could improve?"
 msgid "What your booker should provide to receive confirmations"
 msgstr "What your booker should provide to receive confirmations"
 
+msgid "WhatsApp"
+msgstr "WhatsApp"
+
 msgid "WhatsApp Booking First"
 msgstr "WhatsApp Booking First"
+
+msgid "WhatsApp Business"
+msgstr "WhatsApp Business"
+
+msgid "WhatsApp connected"
+msgstr "WhatsApp connected"
 
 msgid "WhatsApp Connection Pending"
 msgstr "WhatsApp Connection Pending"
@@ -2274,14 +2325,23 @@ msgstr "You successfully deployed {productName}! 🎉"
 msgid "You successfully installed {productName}! 🎉"
 msgstr "You successfully installed {productName}! 🎉"
 
+msgid "Your account is connected to WhatsApp."
+msgstr "Your account is connected to WhatsApp."
+
 msgid "Your booking is confirmed."
 msgstr "Your booking is confirmed."
 
 msgid "Your dashboard is empty"
 msgstr "Your dashboard is empty"
 
+msgid "Your message has been sent."
+msgstr "Your message has been sent."
+
 msgid "Your name"
 msgstr "Your name"
 
 msgid "Your stored connection will be removed. Existing bookings keep their location and calendar destination, but new bookings will no longer use this app."
 msgstr "Your stored connection will be removed. Existing bookings keep their location and calendar destination, but new bookings will no longer use this app."
+
+msgid "Your WhatsApp Business account is now connected."
+msgstr "Your WhatsApp Business account is now connected."

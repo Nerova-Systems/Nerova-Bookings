@@ -1,11 +1,10 @@
 using System.Net.Http.Json;
+using FluentAssertions;
 using Main.Database;
 using Main.Features.WhatsAppOnboarding.Domain;
 using Main.Features.WhatsAppOnboarding.Queries;
 using Main.Integrations.Meta;
-using FluentAssertions;
 using SharedKernel.Tests;
-using SharedKernel.Tests.Persistence;
 using Xunit;
 
 namespace Main.Tests.WhatsAppOnboarding;

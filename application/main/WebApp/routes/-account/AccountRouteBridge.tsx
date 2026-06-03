@@ -6,7 +6,6 @@ const NotFoundPage = lazy(() => import("account/NotFoundPage"));
 
 const ACCOUNT_PREFIXES = [
   "/account",
-  "/channels",
   "/components",
   "/error",
   "/legal",
@@ -15,8 +14,7 @@ const ACCOUNT_PREFIXES = [
   "/signup",
   "/support",
   "/user",
-  "/welcome",
-  "/whatsapp"
+  "/welcome"
 ];
 
 export function AccountRouteBridge() {

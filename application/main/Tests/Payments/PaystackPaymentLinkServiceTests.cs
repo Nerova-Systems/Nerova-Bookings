@@ -31,25 +31,26 @@ public sealed class PaystackPaymentLinkServiceTests
                                                     "reference": "nerova_booking_42"
                                                   }
                                                 }
-                                                """)
+                                                """
+                    )
                 };
             }
         );
-        var client = BuildClient(handler, secretKey: "sk_test_xyz");
+        var client = BuildClient(handler, "sk_test_xyz");
 
         var result = await client.CreatePaymentLinkAsync(
-            subaccountCode: "ACCT_subxyz",
-            amountMinorUnits: 50_000,
-            currency: "NGN",
-            customerEmail: "buyer@example.com",
-            reference: "nerova_booking_42",
-            callbackUrl: "https://app.nerova.test/callback",
-            metadata: new Dictionary<string, string> { ["booking_id"] = "B-42" },
-            cancellationToken: CancellationToken.None
+            "ACCT_subxyz",
+            50_000,
+            "NGN",
+            "buyer@example.com",
+            "nerova_booking_42",
+            "https://app.nerova.test/callback",
+            new Dictionary<string, string> { ["booking_id"] = "B-42" },
+            CancellationToken.None
         );
 
         result.Should().NotBeNull();
-        result!.AuthorizationUrl.Should().Be("https://checkout.paystack.com/abc");
+        result.AuthorizationUrl.Should().Be("https://checkout.paystack.com/abc");
         result.AccessCode.Should().Be("ACCESS_123");
         result.Reference.Should().Be("nerova_booking_42");
 
@@ -76,7 +77,7 @@ public sealed class PaystackPaymentLinkServiceTests
                 return Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK));
             }
         );
-        var client = BuildClient(handler, secretKey: null);
+        var client = BuildClient(handler, null);
 
         var result = await client.CreatePaymentLinkAsync(
             "ACCT", 100, "NGN", "x@y.z", "ref", null, null, CancellationToken.None
@@ -90,11 +91,12 @@ public sealed class PaystackPaymentLinkServiceTests
     public async Task CreatePaymentLinkAsync_OnHttpError_ReturnsNull()
     {
         var handler = new RecordingHandler(_ => Task.FromResult(new HttpResponseMessage(HttpStatusCode.BadRequest)
-            {
-                Content = new StringContent("{\"status\":false,\"message\":\"bad\"}")
-            }
-        ));
-        var client = BuildClient(handler, secretKey: "sk_test_xyz");
+                {
+                    Content = new StringContent("{\"status\":false,\"message\":\"bad\"}")
+                }
+            )
+        );
+        var client = BuildClient(handler, "sk_test_xyz");
 
         var result = await client.CreatePaymentLinkAsync(
             "ACCT", 100, "NGN", "x@y.z", "ref", null, null, CancellationToken.None
@@ -121,6 +123,8 @@ public sealed class PaystackPaymentLinkServiceTests
     private sealed class RecordingHandler(Func<HttpRequestMessage, Task<HttpResponseMessage>> respond) : HttpMessageHandler
     {
         protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
-            => respond(request);
+        {
+            return respond(request);
+        }
     }
 }

@@ -10,7 +10,7 @@ import { isWhatsAppSignupEnabled } from "@/shared/lib/whatsapp/whatsAppConfig";
 import { WhatsAppConnectionCard } from "./-components/WhatsAppConnectionCard";
 import { WhatsAppConversation } from "./-components/WhatsAppConversation";
 
-export const Route = createFileRoute("/dashboard/whatsapp")({
+export const Route = createFileRoute("/channels/whatsapp")({
   beforeLoad: () => {
     // Hide the whole feature when the public toggle is off. The side-menu entry is also gated, but
     // the route stays reachable via direct URL or a stale bookmark, so redirect to the dashboard.

@@ -10,7 +10,9 @@ namespace Main.Features.Payments.Domain;
 /// </summary>
 public sealed class ProcessedPaymentEvent
 {
-    private ProcessedPaymentEvent() { }
+    private ProcessedPaymentEvent()
+    {
+    }
 
     private ProcessedPaymentEvent(string eventId, DateTimeOffset processedAt)
     {
@@ -18,12 +20,14 @@ public sealed class ProcessedPaymentEvent
         ProcessedAt = processedAt;
     }
 
-    public string EventId { get; private set; } = string.Empty;
+    public string EventId { get; private init; } = string.Empty;
 
-    public DateTimeOffset ProcessedAt { get; private set; }
+    public DateTimeOffset ProcessedAt { get; private init; }
 
     public static ProcessedPaymentEvent Create(string eventId, DateTimeOffset processedAt)
-        => new(eventId, processedAt);
+    {
+        return new ProcessedPaymentEvent(eventId, processedAt);
+    }
 }
 
 public sealed class ProcessedPaymentEventConfiguration : IEntityTypeConfiguration<ProcessedPaymentEvent>

@@ -1,4 +1,5 @@
 using System.Text.Json;
+using JetBrains.Annotations;
 using Main.Database;
 using Main.Features.WhatsAppMessaging.Domain;
 using Main.Features.WhatsAppOnboarding.Domain;
@@ -124,21 +125,28 @@ public sealed class ProcessPendingWhatsAppEvents(
 
     private sealed record MetaWebhookPayload(MetaWebhookEntry[]? Entry);
 
+    [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
     private sealed record MetaWebhookEntry(string? Id, MetaWebhookChange[]? Changes);
 
+    [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
     private sealed record MetaWebhookChange(MetaWebhookValue? Value);
 
+    [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
     private sealed record MetaWebhookValue(
         MetaWebhookMetadata? Metadata,
         MetaWebhookMessage[]? Messages,
         MetaWebhookStatus[]? Statuses
     );
 
+    [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
     private sealed record MetaWebhookMetadata(string? PhoneNumberId, string? DisplayPhoneNumber);
 
+    [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
     private sealed record MetaWebhookMessage(string? Id, string? From, string? Timestamp, MetaWebhookMessageText? Text);
 
+    [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
     private sealed record MetaWebhookMessageText(string? Body);
 
+    [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
     private sealed record MetaWebhookStatus(string? Id, string? Status);
 }

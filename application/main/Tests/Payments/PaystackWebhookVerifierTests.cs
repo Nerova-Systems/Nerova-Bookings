@@ -30,7 +30,7 @@ public sealed class PaystackWebhookVerifierTests
         var result = verifier.Verify(payload, signature);
 
         result.Should().NotBeNull();
-        result!.EventId.Should().Be("evt_abc");
+        result.EventId.Should().Be("evt_abc");
         result.EventType.Should().Be("charge.success");
         result.Reference.Should().Be("nerova_booking_42");
     }
@@ -68,7 +68,7 @@ public sealed class PaystackWebhookVerifierTests
         var result = verifier.Verify(payload, signature);
 
         result.Should().NotBeNull();
-        result!.EventType.Should().Be("charge.failed");
+        result.EventType.Should().Be("charge.failed");
         result.EventId.Should().Be("nerova_booking_99");
         result.Reference.Should().Be("nerova_booking_99");
     }
@@ -98,7 +98,9 @@ public sealed class PaystackWebhookVerifierTests
     }
 
     private static string Sign(string secretKey, string payload)
-        => Convert.ToHexString(
+    {
+        return Convert.ToHexString(
             HMACSHA512.HashData(Encoding.UTF8.GetBytes(secretKey), Encoding.UTF8.GetBytes(payload))
         ).ToLowerInvariant();
+    }
 }

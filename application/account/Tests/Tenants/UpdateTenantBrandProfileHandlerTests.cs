@@ -1,3 +1,4 @@
+using System.Net;
 using Account.Features.Subscriptions.Domain;
 using Account.Features.Tenants.Commands;
 using Account.Features.Tenants.Domain;
@@ -5,7 +6,6 @@ using Account.Features.Users.Domain;
 using FluentAssertions;
 using NSubstitute;
 using SharedKernel.Authentication;
-using SharedKernel.Cqrs;
 using SharedKernel.Domain;
 using SharedKernel.ExecutionContext;
 using SharedKernel.Telemetry;
@@ -31,7 +31,7 @@ public sealed class UpdateTenantBrandProfileHandlerTests
         executionContext.UserInfo.Returns(new UserInfo { IsAuthenticated = true, Role = nameof(UserRole.Owner) });
         var events = Substitute.For<ITelemetryEventsCollector>();
 
-        var tenant = Tenant.Create("owner@acme.test", existingCount: 0);
+        var tenant = Tenant.Create("owner@acme.test", 0);
         tenants.GetCurrentTenantAsync(Arg.Any<CancellationToken>()).Returns(tenant);
 
         var sut = new UpdateTenantBrandProfileHandler(tenants, subs, executionContext, events);
@@ -61,7 +61,7 @@ public sealed class UpdateTenantBrandProfileHandlerTests
         var result = await sut.Handle(BasicCommand(), CancellationToken.None);
 
         result.IsSuccess.Should().BeFalse();
-        result.StatusCode.Should().Be(System.Net.HttpStatusCode.Forbidden);
+        result.StatusCode.Should().Be(HttpStatusCode.Forbidden);
     }
 
     [Fact]
@@ -77,7 +77,7 @@ public sealed class UpdateTenantBrandProfileHandlerTests
         );
 
         result.IsSuccess.Should().BeFalse();
-        result.StatusCode.Should().Be(System.Net.HttpStatusCode.Forbidden);
+        result.StatusCode.Should().Be(HttpStatusCode.Forbidden);
     }
 
     [Fact]
@@ -92,7 +92,7 @@ public sealed class UpdateTenantBrandProfileHandlerTests
         );
 
         result.IsSuccess.Should().BeFalse();
-        result.StatusCode.Should().Be(System.Net.HttpStatusCode.Forbidden);
+        result.StatusCode.Should().Be(HttpStatusCode.Forbidden);
     }
 
     [Fact]
@@ -110,7 +110,7 @@ public sealed class UpdateTenantBrandProfileHandlerTests
         );
 
         result.IsSuccess.Should().BeFalse();
-        result.StatusCode.Should().Be(System.Net.HttpStatusCode.Forbidden);
+        result.StatusCode.Should().Be(HttpStatusCode.Forbidden);
     }
 
     [Fact]

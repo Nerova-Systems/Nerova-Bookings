@@ -7,7 +7,6 @@ using SharedKernel.Cqrs;
 using SharedKernel.Domain;
 using SharedKernel.ExecutionContext;
 using SharedKernel.Telemetry;
-using System.Text.Json.Serialization;
 using FeatureFlagDefinitions = SharedKernel.FeatureFlags.FeatureFlags;
 
 namespace Account.Features.Teams.Commands;
@@ -60,6 +59,7 @@ public sealed class UpdateTeamMembersHandler(
         {
             return Result.Unauthorized("User is not associated with a tenant.");
         }
+
         var userId = executionContext.UserInfo.Id;
 
         if (executionContext.ActiveOrgId is not null)

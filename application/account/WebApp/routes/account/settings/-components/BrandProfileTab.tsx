@@ -20,8 +20,6 @@ import { toast } from "sonner";
 import { TenantLogoPicker } from "@/shared/components/TenantLogoPicker";
 import { api, MetaBusinessVertical, SubscriptionPlan, UserRole, type Schemas } from "@/shared/lib/api/client";
 
-import { DisplayNameDialog, DisplayNameStatusBadge } from "./DisplayNameDialog";
-
 // Tier helpers
 function getMaxWebsites(plan: SubscriptionPlan | null | undefined): number {
   if (plan === SubscriptionPlan.Standard || plan === SubscriptionPlan.Premium) return 2;
@@ -58,9 +56,7 @@ export function BrandProfileTab() {
   const { data: tenant, isLoading: tenantLoading } = api.useQuery("get", "/api/account/tenants/current");
   const { data: currentUser, isLoading: userLoading } = api.useQuery("get", "/api/account/users/me");
   const { data: subscription } = api.useQuery("get", "/api/account/subscriptions/current");
-  const { data: displayNameStatus } = api.useQuery("get", "/api/whatsapp/display-name");
 
-  const [isDisplayNameDialogOpen, setIsDisplayNameDialogOpen] = useState(false);
   const [selectedLogoFile, setSelectedLogoFile] = useState<File | null>(null);
 
   const updateTenantLogoMutation = api.useMutation("post", "/api/account/tenants/current/update-logo");
@@ -148,8 +144,7 @@ export function BrandProfileTab() {
   const readOnly = !isOwner;
 
   return (
-    <>
-      <Form onSubmit={handleSubmit} validationBehavior="aria" className="flex flex-col gap-8 pt-4">
+    <Form onSubmit={handleSubmit} validationBehavior="aria" className="flex flex-col gap-8 pt-4">
         {/* Section A: Business identity */}
         <div className="flex flex-col gap-4">
           <div>
@@ -351,43 +346,6 @@ export function BrandProfileTab() {
           </div>
         </div>
 
-        {/* Section E: WhatsApp display name */}
-        <div className="flex flex-col gap-4">
-          <div>
-            <h3 className="text-base font-semibold">
-              <Trans>WhatsApp display name</Trans>
-            </h3>
-            <p className="text-sm text-muted-foreground">
-              <Trans>The verified name shown to users in WhatsApp. Changes require Meta review.</Trans>
-            </p>
-          </div>
-          <Separator />
-
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <div className="flex flex-col gap-1">
-              <span className="text-sm font-medium">
-                {displayNameStatus?.verifiedName ?? (
-                  <span className="text-muted-foreground">
-                    <Trans>No verified name</Trans>
-                  </span>
-                )}
-              </span>
-              {displayNameStatus?.requestedDisplayName && displayNameStatus.status !== "Approved" && (
-                <span className="text-xs text-muted-foreground">
-                  <Trans>Requested: {displayNameStatus.requestedDisplayName}</Trans>
-                </span>
-              )}
-              <DisplayNameStatusBadge status={displayNameStatus} />
-            </div>
-
-            {isOwner && (
-              <Button type="button" variant="outline" size="sm" onClick={() => setIsDisplayNameDialogOpen(true)}>
-                <Trans>Request name change</Trans>
-              </Button>
-            )}
-          </div>
-        </div>
-
         {/* Save button */}
         {isOwner && (
           <div className="mt-4 flex justify-end">
@@ -397,13 +355,6 @@ export function BrandProfileTab() {
           </div>
         )}
       </Form>
-
-      <DisplayNameDialog
-        isOpen={isDisplayNameDialogOpen}
-        onOpenChange={setIsDisplayNameDialogOpen}
-        currentStatus={displayNameStatus}
-      />
-    </>
   );
 }
 
