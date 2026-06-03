@@ -11,10 +11,22 @@ msgstr ""
 "Language-Team: \n"
 "Plural-Forms: \n"
 
+#. placeholder {0}: result.value
+msgid "{0, plural, one {# hour ago} other {# hours ago}}"
+msgstr "{0, plural, one {# hour ago} other {# hours ago}}"
+
+#. placeholder {0}: result.value
+msgid "{0, plural, one {# minute ago} other {# minutes ago}}"
+msgstr "{0, plural, one {# minute ago} other {# minutes ago}}"
+
 #. placeholder {0}: getBookingEmptyDescription(status)
 #. placeholder {0}: getBookingStatusLabel(bookingStatus)
 msgid "{0}"
 msgstr "{0}"
+
+#. placeholder {0}: clients.length
+msgid "{0} clients deleted successfully"
+msgstr "{0} clients deleted successfully"
 
 #. placeholder {0}: schedule.availabilityWindows.length
 msgid "{0} windows"
@@ -197,6 +209,13 @@ msgstr "Apps"
 
 msgid "Apps installed for your account are available to this event type. Conferencing apps appear as location choices on the Setup tab, and connected calendars are used to check availability."
 msgstr "Apps installed for your account are available to this event type. Conferencing apps appear as location choices on the Setup tab, and connected calendars are used to check availability."
+
+#. placeholder {0}: clients.length
+msgid "Are you sure you want to delete <0>{0} clients</0>?"
+msgstr "Are you sure you want to delete <0>{0} clients</0>?"
+
+msgid "Are you sure you want to delete <0>{clientDisplayName}</0>?"
+msgstr "Are you sure you want to delete <0>{clientDisplayName}</0>?"
 
 msgid "At least one schedule exists"
 msgstr "At least one schedule exists"
@@ -459,6 +478,33 @@ msgstr "Choose which schedule controls when this event type can be booked."
 msgid "Clear"
 msgstr "Clear"
 
+msgid "Clear search"
+msgstr "Clear search"
+
+msgid "Client actions"
+msgstr "Client actions"
+
+msgid "Client deleted successfully: {clientDisplayName}"
+msgstr "Client deleted successfully: {clientDisplayName}"
+
+msgid "Client profile"
+msgstr "Client profile"
+
+msgid "Client updated"
+msgstr "Client updated"
+
+msgid "Clients"
+msgstr "Clients"
+
+msgid "Clients loading"
+msgstr "Clients loading"
+
+msgid "Clients will appear here once bookings are made."
+msgstr "Clients will appear here once bookings are made."
+
+msgid "Close client profile"
+msgstr "Close client profile"
+
 msgid "Collapse Apps"
 msgstr "Collapse Apps"
 
@@ -616,6 +662,9 @@ msgstr "Copy times"
 msgid "Could not disconnect connector account."
 msgstr "Could not disconnect connector account."
 
+msgid "Could not load WhatsApp sign-up. Please refresh and try again."
+msgstr "Could not load WhatsApp sign-up. Please refresh and try again."
+
 msgid "Could not start connector setup."
 msgstr "Could not start connector setup."
 
@@ -705,6 +754,16 @@ msgstr "Define the public booking page details people see before they choose a t
 
 msgid "Delete"
 msgstr "Delete"
+
+#. placeholder {0}: selectedClients.length
+msgid "Delete {0} clients"
+msgstr "Delete {0} clients"
+
+msgid "Delete client"
+msgstr "Delete client"
+
+msgid "Delete clients"
+msgstr "Delete clients"
 
 msgid "Delete event type"
 msgstr "Delete event type"
@@ -932,8 +991,14 @@ msgstr "Filter"
 msgid "Filter bookings"
 msgstr "Filter bookings"
 
+msgid "First name"
+msgstr "First name"
+
 msgid "First slot only"
 msgstr "First slot only"
+
+msgid "First visit"
+msgstr "First visit"
 
 msgid "For security, the signing secret is only shown once — right after the webhook is created. If you've lost it, delete this webhook and create a new one to receive a fresh secret."
 msgstr "For security, the signing secret is only shown once — right after the webhook is created. If you've lost it, delete this webhook and create a new one to receive a fresh secret."
@@ -1089,6 +1154,9 @@ msgstr "Interval"
 msgid "Join meeting"
 msgstr "Join meeting"
 
+msgid "Just now"
+msgstr "Just now"
+
 msgid "Keep booking"
 msgstr "Keep booking"
 
@@ -1104,6 +1172,12 @@ msgstr "Language"
 #. placeholder {0}: formatTimestamp(stats.lastActivityAt)
 msgid "Last message {0}"
 msgstr "Last message {0}"
+
+msgid "Last name"
+msgstr "Last name"
+
+msgid "Last visit"
+msgstr "Last visit"
 
 msgid "Launch troubleshooter"
 msgstr "Launch troubleshooter"
@@ -1228,11 +1302,17 @@ msgstr "Manage"
 msgid "Manage apps"
 msgstr "Manage apps"
 
+msgid "Manage client"
+msgstr "Manage client"
+
 msgid "Manage team hosts & round-robin"
 msgstr "Manage team hosts & round-robin"
 
 msgid "Manage weekly schedules for booking availability."
 msgstr "Manage weekly schedules for booking availability."
+
+msgid "Manage your booking clients here."
+msgstr "Manage your booking clients here."
 
 msgid "Mandatory for attendee only"
 msgstr "Mandatory for attendee only"
@@ -1302,6 +1382,9 @@ msgstr "Minimum rating"
 msgid "Minutes duration"
 msgstr "Minutes duration"
 
+msgid "Missing"
+msgstr "Missing"
+
 msgid "Mon"
 msgstr "Mon"
 
@@ -1350,6 +1433,9 @@ msgstr "Navigation"
 msgid "Needs attention"
 msgstr "Needs attention"
 
+msgid "Needs info"
+msgstr "Needs info"
+
 msgid "New"
 msgstr "New"
 
@@ -1392,6 +1478,12 @@ msgstr "No bookings this week"
 
 msgid "No calendars connected. Install one so availability checks include external events."
 msgstr "No calendars connected. Install one so availability checks include external events."
+
+msgid "No clients found"
+msgstr "No clients found"
+
+msgid "No clients yet"
+msgstr "No clients yet"
 
 msgid "No conferencing apps connected. Install one to add it as a location."
 msgstr "No conferencing apps connected. Install one to add it as a location."
@@ -2283,6 +2375,9 @@ msgstr "Triggers"
 msgid "Try adjusting your search criteria or select a different category."
 msgstr "Try adjusting your search criteria or select a different category."
 
+msgid "Try adjusting your search or filters"
+msgstr "Try adjusting your search or filters"
+
 msgid "Tue"
 msgstr "Tue"
 
@@ -2313,6 +2408,9 @@ msgstr "Unique contacts"
 
 msgid "Untitled field"
 msgstr "Untitled field"
+
+msgid "Update this client's contact details."
+msgstr "Update this client's contact details."
 
 msgid "Update where this booking takes place."
 msgstr "Update where this booking takes place."
@@ -2349,6 +2447,9 @@ msgstr "View next week"
 
 msgid "View previous week"
 msgstr "View previous week"
+
+msgid "View profile"
+msgstr "View profile"
 
 msgid "View recordings"
 msgstr "View recordings"

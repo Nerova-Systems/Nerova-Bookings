@@ -11,10 +11,22 @@ msgstr ""
 "Language-Team: \n"
 "Plural-Forms: \n"
 
+#. placeholder {0}: result.value
+msgid "{0, plural, one {# hour ago} other {# hours ago}}"
+msgstr ""
+
+#. placeholder {0}: result.value
+msgid "{0, plural, one {# minute ago} other {# minutes ago}}"
+msgstr ""
+
 #. placeholder {0}: getBookingEmptyDescription(status)
 #. placeholder {0}: getBookingStatusLabel(bookingStatus)
 msgid "{0}"
 msgstr "{0}"
+
+#. placeholder {0}: clients.length
+msgid "{0} clients deleted successfully"
+msgstr ""
 
 #. placeholder {0}: schedule.availabilityWindows.length
 msgid "{0} windows"
@@ -197,6 +209,13 @@ msgstr "Apps"
 
 msgid "Apps installed for your account are available to this event type. Conferencing apps appear as location choices on the Setup tab, and connected calendars are used to check availability."
 msgstr "Apps installeret på din konto er tilgængelige til denne begivenhedstype. Konferenceringsapps vises som lokationsvalg på opsætningsfanen, og tilsluttede kalendere bruges til at kontrollere tilgængelighed."
+
+#. placeholder {0}: clients.length
+msgid "Are you sure you want to delete <0>{0} clients</0>?"
+msgstr ""
+
+msgid "Are you sure you want to delete <0>{clientDisplayName}</0>?"
+msgstr ""
 
 msgid "At least one schedule exists"
 msgstr "Der findes mindst én tidsplan"
@@ -459,6 +478,33 @@ msgstr "Vælg, hvilken tidsplan der styrer, hvornår denne begivenhedstype kan b
 msgid "Clear"
 msgstr "Ryd"
 
+msgid "Clear search"
+msgstr ""
+
+msgid "Client actions"
+msgstr ""
+
+msgid "Client deleted successfully: {clientDisplayName}"
+msgstr ""
+
+msgid "Client profile"
+msgstr ""
+
+msgid "Client updated"
+msgstr ""
+
+msgid "Clients"
+msgstr ""
+
+msgid "Clients loading"
+msgstr ""
+
+msgid "Clients will appear here once bookings are made."
+msgstr ""
+
+msgid "Close client profile"
+msgstr ""
+
 msgid "Collapse Apps"
 msgstr ""
 
@@ -616,6 +662,9 @@ msgstr "Kopier tider"
 msgid "Could not disconnect connector account."
 msgstr "Kunne ikke afbryde connector-kontoen."
 
+msgid "Could not load WhatsApp sign-up. Please refresh and try again."
+msgstr ""
+
 msgid "Could not start connector setup."
 msgstr "Kunne ikke starte connector-opsætningen."
 
@@ -705,6 +754,16 @@ msgstr "Angiv oplysningerne på den offentlige bookingside, som vises, før folk
 
 msgid "Delete"
 msgstr "Slet"
+
+#. placeholder {0}: selectedClients.length
+msgid "Delete {0} clients"
+msgstr ""
+
+msgid "Delete client"
+msgstr ""
+
+msgid "Delete clients"
+msgstr ""
 
 msgid "Delete event type"
 msgstr "Slet begivenhedstype"
@@ -932,7 +991,13 @@ msgstr "Filtrer"
 msgid "Filter bookings"
 msgstr "Filtrer bookinger"
 
+msgid "First name"
+msgstr ""
+
 msgid "First slot only"
+msgstr ""
+
+msgid "First visit"
 msgstr ""
 
 msgid "For security, the signing secret is only shown once — right after the webhook is created. If you've lost it, delete this webhook and create a new one to receive a fresh secret."
@@ -1089,6 +1154,9 @@ msgstr "Interval"
 msgid "Join meeting"
 msgstr ""
 
+msgid "Just now"
+msgstr ""
+
 msgid "Keep booking"
 msgstr "Behold booking"
 
@@ -1103,6 +1171,12 @@ msgstr "Sprog"
 
 #. placeholder {0}: formatTimestamp(stats.lastActivityAt)
 msgid "Last message {0}"
+msgstr ""
+
+msgid "Last name"
+msgstr ""
+
+msgid "Last visit"
 msgstr ""
 
 msgid "Launch troubleshooter"
@@ -1228,11 +1302,17 @@ msgstr ""
 msgid "Manage apps"
 msgstr "Administrer apps"
 
+msgid "Manage client"
+msgstr ""
+
 msgid "Manage team hosts & round-robin"
 msgstr ""
 
 msgid "Manage weekly schedules for booking availability."
 msgstr "Administrer ugentlige tidsplaner for bookingtilgængelighed."
+
+msgid "Manage your booking clients here."
+msgstr ""
 
 msgid "Mandatory for attendee only"
 msgstr "Obligatorisk kun for deltager"
@@ -1302,6 +1382,9 @@ msgstr "Minimumsvurdering"
 msgid "Minutes duration"
 msgstr ""
 
+msgid "Missing"
+msgstr ""
+
 msgid "Mon"
 msgstr "Man"
 
@@ -1350,6 +1433,9 @@ msgstr "Navigation"
 msgid "Needs attention"
 msgstr "Kræver opmærksomhed"
 
+msgid "Needs info"
+msgstr ""
+
 msgid "New"
 msgstr "Ny"
 
@@ -1392,6 +1478,12 @@ msgstr "Ingen bookinger denne uge"
 
 msgid "No calendars connected. Install one so availability checks include external events."
 msgstr "Ingen kalendere tilsluttet. Installer én, så tilgængelighedstjek inkluderer eksterne begivenheder."
+
+msgid "No clients found"
+msgstr ""
+
+msgid "No clients yet"
+msgstr ""
 
 msgid "No conferencing apps connected. Install one to add it as a location."
 msgstr "Ingen konferenceringsapps tilsluttet. Installer én for at tilføje den som lokation."
@@ -2283,6 +2375,9 @@ msgstr "Udløsere"
 msgid "Try adjusting your search criteria or select a different category."
 msgstr ""
 
+msgid "Try adjusting your search or filters"
+msgstr ""
+
 msgid "Tue"
 msgstr "Tir"
 
@@ -2313,6 +2408,9 @@ msgstr ""
 
 msgid "Untitled field"
 msgstr "Felt uden titel"
+
+msgid "Update this client's contact details."
+msgstr ""
 
 msgid "Update where this booking takes place."
 msgstr "Opdater hvor denne booking finder sted."
@@ -2349,6 +2447,9 @@ msgstr "Vis næste uge"
 
 msgid "View previous week"
 msgstr "Vis forrige uge"
+
+msgid "View profile"
+msgstr ""
 
 msgid "View recordings"
 msgstr "Vis optagelser"

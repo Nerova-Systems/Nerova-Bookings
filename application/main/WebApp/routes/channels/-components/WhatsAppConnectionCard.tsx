@@ -65,7 +65,7 @@ export function WhatsAppConnectionCard() {
     [completeMutation]
   );
 
-  const { launch, isSdkReady, isLaunching } = useWhatsAppEmbeddedSignup({
+  const { launch, isSdkReady, isLaunching, sdkError } = useWhatsAppEmbeddedSignup({
     appId: whatsAppSignupConfig.metaAppId,
     configId: whatsAppSignupConfig.metaConfigId,
     onComplete: handleComplete
@@ -108,9 +108,16 @@ export function WhatsAppConnectionCard() {
             status={status?.status ?? ""}
           />
         ) : (
-          <Button onClick={launch} disabled={!isSdkReady} isPending={isBusy}>
-            {isBusy ? <Trans>Connecting...</Trans> : <Trans>Connect WhatsApp</Trans>}
-          </Button>
+          <div className="flex flex-col gap-2">
+            <Button onClick={launch} disabled={!isSdkReady} isPending={isBusy}>
+              {isBusy ? <Trans>Connecting...</Trans> : <Trans>Connect WhatsApp</Trans>}
+            </Button>
+            {sdkError ? (
+              <p className="text-sm text-destructive">
+                <Trans>Could not load WhatsApp sign-up. Please refresh and try again.</Trans>
+              </p>
+            ) : null}
+          </div>
         )}
       </CardContent>
     </Card>

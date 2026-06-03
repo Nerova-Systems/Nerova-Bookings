@@ -1,4 +1,5 @@
 using Main.Features.Apps.Domain;
+using Main.Features.Clients.Domain;
 using Main.Features.EventTypes.Domain;
 using Main.Features.Schedules.Domain;
 using Main.Features.Scheduling.Domain;
@@ -166,3 +167,12 @@ public sealed class WebhookDelivered(WebhookId webhookId, string eventType)
 
 public sealed class WebhookDeliveryDeadLettered(WebhookId webhookId, string eventType)
     : TelemetryEvent(("webhook_id", webhookId), ("event_type", eventType));
+
+public sealed class ClientUpdated(ClientId clientId)
+    : TelemetryEvent(("client_id", clientId));
+
+public sealed class ClientDeleted(ClientId clientId, bool bulkDeletion = false)
+    : TelemetryEvent(("client_id", clientId), ("bulk_deletion", bulkDeletion));
+
+public sealed class ClientsBulkDeleted(int count)
+    : TelemetryEvent(("count", count));

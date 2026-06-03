@@ -42,21 +42,27 @@ export function useWhatsAppEmbeddedSignup({ appId, configId, onComplete }: UseWh
   const sessionInfoRef = useRef<SessionInfo>({ wabaId: null, phoneNumberId: null });
   const [isSdkReady, setIsSdkReady] = useState(false);
   const [isLaunching, setIsLaunching] = useState(false);
+  const [sdkError, setSdkError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!appId) {
+      setSdkError("Meta App ID is not configured.");
       return;
     }
 
     let isMounted = true;
+    setSdkError(null);
     loadFacebookSdk(appId)
       .then(() => {
         if (isMounted) {
           setIsSdkReady(true);
         }
       })
-      .catch(() => {
-        // The connect button stays disabled while the SDK is unavailable; nothing else to do.
+      .catch((error: unknown) => {
+        if (isMounted) {
+          // Surface the failure so the SDK never fails silently (e.g. blocked by CSP or network).
+          setSdkError(error instanceof Error ? error.message : "Failed to load the Facebook SDK.");
+        }
       });
 
     return () => {
@@ -116,5 +122,5 @@ export function useWhatsAppEmbeddedSignup({ appId, configId, onComplete }: UseWh
     );
   }, [configId, onComplete]);
 
-  return { launch, isSdkReady, isLaunching };
+  return { launch, isSdkReady, isLaunching, sdkError };
 }

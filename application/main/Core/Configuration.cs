@@ -8,6 +8,7 @@ using Main.Features.Apps.Connectors.WhatsApp;
 using Main.Features.Apps.Domain;
 using Main.Features.Apps.Infrastructure;
 using Main.Features.BookingSideEffects.Workers;
+using Main.Features.Clients.Domain;
 using Main.Features.Connectors.Domain;
 using Main.Features.EventTypes.Domain;
 using Main.Features.Insights.Shared;
@@ -235,6 +236,7 @@ public static class Configuration
                 .AddScoped<IPaystackPaymentLinkService, PaystackPaymentLinkService>()
                 .AddScoped<IPaystackWebhookVerifier, PaystackWebhookVerifier>()
                 .AddScoped<IProcessedPaymentEventRepository, ProcessedPaymentEventRepository>()
+                .AddScoped<IClientRepository, ClientRepository>()
                 .AddHttpClient()
                 .AddEmailRendering("WebApp")
                 .AddSharedServices<MainDbContext>([Assembly]);

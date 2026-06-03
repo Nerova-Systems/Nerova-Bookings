@@ -236,13 +236,13 @@ public class SinglePageAppConfiguration
         var contentSecurityPolicies = new[]
         {
             $"script-src {trustedHosts} 'nonce-{{NONCE_PLACEHOLDER}}' 'strict-dynamic' https:",
-            $"script-src-elem {trustedHosts} https://js.paystack.co 'nonce-{{NONCE_PLACEHOLDER}}'",
+            $"script-src-elem {trustedHosts} https://js.paystack.co https://connect.facebook.net 'nonce-{{NONCE_PLACEHOLDER}}'",
             $"style-src {trustedHosts} https://fonts.googleapis.com 'nonce-{{NONCE_PLACEHOLDER}}'",
             $"style-src-elem {trustedHosts} https://fonts.googleapis.com 'nonce-{{NONCE_PLACEHOLDER}}'",
             $"font-src {trustedHosts} https://fonts.gstatic.com data:",
             $"default-src {trustedHosts}",
-            $"connect-src {trustedHosts} https://js.paystack.co https://api.paystack.co https://checkout.paystack.com data:",
-            $"frame-src {trustedHosts} https://js.paystack.co https://checkout.paystack.com",
+            $"connect-src {trustedHosts} https://js.paystack.co https://api.paystack.co https://checkout.paystack.com https://graph.facebook.com https://www.facebook.com https://connect.facebook.net data:",
+            $"frame-src {trustedHosts} https://js.paystack.co https://checkout.paystack.com https://www.facebook.com https://web.facebook.com",
             $"img-src {trustedHosts} data: blob:",
             "object-src 'none'",
             "base-uri 'none'"
