@@ -20,6 +20,12 @@ msgstr "{0}"
 msgid "{0} windows"
 msgstr "{0} vinduer"
 
+msgid "{count} app"
+msgstr ""
+
+msgid "{count} apps"
+msgstr ""
+
 msgid "{count} selected"
 msgstr "{count} valgt"
 
@@ -41,9 +47,6 @@ msgstr "0 apps, 0 aktive"
 
 msgid "A confirmation will be sent to the email address you provided."
 msgstr "En bekræftelse sendes til den e-mailadresse, du har angivet."
-
-msgid "About"
-msgstr "Om"
 
 msgid "Accepted"
 msgstr "Accepteret"
@@ -164,6 +167,9 @@ msgstr "Enhver vurdering"
 
 msgid "App categories"
 msgstr "App-kategorier"
+
+msgid "App store"
+msgstr ""
 
 msgid "App Store"
 msgstr ""
@@ -354,6 +360,7 @@ msgstr ""
 msgid "By"
 msgstr "Af"
 
+#. placeholder {0}: app.publisher
 #. placeholder {0}: entry.actorUserId
 msgid "By {0}"
 msgstr "Af {0}"
@@ -417,11 +424,17 @@ msgstr "{0} bookinger annulleret"
 msgid "Capacity limits"
 msgstr ""
 
+msgid "Category"
+msgstr ""
+
 msgid "Channels"
 msgstr "Kanaler"
 
 msgid "Checkbox"
 msgstr "Afkrydsningsfelt"
+
+msgid "Checking…"
+msgstr ""
 
 msgid "Choose the booker layout and accent color for this event type."
 msgstr ""
@@ -438,7 +451,16 @@ msgstr "Vælg, hvilken tidsplan der styrer, hvornår denne begivenhedstype kan b
 msgid "Clear"
 msgstr "Ryd"
 
+msgid "Collapse Apps"
+msgstr ""
+
+msgid "Collapse Channels"
+msgstr ""
+
 msgid "Column"
+msgstr ""
+
+msgid "Coming soon"
 msgstr ""
 
 msgid "Completed"
@@ -498,6 +520,9 @@ msgstr "Connect installed apps to this event type."
 msgid "Connect Microsoft"
 msgstr "Forbind Microsoft"
 
+msgid "Connect the messaging channels your customers use to receive bookings and reminders."
+msgstr ""
+
 msgid "Connect WhatsApp"
 msgstr ""
 
@@ -533,6 +558,12 @@ msgstr "Connector-godkendelses-URL blev ikke returneret."
 
 msgid "Connector is not configured."
 msgstr "Connectoren er ikke konfigureret."
+
+msgid "Contact"
+msgstr ""
+
+msgid "Contact support"
+msgstr ""
 
 msgid "Continue"
 msgstr "Fortsæt"
@@ -685,6 +716,9 @@ msgstr "Slet webhook"
 msgid "Delete webhook?"
 msgstr "Slet webhook?"
 
+msgid "Deliver transactional booking emails to your customers. Coming soon."
+msgstr ""
+
 msgid "Description"
 msgstr "Beskrivelse"
 
@@ -829,6 +863,12 @@ msgstr "Der findes præcis én standardtidsplan"
 msgid "Exclude emails"
 msgstr "Ekskluder e-mails"
 
+msgid "Expand Apps"
+msgstr ""
+
+msgid "Expand Channels"
+msgstr ""
+
 msgid "Expires"
 msgstr "Udløber"
 
@@ -865,6 +905,9 @@ msgstr "Kunne ikke sætte testhændelse i kø"
 
 msgid "Failed to start install. Please try again."
 msgstr "Kunne ikke starte installation. Prøv igen."
+
+msgid "Featured categories"
+msgstr ""
 
 msgid "Feedback (optional)"
 msgstr "Feedback (valgfrit)"
@@ -910,6 +953,10 @@ msgstr "Gå til app"
 
 msgid "Go to availability"
 msgstr "Gå til tilgængelighed"
+
+#. placeholder {0}: index + 1
+msgid "Go to screenshot {0}"
+msgstr ""
 
 msgid "Good afternoon"
 msgstr "God eftermiddag"
@@ -1006,6 +1053,9 @@ msgstr "Installer app"
 
 msgid "Installed"
 msgstr "Installeret"
+
+msgid "Installed apps"
+msgstr ""
 
 msgid "Instant meeting"
 msgstr "Øjeblikkeligt møde"
@@ -1154,6 +1204,9 @@ msgstr "Hovednavigation"
 msgid "Make another schedule default before deleting this one."
 msgstr "Gør en anden tidsplan til standard, før du sletter denne."
 
+msgid "Manage"
+msgstr ""
+
 msgid "Manage apps"
 msgstr "Administrer apps"
 
@@ -1246,6 +1299,9 @@ msgstr ""
 msgid "Most booked event types in the selected range."
 msgstr "Mest bookede event-typer i det valgte interval."
 
+msgid "Most popular"
+msgstr ""
+
 msgid "Move event types to another schedule before deleting this one."
 msgstr "Flyt aftaletyper til en anden tidsplan, før du sletter denne."
 
@@ -1290,6 +1346,9 @@ msgstr "Ny webhook"
 
 msgid "Next"
 msgstr "Næste"
+
+msgid "Next screenshot"
+msgstr ""
 
 #. placeholder {0}: getBookingStatusLabel(status).toLowerCase()
 msgid "No {0} bookings yet"
@@ -1494,6 +1553,9 @@ msgstr "Andet"
 msgid "Overrides: {0}"
 msgstr "Undtagelser: {0}"
 
+msgid "Overview"
+msgstr ""
+
 msgid "Passed"
 msgstr "Bestået"
 
@@ -1542,8 +1604,14 @@ msgstr "Forhåndsvis bookingside"
 msgid "Previous"
 msgstr "Forrige"
 
+msgid "Previous screenshot"
+msgstr ""
+
 msgid "Price"
 msgstr "Pris"
+
+msgid "Pricing"
+msgstr ""
 
 msgid "Primary location"
 msgstr ""
@@ -1569,6 +1637,9 @@ msgstr "Offentlig booking"
 msgid "Public link copied"
 msgstr "Offentligt link kopieret"
 
+msgid "Publisher"
+msgstr ""
+
 msgid "Question"
 msgstr "Spørgsmål"
 
@@ -1592,6 +1663,9 @@ msgstr "Vurdering"
 
 msgid "Rating saved"
 msgstr "Vurdering gemt"
+
+msgid "Reach customers on WhatsApp with embedded signup, business profile setup, and booking workflows."
+msgstr ""
 
 msgid "Reason"
 msgstr "Årsag"
@@ -1813,6 +1887,13 @@ msgstr "Tidsplan opdateret"
 msgid "Scope"
 msgstr "Omfang"
 
+#. placeholder {0}: clampedIndex + 1
+msgid "Screenshot {0} of {appName}"
+msgstr ""
+
+msgid "Screenshots"
+msgstr ""
+
 msgid "Search"
 msgstr "Søg"
 
@@ -1824,6 +1905,9 @@ msgstr "Søg i bookinger"
 
 msgid "Search by name or email"
 msgstr "Søg efter navn eller e-mail"
+
+msgid "Search results"
+msgstr ""
 
 msgid "Search team members"
 msgstr "Søg i teammedlemmer"
@@ -1898,6 +1982,9 @@ msgid "Send a signed HTTP POST to your endpoint when the selected events occur."
 msgstr "Send en signeret HTTP POST til dit endpoint, når de valgte hændelser indtræffer."
 
 msgid "Send bookers to a custom page after success or cancellation."
+msgstr ""
+
+msgid "Send booking confirmations and reminders over SMS. Coming soon."
 msgstr ""
 
 msgid "Send Cal Video transcription emails"
@@ -1987,6 +2074,9 @@ msgstr "Slotinterval"
 
 msgid "Slug"
 msgstr "Slug"
+
+msgid "SMS"
+msgstr ""
 
 msgid "Something doesn't look right?"
 msgstr "Ser noget forkert ud?"
@@ -2250,6 +2340,9 @@ msgstr "Webhook opdateret"
 
 msgid "Webhooks"
 msgstr "Webhooks"
+
+msgid "Website"
+msgstr ""
 
 msgid "Wed"
 msgstr "Ons"

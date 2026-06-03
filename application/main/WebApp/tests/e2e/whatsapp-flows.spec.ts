@@ -32,20 +32,20 @@ test.describe("@smoke", () => {
       await completeSignupFlow(page, expect, owner, context);
     })();
 
-    await step(
-      "Navigate to /channels/whatsapp & verify page heading, card title, connect button and sidebar nav link"
-    )(async () => {
-      await page.goto("/channels/whatsapp");
+    await step("Navigate to /channels/whatsapp & verify page heading, card title, connect button and sidebar nav link")(
+      async () => {
+        await page.goto("/channels/whatsapp");
 
-      await expect(page.getByRole("heading", { name: "WhatsApp", level: 1 })).toBeVisible();
-      // CardTitle renders as <div data-slot="card-title">, not a heading element.
-      // Use exact: true to avoid matching page subtitle and card description that contain this substring.
-      await expect(page.getByText("WhatsApp Business", { exact: true })).toBeVisible();
-      await expect(page.getByRole("button", { name: "Connect WhatsApp" })).toBeVisible();
-      await expect(
-        page.getByRole("navigation", { name: "Main navigation" }).getByRole("link", { name: "Channels" })
-      ).toBeVisible();
-    })();
+        await expect(page.getByRole("heading", { name: "WhatsApp", level: 1 })).toBeVisible();
+        // CardTitle renders as <div data-slot="card-title">, not a heading element.
+        // Use exact: true to avoid matching page subtitle and card description that contain this substring.
+        await expect(page.getByText("WhatsApp Business", { exact: true })).toBeVisible();
+        await expect(page.getByRole("button", { name: "Connect WhatsApp" })).toBeVisible();
+        await expect(
+          page.getByRole("navigation", { name: "Main navigation" }).getByRole("link", { name: "Channels" })
+        ).toBeVisible();
+      }
+    )();
   });
 });
 

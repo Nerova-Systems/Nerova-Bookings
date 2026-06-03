@@ -11,24 +11,20 @@ import {
   SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
+  SidebarMenuCollapsibleProvider,
   SidebarMenuItem,
   SidebarRail
 } from "@repo/ui/components/Sidebar";
 import { Link as RouterLink, useNavigate, useRouter } from "@tanstack/react-router";
 import MobileMenu from "account/MobileMenu";
 import UserMenu from "account/UserMenu";
-import {
-  BarChart3Icon,
-  CalendarCheckIcon,
-  CalendarDaysIcon,
-  LayoutDashboardIcon,
-  MessageCircleIcon,
-  TimerIcon
-} from "lucide-react";
+import { BarChart3Icon, CalendarCheckIcon, CalendarDaysIcon, LayoutDashboardIcon, TimerIcon } from "lucide-react";
 import { use } from "react";
 
 import { getWeekStartDate } from "@/routes/-bookings/bookingTypes";
 import { formatWeekStartSearchValue } from "@/routes/-bookings/WeekPicker";
+
+import { AppsNavSection, ChannelsNavSection } from "./MainSideMenuNav";
 
 const normalizePath = (path: string): string => path.replace(/\/$/, "") || "/";
 
@@ -47,6 +43,15 @@ export function MainSideMenu() {
     navigate({ to: path });
   };
 
+  // Seed the initially-expanded collapsible group from the current route so deep links land with the
+  // matching section already open (single-expand: only one of Apps / Channels can be open at a time).
+  const defaultExpandedGroup =
+    currentPath === "/apps" || currentPath.startsWith("/apps/")
+      ? "apps"
+      : currentPath === "/channels" || currentPath.startsWith("/channels/")
+        ? "channels"
+        : null;
+
   return (
     <Sidebar collapsible="icon" mobileContent={<MobileMenu onNavigate={handleNavigate} />}>
       <nav className="contents" aria-label={t`Main navigation`}>
@@ -59,108 +64,98 @@ export function MainSideMenu() {
               <Trans>Navigation</Trans>
             </SidebarGroupLabel>
             <SidebarGroupContent>
-              <SidebarMenu>
-                <SidebarMenuItem>
-                  <SidebarMenuButton asChild={true} isActive={currentPath === "/dashboard"} tooltip={t`Dashboard`}>
-                    <RouterLink to="/dashboard">
-                      <LayoutDashboardIcon />
-                      <span>
-                        <Trans>Dashboard</Trans>
-                      </span>
-                    </RouterLink>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-                <SidebarMenuItem>
-                  <SidebarMenuButton
-                    asChild={true}
-                    isActive={currentPath.startsWith("/event-types")}
-                    tooltip={t`Event types`}
-                  >
-                    <RouterLink to="/event-types" search={{ dialog: undefined, duplicateEventTypeId: undefined }}>
-                      <TimerIcon />
-                      <span>
-                        <Trans>Event types</Trans>
-                      </span>
-                    </RouterLink>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-                <SidebarMenuItem>
-                  <SidebarMenuButton
-                    asChild={true}
-                    isActive={currentPath.startsWith("/bookings")}
-                    tooltip={t`Bookings`}
-                  >
-                    <RouterLink
-                      to="/bookings/$status"
-                      params={{ status: "upcoming" }}
-                      search={{
-                        search: undefined,
-                        eventTypeId: undefined,
-                        attendeeName: undefined,
-                        attendeeEmail: undefined,
-                        bookingUid: undefined,
-                        dateFrom: undefined,
-                        dateTo: undefined,
-                        noShowOnly: undefined,
-                        hasInternalNote: undefined,
-                        minRating: undefined,
-                        view: "list",
-                        weekStart: formatWeekStartSearchValue(getWeekStartDate(new Date())),
-                        pageOffset: 0
-                      }}
-                    >
-                      <CalendarCheckIcon />
-                      <span>
-                        <Trans>Bookings</Trans>
-                      </span>
-                    </RouterLink>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-                <SidebarMenuItem>
-                  <SidebarMenuButton
-                    asChild={true}
-                    isActive={currentPath.startsWith("/availability")}
-                    tooltip={t`Availability`}
-                  >
-                    <RouterLink to="/availability">
-                      <CalendarDaysIcon />
-                      <span>
-                        <Trans>Availability</Trans>
-                      </span>
-                    </RouterLink>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-                {isInsightsEnabled && (
+              <SidebarMenuCollapsibleProvider defaultExpanded={defaultExpandedGroup}>
+                <SidebarMenu>
                   <SidebarMenuItem>
-                    <SidebarMenuButton
-                      asChild={true}
-                      isActive={currentPath.startsWith("/insights")}
-                      tooltip={t`Insights`}
-                    >
-                      <RouterLink to="/insights" search={{ from: undefined, to: undefined }}>
-                        <BarChart3Icon />
+                    <SidebarMenuButton asChild={true} isActive={currentPath === "/dashboard"} tooltip={t`Dashboard`}>
+                      <RouterLink to="/dashboard">
+                        <LayoutDashboardIcon />
                         <span>
-                          <Trans>Insights</Trans>
+                          <Trans>Dashboard</Trans>
                         </span>
                       </RouterLink>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
-                )}
-                <SidebarMenuItem>
-                  <SidebarMenuButton
-                    asChild={true}
-                    isActive={currentPath.startsWith("/channels")}
-                    tooltip={t`Channels`}
-                  >
-                    <RouterLink to="/channels/whatsapp">
-                      <MessageCircleIcon />
-                      <span>
-                        <Trans>Channels</Trans>
-                      </span>
-                    </RouterLink>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              </SidebarMenu>
+                  <SidebarMenuItem>
+                    <SidebarMenuButton
+                      asChild={true}
+                      isActive={currentPath.startsWith("/event-types")}
+                      tooltip={t`Event types`}
+                    >
+                      <RouterLink to="/event-types" search={{ dialog: undefined, duplicateEventTypeId: undefined }}>
+                        <TimerIcon />
+                        <span>
+                          <Trans>Event types</Trans>
+                        </span>
+                      </RouterLink>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                  <SidebarMenuItem>
+                    <SidebarMenuButton
+                      asChild={true}
+                      isActive={currentPath.startsWith("/bookings")}
+                      tooltip={t`Bookings`}
+                    >
+                      <RouterLink
+                        to="/bookings/$status"
+                        params={{ status: "upcoming" }}
+                        search={{
+                          search: undefined,
+                          eventTypeId: undefined,
+                          attendeeName: undefined,
+                          attendeeEmail: undefined,
+                          bookingUid: undefined,
+                          dateFrom: undefined,
+                          dateTo: undefined,
+                          noShowOnly: undefined,
+                          hasInternalNote: undefined,
+                          minRating: undefined,
+                          view: "list",
+                          weekStart: formatWeekStartSearchValue(getWeekStartDate(new Date())),
+                          pageOffset: 0
+                        }}
+                      >
+                        <CalendarCheckIcon />
+                        <span>
+                          <Trans>Bookings</Trans>
+                        </span>
+                      </RouterLink>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                  <SidebarMenuItem>
+                    <SidebarMenuButton
+                      asChild={true}
+                      isActive={currentPath.startsWith("/availability")}
+                      tooltip={t`Availability`}
+                    >
+                      <RouterLink to="/availability">
+                        <CalendarDaysIcon />
+                        <span>
+                          <Trans>Availability</Trans>
+                        </span>
+                      </RouterLink>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                  {isInsightsEnabled && (
+                    <SidebarMenuItem>
+                      <SidebarMenuButton
+                        asChild={true}
+                        isActive={currentPath.startsWith("/insights")}
+                        tooltip={t`Insights`}
+                      >
+                        <RouterLink to="/insights" search={{ from: undefined, to: undefined }}>
+                          <BarChart3Icon />
+                          <span>
+                            <Trans>Insights</Trans>
+                          </span>
+                        </RouterLink>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  )}
+                  <AppsNavSection currentPath={currentPath} />
+                  <ChannelsNavSection currentPath={currentPath} />
+                </SidebarMenu>
+              </SidebarMenuCollapsibleProvider>
             </SidebarGroupContent>
           </SidebarGroup>
         </SidebarContent>
@@ -169,4 +164,3 @@ export function MainSideMenu() {
     </Sidebar>
   );
 }
-

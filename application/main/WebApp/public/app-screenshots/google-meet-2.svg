@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500" role="img" aria-label="Google Meet – Bookings preview">
+  <rect width="800" height="500" fill="#f1f5f9"/>
+  <rect x="40" y="40" width="720" height="420" rx="12" fill="#ffffff" stroke="#e2e8f0" stroke-width="2"/>
+  <rect x="40" y="40" width="720" height="48" rx="12" fill="#00832D"/>
+  <rect x="40" y="64" width="720" height="24" fill="#00832D"/>
+  <circle cx="68" cy="64" r="6" fill="#ffffff" opacity="0.8"/>
+  <circle cx="90" cy="64" r="6" fill="#ffffff" opacity="0.8"/>
+  <circle cx="112" cy="64" r="6" fill="#ffffff" opacity="0.8"/>
+  <text x="400" y="71" font-family="Arial, sans-serif" font-size="18" font-weight="700" fill="#ffffff" text-anchor="middle">Google Meet – Bookings</text>
+  <text x="80" y="128" font-family="Arial, sans-serif" font-size="16" font-weight="700" fill="#0f172a">Upcoming bookings</text>
+  <g>
+    <rect x="80" y="150" width="640" height="64" rx="8" fill="#f8fafc" stroke="#e2e8f0"/>
+    <rect x="80" y="150" width="6" height="64" rx="3" fill="#00832D"/>
+    <rect x="80" y="232" width="640" height="64" rx="8" fill="#f8fafc" stroke="#e2e8f0"/>
+    <rect x="80" y="232" width="6" height="64" rx="3" fill="#00832D"/>
+    <rect x="80" y="314" width="640" height="64" rx="8" fill="#f8fafc" stroke="#e2e8f0"/>
+    <rect x="80" y="314" width="6" height="64" rx="3" fill="#00832D"/>
+  </g>
+  <g fill="#cbd5e1">
+    <rect x="110" y="170" width="180" height="12" rx="6"/><rect x="110" y="190" width="120" height="10" rx="5"/>
+    <rect x="110" y="252" width="220" height="12" rx="6"/><rect x="110" y="272" width="140" height="10" rx="5"/>
+    <rect x="110" y="334" width="160" height="12" rx="6"/><rect x="110" y="354" width="110" height="10" rx="5"/>
+  </g>
+  <g fill="#00832D" opacity="0.9">
+    <rect x="600" y="172" width="96" height="28" rx="14"/><rect x="600" y="254" width="96" height="28" rx="14"/><rect x="600" y="336" width="96" height="28" rx="14"/>
+  </g>
+</svg>

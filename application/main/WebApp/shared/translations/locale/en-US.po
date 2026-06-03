@@ -20,6 +20,12 @@ msgstr "{0}"
 msgid "{0} windows"
 msgstr "{0} windows"
 
+msgid "{count} app"
+msgstr "{count} app"
+
+msgid "{count} apps"
+msgstr "{count} apps"
+
 msgid "{count} selected"
 msgstr "{count} selected"
 
@@ -41,9 +47,6 @@ msgstr "0 apps, 0 active"
 
 msgid "A confirmation will be sent to the email address you provided."
 msgstr "A confirmation will be sent to the email address you provided."
-
-msgid "About"
-msgstr "About"
 
 msgid "Accepted"
 msgstr "Accepted"
@@ -164,6 +167,9 @@ msgstr "Any rating"
 
 msgid "App categories"
 msgstr "App categories"
+
+msgid "App store"
+msgstr "App store"
 
 msgid "App Store"
 msgstr "App Store"
@@ -354,6 +360,7 @@ msgstr "Business name"
 msgid "By"
 msgstr "By"
 
+#. placeholder {0}: app.publisher
 #. placeholder {0}: entry.actorUserId
 msgid "By {0}"
 msgstr "By {0}"
@@ -417,11 +424,17 @@ msgstr "Cancelled {0} bookings"
 msgid "Capacity limits"
 msgstr "Capacity limits"
 
+msgid "Category"
+msgstr "Category"
+
 msgid "Channels"
 msgstr "Channels"
 
 msgid "Checkbox"
 msgstr "Checkbox"
+
+msgid "Checking…"
+msgstr "Checking…"
 
 msgid "Choose the booker layout and accent color for this event type."
 msgstr "Choose the booker layout and accent color for this event type."
@@ -438,8 +451,17 @@ msgstr "Choose which schedule controls when this event type can be booked."
 msgid "Clear"
 msgstr "Clear"
 
+msgid "Collapse Apps"
+msgstr "Collapse Apps"
+
+msgid "Collapse Channels"
+msgstr "Collapse Channels"
+
 msgid "Column"
 msgstr "Column"
+
+msgid "Coming soon"
+msgstr "Coming soon"
 
 msgid "Completed"
 msgstr "Completed"
@@ -498,6 +520,9 @@ msgstr "Connect installed apps to this event type."
 msgid "Connect Microsoft"
 msgstr "Connect Microsoft"
 
+msgid "Connect the messaging channels your customers use to receive bookings and reminders."
+msgstr "Connect the messaging channels your customers use to receive bookings and reminders."
+
 msgid "Connect WhatsApp"
 msgstr "Connect WhatsApp"
 
@@ -533,6 +558,12 @@ msgstr "Connector authorization URL was not returned."
 
 msgid "Connector is not configured."
 msgstr "Connector is not configured."
+
+msgid "Contact"
+msgstr "Contact"
+
+msgid "Contact support"
+msgstr "Contact support"
 
 msgid "Continue"
 msgstr "Continue"
@@ -685,6 +716,9 @@ msgstr "Delete webhook"
 msgid "Delete webhook?"
 msgstr "Delete webhook?"
 
+msgid "Deliver transactional booking emails to your customers. Coming soon."
+msgstr "Deliver transactional booking emails to your customers. Coming soon."
+
 msgid "Description"
 msgstr "Description"
 
@@ -829,6 +863,12 @@ msgstr "Exactly one default schedule exists"
 msgid "Exclude emails"
 msgstr "Exclude emails"
 
+msgid "Expand Apps"
+msgstr "Expand Apps"
+
+msgid "Expand Channels"
+msgstr "Expand Channels"
+
 msgid "Expires"
 msgstr "Expires"
 
@@ -865,6 +905,9 @@ msgstr "Failed to queue test event"
 
 msgid "Failed to start install. Please try again."
 msgstr "Failed to start install. Please try again."
+
+msgid "Featured categories"
+msgstr "Featured categories"
 
 msgid "Feedback (optional)"
 msgstr "Feedback (optional)"
@@ -910,6 +953,10 @@ msgstr "Go to app"
 
 msgid "Go to availability"
 msgstr "Go to availability"
+
+#. placeholder {0}: index + 1
+msgid "Go to screenshot {0}"
+msgstr "Go to screenshot {0}"
 
 msgid "Good afternoon"
 msgstr "Good afternoon"
@@ -1006,6 +1053,9 @@ msgstr "Install app"
 
 msgid "Installed"
 msgstr "Installed"
+
+msgid "Installed apps"
+msgstr "Installed apps"
 
 msgid "Instant meeting"
 msgstr "Instant meeting"
@@ -1154,6 +1204,9 @@ msgstr "Main navigation"
 msgid "Make another schedule default before deleting this one."
 msgstr "Make another schedule default before deleting this one."
 
+msgid "Manage"
+msgstr "Manage"
+
 msgid "Manage apps"
 msgstr "Manage apps"
 
@@ -1246,6 +1299,9 @@ msgstr "Monthly"
 msgid "Most booked event types in the selected range."
 msgstr "Most booked event types in the selected range."
 
+msgid "Most popular"
+msgstr "Most popular"
+
 msgid "Move event types to another schedule before deleting this one."
 msgstr "Move event types to another schedule before deleting this one."
 
@@ -1290,6 +1346,9 @@ msgstr "New webhook"
 
 msgid "Next"
 msgstr "Next"
+
+msgid "Next screenshot"
+msgstr "Next screenshot"
 
 #. placeholder {0}: getBookingStatusLabel(status).toLowerCase()
 msgid "No {0} bookings yet"
@@ -1494,6 +1553,9 @@ msgstr "Other"
 msgid "Overrides: {0}"
 msgstr "Overrides: {0}"
 
+msgid "Overview"
+msgstr "Overview"
+
 msgid "Passed"
 msgstr "Passed"
 
@@ -1542,8 +1604,14 @@ msgstr "Preview booking page"
 msgid "Previous"
 msgstr "Previous"
 
+msgid "Previous screenshot"
+msgstr "Previous screenshot"
+
 msgid "Price"
 msgstr "Price"
+
+msgid "Pricing"
+msgstr "Pricing"
 
 msgid "Primary location"
 msgstr "Primary location"
@@ -1569,6 +1637,9 @@ msgstr "Public booking"
 msgid "Public link copied"
 msgstr "Public link copied"
 
+msgid "Publisher"
+msgstr "Publisher"
+
 msgid "Question"
 msgstr "Question"
 
@@ -1592,6 +1663,9 @@ msgstr "Rating"
 
 msgid "Rating saved"
 msgstr "Rating saved"
+
+msgid "Reach customers on WhatsApp with embedded signup, business profile setup, and booking workflows."
+msgstr "Reach customers on WhatsApp with embedded signup, business profile setup, and booking workflows."
 
 msgid "Reason"
 msgstr "Reason"
@@ -1813,6 +1887,13 @@ msgstr "Schedule updated"
 msgid "Scope"
 msgstr "Scope"
 
+#. placeholder {0}: clampedIndex + 1
+msgid "Screenshot {0} of {appName}"
+msgstr "Screenshot {0} of {appName}"
+
+msgid "Screenshots"
+msgstr "Screenshots"
+
 msgid "Search"
 msgstr "Search"
 
@@ -1824,6 +1905,9 @@ msgstr "Search bookings"
 
 msgid "Search by name or email"
 msgstr "Search by name or email"
+
+msgid "Search results"
+msgstr "Search results"
 
 msgid "Search team members"
 msgstr "Search team members"
@@ -1899,6 +1983,9 @@ msgstr "Send a signed HTTP POST to your endpoint when the selected events occur.
 
 msgid "Send bookers to a custom page after success or cancellation."
 msgstr "Send bookers to a custom page after success or cancellation."
+
+msgid "Send booking confirmations and reminders over SMS. Coming soon."
+msgstr "Send booking confirmations and reminders over SMS. Coming soon."
 
 msgid "Send Cal Video transcription emails"
 msgstr "Send Cal Video transcription emails"
@@ -1987,6 +2074,9 @@ msgstr "Slot interval"
 
 msgid "Slug"
 msgstr "Slug"
+
+msgid "SMS"
+msgstr "SMS"
 
 msgid "Something doesn't look right?"
 msgstr "Something doesn't look right?"
@@ -2250,6 +2340,9 @@ msgstr "Webhook updated"
 
 msgid "Webhooks"
 msgstr "Webhooks"
+
+msgid "Website"
+msgstr "Website"
 
 msgid "Wed"
 msgstr "Wed"

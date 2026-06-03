@@ -145,216 +145,214 @@ export function BrandProfileTab() {
 
   return (
     <Form onSubmit={handleSubmit} validationBehavior="aria" className="flex flex-col gap-8 pt-4">
-        {/* Section A: Business identity */}
-        <div className="flex flex-col gap-4">
-          <div>
-            <h3 className="text-base font-semibold">
-              <Trans>Business identity</Trans>
-            </h3>
-            <p className="text-sm text-muted-foreground">
-              <Trans>Basic information shown on your WhatsApp profile.</Trans>
-            </p>
-          </div>
-          <Separator />
+      {/* Section A: Business identity */}
+      <div className="flex flex-col gap-4">
+        <div>
+          <h3 className="text-base font-semibold">
+            <Trans>Business identity</Trans>
+          </h3>
+          <p className="text-sm text-muted-foreground">
+            <Trans>Basic information shown on your WhatsApp profile.</Trans>
+          </p>
+        </div>
+        <Separator />
 
-          <TextField
-            name="businessDisplayName"
-            label={t`Business display name`}
-            value={formValues.businessDisplayName}
-            onChange={(v) => setFormValues((prev) => ({ ...prev, businessDisplayName: v }))}
-            required={true}
-            readOnly={readOnly}
-            description={t`The name shown on your WhatsApp Business profile`}
+        <TextField
+          name="businessDisplayName"
+          label={t`Business display name`}
+          value={formValues.businessDisplayName}
+          onChange={(v) => setFormValues((prev) => ({ ...prev, businessDisplayName: v }))}
+          required={true}
+          readOnly={readOnly}
+          description={t`The name shown on your WhatsApp Business profile`}
+        />
+
+        <TierGatedField plan={currentPlan}>
+          <TextAreaField
+            name="brandAboutText"
+            label={t`About / tagline`}
+            value={formValues.brandAboutText}
+            onChange={(v) => setFormValues((prev) => ({ ...prev, brandAboutText: v }))}
+            readOnly={readOnly || !hasPaidPlan}
+            disabled={!hasPaidPlan}
+            description={t`A short tagline shown on your WhatsApp profile (max 139 characters)`}
+            maxLength={139}
+            lines={2}
           />
+        </TierGatedField>
 
-          <TierGatedField plan={currentPlan}>
-            <TextAreaField
-              name="brandAboutText"
-              label={t`About / tagline`}
-              value={formValues.brandAboutText}
-              onChange={(v) => setFormValues((prev) => ({ ...prev, brandAboutText: v }))}
-              readOnly={readOnly || !hasPaidPlan}
-              disabled={!hasPaidPlan}
-              description={t`A short tagline shown on your WhatsApp profile (max 139 characters)`}
-              maxLength={139}
-              lines={2}
-            />
-          </TierGatedField>
+        <TierGatedField plan={currentPlan}>
+          <TextAreaField
+            name="brandDescription"
+            label={t`Business description`}
+            value={formValues.brandDescription}
+            onChange={(v) => setFormValues((prev) => ({ ...prev, brandDescription: v }))}
+            readOnly={readOnly || !hasPaidPlan}
+            disabled={!hasPaidPlan}
+            description={t`A longer description of your business`}
+            lines={3}
+          />
+        </TierGatedField>
 
-          <TierGatedField plan={currentPlan}>
-            <TextAreaField
-              name="brandDescription"
-              label={t`Business description`}
-              value={formValues.brandDescription}
-              onChange={(v) => setFormValues((prev) => ({ ...prev, brandDescription: v }))}
-              readOnly={readOnly || !hasPaidPlan}
-              disabled={!hasPaidPlan}
-              description={t`A longer description of your business`}
-              lines={3}
-            />
-          </TierGatedField>
+        <TierGatedField plan={currentPlan}>
+          <TextField
+            name="brandEmail"
+            label={t`Business email`}
+            type="email"
+            value={formValues.brandEmail}
+            onChange={(v) => setFormValues((prev) => ({ ...prev, brandEmail: v }))}
+            readOnly={readOnly || !hasPaidPlan}
+            disabled={!hasPaidPlan}
+          />
+        </TierGatedField>
 
-          <TierGatedField plan={currentPlan}>
-            <TextField
-              name="brandEmail"
-              label={t`Business email`}
-              type="email"
-              value={formValues.brandEmail}
-              onChange={(v) => setFormValues((prev) => ({ ...prev, brandEmail: v }))}
-              readOnly={readOnly || !hasPaidPlan}
-              disabled={!hasPaidPlan}
-            />
-          </TierGatedField>
+        <TierGatedField plan={currentPlan}>
+          <TextField
+            name="brandAddress"
+            label={t`Business address`}
+            value={formValues.brandAddress}
+            onChange={(v) => setFormValues((prev) => ({ ...prev, brandAddress: v }))}
+            readOnly={readOnly || !hasPaidPlan}
+            disabled={!hasPaidPlan}
+          />
+        </TierGatedField>
+      </div>
 
-          <TierGatedField plan={currentPlan}>
-            <TextField
-              name="brandAddress"
-              label={t`Business address`}
-              value={formValues.brandAddress}
-              onChange={(v) => setFormValues((prev) => ({ ...prev, brandAddress: v }))}
-              readOnly={readOnly || !hasPaidPlan}
-              disabled={!hasPaidPlan}
-            />
-          </TierGatedField>
+      {/* Section B: Logo */}
+      <div className="flex flex-col gap-4">
+        <div>
+          <h3 className="text-base font-semibold">
+            <Trans>Profile logo</Trans>
+          </h3>
+          <p className="text-sm text-muted-foreground">
+            <Trans>Your business logo shown on WhatsApp.</Trans>
+          </p>
         </div>
+        <Separator />
 
-        {/* Section B: Logo */}
-        <div className="flex flex-col gap-4">
-          <div>
-            <h3 className="text-base font-semibold">
-              <Trans>Profile logo</Trans>
-            </h3>
-            <p className="text-sm text-muted-foreground">
-              <Trans>Your business logo shown on WhatsApp.</Trans>
-            </p>
-          </div>
-          <Separator />
+        <TierGatedField plan={currentPlan}>
+          <TenantLogoPicker
+            logoUrl={tenant?.logoUrl}
+            tenantName={tenant?.name ?? ""}
+            isPending={saveBrandProfileMutation.isPending}
+            readOnly={readOnly || !hasPaidPlan}
+            size="lg"
+            onFileSelect={handleLogoFileSelect}
+            onRemove={() => {
+              setSelectedLogoFile(null);
+            }}
+          />
+        </TierGatedField>
+      </div>
 
-          <TierGatedField plan={currentPlan}>
-            <TenantLogoPicker
-              logoUrl={tenant?.logoUrl}
-              tenantName={tenant?.name ?? ""}
-              isPending={saveBrandProfileMutation.isPending}
-              readOnly={readOnly || !hasPaidPlan}
-              size="lg"
-              onFileSelect={handleLogoFileSelect}
-              onRemove={() => {
-                setSelectedLogoFile(null);
-              }}
-            />
-          </TierGatedField>
+      {/* Section C: Business vertical */}
+      <div className="flex flex-col gap-4">
+        <div>
+          <h3 className="text-base font-semibold">
+            <Trans>Business category</Trans>
+          </h3>
+          <p className="text-sm text-muted-foreground">
+            <Trans>Select the category that best describes your business.</Trans>
+          </p>
         </div>
+        <Separator />
 
-        {/* Section C: Business vertical */}
-        <div className="flex flex-col gap-4">
-          <div>
-            <h3 className="text-base font-semibold">
-              <Trans>Business category</Trans>
-            </h3>
-            <p className="text-sm text-muted-foreground">
-              <Trans>Select the category that best describes your business.</Trans>
-            </p>
-          </div>
-          <Separator />
-
-          <SelectField
-            name="brandVertical"
-            label={t`Business category`}
-            value={formValues.brandVertical}
-            onValueChange={(v) =>
-              setFormValues((prev) => ({ ...prev, brandVertical: v as MetaBusinessVertical | null }))
-            }
-            disabled={readOnly}
-          >
-            <SelectTrigger>
-              <SelectValue>
-                {(v: MetaBusinessVertical | null) =>
-                  v ? VERTICAL_LABELS[v] : <span className="text-muted-foreground">{t`Select category`}</span>
-                }
-              </SelectValue>
-            </SelectTrigger>
-            <SelectContent>
-              {Object.values(MetaBusinessVertical).map((v) => (
-                <SelectItem key={v} value={v}>
-                  {VERTICAL_LABELS[v]}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </SelectField>
-        </div>
-
-        {/* Section D: Websites */}
-        <div className="flex flex-col gap-4">
-          <div>
-            <h3 className="text-base font-semibold">
-              <Trans>Websites</Trans>
-            </h3>
-            <p className="text-sm text-muted-foreground">
-              {maxWebsites === 1 ? (
-                <Trans>URLs shown on your WhatsApp profile. Your plan supports 1 website.</Trans>
-              ) : (
-                <Trans>URLs shown on your WhatsApp profile. Your plan supports up to 2 websites.</Trans>
-              )}
-            </p>
-          </div>
-          <Separator />
-
-          <div className="flex flex-col gap-2">
-            {formValues.brandWebsites.map((url, index) => (
-              <div key={index} className="flex items-end gap-2">
-                <TextField
-                  className="flex-1"
-                  name={`brandWebsites[${index}]`}
-                  label={index === 0 ? t`Website URL` : undefined}
-                  type="url"
-                  value={url}
-                  onChange={(v) => handleWebsiteChange(index, v)}
-                  readOnly={readOnly}
-                  placeholder="https://"
-                />
-                {index > 0 && !readOnly && (
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon"
-                    aria-label={t`Remove website`}
-                    onClick={() => handleRemoveWebsite(index)}
-                  >
-                    <Trash2Icon />
-                  </Button>
-                )}
-              </div>
+        <SelectField
+          name="brandVertical"
+          label={t`Business category`}
+          value={formValues.brandVertical}
+          onValueChange={(v) => setFormValues((prev) => ({ ...prev, brandVertical: v as MetaBusinessVertical | null }))}
+          disabled={readOnly}
+        >
+          <SelectTrigger>
+            <SelectValue>
+              {(v: MetaBusinessVertical | null) =>
+                v ? VERTICAL_LABELS[v] : <span className="text-muted-foreground">{t`Select category`}</span>
+              }
+            </SelectValue>
+          </SelectTrigger>
+          <SelectContent>
+            {Object.values(MetaBusinessVertical).map((v) => (
+              <SelectItem key={v} value={v}>
+                {VERTICAL_LABELS[v]}
+              </SelectItem>
             ))}
+          </SelectContent>
+        </SelectField>
+      </div>
 
-            {!readOnly && formValues.brandWebsites.length < maxWebsites && (
-              <Button type="button" variant="outline" size="sm" onClick={handleAddWebsite} className="w-fit">
-                <PlusIcon />
-                <Trans>Add website</Trans>
-              </Button>
+      {/* Section D: Websites */}
+      <div className="flex flex-col gap-4">
+        <div>
+          <h3 className="text-base font-semibold">
+            <Trans>Websites</Trans>
+          </h3>
+          <p className="text-sm text-muted-foreground">
+            {maxWebsites === 1 ? (
+              <Trans>URLs shown on your WhatsApp profile. Your plan supports 1 website.</Trans>
+            ) : (
+              <Trans>URLs shown on your WhatsApp profile. Your plan supports up to 2 websites.</Trans>
             )}
-
-            {!readOnly && maxWebsites < 2 && (
-              <p className="text-sm text-muted-foreground">
-                <Trans>
-                  <Link to="/account/billing" className="text-primary underline underline-offset-4">
-                    Upgrade your plan
-                  </Link>{" "}
-                  to add a second website.
-                </Trans>
-              </p>
-            )}
-          </div>
+          </p>
         </div>
+        <Separator />
 
-        {/* Save button */}
-        {isOwner && (
-          <div className="mt-4 flex justify-end">
-            <Button type="submit" isPending={saveBrandProfileMutation.isPending}>
-              {saveBrandProfileMutation.isPending ? <Trans>Saving...</Trans> : <Trans>Save changes</Trans>}
+        <div className="flex flex-col gap-2">
+          {formValues.brandWebsites.map((url, index) => (
+            <div key={index} className="flex items-end gap-2">
+              <TextField
+                className="flex-1"
+                name={`brandWebsites[${index}]`}
+                label={index === 0 ? t`Website URL` : undefined}
+                type="url"
+                value={url}
+                onChange={(v) => handleWebsiteChange(index, v)}
+                readOnly={readOnly}
+                placeholder="https://"
+              />
+              {index > 0 && !readOnly && (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  aria-label={t`Remove website`}
+                  onClick={() => handleRemoveWebsite(index)}
+                >
+                  <Trash2Icon />
+                </Button>
+              )}
+            </div>
+          ))}
+
+          {!readOnly && formValues.brandWebsites.length < maxWebsites && (
+            <Button type="button" variant="outline" size="sm" onClick={handleAddWebsite} className="w-fit">
+              <PlusIcon />
+              <Trans>Add website</Trans>
             </Button>
-          </div>
-        )}
-      </Form>
+          )}
+
+          {!readOnly && maxWebsites < 2 && (
+            <p className="text-sm text-muted-foreground">
+              <Trans>
+                <Link to="/account/billing" className="text-primary underline underline-offset-4">
+                  Upgrade your plan
+                </Link>{" "}
+                to add a second website.
+              </Trans>
+            </p>
+          )}
+        </div>
+      </div>
+
+      {/* Save button */}
+      {isOwner && (
+        <div className="mt-4 flex justify-end">
+          <Button type="submit" isPending={saveBrandProfileMutation.isPending}>
+            {saveBrandProfileMutation.isPending ? <Trans>Saving...</Trans> : <Trans>Save changes</Trans>}
+          </Button>
+        </div>
+      )}
+    </Form>
   );
 }
 

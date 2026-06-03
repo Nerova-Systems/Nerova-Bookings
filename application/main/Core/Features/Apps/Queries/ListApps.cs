@@ -39,7 +39,8 @@ public sealed class ListAppsHandler(
                     app,
                     installedSlugs.Contains(app.Id),
                     connectedSlugs.Contains(app.Id),
-                    appRegistry.Resolve(app.Id)?.Permissions.ToArray() ?? []
+                    appRegistry.Resolve(app.Id)?.Permissions.ToArray() ?? [],
+                    AppListingCatalog.For(app.Id)
                 )
             )
             .ToArray();

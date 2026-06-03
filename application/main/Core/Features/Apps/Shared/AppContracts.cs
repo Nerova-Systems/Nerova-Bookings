@@ -3,6 +3,24 @@ using Main.Features.Apps.Domain;
 
 namespace Main.Features.Apps.Shared;
 
+/// <summary>
+///     Marketing metadata used to render the App Store listing and detail pages: the connector's
+///     publisher, pricing label, contact details, a longer overview, and screenshot image URLs.
+///     Resolved per-slug by <see cref="AppListingCatalog" />.
+/// </summary>
+[PublicAPI]
+public sealed record AppListing(
+    string Publisher,
+    string Pricing,
+    string Website,
+    string SupportEmail,
+    string Overview,
+    string[] Screenshots
+)
+{
+    public static readonly AppListing Default = new(string.Empty, "Free", string.Empty, string.Empty, string.Empty, []);
+}
+
 [PublicAPI]
 public sealed record AppResponse(
     AppSlug Slug,
@@ -13,14 +31,21 @@ public sealed record AppResponse(
     bool IsActive,
     bool IsInstalledForTenant,
     bool IsConnectedForUser,
-    AppPermission[] Permissions
+    AppPermission[] Permissions,
+    string Publisher,
+    string Pricing,
+    string Website,
+    string SupportEmail,
+    string Overview,
+    string[] Screenshots
 )
 {
     public static AppResponse From(
         App app,
         bool isInstalledForTenant,
         bool isConnectedForUser,
-        AppPermission[] permissions
+        AppPermission[] permissions,
+        AppListing listing
     )
     {
         return new AppResponse(
@@ -32,7 +57,13 @@ public sealed record AppResponse(
             app.IsActive,
             isInstalledForTenant,
             isConnectedForUser,
-            permissions
+            permissions,
+            listing.Publisher,
+            listing.Pricing,
+            listing.Website,
+            listing.SupportEmail,
+            string.IsNullOrWhiteSpace(listing.Overview) ? app.Description : listing.Overview,
+            listing.Screenshots
         );
     }
 }
