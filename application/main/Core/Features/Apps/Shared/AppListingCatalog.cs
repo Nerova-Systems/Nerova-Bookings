@@ -49,7 +49,8 @@ public static class AppListingCatalog
             "https://meet.google.com/",
             "support@google.com",
             "Google Meet adds a video conferencing link to your bookings using your connected Google Calendar. A Meet link is created for each event automatically — no extra sign-in required once Google Calendar is connected.",
-            ["/app-screenshots/google-meet-1.svg", "/app-screenshots/google-meet-2.svg"]
+            ["/app-screenshots/google-meet-1.svg", "/app-screenshots/google-meet-2.svg"],
+            IsNew: true
         ),
         [MsTeamsSlug.Value] = new AppListing(
             "Microsoft",
@@ -57,7 +58,8 @@ public static class AppListingCatalog
             "https://www.microsoft.com/microsoft-teams/",
             "support@microsoft.com",
             "Microsoft Teams adds an online meeting link to your bookings using your connected Office 365 Calendar. A Teams meeting is generated for each event automatically once Office 365 Calendar is connected.",
-            ["/app-screenshots/ms-teams-1.svg", "/app-screenshots/ms-teams-2.svg"]
+            ["/app-screenshots/ms-teams-1.svg", "/app-screenshots/ms-teams-2.svg"],
+            IsNew: true
         ),
         ["whatsapp"] = new AppListing(
             "Meta",

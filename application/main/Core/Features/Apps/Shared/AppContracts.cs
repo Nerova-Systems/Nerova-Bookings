@@ -15,7 +15,8 @@ public sealed record AppListing(
     string Website,
     string SupportEmail,
     string Overview,
-    string[] Screenshots
+    string[] Screenshots,
+    bool IsNew = false
 )
 {
     public static readonly AppListing Default = new(string.Empty, "Free", string.Empty, string.Empty, string.Empty, []);
@@ -37,7 +38,8 @@ public sealed record AppResponse(
     string Website,
     string SupportEmail,
     string Overview,
-    string[] Screenshots
+    string[] Screenshots,
+    bool IsNew
 )
 {
     public static AppResponse From(
@@ -63,7 +65,8 @@ public sealed record AppResponse(
             listing.Website,
             listing.SupportEmail,
             string.IsNullOrWhiteSpace(listing.Overview) ? app.Description : listing.Overview,
-            listing.Screenshots
+            listing.Screenshots,
+            listing.IsNew
         );
     }
 }

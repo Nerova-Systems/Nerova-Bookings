@@ -40,72 +40,28 @@ export function AppDetailView({ app, allApps }: Readonly<{ app: App; allApps: re
   const canInstall = app.isActive && missingPrerequisite === null && !isInstalled;
 
   return (
-    <div className="flex flex-col gap-8">
-      <div className="flex flex-col gap-4 border-b border-border pb-6 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex items-center gap-4">
-          <img
-            src={getAppIconSrc(app)}
-            alt=""
-            className="size-16 shrink-0 rounded-xl border bg-background object-contain p-2 shadow-sm"
-          />
-          <div className="min-w-0">
-            <div className="flex flex-wrap items-center gap-2">
-              <h1 className="text-2xl font-bold text-foreground">{app.name}</h1>
-              {isInstalled && (
-                <Badge className="flex items-center gap-1 border-emerald-500/20 bg-emerald-500/10 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400">
-                  <CheckCircle2Icon className="size-3" />
-                  <Trans>Connected</Trans>
-                </Badge>
-              )}
+    <>
+      <div className="grid grid-cols-1 gap-8 lg:grid-cols-[3fr_2fr]">
+        <div className="order-2 flex flex-col gap-8 lg:order-1">
+          <AppScreenshotCarousel screenshots={app.screenshots} appName={app.name} />
+
+          {missingPrerequisite && (
+            <div className="flex gap-3 rounded-lg border border-amber-200 bg-amber-50/50 p-4 dark:border-amber-900/50 dark:bg-amber-950/20">
+              <AlertTriangleIcon className="mt-0.5 size-4 shrink-0 text-amber-600 dark:text-amber-400" />
+              <div className="text-sm">
+                <p className="font-semibold text-amber-800 dark:text-amber-300">
+                  <Trans>Prerequisite required</Trans>
+                </p>
+                <p className="mt-0.5 text-amber-700/95 dark:text-amber-400/90">
+                  <Trans>
+                    You must install and connect <strong>{missingPrerequisite.name}</strong> first before you can enable{" "}
+                    {app.name}.
+                  </Trans>
+                </p>
+              </div>
             </div>
-            <p className="mt-1 text-sm text-muted-foreground">
-              {app.publisher ? <Trans>By {app.publisher}</Trans> : null}
-              {app.publisher ? " · " : null}
-              {getAppCategoryLabel(app.category)}
-            </p>
-          </div>
-        </div>
-        <div className="shrink-0">
-          {isInstalled ? (
-            <Button variant="destructive" size="sm" onClick={() => setAppToUninstall(app)}>
-              <Trash2Icon className="size-4" />
-              <Trans>Uninstall app</Trans>
-            </Button>
-          ) : (
-            <Button
-              size="sm"
-              disabled={!canInstall}
-              isPending={installMutation.isPending}
-              onClick={() => installMutation.mutate({ params: { path: { slug: app.slug } } })}
-            >
-              <Trans>Install app</Trans>
-              <ArrowRightIcon className="size-4" />
-            </Button>
           )}
-        </div>
-      </div>
 
-      <AppScreenshotCarousel screenshots={app.screenshots} appName={app.name} />
-
-      {missingPrerequisite && (
-        <div className="flex gap-3 rounded-lg border border-amber-200 bg-amber-50/50 p-4 dark:border-amber-900/50 dark:bg-amber-950/20">
-          <AlertTriangleIcon className="mt-0.5 size-4 shrink-0 text-amber-600 dark:text-amber-400" />
-          <div className="text-sm">
-            <p className="font-semibold text-amber-800 dark:text-amber-300">
-              <Trans>Prerequisite required</Trans>
-            </p>
-            <p className="mt-0.5 text-amber-700/95 dark:text-amber-400/90">
-              <Trans>
-                You must install and connect <strong>{missingPrerequisite.name}</strong> first before you can enable{" "}
-                {app.name}.
-              </Trans>
-            </p>
-          </div>
-        </div>
-      )}
-
-      <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1fr_18rem]">
-        <div className="flex flex-col gap-8">
           <section>
             <h2 className="mb-2 text-sm font-semibold tracking-wider text-muted-foreground uppercase">
               <Trans>Overview</Trans>
@@ -121,7 +77,16 @@ export function AppDetailView({ app, allApps }: Readonly<{ app: App; allApps: re
           </section>
         </div>
 
-        <AppDetailSidebar app={app} />
+        <div className="order-1 lg:order-2">
+          <AppDetailSidebar
+            app={app}
+            isInstalled={isInstalled}
+            canInstall={canInstall}
+            isPending={installMutation.isPending}
+            onInstall={() => installMutation.mutate({ params: { path: { slug: app.slug } } })}
+            onUninstall={() => setAppToUninstall(app)}
+          />
+        </div>
       </div>
 
       <UninstallAppDialog
@@ -131,35 +96,87 @@ export function AppDetailView({ app, allApps }: Readonly<{ app: App; allApps: re
           if (!isOpen) setAppToUninstall(null);
         }}
       />
-    </div>
+    </>
   );
 }
 
-function AppDetailSidebar({ app }: Readonly<{ app: App }>) {
+interface AppDetailSidebarProps {
+  app: App;
+  isInstalled: boolean;
+  canInstall: boolean;
+  isPending: boolean;
+  onInstall: () => void;
+  onUninstall: () => void;
+}
+
+function AppDetailSidebar({
+  app,
+  isInstalled,
+  canInstall,
+  isPending,
+  onInstall,
+  onUninstall
+}: Readonly<AppDetailSidebarProps>) {
   return (
-    <aside className="flex flex-col gap-6 lg:border-l lg:border-border lg:pl-8">
-      <div>
+    <aside className="flex flex-col gap-6 rounded-xl border border-border bg-card p-6 lg:sticky lg:top-6">
+      <div className="flex items-start gap-4">
+        <img
+          src={getAppIconSrc(app)}
+          alt=""
+          className="size-16 shrink-0 rounded-xl border bg-background object-contain p-2 shadow-sm"
+        />
+        <div className="min-w-0">
+          <h1 className="text-xl font-bold text-foreground">{app.name}</h1>
+          <div className="mt-2 flex flex-wrap gap-1.5">
+            <Badge
+              variant="outline"
+              className="text-[10px] font-semibold tracking-wider text-muted-foreground uppercase"
+            >
+              {getAppCategoryLabel(app.category)}
+            </Badge>
+            <Badge variant="outline" className="text-[10px] font-semibold tracking-wider uppercase">
+              {app.pricing}
+            </Badge>
+            {isInstalled && (
+              <Badge className="flex items-center gap-1 border-emerald-500/20 bg-emerald-500/10 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400">
+                <CheckCircle2Icon className="size-3" />
+                <Trans>Connected</Trans>
+              </Badge>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {isInstalled ? (
+        <Button variant="destructive" className="w-full justify-center" onClick={onUninstall}>
+          <Trash2Icon className="size-4" />
+          <Trans>Uninstall app</Trans>
+        </Button>
+      ) : (
+        <Button className="w-full justify-center" disabled={!canInstall} isPending={isPending} onClick={onInstall}>
+          <Trans>Install app</Trans>
+          <ArrowRightIcon className="size-4" />
+        </Button>
+      )}
+
+      {app.publisher && (
+        <div className="border-t border-border pt-4">
+          <h3 className="mb-1 text-xs font-semibold tracking-wider text-muted-foreground uppercase">
+            <Trans>Published by</Trans>
+          </h3>
+          <p className="text-sm text-foreground">{app.publisher}</p>
+        </div>
+      )}
+
+      <div className="border-t border-border pt-4">
         <h3 className="mb-1 text-xs font-semibold tracking-wider text-muted-foreground uppercase">
           <Trans>Pricing</Trans>
         </h3>
         <p className="text-sm font-medium text-foreground">{app.pricing}</p>
       </div>
-      {app.publisher && (
-        <div>
-          <h3 className="mb-1 text-xs font-semibold tracking-wider text-muted-foreground uppercase">
-            <Trans>Publisher</Trans>
-          </h3>
-          <p className="text-sm text-foreground">{app.publisher}</p>
-        </div>
-      )}
-      <div>
-        <h3 className="mb-1 text-xs font-semibold tracking-wider text-muted-foreground uppercase">
-          <Trans>Category</Trans>
-        </h3>
-        <p className="text-sm text-foreground">{getAppCategoryLabel(app.category)}</p>
-      </div>
+
       {(app.website || app.supportEmail) && (
-        <div>
+        <div className="border-t border-border pt-4">
           <h3 className="mb-2 text-xs font-semibold tracking-wider text-muted-foreground uppercase">
             <Trans>Contact</Trans>
           </h3>

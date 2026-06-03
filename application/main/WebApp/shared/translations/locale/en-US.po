@@ -57,6 +57,9 @@ msgstr "Active"
 msgid "Active bookings per booker"
 msgstr "Active bookings per booker"
 
+msgid "Activity"
+msgstr "Activity"
+
 msgid "Add a question"
 msgstr "Add a question"
 
@@ -168,6 +171,12 @@ msgstr "Any rating"
 msgid "App categories"
 msgstr "App categories"
 
+msgid "App Details"
+msgstr "App Details"
+
+msgid "App not found"
+msgstr "App not found"
+
 msgid "App store"
 msgstr "App store"
 
@@ -224,6 +233,9 @@ msgstr "Available times"
 
 msgid "Back"
 msgstr "Back"
+
+msgid "Back to App Store"
+msgstr "Back to App Store"
 
 msgid "Back to availability"
 msgstr "Back to availability"
@@ -360,7 +372,6 @@ msgstr "Business name"
 msgid "By"
 msgstr "By"
 
-#. placeholder {0}: app.publisher
 #. placeholder {0}: entry.actorUserId
 msgid "By {0}"
 msgstr "By {0}"
@@ -423,9 +434,6 @@ msgstr "Cancelled {0} bookings"
 
 msgid "Capacity limits"
 msgstr "Capacity limits"
-
-msgid "Category"
-msgstr "Category"
 
 msgid "Channels"
 msgstr "Channels"
@@ -718,6 +726,9 @@ msgstr "Delete webhook?"
 
 msgid "Deliver transactional booking emails to your customers. Coming soon."
 msgstr "Deliver transactional booking emails to your customers. Coming soon."
+
+msgid "Delivered"
+msgstr "Delivered"
 
 msgid "Description"
 msgstr "Description"
@@ -1039,6 +1050,9 @@ msgstr "How often you can be booked"
 msgid "In person"
 msgstr "In person"
 
+msgid "Inbound"
+msgstr "Inbound"
+
 msgid "Insights"
 msgstr "Insights"
 
@@ -1086,6 +1100,10 @@ msgstr "Label"
 
 msgid "Language"
 msgstr "Language"
+
+#. placeholder {0}: formatTimestamp(stats.lastActivityAt)
+msgid "Last message {0}"
+msgstr "Last message {0}"
 
 msgid "Launch troubleshooter"
 msgstr "Launch troubleshooter"
@@ -1344,6 +1362,9 @@ msgstr "New schedule"
 msgid "New webhook"
 msgstr "New webhook"
 
+msgid "Newly added"
+msgstr "Newly added"
+
 msgid "Next"
 msgstr "Next"
 
@@ -1549,6 +1570,9 @@ msgstr "Options"
 msgid "Other"
 msgstr "Other"
 
+msgid "Outbound"
+msgstr "Outbound"
+
 #. placeholder {0}: schedule.dateOverrides.length
 msgid "Overrides: {0}"
 msgstr "Overrides: {0}"
@@ -1637,8 +1661,8 @@ msgstr "Public booking"
 msgid "Public link copied"
 msgstr "Public link copied"
 
-msgid "Publisher"
-msgstr "Publisher"
+msgid "Published by"
+msgstr "Published by"
 
 msgid "Question"
 msgstr "Question"
@@ -1893,6 +1917,12 @@ msgstr "Screenshot {0} of {appName}"
 
 msgid "Screenshots"
 msgstr "Screenshots"
+
+msgid "Scroll left"
+msgstr "Scroll left"
+
+msgid "Scroll right"
+msgstr "Scroll right"
 
 msgid "Search"
 msgstr "Search"
@@ -2160,6 +2190,9 @@ msgstr "This action applies to every selected booking."
 msgid "This app does not request access to any of your data."
 msgstr "This app does not request access to any of your data."
 
+msgid "This app is unavailable or no longer exists. Browse the App Store for available apps."
+msgstr "This app is unavailable or no longer exists. Browse the App Store for available apps."
+
 msgid "this attendee"
 msgstr "this attendee"
 
@@ -2241,6 +2274,9 @@ msgstr "Top hosts"
 msgid "Total bookings"
 msgstr "Total bookings"
 
+msgid "Total messages"
+msgstr "Total messages"
+
 msgid "Triggers"
 msgstr "Triggers"
 
@@ -2271,6 +2307,9 @@ msgstr "Uninstall {0}?"
 
 msgid "Uninstall app"
 msgstr "Uninstall app"
+
+msgid "Unique contacts"
+msgstr "Unique contacts"
 
 msgid "Untitled field"
 msgstr "Untitled field"

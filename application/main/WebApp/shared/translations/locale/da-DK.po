@@ -57,6 +57,9 @@ msgstr "Aktiv"
 msgid "Active bookings per booker"
 msgstr ""
 
+msgid "Activity"
+msgstr ""
+
 msgid "Add a question"
 msgstr "Tilføj et spørgsmål"
 
@@ -168,6 +171,12 @@ msgstr "Enhver vurdering"
 msgid "App categories"
 msgstr "App-kategorier"
 
+msgid "App Details"
+msgstr ""
+
+msgid "App not found"
+msgstr ""
+
 msgid "App store"
 msgstr ""
 
@@ -224,6 +233,9 @@ msgstr "Tilgængelige tider"
 
 msgid "Back"
 msgstr "Tilbage"
+
+msgid "Back to App Store"
+msgstr ""
 
 msgid "Back to availability"
 msgstr "Tilbage til tilgængelighed"
@@ -360,7 +372,6 @@ msgstr ""
 msgid "By"
 msgstr "Af"
 
-#. placeholder {0}: app.publisher
 #. placeholder {0}: entry.actorUserId
 msgid "By {0}"
 msgstr "Af {0}"
@@ -422,9 +433,6 @@ msgid "Cancelled {0} bookings"
 msgstr "{0} bookinger annulleret"
 
 msgid "Capacity limits"
-msgstr ""
-
-msgid "Category"
 msgstr ""
 
 msgid "Channels"
@@ -717,6 +725,9 @@ msgid "Delete webhook?"
 msgstr "Slet webhook?"
 
 msgid "Deliver transactional booking emails to your customers. Coming soon."
+msgstr ""
+
+msgid "Delivered"
 msgstr ""
 
 msgid "Description"
@@ -1039,6 +1050,9 @@ msgstr "Hvor ofte du kan bookes"
 msgid "In person"
 msgstr "Fysisk"
 
+msgid "Inbound"
+msgstr ""
+
 msgid "Insights"
 msgstr "Indsigt"
 
@@ -1086,6 +1100,10 @@ msgstr "Etiket"
 
 msgid "Language"
 msgstr "Sprog"
+
+#. placeholder {0}: formatTimestamp(stats.lastActivityAt)
+msgid "Last message {0}"
+msgstr ""
 
 msgid "Launch troubleshooter"
 msgstr "Start fejlfinding"
@@ -1344,6 +1362,9 @@ msgstr "Ny tidsplan"
 msgid "New webhook"
 msgstr "Ny webhook"
 
+msgid "Newly added"
+msgstr ""
+
 msgid "Next"
 msgstr "Næste"
 
@@ -1549,6 +1570,9 @@ msgstr "Muligheder"
 msgid "Other"
 msgstr "Andet"
 
+msgid "Outbound"
+msgstr ""
+
 #. placeholder {0}: schedule.dateOverrides.length
 msgid "Overrides: {0}"
 msgstr "Undtagelser: {0}"
@@ -1637,7 +1661,7 @@ msgstr "Offentlig booking"
 msgid "Public link copied"
 msgstr "Offentligt link kopieret"
 
-msgid "Publisher"
+msgid "Published by"
 msgstr ""
 
 msgid "Question"
@@ -1892,6 +1916,12 @@ msgid "Screenshot {0} of {appName}"
 msgstr ""
 
 msgid "Screenshots"
+msgstr ""
+
+msgid "Scroll left"
+msgstr ""
+
+msgid "Scroll right"
 msgstr ""
 
 msgid "Search"
@@ -2160,6 +2190,9 @@ msgstr "Denne handling gælder for alle valgte bookinger."
 msgid "This app does not request access to any of your data."
 msgstr "Denne app anmoder ikke om adgang til nogen af dine data."
 
+msgid "This app is unavailable or no longer exists. Browse the App Store for available apps."
+msgstr ""
+
 msgid "this attendee"
 msgstr ""
 
@@ -2241,6 +2274,9 @@ msgstr "Mest aktive værter"
 msgid "Total bookings"
 msgstr "Bookinger i alt"
 
+msgid "Total messages"
+msgstr ""
+
 msgid "Triggers"
 msgstr "Udløsere"
 
@@ -2271,6 +2307,9 @@ msgstr "Afinstaller {0}?"
 
 msgid "Uninstall app"
 msgstr "Afinstaller app"
+
+msgid "Unique contacts"
+msgstr ""
 
 msgid "Untitled field"
 msgstr "Felt uden titel"

@@ -13,6 +13,14 @@ const CATEGORY_ICON: Readonly<Record<AppCategory, LucideIcon>> = {
   [AppCategory.Other]: BlocksIcon
 };
 
+/** Per-category gradient backdrop for the featured-category slider tiles (decision 3A). */
+const CATEGORY_GRADIENT: Readonly<Record<AppCategory, string>> = {
+  [AppCategory.Calendar]: "from-sky-500/15 to-blue-500/5 text-sky-600 dark:text-sky-400",
+  [AppCategory.Conferencing]: "from-violet-500/15 to-fuchsia-500/5 text-violet-600 dark:text-violet-400",
+  [AppCategory.Payment]: "from-emerald-500/15 to-teal-500/5 text-emerald-600 dark:text-emerald-400",
+  [AppCategory.Other]: "from-amber-500/15 to-orange-500/5 text-amber-600 dark:text-amber-400"
+};
+
 export function CategoryCard({
   category,
   count,
@@ -23,13 +31,16 @@ export function CategoryCard({
     <button
       type="button"
       onClick={onClick}
-      className="group flex items-center gap-4 rounded-lg border border-border bg-card p-5 text-left outline-ring transition-colors hover:border-primary/40 hover:bg-accent/40 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
+      className={cn(
+        "group flex h-36 w-full flex-col justify-between rounded-xl border border-border bg-gradient-to-br p-5 text-left outline-ring transition-all hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2",
+        CATEGORY_GRADIENT[category]
+      )}
     >
-      <div className="flex size-12 items-center justify-center rounded-lg bg-primary/10 text-primary transition-colors group-hover:bg-primary/15">
-        <Icon className="size-6" />
+      <div className="flex size-11 items-center justify-center rounded-lg bg-background/70 shadow-sm backdrop-blur-sm">
+        <Icon className="size-5" />
       </div>
       <div className="min-w-0">
-        <p className="font-medium text-foreground">{getAppCategoryLabel(category)}</p>
+        <p className="font-semibold text-foreground">{getAppCategoryLabel(category)}</p>
         <p className="text-sm text-muted-foreground">
           {count === 1 ? <Trans>{count} app</Trans> : <Trans>{count} apps</Trans>}
         </p>

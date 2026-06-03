@@ -20,5 +20,9 @@ public sealed class WhatsAppMessagingEndpoints : IEndpoints
         group.MapGet("/", async Task<ApiResult<GetWhatsAppMessagesResponse>> ([AsParameters] GetWhatsAppMessagesQuery query, IMediator mediator)
             => await mediator.Send(query)
         ).Produces<GetWhatsAppMessagesResponse>();
+
+        group.MapGet("/stats", async Task<ApiResult<GetWhatsAppStatsResponse>> ([AsParameters] GetWhatsAppStatsQuery query, IMediator mediator)
+            => await mediator.Send(query)
+        ).Produces<GetWhatsAppStatsResponse>();
     }
 }

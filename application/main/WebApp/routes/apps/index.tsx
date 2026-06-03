@@ -12,6 +12,7 @@ import { api } from "@/shared/lib/api/client";
 
 import type { App } from "./-components/appsTypes";
 
+import { AppSlider } from "./-components/AppSlider";
 import { AppsPageShell } from "./-components/AppsPageShell";
 import { AppStoreCard } from "./-components/AppStoreCard";
 import { CategoryCard, CategoryPill } from "./-components/AppStoreFilters";
@@ -58,9 +59,11 @@ function AppStoreGalleryPage() {
 
   const popularApps = useMemo(
     () =>
-      [...apps].sort((a, b) => popularRank(a.slug) - popularRank(b.slug) || a.name.localeCompare(b.name)).slice(0, 4),
+      [...apps].sort((a, b) => popularRank(a.slug) - popularRank(b.slug) || a.name.localeCompare(b.name)).slice(0, 8),
     [apps]
   );
+
+  const newApps = useMemo(() => apps.filter((app) => app.isNew).sort((a, b) => a.name.localeCompare(b.name)), [apps]);
 
   const normalizedSearch = searchQuery.trim().toLowerCase();
   const isFiltering = normalizedSearch.length > 0 || selectedCategory !== null;
@@ -93,36 +96,39 @@ function AppStoreGalleryPage() {
       actions={searchInput}
     >
       <div className="flex flex-col gap-10">
-        {/* Featured categories + Most popular only show on the unfiltered landing view */}
+        {/* Featured categories + Most popular + Newly added only show on the unfiltered landing view */}
         {!isFiltering && !isLoading && availableCategories.length > 0 && (
-          <section>
-            <h2 className="mb-4 text-base font-semibold text-foreground">
-              <Trans>Featured categories</Trans>
-            </h2>
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
-              {availableCategories.map((category) => (
+          <AppSlider title={<Trans>Featured categories</Trans>}>
+            {availableCategories.map((category) => (
+              <div key={category} className="w-64 shrink-0 snap-start">
                 <CategoryCard
-                  key={category}
                   category={category}
                   count={categoryCounts.get(category) ?? 0}
                   onClick={() => setSelectedCategory(category)}
                 />
-              ))}
-            </div>
-          </section>
+              </div>
+            ))}
+          </AppSlider>
         )}
 
         {!isFiltering && !isLoading && popularApps.length > 0 && (
-          <section>
-            <h2 className="mb-4 text-base font-semibold text-foreground">
-              <Trans>Most popular</Trans>
-            </h2>
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
-              {popularApps.map((app) => (
-                <AppStoreCard key={app.slug} app={app} allApps={apps} onDetails={() => openDetails(app)} />
-              ))}
-            </div>
-          </section>
+          <AppSlider title={<Trans>Most popular</Trans>}>
+            {popularApps.map((app) => (
+              <div key={app.slug} className="w-72 shrink-0 snap-start">
+                <AppStoreCard app={app} allApps={apps} onDetails={() => openDetails(app)} />
+              </div>
+            ))}
+          </AppSlider>
+        )}
+
+        {!isFiltering && !isLoading && newApps.length > 0 && (
+          <AppSlider title={<Trans>Newly added</Trans>}>
+            {newApps.map((app) => (
+              <div key={app.slug} className="w-72 shrink-0 snap-start">
+                <AppStoreCard app={app} allApps={apps} onDetails={() => openDetails(app)} />
+              </div>
+            ))}
+          </AppSlider>
         )}
 
         {/* All apps with category filter */}

@@ -3,6 +3,7 @@ import { Trans } from "@lingui/react/macro";
 import { Badge } from "@repo/ui/components/Badge";
 import { Button } from "@repo/ui/components/Button";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@repo/ui/components/Collapsible";
+import { Link as RouterLink } from "@tanstack/react-router";
 import { ChevronDownIcon } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -69,6 +70,14 @@ export function AppRow({ app, onUninstall }: Readonly<AppRowProps>) {
         </div>
 
         <div className="flex shrink-0 items-center gap-2">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="hidden sm:inline-flex"
+            render={<RouterLink to="/apps/$slug" params={{ slug: app.slug }} />}
+          >
+            <Trans>Details</Trans>
+          </Button>
           <CollapsibleTrigger
             render={
               <Button variant="ghost" size="sm" aria-label={t`Show permissions for ${app.name}`}>
