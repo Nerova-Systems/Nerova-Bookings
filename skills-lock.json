@@ -7,6 +7,108 @@
       "skillPath": "skills/agents-sdk/SKILL.md",
       "computedHash": "01515ef239bee4ab1464d0eb735a857de3832a304fccd9315bf439837c053e62"
     },
+    "azure-ai": {
+      "source": "microsoft/azure-skills",
+      "sourceType": "github",
+      "skillPath": "skills/azure-ai/SKILL.md",
+      "computedHash": "09d7b1f982b731532ffaef107f3cd9a922464ca8812093f454852a7668cfcfd6"
+    },
+    "azure-cloud-migrate": {
+      "source": "microsoft/azure-skills",
+      "sourceType": "github",
+      "skillPath": "skills/azure-cloud-migrate/SKILL.md",
+      "computedHash": "ac96bc3d58eedb12fa264bbaec6c55dbceb7fd964f6d2529d0afaa97c1ce2ab8"
+    },
+    "azure-compliance": {
+      "source": "microsoft/azure-skills",
+      "sourceType": "github",
+      "skillPath": "skills/azure-compliance/SKILL.md",
+      "computedHash": "118525ad0d3d9b3e27f5d8b6bf86129efe90d57c14874d1c6ca9695cda86ede4"
+    },
+    "azure-compute": {
+      "source": "microsoft/azure-skills",
+      "sourceType": "github",
+      "skillPath": "skills/azure-compute/SKILL.md",
+      "computedHash": "19f51e07e1ab2fa34706050843e8688e5fdb03af6e134eeca894468cd7a99c16"
+    },
+    "azure-cost": {
+      "source": "microsoft/azure-skills",
+      "sourceType": "github",
+      "skillPath": "skills/azure-cost/SKILL.md",
+      "computedHash": "c2e6430e746847f0dbb5a2040f56f364972c6d5a996a24852ccc0bc981fcb4d9"
+    },
+    "azure-deploy": {
+      "source": "microsoft/azure-skills",
+      "sourceType": "github",
+      "skillPath": "skills/azure-deploy/SKILL.md",
+      "computedHash": "d9030d755b4294c945123a099c5492abdf260e868f0e9aa0e0ec0e5b0ebe23f9"
+    },
+    "azure-diagnostics": {
+      "source": "microsoft/azure-skills",
+      "sourceType": "github",
+      "skillPath": "skills/azure-diagnostics/SKILL.md",
+      "computedHash": "8bf4e13fe6b69e16f40a3cf28a5f81376a0c3aef030d55b7e31c289a2cec8301"
+    },
+    "azure-enterprise-infra-planner": {
+      "source": "microsoft/azure-skills",
+      "sourceType": "github",
+      "skillPath": "skills/azure-enterprise-infra-planner/SKILL.md",
+      "computedHash": "5939889e19ff7f209181f51ec7e2e90b9bc2a66a90ef1d4893f27ee6c900588a"
+    },
+    "azure-prepare": {
+      "source": "microsoft/azure-skills",
+      "sourceType": "github",
+      "skillPath": "skills/azure-prepare/SKILL.md",
+      "computedHash": "226f3cc6136e9de37c0538b008f4a0e61630b8864ac1a1b1a84c0b714b2b283f"
+    },
+    "azure-quotas": {
+      "source": "microsoft/azure-skills",
+      "sourceType": "github",
+      "skillPath": "skills/azure-quotas/SKILL.md",
+      "computedHash": "59007edd73a29918186336b6605cd93e83976702c6186a7c3453c8162737c0eb"
+    },
+    "azure-rbac": {
+      "source": "microsoft/azure-skills",
+      "sourceType": "github",
+      "skillPath": "skills/azure-rbac/SKILL.md",
+      "computedHash": "e4af230a641f4c6164b18d4c52a6a9afe8d04a561f52c3ca8e21cb8abe6f5b9b"
+    },
+    "azure-reliability": {
+      "source": "microsoft/azure-skills",
+      "sourceType": "github",
+      "skillPath": "skills/azure-reliability/SKILL.md",
+      "computedHash": "058f5c2ad3522250404193ed12b989005d474ca80a06d2ed413b02fdc368a957"
+    },
+    "azure-resource-lookup": {
+      "source": "microsoft/azure-skills",
+      "sourceType": "github",
+      "skillPath": "skills/azure-resource-lookup/SKILL.md",
+      "computedHash": "9d8f954005708ce7905cb60863c853216e88cff7a3684dcf1df112c1c7ac0787"
+    },
+    "azure-resource-visualizer": {
+      "source": "microsoft/azure-skills",
+      "sourceType": "github",
+      "skillPath": "skills/azure-resource-visualizer/SKILL.md",
+      "computedHash": "c6612f19a66f2332b5539e116bdde9500bf35d3d12349267ea610337be861609"
+    },
+    "azure-storage": {
+      "source": "microsoft/azure-skills",
+      "sourceType": "github",
+      "skillPath": "skills/azure-storage/SKILL.md",
+      "computedHash": "5e93ffc5ee21f947edf2cf39a187a7ce465b84dcea01c195cb23bb29be29b6b7"
+    },
+    "azure-upgrade": {
+      "source": "microsoft/azure-skills",
+      "sourceType": "github",
+      "skillPath": "skills/azure-upgrade/SKILL.md",
+      "computedHash": "ce0b1798c61f54a849cad5865709339ad411db03a49819676059e1445bbbe856"
+    },
+    "azure-validate": {
+      "source": "microsoft/azure-skills",
+      "sourceType": "github",
+      "skillPath": "skills/azure-validate/SKILL.md",
+      "computedHash": "32dbf12501454e92d7e07d665f4e9df576465f27b5e9e9ca68b8fa63f1ea5e63"
+    },
     "cloudflare": {
       "source": "cloudflare/skills",
       "sourceType": "github",
@@ -24,6 +126,90 @@
       "sourceType": "github",
       "skillPath": "skills/durable-objects/SKILL.md",
       "computedHash": "afa5e9dfcbbe3b70107d9f263a1c183ef89afbb5eb97f42be01cad7bd942958f"
+    },
+    "entra-app-registration": {
+      "source": "microsoft/azure-skills",
+      "sourceType": "github",
+      "skillPath": "skills/entra-app-registration/SKILL.md",
+      "computedHash": "b36605ccb116591593115e3da5772d391e5abc0a8fd12937157ccfa1534874a8"
+    },
+    "microsoft-foundry": {
+      "source": "microsoft/azure-skills",
+      "sourceType": "github",
+      "skillPath": "skills/microsoft-foundry/SKILL.md",
+      "computedHash": "867015cb251d43d4765b34ee19fae97a2ecbc1fbb5d3339c7481c743c7e2d8b9"
+    },
+    "paystack-charges": {
+      "source": "rexedge/paystack",
+      "sourceType": "github",
+      "skillPath": "skills/paystack-charges/SKILL.md",
+      "computedHash": "1960008170cbe1d181df4cf9b05a08b6122458c45a3a970f644c0e6bcae0e46b"
+    },
+    "paystack-customers": {
+      "source": "rexedge/paystack",
+      "sourceType": "github",
+      "skillPath": "skills/paystack-customers/SKILL.md",
+      "computedHash": "53201ee16009c208c04bff0cce06d1bde7e82f158d4eaf0ccc0b5e8d3e5881de"
+    },
+    "paystack-dedicated-accounts": {
+      "source": "rexedge/paystack",
+      "sourceType": "github",
+      "skillPath": "skills/paystack-dedicated-accounts/SKILL.md",
+      "computedHash": "ecfc75f2220e28c00768954f2a676affc8cd0082438fcf1b1975c416d14e4696"
+    },
+    "paystack-disputes": {
+      "source": "rexedge/paystack",
+      "sourceType": "github",
+      "skillPath": "skills/paystack-disputes/SKILL.md",
+      "computedHash": "73ea1ef885dd604ff01ad12caf73ba97e7a9999e9741b1551c0bb7290f1c2981"
+    },
+    "paystack-refunds": {
+      "source": "rexedge/paystack",
+      "sourceType": "github",
+      "skillPath": "skills/paystack-refunds/SKILL.md",
+      "computedHash": "cfc851aec1e05e5d5d73f207f21320b2250e96a1c8a1f3bc1395955068531224"
+    },
+    "paystack-setup": {
+      "source": "rexedge/paystack",
+      "sourceType": "github",
+      "skillPath": "skills/paystack-setup/SKILL.md",
+      "computedHash": "4084505f180db2d2013b978b68136f807969e73ac879bc4b58305a7a8b9dd008"
+    },
+    "paystack-splits": {
+      "source": "rexedge/paystack",
+      "sourceType": "github",
+      "skillPath": "skills/paystack-splits/SKILL.md",
+      "computedHash": "90eea4d34affb73ae08ff942cce364b7dbd6e914d50e6153745247620547181d"
+    },
+    "paystack-subaccounts": {
+      "source": "rexedge/paystack",
+      "sourceType": "github",
+      "skillPath": "skills/paystack-subaccounts/SKILL.md",
+      "computedHash": "61c9d98d285b83b55a2c615220ffde20448467903ac646f174f64db7d45df9b2"
+    },
+    "paystack-subscriptions": {
+      "source": "rexedge/paystack",
+      "sourceType": "github",
+      "skillPath": "skills/paystack-subscriptions/SKILL.md",
+      "computedHash": "a3f25c3fe06b6ee1688aecddb3e32e28da342ef2c571c8a6e030b0edc34f5fed"
+    },
+    "paystack-testing": {
+      "source": "rexedge/paystack",
+      "sourceType": "github",
+      "skillPath": "skills/paystack-testing/SKILL.md",
+      "computedHash": "0c013ae6a85d813b1b8ada7b8216dc2db540fa0ea1e328b2d2b541ee668cddc7"
+    },
+    "paystack-transfer-recipients": {
+      "source": "rexedge/paystack",
+      "sourceType": "github",
+      "skillPath": "skills/paystack-transfer-recipients/SKILL.md",
+      "computedHash": "0c92d0692a493e8722ec7c45f8107be9c25c575e63ddc2236eff9119fbfdea94"
+    },
+    "paystack-webhooks": {
+      "source": "rexedge/paystack",
+      "sourceType": "github",
+      "skillPath": "skills/paystack-webhooks/SKILL.md",
+      "computedHash": "175e38c01d4c30121fa43b07a9b76ffcace0fa7366ce3fbf64bd9aa36bdcf1ed"
     },
     "sandbox-sdk": {
       "source": "cloudflare/skills",

@@ -40,12 +40,11 @@ public sealed class CompleteEmailLoginTests(AccountWebApplicationFactory factory
         );
         updatedEmailLoginCount.Should().Be(1);
 
-        TelemetryEventsCollectorSpy.CollectedEvents.Count.Should().Be(4);
+        TelemetryEventsCollectorSpy.CollectedEvents.Count.Should().Be(3);
         TelemetryEventsCollectorSpy.CollectedEvents[0].GetType().Name.Should().Be("EmailLoginStarted");
-        TelemetryEventsCollectorSpy.CollectedEvents[1].GetType().Name.Should().Be("FeatureFlagPlanOverrideActivated");
-        TelemetryEventsCollectorSpy.CollectedEvents[2].GetType().Name.Should().Be("SessionCreated");
-        TelemetryEventsCollectorSpy.CollectedEvents[3].GetType().Name.Should().Be("EmailLoginCompleted");
-        TelemetryEventsCollectorSpy.CollectedEvents[3].Properties["event.user_id"].Should().Be(DatabaseSeeder.Tenant1Owner.Id);
+        TelemetryEventsCollectorSpy.CollectedEvents[1].GetType().Name.Should().Be("SessionCreated");
+        TelemetryEventsCollectorSpy.CollectedEvents[2].GetType().Name.Should().Be("EmailLoginCompleted");
+        TelemetryEventsCollectorSpy.CollectedEvents[2].Properties["event.user_id"].Should().Be(DatabaseSeeder.Tenant1Owner.Id);
         TelemetryEventsCollectorSpy.AreAllEventsDispatched.Should().BeTrue();
 
         response.Headers.Count(h => h.Key == "x-refresh-token").Should().Be(1);
@@ -198,12 +197,11 @@ public sealed class CompleteEmailLoginTests(AccountWebApplicationFactory factory
             [new { tenantId = DatabaseSeeder.Tenant1.Id.ToString(), email = email.ToLower() }]
         ).Should().Be(1);
 
-        TelemetryEventsCollectorSpy.CollectedEvents.Count.Should().Be(5);
+        TelemetryEventsCollectorSpy.CollectedEvents.Count.Should().Be(4);
         TelemetryEventsCollectorSpy.CollectedEvents[0].GetType().Name.Should().Be("EmailLoginStarted");
         TelemetryEventsCollectorSpy.CollectedEvents[1].GetType().Name.Should().Be("UserInviteAccepted");
-        TelemetryEventsCollectorSpy.CollectedEvents[2].GetType().Name.Should().Be("FeatureFlagPlanOverrideActivated");
-        TelemetryEventsCollectorSpy.CollectedEvents[3].GetType().Name.Should().Be("SessionCreated");
-        TelemetryEventsCollectorSpy.CollectedEvents[4].GetType().Name.Should().Be("EmailLoginCompleted");
+        TelemetryEventsCollectorSpy.CollectedEvents[2].GetType().Name.Should().Be("SessionCreated");
+        TelemetryEventsCollectorSpy.CollectedEvents[3].GetType().Name.Should().Be("EmailLoginCompleted");
         TelemetryEventsCollectorSpy.AreAllEventsDispatched.Should().BeTrue();
     }
 
@@ -248,25 +246,6 @@ public sealed class CompleteEmailLoginTests(AccountWebApplicationFactory factory
                 ("has_drift_detected", false),
                 ("drift_checked_at", null),
                 ("drift_discrepancies", "[]")
-            ]
-        );
-
-        // Pre-create the plan-source override row for `whatsapp-flows-enabled` so the
-        // PlanBasedFeatureFlagEvaluator finds an existing active row and does not emit an
-        // extra FeatureFlagPlanOverrideActivated event that would change the asserted count.
-        Connection.Insert("feature_flags", [
-                ("id", Account.Features.FeatureFlags.Domain.FeatureFlagId.NewId().ToString()),
-                ("created_at", TimeProvider.GetUtcNow()),
-                ("modified_at", null),
-                ("flag_key", "whatsapp-flows-enabled"),
-                ("tenant_id", tenant2Id.Value),
-                ("user_id", null),
-                ("enabled_at", TimeProvider.GetUtcNow()),
-                ("disabled_at", null),
-                ("bucket_start", null),
-                ("bucket_end", null),
-                ("source", "Plan"),
-                ("scope", "Tenant")
             ]
         );
 
@@ -325,11 +304,10 @@ public sealed class CompleteEmailLoginTests(AccountWebApplicationFactory factory
         response.Headers.Count(h => h.Key == "x-refresh-token").Should().Be(1);
         response.Headers.Count(h => h.Key == "x-access-token").Should().Be(1);
 
-        TelemetryEventsCollectorSpy.CollectedEvents.Count.Should().Be(3);
-        TelemetryEventsCollectorSpy.CollectedEvents[0].GetType().Name.Should().Be("FeatureFlagPlanOverrideActivated");
-        TelemetryEventsCollectorSpy.CollectedEvents[1].GetType().Name.Should().Be("SessionCreated");
-        TelemetryEventsCollectorSpy.CollectedEvents[2].GetType().Name.Should().Be("EmailLoginCompleted");
-        TelemetryEventsCollectorSpy.CollectedEvents[2].Properties["event.user_id"].Should().Be(DatabaseSeeder.Tenant1Owner.Id);
+        TelemetryEventsCollectorSpy.CollectedEvents.Count.Should().Be(2);
+        TelemetryEventsCollectorSpy.CollectedEvents[0].GetType().Name.Should().Be("SessionCreated");
+        TelemetryEventsCollectorSpy.CollectedEvents[1].GetType().Name.Should().Be("EmailLoginCompleted");
+        TelemetryEventsCollectorSpy.CollectedEvents[1].Properties["event.user_id"].Should().Be(DatabaseSeeder.Tenant1Owner.Id);
     }
 
     [Fact]
@@ -361,11 +339,10 @@ public sealed class CompleteEmailLoginTests(AccountWebApplicationFactory factory
         // Assert
         await response.ShouldBeSuccessfulPostRequest(hasLocation: false);
 
-        TelemetryEventsCollectorSpy.CollectedEvents.Count.Should().Be(3);
-        TelemetryEventsCollectorSpy.CollectedEvents[0].GetType().Name.Should().Be("FeatureFlagPlanOverrideActivated");
-        TelemetryEventsCollectorSpy.CollectedEvents[1].GetType().Name.Should().Be("SessionCreated");
-        TelemetryEventsCollectorSpy.CollectedEvents[2].GetType().Name.Should().Be("EmailLoginCompleted");
-        TelemetryEventsCollectorSpy.CollectedEvents[2].Properties["event.user_id"].Should().Be(DatabaseSeeder.Tenant1Owner.Id);
+        TelemetryEventsCollectorSpy.CollectedEvents.Count.Should().Be(2);
+        TelemetryEventsCollectorSpy.CollectedEvents[0].GetType().Name.Should().Be("SessionCreated");
+        TelemetryEventsCollectorSpy.CollectedEvents[1].GetType().Name.Should().Be("EmailLoginCompleted");
+        TelemetryEventsCollectorSpy.CollectedEvents[1].Properties["event.user_id"].Should().Be(DatabaseSeeder.Tenant1Owner.Id);
     }
 
     private async Task<EmailLoginId> StartEmailLogin(string email)

@@ -1,6 +1,6 @@
 using JetBrains.Annotations;
 using Main.Features.Scheduling.Shared;
-using Main.Features.WhatsAppFlows.Infrastructure;
+using Main.Features.WhatsAppOnboarding.Domain;
 using SharedKernel.Cqrs;
 
 namespace Main.Features.Scheduling.Queries;
@@ -17,7 +17,7 @@ public sealed record GetPublicEventTypeQuery(string Handle, string Slug, string?
 
 public sealed class GetPublicEventTypeHandler(
     PublicSchedulingResolver publicSchedulingResolver,
-    IWhatsAppFlowProfileSync profileSync
+    IWhatsAppBusinessAccountRepository whatsAppBusinessAccountRepository
 ) : IRequestHandler<GetPublicEventTypeQuery, Result<PublicEventTypeResponse>>
 {
     public async Task<Result<PublicEventTypeResponse>> Handle(GetPublicEventTypeQuery query, CancellationToken cancellationToken)
@@ -29,8 +29,8 @@ public sealed class GetPublicEventTypeHandler(
         }
 
         var context = contextResult.Value!;
-        var wabaProfile = await profileSync.GetByTenantId(context.Profile.TenantId, cancellationToken);
-        var wabaPhoneNumber = wabaProfile?.DisplayPhoneNumber;
+        var whatsAppAccount = await whatsAppBusinessAccountRepository.GetByTenantIdUnfilteredAsync(context.Profile.TenantId, cancellationToken);
+        var wabaPhoneNumber = whatsAppAccount?.PhoneNumber.DisplayPhoneNumber;
 
         return PublicEventTypeResponse.From(context.Profile, context.EventType, wabaPhoneNumber);
     }

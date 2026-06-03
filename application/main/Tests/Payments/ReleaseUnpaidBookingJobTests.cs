@@ -2,7 +2,6 @@ using FluentAssertions;
 using Main.Features.EventTypes.Domain;
 using Main.Features.Payments.Jobs;
 using Main.Features.Scheduling.Domain;
-using Main.Features.WhatsAppFlows.Infrastructure;
 using Microsoft.Extensions.Logging.Abstractions;
 using NSubstitute;
 using SharedKernel.Domain;

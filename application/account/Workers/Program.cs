@@ -23,9 +23,6 @@ builder.Services.AddTransient<DataMigrationRunner<AccountDbContext>>();
 builder.Services.AddTransient<FeatureFlagDefinitionReconciler>();
 
 builder.Services.AddHostedService<BillingDriftWorker>();
-builder.Services.AddHostedService<WabaProfileSyncWorker>();
-builder.Services.AddHostedService<WabaProfileDriftWorker>();
-builder.Services.AddHostedService<WabaDisplayNameReviewWorker>();
 
 var host = builder.Build();
 

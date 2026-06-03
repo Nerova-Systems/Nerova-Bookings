@@ -1,9 +1,6 @@
-using System.Text.Json;
 using Account.Features.Subscriptions.Domain;
 using Account.Features.Tenants.Domain;
 using Account.Features.Users.Domain;
-using Account.Features.WhatsApp.Domain;
-using Account.Features.WhatsApp.Infrastructure;
 using FluentValidation;
 using JetBrains.Annotations;
 using SharedKernel.Authentication;
@@ -14,10 +11,9 @@ using SharedKernel.Telemetry;
 namespace Account.Features.Tenants.Commands;
 
 /// <summary>
-///     Updates the current tenant's <see cref="BrandProfile" /> and enqueues a row in the
-///     <see cref="WabaProfileSyncOutbox" /> so the Phase 7b sync job can propagate the change to
-///     Meta. The command is the only entry point that mutates BrandProfile — there is no separate
-///     "set logo" command at this layer (logo URL is one of the BrandProfile fields).
+///     Updates the current tenant's <see cref="BrandProfile" />. The command is the only entry
+///     point that mutates BrandProfile — there is no separate "set logo" command at this layer
+///     (logo URL is one of the BrandProfile fields).
 /// </summary>
 [PublicAPI]
 public sealed record UpdateTenantBrandProfileCommand : ICommand, IRequest<Result>
@@ -61,10 +57,7 @@ public sealed class UpdateTenantBrandProfileValidator : AbstractValidator<Update
 public sealed class UpdateTenantBrandProfileHandler(
     ITenantRepository tenantRepository,
     ISubscriptionRepository subscriptionRepository,
-    IWabaConfigurationRepository wabaConfigurationRepository,
-    IWabaProfileSyncOutboxRepository outboxRepository,
     IExecutionContext executionContext,
-    TimeProvider timeProvider,
     ITelemetryEventsCollector events
 ) : IRequestHandler<UpdateTenantBrandProfileCommand, Result>
 {
@@ -143,26 +136,6 @@ public sealed class UpdateTenantBrandProfileHandler(
 
         tenant.UpdateBrandProfile(profile);
         tenantRepository.Update(tenant);
-
-        // ─── Enqueue sync (only if the tenant has linked a WABA) ─────────
-        // The sync job needs a phone number id to call Meta. When the tenant has not finished
-        // WABA onboarding we still persist BrandProfile (so the UI can render it) but skip the
-        // outbox row — the LinkWabaAccount flow will trigger a sync when the phone is registered.
-        var waba = await wabaConfigurationRepository.GetByTenantIdAsync(tenant.Id, cancellationToken);
-        if (waba?.PhoneNumberId is not null)
-        {
-            var dto = WabaProfileMapper.Map(profile, profilePictureHandle: null);
-            var serialized = JsonSerializer.Serialize(dto);
-            var now = timeProvider.GetUtcNow();
-            var outbox = WabaProfileSyncOutbox.Enqueue(
-                tenant.Id,
-                waba.PhoneNumberId,
-                serialized,
-                profile.BrandLogoUrl,
-                now
-            );
-            await outboxRepository.AddAsync(outbox, cancellationToken);
-        }
 
         events.CollectEvent(new TenantBrandProfileUpdated(profile.BrandVertical.ToString()));
 

@@ -21,6 +21,13 @@ public interface IWhatsAppBusinessAccountRepository : IAppendRepository<WhatsApp
     ///     which tenant owns the incoming message.
     /// </summary>
     Task<WhatsAppBusinessAccount?> GetByMetaPhoneNumberIdUnfilteredAsync(string metaPhoneNumberId, CancellationToken cancellationToken);
+
+    /// <summary>
+    ///     Looks up a WhatsApp Business Account for a specific tenant, bypassing the tenant query filter.
+    ///     Used by public/anonymous code paths (e.g. the public booking page) where no tenant context is
+    ///     established but the tenant has already been resolved from the request.
+    /// </summary>
+    Task<WhatsAppBusinessAccount?> GetByTenantIdUnfilteredAsync(TenantId tenantId, CancellationToken cancellationToken);
 }
 
 public sealed class WhatsAppBusinessAccountRepository(MainDbContext mainDbContext)
@@ -36,5 +43,12 @@ public sealed class WhatsAppBusinessAccountRepository(MainDbContext mainDbContex
         return await DbSet
             .IgnoreQueryFilters([QueryFilterNames.Tenant])
             .FirstOrDefaultAsync(a => a.PhoneNumber.MetaPhoneNumberId == metaPhoneNumberId, cancellationToken);
+    }
+
+    public async Task<WhatsAppBusinessAccount?> GetByTenantIdUnfilteredAsync(TenantId tenantId, CancellationToken cancellationToken)
+    {
+        return await DbSet
+            .IgnoreQueryFilters([QueryFilterNames.Tenant])
+            .FirstOrDefaultAsync(a => a.TenantId == tenantId, cancellationToken);
     }
 }

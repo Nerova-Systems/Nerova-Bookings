@@ -2,7 +2,6 @@ using Account.Features.Subscriptions.Domain;
 using Account.Features.Tenants.Commands;
 using Account.Features.Tenants.Domain;
 using Account.Features.Users.Domain;
-using Account.Features.WhatsApp.Domain;
 using FluentAssertions;
 using NSubstitute;
 using SharedKernel.Authentication;
@@ -15,37 +14,28 @@ using Xunit;
 namespace Account.Tests.Tenants;
 
 /// <summary>
-///     Phase 7a — tier enforcement and outbox enqueue for
-///     <see cref="UpdateTenantBrandProfileHandler" />. Mirrors the layout of
-///     <c>LinkWabaAccountHandlerTierTests</c> — direct handler instantiation with NSubstitute
-///     mocks; no <c>WebApplicationFactory</c>.
+///     Tier enforcement and persistence for <see cref="UpdateTenantBrandProfileHandler" />.
+///     Direct handler instantiation with NSubstitute mocks; no <c>WebApplicationFactory</c>.
 /// </summary>
 public sealed class UpdateTenantBrandProfileHandlerTests
 {
     private static (
         UpdateTenantBrandProfileHandler sut,
         ITenantRepository tenants,
-        ISubscriptionRepository subs,
-        IWabaConfigurationRepository waba,
-        IWabaProfileSyncOutboxRepository outbox
+        ISubscriptionRepository subs
         ) BuildSut()
     {
         var tenants = Substitute.For<ITenantRepository>();
         var subs = Substitute.For<ISubscriptionRepository>();
-        var waba = Substitute.For<IWabaConfigurationRepository>();
-        var outbox = Substitute.For<IWabaProfileSyncOutboxRepository>();
         var executionContext = Substitute.For<IExecutionContext>();
         executionContext.UserInfo.Returns(new UserInfo { IsAuthenticated = true, Role = nameof(UserRole.Owner) });
-        var time = TimeProvider.System;
         var events = Substitute.For<ITelemetryEventsCollector>();
 
         var tenant = Tenant.Create("owner@acme.test", existingCount: 0);
         tenants.GetCurrentTenantAsync(Arg.Any<CancellationToken>()).Returns(tenant);
 
-        var sut = new UpdateTenantBrandProfileHandler(
-            tenants, subs, waba, outbox, executionContext, time, events
-        );
-        return (sut, tenants, subs, waba, outbox);
+        var sut = new UpdateTenantBrandProfileHandler(tenants, subs, executionContext, events);
+        return (sut, tenants, subs);
     }
 
     private static UpdateTenantBrandProfileCommand BasicCommand()
@@ -60,12 +50,12 @@ public sealed class UpdateTenantBrandProfileHandlerTests
     [Fact]
     public async Task NonOwner_ReturnsForbidden()
     {
-        var (_, tenants, subs, waba, outbox) = BuildSut();
+        var tenants = Substitute.For<ITenantRepository>();
+        var subs = Substitute.For<ISubscriptionRepository>();
         var executionContext = Substitute.For<IExecutionContext>();
         executionContext.UserInfo.Returns(new UserInfo { IsAuthenticated = true, Role = nameof(UserRole.Member) });
         var sut = new UpdateTenantBrandProfileHandler(
-            tenants, subs, waba, outbox, executionContext, TimeProvider.System,
-            Substitute.For<ITelemetryEventsCollector>()
+            tenants, subs, executionContext, Substitute.For<ITelemetryEventsCollector>()
         );
 
         var result = await sut.Handle(BasicCommand(), CancellationToken.None);
@@ -77,7 +67,7 @@ public sealed class UpdateTenantBrandProfileHandlerTests
     [Fact]
     public async Task FreeTier_LogoUpload_ReturnsForbidden()
     {
-        var (sut, _, subs, _, _) = BuildSut();
+        var (sut, _, subs) = BuildSut();
         // Free tier = no subscription row.
         subs.GetByTenantIdUnfilteredAsync(Arg.Any<TenantId>(), Arg.Any<CancellationToken>()).Returns((Subscription?)null);
 
@@ -93,7 +83,7 @@ public sealed class UpdateTenantBrandProfileHandlerTests
     [Fact]
     public async Task FreeTier_AboutText_ReturnsForbidden()
     {
-        var (sut, _, subs, _, _) = BuildSut();
+        var (sut, _, subs) = BuildSut();
         subs.GetByTenantIdUnfilteredAsync(Arg.Any<TenantId>(), Arg.Any<CancellationToken>()).Returns((Subscription?)null);
 
         var result = await sut.Handle(
@@ -110,7 +100,7 @@ public sealed class UpdateTenantBrandProfileHandlerTests
     {
         // Basis allows only 1 website; Standard+ unlocks the second slot. Subscription.Create
         // defaults to Basis so no extra setup needed here.
-        var (sut, _, subs, _, _) = BuildSut();
+        var (sut, _, subs) = BuildSut();
         subs.GetByTenantIdUnfilteredAsync(Arg.Any<TenantId>(), Arg.Any<CancellationToken>())
             .Returns(Subscription.Create(new TenantId(1)));
 
@@ -124,34 +114,15 @@ public sealed class UpdateTenantBrandProfileHandlerTests
     }
 
     [Fact]
-    public async Task BasisTier_NoWabaLinked_PersistsButDoesNotEnqueue()
+    public async Task BasisTier_ValidProfile_Persists()
     {
-        var (sut, _, subs, waba, outbox) = BuildSut();
+        var (sut, tenants, subs) = BuildSut();
         subs.GetByTenantIdUnfilteredAsync(Arg.Any<TenantId>(), Arg.Any<CancellationToken>())
             .Returns(Subscription.Create(new TenantId(1)));
-        waba.GetByTenantIdAsync(Arg.Any<TenantId>(), Arg.Any<CancellationToken>()).Returns((WabaConfiguration?)null);
 
         var result = await sut.Handle(BasicCommand(), CancellationToken.None);
 
         result.IsSuccess.Should().BeTrue();
-        await outbox.DidNotReceive().AddAsync(Arg.Any<WabaProfileSyncOutbox>(), Arg.Any<CancellationToken>());
-    }
-
-    [Fact]
-    public async Task BasisTier_WithLinkedWaba_EnqueuesOutboxRow()
-    {
-        var (sut, _, subs, waba, outbox) = BuildSut();
-        subs.GetByTenantIdUnfilteredAsync(Arg.Any<TenantId>(), Arg.Any<CancellationToken>())
-            .Returns(Subscription.Create(new TenantId(1)));
-        var wabaConfig = WabaConfiguration.Create(new TenantId(1), "waba_1", "phone_1", "+1 555 0100");
-        waba.GetByTenantIdAsync(Arg.Any<TenantId>(), Arg.Any<CancellationToken>()).Returns(wabaConfig);
-
-        var result = await sut.Handle(BasicCommand(), CancellationToken.None);
-
-        result.IsSuccess.Should().BeTrue();
-        await outbox.Received(1).AddAsync(
-            Arg.Is<WabaProfileSyncOutbox>(o => o.Status == WabaProfileSyncStatus.Pending && o.PhoneNumberId == "phone_1"),
-            Arg.Any<CancellationToken>()
-        );
+        tenants.Received(1).Update(Arg.Any<Tenant>());
     }
 }
