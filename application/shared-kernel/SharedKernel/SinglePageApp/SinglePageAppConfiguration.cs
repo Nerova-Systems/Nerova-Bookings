@@ -130,7 +130,7 @@ public class SinglePageAppConfiguration
     public string GetHtmlTemplate()
     {
         AwaitSinglePageAppGeneration();
-        return _htmlTemplate ??= File.ReadAllText(_htmlTemplatePath, new UTF8Encoding());
+        return _htmlTemplate ??= ReadAllTextWithRetry(_htmlTemplatePath, new UTF8Encoding());
     }
 
     /// <summary>
@@ -146,7 +146,7 @@ public class SinglePageAppConfiguration
         {
             if (File.Exists(_htmlTemplatePath))
             {
-                _htmlTemplate = File.ReadAllText(_htmlTemplatePath, new UTF8Encoding());
+                _htmlTemplate = ReadAllTextWithRetry(_htmlTemplatePath, new UTF8Encoding());
                 return;
             }
 
@@ -154,9 +154,29 @@ public class SinglePageAppConfiguration
         }
     }
 
+    internal static string ReadAllTextWithRetry(string path, Encoding encoding, int maxRetries = 30, int retryDelayMs = 250)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(path);
+        ArgumentNullException.ThrowIfNull(encoding);
+
+        for (var attempt = 1; attempt <= maxRetries; attempt++)
+        {
+            try
+            {
+                return File.ReadAllText(path, encoding);
+            }
+            catch (IOException) when (attempt < maxRetries)
+            {
+                Thread.Sleep(TimeSpan.FromMilliseconds(retryDelayMs));
+            }
+        }
+
+        return File.ReadAllText(path, encoding);
+    }
+
     public string GetRemoteEntryJs()
     {
-        return _remoteEntryJsContent ??= File.ReadAllText(_remoteEntryJsPath, new UTF8Encoding());
+        return _remoteEntryJsContent ??= ReadAllTextWithRetry(_remoteEntryJsPath, new UTF8Encoding());
     }
 
     private static string GetWebAppDistRoot(string webAppProjectName, string webAppDistRootName)
