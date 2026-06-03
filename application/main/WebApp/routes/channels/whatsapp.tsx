@@ -9,6 +9,7 @@ import { isWhatsAppSignupEnabled } from "@/shared/lib/whatsapp/whatsAppConfig";
 
 import { WhatsAppConnectionCard } from "./-components/WhatsAppConnectionCard";
 import { WhatsAppConversation } from "./-components/WhatsAppConversation";
+import { WhatsAppStats } from "./-components/WhatsAppStats";
 
 export const Route = createFileRoute("/channels/whatsapp")({
   beforeLoad: () => {
@@ -37,8 +38,11 @@ function WhatsAppPage() {
           title={t`WhatsApp`}
           subtitle={t`Connect your WhatsApp Business account to send and receive messages.`}
         >
-          <WhatsAppConnectionCard />
-          {isConnected && <WhatsAppConversation />}
+          <div className="flex flex-col gap-8">
+            <WhatsAppConnectionCard />
+            {isConnected && <WhatsAppStats />}
+            {isConnected && <WhatsAppConversation />}
+          </div>
         </AppLayout>
       </SidebarInset>
     </SidebarProvider>
