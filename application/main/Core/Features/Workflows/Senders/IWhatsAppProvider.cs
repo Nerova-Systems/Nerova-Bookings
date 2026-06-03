@@ -9,6 +9,7 @@ namespace Main.Features.Workflows.Senders;
 public interface IWhatsAppProvider
 {
     Task<WhatsAppResult> SendAsync(
+        TenantId tenantId,
         string toE164,
         string templateName,
         IReadOnlyDictionary<string, string> variables,

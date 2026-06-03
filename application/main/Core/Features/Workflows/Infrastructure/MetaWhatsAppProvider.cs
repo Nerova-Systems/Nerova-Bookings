@@ -2,6 +2,8 @@ using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text.Json;
+using Main.Features.WhatsAppOnboarding.Domain;
+using Main.Features.WhatsAppOnboarding.Shared;
 using Main.Features.Workflows.Senders;
 using Microsoft.Extensions.Options;
 
@@ -11,16 +13,21 @@ namespace Main.Features.Workflows.Infrastructure;
 ///     Meta WhatsApp Business Cloud API adapter. POSTs a JSON template message to
 ///     <c>/{phone-number-id}/messages</c> with a Bearer access token.
 ///     <para>
+///         Credentials are loaded per-tenant from the <see cref="WhatsAppBusinessAccount" /> stored
+///         in the database after a tenant completes the Embedded Signup flow. No server-level
+///         phone-number ID or access token is required.
 ///         Variables are positional in WhatsApp templates (<c>{{1}}</c>, <c>{{2}}</c>, ...).
 ///         The provided dictionary is sorted by integer key when numeric, otherwise by ordinal
 ///         key — callers should pass <c>{"1": ..., "2": ...}</c> for predictable ordering.
-///         When credentials are missing the provider returns <see cref="WhatsAppResult.NotConfigured" />
-///         and logs once per call so the workflow tick is not blocked.
+///         When the tenant has no WhatsApp account the provider returns
+///         <see cref="WhatsAppResult.NotConfigured" /> so the workflow tick is not blocked.
 ///     </para>
 /// </summary>
 public sealed class MetaWhatsAppProvider(
     IHttpClientFactory httpClientFactory,
     IOptions<MetaWhatsAppOptions> options,
+    IWhatsAppBusinessAccountRepository wabaRepository,
+    WhatsAppAccessTokenProtector tokenProtector,
     ILogger<MetaWhatsAppProvider> logger
 ) : IWhatsAppProvider
 {
@@ -29,23 +36,32 @@ public sealed class MetaWhatsAppProvider(
     private readonly MetaWhatsAppOptions _options = options.Value;
 
     public async Task<WhatsAppResult> SendAsync(
+        TenantId tenantId,
         string toE164,
         string templateName,
         IReadOnlyDictionary<string, string> variables,
         CancellationToken cancellationToken
     )
     {
-        if (!_options.IsConfigured)
+        var waba = await wabaRepository.GetByTenantIdUnfilteredAsync(tenantId, cancellationToken);
+        if (waba is null || waba.PhoneNumber is null)
         {
-            logger.LogWarning("Meta WhatsApp provider not configured; skipping message to {Recipient}.", toE164);
-            return WhatsAppResult.NotConfigured("Meta WhatsApp credentials missing");
+            logger.LogWarning(
+                "Meta WhatsApp not configured for tenant {TenantId}; skipping message to {Recipient}.",
+                tenantId,
+                toE164
+            );
+            return WhatsAppResult.NotConfigured($"No WhatsApp Business Account for tenant {tenantId}");
         }
+
+        var accessToken = tokenProtector.Unprotect(waba.AccessToken);
+        var phoneNumberId = waba.PhoneNumber.MetaPhoneNumberId;
 
         var client = httpClientFactory.CreateClient(HttpClientName);
 
-        var url = $"{_options.ApiBaseUrl.TrimEnd('/')}/{_options.PhoneNumberId}/messages";
+        var url = $"{_options.ApiBaseUrl.TrimEnd('/')}/{phoneNumberId}/messages";
         var request = new HttpRequestMessage(HttpMethod.Post, url);
-        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", _options.AccessToken);
+        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
 
         var bodyParameters = OrderedParameters(variables)
             .Select(value => new { type = "text", text = value })

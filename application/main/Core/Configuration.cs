@@ -266,14 +266,8 @@ public static class Configuration
                         opts.FromNumber = Environment.GetEnvironmentVariable("TWILIO_FROM_NUMBER") ?? string.Empty;
                     }
                 )
-                .Configure<MetaWhatsAppOptions>(opts =>
-                    {
-                        opts.PhoneNumberId = Environment.GetEnvironmentVariable("META_WABA_PHONE_NUMBER_ID") ?? string.Empty;
-                        opts.AccessToken = Environment.GetEnvironmentVariable("META_WABA_ACCESS_TOKEN") ?? string.Empty;
-                    }
-                )
                 .AddSingleton<ISmsProvider, TwilioSmsProvider>()
-                .AddSingleton<IWhatsAppProvider, MetaWhatsAppProvider>()
+                .AddScoped<IWhatsAppProvider, MetaWhatsAppProvider>()
                 .AddScoped<IHostEmailProvider, HostEmailProvider>();
 
             // TickerQ with EF Core persistence (tables added to MainDbContext via model customizer)

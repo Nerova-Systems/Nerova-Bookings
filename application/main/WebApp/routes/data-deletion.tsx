@@ -1,5 +1,4 @@
 import { createFileRoute, useSearch } from "@tanstack/react-router";
-import { zodValidator } from "@tanstack/zod-adapter";
 import { z } from "zod";
 
 const searchSchema = z.object({
@@ -7,7 +6,7 @@ const searchSchema = z.object({
 });
 
 export const Route = createFileRoute("/data-deletion")({
-  validateSearch: zodValidator(searchSchema),
+  validateSearch: (search) => searchSchema.parse(search),
   component: DataDeletionPage
 });
 

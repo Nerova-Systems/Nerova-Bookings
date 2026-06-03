@@ -41,7 +41,7 @@ public sealed class DispatchWorkflowReminderJobTests : EndpointBaseTest<MainDbCo
 
         await BuildJob(sms, whatsApp, reminder).ExecuteAsync(null!, CancellationToken.None);
 
-        await whatsApp.DidNotReceive().SendAsync(null!, null!, null!, CancellationToken.None);
+        await whatsApp.DidNotReceive().SendAsync(Arg.Any<TenantId>(), null!, null!, null!, CancellationToken.None);
         reminder.Status.Should().Be(WorkflowReminderStatus.Dispatched);
         reminder.ReferenceId.Should().Be("SM_abc");
         reminder.RetryCount.Should().Be(0);
@@ -55,6 +55,7 @@ public sealed class DispatchWorkflowReminderJobTests : EndpointBaseTest<MainDbCo
 
         var whatsApp = Substitute.For<IWhatsAppProvider>();
         whatsApp.SendAsync(
+                Arg.Any<TenantId>(),
                 "+15551234567",
                 "booking_reminder",
                 Arg.Is<IReadOnlyDictionary<string, string>>(d => d["1"] == "rendered body"),
@@ -67,7 +68,7 @@ public sealed class DispatchWorkflowReminderJobTests : EndpointBaseTest<MainDbCo
         await BuildJob(sms, whatsApp, reminder).ExecuteAsync(null!, CancellationToken.None);
 
         await sms.DidNotReceive().SendAsync(null!, null!, CancellationToken.None);
-        await whatsApp.Received(1).SendAsync("+15551234567", "booking_reminder", Arg.Any<IReadOnlyDictionary<string, string>>(), Arg.Any<CancellationToken>());
+        await whatsApp.Received(1).SendAsync(Arg.Any<TenantId>(), "+15551234567", "booking_reminder", Arg.Any<IReadOnlyDictionary<string, string>>(), Arg.Any<CancellationToken>());
         reminder.Status.Should().Be(WorkflowReminderStatus.Dispatched);
         reminder.ReferenceId.Should().Be("wamid.x");
     }

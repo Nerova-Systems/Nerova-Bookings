@@ -104,7 +104,7 @@ public sealed class DispatchWorkflowReminderJob(
                 break;
 
             case WorkflowAction.WhatsappNumber when !string.IsNullOrWhiteSpace(reminder.SendTo):
-                await SendWhatsAppAsync(reminder, reminder.SendTo, ct);
+                await SendWhatsAppAsync(reminder, booking.TenantId, reminder.SendTo, ct);
                 break;
 
             case WorkflowAction.SmsAttendee:
@@ -159,12 +159,12 @@ public sealed class DispatchWorkflowReminderJob(
         }
     }
 
-    private async Task SendWhatsAppAsync(WorkflowReminder reminder, string phoneE164, CancellationToken ct)
+    private async Task SendWhatsAppAsync(WorkflowReminder reminder, TenantId tenantId, string phoneE164, CancellationToken ct)
     {
         var templateName = ResolveTemplateName(reminder.Template);
         var variables = BuildWhatsAppVariables(reminder);
 
-        var result = await whatsAppProvider.SendAsync(phoneE164, templateName, variables, ct);
+        var result = await whatsAppProvider.SendAsync(tenantId, phoneE164, templateName, variables, ct);
         switch (result.Status)
         {
             case WhatsAppResultStatus.Sent:

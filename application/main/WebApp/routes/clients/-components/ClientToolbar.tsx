@@ -19,16 +19,14 @@ interface ClientToolbarProps {
 
 export function ClientToolbar({ selectedClients, onSelectedClientsChange }: Readonly<ClientToolbarProps>) {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [areFiltersExpanded, setAreFiltersExpanded] = useState(false);
 
-  const buttonExpandClass = areFiltersExpanded ? "" : "@[30rem]:w-fit @[30rem]:gap-1.5 @[30rem]:px-6";
-  const textVisibilityClass = areFiltersExpanded ? "hidden" : "hidden @[30rem]:inline";
+  const buttonExpandClass = "@[30rem]:w-fit @[30rem]:gap-1.5 @[30rem]:px-6";
+  const textVisibilityClass = "hidden @[30rem]:inline";
 
   return (
     <div className="@container mb-4 flex items-center justify-between gap-2">
       <ClientQuerying
         onFiltersUpdated={() => onSelectedClientsChange([])}
-        onFiltersExpandedChange={setAreFiltersExpanded}
       />
       <div className="mt-auto flex items-center gap-2">
         {selectedClients.length > 1 && (
