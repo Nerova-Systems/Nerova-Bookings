@@ -5,6 +5,7 @@ using Main.Features.Workflows.Domain;
 using Main.Features.Workflows.Infrastructure;
 using Main.Features.Workflows.Senders;
 using Microsoft.EntityFrameworkCore;
+using SharedKernel.Domain;
 using SharedKernel.Integrations.Email;
 using SharedKernel.Persistence;
 using TickerQ.Utilities.Base;

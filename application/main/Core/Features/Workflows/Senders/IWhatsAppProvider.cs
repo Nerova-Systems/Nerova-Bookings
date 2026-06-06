@@ -1,3 +1,5 @@
+using SharedKernel.Domain;
+
 namespace Main.Features.Workflows.Senders;
 
 /// <summary>

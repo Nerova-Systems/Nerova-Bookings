@@ -6,6 +6,7 @@ using Main.Features.WhatsAppOnboarding.Domain;
 using Main.Features.WhatsAppOnboarding.Shared;
 using Main.Features.Workflows.Senders;
 using Microsoft.Extensions.Options;
+using SharedKernel.Domain;
 
 namespace Main.Features.Workflows.Infrastructure;
 
