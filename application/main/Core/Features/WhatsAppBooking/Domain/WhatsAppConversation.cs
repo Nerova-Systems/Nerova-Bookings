@@ -18,12 +18,9 @@ public sealed record WhatsAppConversationId(string Value) : StronglyTypedUlid<Wh
 
 /// <summary>
 ///     Tracks the deterministic WhatsApp booking conversation for a single customer (identified by their
-///     WhatsApp phone number) talking to a tenant's WhatsApp Business number. Booking details are captured
-///     inside a native WhatsApp Flow, so the state machine is intentionally small: a session starts on first
-///     contact, a Flow is sent (<see cref="WhatsAppConversationState.AwaitingFlowCompletion" />), and the
-///     conversation is <see cref="WhatsAppConversationState.Confirmed" /> once the submitted Flow produces a
-///     booking. Inactive sessions <see cref="WhatsAppConversationState.Expired" />. The full message
-///     transcript and raw webhook payloads live on WhatsAppMessage / WhatsAppEvent respectively.
+///     WhatsApp phone number) talking to a tenant's WhatsApp Business number. The state machine forks on
+///     first contact: known customers go straight to booking; unknown customers go through an in-Flow login
+///     step first.
 /// </summary>
 public sealed class WhatsAppConversation : AggregateRoot<WhatsAppConversationId>, ITenantScopedEntity
 {
@@ -54,6 +51,12 @@ public sealed class WhatsAppConversation : AggregateRoot<WhatsAppConversationId>
     public WhatsAppConversationState State { get; private set; }
 
     /// <summary>
+    ///     True once the customer has been matched to an existing Client record or has completed the login Flow.
+    ///     Determines whether the engine skips the login step and goes straight to booking.
+    /// </summary>
+    public bool IsIdentified { get; private set; }
+
+    /// <summary>
     ///     Correlation token for the in-flight WhatsApp Flow. Echoed back in the flow-completion (nfm_reply)
     ///     webhook so the submission can be matched to this conversation. Null when no Flow awaits completion.
     /// </summary>
@@ -74,9 +77,28 @@ public sealed class WhatsAppConversation : AggregateRoot<WhatsAppConversationId>
     /// <summary>Records that a booking Flow has been sent and the conversation awaits the customer's submission.</summary>
     public void BeginFlow(string flowToken, DateTimeOffset now)
     {
-        State = WhatsAppConversationState.AwaitingFlowCompletion;
+        State = WhatsAppConversationState.AwaitingBookingFlow;
         ActiveFlowToken = flowToken;
         DraftBookingId = null;
+        LastInboundAt = now;
+        ExpiresAt = now + SessionTimeout;
+    }
+
+    /// <summary>Records that a login Flow has been sent to an unidentified customer.</summary>
+    public void BeginLoginFlow(string flowToken, DateTimeOffset now)
+    {
+        State = WhatsAppConversationState.AwaitingLoginFlow;
+        ActiveFlowToken = flowToken;
+        LastInboundAt = now;
+        ExpiresAt = now + SessionTimeout;
+    }
+
+    /// <summary>Marks the customer as identified (matched to a Client or completed login Flow).</summary>
+    public void MarkIdentified(DateTimeOffset now)
+    {
+        IsIdentified = true;
+        ActiveFlowToken = null;
+        State = WhatsAppConversationState.Idle;
         LastInboundAt = now;
         ExpiresAt = now + SessionTimeout;
     }
@@ -101,6 +123,7 @@ public sealed class WhatsAppConversation : AggregateRoot<WhatsAppConversationId>
     public void Restart(DateTimeOffset now)
     {
         State = WhatsAppConversationState.Idle;
+        IsIdentified = false;
         ActiveFlowToken = null;
         DraftBookingId = null;
         LastInboundAt = now;
@@ -117,7 +140,9 @@ public sealed class WhatsAppConversation : AggregateRoot<WhatsAppConversationId>
     /// <summary>True when an in-progress session has passed its inactivity deadline.</summary>
     public bool HasExpired(DateTimeOffset now)
     {
-        return State is WhatsAppConversationState.Idle or WhatsAppConversationState.AwaitingFlowCompletion
+        return State is WhatsAppConversationState.Idle
+                   or WhatsAppConversationState.AwaitingLoginFlow
+                   or WhatsAppConversationState.AwaitingBookingFlow
             && ExpiresAt < now;
     }
 
@@ -133,7 +158,8 @@ public sealed class WhatsAppConversation : AggregateRoot<WhatsAppConversationId>
 public enum WhatsAppConversationState
 {
     Idle,
-    AwaitingFlowCompletion,
+    AwaitingLoginFlow,
+    AwaitingBookingFlow,
     Confirmed,
     Expired
 }

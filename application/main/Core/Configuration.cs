@@ -110,7 +110,11 @@ public static class Configuration
             services.AddScoped<ProcessPendingWhatsAppEvents>();
             services.AddScoped<IWhatsAppOutboundSender, WhatsAppOutboundSender>();
             services.AddScoped<WhatsAppConversationEngine>();
-            services.Configure<WhatsAppBookingOptions>(bookingOptions => bookingOptions.FlowId = Environment.GetEnvironmentVariable("WHATSAPP_BOOKING_FLOW_ID"));
+            services.Configure<WhatsAppBookingOptions>(bookingOptions =>
+            {
+                bookingOptions.FlowId = Environment.GetEnvironmentVariable("WHATSAPP_BOOKING_FLOW_ID");
+                bookingOptions.LoginFlowId = Environment.GetEnvironmentVariable("WHATSAPP_LOGIN_FLOW_ID");
+            });
 
             return services
                 .AddScoped<IPermissionCheckService, PermissionCheckService>()

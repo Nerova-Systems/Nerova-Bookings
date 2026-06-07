@@ -14,4 +14,10 @@ public sealed class WhatsAppBookingOptions
     ///     before the Flow has been published and configured.
     /// </summary>
     public string? FlowId { get; set; }
+
+    /// <summary>
+    ///     The published WhatsApp Flow id used for customer login / registration (name + email + OTP).
+    ///     When empty, the engine falls back to a plain-text prompt asking the customer to text their email.
+    /// </summary>
+    public string? LoginFlowId { get; set; }
 }
