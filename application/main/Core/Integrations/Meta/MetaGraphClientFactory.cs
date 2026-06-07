@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 
 namespace Main.Integrations.Meta;
 
@@ -10,7 +11,7 @@ namespace Main.Integrations.Meta;
 ///     client is used when the app is configured with Meta credentials, and the mock is used as the default
 ///     fallback so the app boots and onboarding works locally without any Meta secrets.
 /// </summary>
-public sealed class MetaGraphClientFactory(IServiceProvider serviceProvider, IConfiguration configuration, IHttpContextAccessor httpContextAccessor)
+public sealed class MetaGraphClientFactory(IServiceProvider serviceProvider, IConfiguration configuration, IHttpContextAccessor httpContextAccessor, IHostEnvironment environment)
 {
     public const string UseMockProviderCookieName = "__Test_Use_Mock_Provider";
 
@@ -22,9 +23,19 @@ public sealed class MetaGraphClientFactory(IServiceProvider serviceProvider, ICo
 
     public IMetaGraphClient GetClient()
     {
-        if (ShouldUseMockProvider() || !IsConfigured)
+        if (ShouldUseMockProvider())
         {
             return serviceProvider.GetRequiredKeyedService<IMetaGraphClient>("mock-meta");
+        }
+
+        if (!IsConfigured)
+        {
+            if (environment.IsDevelopment())
+            {
+                return serviceProvider.GetRequiredKeyedService<IMetaGraphClient>("mock-meta");
+            }
+
+            return serviceProvider.GetRequiredKeyedService<IMetaGraphClient>("unconfigured-meta");
         }
 
         return serviceProvider.GetRequiredKeyedService<IMetaGraphClient>("meta");

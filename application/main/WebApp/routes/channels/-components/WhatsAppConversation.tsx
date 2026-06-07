@@ -1,24 +1,13 @@
-import { t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
-import { Button } from "@repo/ui/components/Button";
 import { Card, CardContent, CardHeader, CardTitle } from "@repo/ui/components/Card";
 import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@repo/ui/components/Empty";
-import { Form } from "@repo/ui/components/Form";
 import { Skeleton } from "@repo/ui/components/Skeleton";
-import { TextAreaField } from "@repo/ui/components/TextAreaField";
-import { TextField } from "@repo/ui/components/TextField";
-import { mutationSubmitter } from "@repo/ui/forms/mutationSubmitter";
 import { useFormatDate } from "@repo/ui/hooks/useSmartDate";
 import { MessageCircleIcon } from "lucide-react";
-import { useState } from "react";
-import { toast } from "sonner";
 
 import type { Schemas } from "@/shared/lib/api/client";
 
-import { api, queryClient } from "@/shared/lib/api/client";
-
-const MESSAGES_QUERY_KEY = ["get", "/api/main/whatsapp/messages"] as const;
-const MAX_MESSAGE_LENGTH = 4096;
+import { api } from "@/shared/lib/api/client";
 
 type WhatsAppMessage = Schemas["WhatsAppMessageItem"];
 
@@ -92,7 +81,7 @@ function MessagesList() {
             <Trans>No messages yet</Trans>
           </EmptyTitle>
           <EmptyDescription>
-            <Trans>Send your first message using the form below.</Trans>
+            <Trans>Messages from customers will appear here once Meta starts delivering webhooks.</Trans>
           </EmptyDescription>
         </EmptyHeader>
       </Empty>
@@ -111,67 +100,17 @@ function MessagesList() {
   );
 }
 
-function SendMessageForm() {
-  const [messageText, setMessageText] = useState("");
-
-  const sendMutation = api.useMutation("post", "/api/main/whatsapp/messages", {
-    onSuccess: () => {
-      toast.success(t`Message sent`, {
-        description: t`Your message has been sent.`
-      });
-      queryClient.invalidateQueries({ queryKey: MESSAGES_QUERY_KEY });
-      setMessageText("");
-    }
-  });
-
+export function WhatsAppConversation() {
   return (
     <Card>
       <CardHeader>
         <CardTitle>
-          <Trans>Send a message</Trans>
+          <Trans>Messages</Trans>
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <Form
-          onSubmit={mutationSubmitter(sendMutation)}
-          validationErrors={sendMutation.error?.errors}
-          validationBehavior="aria"
-        >
-          <TextField name="to" label={t`Recipient`} type="tel" required disabled={sendMutation.isPending} />
-          <TextAreaField
-            name="text"
-            label={t`Message`}
-            required
-            maxLength={MAX_MESSAGE_LENGTH}
-            value={messageText}
-            onChange={setMessageText}
-            disabled={sendMutation.isPending}
-          />
-          <div className="flex justify-end">
-            <Button type="submit" isPending={sendMutation.isPending}>
-              {sendMutation.isPending ? <Trans>Sending...</Trans> : <Trans>Send message</Trans>}
-            </Button>
-          </div>
-        </Form>
+        <MessagesList />
       </CardContent>
     </Card>
-  );
-}
-
-export function WhatsAppConversation() {
-  return (
-    <div className="flex flex-col gap-6">
-      <Card>
-        <CardHeader>
-          <CardTitle>
-            <Trans>Messages</Trans>
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <MessagesList />
-        </CardContent>
-      </Card>
-      <SendMessageForm />
-    </div>
   );
 }

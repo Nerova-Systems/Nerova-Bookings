@@ -57,6 +57,16 @@ public sealed class ProcessPendingWhatsAppEvents(
                             ? await whatsAppBusinessAccountRepository.GetByMetaPhoneNumberIdUnfilteredAsync(phoneNumberId, cancellationToken)
                             : null;
 
+                        if (account is null)
+                        {
+                            var error = $"No WABA registered for Meta phone number ID '{phoneNumberId}'. Re-run embedded signup or check WABA configuration.";
+                            logger.LogError("WhatsApp event '{EventId}': {Error}", whatsAppEvent.Id.Value, error);
+                            whatsAppEvent.MarkFailed(timeProvider.GetUtcNow(), error);
+                            whatsAppEventRepository.Update(whatsAppEvent);
+                            await dbContext.SaveChangesAsync(cancellationToken);
+                            return;
+                        }
+
                         foreach (var msg in value.Messages)
                         {
                             if (string.IsNullOrEmpty(msg.Id) || string.IsNullOrEmpty(msg.From)) continue;
@@ -64,12 +74,6 @@ public sealed class ProcessPendingWhatsAppEvents(
                             // Dedup: if a message with this MetaMessageId already exists, skip
                             var existing = await whatsAppMessageRepository.GetByMetaMessageIdUnfilteredAsync(msg.Id, cancellationToken);
                             if (existing is not null) continue;
-
-                            if (account is null)
-                            {
-                                logger.LogWarning("Received WhatsApp message for unknown phone number ID '{PhoneNumberId}', skipping", phoneNumberId);
-                                continue;
-                            }
 
                             var toPhoneNumber = value.Metadata?.DisplayPhoneNumber ?? string.Empty;
                             var timestamp = DateTimeOffset.FromUnixTimeSeconds(long.TryParse(msg.Timestamp, out var ts) ? ts : 0);

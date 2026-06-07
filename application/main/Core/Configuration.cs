@@ -104,6 +104,7 @@ public static class Configuration
             );
             services.AddKeyedScoped<IMetaGraphClient>("meta", (serviceProvider, _) => serviceProvider.GetRequiredService<MetaGraphClient>());
             services.AddKeyedScoped<IMetaGraphClient, MockMetaGraphClient>("mock-meta");
+            services.AddKeyedScoped<IMetaGraphClient, UnconfiguredMetaGraphClient>("unconfigured-meta");
             services.AddScoped<MetaGraphClientFactory>();
             services.AddScoped<WhatsAppAccessTokenProtector>();
             services.AddScoped<ProcessPendingWhatsAppEvents>();

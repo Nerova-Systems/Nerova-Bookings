@@ -13,6 +13,16 @@ namespace Main.Tests.WhatsAppMessaging;
 
 public sealed class WhatsAppWebhookTests : EndpointBaseTest<MainDbContext>
 {
+    private sealed record DiagnosticsResponse(
+        bool MetaConfigured,
+        bool UsesMockProvider,
+        bool HasAppId,
+        bool HasAppSecret,
+        bool HasConfigId,
+        bool HasWebhookVerifyToken,
+        string WebhookPath,
+        string Note);
+
     private const string WebhookUrl = "/api/main/whatsapp/webhook";
     private const string WabaId = "123456789012345";
     private const string PhoneNumberId = "123456789012345-phone"; // MockMetaGraphClient returns "{wabaId}-phone"
@@ -75,6 +85,25 @@ public sealed class WhatsAppWebhookTests : EndpointBaseTest<MainDbContext>
                    }]
                  }
                  """;
+    }
+
+    [Fact]
+    public async Task Diagnostics_ShouldReportMockProviderWhenMetaCredentialsAreMissing()
+    {
+        // Act
+        var response = await AnonymousHttpClient.GetAsync("/api/main/whatsapp/webhook/diagnostics");
+
+        // Assert
+        response.EnsureSuccessStatusCode();
+
+        var body = await response.Content.ReadFromJsonAsync<DiagnosticsResponse>();
+        body.Should().NotBeNull();
+        body!.MetaConfigured.Should().BeFalse();
+        body.UsesMockProvider.Should().BeTrue();
+        body.HasAppId.Should().BeFalse();
+        body.HasAppSecret.Should().BeFalse();
+        body.HasConfigId.Should().BeFalse();
+        body.HasWebhookVerifyToken.Should().BeFalse();
     }
 
     [Fact]
@@ -248,5 +277,34 @@ public sealed class WhatsAppWebhookTests : EndpointBaseTest<MainDbContext>
 
         var status = Connection.ExecuteScalar<string>($"SELECT status FROM whats_app_messages WHERE meta_message_id = '{metaMessageId}'", []);
         status.Should().Be(nameof(WhatsAppMessageStatus.Delivered));
+    }
+
+    [Fact]
+    public async Task PostWebhook_WhenInboundMessageWithUnknownPhoneNumberId_ShouldMarkEventFailed()
+    {
+        // Arrange — do NOT onboard any WABA, so no phone number ID is registered
+        var payload = BuildInboundMessagePayload("999999999-unregistered", messageId: "wamid.unknown001");
+        var signature = ComputeValidSignature(payload);
+
+        // Act
+        var request = new HttpRequestMessage(HttpMethod.Post, WebhookUrl)
+        {
+            Content = new StringContent(payload, Encoding.UTF8, "application/json")
+        };
+        request.Headers.Add("X-Hub-Signature-256", signature);
+        var response = await AnonymousHttpClient.SendAsync(request);
+
+        // Assert — webhook is acknowledged (200) but the event should be marked Failed, not Processed
+        response.EnsureSuccessStatusCode();
+
+        var eventStatus = Connection.ExecuteScalar<string>("SELECT status FROM whats_app_events", []);
+        eventStatus.Should().Be(nameof(WhatsAppEventStatus.Failed));
+
+        var eventError = Connection.ExecuteScalar<string>("SELECT error FROM whats_app_events", []);
+        eventError.Should().Contain("999999999-unregistered");
+
+        // No message row should have been created
+        var messageCount = Connection.ExecuteScalar<long>("SELECT COUNT(*) FROM whats_app_messages WHERE meta_message_id = 'wamid.unknown001'", []);
+        messageCount.Should().Be(0);
     }
 }

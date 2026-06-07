@@ -11,6 +11,7 @@ import { WhatsAppConnectionCard } from "./-components/WhatsAppConnectionCard";
 import { WhatsAppConversation } from "./-components/WhatsAppConversation";
 import { WhatsAppConversationsPanel } from "./-components/WhatsAppConversationsPanel";
 import { WhatsAppStats } from "./-components/WhatsAppStats";
+import { WhatsAppWebhookActivityPanel } from "./-components/WhatsAppWebhookActivityPanel";
 
 export const Route = createFileRoute("/channels/whatsapp")({
   beforeLoad: () => {
@@ -42,6 +43,7 @@ function WhatsAppPage() {
           <div className="flex flex-col gap-8">
             <WhatsAppConnectionCard />
             {isConnected && <WhatsAppStats />}
+            {isConnected && <WhatsAppWebhookActivityPanel />}
             {isConnected && <WhatsAppConversationsPanel />}
             {isConnected && <WhatsAppConversation />}
           </div>
