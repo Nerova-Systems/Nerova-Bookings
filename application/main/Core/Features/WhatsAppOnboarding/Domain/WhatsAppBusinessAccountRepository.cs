@@ -28,6 +28,8 @@ public interface IWhatsAppBusinessAccountRepository : IAppendRepository<WhatsApp
     ///     established but the tenant has already been resolved from the request.
     /// </summary>
     Task<WhatsAppBusinessAccount?> GetByTenantIdUnfilteredAsync(TenantId tenantId, CancellationToken cancellationToken);
+
+    void Remove(WhatsAppBusinessAccount account);
 }
 
 public sealed class WhatsAppBusinessAccountRepository(MainDbContext mainDbContext)
@@ -50,5 +52,10 @@ public sealed class WhatsAppBusinessAccountRepository(MainDbContext mainDbContex
         return await DbSet
             .IgnoreQueryFilters([QueryFilterNames.Tenant])
             .FirstOrDefaultAsync(a => a.TenantId == tenantId, cancellationToken);
+    }
+
+    public new void Remove(WhatsAppBusinessAccount account)
+    {
+        base.Remove(account);
     }
 }

@@ -1375,17 +1375,17 @@ msgstr "Meeting started"
 msgid "Members handling the most bookings."
 msgstr "Members handling the most bookings."
 
-msgid "Message"
-msgstr "Message"
-
 msgid "Message (optional)"
 msgstr "Message (optional)"
 
-msgid "Message sent"
-msgstr "Message sent"
-
 msgid "Messages"
 msgstr "Messages"
+
+msgid "Messages from customers will appear here once Meta starts delivering webhooks."
+msgstr "Messages from customers will appear here once Meta starts delivering webhooks."
+
+msgid "Meta has not delivered any webhooks to this server yet. Ensure the webhook URL and verify token are registered in the Meta app dashboard, and that the WhatsApp product subscription is active."
+msgstr "Meta has not delivered any webhooks to this server yet. Ensure the webhook URL and verify token are registered in the Meta app dashboard, and that the WhatsApp product subscription is active."
 
 msgid "Minimum length"
 msgstr "Minimum length"
@@ -1580,6 +1580,9 @@ msgstr "No times available on this date."
 msgid "No webhooks configured."
 msgstr "No webhooks configured."
 
+msgid "No webhooks received"
+msgstr "No webhooks received"
+
 msgid "No webhooks yet"
 msgstr "No webhooks yet"
 
@@ -1764,6 +1767,9 @@ msgstr "Private link removed"
 msgid "Private links"
 msgstr "Private links"
 
+msgid "Processed"
+msgstr "Processed"
+
 msgid "Public booking"
 msgstr "Public booking"
 
@@ -1820,9 +1826,6 @@ msgstr "Reassigned"
 
 msgid "Recent deliveries"
 msgstr "Recent deliveries"
-
-msgid "Recipient"
-msgstr "Recipient"
 
 msgid "Recording ready"
 msgstr "Recording ready"
@@ -2114,9 +2117,6 @@ msgstr "Selected calendars"
 msgid "Selected hosts"
 msgstr "Selected hosts"
 
-msgid "Send a message"
-msgstr "Send a message"
-
 msgid "Send a signed HTTP POST to your endpoint when the selected events occur."
 msgstr "Send a signed HTTP POST to your endpoint when the selected events occur."
 
@@ -2135,9 +2135,6 @@ msgstr "Send Cal.com-compatible booking lifecycle payloads to external systems."
 msgid "Send emails with the transcription of the Cal Video after the meeting ends. Requires a paid plan."
 msgstr "Send emails with the transcription of the Cal Video after the meeting ends. Requires a paid plan."
 
-msgid "Send message"
-msgstr "Send message"
-
 msgid "Send request"
 msgstr "Send request"
 
@@ -2146,12 +2143,6 @@ msgstr "Send signed HTTP notifications to your services when booking lifecycle e
 
 msgid "Send test event"
 msgstr "Send test event"
-
-msgid "Send your first message using the form below."
-msgstr "Send your first message using the form below."
-
-msgid "Sending..."
-msgstr "Sending..."
 
 msgid "Sent"
 msgstr "Sent"
@@ -2483,6 +2474,9 @@ msgstr "We will display this email address as the organizer, and send confirmati
 msgid "Webhook"
 msgstr "Webhook"
 
+msgid "Webhook activity"
+msgstr "Webhook activity"
+
 msgid "Webhook created"
 msgstr "Webhook created"
 
@@ -2543,6 +2537,9 @@ msgstr "WhatsApp connected"
 msgid "WhatsApp Connection Pending"
 msgstr "WhatsApp Connection Pending"
 
+msgid "WhatsApp disconnected"
+msgstr "WhatsApp disconnected"
+
 msgid "When"
 msgstr "When"
 
@@ -2587,14 +2584,14 @@ msgstr "Your booking is confirmed."
 msgid "Your dashboard is empty"
 msgstr "Your dashboard is empty"
 
-msgid "Your message has been sent."
-msgstr "Your message has been sent."
-
 msgid "Your name"
 msgstr "Your name"
 
 msgid "Your stored connection will be removed. Existing bookings keep their location and calendar destination, but new bookings will no longer use this app."
 msgstr "Your stored connection will be removed. Existing bookings keep their location and calendar destination, but new bookings will no longer use this app."
+
+msgid "Your WhatsApp Business account has been disconnected."
+msgstr "Your WhatsApp Business account has been disconnected."
 
 msgid "Your WhatsApp Business account is now connected."
 msgstr "Your WhatsApp Business account is now connected."

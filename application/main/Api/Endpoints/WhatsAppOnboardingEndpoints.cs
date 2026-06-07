@@ -17,6 +17,10 @@ public sealed class WhatsAppOnboardingEndpoints : IEndpoints
             => await mediator.Send(command)
         );
 
+        group.MapDelete("/waba", async Task<ApiResult> (IMediator mediator)
+            => await mediator.Send(new DisconnectWhatsAppCommand())
+        );
+
         group.MapGet("/status", async Task<ApiResult<GetWhatsAppOnboardingStatusResponse>> ([AsParameters] GetWhatsAppOnboardingStatusQuery query, IMediator mediator)
             => await mediator.Send(query)
         ).Produces<GetWhatsAppOnboardingStatusResponse>();

@@ -58,6 +58,15 @@ export function WhatsAppConnectionCard() {
     }
   });
 
+  const disconnectMutation = api.useMutation("delete", "/api/main/whatsapp/waba", {
+    onSuccess: () => {
+      toast.success(t`WhatsApp disconnected`, {
+        description: t`Your WhatsApp Business account has been disconnected.`
+      });
+      queryClient.invalidateQueries({ queryKey: STATUS_QUERY_KEY });
+    }
+  });
+
   const handleComplete = useCallback(
     (payload: EmbeddedSignupPayload) => {
       completeMutation.mutate({ body: payload });
@@ -77,7 +86,7 @@ export function WhatsAppConnectionCard() {
 
   const status = statusQuery.data;
   const isConnected = status?.isConnected ?? false;
-  const isBusy = isLaunching || completeMutation.isPending;
+  const isBusy = isLaunching || completeMutation.isPending || disconnectMutation.isPending;
 
   return (
     <Card>
@@ -102,11 +111,22 @@ export function WhatsAppConnectionCard() {
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
         {isConnected ? (
-          <ConnectedDetails
-            businessName={status?.businessName ?? null}
-            phoneNumber={status?.phoneNumber ?? null}
-            status={status?.status ?? ""}
-          />
+          <>
+            <ConnectedDetails
+              businessName={status?.businessName ?? null}
+              phoneNumber={status?.phoneNumber ?? null}
+              status={status?.status ?? ""}
+            />
+            <div className="flex justify-end">
+              <Button
+                variant="outline"
+                onClick={() => disconnectMutation.mutate({})}
+                isPending={disconnectMutation.isPending}
+              >
+                <Trans>Disconnect</Trans>
+              </Button>
+            </div>
+          </>
         ) : (
           <div className="flex flex-col gap-2">
             <Button onClick={launch} disabled={!isSdkReady} isPending={isBusy}>

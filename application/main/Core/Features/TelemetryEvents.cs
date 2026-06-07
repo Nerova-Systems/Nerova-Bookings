@@ -27,6 +27,9 @@ public sealed class ScheduleUpdated(ScheduleId scheduleId)
 public sealed class WhatsAppBusinessAccountOnboarded(WhatsAppBusinessAccountId whatsAppBusinessAccountId)
     : TelemetryEvent(("whats_app_business_account_id", whatsAppBusinessAccountId));
 
+public sealed class WhatsAppBusinessAccountDisconnected(WhatsAppBusinessAccountId whatsAppBusinessAccountId)
+    : TelemetryEvent(("whats_app_business_account_id", whatsAppBusinessAccountId));
+
 public sealed class WhatsAppMessageReceived(WhatsAppMessageId whatsAppMessageId)
     : TelemetryEvent(("whats_app_message_id", whatsAppMessageId));
 

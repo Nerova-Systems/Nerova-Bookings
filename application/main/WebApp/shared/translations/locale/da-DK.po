@@ -1375,16 +1375,16 @@ msgstr "Møde startet"
 msgid "Members handling the most bookings."
 msgstr "Medlemmer der håndterer flest bookinger."
 
-msgid "Message"
-msgstr ""
-
 msgid "Message (optional)"
 msgstr "Besked (valgfrit)"
 
-msgid "Message sent"
+msgid "Messages"
 msgstr ""
 
-msgid "Messages"
+msgid "Messages from customers will appear here once Meta starts delivering webhooks."
+msgstr ""
+
+msgid "Meta has not delivered any webhooks to this server yet. Ensure the webhook URL and verify token are registered in the Meta app dashboard, and that the WhatsApp product subscription is active."
 msgstr ""
 
 msgid "Minimum length"
@@ -1580,6 +1580,9 @@ msgstr "Ingen tider er tilgængelige på denne dato."
 msgid "No webhooks configured."
 msgstr "Ingen webhooks konfigureret."
 
+msgid "No webhooks received"
+msgstr ""
+
 msgid "No webhooks yet"
 msgstr "Ingen webhooks endnu"
 
@@ -1764,6 +1767,9 @@ msgstr "Privat link fjernet"
 msgid "Private links"
 msgstr ""
 
+msgid "Processed"
+msgstr ""
+
 msgid "Public booking"
 msgstr "Offentlig booking"
 
@@ -1820,9 +1826,6 @@ msgstr "Omfordelt"
 
 msgid "Recent deliveries"
 msgstr "Seneste leveringer"
-
-msgid "Recipient"
-msgstr ""
 
 msgid "Recording ready"
 msgstr "Optagelse klar"
@@ -2114,9 +2117,6 @@ msgstr "Valgte kalendere"
 msgid "Selected hosts"
 msgstr "Valgte værter"
 
-msgid "Send a message"
-msgstr ""
-
 msgid "Send a signed HTTP POST to your endpoint when the selected events occur."
 msgstr "Send en signeret HTTP POST til dit endpoint, når de valgte hændelser indtræffer."
 
@@ -2135,9 +2135,6 @@ msgstr "Send Cal.com-kompatible booking-livscyklusdata til eksterne systemer."
 msgid "Send emails with the transcription of the Cal Video after the meeting ends. Requires a paid plan."
 msgstr "Send e-mails med transskriptionen af Cal Video efter mødet slutter. Kræver en betalt plan."
 
-msgid "Send message"
-msgstr ""
-
 msgid "Send request"
 msgstr "Send anmodning"
 
@@ -2146,12 +2143,6 @@ msgstr "Send signerede HTTP-meddelelser til dine tjenester, når booking-livscyk
 
 msgid "Send test event"
 msgstr "Send testhændelse"
-
-msgid "Send your first message using the form below."
-msgstr ""
-
-msgid "Sending..."
-msgstr ""
 
 msgid "Sent"
 msgstr "Sendt"
@@ -2483,6 +2474,9 @@ msgstr "Vi viser denne e-mailadresse som arrangør og sender bekræftelsesmails 
 msgid "Webhook"
 msgstr "Webhook"
 
+msgid "Webhook activity"
+msgstr ""
+
 msgid "Webhook created"
 msgstr "Webhook oprettet"
 
@@ -2543,6 +2537,9 @@ msgstr ""
 msgid "WhatsApp Connection Pending"
 msgstr ""
 
+msgid "WhatsApp disconnected"
+msgstr ""
+
 msgid "When"
 msgstr "Hvornår"
 
@@ -2587,14 +2584,14 @@ msgstr "Din booking er bekræftet."
 msgid "Your dashboard is empty"
 msgstr "Dit dashboard er tomt"
 
-msgid "Your message has been sent."
-msgstr ""
-
 msgid "Your name"
 msgstr "Dit navn"
 
 msgid "Your stored connection will be removed. Existing bookings keep their location and calendar destination, but new bookings will no longer use this app."
 msgstr "Din gemte forbindelse vil blive fjernet. Eksisterende bookinger beholder deres lokation og kalenderdestinat, men nye bookinger vil ikke længere bruge denne app."
+
+msgid "Your WhatsApp Business account has been disconnected."
+msgstr ""
 
 msgid "Your WhatsApp Business account is now connected."
 msgstr ""

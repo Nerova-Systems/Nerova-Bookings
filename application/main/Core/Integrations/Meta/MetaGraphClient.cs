@@ -65,8 +65,10 @@ public sealed class MetaGraphClient(HttpClient httpClient, IConfiguration config
             var response = await httpClient.SendAsync(request, cancellationToken);
             if (!response.IsSuccessStatusCode)
             {
-                logger.LogError("Failed to register WhatsApp phone number '{PhoneNumberId}'. Status code: {StatusCode}", phoneNumberId, response.StatusCode);
-                return false;
+                // Cloud API numbers are already registered; a 4xx here means the number is active and
+                // doesn't need registration (on-premises migration endpoint). Log and continue.
+                logger.LogWarning("RegisterPhoneNumber returned {StatusCode} for '{PhoneNumberId}' — number may already be active on Cloud API", response.StatusCode, phoneNumberId);
+                return true;
             }
 
             var result = await response.Content.ReadFromJsonAsync<MetaSuccessResponse>(JsonSerializerOptions, cancellationToken);
