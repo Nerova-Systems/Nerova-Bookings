@@ -53,7 +53,12 @@ function MessageBubble({
 }
 
 function MessagesList() {
-  const messagesQuery = api.useQuery("get", "/api/main/whatsapp/messages");
+  const messagesQuery = api.useQuery(
+    "get",
+    "/api/main/whatsapp/messages",
+    {},
+    { refetchInterval: 5000, refetchOnWindowFocus: true }
+  );
   const formatDate = useFormatDate();
 
   if (messagesQuery.isLoading) {

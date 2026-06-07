@@ -23,6 +23,7 @@ public sealed class BookingConfiguration : IEntityTypeConfiguration<Booking>
         builder.Property(booking => booking.LocationValue).HasMaxLength(500);
         builder.Property(booking => booking.BookerName).HasMaxLength(120);
         builder.Property(booking => booking.BookerEmail).HasMaxLength(320);
+        builder.Property(booking => booking.BookerPhone).HasMaxLength(30);
         builder.Property(booking => booking.TimeZone).HasMaxLength(100);
         builder.Property(booking => booking.Status).HasMaxLength(40);
         builder.Property(booking => booking.ResponsesJson).HasColumnType("jsonb");

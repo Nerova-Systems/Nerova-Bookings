@@ -1,6 +1,7 @@
 using Main.Database;
 using Microsoft.EntityFrameworkCore;
 using SharedKernel.Domain;
+using SharedKernel.EntityFramework;
 using SharedKernel.Persistence;
 
 namespace Main.Features.Clients.Domain;
@@ -19,6 +20,13 @@ public interface IClientRepository : ICrudRepository<Client, ClientId>, IBulkRem
         int? pageSize,
         CancellationToken cancellationToken
     );
+
+    /// <summary>
+    ///     Finds an existing client for the tenant matching the given phone number (preferred) or email,
+    ///     bypassing the tenant query filter. Used by the booking-created upsert, which runs for anonymous
+    ///     public bookings where no tenant context is set.
+    /// </summary>
+    Task<Client?> GetByTenantAndContactUnfilteredAsync(TenantId tenantId, string? phoneNumber, string? email, CancellationToken cancellationToken);
 }
 
 public sealed class ClientRepository(MainDbContext mainDbContext)
@@ -94,5 +102,28 @@ public sealed class ClientRepository(MainDbContext mainDbContext)
         var result = size == 0 ? [] : ordered.Skip((pageOffset ?? 0) * size).Take(size).ToArray();
 
         return (result, totalItems, totalPages);
+    }
+
+    public async Task<Client?> GetByTenantAndContactUnfilteredAsync(TenantId tenantId, string? phoneNumber, string? email, CancellationToken cancellationToken)
+    {
+        var normalizedPhone = string.IsNullOrWhiteSpace(phoneNumber) ? null : phoneNumber.Trim();
+        var normalizedEmail = string.IsNullOrWhiteSpace(email) ? null : email.Trim().ToLowerInvariant();
+
+        if (normalizedPhone is not null)
+        {
+            var byPhone = await DbSet
+                .IgnoreQueryFilters([QueryFilterNames.Tenant])
+                .FirstOrDefaultAsync(client => client.TenantId == tenantId && client.PhoneNumber == normalizedPhone, cancellationToken);
+            if (byPhone is not null) return byPhone;
+        }
+
+        if (normalizedEmail is not null)
+        {
+            return await DbSet
+                .IgnoreQueryFilters([QueryFilterNames.Tenant])
+                .FirstOrDefaultAsync(client => client.TenantId == tenantId && client.Email == normalizedEmail, cancellationToken);
+        }
+
+        return null;
     }
 }

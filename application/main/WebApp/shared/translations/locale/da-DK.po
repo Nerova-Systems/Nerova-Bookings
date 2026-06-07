@@ -28,6 +28,11 @@ msgstr "{0}"
 msgid "{0} clients deleted successfully"
 msgstr ""
 
+#. placeholder {0}: conversation.inboundCount
+#. placeholder {1}: conversation.outboundCount
+msgid "{0} received · {1} sent"
+msgstr ""
+
 #. placeholder {0}: schedule.availabilityWindows.length
 msgid "{0} windows"
 msgstr "{0} vinduer"
@@ -277,6 +282,9 @@ msgstr "Bloker tidspunkt mens afventer"
 msgid "Book Instantly on WhatsApp"
 msgstr ""
 
+msgid "booked"
+msgstr ""
+
 msgid "Booked minutes per day"
 msgstr ""
 
@@ -303,6 +311,9 @@ msgstr "Booking annulleret"
 
 msgid "Booking confirmed"
 msgstr "Booking bekræftet"
+
+msgid "Booking conversations"
+msgstr ""
 
 msgid "Booking created"
 msgstr "Booking oprettet"
@@ -967,6 +978,9 @@ msgstr "Mislykket"
 msgid "Failed to copy secret"
 msgstr "Kunne ikke kopiere hemmelighed"
 
+msgid "Failed to load conversations."
+msgstr ""
+
 msgid "Failed to load messages."
 msgstr ""
 
@@ -1493,6 +1507,9 @@ msgstr "Ingen tilsluttede Google- eller Microsoft-kalendere."
 
 msgid "No connector accounts are connected yet."
 msgstr "Der er endnu ikke forbundet nogen connector-konti."
+
+msgid "No conversations yet"
+msgstr ""
 
 msgid "No custom booking fields yet."
 msgstr "Ingen brugerdefinerede bookingfelter endnu."
@@ -2528,6 +2545,9 @@ msgstr ""
 
 msgid "When"
 msgstr "Hvornår"
+
+msgid "When customers message your WhatsApp number, their booking conversations appear here."
+msgstr ""
 
 msgid "Why is this booking being reassigned?"
 msgstr "Hvorfor omfordeles denne booking?"

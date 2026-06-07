@@ -108,12 +108,20 @@ public sealed class DispatchWorkflowReminderJob(
                 await SendWhatsAppAsync(reminder, booking.TenantId, reminder.SendTo, ct);
                 break;
 
+            case WorkflowAction.SmsAttendee when !string.IsNullOrWhiteSpace(booking.BookerPhone):
+                await SendSmsAsync(reminder, booking.BookerPhone, ct);
+                break;
+
+            case WorkflowAction.WhatsappAttendee when !string.IsNullOrWhiteSpace(booking.BookerPhone):
+                await SendWhatsAppAsync(reminder, booking.TenantId, booking.BookerPhone, ct);
+                break;
+
             case WorkflowAction.SmsAttendee:
             case WorkflowAction.WhatsappAttendee:
-                // Booking does not capture an attendee phone number yet. Until that field lands
-                // (deferred), *Attendee SMS/WhatsApp reminders cannot be delivered — cancel cleanly.
+                // The booking has no attendee phone number (e.g. created via the public web flow), so an
+                // attendee SMS/WhatsApp reminder cannot be delivered — cancel cleanly.
                 logger.LogWarning(
-                    "Workflow reminder {ReminderId} action {Action} cannot be dispatched: attendee phone number not captured at booking time.",
+                    "Workflow reminder {ReminderId} action {Action} cannot be dispatched: the booking has no attendee phone number.",
                     reminder.Id.Value,
                     reminder.Action
                 );

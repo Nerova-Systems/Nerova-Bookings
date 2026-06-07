@@ -26,6 +26,8 @@ using Main.Features.TeamMembers.Domain;
 using Main.Features.TeamMembers.Infrastructure;
 using Main.Features.Webhooks.Infrastructure;
 using Main.Features.Webhooks.Jobs;
+using Main.Features.WhatsAppBooking;
+using Main.Features.WhatsAppBooking.Infrastructure;
 using Main.Features.WhatsAppMessaging.Shared;
 using Main.Features.WhatsAppOnboarding.Shared;
 using Main.Features.Workflows.EventHandlers;
@@ -105,6 +107,9 @@ public static class Configuration
             services.AddScoped<MetaGraphClientFactory>();
             services.AddScoped<WhatsAppAccessTokenProtector>();
             services.AddScoped<ProcessPendingWhatsAppEvents>();
+            services.AddScoped<IWhatsAppOutboundSender, WhatsAppOutboundSender>();
+            services.AddScoped<WhatsAppConversationEngine>();
+            services.Configure<WhatsAppBookingOptions>(bookingOptions => bookingOptions.FlowId = Environment.GetEnvironmentVariable("WHATSAPP_BOOKING_FLOW_ID"));
 
             return services
                 .AddScoped<IPermissionCheckService, PermissionCheckService>()

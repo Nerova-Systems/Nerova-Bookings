@@ -9,6 +9,7 @@ import { isWhatsAppSignupEnabled } from "@/shared/lib/whatsapp/whatsAppConfig";
 
 import { WhatsAppConnectionCard } from "./-components/WhatsAppConnectionCard";
 import { WhatsAppConversation } from "./-components/WhatsAppConversation";
+import { WhatsAppConversationsPanel } from "./-components/WhatsAppConversationsPanel";
 import { WhatsAppStats } from "./-components/WhatsAppStats";
 
 export const Route = createFileRoute("/channels/whatsapp")({
@@ -41,6 +42,7 @@ function WhatsAppPage() {
           <div className="flex flex-col gap-8">
             <WhatsAppConnectionCard />
             {isConnected && <WhatsAppStats />}
+            {isConnected && <WhatsAppConversationsPanel />}
             {isConnected && <WhatsAppConversation />}
           </div>
         </AppLayout>

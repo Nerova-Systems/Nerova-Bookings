@@ -17,6 +17,14 @@ public interface ISchedulingProfileRepository : ICrudRepository<SchedulingProfil
     /// </summary>
     Task<SchedulingProfile?> GetByHandleUnfilteredAsync(string handle, CancellationToken cancellationToken);
 
+    /// <summary>
+    ///     Returns the tenant's primary (solo, owner-scoped) scheduling profile without tenant query filters. Used by
+    ///     anonymous WhatsApp booking processing, which has resolved the tenant from the inbound message's WhatsApp
+    ///     Business Account but carries no execution-context tenant. Returns the earliest-created solo profile so the
+    ///     result is deterministic for single-operator businesses.
+    /// </summary>
+    Task<SchedulingProfile?> GetByTenantIdUnfilteredAsync(TenantId tenantId, CancellationToken cancellationToken);
+
     Task<bool> HandleExistsAsync(string handle, UserId? excludedOwnerUserId, CancellationToken cancellationToken);
 }
 
@@ -47,6 +55,17 @@ public sealed class SchedulingProfileRepository(MainDbContext mainDbContext)
             .IgnoreQueryFilters()
             .Where(profile => profile.DeletedAt == null)
             .Where(profile => profile.Handle == normalizedHandle)
+            .FirstOrDefaultAsync(cancellationToken);
+    }
+
+    public async Task<SchedulingProfile?> GetByTenantIdUnfilteredAsync(TenantId tenantId, CancellationToken cancellationToken)
+    {
+        return await DbSet
+            .IgnoreQueryFilters()
+            .Where(profile => profile.DeletedAt == null)
+            .Where(profile => profile.TenantId == tenantId)
+            .Where(profile => profile.TeamId == null)
+            .OrderBy(profile => profile.Id)
             .FirstOrDefaultAsync(cancellationToken);
     }
 

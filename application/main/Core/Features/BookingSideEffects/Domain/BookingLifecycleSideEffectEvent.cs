@@ -14,6 +14,7 @@ public sealed record BookingLifecycleSideEffectEvent(
     string Title,
     string BookerName,
     string BookerEmail,
+    string? BookerPhone,
     DateTimeOffset StartTime,
     DateTimeOffset EndTime,
     string Status,

@@ -5,8 +5,8 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useCallback, useEffect, useState } from "react";
 import { z } from "zod";
 
-import { api, type components, SortableClientProperties, SortOrder } from "@/shared/lib/api/client";
 import { MainSideMenu } from "@/shared/components/MainSideMenu";
+import { api, type components, SortableClientProperties, SortOrder } from "@/shared/lib/api/client";
 
 import { ClientProfileSidePane } from "./-components/ClientProfileSidePane";
 import { ClientTable } from "./-components/ClientTable";
@@ -111,47 +111,47 @@ export default function ClientsPage() {
     <SidebarProvider>
       <MainSideMenu />
       <SidebarInset>
-      <>
-      <AppLayout
-        variant="center"
-        sidePane={getSidePane()}
-        maxWidth="64rem"
-        title={t`Clients`}
-        subtitle={t`Manage your booking clients here.`}
-      >
-        <div className="flex min-h-0 flex-1 flex-col">
-          <div className="max-sm:sticky max-sm:top-12">
-            <ClientToolbar selectedClients={selectedClients} onSelectedClientsChange={setSelectedClients} />
-          </div>
-          <div className="flex min-h-0 flex-1 flex-col">
-            <ClientTable
-              selectedClients={selectedClients}
-              onSelectedClientsChange={setSelectedClients}
-              onViewProfile={handleViewProfile}
-              onManageClient={handleManageClient}
-              onDeleteClient={handleDeleteClient}
-            />
-          </div>
-        </div>
-      </AppLayout>
+        <>
+          <AppLayout
+            variant="center"
+            sidePane={getSidePane()}
+            maxWidth="64rem"
+            title={t`Clients`}
+            subtitle={t`Manage your booking clients here.`}
+          >
+            <div className="flex min-h-0 flex-1 flex-col">
+              <div className="max-sm:sticky max-sm:top-12">
+                <ClientToolbar selectedClients={selectedClients} onSelectedClientsChange={setSelectedClients} />
+              </div>
+              <div className="flex min-h-0 flex-1 flex-col">
+                <ClientTable
+                  selectedClients={selectedClients}
+                  onSelectedClientsChange={setSelectedClients}
+                  onViewProfile={handleViewProfile}
+                  onManageClient={handleManageClient}
+                  onDeleteClient={handleDeleteClient}
+                />
+              </div>
+            </div>
+          </AppLayout>
 
-      <ManageClientDialog
-        client={clientToManage}
-        isOpen={clientToManage !== null}
-        onOpenChange={(isOpen) => !isOpen && setClientToManage(null)}
-      />
+          <ManageClientDialog
+            client={clientToManage}
+            isOpen={clientToManage !== null}
+            onOpenChange={(isOpen) => !isOpen && setClientToManage(null)}
+          />
 
-      <DeleteClientDialog
-        clients={clientToDelete ? [clientToDelete] : []}
-        isOpen={clientToDelete !== null}
-        onOpenChange={(isOpen) => !isOpen && setClientToDelete(null)}
-        onClientsDeleted={() => {
-          setSelectedClients([]);
-          setProfileClient(null);
-          navigate({ search: (prev) => ({ ...prev, clientId: undefined }) });
-        }}
-      />
-    </>
+          <DeleteClientDialog
+            clients={clientToDelete ? [clientToDelete] : []}
+            isOpen={clientToDelete !== null}
+            onOpenChange={(isOpen) => !isOpen && setClientToDelete(null)}
+            onClientsDeleted={() => {
+              setSelectedClients([]);
+              setProfileClient(null);
+              navigate({ search: (prev) => ({ ...prev, clientId: undefined }) });
+            }}
+          />
+        </>
       </SidebarInset>
     </SidebarProvider>
   );

@@ -74,7 +74,7 @@ function BookingsPage() {
         }
       }
     },
-    { enabled: view === "list" }
+    { enabled: view === "list", refetchOnWindowFocus: true, refetchInterval: 15000 }
   );
 
   useEffect(() => {

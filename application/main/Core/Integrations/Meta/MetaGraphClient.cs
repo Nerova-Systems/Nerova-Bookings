@@ -198,6 +198,202 @@ public sealed class MetaGraphClient(HttpClient httpClient, IConfiguration config
         }
     }
 
+    public async Task<string?> SendInteractiveButtonsAsync(
+        string phoneNumberId,
+        string accessToken,
+        string toPhoneNumber,
+        string bodyText,
+        IReadOnlyList<WhatsAppReplyButton> buttons,
+        CancellationToken cancellationToken
+    )
+    {
+        var payload = new
+        {
+            MessagingProduct = "whatsapp",
+            To = toPhoneNumber,
+            Type = "interactive",
+            Interactive = new
+            {
+                Type = "button",
+                Body = new { Text = bodyText },
+                Action = new
+                {
+                    Buttons = buttons
+                        .Select(button => new { Type = "reply", Reply = new { button.Id, button.Title } })
+                        .ToArray()
+                }
+            }
+        };
+
+        return await PostInteractiveMessageAsync(phoneNumberId, accessToken, toPhoneNumber, payload, cancellationToken);
+    }
+
+    public async Task<string?> SendInteractiveListAsync(
+        string phoneNumberId,
+        string accessToken,
+        string toPhoneNumber,
+        string bodyText,
+        string buttonLabel,
+        IReadOnlyList<WhatsAppListSection> sections,
+        CancellationToken cancellationToken
+    )
+    {
+        var payload = new
+        {
+            MessagingProduct = "whatsapp",
+            To = toPhoneNumber,
+            Type = "interactive",
+            Interactive = new
+            {
+                Type = "list",
+                Body = new { Text = bodyText },
+                Action = new
+                {
+                    Button = buttonLabel,
+                    Sections = sections
+                        .Select(section => new
+                        {
+                            section.Title,
+                            Rows = section.Rows
+                                .Select(row => row.Description is null
+                                    ? (object)new { row.Id, row.Title }
+                                    : new { row.Id, row.Title, row.Description })
+                                .ToArray()
+                        })
+                        .ToArray()
+                }
+            }
+        };
+
+        return await PostInteractiveMessageAsync(phoneNumberId, accessToken, toPhoneNumber, payload, cancellationToken);
+    }
+
+    public async Task<string?> SendCtaUrlButtonAsync(
+        string phoneNumberId,
+        string accessToken,
+        string toPhoneNumber,
+        string bodyText,
+        string buttonText,
+        string url,
+        CancellationToken cancellationToken
+    )
+    {
+        var payload = new
+        {
+            MessagingProduct = "whatsapp",
+            To = toPhoneNumber,
+            Type = "interactive",
+            Interactive = new
+            {
+                Type = "cta_url",
+                Body = new { Text = bodyText },
+                Action = new
+                {
+                    Name = "cta_url",
+                    Parameters = new { DisplayText = buttonText, Url = url }
+                }
+            }
+        };
+
+        return await PostInteractiveMessageAsync(phoneNumberId, accessToken, toPhoneNumber, payload, cancellationToken);
+    }
+
+    public async Task<string?> SendFlowMessageAsync(
+        string phoneNumberId,
+        string accessToken,
+        string toPhoneNumber,
+        string bodyText,
+        string flowId,
+        string flowToken,
+        string flowCtaText,
+        string? initialScreen,
+        object? initialData,
+        CancellationToken cancellationToken
+    )
+    {
+        object parameters = initialScreen is null
+            ? new
+            {
+                FlowMessageVersion = "3",
+                FlowToken = flowToken,
+                FlowId = flowId,
+                FlowCta = flowCtaText,
+                FlowAction = "data_exchange"
+            }
+            : new
+            {
+                FlowMessageVersion = "3",
+                FlowToken = flowToken,
+                FlowId = flowId,
+                FlowCta = flowCtaText,
+                FlowAction = "navigate",
+                FlowActionPayload = initialData is null
+                    ? (object)new { Screen = initialScreen }
+                    : new { Screen = initialScreen, Data = initialData }
+            };
+
+        var payload = new
+        {
+            MessagingProduct = "whatsapp",
+            To = toPhoneNumber,
+            Type = "interactive",
+            Interactive = new
+            {
+                Type = "flow",
+                Body = new { Text = bodyText },
+                Action = new
+                {
+                    Name = "flow",
+                    Parameters = parameters
+                }
+            }
+        };
+
+        return await PostInteractiveMessageAsync(phoneNumberId, accessToken, toPhoneNumber, payload, cancellationToken);
+    }
+
+    /// <summary>
+    ///     Shared POST + response parsing for interactive (button/list/cta_url/flow) messages. On a non-success
+    ///     status the Meta error body is logged to aid debugging. Never throws — returns null on any failure.
+    /// </summary>
+    private async Task<string?> PostInteractiveMessageAsync(string phoneNumberId, string accessToken, string toPhoneNumber, object payload, CancellationToken cancellationToken)
+    {
+        try
+        {
+            using var request = new HttpRequestMessage(HttpMethod.Post, $"{_graphApiVersion}/{phoneNumberId}/messages");
+            request.Content = JsonContent.Create(payload, options: JsonSerializerOptions);
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+
+            var response = await httpClient.SendAsync(request, cancellationToken);
+            if (!response.IsSuccessStatusCode)
+            {
+                var errorBody = await response.Content.ReadAsStringAsync(cancellationToken);
+                logger.LogError(
+                    "Failed to send WhatsApp interactive message to '{ToPhoneNumber}'. Status code: {StatusCode}. Body: {ErrorBody}",
+                    toPhoneNumber,
+                    response.StatusCode,
+                    errorBody
+                );
+                return null;
+            }
+
+            var result = await response.Content.ReadFromJsonAsync<MetaSendMessageResponse>(JsonSerializerOptions, cancellationToken);
+            var messageId = result?.Messages?.FirstOrDefault()?.Id;
+            if (string.IsNullOrEmpty(messageId))
+            {
+                logger.LogError("WhatsApp interactive send response to '{ToPhoneNumber}' contained no message ID", toPhoneNumber);
+                return null;
+            }
+
+            return messageId;
+        }
+        catch (Exception ex) when (ex is HttpRequestException or OperationCanceledException or JsonException && !cancellationToken.IsCancellationRequested)
+        {
+            logger.LogError(ex, "Error sending WhatsApp interactive message to '{ToPhoneNumber}'", toPhoneNumber);
+            return null;
+        }
+    }
+
     private sealed record MetaTokenResponse(string? AccessToken);
 
     [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]

@@ -52,6 +52,7 @@ public sealed class Booking : AggregateRoot<BookingId>, ITenantScopedEntity
         string? locationValue,
         string bookerName,
         string bookerEmail,
+        string? bookerPhone,
         string timeZone,
         BookingStatus status,
         Dictionary<string, string> responses,
@@ -71,12 +72,13 @@ public sealed class Booking : AggregateRoot<BookingId>, ITenantScopedEntity
         LocationValue = string.IsNullOrWhiteSpace(locationValue) ? null : locationValue.Trim();
         BookerName = bookerName.Trim();
         BookerEmail = bookerEmail.Trim().ToLowerInvariant();
+        BookerPhone = string.IsNullOrWhiteSpace(bookerPhone) ? null : bookerPhone.Trim();
         TimeZone = timeZone.Trim();
         Status = status;
         ResponsesJson = JsonSerializer.Serialize(responses, JsonSerializerOptions);
         MetadataJson = metadata is null ? null : JsonSerializer.Serialize(metadata, JsonSerializerOptions);
         AttendeesJson = JsonSerializer.Serialize(
-            new[] { new BookingCalAttendee(BookerName, BookerEmail, TimeZone, null, null, false) },
+            new[] { new BookingCalAttendee(BookerName, BookerEmail, TimeZone, BookerPhone, null, false) },
             JsonSerializerOptions
         );
         ReferencesJson = "[]";
@@ -108,6 +110,9 @@ public sealed class Booking : AggregateRoot<BookingId>, ITenantScopedEntity
     public string BookerName { get; }
 
     public string BookerEmail { get; }
+
+    /// <summary>The booker's phone number in E.164 format. Null for bookings made without a phone (for example web bookings).</summary>
+    public string? BookerPhone { get; }
 
     public string TimeZone { get; }
 
@@ -440,10 +445,11 @@ public sealed class Booking : AggregateRoot<BookingId>, ITenantScopedEntity
         string timeZone,
         BookingStatus status,
         Dictionary<string, string> responses,
-        TenantId? teamId = null
+        TenantId? teamId = null,
+        string? bookerPhone = null
     )
     {
-        return Create(tenantId, ownerUserId, eventTypeId, startTime, durationMinutes, beforeEventBufferMinutes, afterEventBufferMinutes, string.Empty, null, null, null, bookerName, bookerEmail, timeZone, status, responses, teamId);
+        return Create(tenantId, ownerUserId, eventTypeId, startTime, durationMinutes, beforeEventBufferMinutes, afterEventBufferMinutes, string.Empty, null, null, null, bookerName, bookerEmail, timeZone, status, responses, teamId, bookerPhone);
     }
 
     public static Booking Create(
@@ -463,10 +469,11 @@ public sealed class Booking : AggregateRoot<BookingId>, ITenantScopedEntity
         string timeZone,
         BookingStatus status,
         Dictionary<string, string> responses,
-        TenantId? teamId = null
+        TenantId? teamId = null,
+        string? bookerPhone = null
     )
     {
-        var booking = new Booking(tenantId, ownerUserId, eventTypeId, startTime, startTime.AddMinutes(durationMinutes), beforeEventBufferMinutes, afterEventBufferMinutes, title, description, locationType, locationValue, bookerName, bookerEmail, timeZone, status, responses, null);
+        var booking = new Booking(tenantId, ownerUserId, eventTypeId, startTime, startTime.AddMinutes(durationMinutes), beforeEventBufferMinutes, afterEventBufferMinutes, title, description, locationType, locationValue, bookerName, bookerEmail, bookerPhone, timeZone, status, responses, null);
         if (teamId is not null) booking.AssignToTeam(teamId);
         return booking;
     }
@@ -483,6 +490,7 @@ public sealed class Booking : AggregateRoot<BookingId>, ITenantScopedEntity
                 Title,
                 BookerName,
                 BookerEmail,
+                BookerPhone,
                 StartTime,
                 EndTime,
                 Status.ToString(),

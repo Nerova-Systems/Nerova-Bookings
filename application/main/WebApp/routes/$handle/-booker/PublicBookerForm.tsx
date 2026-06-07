@@ -88,7 +88,8 @@ export function BookEventForm({
                   privateLink: privateLink ?? null,
                   rescheduleBookingId: rescheduleBooking?.id ?? null,
                   rescheduleReason: values.rescheduleReason ?? null,
-                  rescheduledBy: rescheduledBy ?? null
+                  rescheduledBy: rescheduledBy ?? null,
+                  bookerPhone: null
                 }
               })
             }

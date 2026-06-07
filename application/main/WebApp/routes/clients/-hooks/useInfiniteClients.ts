@@ -46,7 +46,7 @@ export function useInfiniteClients({
         }
       }
     },
-    { enabled }
+    { enabled, refetchOnWindowFocus: true, refetchInterval: 15000 }
   );
 
   useEffect(() => {

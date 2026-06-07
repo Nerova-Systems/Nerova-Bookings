@@ -18,8 +18,8 @@ function DataDeletionPage() {
       <div className="max-w-md text-center">
         <h1 className="mb-4 text-2xl font-semibold">Data Deletion Request</h1>
         <p className="mb-4 text-muted-foreground">
-          Your data deletion request has been received and processed. We do not retain any personal data associated
-          with your Facebook account.
+          Your data deletion request has been received and processed. We do not retain any personal data associated with
+          your Facebook account.
         </p>
         {id && (
           <p className="text-sm text-muted-foreground">

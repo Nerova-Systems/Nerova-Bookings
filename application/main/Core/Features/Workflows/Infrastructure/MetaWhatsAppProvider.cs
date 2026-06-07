@@ -45,7 +45,7 @@ public sealed class MetaWhatsAppProvider(
     )
     {
         var waba = await wabaRepository.GetByTenantIdUnfilteredAsync(tenantId, cancellationToken);
-        if (waba is null || waba.PhoneNumber is null)
+        if (waba is null)
         {
             logger.LogWarning(
                 "Meta WhatsApp not configured for tenant {TenantId}; skipping message to {Recipient}.",

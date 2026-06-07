@@ -25,7 +25,8 @@ public sealed record CreatePublicBookingCommand(
     string? PrivateLink = null,
     BookingId? RescheduleBookingId = null,
     string? RescheduleReason = null,
-    string? RescheduledBy = null
+    string? RescheduledBy = null,
+    string? BookerPhone = null
 ) : ICommand, IRequest<Result<CreatePublicBookingResponse>>;
 
 public sealed class CreatePublicBookingValidator : AbstractValidator<CreatePublicBookingCommand>
@@ -40,6 +41,7 @@ public sealed class CreatePublicBookingValidator : AbstractValidator<CreatePubli
         RuleFor(command => command.BookerEmail).NotEmpty().EmailAddress().MaximumLength(320);
         RuleFor(command => command.RescheduleReason).NotEmpty().MaximumLength(1000).When(command => command.RescheduleBookingId is not null);
         RuleFor(command => command.RescheduledBy).MaximumLength(320);
+        RuleFor(command => command.BookerPhone).MaximumLength(30).When(command => command.BookerPhone is not null);
     }
 }
 
@@ -200,7 +202,8 @@ public sealed class CreatePublicBookingHandler(
             command.TimeZone,
             status,
             command.Responses ?? new Dictionary<string, string>(StringComparer.Ordinal),
-            context.EventType.TeamId
+            context.EventType.TeamId,
+            command.BookerPhone
         );
 
         if (originalBooking is not null)

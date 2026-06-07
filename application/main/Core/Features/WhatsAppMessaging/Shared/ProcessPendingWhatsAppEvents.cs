@@ -1,6 +1,8 @@
 using System.Text.Json;
 using JetBrains.Annotations;
 using Main.Database;
+using Main.Features.WhatsAppBooking;
+using Main.Features.WhatsAppBooking.Shared;
 using Main.Features.WhatsAppMessaging.Domain;
 using Main.Features.WhatsAppOnboarding.Domain;
 using SharedKernel.Telemetry;
@@ -17,6 +19,7 @@ public sealed class ProcessPendingWhatsAppEvents(
     IWhatsAppEventRepository whatsAppEventRepository,
     IWhatsAppMessageRepository whatsAppMessageRepository,
     IWhatsAppBusinessAccountRepository whatsAppBusinessAccountRepository,
+    WhatsAppConversationEngine conversationEngine,
     TimeProvider timeProvider,
     ITelemetryEventsCollector events,
     ILogger<ProcessPendingWhatsAppEvents> logger
@@ -70,11 +73,15 @@ public sealed class ProcessPendingWhatsAppEvents(
 
                             var toPhoneNumber = value.Metadata?.DisplayPhoneNumber ?? string.Empty;
                             var timestamp = DateTimeOffset.FromUnixTimeSeconds(long.TryParse(msg.Timestamp, out var ts) ? ts : 0);
-                            var text = msg.Text?.Body ?? string.Empty;
+                            var text = ResolveInboundText(msg);
 
                             var message = WhatsAppMessage.CreateInbound(account.TenantId, msg.Id, msg.From, toPhoneNumber, text, timestamp);
                             await whatsAppMessageRepository.AddAsync(message, cancellationToken);
                             events.CollectEvent(new WhatsAppMessageReceived(message.Id));
+
+                            // Drive the deterministic booking conversation (greet, launch Flow, advance state).
+                            var inbound = BuildInboundMessage(msg.From, msg);
+                            await conversationEngine.HandleInboundAsync(account, inbound, cancellationToken);
                         }
                     }
 
@@ -123,6 +130,69 @@ public sealed class ProcessPendingWhatsAppEvents(
         };
     }
 
+    /// <summary>
+    ///     Resolves a human-readable transcript representation of an inbound message. Plain text returns its
+    ///     body; an interactive button/list reply returns the tapped option's title; a Flow completion
+    ///     (nfm_reply) returns the submitted response JSON. The full raw payload always remains available on the
+    ///     <see cref="WhatsAppEvent" /> for deep debugging.
+    /// </summary>
+    private static string ResolveInboundText(MetaWebhookMessage message)
+    {
+        if (message.Text?.Body is { Length: > 0 } body)
+        {
+            return body;
+        }
+
+        var interactive = message.Interactive;
+        if (interactive?.ButtonReply?.Title is { Length: > 0 } buttonTitle)
+        {
+            return buttonTitle;
+        }
+
+        if (interactive?.ListReply?.Title is { Length: > 0 } listTitle)
+        {
+            return listTitle;
+        }
+
+        if (interactive?.NfmReply?.ResponseJson is { Length: > 0 } responseJson)
+        {
+            return responseJson;
+        }
+
+        return string.Empty;
+    }
+
+    /// <summary>
+    ///     Maps the parsed Meta webhook message to the normalized inbound shape the conversation engine consumes:
+    ///     a Flow completion (with its submitted response JSON), an interactive button/list reply (with the
+    ///     tapped option id), plain text, or an unsupported message type.
+    /// </summary>
+    private static WhatsAppInboundMessage BuildInboundMessage(string fromPhoneNumber, MetaWebhookMessage message)
+    {
+        var interactive = message.Interactive;
+        if (interactive?.NfmReply is not null)
+        {
+            return new WhatsAppInboundMessage(fromPhoneNumber, WhatsAppInboundKind.FlowCompletion, null, null, interactive.NfmReply.ResponseJson);
+        }
+
+        if (interactive?.ButtonReply is not null)
+        {
+            return new WhatsAppInboundMessage(fromPhoneNumber, WhatsAppInboundKind.ButtonReply, interactive.ButtonReply.Title, interactive.ButtonReply.Id, null);
+        }
+
+        if (interactive?.ListReply is not null)
+        {
+            return new WhatsAppInboundMessage(fromPhoneNumber, WhatsAppInboundKind.ListReply, interactive.ListReply.Title, interactive.ListReply.Id, null);
+        }
+
+        if (message.Text?.Body is { Length: > 0 } body)
+        {
+            return new WhatsAppInboundMessage(fromPhoneNumber, WhatsAppInboundKind.Text, body, null, null);
+        }
+
+        return new WhatsAppInboundMessage(fromPhoneNumber, WhatsAppInboundKind.Other, null, null, null);
+    }
+
     private sealed record MetaWebhookPayload(MetaWebhookEntry[]? Entry);
 
     [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
@@ -142,10 +212,24 @@ public sealed class ProcessPendingWhatsAppEvents(
     private sealed record MetaWebhookMetadata(string? PhoneNumberId, string? DisplayPhoneNumber);
 
     [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
-    private sealed record MetaWebhookMessage(string? Id, string? From, string? Timestamp, MetaWebhookMessageText? Text);
+    private sealed record MetaWebhookMessage(string? Id, string? From, string? Timestamp, string? Type, MetaWebhookMessageText? Text, MetaWebhookInteractive? Interactive);
 
     [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
     private sealed record MetaWebhookMessageText(string? Body);
+
+    [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
+    private sealed record MetaWebhookInteractive(
+        string? Type,
+        MetaWebhookInteractiveReply? ButtonReply,
+        MetaWebhookInteractiveReply? ListReply,
+        MetaWebhookNfmReply? NfmReply
+    );
+
+    [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
+    private sealed record MetaWebhookInteractiveReply(string? Id, string? Title, string? Description);
+
+    [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
+    private sealed record MetaWebhookNfmReply(string? Name, string? Body, string? ResponseJson);
 
     [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
     private sealed record MetaWebhookStatus(string? Id, string? Status);

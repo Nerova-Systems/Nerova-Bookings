@@ -25,9 +25,7 @@ export function ClientToolbar({ selectedClients, onSelectedClientsChange }: Read
 
   return (
     <div className="@container mb-4 flex items-center justify-between gap-2">
-      <ClientQuerying
-        onFiltersUpdated={() => onSelectedClientsChange([])}
-      />
+      <ClientQuerying onFiltersUpdated={() => onSelectedClientsChange([])} />
       <div className="mt-auto flex items-center gap-2">
         {selectedClients.length > 1 && (
           <Tooltip>

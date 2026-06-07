@@ -28,6 +28,11 @@ msgstr "{0}"
 msgid "{0} clients deleted successfully"
 msgstr "{0} clients deleted successfully"
 
+#. placeholder {0}: conversation.inboundCount
+#. placeholder {1}: conversation.outboundCount
+msgid "{0} received · {1} sent"
+msgstr "{0} received · {1} sent"
+
 #. placeholder {0}: schedule.availabilityWindows.length
 msgid "{0} windows"
 msgstr "{0} windows"
@@ -277,6 +282,9 @@ msgstr "Block slot while pending"
 msgid "Book Instantly on WhatsApp"
 msgstr "Book Instantly on WhatsApp"
 
+msgid "booked"
+msgstr "booked"
+
 msgid "Booked minutes per day"
 msgstr "Booked minutes per day"
 
@@ -303,6 +311,9 @@ msgstr "Booking cancelled"
 
 msgid "Booking confirmed"
 msgstr "Booking confirmed"
+
+msgid "Booking conversations"
+msgstr "Booking conversations"
 
 msgid "Booking created"
 msgstr "Booking created"
@@ -967,6 +978,9 @@ msgstr "Failed"
 msgid "Failed to copy secret"
 msgstr "Failed to copy secret"
 
+msgid "Failed to load conversations."
+msgstr "Failed to load conversations."
+
 msgid "Failed to load messages."
 msgstr "Failed to load messages."
 
@@ -1493,6 +1507,9 @@ msgstr "No connected Google or Microsoft calendars."
 
 msgid "No connector accounts are connected yet."
 msgstr "No connector accounts are connected yet."
+
+msgid "No conversations yet"
+msgstr "No conversations yet"
 
 msgid "No custom booking fields yet."
 msgstr "No custom booking fields yet."
@@ -2528,6 +2545,9 @@ msgstr "WhatsApp Connection Pending"
 
 msgid "When"
 msgstr "When"
+
+msgid "When customers message your WhatsApp number, their booking conversations appear here."
+msgstr "When customers message your WhatsApp number, their booking conversations appear here."
 
 msgid "Why is this booking being reassigned?"
 msgstr "Why is this booking being reassigned?"

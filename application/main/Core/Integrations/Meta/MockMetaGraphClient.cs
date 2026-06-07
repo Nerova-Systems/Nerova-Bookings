@@ -41,4 +41,58 @@ public sealed class MockMetaGraphClient : IMetaGraphClient
     {
         return Task.FromResult<string?>($"wamid.MOCK_{Guid.NewGuid():N}");
     }
+
+    public Task<string?> SendInteractiveButtonsAsync(
+        string phoneNumberId,
+        string accessToken,
+        string toPhoneNumber,
+        string bodyText,
+        IReadOnlyList<WhatsAppReplyButton> buttons,
+        CancellationToken cancellationToken
+    )
+    {
+        return Task.FromResult<string?>($"wamid.MOCK_{Guid.NewGuid():N}");
+    }
+
+    public Task<string?> SendInteractiveListAsync(
+        string phoneNumberId,
+        string accessToken,
+        string toPhoneNumber,
+        string bodyText,
+        string buttonLabel,
+        IReadOnlyList<WhatsAppListSection> sections,
+        CancellationToken cancellationToken
+    )
+    {
+        return Task.FromResult<string?>($"wamid.MOCK_{Guid.NewGuid():N}");
+    }
+
+    public Task<string?> SendCtaUrlButtonAsync(
+        string phoneNumberId,
+        string accessToken,
+        string toPhoneNumber,
+        string bodyText,
+        string buttonText,
+        string url,
+        CancellationToken cancellationToken
+    )
+    {
+        return Task.FromResult<string?>($"wamid.MOCK_{Guid.NewGuid():N}");
+    }
+
+    public Task<string?> SendFlowMessageAsync(
+        string phoneNumberId,
+        string accessToken,
+        string toPhoneNumber,
+        string bodyText,
+        string flowId,
+        string flowToken,
+        string flowCtaText,
+        string? initialScreen,
+        object? initialData,
+        CancellationToken cancellationToken
+    )
+    {
+        return Task.FromResult<string?>($"wamid.MOCK_{Guid.NewGuid():N}");
+    }
 }
