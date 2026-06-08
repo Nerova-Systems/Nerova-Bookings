@@ -14,6 +14,12 @@ public interface IEventTypeRepository : ICrudRepository<EventType, EventTypeId>,
 
     Task<EventType?> GetPublicBySlugUnfilteredAsync(TenantId tenantId, UserId ownerUserId, string slug, CancellationToken cancellationToken);
 
+    /// <summary>
+    ///     Returns all visible (non-hidden, non-deleted) event types for the owner of the given tenant's
+    ///     scheduling profile. Used by the WhatsApp booking Flow to populate the services list.
+    /// </summary>
+    Task<EventType[]> GetPublicListByOwnerUnfilteredAsync(TenantId tenantId, UserId ownerUserId, CancellationToken cancellationToken);
+
     Task<bool> ExistsForScheduleAsync(UserId ownerUserId, ScheduleId scheduleId, CancellationToken cancellationToken);
 
     Task<bool> SlugExistsForOwnerAsync(UserId ownerUserId, string slug, EventTypeId? excludedEventTypeId, CancellationToken cancellationToken);
@@ -79,6 +85,15 @@ public sealed class EventTypeRepository(MainDbContext mainDbContext)
             .Where(eventType => eventType.OwnerUserId == ownerUserId)
             .Where(eventType => eventType.ScheduleId == scheduleId)
             .AnyAsync(cancellationToken);
+    }
+
+    public async Task<EventType[]> GetPublicListByOwnerUnfilteredAsync(TenantId tenantId, UserId ownerUserId, CancellationToken cancellationToken)
+    {
+        return await DbSet
+            .IgnoreQueryFilters()
+            .Where(et => et.TenantId == tenantId && et.OwnerUserId == ownerUserId && et.DeletedAt == null && !et.Hidden)
+            .OrderBy(et => et.Title)
+            .ToArrayAsync(cancellationToken);
     }
 
     public async Task<bool> SlugExistsForOwnerAsync(UserId ownerUserId, string slug, EventTypeId? excludedEventTypeId, CancellationToken cancellationToken)

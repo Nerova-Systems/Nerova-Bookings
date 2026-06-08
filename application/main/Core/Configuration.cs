@@ -27,6 +27,7 @@ using Main.Features.TeamMembers.Infrastructure;
 using Main.Features.Webhooks.Infrastructure;
 using Main.Features.Webhooks.Jobs;
 using Main.Features.WhatsAppBooking;
+using Main.Features.WhatsAppBooking.Domain;
 using Main.Features.WhatsAppBooking.Infrastructure;
 using Main.Features.WhatsAppMessaging.Shared;
 using Main.Features.WhatsAppOnboarding.Shared;
@@ -110,6 +111,10 @@ public static class Configuration
             services.AddScoped<ProcessPendingWhatsAppEvents>();
             services.AddScoped<IWhatsAppOutboundSender, WhatsAppOutboundSender>();
             services.AddScoped<WhatsAppConversationEngine>();
+            services.AddSingleton<WhatsAppFlowCrypto>();
+            services.AddScoped<WhatsAppLoginFlowDataEndpoint>();
+            services.AddScoped<WhatsAppBookingFlowDataEndpoint>();
+            services.AddScoped<IWhatsAppLoginChallengeRepository, WhatsAppLoginChallengeRepository>();
             services.Configure<WhatsAppBookingOptions>(bookingOptions =>
             {
                 bookingOptions.FlowId = Environment.GetEnvironmentVariable("WHATSAPP_BOOKING_FLOW_ID");
