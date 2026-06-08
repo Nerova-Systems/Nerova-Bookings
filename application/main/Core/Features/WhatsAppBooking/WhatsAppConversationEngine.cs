@@ -114,13 +114,14 @@ public sealed class WhatsAppConversationEngine(
         CancellationToken cancellationToken
     )
     {
-        if (!string.IsNullOrWhiteSpace(_options.LoginFlowId))
+        var loginFlowId = account.LoginFlowId ?? _options.LoginFlowId;
+        if (!string.IsNullOrWhiteSpace(loginFlowId))
         {
             var flowToken = $"login-{conversation.Id.Value}";
             var sent = await outboundSender.SendFlowAsync(
                 account, toPhoneNumber,
                 "Please enter your details to sign in or create an account.",
-                _options.LoginFlowId, flowToken, "Sign in / Register",
+                loginFlowId, flowToken, "Sign in / Register",
                 null, null, cancellationToken
             );
             if (sent)
@@ -183,13 +184,14 @@ public sealed class WhatsAppConversationEngine(
         CancellationToken cancellationToken
     )
     {
-        if (!string.IsNullOrWhiteSpace(_options.FlowId))
+        var bookingFlowId = account.BookingFlowId ?? _options.FlowId;
+        if (!string.IsNullOrWhiteSpace(bookingFlowId))
         {
             var flowToken = conversation.Id.Value;
             var sent = await outboundSender.SendFlowAsync(
                 account, toPhoneNumber,
                 "Tap below to choose your service, date and time.",
-                _options.FlowId, flowToken, "Book appointment",
+                bookingFlowId, flowToken, "Book appointment",
                 null, null, cancellationToken
             );
             if (sent)

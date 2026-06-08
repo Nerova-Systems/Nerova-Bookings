@@ -66,4 +66,13 @@ public sealed class UnconfiguredMetaGraphClient : IMetaGraphClient
         object? initialData,
         CancellationToken cancellationToken
     ) => Task.FromResult<string?>(null);
+
+    public Task<string?> CreateAndPublishFlowAsync(string wabaId, string flowName, string category, string flowJson, string accessToken, CancellationToken cancellationToken)
+        => Task.FromResult<string?>(null);
+
+    public Task<bool> UpdateFlowJsonAsync(string flowId, string flowJson, string accessToken, CancellationToken cancellationToken)
+        => Task.FromResult(false);
+
+    public Task<bool> UploadFlowPublicKeyAsync(string wabaId, string publicKeyPem, string accessToken, CancellationToken cancellationToken)
+        => Task.FromResult(false);
 }

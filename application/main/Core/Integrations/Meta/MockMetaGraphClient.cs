@@ -95,4 +95,13 @@ public sealed class MockMetaGraphClient : IMetaGraphClient
     {
         return Task.FromResult<string?>($"wamid.MOCK_{Guid.NewGuid():N}");
     }
+
+    public Task<string?> CreateAndPublishFlowAsync(string wabaId, string flowName, string category, string flowJson, string accessToken, CancellationToken cancellationToken)
+        => Task.FromResult<string?>($"mock-flow-{flowName.ToLowerInvariant().Replace(' ', '-')}");
+
+    public Task<bool> UpdateFlowJsonAsync(string flowId, string flowJson, string accessToken, CancellationToken cancellationToken)
+        => Task.FromResult(true);
+
+    public Task<bool> UploadFlowPublicKeyAsync(string wabaId, string publicKeyPem, string accessToken, CancellationToken cancellationToken)
+        => Task.FromResult(true);
 }

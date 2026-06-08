@@ -40,6 +40,12 @@ public sealed class WhatsAppBusinessAccount : AggregateRoot<WhatsAppBusinessAcco
 
     public TenantId TenantId { get; }
 
+    /// <summary>Flow ID of the published WhatsApp Booking Flow under this tenant's WABA. Null until created at onboarding.</summary>
+    public string? BookingFlowId { get; private set; }
+
+    /// <summary>Flow ID of the published WhatsApp Login/Registration Flow under this tenant's WABA. Null until created at onboarding.</summary>
+    public string? LoginFlowId { get; private set; }
+
     public static WhatsAppBusinessAccount Create(TenantId tenantId, string metaWabaId, string businessName, string encryptedAccessToken, WhatsAppPhoneNumber phoneNumber)
     {
         return new WhatsAppBusinessAccount(tenantId)
@@ -49,6 +55,13 @@ public sealed class WhatsAppBusinessAccount : AggregateRoot<WhatsAppBusinessAcco
             AccessToken = encryptedAccessToken,
             PhoneNumber = phoneNumber
         };
+    }
+
+    /// <summary>Stores the published WhatsApp Flow IDs provisioned for this tenant during or after onboarding.</summary>
+    public void SetFlowIds(string? bookingFlowId, string? loginFlowId)
+    {
+        if (!string.IsNullOrWhiteSpace(bookingFlowId)) BookingFlowId = bookingFlowId;
+        if (!string.IsNullOrWhiteSpace(loginFlowId)) LoginFlowId = loginFlowId;
     }
 }
 

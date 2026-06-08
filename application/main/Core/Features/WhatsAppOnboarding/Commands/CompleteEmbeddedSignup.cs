@@ -1,5 +1,6 @@
 using FluentValidation;
 using JetBrains.Annotations;
+using Main.Features.WhatsAppBooking.Infrastructure;
 using Main.Features.WhatsAppOnboarding.Domain;
 using Main.Features.WhatsAppOnboarding.Shared;
 using Main.Integrations.Meta;
@@ -26,6 +27,7 @@ public sealed class CompleteEmbeddedSignupHandler(
     IWhatsAppBusinessAccountRepository whatsAppBusinessAccountRepository,
     MetaGraphClientFactory metaGraphClientFactory,
     WhatsAppAccessTokenProtector accessTokenProtector,
+    WhatsAppFlowCrypto flowCrypto,
     IExecutionContext executionContext,
     ITelemetryEventsCollector events
 ) : IRequestHandler<CompleteEmbeddedSignupCommand, Result>
@@ -84,8 +86,40 @@ public sealed class CompleteEmbeddedSignupHandler(
         );
         await whatsAppBusinessAccountRepository.AddAsync(account, cancellationToken);
 
+        // Non-fatal: provision WhatsApp Flows and register the RSA public key for the data endpoint.
+        // Failures are logged and skipped — the WABA is still connected and the tenant can retry later.
+        await ProvisionFlowsAsync(metaGraphClient, account, accessToken, cancellationToken);
+
         events.CollectEvent(new WhatsAppBusinessAccountOnboarded(account.Id));
 
         return Result.Success();
+    }
+
+    private async Task ProvisionFlowsAsync(
+        IMetaGraphClient metaGraphClient,
+        WhatsAppBusinessAccount account,
+        string accessToken,
+        CancellationToken cancellationToken)
+    {
+        var baseUrl = Environment.GetEnvironmentVariable("PUBLIC_URL") ?? "https://app.nerovasystems.com";
+
+        // Upload the platform RSA public key to this WABA so Meta can encrypt data-exchange requests.
+        await metaGraphClient.UploadFlowPublicKeyAsync(account.MetaWabaId, flowCrypto.PublicKeyPem, accessToken, cancellationToken);
+
+        // Create + publish the Login Flow.
+        var loginFlowJson = WhatsAppLoginFlowDefinition.Build($"{baseUrl}/api/main/whatsapp/flows/login/data");
+        var loginFlowId = await metaGraphClient.CreateAndPublishFlowAsync(
+            account.MetaWabaId, "Nerova Sign In", "SIGN_IN", loginFlowJson, accessToken, cancellationToken);
+
+        // Create + publish the Booking Flow.
+        var bookingFlowJson = WhatsAppBookingFlowDefinition.Build($"{baseUrl}/api/main/whatsapp/flows/booking/data");
+        var bookingFlowId = await metaGraphClient.CreateAndPublishFlowAsync(
+            account.MetaWabaId, "Nerova Booking", "APPOINTMENT_BOOKING", bookingFlowJson, accessToken, cancellationToken);
+
+        if (!string.IsNullOrWhiteSpace(loginFlowId) || !string.IsNullOrWhiteSpace(bookingFlowId))
+        {
+            account.SetFlowIds(bookingFlowId, loginFlowId);
+            whatsAppBusinessAccountRepository.Update(account);
+        }
     }
 }

@@ -29,6 +29,8 @@ public interface IWhatsAppBusinessAccountRepository : IAppendRepository<WhatsApp
     /// </summary>
     Task<WhatsAppBusinessAccount?> GetByTenantIdUnfilteredAsync(TenantId tenantId, CancellationToken cancellationToken);
 
+    void Update(WhatsAppBusinessAccount account);
+
     void Remove(WhatsAppBusinessAccount account);
 }
 
@@ -54,8 +56,7 @@ public sealed class WhatsAppBusinessAccountRepository(MainDbContext mainDbContex
             .FirstOrDefaultAsync(a => a.TenantId == tenantId, cancellationToken);
     }
 
-    public new void Remove(WhatsAppBusinessAccount account)
-    {
-        base.Remove(account);
-    }
+    public new void Update(WhatsAppBusinessAccount account) => base.Update(account);
+
+    public new void Remove(WhatsAppBusinessAccount account) => base.Remove(account);
 }
