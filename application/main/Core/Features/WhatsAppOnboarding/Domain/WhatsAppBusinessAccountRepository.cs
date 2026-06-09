@@ -56,7 +56,13 @@ public sealed class WhatsAppBusinessAccountRepository(MainDbContext mainDbContex
             .FirstOrDefaultAsync(a => a.TenantId == tenantId, cancellationToken);
     }
 
-    public new void Update(WhatsAppBusinessAccount account) => base.Update(account);
+    public new void Update(WhatsAppBusinessAccount account)
+    {
+        base.Update(account);
+    }
 
-    public new void Remove(WhatsAppBusinessAccount account) => base.Remove(account);
+    public new void Remove(WhatsAppBusinessAccount account)
+    {
+        base.Remove(account);
+    }
 }

@@ -21,24 +21,26 @@ public sealed class WhatsAppWebhookEndpoints : IEndpoints
         ).Produces<GetWhatsAppWebhookEventsResponse>();
 
         group.MapGet("/diagnostics", (IConfiguration configuration, MetaGraphClientFactory metaGraphClientFactory) =>
-            {
-                var hasAppId = !string.IsNullOrWhiteSpace(configuration["Meta:AppId"]) && configuration["Meta:AppId"] != "not-configured";
-                var hasAppSecret = !string.IsNullOrWhiteSpace(configuration["Meta:AppSecret"]) && configuration["Meta:AppSecret"] != "not-configured";
-                var hasConfigId = !string.IsNullOrWhiteSpace(configuration["Meta:ConfigId"]) && configuration["Meta:ConfigId"] != "not-configured";
-                var hasWebhookVerifyToken = !string.IsNullOrWhiteSpace(configuration["Meta:WebhookVerifyToken"]) && configuration["Meta:WebhookVerifyToken"] != "not-configured";
-
-                return Results.Ok(new
                 {
-                    metaConfigured = metaGraphClientFactory.IsConfigured,
-                    usesMockProvider = !metaGraphClientFactory.IsConfigured,
-                    hasAppId,
-                    hasAppSecret,
-                    hasConfigId,
-                    hasWebhookVerifyToken,
-                    webhookPath = RoutesPrefix,
-                    note = "This endpoint reports only whether the live deployment has real Meta credentials configured; it never exposes secret values."
-                });
-            })
+                    var hasAppId = !string.IsNullOrWhiteSpace(configuration["Meta:AppId"]) && configuration["Meta:AppId"] != "not-configured";
+                    var hasAppSecret = !string.IsNullOrWhiteSpace(configuration["Meta:AppSecret"]) && configuration["Meta:AppSecret"] != "not-configured";
+                    var hasConfigId = !string.IsNullOrWhiteSpace(configuration["Meta:ConfigId"]) && configuration["Meta:ConfigId"] != "not-configured";
+                    var hasWebhookVerifyToken = !string.IsNullOrWhiteSpace(configuration["Meta:WebhookVerifyToken"]) && configuration["Meta:WebhookVerifyToken"] != "not-configured";
+
+                    return Results.Ok(new
+                        {
+                            metaConfigured = metaGraphClientFactory.IsConfigured,
+                            usesMockProvider = !metaGraphClientFactory.IsConfigured,
+                            hasAppId,
+                            hasAppSecret,
+                            hasConfigId,
+                            hasWebhookVerifyToken,
+                            webhookPath = RoutesPrefix,
+                            note = "This endpoint reports only whether the live deployment has real Meta credentials configured; it never exposes secret values."
+                        }
+                    );
+                }
+            )
             .AllowAnonymous();
 
         // Webhook verification: Meta sends a GET with hub.mode=subscribe and hub.verify_token to confirm the endpoint

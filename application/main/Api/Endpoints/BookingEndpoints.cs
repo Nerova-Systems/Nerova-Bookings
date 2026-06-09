@@ -102,4 +102,3 @@ public sealed record RejectBookingRequest(string? RejectionReason = null);
 public sealed record RequestRescheduleRequest(string? RescheduleReason = null);
 
 public sealed record EditBookingLocationRequest(string? LocationType, string? LocationValue);
-

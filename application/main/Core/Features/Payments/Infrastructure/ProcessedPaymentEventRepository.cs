@@ -14,7 +14,9 @@ public interface IProcessedPaymentEventRepository
 public sealed class ProcessedPaymentEventRepository(MainDbContext dbContext) : IProcessedPaymentEventRepository
 {
     public Task<bool> IsProcessedAsync(string eventId, CancellationToken cancellationToken)
-        => dbContext.Set<ProcessedPaymentEvent>().AsNoTracking().AnyAsync(e => e.EventId == eventId, cancellationToken);
+    {
+        return dbContext.Set<ProcessedPaymentEvent>().AsNoTracking().AnyAsync(e => e.EventId == eventId, cancellationToken);
+    }
 
     public async Task AddAsync(ProcessedPaymentEvent entry, CancellationToken cancellationToken)
     {

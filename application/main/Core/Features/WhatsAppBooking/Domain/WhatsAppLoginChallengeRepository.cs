@@ -29,7 +29,13 @@ public sealed class WhatsAppLoginChallengeRepository(MainDbContext mainDbContext
             .FirstOrDefaultAsync(c => c.TenantId == tenantId && c.PhoneNumber == phoneNumber, cancellationToken);
     }
 
-    public new void Update(WhatsAppLoginChallenge challenge) => base.Update(challenge);
+    public new void Update(WhatsAppLoginChallenge challenge)
+    {
+        base.Update(challenge);
+    }
 
-    public new void Remove(WhatsAppLoginChallenge challenge) => base.Remove(challenge);
+    public new void Remove(WhatsAppLoginChallenge challenge)
+    {
+        base.Remove(challenge);
+    }
 }

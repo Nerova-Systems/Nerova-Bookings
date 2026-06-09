@@ -1,10 +1,10 @@
 using System.Net;
 using System.Text.Json;
 using FluentAssertions;
-using Main.Features.Workflows.Infrastructure;
-using Main.Features.Workflows.Senders;
 using Main.Features.WhatsAppOnboarding.Domain;
 using Main.Features.WhatsAppOnboarding.Shared;
+using Main.Features.Workflows.Infrastructure;
+using Main.Features.Workflows.Senders;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
@@ -16,6 +16,8 @@ namespace Main.Tests.Workflows;
 
 public sealed class MetaWhatsAppProviderTests
 {
+    private static readonly TenantId TestTenantId = new(1);
+
     [Fact]
     public async Task SendAsync_WhenNotConfigured_ShouldReturnNotConfiguredAndNotCallHttp()
     {
@@ -149,8 +151,6 @@ public sealed class MetaWhatsAppProviderTests
         result.Status.Should().Be(WhatsAppResultStatus.PermanentFailure);
         result.ErrorReason.Should().Contain("401");
     }
-
-    private static readonly TenantId TestTenantId = new(1);
 
     private static MetaWhatsAppOptions ConfiguredOptions()
     {

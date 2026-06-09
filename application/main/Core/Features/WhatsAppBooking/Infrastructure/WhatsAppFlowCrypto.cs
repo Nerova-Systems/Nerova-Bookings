@@ -42,6 +42,11 @@ public sealed class WhatsAppFlowCrypto : IDisposable
     /// <summary>PEM-encoded RSA public key (SubjectPublicKeyInfo format) for upload to Meta.</summary>
     public string PublicKeyPem => _rsa.ExportSubjectPublicKeyInfoPem();
 
+    public void Dispose()
+    {
+        _rsa.Dispose();
+    }
+
     /// <summary>
     ///     Decrypts an incoming Meta Flow request. Returns the AES key, original IV, and decrypted JSON body.
     /// </summary>
@@ -82,8 +87,6 @@ public sealed class WhatsAppFlowCrypto : IDisposable
         tag.CopyTo(result, ciphertext.Length);
         return Convert.ToBase64String(result);
     }
-
-    public void Dispose() => _rsa.Dispose();
 }
 
 public sealed record FlowDecryptResult(byte[] AesKey, byte[] Iv, string Json);

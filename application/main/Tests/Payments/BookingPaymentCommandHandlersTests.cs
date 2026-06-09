@@ -1,8 +1,8 @@
 using FluentAssertions;
+using Main.Features.EventTypes.Domain;
 using Main.Features.Payments.Commands;
 using Main.Features.Payments.Domain;
 using Main.Features.Payments.Infrastructure;
-using Main.Features.EventTypes.Domain;
 using Main.Features.Scheduling.Domain;
 using Microsoft.Extensions.Logging.Abstractions;
 using NSubstitute;
@@ -87,23 +87,28 @@ public sealed class BookingPaymentCommandHandlersTests
     }
 
     private static Booking CreateBooking()
-        => Booking.Create(
-            tenantId: new TenantId(1),
-            ownerUserId: UserId.NewId(),
-            eventTypeId: EventTypeId.NewId(),
-            startTime: Now.AddHours(2),
-            durationMinutes: 30,
-            beforeEventBufferMinutes: 0,
-            afterEventBufferMinutes: 0,
-            bookerName: "Alice",
-            bookerEmail: "alice@example.com",
-            timeZone: "UTC",
-            status: BookingStatus.Accepted,
-            responses: new Dictionary<string, string>()
+    {
+        return Booking.Create(
+            new TenantId(1),
+            UserId.NewId(),
+            EventTypeId.NewId(),
+            Now.AddHours(2),
+            30,
+            0,
+            0,
+            "Alice",
+            "alice@example.com",
+            "UTC",
+            BookingStatus.Accepted,
+            new Dictionary<string, string>()
         );
+    }
 
     private sealed class FakeTimeProvider(DateTimeOffset now) : TimeProvider
     {
-        public override DateTimeOffset GetUtcNow() => now;
+        public override DateTimeOffset GetUtcNow()
+        {
+            return now;
+        }
     }
 }

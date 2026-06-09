@@ -1,7 +1,6 @@
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
-using Microsoft.Extensions.Configuration;
 using SharedKernel.Endpoints;
 
 namespace Main.Api.Endpoints;
@@ -61,7 +60,8 @@ public sealed class WhatsAppDataDeletionEndpoints : IEndpoints
 
                 if (!CryptographicOperations.FixedTimeEquals(
                         Encoding.ASCII.GetBytes(expectedSignature),
-                        Encoding.ASCII.GetBytes(encodedSignature)))
+                        Encoding.ASCII.GetBytes(encodedSignature)
+                    ))
                 {
                     return Results.Unauthorized();
                 }

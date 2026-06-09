@@ -1,4 +1,3 @@
-using SharedKernel.Domain;
 using SharedKernel.StronglyTypedIds;
 
 namespace Main.Features.Clients.Domain;

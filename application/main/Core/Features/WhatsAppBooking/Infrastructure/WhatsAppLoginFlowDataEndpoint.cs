@@ -1,20 +1,20 @@
 using System.Text.Json;
 using Main.Database;
-using Main.Features.Clients.Domain;
 using Main.Features.WhatsAppBooking.Domain;
 using SharedKernel.Domain;
 using SharedKernel.Integrations.Email;
+using SharedKernel.Platform;
 
 namespace Main.Features.WhatsAppBooking.Infrastructure;
 
 /// <summary>
 ///     Handles decrypted Meta Flows data-exchange requests for the WhatsApp Login/Registration Flow.
-///     Screens: SIGN_IN (email lookup) -> OTP_VERIFY or SIGN_UP -> OTP_VERIFY -> SUCCESS.
+///     Screens: DETAILS (name + email; phone prefilled with the verified sender) -> OTP_VERIFY -> CONFIRM.
+///     The OTP is emailed via the platform email client and the email doubles as an account-recovery key.
 /// </summary>
 public sealed class WhatsAppLoginFlowDataEndpoint(
     IWhatsAppConversationRepository conversationRepository,
     IWhatsAppLoginChallengeRepository challengeRepository,
-    IClientRepository clientRepository,
     IEmailClient emailClient,
     WhatsAppFlowCrypto crypto,
     MainDbContext dbContext,
@@ -22,16 +22,18 @@ public sealed class WhatsAppLoginFlowDataEndpoint(
     ILogger<WhatsAppLoginFlowDataEndpoint> logger
 )
 {
+    private const string FlowVersion = "3.0";
+
     private static readonly JsonSerializerOptions JsonOptions = new()
     {
         PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower,
         WriteIndented = false
     };
 
-    private const string FlowVersion = "3.0";
-
     public async Task<string> HandleEncryptedAsync(
-        string encryptedAesKey, string encryptedFlowData, string initialVector,
+        string encryptedAesKey,
+        string encryptedFlowData,
+        string initialVector,
         CancellationToken ct)
     {
         var decrypted = crypto.Decrypt(encryptedAesKey, encryptedFlowData, initialVector);
@@ -42,60 +44,62 @@ public sealed class WhatsAppLoginFlowDataEndpoint(
     private async Task<string> ProcessAsync(string requestJson, CancellationToken ct)
     {
         FlowDataRequest? req;
-        try { req = JsonSerializer.Deserialize<FlowDataRequest>(requestJson, JsonOptions); }
-        catch (JsonException ex) { logger.LogWarning(ex, "Failed to parse Login Flow request"); return Ping(); }
+        try
+        {
+            req = JsonSerializer.Deserialize<FlowDataRequest>(requestJson, JsonOptions);
+        }
+        catch (JsonException ex)
+        {
+            logger.LogWarning(ex, "Failed to parse Login Flow request");
+            return Ping();
+        }
 
         if (req is null || req.Action == "ping") return Ping();
-        if (req.Action == "init") return SignInScreen(string.Empty);
+        if (req.Action == "init")
+        {
+            // The Flow is normally launched directly on DETAILS with the phone prefilled; handle init
+            // defensively by resolving the verified sender from the flow_token.
+            var (_, initPhone) = await ResolveConversationAsync(req.FlowToken, ct);
+            return DetailsScreen(initPhone ?? string.Empty, string.Empty, string.Empty);
+        }
 
         return req.Screen switch
         {
-            "SIGN_IN" => await HandleSignInAsync(req, ct),
-            "SIGN_UP" => await HandleSignUpAsync(req, ct),
+            "DETAILS" => await HandleDetailsAsync(req, ct),
             "OTP_VERIFY" => await HandleOtpVerifyAsync(req, ct),
-            "SUCCESS" => Ping(), // terminal screen submission — just ack
+            "CONFIRM" => Ping(), // terminal screen completes client-side — just ack
             _ => Ping()
         };
     }
 
     // ── Handlers ──────────────────────────────────────────────────────────────────
 
-    private async Task<string> HandleSignInAsync(FlowDataRequest req, CancellationToken ct)
+    private async Task<string> HandleDetailsAsync(FlowDataRequest req, CancellationToken ct)
     {
-        var email = req.DataString("email");
-        if (string.IsNullOrWhiteSpace(email)) return SignInScreen("Please enter a valid email address.");
+        var name = req.DataString("name")?.Trim() ?? string.Empty;
+        var email = req.DataString("email")?.Trim().ToLowerInvariant() ?? string.Empty;
+        var phoneDisplay = req.DataString("phone")?.Trim() ?? string.Empty;
+
+        if (string.IsNullOrWhiteSpace(name) || string.IsNullOrWhiteSpace(email) || !email.Contains('@'))
+        {
+            return DetailsScreen(phoneDisplay, name, email, "Please enter your name and a valid email address.");
+        }
 
         var (tenantId, phone) = await ResolveConversationAsync(req.FlowToken, ct);
-        if (tenantId is null || phone is null) return SignInScreen("Session expired. Please start again.");
+        if (tenantId is null || phone is null)
+        {
+            return DetailsScreen(phoneDisplay, name, email, "Session expired. Please start again.");
+        }
 
-        // Check if this email matches an existing client for this tenant.
-        var client = await clientRepository.GetByTenantAndContactUnfilteredAsync(tenantId, null, email.Trim().ToLowerInvariant(), ct);
-        var name = client is not null ? $"{client.FirstName} {client.LastName}".Trim() : string.Empty;
-
-        // Send OTP and navigate to OTP_VERIFY.
-        var sent = await SendOtpAsync(tenantId, phone, email.Trim().ToLowerInvariant(), ct);
-        if (!sent) return SignInScreen("Failed to send verification code. Please try again.");
-
-        return OtpVerifyScreen(email.Trim().ToLowerInvariant(), name);
-    }
-
-    private async Task<string> HandleSignUpAsync(FlowDataRequest req, CancellationToken ct)
-    {
-        var firstName = req.DataString("first_name")?.Trim();
-        var lastName = req.DataString("last_name")?.Trim();
-        var email = req.DataString("email")?.Trim().ToLowerInvariant();
-
-        if (string.IsNullOrWhiteSpace(firstName) || string.IsNullOrWhiteSpace(email))
-            return SignUpScreen(email ?? string.Empty);
-
-        var (tenantId, phone) = await ResolveConversationAsync(req.FlowToken, ct);
-        if (tenantId is null || phone is null) return SignUpScreen(email);
-
+        // Send the OTP to the entered email. The challenge is keyed by the verified WhatsApp sender,
+        // so it is the verified phone — not a typed value — that ties the code to this conversation.
         var sent = await SendOtpAsync(tenantId, phone, email, ct);
-        if (!sent) return SignUpScreen(email);
+        if (!sent)
+        {
+            return DetailsScreen(phone, name, email, "Failed to send verification code. Please try again.");
+        }
 
-        var name = $"{firstName} {lastName}".Trim();
-        return OtpVerifyScreen(email, name);
+        return OtpVerifyScreen(name, email, phone);
     }
 
     private async Task<string> HandleOtpVerifyAsync(FlowDataRequest req, CancellationToken ct)
@@ -103,26 +107,37 @@ public sealed class WhatsAppLoginFlowDataEndpoint(
         var otp = req.DataString("otp")?.Trim();
         var name = req.DataString("name") ?? string.Empty;
         var email = req.DataString("email") ?? string.Empty;
+        var phoneDisplay = req.DataString("phone") ?? string.Empty;
 
         if (string.IsNullOrWhiteSpace(otp))
-            return OtpVerifyScreen(email, name, "Please enter the verification code.");
+        {
+            return OtpVerifyScreen(name, email, phoneDisplay, "Please enter the verification code.");
+        }
 
         var (tenantId, phone) = await ResolveConversationAsync(req.FlowToken, ct);
         if (tenantId is null || phone is null)
-            return OtpVerifyScreen(email, name, "Session expired. Please start again.");
+        {
+            return OtpVerifyScreen(name, email, phoneDisplay, "Session expired. Please start again.");
+        }
 
         var challenge = await challengeRepository.GetByTenantAndPhoneUnfilteredAsync(tenantId, phone, ct);
         if (challenge is null)
-            return OtpVerifyScreen(email, name, "Session expired. Please start again.");
+        {
+            return OtpVerifyScreen(name, email, phone, "Session expired. Please start again.");
+        }
 
         if (!challenge.Validate(otp, timeProvider.GetUtcNow()))
-            return OtpVerifyScreen(email, name, "Invalid or expired code. Please try again.");
+        {
+            return OtpVerifyScreen(name, email, phone, "Invalid or expired code. Please try again.");
+        }
 
         challenge.Consume();
         challengeRepository.Update(challenge);
         await dbContext.SaveChangesAsync(ct);
 
-        return SuccessScreen(name, email);
+        // Navigate to the terminal CONFIRM screen with the verified phone; the user taps Confirm there,
+        // which completes the Flow (complete action) and emits the nfm_reply the engine consumes.
+        return ConfirmScreen(name, email, phone);
     }
 
     // ── OTP helper ────────────────────────────────────────────────────────────────
@@ -131,7 +146,11 @@ public sealed class WhatsAppLoginFlowDataEndpoint(
     {
         // Remove any existing challenge.
         var existing = await challengeRepository.GetByTenantAndPhoneUnfilteredAsync(tenantId, phone, ct);
-        if (existing is not null) { challengeRepository.Remove(existing); await dbContext.SaveChangesAsync(ct); }
+        if (existing is not null)
+        {
+            challengeRepository.Remove(existing);
+            await dbContext.SaveChangesAsync(ct);
+        }
 
         var (challenge, otp) = WhatsAppLoginChallenge.Create(tenantId, phone, email, timeProvider.GetUtcNow());
         await challengeRepository.AddAsync(challenge, ct);
@@ -139,12 +158,14 @@ public sealed class WhatsAppLoginFlowDataEndpoint(
 
         try
         {
-            await emailClient.SendAsync(new SharedKernel.Integrations.Email.EmailMessage(
-                email,
-                "Your verification code",
-                $"<p>Your verification code is: <strong>{otp}</strong></p><p>It expires in 15 minutes.</p>",
-                $"Your verification code is: {otp}. It expires in 15 minutes."
-            ), ct);
+            var productName = Settings.Current.Branding.ProductName;
+            await emailClient.SendAsync(new EmailMessage(
+                    email,
+                    $"{productName} verification code",
+                    $"<p>Your {productName} verification code is: <strong>{otp}</strong></p><p>It expires in 15 minutes.</p>",
+                    $"Your {productName} verification code is: {otp}. It expires in 15 minutes."
+                ), ct
+            );
             return true;
         }
         catch (Exception ex)
@@ -156,20 +177,25 @@ public sealed class WhatsAppLoginFlowDataEndpoint(
 
     // ── Screen builders ────────────────────────────────────────────────────────────
 
-    private static string Ping() =>
-        JsonSerializer.Serialize(new { version = FlowVersion, data = new { status = "active" } }, JsonOptions);
+    private static string Ping()
+    {
+        return JsonSerializer.Serialize(new { version = FlowVersion, data = new { status = "active" } }, JsonOptions);
+    }
 
-    private static string SignInScreen(string errorMessage) =>
-        JsonSerializer.Serialize(new { version = FlowVersion, screen = "SIGN_IN", data = new { error_message = errorMessage } }, JsonOptions);
+    private static string DetailsScreen(string phone, string name, string email, string errorMessage = "")
+    {
+        return JsonSerializer.Serialize(new { version = FlowVersion, screen = "DETAILS", data = new { name, email, phone, error_message = errorMessage } }, JsonOptions);
+    }
 
-    private static string SignUpScreen(string email) =>
-        JsonSerializer.Serialize(new { version = FlowVersion, screen = "SIGN_UP", data = new { email } }, JsonOptions);
+    private static string OtpVerifyScreen(string name, string email, string phone, string errorMessage = "")
+    {
+        return JsonSerializer.Serialize(new { version = FlowVersion, screen = "OTP_VERIFY", data = new { name, email, phone, error_message = errorMessage } }, JsonOptions);
+    }
 
-    private static string OtpVerifyScreen(string email, string name, string errorMessage = "") =>
-        JsonSerializer.Serialize(new { version = FlowVersion, screen = "OTP_VERIFY", data = new { email, name, error_message = errorMessage } }, JsonOptions);
-
-    private static string SuccessScreen(string name, string email) =>
-        JsonSerializer.Serialize(new { version = FlowVersion, screen = "SUCCESS", data = new { name, email } }, JsonOptions);
+    private static string ConfirmScreen(string name, string email, string phone)
+    {
+        return JsonSerializer.Serialize(new { version = FlowVersion, screen = "CONFIRM", data = new { name, email, phone } }, JsonOptions);
+    }
 
     // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -180,7 +206,15 @@ public sealed class WhatsAppLoginFlowDataEndpoint(
         if (!flowToken.StartsWith(prefix, StringComparison.Ordinal)) return (null, null);
         var rawId = flowToken[prefix.Length..];
         WhatsAppConversationId conversationId;
-        try { conversationId = new WhatsAppConversationId(rawId); } catch { return (null, null); }
+        try
+        {
+            conversationId = new WhatsAppConversationId(rawId);
+        }
+        catch
+        {
+            return (null, null);
+        }
+
         var conversation = await conversationRepository.GetByIdAsync(conversationId, ct);
         return conversation is null ? (null, null) : (conversation.TenantId, conversation.CustomerPhoneNumber);
     }
@@ -189,8 +223,11 @@ public sealed class WhatsAppLoginFlowDataEndpoint(
 internal sealed class FlowDataRequest
 {
     public string? Version { get; init; }
+
     public string? Action { get; init; }
+
     public string? Screen { get; init; }
+
     public JsonElement? Data { get; init; }
 
     [JsonPropertyName("flow_token")]
@@ -206,5 +243,7 @@ internal sealed class FlowDataRequest
 internal static class JsonElementExtensions
 {
     public static string? TryGetString(this JsonElement element, string propertyName)
-        => element.TryGetProperty(propertyName, out var p) ? p.GetString() : null;
+    {
+        return element.TryGetProperty(propertyName, out var p) ? p.GetString() : null;
+    }
 }

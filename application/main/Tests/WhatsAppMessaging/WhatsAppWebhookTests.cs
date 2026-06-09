@@ -13,16 +13,6 @@ namespace Main.Tests.WhatsAppMessaging;
 
 public sealed class WhatsAppWebhookTests : EndpointBaseTest<MainDbContext>
 {
-    private sealed record DiagnosticsResponse(
-        bool MetaConfigured,
-        bool UsesMockProvider,
-        bool HasAppId,
-        bool HasAppSecret,
-        bool HasConfigId,
-        bool HasWebhookVerifyToken,
-        string WebhookPath,
-        string Note);
-
     private const string WebhookUrl = "/api/main/whatsapp/webhook";
     private const string WabaId = "123456789012345";
     private const string PhoneNumberId = "123456789012345-phone"; // MockMetaGraphClient returns "{wabaId}-phone"
@@ -307,4 +297,15 @@ public sealed class WhatsAppWebhookTests : EndpointBaseTest<MainDbContext>
         var messageCount = Connection.ExecuteScalar<long>("SELECT COUNT(*) FROM whats_app_messages WHERE meta_message_id = 'wamid.unknown001'", []);
         messageCount.Should().Be(0);
     }
+
+    private sealed record DiagnosticsResponse(
+        bool MetaConfigured,
+        bool UsesMockProvider,
+        bool HasAppId,
+        bool HasAppSecret,
+        bool HasConfigId,
+        bool HasWebhookVerifyToken,
+        string WebhookPath,
+        string Note
+    );
 }

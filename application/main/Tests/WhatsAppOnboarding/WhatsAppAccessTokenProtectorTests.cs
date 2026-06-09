@@ -1,5 +1,5 @@
-using Main.Features.WhatsAppOnboarding.Shared;
 using FluentAssertions;
+using Main.Features.WhatsAppOnboarding.Shared;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.Extensions.Logging.Abstractions;
 using Xunit;
@@ -8,8 +8,10 @@ namespace Main.Tests.WhatsAppOnboarding;
 
 public sealed class WhatsAppAccessTokenProtectorTests
 {
-    private static WhatsAppAccessTokenProtector CreateProtector() =>
-        new(new EphemeralDataProtectionProvider(), NullLogger<WhatsAppAccessTokenProtector>.Instance);
+    private static WhatsAppAccessTokenProtector CreateProtector()
+    {
+        return new WhatsAppAccessTokenProtector(new EphemeralDataProtectionProvider(), NullLogger<WhatsAppAccessTokenProtector>.Instance);
+    }
 
     [Fact]
     public void ProtectThenUnprotect_ShouldRoundTripAndNotExposePlaintext()

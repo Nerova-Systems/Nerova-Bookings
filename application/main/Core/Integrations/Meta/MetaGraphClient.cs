@@ -1,5 +1,6 @@
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
+using System.Text;
 using System.Text.Json;
 using JetBrains.Annotations;
 using Microsoft.Extensions.Configuration;
@@ -254,14 +255,16 @@ public sealed class MetaGraphClient(HttpClient httpClient, IConfiguration config
                     Button = buttonLabel,
                     Sections = sections
                         .Select(section => new
-                        {
-                            section.Title,
-                            Rows = section.Rows
-                                .Select(row => row.Description is null
-                                    ? (object)new { row.Id, row.Title }
-                                    : new { row.Id, row.Title, row.Description })
-                                .ToArray()
-                        })
+                            {
+                                section.Title,
+                                Rows = section.Rows
+                                    .Select(row => row.Description is null
+                                        ? (object)new { row.Id, row.Title }
+                                        : new { row.Id, row.Title, row.Description }
+                                    )
+                                    .ToArray()
+                            }
+                        )
                         .ToArray()
                 }
             }
@@ -354,6 +357,134 @@ public sealed class MetaGraphClient(HttpClient httpClient, IConfiguration config
         return await PostInteractiveMessageAsync(phoneNumberId, accessToken, toPhoneNumber, payload, cancellationToken);
     }
 
+    // ─── Flows management ────────────────────────────────────────────────────────
+
+    public async Task<string?> CreateAndPublishFlowAsync(string wabaId, string flowName, string category, string flowJson, string accessToken, CancellationToken cancellationToken)
+    {
+        try
+        {
+            // 1. Create the Flow shell.
+            using var createRequest = new HttpRequestMessage(HttpMethod.Post, $"{_graphApiVersion}/{wabaId}/flows");
+            createRequest.Content = JsonContent.Create(new { name = flowName, categories = new[] { category } }, options: JsonSerializerOptions);
+            createRequest.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+
+            var createResponse = await httpClient.SendAsync(createRequest, cancellationToken);
+            if (!createResponse.IsSuccessStatusCode)
+            {
+                var err = await createResponse.Content.ReadAsStringAsync(cancellationToken);
+                logger.LogError("Failed to create WhatsApp Flow '{FlowName}' for WABA '{WabaId}'. Status: {Status}. Body: {Body}", flowName, wabaId, createResponse.StatusCode, err);
+                return null;
+            }
+
+            var created = await createResponse.Content.ReadFromJsonAsync<MetaFlowCreateResponse>(JsonSerializerOptions, cancellationToken);
+            var flowId = created?.Id;
+            if (string.IsNullOrWhiteSpace(flowId))
+            {
+                logger.LogError("WhatsApp Flow create response for '{FlowName}' contained no flow ID", flowName);
+                return null;
+            }
+
+            // 2. Upload the Flow JSON as an asset.
+            // Meta requires: asset_type=FLOW_JSON, name=flow.json, file=<json bytes with application/json content type>.
+            var fileContent = new ByteArrayContent(Encoding.UTF8.GetBytes(flowJson));
+            fileContent.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+
+            using var uploadForm = new MultipartFormDataContent();
+            uploadForm.Add(new StringContent("FLOW_JSON"), "asset_type");
+            uploadForm.Add(new StringContent("flow.json"), "name");
+            uploadForm.Add(fileContent, "file", "flow.json");
+            using var uploadRequest = new HttpRequestMessage(HttpMethod.Post, $"{_graphApiVersion}/{flowId}/assets");
+            uploadRequest.Content = uploadForm;
+            uploadRequest.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+
+            var uploadResponse = await httpClient.SendAsync(uploadRequest, cancellationToken);
+            if (!uploadResponse.IsSuccessStatusCode)
+            {
+                var err = await uploadResponse.Content.ReadAsStringAsync(cancellationToken);
+                logger.LogError("Failed to upload Flow JSON for flow '{FlowId}'. Status: {Status}. Body: {Body}", flowId, uploadResponse.StatusCode, err);
+                return null;
+            }
+
+            // 3. Publish the Flow so it can be sent in messages.
+            using var publishRequest = new HttpRequestMessage(HttpMethod.Post, $"{_graphApiVersion}/{flowId}/publish");
+            publishRequest.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+
+            var publishResponse = await httpClient.SendAsync(publishRequest, cancellationToken);
+            if (!publishResponse.IsSuccessStatusCode)
+            {
+                var err = await publishResponse.Content.ReadAsStringAsync(cancellationToken);
+                logger.LogWarning("Failed to publish Flow '{FlowId}' (may need Meta review). Status: {Status}. Body: {Body}", flowId, publishResponse.StatusCode, err);
+                // Return the flow ID even when publish fails — the tenant can retry via dashboard.
+            }
+
+            return flowId;
+        }
+        catch (Exception ex) when (ex is HttpRequestException or OperationCanceledException or JsonException && !cancellationToken.IsCancellationRequested)
+        {
+            logger.LogError(ex, "Error creating/publishing WhatsApp Flow '{FlowName}' for WABA '{WabaId}'", flowName, wabaId);
+            return null;
+        }
+    }
+
+    public async Task<bool> UpdateFlowJsonAsync(string flowId, string flowJson, string accessToken, CancellationToken cancellationToken)
+    {
+        try
+        {
+            var fileContent = new ByteArrayContent(Encoding.UTF8.GetBytes(flowJson));
+            fileContent.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+
+            using var uploadForm = new MultipartFormDataContent();
+            uploadForm.Add(new StringContent("FLOW_JSON"), "asset_type");
+            uploadForm.Add(new StringContent("flow.json"), "name");
+            uploadForm.Add(fileContent, "file", "flow.json");
+            using var request = new HttpRequestMessage(HttpMethod.Post, $"{_graphApiVersion}/{flowId}/assets");
+            request.Content = uploadForm;
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+
+            var response = await httpClient.SendAsync(request, cancellationToken);
+            if (!response.IsSuccessStatusCode)
+            {
+                var err = await response.Content.ReadAsStringAsync(cancellationToken);
+                logger.LogError("Failed to update Flow JSON for flow '{FlowId}'. Status: {Status}. Body: {Body}", flowId, response.StatusCode, err);
+                return false;
+            }
+
+            return true;
+        }
+        catch (Exception ex) when (ex is HttpRequestException or OperationCanceledException && !cancellationToken.IsCancellationRequested)
+        {
+            logger.LogError(ex, "Error updating Flow JSON for flow '{FlowId}'", flowId);
+            return false;
+        }
+    }
+
+    public async Task<bool> UploadFlowPublicKeyAsync(string wabaId, string publicKeyPem, string accessToken, CancellationToken cancellationToken)
+    {
+        try
+        {
+            using var form = new MultipartFormDataContent();
+            form.Add(new StringContent(publicKeyPem), "public_key");
+            using var request = new HttpRequestMessage(HttpMethod.Post, $"{_graphApiVersion}/{wabaId}/whatsapp_flow_data_endpoint/upload_key");
+            request.Content = form;
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+
+            var response = await httpClient.SendAsync(request, cancellationToken);
+            if (!response.IsSuccessStatusCode)
+            {
+                var err = await response.Content.ReadAsStringAsync(cancellationToken);
+                logger.LogError("Failed to upload Flow RSA public key for WABA '{WabaId}'. Status: {Status}. Body: {Body}", wabaId, response.StatusCode, err);
+                return false;
+            }
+
+            return true;
+        }
+        catch (Exception ex) when (ex is HttpRequestException or OperationCanceledException && !cancellationToken.IsCancellationRequested)
+        {
+            logger.LogError(ex, "Error uploading Flow RSA public key for WABA '{WabaId}'", wabaId);
+            return false;
+        }
+    }
+
     /// <summary>
     ///     Shared POST + response parsing for interactive (button/list/cta_url/flow) messages. On a non-success
     ///     status the Meta error body is logged to aid debugging. Never throws — returns null on any failure.
@@ -420,134 +551,6 @@ public sealed class MetaGraphClient(HttpClient httpClient, IConfiguration config
 
     [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
     private sealed record MetaSentMessageId(string? Id);
-
-    // ─── Flows management ────────────────────────────────────────────────────────
-
-    public async Task<string?> CreateAndPublishFlowAsync(string wabaId, string flowName, string category, string flowJson, string accessToken, CancellationToken cancellationToken)
-    {
-        try
-        {
-            // 1. Create the Flow shell.
-            using var createRequest = new HttpRequestMessage(HttpMethod.Post, $"{_graphApiVersion}/{wabaId}/flows");
-            createRequest.Content = JsonContent.Create(new { name = flowName, categories = new[] { category } }, options: JsonSerializerOptions);
-            createRequest.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
-
-            var createResponse = await httpClient.SendAsync(createRequest, cancellationToken);
-            if (!createResponse.IsSuccessStatusCode)
-            {
-                var err = await createResponse.Content.ReadAsStringAsync(cancellationToken);
-                logger.LogError("Failed to create WhatsApp Flow '{FlowName}' for WABA '{WabaId}'. Status: {Status}. Body: {Body}", flowName, wabaId, createResponse.StatusCode, err);
-                return null;
-            }
-
-            var created = await createResponse.Content.ReadFromJsonAsync<MetaFlowCreateResponse>(JsonSerializerOptions, cancellationToken);
-            var flowId = created?.Id;
-            if (string.IsNullOrWhiteSpace(flowId))
-            {
-                logger.LogError("WhatsApp Flow create response for '{FlowName}' contained no flow ID", flowName);
-                return null;
-            }
-
-            // 2. Upload the Flow JSON as an asset.
-            // Meta requires: asset_type=FLOW_JSON, name=flow.json, file=<json bytes with application/json content type>.
-            var fileContent = new ByteArrayContent(System.Text.Encoding.UTF8.GetBytes(flowJson));
-            fileContent.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/json");
-
-            using var uploadForm = new MultipartFormDataContent();
-            uploadForm.Add(new StringContent("FLOW_JSON"), "asset_type");
-            uploadForm.Add(new StringContent("flow.json"), "name");
-            uploadForm.Add(fileContent, "file", "flow.json");
-            using var uploadRequest = new HttpRequestMessage(HttpMethod.Post, $"{_graphApiVersion}/{flowId}/assets");
-            uploadRequest.Content = uploadForm;
-            uploadRequest.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
-
-            var uploadResponse = await httpClient.SendAsync(uploadRequest, cancellationToken);
-            if (!uploadResponse.IsSuccessStatusCode)
-            {
-                var err = await uploadResponse.Content.ReadAsStringAsync(cancellationToken);
-                logger.LogError("Failed to upload Flow JSON for flow '{FlowId}'. Status: {Status}. Body: {Body}", flowId, uploadResponse.StatusCode, err);
-                return null;
-            }
-
-            // 3. Publish the Flow so it can be sent in messages.
-            using var publishRequest = new HttpRequestMessage(HttpMethod.Post, $"{_graphApiVersion}/{flowId}/publish");
-            publishRequest.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
-
-            var publishResponse = await httpClient.SendAsync(publishRequest, cancellationToken);
-            if (!publishResponse.IsSuccessStatusCode)
-            {
-                var err = await publishResponse.Content.ReadAsStringAsync(cancellationToken);
-                logger.LogWarning("Failed to publish Flow '{FlowId}' (may need Meta review). Status: {Status}. Body: {Body}", flowId, publishResponse.StatusCode, err);
-                // Return the flow ID even when publish fails — the tenant can retry via dashboard.
-            }
-
-            return flowId;
-        }
-        catch (Exception ex) when (ex is HttpRequestException or OperationCanceledException or JsonException && !cancellationToken.IsCancellationRequested)
-        {
-            logger.LogError(ex, "Error creating/publishing WhatsApp Flow '{FlowName}' for WABA '{WabaId}'", flowName, wabaId);
-            return null;
-        }
-    }
-
-    public async Task<bool> UpdateFlowJsonAsync(string flowId, string flowJson, string accessToken, CancellationToken cancellationToken)
-    {
-        try
-        {
-            var fileContent = new ByteArrayContent(System.Text.Encoding.UTF8.GetBytes(flowJson));
-            fileContent.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/json");
-
-            using var uploadForm = new MultipartFormDataContent();
-            uploadForm.Add(new StringContent("FLOW_JSON"), "asset_type");
-            uploadForm.Add(new StringContent("flow.json"), "name");
-            uploadForm.Add(fileContent, "file", "flow.json");
-            using var request = new HttpRequestMessage(HttpMethod.Post, $"{_graphApiVersion}/{flowId}/assets");
-            request.Content = uploadForm;
-            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
-
-            var response = await httpClient.SendAsync(request, cancellationToken);
-            if (!response.IsSuccessStatusCode)
-            {
-                var err = await response.Content.ReadAsStringAsync(cancellationToken);
-                logger.LogError("Failed to update Flow JSON for flow '{FlowId}'. Status: {Status}. Body: {Body}", flowId, response.StatusCode, err);
-                return false;
-            }
-
-            return true;
-        }
-        catch (Exception ex) when (ex is HttpRequestException or OperationCanceledException && !cancellationToken.IsCancellationRequested)
-        {
-            logger.LogError(ex, "Error updating Flow JSON for flow '{FlowId}'", flowId);
-            return false;
-        }
-    }
-
-    public async Task<bool> UploadFlowPublicKeyAsync(string wabaId, string publicKeyPem, string accessToken, CancellationToken cancellationToken)
-    {
-        try
-        {
-            using var form = new MultipartFormDataContent();
-            form.Add(new StringContent(publicKeyPem), "public_key");
-            using var request = new HttpRequestMessage(HttpMethod.Post, $"{_graphApiVersion}/{wabaId}/whatsapp_flow_data_endpoint/upload_key");
-            request.Content = form;
-            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
-
-            var response = await httpClient.SendAsync(request, cancellationToken);
-            if (!response.IsSuccessStatusCode)
-            {
-                var err = await response.Content.ReadAsStringAsync(cancellationToken);
-                logger.LogError("Failed to upload Flow RSA public key for WABA '{WabaId}'. Status: {Status}. Body: {Body}", wabaId, response.StatusCode, err);
-                return false;
-            }
-
-            return true;
-        }
-        catch (Exception ex) when (ex is HttpRequestException or OperationCanceledException && !cancellationToken.IsCancellationRequested)
-        {
-            logger.LogError(ex, "Error uploading Flow RSA public key for WABA '{WabaId}'", wabaId);
-            return false;
-        }
-    }
 
     private sealed record MetaFlowCreateResponse(string? Id);
 }

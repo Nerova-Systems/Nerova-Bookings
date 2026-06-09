@@ -28,16 +28,22 @@ public sealed class ReprovisionWhatsAppFlowsHandler(
     public async Task<Result> Handle(ReprovisionWhatsAppFlowsCommand command, CancellationToken cancellationToken)
     {
         if (executionContext.UserInfo.Role != "Owner")
+        {
             return Result.Forbidden("Only owners can reprovision WhatsApp Flows.");
+        }
 
         var account = await whatsAppBusinessAccountRepository.GetByTenantAsync(cancellationToken);
         if (account is null)
+        {
             return Result.BadRequest("No WhatsApp Business Account connected. Complete embedded signup first.");
+        }
 
         var metaGraphClient = metaGraphClientFactory.GetClient();
         var accessToken = accessTokenProtector.Unprotect(account.AccessToken);
         if (string.IsNullOrWhiteSpace(accessToken))
+        {
             return Result.BadRequest("Could not decrypt the access token. Please reconnect your WhatsApp account.");
+        }
 
         var baseUrl = Environment.GetEnvironmentVariable("PUBLIC_URL") ?? "https://app.nerovasystems.com";
 
@@ -47,19 +53,27 @@ public sealed class ReprovisionWhatsAppFlowsHandler(
         var loginFlowJson = WhatsAppLoginFlowDefinition.Build($"{baseUrl}/api/main/whatsapp/flows/login/data");
         var bookingFlowJson = WhatsAppBookingFlowDefinition.Build($"{baseUrl}/api/main/whatsapp/flows/booking/data");
 
-        string? loginFlowId = account.LoginFlowId;
-        string? bookingFlowId = account.BookingFlowId;
+        var loginFlowId = account.LoginFlowId;
+        var bookingFlowId = account.BookingFlowId;
 
         // Update existing flows if IDs are known, otherwise create new ones.
         if (!string.IsNullOrWhiteSpace(loginFlowId))
+        {
             await metaGraphClient.UpdateFlowJsonAsync(loginFlowId, loginFlowJson, accessToken, cancellationToken);
+        }
         else
+        {
             loginFlowId = await metaGraphClient.CreateAndPublishFlowAsync(account.MetaWabaId, "Nerova Sign In", "SIGN_IN", loginFlowJson, accessToken, cancellationToken);
+        }
 
         if (!string.IsNullOrWhiteSpace(bookingFlowId))
+        {
             await metaGraphClient.UpdateFlowJsonAsync(bookingFlowId, bookingFlowJson, accessToken, cancellationToken);
+        }
         else
+        {
             bookingFlowId = await metaGraphClient.CreateAndPublishFlowAsync(account.MetaWabaId, "Nerova Booking", "APPOINTMENT_BOOKING", bookingFlowJson, accessToken, cancellationToken);
+        }
 
         account.SetFlowIds(bookingFlowId, loginFlowId);
         whatsAppBusinessAccountRepository.Update(account);

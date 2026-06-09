@@ -25,10 +25,11 @@ public sealed class MetaGraphClientFactoryTests
         using var provider = services.BuildServiceProvider();
         var configuration = new ConfigurationBuilder()
             .AddInMemoryCollection(new Dictionary<string, string?>
-            {
-                ["Meta:AppId"] = "",
-                ["Meta:AppSecret"] = ""
-            })
+                {
+                    ["Meta:AppId"] = "",
+                    ["Meta:AppSecret"] = ""
+                }
+            )
             .Build();
 
         var factory = new MetaGraphClientFactory(provider, configuration, new HttpContextAccessor(), provider.GetRequiredService<IHostEnvironment>());
@@ -40,11 +41,16 @@ public sealed class MetaGraphClientFactoryTests
 
     private sealed class TestHostEnvironment(string environmentName) : IHostEnvironment
     {
-        public string EnvironmentName { get; set; } = environmentName;
-        public string ApplicationName { get; set; } = "Main.Tests";
-        public string ContentRootPath { get; set; } = AppContext.BaseDirectory;
-        public IFileProvider ContentRootFileProvider { get; set; } = new NullFileProvider();
         public string WebRootPath { get; set; } = AppContext.BaseDirectory;
+
         public IFileProvider WebRootFileProvider { get; set; } = new NullFileProvider();
+
+        public string EnvironmentName { get; set; } = environmentName;
+
+        public string ApplicationName { get; set; } = "Main.Tests";
+
+        public string ContentRootPath { get; set; } = AppContext.BaseDirectory;
+
+        public IFileProvider ContentRootFileProvider { get; set; } = new NullFileProvider();
     }
 }

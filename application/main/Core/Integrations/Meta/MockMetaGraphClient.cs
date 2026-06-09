@@ -97,11 +97,17 @@ public sealed class MockMetaGraphClient : IMetaGraphClient
     }
 
     public Task<string?> CreateAndPublishFlowAsync(string wabaId, string flowName, string category, string flowJson, string accessToken, CancellationToken cancellationToken)
-        => Task.FromResult<string?>($"mock-flow-{flowName.ToLowerInvariant().Replace(' ', '-')}");
+    {
+        return Task.FromResult<string?>($"mock-flow-{flowName.ToLowerInvariant().Replace(' ', '-')}");
+    }
 
     public Task<bool> UpdateFlowJsonAsync(string flowId, string flowJson, string accessToken, CancellationToken cancellationToken)
-        => Task.FromResult(true);
+    {
+        return Task.FromResult(true);
+    }
 
     public Task<bool> UploadFlowPublicKeyAsync(string wabaId, string publicKeyPem, string accessToken, CancellationToken cancellationToken)
-        => Task.FromResult(true);
+    {
+        return Task.FromResult(true);
+    }
 }

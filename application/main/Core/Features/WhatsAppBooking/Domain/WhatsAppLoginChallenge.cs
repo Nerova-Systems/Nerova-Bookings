@@ -11,7 +11,10 @@ namespace Main.Features.WhatsAppBooking.Domain;
 [JsonConverter(typeof(StronglyTypedIdJsonConverter<string, WhatsAppLoginChallengeId>))]
 public sealed record WhatsAppLoginChallengeId(string Value) : StronglyTypedUlid<WhatsAppLoginChallengeId>(Value)
 {
-    public override string ToString() => Value;
+    public override string ToString()
+    {
+        return Value;
+    }
 }
 
 /// <summary>
@@ -38,8 +41,6 @@ public sealed class WhatsAppLoginChallenge : AggregateRoot<WhatsAppLoginChalleng
         TenantId = tenantId;
     }
 
-    public TenantId TenantId { get; } = new(0);
-
     /// <summary>Customer WhatsApp phone number in E.164 format.</summary>
     public string PhoneNumber { get; private set; } = string.Empty;
 
@@ -54,12 +55,17 @@ public sealed class WhatsAppLoginChallenge : AggregateRoot<WhatsAppLoginChalleng
 
     public DateTimeOffset ExpiresAt { get; private set; }
 
+    public TenantId TenantId { get; } = new(0);
+
     /// <summary>
     ///     Creates a new challenge and returns both the aggregate and the plain 6-digit OTP.
     ///     The OTP must be emailed to the customer immediately; it is not persisted.
     /// </summary>
     public static (WhatsAppLoginChallenge Challenge, string PlainOtp) Create(
-        TenantId tenantId, string phoneNumber, string email, DateTimeOffset now)
+        TenantId tenantId,
+        string phoneNumber,
+        string email,
+        DateTimeOffset now)
     {
         var otp = Random.Shared.Next(100_000, 999_999).ToString();
         var salt = Convert.ToBase64String(RandomNumberGenerator.GetBytes(16));
@@ -82,12 +88,17 @@ public sealed class WhatsAppLoginChallenge : AggregateRoot<WhatsAppLoginChalleng
     public bool Validate(string otp, DateTimeOffset now)
     {
         return !IsConsumed && ExpiresAt > now
-               && string.Equals(Hash(otp, OtpSalt), OtpHash, StringComparison.Ordinal);
+                           && string.Equals(Hash(otp, OtpSalt), OtpHash, StringComparison.Ordinal);
     }
 
     /// <summary>Marks the challenge consumed so it cannot be replayed.</summary>
-    public void Consume() => IsConsumed = true;
+    public void Consume()
+    {
+        IsConsumed = true;
+    }
 
     private static string Hash(string otp, string salt)
-        => Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(otp + salt))).ToLowerInvariant();
+    {
+        return Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(otp + salt))).ToLowerInvariant();
+    }
 }

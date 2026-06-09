@@ -30,7 +30,8 @@ public sealed class AcknowledgeWhatsAppWebhookHandler(
 
         if (!CryptographicOperations.FixedTimeEquals(
                 Encoding.ASCII.GetBytes(expectedSignature),
-                Encoding.ASCII.GetBytes(providedSignature)))
+                Encoding.ASCII.GetBytes(providedSignature)
+            ))
         {
             return Result<WhatsAppEvent?>.Unauthorized("Invalid webhook signature.");
         }

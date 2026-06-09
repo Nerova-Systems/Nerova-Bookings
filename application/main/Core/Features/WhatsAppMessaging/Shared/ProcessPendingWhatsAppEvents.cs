@@ -216,7 +216,14 @@ public sealed class ProcessPendingWhatsAppEvents(
     private sealed record MetaWebhookMetadata(string? PhoneNumberId, string? DisplayPhoneNumber);
 
     [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
-    private sealed record MetaWebhookMessage(string? Id, string? From, string? Timestamp, string? Type, MetaWebhookMessageText? Text, MetaWebhookInteractive? Interactive);
+    private sealed record MetaWebhookMessage(
+        string? Id,
+        string? From,
+        string? Timestamp,
+        string? Type,
+        MetaWebhookMessageText? Text,
+        MetaWebhookInteractive? Interactive
+    );
 
     [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
     private sealed record MetaWebhookMessageText(string? Body);

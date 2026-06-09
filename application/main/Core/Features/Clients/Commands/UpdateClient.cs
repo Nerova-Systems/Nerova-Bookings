@@ -2,7 +2,6 @@ using FluentValidation;
 using JetBrains.Annotations;
 using Main.Features.Clients.Domain;
 using SharedKernel.Cqrs;
-using SharedKernel.Domain;
 using SharedKernel.Telemetry;
 
 namespace Main.Features.Clients.Commands;

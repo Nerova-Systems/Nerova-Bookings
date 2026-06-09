@@ -1,10 +1,10 @@
-using SharedKernel.Cqrs;
 using System.Text.Json;
 using Main.Features.EventTypes.Domain;
-using Main.Features.Scheduling.Queries;
 using Main.Features.Scheduling.Domain;
+using Main.Features.Scheduling.Queries;
 using Main.Features.Scheduling.Shared;
 using Main.Features.WhatsAppBooking.Domain;
+using SharedKernel.Cqrs;
 
 namespace Main.Features.WhatsAppBooking.Infrastructure;
 
@@ -23,19 +23,22 @@ public sealed class WhatsAppBookingFlowDataEndpoint(
     ILogger<WhatsAppBookingFlowDataEndpoint> logger
 )
 {
+    private const string FlowVersion = "3.0";
+
+    // Default timezone — TODO: replace with per-tenant config when available.
+    private const string DefaultTimezone = "Africa/Johannesburg";
+
     private static readonly JsonSerializerOptions JsonOptions = new()
     {
         PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower,
         WriteIndented = false
     };
 
-    private const string FlowVersion = "3.0";
-    // Default timezone — TODO: replace with per-tenant config when available.
-    private const string DefaultTimezone = "Africa/Johannesburg";
-
     public async Task<string> HandleEncryptedAsync(
         WhatsAppFlowCrypto crypto,
-        string encryptedAesKey, string encryptedFlowData, string initialVector,
+        string encryptedAesKey,
+        string encryptedFlowData,
+        string initialVector,
         CancellationToken ct)
     {
         var decrypted = crypto.Decrypt(encryptedAesKey, encryptedFlowData, initialVector);
@@ -46,8 +49,15 @@ public sealed class WhatsAppBookingFlowDataEndpoint(
     private async Task<string> ProcessAsync(string requestJson, CancellationToken ct)
     {
         FlowDataRequest? req;
-        try { req = JsonSerializer.Deserialize<FlowDataRequest>(requestJson, JsonOptions); }
-        catch (JsonException ex) { logger.LogWarning(ex, "Failed to parse Booking Flow request"); return Ping(); }
+        try
+        {
+            req = JsonSerializer.Deserialize<FlowDataRequest>(requestJson, JsonOptions);
+        }
+        catch (JsonException ex)
+        {
+            logger.LogWarning(ex, "Failed to parse Booking Flow request");
+            return Ping();
+        }
 
         if (req is null || req.Action == "ping") return Ping();
 
@@ -129,17 +139,18 @@ public sealed class WhatsAppBookingFlowDataEndpoint(
         if (daySlotsResult.IsSuccess && daySlotsResult.Value?.Slots.TryGetValue(dateStr, out var daySlots) == true)
         {
             times = daySlots.Select(s =>
-            {
-                try
                 {
-                    var local = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(s.Time, DefaultTimezone);
-                    return new FlowItem(s.Time.ToString("o"), local.ToString("HH:mm"));
+                    try
+                    {
+                        var local = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(s.Time, DefaultTimezone);
+                        return new FlowItem(s.Time.ToString("o"), local.ToString("HH:mm"));
+                    }
+                    catch
+                    {
+                        return new FlowItem(s.Time.ToString("o"), s.Time.ToString("HH:mm"));
+                    }
                 }
-                catch
-                {
-                    return new FlowItem(s.Time.ToString("o"), s.Time.ToString("HH:mm"));
-                }
-            }).ToArray();
+            ).ToArray();
         }
 
         return AppointmentScreen(services, true, dates, true, times, times.Length > 0, eventType.DurationMinutes, DefaultTimezone);
@@ -154,7 +165,9 @@ public sealed class WhatsAppBookingFlowDataEndpoint(
         var email = req.DataString("email") ?? string.Empty;
         var durationMinutes = 30;
         if (req.Data.HasValue && req.Data.Value.TryGetProperty("duration_minutes", out var dm) && dm.TryGetInt32(out var v))
+        {
             durationMinutes = v;
+        }
 
         string summary;
         try
@@ -173,47 +186,72 @@ public sealed class WhatsAppBookingFlowDataEndpoint(
 
     // -- Screen builders ----------------------------------------------------------
 
-    private static string Ping() =>
-        JsonSerializer.Serialize(new { version = FlowVersion, data = new { status = "active" } }, JsonOptions);
-
-    private static string AppointmentScreen(FlowItem[] services, bool serviceEnabled, FlowItem[] dates,
-        bool dateEnabled, FlowItem[] times, bool timeEnabled, int durationMinutes, string timezone)
+    private static string Ping()
     {
-        return JsonSerializer.Serialize(new
-        {
-            version = FlowVersion, screen = "APPOINTMENT",
-            data = new
-            {
-                service = services, date = dates, time = times,
-                is_date_enabled = dateEnabled, is_time_enabled = timeEnabled,
-                duration_minutes = durationMinutes, timezone
-            }
-        }, JsonOptions);
+        return JsonSerializer.Serialize(new { version = FlowVersion, data = new { status = "active" } }, JsonOptions);
     }
 
-    private static string SummaryScreen(string summary, string serviceSlug, string startTimeIso,
-        int durationMinutes, string timezone, string name, string email)
+    private static string AppointmentScreen(
+        FlowItem[] services,
+        bool serviceEnabled,
+        FlowItem[] dates,
+        bool dateEnabled,
+        FlowItem[] times,
+        bool timeEnabled,
+        int durationMinutes,
+        string timezone)
     {
         return JsonSerializer.Serialize(new
-        {
-            version = FlowVersion, screen = "SUMMARY",
-            data = new { summary, service_slug = serviceSlug, start_time_iso = startTimeIso, duration_minutes = durationMinutes, timezone, name, email }
-        }, JsonOptions);
+            {
+                version = FlowVersion, screen = "APPOINTMENT",
+                data = new
+                {
+                    service = services, date = dates, time = times,
+                    is_date_enabled = dateEnabled, is_time_enabled = timeEnabled,
+                    duration_minutes = durationMinutes, timezone
+                }
+            }, JsonOptions
+        );
+    }
+
+    private static string SummaryScreen(
+        string summary,
+        string serviceSlug,
+        string startTimeIso,
+        int durationMinutes,
+        string timezone,
+        string name,
+        string email)
+    {
+        return JsonSerializer.Serialize(new
+            {
+                version = FlowVersion, screen = "SUMMARY",
+                data = new { summary, service_slug = serviceSlug, start_time_iso = startTimeIso, duration_minutes = durationMinutes, timezone, name, email }
+            }, JsonOptions
+        );
     }
 
     // -- Helpers ------------------------------------------------------------------
 
-    private async Task<Main.Features.Scheduling.Domain.SchedulingProfile?> ResolveProfileAsync(string? flowToken, CancellationToken ct)
+    private async Task<SchedulingProfile?> ResolveProfileAsync(string? flowToken, CancellationToken ct)
     {
         if (string.IsNullOrWhiteSpace(flowToken)) return null;
         WhatsAppConversationId conversationId;
-        try { conversationId = new WhatsAppConversationId(flowToken); } catch { return null; }
+        try
+        {
+            conversationId = new WhatsAppConversationId(flowToken);
+        }
+        catch
+        {
+            return null;
+        }
+
         var conversation = await conversationRepository.GetByIdAsync(conversationId, ct);
         if (conversation is null) return null;
         return await schedulingProfileRepository.GetByTenantIdUnfilteredAsync(conversation.TenantId, ct);
     }
 
-    private async Task<FlowItem[]> GetServicesAsync(Main.Features.Scheduling.Domain.SchedulingProfile profile, CancellationToken ct)
+    private async Task<FlowItem[]> GetServicesAsync(SchedulingProfile profile, CancellationToken ct)
     {
         var eventTypes = await eventTypeRepository.GetPublicListByOwnerUnfilteredAsync(profile.TenantId, profile.OwnerUserId, ct);
         return eventTypes.Select(et => new FlowItem(et.Slug, et.Title)).ToArray();
@@ -227,5 +265,5 @@ public sealed class WhatsAppBookingFlowDataEndpoint(
             .ToArray();
     }
 }
-internal sealed record FlowItem(string Id, string Title);
 
+internal sealed record FlowItem(string Id, string Title);

@@ -120,7 +120,6 @@ public sealed class Booking : AggregateRoot<BookingId>, ITenantScopedEntity
 
     public string ResponsesJson { get; private set; }
 
-
     public string AttendeesJson { get; private set; }
 
     public string ReferencesJson { get; private set; }
@@ -195,7 +194,6 @@ public sealed class Booking : AggregateRoot<BookingId>, ITenantScopedEntity
 
     /// <summary>Arbitrary metadata blob mirroring cal.com <c>metadata</c>.</summary>
     public string? MetadataJson { get; private set; }
-
 
     // --- WhatsApp Flows + Paystack payment tracking (Phase 4) ---
 

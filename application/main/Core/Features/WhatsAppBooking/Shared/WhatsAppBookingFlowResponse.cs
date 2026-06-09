@@ -17,10 +17,15 @@ public sealed class WhatsAppBookingFlowResponse
     };
 
     public string? EventSlug { get; private init; }
+
     public DateTimeOffset? StartTime { get; private init; }
+
     public int? DurationMinutes { get; private init; }
+
     public string? TimeZone { get; private init; }
+
     public string? BookerName { get; private init; }
+
     public string? BookerEmail { get; private init; }
 
     public static WhatsAppBookingFlowResponse? TryParse(string? responseJson)
@@ -89,18 +94,20 @@ public sealed class WhatsAppBookingFlowResponse
     public bool IsBookable()
     {
         return !string.IsNullOrWhiteSpace(EventSlug)
-            && StartTime is not null
-            && DurationMinutes is > 0
-            && !string.IsNullOrWhiteSpace(TimeZone)
-            && !string.IsNullOrWhiteSpace(BookerName)
-            && !string.IsNullOrWhiteSpace(BookerEmail);
+               && StartTime is not null
+               && DurationMinutes is > 0
+               && !string.IsNullOrWhiteSpace(TimeZone)
+               && !string.IsNullOrWhiteSpace(BookerName)
+               && !string.IsNullOrWhiteSpace(BookerEmail);
     }
 }
 
 internal static class JsonElementDocExtensions
 {
     public static string? TryGetStringProp(this JsonElement el, string name)
-        => el.TryGetProperty(name, out var p) && p.ValueKind == JsonValueKind.String ? p.GetString() : null;
+    {
+        return el.TryGetProperty(name, out var p) && p.ValueKind == JsonValueKind.String ? p.GetString() : null;
+    }
 
     public static int TryGetIntProp(this JsonElement el, string name)
     {
@@ -110,4 +117,3 @@ internal static class JsonElementDocExtensions
         return 0;
     }
 }
-

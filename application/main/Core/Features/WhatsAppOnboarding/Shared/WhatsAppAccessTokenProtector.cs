@@ -1,5 +1,5 @@
-using Microsoft.AspNetCore.DataProtection;
 using System.Security.Cryptography;
+using Microsoft.AspNetCore.DataProtection;
 
 namespace Main.Features.WhatsAppOnboarding.Shared;
 

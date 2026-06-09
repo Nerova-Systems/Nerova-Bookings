@@ -3,8 +3,8 @@ using Main.Features.Apps.Connectors.GoogleCalendar;
 using Main.Features.Apps.Connectors.GoogleMeet;
 using Main.Features.Apps.Connectors.MsTeams;
 using Main.Features.Apps.Connectors.Office365Calendar;
-using Main.Features.Apps.Connectors.Zoom;
 using Main.Features.Apps.Connectors.WhatsApp;
+using Main.Features.Apps.Connectors.Zoom;
 using Main.Features.Apps.Domain;
 using Main.Features.Apps.Infrastructure;
 using Main.Features.BookingSideEffects.Workers;
@@ -116,10 +116,11 @@ public static class Configuration
             services.AddScoped<WhatsAppBookingFlowDataEndpoint>();
             services.AddScoped<IWhatsAppLoginChallengeRepository, WhatsAppLoginChallengeRepository>();
             services.Configure<WhatsAppBookingOptions>(bookingOptions =>
-            {
-                bookingOptions.FlowId = Environment.GetEnvironmentVariable("WHATSAPP_BOOKING_FLOW_ID");
-                bookingOptions.LoginFlowId = Environment.GetEnvironmentVariable("WHATSAPP_LOGIN_FLOW_ID");
-            });
+                {
+                    bookingOptions.FlowId = Environment.GetEnvironmentVariable("WHATSAPP_BOOKING_FLOW_ID");
+                    bookingOptions.LoginFlowId = Environment.GetEnvironmentVariable("WHATSAPP_LOGIN_FLOW_ID");
+                }
+            );
 
             return services
                 .AddScoped<IPermissionCheckService, PermissionCheckService>()

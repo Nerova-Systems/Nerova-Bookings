@@ -55,15 +55,16 @@ public sealed class GetWhatsAppConversationsHandler(
             .ToDictionary(group => group.Key, group => group.Count());
 
         var items = conversations.Select(conversation => new WhatsAppConversationItem(
-            conversation.Id.Value,
-            conversation.CustomerPhoneNumber,
-            conversation.State.ToString(),
-            conversation.DraftBookingId?.Value,
-            inboundByPhone.GetValueOrDefault(conversation.CustomerPhoneNumber),
-            outboundByPhone.GetValueOrDefault(conversation.CustomerPhoneNumber),
-            conversation.LastInboundAt,
-            conversation.ExpiresAt
-        )).ToArray();
+                conversation.Id.Value,
+                conversation.CustomerPhoneNumber,
+                conversation.State.ToString(),
+                conversation.DraftBookingId?.Value,
+                inboundByPhone.GetValueOrDefault(conversation.CustomerPhoneNumber),
+                outboundByPhone.GetValueOrDefault(conversation.CustomerPhoneNumber),
+                conversation.LastInboundAt,
+                conversation.ExpiresAt
+            )
+        ).ToArray();
 
         return new GetWhatsAppConversationsResponse(items);
     }

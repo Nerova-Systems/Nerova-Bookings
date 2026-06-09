@@ -1,9 +1,9 @@
 using System.Net;
 using System.Net.Http.Json;
+using FluentAssertions;
 using Main.Database;
 using Main.Features;
 using Main.Features.WhatsAppMessaging.Commands;
-using FluentAssertions;
 using SharedKernel.Tests;
 using SharedKernel.Tests.Persistence;
 using SharedKernel.Validation;

@@ -3,7 +3,6 @@ using JetBrains.Annotations;
 using Main.Features.Clients.Domain;
 using Mapster;
 using SharedKernel.Cqrs;
-using SharedKernel.Domain;
 using SharedKernel.Persistence;
 
 namespace Main.Features.Clients.Queries;

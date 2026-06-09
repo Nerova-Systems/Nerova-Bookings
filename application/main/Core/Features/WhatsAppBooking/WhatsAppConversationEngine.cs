@@ -120,9 +120,9 @@ public sealed class WhatsAppConversationEngine(
             var flowToken = $"login-{conversation.Id.Value}";
             var sent = await outboundSender.SendFlowAsync(
                 account, toPhoneNumber,
-                "Please enter your details to sign in or create an account.",
+                "Please confirm your details to sign in or create an account.",
                 loginFlowId, flowToken, "Sign in / Register",
-                null, null, cancellationToken
+                "DETAILS", new { phone = toPhoneNumber, name = "", email = "", error_message = "" }, cancellationToken
             );
             if (sent)
             {
@@ -133,10 +133,12 @@ public sealed class WhatsAppConversationEngine(
             logger.LogWarning("Failed to send login Flow to {Recipient} for tenant {TenantId}.", toPhoneNumber, account.TenantId);
         }
 
-        // Fallback: plain text asking for email (pre-Flow path).
+        // No Flow configured yet. Never ask for an email over plain text — email is collected only inside
+        // the Flow — so send a neutral holding message instead.
         await outboundSender.SendTextAsync(account, toPhoneNumber,
-            "To get started, please reply with your email address so we can look up your account.",
-            cancellationToken);
+            "We're getting your sign-in ready — we'll be with you shortly.",
+            cancellationToken
+        );
         conversation.TouchInbound(now);
     }
 
@@ -154,7 +156,8 @@ public sealed class WhatsAppConversationEngine(
             logger.LogWarning("Login Flow completion for conversation {ConversationId} could not be parsed.", conversation.Id.Value);
             await outboundSender.SendTextAsync(account, inbound.FromPhoneNumber,
                 "Sorry, we couldn't read your details. Please try again.",
-                cancellationToken);
+                cancellationToken
+            );
             conversation.Restart(now);
             return;
         }
@@ -208,7 +211,8 @@ public sealed class WhatsAppConversationEngine(
         // No Flow configured yet.
         await outboundSender.SendTextAsync(account, toPhoneNumber,
             "Our booking assistant is being set up — we'll be with you shortly.",
-            cancellationToken);
+            cancellationToken
+        );
         conversation.TouchInbound(now);
     }
 
@@ -229,7 +233,8 @@ public sealed class WhatsAppConversationEngine(
             );
             await outboundSender.SendTextAsync(account, inbound.FromPhoneNumber,
                 "Sorry, we couldn't read your booking details. Please send us a message to try again.",
-                cancellationToken);
+                cancellationToken
+            );
             conversation.Restart(now);
             return;
         }
@@ -240,7 +245,8 @@ public sealed class WhatsAppConversationEngine(
             logger.LogWarning("No scheduling profile found for tenant {TenantId}; cannot create WhatsApp booking.", account.TenantId);
             await outboundSender.SendTextAsync(account, inbound.FromPhoneNumber,
                 "Sorry, online booking isn't available right now. Please contact us directly.",
-                cancellationToken);
+                cancellationToken
+            );
             conversation.Restart(now);
             return;
         }
@@ -265,7 +271,8 @@ public sealed class WhatsAppConversationEngine(
             );
             await outboundSender.SendTextAsync(account, inbound.FromPhoneNumber,
                 "Sorry, we couldn't confirm that time — it may no longer be available. Please send us a message to try another slot.",
-                cancellationToken);
+                cancellationToken
+            );
             conversation.Restart(now);
             return;
         }

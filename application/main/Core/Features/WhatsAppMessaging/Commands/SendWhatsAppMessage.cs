@@ -49,6 +49,7 @@ public sealed class SendWhatsAppMessageHandler(
         {
             return Result<SendWhatsAppMessageResponse>.BadRequest("Your WhatsApp account connection is no longer valid. Please re-connect your WhatsApp account.");
         }
+
         var phoneNumberId = account.PhoneNumber.MetaPhoneNumberId;
 
         var metaGraphClient = metaGraphClientFactory.GetClient();

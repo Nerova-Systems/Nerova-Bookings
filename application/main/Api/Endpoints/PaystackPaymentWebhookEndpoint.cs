@@ -43,7 +43,7 @@ public sealed class PaystackPaymentWebhookEndpoint : IEndpoints
 
                 // Only react to terminal charge events. Other events (e.g. transfer.success) are
                 // out of scope for booking payments — accept + ignore so Paystack stops retrying.
-                Result dispatchResult = verified.EventType switch
+                var dispatchResult = verified.EventType switch
                 {
                     "charge.success" => await mediator.Send(new ConfirmBookingPaymentCommand(verified.Reference, verified.EventId), cancellationToken),
                     "charge.failed" => await mediator.Send(new ReleaseBookingPaymentCommand(verified.Reference, verified.EventId), cancellationToken),

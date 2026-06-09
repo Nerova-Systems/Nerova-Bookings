@@ -19,7 +19,7 @@ public static class AppListingCatalog
 {
     private static readonly IReadOnlyDictionary<string, AppListing> Listings = new Dictionary<string, AppListing>
     {
-        [GoogleCalendarSlug.Value] = new AppListing(
+        [GoogleCalendarSlug.Value] = new(
             "Google",
             "Free",
             "https://workspace.google.com/products/calendar/",
@@ -27,7 +27,7 @@ public static class AppListingCatalog
             "Google Calendar is the time-management and scheduling calendar service from Google. Connect it to keep your bookings in sync, automatically push new events to your calendar, and respect existing busy time so attendees can only book when you are genuinely free.",
             ["/app-screenshots/google-calendar-1.svg", "/app-screenshots/google-calendar-2.svg"]
         ),
-        [Office365CalendarSlug.Value] = new AppListing(
+        [Office365CalendarSlug.Value] = new(
             "Microsoft",
             "Free",
             "https://www.microsoft.com/microsoft-365/outlook/calendar",
@@ -35,7 +35,7 @@ public static class AppListingCatalog
             "Office 365 Calendar keeps your Outlook and Microsoft 365 schedule in sync with your bookings. New events are written back to your calendar and existing meetings block out availability so you are never double-booked.",
             ["/app-screenshots/office365-calendar-1.svg", "/app-screenshots/office365-calendar-2.svg"]
         ),
-        [ZoomSlug.Value] = new AppListing(
+        [ZoomSlug.Value] = new(
             "Zoom Video Communications",
             "Free",
             "https://zoom.us/",
@@ -43,25 +43,25 @@ public static class AppListingCatalog
             "Zoom is the video conferencing platform for meetings and webinars. Connect it to automatically generate a unique Zoom meeting link for every confirmed booking and include it in confirmations and reminders.",
             ["/app-screenshots/zoom-1.svg", "/app-screenshots/zoom-2.svg"]
         ),
-        [GoogleMeetSlug.Value] = new AppListing(
+        [GoogleMeetSlug.Value] = new(
             "Google",
             "Free",
             "https://meet.google.com/",
             "support@google.com",
             "Google Meet adds a video conferencing link to your bookings using your connected Google Calendar. A Meet link is created for each event automatically — no extra sign-in required once Google Calendar is connected.",
             ["/app-screenshots/google-meet-1.svg", "/app-screenshots/google-meet-2.svg"],
-            IsNew: true
+            true
         ),
-        [MsTeamsSlug.Value] = new AppListing(
+        [MsTeamsSlug.Value] = new(
             "Microsoft",
             "Free",
             "https://www.microsoft.com/microsoft-teams/",
             "support@microsoft.com",
             "Microsoft Teams adds an online meeting link to your bookings using your connected Office 365 Calendar. A Teams meeting is generated for each event automatically once Office 365 Calendar is connected.",
             ["/app-screenshots/ms-teams-1.svg", "/app-screenshots/ms-teams-2.svg"],
-            IsNew: true
+            true
         ),
-        ["whatsapp"] = new AppListing(
+        ["whatsapp"] = new(
             "Meta",
             "Free",
             "https://business.whatsapp.com/",

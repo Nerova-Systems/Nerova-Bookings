@@ -27,12 +27,13 @@ public sealed class GetWhatsAppWebhookEventsHandler(IWhatsAppEventRepository wha
         var events = await whatsAppEventRepository.GetRecentAsync(20, cancellationToken);
 
         var items = events.Select(e => new WhatsAppWebhookEventItem(
-            e.Id.Value,
-            e.Status.ToString(),
-            e.CreatedAt,
-            e.ProcessedAt,
-            e.Error
-        )).ToArray();
+                e.Id.Value,
+                e.Status.ToString(),
+                e.CreatedAt,
+                e.ProcessedAt,
+                e.Error
+            )
+        ).ToArray();
 
         return new GetWhatsAppWebhookEventsResponse(items);
     }

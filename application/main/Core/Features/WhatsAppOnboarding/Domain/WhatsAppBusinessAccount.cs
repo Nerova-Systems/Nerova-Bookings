@@ -38,13 +38,16 @@ public sealed class WhatsAppBusinessAccount : AggregateRoot<WhatsAppBusinessAcco
 
     public WhatsAppPhoneNumber PhoneNumber { get; private set; } = null!;
 
-    public TenantId TenantId { get; }
-
     /// <summary>Flow ID of the published WhatsApp Booking Flow under this tenant's WABA. Null until created at onboarding.</summary>
     public string? BookingFlowId { get; private set; }
 
-    /// <summary>Flow ID of the published WhatsApp Login/Registration Flow under this tenant's WABA. Null until created at onboarding.</summary>
+    /// <summary>
+    ///     Flow ID of the published WhatsApp Login/Registration Flow under this tenant's WABA. Null until created at
+    ///     onboarding.
+    /// </summary>
     public string? LoginFlowId { get; private set; }
+
+    public TenantId TenantId { get; }
 
     public static WhatsAppBusinessAccount Create(TenantId tenantId, string metaWabaId, string businessName, string encryptedAccessToken, WhatsAppPhoneNumber phoneNumber)
     {

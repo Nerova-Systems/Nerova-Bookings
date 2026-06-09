@@ -6,9 +6,11 @@ using SharedKernel.Domain;
 namespace Main.Features.WhatsAppBooking.Commands;
 
 /// <summary>
-///     Upserts a <see cref="Client" /> from a WhatsApp login Flow completion. Matches by phone number;
-///     creates a new client if none found. Does not go through the booking side-effect infrastructure
-///     because there is no booking yet at this point.
+///     Upserts a <see cref="Client" /> from a WhatsApp login Flow completion. Matches by phone first, then
+///     by email (the account-recovery key): when matched by email the verified WhatsApp number is written
+///     to the client so a returning customer on a new device keeps a single, up-to-date record. Creates a
+///     new client if none is found. Does not go through the booking side-effect infrastructure because
+///     there is no booking yet at this point.
 /// </summary>
 [PublicAPI]
 public sealed record UpsertClientFromWhatsAppLoginCommand(TenantId TenantId, string FullName, string Email, string PhoneNumber) : IRequest<Result>;
@@ -29,7 +31,9 @@ public sealed class UpsertClientFromWhatsAppLoginHandler(
             existing.RecordVisit(timeProvider.GetUtcNow());
 
             var mergedEmail = string.IsNullOrWhiteSpace(existing.Email) ? command.Email : existing.Email;
-            var mergedPhone = string.IsNullOrWhiteSpace(existing.PhoneNumber) ? command.PhoneNumber : existing.PhoneNumber;
+            // Prefer the verified WhatsApp number so an email-matched (recovery) client has their new
+            // number written; fall back to the existing number only when no verified number is supplied.
+            var mergedPhone = string.IsNullOrWhiteSpace(command.PhoneNumber) ? existing.PhoneNumber : command.PhoneNumber;
             if (!string.Equals(mergedEmail, existing.Email, StringComparison.Ordinal)
                 || !string.Equals(mergedPhone, existing.PhoneNumber, StringComparison.Ordinal))
             {

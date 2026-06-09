@@ -346,6 +346,7 @@ public sealed class EventType : SoftDeletableAggregateRoot<EventTypeId>, ITenant
     {
         Settings = EventTypeSettings.Normalize(settings, DurationMinutes, LocationType, LocationValue);
     }
+
     /// <summary>
     ///     Replaces only the location fields on this event type, leaving all other state untouched.
     ///     Used by bulk-apply commands so the caller does not need to re-send the full Update payload.

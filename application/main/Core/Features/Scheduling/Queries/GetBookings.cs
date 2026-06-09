@@ -111,7 +111,8 @@ public sealed class GetBookingsHandler(
     ISchedulingProfileRepository schedulingProfileRepository,
     IBookingInternalNoteRepository bookingInternalNoteRepository,
     IExecutionContext executionContext,
-    TimeProvider timeProvider)
+    TimeProvider timeProvider
+)
     : IRequestHandler<GetBookingsQuery, Result<BookingsResponse>>
 {
     public async Task<Result<BookingsResponse>> Handle(GetBookingsQuery query, CancellationToken cancellationToken)

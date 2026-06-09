@@ -65,7 +65,8 @@ public interface IMetaGraphClient
 
     /// <summary>
     ///     Sends an interactive call-to-action URL button message via the WhatsApp Cloud API. Used to deliver a
-    ///     tappable link (for example a Paystack checkout URL). Returns the Meta message ID (wamid.*) on success, or null on any failure.
+    ///     tappable link (for example a Paystack checkout URL). Returns the Meta message ID (wamid.*) on success, or null on
+    ///     any failure.
     /// </summary>
     Task<string?> SendCtaUrlButtonAsync(
         string phoneNumberId,
@@ -122,10 +123,16 @@ public sealed record MetaWabaMetadata(string Id, string Name);
 
 public sealed record MetaPhoneNumber(string Id, string DisplayPhoneNumber, string VerifiedName);
 
-/// <summary>A tappable quick-reply button in an interactive message. <paramref name="Id" /> is echoed back in the inbound webhook when tapped.</summary>
+/// <summary>
+///     A tappable quick-reply button in an interactive message. <paramref name="Id" /> is echoed back in the inbound
+///     webhook when tapped.
+/// </summary>
 public sealed record WhatsAppReplyButton(string Id, string Title);
 
-/// <summary>A selectable row in an interactive list message. <paramref name="Id" /> is echoed back in the inbound webhook when selected.</summary>
+/// <summary>
+///     A selectable row in an interactive list message. <paramref name="Id" /> is echoed back in the inbound webhook
+///     when selected.
+/// </summary>
 public sealed record WhatsAppListRow(string Id, string Title, string? Description = null);
 
 /// <summary>A titled group of <see cref="WhatsAppListRow" /> entries in an interactive list message.</summary>

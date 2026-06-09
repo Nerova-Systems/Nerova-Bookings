@@ -29,14 +29,15 @@ public sealed class GetWhatsAppMessagesHandler(IWhatsAppMessageRepository whatsA
         var messages = await whatsAppMessageRepository.GetByTenantAsync(cancellationToken);
 
         var items = messages.Select(m => new WhatsAppMessageItem(
-            m.Id.Value,
-            m.Direction.ToString(),
-            m.FromPhoneNumber,
-            m.ToPhoneNumber,
-            m.Text,
-            m.Status.ToString(),
-            m.Timestamp
-        )).ToArray();
+                m.Id.Value,
+                m.Direction.ToString(),
+                m.FromPhoneNumber,
+                m.ToPhoneNumber,
+                m.Text,
+                m.Status.ToString(),
+                m.Timestamp
+            )
+        ).ToArray();
 
         return new GetWhatsAppMessagesResponse(items);
     }

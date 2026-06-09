@@ -22,8 +22,6 @@ public sealed class WhatsAppMessage : AggregateRoot<WhatsAppMessageId>, ITenantS
         TenantId = tenantId;
     }
 
-    public TenantId TenantId { get; }
-
     /// <summary>
     ///     The external Meta message ID (wamid.*). Indexed for lookups during status updates.
     /// </summary>
@@ -49,6 +47,8 @@ public sealed class WhatsAppMessage : AggregateRoot<WhatsAppMessageId>, ITenantS
     ///     The timestamp reported by Meta in the webhook payload (Unix epoch seconds, converted to UTC).
     /// </summary>
     public DateTimeOffset Timestamp { get; private set; }
+
+    public TenantId TenantId { get; }
 
     public static WhatsAppMessage CreateInbound(TenantId tenantId, string metaMessageId, string fromPhoneNumber, string toPhoneNumber, string text, DateTimeOffset timestamp)
     {

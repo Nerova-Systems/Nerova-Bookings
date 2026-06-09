@@ -236,7 +236,8 @@ public sealed class BookingRepository(MainDbContext mainDbContext)
             .AsTracking()
             .Where(b => b.PaymentStatus == BookingPaymentStatus.Pending
                         && b.PaymentStateChangedAt != null
-                        && b.PaymentStateChangedAt < cutoff)
+                        && b.PaymentStateChangedAt < cutoff
+            )
             .ToArrayAsync(cancellationToken);
     }
 
@@ -248,7 +249,8 @@ public sealed class BookingRepository(MainDbContext mainDbContext)
             .Where(b => b.PaymentStatus == BookingPaymentStatus.Pending
                         && b.PaymentReminderSentAt == null
                         && b.PaymentStateChangedAt != null
-                        && b.PaymentStateChangedAt < cutoff)
+                        && b.PaymentStateChangedAt < cutoff
+            )
             .ToArrayAsync(cancellationToken);
     }
 

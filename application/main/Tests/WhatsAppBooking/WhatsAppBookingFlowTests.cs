@@ -60,14 +60,15 @@ public sealed class WhatsAppBookingFlowTests : EndpointBaseTest<MainDbContext>
         var slot = await GetFirstAvailableSlotAsync("product-demo");
         const string customer = "+27820002222";
         var responseJson = JsonSerializer.Serialize(new Dictionary<string, object>
-        {
-            ["event_slug"] = "product-demo",
-            ["start_time"] = slot.ToString("o"),
-            ["duration"] = 30,
-            ["timezone"] = "Africa/Johannesburg",
-            ["booker_name"] = "Thandi Mokoena",
-            ["booker_email"] = "thandi@example.com"
-        });
+            {
+                ["event_slug"] = "product-demo",
+                ["start_time"] = slot.ToString("o"),
+                ["duration"] = 30,
+                ["timezone"] = "Africa/Johannesburg",
+                ["booker_name"] = "Thandi Mokoena",
+                ["booker_email"] = "thandi@example.com"
+            }
+        );
         var payload = BuildFlowCompletionPayload(customer, "wamid.booking.flow.1", responseJson);
 
         // Act
@@ -101,6 +102,74 @@ public sealed class WhatsAppBookingFlowTests : EndpointBaseTest<MainDbContext>
     }
 
     [Fact]
+    public async Task PostWebhook_WhenLoginFlowCompletion_ShouldCreateIdentifiedClientWithoutPromptingForEmail()
+    {
+        // Arrange
+        await OnboardWhatsAppAsync();
+        const string customer = "+27820005555";
+        await DriveConversationToAwaitingLoginAsync(customer, "create");
+        var responseJson = BuildLoginResponseJson("Lerato Khumalo", "lerato@example.com", customer);
+        var payload = BuildFlowCompletionPayload(customer, "wamid.login.flow.create", responseJson);
+
+        // Act
+        var response = await PostSignedWebhookAsync(payload);
+
+        // Assert
+        response.EnsureSuccessStatusCode();
+        Connection.ExecuteScalar<long>("SELECT COUNT(*) FROM clients WHERE email = 'lerato@example.com'", []).Should().Be(1);
+        Connection.ExecuteScalar<string>("SELECT phone_number FROM clients WHERE email = 'lerato@example.com'", []).Should().Be(customer);
+        Connection.ExecuteScalar<long>($"SELECT is_identified FROM whats_app_conversations WHERE customer_phone_number = '{customer}'", []).Should().Be(1);
+        // The email is collected only inside the Flow — it must never be requested over plain WhatsApp text.
+        Connection.ExecuteScalar<long>("SELECT COUNT(*) FROM whats_app_messages WHERE direction = 'Outbound' AND text LIKE '%email%'", []).Should().Be(0);
+    }
+
+    [Fact]
+    public async Task PostWebhook_WhenLoginFromNewNumberWithKnownEmail_ShouldMoveNumberToExistingClient()
+    {
+        // Arrange — a client first signs in from their original WhatsApp number.
+        await OnboardWhatsAppAsync();
+        const string oldNumber = "+27820006666";
+        const string newNumber = "+27820007777";
+        const string email = "returning@example.com";
+
+        await DriveConversationToAwaitingLoginAsync(oldNumber, "old");
+        (await PostSignedWebhookAsync(BuildFlowCompletionPayload(
+                oldNumber, "wamid.login.flow.old", BuildLoginResponseJson("Sipho Dlamini", email, oldNumber)
+            )
+        )).EnsureSuccessStatusCode();
+
+        // Act — the same client returns on a brand-new number and signs in with the same email (recovery).
+        await DriveConversationToAwaitingLoginAsync(newNumber, "new");
+        var response = await PostSignedWebhookAsync(BuildFlowCompletionPayload(
+                newNumber, "wamid.login.flow.new", BuildLoginResponseJson("Sipho Dlamini", email, newNumber)
+            )
+        );
+
+        // Assert — the verified new number replaces the old one on the single existing client record.
+        response.EnsureSuccessStatusCode();
+        Connection.ExecuteScalar<long>($"SELECT COUNT(*) FROM clients WHERE email = '{email}'", []).Should().Be(1);
+        Connection.ExecuteScalar<string>($"SELECT phone_number FROM clients WHERE email = '{email}'", []).Should().Be(newNumber);
+        Connection.ExecuteScalar<long>($"SELECT COUNT(*) FROM clients WHERE phone_number = '{oldNumber}'", []).Should().Be(0);
+    }
+
+    [Fact]
+    public async Task PostWebhook_WhenLoginFlowCompletionIsUnparseable_ShouldNotCreateClient()
+    {
+        // Arrange
+        await OnboardWhatsAppAsync();
+        const string customer = "+27820008888";
+        await DriveConversationToAwaitingLoginAsync(customer, "bad");
+
+        // Act
+        var response = await PostSignedWebhookAsync(BuildFlowCompletionPayload(customer, "wamid.login.flow.bad", "not-json"));
+
+        // Assert
+        response.EnsureSuccessStatusCode();
+        Connection.ExecuteScalar<long>($"SELECT COUNT(*) FROM clients WHERE phone_number = '{customer}'", []).Should().Be(0);
+        Connection.ExecuteScalar<string>($"SELECT state FROM whats_app_conversations WHERE customer_phone_number = '{customer}'", []).Should().Be("Idle");
+    }
+
+    [Fact]
     public async Task GetConversations_WhenConversationsExist_ShouldReturnRecordForTenant()
     {
         // Arrange
@@ -122,6 +191,25 @@ public sealed class WhatsAppBookingFlowTests : EndpointBaseTest<MainDbContext>
     {
         var onboardCommand = new { code = "valid-auth-code", wabaId = WabaId, phoneNumberId = PhoneNumberId };
         (await AuthenticatedOwnerHttpClient.PostAsJsonAsync("/api/main/whatsapp/embedded-signup/complete", onboardCommand)).EnsureSuccessStatusCode();
+    }
+
+    // Drives an unknown customer to the AwaitingLoginFlow state: an inbound text triggers the welcome +
+    // "Sign in / Register" button, then tapping that button sends the login Flow.
+    private async Task DriveConversationToAwaitingLoginAsync(string customer, string suffix)
+    {
+        (await PostSignedWebhookAsync(BuildTextPayload(customer, $"wamid.login.text.{suffix}", "Hi"))).EnsureSuccessStatusCode();
+        (await PostSignedWebhookAsync(BuildButtonReplyPayload(customer, $"wamid.login.btn.{suffix}", "login", "Sign in / Register"))).EnsureSuccessStatusCode();
+    }
+
+    private static string BuildLoginResponseJson(string name, string email, string phone)
+    {
+        return JsonSerializer.Serialize(new Dictionary<string, object>
+            {
+                ["name"] = name,
+                ["email"] = email,
+                ["phone"] = phone
+            }
+        );
     }
 
     private async Task<HttpResponseMessage> PostSignedWebhookAsync(string payload)
@@ -219,6 +307,33 @@ public sealed class WhatsAppBookingFlowTests : EndpointBaseTest<MainDbContext>
                            "timestamp": "1700000000",
                            "type": "text",
                            "text": { "body": "{{text}}" }
+                         }]
+                       }
+                     }]
+                   }]
+                 }
+                 """;
+    }
+
+    private static string BuildButtonReplyPayload(string fromNumber, string messageId, string buttonId, string buttonTitle)
+    {
+        return $$"""
+                 {
+                   "object": "whatsapp_business_account",
+                   "entry": [{
+                     "id": "{{WabaId}}",
+                     "changes": [{
+                       "value": {
+                         "metadata": { "phone_number_id": "{{PhoneNumberId}}", "display_phone_number": "+1 555-0100" },
+                         "messages": [{
+                           "id": "{{messageId}}",
+                           "from": "{{fromNumber}}",
+                           "timestamp": "1700000000",
+                           "type": "interactive",
+                           "interactive": {
+                             "type": "button_reply",
+                             "button_reply": { "id": "{{buttonId}}", "title": "{{buttonTitle}}" }
+                           }
                          }]
                        }
                      }]

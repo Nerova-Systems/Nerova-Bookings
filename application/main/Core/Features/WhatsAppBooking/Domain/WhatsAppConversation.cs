@@ -43,8 +43,6 @@ public sealed class WhatsAppConversation : AggregateRoot<WhatsAppConversationId>
         ExpiresAt = now + SessionTimeout;
     }
 
-    public TenantId TenantId { get; } = new(0);
-
     /// <summary>The customer's WhatsApp phone number in E.164 format. Unique per tenant.</summary>
     public string CustomerPhoneNumber { get; private set; }
 
@@ -68,6 +66,8 @@ public sealed class WhatsAppConversation : AggregateRoot<WhatsAppConversationId>
     public DateTimeOffset LastInboundAt { get; private set; }
 
     public DateTimeOffset ExpiresAt { get; private set; }
+
+    public TenantId TenantId { get; } = new(0);
 
     public static WhatsAppConversation Start(TenantId tenantId, string customerPhoneNumber, DateTimeOffset now)
     {
@@ -143,7 +143,7 @@ public sealed class WhatsAppConversation : AggregateRoot<WhatsAppConversationId>
         return State is WhatsAppConversationState.Idle
                    or WhatsAppConversationState.AwaitingLoginFlow
                    or WhatsAppConversationState.AwaitingBookingFlow
-            && ExpiresAt < now;
+               && ExpiresAt < now;
     }
 
     /// <summary>True when the given Flow-completion token matches the in-flight Flow for this conversation.</summary>
