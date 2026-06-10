@@ -295,20 +295,26 @@ public sealed class WhatsAppConversationEngine(
     )
     {
         var businessName = string.IsNullOrWhiteSpace(account.BusinessName) ? "us" : account.BusinessName;
+        var loginFlowId = account.LoginFlowId ?? _options.LoginFlowId;
+        var hasLoginFlow = !string.IsNullOrWhiteSpace(loginFlowId);
 
-        if (isIdentified)
+        if (isIdentified || !hasLoginFlow)
         {
-            // Known customer — offer booking directly.
+            // Known customer, or no login flow configured — offer booking directly.
+            // (The booking flow itself captures name + email, so no login step is needed.)
+            var body = isIdentified
+                ? $"Welcome back! Ready to book with {businessName}?"
+                : $"Hi! Welcome to {businessName}. Tap below to book an appointment.";
             await outboundSender.SendButtonsAsync(
                 account, toPhoneNumber,
-                $"Welcome back! Ready to book with {businessName}?",
+                body,
                 [new WhatsAppReplyButton(ButtonIdBook, "Book appointment")],
                 cancellationToken
             );
         }
         else
         {
-            // Unknown customer — welcome + offer login/register.
+            // Unknown customer with a login flow configured — ask them to sign in first.
             await outboundSender.SendButtonsAsync(
                 account, toPhoneNumber,
                 $"Hi! Welcome to {businessName}. To get started, please sign in or create an account.",
