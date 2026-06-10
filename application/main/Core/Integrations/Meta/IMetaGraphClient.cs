@@ -118,11 +118,19 @@ public interface IMetaGraphClient
     ///     encrypt data-exchange requests. Returns true on success.
     /// </summary>
     Task<bool> UploadFlowPublicKeyAsync(string wabaId, string publicKeyPem, string accessToken, CancellationToken cancellationToken);
+
+    /// <summary>
+    ///     Lists all WhatsApp Flows registered under a WABA. Returns null on any failure.
+    /// </summary>
+    Task<MetaFlowInfo[]?> ListFlowsAsync(string wabaId, string accessToken, CancellationToken cancellationToken);
 }
 
 public sealed record MetaWabaMetadata(string Id, string Name);
 
 public sealed record MetaPhoneNumber(string Id, string DisplayPhoneNumber, string VerifiedName);
+
+/// <summary>A WhatsApp Flow registered under a WABA.</summary>
+public sealed record MetaFlowInfo(string Id, string Name, string Status);
 
 /// <summary>
 ///     A tappable quick-reply button in an interactive message. <paramref name="Id" /> is echoed back in the inbound

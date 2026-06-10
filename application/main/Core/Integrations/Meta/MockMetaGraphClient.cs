@@ -110,4 +110,9 @@ public sealed class MockMetaGraphClient : IMetaGraphClient
     {
         return Task.FromResult(true);
     }
+
+    public Task<MetaFlowInfo[]?> ListFlowsAsync(string wabaId, string accessToken, CancellationToken cancellationToken)
+    {
+        return Task.FromResult<MetaFlowInfo[]?>([]);
+    }
 }

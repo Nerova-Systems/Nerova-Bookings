@@ -105,4 +105,9 @@ public sealed class UnconfiguredMetaGraphClient : IMetaGraphClient
     {
         return Task.FromResult(false);
     }
+
+    public Task<MetaFlowInfo[]?> ListFlowsAsync(string wabaId, string accessToken, CancellationToken cancellationToken)
+    {
+        return Task.FromResult<MetaFlowInfo[]?>(null);
+    }
 }

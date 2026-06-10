@@ -56,6 +56,14 @@ public sealed class ReprovisionWhatsAppFlowsHandler(
         var loginFlowId = account.LoginFlowId;
         var bookingFlowId = account.BookingFlowId;
 
+        // If IDs are missing, try to discover existing flows by name before creating new ones.
+        if (string.IsNullOrWhiteSpace(loginFlowId) || string.IsNullOrWhiteSpace(bookingFlowId))
+        {
+            var existingFlows = await metaGraphClient.ListFlowsAsync(account.MetaWabaId, accessToken, cancellationToken) ?? [];
+            loginFlowId ??= existingFlows.FirstOrDefault(f => f.Name == "Nerova Sign In")?.Id;
+            bookingFlowId ??= existingFlows.FirstOrDefault(f => f.Name == "Nerova Booking")?.Id;
+        }
+
         // Update existing flows if IDs are known, otherwise create new ones.
         if (!string.IsNullOrWhiteSpace(loginFlowId))
         {

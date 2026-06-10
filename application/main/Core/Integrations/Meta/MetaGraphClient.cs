@@ -497,8 +497,33 @@ public sealed class MetaGraphClient(HttpClient httpClient, IConfiguration config
         }
     }
 
+    public async Task<MetaFlowInfo[]?> ListFlowsAsync(string wabaId, string accessToken, CancellationToken cancellationToken)
+    {
+        try
+        {
+            using var request = new HttpRequestMessage(HttpMethod.Get, $"{_graphApiVersion}/{wabaId}/flows?fields=id,name,status&limit=100");
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+
+            var response = await httpClient.SendAsync(request, cancellationToken);
+            if (!response.IsSuccessStatusCode)
+            {
+                var err = await response.Content.ReadAsStringAsync(cancellationToken);
+                logger.LogError("Failed to list WhatsApp Flows for WABA '{WabaId}'. Status: {Status}. Body: {Body}", wabaId, response.StatusCode, err);
+                return null;
+            }
+
+            var result = await response.Content.ReadFromJsonAsync<MetaFlowsListResponse>(JsonSerializerOptions, cancellationToken);
+            return result?.Data?.Select(d => new MetaFlowInfo(d.Id ?? string.Empty, d.Name ?? string.Empty, d.Status ?? string.Empty)).ToArray();
+        }
+        catch (Exception ex) when (ex is HttpRequestException or OperationCanceledException or JsonException && !cancellationToken.IsCancellationRequested)
+        {
+            logger.LogError(ex, "Error listing WhatsApp Flows for WABA '{WabaId}'", wabaId);
+            return null;
+        }
+    }
+
     /// <summary>
-    ///     Shared POST + response parsing for interactive (button/list/cta_url/flow) messages. On a non-success
+
     ///     status the Meta error body is logged to aid debugging. Never throws — returns null on any failure.
     /// </summary>
     private async Task<string?> PostInteractiveMessageAsync(string phoneNumberId, string accessToken, string toPhoneNumber, object payload, CancellationToken cancellationToken)
@@ -565,4 +590,9 @@ public sealed class MetaGraphClient(HttpClient httpClient, IConfiguration config
     private sealed record MetaSentMessageId(string? Id);
 
     private sealed record MetaFlowCreateResponse(string? Id);
+
+    private sealed record MetaFlowsListResponse(MetaFlowData[]? Data);
+
+    [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
+    private sealed record MetaFlowData(string? Id, string? Name, string? Status);
 }
