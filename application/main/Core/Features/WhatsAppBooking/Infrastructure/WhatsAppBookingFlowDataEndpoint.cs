@@ -212,15 +212,21 @@ public sealed class WhatsAppBookingFlowDataEndpoint(
         string timezone)
     {
         return JsonSerializer.Serialize(new
+        {
+            version = FlowVersion,
+            screen = "APPOINTMENT",
+            data = new
             {
-                version = FlowVersion, screen = "APPOINTMENT",
-                data = new
-                {
-                    service = services, date = dates, time = times,
-                    is_date_enabled = dateEnabled, is_time_enabled = timeEnabled,
-                    duration_minutes = durationMinutes, timezone
-                }
-            }, JsonOptions
+                service = services,
+                is_service_enabled = serviceEnabled,
+                date = dates,
+                time = times,
+                is_date_enabled = dateEnabled,
+                is_time_enabled = timeEnabled,
+                duration_minutes = durationMinutes,
+                timezone
+            }
+        }, JsonOptions
         );
     }
 
@@ -232,10 +238,11 @@ public sealed class WhatsAppBookingFlowDataEndpoint(
         string timezone)
     {
         return JsonSerializer.Serialize(new
-            {
-                version = FlowVersion, screen = "SUMMARY",
-                data = new { summary_text = summaryText, service_slug = serviceSlug, start_time_iso = startTimeIso, duration_minutes = durationMinutes, timezone }
-            }, JsonOptions
+        {
+            version = FlowVersion,
+            screen = "SUMMARY",
+            data = new { summary_text = summaryText, service_slug = serviceSlug, start_time_iso = startTimeIso, duration_minutes = durationMinutes, timezone }
+        }, JsonOptions
         );
     }
 

@@ -10,12 +10,6 @@ namespace Main.Features.WhatsAppBooking.Shared;
 /// </summary>
 public sealed class WhatsAppBookingFlowResponse
 {
-    private static readonly JsonSerializerOptions JsonOptions = new()
-    {
-        PropertyNameCaseInsensitive = true,
-        NumberHandling = JsonNumberHandling.AllowReadingFromString
-    };
-
     public string? EventSlug { get; private init; }
 
     public DateTimeOffset? StartTime { get; private init; }

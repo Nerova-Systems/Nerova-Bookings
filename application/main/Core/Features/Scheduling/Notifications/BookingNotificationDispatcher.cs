@@ -127,31 +127,38 @@ public sealed class BookingNotificationDispatcher(
         CancellationToken ct
     )
     {
-        var model = new BookingEmailModel(
-            recipientName,
-            booking.BookerName,
-            hostName,
-            eventTitle,
-            booking.StartTime,
-            booking.EndTime,
-            booking.TimeZone,
-            booking.LocationValue,
-            booking.CancellationReason
-        );
-
-        EmailTemplateBase template = kind switch
+        try
         {
-            BookingNotificationKind.Created => new BookingConfirmationEmailTemplate(locale, model),
-            BookingNotificationKind.Cancelled => new BookingCancellationEmailTemplate(locale, model),
-            BookingNotificationKind.Rescheduled => new BookingRescheduleEmailTemplate(locale, model),
-            _ => throw new ArgumentOutOfRangeException(nameof(kind), kind, null)
-        };
+            var model = new BookingEmailModel(
+                recipientName,
+                booking.BookerName,
+                hostName,
+                eventTitle,
+                booking.StartTime,
+                booking.EndTime,
+                booking.TimeZone,
+                booking.LocationValue,
+                booking.CancellationReason
+            );
 
-        var rendered = emailRenderer.RenderEmail(template);
-        await emailClient.SendAsync(
-            new EmailMessage(toEmail, rendered.Subject, rendered.HtmlBody, rendered.PlainTextBody, Enclosures: enclosures),
-            ct
-        );
+            EmailTemplateBase template = kind switch
+            {
+                BookingNotificationKind.Created => new BookingConfirmationEmailTemplate(locale, model),
+                BookingNotificationKind.Cancelled => new BookingCancellationEmailTemplate(locale, model),
+                BookingNotificationKind.Rescheduled => new BookingRescheduleEmailTemplate(locale, model),
+                _ => throw new ArgumentOutOfRangeException(nameof(kind), kind, null)
+            };
+
+            var rendered = emailRenderer.RenderEmail(template);
+            await emailClient.SendAsync(
+                new EmailMessage(toEmail, rendered.Subject, rendered.HtmlBody, rendered.PlainTextBody, Enclosures: enclosures),
+                ct
+            );
+        }
+        catch (Exception ex)
+        {
+            logger.LogWarning(ex, "Booking {Kind} email to {ToEmail} for booking {BookingId} could not be sent and was skipped.", kind, toEmail, booking.Id);
+        }
     }
 
     private static string ResolveLocale(string locale)
