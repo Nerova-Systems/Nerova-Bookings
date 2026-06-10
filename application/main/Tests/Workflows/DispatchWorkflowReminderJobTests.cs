@@ -10,7 +10,6 @@ using Main.Features.Workflows.Senders;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging.Abstractions;
 using NSubstitute;
-using SharedKernel.Domain;
 using SharedKernel.Integrations.Email;
 using SharedKernel.Persistence;
 using Xunit;

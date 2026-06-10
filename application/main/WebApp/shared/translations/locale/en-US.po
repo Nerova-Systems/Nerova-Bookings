@@ -987,6 +987,9 @@ msgstr "Failed to load messages."
 msgid "Failed to queue test event"
 msgstr "Failed to queue test event"
 
+msgid "Failed to refresh flows"
+msgstr "Failed to refresh flows"
+
 msgid "Failed to start install. Please try again."
 msgstr "Failed to start install. Please try again."
 
@@ -1013,6 +1016,9 @@ msgstr "First slot only"
 
 msgid "First visit"
 msgstr "First visit"
+
+msgid "Flows updated"
+msgstr "Flows updated"
 
 msgid "For security, the signing secret is only shown once — right after the webhook is created. If you've lost it, delete this webhook and create a new one to receive a fresh secret."
 msgstr "For security, the signing secret is only shown once — right after the webhook is created. If you've lost it, delete this webhook and create a new one to receive a fresh secret."
@@ -1728,6 +1734,9 @@ msgstr "Ping"
 msgid "Placeholder"
 msgstr "Placeholder"
 
+msgid "Please try again or reconnect your WhatsApp account."
+msgstr "Please try again or reconnect your WhatsApp account."
+
 msgid "Prerequisite required"
 msgstr "Prerequisite required"
 
@@ -1844,6 +1853,9 @@ msgstr "Recurring events cannot be enabled while seats are enabled."
 
 msgid "Redirects"
 msgstr "Redirects"
+
+msgid "Refresh flows"
+msgstr "Refresh flows"
 
 msgid "Reject booking"
 msgstr "Reject booking"
@@ -2589,6 +2601,9 @@ msgstr "Your name"
 
 msgid "Your stored connection will be removed. Existing bookings keep their location and calendar destination, but new bookings will no longer use this app."
 msgstr "Your stored connection will be removed. Existing bookings keep their location and calendar destination, but new bookings will no longer use this app."
+
+msgid "Your WhatsApp booking and sign-in flows have been refreshed."
+msgstr "Your WhatsApp booking and sign-in flows have been refreshed."
 
 msgid "Your WhatsApp Business account has been disconnected."
 msgstr "Your WhatsApp Business account has been disconnected."

@@ -987,6 +987,9 @@ msgstr ""
 msgid "Failed to queue test event"
 msgstr "Kunne ikke sætte testhændelse i kø"
 
+msgid "Failed to refresh flows"
+msgstr ""
+
 msgid "Failed to start install. Please try again."
 msgstr "Kunne ikke starte installation. Prøv igen."
 
@@ -1012,6 +1015,9 @@ msgid "First slot only"
 msgstr ""
 
 msgid "First visit"
+msgstr ""
+
+msgid "Flows updated"
 msgstr ""
 
 msgid "For security, the signing secret is only shown once — right after the webhook is created. If you've lost it, delete this webhook and create a new one to receive a fresh secret."
@@ -1728,6 +1734,9 @@ msgstr "Ping"
 msgid "Placeholder"
 msgstr "Pladsholder"
 
+msgid "Please try again or reconnect your WhatsApp account."
+msgstr ""
+
 msgid "Prerequisite required"
 msgstr "Forudsætning kræves"
 
@@ -1843,6 +1852,9 @@ msgid "Recurring events cannot be enabled while seats are enabled."
 msgstr ""
 
 msgid "Redirects"
+msgstr ""
+
+msgid "Refresh flows"
 msgstr ""
 
 msgid "Reject booking"
@@ -2589,6 +2601,9 @@ msgstr "Dit navn"
 
 msgid "Your stored connection will be removed. Existing bookings keep their location and calendar destination, but new bookings will no longer use this app."
 msgstr "Din gemte forbindelse vil blive fjernet. Eksisterende bookinger beholder deres lokation og kalenderdestinat, men nye bookinger vil ikke længere bruge denne app."
+
+msgid "Your WhatsApp booking and sign-in flows have been refreshed."
+msgstr ""
 
 msgid "Your WhatsApp Business account has been disconnected."
 msgstr ""

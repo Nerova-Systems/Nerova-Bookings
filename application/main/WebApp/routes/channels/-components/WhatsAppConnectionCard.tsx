@@ -67,6 +67,19 @@ export function WhatsAppConnectionCard() {
     }
   });
 
+  const reprovisionMutation = api.useMutation("post", "/api/main/whatsapp/waba/reprovision-flows", {
+    onSuccess: () => {
+      toast.success(t`Flows updated`, {
+        description: t`Your WhatsApp booking and sign-in flows have been refreshed.`
+      });
+    },
+    onError: () => {
+      toast.error(t`Failed to refresh flows`, {
+        description: t`Please try again or reconnect your WhatsApp account.`
+      });
+    }
+  });
+
   const handleComplete = useCallback(
     (payload: EmbeddedSignupPayload) => {
       completeMutation.mutate({ body: payload });
@@ -86,7 +99,7 @@ export function WhatsAppConnectionCard() {
 
   const status = statusQuery.data;
   const isConnected = status?.isConnected ?? false;
-  const isBusy = isLaunching || completeMutation.isPending || disconnectMutation.isPending;
+  const isBusy = isLaunching || completeMutation.isPending || disconnectMutation.isPending || reprovisionMutation.isPending;
 
   return (
     <Card>
@@ -117,7 +130,14 @@ export function WhatsAppConnectionCard() {
               phoneNumber={status?.phoneNumber ?? null}
               status={status?.status ?? ""}
             />
-            <div className="flex justify-end">
+            <div className="flex justify-end gap-2">
+              <Button
+                variant="ghost"
+                onClick={() => reprovisionMutation.mutate({})}
+                isPending={reprovisionMutation.isPending}
+              >
+                <Trans>Refresh flows</Trans>
+              </Button>
               <Button
                 variant="outline"
                 onClick={() => disconnectMutation.mutate({})}
