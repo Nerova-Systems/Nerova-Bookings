@@ -430,6 +430,7 @@ public sealed class MetaGraphClient(HttpClient httpClient, IConfiguration config
     {
         try
         {
+            // 1. Upload the new JSON asset. This reverts a PUBLISHED flow back to DRAFT.
             var fileContent = new ByteArrayContent(Encoding.UTF8.GetBytes(flowJson));
             fileContent.Headers.ContentType = new MediaTypeHeaderValue("application/json");
 
@@ -447,6 +448,17 @@ public sealed class MetaGraphClient(HttpClient httpClient, IConfiguration config
                 var err = await response.Content.ReadAsStringAsync(cancellationToken);
                 logger.LogError("Failed to update Flow JSON for flow '{FlowId}'. Status: {Status}. Body: {Body}", flowId, response.StatusCode, err);
                 return false;
+            }
+
+            // 2. Re-publish the flow. Uploading new JSON reverts status to DRAFT; Meta will not send DRAFT flows.
+            using var publishRequest = new HttpRequestMessage(HttpMethod.Post, $"{_graphApiVersion}/{flowId}/publish");
+            publishRequest.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+
+            var publishResponse = await httpClient.SendAsync(publishRequest, cancellationToken);
+            if (!publishResponse.IsSuccessStatusCode)
+            {
+                var err = await publishResponse.Content.ReadAsStringAsync(cancellationToken);
+                logger.LogWarning("Failed to re-publish Flow '{FlowId}' after JSON update (may need Meta review). Status: {Status}. Body: {Body}", flowId, publishResponse.StatusCode, err);
             }
 
             return true;

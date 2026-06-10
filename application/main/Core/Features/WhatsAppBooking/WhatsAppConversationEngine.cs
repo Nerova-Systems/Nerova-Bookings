@@ -6,7 +6,6 @@ using Main.Features.WhatsAppBooking.Domain;
 using Main.Features.WhatsAppBooking.Infrastructure;
 using Main.Features.WhatsAppBooking.Shared;
 using Main.Features.WhatsAppOnboarding.Domain;
-using Main.Integrations.Meta;
 using Microsoft.Extensions.Options;
 using SharedKernel.Domain;
 
@@ -28,9 +27,6 @@ public sealed class WhatsAppConversationEngine(
     ILogger<WhatsAppConversationEngine> logger
 )
 {
-    private const string ButtonIdBook = "book";
-    private const string ButtonIdLogin = "login";
-
     private readonly WhatsAppBookingOptions _options = options.Value;
 
     public async Task HandleInboundAsync(WhatsAppBusinessAccount account, WhatsAppInboundMessage inbound, CancellationToken cancellationToken)
@@ -60,31 +56,13 @@ public sealed class WhatsAppConversationEngine(
             return;
         }
 
-        // Button reply routing.
-        if (inbound.Kind == WhatsAppInboundKind.ButtonReply)
-        {
-            if (inbound.InteractiveReplyId == ButtonIdBook && conversation.State == WhatsAppConversationState.Idle)
-            {
-                await SendBookingFlowAsync(account, conversation, inbound.FromPhoneNumber, now, cancellationToken);
-                conversationRepository.Update(conversation);
-                return;
-            }
-
-            if (inbound.InteractiveReplyId == ButtonIdLogin && conversation.State == WhatsAppConversationState.Idle)
-            {
-                await SendLoginFlowAsync(account, conversation, inbound.FromPhoneNumber, now, cancellationToken);
-                conversationRepository.Update(conversation);
-                return;
-            }
-        }
-
         // Returning customer after a completed/expired session, or a session that timed out: start fresh.
         if (conversation.State is WhatsAppConversationState.Confirmed or WhatsAppConversationState.Expired || conversation.HasExpired(now))
         {
             conversation.Restart(now);
         }
 
-        // Idle: welcome the customer and offer the right next step based on whether they are identified.
+        // Idle: immediately launch the right flow based on whether the customer is identified.
         if (conversation.State == WhatsAppConversationState.Idle)
         {
             var isIdentified = conversation.IsIdentified || await IsKnownClientAsync(account.TenantId, inbound.FromPhoneNumber, cancellationToken);
@@ -93,11 +71,18 @@ public sealed class WhatsAppConversationEngine(
                 conversation.MarkIdentified(now);
             }
 
-            await SendWelcomeAsync(account, conversation, inbound.FromPhoneNumber, isIdentified, now, cancellationToken);
+            if (isIdentified)
+            {
+                await SendBookingFlowAsync(account, conversation, inbound.FromPhoneNumber, now, cancellationToken);
+            }
+            else
+            {
+                await SendLoginFlowAsync(account, conversation, inbound.FromPhoneNumber, now, cancellationToken);
+            }
         }
         else
         {
-            // Mid-flow re-message: remind them the form is waiting.
+            // Mid-flow re-message: the customer sent a text while a flow is open — just ignore.
             conversation.TouchInbound(now);
         }
 
@@ -168,13 +153,8 @@ public sealed class WhatsAppConversationEngine(
 
         conversation.MarkIdentified(now);
 
-        var businessName = string.IsNullOrWhiteSpace(account.BusinessName) ? "us" : account.BusinessName;
-        await outboundSender.SendButtonsAsync(
-            account, inbound.FromPhoneNumber,
-            $"Welcome, {loginResponse.Name}! You're all set. Tap below to book your appointment with {businessName}.",
-            [new WhatsAppReplyButton(ButtonIdBook, "Book appointment")],
-            cancellationToken
-        );
+        // Identity confirmed — immediately open the booking flow without an extra step.
+        await SendBookingFlowAsync(account, conversation, inbound.FromPhoneNumber, now, cancellationToken);
     }
 
     // ─── Booking flow ─────────────────────────────────────────────────────────────
@@ -257,8 +237,8 @@ public sealed class WhatsAppConversationEngine(
             flowResponse.StartTime!.Value,
             flowResponse.DurationMinutes!.Value,
             flowResponse.TimeZone!,
-            flowResponse.BookerName!,
-            flowResponse.BookerEmail!,
+            await GetClientNameAsync(account.TenantId, inbound.FromPhoneNumber, cancellationToken),
+            await GetClientEmailAsync(account.TenantId, inbound.FromPhoneNumber, cancellationToken),
             BookerPhone: inbound.FromPhoneNumber
         );
 
@@ -283,55 +263,25 @@ public sealed class WhatsAppConversationEngine(
         await outboundSender.SendTextAsync(account, inbound.FromPhoneNumber, confirmation, cancellationToken);
     }
 
-    // ─── Welcome fork ─────────────────────────────────────────────────────────────
-
-    private async Task SendWelcomeAsync(
-        WhatsAppBusinessAccount account,
-        WhatsAppConversation conversation,
-        string toPhoneNumber,
-        bool isIdentified,
-        DateTimeOffset now,
-        CancellationToken cancellationToken
-    )
-    {
-        var businessName = string.IsNullOrWhiteSpace(account.BusinessName) ? "us" : account.BusinessName;
-        var loginFlowId = account.LoginFlowId ?? _options.LoginFlowId;
-        var hasLoginFlow = !string.IsNullOrWhiteSpace(loginFlowId);
-
-        if (isIdentified || !hasLoginFlow)
-        {
-            // Known customer, or no login flow configured — offer booking directly.
-            // (The booking flow itself captures name + email, so no login step is needed.)
-            var body = isIdentified
-                ? $"Welcome back! Ready to book with {businessName}?"
-                : $"Hi! Welcome to {businessName}. Tap below to book an appointment.";
-            await outboundSender.SendButtonsAsync(
-                account, toPhoneNumber,
-                body,
-                [new WhatsAppReplyButton(ButtonIdBook, "Book appointment")],
-                cancellationToken
-            );
-        }
-        else
-        {
-            // Unknown customer with a login flow configured — ask them to sign in first.
-            await outboundSender.SendButtonsAsync(
-                account, toPhoneNumber,
-                $"Hi! Welcome to {businessName}. To get started, please sign in or create an account.",
-                [new WhatsAppReplyButton(ButtonIdLogin, "Sign in / Register")],
-                cancellationToken
-            );
-        }
-
-        conversation.TouchInbound(now);
-    }
-
     // ─── Helpers ──────────────────────────────────────────────────────────────────
 
     private async Task<bool> IsKnownClientAsync(TenantId tenantId, string phoneNumber, CancellationToken cancellationToken)
     {
         var client = await clientRepository.GetByTenantAndContactUnfilteredAsync(tenantId, phoneNumber, null, cancellationToken);
         return client is not null;
+    }
+
+    private async Task<string> GetClientNameAsync(TenantId tenantId, string phoneNumber, CancellationToken cancellationToken)
+    {
+        var client = await clientRepository.GetByTenantAndContactUnfilteredAsync(tenantId, phoneNumber, null, cancellationToken);
+        if (client is null) return "Unknown";
+        return $"{client.FirstName} {client.LastName}".Trim();
+    }
+
+    private async Task<string> GetClientEmailAsync(TenantId tenantId, string phoneNumber, CancellationToken cancellationToken)
+    {
+        var client = await clientRepository.GetByTenantAndContactUnfilteredAsync(tenantId, phoneNumber, null, cancellationToken);
+        return client?.Email ?? string.Empty;
     }
 
     private static string BuildConfirmationMessage(DateTimeOffset startUtc, string timeZoneId)

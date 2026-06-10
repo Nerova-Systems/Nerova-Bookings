@@ -106,9 +106,10 @@ public interface IMetaGraphClient
     Task<string?> CreateAndPublishFlowAsync(string wabaId, string flowName, string category, string flowJson, string accessToken, CancellationToken cancellationToken);
 
     /// <summary>
-    ///     Uploads a new Flow JSON definition to an existing flow (replaces the current asset).
-    ///     Used to update flows that were previously created with the wrong JSON.
-    ///     Returns true on success.
+    ///     Uploads a new Flow JSON definition to an existing flow and re-publishes it.
+    ///     Uploading JSON reverts a PUBLISHED flow to DRAFT; the publish step is required so Meta
+    ///     will send the flow in messages. Returns true when the upload succeeds (publish failure is
+    ///     logged as a warning but does not fail the call).
     /// </summary>
     Task<bool> UpdateFlowJsonAsync(string flowId, string flowJson, string accessToken, CancellationToken cancellationToken);
 

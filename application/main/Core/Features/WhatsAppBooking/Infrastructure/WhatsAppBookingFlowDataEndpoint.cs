@@ -10,9 +10,9 @@ namespace Main.Features.WhatsAppBooking.Infrastructure;
 
 /// <summary>
 ///     Handles decrypted Meta Flows data-exchange requests for the WhatsApp Booking Flow.
-///     Services the APPOINTMENT screen''s cascading on-select dropdowns (service -> dates -> times)
-///     and the DETAILS screen''s summary generation. The terminal SUMMARY screen data_exchange
-///     is handled by the conversation engine via the nfm_reply webhook.
+///     Services the APPOINTMENT screen's cascading on-select dropdowns (service -> dates -> times)
+///     and the "continue" action that builds the SUMMARY screen. The terminal SUMMARY screen uses the
+///     <c>complete</c> action which triggers an nfm_reply webhook handled by the conversation engine.
 /// </summary>
 public sealed class WhatsAppBookingFlowDataEndpoint(
     IWhatsAppConversationRepository conversationRepository,
@@ -70,11 +70,10 @@ public sealed class WhatsAppBookingFlowDataEndpoint(
             {
                 "service_selected" => await HandleServiceSelectedAsync(req, ct),
                 "date_selected" => await HandleDateSelectedAsync(req, ct),
+                "continue" => await HandleAppointmentContinueAsync(req, ct),
                 _ => Ping()
             };
         }
-
-        if (req.Screen == "DETAILS") return await HandleDetailsAsync(req, ct);
 
         return Ping();
     }
@@ -156,32 +155,43 @@ public sealed class WhatsAppBookingFlowDataEndpoint(
         return AppointmentScreen(services, true, dates, true, times, times.Length > 0, eventType.DurationMinutes, DefaultTimezone);
     }
 
-    private async Task<string> HandleDetailsAsync(FlowDataRequest req, CancellationToken ct)
+    private async Task<string> HandleAppointmentContinueAsync(FlowDataRequest req, CancellationToken ct)
     {
         var serviceSlug = req.DataString("service_slug") ?? string.Empty;
         var startTimeIso = req.DataString("start_time_iso") ?? string.Empty;
         var timezone = req.DataString("timezone") ?? DefaultTimezone;
-        var name = req.DataString("name") ?? string.Empty;
-        var email = req.DataString("email") ?? string.Empty;
         var durationMinutes = 30;
         if (req.Data.HasValue && req.Data.Value.TryGetProperty("duration_minutes", out var dm) && dm.TryGetInt32(out var v))
         {
             durationMinutes = v;
         }
 
-        string summary;
+        if (string.IsNullOrWhiteSpace(serviceSlug) || string.IsNullOrWhiteSpace(startTimeIso)) return Ping();
+
+        // Resolve the human-readable service name.
+        var profile = await ResolveProfileAsync(req.FlowToken, ct);
+        var serviceName = serviceSlug;
+        if (profile is not null)
+        {
+            var eventType = (await eventTypeRepository.GetPublicListByOwnerUnfilteredAsync(profile.TenantId, profile.OwnerUserId, ct))
+                .FirstOrDefault(et => et.Slug == serviceSlug);
+            if (eventType is not null)
+                serviceName = eventType.Title;
+        }
+
+        string summaryText;
         try
         {
             var start = DateTimeOffset.Parse(startTimeIso);
             var local = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(start, timezone);
-            summary = $"Service: {serviceSlug}\n{local:dddd, d MMM yyyy} at {local:HH:mm} ({durationMinutes} min)\n\nName: {name}\nEmail: {email}";
+            summaryText = $"{serviceName}\n{local:dddd, d MMM yyyy} at {local:HH:mm} ({durationMinutes} min)";
         }
         catch
         {
-            summary = $"{serviceSlug} — {startTimeIso}\n\nName: {name}\nEmail: {email}";
+            summaryText = $"{serviceName} — {startTimeIso}";
         }
 
-        return SummaryScreen(summary, serviceSlug, startTimeIso, durationMinutes, timezone, name, email);
+        return SummaryScreen(summaryText, serviceSlug, startTimeIso, durationMinutes, timezone);
     }
 
     // -- Screen builders ----------------------------------------------------------
@@ -215,18 +225,16 @@ public sealed class WhatsAppBookingFlowDataEndpoint(
     }
 
     private static string SummaryScreen(
-        string summary,
+        string summaryText,
         string serviceSlug,
         string startTimeIso,
         int durationMinutes,
-        string timezone,
-        string name,
-        string email)
+        string timezone)
     {
         return JsonSerializer.Serialize(new
             {
                 version = FlowVersion, screen = "SUMMARY",
-                data = new { summary, service_slug = serviceSlug, start_time_iso = startTimeIso, duration_minutes = durationMinutes, timezone, name, email }
+                data = new { summary_text = summaryText, service_slug = serviceSlug, start_time_iso = startTimeIso, duration_minutes = durationMinutes, timezone }
             }, JsonOptions
         );
     }

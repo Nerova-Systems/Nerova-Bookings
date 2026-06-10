@@ -24,10 +24,6 @@ public sealed class WhatsAppBookingFlowResponse
 
     public string? TimeZone { get; private init; }
 
-    public string? BookerName { get; private init; }
-
-    public string? BookerEmail { get; private init; }
-
     public static WhatsAppBookingFlowResponse? TryParse(string? responseJson)
     {
         if (string.IsNullOrWhiteSpace(responseJson)) return null;
@@ -42,8 +38,6 @@ public sealed class WhatsAppBookingFlowResponse
             var startTimeIso = root.TryGetStringProp("start_time_iso");
             var durationV7 = root.TryGetIntProp("duration_minutes");
             var timezoneV7 = root.TryGetStringProp("timezone");
-            var nameV7 = root.TryGetStringProp("booker_name");
-            var emailV7 = root.TryGetStringProp("booker_email");
 
             if (!string.IsNullOrWhiteSpace(serviceSluv7) && !string.IsNullOrWhiteSpace(startTimeIso))
             {
@@ -53,9 +47,7 @@ public sealed class WhatsAppBookingFlowResponse
                     EventSlug = serviceSluv7,
                     StartTime = parsedStart,
                     DurationMinutes = durationV7 > 0 ? durationV7 : null,
-                    TimeZone = string.IsNullOrWhiteSpace(timezoneV7) ? "UTC" : timezoneV7,
-                    BookerName = nameV7,
-                    BookerEmail = emailV7
+                    TimeZone = string.IsNullOrWhiteSpace(timezoneV7) ? "UTC" : timezoneV7
                 };
                 return response.IsBookable() ? response : null;
             }
@@ -65,8 +57,6 @@ public sealed class WhatsAppBookingFlowResponse
             var legacyStartTime = root.TryGetStringProp("start_time");
             var legacyDuration = root.TryGetIntProp("duration");
             var legacyTimezone = root.TryGetStringProp("timezone");
-            var legacyName = root.TryGetStringProp("booker_name");
-            var legacyEmail = root.TryGetStringProp("booker_email");
 
             if (!string.IsNullOrWhiteSpace(legacySlug) && !string.IsNullOrWhiteSpace(legacyStartTime))
             {
@@ -76,9 +66,7 @@ public sealed class WhatsAppBookingFlowResponse
                     EventSlug = legacySlug,
                     StartTime = parsedStart,
                     DurationMinutes = legacyDuration > 0 ? legacyDuration : null,
-                    TimeZone = string.IsNullOrWhiteSpace(legacyTimezone) ? "UTC" : legacyTimezone,
-                    BookerName = legacyName,
-                    BookerEmail = legacyEmail
+                    TimeZone = string.IsNullOrWhiteSpace(legacyTimezone) ? "UTC" : legacyTimezone
                 };
                 return response.IsBookable() ? response : null;
             }
@@ -96,9 +84,7 @@ public sealed class WhatsAppBookingFlowResponse
         return !string.IsNullOrWhiteSpace(EventSlug)
                && StartTime is not null
                && DurationMinutes is > 0
-               && !string.IsNullOrWhiteSpace(TimeZone)
-               && !string.IsNullOrWhiteSpace(BookerName)
-               && !string.IsNullOrWhiteSpace(BookerEmail);
+               && !string.IsNullOrWhiteSpace(TimeZone);
     }
 }
 

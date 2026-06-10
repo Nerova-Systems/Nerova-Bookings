@@ -52,21 +52,33 @@ public sealed class WhatsAppBookingFlowTests : EndpointBaseTest<MainDbContext>
     [Fact]
     public async Task PostWebhook_WhenFlowCompletion_ShouldCreateBookingAndClientAndConfirm()
     {
-        // Arrange
+        // Arrange — customer must log in first (which creates the client record), then book.
         await UpdateSchedulingProfileAsync("owner");
         var scheduleId = await CreateScheduleAsync();
         await CreateEventTypeAsync(scheduleId, "Product demo", "product-demo");
         await OnboardWhatsAppAsync();
-        var slot = await GetFirstAvailableSlotAsync("product-demo");
         const string customer = "+27820002222";
+
+        // Step 1: first inbound triggers login flow for unknown customer.
+        await DriveConversationToAwaitingLoginAsync(customer, "book");
+
+        // Step 2: complete login — creates client and transitions to AwaitingBookingFlow.
+        var loginJson = BuildLoginResponseJson("Thandi Mokoena", "thandi@example.com", customer);
+        (await PostSignedWebhookAsync(BuildFlowCompletionPayload(customer, "wamid.booking.login", loginJson))).EnsureSuccessStatusCode();
+
+        // Verify client was created during login before proceeding to booking.
+        Connection.ExecuteScalar<long>($"SELECT COUNT(*) FROM clients WHERE phone_number = '{customer}'", []).Should().Be(1, "login flow should have created the client");
+        Connection.ExecuteScalar<string>($"SELECT email FROM clients WHERE phone_number = '{customer}'", []).Should().Be("thandi@example.com");
+        Connection.ExecuteScalar<string>($"SELECT state FROM whats_app_conversations WHERE customer_phone_number = '{customer}'", []).Should().Be("AwaitingBookingFlow", "login completion should have transitioned to booking flow state");
+
+        // Step 3: complete booking — name and email are resolved from the client record.
+        var slot = await GetFirstAvailableSlotAsync("product-demo");
         var responseJson = JsonSerializer.Serialize(new Dictionary<string, object>
             {
                 ["event_slug"] = "product-demo",
                 ["start_time"] = slot.ToString("o"),
                 ["duration"] = 30,
-                ["timezone"] = "Africa/Johannesburg",
-                ["booker_name"] = "Thandi Mokoena",
-                ["booker_email"] = "thandi@example.com"
+                ["timezone"] = "Africa/Johannesburg"
             }
         );
         var payload = BuildFlowCompletionPayload(customer, "wamid.booking.flow.1", responseJson);
@@ -193,12 +205,11 @@ public sealed class WhatsAppBookingFlowTests : EndpointBaseTest<MainDbContext>
         (await AuthenticatedOwnerHttpClient.PostAsJsonAsync("/api/main/whatsapp/embedded-signup/complete", onboardCommand)).EnsureSuccessStatusCode();
     }
 
-    // Drives an unknown customer to the AwaitingLoginFlow state: an inbound text triggers the welcome +
-    // "Sign in / Register" button, then tapping that button sends the login Flow.
+    // Drives an unknown customer to the AwaitingLoginFlow state: the first inbound text immediately
+    // triggers the login Flow for unknown customers (no button step required).
     private async Task DriveConversationToAwaitingLoginAsync(string customer, string suffix)
     {
         (await PostSignedWebhookAsync(BuildTextPayload(customer, $"wamid.login.text.{suffix}", "Hi"))).EnsureSuccessStatusCode();
-        (await PostSignedWebhookAsync(BuildButtonReplyPayload(customer, $"wamid.login.btn.{suffix}", "login", "Sign in / Register"))).EnsureSuccessStatusCode();
     }
 
     private static string BuildLoginResponseJson(string name, string email, string phone)
@@ -307,33 +318,6 @@ public sealed class WhatsAppBookingFlowTests : EndpointBaseTest<MainDbContext>
                            "timestamp": "1700000000",
                            "type": "text",
                            "text": { "body": "{{text}}" }
-                         }]
-                       }
-                     }]
-                   }]
-                 }
-                 """;
-    }
-
-    private static string BuildButtonReplyPayload(string fromNumber, string messageId, string buttonId, string buttonTitle)
-    {
-        return $$"""
-                 {
-                   "object": "whatsapp_business_account",
-                   "entry": [{
-                     "id": "{{WabaId}}",
-                     "changes": [{
-                       "value": {
-                         "metadata": { "phone_number_id": "{{PhoneNumberId}}", "display_phone_number": "+1 555-0100" },
-                         "messages": [{
-                           "id": "{{messageId}}",
-                           "from": "{{fromNumber}}",
-                           "timestamp": "1700000000",
-                           "type": "interactive",
-                           "interactive": {
-                             "type": "button_reply",
-                             "button_reply": { "id": "{{buttonId}}", "title": "{{buttonTitle}}" }
-                           }
                          }]
                        }
                      }]
