@@ -51,7 +51,6 @@ public static class WhatsAppLoginFlowDefinition
                                "label": "Full name",
                                "name": "name",
                                "input-type": "text",
-                               "init-value": "${data.name}"
                              },
                              {
                                "type": "TextBody",
@@ -63,15 +62,10 @@ public static class WhatsAppLoginFlowDefinition
                                "label": "Email address",
                                "name": "email",
                                "input-type": "email",
-                               "init-value": "${data.email}"
                              },
                              {
-                               "type": "TextInput",
-                               "label": "Phone number",
-                               "name": "phone",
-                               "input-type": "phone",
-                               "init-value": "${data.phone}",
-                               "enabled": false
+                               "type": "TextBody",
+                               "text": "Your WhatsApp number: ${data.phone}"
                              },
                              {
                                "type": "Footer",
