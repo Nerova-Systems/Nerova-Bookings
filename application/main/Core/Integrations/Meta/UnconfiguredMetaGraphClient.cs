@@ -91,12 +91,12 @@ public sealed class UnconfiguredMetaGraphClient : IMetaGraphClient
         return Task.FromResult<string?>(null);
     }
 
-    public Task<string?> CreateAndPublishFlowAsync(string wabaId, string flowName, string category, string flowJson, string accessToken, CancellationToken cancellationToken)
+    public Task<string?> CreateAndPublishFlowAsync(string wabaId, string flowName, string category, string flowJson, string endpointUri, string accessToken, CancellationToken cancellationToken)
     {
         return Task.FromResult<string?>(null);
     }
 
-    public Task<bool> UpdateFlowJsonAsync(string flowId, string flowJson, string accessToken, CancellationToken cancellationToken)
+    public Task<bool> UpdateFlowJsonAsync(string flowId, string flowJson, string endpointUri, string accessToken, CancellationToken cancellationToken)
     {
         return Task.FromResult(false);
     }

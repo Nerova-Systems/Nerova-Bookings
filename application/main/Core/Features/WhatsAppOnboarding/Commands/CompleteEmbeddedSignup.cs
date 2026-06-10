@@ -107,15 +107,17 @@ public sealed class CompleteEmbeddedSignupHandler(
         await metaGraphClient.UploadFlowPublicKeyAsync(account.MetaWabaId, flowCrypto.PublicKeyPem, accessToken, cancellationToken);
 
         // Create + publish the Login Flow.
-        var loginFlowJson = WhatsAppLoginFlowDefinition.Build($"{baseUrl}/api/main/whatsapp/flows/login/data");
+        var loginFlowJson = WhatsAppLoginFlowDefinition.Build();
+        var loginEndpointUri = $"{baseUrl}/api/main/whatsapp/flows/login/data";
         var loginFlowId = await metaGraphClient.CreateAndPublishFlowAsync(
-            account.MetaWabaId, "Nerova Sign In", "SIGN_IN", loginFlowJson, accessToken, cancellationToken
+            account.MetaWabaId, "Nerova Sign In", "SIGN_IN", loginFlowJson, loginEndpointUri, accessToken, cancellationToken
         );
 
         // Create + publish the Booking Flow.
-        var bookingFlowJson = WhatsAppBookingFlowDefinition.Build($"{baseUrl}/api/main/whatsapp/flows/booking/data");
+        var bookingFlowJson = WhatsAppBookingFlowDefinition.Build();
+        var bookingEndpointUri = $"{baseUrl}/api/main/whatsapp/flows/booking/data";
         var bookingFlowId = await metaGraphClient.CreateAndPublishFlowAsync(
-            account.MetaWabaId, "Nerova Booking", "APPOINTMENT_BOOKING", bookingFlowJson, accessToken, cancellationToken
+            account.MetaWabaId, "Nerova Booking", "APPOINTMENT_BOOKING", bookingFlowJson, bookingEndpointUri, accessToken, cancellationToken
         );
 
         if (!string.IsNullOrWhiteSpace(loginFlowId) || !string.IsNullOrWhiteSpace(bookingFlowId))

@@ -50,8 +50,10 @@ public sealed class ReprovisionWhatsAppFlowsHandler(
         // Always re-register the RSA public key (idempotent).
         await metaGraphClient.UploadFlowPublicKeyAsync(account.MetaWabaId, flowCrypto.PublicKeyPem, accessToken, cancellationToken);
 
-        var loginFlowJson = WhatsAppLoginFlowDefinition.Build($"{baseUrl}/api/main/whatsapp/flows/login/data");
-        var bookingFlowJson = WhatsAppBookingFlowDefinition.Build($"{baseUrl}/api/main/whatsapp/flows/booking/data");
+        var loginFlowJson = WhatsAppLoginFlowDefinition.Build();
+        var loginEndpointUri = $"{baseUrl}/api/main/whatsapp/flows/login/data";
+        var bookingFlowJson = WhatsAppBookingFlowDefinition.Build();
+        var bookingEndpointUri = $"{baseUrl}/api/main/whatsapp/flows/booking/data";
 
         var loginFlowId = account.LoginFlowId;
         var bookingFlowId = account.BookingFlowId;
@@ -67,20 +69,20 @@ public sealed class ReprovisionWhatsAppFlowsHandler(
         // Update existing flows if IDs are known, otherwise create new ones.
         if (!string.IsNullOrWhiteSpace(loginFlowId))
         {
-            await metaGraphClient.UpdateFlowJsonAsync(loginFlowId, loginFlowJson, accessToken, cancellationToken);
+            await metaGraphClient.UpdateFlowJsonAsync(loginFlowId, loginFlowJson, loginEndpointUri, accessToken, cancellationToken);
         }
         else
         {
-            loginFlowId = await metaGraphClient.CreateAndPublishFlowAsync(account.MetaWabaId, "Nerova Sign In", "SIGN_IN", loginFlowJson, accessToken, cancellationToken);
+            loginFlowId = await metaGraphClient.CreateAndPublishFlowAsync(account.MetaWabaId, "Nerova Sign In", "SIGN_IN", loginFlowJson, loginEndpointUri, accessToken, cancellationToken);
         }
 
         if (!string.IsNullOrWhiteSpace(bookingFlowId))
         {
-            await metaGraphClient.UpdateFlowJsonAsync(bookingFlowId, bookingFlowJson, accessToken, cancellationToken);
+            await metaGraphClient.UpdateFlowJsonAsync(bookingFlowId, bookingFlowJson, bookingEndpointUri, accessToken, cancellationToken);
         }
         else
         {
-            bookingFlowId = await metaGraphClient.CreateAndPublishFlowAsync(account.MetaWabaId, "Nerova Booking", "APPOINTMENT_BOOKING", bookingFlowJson, accessToken, cancellationToken);
+            bookingFlowId = await metaGraphClient.CreateAndPublishFlowAsync(account.MetaWabaId, "Nerova Booking", "APPOINTMENT_BOOKING", bookingFlowJson, bookingEndpointUri, accessToken, cancellationToken);
         }
 
         account.SetFlowIds(bookingFlowId, loginFlowId);

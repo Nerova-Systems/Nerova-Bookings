@@ -359,13 +359,13 @@ public sealed class MetaGraphClient(HttpClient httpClient, IConfiguration config
 
     // ─── Flows management ────────────────────────────────────────────────────────
 
-    public async Task<string?> CreateAndPublishFlowAsync(string wabaId, string flowName, string category, string flowJson, string accessToken, CancellationToken cancellationToken)
+    public async Task<string?> CreateAndPublishFlowAsync(string wabaId, string flowName, string category, string flowJson, string endpointUri, string accessToken, CancellationToken cancellationToken)
     {
         try
         {
-            // 1. Create the Flow shell.
+            // 1. Create the Flow shell (include endpoint_uri so Meta knows where to route data-exchange requests).
             using var createRequest = new HttpRequestMessage(HttpMethod.Post, $"{_graphApiVersion}/{wabaId}/flows");
-            createRequest.Content = JsonContent.Create(new { name = flowName, categories = new[] { category } }, options: JsonSerializerOptions);
+            createRequest.Content = JsonContent.Create(new { name = flowName, categories = new[] { category }, endpoint_uri = endpointUri }, options: JsonSerializerOptions);
             createRequest.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
 
             var createResponse = await httpClient.SendAsync(createRequest, cancellationToken);
@@ -426,7 +426,7 @@ public sealed class MetaGraphClient(HttpClient httpClient, IConfiguration config
         }
     }
 
-    public async Task<bool> UpdateFlowJsonAsync(string flowId, string flowJson, string accessToken, CancellationToken cancellationToken)
+    public async Task<bool> UpdateFlowJsonAsync(string flowId, string flowJson, string endpointUri, string accessToken, CancellationToken cancellationToken)
     {
         try
         {
@@ -450,7 +450,19 @@ public sealed class MetaGraphClient(HttpClient httpClient, IConfiguration config
                 return false;
             }
 
-            // 2. Re-publish the flow. Uploading new JSON reverts status to DRAFT; Meta will not send DRAFT flows.
+            // 2. Set the endpoint URI (not in JSON since v3.0 — must be set via the Flows API).
+            using var endpointRequest = new HttpRequestMessage(HttpMethod.Post, $"{_graphApiVersion}/{flowId}");
+            endpointRequest.Content = JsonContent.Create(new { endpoint_uri = endpointUri }, options: JsonSerializerOptions);
+            endpointRequest.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+
+            var endpointResponse = await httpClient.SendAsync(endpointRequest, cancellationToken);
+            if (!endpointResponse.IsSuccessStatusCode)
+            {
+                var err = await endpointResponse.Content.ReadAsStringAsync(cancellationToken);
+                logger.LogWarning("Failed to set endpoint_uri for Flow '{FlowId}'. Status: {Status}. Body: {Body}", flowId, endpointResponse.StatusCode, err);
+            }
+
+            // 3. Re-publish the flow. Uploading new JSON reverts status to DRAFT; Meta will not send DRAFT flows.
             using var publishRequest = new HttpRequestMessage(HttpMethod.Post, $"{_graphApiVersion}/{flowId}/publish");
             publishRequest.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
 
@@ -523,7 +535,6 @@ public sealed class MetaGraphClient(HttpClient httpClient, IConfiguration config
     }
 
     /// <summary>
-
     ///     status the Meta error body is logged to aid debugging. Never throws — returns null on any failure.
     /// </summary>
     private async Task<string?> PostInteractiveMessageAsync(string phoneNumberId, string accessToken, string toPhoneNumber, object payload, CancellationToken cancellationToken)

@@ -41,10 +41,6 @@ public sealed class MetaGraphClientFactoryTests
 
     private sealed class TestHostEnvironment(string environmentName) : IHostEnvironment
     {
-        public string WebRootPath { get; set; } = AppContext.BaseDirectory;
-
-        public IFileProvider WebRootFileProvider { get; set; } = new NullFileProvider();
-
         public string EnvironmentName { get; set; } = environmentName;
 
         public string ApplicationName { get; set; } = "Main.Tests";

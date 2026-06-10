@@ -46,18 +46,12 @@ public sealed class WhatsAppFlowEndpoints : IEndpoints
 
         var authGroup = routes.MapGroup(RoutePrefix).RequireAuthorization().WithTags("WhatsAppFlows");
 
-        authGroup.MapGet("/login/definition", (IConfiguration configuration) =>
-            {
-                var baseUrl = GetBaseUrl(configuration);
-                return Results.Text(WhatsAppLoginFlowDefinition.Build($"{baseUrl}/api/main/whatsapp/flows/login/data"), "application/json");
-            }
+        authGroup.MapGet("/login/definition", () =>
+            Results.Text(WhatsAppLoginFlowDefinition.Build(), "application/json")
         );
 
-        authGroup.MapGet("/booking/definition", (IConfiguration configuration) =>
-            {
-                var baseUrl = GetBaseUrl(configuration);
-                return Results.Text(WhatsAppBookingFlowDefinition.Build($"{baseUrl}/api/main/whatsapp/flows/booking/data"), "application/json");
-            }
+        authGroup.MapGet("/booking/definition", () =>
+            Results.Text(WhatsAppBookingFlowDefinition.Build(), "application/json")
         );
     }
 
@@ -83,12 +77,5 @@ public sealed class WhatsAppFlowEndpoints : IEndpoints
         {
             return false;
         }
-    }
-
-    private static string GetBaseUrl(IConfiguration configuration)
-    {
-        return Environment.GetEnvironmentVariable("PUBLIC_URL")
-               ?? configuration["PUBLIC_URL"]
-               ?? "https://app.nerovasystems.com";
     }
 }

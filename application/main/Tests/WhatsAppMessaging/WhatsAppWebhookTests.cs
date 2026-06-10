@@ -88,7 +88,7 @@ public sealed class WhatsAppWebhookTests : EndpointBaseTest<MainDbContext>
 
         var body = await response.Content.ReadFromJsonAsync<DiagnosticsResponse>();
         body.Should().NotBeNull();
-        body!.MetaConfigured.Should().BeFalse();
+        body.MetaConfigured.Should().BeFalse();
         body.UsesMockProvider.Should().BeTrue();
         body.HasAppId.Should().BeFalse();
         body.HasAppSecret.Should().BeFalse();

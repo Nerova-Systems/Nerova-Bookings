@@ -103,7 +103,7 @@ public interface IMetaGraphClient
     ///     Creates a new WhatsApp Flow under the given WABA and uploads its JSON definition.
     ///     Returns the new flow ID on success, or null on any failure.
     /// </summary>
-    Task<string?> CreateAndPublishFlowAsync(string wabaId, string flowName, string category, string flowJson, string accessToken, CancellationToken cancellationToken);
+    Task<string?> CreateAndPublishFlowAsync(string wabaId, string flowName, string category, string flowJson, string endpointUri, string accessToken, CancellationToken cancellationToken);
 
     /// <summary>
     ///     Uploads a new Flow JSON definition to an existing flow and re-publishes it.
@@ -111,7 +111,7 @@ public interface IMetaGraphClient
     ///     will send the flow in messages. Returns true when the upload succeeds (publish failure is
     ///     logged as a warning but does not fail the call).
     /// </summary>
-    Task<bool> UpdateFlowJsonAsync(string flowId, string flowJson, string accessToken, CancellationToken cancellationToken);
+    Task<bool> UpdateFlowJsonAsync(string flowId, string flowJson, string endpointUri, string accessToken, CancellationToken cancellationToken);
 
     /// <summary>
     ///     Uploads the platform RSA public key to a WABA's Flows data endpoint configuration so Meta can

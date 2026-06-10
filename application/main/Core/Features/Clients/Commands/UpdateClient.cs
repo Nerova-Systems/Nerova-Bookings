@@ -28,7 +28,7 @@ public sealed class UpdateClientValidator : AbstractValidator<UpdateClientComman
             .WithMessage("Email must be a valid email address no longer than 100 characters.");
         RuleFor(x => x.PhoneNumber)
             .MaximumLength(30)
-            .Matches(@"^[+0-9 ()-]+$")
+            .Matches("^[+0-9 ()-]+$")
             .When(x => !string.IsNullOrWhiteSpace(x.PhoneNumber))
             .WithMessage("Phone number must be a valid phone number no longer than 30 characters.");
     }

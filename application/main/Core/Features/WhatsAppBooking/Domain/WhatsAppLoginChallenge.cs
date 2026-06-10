@@ -42,18 +42,18 @@ public sealed class WhatsAppLoginChallenge : AggregateRoot<WhatsAppLoginChalleng
     }
 
     /// <summary>Customer WhatsApp phone number in E.164 format.</summary>
-    public string PhoneNumber { get; private set; } = string.Empty;
+    public string PhoneNumber { get; init; } = string.Empty;
 
-    public string Email { get; private set; } = string.Empty;
+    public string Email { get; init; } = string.Empty;
 
     /// <summary>Lowercase hex SHA-256 of (otp + salt). Never the plain OTP.</summary>
-    public string OtpHash { get; private set; } = string.Empty;
+    public string OtpHash { get; init; } = string.Empty;
 
-    public string OtpSalt { get; private set; } = string.Empty;
+    public string OtpSalt { get; init; } = string.Empty;
 
     public bool IsConsumed { get; private set; }
 
-    public DateTimeOffset ExpiresAt { get; private set; }
+    public DateTimeOffset ExpiresAt { get; init; }
 
     public TenantId TenantId { get; } = new(0);
 
