@@ -72,7 +72,9 @@ Found in current user-facing strings. This becomes the vocabulary review gate:
 | "Explore and connect powerful app extensions and calendar sync options to automate bookings" (App store subtitle) | "Turn on what your business needs." (the deck's own line — it's better) |
 | "Webhook secret", "Event subscriptions" | Developer settings only, behind "For developers". |
 
-Rule of thumb: if Fresha's receptionist-facing UI wouldn't say it, neither do we.
+Rule of thumb: if a receptionist-facing UI wouldn't say it, neither do we.
+
+**Vocabulary is a vertical layer, not a constant.** Nerova serves every booking-based business — salons today, vets, clinics, and broader SMEs on the roadmap. So core strings must be vertical-neutral, with the welcome template applying a term map: "Clients" renders as "Patients" in a clinic and "Pet owners" at a vet; "Services" can render as "Treatments" or "Consultations". One term map per vertical (≈10 words), applied through the existing Lingui layer — never hardcode salon words into shared components.
 
 ---
 
@@ -150,12 +152,37 @@ This is the platform's engine and the deck's "deterministic core" — keep the c
 **Current state:** `welcome/$.tsx` is a bridge to the account SCS (generic signup/tenant flow). Nothing Nerova-specific yet — which is the opportunity, and per your note this is where template configs will live.
 
 **Direction — the 4-step front-desk setup** (deck slide 12, productized):
-1. **"What kind of business?"** — visual vertical picker (Salon / Barber / Nails / Trainer / Tutor / Other). This single answer drives the template: services with typical durations/prices/deposits, hours, extension defaults, WhatsApp tone.
+1. **"What kind of business?"** — visual vertical picker (Salon / Barber / Nails / Trainer / Tutor / Vet / Clinic / Other). This single answer drives the template: services with typical durations/prices/deposits, hours, extension defaults, WhatsApp tone, and the vocabulary term map (§3). The picker list grows without code changes — templates are data. Health-adjacent verticals (vets, clinics) also tighten the data-handling posture (POPIA), which *strengthens* the safety story: same UI, higher stakes, same green dot.
 2. **"Bring your data"** — drop a CSV/export from Fresha/Calendly/spreadsheets, or skip. AI maps it; show the mapping as a *receipt*, not a wizard: "Found 214 clients, 18 services, 2 years of history. All imported." (Safe-and-organized, proven in step 2.)
 3. **"Connect WhatsApp"** — embedded signup, one button, "use the number clients already message."
 4. **"Your front desk is ready"** — a review screen listing what was set up FOR them (services, hours, extensions ON, deposit policy) with inline edit affordances, then one CTA: **"Open Today"**. Land on the Today page already populated from the import — never an empty dashboard.
 
 Each step is skippable; nothing blocks reaching the app. The template system means the answer to step 1 configures ~40 decisions the owner never sees — that's the "few steps, entire system" promise, and it's exactly what Meta Business Platform structurally cannot do.
+
+### 4.8 Accounts, organization & teams (account SCS, excl. back-office)
+
+**Current state:** The machinery here is genuinely enterprise-grade and ahead of MVP needs — in a good way: OTP + Google login, a users table with invites, role management (Owner/Admin/Member plus custom roles with a permission matrix), a recycle bin for deleted users, teams with public profiles and member roles, org settings tabs (Profile / Members / Teams / SSO / SMTP / Billing), a full subscription/billing stack (plans, checkout, dunning banners, retry flows), an audit log, and a tenant switcher. The Brand Profile tab (business category, tagline, logo, websites "shown on your WhatsApp profile") is exactly the right object — the business's public identity, framed in WhatsApp terms.
+
+Five problems, all framing rather than plumbing:
+
+1. **B2B SaaS admin voice.** "Organization", "members", "users", an Account Overview dashboard of "Active users in the past 30 days" — a salon owner with two stylists asks none of these questions. Signup copy is template boilerplate: *"Sign up in seconds to start building on {productName}"* — owners don't "build."
+2. **Two team concepts collide.** `account/teams` (org structure: invites, roles, public team pages, slugs, "Hide branding" toggles) vs. the scheduling layer's hosts (EventTypeTeamTab). cal.com heritage. The owner has one concept: *the people who work here* — what they do, when they work, what they can see.
+3. **EventTypeTeamTab is the single worst jargon surface in the product:** "Segment query", "Host subset rotation", "Max lead threshold", "Distribute bookings across hosts based on weighting and lead history." This is cal.com's enterprise sales-routing verbatim. The salon meaning is simple and *valuable*: "Who does this service?", "Share bookings fairly", "Rebook clients with the same stylist" (that last one — `Reschedule with same host` — is a feature owners will love if it speaks their language).
+4. **Enterprise features at full visibility.** SSO, SMTP, custom roles, permission matrix sit at the same level as Profile. Right to exist (clinics will need them — POPIA, multi-practitioner orgs); wrong to be visible to a solo nail tech.
+5. **The audit log is trust gold, buried.** "Review every significant action performed in your organization" *is* the "your data is safe and organized" promise made literal — and it's a permission-gated settings page nobody will find.
+
+**Direction — one surface called "My Team", and a collapsing account area:**
+
+- **Solo by default (P4 applied to people).** Most target businesses are one person. A solo owner should never see Users, Teams, Roles, or an org overview — the entire area collapses to: Business profile, Plan & billing, Activity. The team surface appears when the **Staff Management extension** (deck slide 8) turns ON or a second person is invited. Teams/roles/users machinery becomes the engine behind that extension, not nav real estate.
+- **"My Team" = one page, one mental model.** A person card: photo, name, what they do (services → feeds the host picker), when they work (link to their Hours), and what they can see in Nerova (Owner / Manager / Staff — plain descriptions, custom roles behind "Advanced"). Invite by WhatsApp number first, email second — staff in this market live on WhatsApp, not email.
+- **Booking distribution in plain words.** Replace the routing tab with three controls: "Who does this service" (member picker), "Share new bookings fairly" (round robin), "Repeat clients keep their person" (same-host rebooking). Segment queries and weighting move behind "Fine-tune" with the rest of the §4.3 drawer.
+- **Org settings → "Business settings"** with three groups: Business profile (the existing Brand Profile tab, promoted — it's the public face on WhatsApp), Plan & billing (existing stack, unchanged), and Advanced (SSO, SMTP, custom roles, developer/webhooks) — collapsed, discoverable, never default-visible.
+- **Audit log → "Activity history"**, surfaced as a trust feature: "Every change in your business, recorded." Same data, new voice; for clinics it graduates into compliance evidence.
+- **Tenant switcher → locations.** Multi-account switching reframed as the multi-location story ("Glow Salon — Sandton / Rosebank") — that's the real-world reason an owner has two tenants.
+- **Account Overview page:** retire it (its user-count stats answer no owner question), or repurpose as the Activity history landing.
+- **Login/signup copy:** keep the flow (OTP + Google is right for this market), replace developer-template strings; signup speaks the service: "Your front desk, ready in minutes."
+
+**Reuse verdict:** ~90% of this code survives. Users/teams/roles/billing/audit are the engine; the work is one new "My Team" page, visibility gating by team size + extension state, and string replacement. The enterprise depth becomes a *clinic-readiness* asset rather than salon-facing noise.
 
 ---
 

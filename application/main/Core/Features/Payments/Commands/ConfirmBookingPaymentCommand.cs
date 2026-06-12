@@ -18,6 +18,7 @@ public sealed record ConfirmBookingPaymentCommand(string Reference, string Event
 public sealed class ConfirmBookingPaymentHandler(
     IBookingRepository bookingRepository,
     IProcessedPaymentEventRepository processedPaymentEventRepository,
+    IMediator mediator,
     TimeProvider timeProvider,
     ILogger<ConfirmBookingPaymentHandler> logger
 ) : IRequestHandler<ConfirmBookingPaymentCommand, Result>
@@ -45,6 +46,11 @@ public sealed class ConfirmBookingPaymentHandler(
         bookingRepository.Update(booking);
 
         await processedPaymentEventRepository.AddAsync(ProcessedPaymentEvent.Create(command.EventId, now), cancellationToken);
+
+        // Payment-resume turn (spec R5): WhatsApp customers get their confirmation without sending a
+        // new message. No-op for tenants without the receptionist or bookings without a phone number.
+        await mediator.Send(new Receptionist.Commands.NotifyCustomerOfPaidDepositCommand(booking.Id), cancellationToken);
+
         return Result.Success();
     }
 }

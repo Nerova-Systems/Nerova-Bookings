@@ -11,6 +11,7 @@ using SharedKernel.Authentication;
 using SharedKernel.Domain;
 using SharedKernel.Tests;
 using Xunit;
+using static Main.Tests.DateDriftTestDates;
 
 namespace Main.Tests.Collective;
 
@@ -20,9 +21,9 @@ namespace Main.Tests.Collective;
 /// </summary>
 public sealed class CollectiveBookingFlowTests : EndpointBaseTest<MainDbContext>
 {
-    // Fixed test date: Wednesday 2026-06-03 (to avoid weekends)
+    // Wednesday test date avoids weekend edge cases
     // 09:00 SAST = 07:00 UTC; 09:30 SAST = 07:30 UTC
-    private static readonly string TestDate = "2026-06-03";
+    private static readonly string TestDate = FutureDate(2);
     private static readonly string SlotTimeUtc = $"{TestDate}T07:00:00Z"; // 09:00 SAST
     private static readonly string FreeSlotTimeUtc = $"{TestDate}T08:00:00Z"; // 10:00 SAST
     private readonly HttpClient _collectiveClient;

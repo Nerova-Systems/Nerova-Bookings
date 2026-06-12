@@ -9,6 +9,7 @@ using Microsoft.Extensions.DependencyInjection;
 using SharedKernel.Domain;
 using SharedKernel.Tests;
 using Xunit;
+using static Main.Tests.DateDriftTestDates;
 
 namespace Main.Tests.Scheduling;
 
@@ -134,7 +135,7 @@ public sealed class PublicSchedulingEndpointsTests : EndpointBaseTest<MainDbCont
             "Private call",
             "private-call",
             true,
-            new { privateLinks = new[] { new { link = "vip", expiresAt = "2026-05-01T00:00:00Z", maxUsageCount = (int?)null, usageCount = 0 } } }
+            new { privateLinks = new[] { new { link = "vip", expiresAt = PastDateTimeText(0, 0), maxUsageCount = (int?)null, usageCount = 0 } } }
         );
 
         // Act
@@ -176,13 +177,13 @@ public sealed class PublicSchedulingEndpointsTests : EndpointBaseTest<MainDbCont
             "Private call",
             "private-call",
             true,
-            new { privateLinks = new[] { new { link = "vip", expiresAt = "2026-06-30T23:59:59Z", maxUsageCount = 1, usageCount = 0 } } }
+            new { privateLinks = new[] { new { link = "vip", expiresAt = FutureDateTimeText(29, 23, 59, 59), maxUsageCount = 1, usageCount = 0 } } }
         );
         var command = new
         {
             handle = "owner",
             eventSlug = "private-call",
-            startTime = "2026-06-01T07:00:00Z",
+            startTime = FutureDateTimeText(0, 7, 0),
             duration = 30,
             timeZone = "Africa/Johannesburg",
             bookerName = "Ada Lovelace",
@@ -209,13 +210,13 @@ public sealed class PublicSchedulingEndpointsTests : EndpointBaseTest<MainDbCont
         await CreateEventTypeAsync(schedule.Id, "Intro call", "intro-call");
 
         // Act
-        var response = await AnonymousHttpClient.GetAsync("/api/public/slots?handle=owner&eventSlug=intro-call&startTime=2026-06-01T00:00:00Z&endTime=2026-06-02T00:00:00Z&timeZone=Africa/Johannesburg&duration=30");
+        var response = await AnonymousHttpClient.GetAsync($"/api/public/slots?handle=owner&eventSlug=intro-call&startTime={FutureDateTimeText(0, 0, 0)}&endTime={FutureDateTimeText(1, 0, 0)}&timeZone=Africa/Johannesburg&duration=30");
 
         // Assert
         response.ShouldBeSuccessfulGetRequest();
         var slots = await response.DeserializeResponse<PublicSlotsResponse>();
-        slots!.Slots["2026-06-01"].Select(slot => slot.Time).Should().Contain(DateTimeOffset.Parse("2026-06-01T07:00:00Z"));
-        slots.Slots["2026-06-01"].Select(slot => slot.EndTime).Should().Contain(DateTimeOffset.Parse("2026-06-01T07:30:00Z"));
+        slots!.Slots[FutureDate(0)].Select(slot => slot.Time).Should().Contain(FutureDateTime(0, 7, 0));
+        slots.Slots[FutureDate(0)].Select(slot => slot.EndTime).Should().Contain(FutureDateTime(0, 7, 30));
     }
 
     [Fact]
@@ -236,20 +237,20 @@ public sealed class PublicSchedulingEndpointsTests : EndpointBaseTest<MainDbCont
                     {
                         integration = "google-calendar",
                         externalId = "primary",
-                        credentialId = "fake-busy:owner-scope|2026-06-01T07:00:00Z/2026-06-01T07:30:00Z"
+                        credentialId = $"fake-busy:owner-scope|{FutureDateTimeText(0, 7, 0)}/{FutureDateTimeText(0, 7, 30)}"
                     }
                 }
             }
         );
 
         // Act
-        var response = await AnonymousHttpClient.GetAsync("/api/public/slots?handle=owner&eventSlug=intro-call&startTime=2026-06-01T00:00:00Z&endTime=2026-06-02T00:00:00Z&timeZone=Africa/Johannesburg&duration=30");
+        var response = await AnonymousHttpClient.GetAsync($"/api/public/slots?handle=owner&eventSlug=intro-call&startTime={FutureDateTimeText(0, 0, 0)}&endTime={FutureDateTimeText(1, 0, 0)}&timeZone=Africa/Johannesburg&duration=30");
 
         // Assert
         response.ShouldBeSuccessfulGetRequest();
         var slots = await response.DeserializeResponse<PublicSlotsResponse>();
-        slots!.Slots["2026-06-01"].Select(slot => slot.Time).Should().NotContain(DateTimeOffset.Parse("2026-06-01T07:00:00Z"));
-        slots.Slots["2026-06-01"].Select(slot => slot.Time).Should().Contain(DateTimeOffset.Parse("2026-06-01T07:30:00Z"));
+        slots!.Slots[FutureDate(0)].Select(slot => slot.Time).Should().NotContain(FutureDateTime(0, 7, 0));
+        slots.Slots[FutureDate(0)].Select(slot => slot.Time).Should().Contain(FutureDateTime(0, 7, 30));
     }
 
     [Fact]
@@ -262,12 +263,12 @@ public sealed class PublicSchedulingEndpointsTests : EndpointBaseTest<MainDbCont
         await ReplaceEventTypeSettingsAsync(eventType.Id, """{"DurationOptions":[]}""");
 
         // Act
-        var response = await AnonymousHttpClient.GetAsync("/api/public/slots?handle=owner&eventSlug=intro-call&startTime=2026-06-01T00:00:00Z&endTime=2026-06-02T00:00:00Z&timeZone=Africa/Johannesburg&duration=30");
+        var response = await AnonymousHttpClient.GetAsync($"/api/public/slots?handle=owner&eventSlug=intro-call&startTime={FutureDateTimeText(0, 0, 0)}&endTime={FutureDateTimeText(1, 0, 0)}&timeZone=Africa/Johannesburg&duration=30");
 
         // Assert
         response.ShouldBeSuccessfulGetRequest();
         var slots = await response.DeserializeResponse<PublicSlotsResponse>();
-        slots!.Slots["2026-06-01"].Select(slot => slot.Time).Should().Contain(DateTimeOffset.Parse("2026-06-01T07:00:00Z"));
+        slots!.Slots[FutureDate(0)].Select(slot => slot.Time).Should().Contain(FutureDateTime(0, 7, 0));
     }
 
     [Fact]
@@ -281,7 +282,7 @@ public sealed class PublicSchedulingEndpointsTests : EndpointBaseTest<MainDbCont
         {
             handle = "owner",
             eventSlug = "intro-call",
-            startTime = "2026-06-01T07:00:00Z",
+            startTime = FutureDateTimeText(0, 7, 0),
             duration = 30,
             timeZone = "Africa/Johannesburg",
             bookerName = "Ada Lovelace",
@@ -305,13 +306,13 @@ public sealed class PublicSchedulingEndpointsTests : EndpointBaseTest<MainDbCont
         await UpdateSchedulingProfileAsync("owner");
         var schedule = await CreateScheduleAsync();
         await CreateEventTypeAsync(schedule.Id, "Intro call", "intro-call", settings: new { limits = new { maxActiveBookingsPerBooker = 1 } });
-        await CreateBookingAsync("intro-call", "2026-06-01T07:00:00Z", "Ada Lovelace", "ada@example.com");
+        await CreateBookingAsync("intro-call", FutureDateTimeText(0, 7, 0), "Ada Lovelace", "ada@example.com");
 
         var command = new
         {
             handle = "owner",
             eventSlug = "intro-call",
-            startTime = "2026-06-01T08:00:00Z",
+            startTime = FutureDateTimeText(0, 8, 0),
             duration = 30,
             timeZone = "Africa/Johannesburg",
             bookerName = "Ada Lovelace",
@@ -333,13 +334,13 @@ public sealed class PublicSchedulingEndpointsTests : EndpointBaseTest<MainDbCont
         await UpdateSchedulingProfileAsync("owner");
         var schedule = await CreateScheduleAsync();
         await CreateEventTypeAsync(schedule.Id, "Intro call", "intro-call", settings: new { limits = new { maxBookingsPerDay = 1 } });
-        await CreateBookingAsync("intro-call", "2026-06-01T07:00:00Z", "Ada Lovelace", "ada@example.com");
+        await CreateBookingAsync("intro-call", FutureDateTimeText(0, 7, 0), "Ada Lovelace", "ada@example.com");
 
         var command = new
         {
             handle = "owner",
             eventSlug = "intro-call",
-            startTime = "2026-06-01T08:00:00Z",
+            startTime = FutureDateTimeText(0, 8, 0),
             duration = 30,
             timeZone = "Africa/Johannesburg",
             bookerName = "Grace Hopper",
@@ -361,13 +362,13 @@ public sealed class PublicSchedulingEndpointsTests : EndpointBaseTest<MainDbCont
         await UpdateSchedulingProfileAsync("owner");
         var schedule = await CreateScheduleAsync();
         await CreateEventTypeAsync(schedule.Id, "Intro call", "intro-call", settings: new { limits = new { maxBookingDurationMinutesPerDay = 45 } });
-        await CreateBookingAsync("intro-call", "2026-06-01T07:00:00Z", "Ada Lovelace", "ada@example.com");
+        await CreateBookingAsync("intro-call", FutureDateTimeText(0, 7, 0), "Ada Lovelace", "ada@example.com");
 
         var command = new
         {
             handle = "owner",
             eventSlug = "intro-call",
-            startTime = "2026-06-01T08:00:00Z",
+            startTime = FutureDateTimeText(0, 8, 0),
             duration = 30,
             timeZone = "Africa/Johannesburg",
             bookerName = "Grace Hopper",
@@ -405,7 +406,7 @@ public sealed class PublicSchedulingEndpointsTests : EndpointBaseTest<MainDbCont
         {
             handle = "owner",
             eventSlug = "intro-call",
-            startTime = "2026-06-01T07:00:00Z",
+            startTime = FutureDateTimeText(0, 7, 0),
             duration = 30,
             timeZone = "Africa/Johannesburg",
             bookerName = "Ada Lovelace",
@@ -449,7 +450,7 @@ public sealed class PublicSchedulingEndpointsTests : EndpointBaseTest<MainDbCont
         {
             handle = "owner",
             eventSlug = "intro-call",
-            startTime = "2026-06-01T07:00:00Z",
+            startTime = FutureDateTimeText(0, 7, 0),
             duration = 30,
             timeZone = "Africa/Johannesburg",
             bookerName = "Ada Lovelace",
@@ -477,16 +478,16 @@ public sealed class PublicSchedulingEndpointsTests : EndpointBaseTest<MainDbCont
             slotIntervalMinutes: 15,
             settings: new { seats = new { enabled = true, capacity = 1, showAttendeeInfo = false } }
         );
-        await CreateBookingAsync("intro-call", "2026-06-01T07:00:00Z", "Ada Lovelace", "ada@example.com");
+        await CreateBookingAsync("intro-call", FutureDateTimeText(0, 7, 0), "Ada Lovelace", "ada@example.com");
 
         // Act
-        var response = await AnonymousHttpClient.GetAsync("/api/public/slots?handle=owner&eventSlug=intro-call&startTime=2026-06-01T00:00:00Z&endTime=2026-06-02T00:00:00Z&timeZone=Africa/Johannesburg&duration=30");
+        var response = await AnonymousHttpClient.GetAsync($"/api/public/slots?handle=owner&eventSlug=intro-call&startTime={FutureDateTimeText(0, 0, 0)}&endTime={FutureDateTimeText(1, 0, 0)}&timeZone=Africa/Johannesburg&duration=30");
 
         // Assert
         response.ShouldBeSuccessfulGetRequest();
         var slots = await response.DeserializeResponse<PublicSlotsResponse>();
-        slots!.Slots["2026-06-01"].Select(slot => slot.Time).Should().NotContain(DateTimeOffset.Parse("2026-06-01T07:00:00Z"));
-        slots.Slots["2026-06-01"].Select(slot => slot.Time).Should().NotContain(DateTimeOffset.Parse("2026-06-01T07:15:00Z"));
+        slots!.Slots[FutureDate(0)].Select(slot => slot.Time).Should().NotContain(FutureDateTime(0, 7, 0));
+        slots.Slots[FutureDate(0)].Select(slot => slot.Time).Should().NotContain(FutureDateTime(0, 7, 15));
     }
 
     private async Task<SchedulingProfileResponse> UpdateSchedulingProfileAsync(string handle)

@@ -612,6 +612,7 @@ const visualEventTypeSettings = {
   privateLinks: [{ expiresAt: "2026-07-01T00:00:00.000Z", link: "vip", maxUsageCount: 10, usageCount: 2 }],
   recurrence: null,
   redirects: { cancellationUrl: null, successUrl: "https://example.com/thanks" },
+  payment: { requiresDeposit: false, depositAmount: null, price: null, currency: "ZAR" },
   reschedulePolicy: {
     allowReschedule: true,
     minimumNoticeMinutes: 180,

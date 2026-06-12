@@ -4,6 +4,7 @@ using Main.Features.Insights.Queries.GetTopEventTypes;
 using SharedKernel.Tests;
 using SharedKernel.Tests.Persistence;
 using Xunit;
+using static Main.Tests.DateDriftTestDates;
 
 namespace Main.Tests.Insights;
 
@@ -37,9 +38,9 @@ public sealed class GetTopEventTypesQueryTests : InsightsEndpointBaseTest
         await CreateEventTypeAsync(schedule.Id, "Strategy Session", "strategy");
         // Create at future weekday slots; Connection.Update moves them to the analytics date range
         // b3 uses a different day since all event types share the owner's availability
-        var b1 = await CreateBookingAsync("intro-call", "2026-06-01T07:00:00Z");
-        var b2 = await CreateBookingAsync("intro-call", "2026-06-01T09:00:00Z");
-        var b3 = await CreateBookingAsync("strategy", "2026-06-02T07:00:00Z");
+        var b1 = await CreateBookingAsync("intro-call", FutureDateTimeText(0, 7, 0));
+        var b2 = await CreateBookingAsync("intro-call", FutureDateTimeText(0, 9, 0));
+        var b3 = await CreateBookingAsync("strategy", FutureDateTimeText(1, 7, 0));
         Connection.Update("bookings", "id", b1.Id, [("start_time", DateTimeOffset.Parse("2025-06-01T07:00:00Z")), ("end_time", DateTimeOffset.Parse("2025-06-01T07:30:00Z"))]);
         Connection.Update("bookings", "id", b2.Id, [("start_time", DateTimeOffset.Parse("2025-06-01T09:00:00Z")), ("end_time", DateTimeOffset.Parse("2025-06-01T09:30:00Z"))]);
         Connection.Update("bookings", "id", b3.Id, [("start_time", DateTimeOffset.Parse("2025-06-02T07:00:00Z")), ("end_time", DateTimeOffset.Parse("2025-06-02T07:30:00Z"))]);
@@ -65,8 +66,8 @@ public sealed class GetTopEventTypesQueryTests : InsightsEndpointBaseTest
         var schedule = await CreateScheduleAsync();
         await CreateEventTypeAsync(schedule.Id, "Consult", "consult");
         // Create at future weekday slots; Connection.Update moves them to the analytics date range
-        var b1 = await CreateBookingAsync("consult", "2026-06-01T07:00:00Z");
-        var b2 = await CreateBookingAsync("consult", "2026-06-01T09:00:00Z");
+        var b1 = await CreateBookingAsync("consult", FutureDateTimeText(0, 7, 0));
+        var b2 = await CreateBookingAsync("consult", FutureDateTimeText(0, 9, 0));
         Connection.Update("bookings", "id", b1.Id, [("start_time", DateTimeOffset.Parse("2025-06-01T07:00:00Z")), ("end_time", DateTimeOffset.Parse("2025-06-01T07:30:00Z"))]);
         Connection.Update("bookings", "id", b2.Id, [
                 ("start_time", DateTimeOffset.Parse("2025-06-01T09:00:00Z")),

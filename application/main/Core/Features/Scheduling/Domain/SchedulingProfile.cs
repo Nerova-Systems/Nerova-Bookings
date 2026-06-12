@@ -42,6 +42,12 @@ public sealed class SchedulingProfile : SoftDeletableAggregateRoot<SchedulingPro
     public string? AvatarUrl { get; private set; }
 
     /// <summary>
+    ///     Paystack subaccount code that routes booking deposits and payments to the tenant's own bank
+    ///     account (Paystack splits the charge automatically). Null until the tenant connects payouts.
+    /// </summary>
+    public string? PaystackSubaccountCode { get; private set; }
+
+    /// <summary>
     ///     When non-null, references a Tenant of TenantKind.Team. When null, the aggregate is owned by the existing
     ///     user/solo scope.
     /// </summary>
@@ -82,6 +88,11 @@ public sealed class SchedulingProfile : SoftDeletableAggregateRoot<SchedulingPro
         Handle = NormalizeHandle(handle);
         DisplayName = string.IsNullOrWhiteSpace(displayName) ? Handle : displayName.Trim();
         AvatarUrl = string.IsNullOrWhiteSpace(avatarUrl) ? null : avatarUrl.Trim();
+    }
+
+    public void SetPaystackSubaccount(string? subaccountCode)
+    {
+        PaystackSubaccountCode = string.IsNullOrWhiteSpace(subaccountCode) ? null : subaccountCode.Trim();
     }
 
     public static string NormalizeHandle(string value)

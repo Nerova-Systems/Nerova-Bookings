@@ -34,7 +34,7 @@ public static class BookingActionAvailability
             Disabled("Recordings are not available until conferencing is ported."),
             Disabled("Session details are not available until conferencing is ported."),
             ResolveMarkNoShow(booking, now),
-            Disabled("Report booking is not implemented yet."),
+            ResolveReport(booking),
             ResolveConfirm(booking),
             ResolveReject(booking),
             ResolveRate(booking, now),
@@ -81,6 +81,16 @@ public static class BookingActionAvailability
         }
 
         return Disabled("Only awaiting-confirmation bookings can be confirmed.");
+    }
+
+    public static BookingActionResponse ResolveReport(Booking booking)
+    {
+        if (booking.Status is BookingStatus.Cancelled or BookingStatus.Rejected)
+        {
+            return Disabled("Closed bookings cannot be reported.");
+        }
+
+        return new BookingActionResponse(true, true, null);
     }
 
     public static BookingActionResponse ResolveReject(Booking booking)

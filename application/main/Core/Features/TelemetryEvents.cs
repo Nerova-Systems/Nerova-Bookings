@@ -1,9 +1,12 @@
 using Main.Features.Apps.Domain;
 using Main.Features.Clients.Domain;
+using Main.Features.DataImport.Domain;
 using Main.Features.EventTypes.Domain;
+using Main.Features.Receptionist.Domain;
 using Main.Features.Schedules.Domain;
 using Main.Features.Scheduling.Domain;
 using Main.Features.Webhooks.Domain;
+using Main.Features.WhatsAppBooking.Domain;
 using Main.Features.WhatsAppMessaging.Domain;
 using Main.Features.WhatsAppOnboarding.Domain;
 using Main.Features.Workflows.Domain;
@@ -179,3 +182,54 @@ public sealed class ClientDeleted(ClientId clientId, bool bulkDeletion = false)
 
 public sealed class ClientsBulkDeleted(int count)
     : TelemetryEvent(("count", count));
+
+public sealed class ReceptionistTurnCompleted(WhatsAppConversationId whatsAppConversationId, int toolCallCount, long inputTokens, long outputTokens, long latencyMs)
+    : TelemetryEvent(("whats_app_conversation_id", whatsAppConversationId), ("tool_call_count", toolCallCount), ("input_tokens", inputTokens), ("output_tokens", outputTokens), ("latency_ms", latencyMs));
+
+public sealed class ReceptionistEscalated(EscalationId escalationId, string reason)
+    : TelemetryEvent(("escalation_id", escalationId), ("reason", reason));
+
+public sealed class EscalationResolved(EscalationId escalationId, bool dismissed)
+    : TelemetryEvent(("escalation_id", escalationId), ("dismissed", dismissed));
+
+public sealed class ReceptionistSettingsUpdated(bool isEnabled, ReceptionistTone tone)
+    : TelemetryEvent(("is_enabled", isEnabled), ("tone", tone));
+
+public sealed class BookingCreatedByAgent(BookingId bookingId, EventTypeId eventTypeId)
+    : TelemetryEvent(("booking_id", bookingId), ("event_type_id", eventTypeId));
+
+public sealed class BookingCancelledByCustomer(BookingId bookingId)
+    : TelemetryEvent(("booking_id", bookingId));
+
+public sealed class BookingRescheduledByCustomer(BookingId oldBookingId, BookingId newBookingId)
+    : TelemetryEvent(("old_booking_id", oldBookingId), ("booking_id", newBookingId));
+
+public sealed class BookingDepositRequested(BookingId bookingId, EventTypeId eventTypeId, long amountMinorUnits)
+    : TelemetryEvent(("booking_id", bookingId), ("event_type_id", eventTypeId), ("amount_minor_units", amountMinorUnits));
+
+public sealed class DepositCollectedByAgent(BookingId bookingId)
+    : TelemetryEvent(("booking_id", bookingId));
+
+public sealed class ImportJobStarted(ImportJobId importJobId)
+    : TelemetryEvent(("import_job_id", importJobId));
+
+public sealed class ImportJobReadyForReview(ImportJobId importJobId, int rowsTotal, int rowsValid, int rowsDuplicate, int rowsInvalid)
+    : TelemetryEvent(("import_job_id", importJobId), ("rows_total", rowsTotal), ("rows_valid", rowsValid), ("rows_duplicate", rowsDuplicate), ("rows_invalid", rowsInvalid));
+
+public sealed class ImportJobCompleted(ImportJobId importJobId, int rowsTotal, int rowsCommitted, int rowsRejected)
+    : TelemetryEvent(("import_job_id", importJobId), ("rows_total", rowsTotal), ("rows_committed", rowsCommitted), ("rows_rejected", rowsRejected));
+
+public sealed class ImportJobRejected(ImportJobId importJobId)
+    : TelemetryEvent(("import_job_id", importJobId));
+
+public sealed class ClientsBulkImported(int createdCount, int mergedCount)
+    : TelemetryEvent(("created_count", createdCount), ("merged_count", mergedCount));
+
+public sealed class JobRunCompleted(string jobType, int level, string outcome)
+    : TelemetryEvent(("job_type", jobType), ("level", level), ("outcome", outcome));
+
+public sealed class JobSuggestionResolved(string jobType, bool approved)
+    : TelemetryEvent(("job_type", jobType), ("approved", approved));
+
+public sealed class AutonomyLevelChanged(string jobType, int fromLevel, int toLevel)
+    : TelemetryEvent(("job_type", jobType), ("from_level", fromLevel), ("to_level", toLevel));

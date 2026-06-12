@@ -113,7 +113,7 @@ export function eventTypeToPayload(eventType: EventType): EventTypePayload {
     locationType: eventType.locationType,
     locationValue: eventType.locationValue,
     settings: eventType.settings,
-    teamId: (eventType as any).teamId
+    teamId: eventType.teamId
   };
 }
 
@@ -205,6 +205,12 @@ export function getEventTypeSettings(payload: EventTypePayload): EventTypeSettin
     redirects: {
       successUrl: settings?.redirects?.successUrl ?? null,
       cancellationUrl: settings?.redirects?.cancellationUrl ?? null
+    },
+    payment: {
+      requiresDeposit: settings?.payment?.requiresDeposit ?? false,
+      depositAmount: settings?.payment?.depositAmount ?? null,
+      price: settings?.payment?.price ?? null,
+      currency: settings?.payment?.currency ?? "ZAR"
     },
     interfaceLanguage: settings?.interfaceLanguage?.trim() || null,
     metadata: settings?.metadata ?? {},

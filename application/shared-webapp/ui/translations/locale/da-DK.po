@@ -39,6 +39,15 @@ msgstr "Tilføj e-mailadresse"
 msgid "Add option"
 msgstr "Tilføj mulighed"
 
+msgid "AI business insights"
+msgstr ""
+
+msgid "AI data import"
+msgstr ""
+
+msgid "AI receptionist"
+msgstr ""
+
 msgid "Allow org members to sign in via Google Workspace. Ports cal.com Google SSO. Requires g3-sso-google."
 msgstr "Giv org-medlemmer mulighed for at logge ind via Google Workspace. Porter cal.com Google SSO. Kræver g3-sso-google."
 
@@ -210,6 +219,9 @@ msgstr "Google OAuth"
 msgid "Google SSO"
 msgstr "Google SSO"
 
+msgid "Handle inbound WhatsApp conversations with the AI receptionist: answers questions, books, reschedules, and cancels appointments, escalating to a human when needed"
+msgstr ""
+
 msgid "Hex color value"
 msgstr "Hex-farveværdi"
 
@@ -221,6 +233,9 @@ msgstr "Uforanderlig registrering af alle væsentlige systemhændelser på tvær
 
 msgid "Impersonation"
 msgstr "Brugerefterligning"
+
+msgid "Import clients from a CSV export of a previous system: the AI maps columns automatically and the owner reviews before anything is saved"
+msgstr ""
 
 msgid "In-app support ticket creation, inbox, and back-office support tabs"
 msgstr "Oprettelse af supportsager i appen, indbakke og back-office supportfaner"
@@ -445,6 +460,9 @@ msgstr "Upload bannerbillede"
 
 msgid "View {name} in marketplace"
 msgstr "Se {name} i markedsplads"
+
+msgid "Weekly business summaries, no-show and retention insights, and suggested actions the owner can trigger with one tap"
+msgstr ""
 
 msgid "Workflows"
 msgstr "Arbejdsflows"

@@ -58,6 +58,8 @@ public sealed record EventTypeSettings
 
     public EventTypeEmail Email { get; init; } = new();
 
+    public EventTypePayment Payment { get; init; } = new();
+
     public bool EnablePerHostLocations { get; init; }
 
     public static EventTypeSettings Default(int durationMinutes, string? locationType, string? locationValue)
@@ -237,6 +239,18 @@ public sealed class EventTypeSettingsValidator : AbstractValidator<EventTypeSett
         RuleFor(settings => settings.EventColor)
             .Must(color => color is null || IsHexColor(color))
             .WithMessage("Event color must be a valid hex color.");
+        RuleFor(settings => settings.Payment.Price)
+            .Must(price => price is null or >= 0)
+            .WithMessage("Price must be non-negative.");
+        RuleFor(settings => settings.Payment.DepositAmount)
+            .Must(deposit => deposit is null or >= 0)
+            .WithMessage("Deposit must be non-negative.");
+        RuleFor(settings => settings.Payment)
+            .Must(payment => payment.DepositAmount is null || payment.Price is null || payment.DepositAmount <= payment.Price)
+            .WithMessage("Deposit cannot exceed the price.");
+        RuleFor(settings => settings.Payment.Currency)
+            .Must(currency => currency.Length == 3 && currency.All(char.IsAsciiLetterUpper))
+            .WithMessage("Currency must be a three-letter ISO code.");
         RuleForEach(settings => settings.Locations).ChildRules(location =>
             {
                 location.RuleFor(l => l.Type).Length(1, 80).WithMessage("Location type must be between 1 and 80 characters.");
@@ -416,6 +430,22 @@ public sealed class EventTypeSettingsValidator : AbstractValidator<EventTypeSett
 }
 
 public sealed record EventTypeLocation(string Type, string? Value, bool DisplayLocationPubliclyToTeam = false);
+
+/// <summary>
+///     Pricing for a service: the full price shown to bookers and the upfront deposit collected at booking
+///     time via Paystack (the platform's no-show protection). Amounts are in major units of
+///     <see cref="Currency" /> (e.g. rand); a null price means the service has no published price.
+/// </summary>
+public sealed record EventTypePayment
+{
+    public decimal? Price { get; init; }
+
+    public string Currency { get; init; } = "ZAR";
+
+    public decimal? DepositAmount { get; init; }
+
+    public bool RequiresDeposit => DepositAmount is > 0;
+}
 
 public sealed record EventTypeBookingField
 {

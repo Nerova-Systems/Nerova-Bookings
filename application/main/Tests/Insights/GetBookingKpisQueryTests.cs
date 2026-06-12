@@ -4,6 +4,7 @@ using Main.Features.Insights.Queries.GetBookingKpis;
 using SharedKernel.Tests;
 using SharedKernel.Tests.Persistence;
 using Xunit;
+using static Main.Tests.DateDriftTestDates;
 
 namespace Main.Tests.Insights;
 
@@ -54,9 +55,9 @@ public sealed class GetBookingKpisQueryTests : InsightsEndpointBaseTest
         var schedule = await CreateScheduleAsync();
         await CreateEventTypeAsync(schedule.Id, "Consultation", "consultation");
         // Create at future weekday slots; Connection.Update moves them to the analytics date range
-        var accepted = await CreateBookingAsync("consultation", "2026-06-01T07:00:00Z");
-        var cancelled = await CreateBookingAsync("consultation", "2026-06-01T09:00:00Z");
-        var pending = await CreateBookingAsync("consultation", "2026-06-01T11:00:00Z");
+        var accepted = await CreateBookingAsync("consultation", FutureDateTimeText(0, 7, 0));
+        var cancelled = await CreateBookingAsync("consultation", FutureDateTimeText(0, 9, 0));
+        var pending = await CreateBookingAsync("consultation", FutureDateTimeText(0, 11, 0));
         Connection.Update("bookings", "id", accepted.Id, [
                 ("start_time", DateTimeOffset.Parse("2025-06-02T07:00:00Z")),
                 ("end_time", DateTimeOffset.Parse("2025-06-02T07:30:00Z"))
@@ -94,7 +95,7 @@ public sealed class GetBookingKpisQueryTests : InsightsEndpointBaseTest
         await UpdateSchedulingProfileAsync("owner");
         var schedule = await CreateScheduleAsync();
         await CreateEventTypeAsync(schedule.Id, "Consultation", "consultation");
-        var booking = await CreateBookingAsync("consultation", "2026-06-01T07:00:00Z");
+        var booking = await CreateBookingAsync("consultation", FutureDateTimeText(0, 7, 0));
         Connection.Update("bookings", "id", booking.Id, [("tenant_id", 99999L)]);
 
         var response = await InsightsClient.GetAsync(Url);

@@ -23,15 +23,14 @@ import {
   CalendarCheckIcon,
   CalendarDaysIcon,
   LayoutDashboardIcon,
-  TimerIcon,
-  UsersIcon
+  TimerIcon
 } from "lucide-react";
 import { use } from "react";
 
 import { getWeekStartDate } from "@/routes/-bookings/bookingTypes";
 import { formatWeekStartSearchValue } from "@/routes/-bookings/WeekPicker";
 
-import { AppsNavSection, ChannelsNavSection } from "./MainSideMenuNav";
+import { AppsNavSection, ChannelsNavSection, ClientsNavSection } from "./MainSideMenuNav";
 
 const normalizePath = (path: string): string => path.replace(/\/$/, "") || "/";
 
@@ -129,20 +128,7 @@ export function MainSideMenu() {
                       </RouterLink>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
-                  <SidebarMenuItem>
-                    <SidebarMenuButton
-                      asChild={true}
-                      isActive={currentPath.startsWith("/clients")}
-                      tooltip={t`Clients`}
-                    >
-                      <RouterLink to="/clients">
-                        <UsersIcon />
-                        <span>
-                          <Trans>Clients</Trans>
-                        </span>
-                      </RouterLink>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
+                  <ClientsNavSection currentPath={currentPath} />
                   <SidebarMenuItem>
                     <SidebarMenuButton
                       asChild={true}

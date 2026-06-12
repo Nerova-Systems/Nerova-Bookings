@@ -7,6 +7,7 @@ import { MainSideMenu } from "@/shared/components/MainSideMenu";
 import { api } from "@/shared/lib/api/client";
 import { isWhatsAppSignupEnabled } from "@/shared/lib/whatsapp/whatsAppConfig";
 
+import { ReceptionistCard } from "./-components/ReceptionistCard";
 import { WhatsAppConnectionCard } from "./-components/WhatsAppConnectionCard";
 import { WhatsAppConversation } from "./-components/WhatsAppConversation";
 import { WhatsAppConversationsPanel } from "./-components/WhatsAppConversationsPanel";
@@ -42,6 +43,7 @@ function WhatsAppPage() {
         >
           <div className="flex flex-col gap-8">
             <WhatsAppConnectionCard />
+            {isConnected && <ReceptionistCard />}
             {isConnected && <WhatsAppStats />}
             {isConnected && <WhatsAppWebhookActivityPanel />}
             {isConnected && <WhatsAppConversationsPanel />}

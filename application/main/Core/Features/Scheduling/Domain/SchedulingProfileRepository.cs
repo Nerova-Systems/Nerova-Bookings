@@ -26,6 +26,9 @@ public interface ISchedulingProfileRepository : ICrudRepository<SchedulingProfil
     Task<SchedulingProfile?> GetByTenantIdUnfilteredAsync(TenantId tenantId, CancellationToken cancellationToken);
 
     Task<bool> HandleExistsAsync(string handle, UserId? excludedOwnerUserId, CancellationToken cancellationToken);
+
+    /// <summary>Distinct tenant ids that have a live scheduling profile — the autonomy runner's tenant universe.</summary>
+    Task<TenantId[]> GetAllTenantIdsUnfilteredAsync(CancellationToken cancellationToken);
 }
 
 public sealed class SchedulingProfileRepository(MainDbContext mainDbContext)
@@ -83,5 +86,16 @@ public sealed class SchedulingProfileRepository(MainDbContext mainDbContext)
         }
 
         return await profiles.AnyAsync(cancellationToken);
+    }
+
+    public async Task<TenantId[]> GetAllTenantIdsUnfilteredAsync(CancellationToken cancellationToken)
+    {
+        var tenantIds = await DbSet
+            .IgnoreQueryFilters()
+            .Where(profile => profile.DeletedAt == null)
+            .Select(profile => profile.TenantId)
+            .ToArrayAsync(cancellationToken);
+
+        return tenantIds.Distinct().ToArray();
     }
 }

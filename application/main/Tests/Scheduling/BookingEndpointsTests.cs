@@ -6,6 +6,7 @@ using Main.Database;
 using SharedKernel.Tests;
 using SharedKernel.Tests.Persistence;
 using Xunit;
+using static Main.Tests.DateDriftTestDates;
 
 namespace Main.Tests.Scheduling;
 
@@ -29,13 +30,13 @@ public sealed class BookingEndpointsTests : EndpointBaseTest<MainDbContext>
         var schedule = await CreateScheduleAsync();
         var introEventType = await CreateEventTypeAsync(schedule.Id, "Intro call", "intro-call");
         var recurringEventType = await CreateEventTypeAsync(schedule.Id, "Weekly sync", "weekly-sync", new { recurrence = new { frequency = "weekly", interval = 1, count = 4 } });
-        var upcoming = await CreateBookingAsync("intro-call", "2026-06-01T07:00:00Z", "Ada Lovelace", "ada@example.com");
-        var pending = await CreateBookingAsync("intro-call", "2026-06-01T08:00:00Z", "Grace Hopper", "grace@example.com");
-        var recurring = await CreateBookingAsync("weekly-sync", "2026-06-02T07:00:00Z", "Alan Turing", "alan@example.com");
-        var past = await CreateBookingAsync("intro-call", "2026-06-03T07:00:00Z", "Katherine Johnson", "katherine@example.com");
-        var cancelled = await CreateBookingAsync("intro-call", "2026-06-03T08:00:00Z", "Margaret Hamilton", "margaret@example.com");
+        var upcoming = await CreateBookingAsync("intro-call", FutureDateTimeText(0, 7, 0), "Ada Lovelace", "ada@example.com");
+        var pending = await CreateBookingAsync("intro-call", FutureDateTimeText(0, 8, 0), "Grace Hopper", "grace@example.com");
+        var recurring = await CreateBookingAsync("weekly-sync", FutureDateTimeText(1, 7, 0), "Alan Turing", "alan@example.com");
+        var past = await CreateBookingAsync("intro-call", FutureDateTimeText(2, 7, 0), "Katherine Johnson", "katherine@example.com");
+        var cancelled = await CreateBookingAsync("intro-call", FutureDateTimeText(2, 8, 0), "Margaret Hamilton", "margaret@example.com");
         Connection.Update("bookings", "id", pending.Id, [("status", "Pending")]);
-        Connection.Update("bookings", "id", past.Id, [("start_time", DateTimeOffset.Parse("2026-05-01T07:00:00Z")), ("end_time", DateTimeOffset.Parse("2026-05-01T07:30:00Z"))]);
+        Connection.Update("bookings", "id", past.Id, [("start_time", PastDateTime(7, 0)), ("end_time", PastDateTime(7, 30))]);
         Connection.Update("bookings", "id", cancelled.Id, [("status", "Cancelled")]);
 
         // Act
@@ -77,7 +78,7 @@ public sealed class BookingEndpointsTests : EndpointBaseTest<MainDbContext>
         await UpdateSchedulingProfileAsync("owner");
         var schedule = await CreateScheduleAsync();
         await CreateEventTypeAsync(schedule.Id, "Intro call", "intro-call");
-        await CreateBookingAsync("intro-call", "2026-06-01T07:00:00Z", "Ada Lovelace", "ada@example.com");
+        await CreateBookingAsync("intro-call", FutureDateTimeText(0, 7, 0), "Ada Lovelace", "ada@example.com");
 
         // Act
         var response = await AuthenticatedMemberHttpClient.GetAsync("/api/bookings?status=upcoming");
@@ -95,15 +96,15 @@ public sealed class BookingEndpointsTests : EndpointBaseTest<MainDbContext>
         await UpdateSchedulingProfileAsync("owner");
         var schedule = await CreateScheduleAsync();
         await CreateEventTypeAsync(schedule.Id, "Intro call", "intro-call");
-        var upcoming = await CreateBookingAsync("intro-call", "2026-07-07T07:00:00Z", "Ada Lovelace", "ada@example.com");
-        var past = await CreateBookingAsync("intro-call", "2026-07-14T07:00:00Z", "Katherine Johnson", "katherine@example.com");
-        var outsideWindow = await CreateBookingAsync("intro-call", "2026-07-21T07:00:00Z", "Dorothy Vaughan", "dorothy@example.com");
-        Connection.Update("bookings", "id", past.Id, [("start_time", DateTimeOffset.Parse("2026-07-03T07:00:00Z")), ("end_time", DateTimeOffset.Parse("2026-07-03T07:30:00Z"))]);
-        Connection.Update("bookings", "id", outsideWindow.Id, [("start_time", DateTimeOffset.Parse("2026-07-17T07:00:00Z")), ("end_time", DateTimeOffset.Parse("2026-07-17T07:30:00Z"))]);
+        var upcoming = await CreateBookingAsync("intro-call", FutureDateTimeText(36, 7, 0), "Ada Lovelace", "ada@example.com");
+        var past = await CreateBookingAsync("intro-call", FutureDateTimeText(43, 7, 0), "Katherine Johnson", "katherine@example.com");
+        var outsideWindow = await CreateBookingAsync("intro-call", FutureDateTimeText(50, 7, 0), "Dorothy Vaughan", "dorothy@example.com");
+        Connection.Update("bookings", "id", past.Id, [("start_time", FutureDateTime(32, 7, 0)), ("end_time", FutureDateTime(32, 7, 30))]);
+        Connection.Update("bookings", "id", outsideWindow.Id, [("start_time", FutureDateTime(46, 7, 0)), ("end_time", FutureDateTime(46, 7, 30))]);
 
         // Act
         var response = await AuthenticatedOwnerHttpClient.GetAsync(
-            "/api/bookings?statuses=upcoming&statuses=past&afterStartDate=2026-07-01T00:00:00Z&beforeEndDate=2026-07-07T23:59:59Z&pageSize=100"
+            $"/api/bookings?statuses=upcoming&statuses=past&afterStartDate={FutureDateTimeText(30, 0, 0)}&beforeEndDate={FutureDateTimeText(36, 23, 59, 59)}&pageSize=100"
         );
 
         // Assert
@@ -119,13 +120,13 @@ public sealed class BookingEndpointsTests : EndpointBaseTest<MainDbContext>
         await UpdateSchedulingProfileAsync("owner");
         var schedule = await CreateScheduleAsync();
         await CreateEventTypeAsync(schedule.Id, "Intro call", "intro-call");
-        var upcoming = await CreateBookingAsync("intro-call", "2026-06-01T07:00:00Z", "Ada Lovelace", "ada@example.com");
-        var pending = await CreateBookingAsync("intro-call", "2026-06-01T08:00:00Z", "Grace Hopper", "grace@example.com");
-        var past = await CreateBookingAsync("intro-call", "2026-06-03T07:00:00Z", "Katherine Johnson", "katherine@example.com");
-        var cancelled = await CreateBookingAsync("intro-call", "2026-06-03T08:00:00Z", "Margaret Hamilton", "margaret@example.com");
-        var rejected = await CreateBookingAsync("intro-call", "2026-06-03T09:00:00Z", "Dorothy Vaughan", "dorothy@example.com");
+        var upcoming = await CreateBookingAsync("intro-call", FutureDateTimeText(0, 7, 0), "Ada Lovelace", "ada@example.com");
+        var pending = await CreateBookingAsync("intro-call", FutureDateTimeText(0, 8, 0), "Grace Hopper", "grace@example.com");
+        var past = await CreateBookingAsync("intro-call", FutureDateTimeText(2, 7, 0), "Katherine Johnson", "katherine@example.com");
+        var cancelled = await CreateBookingAsync("intro-call", FutureDateTimeText(2, 8, 0), "Margaret Hamilton", "margaret@example.com");
+        var rejected = await CreateBookingAsync("intro-call", FutureDateTimeText(2, 9, 0), "Dorothy Vaughan", "dorothy@example.com");
         Connection.Update("bookings", "id", pending.Id, [("status", "Pending")]);
-        Connection.Update("bookings", "id", past.Id, [("start_time", DateTimeOffset.Parse("2026-05-01T07:00:00Z")), ("end_time", DateTimeOffset.Parse("2026-05-01T07:30:00Z"))]);
+        Connection.Update("bookings", "id", past.Id, [("start_time", PastDateTime(7, 0)), ("end_time", PastDateTime(7, 30))]);
         Connection.Update("bookings", "id", cancelled.Id, [("status", "Cancelled")]);
         Connection.Update("bookings", "id", rejected.Id, [("status", "Rejected")]);
 
@@ -146,7 +147,7 @@ public sealed class BookingEndpointsTests : EndpointBaseTest<MainDbContext>
         actionsByBookingId[upcoming.Id].Reschedule.Enabled.Should().BeTrue();
         actionsByBookingId[upcoming.Id].RequestReschedule.Enabled.Should().BeTrue();
         actionsByBookingId[upcoming.Id].AddGuests.Enabled.Should().BeTrue();
-        actionsByBookingId[upcoming.Id].Report.Enabled.Should().BeFalse();
+        actionsByBookingId[upcoming.Id].Report.Enabled.Should().BeTrue();
     }
 
     [Fact]
@@ -166,7 +167,7 @@ public sealed class BookingEndpointsTests : EndpointBaseTest<MainDbContext>
         await UpdateSchedulingProfileAsync("owner");
         var schedule = await CreateScheduleAsync();
         await CreateEventTypeAsync(schedule.Id, "Intro call", "intro-call");
-        var booking = await CreateBookingAsync("intro-call", "2026-06-01T07:00:00Z", "Ada Lovelace", "ada@example.com");
+        var booking = await CreateBookingAsync("intro-call", FutureDateTimeText(0, 7, 0), "Ada Lovelace", "ada@example.com");
 
         // Act
         var response = await AuthenticatedOwnerHttpClient.PostAsync($"/api/bookings/{booking.Id}/cancel", null);
@@ -183,8 +184,8 @@ public sealed class BookingEndpointsTests : EndpointBaseTest<MainDbContext>
         await UpdateSchedulingProfileAsync("owner");
         var schedule = await CreateScheduleAsync();
         await CreateEventTypeAsync(schedule.Id, "Intro call", "intro-call");
-        var past = await CreateBookingAsync("intro-call", "2026-06-01T07:00:00Z", "Ada Lovelace", "ada@example.com");
-        Connection.Update("bookings", "id", past.Id, [("start_time", DateTimeOffset.Parse("2026-05-01T07:00:00Z")), ("end_time", DateTimeOffset.Parse("2026-05-01T07:30:00Z"))]);
+        var past = await CreateBookingAsync("intro-call", FutureDateTimeText(0, 7, 0), "Ada Lovelace", "ada@example.com");
+        Connection.Update("bookings", "id", past.Id, [("start_time", PastDateTime(7, 0)), ("end_time", PastDateTime(7, 30))]);
 
         // Act
         var response = await AuthenticatedOwnerHttpClient.PostAsync($"/api/bookings/{past.Id}/cancel", null);
@@ -201,7 +202,7 @@ public sealed class BookingEndpointsTests : EndpointBaseTest<MainDbContext>
         await UpdateSchedulingProfileAsync("owner");
         var schedule = await CreateScheduleAsync();
         await CreateEventTypeAsync(schedule.Id, "Intro call", "intro-call", new { cancellationPolicy = new { allowCancellation = false } });
-        var booking = await CreateBookingAsync("intro-call", "2026-06-01T07:00:00Z", "Ada Lovelace", "ada@example.com");
+        var booking = await CreateBookingAsync("intro-call", FutureDateTimeText(0, 7, 0), "Ada Lovelace", "ada@example.com");
 
         // Act
         var response = await AuthenticatedOwnerHttpClient.PostAsync($"/api/bookings/{booking.Id}/cancel", null);
@@ -218,7 +219,7 @@ public sealed class BookingEndpointsTests : EndpointBaseTest<MainDbContext>
         await UpdateSchedulingProfileAsync("owner");
         var schedule = await CreateScheduleAsync();
         await CreateEventTypeAsync(schedule.Id, "Intro call", "intro-call");
-        var booking = await CreateBookingAsync("intro-call", "2026-06-01T07:00:00Z", "Ada Lovelace", "ada@example.com");
+        var booking = await CreateBookingAsync("intro-call", FutureDateTimeText(0, 7, 0), "Ada Lovelace", "ada@example.com");
 
         // Act
         var response = await AuthenticatedMemberHttpClient.PostAsync($"/api/bookings/{booking.Id}/cancel", null);
@@ -237,7 +238,7 @@ public sealed class BookingEndpointsTests : EndpointBaseTest<MainDbContext>
         await UpdateSchedulingProfileAsync("owner");
         var schedule = await CreateScheduleAsync();
         await CreateEventTypeAsync(schedule.Id, "Intro call", "intro-call");
-        var booking = await CreateBookingAsync("intro-call", "2026-06-01T07:00:00Z", "Ada Lovelace", "ada@example.com");
+        var booking = await CreateBookingAsync("intro-call", FutureDateTimeText(0, 7, 0), "Ada Lovelace", "ada@example.com");
         Connection.Update("bookings", "id", booking.Id, [("owner_user_id", DatabaseSeeder.Tenant1Member.Id!.ToString())]);
 
         // Act
@@ -255,7 +256,7 @@ public sealed class BookingEndpointsTests : EndpointBaseTest<MainDbContext>
         await UpdateSchedulingProfileAsync(AuthenticatedOwnerHttpClient, "owner", "Owner Name");
         var schedule = await CreateScheduleAsync(AuthenticatedOwnerHttpClient);
         await CreateEventTypeAsync(AuthenticatedOwnerHttpClient, schedule.Id, "Intro call", "intro-call");
-        var booking = await CreateBookingAsync("owner", "intro-call", "2026-06-01T07:00:00Z", "Ada Lovelace", "ada@example.com");
+        var booking = await CreateBookingAsync("owner", "intro-call", FutureDateTimeText(0, 7, 0), "Ada Lovelace", "ada@example.com");
 
         // Act
         var response = await AuthenticatedMemberHttpClient.PostAsJsonAsync(
@@ -285,7 +286,7 @@ public sealed class BookingEndpointsTests : EndpointBaseTest<MainDbContext>
         await UpdateSchedulingProfileAsync(AuthenticatedOwnerHttpClient, "owner", "Owner Name");
         var schedule = await CreateScheduleAsync(AuthenticatedOwnerHttpClient);
         await CreateEventTypeAsync(AuthenticatedOwnerHttpClient, schedule.Id, "Intro call", "intro-call");
-        var booking = await CreateBookingAsync("owner", "intro-call", "2026-06-01T07:00:00Z", "Ada Lovelace", "ada@example.com");
+        var booking = await CreateBookingAsync("owner", "intro-call", FutureDateTimeText(0, 7, 0), "Ada Lovelace", "ada@example.com");
         await AuthenticatedMemberHttpClient.PostAsJsonAsync(
             $"/api/bookings/{booking.Id}/report",
             new { reasonCode = "Abuse", notes = (string?)null }
@@ -310,7 +311,7 @@ public sealed class BookingEndpointsTests : EndpointBaseTest<MainDbContext>
         await UpdateSchedulingProfileAsync("owner");
         var schedule = await CreateScheduleAsync();
         await CreateEventTypeAsync(schedule.Id, "Intro call", "intro-call", new { confirmationPolicy = new { requiresConfirmation = true } });
-        var booking = await CreateBookingAsync("intro-call", "2026-06-01T07:00:00Z", "Ada Lovelace", "ada@example.com");
+        var booking = await CreateBookingAsync("intro-call", FutureDateTimeText(0, 7, 0), "Ada Lovelace", "ada@example.com");
 
         // Act
         var response = await AuthenticatedOwnerHttpClient.PostAsync($"/api/bookings/{booking.Id}/confirm", null);
@@ -329,7 +330,7 @@ public sealed class BookingEndpointsTests : EndpointBaseTest<MainDbContext>
         await UpdateSchedulingProfileAsync("owner");
         var schedule = await CreateScheduleAsync();
         await CreateEventTypeAsync(schedule.Id, "Intro call", "intro-call", new { confirmationPolicy = new { requiresConfirmation = true } });
-        var booking = await CreateBookingAsync("intro-call", "2026-06-01T07:00:00Z", "Ada Lovelace", "ada@example.com");
+        var booking = await CreateBookingAsync("intro-call", FutureDateTimeText(0, 7, 0), "Ada Lovelace", "ada@example.com");
 
         // Act
         var response = await AuthenticatedOwnerHttpClient.PostAsJsonAsync($"/api/bookings/{booking.Id}/reject", new { rejectionReason = "Not a fit" });
@@ -349,7 +350,7 @@ public sealed class BookingEndpointsTests : EndpointBaseTest<MainDbContext>
         await UpdateSchedulingProfileAsync("owner");
         var schedule = await CreateScheduleAsync();
         await CreateEventTypeAsync(schedule.Id, "Intro call", "intro-call");
-        var booking = await CreateBookingAsync("intro-call", "2026-06-01T07:00:00Z", "Ada Lovelace", "ada@example.com");
+        var booking = await CreateBookingAsync("intro-call", FutureDateTimeText(0, 7, 0), "Ada Lovelace", "ada@example.com");
 
         // Act
         var response = await AuthenticatedOwnerHttpClient.PostAsJsonAsync($"/api/bookings/{booking.Id}/request-reschedule", new { rescheduleReason = "Need another time" });
@@ -369,7 +370,7 @@ public sealed class BookingEndpointsTests : EndpointBaseTest<MainDbContext>
         await UpdateSchedulingProfileAsync("owner");
         var schedule = await CreateScheduleAsync();
         await CreateEventTypeAsync(schedule.Id, "Intro call", "intro-call");
-        var booking = await CreateBookingAsync("intro-call", "2026-06-01T07:00:00Z", "Ada Lovelace", "ada@example.com");
+        var booking = await CreateBookingAsync("intro-call", FutureDateTimeText(0, 7, 0), "Ada Lovelace", "ada@example.com");
 
         // Act
         var response = await AuthenticatedOwnerHttpClient.PostAsJsonAsync(
@@ -390,7 +391,7 @@ public sealed class BookingEndpointsTests : EndpointBaseTest<MainDbContext>
         await UpdateSchedulingProfileAsync("owner");
         var schedule = await CreateScheduleAsync();
         await CreateEventTypeAsync(schedule.Id, "Intro call", "intro-call");
-        var booking = await CreateBookingAsync("intro-call", "2026-06-01T07:00:00Z", "Ada Lovelace", "ada@example.com");
+        var booking = await CreateBookingAsync("intro-call", FutureDateTimeText(0, 7, 0), "Ada Lovelace", "ada@example.com");
 
         // Act
         var response = await AuthenticatedOwnerHttpClient.PutAsJsonAsync($"/api/bookings/{booking.Id}/location", new { locationType = "phone", locationValue = "+27110000000" });
@@ -410,7 +411,7 @@ public sealed class BookingEndpointsTests : EndpointBaseTest<MainDbContext>
         await UpdateSchedulingProfileAsync("owner");
         var schedule = await CreateScheduleAsync();
         await CreateEventTypeAsync(schedule.Id, "Intro call", "intro-call");
-        var booking = await CreateBookingAsync("intro-call", "2026-06-01T07:00:00Z", "Ada Lovelace", "ada@example.com");
+        var booking = await CreateBookingAsync("intro-call", FutureDateTimeText(0, 7, 0), "Ada Lovelace", "ada@example.com");
 
         // Act
         var response = await AnonymousHttpClient.GetAsync($"/api/public/reschedule-bookings/{booking.Id}?handle=owner&eventSlug=intro-call");
@@ -436,7 +437,7 @@ public sealed class BookingEndpointsTests : EndpointBaseTest<MainDbContext>
         var schedule = await CreateScheduleAsync();
         await CreateEventTypeAsync(schedule.Id, "Intro call", "intro-call");
         await CreateEventTypeAsync(schedule.Id, "Follow up", "follow-up");
-        var booking = await CreateBookingAsync("intro-call", "2026-06-01T07:00:00Z", "Ada Lovelace", "ada@example.com");
+        var booking = await CreateBookingAsync("intro-call", FutureDateTimeText(0, 7, 0), "Ada Lovelace", "ada@example.com");
 
         // Act
         var response = await AnonymousHttpClient.GetAsync($"/api/public/reschedule-bookings/{booking.Id}?handle=owner&eventSlug=follow-up");
@@ -452,7 +453,7 @@ public sealed class BookingEndpointsTests : EndpointBaseTest<MainDbContext>
         await UpdateSchedulingProfileAsync("owner");
         var schedule = await CreateScheduleAsync();
         await CreateEventTypeAsync(schedule.Id, "Intro call", "intro-call");
-        var originalBooking = await CreateBookingAsync("intro-call", "2026-06-01T07:00:00Z", "Ada Lovelace", "ada@example.com");
+        var originalBooking = await CreateBookingAsync("intro-call", FutureDateTimeText(0, 7, 0), "Ada Lovelace", "ada@example.com");
 
         // Act
         var response = await AnonymousHttpClient.PostAsJsonAsync(
@@ -461,7 +462,7 @@ public sealed class BookingEndpointsTests : EndpointBaseTest<MainDbContext>
             {
                 handle = "owner",
                 eventSlug = "intro-call",
-                startTime = "2026-06-01T08:00:00Z",
+                startTime = FutureDateTimeText(0, 8, 0),
                 duration = 30,
                 timeZone = "Africa/Johannesburg",
                 bookerName = "Ada Lovelace",
@@ -491,7 +492,7 @@ public sealed class BookingEndpointsTests : EndpointBaseTest<MainDbContext>
         await UpdateSchedulingProfileAsync("owner");
         var schedule = await CreateScheduleAsync();
         await CreateEventTypeAsync(schedule.Id, "Intro call", "intro-call");
-        var originalBooking = await CreateBookingAsync("intro-call", "2026-06-01T07:00:00Z", "Ada Lovelace", "ada@example.com");
+        var originalBooking = await CreateBookingAsync("intro-call", FutureDateTimeText(0, 7, 0), "Ada Lovelace", "ada@example.com");
 
         // Act
         var response = await AnonymousHttpClient.PostAsJsonAsync(
@@ -500,7 +501,7 @@ public sealed class BookingEndpointsTests : EndpointBaseTest<MainDbContext>
             {
                 handle = "owner",
                 eventSlug = "intro-call",
-                startTime = "2026-06-01T07:00:00Z",
+                startTime = FutureDateTimeText(0, 7, 0),
                 duration = 30,
                 timeZone = "Africa/Johannesburg",
                 bookerName = "Ada Lovelace",
@@ -523,7 +524,7 @@ public sealed class BookingEndpointsTests : EndpointBaseTest<MainDbContext>
         await UpdateSchedulingProfileAsync("owner");
         var schedule = await CreateScheduleAsync();
         await CreateEventTypeAsync(schedule.Id, "Intro call", "intro-call", new { reschedulePolicy = new { allowReschedule = false } });
-        var originalBooking = await CreateBookingAsync("intro-call", "2026-06-01T07:00:00Z", "Ada Lovelace", "ada@example.com");
+        var originalBooking = await CreateBookingAsync("intro-call", FutureDateTimeText(0, 7, 0), "Ada Lovelace", "ada@example.com");
 
         // Act
         var response = await AnonymousHttpClient.PostAsJsonAsync(
@@ -532,7 +533,7 @@ public sealed class BookingEndpointsTests : EndpointBaseTest<MainDbContext>
             {
                 handle = "owner",
                 eventSlug = "intro-call",
-                startTime = "2026-06-01T08:00:00Z",
+                startTime = FutureDateTimeText(0, 8, 0),
                 duration = 30,
                 timeZone = "Africa/Johannesburg",
                 bookerName = "Ada Lovelace",

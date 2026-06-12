@@ -27,6 +27,12 @@ public interface IClientRepository : ICrudRepository<Client, ClientId>, IBulkRem
     ///     public bookings where no tenant context is set.
     /// </summary>
     Task<Client?> GetByTenantAndContactUnfilteredAsync(TenantId tenantId, string? phoneNumber, string? email, CancellationToken cancellationToken);
+
+    /// <summary>
+    ///     All clients of a tenant for in-memory duplicate detection during imports (avoids per-row
+    ///     lookups). Unfiltered so the import pipeline can run from background contexts too.
+    /// </summary>
+    Task<Client[]> GetAllForDuplicateCheckUnfilteredAsync(TenantId tenantId, CancellationToken cancellationToken);
 }
 
 public sealed class ClientRepository(MainDbContext mainDbContext)
@@ -125,5 +131,13 @@ public sealed class ClientRepository(MainDbContext mainDbContext)
         }
 
         return null;
+    }
+
+    public async Task<Client[]> GetAllForDuplicateCheckUnfilteredAsync(TenantId tenantId, CancellationToken cancellationToken)
+    {
+        return await DbSet
+            .IgnoreQueryFilters([QueryFilterNames.Tenant])
+            .Where(client => client.TenantId == tenantId)
+            .ToArrayAsync(cancellationToken);
     }
 }

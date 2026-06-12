@@ -13,9 +13,23 @@ import { api } from "@/shared/lib/api/client";
 type WebhookEventItem = Schemas["WhatsAppWebhookEventItem"];
 
 function statusBadge(status: string) {
-  if (status === "Processed") return <Badge variant="default"><Trans>Processed</Trans></Badge>;
-  if (status === "Failed") return <Badge variant="destructive"><Trans>Failed</Trans></Badge>;
-  return <Badge variant="secondary"><Trans>Pending</Trans></Badge>;
+  if (status === "Processed")
+    return (
+      <Badge variant="default">
+        <Trans>Processed</Trans>
+      </Badge>
+    );
+  if (status === "Failed")
+    return (
+      <Badge variant="destructive">
+        <Trans>Failed</Trans>
+      </Badge>
+    );
+  return (
+    <Badge variant="secondary">
+      <Trans>Pending</Trans>
+    </Badge>
+  );
 }
 
 export function WhatsAppWebhookActivityPanel() {
@@ -78,9 +92,7 @@ export function WhatsAppWebhookActivityPanel() {
                     {formatDate(event.createdAt, true)}
                   </time>
                 </div>
-                {event.error && (
-                  <p className="text-xs text-destructive">{event.error}</p>
-                )}
+                {event.error && <p className="text-xs text-destructive">{event.error}</p>}
               </div>
             ))}
           </div>

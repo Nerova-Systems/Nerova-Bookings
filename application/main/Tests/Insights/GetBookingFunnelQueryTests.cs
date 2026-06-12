@@ -4,6 +4,7 @@ using Main.Features.Insights.Queries.GetBookingFunnel;
 using SharedKernel.Tests;
 using SharedKernel.Tests.Persistence;
 using Xunit;
+using static Main.Tests.DateDriftTestDates;
 
 namespace Main.Tests.Insights;
 
@@ -37,11 +38,11 @@ public sealed class GetBookingFunnelQueryTests : InsightsEndpointBaseTest
         var schedule = await CreateScheduleAsync();
         await CreateEventTypeAsync(schedule.Id, "Consult", "consult");
         // Create at future weekday slots; Connection.Update moves them to the analytics date range
-        var completed = await CreateBookingAsync("consult", "2026-06-01T07:00:00Z");
+        var completed = await CreateBookingAsync("consult", FutureDateTimeText(0, 7, 0));
         // accepted + future → accepted only
-        var accepted = await CreateBookingAsync("consult", "2026-06-01T09:00:00Z");
+        var accepted = await CreateBookingAsync("consult", FutureDateTimeText(0, 9, 0));
         // cancelled → created but not accepted
-        var cancelled = await CreateBookingAsync("consult", "2026-06-01T11:00:00Z");
+        var cancelled = await CreateBookingAsync("consult", FutureDateTimeText(0, 11, 0));
 
         Connection.Update("bookings", "id", completed.Id, [
                 ("start_time", DateTimeOffset.Parse("2025-06-02T07:00:00Z")),

@@ -17,6 +17,7 @@ using SharedKernel.Integrations.Email;
 using SharedKernel.Tests;
 using SharedKernel.Tests.Persistence;
 using Xunit;
+using static Main.Tests.DateDriftTestDates;
 
 namespace Main.Tests.Scheduling;
 
@@ -118,7 +119,7 @@ public sealed class BookingSideEffectsTests : EndpointBaseTest<MainDbContext>
             {
                 handle = "owner",
                 eventSlug = "intro-call",
-                startTime = "2026-06-01T07:00:00Z",
+                startTime = FutureDateTimeText(0, 7, 0),
                 duration = 30,
                 timeZone = "Africa/Johannesburg",
                 bookerName = "Ada Lovelace",
@@ -158,7 +159,7 @@ public sealed class BookingSideEffectsTests : EndpointBaseTest<MainDbContext>
             "integration",
             "zoom-video"
         );
-        var booking = await CreateBookingAsync("intro-call", "2026-06-01T07:00:00Z", "Ada Lovelace", "ada@example.com");
+        var booking = await CreateBookingAsync("intro-call", FutureDateTimeText(0, 7, 0), "Ada Lovelace", "ada@example.com");
 
         using var scope = Provider.CreateScope();
         var processor = scope.ServiceProvider.GetRequiredService<BookingSideEffectProcessor>();
@@ -197,7 +198,7 @@ public sealed class BookingSideEffectsTests : EndpointBaseTest<MainDbContext>
             "integration",
             "google-meet"
         );
-        var booking = await CreateBookingAsync("intro-call", "2026-06-01T07:00:00Z", "Ada Lovelace", "ada@example.com");
+        var booking = await CreateBookingAsync("intro-call", FutureDateTimeText(0, 7, 0), "Ada Lovelace", "ada@example.com");
 
         using var scope = Provider.CreateScope();
         var processor = scope.ServiceProvider.GetRequiredService<BookingSideEffectProcessor>();
@@ -245,7 +246,7 @@ public sealed class BookingSideEffectsTests : EndpointBaseTest<MainDbContext>
             "integration",
             "zoom-video"
         );
-        var booking = await CreateBookingAsync("intro-call", "2026-06-01T07:00:00Z", "Ada Lovelace", "ada@example.com");
+        var booking = await CreateBookingAsync("intro-call", FutureDateTimeText(0, 7, 0), "Ada Lovelace", "ada@example.com");
 
         // Act
         var response = await AuthenticatedOwnerHttpClient.PostAsync($"/api/bookings/{booking.Id}/confirm", null);
@@ -279,7 +280,7 @@ public sealed class BookingSideEffectsTests : EndpointBaseTest<MainDbContext>
             "integration",
             "zoom-video"
         );
-        var booking = await CreateBookingAsync("intro-call", "2026-06-01T07:00:00Z", "Ada Lovelace", "ada@example.com");
+        var booking = await CreateBookingAsync("intro-call", FutureDateTimeText(0, 7, 0), "Ada Lovelace", "ada@example.com");
 
         using var scope = Provider.CreateScope();
         var processor = scope.ServiceProvider.GetRequiredService<BookingSideEffectProcessor>();
@@ -311,7 +312,7 @@ public sealed class BookingSideEffectsTests : EndpointBaseTest<MainDbContext>
         var schedule = await CreateScheduleAsync();
         var eventType = await CreateEventTypeAsync(schedule.Id, "Intro call", "intro-call", new { confirmationPolicy = new { requiresConfirmation = true } });
         await CreateWebhookAsync(eventType.Id, "BOOKING_CONFIRMED");
-        var booking = await CreateBookingAsync("intro-call", "2026-06-01T07:00:00Z", "Ada Lovelace", "ada@example.com");
+        var booking = await CreateBookingAsync("intro-call", FutureDateTimeText(0, 7, 0), "Ada Lovelace", "ada@example.com");
 
         // Act
         var response = await AuthenticatedOwnerHttpClient.PostAsync($"/api/bookings/{booking.Id}/confirm", null);
@@ -332,7 +333,7 @@ public sealed class BookingSideEffectsTests : EndpointBaseTest<MainDbContext>
         var schedule = await CreateScheduleAsync();
         var eventType = await CreateEventTypeAsync(schedule.Id, "Intro call", "intro-call");
         await CreateWorkflowAsync(eventType.Id, "BOOKING_CREATED");
-        var booking = await CreateBookingAsync("intro-call", "2026-06-01T07:00:00Z", "Ada Lovelace", "ada@example.com");
+        var booking = await CreateBookingAsync("intro-call", FutureDateTimeText(0, 7, 0), "Ada Lovelace", "ada@example.com");
 
         using var scope = Provider.CreateScope();
         var processor = scope.ServiceProvider.GetRequiredService<BookingSideEffectProcessor>();
@@ -365,7 +366,7 @@ public sealed class BookingSideEffectsTests : EndpointBaseTest<MainDbContext>
         var eventType = await CreateEventTypeAsync(schedule.Id, "Intro call", "intro-call");
         await CreateWorkflowAsync(eventType.Id, "BOOKING_CREATED");
         await CreateWebhookAsync(eventType.Id, "BOOKING_CREATED");
-        var booking = await CreateBookingAsync("intro-call", "2026-06-01T07:00:00Z", "Ada Lovelace", "ada@example.com");
+        var booking = await CreateBookingAsync("intro-call", FutureDateTimeText(0, 7, 0), "Ada Lovelace", "ada@example.com");
 
         // Act
         var response = await _sideEffectsClient.GetAsync($"/api/event-types/{eventType.Id}/side-effect-deliveries");
@@ -386,8 +387,8 @@ public sealed class BookingSideEffectsTests : EndpointBaseTest<MainDbContext>
         var schedule = await CreateScheduleAsync();
         var eventType = await CreateEventTypeAsync(schedule.Id, "Intro call", "intro-call");
         await CreateWorkflowAsync(eventType.Id, "BOOKING_CREATED");
-        await CreateBookingAsync("intro-call", "2026-06-01T07:00:00Z", "Ada Lovelace", "ada@example.com");
-        var expectedBooking = await CreateBookingAsync("intro-call", "2026-06-02T07:00:00Z", "Grace Hopper", "grace@example.com");
+        await CreateBookingAsync("intro-call", FutureDateTimeText(0, 7, 0), "Ada Lovelace", "ada@example.com");
+        var expectedBooking = await CreateBookingAsync("intro-call", FutureDateTimeText(1, 7, 0), "Grace Hopper", "grace@example.com");
 
         // Act
         var response = await _sideEffectsClient.GetAsync($"/api/bookings/{expectedBooking.Id}/side-effects");
@@ -410,7 +411,7 @@ public sealed class BookingSideEffectsTests : EndpointBaseTest<MainDbContext>
         await CreateWebhookAsync(eventType.Id, "BOOKING_CREATED", false);
 
         // Act
-        var booking = await CreateBookingAsync("intro-call", "2026-06-01T07:00:00Z", "Ada Lovelace", "ada@example.com");
+        var booking = await CreateBookingAsync("intro-call", FutureDateTimeText(0, 7, 0), "Ada Lovelace", "ada@example.com");
 
         // Assert
         Connection.ExecuteScalar<long>(
@@ -427,7 +428,7 @@ public sealed class BookingSideEffectsTests : EndpointBaseTest<MainDbContext>
         var schedule = await CreateScheduleAsync();
         var eventType = await CreateEventTypeAsync(schedule.Id, "Intro call", "intro-call");
         await CreateWorkflowAsync(eventType.Id, "BOOKING_CREATED");
-        await CreateBookingAsync("intro-call", "2026-06-01T07:00:00Z", "Ada Lovelace", "ada@example.com");
+        await CreateBookingAsync("intro-call", FutureDateTimeText(0, 7, 0), "Ada Lovelace", "ada@example.com");
 
         using var scope = Provider.CreateScope();
         var processor = scope.ServiceProvider.GetRequiredService<BookingSideEffectProcessor>();
@@ -450,7 +451,7 @@ public sealed class BookingSideEffectsTests : EndpointBaseTest<MainDbContext>
         var schedule = await CreateScheduleAsync();
         var eventType = await CreateEventTypeAsync(schedule.Id, "Intro call", "intro-call");
         await CreateWebhookAsync(eventType.Id, "BOOKING_CREATED", subscriberUrl: "http://localhost:1/cal/webhook");
-        await CreateBookingAsync("intro-call", "2026-06-01T07:00:00Z", "Ada Lovelace", "ada@example.com");
+        await CreateBookingAsync("intro-call", FutureDateTimeText(0, 7, 0), "Ada Lovelace", "ada@example.com");
 
         using var scope = Provider.CreateScope();
         var dbContext = scope.ServiceProvider.GetRequiredService<MainDbContext>();
@@ -479,7 +480,7 @@ public sealed class BookingSideEffectsTests : EndpointBaseTest<MainDbContext>
         var schedule = await CreateScheduleAsync();
         var eventType = await CreateEventTypeAsync(schedule.Id, "Intro call", "intro-call");
         await CreateWebhookAsync(eventType.Id, "BOOKING_CREATED");
-        await CreateBookingAsync("intro-call", "2026-06-01T07:00:00Z", "Ada Lovelace", "ada@example.com");
+        await CreateBookingAsync("intro-call", FutureDateTimeText(0, 7, 0), "Ada Lovelace", "ada@example.com");
 
         using var scope = Provider.CreateScope();
         var httpHandler = new CapturingHttpMessageHandler();

@@ -4,6 +4,7 @@ using Main.Features.Insights.Queries.GetCancellationReasons;
 using SharedKernel.Tests;
 using SharedKernel.Tests.Persistence;
 using Xunit;
+using static Main.Tests.DateDriftTestDates;
 
 namespace Main.Tests.Insights;
 
@@ -35,7 +36,7 @@ public sealed class GetCancellationReasonsQueryTests : InsightsEndpointBaseTest
         var schedule = await CreateScheduleAsync();
         await CreateEventTypeAsync(schedule.Id, "Consult", "consult");
         // Create at a future weekday slot; Connection.Update moves it to the analytics date range
-        var b = await CreateBookingAsync("consult", "2026-06-01T07:00:00Z");
+        var b = await CreateBookingAsync("consult", FutureDateTimeText(0, 7, 0));
         Connection.Update("bookings", "id", b.Id, [
                 ("start_time", DateTimeOffset.Parse("2025-06-01T07:00:00Z")),
                 ("end_time", DateTimeOffset.Parse("2025-06-01T07:30:00Z")),
@@ -62,8 +63,8 @@ public sealed class GetCancellationReasonsQueryTests : InsightsEndpointBaseTest
         var schedule = await CreateScheduleAsync();
         await CreateEventTypeAsync(schedule.Id, "Consult", "consult");
         // Create at future weekday slots; Connection.Update moves them to the analytics date range
-        var b1 = await CreateBookingAsync("consult", "2026-06-01T07:00:00Z");
-        var b2 = await CreateBookingAsync("consult", "2026-06-01T09:00:00Z");
+        var b1 = await CreateBookingAsync("consult", FutureDateTimeText(0, 7, 0));
+        var b2 = await CreateBookingAsync("consult", FutureDateTimeText(0, 9, 0));
         Connection.Update("bookings", "id", b1.Id, [
                 ("start_time", DateTimeOffset.Parse("2025-06-01T07:00:00Z")),
                 ("end_time", DateTimeOffset.Parse("2025-06-01T07:30:00Z")),

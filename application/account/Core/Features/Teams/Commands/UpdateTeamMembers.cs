@@ -39,7 +39,8 @@ public sealed class UpdateTeamMembersHandler(
     IMembershipRepository membershipRepository,
     IUserRepository userRepository,
     ITelemetryEventsCollector events,
-    IExecutionContext executionContext
+    IExecutionContext executionContext,
+    TimeProvider timeProvider
 ) : IRequestHandler<UpdateTeamMembersCommand, Result>
 {
     public async Task<Result> Handle(UpdateTeamMembersCommand command, CancellationToken cancellationToken)
@@ -141,7 +142,7 @@ public sealed class UpdateTeamMembersHandler(
                 userId,
                 "DIRECT_ADD_" + Guid.NewGuid().ToString("N")
             );
-            directMembership.Accept(DateTimeOffset.UtcNow);
+            directMembership.Accept(timeProvider.GetUtcNow());
 
             await membershipRepository.AddAsync(directMembership, cancellationToken);
             events.CollectEvent(new TeamMemberInvited(team.Id, parentId, directMembership.Id, MembershipRole.Member));

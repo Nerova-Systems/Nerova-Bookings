@@ -4,6 +4,7 @@ using Main.Features.Insights.Queries.GetBookingHeatmap;
 using SharedKernel.Tests;
 using SharedKernel.Tests.Persistence;
 using Xunit;
+using static Main.Tests.DateDriftTestDates;
 
 namespace Main.Tests.Insights;
 
@@ -35,7 +36,7 @@ public sealed class GetBookingHeatmapQueryTests : InsightsEndpointBaseTest
         var schedule = await CreateScheduleAsync();
         await CreateEventTypeAsync(schedule.Id, "Consult", "consult");
         // Create at a future weekday slot; Connection.Update sets the desired Sunday date
-        var b1 = await CreateBookingAsync("consult", "2026-06-01T07:00:00Z");
+        var b1 = await CreateBookingAsync("consult", FutureDateTimeText(0, 7, 0));
         Connection.Update("bookings", "id", b1.Id, [("start_time", DateTimeOffset.Parse("2025-06-01T07:00:00Z")), ("end_time", DateTimeOffset.Parse("2025-06-01T07:30:00Z"))]);
 
         // Act — UTC timezone so local hour == UTC hour

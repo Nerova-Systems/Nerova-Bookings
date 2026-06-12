@@ -22,7 +22,7 @@ public sealed class BookingPaymentCommandHandlersTests
         processed.IsProcessedAsync("evt_1", Arg.Any<CancellationToken>()).Returns(true);
         var bookings = Substitute.For<IBookingRepository>();
 
-        var handler = new ConfirmBookingPaymentHandler(bookings, processed, new FakeTimeProvider(Now), NullLogger<ConfirmBookingPaymentHandler>.Instance);
+        var handler = new ConfirmBookingPaymentHandler(bookings, processed, Substitute.For<IMediator>(), new FakeTimeProvider(Now), NullLogger<ConfirmBookingPaymentHandler>.Instance);
         var result = await handler.Handle(new ConfirmBookingPaymentCommand("ref_42", "evt_1"), CancellationToken.None);
 
         result.IsSuccess.Should().BeTrue();
@@ -41,7 +41,7 @@ public sealed class BookingPaymentCommandHandlersTests
         var processed = Substitute.For<IProcessedPaymentEventRepository>();
         processed.IsProcessedAsync("evt_2", Arg.Any<CancellationToken>()).Returns(false);
 
-        var handler = new ConfirmBookingPaymentHandler(bookings, processed, new FakeTimeProvider(Now), NullLogger<ConfirmBookingPaymentHandler>.Instance);
+        var handler = new ConfirmBookingPaymentHandler(bookings, processed, Substitute.For<IMediator>(), new FakeTimeProvider(Now), NullLogger<ConfirmBookingPaymentHandler>.Instance);
         var result = await handler.Handle(new ConfirmBookingPaymentCommand("ref_42", "evt_2"), CancellationToken.None);
 
         result.IsSuccess.Should().BeTrue();
@@ -58,7 +58,7 @@ public sealed class BookingPaymentCommandHandlersTests
         bookings.GetByPaymentReferenceUnfilteredAsync(Arg.Any<string>(), Arg.Any<CancellationToken>()).Returns((Booking?)null);
         var processed = Substitute.For<IProcessedPaymentEventRepository>();
 
-        var handler = new ConfirmBookingPaymentHandler(bookings, processed, new FakeTimeProvider(Now), NullLogger<ConfirmBookingPaymentHandler>.Instance);
+        var handler = new ConfirmBookingPaymentHandler(bookings, processed, Substitute.For<IMediator>(), new FakeTimeProvider(Now), NullLogger<ConfirmBookingPaymentHandler>.Instance);
         var result = await handler.Handle(new ConfirmBookingPaymentCommand("missing_ref", "evt_3"), CancellationToken.None);
 
         result.IsSuccess.Should().BeTrue();

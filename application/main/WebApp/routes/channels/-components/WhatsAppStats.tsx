@@ -1,5 +1,6 @@
 import { Trans } from "@lingui/react/macro";
 import { Skeleton } from "@repo/ui/components/Skeleton";
+import { useFormatDate } from "@repo/ui/hooks/useSmartDate";
 import { cn } from "@repo/ui/utils";
 import {
   ArrowDownLeftIcon,
@@ -19,6 +20,7 @@ import { api } from "@/shared/lib/api/client";
  */
 export function WhatsAppStats() {
   const statsQuery = api.useQuery("get", "/api/main/whatsapp/messages/stats");
+  const formatDate = useFormatDate();
   const stats = statsQuery.data;
 
   if (statsQuery.isLoading) {
@@ -41,7 +43,7 @@ export function WhatsAppStats() {
         </h2>
         {stats.lastActivityAt !== null && (
           <span className="text-xs text-muted-foreground">
-            <Trans>Last message {formatTimestamp(stats.lastActivityAt)}</Trans>
+            <Trans>Last message {formatDate(stats.lastActivityAt, true)}</Trans>
           </span>
         )}
       </div>
@@ -54,33 +56,33 @@ export function WhatsAppStats() {
         />
         <StatTile
           icon={<ArrowDownLeftIcon className="size-4" />}
-          label={<Trans>Inbound</Trans>}
+          label={<Trans>From clients</Trans>}
           value={stats.inboundCount}
-          accent="text-sky-600 dark:text-sky-400"
+          accent="text-primary"
         />
         <StatTile
           icon={<ArrowUpRightIcon className="size-4" />}
-          label={<Trans>Outbound</Trans>}
+          label={<Trans>From you</Trans>}
           value={stats.outboundCount}
-          accent="text-violet-600 dark:text-violet-400"
+          accent="text-primary"
         />
         <StatTile
           icon={<CheckCheckIcon className="size-4" />}
           label={<Trans>Delivered</Trans>}
           value={stats.deliveredCount}
-          accent="text-emerald-600 dark:text-emerald-400"
+          accent="text-success"
         />
         <StatTile
           icon={<TriangleAlertIcon className="size-4" />}
-          label={<Trans>Failed</Trans>}
+          label={<Trans>Needs attention</Trans>}
           value={stats.failedCount}
-          accent="text-rose-600 dark:text-rose-400"
+          accent="text-destructive"
         />
         <StatTile
           icon={<UsersIcon className="size-4" />}
           label={<Trans>Unique contacts</Trans>}
           value={stats.uniqueContacts}
-          accent="text-amber-600 dark:text-amber-400"
+          accent="text-warning"
         />
       </div>
     </section>
@@ -102,11 +104,4 @@ function StatTile({
       <p className="text-2xl font-bold text-foreground tabular-nums">{value}</p>
     </div>
   );
-}
-
-function formatTimestamp(value: string): string {
-  return new Date(value).toLocaleString(undefined, {
-    dateStyle: "medium",
-    timeStyle: "short"
-  });
 }

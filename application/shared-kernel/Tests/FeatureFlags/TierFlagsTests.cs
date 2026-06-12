@@ -57,8 +57,8 @@ public sealed class TierFlagsTests
     [Fact]
     public void Registry_TotalFlagCount_ShouldBeSeventeenPlusExistingFlags()
     {
-        // 7 pre-existing flags + 3 tier + 15 capability + 1 integration = 26 total.
-        AllFlags.Should().HaveCount(26);
+        // 7 pre-existing flags + 3 tier + 15 capability + 1 integration + 3 AI front desk = 29 total.
+        AllFlags.Should().HaveCount(29);
     }
 
     [Theory]

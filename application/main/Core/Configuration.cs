@@ -7,9 +7,12 @@ using Main.Features.Apps.Connectors.WhatsApp;
 using Main.Features.Apps.Connectors.Zoom;
 using Main.Features.Apps.Domain;
 using Main.Features.Apps.Infrastructure;
+using Main.Features.Autonomy.Jobs;
+using Main.Features.Autonomy.Shared;
 using Main.Features.BookingSideEffects.Workers;
 using Main.Features.Clients.Domain;
 using Main.Features.Connectors.Domain;
+using Main.Features.DataImport.Agent;
 using Main.Features.EventTypes.Domain;
 using Main.Features.Insights.Shared;
 using Main.Features.ManagedEventTypes.EventHandlers;
@@ -19,6 +22,8 @@ using Main.Features.Payments.Jobs;
 using Main.Features.Payments.Paystack;
 using Main.Features.Permissions.Pipeline;
 using Main.Features.Permissions.Services;
+using Main.Features.Receptionist.Agent;
+using Main.Features.Receptionist.Shared;
 using Main.Features.Scheduling.Domain;
 using Main.Features.Scheduling.Notifications;
 using Main.Features.Scheduling.Shared;
@@ -36,12 +41,15 @@ using Main.Features.Workflows.Infrastructure;
 using Main.Features.Workflows.Jobs;
 using Main.Features.Workflows.Senders;
 using Main.Features.Workflows.Services;
+using Main.Integrations.Ai;
 using Main.Integrations.Meta;
+using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Options;
 using SharedKernel.Configuration;
 using SharedKernel.Emails;
 using TickerQ.DependencyInjection;
@@ -121,6 +129,43 @@ public static class Configuration
                     bookingOptions.LoginFlowId = Environment.GetEnvironmentVariable("WHATSAPP_LOGIN_FLOW_ID");
                 }
             );
+
+            // ─── AI Front Desk (docs/agentic-system-spec.md) ───────────
+            // Claude via the Anthropic Messages API (api.anthropic.com or a Foundry endpoint). When no
+            // API key is configured (tests, fresh local dev) the deterministic ScriptedChatClient keeps
+            // the whole agent pipeline exercisable without a model — and the spec's reliability rule
+            // holds either way: the deterministic Flows engine remains the fallback for booking.
+            services.Configure<AiOptions>(options =>
+                {
+                    options.ApiKey = Environment.GetEnvironmentVariable("ANTHROPIC_API_KEY");
+                    var endpoint = Environment.GetEnvironmentVariable("AI_ENDPOINT");
+                    if (!string.IsNullOrWhiteSpace(endpoint)) options.Endpoint = endpoint;
+                    var model = Environment.GetEnvironmentVariable("AI_MODEL");
+                    if (!string.IsNullOrWhiteSpace(model)) options.Model = model;
+                }
+            );
+            services.AddHttpClient("anthropic", client => { client.Timeout = TimeSpan.FromSeconds(60); });
+            services.AddScoped<IChatClient>(serviceProvider =>
+                {
+                    var aiOptions = serviceProvider.GetRequiredService<IOptions<AiOptions>>();
+                    if (!aiOptions.Value.IsConfigured) return new ScriptedChatClient();
+
+                    var httpClient = serviceProvider.GetRequiredService<IHttpClientFactory>().CreateClient("anthropic");
+                    return new AnthropicChatClient(httpClient, aiOptions, serviceProvider.GetRequiredService<ILogger<AnthropicChatClient>>());
+                }
+            );
+            services.AddScoped<ReceptionistToolCatalog>();
+            services.AddScoped<ReceptionistAgentFactory>();
+            services.AddScoped<ReceptionistInboundRouter>();
+            services.AddSingleton<ReceptionistTurnLockRegistry>();
+            services.AddScoped<ColumnMappingInferrer>();
+
+            // ─── Autonomy jobs (docs/maf-autonomy-design.md) ───────────
+            // The catalog is code: every job pairs a deterministic detector with command-mediated
+            // actions. New jobs register here; the runner discovers them through IAutonomyJob.
+            services.AddScoped<IAutonomyJob, PaymentRecoveryJob>();
+            services.AddScoped<IAutonomyJob, RebookCancelledJob>();
+            services.AddScoped<IAutonomyJob, WeeklyDigestJob>();
 
             return services
                 .AddScoped<IPermissionCheckService, PermissionCheckService>()
@@ -316,6 +361,12 @@ public static class Configuration
             // that have been outstanding for ReminderWindow.
             services.MapTicker<ReleaseUnpaidBookingJob>()
                 .WithCron("*/1 * * * *");
+
+            // ─── Autonomy runner ──────────────────────────────────────────
+            // Detects and executes (or suggests) front-desk jobs every 15 minutes. Quiet hours and
+            // daily caps are enforced inside the runner command, not by the schedule.
+            services.MapTicker<AutonomyTickerJob>()
+                .WithCron("*/15 * * * *");
 
             return services;
         }

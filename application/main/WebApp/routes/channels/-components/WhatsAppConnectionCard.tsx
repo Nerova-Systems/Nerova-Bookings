@@ -99,7 +99,8 @@ export function WhatsAppConnectionCard() {
 
   const status = statusQuery.data;
   const isConnected = status?.isConnected ?? false;
-  const isBusy = isLaunching || completeMutation.isPending || disconnectMutation.isPending || reprovisionMutation.isPending;
+  const isBusy =
+    isLaunching || completeMutation.isPending || disconnectMutation.isPending || reprovisionMutation.isPending;
 
   return (
     <Card>

@@ -1,6 +1,7 @@
 using System.Text.Json;
 using JetBrains.Annotations;
 using Main.Database;
+using Main.Features.Receptionist.Shared;
 using Main.Features.WhatsAppBooking;
 using Main.Features.WhatsAppBooking.Shared;
 using Main.Features.WhatsAppMessaging.Domain;
@@ -20,6 +21,7 @@ public sealed class ProcessPendingWhatsAppEvents(
     IWhatsAppMessageRepository whatsAppMessageRepository,
     IWhatsAppBusinessAccountRepository whatsAppBusinessAccountRepository,
     WhatsAppConversationEngine conversationEngine,
+    ReceptionistInboundRouter receptionistInboundRouter,
     TimeProvider timeProvider,
     ITelemetryEventsCollector events,
     ILogger<ProcessPendingWhatsAppEvents> logger
@@ -83,9 +85,14 @@ public sealed class ProcessPendingWhatsAppEvents(
                             await whatsAppMessageRepository.AddAsync(message, cancellationToken);
                             events.CollectEvent(new WhatsAppMessageReceived(message.Id));
 
-                            // Drive the deterministic booking conversation (greet, launch Flow, advance state).
+                            // Route to the AI receptionist when enabled for the tenant; otherwise drive
+                            // the deterministic booking conversation (greet, launch Flow, advance state).
                             var inbound = BuildInboundMessage(msg.From, msg);
-                            await conversationEngine.HandleInboundAsync(account, inbound, cancellationToken);
+                            var handledByReceptionist = await receptionistInboundRouter.TryHandleInboundAsync(account, inbound, cancellationToken);
+                            if (!handledByReceptionist)
+                            {
+                                await conversationEngine.HandleInboundAsync(account, inbound, cancellationToken);
+                            }
                         }
                     }
 

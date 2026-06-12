@@ -39,6 +39,15 @@ msgstr "Add email address"
 msgid "Add option"
 msgstr "Add option"
 
+msgid "AI business insights"
+msgstr "AI business insights"
+
+msgid "AI data import"
+msgstr "AI data import"
+
+msgid "AI receptionist"
+msgstr "AI receptionist"
+
 msgid "Allow org members to sign in via Google Workspace. Ports cal.com Google SSO. Requires g3-sso-google."
 msgstr "Allow org members to sign in via Google Workspace. Ports cal.com Google SSO. Requires g3-sso-google."
 
@@ -210,6 +219,9 @@ msgstr "Google OAuth"
 msgid "Google SSO"
 msgstr "Google SSO"
 
+msgid "Handle inbound WhatsApp conversations with the AI receptionist: answers questions, books, reschedules, and cancels appointments, escalating to a human when needed"
+msgstr "Handle inbound WhatsApp conversations with the AI receptionist: answers questions, books, reschedules, and cancels appointments, escalating to a human when needed"
+
 msgid "Hex color value"
 msgstr "Hex color value"
 
@@ -221,6 +233,9 @@ msgstr "Immutable record of all significant system events across every SCS, writ
 
 msgid "Impersonation"
 msgstr "Impersonation"
+
+msgid "Import clients from a CSV export of a previous system: the AI maps columns automatically and the owner reviews before anything is saved"
+msgstr "Import clients from a CSV export of a previous system: the AI maps columns automatically and the owner reviews before anything is saved"
 
 msgid "In-app support ticket creation, inbox, and back-office support tabs"
 msgstr "In-app support ticket creation, inbox, and back-office support tabs"
@@ -445,6 +460,9 @@ msgstr "Upload banner image"
 
 msgid "View {name} in marketplace"
 msgstr "View {name} in marketplace"
+
+msgid "Weekly business summaries, no-show and retention insights, and suggested actions the owner can trigger with one tap"
+msgstr "Weekly business summaries, no-show and retention insights, and suggested actions the owner can trigger with one tap"
 
 msgid "Workflows"
 msgstr "Workflows"

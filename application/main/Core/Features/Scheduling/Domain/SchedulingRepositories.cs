@@ -75,6 +75,19 @@ public interface IBookingRepository : IAppendRepository<Booking, BookingId>
     ///     dispatcher + TickerQ payment jobs) that do not carry tenant context.
     /// </summary>
     Task<Booking?> GetByIdUnfilteredAsync(BookingId bookingId, CancellationToken cancellationToken);
+
+    /// <summary>
+    ///     Upcoming bookings made by a customer phone number within a tenant. Used by the AI
+    ///     receptionist (webhook context, no execution context) to let an identified customer see
+    ///     and manage their own bookings.
+    /// </summary>
+    Task<Booking[]> GetUpcomingByBookerPhoneUnfilteredAsync(TenantId tenantId, string bookerPhone, DateTimeOffset from, CancellationToken cancellationToken);
+
+    /// <summary>Bookings cancelled after the given time for a tenant. Used by the rebook autonomy job.</summary>
+    Task<Booking[]> GetRecentlyCancelledUnfilteredAsync(TenantId tenantId, DateTimeOffset since, CancellationToken cancellationToken);
+
+    /// <summary>All bookings of a tenant intersecting the range. Used by the weekly digest metrics.</summary>
+    Task<Booking[]> GetForTenantRangeUnfilteredAsync(TenantId tenantId, DateTimeOffset from, DateTimeOffset to, CancellationToken cancellationToken);
 }
 
 public sealed record BookingWithEventType(Booking Booking, EventType EventType);
@@ -260,5 +273,41 @@ public sealed class BookingRepository(MainDbContext mainDbContext)
             .IgnoreQueryFilters()
             .AsTracking()
             .SingleOrDefaultAsync(b => b.Id == bookingId, cancellationToken);
+    }
+
+    public async Task<Booking[]> GetUpcomingByBookerPhoneUnfilteredAsync(TenantId tenantId, string bookerPhone, DateTimeOffset from, CancellationToken cancellationToken)
+    {
+        var bookings = await DbSet
+            .IgnoreQueryFilters()
+            .AsTracking()
+            .Where(b => b.TenantId == tenantId && b.BookerPhone == bookerPhone)
+            .Where(b => b.Status == BookingStatus.Accepted || b.Status == BookingStatus.Pending || b.Status == BookingStatus.AwaitingHost)
+            .ToArrayAsync(cancellationToken);
+
+        return bookings
+            .Where(b => b.EndTime > from)
+            .OrderBy(b => b.StartTime)
+            .ThenBy(b => b.Id)
+            .ToArray();
+    }
+
+    public async Task<Booking[]> GetRecentlyCancelledUnfilteredAsync(TenantId tenantId, DateTimeOffset since, CancellationToken cancellationToken)
+    {
+        var bookings = await DbSet
+            .IgnoreQueryFilters()
+            .Where(b => b.TenantId == tenantId && b.Status == BookingStatus.Cancelled)
+            .ToArrayAsync(cancellationToken);
+
+        return bookings.Where(b => (b.ModifiedAt ?? b.CreatedAt) >= since).ToArray();
+    }
+
+    public async Task<Booking[]> GetForTenantRangeUnfilteredAsync(TenantId tenantId, DateTimeOffset from, DateTimeOffset to, CancellationToken cancellationToken)
+    {
+        var bookings = await DbSet
+            .IgnoreQueryFilters()
+            .Where(b => b.TenantId == tenantId)
+            .ToArrayAsync(cancellationToken);
+
+        return bookings.Where(b => b.StartTime < to && b.EndTime > from).ToArray();
     }
 }

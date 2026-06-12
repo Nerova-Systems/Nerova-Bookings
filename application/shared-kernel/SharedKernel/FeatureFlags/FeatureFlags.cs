@@ -399,4 +399,50 @@ public static partial class FeatureFlags
         true,
         "tier-enterprise"
     );
+
+    // -----------------------------------------------------------------------------------------
+    // AI Front Desk flags
+    //
+    // Per-tenant gates for the agentic layer (docs/agentic-system-spec.md §5.6 R34). Each agent
+    // ships dark: IsKillSwitchEnabled=true creates the base row inactive, and an admin must
+    // explicitly activate per pilot tenant. Tracked in telemetry so adoption of the AI tier is
+    // measurable from day one.
+    // -----------------------------------------------------------------------------------------
+
+    /// <summary>
+    ///     Gates the WhatsApp receptionist agent: free-text inbound messages route to the
+    ///     conversational agent instead of the deterministic Flows engine. Turning this off
+    ///     reverts to the Flows engine on the next message (kill switch, spec §6.5.7).
+    /// </summary>
+    public static readonly FeatureFlagDefinition ReceptionistAgent = new TenantAdminManagedFlag(
+        "receptionist-agent",
+        "AI receptionist",
+        "Handle inbound WhatsApp conversations with the AI receptionist: answers questions, books, reschedules, and cancels appointments, escalating to a human when needed",
+        true,
+        true
+    );
+
+    /// <summary>
+    ///     Gates the AI data import: tenants upload a CSV export from their old system and the
+    ///     import agent maps clients into Nerova with human review before commit.
+    /// </summary>
+    public static readonly FeatureFlagDefinition DataImportAgent = new TenantAdminManagedFlag(
+        "data-import-agent",
+        "AI data import",
+        "Import clients from a CSV export of a previous system: the AI maps columns automatically and the owner reviews before anything is saved",
+        true,
+        true
+    );
+
+    /// <summary>
+    ///     Gates the owner agent: weekly business digests, proactive insights, and suggested
+    ///     actions delivered to the owner, plus the autonomous jobs framework built on top.
+    /// </summary>
+    public static readonly FeatureFlagDefinition OwnerAgent = new TenantAdminManagedFlag(
+        "owner-agent",
+        "AI business insights",
+        "Weekly business summaries, no-show and retention insights, and suggested actions the owner can trigger with one tap",
+        true,
+        true
+    );
 }

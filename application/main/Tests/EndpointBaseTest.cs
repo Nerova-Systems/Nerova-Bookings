@@ -40,6 +40,8 @@ public abstract class EndpointBaseTest<TContext> : IDisposable where TContext : 
     {
         Environment.SetEnvironmentVariable(SinglePageAppConfiguration.PublicUrlKey, TestPublicUrl);
         Environment.SetEnvironmentVariable(SinglePageAppConfiguration.CdnUrlKey, $"{TestPublicUrl}/main");
+        // Tests must always use the deterministic ScriptedChatClient — never a developer's real AI key.
+        Environment.SetEnvironmentVariable("ANTHROPIC_API_KEY", null);
         Environment.SetEnvironmentVariable(
             "APPLICATIONINSIGHTS_CONNECTION_STRING",
             "InstrumentationKey=00000000-0000-0000-0000-000000000000;IngestionEndpoint=https://localhost;LiveEndpoint=https://localhost"

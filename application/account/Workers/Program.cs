@@ -21,6 +21,7 @@ builder.Services.AddHostedService<SubscriptionBillingWorker>();
 builder.Services.AddTransient<DatabaseMigrationService<AccountDbContext>>();
 builder.Services.AddTransient<DataMigrationRunner<AccountDbContext>>();
 builder.Services.AddTransient<FeatureFlagDefinitionReconciler>();
+builder.Services.AddTransient<DevelopmentDataSeeder>();
 
 builder.Services.AddHostedService<BillingDriftWorker>();
 
@@ -45,5 +46,12 @@ await dataMigrationRunner.RunMigrationsAsync(lifetime.ApplicationStopping);
 // non-zero so the orchestrator notices, which is preferable to running with inconsistent flag state.
 var featureFlagDefinitionReconciler = scope.ServiceProvider.GetRequiredService<FeatureFlagDefinitionReconciler>();
 await featureFlagDefinitionReconciler.ReconcileAsync(lifetime.ApplicationStopping);
+
+// Seed demo organization + teams data for local development only (idempotent, never in Azure).
+if (!SharedInfrastructureConfiguration.IsRunningInAzure)
+{
+    var developmentDataSeeder = scope.ServiceProvider.GetRequiredService<DevelopmentDataSeeder>();
+    await developmentDataSeeder.SeedAsync(lifetime.ApplicationStopping);
+}
 
 await host.RunAsync();

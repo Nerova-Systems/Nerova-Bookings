@@ -122,6 +122,18 @@ function getKnownFeatureFlagLabels(): Record<string, FeatureFlagLabel> {
     "cap-insights": {
       name: t`Insights`,
       description: t`Analytics dashboard: booking volume, event-type performance, and member load metrics. Ports cal.com insights. Requires g3-insights.`
+    },
+    "receptionist-agent": {
+      name: t`AI receptionist`,
+      description: t`Handle inbound WhatsApp conversations with the AI receptionist: answers questions, books, reschedules, and cancels appointments, escalating to a human when needed`
+    },
+    "data-import-agent": {
+      name: t`AI data import`,
+      description: t`Import clients from a CSV export of a previous system: the AI maps columns automatically and the owner reviews before anything is saved`
+    },
+    "owner-agent": {
+      name: t`AI business insights`,
+      description: t`Weekly business summaries, no-show and retention insights, and suggested actions the owner can trigger with one tap`
     }
   };
 }

@@ -9,7 +9,7 @@
 // `useFeatureFlag(deletedKey)` and `getFeatureFlagLabel(deletedKey)` callsite into a TS compile
 // error after the next backend build regenerates this file.
 
-export type FeatureFlagKey = "google-oauth" | "subscriptions" | "support-system" | "beta-features" | "sso" | "account-overview" | "compact-view" | "experimental-ui" | "tier-teams" | "tier-organizations" | "tier-enterprise" | "cap-managed-event-types" | "cap-round-robin" | "cap-collective" | "cap-attributes" | "cap-custom-smtp" | "cap-org-billing" | "cap-delegation-credentials" | "cap-sso-microsoft" | "cap-sso-google" | "cap-integration-attribute-sync" | "cap-audit-log" | "cap-workflows" | "cap-api-keys" | "cap-impersonation" | "cap-insights";
+export type FeatureFlagKey = "google-oauth" | "subscriptions" | "support-system" | "beta-features" | "sso" | "account-overview" | "compact-view" | "experimental-ui" | "tier-teams" | "tier-organizations" | "tier-enterprise" | "cap-managed-event-types" | "cap-round-robin" | "cap-collective" | "cap-attributes" | "cap-custom-smtp" | "cap-org-billing" | "cap-delegation-credentials" | "cap-sso-microsoft" | "cap-sso-google" | "cap-integration-attribute-sync" | "cap-audit-log" | "cap-workflows" | "cap-api-keys" | "cap-impersonation" | "cap-insights" | "receptionist-agent" | "data-import-agent" | "owner-agent";
 
 type FeatureFlagScope = "system" | "tenant" | "user";
 type FeatureFlagAdminLevel = "systemAdmin" | "tenantOwner" | "user";
@@ -218,6 +218,27 @@ const featureFlagRegistry: Record<FeatureFlagKey, FeatureFlagDefinition> = {
       adminLevel: "systemAdmin",
       parentDependency: "tier-enterprise",
       description: "Analytics dashboard: booking volume, event-type performance, and member load metrics. Ports cal.com insights. Requires g3-insights."
+    },
+    "receptionist-agent": {
+      key: "receptionist-agent",
+      scope: "tenant",
+      adminLevel: "systemAdmin",
+      parentDependency: null,
+      description: "Handle inbound WhatsApp conversations with the AI receptionist: answers questions, books, reschedules, and cancels appointments, escalating to a human when needed"
+    },
+    "data-import-agent": {
+      key: "data-import-agent",
+      scope: "tenant",
+      adminLevel: "systemAdmin",
+      parentDependency: null,
+      description: "Import clients from a CSV export of a previous system: the AI maps columns automatically and the owner reviews before anything is saved"
+    },
+    "owner-agent": {
+      key: "owner-agent",
+      scope: "tenant",
+      adminLevel: "systemAdmin",
+      parentDependency: null,
+      description: "Weekly business summaries, no-show and retention insights, and suggested actions the owner can trigger with one tap"
     }
 };
 

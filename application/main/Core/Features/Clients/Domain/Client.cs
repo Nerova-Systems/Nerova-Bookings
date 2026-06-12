@@ -36,6 +36,9 @@ public sealed class Client : AggregateRoot<ClientId>, ITenantScopedEntity
 
     public string? AvatarUrl { get; private set; }
 
+    /// <summary>Free-text notes about the client, e.g. imported remarks from a previous system.</summary>
+    public string? Notes { get; private set; }
+
     public DateTimeOffset? LastVisitAt { get; private set; }
 
     public bool NeedsAttention => string.IsNullOrWhiteSpace(Email) || string.IsNullOrWhiteSpace(PhoneNumber);
@@ -58,6 +61,11 @@ public sealed class Client : AggregateRoot<ClientId>, ITenantScopedEntity
     public void UpdateAvatar(string? avatarUrl)
     {
         AvatarUrl = Normalize(avatarUrl);
+    }
+
+    public void UpdateNotes(string? notes)
+    {
+        Notes = Normalize(notes);
     }
 
     public void RecordVisit(DateTimeOffset visitedAt)
