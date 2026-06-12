@@ -1449,6 +1449,10 @@ msgstr "Only owners can change user roles"
 msgid "Only trusted personnel access data through Azure AD authentication"
 msgstr "Only trusted personnel access data through Azure AD authentication"
 
+#. placeholder {0}: team.name
+msgid "Open {0}"
+msgstr "Open {0}"
+
 msgid "Open your first ticket"
 msgstr "Open your first ticket"
 

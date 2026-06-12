@@ -40,13 +40,13 @@ msgid "Add option"
 msgstr "Tilføj mulighed"
 
 msgid "AI business insights"
-msgstr ""
+msgstr "AI-forretningsindsigter"
 
 msgid "AI data import"
-msgstr ""
+msgstr "AI-dataimport"
 
 msgid "AI receptionist"
-msgstr ""
+msgstr "AI-receptionist"
 
 msgid "Allow org members to sign in via Google Workspace. Ports cal.com Google SSO. Requires g3-sso-google."
 msgstr "Giv org-medlemmer mulighed for at logge ind via Google Workspace. Porter cal.com Google SSO. Kræver g3-sso-google."
@@ -220,7 +220,7 @@ msgid "Google SSO"
 msgstr "Google SSO"
 
 msgid "Handle inbound WhatsApp conversations with the AI receptionist: answers questions, books, reschedules, and cancels appointments, escalating to a human when needed"
-msgstr ""
+msgstr "Håndter indgående WhatsApp-samtaler med AI-receptionisten: svarer på spørgsmål, booker, ombooker og aflyser aftaler og sender videre til et menneske, når det er nødvendigt"
 
 msgid "Hex color value"
 msgstr "Hex-farveværdi"
@@ -235,7 +235,7 @@ msgid "Impersonation"
 msgstr "Brugerefterligning"
 
 msgid "Import clients from a CSV export of a previous system: the AI maps columns automatically and the owner reviews before anything is saved"
-msgstr ""
+msgstr "Importér klienter fra en CSV-eksport fra et tidligere system: AI'en matcher kolonner automatisk, og ejeren gennemgår, før noget gemmes"
 
 msgid "In-app support ticket creation, inbox, and back-office support tabs"
 msgstr "Oprettelse af supportsager i appen, indbakke og back-office supportfaner"
@@ -462,7 +462,7 @@ msgid "View {name} in marketplace"
 msgstr "Se {name} i markedsplads"
 
 msgid "Weekly business summaries, no-show and retention insights, and suggested actions the owner can trigger with one tap"
-msgstr ""
+msgstr "Ugentlige virksomhedsopsummeringer, indsigter om udeblivelser og fastholdelse samt foreslåede handlinger, som ejeren kan udløse med ét tryk"
 
 msgid "Workflows"
 msgstr "Arbejdsflows"

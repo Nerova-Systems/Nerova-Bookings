@@ -39,7 +39,7 @@ msgstr "{0} er ikke en tilladt filtype"
 
 #. placeholder {0}: role.memberCount
 msgid "{0} members assigned"
-msgstr ""
+msgstr "{0} medlemmer tildelt"
 
 #. placeholder {0}: targetPlanDetails.name
 msgid "{0} plan"
@@ -145,7 +145,7 @@ msgid "A ticket can have at most {MAX_ATTACHMENTS} attachments"
 msgstr "En sag kan højst have {MAX_ATTACHMENTS} vedhæftede filer"
 
 msgid "About"
-msgstr ""
+msgstr "Om"
 
 msgid "About / tagline"
 msgstr "Om / tagline"
@@ -244,16 +244,16 @@ msgid "Add more in the Users menu"
 msgstr "Tilføj flere i Brugere menuen"
 
 msgid "Add or remove users to manage who belongs to this team."
-msgstr ""
+msgstr "Tilføj eller fjern brugere for at styre, hvem der hører til dette team."
 
 msgid "Add profile picture"
 msgstr "Tilføj profilbillede"
 
 msgid "Add selected users to team"
-msgstr ""
+msgstr "Tilføj valgte brugere til team"
 
 msgid "Add users from the left to get started."
-msgstr ""
+msgstr "Tilføj brugere fra venstre for at komme i gang."
 
 msgid "Add website"
 msgstr "Tilføj websted"
@@ -336,7 +336,7 @@ msgstr "Er du sikker på, at du vil slette <0>{0} brugere</0>?"
 
 #. placeholder {0}: role.name
 msgid "Are you sure you want to delete <0>{0}</0>? Members assigned to this role will lose its permissions."
-msgstr ""
+msgstr "Er du sikker på, at du vil slette <0>{0}</0>? Medlemmer med denne rolle mister dens rettigheder."
 
 msgid "Are you sure you want to delete <0>{userDisplayName}</0>?"
 msgstr "Er du sikker på, at du vil slette <0>{userDisplayName}</0>?"
@@ -556,7 +556,7 @@ msgid "Check your spam folder."
 msgstr "Tjek din spammappe."
 
 msgid "Choose a name and select the permissions this role grants."
-msgstr ""
+msgstr "Vælg et navn, og vælg de rettigheder, denne rolle giver."
 
 msgid "Choose a plan to get started."
 msgstr "Vælg en plan for at komme i gang."
@@ -589,7 +589,7 @@ msgid "Close"
 msgstr "Luk"
 
 msgid "Close team details"
-msgstr ""
+msgstr "Luk teamdetaljer"
 
 msgid "Close user profile"
 msgstr "Luk brugerprofil"
@@ -614,7 +614,7 @@ msgid "Confirm downgrade"
 msgstr "Bekræft nedgradering"
 
 msgid "Confirm team name"
-msgstr ""
+msgstr "Bekræft teamnavn"
 
 msgid "Contact support"
 msgstr "Kontakt support"
@@ -629,7 +629,7 @@ msgid "Continue"
 msgstr "Fortsæt"
 
 msgid "Control how your team appears to bookers."
-msgstr ""
+msgstr "Styr, hvordan dit team vises for bookere."
 
 msgid "Could not save preferences. Please try again."
 msgstr "Indstillingerne kunne ikke gemmes. Pr├╕v igen."
@@ -638,16 +638,16 @@ msgid "Country"
 msgstr "Land"
 
 msgid "Create a custom role to grant members the exact permissions they need."
-msgstr ""
+msgstr "Opret en brugerdefineret rolle for at give medlemmer præcis de rettigheder, de har brug for."
 
 msgid "Create a role"
-msgstr ""
+msgstr "Opret en rolle"
 
 msgid "Create a team"
-msgstr ""
+msgstr "Opret et team"
 
 msgid "Create a team to collaborate on event types and bookings with your colleagues."
-msgstr ""
+msgstr "Opret et team for at samarbejde om begivenhedstyper og bookinger med dine kolleger."
 
 msgid "Create new account"
 msgstr "Opret ny konto"
@@ -659,10 +659,10 @@ msgid "Create new team"
 msgstr "Opret nyt team"
 
 msgid "Create role"
-msgstr ""
+msgstr "Opret rolle"
 
 msgid "Create team"
-msgstr ""
+msgstr "Opret team"
 
 msgid "Create your account"
 msgstr "Opret din konto"
@@ -671,7 +671,7 @@ msgid "Created"
 msgstr "Oprettet"
 
 msgid "Creating..."
-msgstr ""
+msgstr "Opretter..."
 
 msgid "Credit note"
 msgstr "Kreditnota"
@@ -683,10 +683,10 @@ msgid "Current plan"
 msgstr "Nuværende plan"
 
 msgid "Custom role"
-msgstr ""
+msgstr "Brugerdefineret rolle"
 
 msgid "Custom role updated"
-msgstr ""
+msgstr "Brugerdefineret rolle opdateret"
 
 msgid "Custom SMTP"
 msgstr "Brugerdefineret SMTP"
@@ -734,14 +734,14 @@ msgid "Default"
 msgstr "Standard"
 
 msgid "Define custom roles and assign permissions to control what your members can do."
-msgstr ""
+msgstr "Definér brugerdefinerede roller og tildel rettigheder for at styre, hvad dine medlemmer kan gøre."
 
 msgid "Delete"
 msgstr "Slet"
 
 #. placeholder {0}: role.name
 msgid "Delete {0}"
-msgstr ""
+msgstr "Slet {0}"
 
 #. placeholder {0}: selectedUsers.length
 msgid "Delete {0} users"
@@ -754,10 +754,10 @@ msgid "Delete permanently"
 msgstr "Slet permanent"
 
 msgid "Delete role"
-msgstr ""
+msgstr "Slet rolle"
 
 msgid "Delete team"
-msgstr ""
+msgstr "Slet team"
 
 msgid "Delete user"
 msgstr "Slet bruger"
@@ -782,10 +782,10 @@ msgstr "Slettede brugere vil blive vist her til gendannelse"
 
 #. placeholder {0}: team.name
 msgid "Deleting <0>{0}</0> will remove all memberships and is irreversible. Type the team name to confirm."
-msgstr ""
+msgstr "Hvis du sletter <0>{0}</0>, fjernes alle medlemskaber, og det kan ikke fortrydes. Skriv teamnavnet for at bekræfte."
 
 msgid "Deleting a team is permanent and cannot be undone."
-msgstr ""
+msgstr "Sletning af et team er permanent og kan ikke fortrydes."
 
 msgid "Description"
 msgstr "Beskrivelse"
@@ -841,24 +841,24 @@ msgstr "Rediger"
 
 #. placeholder {0}: role.name
 msgid "Edit {0}"
-msgstr ""
+msgstr "Rediger {0}"
 
 msgid "Edit billing information"
 msgstr "Rediger faktureringsoplysninger"
 
 msgid "Edit general settings"
-msgstr ""
+msgstr "Rediger generelle indstillinger"
 
 msgid "Edit profile"
 msgstr "Rediger profil"
 
 #. placeholder {0}: team.name
 msgid "Edit team - {0}"
-msgstr ""
+msgstr "Rediger team - {0}"
 
 #. placeholder {0}: team.name
 msgid "Edit team members - {0}"
-msgstr ""
+msgstr "Rediger teammedlemmer - {0}"
 
 msgid "Edit user profile"
 msgstr "Rediger brugerprofil"
@@ -915,7 +915,7 @@ msgid "Estimated next bill: {targetFormattedPrice}"
 msgstr "Forventet næste regning: {targetFormattedPrice}"
 
 msgid "Everyone is already a member."
-msgstr ""
+msgstr "Alle er allerede medlemmer."
 
 msgid "Excl. tax"
 msgstr "Ekskl. moms"
@@ -933,10 +933,10 @@ msgid "Failed"
 msgstr "Mislykket"
 
 msgid "Failed to create role. Please try again."
-msgstr ""
+msgstr "Rollen kunne ikke oprettes. Prøv igen."
 
 msgid "Failed to update role. Please try again."
-msgstr ""
+msgstr "Rollen kunne ikke opdateres. Prøv igen."
 
 msgid "Feature"
 msgstr "Funktion"
@@ -999,7 +999,7 @@ msgid "GDPR Compliant"
 msgstr "GDPR-kompatibel"
 
 msgid "General"
-msgstr ""
+msgstr "Generelt"
 
 msgid "GitHub"
 msgstr "GitHub"
@@ -1053,25 +1053,25 @@ msgid "Hi! Welcome back"
 msgstr "Hej! Velkommen tilbage"
 
 msgid "Hide \"Book a team member\""
-msgstr ""
+msgstr "Skjul \"Book et teammedlem\""
 
 msgid "Hide branding"
-msgstr ""
+msgstr "Skjul branding"
 
 msgid "Hide details"
 msgstr "Skjul detaljer"
 
 msgid "Hide team profile link"
-msgstr ""
+msgstr "Skjul link til teamprofil"
 
 msgid "Hide the \"Powered by\" footer on booking pages."
-msgstr ""
+msgstr "Skjul \"Powered by\"-sidefoden på bookingsider."
 
 msgid "Hide the option to book any available member from the team profile page."
-msgstr ""
+msgstr "Skjul muligheden for at booke et ledigt medlem fra teamets profilside."
 
 msgid "Hide the team's member list and profile page from public visitors."
-msgstr ""
+msgstr "Skjul teamets medlemsliste og profilside for offentlige besøgende."
 
 msgid "Host"
 msgstr "Vært"
@@ -1101,13 +1101,13 @@ msgid "Invitation pending"
 msgstr "Invitation afventer"
 
 msgid "Invitation sent"
-msgstr ""
+msgstr "Invitation sendt"
 
 msgid "Invite member"
-msgstr ""
+msgstr "Inviter medlem"
 
 msgid "Invite team member"
-msgstr ""
+msgstr "Inviter teammedlem"
 
 msgid "Invite user"
 msgstr "Inviter bruger"
@@ -1188,10 +1188,10 @@ msgid "LinkedIn"
 msgstr "LinkedIn"
 
 msgid "Loading members..."
-msgstr ""
+msgstr "Indlæser medlemmer..."
 
 msgid "Loading permissions..."
-msgstr ""
+msgstr "Indlæser rettigheder..."
 
 msgid "Loading..."
 msgstr "Indlæser..."
@@ -1237,13 +1237,13 @@ msgstr "Administrer"
 
 #. placeholder {0}: team.name
 msgid "Manage {0}"
-msgstr ""
+msgstr "Administrer {0}"
 
 msgid "Manage how dates, times, and language are presented across the app."
 msgstr "Administrer hvordan datoer, tidspunkter og sprog vises i appen."
 
 msgid "Manage members"
-msgstr ""
+msgstr "Administrer medlemmer"
 
 msgid "Manage subscription"
 msgstr "Administrer abonnement"
@@ -1276,13 +1276,13 @@ msgid "Member"
 msgstr "Medlem"
 
 msgid "Member removed"
-msgstr ""
+msgstr "Medlem fjernet"
 
 msgid "Members"
-msgstr ""
+msgstr "Medlemmer"
 
 msgid "Membership role"
-msgstr ""
+msgstr "Medlemsrolle"
 
 msgid "Metadata"
 msgstr "Metadata"
@@ -1348,10 +1348,10 @@ msgid "Need help? Our support team is here to assist you."
 msgstr "Har du brug for hjælp? Vores supportteam er klart til at hjælpe."
 
 msgid "New role"
-msgstr ""
+msgstr "Ny rolle"
 
 msgid "New team"
-msgstr ""
+msgstr "Nyt team"
 
 msgid "New ticket"
 msgstr "Ny sag"
@@ -1378,7 +1378,7 @@ msgid "No billing information on file"
 msgstr "Ingen faktureringsoplysninger registreret"
 
 msgid "No custom roles available"
-msgstr ""
+msgstr "Ingen brugerdefinerede roller tilgængelige"
 
 msgid "No entries match your filters"
 msgstr "Ingen poster matcher dine filtre"
@@ -1390,10 +1390,10 @@ msgid "No members in this organization yet."
 msgstr "Ingen medlemmer i denne organisation endnu."
 
 msgid "No members yet."
-msgstr ""
+msgstr "Ingen medlemmer endnu."
 
 msgid "No members yet. Invite your first teammate to get started."
-msgstr ""
+msgstr "Ingen medlemmer endnu. Inviter din første holdkammerat for at komme i gang."
 
 msgid "No payment history available."
 msgstr "Ingen betalingshistorik tilgængelig."
@@ -1402,13 +1402,13 @@ msgid "No payment method on file"
 msgstr "Ingen betalingsmetode registreret"
 
 msgid "No roles yet"
-msgstr ""
+msgstr "Ingen roller endnu"
 
 msgid "No team members"
-msgstr ""
+msgstr "Ingen teammedlemmer"
 
 msgid "No teams yet"
-msgstr ""
+msgstr "Ingen teams endnu"
 
 msgid "No teams yet. Create your first team to start collaborating."
 msgstr "Ingen teams endnu. Opret dit første team for at begynde at samarbejde."
@@ -1420,7 +1420,7 @@ msgid "No users found"
 msgstr "Ingen brugere fundet"
 
 msgid "No users to add"
-msgstr ""
+msgstr "Ingen brugere at tilføje"
 
 msgid "None"
 msgstr "Ingen"
@@ -1448,6 +1448,10 @@ msgstr "Kun ejere kan ændre brugerroller"
 
 msgid "Only trusted personnel access data through Azure AD authentication"
 msgstr "Kun betroet personale får adgang til data gennem Azure AD autentificering"
+
+#. placeholder {0}: team.name
+msgid "Open {0}"
+msgstr "Åbn {0}"
 
 msgid "Open your first ticket"
 msgstr "Opret din første sag"
@@ -1544,7 +1548,7 @@ msgid "Permanently delete users"
 msgstr "Slet brugere permanent"
 
 msgid "Permissions"
-msgstr ""
+msgstr "Rettigheder"
 
 msgid "Pick a name and a URL slug. You can configure branding and invite members after creating the team."
 msgstr "Vælg et navn og en URL-slug. Du kan konfigurere branding og invitere medlemmer efter oprettelse af teamet."
@@ -1616,7 +1620,7 @@ msgid "Privacy Policy"
 msgstr "Privatlivspolitik"
 
 msgid "Private team"
-msgstr ""
+msgstr "Privat team"
 
 msgid "Processing payment..."
 msgstr "Behandler betaling..."
@@ -1643,7 +1647,7 @@ msgid "Profile updated successfully"
 msgstr "Profil opdateret succesfuldt"
 
 msgid "Public information shown on your team's booking pages."
-msgstr ""
+msgstr "Offentlige oplysninger, der vises på dit teams bookingsider."
 
 msgid "Rate this support"
 msgstr "Bedøm denne support"
@@ -1688,22 +1692,22 @@ msgstr "Fjern {0}"
 
 #. placeholder {0}: memberToRemove.email
 msgid "Remove <0>{0}</0> from this team? They will lose access to team event types and bookings."
-msgstr ""
+msgstr "Fjern <0>{0}</0> fra dette team? Personen mister adgang til teamets begivenhedstyper og bookinger."
 
 msgid "Remove logo"
 msgstr "Fjern logo"
 
 msgid "Remove member"
-msgstr ""
+msgstr "Fjern medlem"
 
 msgid "Remove profile picture"
 msgstr "Fjern profilbillede"
 
 msgid "Remove selected users from team"
-msgstr ""
+msgstr "Fjern valgte brugere fra teamet"
 
 msgid "Remove the link back to the team profile from individual member pages."
-msgstr ""
+msgstr "Fjern linket tilbage til teamprofilen fra de enkelte medlemssider."
 
 msgid "Remove website"
 msgstr "Fjern websted"
@@ -1718,7 +1722,7 @@ msgid "Request a new code"
 msgstr "Anmod om en ny kode"
 
 msgid "Resource"
-msgstr ""
+msgstr "Ressource"
 
 msgid "Resource ID"
 msgstr "Ressource-ID"
@@ -1772,17 +1776,17 @@ msgstr "Rolle"
 
 #. placeholder {0}: created.name
 msgid "Role created: {0}"
-msgstr ""
+msgstr "Rolle oprettet: {0}"
 
 #. placeholder {0}: role.name
 msgid "Role deleted: {0}"
 msgstr "Role deleted: {0}\"#, fuzzy"
 
 msgid "Role description"
-msgstr ""
+msgstr "Rollebeskrivelse"
 
 msgid "Role name"
-msgstr ""
+msgstr "Rollenavn"
 
 #. placeholder {0}: user.email
 msgid "Role updated for {0}"
@@ -1790,10 +1794,10 @@ msgstr "Rolle opdateret for {0}"
 
 #. placeholder {0}: updated.name
 msgid "Role updated: {0}"
-msgstr ""
+msgstr "Rolle opdateret: {0}"
 
 msgid "Roles"
-msgstr ""
+msgstr "Roller"
 
 msgid "Saturday"
 msgstr "L├╕rdag"
@@ -1817,10 +1821,10 @@ msgid "Search"
 msgstr "Søg"
 
 msgid "Search by name, email, or title"
-msgstr ""
+msgstr "Søg efter navn, e-mail eller titel"
 
 msgid "Search users"
-msgstr ""
+msgstr "Søg efter brugere"
 
 msgid "Security, privacy, and compliance information"
 msgstr "Sikkerheds-, privatlivs- og overholdelsesoplysninger"
@@ -1852,7 +1856,7 @@ msgid "Select your preferred language. Saved to your profile."
 msgstr "Vælg dit foretrukne sprog. Gemt på din profil."
 
 msgid "Selecting <0>Manage</0> for a resource implicitly grants Create, Read, Update, and Delete."
-msgstr ""
+msgstr "Når du vælger <0>Administrer</0> for en ressource, gives der automatisk Opret, Læs, Opdater og Slet."
 
 msgid "Send"
 msgstr "Send"
@@ -1864,7 +1868,7 @@ msgid "Send invite"
 msgstr "Send invitation"
 
 msgid "Send test"
-msgstr ""
+msgstr "Send test"
 
 msgid "Send to support"
 msgstr "Send til supporten"
@@ -2030,7 +2034,7 @@ msgid "Sunday"
 msgstr "S├╕ndag"
 
 msgid "Support"
-msgstr ""
+msgstr "Support"
 
 msgid "Support staff"
 msgstr "Supportmedarbejder"
@@ -2051,7 +2055,7 @@ msgid "System"
 msgstr "System"
 
 msgid "System roles cannot be edited. The permission set is fixed."
-msgstr ""
+msgstr "Systemroller kan ikke redigeres. Rettighedssættet er fast."
 
 msgid "Tablet"
 msgstr "Tablet"
@@ -2068,29 +2072,29 @@ msgstr "Team oprettet: {0}"
 
 #. placeholder {0}: team.name
 msgid "Team deleted: {0}"
-msgstr ""
+msgstr "Team slettet: {0}"
 
 msgid "Team description"
-msgstr ""
+msgstr "Teambeskrivelse"
 
 msgid "Team details"
-msgstr ""
+msgstr "Teamdetaljer"
 
 msgid "Team members"
-msgstr ""
+msgstr "Teammedlemmer"
 
 msgid "Team members updated successfully"
-msgstr ""
+msgstr "Teammedlemmer opdateret"
 
 msgid "Team name"
-msgstr ""
+msgstr "Teamnavn"
 
 msgid "Team slug"
-msgstr ""
+msgstr "Team-slug"
 
 #. placeholder {0}: updated.name
 msgid "Team updated: {0}"
-msgstr ""
+msgstr "Team opdateret: {0}"
 
 msgid "Teams"
 msgstr "Teams"
@@ -2156,7 +2160,7 @@ msgid "The page you are looking for does not exist or was moved."
 msgstr "Siden du leder efter findes ikke eller er blevet flyttet."
 
 msgid "The user must already have an account. Pick the role they will hold in this team."
-msgstr ""
+msgstr "Brugeren skal allerede have en konto. Vælg den rolle, personen skal have i dette team."
 
 msgid "Theme"
 msgstr "Tema"
@@ -2234,7 +2238,7 @@ msgid "Trust Center (opens in new window)"
 msgstr "Tillidscenter (åbner i nyt vindue)"
 
 msgid "Try a different search."
-msgstr ""
+msgstr "Prøv en anden søgning."
 
 msgid "Try adjusting your search or filters"
 msgstr "Prøv at justere din søgning eller filtre"
@@ -2282,10 +2286,10 @@ msgid "Update the billing details associated with your subscription."
 msgstr "Opdater faktureringsoplysningerne tilknyttet dit abonnement."
 
 msgid "Update the role's permissions or description."
-msgstr ""
+msgstr "Opdater rollens rettigheder eller beskrivelse."
 
 msgid "Update the team's profile information, visibility, and branding settings."
-msgstr ""
+msgstr "Opdater teamets profiloplysninger, synlighed og brandingindstillinger."
 
 msgid "Update your profile picture and personal details here."
 msgstr "Opdater dit profilbillede og personlige oplysninger her."
@@ -2430,7 +2434,7 @@ msgid "View users"
 msgstr "Se brugere"
 
 msgid "Visibility & branding"
-msgstr ""
+msgstr "Synlighed og branding"
 
 msgid "Waiting on support"
 msgstr "Venter på supporten"

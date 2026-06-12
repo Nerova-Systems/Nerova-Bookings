@@ -3063,7 +3063,7 @@ msgid "View billing events"
 msgstr "Vis faktureringshændelser"
 
 msgid "View payments and manage your payment method."
-msgstr ""
+msgstr "Se betalinger og administrer din betalingsmetode."
 
 msgid "View profile verification"
 msgstr "Vis profilbekræftelse"

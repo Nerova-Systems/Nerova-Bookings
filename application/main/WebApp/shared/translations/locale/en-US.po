@@ -32,8 +32,8 @@ msgstr "{0} clients deleted successfully"
 #. placeholder {1}: job.rowsValid
 #. placeholder {2}: job.rowsDuplicate
 #. placeholder {3}: job.rowsInvalid
-msgid "{0} clients found � {1} ready � {2} already exist �  {3} need attention"
-msgstr "{0} clients found � {1} ready � {2} already exist �  {3} need attention"
+msgid "{0} clients found · {1} ready · {2} already exist · {3} need attention"
+msgstr "{0} clients found · {1} ready · {2} already exist · {3} need attention"
 
 #. placeholder {0}: conversation.inboundCount
 #. placeholder {1}: conversation.outboundCount
@@ -181,8 +181,8 @@ msgid "All event types"
 msgstr "All event types"
 
 #. placeholder {0}: job.rowsCommitted
-msgid "All set � {0} clients imported."
-msgstr "All set � {0} clients imported."
+msgid "All set — {0} clients imported."
+msgstr "All set — {0} clients imported."
 
 msgid "Allow cancellation"
 msgstr "Allow cancellation"
@@ -2746,8 +2746,8 @@ msgstr "Your account is connected to WhatsApp."
 msgid "Your AI receptionist is answering WhatsApp"
 msgstr "Your AI receptionist is answering WhatsApp"
 
-msgid "Your AI receptionist is off � messages use the guided booking flow"
-msgstr "Your AI receptionist is off � messages use the guided booking flow"
+msgid "Your AI receptionist is off — messages use the guided booking flow"
+msgstr "Your AI receptionist is off — messages use the guided booking flow"
 
 msgid "Your booking is confirmed."
 msgstr "Your booking is confirmed."
