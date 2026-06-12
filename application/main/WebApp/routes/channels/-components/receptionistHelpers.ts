@@ -11,13 +11,17 @@ export const awaitingJobRunsQueryKey = [
   "/api/main/autonomy/job-runs",
   { params: { query: { Status: "AwaitingApproval" } } }
 ];
-export const completedJobRunsQueryKey = ["get", "/api/main/autonomy/job-runs", { params: { query: { Status: "Completed" } } }];
+export const completedJobRunsQueryKey = [
+  "get",
+  "/api/main/autonomy/job-runs",
+  { params: { query: { Status: "Completed" } } }
+];
 export const policiesQueryKey = ["get", "/api/main/autonomy/policies"] as const;
 
 export function enabledMessage(isEnabled: boolean) {
   return isEnabled
     ? t`Your AI receptionist is answering WhatsApp`
-    : t`Your AI receptionist is off — messages use the guided booking flow`;
+    : t`Your AI receptionist is off â€” messages use the guided booking flow`;
 }
 
 export function settingsBody(

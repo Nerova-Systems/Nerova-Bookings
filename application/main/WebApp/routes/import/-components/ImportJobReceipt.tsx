@@ -31,7 +31,7 @@ function CompletedReceipt({ job }: Readonly<{ job: ImportJobDetails }>) {
     <Card>
       <CardHeader>
         <CardTitle>
-          <Trans>All set — {job.rowsCommitted} clients imported.</Trans>
+          <Trans>All set â€” {job.rowsCommitted} clients imported.</Trans>
         </CardTitle>
         <CardDescription>
           <Trans>Your client list is ready for bookings, messages, and follow-ups.</Trans>
@@ -110,7 +110,7 @@ function ReadyForReviewReceipt({ job }: Readonly<{ job: ImportJobDetails }>) {
       <CardContent className="flex flex-col gap-5">
         <div className="rounded-lg border bg-muted/30 p-4 text-sm font-medium">
           <Trans>
-            {job.rowsTotal} clients found · {job.rowsValid} ready · {job.rowsDuplicate} already exist · {" "}
+            {job.rowsTotal} clients found Â· {job.rowsValid} ready Â· {job.rowsDuplicate} already exist Â·{" "}
             {job.rowsInvalid} need attention
           </Trans>
         </div>

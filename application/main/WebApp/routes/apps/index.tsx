@@ -43,7 +43,6 @@ function AppStoreGalleryPage() {
     void navigate({ to: "/apps/$slug", params: { slug: app.slug } });
   };
 
-  // Only show category tabs / cards that actually have apps.
   const availableCategories = useMemo(
     () => APP_CATEGORY_ORDER.filter((category) => apps.some((app) => app.category === category)),
     [apps]
@@ -96,7 +95,6 @@ function AppStoreGalleryPage() {
       actions={searchInput}
     >
       <div className="flex flex-col gap-10">
-        {/* Featured categories + Most popular + Newly added only show on the unfiltered landing view */}
         {!isFiltering && !isLoading && availableCategories.length > 0 && (
           <AppSlider title={<Trans>Featured categories</Trans>}>
             {availableCategories.map((category) => (

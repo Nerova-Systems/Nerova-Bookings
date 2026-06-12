@@ -18,9 +18,7 @@ import {
   MessageCircleIcon,
   MessageSquareIcon,
   PackageCheckIcon,
-  StoreIcon,
-  UploadIcon,
-  UsersIcon
+  StoreIcon
 } from "lucide-react";
 import { useEffect } from "react";
 
@@ -106,33 +104,6 @@ export function AppsNavSection({ currentPath }: Readonly<{ currentPath: string }
         </SidebarMenuSubItem>
       </SidebarMenuSub>
     </SidebarMenuItem>
-  );
-}
-
-export function ClientsNavSection({ currentPath }: Readonly<{ currentPath: string }>) {
-  return (
-    <>
-      <SidebarMenuItem>
-        <SidebarMenuButton asChild={true} isActive={currentPath.startsWith("/clients")} tooltip={t`Clients`}>
-          <RouterLink to="/clients">
-            <UsersIcon />
-            <span>
-              <Trans>Clients</Trans>
-            </span>
-          </RouterLink>
-        </SidebarMenuButton>
-      </SidebarMenuItem>
-      <SidebarMenuItem>
-        <SidebarMenuButton asChild={true} isActive={currentPath.startsWith("/import")} tooltip={t`Import clients`}>
-          <RouterLink to="/import">
-            <UploadIcon />
-            <span>
-              <Trans>Import clients</Trans>
-            </span>
-          </RouterLink>
-        </SidebarMenuButton>
-      </SidebarMenuItem>
-    </>
   );
 }
 

@@ -1,4 +1,3 @@
-import { t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
 import { createFileRoute } from "@tanstack/react-router";
 import { MessageSquareIcon, QrCodeIcon, SparklesIcon, CalendarDaysIcon, ExternalLinkIcon } from "lucide-react";

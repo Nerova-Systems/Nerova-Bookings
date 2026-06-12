@@ -18,19 +18,14 @@ import {
 import { Link as RouterLink, useNavigate, useRouter } from "@tanstack/react-router";
 import MobileMenu from "account/MobileMenu";
 import UserMenu from "account/UserMenu";
-import {
-  BarChart3Icon,
-  CalendarCheckIcon,
-  CalendarDaysIcon,
-  LayoutDashboardIcon,
-  TimerIcon
-} from "lucide-react";
+import { BarChart3Icon, CalendarCheckIcon, CalendarDaysIcon, LayoutDashboardIcon, TimerIcon } from "lucide-react";
 import { use } from "react";
 
 import { getWeekStartDate } from "@/routes/-bookings/bookingTypes";
 import { formatWeekStartSearchValue } from "@/routes/-bookings/WeekPicker";
 
-import { AppsNavSection, ChannelsNavSection, ClientsNavSection } from "./MainSideMenuNav";
+import { ClientsNavSection } from "./ClientsNavSection";
+import { AppsNavSection, ChannelsNavSection } from "./MainSideMenuNav";
 
 const normalizePath = (path: string): string => path.replace(/\/$/, "") || "/";
 

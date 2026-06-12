@@ -1038,7 +1038,7 @@ function conferencingAppsForAccount(account: CoreConnectorAccount) {
   return [];
 }
 
-function BookingFieldsEditor({
+function _BookingFieldsEditor({
   value,
   onChange
 }: Readonly<{ value: BookingField[]; onChange: (value: BookingField[]) => void }>) {
@@ -1267,7 +1267,7 @@ function BookingFieldOptionsEditor({
   );
 }
 
-function PrivateLinksEditor({
+function _PrivateLinksEditor({
   value,
   onChange
 }: Readonly<{ value: PrivateLink[]; onChange: (value: PrivateLink[]) => void }>) {

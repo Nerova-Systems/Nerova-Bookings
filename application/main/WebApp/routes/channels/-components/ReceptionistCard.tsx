@@ -1,5 +1,5 @@
-import { Trans } from "@lingui/react/macro";
 import { t } from "@lingui/core/macro";
+import { Trans } from "@lingui/react/macro";
 import { Button } from "@repo/ui/components/Button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@repo/ui/components/Card";
 import { Skeleton } from "@repo/ui/components/Skeleton";
@@ -10,8 +10,8 @@ import { api, JobRunStatus, queryClient } from "@/shared/lib/api/client";
 
 import { ReceptionistFineTuneDialog } from "./ReceptionistFineTuneDialog";
 import { ReceptionistHandledFeed } from "./ReceptionistHandledFeed";
-import { ReceptionistNeedsYouBlock } from "./ReceptionistNeedsYouBlock";
 import { enabledMessage, settingsBody, settingsQueryKey } from "./receptionistHelpers";
+import { ReceptionistNeedsYouBlock } from "./ReceptionistNeedsYouBlock";
 
 function ReceptionistCardSkeleton() {
   return (
