@@ -124,54 +124,7 @@ function TeamsPage() {
         ) : (
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {teams.map((team) => (
-              <div
-                key={team.id}
-                onClick={() => openDetails(team)}
-                className="linear-card group relative flex cursor-pointer flex-col justify-between p-6 transition-all hover:border-muted-foreground/30 hover:bg-muted/10"
-              >
-                <div>
-                  <div className="flex items-start justify-between">
-                    <div className="flex items-center gap-3">
-                      <Avatar className="size-10 border border-border">
-                        {team.logoUrl && <AvatarImage src={team.logoUrl} alt={team.name} />}
-                        <AvatarFallback className="bg-brand/10 text-brand text-sm font-semibold">
-                          {team.name.charAt(0).toUpperCase()}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div>
-                        <h4 className="group-hover:text-brand font-semibold tracking-tight text-foreground transition-colors">
-                          {team.name}
-                        </h4>
-                        <span className="text-xs text-muted-foreground">/{team.slug ?? "—"}</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {team.bio && <p className="mt-4 line-clamp-2 text-sm text-muted-foreground">{team.bio}</p>}
-                </div>
-
-                <div className="mt-6 flex items-center justify-between border-t border-border/50 pt-4">
-                  <div className="flex flex-col">
-                    <span className="text-[10px] font-semibold tracking-wider text-muted-foreground uppercase">
-                      <Trans>Members</Trans>
-                    </span>
-                    <span className="mt-0.5 font-mono text-xl font-bold tracking-tight text-foreground">
-                      {team.memberCount}
-                    </span>
-                  </div>
-
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      openDetails(team);
-                    }}
-                    className={buttonVariants({ variant: "ghost", size: "sm" })}
-                    aria-label={t`Manage ${team.name}`}
-                  >
-                    <Trans>Manage</Trans>
-                  </button>
-                </div>
-              </div>
+              <TeamCard key={team.id} team={team} onOpenDetails={() => openDetails(team)} />
             ))}
           </div>
         )}
@@ -208,5 +161,55 @@ function TeamsPage() {
         }}
       />
     </>
+  );
+}
+
+function TeamCard({ team, onOpenDetails }: Readonly<{ team: Team; onOpenDetails: () => void }>) {
+  return (
+    <div className="linear-card group relative flex flex-col justify-between p-6 transition-all hover:border-muted-foreground/30 hover:bg-muted/10">
+      <button
+        type="button"
+        onClick={onOpenDetails}
+        aria-label={t`Open ${team.name}`}
+        className="absolute inset-0 cursor-pointer"
+      />
+      <div>
+        <div className="flex items-start justify-between">
+          <div className="flex items-center gap-3">
+            <Avatar className="size-10 border border-border">
+              {team.logoUrl && <AvatarImage src={team.logoUrl} alt={team.name} />}
+              <AvatarFallback className="bg-brand/10 text-brand text-sm font-semibold">
+                {team.name.charAt(0).toUpperCase()}
+              </AvatarFallback>
+            </Avatar>
+            <div>
+              <h4 className="group-hover:text-brand font-semibold tracking-tight text-foreground transition-colors">
+                {team.name}
+              </h4>
+              <span className="text-xs text-muted-foreground">/{team.slug ?? "—"}</span>
+            </div>
+          </div>
+        </div>
+
+        {team.bio && <p className="mt-4 line-clamp-2 text-sm text-muted-foreground">{team.bio}</p>}
+      </div>
+
+      <div className="mt-6 flex items-center justify-between border-t border-border/50 pt-4">
+        <div className="flex flex-col">
+          <span className="text-[10px] font-semibold tracking-wider text-muted-foreground uppercase">
+            <Trans>Members</Trans>
+          </span>
+          <span className="mt-0.5 font-mono text-xl font-bold tracking-tight text-foreground">{team.memberCount}</span>
+        </div>
+
+        <button
+          onClick={onOpenDetails}
+          className={`${buttonVariants({ variant: "ghost", size: "sm" })} relative`}
+          aria-label={t`Manage ${team.name}`}
+        >
+          <Trans>Manage</Trans>
+        </button>
+      </div>
+    </div>
   );
 }

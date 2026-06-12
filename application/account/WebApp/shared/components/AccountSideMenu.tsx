@@ -44,7 +44,6 @@ export function AccountSideMenu() {
   const { enabled: isAccountOverviewEnabled } = useFeatureFlag("account-overview");
   const { enabled: isTierEnterpriseEnabled } = useFeatureFlag("tier-enterprise");
   const { enabled: isTierTeamsEnabled } = useFeatureFlag("tier-teams");
-  const { enabled: isTierOrganizationsEnabled } = useFeatureFlag("tier-organizations");
   const { enabled: isAuditLogEnabled } = useFeatureFlag("cap-audit-log");
   const { enabled: isSupportSystemEnabled } = useFeatureFlag("support-system");
   // The /api/account/support-tickets endpoint is gone when the support system is disabled, so the

@@ -49,7 +49,7 @@ export function useTeamMemberPicker({ teamId, isOpen, onClose }: UseTeamMemberPi
     { params: { query: { PageSize: 1000 } } },
     { enabled: isOpen }
   );
-  const allUsers = usersQuery.data?.users ?? [];
+  const allUsers = useMemo(() => usersQuery.data?.users ?? [], [usersQuery.data]);
 
   const membersQuery = api.useQuery(
     "get",
