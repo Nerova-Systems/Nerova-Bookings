@@ -47,11 +47,21 @@ export function AccountSetupForm({ onComplete }: AccountSetupFormProps) {
 
       if (vertical) {
         await updateTenantVerticalMutation.mutateAsync({ body: { vertical: vertical as Schemas["NerovaVertical"] } });
-        await enhancedFetch("/api/scheduling/profile/vertical", {
-          method: "PUT",
-          headers: { "content-type": "application/json" },
-          body: JSON.stringify({ vertical })
-        });
+        // The main-SCS scheduling profile is created lazily on first scheduling use, so it may not exist
+        // yet during onboarding. The account vertical above is the source of truth; mirroring it to the
+        // scheduling profile is best-effort and must never block the welcome flow.
+        try {
+          const verticalResponse = await enhancedFetch("/api/scheduling/profile/vertical", {
+            method: "PUT",
+            headers: { "content-type": "application/json" },
+            body: JSON.stringify({ vertical })
+          });
+          if (!verticalResponse.ok && verticalResponse.status !== 404) {
+            console.warn(`Could not mirror the vertical to the scheduling profile (${verticalResponse.status}).`);
+          }
+        } catch (error) {
+          console.warn("Could not mirror the vertical to the scheduling profile.", error);
+        }
       }
     },
     onSuccess: () => {
