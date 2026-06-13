@@ -10,9 +10,9 @@ namespace Main.Features.Receptionist.Agent;
 /// </summary>
 public sealed class ReceptionistAgentFactory(IChatClient chatClient, ReceptionistToolCatalog toolCatalog)
 {
-    public AIAgent Create(ReceptionistTurnContext context, string serviceSummary)
+    public AIAgent Create(ReceptionistTurnContext context, string serviceSummary, string clientDetailsSummary = "", string recordableFieldsSummary = "")
     {
-        var instructions = PersonaComposer.Compose(context, serviceSummary);
+        var instructions = PersonaComposer.Compose(context, serviceSummary, clientDetailsSummary, recordableFieldsSummary);
         var tools = toolCatalog.Build(context);
 
         return new ChatClientAgent(chatClient, instructions, "Receptionist", "Nerova AI front desk receptionist", tools);

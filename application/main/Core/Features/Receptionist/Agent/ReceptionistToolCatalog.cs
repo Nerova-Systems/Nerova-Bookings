@@ -90,6 +90,18 @@ public sealed class ReceptionistToolCatalog(IMediator mediator)
                 "Create the secure deposit payment link for a booking that requires one and share it with the customer."
             )
         );
+        tools.Add(AIFunctionFactory.Create(
+                (CancellationToken cancellationToken) => GetClientDetails(context, cancellationToken),
+                "GetClientDetails",
+                "Get what the business knows about this customer (preferences, important service notes). Use it to personalize service and avoid asking for things already on file."
+            )
+        );
+        tools.Add(AIFunctionFactory.Create(
+                (string fieldKey, string? value, CancellationToken cancellationToken) => UpdateClientDetail(context, fieldKey, value, cancellationToken),
+                "UpdateClientDetail",
+                "Save one customer detail the customer just told you (e.g. an allergy, a goal, a preference). fieldKey must be a writable key from GetClientDetails or the known field list; value null clears it. Only save what the customer explicitly stated."
+            )
+        );
 
         return tools;
     }
@@ -284,6 +296,37 @@ public sealed class ReceptionistToolCatalog(IMediator mediator)
                 instruction = "Share this exact link with the customer and explain the booking is confirmed once the deposit is paid."
             }
         );
+    }
+
+    private async Task<string> GetClientDetails(ReceptionistTurnContext context, CancellationToken cancellationToken)
+    {
+        if (!context.TryConsumeToolBudget()) return ToolBudgetExceededMessage;
+
+        var result = await mediator.Send(new GetClientAgentDetailsQuery(context.TenantId, context.Client!.Id), cancellationToken);
+        if (!result.IsSuccess) return ToToolError(context, result.GetErrorSummary());
+
+        if (result.Value!.Details.Length == 0) return "Nothing is on file for this customer yet.";
+
+        return Serialize(result.Value.Details.Select(detail => new
+                {
+                    field_key = detail.Key,
+                    label = detail.Label,
+                    value = detail.Value,
+                    affects_service = detail.IsConstraint,
+                    writable = detail.IsWritable
+                }
+            )
+        );
+    }
+
+    private async Task<string> UpdateClientDetail(ReceptionistTurnContext context, string fieldKey, string? value, CancellationToken cancellationToken)
+    {
+        if (!context.TryConsumeToolBudget()) return ToolBudgetExceededMessage;
+
+        var result = await mediator.Send(new UpdateClientDetailFromAgentCommand(context.TenantId, context.Client!.Id, fieldKey.Trim(), value), cancellationToken);
+        if (!result.IsSuccess || result.Value is null) return ToToolError(context, result.GetErrorSummary());
+
+        return $"Saved. Receipt for the owner: {result.Value}";
     }
 
     private async Task<string> EscalateToHuman(ReceptionistTurnContext context, string reason, string summary, CancellationToken cancellationToken)

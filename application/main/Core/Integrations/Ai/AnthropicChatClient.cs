@@ -24,7 +24,7 @@ public sealed class AnthropicChatClient(HttpClient httpClient, IOptions<AiOption
     {
         var payload = BuildRequestPayload(messages, chatOptions);
 
-        using var request = new HttpRequestMessage(HttpMethod.Post, new Uri(new Uri(_options.Endpoint), "/v1/messages"));
+        using var request = new HttpRequestMessage(HttpMethod.Post, BuildMessagesUri(_options.Endpoint));
         request.Headers.Add("x-api-key", _options.ApiKey);
         request.Headers.Add("anthropic-version", AnthropicVersion);
         request.Content = new StringContent(JsonSerializer.Serialize(payload, JsonOptions), Encoding.UTF8, "application/json");
@@ -41,7 +41,9 @@ public sealed class AnthropicChatClient(HttpClient httpClient, IOptions<AiOption
     }
 
     public async IAsyncEnumerable<ChatResponseUpdate> GetStreamingResponseAsync(
-        IEnumerable<ChatMessage> messages, ChatOptions? chatOptions = null, [EnumeratorCancellation] CancellationToken cancellationToken = default)
+        IEnumerable<ChatMessage> messages,
+        ChatOptions? chatOptions = null,
+        [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
         var response = await GetResponseAsync(messages, chatOptions, cancellationToken);
         foreach (var update in response.ToChatResponseUpdates())
@@ -58,6 +60,16 @@ public sealed class AnthropicChatClient(HttpClient httpClient, IOptions<AiOption
     public void Dispose()
     {
         // HttpClient lifetime is owned by IHttpClientFactory.
+    }
+
+    /// <summary>
+    ///     Appends /v1/messages while preserving any base path. Foundry's Anthropic endpoint lives under
+    ///     "https://&lt;resource&gt;.services.ai.azure.com/anthropic" — an absolute-path Uri join would strip
+    ///     that prefix and silently target the wrong API.
+    /// </summary>
+    public static Uri BuildMessagesUri(string endpoint)
+    {
+        return new Uri($"{endpoint.TrimEnd('/')}/v1/messages");
     }
 
     private Dictionary<string, object?> BuildRequestPayload(IEnumerable<ChatMessage> messages, ChatOptions? chatOptions)

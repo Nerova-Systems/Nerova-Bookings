@@ -1,3 +1,4 @@
+using System.Net;
 using System.Net.Http.Json;
 using System.Security.Cryptography;
 using System.Text;
@@ -228,7 +229,48 @@ public sealed class ReceptionistTurnTests : EndpointBaseTest<MainDbContext>
         var response = await AnonymousHttpClient.GetAsync("/api/main/receptionist/escalations");
 
         // Assert
-        response.StatusCode.Should().Be(System.Net.HttpStatusCode.Unauthorized);
+        response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
+    }
+
+    [Fact]
+    public async Task PostWebhook_WhenAgentSavesClientDetail_ShouldPersistFieldAndWriteReceipt()
+    {
+        // Arrange — salon vertical so allergies_sensitivities is agent-writable (Constraint, ReadWrite)
+        await OnboardWhatsAppAsync();
+        await EnableReceptionistAsync();
+        (await AuthenticatedOwnerHttpClient.PutAsJsonAsync("/api/scheduling/profile/vertical", new { vertical = "Salon" })).EnsureSuccessStatusCode();
+        const string customer = "+27830009999";
+        InsertClient(customer, "Naledi", "Dlamini", "naledi.rec@example.com");
+        var script = """@tool UpdateClientDetail {\"fieldKey\":\"allergies_sensitivities\",\"value\":\"Acrylic allergy\"}\n@reply Noted, thanks for telling me!""";
+
+        // Act
+        var response = await PostSignedWebhookAsync(BuildTextPayload(customer, "wamid.rec.detail.1", script));
+
+        // Assert — the field landed, the receipt feeds the activity feed, and the constraint was flagged
+        response.EnsureSuccessStatusCode();
+        Connection.ExecuteScalar<string>("SELECT vertical_fields FROM clients WHERE phone_number = '+27830009999'", []).Should().Contain("Acrylic allergy");
+        Connection.ExecuteScalar<long>("SELECT COUNT(*) FROM job_runs WHERE job_type = 'ClientDetailWrite' AND status = 'Completed'", []).Should().Be(1);
+        Connection.ExecuteScalar<string>("SELECT receipt FROM job_runs WHERE job_type = 'ClientDetailWrite'", []).Should().Contain("Naledi");
+        Connection.ExecuteScalar<long>($"SELECT COUNT(*) FROM whats_app_messages WHERE to_phone_number = '{customer}' AND direction = 'Outbound' AND text = 'Noted, thanks for telling me!'", []).Should().Be(1);
+    }
+
+    [Fact]
+    public async Task PostWebhook_WhenAgentWritesNonWritableField_ShouldRejectWithoutPersisting()
+    {
+        // Arrange — salon hair_type is Read-only for the agent
+        await OnboardWhatsAppAsync();
+        await EnableReceptionistAsync();
+        (await AuthenticatedOwnerHttpClient.PutAsJsonAsync("/api/scheduling/profile/vertical", new { vertical = "Salon" })).EnsureSuccessStatusCode();
+        const string customer = "+27830010101";
+        InsertClient(customer, "Sipho", "Khumalo", "sipho.rec@example.com");
+        var script = """@tool UpdateClientDetail {\"fieldKey\":\"hair_type\",\"value\":\"Curly\"}\n@reply ok""";
+
+        // Act
+        (await PostSignedWebhookAsync(BuildTextPayload(customer, "wamid.rec.detail.2", script))).EnsureSuccessStatusCode();
+
+        // Assert
+        Connection.ExecuteScalar<string>("SELECT vertical_fields FROM clients WHERE phone_number = '+27830010101'", []).Should().NotContain("Curly");
+        Connection.ExecuteScalar<long>("SELECT COUNT(*) FROM job_runs WHERE job_type = 'ClientDetailWrite'", []).Should().Be(0);
     }
 
     private async Task EnableReceptionistAsync()

@@ -52,6 +52,8 @@ var paystackFullyConfigured = paystackConfigured
 
 var (_, metaAppId, metaAppSecret, metaConfigId, metaWebhookVerifyToken) = ConfigureMetaParameters();
 
+var (aiProvider, aiEndpoint, aiApiKey, aiModel, aiFastModel) = ConfigureAiParameters();
+
 var postgresPassword = builder.CreateStablePassword("postgres-password");
 var postgres = builder.AddPostgres("postgres", password: postgresPassword, port: ports.Postgres)
     .WithDataVolume($"{dockerVolumePrefix}{ports.VolumeNameInfix}-postgres-data")
@@ -87,6 +89,7 @@ CreateBlobContainer("avatars");
 CreateBlobContainer("logos");
 CreateBlobContainer("support-tickets");
 CreateBlobContainer("support-staff");
+CreateBlobContainer("service-images");
 
 var frontendBuild = builder
     .AddJavaScriptApp("frontend-build", "../")
@@ -165,6 +168,11 @@ var mainWorkers = builder
     .WithEnvironment("Connectors__Core__OAuth__Office365Calendar__ClientSecret", coreConnectorOAuth.Office365CalendarClientSecret)
     .WithEnvironment("Connectors__Core__OAuth__Zoom__ClientId", coreConnectorOAuth.ZoomClientId)
     .WithEnvironment("Connectors__Core__OAuth__Zoom__ClientSecret", coreConnectorOAuth.ZoomClientSecret)
+    .WithEnvironment("AI_PROVIDER", aiProvider)
+    .WithEnvironment("AI_ENDPOINT", aiEndpoint)
+    .WithEnvironment("AI_API_KEY", aiApiKey)
+    .WithEnvironment("AI_MODEL", aiModel)
+    .WithEnvironment("AI_FAST_MODEL", aiFastModel)
     .WithReference(mainDatabase)
     // Workers resolve host (booking owner) email/locale by reading the account-database users table.
     // Cross-SCS read-only lookup; no cross-write. Booking notification emails depend on this; without
@@ -194,6 +202,11 @@ var mainApi = builder
     .WithEnvironment("Meta__ConfigId", metaConfigId)
     .WithEnvironment("Meta__WebhookVerifyToken", metaWebhookVerifyToken)
     .WithEnvironment("Meta__AllowMockProvider", "true")
+    .WithEnvironment("AI_PROVIDER", aiProvider)
+    .WithEnvironment("AI_ENDPOINT", aiEndpoint)
+    .WithEnvironment("AI_API_KEY", aiApiKey)
+    .WithEnvironment("AI_MODEL", aiModel)
+    .WithEnvironment("AI_FAST_MODEL", aiFastModel)
     .WithEnvironment("PUBLIC_WHATSAPP_SIGNUP_ENABLED", "true")
     .WithEnvironment("PUBLIC_META_APP_ID", metaAppId)
     .WithEnvironment("PUBLIC_META_CONFIG_ID", metaConfigId)
@@ -414,6 +427,24 @@ CoreConnectorOAuthParameters ConfigureCoreConnectorOAuthParameters()
         builder.CreateResourceBuilder(new ParameterResource("meta-config-id", _ => "not-configured", true)),
         builder.CreateResourceBuilder(new ParameterResource("meta-webhook-verify-token", _ => "not-configured", true))
     );
+}
+
+(string Provider, string Endpoint, IResourceBuilder<ParameterResource> ApiKey, string Model, string FastModel) ConfigureAiParameters()
+{
+    // AI Front Desk model provider (docs/agentic-system-spec.md §6.1). All values live in user-secrets
+    // (Parameters:ai-*); when unset the apps fall back to the deterministic ScriptedChatClient. The
+    // provider is a config switch: "AzureOpenAI" today, "Anthropic" (api.anthropic.com or Foundry) later.
+    var provider = builder.Configuration["Parameters:ai-provider"] ?? "";
+    var endpoint = builder.Configuration["Parameters:ai-endpoint"] ?? "";
+    var model = builder.Configuration["Parameters:ai-model"] ?? "";
+    var fastModel = builder.Configuration["Parameters:ai-fast-model"] ?? "";
+
+    var apiKey = builder.Configuration["Parameters:ai-api-key"] is not null
+        ? builder.AddParameter("ai-api-key", true)
+            .WithDescription("API key for the configured AI model provider (Azure OpenAI key or Anthropic key).", true)
+        : builder.CreateResourceBuilder(new ParameterResource("ai-api-key", _ => "", true));
+
+    return (provider, endpoint, apiKey, model, fastModel);
 }
 
 void CreateBlobContainer(string containerName)

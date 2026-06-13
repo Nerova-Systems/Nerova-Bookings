@@ -12,10 +12,12 @@ using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using NSubstitute;
 using SharedKernel.Authentication;
 using SharedKernel.Authentication.TokenGeneration;
 using SharedKernel.ExecutionContext;
+using SharedKernel.Integrations.BlobStorage;
 using SharedKernel.Integrations.Email;
 using SharedKernel.SinglePageApp;
 using SharedKernel.Telemetry;
@@ -29,6 +31,7 @@ public abstract class EndpointBaseTest<TContext> : IDisposable where TContext : 
     // SinglePageAppConfiguration only consumes this as a URI for CSP construction.
     private const string TestPublicUrl = "https://localhost";
     protected readonly AccessTokenGenerator AccessTokenGenerator;
+    protected readonly IBlobStorageClient BlobStorageClient;
     protected readonly IEmailClient EmailClient;
     protected readonly Faker Faker = new();
     protected readonly ServiceCollection Services;
@@ -42,6 +45,8 @@ public abstract class EndpointBaseTest<TContext> : IDisposable where TContext : 
         Environment.SetEnvironmentVariable(SinglePageAppConfiguration.CdnUrlKey, $"{TestPublicUrl}/main");
         // Tests must always use the deterministic ScriptedChatClient — never a developer's real AI key.
         Environment.SetEnvironmentVariable("ANTHROPIC_API_KEY", null);
+        Environment.SetEnvironmentVariable("AI_PROVIDER", null);
+        Environment.SetEnvironmentVariable("AI_API_KEY", null);
         Environment.SetEnvironmentVariable(
             "APPLICATIONINSIGHTS_CONNECTION_STRING",
             "InstrumentationKey=00000000-0000-0000-0000-000000000000;IngestionEndpoint=https://localhost;LiveEndpoint=https://localhost"
@@ -87,6 +92,9 @@ public abstract class EndpointBaseTest<TContext> : IDisposable where TContext : 
         EmailClient = Substitute.For<IEmailClient>();
         Services.AddScoped<IEmailClient>(_ => EmailClient);
 
+        BlobStorageClient = Substitute.For<IBlobStorageClient>();
+        Services.AddKeyedSingleton("main-storage", BlobStorageClient);
+
         var telemetryChannel = Substitute.For<ITelemetryChannel>();
         Services.AddSingleton(new TelemetryClient(new TelemetryConfiguration { TelemetryChannel = telemetryChannel }));
 
@@ -119,6 +127,10 @@ public abstract class EndpointBaseTest<TContext> : IDisposable where TContext : 
 
                         services.Remove(services.Single(d => d.ServiceType == typeof(IEmailClient)));
                         services.AddTransient<IEmailClient>(_ => EmailClient);
+
+                        // Tests never talk to real blob storage: replace the keyed main-storage client.
+                        services.RemoveAll(typeof(IBlobStorageClient));
+                        services.AddKeyedSingleton("main-storage", BlobStorageClient);
 
                         RegisterMockLoggers(services);
 

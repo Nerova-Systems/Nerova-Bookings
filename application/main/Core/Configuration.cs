@@ -1,3 +1,4 @@
+using System.ClientModel;
 using Main.Database;
 using Main.Features.Apps.Connectors.GoogleCalendar;
 using Main.Features.Apps.Connectors.GoogleMeet;
@@ -11,6 +12,7 @@ using Main.Features.Autonomy.Jobs;
 using Main.Features.Autonomy.Shared;
 using Main.Features.BookingSideEffects.Workers;
 using Main.Features.Clients.Domain;
+using Main.Features.Clients.Infrastructure;
 using Main.Features.Connectors.Domain;
 using Main.Features.DataImport.Agent;
 using Main.Features.EventTypes.Domain;
@@ -50,6 +52,7 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
+using OpenAI;
 using SharedKernel.Configuration;
 using SharedKernel.Emails;
 using TickerQ.DependencyInjection;
@@ -67,7 +70,9 @@ public static class Configuration
         public IHostApplicationBuilder AddMainInfrastructure()
         {
             // Infrastructure is configured separately from other Infrastructure services to allow mocking in tests
-            return builder.AddSharedInfrastructure<MainDbContext>("main-database");
+            return builder
+                .AddSharedInfrastructure<MainDbContext>("main-database")
+                .AddNamedBlobStorages([("main-storage", "BLOB_STORAGE_URL")]);
         }
     }
 
@@ -116,6 +121,7 @@ public static class Configuration
             services.AddKeyedScoped<IMetaGraphClient, UnconfiguredMetaGraphClient>("unconfigured-meta");
             services.AddScoped<MetaGraphClientFactory>();
             services.AddScoped<WhatsAppAccessTokenProtector>();
+            services.AddScoped<WhatsAppFlowProvisioner>();
             services.AddScoped<ProcessPendingWhatsAppEvents>();
             services.AddScoped<IWhatsAppOutboundSender, WhatsAppOutboundSender>();
             services.AddScoped<WhatsAppConversationEngine>();
@@ -131,27 +137,47 @@ public static class Configuration
             );
 
             // ─── AI Front Desk (docs/agentic-system-spec.md) ───────────
-            // Claude via the Anthropic Messages API (api.anthropic.com or a Foundry endpoint). When no
-            // API key is configured (tests, fresh local dev) the deterministic ScriptedChatClient keeps
-            // the whole agent pipeline exercisable without a model — and the spec's reliability rule
-            // holds either way: the deterministic Flows engine remains the fallback for booking.
+            // Provider is a configuration switch (spec §6.1): Azure OpenAI today, Claude (Anthropic
+            // Messages API on api.anthropic.com or a Foundry /anthropic endpoint) later. When nothing is
+            // configured (tests, fresh local dev) the deterministic ScriptedChatClient keeps the whole
+            // agent pipeline exercisable without a model — and the spec's reliability rule holds either
+            // way: the deterministic Flows engine remains the fallback for booking.
             services.Configure<AiOptions>(options =>
                 {
-                    options.ApiKey = Environment.GetEnvironmentVariable("ANTHROPIC_API_KEY");
+                    options.Provider = Environment.GetEnvironmentVariable("AI_PROVIDER") ?? "";
+                    options.ApiKey = Environment.GetEnvironmentVariable("AI_API_KEY")
+                                     ?? Environment.GetEnvironmentVariable("ANTHROPIC_API_KEY");
                     var endpoint = Environment.GetEnvironmentVariable("AI_ENDPOINT");
                     if (!string.IsNullOrWhiteSpace(endpoint)) options.Endpoint = endpoint;
                     var model = Environment.GetEnvironmentVariable("AI_MODEL");
                     if (!string.IsNullOrWhiteSpace(model)) options.Model = model;
+                    var fastModel = Environment.GetEnvironmentVariable("AI_FAST_MODEL");
+                    if (!string.IsNullOrWhiteSpace(fastModel)) options.FastModel = fastModel;
+                    options.ClampBudgets();
                 }
             );
             services.AddHttpClient("anthropic", client => { client.Timeout = TimeSpan.FromSeconds(60); });
             services.AddScoped<IChatClient>(serviceProvider =>
                 {
                     var aiOptions = serviceProvider.GetRequiredService<IOptions<AiOptions>>();
-                    if (!aiOptions.Value.IsConfigured) return new ScriptedChatClient();
-
-                    var httpClient = serviceProvider.GetRequiredService<IHttpClientFactory>().CreateClient("anthropic");
-                    return new AnthropicChatClient(httpClient, aiOptions, serviceProvider.GetRequiredService<ILogger<AnthropicChatClient>>());
+                    switch (aiOptions.Value.ResolveProvider())
+                    {
+                        case AiProvider.AzureOpenAi:
+                            // Azure OpenAI's OpenAI-compatible v1 surface: the body's "model" is the
+                            // deployment name and key auth travels as a Bearer token — letting the standard
+                            // OpenAI SDK target it without the Azure-specific client or api-version pinning.
+                            var azureEndpoint = $"{aiOptions.Value.Endpoint.TrimEnd('/')}/openai/v1";
+                            var openAiClient = new OpenAIClient(
+                                new ApiKeyCredential(aiOptions.Value.ApiKey!),
+                                new OpenAIClientOptions { Endpoint = new Uri(azureEndpoint) }
+                            );
+                            return openAiClient.GetChatClient(aiOptions.Value.Model).AsIChatClient();
+                        case AiProvider.Anthropic:
+                            var httpClient = serviceProvider.GetRequiredService<IHttpClientFactory>().CreateClient("anthropic");
+                            return new AnthropicChatClient(httpClient, aiOptions, serviceProvider.GetRequiredService<ILogger<AnthropicChatClient>>());
+                        default:
+                            return new ScriptedChatClient();
+                    }
                 }
             );
             services.AddScoped<ReceptionistToolCatalog>();
@@ -188,6 +214,7 @@ public static class Configuration
                 // tracks add their installers as singletons; this track ships zero installers.
                 .AddSingleton<IAppRegistry, AppRegistry>()
                 .AddSingleton<CredentialProtector>()
+                .AddSingleton<FieldProtector>()
                 // ─── Google Calendar connector ─────────────────────────────
                 // Options bound from env vars (set by AppHost). Installer is a singleton because
                 // it carries no per-request state; the per-credential GoogleCalendarService is

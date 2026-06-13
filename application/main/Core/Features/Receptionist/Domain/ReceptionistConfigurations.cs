@@ -17,6 +17,11 @@ public sealed class ReceptionistSessionConfiguration : IEntityTypeConfiguration<
         builder.MapStronglyTypedLongId<ReceptionistSession, TenantId>(s => s.TenantId);
         builder.MapStronglyTypedId<ReceptionistSession, WhatsAppConversationId, string>(s => s.WhatsAppConversationId);
         builder.Property(s => s.AgentThread).HasColumnType("jsonb");
+
+        // The DB migration declares this FK; without it in the model EF may batch the session insert
+        // before the conversation insert when both are created in one unit of work (Postgres-only
+        // failure — SQLite test databases are built from the model and never see the constraint).
+        builder.HasOne<WhatsAppConversation>().WithMany().HasForeignKey(s => s.WhatsAppConversationId);
     }
 }
 
@@ -29,6 +34,9 @@ public sealed class EscalationConfiguration : IEntityTypeConfiguration<Escalatio
         builder.MapStronglyTypedId<Escalation, WhatsAppConversationId, string>(e => e.WhatsAppConversationId);
         builder.MapStronglyTypedNullableId<Escalation, ClientId, string>(e => e.ClientId);
         builder.MapStronglyTypedNullableId<Escalation, UserId, string>(e => e.ResolvedByUserId);
+
+        // Mirrors the migration's FK so EF orders the conversation insert first (see note above).
+        builder.HasOne<WhatsAppConversation>().WithMany().HasForeignKey(e => e.WhatsAppConversationId);
     }
 }
 

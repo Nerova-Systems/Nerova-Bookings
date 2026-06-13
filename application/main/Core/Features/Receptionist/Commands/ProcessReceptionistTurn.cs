@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using System.Text.Json;
 using JetBrains.Annotations;
 using Main.Features.Clients.Domain;
@@ -9,8 +8,8 @@ using Main.Features.Scheduling.Domain;
 using Main.Features.WhatsAppBooking.Domain;
 using Main.Features.WhatsAppBooking.Infrastructure;
 using Main.Features.WhatsAppOnboarding.Domain;
-using Microsoft.Extensions.Options;
 using Main.Integrations.Ai;
+using Microsoft.Extensions.Options;
 using SharedKernel.Cqrs;
 using SharedKernel.Domain;
 using SharedKernel.Telemetry;
@@ -102,7 +101,7 @@ public sealed class ProcessReceptionistTurnHandler(
         }
 
         // Session expiry follows the conversation timeout semantics: an inactive thread restarts fresh (R7).
-        if (session.State == ReceptionistSessionState.Expired || session.LastTurnAt is not null && now - session.LastTurnAt > WhatsAppConversation.SessionTimeout)
+        if (session.State == ReceptionistSessionState.Expired || (session.LastTurnAt is not null && now - session.LastTurnAt > WhatsAppConversation.SessionTimeout))
         {
             session.RestartThread(now);
         }
@@ -138,10 +137,37 @@ public sealed class ProcessReceptionistTurnHandler(
             )
             : string.Empty;
 
+        // "Known about this client" (vertical-template-fields-spec §6): agent-visible field values are
+        // injected as data so the model treats Constraint facts as service-affecting from turn one.
+        var clientDetailsSummary = string.Empty;
+        var recordableFieldsSummary = string.Empty;
+        if (client is not null)
+        {
+            var detailsResult = await mediator.Send(new GetClientAgentDetailsQuery(command.TenantId, client.Id), cancellationToken);
+            if (detailsResult is { IsSuccess: true, Value.Details.Length: > 0 })
+            {
+                clientDetailsSummary = string.Join("\n", detailsResult.Value.Details.Select(detail =>
+                        detail.IsConstraint ? $"- [IMPORTANT — affects service] {detail.Label}: {detail.Value}" : $"- {detail.Label}: {detail.Value}"
+                    )
+                );
+            }
+
+            // The exact writable field keys for the tenant's vertical (vertical-template-fields-spec §6):
+            // the model must know the precise keys, otherwise it guesses (e.g. "allergy") and the write
+            // is rejected. Listed only for identified customers, since UpdateClientDetail is identity-gated.
+            if (profile.Vertical is { } vertical and not NerovaVertical.Other)
+            {
+                recordableFieldsSummary = string.Join("\n", VerticalFieldCatalog.For(vertical)
+                    .Where(definition => definition.AgentAccess == VerticalFieldAgentAccess.ReadWrite)
+                    .Select(definition => $"- {definition.Key} — {definition.Label}{(definition.Options.Length > 0 ? $" (one of: {string.Join(", ", definition.Options)})" : string.Empty)}")
+                );
+            }
+        }
+
         var stopwatch = Stopwatch.StartNew();
         try
         {
-            var agent = agentFactory.Create(context, serviceSummary);
+            var agent = agentFactory.Create(context, serviceSummary, clientDetailsSummary, recordableFieldsSummary);
 
             var agentSession = session.AgentThread is null
                 ? await agent.CreateSessionAsync(cancellationToken)
@@ -178,7 +204,13 @@ public sealed class ProcessReceptionistTurnHandler(
         {
             // The model or transport failed: degrade to a safe fallback so the customer is never left
             // unanswered, and surface the conversation to a human. Webhook ingestion is unaffected.
-            logger.LogError(exception, "Receptionist turn failed for conversation {ConversationId}", conversation.Id.Value);
+            logger.LogError(
+                exception,
+                "Receptionist turn failed for conversation {ConversationId} (provider {AiProvider}, model {AiModel})",
+                conversation.Id.Value,
+                options.ResolveProvider(),
+                options.Model
+            );
             await outboundSender.SendTextAsync(account, conversation.CustomerPhoneNumber, FallbackMessage, cancellationToken);
             await mediator.Send(new EscalateConversationCommand(command.TenantId, conversation.Id, client?.Id, "Receptionist turn failed", $"Last customer message: {Truncate(command.MessageText)}"), cancellationToken);
             session.Escalate();

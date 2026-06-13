@@ -231,8 +231,8 @@ flowchart LR
 
 ### 6.1 Packages and model access
 
-- `Microsoft.Agents.AI` (1.x GA), `Microsoft.Agents.AI.Workflows` (1.x GA), Foundry/Anthropic connector for `IChatClient`. Pin in `Directory.Packages.props`.
-- Claude on Microsoft Foundry. Note: Claude in Foundry currently executes on Anthropic-operated infrastructure billed via Foundry (disclose in tenant DPA; EU-native hosting expected during 2026).
+- `Microsoft.Agents.AI` (1.x GA), `Microsoft.Agents.AI.Workflows` (1.x GA), Foundry/Anthropic connector for `IChatClient`. Founder-approved addition (2026-06-13): `Microsoft.Extensions.AI.OpenAI` + `OpenAI` as the Azure OpenAI `IChatClient` connector. Pin in `Directory.Packages.props`.
+- Model provider is a configuration switch (`AI_PROVIDER`): **Azure OpenAI today** (credit-eligible; gpt-4.1 + gpt-4.1-mini deployments), Claude on Microsoft Foundry or api.anthropic.com later. Note: Claude in Foundry currently executes on Anthropic-operated infrastructure billed via Foundry, **requires pay-as-you-go billing** (credit-only subscriptions excluded), and is deployable only in East US2 / Sweden Central (disclose in tenant DPA; EU-native hosting expected during 2026).
 - Configuration: Foundry endpoint + deployment names via appsettings/Aspire; `DefaultAzureCredential` when `SharedInfrastructureConfiguration.IsRunningInAzure`, key via user-secrets locally.
 
 ### 6.2 Code layout (main SCS)
