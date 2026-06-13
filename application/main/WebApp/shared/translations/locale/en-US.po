@@ -1102,9 +1102,6 @@ msgstr "Event name"
 msgid "Event subscriptions"
 msgstr "Event subscriptions"
 
-msgid "Event type actions"
-msgstr "Event type actions"
-
 msgid "Event type deleted"
 msgstr "Event type deleted"
 
@@ -1380,11 +1377,11 @@ msgstr "Hide calendar notes"
 msgid "Hide client information from external calendars and disable guests."
 msgstr "Hide client information from external calendars and disable guests."
 
-msgid "Hide event type from profile"
-msgstr "Hide event type from profile"
-
 msgid "Hide from profile"
 msgstr "Hide from profile"
+
+msgid "Hide service from profile"
+msgstr "Hide service from profile"
 
 msgid "History"
 msgstr "History"
@@ -2669,6 +2666,9 @@ msgstr "Separate languages with commas."
 msgid "Service"
 msgstr "Service"
 
+msgid "Service actions"
+msgstr "Service actions"
+
 msgid "Service basics"
 msgstr "Service basics"
 
@@ -2732,9 +2732,6 @@ msgstr "Short Text"
 msgid "Show client info"
 msgstr "Show client info"
 
-msgid "Show event type on profile"
-msgstr "Show event type on profile"
-
 msgid "Show on profile"
 msgstr "Show on profile"
 
@@ -2744,6 +2741,9 @@ msgstr "Show optimized slots"
 #. placeholder {0}: app.name
 msgid "Show permissions for {0}"
 msgstr "Show permissions for {0}"
+
+msgid "Show service on profile"
+msgstr "Show service on profile"
 
 msgid "Shown on the public booking page. Images are resized before upload."
 msgstr "Shown on the public booking page. Images are resized before upload."

@@ -89,13 +89,13 @@ export function EventTypeOverflowActions({
   onDelete: () => void;
 }>) {
   return (
-    <DropdownMenu trackingTitle={t`Event type actions`}>
+    <DropdownMenu trackingTitle={t`Service actions`}>
       <DropdownMenuTrigger
         render={
-          <Button type="button" variant="ghost" size="icon-sm" aria-label={t`Event type actions`}>
+          <Button type="button" variant="ghost" size="icon-sm" aria-label={t`Service actions`}>
             <EllipsisIcon />
             <span className="sr-only">
-              <Trans>Event type actions</Trans>
+              <Trans>Service actions</Trans>
             </span>
           </Button>
         }

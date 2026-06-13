@@ -113,9 +113,7 @@ export function EventTypesList({
                     render={
                       <div className="flex min-h-[var(--control-height)] items-center">
                         <Switch
-                          aria-label={
-                            eventType.hidden ? t`Show event type on profile` : t`Hide event type from profile`
-                          }
+                          aria-label={eventType.hidden ? t`Show service on profile` : t`Hide service from profile`}
                           checked={!eventType.hidden}
                           onCheckedChange={(checked) => onHiddenChange(eventType, !checked)}
                         />
@@ -124,9 +122,9 @@ export function EventTypesList({
                   />
                   <TooltipContent>
                     {eventType.hidden ? (
-                      <Trans>Show event type on profile</Trans>
+                      <Trans>Show service on profile</Trans>
                     ) : (
-                      <Trans>Hide event type from profile</Trans>
+                      <Trans>Hide service from profile</Trans>
                     )}
                   </TooltipContent>
                 </Tooltip>

@@ -1102,9 +1102,6 @@ msgstr "Begivenhedsnavn"
 msgid "Event subscriptions"
 msgstr "Hændelsesabonnementer"
 
-msgid "Event type actions"
-msgstr "Servicehandlinger"
-
 msgid "Event type deleted"
 msgstr "Service slettet"
 
@@ -1380,11 +1377,11 @@ msgstr "Skjul kalendernoter"
 msgid "Hide client information from external calendars and disable guests."
 msgstr "Skjul klientoplysninger i eksterne kalendere, og deaktiver gæster."
 
-msgid "Hide event type from profile"
-msgstr "Skjul service fra profilen"
-
 msgid "Hide from profile"
 msgstr "Skjul fra profil"
+
+msgid "Hide service from profile"
+msgstr ""
 
 msgid "History"
 msgstr "Historik"
@@ -2669,6 +2666,9 @@ msgstr "Adskil sprog med kommaer."
 msgid "Service"
 msgstr "Service"
 
+msgid "Service actions"
+msgstr ""
+
 msgid "Service basics"
 msgstr "Servicegrundlag"
 
@@ -2732,9 +2732,6 @@ msgstr "Kort tekst"
 msgid "Show client info"
 msgstr "Vis klientoplysninger"
 
-msgid "Show event type on profile"
-msgstr "Vis service på profilen"
-
 msgid "Show on profile"
 msgstr "Vis på profil"
 
@@ -2744,6 +2741,9 @@ msgstr "Vis optimerede tidspunkter"
 #. placeholder {0}: app.name
 msgid "Show permissions for {0}"
 msgstr "Vis tilladelser for {0}"
+
+msgid "Show service on profile"
+msgstr ""
 
 msgid "Shown on the public booking page. Images are resized before upload."
 msgstr "Vises på den offentlige bookingside. Billeder tilpasses før upload."
