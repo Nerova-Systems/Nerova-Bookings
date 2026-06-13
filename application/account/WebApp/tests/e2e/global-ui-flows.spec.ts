@@ -188,7 +188,7 @@ test.describe("@comprehensive", () => {
       await typeOneTimeCode(page, getVerificationCode());
 
       await expect(page).toHaveURL("/dashboard");
-      await expect(page.getByRole("heading", { name: "Your dashboard is empty" })).toBeVisible();
+      await expect(page.getByRole("heading", { name: "Nothing needs you right now" })).toBeVisible();
 
       // The /account dashboard is gated by the account-overview feature flag (off by default for
       // new tenants); land on /account/users directly so this test is decoupled from the flag.

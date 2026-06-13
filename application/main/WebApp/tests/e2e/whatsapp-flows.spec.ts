@@ -37,9 +37,9 @@ test.describe("@smoke", () => {
         await page.goto("/channels/whatsapp");
 
         await expect(page.getByRole("heading", { name: "WhatsApp", level: 1 })).toBeVisible();
-        // CardTitle renders as <div data-slot="card-title">, not a heading element.
-        // Use exact: true to avoid matching page subtitle and card description that contain this substring.
-        await expect(page.getByText("WhatsApp Business", { exact: true })).toBeVisible();
+        // CardTitle renders as <div data-slot="card-title">, not a heading element. A fresh tenant is
+        // disconnected, so the connection card shows the "not answering yet" state.
+        await expect(page.getByText("Nerova is not answering WhatsApp yet", { exact: true })).toBeVisible();
         await expect(page.getByRole("button", { name: "Connect WhatsApp" })).toBeVisible();
         await expect(
           page.getByRole("navigation", { name: "Main navigation" }).getByRole("link", { name: "Channels" })

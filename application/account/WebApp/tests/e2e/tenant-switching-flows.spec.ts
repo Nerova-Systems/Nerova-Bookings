@@ -52,7 +52,7 @@ test.describe("@comprehensive", () => {
     // === SINGLE TENANT DISPLAY ===
     await step("Create single tenant & verify dropdown is hidden")(async () => {
       await completeSignupFlow(page1, expect, user, testContext1);
-      await expect(page1.getByRole("heading", { name: "Your dashboard is empty" })).toBeVisible();
+      await expect(page1.getByRole("heading", { name: "Nothing needs you right now" })).toBeVisible();
 
       // Update the first tenant name
       await page1.goto("/account/settings");

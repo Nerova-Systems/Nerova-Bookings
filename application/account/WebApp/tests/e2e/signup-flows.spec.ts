@@ -102,7 +102,7 @@ test.describe("@smoke", () => {
       await page.getByRole("button", { name: "Continue" }).click();
 
       await expect(page).toHaveURL("/dashboard");
-      await expect(page.getByRole("heading", { name: "Your dashboard is empty" })).toBeVisible();
+      await expect(page.getByRole("heading", { name: "Nothing needs you right now" })).toBeVisible();
     })();
 
     await step("Navigate to profile page & verify profile form is visible")(async () => {
@@ -176,7 +176,7 @@ test.describe("@smoke", () => {
       await page.goto("/signup");
 
       await expect(page).toHaveURL("/dashboard");
-      await expect(page.getByRole("heading", { name: "Your dashboard is empty" })).toBeVisible();
+      await expect(page.getByRole("heading", { name: "Nothing needs you right now" })).toBeVisible();
     })();
 
     // === ACCOUNT ===

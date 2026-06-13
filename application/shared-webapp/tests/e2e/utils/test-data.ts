@@ -149,7 +149,7 @@ export async function completeSignupFlow(
 
   // Step 6: Verify redirect to dashboard after welcome flow
   await expect(page).toHaveURL("/dashboard");
-    await expect(page.getByRole("heading", { name: "Your dashboard is empty" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Nothing needs you right now" })).toBeVisible();
 
   // Step 6: Logout if requested (useful for login flow tests)
   if (!keepUserLoggedIn) {

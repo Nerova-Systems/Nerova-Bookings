@@ -33,7 +33,7 @@ test.describe("@smoke", () => {
     // Create owner and member users
     await step("Create owner account with signup flow & verify home page")(async () => {
       await completeSignupFlow(page, expect, owner, context);
-      await expect(page.getByRole("heading", { name: "Your dashboard is empty" })).toBeVisible();
+      await expect(page.getByRole("heading", { name: "Nothing needs you right now" })).toBeVisible();
     })();
 
     await step("Set account name & verify save confirmation")(async () => {
@@ -240,7 +240,7 @@ test.describe("@smoke", () => {
 
     await step("Create owner account with signup flow & verify home page")(async () => {
       await completeSignupFlow(page, expect, owner, context);
-      await expect(page.getByRole("heading", { name: "Your dashboard is empty" })).toBeVisible();
+      await expect(page.getByRole("heading", { name: "Nothing needs you right now" })).toBeVisible();
     })();
 
     await step("Set account name & verify save confirmation")(async () => {
