@@ -35,6 +35,14 @@ public sealed class EventTypeEndpoints : IEndpoints
             => await mediator.Send(new DeleteEventTypeCommand(id))
         );
 
+        group.MapPost("/{id}/image", async Task<ApiResult> (EventTypeId id, IFormFile file, IMediator mediator)
+            => await mediator.Send(new UpdateEventTypeImageCommand(file.OpenReadStream(), file.ContentType) { Id = id })
+        ).DisableAntiforgery();
+
+        group.MapDelete("/{id}/image", async Task<ApiResult> (EventTypeId id, IMediator mediator)
+            => await mediator.Send(new RemoveEventTypeImageCommand(id))
+        );
+
         group.MapGet("/{id}/hashed-links", async Task<ApiResult<HashedLinksResponse>> (EventTypeId id, IMediator mediator)
             => await mediator.Send(new ListHashedLinksQuery(id))
         ).Produces<HashedLinksResponse>();

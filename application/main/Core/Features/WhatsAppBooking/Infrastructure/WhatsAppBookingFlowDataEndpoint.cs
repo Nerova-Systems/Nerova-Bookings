@@ -4,7 +4,9 @@ using Main.Features.Scheduling.Domain;
 using Main.Features.Scheduling.Queries;
 using Main.Features.Scheduling.Shared;
 using Main.Features.WhatsAppBooking.Domain;
+using Microsoft.Extensions.DependencyInjection;
 using SharedKernel.Cqrs;
+using SharedKernel.Integrations.BlobStorage;
 
 namespace Main.Features.WhatsAppBooking.Infrastructure;
 
@@ -18,6 +20,7 @@ public sealed class WhatsAppBookingFlowDataEndpoint(
     IWhatsAppConversationRepository conversationRepository,
     ISchedulingProfileRepository schedulingProfileRepository,
     IEventTypeRepository eventTypeRepository,
+    [FromKeyedServices("main-storage")] IBlobStorageClient blobStorageClient,
     IMediator mediator,
     TimeProvider timeProvider,
     ILogger<WhatsAppBookingFlowDataEndpoint> logger
@@ -168,15 +171,19 @@ public sealed class WhatsAppBookingFlowDataEndpoint(
 
         if (string.IsNullOrWhiteSpace(serviceSlug) || string.IsNullOrWhiteSpace(startTimeIso)) return Ping();
 
-        // Resolve the human-readable service name.
+        // Resolve the human-readable service name and image.
         var profile = await ResolveProfileAsync(req.FlowToken, ct);
         var serviceName = serviceSlug;
+        var serviceImageBase64 = string.Empty;
         if (profile is not null)
         {
             var eventType = (await eventTypeRepository.GetPublicListByOwnerUnfilteredAsync(profile.TenantId, profile.OwnerUserId, ct))
                 .FirstOrDefault(et => et.Slug == serviceSlug);
             if (eventType is not null)
+            {
                 serviceName = eventType.Title;
+                serviceImageBase64 = await LoadServiceImageBase64Async(eventType, ct);
+            }
         }
 
         string summaryText;
@@ -191,7 +198,39 @@ public sealed class WhatsAppBookingFlowDataEndpoint(
             summaryText = $"{serviceName} — {startTimeIso}";
         }
 
-        return SummaryScreen(summaryText, serviceSlug, startTimeIso, durationMinutes, timezone);
+        return SummaryScreen(summaryText, serviceSlug, startTimeIso, durationMinutes, timezone, serviceImageBase64);
+    }
+
+    /// <summary>
+    ///     Loads the service image as base64 for the Flow JSON <c>Image</c> component (Flows take inline
+    ///     base64 only — no URLs). Images are pre-resized in the browser at upload time, keeping the
+    ///     per-screen payload within Meta's limits; anything oversized or unreadable degrades to no image.
+    /// </summary>
+    private async Task<string> LoadServiceImageBase64Async(EventType eventType, CancellationToken ct)
+    {
+        const int maxImageBytes = 300 * 1024;
+        if (eventType.ImageUrl is null) return string.Empty;
+
+        // ImageUrl shape: "/service-images/{blobName}"
+        var segments = eventType.ImageUrl.TrimStart('/').Split('/', 2);
+        if (segments.Length != 2) return string.Empty;
+
+        try
+        {
+            var download = await blobStorageClient.DownloadAsync(segments[0], segments[1], ct);
+            if (download is null) return string.Empty;
+
+            using var memoryStream = new MemoryStream();
+            await download.Value.Stream.CopyToAsync(memoryStream, ct);
+            if (memoryStream.Length is 0 or > maxImageBytes) return string.Empty;
+
+            return Convert.ToBase64String(memoryStream.ToArray());
+        }
+        catch (Exception exception)
+        {
+            logger.LogWarning(exception, "Failed to load service image for Flow summary; continuing without image");
+            return string.Empty;
+        }
     }
 
     // -- Screen builders ----------------------------------------------------------
@@ -212,21 +251,21 @@ public sealed class WhatsAppBookingFlowDataEndpoint(
         string timezone)
     {
         return JsonSerializer.Serialize(new
-        {
-            version = FlowVersion,
-            screen = "APPOINTMENT",
-            data = new
             {
-                service = services,
-                is_service_enabled = serviceEnabled,
-                date = dates,
-                time = times,
-                is_date_enabled = dateEnabled,
-                is_time_enabled = timeEnabled,
-                duration_minutes = durationMinutes,
-                timezone
-            }
-        }, JsonOptions
+                version = FlowVersion,
+                screen = "APPOINTMENT",
+                data = new
+                {
+                    service = services,
+                    is_service_enabled = serviceEnabled,
+                    date = dates,
+                    time = times,
+                    is_date_enabled = dateEnabled,
+                    is_time_enabled = timeEnabled,
+                    duration_minutes = durationMinutes,
+                    timezone
+                }
+            }, JsonOptions
         );
     }
 
@@ -235,14 +274,24 @@ public sealed class WhatsAppBookingFlowDataEndpoint(
         string serviceSlug,
         string startTimeIso,
         int durationMinutes,
-        string timezone)
+        string timezone,
+        string serviceImageBase64)
     {
         return JsonSerializer.Serialize(new
-        {
-            version = FlowVersion,
-            screen = "SUMMARY",
-            data = new { summary_text = summaryText, service_slug = serviceSlug, start_time_iso = startTimeIso, duration_minutes = durationMinutes, timezone }
-        }, JsonOptions
+            {
+                version = FlowVersion,
+                screen = "SUMMARY",
+                data = new
+                {
+                    summary_text = summaryText,
+                    service_slug = serviceSlug,
+                    start_time_iso = startTimeIso,
+                    duration_minutes = durationMinutes,
+                    timezone,
+                    service_image = serviceImageBase64,
+                    has_service_image = serviceImageBase64.Length > 0
+                }
+            }, JsonOptions
         );
     }
 

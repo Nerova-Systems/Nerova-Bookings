@@ -138,7 +138,9 @@ public static class WhatsAppBookingFlowDefinition
                        "service_slug": { "type": "string", "__example__": "demo" },
                        "start_time_iso": { "type": "string", "__example__": "2026-01-15T10:30:00Z" },
                        "duration_minutes": { "type": "number", "__example__": 30 },
-                       "timezone": { "type": "string", "__example__": "Africa/Johannesburg" }
+                       "timezone": { "type": "string", "__example__": "Africa/Johannesburg" },
+                       "service_image": { "type": "string", "__example__": "" },
+                       "has_service_image": { "type": "boolean", "__example__": false }
                      },
                      "layout": {
                        "type": "SingleColumnLayout",
@@ -150,6 +152,18 @@ public static class WhatsAppBookingFlowDefinition
                              {
                                "type": "TextHeading",
                                "text": "Booking summary"
+                             },
+                             {
+                               "type": "If",
+                               "condition": "${data.has_service_image}",
+                               "then": [
+                                 {
+                                   "type": "Image",
+                                   "src": "${data.service_image}",
+                                   "scale-type": "cover",
+                                   "aspect-ratio": 1.91
+                                 }
+                               ]
                              },
                              {
                                "type": "TextBody",

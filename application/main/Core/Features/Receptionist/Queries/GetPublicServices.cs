@@ -7,7 +7,17 @@ using SharedKernel.Domain;
 namespace Main.Features.Receptionist.Queries;
 
 [PublicAPI]
-public sealed record PublicServiceResponse(EventTypeId Id, string Slug, string Title, string? Description, int DurationMinutes, decimal? Price, string Currency, decimal? DepositAmount);
+public sealed record PublicServiceResponse(
+    EventTypeId Id,
+    string Slug,
+    string Title,
+    string? Description,
+    int DurationMinutes,
+    decimal? Price,
+    string Currency,
+    decimal? DepositAmount,
+    string? ImageUrl
+);
 
 [PublicAPI]
 public sealed record GetPublicServicesResponse(PublicServiceResponse[] Services);
@@ -40,7 +50,8 @@ public sealed class GetPublicServicesHandler(ISchedulingProfileRepository schedu
                 eventType.DurationMinutes,
                 eventType.Settings.Payment.Price,
                 eventType.Settings.Payment.Currency,
-                eventType.Settings.Payment.DepositAmount
+                eventType.Settings.Payment.DepositAmount,
+                eventType.ImageUrl
             )
         ).ToArray();
 

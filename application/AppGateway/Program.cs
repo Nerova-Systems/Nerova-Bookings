@@ -62,7 +62,7 @@ else
     );
 }
 
-builder.AddNamedBlobStorages([("account-storage", "ACCOUNT_STORAGE_URL")]);
+builder.AddNamedBlobStorages([("account-storage", "ACCOUNT_STORAGE_URL"), ("main-storage", "MAIN_STORAGE_URL")]);
 
 builder.WebHost.UseKestrel(option => option.AddServerHeader = false);
 

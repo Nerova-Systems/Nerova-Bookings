@@ -9,7 +9,8 @@ public class ManagedIdentityTransform(TokenCredential credential)
     protected override string? GetValue(RequestTransformContext context)
     {
         if (!context.HttpContext.Request.Path.StartsWithSegments("/avatars", StringComparison.OrdinalIgnoreCase) &&
-            !context.HttpContext.Request.Path.StartsWithSegments("/logos", StringComparison.OrdinalIgnoreCase))
+            !context.HttpContext.Request.Path.StartsWithSegments("/logos", StringComparison.OrdinalIgnoreCase) &&
+            !context.HttpContext.Request.Path.StartsWithSegments("/service-images", StringComparison.OrdinalIgnoreCase))
         {
             return null;
         }
@@ -25,7 +26,8 @@ public class ApiVersionHeaderTransform() : RequestHeaderTransform("x-ms-version"
     protected override string? GetValue(RequestTransformContext context)
     {
         return !context.HttpContext.Request.Path.StartsWithSegments("/avatars") &&
-               !context.HttpContext.Request.Path.StartsWithSegments("/logos")
+               !context.HttpContext.Request.Path.StartsWithSegments("/logos") &&
+               !context.HttpContext.Request.Path.StartsWithSegments("/service-images")
             ? null
             : "2023-11-03";
     }

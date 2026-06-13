@@ -34,7 +34,8 @@ public sealed record PublicEventTypeResponse(
     EventTypeRecurrence? Recurrence,
     EventTypeSeats Seats,
     string? WabaPhoneNumber,
-    PublicSchedulingProfileResponse Profile
+    PublicSchedulingProfileResponse Profile,
+    string? ImageUrl
 )
 {
     public static PublicEventTypeResponse From(SchedulingProfile profile, EventType eventType, string? wabaPhoneNumber = null)
@@ -59,7 +60,8 @@ public sealed record PublicEventTypeResponse(
             eventType.Settings.Recurrence,
             eventType.Settings.Seats,
             wabaPhoneNumber,
-            PublicSchedulingProfileResponse.From(profile)
+            PublicSchedulingProfileResponse.From(profile),
+            eventType.ImageUrl
         );
     }
 }

@@ -459,6 +459,12 @@ module mainStorageAccount '../modules/storage-account.bicep' = {
     tags: tags
     sku: 'Standard_GRS'
     userAssignedIdentityName: mainIdentity.outputs.name
+    containers: [
+      {
+        name: 'service-images'
+        publicAccess: 'None'
+      }
+    ]
   }
 }
 
@@ -614,6 +620,10 @@ module appGateway '../modules/container-app.bicep' = {
         value: 'https://${accountStorageAccountName}.blob.${az.environment().suffixes.storage}'
       }
       {
+        name: 'MAIN_STORAGE_URL'
+        value: 'https://${mainStorageAccountName}.blob.${az.environment().suffixes.storage}'
+      }
+      {
         name: 'ACCOUNT_API_URL'
         value: 'https://account-api.internal.${containerAppsEnvironment.outputs.defaultDomainName}'
       }
@@ -634,6 +644,15 @@ module appGatewayAccountStorageBlobDataReaderRoleAssignment '../modules/role-ass
   name: '${clusterResourceGroupName}-app-gateway-account-blob-reader'
   params: {
     storageAccountName: accountStorageAccount.outputs.name
+    userAssignedIdentityName: appGatewayIdentity.outputs.name
+  }
+}
+
+module appGatewayMainStorageBlobDataReaderRoleAssignment '../modules/role-assignments-storage-blob-data-reader.bicep' = {
+  scope: clusterResourceGroup
+  name: '${clusterResourceGroupName}-app-gateway-main-blob-reader'
+  params: {
+    storageAccountName: mainStorageAccount.outputs.name
     userAssignedIdentityName: appGatewayIdentity.outputs.name
   }
 }

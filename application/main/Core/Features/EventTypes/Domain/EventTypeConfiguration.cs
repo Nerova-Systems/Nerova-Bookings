@@ -33,6 +33,7 @@ public sealed class EventTypeConfiguration : IEntityTypeConfiguration<EventType>
         builder.Property(eventType => eventType.Description).HasMaxLength(1000);
         builder.Property(eventType => eventType.LocationType).HasMaxLength(80);
         builder.Property(eventType => eventType.LocationValue).HasMaxLength(500);
+        builder.Property(eventType => eventType.ImageUrl).HasMaxLength(500);
         builder.Property(eventType => eventType.Settings)
             .HasColumnType("jsonb")
             .HasConversion(

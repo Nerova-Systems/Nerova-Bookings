@@ -117,6 +117,12 @@ public sealed class EventType : SoftDeletableAggregateRoot<EventTypeId>, ITenant
     public bool BookingRequiresAuthentication { get; private set; }
 
     /// <summary>
+    ///     Gateway-served blob URL ("/service-images/{tenantId}/{eventTypeId}/{hash}.{ext}") for the
+    ///     service image shown on the services list, the public booking page, and WhatsApp Flows.
+    /// </summary>
+    public string? ImageUrl { get; private set; }
+
+    /// <summary>
     ///     Nullable reference to a secondary email's owning user. No FK constraint enforced; relationship is logical.
     /// </summary>
     public UserId? SecondaryEmailUserId { get; private set; }
@@ -356,6 +362,11 @@ public sealed class EventType : SoftDeletableAggregateRoot<EventTypeId>, ITenant
         LocationType = string.IsNullOrWhiteSpace(locationType) ? null : locationType.Trim();
         LocationValue = string.IsNullOrWhiteSpace(locationValue) ? null : locationValue.Trim();
         Settings = EventTypeSettings.Normalize(Settings, DurationMinutes, LocationType, LocationValue);
+    }
+
+    public void SetImage(string? imageUrl)
+    {
+        ImageUrl = string.IsNullOrWhiteSpace(imageUrl) ? null : imageUrl;
     }
 
     public void SetSettings(EventTypeSettings settings)
