@@ -39,11 +39,11 @@ export function DuplicateEventTypeDialog({
   onOpenChange: (isOpen: boolean) => void;
 }>) {
   return (
-    <DirtyDialog trackingTitle={t`Duplicate event type`} open={isOpen} onOpenChange={onOpenChange}>
+    <DirtyDialog trackingTitle={t`Duplicate service`} open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-2xl">
         <DialogHeader>
           <DialogTitle>
-            <Trans>Duplicate event type</Trans>
+            <Trans>Duplicate service</Trans>
           </DialogTitle>
           <DialogDescription>
             <Trans>Review the copied booking basics before creating the duplicate.</Trans>
@@ -61,7 +61,7 @@ function DuplicateEventTypeDialogBody({ eventType, onClose }: Readonly<{ eventTy
   const [draft, setDraft] = useState<EventTypePayload>(() => eventTypeToDuplicatePayload(eventType));
   const duplicateMutation = api.useMutation("post", "/api/event-types", {
     onSuccess: (createdEventType) => {
-      toast.success(t`Event type duplicated`);
+      toast.success(t`Service duplicated`);
       void queryClient.invalidateQueries();
       flushSync(() => setDirty(false));
       onClose();

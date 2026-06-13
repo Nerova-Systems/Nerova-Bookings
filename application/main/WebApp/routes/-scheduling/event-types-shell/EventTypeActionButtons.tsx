@@ -112,11 +112,11 @@ export function EventTypeOverflowActions({
           <ExternalLinkIcon />
           <Trans>Preview</Trans>
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={onDuplicate} trackingLabel={t`Duplicate event type`}>
+        <DropdownMenuItem onClick={onDuplicate} trackingLabel={t`Duplicate service`}>
           <FilesIcon />
           <Trans>Duplicate</Trans>
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={onDelete} trackingLabel={t`Delete event type`} variant="destructive">
+        <DropdownMenuItem onClick={onDelete} trackingLabel={t`Delete service`} variant="destructive">
           <Trash2Icon />
           <Trans>Delete</Trans>
         </DropdownMenuItem>

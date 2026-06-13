@@ -831,8 +831,8 @@ msgstr "Kunne ikke starte connector-opsætningen."
 msgid "Count no-shows"
 msgstr "Tæl udeblivelser"
 
-msgid "Create a private setup event type before opening public booking."
-msgstr "Opret en privat opsætningsservice, før du åbner for offentlig booking."
+msgid "Create a private setup service before opening public booking."
+msgstr ""
 
 msgid "Create a webhook to forward booking events to your own services."
 msgstr "Opret en webhook for at videresende booking-hændelser til dine egne tjenester."
@@ -931,17 +931,17 @@ msgstr "Slet klient"
 msgid "Delete clients"
 msgstr "Slet klienter"
 
-msgid "Delete event type"
-msgstr "Slet service"
-
-msgid "Delete event type?"
-msgstr "Slet service?"
-
 msgid "Delete note"
 msgstr "Slet note"
 
 msgid "Delete schedule"
 msgstr "Slet tidsplan"
+
+msgid "Delete service"
+msgstr ""
+
+msgid "Delete service?"
+msgstr ""
 
 msgid "Delete webhook"
 msgstr "Slet webhook"
@@ -1027,8 +1027,8 @@ msgstr "Slip en CSV her, eller klik for at vælge en"
 msgid "Duplicate"
 msgstr "Dupliker"
 
-msgid "Duplicate event type"
-msgstr "Dupliker service"
+msgid "Duplicate service"
+msgstr ""
 
 msgid "Duration"
 msgstr "Varighed"
@@ -1101,12 +1101,6 @@ msgstr "Begivenhedsnavn"
 
 msgid "Event subscriptions"
 msgstr "Hændelsesabonnementer"
-
-msgid "Event type deleted"
-msgstr "Service slettet"
-
-msgid "Event type duplicated"
-msgstr "Service duplikeret"
 
 msgid "Event, client, email, or reference number"
 msgstr "Service, klient, e-mail eller referencenummer"
@@ -1588,9 +1582,6 @@ msgstr "Indlæser detaljer..."
 msgid "Loading developer notifications..."
 msgstr "Indlæser udviklernotifikationer..."
 
-msgid "Loading event types..."
-msgstr "Indlæser services..."
-
 msgid "Loading private links…"
 msgstr "Indlæser private links…"
 
@@ -1599,6 +1590,9 @@ msgstr "Indlæser tidsplaner..."
 
 msgid "Loading service..."
 msgstr "Indlæser service..."
+
+msgid "Loading services..."
+msgstr ""
 
 msgid "Loading team members…"
 msgstr "Indlæser teammedlemmer…"
@@ -1922,12 +1916,6 @@ msgstr "Ingen destinationskalender"
 msgid "No developer notifications configured."
 msgstr "Ingen udviklernotifikationer er sat op."
 
-msgid "No event types match your search."
-msgstr "Ingen services matcher din søgning."
-
-msgid "No event types yet"
-msgstr "Ingen services endnu"
-
 msgid "No filters"
 msgstr "Ingen filtre"
 
@@ -1951,6 +1939,12 @@ msgstr "Ingen private links endnu."
 
 msgid "No schedules yet"
 msgstr "Ingen tidsplaner endnu"
+
+msgid "No services match your search."
+msgstr ""
+
+msgid "No services yet"
+msgstr ""
 
 msgid "No settings available yet."
 msgstr "Ingen indstillinger er tilgængelige endnu."
@@ -2678,6 +2672,12 @@ msgstr "Servicebegrænsninger"
 msgid "Service created"
 msgstr "Service oprettet"
 
+msgid "Service deleted"
+msgstr ""
+
+msgid "Service duplicated"
+msgstr ""
+
 msgid "Service image"
 msgstr "Servicebillede"
 
@@ -2907,9 +2907,6 @@ msgstr "denne klient"
 msgid "This confirms the booking with {0}."
 msgstr "Dette bekræfter bookingen med {0}."
 
-msgid "this event type"
-msgstr "denne service"
-
 msgid "This file contains sensitive columns (shown masked). They are not imported from this screen — review them with your administrator before adding them to client records."
 msgstr "Denne fil indeholder f\\u00f8lsomme kolonner (vist maskeret). De importeres ikke fra denne sk\\u00e6rm — gennemg\\u00e5 dem med din administrator, f\\u00f8r de f\\u00f8jes til klientkort."
 
@@ -2928,6 +2925,9 @@ msgstr "Dette afviser den afventende booking med {0}."
 
 msgid "This removes the booking page for {deleteSubject}."
 msgstr "Dette fjerner bookingsiden for {deleteSubject}."
+
+msgid "this service"
+msgstr ""
 
 msgid "This service is not available for public booking yet."
 msgstr "Denne service er endnu ikke tilgængelig for offentlig booking."

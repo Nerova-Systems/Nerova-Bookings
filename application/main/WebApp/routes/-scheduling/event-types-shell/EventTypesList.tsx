@@ -58,7 +58,7 @@ export function EventTypesList({
       </div>
       {isLoading ? (
         <div className="rounded-md border p-4 text-sm text-muted-foreground">
-          <Trans>Loading event types...</Trans>
+          <Trans>Loading services...</Trans>
         </div>
       ) : eventTypes.length === 0 ? (
         <Empty className="min-h-48 border">
@@ -67,16 +67,16 @@ export function EventTypesList({
               <TimerIcon />
             </EmptyMedia>
             <EmptyTitle>
-              <Trans>No event types yet</Trans>
+              <Trans>No services yet</Trans>
             </EmptyTitle>
             <EmptyDescription>
-              <Trans>Create a private setup event type before opening public booking.</Trans>
+              <Trans>Create a private setup service before opening public booking.</Trans>
             </EmptyDescription>
           </EmptyHeader>
         </Empty>
       ) : filteredEventTypes.length === 0 ? (
         <div className="rounded-md border p-8 text-center text-sm text-muted-foreground">
-          <Trans>No event types match your search.</Trans>
+          <Trans>No services match your search.</Trans>
         </div>
       ) : (
         <div className="overflow-hidden rounded-lg border bg-background">

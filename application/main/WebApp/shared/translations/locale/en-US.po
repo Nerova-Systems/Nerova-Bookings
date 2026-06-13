@@ -831,8 +831,8 @@ msgstr "Could not start connector setup."
 msgid "Count no-shows"
 msgstr "Count no-shows"
 
-msgid "Create a private setup event type before opening public booking."
-msgstr "Create a private setup event type before opening public booking."
+msgid "Create a private setup service before opening public booking."
+msgstr "Create a private setup service before opening public booking."
 
 msgid "Create a webhook to forward booking events to your own services."
 msgstr "Create a webhook to forward booking events to your own services."
@@ -931,17 +931,17 @@ msgstr "Delete client"
 msgid "Delete clients"
 msgstr "Delete clients"
 
-msgid "Delete event type"
-msgstr "Delete event type"
-
-msgid "Delete event type?"
-msgstr "Delete event type?"
-
 msgid "Delete note"
 msgstr "Delete note"
 
 msgid "Delete schedule"
 msgstr "Delete schedule"
+
+msgid "Delete service"
+msgstr "Delete service"
+
+msgid "Delete service?"
+msgstr "Delete service?"
 
 msgid "Delete webhook"
 msgstr "Delete webhook"
@@ -1027,8 +1027,8 @@ msgstr "Drop a CSV here, or click to choose one"
 msgid "Duplicate"
 msgstr "Duplicate"
 
-msgid "Duplicate event type"
-msgstr "Duplicate event type"
+msgid "Duplicate service"
+msgstr "Duplicate service"
 
 msgid "Duration"
 msgstr "Duration"
@@ -1101,12 +1101,6 @@ msgstr "Event name"
 
 msgid "Event subscriptions"
 msgstr "Event subscriptions"
-
-msgid "Event type deleted"
-msgstr "Event type deleted"
-
-msgid "Event type duplicated"
-msgstr "Event type duplicated"
 
 msgid "Event, client, email, or reference number"
 msgstr "Event, client, email, or reference number"
@@ -1588,9 +1582,6 @@ msgstr "Loading details..."
 msgid "Loading developer notifications..."
 msgstr "Loading developer notifications..."
 
-msgid "Loading event types..."
-msgstr "Loading event types..."
-
 msgid "Loading private links…"
 msgstr "Loading private links…"
 
@@ -1599,6 +1590,9 @@ msgstr "Loading schedules..."
 
 msgid "Loading service..."
 msgstr "Loading service..."
+
+msgid "Loading services..."
+msgstr "Loading services..."
 
 msgid "Loading team members…"
 msgstr "Loading team members…"
@@ -1922,12 +1916,6 @@ msgstr "No destination calendar"
 msgid "No developer notifications configured."
 msgstr "No developer notifications configured."
 
-msgid "No event types match your search."
-msgstr "No event types match your search."
-
-msgid "No event types yet"
-msgstr "No event types yet"
-
 msgid "No filters"
 msgstr "No filters"
 
@@ -1951,6 +1939,12 @@ msgstr "No private links yet."
 
 msgid "No schedules yet"
 msgstr "No schedules yet"
+
+msgid "No services match your search."
+msgstr "No services match your search."
+
+msgid "No services yet"
+msgstr "No services yet"
 
 msgid "No settings available yet."
 msgstr "No settings available yet."
@@ -2678,6 +2672,12 @@ msgstr "Service constraints"
 msgid "Service created"
 msgstr "Service created"
 
+msgid "Service deleted"
+msgstr "Service deleted"
+
+msgid "Service duplicated"
+msgstr "Service duplicated"
+
 msgid "Service image"
 msgstr "Service image"
 
@@ -2907,9 +2907,6 @@ msgstr "this client"
 msgid "This confirms the booking with {0}."
 msgstr "This confirms the booking with {0}."
 
-msgid "this event type"
-msgstr "this event type"
-
 msgid "This file contains sensitive columns (shown masked). They are not imported from this screen — review them with your administrator before adding them to client records."
 msgstr "This file contains sensitive columns (shown masked). They are not imported from this screen — review them with your administrator before adding them to client records."
 
@@ -2928,6 +2925,9 @@ msgstr "This rejects the pending booking with {0}."
 
 msgid "This removes the booking page for {deleteSubject}."
 msgstr "This removes the booking page for {deleteSubject}."
+
+msgid "this service"
+msgstr "this service"
 
 msgid "This service is not available for public booking yet."
 msgstr "This service is not available for public booking yet."

@@ -30,10 +30,10 @@ export function DeleteEventTypeDialog({
   onOpenChange: (isOpen: boolean) => void;
   onDeleted?: () => void;
 }>) {
-  const deleteSubject = eventType?.title ?? t`this event type`;
+  const deleteSubject = eventType?.title ?? t`this service`;
   const deleteMutation = api.useMutation("delete", "/api/event-types/{id}", {
     onSuccess: () => {
-      toast.success(t`Event type deleted`);
+      toast.success(t`Service deleted`);
       void queryClient.invalidateQueries();
       onOpenChange(false);
       onDeleted?.();
@@ -41,11 +41,11 @@ export function DeleteEventTypeDialog({
   });
 
   return (
-    <AlertDialog trackingTitle={t`Delete event type`} open={isOpen} onOpenChange={onOpenChange}>
+    <AlertDialog trackingTitle={t`Delete service`} open={isOpen} onOpenChange={onOpenChange}>
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>
-            <Trans>Delete event type?</Trans>
+            <Trans>Delete service?</Trans>
           </AlertDialogTitle>
           <AlertDialogDescription>
             <Trans>This removes the booking page for {deleteSubject}.</Trans>
