@@ -99,7 +99,7 @@ function DeltaBadge({ value, suffix, invert }: Readonly<{ value: number; suffix?
   const isBad = invert ? isPositive : isNegative;
 
   const Icon = isFlat ? MinusIcon : isPositive ? ArrowUpIcon : ArrowDownIcon;
-  const tone = isFlat ? "text-muted-foreground" : isGood ? "text-emerald-600" : isBad ? "text-rose-600" : "";
+  const tone = isFlat ? "text-muted-foreground" : isGood ? "text-primary" : isBad ? "text-rose-600" : "";
 
   const formatted = suffix === "pp" ? `${(value * 100).toFixed(1)}pp` : `${(value * 100).toFixed(1)}%`;
 

@@ -76,7 +76,7 @@ export function PublicBooker({
 
   return (
     <div
-      data-testid="booker-container"
+      data-testid="client-container"
       data-booker-state={state}
       className={cn(
         "mx-auto grid w-full max-w-full items-start overflow-hidden rounded-md border border-border bg-background shadow-sm transition-[width] duration-300 motion-reduce:transition-none",
@@ -140,7 +140,7 @@ function PublicBookerUnavailable() {
           <Trans>Booking page unavailable</Trans>
         </h1>
         <span className="text-sm text-muted-foreground">
-          <Trans>This event type is not available for public booking yet.</Trans>
+          <Trans>This service is not available for public booking yet.</Trans>
         </span>
       </div>
     </div>

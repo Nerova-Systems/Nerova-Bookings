@@ -92,7 +92,7 @@ function CancelBookingDialogBody({
             name="reason"
             autoFocus={true}
             value={reason}
-            placeholder={t`Let the attendee know why this booking is being cancelled`}
+            placeholder={t`Let the client know why this booking is being cancelled`}
             onChange={(event) => setReason(event.currentTarget.value)}
           />
         </div>

@@ -1,5 +1,6 @@
 import { t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@repo/ui/components/Accordion";
 import { Badge } from "@repo/ui/components/Badge";
 import { Button } from "@repo/ui/components/Button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@repo/ui/components/Card";
@@ -22,26 +23,35 @@ function ConnectedDetails({
   status
 }: Readonly<{ businessName: string | null; phoneNumber: string | null; status: string }>) {
   return (
-    <div className="flex flex-col gap-3">
-      <div className="flex items-center justify-between gap-4">
-        <span className="text-sm text-muted-foreground">
-          <Trans>Status</Trans>
-        </span>
-        <Badge variant="default">{status}</Badge>
-      </div>
-      <div className="flex items-center justify-between gap-4">
-        <span className="text-sm text-muted-foreground">
-          <Trans>Business name</Trans>
-        </span>
-        <span className="text-sm font-medium">{businessName ?? "-"}</span>
-      </div>
-      <div className="flex items-center justify-between gap-4">
-        <span className="text-sm text-muted-foreground">
-          <Trans>Phone number</Trans>
-        </span>
-        <span className="text-sm font-medium">{phoneNumber ?? "-"}</span>
-      </div>
-    </div>
+    <Accordion>
+      <AccordionItem value="technical-details" className="border-b-0">
+        <AccordionTrigger className="py-2 text-sm">
+          <Trans>Technical details</Trans>
+        </AccordionTrigger>
+        <AccordionContent>
+          <dl className="grid gap-3 rounded-lg border bg-muted/30 p-4 text-sm sm:grid-cols-2">
+            <div className="flex flex-col gap-1">
+              <dt className="text-muted-foreground">
+                <Trans>Connection state</Trans>
+              </dt>
+              <dd className="font-medium">{status || "-"}</dd>
+            </div>
+            <div className="flex flex-col gap-1">
+              <dt className="text-muted-foreground">
+                <Trans>Business name</Trans>
+              </dt>
+              <dd className="font-medium">{businessName ?? "-"}</dd>
+            </div>
+            <div className="flex flex-col gap-1">
+              <dt className="text-muted-foreground">
+                <Trans>Phone number</Trans>
+              </dt>
+              <dd className="font-medium">{phoneNumber ?? "-"}</dd>
+            </div>
+          </dl>
+        </AccordionContent>
+      </AccordionItem>
+    </Accordion>
   );
 }
 
@@ -69,12 +79,12 @@ export function WhatsAppConnectionCard() {
 
   const reprovisionMutation = api.useMutation("post", "/api/main/whatsapp/waba/reprovision-flows", {
     onSuccess: () => {
-      toast.success(t`Flows updated`, {
-        description: t`Your WhatsApp booking and sign-in flows have been refreshed.`
+      toast.success(t`Booking experience fixed`, {
+        description: t`Your WhatsApp booking and sign-in experience is up to date.`
       });
     },
     onError: () => {
-      toast.error(t`Failed to refresh flows`, {
+      toast.error(t`Could not fix booking experience`, {
         description: t`Please try again or reconnect your WhatsApp account.`
       });
     }
@@ -103,24 +113,37 @@ export function WhatsAppConnectionCard() {
     isLaunching || completeMutation.isPending || disconnectMutation.isPending || reprovisionMutation.isPending;
 
   return (
-    <Card>
+    <Card className="border-primary/20 bg-primary/5">
       <CardHeader>
-        <div className="flex items-center gap-3">
-          <div className="flex size-10 items-center justify-center rounded-lg bg-muted">
-            <MessageCircleIcon className="size-5 text-muted-foreground" />
+        <div className="flex items-start justify-between gap-4">
+          <div className="flex items-start gap-3">
+            <div className="flex size-10 items-center justify-center rounded-lg bg-muted">
+              <MessageCircleIcon className="size-5 text-muted-foreground" />
+            </div>
+            <div className="flex flex-col gap-1">
+              <CardTitle>
+                {isConnected ? (
+                  status?.phoneNumber ? (
+                    <Trans>Nerova is answering WhatsApp on {status.phoneNumber}</Trans>
+                  ) : (
+                    <Trans>Nerova is answering WhatsApp</Trans>
+                  )
+                ) : (
+                  <Trans>Nerova is not answering WhatsApp yet</Trans>
+                )}
+              </CardTitle>
+              <CardDescription>
+                {isConnected ? (
+                  <Trans>Clients can message the number they already know. Nerova keeps the front desk moving.</Trans>
+                ) : (
+                  <Trans>Connect the number clients already message and we will guide them into bookings.</Trans>
+                )}
+              </CardDescription>
+            </div>
           </div>
-          <div className="flex flex-col gap-1">
-            <CardTitle>
-              <Trans>WhatsApp Business</Trans>
-            </CardTitle>
-            <CardDescription>
-              {isConnected ? (
-                <Trans>Your account is connected to WhatsApp.</Trans>
-              ) : (
-                <Trans>Connect your WhatsApp Business account to start messaging.</Trans>
-              )}
-            </CardDescription>
-          </div>
+          <Badge variant={isConnected ? "default" : "secondary"}>
+            {isConnected ? <Trans>Connected</Trans> : <Trans>Disconnected</Trans>}
+          </Badge>
         </div>
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
@@ -137,7 +160,7 @@ export function WhatsAppConnectionCard() {
                 onClick={() => reprovisionMutation.mutate({})}
                 isPending={reprovisionMutation.isPending}
               >
-                <Trans>Refresh flows</Trans>
+                <Trans>Fix booking experience</Trans>
               </Button>
               <Button
                 variant="outline"

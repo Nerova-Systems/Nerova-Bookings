@@ -24,7 +24,7 @@ import {
 } from "../-scheduling/schedulingTypes";
 
 export const Route = createFileRoute("/event-types/$eventTypeId")({
-  staticData: { trackingTitle: "Event type details" },
+  staticData: { trackingTitle: "Service details" },
   validateSearch: (search: Record<string, unknown>) => ({
     tabName: isEventTypeTabName(search.tabName) ? search.tabName : "setup"
   }),
@@ -54,7 +54,7 @@ function EventTypeDetailsPage() {
 
   const updateEventTypeMutation = api.useMutation("put", "/api/event-types/{id}", {
     onSuccess: (updatedEventType) => {
-      toast.success(t`Event type updated`);
+      toast.success(t`Service updated`);
       setDraft(eventTypeToPayload(updatedEventType));
       void queryClient.invalidateQueries();
     }
@@ -64,10 +64,10 @@ function EventTypeDetailsPage() {
     setDraft(nextDraft);
   };
 
-  const pageTitle = eventType?.title ?? t`Event type`;
+  const pageTitle = eventType?.title ?? t`Service`;
   const subtitle = eventType
     ? getEventTypePublicUrl(eventType, schedulingProfile?.handle)
-    : t`Edit booking setup for this appointment type.`;
+    : t`Edit booking setup for this service.`;
 
   const titleContent = (
     <div className="flex min-w-0 items-center justify-between gap-3">
@@ -107,11 +107,12 @@ function EventTypeDetailsPage() {
             <GeneralApiErrors error={updateEventTypeMutation.error} />
             {isLoading || !draft || !eventType ? (
               <div className="rounded-md border p-4 text-sm text-muted-foreground">
-                <Trans>Loading event type...</Trans>
+                <Trans>Loading service...</Trans>
               </div>
             ) : (
               <EventTypeEditorTabs
                 eventTypeId={eventTypeId}
+                imageUrl={eventType.imageUrl}
                 tabName={tabName}
                 draft={draft}
                 schedules={schedules}

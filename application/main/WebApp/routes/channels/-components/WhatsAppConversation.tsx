@@ -81,7 +81,7 @@ function MessagesList() {
             <Trans>No messages yet</Trans>
           </EmptyTitle>
           <EmptyDescription>
-            <Trans>Messages from customers will appear here once Meta starts delivering webhooks.</Trans>
+            <Trans>Messages from clients will appear here once new conversations arrive.</Trans>
           </EmptyDescription>
         </EmptyHeader>
       </Empty>

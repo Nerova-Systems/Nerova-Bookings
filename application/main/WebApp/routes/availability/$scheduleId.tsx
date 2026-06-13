@@ -21,7 +21,7 @@ import {
 } from "../-scheduling/schedulingTypes";
 
 export const Route = createFileRoute("/availability/$scheduleId")({
-  staticData: { trackingTitle: "Availability details" },
+  staticData: { trackingTitle: "Hours details" },
   component: AvailabilityDetailsPage
 });
 
@@ -60,7 +60,7 @@ function AvailabilityDetailsPage() {
     : schedule?.isDefault
       ? t`Make another schedule default before deleting this one.`
       : isReferencedByEventType
-        ? t`Move event types to another schedule before deleting this one.`
+        ? t`Move services to another schedule before deleting this one.`
         : null;
 
   useEffect(() => {
@@ -81,7 +81,7 @@ function AvailabilityDetailsPage() {
 
   return (
     <SchedulingPageShell
-      title={draft?.name || schedule?.name || t`Availability`}
+      title={draft?.name || schedule?.name || t`Hours`}
       titleContent={
         <div className="flex min-w-0 items-center gap-3">
           <Button
@@ -104,7 +104,7 @@ function AvailabilityDetailsPage() {
               <PencilIcon className="size-4 shrink-0 text-muted-foreground" />
             </div>
           ) : (
-            <span>{schedule?.name ?? t`Availability`}</span>
+            <span>{schedule?.name ?? t`Hours`}</span>
           )}
         </div>
       }

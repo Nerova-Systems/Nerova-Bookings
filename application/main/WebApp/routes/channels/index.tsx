@@ -40,11 +40,11 @@ function ChannelsOverviewPage() {
         >
           <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
             <ChannelCard
-              icon={<MessageCircleIcon className="size-6 text-emerald-600 dark:text-emerald-400" />}
+              icon={<MessageCircleIcon className="size-6 text-primary" />}
               name={t`WhatsApp Business`}
               description={t`Reach customers on WhatsApp with embedded signup, business profile setup, and booking workflows.`}
               status={whatsAppStatus}
-              accentClassName="bg-gradient-to-br from-emerald-500/15 to-green-500/5"
+              accentClassName="bg-gradient-to-br from-primary/15 to-primary/5"
               to="/channels/whatsapp"
             />
             <ChannelCard

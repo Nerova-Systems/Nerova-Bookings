@@ -151,13 +151,13 @@ export function AddGuestsDialog({ booking, isOpen, onOpenChange, onCompleted }: 
               <Trans>Add guests</Trans>
             </DialogTitle>
             <DialogDescription>
-              <Trans>Add another attendee to this booking.</Trans>
+              <Trans>Add another client to this booking.</Trans>
             </DialogDescription>
           </DialogHeader>
           <DialogBody className="gap-4">
             <GeneralApiErrors error={mutation.error} />
-            <TextField name="guestName" label={t`Attendee name`} required={true} />
-            <TextField name="guestEmail" label={t`Attendee email`} type="email" required={true} />
+            <TextField name="guestName" label={t`Client name`} required={true} />
+            <TextField name="guestEmail" label={t`Client email`} type="email" required={true} />
           </DialogBody>
           <DialogFooter>
             <DialogClose render={<Button type="button" variant="outline" disabled={mutation.isPending} />}>

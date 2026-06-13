@@ -42,7 +42,7 @@ export function FacetedFilters({
       <ToggleFilter
         id="booking-no-show-only"
         label={t`No-show only`}
-        description={t`Only show bookings where the attendee did not join.`}
+        description={t`Only show bookings where the client did not join.`}
         checked={draftSearch.noShowOnly ?? false}
         onCheckedChange={(checked) => updateSearch({ noShowOnly: checked || undefined })}
       />

@@ -89,11 +89,7 @@ function AppStoreGalleryPage() {
   );
 
   return (
-    <AppsPageShell
-      title={t`App Store`}
-      subtitle={t`Explore and connect powerful app extensions and calendar sync options to automate bookings.`}
-      actions={searchInput}
-    >
+    <AppsPageShell title={t`App Store`} subtitle={t`Turn on what your business needs.`} actions={searchInput}>
       <div className="flex flex-col gap-10">
         {!isFiltering && !isLoading && availableCategories.length > 0 && (
           <AppSlider title={<Trans>Featured categories</Trans>}>

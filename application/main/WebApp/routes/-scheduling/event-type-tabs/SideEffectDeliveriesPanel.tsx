@@ -24,7 +24,7 @@ export function SideEffectDeliveriesPanel({ eventTypeId, kind }: SideEffectDeliv
           <Trans>Recent deliveries</Trans>
         </h3>
         <span className="text-xs text-muted-foreground">
-          {kind === "email" ? <Trans>Email</Trans> : <Trans>Webhook</Trans>}
+          {kind === "email" ? <Trans>Email</Trans> : <Trans>Developer notification</Trans>}
         </span>
       </div>
       {isLoading ? (

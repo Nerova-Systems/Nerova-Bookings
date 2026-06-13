@@ -42,7 +42,7 @@ export function WebhookScopeCard({ eventTypeId }: Readonly<{ eventTypeId: string
       <CardContent className="flex flex-wrap items-center gap-3">
         <Badge variant="outline">{eventTypeId}</Badge>
         <p className="text-sm text-muted-foreground">
-          <Trans>The event type scope is locked once a webhook is created.</Trans>
+          <Trans>The service scope is locked once a webhook is created.</Trans>
         </p>
       </CardContent>
     </Card>

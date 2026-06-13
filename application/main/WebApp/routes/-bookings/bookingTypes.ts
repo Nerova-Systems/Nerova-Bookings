@@ -1,3 +1,5 @@
+import { t } from "@lingui/core/macro";
+
 import type { Schemas } from "@/shared/lib/api/client";
 
 export const bookingStatuses = ["upcoming", "unconfirmed", "recurring", "past", "cancelled"] as const;
@@ -32,6 +34,24 @@ export function getBookingStatusLabel(status: BookingStatusView) {
   }
 }
 
+export function getBookingStatusWords(status: string) {
+  switch (status.toLowerCase()) {
+    case "accepted":
+      return t`Confirmed`;
+    case "pending":
+      return t`Waiting for approval`;
+    case "cancelled":
+      return t`Cancelled`;
+    case "rejected":
+      return t`Not approved`;
+    case "no_show":
+    case "noshow":
+      return t`No-show`;
+    default:
+      return status;
+  }
+}
+
 export function getBookingEmptyDescription(status: BookingStatusView) {
   switch (status) {
     case "upcoming":
@@ -39,7 +59,7 @@ export function getBookingEmptyDescription(status: BookingStatusView) {
     case "unconfirmed":
       return "Bookings waiting for approval will appear here.";
     case "recurring":
-      return "Recurring event bookings will appear here when recurring event types are booked.";
+      return "Recurring event bookings will appear here when recurring services are booked.";
     case "past":
       return "Completed bookings will move here after their end time.";
     case "cancelled":

@@ -68,11 +68,11 @@ export function MainSideMenu() {
               <SidebarMenuCollapsibleProvider defaultExpanded={defaultExpandedGroup}>
                 <SidebarMenu>
                   <SidebarMenuItem>
-                    <SidebarMenuButton asChild={true} isActive={currentPath === "/dashboard"} tooltip={t`Dashboard`}>
+                    <SidebarMenuButton asChild={true} isActive={currentPath === "/dashboard"} tooltip={t`Today`}>
                       <RouterLink to="/dashboard">
                         <LayoutDashboardIcon />
                         <span>
-                          <Trans>Dashboard</Trans>
+                          <Trans>Today</Trans>
                         </span>
                       </RouterLink>
                     </SidebarMenuButton>
@@ -81,12 +81,12 @@ export function MainSideMenu() {
                     <SidebarMenuButton
                       asChild={true}
                       isActive={currentPath.startsWith("/event-types")}
-                      tooltip={t`Event types`}
+                      tooltip={t`Services`}
                     >
                       <RouterLink to="/event-types" search={{ dialog: undefined, duplicateEventTypeId: undefined }}>
                         <TimerIcon />
                         <span>
-                          <Trans>Event types</Trans>
+                          <Trans>Services</Trans>
                         </span>
                       </RouterLink>
                     </SidebarMenuButton>
@@ -128,12 +128,12 @@ export function MainSideMenu() {
                     <SidebarMenuButton
                       asChild={true}
                       isActive={currentPath.startsWith("/availability")}
-                      tooltip={t`Availability`}
+                      tooltip={t`Hours`}
                     >
                       <RouterLink to="/availability">
                         <CalendarDaysIcon />
                         <span>
-                          <Trans>Availability</Trans>
+                          <Trans>Hours</Trans>
                         </span>
                       </RouterLink>
                     </SidebarMenuButton>

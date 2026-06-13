@@ -35,14 +35,14 @@ msgstr "{0} klienter blev slettet"
 msgid "{0} clients found · {1} ready · {2} already exist · {3} need attention"
 msgstr "{0} klienter fundet · {1} klar · {2} findes allerede · {3} kræver opmærksomhed"
 
+#. placeholder {0}: schedule.name
+msgid "{0} controls when clients can book."
+msgstr "{0} styrer, hvornår klienter kan booke."
+
 #. placeholder {0}: conversation.inboundCount
 #. placeholder {1}: conversation.outboundCount
 msgid "{0} received · {1} sent"
 msgstr "{0} modtaget · {1} sendt"
-
-#. placeholder {0}: schedule.availabilityWindows.length
-msgid "{0} windows"
-msgstr "{0} vinduer"
 
 msgid "{count} app"
 msgstr "{count} app"
@@ -52,6 +52,12 @@ msgstr "{count} apps"
 
 msgid "{count} selected"
 msgstr "{count} valgt"
+
+msgid "{handledCount} done"
+msgstr "{handledCount} færdige"
+
+msgid "{needsYouCount} open"
+msgstr "{needsYouCount} åbne"
 
 msgid "{openCount} open"
 msgstr "{openCount} åbne"
@@ -66,26 +72,41 @@ msgstr "{totalCount} {0} bookinger"
 msgid "{value} stars and up"
 msgstr "{value} stjerner og op"
 
-msgid "0 active"
-msgstr "0 aktive"
-
-msgid "0 apps, 0 active"
-msgstr "0 apps, 0 aktive"
+msgid "A calm look at today's bookings and what Nerova handled for you."
+msgstr "Et roligt overblik over dagens bookinger og det, Nerova har klaret for dig."
 
 msgid "A confirmation will be sent to the email address you provided."
 msgstr "En bekræftelse sendes til den e-mailadresse, du har angivet."
 
+msgid "A simple note clients see before they book."
+msgstr "En enkel note, som klienter ser, før de booker."
+
 msgid "Accepted"
 msgstr "Accepteret"
+
+msgid "Access to this section is recorded for audit purposes."
+msgstr "Adgang til denne sektion registreres til revision."
+
+msgid "Accounting"
+msgstr "Regnskab"
+
+msgid "Acrylic"
+msgstr "Akryl"
 
 msgid "Active"
 msgstr "Aktiv"
 
 msgid "Active bookings per booker"
-msgstr "Aktive bookinger pr. booker"
+msgstr "Aktive bookinger pr. klient"
 
 msgid "Activity"
 msgstr "Aktivitet"
+
+msgid "Add"
+msgstr "Tilføj"
+
+msgid "Add {label}"
+msgstr "Tilføj {label}"
 
 msgid "Add a question"
 msgstr "Tilføj et spørgsmål"
@@ -96,8 +117,8 @@ msgstr "Tilføj en intern note"
 msgid "Add an override"
 msgstr "Tilføj en undtagelse"
 
-msgid "Add another attendee to this booking."
-msgstr "Add another attendee to this booking."
+msgid "Add another client to this booking."
+msgstr "Tilføj endnu en klient til denne booking."
 
 msgid "Add another guest"
 msgstr "Tilføj endnu en gæst"
@@ -109,7 +130,7 @@ msgid "Add date override"
 msgstr "Tilføj datoundtagelse"
 
 msgid "Add dates when your availability changes from your daily hours."
-msgstr "Tilføj datoer, hvor din tilgængelighed afviger fra dine daglige timer."
+msgstr "Tilføj datoer, når dine åbningstider afviger fra de daglige tider."
 
 msgid "Add guests"
 msgstr "Tilføj gæster"
@@ -117,14 +138,20 @@ msgstr "Tilføj gæster"
 msgid "Add internal note"
 msgstr "Tilføj intern note"
 
-msgid "Add new event type"
-msgstr "Tilføj ny aftaletype"
+msgid "Add later"
+msgstr "Tilføj senere"
 
 msgid "Add new schedule"
 msgstr "Tilføj ny tidsplan"
 
+msgid "Add new service"
+msgstr "Tilføj ny service"
+
 msgid "Add note"
 msgstr "Tilføj note"
+
+msgid "Add notification"
+msgstr "Tilføj notifikation"
 
 msgid "Add option"
 msgstr "Tilføj mulighed"
@@ -141,17 +168,23 @@ msgstr "Tilføj tid"
 msgid "Add to calendar"
 msgstr "Tilføj til kalender"
 
-msgid "Add webhook"
-msgstr "Tilføj webhook"
-
-msgid "Add, remove, and weight individual hosts and host groups."
-msgstr "Tilføj, fjern og vægt enkelte værter og værtsgrupper."
-
 msgid "Additional notes"
 msgstr "Yderligere noter"
 
+msgid "Address, phone number, or video link"
+msgstr "Adresse, telefonnummer eller videolink"
+
+msgid "Adult"
+msgstr "Voksen"
+
 msgid "Advanced"
 msgstr "Avanceret"
+
+msgid "Advanced settings"
+msgstr "Avancerede indstillinger"
+
+msgid "Afrikaans"
+msgstr "Afrikaans"
 
 msgid "After buffer"
 msgstr "Buffer efter"
@@ -177,12 +210,18 @@ msgstr "Alle"
 msgid "All apps"
 msgstr "Alle apps"
 
-msgid "All event types"
-msgstr "Alle aftaletyper"
+msgid "All services"
+msgstr "Alle services"
 
 #. placeholder {0}: job.rowsCommitted
 msgid "All set — {0} clients imported."
 msgstr "Alt klar — {0} klienter importeret."
+
+msgid "Allergies"
+msgstr "Allergier"
+
+msgid "Allergies & sensitivities"
+msgstr "Allergier og følsomheder"
 
 msgid "Allow cancellation"
 msgstr "Tillad aflysning"
@@ -195,6 +234,9 @@ msgstr "Tillad omplanlægning af annullerede bookinger"
 
 msgid "Allow rescheduling past bookings"
 msgstr "Tillad omplanlægning af tidligere bookinger"
+
+msgid "Almond"
+msgstr "Mandel"
 
 msgid "Already exists"
 msgstr "Findes allerede"
@@ -233,7 +275,7 @@ msgid "Apps"
 msgstr "Apps"
 
 msgid "Apps installed for your account are available to this event type. Conferencing apps appear as location choices on the Setup tab, and connected calendars are used to check availability."
-msgstr "Apps installeret på din konto er tilgængelige til denne begivenhedstype. Konferenceringsapps vises som lokationsvalg på opsætningsfanen, og tilsluttede kalendere bruges til at kontrollere tilgængelighed."
+msgstr "Apps installeret på din konto er tilgængelige for denne service. Mødeapps vises som valg af sted på fanen Opsætning, og tilsluttede kalendere bruges til at tjekke ledige tider."
 
 #. placeholder {0}: clients.length
 msgid "Are you sure you want to delete <0>{0} clients</0>?"
@@ -242,35 +284,29 @@ msgstr "Er du sikker på, at du vil slette <0>{0} klienter</0>?"
 msgid "Are you sure you want to delete <0>{clientDisplayName}</0>?"
 msgstr "Er du sikker på, at du vil slette <0>{clientDisplayName}</0>?"
 
+msgid "Ask clients why they cancel"
+msgstr "Spørg klienter, hvorfor de aflyser"
+
+msgid "Ask everyone why they cancel"
+msgstr "Spørg alle, hvorfor de aflyser"
+
+msgid "Ask your team why they cancel"
+msgstr "Spørg dit team, hvorfor de aflyser"
+
 msgid "At least one schedule exists"
 msgstr "Der findes mindst én tidsplan"
 
 msgid "Attempts"
 msgstr "Forsøg"
 
-msgid "Attendee"
-msgstr "Deltager"
-
-msgid "Attendee email"
-msgstr "Deltager-e-mail"
-
-msgid "Attendee name"
-msgstr "Deltagernavn"
-
-msgid "Attendees"
-msgstr "Deltagere"
-
-msgid "Automate reminders and follow-up messages for this event type."
-msgstr "Automate reminders and follow-up messages for this event type."
+msgid "Automate reminders and follow-up messages for this service."
+msgstr "Automatisér påmindelser og opfølgningsbeskeder for denne service."
 
 msgid "Availability"
 msgstr "Tilgængelighed"
 
-msgid "Availability troubleshoot"
-msgstr "Fejlfinding af tilgængelighed"
-
-msgid "Available hosts"
-msgstr "Tilgængelige værter"
+msgid "Available team members"
+msgstr "Tilgængelige teammedlemmer"
 
 msgid "Available times"
 msgstr "Tilgængelige tider"
@@ -281,11 +317,11 @@ msgstr "Tilbage"
 msgid "Back to App Store"
 msgstr "Tilbage til App Store"
 
-msgid "Back to availability"
-msgstr "Tilbage til tilgængelighed"
-
 msgid "Back to dates"
 msgstr "Tilbage til datoer"
+
+msgid "Back to hours"
+msgstr "Tilbage til timer"
 
 msgid "Back to times"
 msgstr "Tilbage til tider"
@@ -293,8 +329,20 @@ msgstr "Tilbage til tider"
 msgid "Basics"
 msgstr "Grundlæggende"
 
+msgid "Beard style"
+msgstr "Skægstil"
+
 msgid "Before buffer"
 msgstr "Buffer før"
+
+msgid "Beginner"
+msgstr "Begynder"
+
+msgid "Bird"
+msgstr "Fugl"
+
+msgid "Birthday"
+msgstr "Fødselsdag"
 
 msgid "Block slot while pending"
 msgstr "Bloker tidspunkt mens afventer"
@@ -317,9 +365,6 @@ msgstr "Bookede minutter pr. uge"
 msgid "Booked minutes per year"
 msgstr "Bookede minutter pr. år"
 
-msgid "Booker layout"
-msgstr "Booker-layout"
-
 msgid "Booking actions"
 msgstr "Bookinghandlinger"
 
@@ -341,17 +386,23 @@ msgstr "Booking oprettet"
 msgid "Booking details"
 msgstr "Bookingdetaljer"
 
-msgid "Booking ID"
-msgstr "Booking-id"
+msgid "Booking experience fixed"
+msgstr "Bookingoplevelsen blev rettet"
 
 msgid "Booking limits"
 msgstr "Bookinggrænser"
+
+msgid "Booking link and page"
+msgstr "Bookinglink og side"
 
 msgid "Booking link copied"
 msgstr "Booking-link kopieret"
 
 msgid "Booking page"
 msgstr "Bookingside"
+
+msgid "Booking page color"
+msgstr "Farve på bookingside"
 
 msgid "Booking Page Not Found"
 msgstr "Bookingside ikke fundet"
@@ -404,6 +455,9 @@ msgstr "Bookinger pr. år"
 msgid "Boolean"
 msgstr "Boolesk"
 
+msgid "Breed"
+msgstr "Race"
+
 msgid "Bring your client list over and we will show you a clear receipt before anything is saved."
 msgstr "Tag din klientliste med, så viser vi dig en tydelig kvittering, før noget gemmes."
 
@@ -425,6 +479,9 @@ msgstr "Virksomhedsnavn"
 msgid "Business notes"
 msgstr "Virksomhedsnoter"
 
+msgid "Business Studies"
+msgstr "Erhvervsøkonomi"
+
 msgid "By"
 msgstr "Af"
 
@@ -444,11 +501,11 @@ msgstr "Navn på kalenderbegivenhed"
 msgid "Calendar grid"
 msgstr "Kalendergitter"
 
-msgid "Calendar settings & more..."
-msgstr "Kalenderindstillinger og mere..."
-
 msgid "Calendar view"
 msgstr "Kalendervisning"
+
+msgid "Cambridge"
+msgstr "Cambridge"
 
 msgid "Cancel"
 msgstr "Annuller"
@@ -491,6 +548,21 @@ msgstr "{0} bookinger annulleret"
 msgid "Capacity limits"
 msgstr "Kapacitetsgrænser"
 
+msgid "CAPS"
+msgstr "CAPS"
+
+msgid "Cat"
+msgstr "Kat"
+
+msgid "Change photo"
+msgstr "Skift foto"
+
+msgid "Change the booking link name, optional durations, and public page layout."
+msgstr "Skift bookinglinkets navn, valgfrie varigheder og layoutet på den offentlige side."
+
+msgid "Change the public link name if you need to."
+msgstr "Skift navnet på det offentlige link, hvis du har brug for det."
+
 msgid "Channels"
 msgstr "Kanaler"
 
@@ -500,20 +572,26 @@ msgstr "Afkrydsningsfelt"
 msgid "Checking…"
 msgstr "Tjekker…"
 
-msgid "Choose the booker layout and accent color for this event type."
-msgstr "Vælg booker-layout og accentfarve for denne begivenhedstype."
+msgid "Choose the client layout and accent color for this service."
+msgstr "Vælg klientlayout og accentfarve for denne service."
 
-msgid "Choose the core calendar and conferencing apps used by this event type."
-msgstr "Vælg de centrale kalender- og konferenceapps, der bruges af denne begivenhedstype."
+msgid "Choose the core calendar and conferencing apps used by this service."
+msgstr "Vælg den primære kalender og de mødeapps, der bruges af denne service."
+
+msgid "Choose the people who can provide this service."
+msgstr "Vælg de personer, der kan udføre denne service."
 
 msgid "Choose which language the public booking page renders in."
 msgstr "Vælg hvilket sprog den offentlige bookingside vises på."
 
 msgid "Choose which schedule controls when this event type can be booked."
-msgstr "Vælg, hvilken tidsplan der styrer, hvornår denne begivenhedstype kan bookes."
+msgstr "Vælg hvilken tidsplan der styrer, hvornår denne service kan bookes."
 
 msgid "Choose your client CSV"
 msgstr "Vælg din klient-CSV"
+
+msgid "Chronic conditions"
+msgstr "Kroniske tilstande"
 
 msgid "Clear"
 msgstr "Ryd"
@@ -521,11 +599,29 @@ msgstr "Ryd"
 msgid "Clear search"
 msgstr "Ryd søgning"
 
+msgid "Client"
+msgstr "Klient"
+
 msgid "Client actions"
 msgstr "Klienthandlinger"
 
 msgid "Client deleted successfully: {clientDisplayName}"
 msgstr "Klient slettet: {clientDisplayName}"
+
+msgid "Client details"
+msgstr "Klientdetaljer"
+
+msgid "Client email"
+msgstr "Klientens e-mail"
+
+msgid "Client messages waiting for your call"
+msgstr "Klientbeskeder, der venter på din vurdering"
+
+msgid "Client name"
+msgstr "Klientens navn"
+
+msgid "Client page layout"
+msgstr "Layout for klientside"
 
 msgid "Client profile"
 msgstr "Klientprofil"
@@ -536,20 +632,41 @@ msgstr "Klient opdateret"
 msgid "Clients"
 msgstr "Klienter"
 
+msgid "Clients can message the number they already know. Nerova keeps the front desk moving."
+msgstr "Klienter kan skrive til det nummer, de allerede kender. Nerova holder receptionen i gang."
+
 msgid "Clients loading"
 msgstr "Klienter indlæses"
 
 msgid "Clients will appear here once bookings are made."
 msgstr "Klienter vises her, når der er foretaget bookinger."
 
+msgid "Clipper guard"
+msgstr "Trimmerkam"
+
 msgid "Close client profile"
 msgstr "Luk klientprofil"
+
+msgid "Closed"
+msgstr "Lukket"
+
+msgid "Coffin"
+msgstr "Coffin"
+
+msgid "Coily"
+msgstr "Kruset"
 
 msgid "Collapse Apps"
 msgstr "Skjul apps"
 
 msgid "Collapse Channels"
 msgstr "Skjul kanaler"
+
+msgid "Colour notes"
+msgstr "Farvenoter"
+
+msgid "Colour preferences"
+msgstr "Farvepræferencer"
 
 msgid "Column"
 msgstr "Kolonne"
@@ -560,6 +677,9 @@ msgstr "Kommer snart"
 msgid "Completed"
 msgstr "Gennemført"
 
+msgid "Computer Applications"
+msgstr "Computeranvendelse"
+
 msgid "Conferencing"
 msgstr "Videomøder"
 
@@ -569,14 +689,8 @@ msgstr "Konfiguration"
 msgid "Configuration required"
 msgstr "Konfiguration påkrævet"
 
-msgid "Configure different events for people to book on your calendar."
-msgstr "Konfigurer forskellige events, som folk kan booke i din kalender."
-
-msgid "Configure instant booking alerts"
-msgstr "Konfigurer øjeblikkelige bookingnotifikationer"
-
-msgid "Configure qualification AI agent"
-msgstr "Konfigurer kvalificerings-AI-agent"
+msgid "Configure the services clients can book with you."
+msgstr "Konfigurer de services, klienter kan booke hos dig."
 
 msgid "Configure your active integrations and calendar destinations in one unified dashboard."
 msgstr "Konfigurer dine aktive integrationer og kalenderdestinationer på ét samlet dashboard."
@@ -587,8 +701,8 @@ msgstr "Bekræft booking"
 msgid "Confirm booking?"
 msgstr "Bekræft booking?"
 
-msgid "Confirm free-email bookers"
-msgstr "Bekræft bookere med gratis e-mail"
+msgid "Confirm free-email clients"
+msgstr "Bekræft klienter med gratis e-mail"
 
 msgid "Confirm this booking?"
 msgstr "Bekræft denne booking?"
@@ -608,8 +722,8 @@ msgstr "Forbind Google"
 msgid "Connect Google, Microsoft, and Zoom accounts for calendars and conferencing."
 msgstr "Forbind Google-, Microsoft- og Zoom-konti til kalendere og videomøder."
 
-msgid "Connect installed apps to this event type."
-msgstr "Connect installed apps to this event type."
+msgid "Connect installed apps to this service."
+msgstr "Forbind installerede apps til denne service."
 
 msgid "Connect Microsoft"
 msgstr "Forbind Microsoft"
@@ -617,14 +731,11 @@ msgstr "Forbind Microsoft"
 msgid "Connect the messaging channels your customers use to receive bookings and reminders."
 msgstr "Forbind de beskedkanaler, dine kunder bruger til at modtage bookinger og påmindelser."
 
+msgid "Connect the number clients already message and we will guide them into bookings."
+msgstr "Forbind det nummer, klienter allerede skriver til, så guider vi dem til bookinger."
+
 msgid "Connect WhatsApp"
 msgstr "Forbind WhatsApp"
-
-msgid "Connect your WhatsApp Business account to send and receive messages."
-msgstr "Forbind din WhatsApp Business-konto for at sende og modtage beskeder."
-
-msgid "Connect your WhatsApp Business account to start messaging."
-msgstr "Forbind din WhatsApp Business-konto for at begynde at sende beskeder."
 
 msgid "Connect Zoom"
 msgstr "Forbind Zoom"
@@ -644,6 +755,9 @@ msgstr "Connected features"
 msgid "Connecting..."
 msgstr "Forbinder..."
 
+msgid "Connection state"
+msgstr "Forbindelsesstatus"
+
 msgid "Connector accounts"
 msgstr "Connector-konti"
 
@@ -652,6 +766,9 @@ msgstr "Connector-godkendelses-URL blev ikke returneret."
 
 msgid "Connector is not configured."
 msgstr "Connectoren er ikke konfigureret."
+
+msgid "Constraint"
+msgstr "Begrænsning"
 
 msgid "Contact"
 msgstr "Kontakt"
@@ -665,8 +782,8 @@ msgstr "Fortsæt"
 msgid "Control how soon bookings can be made and how the schedule is divided into slots."
 msgstr "Styr, hvor tidligt bookinger kan foretages, og hvordan tidsplanen opdeles i tider."
 
-msgid "Control manual approval and booker email checks."
-msgstr "Styr manuel godkendelse og e-mailtjek af bookere."
+msgid "Control manual approval and client email checks."
+msgstr "Styr manuel godkendelse og tjek af klienters e-mail."
 
 msgid "Control whether this booking page is listed publicly."
 msgstr "Styr, om denne bookingside vises offentligt."
@@ -702,6 +819,9 @@ msgstr "Kopier tider"
 msgid "Could not disconnect connector account."
 msgstr "Kunne ikke afbryde connector-kontoen."
 
+msgid "Could not fix booking experience"
+msgstr "Bookingoplevelsen kunne ikke rettes"
+
 msgid "Could not load WhatsApp sign-up. Please refresh and try again."
 msgstr "WhatsApp-tilmelding kunne ikke indlæses. Opdater siden, og prøv igen."
 
@@ -712,34 +832,31 @@ msgid "Count no-shows"
 msgstr "Tæl udeblivelser"
 
 msgid "Create a private setup event type before opening public booking."
-msgstr "Opret en privat opsætningsaftaletype, før offentlig booking åbnes."
+msgstr "Opret en privat opsætningsservice, før du åbner for offentlig booking."
 
 msgid "Create a webhook to forward booking events to your own services."
 msgstr "Opret en webhook for at videresende booking-hændelser til dine egne tjenester."
 
-msgid "Create a weekly schedule before publishing event types."
-msgstr "Opret en ugentlig tidsplan, før aftaletyper udgives."
-
-msgid "Create an availability schedule before adding event types."
-msgstr "Opret en tilgængelighedsplan, før du tilføjer begivenhedstyper."
+msgid "Create a weekly schedule before publishing services."
+msgstr "Opret en ugentlig tidsplan, før du udgiver services."
 
 msgid "Create another schedule before deleting this one."
 msgstr "Opret en anden tidsplan, før du sletter denne."
 
-msgid "Create availability first"
-msgstr "Opret tilgængelighed først"
-
 msgid "Create duplicate"
 msgstr "Opret duplikat"
 
-msgid "Create event type"
-msgstr "Opret aftaletype"
+msgid "Create hours first"
+msgstr "Opret timer først"
 
 msgid "Create private link"
 msgstr "Opret privat link"
 
 msgid "Create schedule"
 msgstr "Opret tidsplan"
+
+msgid "Create service"
+msgstr "Opret service"
 
 msgid "Create the booking page basics now, then finish setup on the next screen."
 msgstr "Opret de grundlæggende bookingoplysninger nu, og færdiggør opsætningen på næste skærm."
@@ -750,14 +867,23 @@ msgstr "Opret webhook"
 msgid "Created"
 msgstr "Oprettet"
 
+msgid "Curly"
+msgstr "Krøllet"
+
+msgid "Current medications"
+msgstr "Aktuel medicin"
+
+msgid "Curriculum"
+msgstr "Læreplan"
+
 msgid "Custom event name"
 msgstr "Brugerdefineret begivenhedsnavn"
 
 msgid "Custom reply-to email"
 msgstr "Brugerdefineret svar-til-e-mail"
 
-msgid "Customize the calendar event title and the reply-to address bookers see."
-msgstr "Tilpas kalenderbegivenhedens titel og svar-til-adressen som bookerne ser."
+msgid "Customize the calendar event title and the reply-to address clients see."
+msgstr "Tilpas kalendertitlen og svaradressen, klienter ser."
 
 msgid "Customize the questions asked on the booking page. Learn more"
 msgstr "Tilpas spørgsmålene på bookingsiden. Lær mere"
@@ -768,11 +894,11 @@ msgstr "Dagligt"
 msgid "Danish"
 msgstr "Dansk"
 
-msgid "Dashboard"
-msgstr "Dashboard"
-
 msgid "Date"
 msgstr "Dato"
+
+msgid "Date of birth"
+msgstr "Fødselsdato"
 
 msgid "Date overrides"
 msgstr "Datoundtagelser"
@@ -806,10 +932,10 @@ msgid "Delete clients"
 msgstr "Slet klienter"
 
 msgid "Delete event type"
-msgstr "Slet begivenhedstype"
+msgstr "Slet service"
 
 msgid "Delete event type?"
-msgstr "Slet begivenhedstype?"
+msgstr "Slet service?"
 
 msgid "Delete note"
 msgstr "Slet note"
@@ -829,14 +955,29 @@ msgstr "Send transaktionelle booking-e-mails til dine kunder. Kommer snart."
 msgid "Delivered"
 msgstr "Leveret"
 
+msgid "Deposit"
+msgstr "Depositum"
+
 msgid "Description"
 msgstr "Beskrivelse"
 
-msgid "Destination calendar"
-msgstr "Destinationskalender"
-
 msgid "Details"
 msgstr "Detaljer"
+
+msgid "Details updated"
+msgstr "Detaljer opdateret"
+
+msgid "Developer notification"
+msgstr "Udviklernotifikation"
+
+msgid "Developer notification deleted"
+msgstr "Udviklernotifikation slettet"
+
+msgid "Developer notification saved"
+msgstr "Udviklernotifikation gemt"
+
+msgid "Dip"
+msgstr "Dip"
 
 msgid "Disable cancelling"
 msgstr "Deaktiver annullering"
@@ -862,17 +1003,20 @@ msgstr "Deaktiveret"
 msgid "Disconnect"
 msgstr "Afbryd forbindelse"
 
+msgid "Disconnected"
+msgstr "Afbrudt"
+
 msgid "Disconnecting..."
 msgstr "Afbryder forbindelse..."
 
 msgid "Dismiss"
 msgstr "Afvis"
 
-msgid "Distribute bookings across hosts based on weighting and lead history."
-msgstr "Fordel bookinger på værter baseret på vægtning og lead-historik."
-
 msgid "Distribution of bookings by status."
 msgstr "Fordeling af bookinger efter status."
+
+msgid "Dog"
+msgstr "Hund"
 
 msgid "Done"
 msgstr "Færdig"
@@ -884,7 +1028,7 @@ msgid "Duplicate"
 msgstr "Dupliker"
 
 msgid "Duplicate event type"
-msgstr "Dupliker begivenhedstype"
+msgstr "Dupliker service"
 
 msgid "Duration"
 msgstr "Varighed"
@@ -892,20 +1036,26 @@ msgstr "Varighed"
 msgid "Duration options"
 msgstr "Varighedsmuligheder"
 
+msgid "Economics"
+msgstr "Økonomi"
+
 msgid "Edit"
 msgstr "Rediger"
 
-msgid "Edit booking setup for this appointment type."
-msgstr "Rediger bookingopsætningen for denne aftaletype."
+msgid "Edit booking setup for this service."
+msgstr "Rediger bookingopsætningen for denne service."
 
 msgid "Edit event"
 msgstr "Rediger begivenhed"
 
+msgid "Edit hours"
+msgstr "Rediger åbningstider"
+
 msgid "Edit location"
 msgstr "Rediger lokation"
 
-msgid "Edit webhook"
-msgstr "Rediger webhook"
+msgid "Edit notification"
+msgstr "Rediger notifikation"
 
 msgid "Email"
 msgstr "E-mail"
@@ -917,7 +1067,13 @@ msgid "Email verification"
 msgstr "E-mailbekræftelse"
 
 msgid "Embed"
-msgstr "Integrer"
+msgstr "Indlejr"
+
+msgid "Emergency contact"
+msgstr "Nødkontakt"
+
+msgid "Emergency contact phone"
+msgstr "Telefon til nødkontakt"
 
 msgid "Enable AI voice agent"
 msgstr "Aktivér AI-stemmeagent"
@@ -946,35 +1102,20 @@ msgstr "Begivenhedsnavn"
 msgid "Event subscriptions"
 msgstr "Hændelsesabonnementer"
 
-msgid "Event type"
-msgstr "Aftaletype"
-
 msgid "Event type actions"
-msgstr "Handlinger for begivenhedstype"
-
-msgid "Event type created"
-msgstr "Aftaletype oprettet"
+msgstr "Servicehandlinger"
 
 msgid "Event type deleted"
-msgstr "Aftaletype slettet"
+msgstr "Service slettet"
 
 msgid "Event type duplicated"
-msgstr "Begivenhedstype duplikeret"
+msgstr "Service duplikeret"
 
-msgid "Event type updated"
-msgstr "Aftaletype opdateret"
+msgid "Event, client, email, or reference number"
+msgstr "Service, klient, e-mail eller referencenummer"
 
-msgid "Event types"
-msgstr "Aftaletyper"
-
-msgid "Event, attendee, email, or booking ID"
-msgstr "Aftale, deltager, e-mail eller booking-id"
-
-msgid "Every schedule has weekly availability"
-msgstr "Alle tidsplaner har ugentlig tilgængelighed"
-
-msgid "Exactly one default schedule exists"
-msgstr "Der findes præcis én standardtidsplan"
+msgid "Every schedule has weekly hours"
+msgstr "Alle tidsplaner har ugentlige timer"
 
 msgid "Exclude emails"
 msgstr "Ekskluder e-mails"
@@ -990,9 +1131,6 @@ msgstr "Udløber"
 
 msgid "Explain why this booking is being rejected"
 msgstr "Forklar hvorfor denne booking afvises"
-
-msgid "Explore and connect powerful app extensions and calendar sync options to automate bookings."
-msgstr "Udforsk og forbind effektive app-udvidelser og kalendersynkroniseringsmuligheder for at automatisere bookinger."
 
 msgid "Explore App Store"
 msgstr "Udforsk App Store"
@@ -1019,20 +1157,32 @@ msgstr "Samtaler kunne ikke indlæses."
 msgid "Failed to load messages."
 msgstr "Beskeder kunne ikke indlæses."
 
+msgid "Failed to process image"
+msgstr "Billedet kunne ikke behandles"
+
 msgid "Failed to queue test event"
 msgstr "Kunne ikke sætte testhændelse i kø"
 
-msgid "Failed to refresh flows"
-msgstr "Flows kunne ikke opdateres"
+msgid "Failed to remove image"
+msgstr "Billedet kunne ikke fjernes"
 
 msgid "Failed to start install. Please try again."
 msgstr "Kunne ikke starte installation. Prøv igen."
+
+msgid "Failed to update image"
+msgstr "Billedet kunne ikke opdateres"
 
 msgid "Featured categories"
 msgstr "Fremhævede kategorier"
 
 msgid "Feedback (optional)"
 msgstr "Feedback (valgfrit)"
+
+msgid "Female"
+msgstr "Hun"
+
+msgid "Female (spayed)"
+msgstr "Hun (steriliseret)"
 
 msgid "Field enabled"
 msgstr "Felt aktiveret"
@@ -1046,8 +1196,17 @@ msgstr "Filtrer bookinger"
 msgid "Fine-tune"
 msgstr "Finjuster"
 
+msgid "Fine-tune how new bookings are shared across your team."
+msgstr "Finjustér, hvordan nye bookinger fordeles i dit team."
+
+msgid "Fine-tune links, hours, breathing room, calendars, client questions, and developer options."
+msgstr "Finjustér links, åbningstider, luft i kalenderen, kalendere, klientspørgsmål og udviklerindstillinger."
+
 msgid "Fine-tune your AI receptionist"
 msgstr "Finjuster din AI-receptionist"
+
+msgid "Finished in the last 24 hours"
+msgstr "Færdiggjort inden for de sidste 24 timer"
 
 msgid "First name"
 msgstr "Fornavn"
@@ -1058,8 +1217,14 @@ msgstr "Kun første tidspunkt"
 msgid "First visit"
 msgstr "Første besøg"
 
-msgid "Flows updated"
-msgstr "Flows opdateret"
+msgid "Fitness level"
+msgstr "Fitnessniveau"
+
+msgid "Fix booking experience"
+msgstr "Ret bookingoplevelse"
+
+msgid "For developers"
+msgstr "For udviklere"
 
 msgid "For security, the signing secret is only shown once — right after the webhook is created. If you've lost it, delete this webhook and create a new one to receive a fresh secret."
 msgstr "Af sikkerhedsmæssige årsager vises signeringshemmeligheden kun én gang — lige efter webhooken er oprettet. Hvis du har mistet den, skal du slette denne webhook og oprette en ny for at modtage en ny hemmelighed."
@@ -1088,8 +1253,17 @@ msgstr "Fra klienter"
 msgid "From you"
 msgstr "Fra dig"
 
+msgid "Gel"
+msgstr "Gel"
+
+msgid "Gel or acrylic"
+msgstr "Gel eller akryl"
+
 msgid "Generate one-off links that bypass the public schedule and expire after use."
 msgstr "Generér engangslinks der omgår den offentlige plan og udløber efter brug."
+
+msgid "Geography"
+msgstr "Geografi"
 
 msgid "Get started"
 msgstr "Kom i gang"
@@ -1097,12 +1271,15 @@ msgstr "Kom i gang"
 msgid "Go to app"
 msgstr "Gå til app"
 
-msgid "Go to availability"
-msgstr "Gå til tilgængelighed"
+msgid "Go to hours"
+msgstr "Gå til timer"
 
 #. placeholder {0}: index + 1
 msgid "Go to screenshot {0}"
 msgstr "Gå til skærmbillede {0}"
+
+msgid "Goals"
+msgstr "Mål"
 
 msgid "Good afternoon"
 msgstr "God eftermiddag"
@@ -1128,6 +1305,48 @@ msgstr "Google Kalender"
 msgid "Google Meet"
 msgstr "Google Meet"
 
+msgid "Gr 1"
+msgstr "1. klasse"
+
+msgid "Gr 10"
+msgstr "10. klasse"
+
+msgid "Gr 11"
+msgstr "11. klasse"
+
+msgid "Gr 12"
+msgstr "12. klasse"
+
+msgid "Gr 2"
+msgstr "2. klasse"
+
+msgid "Gr 3"
+msgstr "3. klasse"
+
+msgid "Gr 4"
+msgstr "4. klasse"
+
+msgid "Gr 5"
+msgstr "5. klasse"
+
+msgid "Gr 6"
+msgstr "6. klasse"
+
+msgid "Gr 7"
+msgstr "7. klasse"
+
+msgid "Gr 8"
+msgstr "8. klasse"
+
+msgid "Gr 9"
+msgstr "9. klasse"
+
+msgid "Grade"
+msgstr "Klassetrin"
+
+msgid "Guardian phone"
+msgstr "Værges telefon"
+
 msgid "Guest"
 msgstr "Gæst"
 
@@ -1140,20 +1359,17 @@ msgstr "Gæster tilføjet"
 msgid "Guests will receive an invite for this booking."
 msgstr "Gæster vil modtage en invitation til denne booking."
 
+msgid "Hair type"
+msgstr "Hårtype"
+
 msgid "Handled by Nerova"
 msgstr "Håndteret af Nerova"
 
 msgid "Has internal note"
 msgstr "Har intern note"
 
-msgid "Here's your overview of what's happening."
-msgstr "Her er dit overblik over hvad der sker."
-
 msgid "Hidden"
 msgstr "Skjult"
-
-msgid "Hide booker information from external calendars and disable guests."
-msgstr "Skjul bookeroplysninger fra eksterne kalendere og deaktiver gæster."
 
 msgid "Hide calendar event details"
 msgstr "Skjul kalenderbegivenhedens detaljer"
@@ -1161,8 +1377,11 @@ msgstr "Skjul kalenderbegivenhedens detaljer"
 msgid "Hide calendar notes"
 msgstr "Skjul kalendernoter"
 
+msgid "Hide client information from external calendars and disable guests."
+msgstr "Skjul klientoplysninger i eksterne kalendere, og deaktiver gæster."
+
 msgid "Hide event type from profile"
-msgstr "Skjul begivenhedstype fra profil"
+msgstr "Skjul service fra profilen"
 
 msgid "Hide from profile"
 msgstr "Skjul fra profil"
@@ -1170,20 +1389,38 @@ msgstr "Skjul fra profil"
 msgid "History"
 msgstr "Historik"
 
+msgid "Horse"
+msgstr "Hest"
+
 msgid "Host no-show"
 msgstr "Vært udeblev"
 
-msgid "Host segmentation"
-msgstr "Værtssegmentering"
+msgid "Hours"
+msgstr "Timer"
 
-msgid "Host subset rotation"
-msgstr "Rotation af værtsundergruppe"
+msgid "Hours check"
+msgstr "Timetjek"
 
-msgid "Hosts"
-msgstr "Værter"
+msgid "Hours checks"
+msgstr "Timetjek"
 
-msgid "How often you can be booked"
-msgstr "Hvor ofte du kan bookes"
+msgid "How long it takes"
+msgstr "Hvor lang tid det tager"
+
+msgid "ID / passport number"
+msgstr "ID-/pasnummer"
+
+msgid "IEB"
+msgstr "IEB"
+
+msgid "Image must be smaller than 2 MB."
+msgstr "Billedet skal være mindre end 2 MB."
+
+msgid "Image removed"
+msgstr "Billedet blev fjernet"
+
+msgid "Image updated"
+msgstr "Billedet blev opdateret"
 
 msgid "Import cancelled"
 msgstr "Import annulleret"
@@ -1200,6 +1437,9 @@ msgstr "Import startet"
 msgid "In person"
 msgstr "Fysisk"
 
+msgid "Injuries & limitations"
+msgstr "Skader og begrænsninger"
+
 msgid "Insights"
 msgstr "Indsigt"
 
@@ -1207,7 +1447,7 @@ msgid "Install"
 msgstr "Installer"
 
 msgid "Install a calendar or conferencing app to use it with this event type."
-msgstr "Installer en kalender- eller konferenceringsapp for at bruge den med denne begivenhedstype."
+msgstr "Installer en kalender- eller mødeapp for at bruge den med denne service."
 
 msgid "Install app"
 msgstr "Installer app"
@@ -1227,11 +1467,20 @@ msgstr "Plan for øjeblikkelige møder"
 msgid "Interface language"
 msgstr "Grænsefladesprog"
 
+msgid "Intermediate"
+msgstr "Mellem"
+
 msgid "Internal notes"
 msgstr "Interne noter"
 
 msgid "Interval"
 msgstr "Interval"
+
+msgid "isiXhosa"
+msgstr "isiXhosa"
+
+msgid "isiZulu"
+msgstr "isiZulu"
 
 msgid "Join meeting"
 msgstr "Deltag i møde"
@@ -1261,6 +1510,9 @@ msgstr "Seneste besked {0}"
 msgid "Last name"
 msgstr "Efternavn"
 
+msgid "Last vaccination"
+msgstr "Seneste vaccination"
+
 msgid "Last visit"
 msgstr "Seneste besøg"
 
@@ -1270,44 +1522,56 @@ msgstr "Start fejlfinding"
 msgid "Layout"
 msgstr "Layout"
 
-msgid "Let an AI voice agent answer booker calls, qualify them, and place them on this event type's calendar."
-msgstr "Lad en AI-stemmeagent besvare bookeropkald, kvalificere dem og placere dem på denne begivenhedstypes kalender."
+msgid "Learning notes"
+msgstr "Læringsnoter"
 
-msgid "Let attendees know why these bookings are being cancelled"
-msgstr "Fortæl deltagerne hvorfor disse bookinger annulleres"
+msgid "Leave blank if you confirm the exact place with the client later."
+msgstr "Lad feltet være tomt, hvis du bekræfter det præcise sted med klienten senere."
+
+msgid "Leave empty if the price changes per client."
+msgstr "Lad feltet være tomt, hvis prisen ændrer sig pr. klient."
+
+msgid "Let an AI voice agent answer booker calls, qualify them, and place them on this event type's calendar."
+msgstr "Lad en AI-stemmeagent besvare klientopkald, kvalificere dem og lægge dem i denne services kalender."
 
 msgid "Let bookers reserve a series of repeated bookings."
-msgstr "Lad bookere reservere en serie gentagne bookinger."
+msgstr "Lad klienter reservere en serie gentagne bookinger."
+
+msgid "Let clients know why these bookings are being cancelled"
+msgstr "Fortæl klienter, hvorfor disse bookinger aflyses"
 
 msgid "Let Nerova handle it"
 msgstr "Lad Nerova klare det"
 
 msgid "Let qualified bookers start a meeting immediately. Hosts get an instant alert and have a short window to accept before the request expires."
-msgstr "Lad kvalificerede bookere starte et møde med det samme. Værter får en øjeblikkelig besked og har et kort vindue til at acceptere, før anmodningen udløber."
+msgstr "Lad kvalificerede klienter starte et møde med det samme. Værter får en øjeblikkelig besked og har kort tid til at acceptere, før anmodningen udløber."
 
-msgid "Let the attendee know why this booking is being cancelled"
-msgstr "Fortæl deltageren hvorfor denne booking annulleres"
+msgid "Let the client know why this booking is being cancelled"
+msgstr "Fortæl klienten, hvorfor denne booking aflyses"
 
-msgid "Let the attendee know why you need to reschedule"
-msgstr "Fortæl deltageren hvorfor du har brug for at omplanlægge"
+msgid "Let the client know why you need to reschedule"
+msgstr "Fortæl klienten, hvorfor du skal flytte tiden"
+
+msgid "Life Sciences"
+msgstr "Biologi"
 
 msgid "Limit booking volume across the event type and individual bookers."
-msgstr "Begræns bookingvolumen på tværs af begivenhedstypen og de enkelte bookere."
+msgstr "Begræns bookingmængden for servicen og individuelle klienter."
 
-msgid "Limit deliveries to bookings for a single event type, or leave unscoped to receive everything."
-msgstr "Begræns leveringer til bookinger for en enkelt hændelsestype, eller lad være uden afgrænsning for at modtage alt."
+msgid "Limit deliveries to bookings for a single service, or leave unscoped to receive everything."
+msgstr "Begræns leveringer til bookinger for én service, eller lad den være uafgrænset for at modtage alt."
 
-msgid "Limit which hosts can be assigned using a segment expression."
-msgstr "Begræns hvilke værter der kan tildeles ved hjælp af et segmentudtryk."
+msgid "Limit which team members can be assigned using an advanced expression."
+msgstr "Begræns hvilke teammedlemmer der kan tildeles med et avanceret udtryk."
 
 msgid "Limits"
 msgstr "Grænser"
 
-msgid "Link"
-msgstr "Link"
-
 msgid "Link copied"
 msgstr "Link kopieret"
+
+msgid "Link name"
+msgstr "Linknavn"
 
 msgid "List view"
 msgstr "Listevisning"
@@ -1321,20 +1585,26 @@ msgstr "Indlæser tilsluttede konti..."
 msgid "Loading deliveries..."
 msgstr "Indlæser leveringer..."
 
-msgid "Loading event type..."
-msgstr "Indlæser begivenhedstype..."
+msgid "Loading details..."
+msgstr "Indlæser detaljer..."
+
+msgid "Loading developer notifications..."
+msgstr "Indlæser udviklernotifikationer..."
 
 msgid "Loading event types..."
-msgstr "Indlæser aftaletyper..."
-
-msgid "Loading hosts…"
-msgstr "Indlæser værter…"
+msgstr "Indlæser services..."
 
 msgid "Loading private links…"
 msgstr "Indlæser private links…"
 
 msgid "Loading schedules..."
 msgstr "Indlæser tidsplaner..."
+
+msgid "Loading service..."
+msgstr "Indlæser service..."
+
+msgid "Loading team members…"
+msgstr "Indlæser teammedlemmer…"
 
 msgid "Loading webhook..."
 msgstr "Indlæser webhook..."
@@ -1363,8 +1633,8 @@ msgstr "Lokation opdateret"
 msgid "Locations"
 msgstr "Lokationer"
 
-msgid "Lock the booking page timezone or follow the booker."
-msgstr "Lås bookingsidens tidszone eller følg bookeren."
+msgid "Lock the booking page timezone or follow the client."
+msgstr "Lås bookingsidens tidszone, eller følg klientens."
 
 msgid "Lock timezone on booking page"
 msgstr "Lås tidszone på bookingside"
@@ -1384,6 +1654,12 @@ msgstr "Hovednavigation"
 msgid "Make another schedule default before deleting this one."
 msgstr "Gør en anden tidsplan til standard, før du sletter denne."
 
+msgid "Male"
+msgstr "Han"
+
+msgid "Male (neutered)"
+msgstr "Han (kastreret)"
+
 msgid "Manage"
 msgstr "Administrer"
 
@@ -1393,23 +1669,8 @@ msgstr "Administrer apps"
 msgid "Manage client"
 msgstr "Administrer klient"
 
-msgid "Manage team hosts & round-robin"
-msgstr "Administrer teamværter og round-robin"
-
-msgid "Manage weekly schedules for booking availability."
-msgstr "Administrer ugentlige tidsplaner for bookingtilgængelighed."
-
 msgid "Manage your booking clients here."
 msgstr "Administrer dine bookingklienter her."
-
-msgid "Mandatory for attendee only"
-msgstr "Obligatorisk kun for deltager"
-
-msgid "Mandatory for both"
-msgstr "Obligatorisk for begge"
-
-msgid "Mandatory for host only"
-msgstr "Obligatorisk kun for vært"
 
 #. placeholder {0}: bookings.length
 msgid "Mark {0} bookings as no-show?"
@@ -1431,6 +1692,12 @@ msgstr "{0} bookinger markeret som udeblevet"
 msgid "Marked as no-show"
 msgstr "Markeret som udeblevet"
 
+msgid "Mathematical Literacy"
+msgstr "Matematisk forståelse"
+
+msgid "Mathematics"
+msgstr "Matematik"
+
 msgid "Max lead threshold"
 msgstr "Maksimal lead-tærskel"
 
@@ -1439,6 +1706,21 @@ msgstr "Maks. anvendelser"
 
 msgid "Maximum length"
 msgstr "Maksimal længde"
+
+msgid "Medical & identity"
+msgstr "Medicinsk og identitet"
+
+msgid "Medical aid number"
+msgstr "Sygesikringsnummer"
+
+msgid "Medical aid scheme"
+msgstr "Sygesikringsordning"
+
+msgid "Medical conditions"
+msgstr "Medicinske tilstande"
+
+msgid "Medications"
+msgstr "Medicin"
 
 msgid "Meeting ended"
 msgstr "Møde afsluttet"
@@ -1458,17 +1740,20 @@ msgstr "Besked (valgfrit)"
 msgid "Messages"
 msgstr "Beskeder"
 
-msgid "Messages from customers will appear here once Meta starts delivering webhooks."
-msgstr "Beskeder fra kunder vises her, når Meta begynder at levere webhooks."
+msgid "Messages from clients will appear here once new conversations arrive."
+msgstr "Beskeder fra klienter vises her, når nye samtaler kommer ind."
 
-msgid "Meta has not delivered any webhooks to this server yet. Ensure the webhook URL and verify token are registered in the Meta app dashboard, and that the WhatsApp product subscription is active."
-msgstr "Meta har endnu ikke leveret webhooks til denne server. Sørg for, at webhook-URL'en og bekræftelsestokenet er registreret i Meta-appens dashboard, og at WhatsApp-produktabonnementet er aktivt."
+msgid "Microchip number"
+msgstr "Mikrochipnummer"
 
 msgid "Minimum length"
 msgstr "Minimumslængde"
 
 msgid "Minimum rating"
 msgstr "Minimumsvurdering"
+
+msgid "Minutes blocked in your calendar."
+msgstr "Minutter reserveret i din kalender."
 
 msgid "Minutes duration"
 msgstr "Varighed i minutter"
@@ -1488,20 +1773,20 @@ msgstr "Måned"
 msgid "Monthly"
 msgstr "Månedligt"
 
-msgid "Most booked event types in the selected range."
-msgstr "Mest bookede event-typer i det valgte interval."
+msgid "Most booked services in the selected range."
+msgstr "Mest bookede services i den valgte periode."
 
 msgid "Most popular"
 msgstr "Mest populære"
-
-msgid "Move event types to another schedule before deleting this one."
-msgstr "Flyt aftaletyper til en anden tidsplan, før du sletter denne."
 
 msgid "Move field down"
 msgstr "Flyt felt ned"
 
 msgid "Move field up"
 msgstr "Flyt felt op"
+
+msgid "Move services to another schedule before deleting this one."
+msgstr "Flyt services til en anden tidsplan, før du sletter denne."
 
 msgid "Move this booking to a different host. The new host will be notified."
 msgstr "Flyt denne booking til en anden vært. Den nye vært vil blive underrettet."
@@ -1515,8 +1800,14 @@ msgstr "Flere e-mails"
 msgid "Multiple Emails"
 msgstr "Flere e-mails"
 
+msgid "Nail condition notes"
+msgstr "Noter om neglenes tilstand"
+
 msgid "Name"
 msgstr "Navn"
+
+msgid "Natural"
+msgstr "Naturlig"
 
 msgid "Navigation"
 msgstr "Navigation"
@@ -1530,8 +1821,24 @@ msgstr "Mangler oplysninger"
 msgid "Needs you"
 msgstr "Kræver dig"
 
+msgid "Nerova is answering WhatsApp"
+msgstr "Nerova svarer på WhatsApp"
+
+#. placeholder {0}: status.phoneNumber
+msgid "Nerova is answering WhatsApp on {0}"
+msgstr "Nerova svarer på WhatsApp på {0}"
+
+msgid "Nerova is not answering WhatsApp yet"
+msgstr "Nerova svarer ikke på WhatsApp endnu"
+
+msgid "Nerova will bring important client messages and today's bookings here."
+msgstr "Nerova viser vigtige klientbeskeder og dagens bookinger her."
+
 msgid "New"
 msgstr "Ny"
+
+msgid "New client message activity will appear here as soon as WhatsApp sends it to Nerova."
+msgstr "Ny beskedaktivitet fra klienter vises her, så snart WhatsApp sender den til Nerova."
 
 msgid "New host user ID"
 msgstr "Ny værts bruger-ID"
@@ -1551,9 +1858,18 @@ msgstr "Næste"
 msgid "Next screenshot"
 msgstr "Næste skærmbillede"
 
+msgid "No"
+msgstr "Nej"
+
 #. placeholder {0}: getBookingStatusLabel(status).toLowerCase()
 msgid "No {0} bookings yet"
 msgstr "Ingen {0} bookinger endnu"
+
+msgid "No activity yet"
+msgstr "Ingen aktivitet endnu"
+
+msgid "No appointment calendar selected"
+msgstr "Ingen aftalekalender valgt"
 
 msgid "No apps found"
 msgstr "Ingen apps fundet"
@@ -1561,14 +1877,14 @@ msgstr "Ingen apps fundet"
 msgid "No apps installed"
 msgstr "Ingen apps installeret"
 
-msgid "No availability windows"
-msgstr "Ingen tilgængelighedsvinduer"
-
 msgid "No bookings in the selected range."
 msgstr "Ingen bookinger i det valgte interval."
 
 msgid "No bookings this week"
 msgstr "Ingen bookinger denne uge"
+
+msgid "No bookings today."
+msgstr "Ingen bookinger i dag."
 
 msgid "No calendars connected. Install one so availability checks include external events."
 msgstr "Ingen kalendere tilsluttet. Installer én, så tilgængelighedstjek inkluderer eksterne begivenheder."
@@ -1606,14 +1922,14 @@ msgstr "Ingen leveringsforsøg endnu."
 msgid "No destination calendar"
 msgstr "Ingen destinationskalender"
 
-msgid "No destination calendar selected"
-msgstr "Ingen destinationskalender valgt"
+msgid "No developer notifications configured."
+msgstr "Ingen udviklernotifikationer er sat op."
 
 msgid "No event types match your search."
-msgstr "Ingen begivenhedstyper matcher din søgning."
+msgstr "Ingen services matcher din søgning."
 
 msgid "No event types yet"
-msgstr "Ingen aftaletyper endnu"
+msgstr "Ingen services endnu"
 
 msgid "No filters"
 msgstr "Ingen filtre"
@@ -1621,11 +1937,8 @@ msgstr "Ingen filtre"
 msgid "No history entries yet."
 msgstr "Ingen historik endnu."
 
-msgid "No hosts available to assign."
-msgstr "Ingen tilgængelige værter at tildele."
-
-msgid "No hosts selected. Pick team members below to assign them to this event type."
-msgstr "Ingen værter valgt. Vælg teammedlemmer nedenfor for at tildele dem til denne begivenhedstype."
+msgid "No hours set"
+msgstr "Ingen timer angivet"
 
 msgid "No installed apps"
 msgstr "Ingen installerede apps"
@@ -1651,23 +1964,23 @@ msgstr "Ingen særlige tilladelser"
 msgid "No specific schedule"
 msgstr "Ingen specifik plan"
 
+msgid "No team members available to assign."
+msgstr "Ingen teammedlemmer kan tildeles."
+
 msgid "No team members match your search."
 msgstr "Ingen teammedlemmer matcher din søgning."
 
+msgid "No team members selected. Pick who can provide this service below."
+msgstr "Ingen teammedlemmer valgt. Vælg nedenfor, hvem der kan udføre denne service."
+
 msgid "No times available on this date."
 msgstr "Ingen tider er tilgængelige på denne dato."
-
-msgid "No webhooks configured."
-msgstr "Ingen webhooks konfigureret."
-
-msgid "No webhooks received"
-msgstr "Ingen webhooks modtaget"
 
 msgid "No webhooks yet"
 msgstr "Ingen webhooks endnu"
 
 msgid "No weekly availability"
-msgstr "Ingen ugentlig tilgængelighed"
+msgstr "Ingen ugentlige åbningstider"
 
 msgid "No weekly hours"
 msgstr "Ingen ugentlige timer"
@@ -1677,6 +1990,9 @@ msgstr "Udeblev"
 
 msgid "No-show only"
 msgstr "Kun udeblevne"
+
+msgid "Not approved"
+msgstr "Ikke godkendt"
 
 msgid "Not available"
 msgstr "Ikke tilgængelig"
@@ -1695,6 +2011,9 @@ msgstr "Note slettet"
 
 msgid "Notes are only visible to your team"
 msgstr "Noter er kun synlige for dit team"
+
+msgid "Nothing needs you right now"
+msgstr "Intet kræver dig lige nu"
 
 msgid "Nothing needs you right now."
 msgstr "Intet kræver dig lige nu."
@@ -1729,17 +2048,32 @@ msgstr "Office 365-video"
 msgid "Offset start"
 msgstr "Forskyd start"
 
+msgid "One default hours schedule is set"
+msgstr "Én standardtidsplan for timer er valgt"
+
+msgid "One per line, like phone or in-person: 12 Main Road."
+msgstr "Én pr. linje, f.eks. telefon eller fysisk: 12 Main Road."
+
 msgid "One-on-one"
 msgstr "En-til-en"
 
-msgid "Only show bookings where the attendee did not join."
-msgstr "Vis kun bookinger hvor deltageren ikke deltog."
+msgid "Only show bookings where the client did not join."
+msgstr "Vis kun bookinger, hvor klienten ikke deltog."
 
 msgid "Only show bookings with at least one internal note."
 msgstr "Vis kun bookinger med mindst én intern note."
 
 msgid "Only show first available slot"
 msgstr "Vis kun første ledige tidspunkt"
+
+msgid "Only the details clients need to choose and book this service."
+msgstr "Kun de oplysninger klienter behøver for at vælge og booke denne service."
+
+msgid "Open"
+msgstr "Åben"
+
+msgid "Open protected details to add sensitive medical or identity details."
+msgstr "Åbn beskyttede detaljer for at tilføje følsomme medicinske eller identitetsoplysninger."
 
 msgid "Opening secure booking portal..."
 msgstr "Åbner sikker bookingportal..."
@@ -1756,6 +2090,15 @@ msgstr "Mulighedsværdi"
 msgid "Optional"
 msgstr "Valgfri"
 
+msgid "Optional amount clients pay to secure the booking."
+msgstr "Valgfrit beløb, klienter betaler for at sikre bookingen."
+
+msgid "Optional client notes shaped for this business."
+msgstr "Valgfrie klientnoter tilpasset denne virksomhed."
+
+msgid "Optional comma-separated minutes clients can choose instead."
+msgstr "Valgfrie minutter adskilt med komma, som klienter kan vælge i stedet."
+
 msgid "Optional for both"
 msgstr "Valgfri for begge"
 
@@ -1764,6 +2107,12 @@ msgstr "Muligheder"
 
 msgid "Other"
 msgstr "Andet"
+
+msgid "Other places clients can choose"
+msgstr "Andre steder klienter kan vælge"
+
+msgid "Other time choices"
+msgstr "Andre tidsvalg"
 
 #. placeholder {0}: schedule.dateOverrides.length
 msgid "Overrides: {0}"
@@ -1774,6 +2123,9 @@ msgstr "Oversigt"
 
 msgid "Owner WhatsApp number"
 msgstr "Ejerens WhatsApp-nummer"
+
+msgid "Parent / guardian"
+msgstr "Forælder/værge"
 
 msgid "Passed"
 msgstr "Bestået"
@@ -1796,6 +2148,15 @@ msgstr "Kalenderdestinat per begivenhedstype er endnu ikke konfigurerbart — ti
 msgid "Permissions"
 msgstr "Tilladelser"
 
+msgid "Pet date of birth"
+msgstr "Kæledyrets fødselsdato"
+
+msgid "Pet insurance"
+msgstr "Kæledyrsforsikring"
+
+msgid "Pet name"
+msgstr "Kæledyrets navn"
+
 msgid "Phone"
 msgstr "Telefon"
 
@@ -1804,6 +2165,12 @@ msgstr "Telefonopkald"
 
 msgid "Phone number"
 msgstr "Telefonnummer"
+
+msgid "Photo"
+msgstr "Foto"
+
+msgid "Physical Sciences"
+msgstr "Fysik/kemi"
 
 msgid "Ping"
 msgstr "Ping"
@@ -1817,8 +2184,17 @@ msgstr "Legende"
 msgid "Please check the CSV and try again."
 msgstr "Tjek CSV'en, og prøv igen."
 
+msgid "Please select a JPEG, PNG, or WebP image."
+msgstr "Vælg et JPEG-, PNG- eller WebP-billede."
+
 msgid "Please try again or reconnect your WhatsApp account."
 msgstr "Prøv igen, eller forbind din WhatsApp-konto igen."
+
+msgid "Preferred shape"
+msgstr "Foretrukken form"
+
+msgid "Preferred stylist"
+msgstr "Foretrukken stylist"
 
 msgid "Prerequisite required"
 msgstr "Forudsætning kræves"
@@ -1928,6 +2304,9 @@ msgstr "Omfordel vært"
 msgid "Reassigned"
 msgstr "Omfordelt"
 
+msgid "Receipts from the last 24 hours."
+msgstr "Kvitteringer fra de sidste 24 timer."
+
 msgid "Recent deliveries"
 msgstr "Seneste leveringer"
 
@@ -1952,8 +2331,11 @@ msgstr "Gentagne begivenheder kan ikke aktiveres, mens pladser er aktiveret."
 msgid "Redirects"
 msgstr "Omdirigeringer"
 
-msgid "Refresh flows"
-msgstr "Opdater flows"
+msgid "Reference number"
+msgstr "Referencenummer"
+
+msgid "Referring practitioner"
+msgstr "Henvisende behandler"
 
 msgid "Reject booking"
 msgstr "Afvis booking"
@@ -1970,6 +2352,9 @@ msgstr "Afvisning"
 msgid "Rejection reason"
 msgstr "Afvisningsårsag"
 
+msgid "Remove"
+msgstr "Fjern"
+
 msgid "Remove date override"
 msgstr "Fjern datoundtagelse"
 
@@ -1978,10 +2363,6 @@ msgstr "Fjern felt"
 
 msgid "Remove guest"
 msgstr "Fjern gæst"
-
-#. placeholder {0}: chip.displayName
-msgid "Remove host {0}"
-msgstr "Fjern vært {0}"
 
 msgid "Remove link"
 msgstr "Fjern link"
@@ -1992,14 +2373,27 @@ msgstr "Fjern mulighed"
 msgid "Remove private link"
 msgstr "Fjern privat link"
 
+#. placeholder {0}: chip.displayName
+msgid "Remove team member {0}"
+msgstr "Fjern teammedlem {0}"
+
 msgid "Remove time"
 msgstr "Fjern tid"
+
+msgid "Repeat clients keep the same team member"
+msgstr "Gentagne klienter beholder samme teammedlem"
+
+msgid "Repeats"
+msgstr "Gentages"
 
 msgid "Replace this sample page with your own product information and branding."
 msgstr "Erstat denne eksempelside med dine egne produktinformationer og branding."
 
 msgid "Report booking"
 msgstr "Rapporter booking"
+
+msgid "Reptile"
+msgstr "Krybdyr"
 
 msgid "Request expires after"
 msgstr "Anmodning udløber efter"
@@ -2034,9 +2428,6 @@ msgstr "Årsag til flytning"
 msgid "Reschedule requested"
 msgstr "Omplanlægning anmodet"
 
-msgid "Reschedule with same host"
-msgstr "Omplanlæg med samme vært"
-
 msgid "Rescheduled"
 msgstr "Omplanlagt"
 
@@ -2056,7 +2447,7 @@ msgid "Review the copied booking basics before creating the duplicate."
 msgstr "Gennemgå de kopierede bookingoplysninger, før du opretter duplikatet."
 
 msgid "Review the selected schedule before saving this event type."
-msgstr "Gennemgå den valgte tidsplan, før du gemmer denne begivenhedstype."
+msgstr "Gennemgå den valgte tidsplan, før du gemmer denne service."
 
 msgid "Review what we found"
 msgstr "Gennemgå det, vi fandt"
@@ -2064,8 +2455,11 @@ msgstr "Gennemgå det, vi fandt"
 msgid "Rolling window"
 msgstr "Rullende vindue"
 
-msgid "Round robin"
-msgstr "Round-robin"
+msgid "Rotate within a smaller team group"
+msgstr "Rotér inden for en mindre teamgruppe"
+
+msgid "Round"
+msgstr "Rund"
 
 msgid "Sat"
 msgstr "Lør"
@@ -2082,14 +2476,14 @@ msgstr "Gem ændringer"
 msgid "Save location"
 msgstr "Gem lokation"
 
+msgid "Save notification"
+msgstr "Gem notifikation"
+
 msgid "Save rating"
 msgstr "Gem vurdering"
 
 msgid "Save schedule"
 msgstr "Gem tidsplan"
-
-msgid "Save webhook"
-msgstr "Gem webhook"
 
 msgid "Saved filters"
 msgstr "Gemte filtre"
@@ -2112,9 +2506,6 @@ msgstr "Scan med telefonens kamera for at booke med det samme i WhatsApp."
 msgid "Schedule"
 msgstr "Tidsplan"
 
-msgid "Schedule checks"
-msgstr "Tidsplantjek"
-
 msgid "Schedule created"
 msgstr "Tidsplan oprettet"
 
@@ -2132,6 +2523,12 @@ msgstr "Tidsplan utilgængelig"
 
 msgid "Schedule updated"
 msgstr "Tidsplan opdateret"
+
+msgid "Schedules"
+msgstr "Tidsplaner"
+
+msgid "School"
+msgstr "Skole"
 
 msgid "Scope"
 msgstr "Omfang"
@@ -2207,10 +2604,13 @@ msgid "Select a date to view times."
 msgstr "Vælg en dato for at se tider."
 
 msgid "Select a schedule to see its availability summary."
-msgstr "Vælg en tidsplan for at se dens tilgængelighedsoversigt."
+msgstr "Vælg en tidsplan for at se oversigten over åbningstider."
 
 msgid "Select an option"
 msgstr "Vælg en mulighed"
+
+msgid "Select booking"
+msgstr "Vælg booking"
 
 msgid "Select dates"
 msgstr "Vælg datoer"
@@ -2227,26 +2627,20 @@ msgstr "Vælg uge"
 msgid "Selected calendars"
 msgstr "Valgte kalendere"
 
-msgid "Selected hosts"
-msgstr "Valgte værter"
+msgid "Selected team members"
+msgstr "Valgte teammedlemmer"
 
 msgid "Send a signed HTTP POST to your endpoint when the selected events occur."
 msgstr "Send en signeret HTTP POST til dit endpoint, når de valgte hændelser indtræffer."
 
-msgid "Send bookers to a custom page after success or cancellation."
-msgstr "Send bookere til en brugerdefineret side efter succes eller aflysning."
-
 msgid "Send booking confirmations and reminders over SMS. Coming soon."
 msgstr "Send bookingbekræftelser og påmindelser via SMS. Kommer snart."
 
-msgid "Send Cal Video transcription emails"
-msgstr "Send Cal Video-transskriptionsmails"
+msgid "Send clients to a custom page after success or cancellation."
+msgstr "Send klienter til en brugerdefineret side efter gennemført booking eller aflysning."
 
-msgid "Send Cal.com-compatible booking lifecycle payloads to external systems."
-msgstr "Send Cal.com-kompatible booking-livscyklusdata til eksterne systemer."
-
-msgid "Send emails with the transcription of the Cal Video after the meeting ends. Requires a paid plan."
-msgstr "Send e-mails med transskriptionen af Cal Video efter mødet slutter. Kræver en betalt plan."
+msgid "Send emails with the video call transcript after the meeting ends. Requires a paid plan."
+msgstr "Send e-mails med udskriften fra videoopkaldet, når mødet slutter. Kræver en betalt plan."
 
 msgid "Send request"
 msgstr "Send anmodning"
@@ -2257,32 +2651,71 @@ msgstr "Send signerede HTTP-meddelelser til dine tjenester, når booking-livscyk
 msgid "Send test event"
 msgstr "Send testhændelse"
 
+msgid "Send video call transcript emails"
+msgstr "Send e-mails med videoopkaldsudskrifter"
+
+msgid "Sensitive details are saved. Open protected details to view them."
+msgstr "Følsomme oplysninger er gemt. Åbn beskyttede detaljer for at se dem."
+
+msgid "Sensitive details updated"
+msgstr "Følsomme detaljer opdateret"
+
 msgid "Sent"
 msgstr "Sendt"
 
 msgid "Separate languages with commas."
 msgstr "Adskil sprog med kommaer."
 
+msgid "Service"
+msgstr "Service"
+
+msgid "Service basics"
+msgstr "Servicegrundlag"
+
+msgid "Service constraints"
+msgstr "Servicebegrænsninger"
+
+msgid "Service created"
+msgstr "Service oprettet"
+
+msgid "Service image"
+msgstr "Servicebillede"
+
+msgid "Service name"
+msgstr "Servicenavn"
+
+msgid "Service updated"
+msgstr "Service opdateret"
+
+msgid "Services"
+msgstr "Services"
+
 msgid "Set as default"
 msgstr "Angiv som standard"
 
 msgid "Set custom availability for one date."
-msgstr "Angiv tilpasset tilgængelighed for én dato."
+msgstr "Angiv særlige åbningstider for én dato."
 
 msgid "Set how long this booking reserves on the calendar."
 msgstr "Angiv, hvor længe denne booking reserverer i kalenderen."
 
-msgid "Set the primary location and optional alternatives shown to bookers."
-msgstr "Angiv den primære lokation og valgfrie alternativer, der vises for bookere."
+msgid "Set the primary location and optional alternatives shown to clients."
+msgstr "Angiv det primære sted og valgfrie alternativer, som vises for klienter."
 
-msgid "Set up a repeating schedule"
-msgstr "Opsæt en gentagende tidsplan"
+msgid "Set whether clients can change bookings and how much notice is required."
+msgstr "Angiv om klienter kan ændre bookinger, og hvor meget varsel der kræves."
 
-msgid "Set whether bookers can change bookings and how much notice is required."
-msgstr "Angiv, om bookere kan ændre bookinger, og hvor meget varsel der kræves."
+msgid "Set your hours before adding services."
+msgstr "Angiv dine timer, før du tilføjer services."
 
 msgid "Setup"
 msgstr "Opsætning"
+
+msgid "Sex / sterilised"
+msgstr "Køn/steriliseret"
+
+msgid "Share bookings across the team"
+msgstr "Fordel bookinger på tværs af teamet"
 
 msgid "Share how this meeting went. Your feedback is private to your team."
 msgstr "Del hvordan dette møde gik. Din feedback er privat for dit team."
@@ -2290,14 +2723,17 @@ msgstr "Del hvordan dette møde gik. Din feedback er privat for dit team."
 msgid "Share one-off booking links that bypass the public schedule."
 msgstr "Del engangsbookinglinks der omgår den offentlige plan."
 
+msgid "Short description"
+msgstr "Kort beskrivelse"
+
 msgid "Short Text"
 msgstr "Kort tekst"
 
-msgid "Show attendee info"
-msgstr "Vis deltageroplysninger"
+msgid "Show client info"
+msgstr "Vis klientoplysninger"
 
 msgid "Show event type on profile"
-msgstr "Vis begivenhedstype på profil"
+msgstr "Vis service på profilen"
 
 msgid "Show on profile"
 msgstr "Vis på profil"
@@ -2308,6 +2744,9 @@ msgstr "Vis optimerede tidspunkter"
 #. placeholder {0}: app.name
 msgid "Show permissions for {0}"
 msgstr "Vis tilladelser for {0}"
+
+msgid "Shown on the public booking page. Images are resized before upload."
+msgstr "Vises på den offentlige bookingside. Billeder tilpasses før upload."
 
 msgid "Signing secret"
 msgstr "Signeringshemmelighed"
@@ -2321,17 +2760,23 @@ msgstr "Slotinterval"
 msgid "Slug"
 msgstr "Slug"
 
+msgid "Small mammal"
+msgstr "Lille pattedyr"
+
 msgid "SMS"
 msgstr "SMS"
 
 msgid "Something doesn't look right?"
 msgstr "Ser noget forkert ud?"
 
+msgid "Species"
+msgstr "Art"
+
+msgid "Square"
+msgstr "Firkantet"
+
 msgid "Start"
 msgstr "Start"
-
-msgid "Start time"
-msgstr "Starttidspunkt"
 
 msgid "Start with a weekly schedule, then refine availability on the next screen."
 msgstr "Start med en ugentlig tidsplan, og finjuster tilgængeligheden på næste skærm."
@@ -2341,6 +2786,18 @@ msgstr "Status"
 
 msgid "Status breakdown"
 msgstr "Statusfordeling"
+
+msgid "Stiletto"
+msgstr "Stiletto"
+
+msgid "Straight"
+msgstr "Glat"
+
+msgid "Student name"
+msgstr "Elevens navn"
+
+msgid "Subjects"
+msgstr "Fag"
 
 msgid "Subscriber URL"
 msgstr "Abonnent-URL"
@@ -2363,8 +2820,23 @@ msgstr "Mål-URL"
 msgid "Team"
 msgstr "Team"
 
+msgid "Team members"
+msgstr "Teammedlemmer"
+
+msgid "Team rules"
+msgstr "Teamregler"
+
+msgid "Technical details"
+msgstr "Tekniske detaljer"
+
 msgid "Tell us how to sound and when to bring you into a conversation."
 msgstr "Fortæl os, hvordan vi skal lyde, og hvornår vi skal trække dig ind i en samtale."
+
+msgid "Temperament & handling"
+msgstr "Temperament og håndtering"
+
+msgid "Tertiary"
+msgstr "Videregående"
 
 msgid "Test"
 msgstr "Test"
@@ -2372,8 +2844,8 @@ msgstr "Test"
 msgid "Test event queued for delivery"
 msgstr "Testhændelse sat i kø til levering"
 
-msgid "Test webhook queued"
-msgstr "Test-webhook sat i kø"
+msgid "Test notification queued"
+msgstr "Testnotifikation sat i kø"
 
 msgid "Text"
 msgstr "Tekst"
@@ -2381,27 +2853,27 @@ msgstr "Tekst"
 msgid "Textarea"
 msgstr "Tekstområde"
 
-msgid "The attendee will be asked to pick a new time. Add an optional message."
-msgstr "Deltageren vil blive bedt om at vælge et nyt tidspunkt. Tilføj en valgfri besked."
-
-msgid "The attendee will be notified that their booking has been rejected."
-msgstr "Deltageren vil blive underrettet om, at deres booking er blevet afvist."
-
-msgid "The attendee will be notified that their booking is confirmed."
-msgstr "Deltageren vil blive underrettet om, at deres booking er bekræftet."
-
 msgid "The booking link you followed might have expired, or the business might have moved it."
 msgstr "Bookinglinket, du fulgte, kan være udløbet, eller virksomheden kan have flyttet det."
 
 msgid "The booking needs to be manually confirmed before it is pushed to your calendar and a confirmation is sent. Learn more"
 msgstr "Bookingen skal bekræftes manuelt, før den sendes til din kalender, og en bekræftelse sendes. Lær mere"
 
+msgid "The client will be asked to pick a new time. Add an optional message."
+msgstr "Klienten bliver bedt om at vælge en ny tid. Tilføj eventuelt en besked."
+
+msgid "The client will be notified that their booking has been rejected."
+msgstr "Klienten får besked om, at bookingen er blevet afvist."
+
+msgid "The client will be notified that their booking is confirmed."
+msgstr "Klienten får besked om, at bookingen er bekræftet."
+
 #. placeholder {0}: truncateUrl(webhook?.targetUrl ?? "", 80)
 msgid "The endpoint <0>{0}</0> will stop receiving deliveries. This cannot be undone."
 msgstr "Endpointet <0>{0}</0> vil ikke længere modtage leveringer. Dette kan ikke fortrydes."
 
-msgid "The event type scope is locked once a webhook is created."
-msgstr "Hændelsestypens omfang er låst, når webhooken er oprettet."
+msgid "The service scope is locked once a webhook is created."
+msgstr "Serviceafgrænsningen låses, når en webhook er oprettet."
 
 msgid "This action applies to every selected booking."
 msgstr "Denne handling gælder for alle valgte bookinger."
@@ -2412,8 +2884,8 @@ msgstr "Denne app anmoder ikke om adgang til nogen af dine data."
 msgid "This app is unavailable or no longer exists. Browse the App Store for available apps."
 msgstr "Denne app er ikke tilgængelig eller findes ikke længere. Gennemse App Store for tilgængelige apps."
 
-msgid "this attendee"
-msgstr "denne deltager"
+msgid "This becomes the last part of the public booking link."
+msgstr "Dette bliver den sidste del af det offentlige bookinglink."
 
 msgid "This booking was marked for reschedule."
 msgstr "Denne booking blev markeret til ny tid."
@@ -2428,18 +2900,21 @@ msgstr "Dette annullerer bookingen med {0}."
 msgid "This cancels the booking."
 msgstr "Dette annullerer bookingen."
 
-#. placeholder {0}: booking?.bookerName ?? t`this attendee`
+msgid "this client"
+msgstr "denne klient"
+
+#. placeholder {0}: booking?.bookerName ?? t`this client`
 msgid "This confirms the booking with {0}."
 msgstr "Dette bekræfter bookingen med {0}."
 
 msgid "this event type"
-msgstr "denne begivenhedstype"
+msgstr "denne service"
 
-msgid "This event type is not available for public booking yet."
-msgstr "Denne aftaletype er endnu ikke tilgængelig for offentlig booking."
+msgid "This file contains sensitive columns (shown masked). They are not imported from this screen — review them with your administrator before adding them to client records."
+msgstr "Denne fil indeholder f\\u00f8lsomme kolonner (vist maskeret). De importeres ikke fra denne sk\\u00e6rm — gennemg\\u00e5 dem med din administrator, f\\u00f8r de f\\u00f8jes til klientkort."
 
-msgid "This is where your personalized dashboard content will appear. Stay tuned for updates."
-msgstr "Her vil dit personlige dashboard-indhold blive vist. Hold dig opdateret."
+msgid "This is the main switch for your AI employee. When it is on, Nerova answers clients and brings you in only when a person needs your call."
+msgstr "Dette er hovedkontakten for din AI-medarbejder. Når den er slået til, svarer Nerova klienter og trækker dig kun ind, når en person har brug for din vurdering."
 
 msgid "This is your receipt. Nothing is saved until you choose import clients."
 msgstr "Dette er din kvittering. Intet gemmes, før du vælger at importere klienter."
@@ -2447,15 +2922,18 @@ msgstr "Dette er din kvittering. Intet gemmes, før du vælger at importere klie
 msgid "This marks the booking as needing a new time."
 msgstr "Dette markerer bookingen som krævende en ny tid."
 
-#. placeholder {0}: booking?.bookerName ?? t`this attendee`
+#. placeholder {0}: booking?.bookerName ?? t`this client`
 msgid "This rejects the pending booking with {0}."
 msgstr "Dette afviser den afventende booking med {0}."
 
 msgid "This removes the booking page for {deleteSubject}."
 msgstr "Dette fjerner bookingsiden for {deleteSubject}."
 
-msgid "This will record that the attendee did not show up for the meeting."
-msgstr "Dette registrerer, at deltageren ikke mødte op til mødet."
+msgid "This service is not available for public booking yet."
+msgstr "Denne service er endnu ikke tilgængelig for offentlig booking."
+
+msgid "This will record that the client did not show up for the meeting."
+msgstr "Dette registrerer, at klienten ikke mødte op til aftalen."
 
 msgid "This window overlaps another window on the same day."
 msgstr "Dette vindue overlapper et andet vindue på samme dag."
@@ -2466,11 +2944,17 @@ msgstr "Tor"
 msgid "Thursday"
 msgstr "Torsdag"
 
+msgid "Time"
+msgstr "Tid"
+
 msgid "Time slots"
 msgstr "Tidspunkter"
 
 msgid "Time zone"
 msgstr "Tidszone"
+
+msgid "Time, client, and service at a glance."
+msgstr "Tid, klient og service på et øjeblik."
 
 msgid "Times are shown in your selected time zone."
 msgstr "Tider vises i din valgte tidszone."
@@ -2487,14 +2971,17 @@ msgstr "Til"
 msgid "Today"
 msgstr "I dag"
 
+msgid "Today's bookings"
+msgstr "Dagens bookinger"
+
 msgid "Tone"
 msgstr "Tone"
 
-msgid "Top event types"
-msgstr "Mest populære event-typer"
-
 msgid "Top hosts"
 msgstr "Mest aktive værter"
+
+msgid "Top services"
+msgstr "Topservices"
 
 msgid "Total bookings"
 msgstr "Bookinger i alt"
@@ -2521,10 +3008,13 @@ msgid "Tuesday"
 msgstr "Tirsdag"
 
 msgid "Tune how the schedule presents available slots to bookers."
-msgstr "Justér hvordan planen præsenterer ledige tidspunkter for bookerne."
+msgstr "Tilpas hvordan tidsplanen viser ledige tider for klienter."
 
 msgid "Turn AI receptionist on or off"
 msgstr "Slå AI-receptionisten til eller fra"
+
+msgid "Turn on what your business needs."
+msgstr "Slå det til, din virksomhed har brug for."
 
 msgid "Type"
 msgstr "Type"
@@ -2554,14 +3044,20 @@ msgstr "Opdater denne klients kontaktoplysninger."
 msgid "Update where this booking takes place."
 msgstr "Opdater hvor denne booking finder sted."
 
+msgid "Upload photo"
+msgstr "Upload foto"
+
 msgid "URL"
 msgstr "URL"
 
-msgid "Use booker timezone for organizer"
-msgstr "Brug bookerens tidszone til arrangør"
+msgid "Use client timezone for organizer"
+msgstr "Brug klientens tidszone for arrangøren"
 
 msgid "Use segment query"
 msgstr "Brug segmentforespørgsel"
+
+msgid "Use the name clients already know, like \"Gel manicure\"."
+msgstr "Brug navnet, klienter allerede kender, f.eks. \"Gel manicure\"."
 
 msgid "Use this signing secret to verify the HMAC signature on incoming webhook deliveries."
 msgstr "Brug denne signeringshemmelighed til at verificere HMAC-signaturen på indkommende webhook-leveringer."
@@ -2575,8 +3071,17 @@ msgstr "Brugt"
 msgid "user_..."
 msgstr "user_..."
 
+msgid "Usual cut"
+msgstr "Sædvanlig klipning"
+
+msgid "Vaccinations up to date"
+msgstr "Vaccinationer ajour"
+
 msgid "Video call"
 msgstr "Videoopkald"
+
+msgid "Video or online"
+msgstr "Video eller online"
 
 msgid "View and manage appointments clients have booked."
 msgstr "Se og administrer aftaler, som kunder har booket."
@@ -2602,11 +3107,14 @@ msgstr "Vis sessionsdetaljer"
 msgid "Visibility"
 msgstr "Synlighed"
 
+msgid "Waiting for approval"
+msgstr "Afventer godkendelse"
+
 msgid "Want Nerova to handle this automatically from now on?"
 msgstr "Vil du have Nerova til at håndtere dette automatisk fremover?"
 
-msgid "We answer, suggest next steps, and bring you in only when a client needs your call."
-msgstr "Vi svarer, foreslår næste skridt og trækker dig kun ind, når en klient har brug for dit opkald."
+msgid "Wavy"
+msgstr "Bølget"
 
 msgid "We are adding the ready clients now."
 msgstr "Vi tilføjer de klargjorte klienter nu."
@@ -2633,23 +3141,17 @@ msgstr "Vi læser den her og viser derefter, hvad vi fandt, før klienter import
 msgid "We will show each booking helper we finish here."
 msgstr "Vi viser hver bookinghjælper, vi færdiggør, her."
 
+msgid "We will show each finished booking helper here."
+msgstr "Vi viser hver færdig bookinghjælper her."
+
 msgid "We will use these notes in new WhatsApp conversations."
 msgstr "Vi bruger disse noter i nye WhatsApp-samtaler."
-
-msgid "Webhook"
-msgstr "Webhook"
-
-msgid "Webhook activity"
-msgstr "Webhook-aktivitet"
 
 msgid "Webhook created"
 msgstr "Webhook oprettet"
 
 msgid "Webhook deleted"
 msgstr "Webhook slettet"
-
-msgid "Webhook saved"
-msgstr "Webhook gemt"
 
 msgid "Webhook updated"
 msgstr "Webhook opdateret"
@@ -2675,6 +3177,9 @@ msgstr "Ugentligt"
 msgid "Weekly hours"
 msgstr "Ugentlige tider"
 
+msgid "Weight (kg)"
+msgstr "Vægt (kg)"
+
 msgid "Welcome to {productName}"
 msgstr "Velkommen til {productName}"
 
@@ -2684,8 +3189,8 @@ msgstr "Hvad handler dette møde om?"
 msgid "What went well, what could improve?"
 msgstr "Hvad gik godt, hvad kunne forbedres?"
 
-msgid "What your booker should provide to receive confirmations"
-msgstr "Hvad din booker skal angive for at modtage bekræftelser"
+msgid "What your client should provide to receive confirmations"
+msgstr "Det klienten skal oplyse for at modtage bekræftelser"
 
 msgid "WhatsApp"
 msgstr "WhatsApp"
@@ -2708,8 +3213,20 @@ msgstr "WhatsApp afbrudt"
 msgid "When"
 msgstr "Hvornår"
 
+msgid "When are you open for client bookings?"
+msgstr "Hvornår har du åbent for klientbookinger?"
+
+msgid "When are you open?"
+msgstr "Hvornår har du åbent?"
+
 msgid "When customers message your WhatsApp number, their booking conversations appear here."
 msgstr "Når kunder skriver til dit WhatsApp-nummer, vises deres bookingsamtaler her."
+
+msgid "Where appointments are saved"
+msgstr "Hvor aftaler gemmes"
+
+msgid "Where it happens"
+msgstr "Hvor det foregår"
 
 msgid "Why is this booking being reassigned?"
 msgstr "Hvorfor omfordeles denne booking?"
@@ -2723,8 +3240,8 @@ msgstr "Årligt"
 msgid "Yes"
 msgstr "Ja"
 
-msgid "You can select multiple and your bookers can switch views."
-msgstr "Du kan vælge flere, og dine bookere kan skifte visning."
+msgid "You can select multiple and your clients can switch views."
+msgstr "Du kan vælge flere, og dine klienter kan skifte visning."
 
 msgid "You haven't connected any apps yet. Go to the App Store to search for extensions."
 msgstr "Du har ikke forbundet nogen apps endnu. Gå til App Store for at søge efter udvidelser."
@@ -2740,8 +3257,8 @@ msgstr "Du har installeret {productName} med succes! 🎉"
 msgid "You successfully installed {productName}! 🎉"
 msgstr "Du har installeret {productName} med succes! 🎉"
 
-msgid "Your account is connected to WhatsApp."
-msgstr "Din konto er forbundet til WhatsApp."
+msgid "Your AI employee for WhatsApp bookings and client messages."
+msgstr "Din AI-medarbejder til WhatsApp-bookinger og klientbeskeder."
 
 msgid "Your AI receptionist is answering WhatsApp"
 msgstr "Din AI-receptionist svarer på WhatsApp"
@@ -2755,9 +3272,6 @@ msgstr "Din booking er bekræftet."
 msgid "Your client list is ready for bookings, messages, and follow-ups."
 msgstr "Din klientliste er klar til bookinger, beskeder og opfølgninger."
 
-msgid "Your dashboard is empty"
-msgstr "Dit dashboard er tomt"
-
 msgid "Your import receipt will appear here after you choose a CSV file."
 msgstr "Din importkvittering vises her, når du har valgt en CSV-fil."
 
@@ -2770,8 +3284,8 @@ msgstr "Din kvittering vises her, når listen er klar til gennemgang."
 msgid "Your stored connection will be removed. Existing bookings keep their location and calendar destination, but new bookings will no longer use this app."
 msgstr "Din gemte forbindelse vil blive fjernet. Eksisterende bookinger beholder deres lokation og kalenderdestinat, men nye bookinger vil ikke længere bruge denne app."
 
-msgid "Your WhatsApp booking and sign-in flows have been refreshed."
-msgstr "Dine WhatsApp-booking- og loginflows er blevet opdateret."
+msgid "Your WhatsApp booking and sign-in experience is up to date."
+msgstr "Din WhatsApp-booking og loginoplevelse er opdateret."
 
 msgid "Your WhatsApp Business account has been disconnected."
 msgstr "Din WhatsApp Business-konto er blevet afbrudt."

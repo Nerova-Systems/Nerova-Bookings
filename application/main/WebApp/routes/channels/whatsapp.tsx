@@ -9,10 +9,6 @@ import { isWhatsAppSignupEnabled } from "@/shared/lib/whatsapp/whatsAppConfig";
 
 import { ReceptionistCard } from "./-components/ReceptionistCard";
 import { WhatsAppConnectionCard } from "./-components/WhatsAppConnectionCard";
-import { WhatsAppConversation } from "./-components/WhatsAppConversation";
-import { WhatsAppConversationsPanel } from "./-components/WhatsAppConversationsPanel";
-import { WhatsAppStats } from "./-components/WhatsAppStats";
-import { WhatsAppWebhookActivityPanel } from "./-components/WhatsAppWebhookActivityPanel";
 
 export const Route = createFileRoute("/channels/whatsapp")({
   beforeLoad: () => {
@@ -39,15 +35,11 @@ function WhatsAppPage() {
           maxWidth="48rem"
           browserTitle={t`WhatsApp`}
           title={t`WhatsApp`}
-          subtitle={t`Connect your WhatsApp Business account to send and receive messages.`}
+          subtitle={t`Your AI employee for WhatsApp bookings and client messages.`}
         >
           <div className="flex flex-col gap-8">
             <WhatsAppConnectionCard />
             {isConnected && <ReceptionistCard />}
-            {isConnected && <WhatsAppStats />}
-            {isConnected && <WhatsAppWebhookActivityPanel />}
-            {isConnected && <WhatsAppConversationsPanel />}
-            {isConnected && <WhatsAppConversation />}
           </div>
         </AppLayout>
       </SidebarInset>

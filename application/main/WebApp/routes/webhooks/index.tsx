@@ -25,7 +25,7 @@ function WebhooksPage() {
 
   return (
     <WebhooksPageShell
-      title={t`Webhooks`}
+      title={t`For developers`}
       subtitle={t`Send signed HTTP notifications to your services when booking lifecycle events occur.`}
       actions={
         <Button onClick={() => setIsCreateOpen(true)}>

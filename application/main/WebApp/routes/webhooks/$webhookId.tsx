@@ -64,7 +64,7 @@ function WebhookDetailsPage() {
 
   if (isLoading || !webhook || !state) {
     return (
-      <WebhooksPageShell title={t`Webhook`} subtitle={t`Loading...`}>
+      <WebhooksPageShell title={t`For developers`} subtitle={t`Loading...`}>
         <div className="rounded-md border p-4 text-sm text-muted-foreground">
           <Trans>Loading webhook...</Trans>
         </div>
@@ -104,7 +104,7 @@ function WebhookDetailsPage() {
           <div className="flex items-center gap-2">
             <Button variant="ghost" size="sm" onClick={() => navigate({ to: "/webhooks" })}>
               <ArrowLeftIcon />
-              <Trans>Webhooks</Trans>
+              <Trans>For developers</Trans>
             </Button>
           </div>
           <h1 className="truncate font-mono text-2xl font-semibold" title={webhook.targetUrl}>

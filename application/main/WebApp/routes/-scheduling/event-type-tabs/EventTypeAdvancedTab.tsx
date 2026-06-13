@@ -134,7 +134,7 @@ export function EventTypeAdvancedTab({ eventTypeId, value, onChange, error }: Ev
                   {settings.destinationCalendar.externalId}
                 </span>
               ) : (
-                <Trans>No destination calendar selected</Trans>
+                <Trans>No appointment calendar selected</Trans>
               )}
             </div>
             <p className="text-sm text-muted-foreground">
@@ -144,7 +144,7 @@ export function EventTypeAdvancedTab({ eventTypeId, value, onChange, error }: Ev
         </EventTypeTabSection>
         <EventTypeTabSection
           title={<Trans>Layout</Trans>}
-          description={<Trans>You can select multiple and your bookers can switch views.</Trans>}
+          description={<Trans>You can select multiple and your clients can switch views.</Trans>}
         >
           <div className="grid gap-4 lg:grid-cols-3">
             {[
@@ -219,9 +219,9 @@ export function EventTypeAdvancedTab({ eventTypeId, value, onChange, error }: Ev
             name="requiresCancellationReason"
             label={t`Require cancellation reason`}
             items={[
-              { value: "mandatory-host-only", label: t`Mandatory for host only` },
-              { value: "mandatory-both", label: t`Mandatory for both` },
-              { value: "mandatory-attendee-only", label: t`Mandatory for attendee only` },
+              { value: "mandatory-host-only", label: t`Ask your team why they cancel` },
+              { value: "mandatory-both", label: t`Ask everyone why they cancel` },
+              { value: "mandatory-attendee-only", label: t`Ask clients why they cancel` },
               { value: "optional-both", label: t`Optional for both` }
             ]}
             value={requiresCancellationReason}
@@ -233,18 +233,18 @@ export function EventTypeAdvancedTab({ eventTypeId, value, onChange, error }: Ev
               <SelectValue>
                 {(nextValue: string) =>
                   ({
-                    "mandatory-host-only": t`Mandatory for host only`,
-                    "mandatory-both": t`Mandatory for both`,
-                    "mandatory-attendee-only": t`Mandatory for attendee only`,
+                    "mandatory-host-only": t`Ask your team why they cancel`,
+                    "mandatory-both": t`Ask everyone why they cancel`,
+                    "mandatory-attendee-only": t`Ask clients why they cancel`,
                     "optional-both": t`Optional for both`
                   })[nextValue] ?? nextValue
                 }
               </SelectValue>
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="mandatory-host-only">{t`Mandatory for host only`}</SelectItem>
-              <SelectItem value="mandatory-both">{t`Mandatory for both`}</SelectItem>
-              <SelectItem value="mandatory-attendee-only">{t`Mandatory for attendee only`}</SelectItem>
+              <SelectItem value="mandatory-host-only">{t`Ask your team why they cancel`}</SelectItem>
+              <SelectItem value="mandatory-both">{t`Ask everyone why they cancel`}</SelectItem>
+              <SelectItem value="mandatory-attendee-only">{t`Ask clients why they cancel`}</SelectItem>
               <SelectItem value="optional-both">{t`Optional for both`}</SelectItem>
             </SelectContent>
           </SelectField>
@@ -273,11 +273,9 @@ export function EventTypeAdvancedTab({ eventTypeId, value, onChange, error }: Ev
           onCheckedChange={(disableRescheduling) => updateReschedulePolicy({ allowReschedule: !disableRescheduling })}
         />
         <SettingsToggle
-          title={<Trans>Send Cal Video transcription emails</Trans>}
+          title={<Trans>Send video call transcript emails</Trans>}
           description={
-            <Trans>
-              Send emails with the transcription of the Cal Video after the meeting ends. Requires a paid plan.
-            </Trans>
+            <Trans>Send emails with the video call transcript after the meeting ends. Requires a paid plan.</Trans>
           }
           checked={canSendCalVideoTranscriptionEmails}
           onCheckedChange={(nextValue) => updateMetadata({ canSendCalVideoTranscriptionEmails: String(nextValue) })}
@@ -295,7 +293,7 @@ export function EventTypeAdvancedTab({ eventTypeId, value, onChange, error }: Ev
         </EventTypeTabSection>
         <EventTypeTabSection
           title={<Trans>Event name</Trans>}
-          description={<Trans>Customize the calendar event title and the reply-to address bookers see.</Trans>}
+          description={<Trans>Customize the calendar event title and the reply-to address clients see.</Trans>}
         >
           <div className="grid gap-4 md:grid-cols-2">
             <TextField
@@ -314,7 +312,7 @@ export function EventTypeAdvancedTab({ eventTypeId, value, onChange, error }: Ev
         </EventTypeTabSection>
         <EventTypeTabSection
           title={<Trans>Privacy</Trans>}
-          description={<Trans>Hide booker information from external calendars and disable guests.</Trans>}
+          description={<Trans>Hide client information from external calendars and disable guests.</Trans>}
         >
           <div className="grid gap-4 md:grid-cols-2">
             <SwitchField
@@ -339,7 +337,7 @@ export function EventTypeAdvancedTab({ eventTypeId, value, onChange, error }: Ev
         </EventTypeTabSection>
         <EventTypeTabSection
           title={<Trans>Timezone</Trans>}
-          description={<Trans>Lock the booking page timezone or follow the booker.</Trans>}
+          description={<Trans>Lock the booking page timezone or follow the client.</Trans>}
         >
           <div className="grid gap-4 md:grid-cols-2">
             <SwitchField
@@ -357,7 +355,7 @@ export function EventTypeAdvancedTab({ eventTypeId, value, onChange, error }: Ev
             />
             <SwitchField
               name="useBookerTimezone"
-              label={t`Use booker timezone for organizer`}
+              label={t`Use client timezone for organizer`}
               checked={settings.timezone.useBookerTimezone}
               onCheckedChange={(useBookerTimezone) => updateTimezone({ useBookerTimezone })}
             />
@@ -365,7 +363,7 @@ export function EventTypeAdvancedTab({ eventTypeId, value, onChange, error }: Ev
         </EventTypeTabSection>
         <EventTypeTabSection
           title={<Trans>Confirmation</Trans>}
-          description={<Trans>Control manual approval and booker email checks.</Trans>}
+          description={<Trans>Control manual approval and client email checks.</Trans>}
         >
           <div className="grid gap-4 md:grid-cols-2">
             <SwitchField
@@ -390,7 +388,7 @@ export function EventTypeAdvancedTab({ eventTypeId, value, onChange, error }: Ev
             />
             <SwitchField
               name="requiresConfirmationForFreeEmail"
-              label={t`Confirm free-email bookers`}
+              label={t`Confirm free-email clients`}
               checked={settings.confirmationPolicy.requiresConfirmationForFreeEmail}
               onCheckedChange={(requiresConfirmationForFreeEmail) =>
                 updateConfirmationPolicy({ requiresConfirmationForFreeEmail })
@@ -406,7 +404,7 @@ export function EventTypeAdvancedTab({ eventTypeId, value, onChange, error }: Ev
         </EventTypeTabSection>
         <EventTypeTabSection
           title={<Trans>Cancellation and reschedule</Trans>}
-          description={<Trans>Set whether bookers can change bookings and how much notice is required.</Trans>}
+          description={<Trans>Set whether clients can change bookings and how much notice is required.</Trans>}
         >
           <div className="grid gap-4 md:grid-cols-2">
             <SwitchField
@@ -461,7 +459,7 @@ export function EventTypeAdvancedTab({ eventTypeId, value, onChange, error }: Ev
         </EventTypeTabSection>
         <EventTypeTabSection
           title={<Trans>Redirects</Trans>}
-          description={<Trans>Send bookers to a custom page after success or cancellation.</Trans>}
+          description={<Trans>Send clients to a custom page after success or cancellation.</Trans>}
         >
           <div className="grid gap-4 md:grid-cols-2">
             <TextField
@@ -547,7 +545,7 @@ export function EventTypeAdvancedTab({ eventTypeId, value, onChange, error }: Ev
             />
             <SwitchField
               name="showAttendeeInfo"
-              label={t`Show attendee info`}
+              label={t`Show client info`}
               checked={settings.seats.showAttendeeInfo}
               disabled={!settings.seats.enabled || hasRecurrence}
               onCheckedChange={(showAttendeeInfo) => updateSeats({ showAttendeeInfo })}
@@ -556,7 +554,7 @@ export function EventTypeAdvancedTab({ eventTypeId, value, onChange, error }: Ev
         </EventTypeTabSection>
         <EventTypeTabSection
           title={<Trans>Connected features</Trans>}
-          description={<Trans>Choose the core calendar and conferencing apps used by this event type.</Trans>}
+          description={<Trans>Choose the core calendar and conferencing apps used by this service.</Trans>}
         >
           <CoreConnectorSettings
             settings={settings}
@@ -572,15 +570,15 @@ export function EventTypeAdvancedTab({ eventTypeId, value, onChange, error }: Ev
           />
           <DisabledFeatureRow
             title={<Trans>Workflows</Trans>}
-            description={<Trans>Automate reminders and follow-up messages for this event type.</Trans>}
+            description={<Trans>Automate reminders and follow-up messages for this service.</Trans>}
           />
           <DisabledFeatureRow
-            title={<Trans>Webhooks</Trans>}
+            title={<Trans>For developers</Trans>}
             description={<Trans>Notify external systems when bookings change.</Trans>}
           />
           <DisabledFeatureRow
             title={<Trans>Apps</Trans>}
-            description={<Trans>Connect installed apps to this event type.</Trans>}
+            description={<Trans>Connect installed apps to this service.</Trans>}
           />
           <DisabledFeatureRow
             title={<Trans>AI</Trans>}
@@ -627,7 +625,7 @@ function BookingQuestionsPreview({ fields }: Readonly<{ fields: BookingField[] }
             <Trans>Confirmation</Trans>
           </div>
           <p className="text-sm text-muted-foreground">
-            <Trans>What your booker should provide to receive confirmations</Trans>
+            <Trans>What your client should provide to receive confirmations</Trans>
           </p>
         </div>
         <div className="flex overflow-hidden rounded-md border text-sm">
@@ -732,7 +730,7 @@ function CoreConnectorSettings({
       <div className="grid gap-4 rounded-md border p-4">
         <SelectField
           name="destinationCalendarIntegration"
-          label={t`Destination calendar`}
+          label={t`Where appointments are saved`}
           items={destinationCalendarOptions}
           value={destinationValue}
           onValueChange={(nextValue) =>

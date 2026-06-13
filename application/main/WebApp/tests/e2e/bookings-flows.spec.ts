@@ -82,9 +82,9 @@ async function createSchedule(page: Page, name: string) {
 
 async function createEventType(page: Page, title: string, slug: string) {
   await page.goto("/event-types");
-  await page.getByRole("button", { name: "New event type" }).click();
+  await page.getByRole("button", { name: "New service" }).click();
   await page.getByRole("textbox", { name: "Title" }).fill(title);
-  await page.getByRole("textbox", { name: "Slug" }).fill(slug);
+  await page.getByRole("textbox", { name: "Link name" }).fill(slug);
   await page.getByRole("textbox", { name: "Duration", exact: true }).fill("30");
   await blurActiveElement(page);
   await page.getByRole("button", { name: "Continue" }).click();
@@ -123,7 +123,7 @@ async function updateEventTypeSettings(
       if (!listResponse.ok) throw new Error(await listResponse.text());
       const list = (await listResponse.json()) as { eventTypes: EventType[] };
       const eventType = list.eventTypes.find((item) => item.slug === eventSlug);
-      if (!eventType) throw new Error(`Event type '${eventSlug}' was not found.`);
+      if (!eventType) throw new Error(`Service '${eventSlug}' was not found.`);
 
       const updateResponse = await fetch(`/api/event-types/${eventType.id}`, {
         method: "PUT",
@@ -151,8 +151,8 @@ async function createBookedEvent(
   const scheduleName = `Bookings smoke schedule ${unique}`;
   const eventTitle = `Bookings smoke event ${unique}`;
   const eventSlug = `bookings-smoke-event-${unique}`;
-  const bookerName = `Bookings Booker ${unique}`;
-  const bookerEmail = `bookings-booker-${unique}@example.com`;
+  const clientName = `Bookings Booker ${unique}`;
+  const clientEmail = `bookings-client-${unique}@example.com`;
   const bookingNotes = "Bookings dashboard";
   const startTime = addMinutes(getNextMondayAtNine(), bookingSequence * 60);
   bookingSequence += 1;
@@ -160,12 +160,12 @@ async function createBookedEvent(
   await createSchedule(page, scheduleName);
   await expectToastMessage(context, "Schedule created");
   await createEventType(page, eventTitle, eventSlug);
-  await expectToastMessage(context, "Event type created");
+  await expectToastMessage(context, "Service created");
   if (options.requiresConfirmation === true) {
     await page.getByRole("tab", { name: "Advanced" }).click();
     await page.getByRole("switch", { name: "Requires confirmation" }).click();
     await page.getByRole("button", { name: "Save" }).click();
-    await expectToastMessage(context, "Event type updated");
+    await expectToastMessage(context, "Service updated");
   }
 
   const profile = await page.evaluate(async () => {
@@ -182,13 +182,13 @@ async function createBookedEvent(
   });
   await page.goto(`/${profile.handle}/${eventSlug}?${publicBookingSearch.toString()}`);
   await expect(page.getByTestId("public-booker-form")).toBeVisible();
-  await page.getByRole("textbox", { name: "Name" }).fill(bookerName);
-  await page.getByRole("textbox", { name: "Email" }).fill(bookerEmail);
+  await page.getByRole("textbox", { name: "Name" }).fill(clientName);
+  await page.getByRole("textbox", { name: "Email" }).fill(clientEmail);
   await page.getByRole("textbox", { name: "Additional notes" }).fill(bookingNotes);
   await page.getByRole("button", { name: "Confirm booking" }).click();
   await expect(page.getByRole("heading", { name: "Booking confirmed" })).toBeVisible();
 
-  return { eventTitle, eventSlug, handle: profile.handle, bookerName, bookerEmail, bookingNotes, startTime };
+  return { eventTitle, eventSlug, handle: profile.handle, clientName, clientEmail, bookingNotes, startTime };
 }
 
 test.describe("@smoke", () => {
@@ -207,7 +207,7 @@ test.describe("@smoke", () => {
     await createSchedule(ownerPage, scheduleName);
     await expectToastMessage(context, "Schedule created");
     await createEventType(ownerPage, eventTitle, eventSlug);
-    await expectToastMessage(context, "Event type created");
+    await expectToastMessage(context, "Service created");
     await updateEventTypeSettings(ownerPage, eventSlug, {
       bookingFields: [
         { name: "company", label: "Company", type: "text", required: true, options: [] },
@@ -237,10 +237,10 @@ test.describe("@smoke", () => {
       timezone: "Africa/Johannesburg"
     });
     await ownerPage.goto(`/${profile.handle}/${eventSlug}?${publicAvailabilitySearch.toString()}`);
-    await expect(ownerPage.getByTestId("booker-container")).toBeVisible();
-    await expect(ownerPage.getByTestId("booker-event-meta")).toBeVisible();
-    await expect(ownerPage.getByTestId("booker-date-picker")).toBeVisible();
-    await expect(ownerPage.getByTestId("booker-timeslots")).toBeVisible();
+    await expect(ownerPage.getByTestId("client-container")).toBeVisible();
+    await expect(ownerPage.getByTestId("client-event-meta")).toBeVisible();
+    await expect(ownerPage.getByTestId("client-date-picker")).toBeVisible();
+    await expect(ownerPage.getByTestId("client-timeslots")).toBeVisible();
 
     await ownerPage.goto(`/${profile.handle}/${eventSlug}?${publicBookingSearch.toString()}`);
     await expect(ownerPage.getByTestId("public-booker-form")).toBeVisible();
@@ -248,7 +248,7 @@ test.describe("@smoke", () => {
     await expect(ownerPage.getByRole("heading", { name: "Enter your details" })).toBeVisible();
 
     await ownerPage.getByRole("textbox", { name: "Name" }).fill(`Fields Booker ${unique}`);
-    await ownerPage.getByRole("textbox", { name: "Email" }).fill(`fields-booker-${unique}@example.com`);
+    await ownerPage.getByRole("textbox", { name: "Email" }).fill(`fields-client-${unique}@example.com`);
     await ownerPage.getByRole("textbox", { name: "Company" }).fill("Nerova");
     await ownerPage.getByRole("combobox", { name: "Department" }).click();
     await ownerPage.getByRole("option", { name: "Support" }).click();
@@ -347,15 +347,15 @@ test.describe("@smoke", () => {
       await bookingRow.getByTestId("booking-actions-dropdown").click();
       await ownerPage.getByRole("menuitem", { name: "Add guests" }).click();
       await expect(ownerPage.getByRole("dialog", { name: "Add guests" })).toBeVisible();
-      await ownerPage.getByRole("textbox", { name: "Attendee name" }).fill("Guest Booker");
-      await ownerPage.getByRole("textbox", { name: "Attendee email" }).fill("guest-booker@example.com");
+      await ownerPage.getByRole("textbox", { name: "Client name" }).fill("Guest Booker");
+      await ownerPage.getByRole("textbox", { name: "Client email" }).fill("guest-client@example.com");
       await ownerPage.getByRole("button", { name: "Add guests" }).click();
       await expectToastMessage(context, "Guests added");
 
       await bookingRow.click();
       const bookingDetails = ownerPage.getByRole("dialog", { name: booking.eventTitle });
       await expect(bookingDetails.getByText("Suite 5")).toBeVisible();
-      await expect(bookingDetails.getByText("guest-booker@example.com")).toBeVisible();
+      await expect(bookingDetails.getByText("guest-client@example.com")).toBeVisible();
       await ownerPage.keyboard.press("Escape");
     })();
 
@@ -377,8 +377,8 @@ test.describe("@smoke", () => {
       await ownerPage.goto(`${rescheduleUrl.pathname}${rescheduleUrl.search}`);
       await expect(ownerPage.getByTestId("public-booker-form")).toBeVisible();
       await expect(ownerPage.getByRole("heading", { name: "Reschedule booking" })).toBeVisible();
-      await expect(ownerPage.getByRole("textbox", { name: "Name" })).toHaveValue(booking.bookerName);
-      await expect(ownerPage.getByRole("textbox", { name: "Email" })).toHaveValue(booking.bookerEmail);
+      await expect(ownerPage.getByRole("textbox", { name: "Name" })).toHaveValue(booking.clientName);
+      await expect(ownerPage.getByRole("textbox", { name: "Email" })).toHaveValue(booking.clientEmail);
       await expect(ownerPage.getByRole("textbox", { name: "Additional notes" })).toHaveValue(booking.bookingNotes);
       await ownerPage.getByRole("textbox", { name: "Reschedule reason" }).fill(rescheduleReason);
       await ownerPage.getByRole("button", { name: "Reschedule booking" }).click();
@@ -470,8 +470,8 @@ test.describe("@smoke", () => {
 
       const bookingDetails = ownerPage.getByRole("dialog", { name: booking.eventTitle });
       await expect(bookingDetails).toBeVisible();
-      await expect(bookingDetails.getByText(booking.bookerName, { exact: true })).toBeVisible();
-      await expect(bookingDetails.getByText(booking.bookerEmail, { exact: true })).toBeVisible();
+      await expect(bookingDetails.getByText(booking.clientName, { exact: true })).toBeVisible();
+      await expect(bookingDetails.getByText(booking.clientEmail, { exact: true })).toBeVisible();
     })();
 
     await step("Cancel booking from details quick action menu")(async () => {
@@ -505,11 +505,11 @@ test.describe("@comprehensive", () => {
     await step("Apply mobile search filter & verify active filter strip")(async () => {
       await ownerPage.goto("/bookings/upcoming?view=list");
       await ownerPage.getByRole("button", { name: "Filter No filters" }).click();
-      await ownerPage.getByRole("textbox", { name: "Search bookings" }).fill(booking.bookerEmail);
+      await ownerPage.getByRole("textbox", { name: "Search bookings" }).fill(booking.clientEmail);
       await ownerPage.getByRole("button", { name: "Apply filters" }).click();
 
       await expect(ownerPage.getByTestId("active-booking-filters")).toBeVisible();
-      await expect(ownerPage.getByText(`Search: ${booking.bookerEmail}`)).toBeVisible();
+      await expect(ownerPage.getByText(`Search: ${booking.clientEmail}`)).toBeVisible();
       await expect(ownerPage.getByText(booking.eventTitle)).toBeVisible();
     })();
 

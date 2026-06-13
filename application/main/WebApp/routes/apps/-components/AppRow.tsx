@@ -57,8 +57,8 @@ export function AppRow({ app, onUninstall }: Readonly<AppRowProps>) {
           </div>
           {app.description && <p className="line-clamp-2 text-sm text-muted-foreground">{app.description}</p>}
           {isConnected ? (
-            <span className="mt-0.5 inline-flex items-center gap-1.5 text-xs font-medium text-emerald-600 dark:text-emerald-400">
-              <span className="size-2 rounded-full bg-emerald-500" />
+            <span className="mt-0.5 inline-flex items-center gap-1.5 text-xs font-medium text-primary">
+              <span className="size-2 rounded-full bg-primary" />
               <Trans>Connected</Trans>
             </span>
           ) : (

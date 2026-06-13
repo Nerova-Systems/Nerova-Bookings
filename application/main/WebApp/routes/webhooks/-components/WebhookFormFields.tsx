@@ -41,7 +41,7 @@ export function WebhookFormFields({ state, onChange, hideEventTypeScope, disable
     state.targetUrl.trim().length > 0 && !isValidTargetUrl(state.targetUrl) ? t`Enter a valid http(s) URL.` : undefined;
 
   const scopeItems = [
-    { value: UNSCOPED_VALUE, label: t`All event types` },
+    { value: UNSCOPED_VALUE, label: t`All services` },
     ...eventTypes.map((eventType) => ({ value: eventType.id, label: eventType.title }))
   ];
 
@@ -70,7 +70,7 @@ export function WebhookFormFields({ state, onChange, hideEventTypeScope, disable
         <SelectField<string>
           name="eventTypeId"
           label={t`Scope`}
-          description={t`Limit deliveries to bookings for a single event type, or leave unscoped to receive everything.`}
+          description={t`Limit deliveries to bookings for a single service, or leave unscoped to receive everything.`}
           items={scopeItems}
           value={state.eventTypeId ?? UNSCOPED_VALUE}
           onValueChange={(value) =>

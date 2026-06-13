@@ -23,7 +23,7 @@ export function BookingAttendeesSection({
   return (
     <section className="rounded-md border p-4">
       <SectionTitle>
-        <Trans>Attendees</Trans>
+        <Trans>Clients</Trans>
       </SectionTitle>
       {isLoading ? (
         <Skeleton className="h-10 w-full" />

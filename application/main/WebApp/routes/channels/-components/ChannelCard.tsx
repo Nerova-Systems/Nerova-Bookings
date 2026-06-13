@@ -64,8 +64,8 @@ export function ChannelCard({ icon, name, description, status, accentClassName, 
 function StatusPill({ status }: Readonly<{ status: ChannelStatus }>) {
   if (status === "connected") {
     return (
-      <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 px-2.5 py-1 text-xs font-medium text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400">
-        <span className="size-2 animate-pulse rounded-full bg-emerald-500" />
+      <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-2.5 py-1 text-xs font-medium text-primary dark:bg-primary/20 ">
+        <span className="size-2 animate-pulse rounded-full bg-primary" />
         <Trans>Connected</Trans>
       </span>
     );

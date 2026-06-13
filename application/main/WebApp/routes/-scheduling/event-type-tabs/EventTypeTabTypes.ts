@@ -2,6 +2,7 @@ import type { ApiValidationError, EventTypePayload, Schedule } from "../scheduli
 
 export type EventTypeTabProps = Readonly<{
   eventTypeId: string;
+  imageUrl: string | null;
   value: EventTypePayload;
   schedules: Schedule[];
   onChange: (value: EventTypePayload) => void;

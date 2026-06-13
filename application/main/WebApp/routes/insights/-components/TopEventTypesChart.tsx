@@ -38,10 +38,10 @@ export function TopEventTypesChart({ data, isLoading }: Readonly<TopEventTypesCh
     <Card className="pt-0">
       <CardHeader className="border-b py-5">
         <CardTitle>
-          <Trans>Top event types</Trans>
+          <Trans>Top services</Trans>
         </CardTitle>
         <CardDescription>
-          <Trans>Most booked event types in the selected range.</Trans>
+          <Trans>Most booked services in the selected range.</Trans>
         </CardDescription>
       </CardHeader>
       <CardContent className="px-2 pt-4 sm:px-6 sm:pt-6">

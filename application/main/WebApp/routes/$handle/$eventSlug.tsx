@@ -5,7 +5,7 @@ import { MessageSquareIcon, QrCodeIcon, SparklesIcon, CalendarDaysIcon, External
 import { api } from "@/shared/lib/api/client";
 
 export const Route = createFileRoute("/$handle/$eventSlug")({
-  staticData: { trackingTitle: "Public booker" },
+  staticData: { trackingTitle: "Public client" },
   validateSearch: (search: Record<string, unknown>) => ({
     privateLink: search.privateLink as string | undefined
   }),
@@ -32,7 +32,7 @@ function WhatsAppBookingOnlyPage() {
     return (
       <div className="flex min-h-screen items-center justify-center bg-slate-950 text-white">
         <div className="flex flex-col items-center gap-4">
-          <div className="size-12 animate-spin rounded-full border-4 border-emerald-500 border-t-transparent" />
+          <div className="size-12 animate-spin rounded-full border-4 border-primary border-t-transparent" />
           <p className="animate-pulse text-sm font-medium text-slate-400">
             <Trans>Opening secure booking portal...</Trans>
           </p>
@@ -60,12 +60,12 @@ function WhatsAppBookingOnlyPage() {
   return (
     <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-slate-950 px-4 py-12 text-white md:px-8">
       {/* Decorative premium gradients */}
-      <div className="absolute top-[-20%] left-[-20%] size-[600px] rounded-full bg-emerald-500/10 blur-[150px]" />
-      <div className="absolute right-[-20%] bottom-[-20%] size-[600px] rounded-full bg-teal-500/10 blur-[150px]" />
+      <div className="absolute top-[-20%] left-[-20%] size-[600px] rounded-full bg-primary/10 blur-[150px]" />
+      <div className="absolute right-[-20%] bottom-[-20%] size-[600px] rounded-full bg-primary/10 blur-[150px]" />
 
       <div className="relative flex w-full max-w-lg flex-col gap-6" data-testid="public-booker">
         {/* Brand Banner */}
-        <div className="mx-auto flex animate-pulse items-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-4 py-1.5 text-xs font-semibold tracking-widest text-emerald-400 uppercase shadow-lg backdrop-blur-md">
+        <div className="mx-auto flex animate-pulse items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-4 py-1.5 text-xs font-semibold tracking-widest text-primary uppercase shadow-lg backdrop-blur-md">
           <SparklesIcon className="size-3.5" />
           <span>
             <Trans>WhatsApp Booking First</Trans>
@@ -73,17 +73,17 @@ function WhatsAppBookingOnlyPage() {
         </div>
 
         {/* Premium Card */}
-        <div className="overflow-hidden rounded-3xl border border-white/10 bg-slate-900/40 p-8 shadow-2xl backdrop-blur-xl transition-all duration-300 hover:border-emerald-500/30 hover:shadow-emerald-500/5">
+        <div className="overflow-hidden rounded-3xl border border-white/10 bg-slate-900/40 p-8 shadow-2xl backdrop-blur-xl transition-all duration-300 hover:border-primary/30 hover:shadow-primary/5">
           {/* Header */}
           <div className="flex flex-col items-center gap-3 text-center">
             {eventType.profile?.avatarUrl ? (
               <img
                 src={eventType.profile.avatarUrl}
                 alt={eventType.profile.displayName}
-                className="size-20 rounded-2xl object-cover shadow-lg ring-2 ring-emerald-500/30"
+                className="size-20 rounded-2xl object-cover shadow-lg ring-2 ring-primary/30"
               />
             ) : (
-              <div className="flex size-16 items-center justify-center rounded-2xl bg-gradient-to-tr from-emerald-500 to-teal-400 text-xl font-bold text-slate-950 shadow-lg">
+              <div className="flex size-16 items-center justify-center rounded-2xl bg-gradient-to-tr from-primary to-primary/80 text-xl font-bold text-slate-950 shadow-lg">
                 {eventType.profile?.displayName?.charAt(0) || "B"}
               </div>
             )}
@@ -97,7 +97,7 @@ function WhatsAppBookingOnlyPage() {
               <p className="mt-2 max-w-sm text-xs leading-relaxed text-slate-400">{eventType.description}</p>
             )}
             <div className="mt-1 flex items-center justify-center gap-2 rounded-full border border-white/5 bg-white/5 px-3 py-1 text-xs text-slate-400">
-              <CalendarDaysIcon className="size-3.5 text-emerald-400" />
+              <CalendarDaysIcon className="size-3.5 text-primary" />
               <span>
                 {eventType.durationMinutes} <Trans>Minutes duration</Trans>
               </span>
@@ -111,14 +111,14 @@ function WhatsAppBookingOnlyPage() {
             {waUrl ? (
               <>
                 {/* QR Code Container */}
-                <div className="group relative rounded-2xl border border-white/5 bg-slate-950/40 p-4 shadow-inner backdrop-blur-md transition-all duration-300 hover:border-emerald-500/20">
+                <div className="group relative rounded-2xl border border-white/5 bg-slate-950/40 p-4 shadow-inner backdrop-blur-md transition-all duration-300 hover:border-primary/20">
                   <img
                     src={qrUrl}
                     alt="Scan to Book"
                     className="size-48 rounded-lg object-contain transition-transform duration-300 group-hover:scale-[1.02]"
                   />
                   <div className="absolute inset-0 flex items-center justify-center rounded-2xl bg-slate-950/60 opacity-0 backdrop-blur-xs transition-opacity group-hover:opacity-100">
-                    <QrCodeIcon className="size-10 animate-ping text-emerald-400" />
+                    <QrCodeIcon className="size-10 animate-ping text-primary" />
                   </div>
                 </div>
 
@@ -136,7 +136,7 @@ function WhatsAppBookingOnlyPage() {
                   href={waUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="group relative flex w-full items-center justify-center gap-2.5 overflow-hidden rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-400 px-6 py-4 text-center font-bold text-slate-950 shadow-xl transition-all duration-300 hover:scale-[1.02] hover:shadow-emerald-500/20 active:scale-[0.98]"
+                  className="group relative flex w-full items-center justify-center gap-2.5 overflow-hidden rounded-2xl bg-gradient-to-r from-primary to-primary/80 px-6 py-4 text-center font-bold text-slate-950 shadow-xl transition-all duration-300 hover:scale-[1.02] hover:shadow-primary/20 active:scale-[0.98]"
                 >
                   <MessageSquareIcon className="size-5 transition-transform group-hover:rotate-12" />
                   <span>

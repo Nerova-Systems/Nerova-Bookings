@@ -115,6 +115,14 @@ function ReadyForReviewReceipt({ job }: Readonly<{ job: ImportJobDetails }>) {
           </Trans>
         </div>
         <ImportRowsTable rows={job.rows} />
+        {(job.columnMapping?.sensitiveFieldKeys?.length ?? 0) > 0 && (
+          <div className="rounded-lg border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900 dark:border-amber-700 dark:bg-amber-950 dark:text-amber-200">
+            <Trans>
+              This file contains sensitive columns (shown masked). They are not imported from this screen — review them
+              with your administrator before adding them to client records.
+            </Trans>
+          </div>
+        )}
         <div className="flex flex-wrap justify-end gap-2">
           <Button
             variant="outline"
@@ -125,7 +133,10 @@ function ReadyForReviewReceipt({ job }: Readonly<{ job: ImportJobDetails }>) {
           </Button>
           <Button
             onClick={() =>
-              approveMutation.mutate({ params: { path: { id: job.id } }, body: { excludeRowNumbers: [] } })
+              approveMutation.mutate({
+                params: { path: { id: job.id } },
+                body: { excludeRowNumbers: [], confirmedSensitiveFieldKeys: [] }
+              })
             }
             isPending={approveMutation.isPending}
           >

@@ -42,7 +42,7 @@ export function RejectBookingDialog({
             <Trans>Reject booking</Trans>
           </DialogTitle>
           <DialogDescription>
-            <Trans>The attendee will be notified that their booking has been rejected.</Trans>
+            <Trans>The client will be notified that their booking has been rejected.</Trans>
           </DialogDescription>
         </DialogHeader>
         {booking && (

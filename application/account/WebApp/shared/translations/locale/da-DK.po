@@ -405,6 +405,9 @@ msgstr "Tilbage til Mine sager"
 msgid "Back to signup"
 msgstr "Tilbage til tilmelding"
 
+msgid "Barber"
+msgstr "Barber"
+
 msgid "Basic information shown on your WhatsApp profile."
 msgstr "Grundlæggende oplysninger vist på din WhatsApp-profil."
 
@@ -584,6 +587,9 @@ msgstr "Klient-ID"
 
 msgid "Client secret"
 msgstr "Klienthemmelighed"
+
+msgid "Clinic"
+msgstr "Klinik"
 
 msgid "Close"
 msgstr "Luk"
@@ -1335,6 +1341,9 @@ msgstr "Mandag"
 msgid "My tickets"
 msgstr "Mine sager"
 
+msgid "Nails"
+msgstr "Negle"
+
 msgid "Name"
 msgstr "Navn"
 
@@ -1456,6 +1465,9 @@ msgstr "Åbn {0}"
 msgid "Open your first ticket"
 msgstr "Opret din første sag"
 
+msgid "Optional for now. This helps Nerova choose the right words and defaults."
+msgstr "Valgfrit indtil videre. Det hjælper Nerova med at vælge de rigtige ord og standarder."
+
 msgid "or"
 msgstr "eller"
 
@@ -1549,6 +1561,9 @@ msgstr "Slet brugere permanent"
 
 msgid "Permissions"
 msgstr "Rettigheder"
+
+msgid "Personal trainer"
+msgstr "Personlig træner"
 
 msgid "Pick a name and a URL slug. You can configure branding and invite members after creating the team."
 msgstr "Vælg et navn og en URL-slug. Du kan konfigurere branding og invitere medlemmer efter oprettelse af teamet."
@@ -1799,6 +1814,9 @@ msgstr "Rolle opdateret: {0}"
 msgid "Roles"
 msgstr "Roller"
 
+msgid "Salon"
+msgstr "Salon"
+
 msgid "Saturday"
 msgstr "L├╕rdag"
 
@@ -1977,6 +1995,9 @@ msgstr "Solo"
 
 msgid "Something went wrong"
 msgstr "Noget gik galt"
+
+msgid "Soon"
+msgstr "Snart"
 
 msgid "SSO"
 msgstr "SSO"
@@ -2252,6 +2273,9 @@ msgstr "Prøv at rydde eller justere filtrene for at se flere resultater."
 msgid "Tuesday"
 msgstr "Tirsdag"
 
+msgid "Tutor"
+msgstr "Underviser"
+
 msgid "Type your reply…"
 msgstr "Skriv dit svar…"
 
@@ -2415,6 +2439,9 @@ msgstr "Bekræft"
 msgid "Verifying..."
 msgstr "Bekræfter..."
 
+msgid "Vet"
+msgstr "Dyrlæge"
+
 msgid "View"
 msgstr "Vis"
 
@@ -2453,6 +2480,9 @@ msgstr "Onsdag"
 
 msgid "What could have been better?"
 msgstr "Hvad kunne have været bedre?"
+
+msgid "What kind of business are you?"
+msgstr "Hvilken type virksomhed har du?"
 
 msgid "What went wrong? We'll read every word."
 msgstr "Hvad gik galt? Vi læser hvert eneste ord."

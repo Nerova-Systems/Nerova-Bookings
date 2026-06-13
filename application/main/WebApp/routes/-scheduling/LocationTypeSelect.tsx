@@ -10,7 +10,7 @@ export function LocationTypeSelect({
 }: Readonly<{ value: string | null | undefined; onChange: (locationType: string) => void }>) {
   // Installed conferencing connectors (Google Meet, MS Teams, Zoom, ...) appear as additional
   // location choices once the user has connected them on /apps/installed. The location string
-  // stored on the event type matches the app slug so back-end booking handlers can resolve the
+  // stored on the service matches the app slug so back-end booking handlers can resolve the
   // matching IConferenceLinkProvider when the meeting is created.
   const { data: appsData } = api.useQuery("get", "/api/apps");
   const conferencingApps = (appsData?.apps ?? []).filter(
@@ -18,7 +18,7 @@ export function LocationTypeSelect({
   );
 
   const locationTypes = [
-    { value: "link", label: t`Link` },
+    { value: "link", label: t`Video or online` },
     { value: "phone", label: t`Phone` },
     { value: "in-person", label: t`In person` },
     ...conferencingApps.map((app) => ({ value: app.slug, label: app.name }))
@@ -27,7 +27,7 @@ export function LocationTypeSelect({
   return (
     <SelectField
       name="locationType"
-      label={t`Location type`}
+      label={t`Where it happens`}
       items={locationTypes}
       value={value || "link"}
       onValueChange={(locationType) => onChange(locationType ?? "link")}

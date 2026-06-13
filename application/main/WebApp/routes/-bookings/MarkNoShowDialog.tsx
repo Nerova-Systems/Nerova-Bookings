@@ -47,7 +47,7 @@ export function MarkNoShowDialog({
             <Trans>Mark as no-show?</Trans>
           </AlertDialogTitle>
           <AlertDialogDescription>
-            <Trans>This will record that the attendee did not show up for the meeting.</Trans>
+            <Trans>This will record that the client did not show up for the meeting.</Trans>
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogBody>

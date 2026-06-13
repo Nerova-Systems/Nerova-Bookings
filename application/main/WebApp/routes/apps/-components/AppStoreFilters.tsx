@@ -17,7 +17,7 @@ const CATEGORY_ICON: Readonly<Record<AppCategory, LucideIcon>> = {
 const CATEGORY_GRADIENT: Readonly<Record<AppCategory, string>> = {
   [AppCategory.Calendar]: "from-sky-500/15 to-blue-500/5 text-sky-600 dark:text-sky-400",
   [AppCategory.Conferencing]: "from-violet-500/15 to-fuchsia-500/5 text-violet-600 dark:text-violet-400",
-  [AppCategory.Payment]: "from-emerald-500/15 to-teal-500/5 text-emerald-600 dark:text-emerald-400",
+  [AppCategory.Payment]: "from-primary/15 to-primary/5 text-primary",
   [AppCategory.Other]: "from-amber-500/15 to-orange-500/5 text-amber-600 dark:text-amber-400"
 };
 

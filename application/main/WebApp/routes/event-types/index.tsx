@@ -15,7 +15,7 @@ import { SchedulingPageShell } from "../-scheduling/SchedulingPageShell";
 import { eventTypeToPayload, eventTypeToUpdatePayload, type EventType } from "../-scheduling/schedulingTypes";
 
 export const Route = createFileRoute("/event-types/")({
-  staticData: { trackingTitle: "Event types" },
+  staticData: { trackingTitle: "Services" },
   validateSearch: (search: Record<string, unknown>) => ({
     dialog: search.dialog === "new" || search.dialog === "duplicate" ? search.dialog : undefined,
     duplicateEventTypeId: typeof search.duplicateEventTypeId === "string" ? search.duplicateEventTypeId : undefined
@@ -45,8 +45,8 @@ function EventTypesPage() {
 
   return (
     <SchedulingPageShell
-      title={t`Event types`}
-      subtitle={t`Configure different events for people to book on your calendar.`}
+      title={t`Services`}
+      subtitle={t`Configure the services clients can book with you.`}
       actions={
         <Button onClick={openCreateDialog}>
           <PlusIcon />

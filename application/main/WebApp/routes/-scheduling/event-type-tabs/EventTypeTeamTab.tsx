@@ -27,8 +27,8 @@ export function EventTypeTeamTab({ eventTypeId, value, onChange, error }: EventT
     <FormValidationContext.Provider value={error?.errors ?? {}}>
       <div className="grid gap-5">
         <EventTypeTabSection
-          title={<Trans>Round robin</Trans>}
-          description={<Trans>Distribute bookings across hosts based on weighting and lead history.</Trans>}
+          title={<Trans>Share bookings across the team</Trans>}
+          description={<Trans>Fine-tune how new bookings are shared across your team.</Trans>}
         >
           <div className="grid gap-4 md:grid-cols-2">
             <SwitchField
@@ -45,7 +45,7 @@ export function EventTypeTeamTab({ eventTypeId, value, onChange, error }: EventT
             />
             <SwitchField
               name="rescheduleWithSameRoundRobinHost"
-              label={t`Reschedule with same host`}
+              label={t`Repeat clients keep the same team member`}
               checked={teamAssignment.rescheduleWithSameRoundRobinHost}
               onCheckedChange={(rescheduleWithSameRoundRobinHost) =>
                 updateTeamAssignment({ rescheduleWithSameRoundRobinHost })
@@ -63,8 +63,8 @@ export function EventTypeTeamTab({ eventTypeId, value, onChange, error }: EventT
           </div>
         </EventTypeTabSection>
         <EventTypeTabSection
-          title={<Trans>Host segmentation</Trans>}
-          description={<Trans>Limit which hosts can be assigned using a segment expression.</Trans>}
+          title={<Trans>Team rules</Trans>}
+          description={<Trans>Limit which team members can be assigned using an advanced expression.</Trans>}
         >
           <div className="grid gap-4">
             <SwitchField
@@ -84,15 +84,15 @@ export function EventTypeTeamTab({ eventTypeId, value, onChange, error }: EventT
             />
             <SwitchField
               name="rrHostSubsetEnabled"
-              label={t`Host subset rotation`}
+              label={t`Rotate within a smaller team group`}
               checked={teamAssignment.rrHostSubsetEnabled}
               onCheckedChange={(rrHostSubsetEnabled) => updateTeamAssignment({ rrHostSubsetEnabled })}
             />
           </div>
         </EventTypeTabSection>
         <EventTypeTabSection
-          title={<Trans>Hosts</Trans>}
-          description={<Trans>Add, remove, and weight individual hosts and host groups.</Trans>}
+          title={<Trans>Team members</Trans>}
+          description={<Trans>Choose the people who can provide this service.</Trans>}
         >
           <EventTypeHostPicker
             eventTypeId={eventTypeId}

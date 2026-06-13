@@ -40,7 +40,7 @@ export function ConfirmBookingDialog({ booking, isOpen, onOpenChange, onComplete
               <Trans>Confirm booking?</Trans>
             </DialogTitle>
             <DialogDescription>
-              <Trans>This confirms the booking with {booking?.bookerName ?? t`this attendee`}.</Trans>
+              <Trans>This confirms the booking with {booking?.bookerName ?? t`this client`}.</Trans>
             </DialogDescription>
           </DialogHeader>
           <DialogBody>
@@ -85,7 +85,7 @@ export function RejectBookingDialog({ booking, isOpen, onOpenChange, onCompleted
               <Trans>Reject booking?</Trans>
             </DialogTitle>
             <DialogDescription>
-              <Trans>This rejects the pending booking with {booking?.bookerName ?? t`this attendee`}.</Trans>
+              <Trans>This rejects the pending booking with {booking?.bookerName ?? t`this client`}.</Trans>
             </DialogDescription>
           </DialogHeader>
           <DialogBody className="gap-4">

@@ -17,7 +17,7 @@ import { BookingAttendeesSection } from "./BookingAttendeesSection";
 import { DetailRow, SectionTitle } from "./BookingDetailsSheetParts";
 import { BookingHistorySection } from "./BookingHistorySection";
 import { BookingInternalNotesSection } from "./BookingInternalNotesSection";
-import { type BookingListItem, formatBookingDateRange, getStatusVariant } from "./bookingTypes";
+import { type BookingListItem, formatBookingDateRange, getBookingStatusWords, getStatusVariant } from "./bookingTypes";
 
 export function BookingDetailsSheet({
   booking,
@@ -56,7 +56,7 @@ function BookingDetailsSheetBody({ booking, onClose }: Readonly<{ booking: Booki
       <div className="flex flex-col gap-5 overflow-y-auto px-4 pb-4">
         <section className="rounded-md border p-4">
           <div className="mb-4 flex flex-wrap gap-2">
-            <Badge variant={getStatusVariant(booking.status)}>{booking.status}</Badge>
+            <Badge variant={getStatusVariant(booking.status)}>{getBookingStatusWords(booking.status)}</Badge>
             {booking.isRecurring && (
               <Badge variant="outline">
                 <Trans>Recurring</Trans>
@@ -150,7 +150,7 @@ function BookingDetailsSheetBody({ booking, onClose }: Readonly<{ booking: Booki
             <Trans>System</Trans>
           </SectionTitle>
           <span className="text-xs text-muted-foreground">
-            <Trans>Booking ID</Trans>
+            <Trans>Reference number</Trans>
           </span>
           <span className="mt-1 block text-sm break-all text-muted-foreground">{booking.id}</span>
         </section>

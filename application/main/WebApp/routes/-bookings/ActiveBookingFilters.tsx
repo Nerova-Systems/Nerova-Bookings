@@ -58,12 +58,10 @@ function getActiveBookingFilters(eventTypes: EventType[], search: BookingFilterS
   const eventType = eventTypes.find((item) => item.id === search.eventTypeId);
   return [
     search.search ? { key: "search", label: t`Search`, value: search.search } : null,
-    search.eventTypeId
-      ? { key: "eventType", label: t`Event type`, value: eventType?.title ?? search.eventTypeId }
-      : null,
-    search.attendeeName ? { key: "attendeeName", label: t`Attendee name`, value: search.attendeeName } : null,
-    search.attendeeEmail ? { key: "attendeeEmail", label: t`Attendee email`, value: search.attendeeEmail } : null,
-    search.bookingUid ? { key: "bookingUid", label: t`Booking ID`, value: search.bookingUid } : null,
+    search.eventTypeId ? { key: "eventType", label: t`Service`, value: eventType?.title ?? search.eventTypeId } : null,
+    search.attendeeName ? { key: "attendeeName", label: t`Client name`, value: search.attendeeName } : null,
+    search.attendeeEmail ? { key: "attendeeEmail", label: t`Client email`, value: search.attendeeEmail } : null,
+    search.bookingUid ? { key: "bookingUid", label: t`Reference number`, value: search.bookingUid } : null,
     search.dateFrom ? { key: "dateFrom", label: t`From`, value: search.dateFrom } : null,
     search.dateTo ? { key: "dateTo", label: t`To`, value: search.dateTo } : null,
     search.noShowOnly ? { key: "noShowOnly", label: t`No-show only`, value: t`Yes` } : null,

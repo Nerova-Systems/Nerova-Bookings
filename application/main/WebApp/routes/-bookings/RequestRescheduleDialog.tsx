@@ -42,7 +42,7 @@ export function RequestRescheduleDialog({
             <Trans>Request reschedule</Trans>
           </DialogTitle>
           <DialogDescription>
-            <Trans>The attendee will be asked to pick a new time. Add an optional message.</Trans>
+            <Trans>The client will be asked to pick a new time. Add an optional message.</Trans>
           </DialogDescription>
         </DialogHeader>
         {booking && (
@@ -93,7 +93,7 @@ function RequestRescheduleDialogBody({
             name="reason"
             autoFocus={true}
             value={reason}
-            placeholder={t`Let the attendee know why you need to reschedule`}
+            placeholder={t`Let the client know why you need to reschedule`}
             onChange={(event) => setReason(event.currentTarget.value)}
           />
         </div>

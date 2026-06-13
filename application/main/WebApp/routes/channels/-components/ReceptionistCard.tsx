@@ -6,7 +6,13 @@ import { Skeleton } from "@repo/ui/components/Skeleton";
 import { Switch } from "@repo/ui/components/Switch";
 import { useState } from "react";
 
-import { api, JobRunStatus, queryClient } from "@/shared/lib/api/client";
+import { api, queryClient } from "@/shared/lib/api/client";
+import {
+  useAwaitingReceptionistJobRunsQuery,
+  useCompletedReceptionistJobRunsQuery,
+  useOpenReceptionistEscalationsQuery,
+  useReceptionistSettingsQuery
+} from "@/shared/lib/receptionist/queries";
 
 import { ReceptionistFineTuneDialog } from "./ReceptionistFineTuneDialog";
 import { ReceptionistHandledFeed } from "./ReceptionistHandledFeed";
@@ -30,16 +36,10 @@ function ReceptionistCardSkeleton() {
 
 export function ReceptionistCard() {
   const [isFineTuneOpen, setIsFineTuneOpen] = useState(false);
-  const settingsQuery = api.useQuery("get", "/api/main/receptionist/settings");
-  const escalationsQuery = api.useQuery("get", "/api/main/receptionist/escalations", {
-    params: { query: { OpenOnly: true } }
-  });
-  const awaitingJobRunsQuery = api.useQuery("get", "/api/main/autonomy/job-runs", {
-    params: { query: { Status: JobRunStatus.AwaitingApproval, Limit: 5 } }
-  });
-  const completedJobRunsQuery = api.useQuery("get", "/api/main/autonomy/job-runs", {
-    params: { query: { Status: JobRunStatus.Completed, Limit: 8 } }
-  });
+  const settingsQuery = useReceptionistSettingsQuery();
+  const escalationsQuery = useOpenReceptionistEscalationsQuery();
+  const awaitingJobRunsQuery = useAwaitingReceptionistJobRunsQuery(5);
+  const completedJobRunsQuery = useCompletedReceptionistJobRunsQuery(8);
   const updateSettingsMutation = api.useMutation("put", "/api/main/receptionist/settings", {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: settingsQueryKey })
   });
@@ -63,36 +63,39 @@ export function ReceptionistCard() {
               <CardTitle>{enabledMessage(settings.isEnabled)}</CardTitle>
             </div>
             <CardDescription>
-              <Trans>We answer, suggest next steps, and bring you in only when a client needs your call.</Trans>
+              <Trans>
+                This is the main switch for your AI employee. When it is on, Nerova answers clients and brings you in
+                only when a person needs your call.
+              </Trans>
             </CardDescription>
           </div>
-          <Switch
-            checked={settings.isEnabled}
-            disabled={updateSettingsMutation.isPending}
-            aria-label={t`Turn AI receptionist on or off`}
-            onCheckedChange={(isEnabled) => {
-              const previous = settingsQuery.data;
-              queryClient.setQueryData(settingsQueryKey, settingsBody(settings, isEnabled));
-              updateSettingsMutation.mutate(
-                { body: settingsBody(settings, isEnabled) },
-                {
-                  onError: () => {
-                    if (previous) {
-                      queryClient.setQueryData(settingsQueryKey, previous);
+          <div className="flex shrink-0 items-center gap-3">
+            <Button variant="outline" onClick={() => setIsFineTuneOpen(true)}>
+              <Trans>Fine-tune</Trans>
+            </Button>
+            <Switch
+              checked={settings.isEnabled}
+              disabled={updateSettingsMutation.isPending}
+              aria-label={t`Turn AI receptionist on or off`}
+              onCheckedChange={(isEnabled) => {
+                const previous = settingsQuery.data;
+                queryClient.setQueryData(settingsQueryKey, settingsBody(settings, isEnabled));
+                updateSettingsMutation.mutate(
+                  { body: settingsBody(settings, isEnabled) },
+                  {
+                    onError: () => {
+                      if (previous) {
+                        queryClient.setQueryData(settingsQueryKey, previous);
+                      }
                     }
                   }
-                }
-              );
-            }}
-          />
+                );
+              }}
+            />
+          </div>
         </div>
       </CardHeader>
       <CardContent className="flex flex-col gap-6">
-        <div className="flex justify-end">
-          <Button variant="outline" onClick={() => setIsFineTuneOpen(true)}>
-            <Trans>Fine-tune</Trans>
-          </Button>
-        </div>
         <ReceptionistNeedsYouBlock
           escalations={escalationsQuery.data?.escalations ?? []}
           openCount={escalationsQuery.data?.openCount ?? 0}

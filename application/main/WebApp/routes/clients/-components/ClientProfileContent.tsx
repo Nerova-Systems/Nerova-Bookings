@@ -8,6 +8,8 @@ import { HashIcon } from "lucide-react";
 
 import type { components } from "@/shared/lib/api/client";
 
+import { ClientVerticalFieldsCard } from "./ClientVerticalFieldsCard";
+
 type ClientDetails = components["schemas"]["ClientDetails"];
 
 export function ClientProfileContent({ client }: Readonly<{ client: ClientDetails }>) {
@@ -65,6 +67,8 @@ export function ClientProfileContent({ client }: Readonly<{ client: ClientDetail
       </div>
 
       <Separator className="mb-4" />
+
+      <ClientVerticalFieldsCard client={client} />
 
       {/* Visit Details */}
       <div className="mb-4">

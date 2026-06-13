@@ -48,36 +48,36 @@ const viewports = [
 const eventTypeEditorViewports = viewports.filter((viewport) => viewport.name !== "tablet");
 
 for (const viewport of eventTypeEditorViewports) {
-  test.describe(`@smoke event types list visual parity ${viewport.name}`, () => {
+  test.describe(`@smoke services list visual parity ${viewport.name}`, () => {
     test.describe.configure({ mode: "serial" });
     test.use({ viewport: { width: viewport.width, height: viewport.height } });
 
     for (const state of eventTypesListStates) {
-      test(`captures event types list ${state}`, async ({ page }, testInfo) => {
+      test(`captures services list ${state}`, async ({ page }, testInfo) => {
         await page.goto(`/cal-com-ui-parity?surface=event-types-list&state=${state}`);
         await expect(page.getByTestId("cal-com-ui-parity-fixture")).toBeVisible();
         await expect(page.getByTestId("event-types-list-layout")).toBeVisible();
-        await expect(page.getByRole("heading", { name: "Event types" })).toBeVisible();
+        await expect(page.getByRole("heading", { name: "Services" })).toBeVisible();
         await expect(page.getByText("Configure different events for people to book on your calendar.")).toBeVisible();
         await expect(page.getByRole("button", { name: "New" })).toBeVisible();
 
         if (state === "empty") {
-          await expect(page.getByText("No event types yet")).toBeVisible();
+          await expect(page.getByText("No services yet")).toBeVisible();
         } else if (state === "loading") {
-          await expect(page.getByText("Loading event types...")).toBeVisible();
+          await expect(page.getByText("Loading services...")).toBeVisible();
         } else {
           await expect(page.getByRole("textbox", { name: "Search" })).toBeVisible();
           await expect(page.getByRole("heading", { name: "Product Consultation" })).toBeVisible();
           await expect(page.getByText("/visual/product-consultation")).toBeVisible();
           await expect(page.getByText("30m")).toBeVisible();
-          await expect(page.getByLabel("Hide event type from profile").first()).toBeVisible();
+          await expect(page.getByLabel("Hide service from profile").first()).toBeVisible();
           if (viewport.name !== "mobile") {
             await expect(page.getByLabel("Preview booking page").first()).toBeVisible();
           }
           await expect(
             viewport.name === "mobile"
-              ? page.getByLabel("Event type actions").last()
-              : page.getByLabel("Event type actions").first()
+              ? page.getByLabel("Service actions").last()
+              : page.getByLabel("Service actions").first()
           ).toBeVisible();
         }
 
@@ -88,12 +88,12 @@ for (const viewport of eventTypeEditorViewports) {
 }
 
 for (const viewport of viewports) {
-  test.describe(`@smoke public booker visual parity ${viewport.name}`, () => {
+  test.describe(`@smoke public client visual parity ${viewport.name}`, () => {
     test.describe.configure({ mode: "serial" });
     test.use({ viewport: { width: viewport.width, height: viewport.height } });
 
     for (const state of publicBookerStates) {
-      test(`captures public booker ${state}`, async ({ page }, testInfo) => {
+      test(`captures public client ${state}`, async ({ page }, testInfo) => {
         await page.route("**/api/public/bookings", async (route) => {
           await route.fulfill({
             status: 200,
@@ -112,7 +112,7 @@ for (const viewport of viewports) {
         if (state === "unavailable") {
           await expect(page.getByText("Booking page unavailable")).toBeVisible();
         } else {
-          await expect(page.getByTestId("booker-container")).toBeVisible();
+          await expect(page.getByTestId("client-container")).toBeVisible();
         }
 
         if (state === "success") {
@@ -127,30 +127,21 @@ for (const viewport of viewports) {
 }
 
 for (const viewport of eventTypeEditorViewports) {
-  test.describe(`@smoke event type editor visual parity ${viewport.name}`, () => {
+  test.describe(`@smoke service editor visual parity ${viewport.name}`, () => {
     test.describe.configure({ mode: "serial" });
     test.use({ viewport: { width: viewport.width, height: viewport.height } });
 
     for (const state of eventTypeEditorStates) {
-      test(`captures event type editor ${state}`, async ({ page }, testInfo) => {
+      test(`captures service editor ${state}`, async ({ page }, testInfo) => {
         await mockEventTypeSideEffectApis(page);
         await page.goto(`/cal-com-ui-parity?surface=event-type-editor&state=${state}`);
         await expect(page.getByTestId("cal-com-ui-parity-fixture")).toBeVisible();
         await expect(page.getByTestId("event-type-layout")).toBeVisible();
         await expect(page.getByRole("heading", { name: "Product Consultation" })).toBeVisible();
-        for (const tabName of [
-          "Basics",
-          "Availability",
-          "Limits",
-          "Advanced",
-          "Recurring",
-          "Apps",
-          "Workflows",
-          "Webhooks"
-        ]) {
-          await expect(page.getByRole("button", { name: new RegExp(tabName) })).toBeVisible();
-        }
+        await expect(page.getByText("Service basics")).toBeVisible();
+        await expect(page.getByRole("button", { name: /Advanced settings/ })).toBeVisible();
         if (state === "advanced") {
+          await page.getByRole("button", { name: /Advanced settings/ }).click();
           await expect(page.getByText("Calendar event name")).toBeVisible();
           await expect(page.getByText("Add to calendar")).toBeVisible();
           await expect(page.getByText("Layout")).toBeVisible();
@@ -159,7 +150,7 @@ for (const viewport of eventTypeEditorViewports) {
           await expect(page.getByText("Disable rescheduling", { exact: true })).toBeVisible();
         }
         if (viewport.name === "mobile") {
-          await expect(page.getByRole("button", { name: "Event type actions" })).toBeVisible();
+          await expect(page.getByRole("button", { name: "Service actions" })).toBeVisible();
         }
 
         await captureScreenshot(page, testInfo, "wave-1-14", `event-type-editor-${state}-${viewport.name}.png`);
@@ -201,7 +192,7 @@ for (const viewport of viewports) {
 
 async function submitPublicBookerForm(page: Page) {
   await page.getByRole("textbox", { name: "Name" }).fill("Visual Booker");
-  await page.getByRole("textbox", { name: "Email" }).fill("visual-booker@example.com");
+  await page.getByRole("textbox", { name: "Email" }).fill("visual-client@example.com");
   await page.getByRole("button", { name: "Confirm booking" }).click();
 }
 
@@ -249,7 +240,7 @@ async function mockEventTypeSideEffectApis(page: Page) {
             id: "wf_visual_confirmation",
             name: "Booking confirmation",
             scheduledOffsetMinutes: null,
-            steps: [{ kind: "email", recipient: "booker", subject: "Your booking is confirmed", body: null }],
+            steps: [{ kind: "email", recipient: "client", subject: "Your booking is confirmed", body: null }],
             trigger: "BOOKING_CONFIRMED"
           }
         ]

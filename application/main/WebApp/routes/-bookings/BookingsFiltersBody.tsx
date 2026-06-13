@@ -58,14 +58,14 @@ export function BookingsFiltersBody({
                 aria-label={t`Search bookings`}
                 className="pl-9"
                 value={draftSearch.search ?? ""}
-                placeholder={t`Event, attendee, email, or booking ID`}
+                placeholder={t`Event, client, email, or reference number`}
                 onChange={(event) => updateSearch({ search: event.currentTarget.value || undefined })}
               />
             </div>
           </div>
           <div className="flex flex-col gap-2">
             <Label htmlFor="booking-event-type">
-              <Trans>Event type</Trans>
+              <Trans>Service</Trans>
             </Label>
             <Select
               value={draftSearch.eventTypeId ?? "all"}
@@ -74,18 +74,18 @@ export function BookingsFiltersBody({
                 updateSearch({ eventTypeId: selectedValue === "all" ? undefined : selectedValue });
               }}
             >
-              <SelectTrigger id="booking-event-type" className="w-full" aria-label={t`Event type`}>
+              <SelectTrigger id="booking-event-type" className="w-full" aria-label={t`Service`}>
                 <SelectValue>
                   {(value: string) =>
                     value === "all"
-                      ? t`All event types`
-                      : (eventTypes.find((eventType) => eventType.id === value)?.title ?? t`Event type`)
+                      ? t`All services`
+                      : (eventTypes.find((eventType) => eventType.id === value)?.title ?? t`Service`)
                   }
                 </SelectValue>
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">
-                  <Trans>All event types</Trans>
+                  <Trans>All services</Trans>
                 </SelectItem>
                 {eventTypes.map((eventType) => (
                   <SelectItem key={eventType.id} value={eventType.id}>
@@ -97,19 +97,19 @@ export function BookingsFiltersBody({
           </div>
           <TextFilter
             id="booking-attendee-name"
-            label={t`Attendee name`}
+            label={t`Client name`}
             value={draftSearch.attendeeName}
             onChange={(value) => updateSearch({ attendeeName: value })}
           />
           <TextFilter
             id="booking-attendee-email"
-            label={t`Attendee email`}
+            label={t`Client email`}
             value={draftSearch.attendeeEmail}
             onChange={(value) => updateSearch({ attendeeEmail: value })}
           />
           <TextFilter
             id="booking-uid"
-            label={t`Booking ID`}
+            label={t`Reference number`}
             value={draftSearch.bookingUid}
             onChange={(value) => updateSearch({ bookingUid: value })}
           />

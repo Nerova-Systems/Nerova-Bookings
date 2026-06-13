@@ -48,13 +48,13 @@ export function EventTypeWebhooksTab({ eventTypeId }: EventTypeWebhooksTabProps)
   });
   const deleteMutation = api.useMutation("delete", "/api/event-types/{eventTypeId}/webhooks/{id}", {
     onSuccess: () => {
-      toast.success(t`Webhook deleted`);
+      toast.success(t`Developer notification deleted`);
       void queryClient.invalidateQueries();
     }
   });
   const testMutation = api.useMutation("post", "/api/event-types/{eventTypeId}/webhooks/{id}/test", {
     onSuccess: () => {
-      toast.success(t`Test webhook queued`);
+      toast.success(t`Test notification queued`);
       void queryClient.invalidateQueries();
     }
   });
@@ -66,25 +66,25 @@ export function EventTypeWebhooksTab({ eventTypeId }: EventTypeWebhooksTabProps)
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="min-w-0">
           <h2>
-            <Trans>Webhooks</Trans>
+            <Trans>For developers</Trans>
           </h2>
           <p className="mt-1 text-sm text-muted-foreground">
-            <Trans>Send Cal.com-compatible booking lifecycle payloads to external systems.</Trans>
+            <Trans>Notify external systems when bookings change.</Trans>
           </p>
         </div>
         <Button type="button" size="sm" onClick={() => setEditingWebhook(null)}>
           <PlusIcon />
-          <Trans>Add webhook</Trans>
+          <Trans>Add notification</Trans>
         </Button>
       </div>
       <GeneralApiErrors error={deleteMutation.error ?? testMutation.error} />
       {isLoading ? (
         <div className="rounded-md border p-4 text-sm text-muted-foreground">
-          <Trans>Loading webhooks...</Trans>
+          <Trans>Loading developer notifications...</Trans>
         </div>
       ) : webhooks.length === 0 ? (
         <div className="rounded-md border p-4 text-sm text-muted-foreground">
-          <Trans>No webhooks configured.</Trans>
+          <Trans>No developer notifications configured.</Trans>
         </div>
       ) : (
         <div className="grid gap-3">
@@ -149,10 +149,14 @@ function WebhookDialog({
 }>) {
   const isOpen = webhook !== undefined;
   return (
-    <DirtyDialog open={isOpen} onOpenChange={(open) => !open && onOpenChange(undefined)} trackingTitle={t`Webhook`}>
+    <DirtyDialog
+      open={isOpen}
+      onOpenChange={(open) => !open && onOpenChange(undefined)}
+      trackingTitle={t`For developers`}
+    >
       <DialogContent className="sm:w-dialog-md">
         <DialogHeader>
-          <DialogTitle>{webhook ? <Trans>Edit webhook</Trans> : <Trans>Add webhook</Trans>}</DialogTitle>
+          <DialogTitle>{webhook ? <Trans>Edit notification</Trans> : <Trans>Add notification</Trans>}</DialogTitle>
         </DialogHeader>
         {isOpen && (
           <WebhookDialogBody eventTypeId={eventTypeId} webhook={webhook} onClose={() => onOpenChange(undefined)} />
@@ -175,14 +179,14 @@ function WebhookDialogBody({
   const [payload, setPayload] = useState<WebhookPayload>(() => webhookToPayload(webhook));
   const createMutation = api.useMutation("post", "/api/event-types/{eventTypeId}/webhooks", {
     onSuccess: () => {
-      toast.success(t`Webhook saved`);
+      toast.success(t`Developer notification saved`);
       void queryClient.invalidateQueries();
       onClose();
     }
   });
   const updateMutation = api.useMutation("put", "/api/event-types/{eventTypeId}/webhooks/{id}", {
     onSuccess: () => {
-      toast.success(t`Webhook saved`);
+      toast.success(t`Developer notification saved`);
       void queryClient.invalidateQueries();
       onClose();
     }
@@ -254,7 +258,7 @@ function WebhookDialogBody({
           <Trans>Cancel</Trans>
         </DialogClose>
         <Button type="submit" isPending={mutation.isPending}>
-          {mutation.isPending ? <Trans>Saving...</Trans> : <Trans>Save webhook</Trans>}
+          {mutation.isPending ? <Trans>Saving...</Trans> : <Trans>Save notification</Trans>}
         </Button>
       </DialogFooter>
     </DialogForm>

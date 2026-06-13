@@ -138,7 +138,7 @@ function BookingBulkActionSheet({
             <Textarea
               autoFocus={true}
               value={reason}
-              placeholder={t`Let attendees know why these bookings are being cancelled`}
+              placeholder={t`Let clients know why these bookings are being cancelled`}
               onChange={(event) => setReason(event.currentTarget.value)}
             />
           )}

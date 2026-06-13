@@ -41,7 +41,7 @@ export function WhatsAppWebhookActivityPanel() {
       <Card>
         <CardHeader>
           <CardTitle>
-            <Trans>Webhook activity</Trans>
+            <Trans>Activity</Trans>
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -61,7 +61,7 @@ export function WhatsAppWebhookActivityPanel() {
     <Card>
       <CardHeader>
         <CardTitle>
-          <Trans>Webhook activity</Trans>
+          <Trans>Activity</Trans>
         </CardTitle>
       </CardHeader>
       <CardContent>
@@ -72,13 +72,10 @@ export function WhatsAppWebhookActivityPanel() {
                 <RadioIcon />
               </EmptyMedia>
               <EmptyTitle>
-                <Trans>No webhooks received</Trans>
+                <Trans>No activity yet</Trans>
               </EmptyTitle>
               <EmptyDescription>
-                <Trans>
-                  Meta has not delivered any webhooks to this server yet. Ensure the webhook URL and verify token are
-                  registered in the Meta app dashboard, and that the WhatsApp product subscription is active.
-                </Trans>
+                <Trans>New client message activity will appear here as soon as WhatsApp sends it to Nerova.</Trans>
               </EmptyDescription>
             </EmptyHeader>
           </Empty>

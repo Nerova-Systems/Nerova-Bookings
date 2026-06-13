@@ -78,7 +78,7 @@ export function DatePickerSection({
   return (
     <section
       className="flex min-w-0 flex-col border-t p-5 md:w-(--booker-main-width) md:border-t-0 md:border-l md:px-5 md:py-3"
-      data-testid="booker-date-picker"
+      data-testid="client-date-picker"
     >
       <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between md:hidden">
         <div className="flex flex-col gap-1">
@@ -123,7 +123,7 @@ export function TimeSlotsSection({
   return (
     <aside
       className="fixed inset-0 z-50 overflow-auto bg-background p-8 md:static md:z-auto md:w-(--booker-timeslots-width) md:overflow-visible md:border-l md:px-5 md:py-3"
-      data-testid="booker-timeslots"
+      data-testid="client-timeslots"
     >
       <div className="mb-6 flex items-start justify-between gap-4 md:hidden">
         <div className="flex min-w-0 flex-col gap-1">

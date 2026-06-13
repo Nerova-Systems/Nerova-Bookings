@@ -9,7 +9,7 @@ import { api } from "@/shared/lib/api/client";
 import { SchedulingPageShell } from "../-scheduling/SchedulingPageShell";
 
 export const Route = createFileRoute("/availability/troubleshoot")({
-  staticData: { trackingTitle: "Availability troubleshoot" },
+  staticData: { trackingTitle: "Hours check" },
   component: AvailabilityTroubleshootPage
 });
 
@@ -22,23 +22,23 @@ function AvailabilityTroubleshootPage() {
 
   return (
     <SchedulingPageShell
-      title={t`Availability troubleshoot`}
+      title={t`Hours check`}
       subtitle={t`Review schedule setup issues that can prevent clients from finding bookable times.`}
       actions={
         <Button type="button" variant="outline" onClick={() => navigate({ to: "/availability" })}>
           <ArrowLeftIcon />
-          <Trans>Back to availability</Trans>
+          <Trans>Back to hours</Trans>
         </Button>
       }
     >
       <div className="rounded-md border p-6">
         <h2>
-          <Trans>Schedule checks</Trans>
+          <Trans>Hours checks</Trans>
         </h2>
         <div className="mt-4 flex flex-col gap-3 text-sm">
           <CheckRow label={t`At least one schedule exists`} passed={schedules.length > 0} />
-          <CheckRow label={t`Exactly one default schedule exists`} passed={defaultSchedules.length === 1} />
-          <CheckRow label={t`Every schedule has weekly availability`} passed={schedulesWithoutWindows.length === 0} />
+          <CheckRow label={t`One default hours schedule is set`} passed={defaultSchedules.length === 1} />
+          <CheckRow label={t`Every schedule has weekly hours`} passed={schedulesWithoutWindows.length === 0} />
         </div>
       </div>
     </SchedulingPageShell>

@@ -41,7 +41,7 @@ export function AppStoreCard({ app, allApps, onDetails }: Readonly<AppStoreCardP
     <div className="relative flex h-64 flex-col rounded-md border border-border bg-card p-5">
       <div className="absolute top-4 right-4 flex flex-wrap justify-end gap-1">
         {isInstalled && (
-          <Badge className="flex items-center gap-1 border-emerald-500/20 bg-emerald-500/10 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400">
+          <Badge className="flex items-center gap-1 border-primary/20 bg-primary/10 text-primary">
             <CheckCircle2Icon className="size-3" />
             <Trans>Installed</Trans>
           </Badge>

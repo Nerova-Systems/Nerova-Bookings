@@ -93,7 +93,7 @@ async function createEventType(page: Page, title: string, slug: string, duration
   await page.goto("/event-types");
   await page.getByRole("button", { name: "New" }).click();
   await page.getByRole("textbox", { name: "Title" }).fill(title);
-  await page.getByRole("textbox", { name: "Slug" }).fill(slug);
+  await page.getByRole("textbox", { name: "Link name" }).fill(slug);
   await page.getByRole("textbox", { name: "Duration", exact: true }).fill(duration);
   await blurActiveElement(page);
   await page.getByRole("button", { name: "Continue" }).click();
@@ -105,10 +105,10 @@ async function openEventTypeDuplicateDialog(page: Page, title: string) {
   await page.goto("/event-types");
   await page.getByRole("textbox", { name: "Search" }).fill(title);
   await expect(page.getByRole("link").filter({ hasText: title }).first()).toBeVisible();
-  await page.getByRole("button", { name: "Event type actions" }).first().click();
+  await page.getByRole("button", { name: "Service actions" }).first().click();
   await page.getByRole("menuitem", { name: "Duplicate" }).click();
 
-  await expect(page.getByRole("dialog", { name: "Duplicate event type" })).toBeVisible();
+  await expect(page.getByRole("dialog", { name: "Duplicate service" })).toBeVisible();
 }
 
 async function deleteCurrentEventType(page: Page, title: string) {
@@ -116,7 +116,7 @@ async function deleteCurrentEventType(page: Page, title: string) {
   try {
     await deleteButton.click({ timeout: 2_000 });
   } catch {
-    await page.getByRole("button", { name: "Event type actions" }).first().click();
+    await page.getByRole("button", { name: "Service actions" }).first().click();
     await page.getByRole("menuitem", { name: "Delete" }).click();
   }
   const deleteDialog = page.getByRole("alertdialog");
@@ -124,7 +124,7 @@ async function deleteCurrentEventType(page: Page, title: string) {
   await expect(deleteDialog.getByText(`This removes the booking page for ${title}.`)).toBeVisible();
   await deleteDialog.getByRole("button", { name: "Delete" }).click();
 
-  await expect(page.getByRole("heading", { name: "Event types" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Services" })).toBeVisible();
 }
 
 async function seedCoreConnectorFixtures(page: Page, busyStartTime: Date, busyEndTime: Date) {
@@ -154,13 +154,13 @@ test.describe("@smoke", () => {
     const eventTitle = `Side effects event ${unique}`;
     const eventSlug = `side-effects-event-${unique}`;
 
-    await step("Create availability schedule and event type")(async () => {
+    await step("Create hours schedule and service")(async () => {
       await enableSideEffectFlags(browser, ownerPage);
       await ownerPage.reload();
       await createSchedule(ownerPage, scheduleName);
       await expectToastMessage(context, "Schedule created");
       await createEventType(ownerPage, eventTitle, eventSlug, "30");
-      await expectToastMessage(context, "Event type created");
+      await expectToastMessage(context, "Service created");
     })();
 
     await step("Create, edit, and delete workflow")(async () => {
@@ -187,7 +187,7 @@ test.describe("@smoke", () => {
     })();
 
     await step("Validate, create, test, and delete webhook")(async () => {
-      await ownerPage.getByRole("tab", { name: "Webhooks" }).click();
+      await ownerPage.getByRole("tab", { name: "For developers" }).click();
       await expect(ownerPage.getByText("Recent deliveries")).toBeVisible();
       await expect(ownerPage.getByText("No delivery attempts yet.")).toBeVisible();
       await ownerPage.getByRole("button", { name: "Add webhook" }).click();
@@ -210,20 +210,20 @@ test.describe("@smoke", () => {
       await expect(ownerPage.getByText("No webhooks configured.")).toBeVisible();
     })();
 
-    await step("Delete event type & verify cleanup completes")(async () => {
+    await step("Delete service & verify cleanup completes")(async () => {
       await deleteCurrentEventType(ownerPage, eventTitle);
-      await expectToastMessage(context, "Event type deleted");
+      await expectToastMessage(context, "Service deleted");
     })();
   });
 
   /**
-   * Covers the core owner event type workflow:
-   * - Create availability schedule and event type through dialogs
+   * Covers the core owner service workflow:
+   * - Create hours schedule and service through dialogs
    * - Edit setup, availability, limits, advanced, and recurring editor tabs
    * - Reload persisted detail state
-   * - Duplicate and delete the duplicate, then clean up the original event type
+   * - Duplicate and delete the duplicate, then clean up the original service
    */
-  test("should create, edit, persist, duplicate, and delete event types", async ({ browser, ownerPage }) => {
+  test("should create, edit, persist, duplicate, and delete services", async ({ browser, ownerPage }) => {
     const context = createTestContext(ownerPage);
     const unique = Date.now();
     const scheduleName = `Event Types Smoke ${unique}`;
@@ -253,16 +253,16 @@ test.describe("@smoke", () => {
       ]);
     })();
 
-    await step("Create availability schedule through dialog & verify schedule detail opens")(async () => {
+    await step("Create hours schedule through dialog & verify schedule detail opens")(async () => {
       await createSchedule(ownerPage, scheduleName);
 
       await expectToastMessage(context, "Schedule created");
     })();
 
-    await step("Create event type through dialog & verify detail editor opens")(async () => {
+    await step("Create service through dialog & verify detail editor opens")(async () => {
       await createEventType(ownerPage, originalTitle, originalSlug, "30");
 
-      await expectToastMessage(context, "Event type created");
+      await expectToastMessage(context, "Service created");
       await expect(ownerPage.getByTestId("event-type-layout")).toBeVisible();
       await expect(ownerPage.locator('[data-testid="event-type-action-bar"]:visible')).toBeVisible();
       await expect(ownerPage.getByTestId("event-type-vertical-tabs")).toBeVisible();
@@ -271,12 +271,12 @@ test.describe("@smoke", () => {
     // === EDIT EVENT TYPE ===
     await step("Update setup fields & verify setup draft changes are visible")(async () => {
       await ownerPage.getByRole("textbox", { name: "Title" }).fill(updatedTitle);
-      await ownerPage.getByRole("textbox", { name: "Slug" }).fill(updatedSlug);
+      await ownerPage.getByRole("textbox", { name: "Link name" }).fill(updatedSlug);
       await ownerPage.getByRole("textbox", { name: "Description" }).fill("A focused strategy session.");
       await ownerPage.getByRole("textbox", { name: "Duration", exact: true }).fill("45");
       await ownerPage.getByRole("textbox", { name: "Duration options" }).fill("45, 60");
       await blurActiveElement(ownerPage);
-      await selectOption(ownerPage.getByLabel("Booker layout"), ownerPage, "Week");
+      await selectOption(ownerPage.getByLabel("Client page layout"), ownerPage, "Week");
       await selectOption(ownerPage.getByLabel("Location type"), ownerPage, "Phone");
       await ownerPage.getByRole("textbox", { name: "Primary location" }).fill("+1 555 0100");
       await ownerPage.getByRole("textbox", { name: "Location list" }).fill("phone: +1 555 0100");
@@ -285,8 +285,8 @@ test.describe("@smoke", () => {
       await expect(ownerPage.getByRole("textbox", { name: "Primary location" })).toHaveValue("+1 555 0100");
     })();
 
-    await step("Update availability schedule & verify schedule summary follows selection")(async () => {
-      await ownerPage.getByRole("tab", { name: "Availability" }).click();
+    await step("Update hours schedule & verify schedule summary follows selection")(async () => {
+      await ownerPage.getByRole("tab", { name: "Hours" }).click();
       await selectOption(ownerPage.getByLabel("Schedule"), ownerPage, scheduleName);
 
       await expect(ownerPage.getByText("Schedule summary")).toBeVisible();
@@ -299,8 +299,8 @@ test.describe("@smoke", () => {
       await ownerPage.getByRole("textbox", { name: "Notice" }).fill("120");
       await ownerPage.getByRole("textbox", { name: "Rolling window" }).fill("30");
       await ownerPage.getByRole("textbox", { name: "Bookings per day" }).fill("4");
-      await ownerPage.getByRole("textbox", { name: "Before buffer" }).fill("10");
-      await ownerPage.getByRole("textbox", { name: "After buffer" }).fill("5");
+      await ownerPage.getByRole("textbox", { name: "Breathing room before" }).fill("10");
+      await ownerPage.getByRole("textbox", { name: "Breathing room after" }).fill("5");
       await blurActiveElement(ownerPage);
 
       await expect(ownerPage.getByRole("textbox", { name: "Slot interval" })).toHaveValue("15");
@@ -334,7 +334,7 @@ test.describe("@smoke", () => {
         .getByRole("checkbox", { name: "Primary calendar Google Calendar - owner.google@example.test" })
         .click();
       await selectOption(
-        ownerPage.getByLabel("Destination calendar"),
+        ownerPage.getByLabel("Where appointments are saved"),
         ownerPage,
         "Focus calendar (Google Calendar - owner.google@example.test)"
       );
@@ -358,15 +358,15 @@ test.describe("@smoke", () => {
       await blurActiveElement(ownerPage);
       await ownerPage.getByRole("button", { name: "Save" }).click();
 
-      await expectToastMessage(context, "Event type updated");
+      await expectToastMessage(context, "Service updated");
     })();
 
-    await step("Reload event type detail & verify persisted values are visible")(async () => {
+    await step("Reload service detail & verify persisted values are visible")(async () => {
       await ownerPage.reload();
       await ownerPage.getByRole("tab", { name: "Basics" }).click();
 
       await expect(ownerPage.getByRole("textbox", { name: "Title" })).toHaveValue(updatedTitle);
-      await expect(ownerPage.getByRole("textbox", { name: "Slug" })).toHaveValue(updatedSlug);
+      await expect(ownerPage.getByRole("textbox", { name: "Link name" })).toHaveValue(updatedSlug);
       await expect(ownerPage.getByRole("textbox", { name: "Duration", exact: true })).toHaveValue("45");
       await ownerPage.getByRole("tab", { name: "Advanced" }).click();
       await expect(ownerPage.getByRole("textbox", { name: "Private link" })).toHaveValue("vip");
@@ -374,7 +374,7 @@ test.describe("@smoke", () => {
       await expect(
         ownerPage.getByRole("checkbox", { name: "Primary calendar Google Calendar - owner.google@example.test" })
       ).toBeChecked();
-      await expect(ownerPage.getByLabel("Destination calendar")).toContainText(
+      await expect(ownerPage.getByLabel("Where appointments are saved")).toContainText(
         "Focus calendar (Google Calendar - owner.google@example.test)"
       );
       await expect(ownerPage.getByLabel("Default conferencing")).toContainText("Zoom (owner.zoom@example.test)");
@@ -400,41 +400,41 @@ test.describe("@smoke", () => {
 
       await ownerPage.goto(`/${profile.handle}/${updatedSlug}?${search.toString()}`);
 
-      await expect(ownerPage.getByTestId("booker-timeslots")).toBeVisible();
+      await expect(ownerPage.getByTestId("client-timeslots")).toBeVisible();
       await expect(ownerPage.getByRole("button", { name: "09:00" })).not.toBeVisible();
       await expect(ownerPage.getByText(googleCredentialId)).not.toBeVisible();
     })();
 
     // === DUPLICATE AND DELETE ===
-    await step("Duplicate event type from list & verify duplicate detail opens")(async () => {
+    await step("Duplicate service from list & verify duplicate detail opens")(async () => {
       await openEventTypeDuplicateDialog(ownerPage, updatedTitle);
       await ownerPage.getByRole("textbox", { name: "Title" }).fill(duplicateTitle);
-      await ownerPage.getByRole("textbox", { name: "Slug" }).fill(duplicateSlug);
+      await ownerPage.getByRole("textbox", { name: "Link name" }).fill(duplicateSlug);
       await ownerPage.getByRole("button", { name: "Create duplicate" }).click();
 
-      await expectToastMessage(context, "Event type duplicated");
+      await expectToastMessage(context, "Service duplicated");
       await expect(ownerPage.getByRole("textbox", { name: "Title" })).toHaveValue(duplicateTitle);
     })();
 
-    await step("Delete duplicated event type & verify list returns")(async () => {
+    await step("Delete duplicated service & verify list returns")(async () => {
       await deleteCurrentEventType(ownerPage, duplicateTitle);
 
-      await expectToastMessage(context, "Event type deleted");
+      await expectToastMessage(context, "Service deleted");
     })();
 
-    await step("Delete original event type & verify cleanup completes")(async () => {
+    await step("Delete original service & verify cleanup completes")(async () => {
       await ownerPage.getByRole("textbox", { name: "Search" }).fill(updatedTitle);
       await ownerPage.getByRole("link").filter({ hasText: updatedTitle }).first().click();
       await deleteCurrentEventType(ownerPage, updatedTitle);
 
-      await expectToastMessage(context, "Event type deleted");
+      await expectToastMessage(context, "Service deleted");
     })();
   });
 });
 
 test.describe("@comprehensive", () => {
   /**
-   * Covers event type hardening surfaces:
+   * Covers service hardening surfaces:
    * - Duplicate slug validation through the duplicate dialog
    * - Mobile editor tab navigation and save action
    * - Apps placeholder tab rendering without unavailable API calls
@@ -449,23 +449,23 @@ test.describe("@comprehensive", () => {
     const duplicateSlug = `comprehensive-duplicate-${unique}`;
 
     // === SETUP ===
-    await step("Create availability schedule through dialog & verify schedule detail opens")(async () => {
+    await step("Create hours schedule through dialog & verify schedule detail opens")(async () => {
       await createSchedule(ownerPage, scheduleName);
 
       await expectToastMessage(context, "Schedule created");
     })();
 
-    await step("Create event type through dialog & verify detail editor opens")(async () => {
+    await step("Create service through dialog & verify detail editor opens")(async () => {
       await createEventType(ownerPage, originalTitle, originalSlug, "25");
 
-      await expectToastMessage(context, "Event type created");
+      await expectToastMessage(context, "Service created");
     })();
 
     // === VALIDATION ===
     await step("Submit duplicate with existing slug & verify validation message")(async () => {
       await openEventTypeDuplicateDialog(ownerPage, originalTitle);
       await ownerPage.getByRole("textbox", { name: "Title" }).fill(duplicateTitle);
-      await ownerPage.getByRole("textbox", { name: "Slug" }).fill(originalSlug);
+      await ownerPage.getByRole("textbox", { name: "Link name" }).fill(originalSlug);
       await ownerPage.getByRole("button", { name: "Create duplicate" }).click();
 
       await expectToastMessage(context, 400, `An event type with slug '${originalSlug}' already exists.`);
@@ -473,10 +473,10 @@ test.describe("@comprehensive", () => {
     })();
 
     await step("Correct duplicate slug & verify duplicate detail opens")(async () => {
-      await ownerPage.getByRole("textbox", { name: "Slug" }).fill(duplicateSlug);
+      await ownerPage.getByRole("textbox", { name: "Link name" }).fill(duplicateSlug);
       await ownerPage.getByRole("button", { name: "Create duplicate" }).click();
 
-      await expectToastMessage(context, "Event type duplicated");
+      await expectToastMessage(context, "Service duplicated");
       await expect(ownerPage.getByRole("textbox", { name: "Title" })).toHaveValue(duplicateTitle);
     })();
 
@@ -489,7 +489,7 @@ test.describe("@comprehensive", () => {
       await expect(ownerPage.getByRole("button", { name: "Save" })).toBeEnabled();
       await ownerPage.getByRole("button", { name: "Save" }).click();
 
-      await expectToastMessage(context, "Event type updated");
+      await expectToastMessage(context, "Service updated");
     })();
 
     await step("Open apps tab & verify placeholder states render")(async () => {
@@ -501,20 +501,20 @@ test.describe("@comprehensive", () => {
     })();
 
     // === CLEANUP ===
-    await step("Delete duplicated event type & verify list returns")(async () => {
+    await step("Delete duplicated service & verify list returns")(async () => {
       await deleteCurrentEventType(ownerPage, duplicateTitle);
 
-      await expectToastMessage(context, "Event type deleted");
+      await expectToastMessage(context, "Service deleted");
     })();
 
-    await step("Delete original event type & verify cleanup completes")(async () => {
+    await step("Delete original service & verify cleanup completes")(async () => {
       await ownerPage.setViewportSize({ width: 1280, height: 720 });
       await ownerPage.goto("/event-types");
       await ownerPage.getByRole("textbox", { name: "Search" }).fill(originalTitle);
       await ownerPage.getByRole("link").filter({ hasText: originalTitle }).first().click();
       await deleteCurrentEventType(ownerPage, originalTitle);
 
-      await expectToastMessage(context, "Event type deleted");
+      await expectToastMessage(context, "Service deleted");
     })();
   });
 });

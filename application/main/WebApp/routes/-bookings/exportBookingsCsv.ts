@@ -1,11 +1,11 @@
 import type { BookingListItem } from "./bookingTypes";
 
 const csvHeaders = [
-  "Booking ID",
+  "Reference number",
   "Status",
-  "Event type",
-  "Attendee name",
-  "Attendee email",
+  "Service",
+  "Client name",
+  "Client email",
   "Start time",
   "End time",
   "Time zone",

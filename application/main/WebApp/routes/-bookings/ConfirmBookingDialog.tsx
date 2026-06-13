@@ -47,7 +47,7 @@ export function ConfirmBookingDialog({
             <Trans>Confirm this booking?</Trans>
           </AlertDialogTitle>
           <AlertDialogDescription>
-            <Trans>The attendee will be notified that their booking is confirmed.</Trans>
+            <Trans>The client will be notified that their booking is confirmed.</Trans>
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogBody>

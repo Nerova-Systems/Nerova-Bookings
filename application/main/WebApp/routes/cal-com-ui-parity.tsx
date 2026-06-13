@@ -241,7 +241,7 @@ function EventTypesListFixture({ state }: Readonly<{ state: EventTypesListVisual
     <section className="mx-auto max-w-[80rem]" data-testid="event-types-list-layout">
       <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
         <div className="min-w-0">
-          <h1 className="text-2xl font-semibold tracking-normal">Event types</h1>
+          <h1 className="text-2xl font-semibold tracking-normal">Services</h1>
           <p className="mt-1 text-base text-muted-foreground">
             Configure different events for people to book on your calendar.
           </p>
@@ -506,6 +506,7 @@ function EventTypeEditorFixture({ state }: Readonly<{ state: EventTypeEditorVisu
       </div>
       <EventTypeEditorTabs
         eventTypeId={visualEditorEventType.id}
+        imageUrl={visualEditorEventType.imageUrl}
         tabName={state}
         draft={draft}
         schedules={visualSchedules}
@@ -533,6 +534,7 @@ const visualEventType = {
   durationMinutes: 30,
   durationOptions: [30, 45, 60],
   handle: "visual",
+  imageUrl: null,
   locations: [{ type: "link", value: "Cal Video", displayLocationPubliclyToTeam: false }],
   locationType: "link",
   locationValue: "Cal Video",
@@ -652,6 +654,7 @@ const visualEditorEventType = {
   durationMinutes: 30,
   hidden: false,
   id: "etype_visual_product_consultation",
+  imageUrl: null,
   locationType: "link",
   locationValue: "Cal Video",
   minimumBookingNoticeMinutes: 60,
@@ -878,7 +881,7 @@ function visualBookingActions(status: string) {
 }
 
 const visualRescheduleBooking = {
-  bookerEmail: "visual-booker@example.com",
+  bookerEmail: "visual-client@example.com",
   bookerName: "Visual Booker",
   canReschedule: true,
   disabledReason: null,

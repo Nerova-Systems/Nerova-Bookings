@@ -20,7 +20,7 @@ export function EventMeta({
   return (
     <section
       className="relative z-10 flex flex-col gap-5 p-6 md:w-(--booker-meta-width)"
-      data-testid="booker-event-meta"
+      data-testid="client-event-meta"
     >
       <div className="flex items-center gap-3">
         <div className="flex size-12 items-center justify-center rounded-full bg-primary text-primary-foreground">
@@ -35,6 +35,13 @@ export function EventMeta({
         <Badge variant="outline" className="w-fit">
           <Trans>Public booking</Trans>
         </Badge>
+        {eventType.imageUrl && (
+          <img
+            src={eventType.imageUrl}
+            alt={t`Service image`}
+            className="aspect-video w-full rounded-lg object-cover"
+          />
+        )}
         <h1>{eventType.title}</h1>
         {eventType.description && (
           <span className="text-sm leading-6 text-muted-foreground">{eventType.description}</span>

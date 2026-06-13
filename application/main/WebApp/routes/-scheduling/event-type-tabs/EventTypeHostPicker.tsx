@@ -101,10 +101,10 @@ export function EventTypeHostPicker({ eventTypeId, hostGroups, onChange }: HostP
     <div className="grid gap-3">
       {selectedChips.length === 0 ? (
         <div className="rounded-md border border-dashed p-3 text-sm text-muted-foreground">
-          <Trans>No hosts selected. Pick team members below to assign them to this event type.</Trans>
+          <Trans>No team members selected. Pick who can provide this service below.</Trans>
         </div>
       ) : (
-        <ul className="flex flex-wrap gap-2" aria-label={t`Selected hosts`}>
+        <ul className="flex flex-wrap gap-2" aria-label={t`Selected team members`}>
           {selectedChips.map((chip) => (
             <li key={chip.userId}>
               <Badge variant="secondary" className="gap-1.5 pr-1 pl-2">
@@ -113,7 +113,7 @@ export function EventTypeHostPicker({ eventTypeId, hostGroups, onChange }: HostP
                   type="button"
                   variant="ghost"
                   size="icon-xs"
-                  aria-label={t`Remove host ${chip.displayName}`}
+                  aria-label={t`Remove team member ${chip.displayName}`}
                   onClick={() => removeUser(chip.userId)}
                 >
                   <XIcon className="h-3 w-3" aria-hidden="true" />
@@ -134,7 +134,7 @@ export function EventTypeHostPicker({ eventTypeId, hostGroups, onChange }: HostP
 
       {isLoading ? (
         <div className="text-sm text-muted-foreground">
-          <Trans>Loading hosts…</Trans>
+          <Trans>Loading team members…</Trans>
         </div>
       ) : candidateMembers.length === 0 ? (
         <div className="flex items-center gap-2 rounded-md border p-3 text-sm text-muted-foreground">
@@ -142,11 +142,14 @@ export function EventTypeHostPicker({ eventTypeId, hostGroups, onChange }: HostP
           {searchQuery ? (
             <Trans>No team members match your search.</Trans>
           ) : (
-            <Trans>No hosts available to assign.</Trans>
+            <Trans>No team members available to assign.</Trans>
           )}
         </div>
       ) : (
-        <ul className="grid max-h-72 gap-1 overflow-y-auto rounded-md border p-1" aria-label={t`Available hosts`}>
+        <ul
+          className="grid max-h-72 gap-1 overflow-y-auto rounded-md border p-1"
+          aria-label={t`Available team members`}
+        >
           {candidateMembers.map((member) => {
             const isSelected = selectedUserIds.has(member.userId);
             return (

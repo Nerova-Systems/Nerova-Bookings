@@ -39,7 +39,7 @@ export function BookingDetailsBody({ booking }: Readonly<{ booking: BookingListI
   return (
     <div className="flex flex-1 flex-col gap-5 overflow-y-auto px-4 py-5">
       <BookingMetaSection booking={booking} />
-      <AttendeesSection booking={booking} />
+      <ClientsSection booking={booking} />
       <BookingResponsesSection booking={booking} />
       <RescheduleSection booking={booking} />
       {booking.rejectionReason && (
@@ -55,7 +55,7 @@ export function BookingDetailsBody({ booking }: Readonly<{ booking: BookingListI
           <Trans>System</Trans>
         </SectionTitle>
         <span className="text-xs text-muted-foreground">
-          <Trans>Booking ID</Trans>
+          <Trans>Reference number</Trans>
         </span>
         <span className="mt-1 block text-sm break-all text-muted-foreground">{booking.id}</span>
       </section>
@@ -102,11 +102,11 @@ function BookingMetaSection({ booking }: Readonly<{ booking: BookingListItem }>)
   );
 }
 
-function AttendeesSection({ booking }: Readonly<{ booking: BookingListItem }>) {
+function ClientsSection({ booking }: Readonly<{ booking: BookingListItem }>) {
   return (
     <section className="grid gap-4">
       <SectionTitle>
-        <Trans>Attendees</Trans>
+        <Trans>Clients</Trans>
       </SectionTitle>
       <div className="grid gap-4">
         <DetailRow icon={<UserIcon />} label={<Trans>Name</Trans>}>

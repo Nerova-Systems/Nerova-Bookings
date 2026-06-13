@@ -28,7 +28,7 @@ import { GeneralApiErrors } from "../-scheduling/ApiErrors";
 
 type UserId = Schemas["UserId"];
 
-// TODO: Wave 4.5 — replace plain text input with a host picker (search users in the booker's team).
+// TODO: Wave 4.5 — replace plain text input with a host picker (search users in the client's team).
 export function ReassignBookingDialog({
   booking,
   isOpen,

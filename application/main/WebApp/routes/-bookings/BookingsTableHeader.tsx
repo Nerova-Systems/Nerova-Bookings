@@ -6,26 +6,17 @@ export function BookingsTableHeader() {
     <TableHeader>
       <TableRow>
         <TableHead className="w-10" />
-        <TableHead className="w-28">
-          <Trans>Status</Trans>
+        <TableHead>
+          <Trans>Client</Trans>
         </TableHead>
         <TableHead>
-          <Trans>Event type</Trans>
-        </TableHead>
-        <TableHead>
-          <Trans>Attendee</Trans>
+          <Trans>Service</Trans>
         </TableHead>
         <TableHead className="w-44">
-          <Trans>Start time</Trans>
+          <Trans>Time</Trans>
         </TableHead>
-        <TableHead className="w-24">
-          <Trans>Duration</Trans>
-        </TableHead>
-        <TableHead className="w-48">
-          <Trans>Location</Trans>
-        </TableHead>
-        <TableHead className="w-24">
-          <Trans>Rating</Trans>
+        <TableHead className="w-36">
+          <Trans>Status</Trans>
         </TableHead>
         <TableHead className="w-10" />
       </TableRow>
