@@ -39,6 +39,20 @@ public sealed class Client : AggregateRoot<ClientId>, ITenantScopedEntity
     /// <summary>Free-text notes about the client, e.g. imported remarks from a previous system.</summary>
     public string? Notes { get; private set; }
 
+    /// <summary>
+    ///     Standard + Constraint vertical field values keyed by catalog key (jsonb). Typed access only —
+    ///     use <see cref="SetVerticalField" /> / <see cref="GetVerticalFields" /> so every write is
+    ///     validated against <see cref="VerticalFieldCatalog" /> before it lands here.
+    /// </summary>
+    private Dictionary<string, string> VerticalFields { get; set; } = new();
+
+    /// <summary>
+    ///     Encrypted JSON payload of Sensitive-class field values (docs/vertical-template-fields-spec.md §3).
+    ///     Written and read only through <c>FieldProtector</c>-aware command/query paths; never exposed
+    ///     to agents, telemetry, or logs.
+    /// </summary>
+    public string? SensitiveFields { get; private set; }
+
     public DateTimeOffset? LastVisitAt { get; private set; }
 
     public bool NeedsAttention => string.IsNullOrWhiteSpace(Email) || string.IsNullOrWhiteSpace(PhoneNumber);
@@ -71,6 +85,39 @@ public sealed class Client : AggregateRoot<ClientId>, ITenantScopedEntity
     public void RecordVisit(DateTimeOffset visitedAt)
     {
         LastVisitAt = visitedAt;
+    }
+
+    /// <summary>Returns a read-only snapshot of the Standard + Constraint vertical field values.</summary>
+    public IReadOnlyDictionary<string, string> GetVerticalFields()
+    {
+        return VerticalFields;
+    }
+
+    /// <summary>
+    ///     Sets or clears (null/whitespace value) one vertical field. The caller is responsible for
+    ///     catalog validation; this method only maintains the storage invariant that empty values are
+    ///     absent keys, never empty strings.
+    /// </summary>
+    public void SetVerticalField(string key, string? value)
+    {
+        // EF change tracking compares the dictionary reference for jsonb conversions — replace, never mutate.
+        var updated = new Dictionary<string, string>(VerticalFields);
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            updated.Remove(key);
+        }
+        else
+        {
+            updated[key] = value.Trim();
+        }
+
+        VerticalFields = updated;
+    }
+
+    /// <summary>Replaces the encrypted sensitive-fields payload (already protected by <c>FieldProtector</c>).</summary>
+    public void SetSensitiveFieldsPayload(string? encryptedPayload)
+    {
+        SensitiveFields = string.IsNullOrWhiteSpace(encryptedPayload) ? null : encryptedPayload;
     }
 
     private static string? Normalize(string? value)

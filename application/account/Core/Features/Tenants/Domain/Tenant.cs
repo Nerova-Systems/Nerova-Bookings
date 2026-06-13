@@ -33,6 +33,14 @@ public sealed class Tenant : SoftDeletableAggregateRoot<TenantId>
     public AbInclusionPin? AbInclusionPin { get; private set; }
 
     /// <summary>
+    ///     The business vertical picked in welcome step 1 (docs/vertical-template-fields-spec.md §1).
+    ///     The vertical is the schema: it selects the fixed client field catalog in the main SCS and
+    ///     maps one-way onto <see cref="MetaBusinessVertical" /> for the WhatsApp brand profile.
+    ///     Changing it after onboarding is a support action, not a self-service setting.
+    /// </summary>
+    public NerovaVertical? Vertical { get; private set; }
+
+    /// <summary>
     ///     The tenant's WhatsApp-facing brand profile. <see langword="null" /> until the tenant
     ///     calls <see cref="Commands.UpdateTenantBrandProfileCommand" />. Persisted as an EF
     ///     owned-type stored in a single <c>jsonb</c> column (<c>brand_profile</c>) for
@@ -201,6 +209,24 @@ public sealed class Tenant : SoftDeletableAggregateRoot<TenantId>
     public void Update(string tenantName)
     {
         Name = tenantName;
+    }
+
+    public void SetVertical(NerovaVertical vertical)
+    {
+        Vertical = vertical;
+    }
+
+    /// <summary>Maps the Nerova vertical one-way onto Meta's WhatsApp business profile taxonomy.</summary>
+    public static MetaBusinessVertical ToMetaBusinessVertical(NerovaVertical vertical)
+    {
+        return vertical switch
+        {
+            NerovaVertical.Salon or NerovaVertical.Barber or NerovaVertical.Nails => MetaBusinessVertical.Beauty,
+            NerovaVertical.Trainer => MetaBusinessVertical.ProfessionalServices,
+            NerovaVertical.Tutor => MetaBusinessVertical.Education,
+            NerovaVertical.Vet or NerovaVertical.Clinic => MetaBusinessVertical.Health,
+            _ => MetaBusinessVertical.Other
+        };
     }
 
     /// <summary>

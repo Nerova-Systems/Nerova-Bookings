@@ -409,6 +409,9 @@ public sealed class TenantUpdated
 public sealed class TenantBrandProfileUpdated(string vertical)
     : TelemetryEvent(("vertical", vertical));
 
+public sealed class TenantVerticalSet(string vertical)
+    : TelemetryEvent(("vertical", vertical));
+
 public sealed class WabaProfileSyncSucceeded(TenantId tenantId, string phoneNumberId, int attempts)
     : TelemetryEvent(("tenant_id", tenantId), ("phone_number_id", phoneNumberId), ("attempts", attempts));
 

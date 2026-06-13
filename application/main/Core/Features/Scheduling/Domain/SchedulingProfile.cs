@@ -48,6 +48,13 @@ public sealed class SchedulingProfile : SoftDeletableAggregateRoot<SchedulingPro
     public string? PaystackSubaccountCode { get; private set; }
 
     /// <summary>
+    ///     The tenant's business vertical (docs/vertical-template-fields-spec.md §1) — the main-SCS copy
+    ///     propagated from the account tenant at welcome so clients, import, and agents can read it
+    ///     without a cross-SCS call. Null until the owner picks a vertical.
+    /// </summary>
+    public NerovaVertical? Vertical { get; private set; }
+
+    /// <summary>
     ///     When non-null, references a Tenant of TenantKind.Team. When null, the aggregate is owned by the existing
     ///     user/solo scope.
     /// </summary>
@@ -93,6 +100,11 @@ public sealed class SchedulingProfile : SoftDeletableAggregateRoot<SchedulingPro
     public void SetPaystackSubaccount(string? subaccountCode)
     {
         PaystackSubaccountCode = string.IsNullOrWhiteSpace(subaccountCode) ? null : subaccountCode.Trim();
+    }
+
+    public void SetVertical(NerovaVertical vertical)
+    {
+        Vertical = vertical;
     }
 
     public static string NormalizeHandle(string value)

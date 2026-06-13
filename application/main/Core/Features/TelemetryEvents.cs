@@ -72,6 +72,24 @@ public sealed class EventTypeUpdated(EventTypeId eventTypeId)
 public sealed class EventTypeDeleted(EventTypeId eventTypeId)
     : TelemetryEvent(("event_type_id", eventTypeId));
 
+public sealed class EventTypeImageUpdated(EventTypeId eventTypeId, string contentType, long fileSize)
+    : TelemetryEvent(("event_type_id", eventTypeId), ("content_type", contentType), ("file_size", fileSize));
+
+public sealed class EventTypeImageRemoved(EventTypeId eventTypeId)
+    : TelemetryEvent(("event_type_id", eventTypeId));
+
+public sealed class SchedulingVerticalSet(string vertical)
+    : TelemetryEvent(("vertical", vertical));
+
+public sealed class ClientVerticalFieldsUpdated(string source, int fieldCount)
+    : TelemetryEvent(("source", source), ("field_count", fieldCount));
+
+public sealed class SensitiveFieldAccessed(string fieldKeys, string role)
+    : TelemetryEvent(("field_keys", fieldKeys), ("role", role));
+
+public sealed class ConstraintFieldFlagged(string fieldKey)
+    : TelemetryEvent(("field_key", fieldKey));
+
 public sealed class WorkflowCreated(WorkflowId workflowId)
     : TelemetryEvent(("workflow_id", workflowId));
 

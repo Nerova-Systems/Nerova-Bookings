@@ -21,6 +21,10 @@ public sealed class PublicSchedulingEndpoints : IEndpoints
             => await mediator.Send(command)
         ).Produces<SchedulingProfileResponse>();
 
+        profileGroup.MapPut("/vertical", async Task<ApiResult> (SetSchedulingVerticalCommand command, IMediator mediator)
+            => await mediator.Send(command)
+        );
+
         var publicGroup = routes.MapGroup("/api/public").WithTags("PublicScheduling").ProducesValidationProblem();
 
         publicGroup.MapGet("/event-types/{handle}/{slug}", async Task<ApiResult<PublicEventTypeResponse>> (string handle, string slug, string? privateLink, IMediator mediator)

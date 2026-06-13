@@ -1,5 +1,7 @@
+using System.Text.Json;
 using JetBrains.Annotations;
 using Main.Features.Clients.Domain;
+using Main.Features.Clients.Infrastructure;
 using SharedKernel.Cqrs;
 using SharedKernel.ExecutionContext;
 using SharedKernel.Telemetry;
@@ -7,7 +9,15 @@ using SharedKernel.Telemetry;
 namespace Main.Features.DataImport.Commands;
 
 [PublicAPI]
-public sealed record ImportClientRow(string FirstName, string LastName, string? Email, string? PhoneNumber, string? Notes);
+public sealed record ImportClientRow(
+    string FirstName,
+    string LastName,
+    string? Email,
+    string? PhoneNumber,
+    string? Notes,
+    Dictionary<string, string>? VerticalFields = null,
+    Dictionary<string, string>? SensitiveFields = null
+);
 
 [PublicAPI]
 public sealed record BulkUpsertClientsResponse(int UpsertedCount, int MergedCount);
@@ -20,9 +30,15 @@ public sealed record BulkUpsertClientsResponse(int UpsertedCount, int MergedCoun
 [PublicAPI]
 public sealed record BulkUpsertClientsCommand(ImportClientRow[] Rows) : ICommand, IRequest<Result<BulkUpsertClientsResponse>>;
 
-public sealed class BulkUpsertClientsHandler(IClientRepository clientRepository, IExecutionContext executionContext, ITelemetryEventsCollector events)
-    : IRequestHandler<BulkUpsertClientsCommand, Result<BulkUpsertClientsResponse>>
+public sealed class BulkUpsertClientsHandler(
+    IClientRepository clientRepository,
+    FieldProtector fieldProtector,
+    IExecutionContext executionContext,
+    ITelemetryEventsCollector events
+) : IRequestHandler<BulkUpsertClientsCommand, Result<BulkUpsertClientsResponse>>
 {
+    private static readonly JsonSerializerOptions JsonOptions = JsonSerializerOptions.Default;
+
     public async Task<Result<BulkUpsertClientsResponse>> Handle(BulkUpsertClientsCommand command, CancellationToken cancellationToken)
     {
         var tenantId = executionContext.TenantId;
@@ -56,6 +72,7 @@ public sealed class BulkUpsertClientsHandler(IClientRepository clientRepository,
                     existing.PhoneNumber ?? row.PhoneNumber
                 );
                 if (existing.Notes is null && row.Notes is not null) existing.UpdateNotes(row.Notes);
+                ApplyVerticalFields(existing, row);
                 clientRepository.Update(existing);
                 mergedCount++;
                 continue;
@@ -63,6 +80,7 @@ public sealed class BulkUpsertClientsHandler(IClientRepository clientRepository,
 
             var client = Client.Create(tenantId, row.FirstName, row.LastName, row.Email, row.PhoneNumber);
             if (row.Notes is not null) client.UpdateNotes(row.Notes);
+            ApplyVerticalFields(client, row);
             await clientRepository.AddAsync(client, cancellationToken);
 
             if (client.PhoneNumber is not null) byPhone[client.PhoneNumber] = client;
@@ -73,5 +91,39 @@ public sealed class BulkUpsertClientsHandler(IClientRepository clientRepository,
         events.CollectEvent(new ClientsBulkImported(createdCount, mergedCount));
 
         return Result<BulkUpsertClientsResponse>.Success(new BulkUpsertClientsResponse(createdCount + mergedCount, mergedCount));
+    }
+
+    /// <summary>
+    ///     Imports vertical field values with the same fill-blanks-only merge posture as core fields,
+    ///     and lands confirmed Sensitive-class values encrypted (vertical-template-fields-spec §7).
+    /// </summary>
+    private void ApplyVerticalFields(Client client, ImportClientRow row)
+    {
+        if (row.VerticalFields is not null)
+        {
+            var current = client.GetVerticalFields();
+            foreach (var (key, value) in row.VerticalFields)
+            {
+                if (!current.ContainsKey(key)) client.SetVerticalField(key, value);
+            }
+        }
+
+        if (row.SensitiveFields is not null && row.SensitiveFields.Count > 0)
+        {
+            var payload = client.SensitiveFields is null
+                ? new Dictionary<string, string>()
+                : JsonSerializer.Deserialize<Dictionary<string, string>>(fieldProtector.Unprotect(client.SensitiveFields), JsonOptions) ?? new Dictionary<string, string>();
+
+            var changed = false;
+            foreach (var (key, value) in row.SensitiveFields)
+            {
+                if (payload.TryAdd(key, value)) changed = true;
+            }
+
+            if (changed)
+            {
+                client.SetSensitiveFieldsPayload(fieldProtector.Protect(JsonSerializer.Serialize(payload, JsonOptions)));
+            }
+        }
     }
 }

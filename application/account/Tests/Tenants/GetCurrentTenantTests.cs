@@ -31,9 +31,10 @@ public sealed class GetCurrentTenantTests(AccountWebApplicationFactory factory) 
                     'state': {'type': 'string', 'minLength': 1, 'maxLength':20},
                     'suspensionReason': {'type': ['null', 'string']},
                     'logoUrl': {'type': ['null', 'string']},
-                    'brandVertical': {'type': ['null', 'string']}
+                    'brandVertical': {'type': ['null', 'string']},
+                    'vertical': {'type': ['null', 'string']}
                 },
-                'required': ['id', 'createdAt', 'modifiedAt', 'name', 'state', 'suspensionReason', 'logoUrl', 'brandVertical'],
+                'required': ['id', 'createdAt', 'modifiedAt', 'name', 'state', 'suspensionReason', 'logoUrl', 'brandVertical', 'vertical'],
                 'additionalProperties': false
             }
             """

@@ -18,7 +18,8 @@ public sealed record TenantResponse(
     TenantState State,
     SuspensionReason? SuspensionReason,
     string? LogoUrl,
-    string? BrandVertical
+    string? BrandVertical,
+    NerovaVertical? Vertical
 );
 
 public sealed class GetTenantHandler(ITenantRepository tenantRepository)
@@ -37,14 +38,15 @@ public sealed class GetTenantHandler(ITenantRepository tenantRepository)
         }
 
         return new TenantResponse(
-            Id: tenant.Id,
-            CreatedAt: tenant.CreatedAt,
-            ModifiedAt: tenant.ModifiedAt,
-            Name: tenant.Name,
-            State: tenant.State,
-            SuspensionReason: tenant.SuspensionReason,
-            LogoUrl: tenant.Logo.Url,
-            BrandVertical: tenant.BrandProfile?.BrandVertical.ToString()
+            tenant.Id,
+            tenant.CreatedAt,
+            tenant.ModifiedAt,
+            tenant.Name,
+            tenant.State,
+            tenant.SuspensionReason,
+            tenant.Logo.Url,
+            tenant.BrandProfile?.BrandVertical.ToString(),
+            tenant.Vertical
         );
     }
 }

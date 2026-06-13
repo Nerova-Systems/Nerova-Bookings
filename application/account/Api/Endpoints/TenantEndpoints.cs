@@ -44,6 +44,10 @@ public sealed class TenantEndpoints : IEndpoints
             => await mediator.Send(command)
         );
 
+        group.MapPut("/current/vertical", async Task<ApiResult> (UpdateTenantVerticalCommand command, IMediator mediator)
+            => await mediator.Send(command)
+        );
+
         // Internal-only endpoint reachable backend-to-backend via the cluster's localhost address.
         routes.MapDelete("/internal-api/account/tenants/{id}", async Task<ApiResult> (TenantId id, IMediator mediator)
             => await mediator.Send(new DeleteTenantCommand(id))

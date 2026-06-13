@@ -33,6 +33,12 @@ public interface IClientRepository : ICrudRepository<Client, ClientId>, IBulkRem
     ///     lookups). Unfiltered so the import pipeline can run from background contexts too.
     /// </summary>
     Task<Client[]> GetAllForDuplicateCheckUnfilteredAsync(TenantId tenantId, CancellationToken cancellationToken);
+
+    /// <summary>
+    ///     Fetches a client by id with an explicit tenant guard, bypassing the tenant query filter.
+    ///     Used by anonymous receptionist webhook paths where no tenant context is set.
+    /// </summary>
+    Task<Client?> GetByIdUnfilteredAsync(TenantId tenantId, ClientId id, CancellationToken cancellationToken);
 }
 
 public sealed class ClientRepository(MainDbContext mainDbContext)
@@ -139,5 +145,12 @@ public sealed class ClientRepository(MainDbContext mainDbContext)
             .IgnoreQueryFilters([QueryFilterNames.Tenant])
             .Where(client => client.TenantId == tenantId)
             .ToArrayAsync(cancellationToken);
+    }
+
+    public async Task<Client?> GetByIdUnfilteredAsync(TenantId tenantId, ClientId id, CancellationToken cancellationToken)
+    {
+        return await DbSet
+            .IgnoreQueryFilters([QueryFilterNames.Tenant])
+            .FirstOrDefaultAsync(client => client.TenantId == tenantId && client.Id == id, cancellationToken);
     }
 }

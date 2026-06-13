@@ -145,7 +145,9 @@ public enum ImportJobStatus
 /// <summary>
 ///     Which uploaded column feeds which client field, with per-column confidence (0..1) from the
 ///     inference step. A null column means the field is absent from the file. FullNameColumn is used
-///     when the file has one combined name column that normalization splits.
+///     when the file has one combined name column that normalization splits. VerticalFieldColumns maps
+///     catalog field keys (docs/vertical-template-fields-spec.md §7) to source headers — columns already
+///     claimed by a core field never appear here (core → vertical priority).
 /// </summary>
 [PublicAPI]
 public sealed record ImportColumnMapping(
@@ -156,7 +158,8 @@ public sealed record ImportColumnMapping(
     string? PhoneColumn,
     string? NotesColumn,
     double Confidence,
-    string Source
+    string Source,
+    Dictionary<string, string>? VerticalFieldColumns = null
 );
 
 [PublicAPI]
@@ -169,7 +172,9 @@ public sealed record ImportRowResult(
     string? Notes,
     ImportRowStatus Status,
     string? Error,
-    string? DuplicateClientId
+    string? DuplicateClientId,
+    Dictionary<string, string>? VerticalFields = null,
+    Dictionary<string, string>? SensitiveFields = null
 );
 
 [PublicAPI]

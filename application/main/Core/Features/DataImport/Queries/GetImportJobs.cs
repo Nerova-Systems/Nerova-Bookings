@@ -1,5 +1,7 @@
 using JetBrains.Annotations;
+using Main.Features.Clients.Domain;
 using Main.Features.DataImport.Domain;
+using Main.Features.Scheduling.Domain;
 using SharedKernel.Cqrs;
 using SharedKernel.ExecutionContext;
 
@@ -14,7 +16,10 @@ public sealed record ImportColumnMappingResponse(
     string? PhoneColumn,
     string? NotesColumn,
     double Confidence,
-    string Source
+    string Source,
+    Dictionary<string, string>? VerticalFieldColumns,
+    string[] SensitiveFieldKeys,
+    string[] ConstraintFieldKeys
 );
 
 [PublicAPI]
@@ -26,7 +31,9 @@ public sealed record ImportRowResponse(
     string? PhoneNumber,
     string? Notes,
     ImportRowStatus Status,
-    string? Error
+    string? Error,
+    Dictionary<string, string>? VerticalFields,
+    Dictionary<string, string>? SensitiveFields
 );
 
 [PublicAPI]
@@ -52,8 +59,11 @@ public sealed record GetImportJobQuery : IRequest<Result<ImportJobDetailsRespons
     public ImportJobId Id { get; init; } = null!;
 }
 
-public sealed class GetImportJobHandler(IImportJobRepository importJobRepository, IExecutionContext executionContext)
-    : IRequestHandler<GetImportJobQuery, Result<ImportJobDetailsResponse>>
+public sealed class GetImportJobHandler(
+    IImportJobRepository importJobRepository,
+    ISchedulingProfileRepository schedulingProfileRepository,
+    IExecutionContext executionContext
+) : IRequestHandler<GetImportJobQuery, Result<ImportJobDetailsResponse>>
 {
     public async Task<Result<ImportJobDetailsResponse>> Handle(GetImportJobQuery query, CancellationToken cancellationToken)
     {
@@ -68,6 +78,9 @@ public sealed class GetImportJobHandler(IImportJobRepository importJobRepository
             return Result<ImportJobDetailsResponse>.NotFound($"Import job '{query.Id}' was not found.");
         }
 
+        var profile = await schedulingProfileRepository.GetByTenantIdUnfilteredAsync(executionContext.TenantId!, cancellationToken);
+        var catalog = profile?.Vertical is { } vertical ? VerticalFieldCatalog.For(vertical) : [];
+
         var mapping = importJob.ColumnMapping is null
             ? null
             : new ImportColumnMappingResponse(
@@ -78,11 +91,21 @@ public sealed class GetImportJobHandler(IImportJobRepository importJobRepository
                 importJob.ColumnMapping.PhoneColumn,
                 importJob.ColumnMapping.NotesColumn,
                 importJob.ColumnMapping.Confidence,
-                importJob.ColumnMapping.Source
+                importJob.ColumnMapping.Source,
+                importJob.ColumnMapping.VerticalFieldColumns,
+                SensitiveKeysIn(importJob.ColumnMapping, catalog),
+                ConstraintKeysIn(importJob.ColumnMapping, catalog)
             );
 
+        // Sensitive values are masked in the review payload (vertical-template-fields-spec §7) — the
+        // owner confirms per column knowing WHICH fields hold data, never seeing the values themselves.
         var rows = importJob.Rows
-            .Select(row => new ImportRowResponse(row.RowNumber, row.FirstName, row.LastName, row.Email, row.PhoneNumber, row.Notes, row.Status, row.Error))
+            .Select(row => new ImportRowResponse(
+                    row.RowNumber, row.FirstName, row.LastName, row.Email, row.PhoneNumber, row.Notes, row.Status, row.Error,
+                    row.VerticalFields,
+                    row.SensitiveFields?.ToDictionary(pair => pair.Key, _ => "•••")
+                )
+            )
             .ToArray();
 
         return Result<ImportJobDetailsResponse>.Success(new ImportJobDetailsResponse(
@@ -101,10 +124,35 @@ public sealed class GetImportJobHandler(IImportJobRepository importJobRepository
             )
         );
     }
+
+    private static string[] SensitiveKeysIn(ImportColumnMapping mapping, IReadOnlyList<VerticalFieldDefinition> catalog)
+    {
+        if (mapping.VerticalFieldColumns is null) return [];
+        return catalog
+            .Where(definition => definition.Sensitivity == VerticalFieldSensitivity.Sensitive && mapping.VerticalFieldColumns.ContainsKey(definition.Key))
+            .Select(definition => definition.Key)
+            .ToArray();
+    }
+
+    private static string[] ConstraintKeysIn(ImportColumnMapping mapping, IReadOnlyList<VerticalFieldDefinition> catalog)
+    {
+        if (mapping.VerticalFieldColumns is null) return [];
+        return catalog
+            .Where(definition => definition.Sensitivity == VerticalFieldSensitivity.Constraint && mapping.VerticalFieldColumns.ContainsKey(definition.Key))
+            .Select(definition => definition.Key)
+            .ToArray();
+    }
 }
 
 [PublicAPI]
-public sealed record ImportJobSummaryResponse(ImportJobId Id, string FileName, ImportJobStatus Status, int RowsTotal, int RowsCommitted, DateTimeOffset CreatedAt);
+public sealed record ImportJobSummaryResponse(
+    ImportJobId Id,
+    string FileName,
+    ImportJobStatus Status,
+    int RowsTotal,
+    int RowsCommitted,
+    DateTimeOffset CreatedAt
+);
 
 [PublicAPI]
 public sealed record GetImportJobsResponse(ImportJobSummaryResponse[] ImportJobs);

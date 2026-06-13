@@ -4,6 +4,7 @@ using Main.Features.Clients.Domain;
 using Main.Features.DataImport.Agent;
 using Main.Features.DataImport.Domain;
 using Main.Features.DataImport.Shared;
+using Main.Features.Scheduling.Domain;
 using SharedKernel.Cqrs;
 using SharedKernel.Telemetry;
 
@@ -21,6 +22,7 @@ public sealed record RunImportPipelineCommand(ImportJobId ImportJobId) : IComman
 public sealed class RunImportPipelineHandler(
     IImportJobRepository importJobRepository,
     IClientRepository clientRepository,
+    ISchedulingProfileRepository schedulingProfileRepository,
     ColumnMappingInferrer columnMappingInferrer,
     ITelemetryEventsCollector events,
     ILogger<RunImportPipelineHandler> logger
@@ -62,6 +64,15 @@ public sealed class RunImportPipelineHandler(
                 return Result.Success();
             }
 
+            // Stage-1 vertical-field mapping (core → vertical priority, vertical-template-fields-spec §7).
+            var profile = await schedulingProfileRepository.GetByTenantIdUnfilteredAsync(importJob.TenantId, cancellationToken);
+            var catalog = profile?.Vertical is { } vertical ? VerticalFieldCatalog.For(vertical) : [];
+            if (catalog.Count > 0)
+            {
+                var verticalColumns = ColumnMappingInferrer.InferVerticalFieldColumns(document.Headers, mapping, catalog);
+                if (verticalColumns.Count > 0) mapping = mapping with { VerticalFieldColumns = verticalColumns };
+            }
+
             importJob.SetColumnMapping(mapping);
 
             var headerIndex = document.Headers
@@ -79,9 +90,10 @@ public sealed class RunImportPipelineHandler(
             for (var rowIndex = 0; rowIndex < document.Rows.Length; rowIndex++)
             {
                 rows.Add(NormalizeAndValidateRow(
-                        rowNumber: rowIndex + 1,
+                        rowIndex + 1,
                         document.Rows[rowIndex],
                         mapping,
+                        catalog,
                         headerIndex,
                         existingByPhone,
                         existingByEmail,
@@ -111,6 +123,7 @@ public sealed class RunImportPipelineHandler(
         int rowNumber,
         string[] row,
         ImportColumnMapping mapping,
+        IReadOnlyList<VerticalFieldDefinition> catalog,
         Dictionary<string, int> headerIndex,
         Dictionary<string, Client> existingByPhone,
         Dictionary<string, Client> existingByEmail,
@@ -123,6 +136,33 @@ public sealed class RunImportPipelineHandler(
             if (column is null || !headerIndex.TryGetValue(column, out var index) || index >= row.Length) return null;
             var value = row[index].Trim();
             return value.Length == 0 ? null : value;
+        }
+
+        // Vertical field values (spec §7): catalog-validated; values failing the kind check are dropped,
+        // never failing the row — name/contact validity alone decides row status. Sensitive-class values
+        // are split out so the review surface can mask them and the commit path can encrypt them.
+        Dictionary<string, string>? verticalFields = null;
+        Dictionary<string, string>? sensitiveFields = null;
+        if (mapping.VerticalFieldColumns is not null)
+        {
+            foreach (var (fieldKey, column) in mapping.VerticalFieldColumns)
+            {
+                var rawValue = GetValue(column);
+                if (rawValue is null) continue;
+
+                var definition = catalog.FirstOrDefault(d => d.Key == fieldKey);
+                if (definition is null) continue;
+                if (VerticalFieldValueValidator.Validate(definition, rawValue) is not null) continue;
+
+                if (definition.Sensitivity == VerticalFieldSensitivity.Sensitive)
+                {
+                    (sensitiveFields ??= new Dictionary<string, string>())[fieldKey] = rawValue;
+                }
+                else
+                {
+                    (verticalFields ??= new Dictionary<string, string>())[fieldKey] = rawValue;
+                }
+            }
         }
 
         var firstName = GetValue(mapping.FirstNameColumn);
@@ -165,19 +205,19 @@ public sealed class RunImportPipelineHandler(
 
         if (normalizedPhone is not null && existingByPhone.TryGetValue(normalizedPhone, out var clientByPhone))
         {
-            return new ImportRowResult(rowNumber, firstName, lastName ?? string.Empty, email, normalizedPhone, notes, ImportRowStatus.Duplicate, "A client with this phone number already exists.", clientByPhone.Id.Value);
+            return new ImportRowResult(rowNumber, firstName, lastName ?? string.Empty, email, normalizedPhone, notes, ImportRowStatus.Duplicate, "A client with this phone number already exists.", clientByPhone.Id.Value, verticalFields, sensitiveFields);
         }
 
         if (email is not null && existingByEmail.TryGetValue(email, out var clientByEmail))
         {
-            return new ImportRowResult(rowNumber, firstName, lastName ?? string.Empty, email, normalizedPhone, notes, ImportRowStatus.Duplicate, "A client with this email already exists.", clientByEmail.Id.Value);
+            return new ImportRowResult(rowNumber, firstName, lastName ?? string.Empty, email, normalizedPhone, notes, ImportRowStatus.Duplicate, "A client with this email already exists.", clientByEmail.Id.Value, verticalFields, sensitiveFields);
         }
 
-        if (normalizedPhone is not null && !seenPhones.Add(normalizedPhone) || email is not null && !seenEmails.Add(email))
+        if ((normalizedPhone is not null && !seenPhones.Add(normalizedPhone)) || (email is not null && !seenEmails.Add(email)))
         {
-            return new ImportRowResult(rowNumber, firstName, lastName ?? string.Empty, email, normalizedPhone, notes, ImportRowStatus.Duplicate, "Duplicated within the file.", null);
+            return new ImportRowResult(rowNumber, firstName, lastName ?? string.Empty, email, normalizedPhone, notes, ImportRowStatus.Duplicate, "Duplicated within the file.", null, verticalFields, sensitiveFields);
         }
 
-        return new ImportRowResult(rowNumber, firstName, lastName ?? string.Empty, email, normalizedPhone, notes, ImportRowStatus.Valid, null, null);
+        return new ImportRowResult(rowNumber, firstName, lastName ?? string.Empty, email, normalizedPhone, notes, ImportRowStatus.Valid, null, null, verticalFields, sensitiveFields);
     }
 }

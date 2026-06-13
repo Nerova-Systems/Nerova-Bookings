@@ -1,5 +1,6 @@
 using System.Text;
 using System.Text.Json;
+using Main.Features.Clients.Domain;
 using Main.Features.DataImport.Domain;
 using Microsoft.Extensions.AI;
 
@@ -108,7 +109,7 @@ public sealed class ColumnMappingInferrer(IChatClient chatClient, ILogger<Column
                 notesColumn = header;
                 matchedColumns++;
             }
-            else if (fullNameColumn is null && (normalized is "name" or "full name" or "client" or "client name" or "customer" or "customer name"))
+            else if (fullNameColumn is null && normalized is "name" or "full name" or "client" or "client name" or "customer" or "customer name")
             {
                 fullNameColumn = header;
                 matchedColumns++;
@@ -127,6 +128,50 @@ public sealed class ColumnMappingInferrer(IChatClient chatClient, ILogger<Column
             : 0.3;
 
         return new ImportColumnMapping(firstNameColumn, lastNameColumn, fullNameColumn, emailColumn, phoneColumn, notesColumn, confidence, "heuristic");
+    }
+
+    /// <summary>
+    ///     Stage-1 deterministic vertical-field mapping (docs/vertical-template-fields-spec.md §7):
+    ///     exact/normalized synonym or label match per catalog definition, applied only to headers not
+    ///     already claimed by a core field (core → vertical priority). One column per field, first match
+    ///     wins, never the other way around — a column can feed at most one vertical field.
+    /// </summary>
+    public static Dictionary<string, string> InferVerticalFieldColumns(
+        string[] headers,
+        ImportColumnMapping coreMapping,
+        IReadOnlyList<VerticalFieldDefinition> catalog)
+    {
+        var usedHeaders = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        foreach (var coreColumn in new[] { coreMapping.FirstNameColumn, coreMapping.LastNameColumn, coreMapping.FullNameColumn, coreMapping.EmailColumn, coreMapping.PhoneColumn, coreMapping.NotesColumn })
+        {
+            if (coreColumn is not null) usedHeaders.Add(coreColumn);
+        }
+
+        var result = new Dictionary<string, string>();
+        foreach (var definition in catalog)
+        {
+            foreach (var header in headers)
+            {
+                if (usedHeaders.Contains(header)) continue;
+
+                var normalized = NormalizeHeader(header);
+                var isMatch = NormalizeHeader(definition.Label) == normalized
+                              || definition.Key.Replace('_', ' ') == normalized
+                              || definition.ImportSynonyms.Any(synonym => NormalizeHeader(synonym) == normalized);
+                if (!isMatch) continue;
+
+                result[definition.Key] = header;
+                usedHeaders.Add(header);
+                break;
+            }
+        }
+
+        return result;
+    }
+
+    private static string NormalizeHeader(string value)
+    {
+        return string.Join(' ', value.Trim().ToLowerInvariant().Split([' ', '-', '_', '/'], StringSplitOptions.RemoveEmptyEntries));
     }
 
     private static bool IsValidAgainstHeaders(ImportColumnMapping mapping, string[] headers)

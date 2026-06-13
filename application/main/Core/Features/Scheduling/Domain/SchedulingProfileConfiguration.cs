@@ -17,6 +17,12 @@ public sealed class SchedulingProfileConfiguration : IEntityTypeConfiguration<Sc
         builder.Property(profile => profile.Handle).HasMaxLength(60);
         builder.Property(profile => profile.DisplayName).HasMaxLength(120);
         builder.Property(profile => profile.AvatarUrl).HasMaxLength(500);
+        builder.Property(profile => profile.Vertical)
+            .HasMaxLength(20)
+            .HasConversion(
+                vertical => vertical.ToString(),
+                value => Enum.Parse<NerovaVertical>(value!)
+            );
 
         builder.HasIndex(profile => profile.Handle).IsUnique().HasFilter("deleted_at IS NULL");
         builder.HasIndex(profile => new { profile.TenantId, profile.OwnerUserId }).IsUnique().HasFilter("deleted_at IS NULL");

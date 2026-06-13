@@ -10,10 +10,12 @@ namespace Main.Features.DataImport.Commands;
 /// <summary>
 ///     The tenant's one-tap approval of a reviewed import (spec R20/R21): commits valid rows through the
 ///     idempotent bulk upsert, optionally excluding flagged rows. Duplicate rows merge into the existing
-///     client; re-approving a committed job creates no duplicates.
+///     client; re-approving a committed job creates no duplicates. Sensitive-class columns are never
+///     committed implicitly: each sensitive field key must be explicitly confirmed
+///     (docs/vertical-template-fields-spec.md §7) or its values are dropped, not imported.
 /// </summary>
 [PublicAPI]
-public sealed record ApproveImportJobCommand(int[]? ExcludeRowNumbers = null) : ICommand, IRequest<Result>
+public sealed record ApproveImportJobCommand(int[]? ExcludeRowNumbers = null, string[]? ConfirmedSensitiveFieldKeys = null) : ICommand, IRequest<Result>
 {
     [JsonIgnore] // Removes from API contract
     public ImportJobId Id { get; init; } = null!;
@@ -54,9 +56,19 @@ public sealed class ApproveImportJobHandler(
         }
 
         var excludedRows = command.ExcludeRowNumbers?.ToHashSet() ?? [];
+        var confirmedSensitiveKeys = command.ConfirmedSensitiveFieldKeys?.ToHashSet(StringComparer.Ordinal) ?? [];
         var rowsToCommit = importJob.Rows
             .Where(row => row.Status != ImportRowStatus.Invalid && !excludedRows.Contains(row.RowNumber))
-            .Select(row => new ImportClientRow(row.FirstName, row.LastName, row.Email, row.PhoneNumber, row.Notes))
+            .Select(row => new ImportClientRow(
+                    row.FirstName,
+                    row.LastName,
+                    row.Email,
+                    row.PhoneNumber,
+                    row.Notes,
+                    row.VerticalFields,
+                    FilterConfirmed(row.SensitiveFields, confirmedSensitiveKeys)
+                )
+            )
             .ToArray();
 
         importJob.MarkCommitting(userId);
@@ -73,5 +85,13 @@ public sealed class ApproveImportJobHandler(
         events.CollectEvent(new ImportJobCompleted(importJob.Id, importJob.RowsTotal, upsertResult.Value.UpsertedCount, importJob.RowsInvalid + excludedRows.Count));
 
         return Result.Success();
+    }
+
+    private static Dictionary<string, string>? FilterConfirmed(Dictionary<string, string>? sensitiveFields, HashSet<string> confirmedKeys)
+    {
+        if (sensitiveFields is null || confirmedKeys.Count == 0) return null;
+
+        var confirmed = sensitiveFields.Where(pair => confirmedKeys.Contains(pair.Key)).ToDictionary(pair => pair.Key, pair => pair.Value);
+        return confirmed.Count == 0 ? null : confirmed;
     }
 }

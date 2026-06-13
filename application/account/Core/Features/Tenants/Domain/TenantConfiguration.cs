@@ -26,6 +26,15 @@ public sealed class TenantConfiguration : IEntityTypeConfiguration<Tenant>
         // working without modification.
         builder.Property(t => t.Kind).HasDefaultValue(TenantKind.Solo);
 
+        // Stored as the enum name to match the vertical varchar(20) column (AddTenantVertical migration);
+        // without this EF would persist the enum as an int and mismatch the Postgres column type.
+        builder.Property(t => t.Vertical)
+            .HasMaxLength(20)
+            .HasConversion(
+                vertical => vertical.ToString(),
+                value => Enum.Parse<NerovaVertical>(value!)
+            );
+
         // Boolean columns must carry HasDefaultValue(false) so that EnsureCreated() generates DEFAULT 0 in
         // the SQLite test schema. Without this, any raw-SQL INSERT that omits these columns (e.g. from
         // SqliteConnectionExtensions.Insert used by existing tests) hits a NOT NULL constraint failure.
