@@ -3,9 +3,10 @@ using Account.Features.Memberships.Domain;
 using Account.Features.OrgProfiles.Domain;
 using Account.Features.Tenants.Domain;
 using Account.Features.Users.Domain;
-using FeatureFlagAggregate = Account.Features.FeatureFlags.Domain.FeatureFlag;
 using Microsoft.EntityFrameworkCore;
+using SharedKernel.Domain;
 using SharedKernel.FeatureFlags;
+using FeatureFlagAggregate = Account.Features.FeatureFlags.Domain.FeatureFlag;
 
 namespace Account.Workers;
 
@@ -41,8 +42,6 @@ public sealed class DevelopmentDataSeeder(AccountDbContext accountDbContext, Tim
         var member = User.Create(organization.Id, DemoMemberEmail, UserRole.Member, true, "en-US", 1);
         accountDbContext.Set<User>().AddRange(owner, member);
 
-        accountDbContext.Set<Membership>().Add(Membership.CreateSeedOwner(organization.Id, owner.Id));
-
         var sandtonTeam = Tenant.CreateTeam(organization, existingTenantCount + 1);
         sandtonTeam.Update("Glow Salon Sandton");
         sandtonTeam.SetSlug("glow-sandton");
@@ -51,6 +50,12 @@ public sealed class DevelopmentDataSeeder(AccountDbContext accountDbContext, Tim
         rosebankTeam.SetSlug("glow-rosebank");
         accountDbContext.Set<Tenant>().AddRange(sandtonTeam, rosebankTeam);
 
+        // Tenants and users must be committed before memberships: the membership→user foreign key
+        // exists only in the database (not in the EF model), so a single batched SaveChanges may
+        // order the membership inserts first and violate the constraint on PostgreSQL.
+        await accountDbContext.SaveChangesAsync(cancellationToken);
+
+        accountDbContext.Set<Membership>().Add(Membership.CreateSeedOwner(organization.Id, owner.Id));
         accountDbContext.Set<Membership>().Add(Membership.CreateSeedOwner(sandtonTeam.Id, owner.Id));
         accountDbContext.Set<Membership>().Add(Membership.CreateSeedOwner(rosebankTeam.Id, owner.Id));
 
@@ -68,7 +73,7 @@ public sealed class DevelopmentDataSeeder(AccountDbContext accountDbContext, Tim
         logger.LogInformation("Seeded development demo organization '{OrganizationName}' with two teams", organization.Name);
     }
 
-    private async Task ActivateTierFlagForDemoOrgAsync(string flagKey, SharedKernel.Domain.TenantId organizationId, DateTimeOffset now, CancellationToken cancellationToken)
+    private async Task ActivateTierFlagForDemoOrgAsync(string flagKey, TenantId organizationId, DateTimeOffset now, CancellationToken cancellationToken)
     {
         // The reconciler creates kill-switch base rows inactive; activate the base flag and grant the
         // demo org an enabled override so team functionality is visible out of the box in development.

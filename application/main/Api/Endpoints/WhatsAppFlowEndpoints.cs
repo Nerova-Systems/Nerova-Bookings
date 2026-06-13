@@ -1,5 +1,6 @@
 using System.Text.Json;
 using Main.Features.WhatsAppBooking.Infrastructure;
+using Microsoft.AspNetCore.Http.Features;
 using SharedKernel.Endpoints;
 
 namespace Main.Api.Endpoints;
@@ -57,6 +58,12 @@ public sealed class WhatsAppFlowEndpoints : IEndpoints
 
     private static async Task<string> ReadBodyAsync(HttpRequest request, CancellationToken ct)
     {
+        // Abuse posture: Flows data-exchange payloads are small encrypted envelopes; cap the anonymous
+        // surface well below the Kestrel default so oversized bodies are rejected before reading.
+        // (The feature is absent on the in-memory test server — hence the null-conditional.)
+        var bodySizeFeature = request.HttpContext.Features.Get<IHttpMaxRequestBodySizeFeature>();
+        if (bodySizeFeature is { IsReadOnly: false }) bodySizeFeature.MaxRequestBodySize = 1024 * 1024;
+
         using var reader = new StreamReader(request.Body);
         return await reader.ReadToEndAsync(ct);
     }

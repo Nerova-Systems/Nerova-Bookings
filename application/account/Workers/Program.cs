@@ -48,10 +48,18 @@ var featureFlagDefinitionReconciler = scope.ServiceProvider.GetRequiredService<F
 await featureFlagDefinitionReconciler.ReconcileAsync(lifetime.ApplicationStopping);
 
 // Seed demo organization + teams data for local development only (idempotent, never in Azure).
+// A seeding failure must never take the worker down — billing and reconciliation still have to run.
 if (!SharedInfrastructureConfiguration.IsRunningInAzure)
 {
     var developmentDataSeeder = scope.ServiceProvider.GetRequiredService<DevelopmentDataSeeder>();
-    await developmentDataSeeder.SeedAsync(lifetime.ApplicationStopping);
+    try
+    {
+        await developmentDataSeeder.SeedAsync(lifetime.ApplicationStopping);
+    }
+    catch (Exception exception)
+    {
+        host.Services.GetRequiredService<ILogger<DevelopmentDataSeeder>>().LogError(exception, "Development data seeding failed; continuing startup");
+    }
 }
 
 await host.RunAsync();

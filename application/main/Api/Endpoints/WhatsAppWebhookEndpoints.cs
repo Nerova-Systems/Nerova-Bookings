@@ -1,7 +1,10 @@
 using Main.Features.WhatsAppMessaging.Commands;
 using Main.Features.WhatsAppMessaging.Queries;
 using Main.Features.WhatsAppMessaging.Shared;
+using Main.Integrations.Ai;
 using Main.Integrations.Meta;
+using Microsoft.AspNetCore.Http.Features;
+using Microsoft.Extensions.Options;
 using SharedKernel.ApiResults;
 using SharedKernel.Endpoints;
 using Result = SharedKernel.Cqrs.Result;
@@ -20,7 +23,7 @@ public sealed class WhatsAppWebhookEndpoints : IEndpoints
             => await mediator.Send(query)
         ).Produces<GetWhatsAppWebhookEventsResponse>();
 
-        group.MapGet("/diagnostics", (IConfiguration configuration, MetaGraphClientFactory metaGraphClientFactory) =>
+        group.MapGet("/diagnostics", (IConfiguration configuration, MetaGraphClientFactory metaGraphClientFactory, IOptions<AiOptions> aiOptions) =>
                 {
                     var hasAppId = !string.IsNullOrWhiteSpace(configuration["Meta:AppId"]) && configuration["Meta:AppId"] != "not-configured";
                     var hasAppSecret = !string.IsNullOrWhiteSpace(configuration["Meta:AppSecret"]) && configuration["Meta:AppSecret"] != "not-configured";
@@ -35,6 +38,8 @@ public sealed class WhatsAppWebhookEndpoints : IEndpoints
                             hasAppSecret,
                             hasConfigId,
                             hasWebhookVerifyToken,
+                            aiProvider = aiOptions.Value.ResolveProvider().ToString(),
+                            aiModel = aiOptions.Value.IsConfigured ? aiOptions.Value.Model : null,
                             webhookPath = RoutesPrefix,
                             note = "This endpoint reports only whether the live deployment has real Meta credentials configured; it never exposes secret values."
                         }
@@ -64,6 +69,12 @@ public sealed class WhatsAppWebhookEndpoints : IEndpoints
         // Two-phase webhook processing with pessimistic locking requires inline logic beyond 3-line convention
         group.MapPost("/", async Task<ApiResult> (HttpRequest request, IMediator mediator, ProcessPendingWhatsAppEvents processPendingWhatsAppEvents) =>
             {
+                // Abuse posture: Meta webhook notifications are small JSON envelopes; cap the anonymous
+                // surface well below the Kestrel default so oversized bodies are rejected before reading.
+                // (The feature is absent on the in-memory test server — hence the null-conditional.)
+                var webhookBodySizeFeature = request.HttpContext.Features.Get<IHttpMaxRequestBodySizeFeature>();
+                if (webhookBodySizeFeature is { IsReadOnly: false }) webhookBodySizeFeature.MaxRequestBodySize = 1024 * 1024;
+
                 var payload = await new StreamReader(request.Body).ReadToEndAsync();
                 if (!request.Headers.TryGetValue("X-Hub-Signature-256", out var signatureHeaderValues) || signatureHeaderValues.Count != 1)
                 {

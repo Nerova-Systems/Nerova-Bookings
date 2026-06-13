@@ -9,29 +9,36 @@ using SharedKernel.Telemetry;
 
 namespace Main.Features.WhatsAppOnboarding.Commands;
 
+/// <summary>
+///     Links a WhatsApp Business Account using a pre-obtained access token, bypassing the Embedded
+///     Signup flow. Developer/owner escape hatch for the one case Embedded Signup cannot serve: a WABA
+///     that lives in the same Meta Business Portfolio as the app itself (Meta blocks self-signup there).
+///     The token is supplied at call time, protected at rest like every other WABA token, and is expected
+///     to be rotated by the owner after development.
+/// </summary>
 [PublicAPI]
-public sealed record CompleteEmbeddedSignupCommand(string Code, string WabaId, string PhoneNumberId) : ICommand, IRequest<Result>;
+public sealed record LinkManualWabaCommand(string WabaId, string PhoneNumberId, string AccessToken) : ICommand, IRequest<Result>;
 
-public sealed class CompleteEmbeddedSignupValidator : AbstractValidator<CompleteEmbeddedSignupCommand>
+public sealed class LinkManualWabaValidator : AbstractValidator<LinkManualWabaCommand>
 {
-    public CompleteEmbeddedSignupValidator()
+    public LinkManualWabaValidator()
     {
-        RuleFor(x => x.Code).NotEmpty().WithMessage("The authorization code is required.");
         RuleFor(x => x.WabaId).NotEmpty().WithMessage("The WhatsApp Business Account ID is required.");
         RuleFor(x => x.PhoneNumberId).NotEmpty().WithMessage("The phone number ID is required.");
+        RuleFor(x => x.AccessToken).NotEmpty().WithMessage("The access token is required.");
     }
 }
 
-public sealed class CompleteEmbeddedSignupHandler(
+public sealed class LinkManualWabaHandler(
     IWhatsAppBusinessAccountRepository whatsAppBusinessAccountRepository,
     MetaGraphClientFactory metaGraphClientFactory,
     WhatsAppAccessTokenProtector accessTokenProtector,
     WhatsAppFlowProvisioner flowProvisioner,
     IExecutionContext executionContext,
     ITelemetryEventsCollector events
-) : IRequestHandler<CompleteEmbeddedSignupCommand, Result>
+) : IRequestHandler<LinkManualWabaCommand, Result>
 {
-    public async Task<Result> Handle(CompleteEmbeddedSignupCommand command, CancellationToken cancellationToken)
+    public async Task<Result> Handle(LinkManualWabaCommand command, CancellationToken cancellationToken)
     {
         if (executionContext.UserInfo.Role != "Owner")
         {
@@ -46,12 +53,7 @@ public sealed class CompleteEmbeddedSignupHandler(
         }
 
         var metaGraphClient = metaGraphClientFactory.GetClient();
-
-        var accessToken = await metaGraphClient.ExchangeCodeForTokenAsync(command.Code, cancellationToken);
-        if (accessToken is null)
-        {
-            return Result.BadRequest("Failed to exchange the authorization code for an access token.");
-        }
+        var accessToken = command.AccessToken;
 
         if (!await metaGraphClient.RegisterPhoneNumberAsync(command.PhoneNumberId, accessToken, cancellationToken))
         {

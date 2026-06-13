@@ -17,6 +17,10 @@ public sealed class WhatsAppOnboardingEndpoints : IEndpoints
             => await mediator.Send(command)
         );
 
+        group.MapPost("/manual-link", async Task<ApiResult> (LinkManualWabaCommand command, IMediator mediator)
+            => await mediator.Send(command)
+        );
+
         group.MapDelete("/waba", async Task<ApiResult> (IMediator mediator)
             => await mediator.Send(new DisconnectWhatsAppCommand())
         );

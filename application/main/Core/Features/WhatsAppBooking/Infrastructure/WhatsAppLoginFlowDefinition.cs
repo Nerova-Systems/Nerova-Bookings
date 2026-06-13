@@ -50,7 +50,7 @@ public static class WhatsAppLoginFlowDefinition
                                "required": true,
                                "label": "Full name",
                                "name": "name",
-                               "input-type": "text",
+                               "input-type": "text"
                              },
                              {
                                "type": "TextBody",
@@ -61,7 +61,7 @@ public static class WhatsAppLoginFlowDefinition
                                "required": true,
                                "label": "Email address",
                                "name": "email",
-                               "input-type": "email",
+                               "input-type": "email"
                              },
                              {
                                "type": "TextBody",
