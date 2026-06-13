@@ -1,4 +1,3 @@
-using System.Globalization;
 using System.Text.Json;
 using Main.Features.Autonomy.Domain;
 using Main.Features.Autonomy.Shared;

@@ -39,7 +39,7 @@ public sealed class WeeklyDigestJob(
     {
         // Fires once per ISO week per tenant: the week id is the trigger, so re-detection is a no-op.
         var isoWeek = $"{ISOWeek.GetYear(now.UtcDateTime)}-W{ISOWeek.GetWeekOfYear(now.UtcDateTime):00}";
-        AutonomyDetection[] detections = [new AutonomyDetection(isoWeek, "Weekly business summary", null)];
+        AutonomyDetection[] detections = [new(isoWeek, "Weekly business summary", null)];
         return Task.FromResult(detections);
     }
 

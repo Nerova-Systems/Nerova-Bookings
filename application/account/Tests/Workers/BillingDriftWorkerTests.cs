@@ -142,10 +142,12 @@ public sealed class BillingDriftWorkerTests(AccountWebApplicationFactory factory
         {
             return null;
         }
+
         if (long.TryParse(value, out var unixMs))
         {
             return DateTimeOffset.FromUnixTimeMilliseconds(unixMs);
         }
+
         return DateTimeOffset.Parse(value, CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal | DateTimeStyles.AdjustToUniversal);
     }
 }

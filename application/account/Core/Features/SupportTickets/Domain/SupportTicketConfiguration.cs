@@ -35,10 +35,11 @@ public sealed class SupportTicketConfiguration : IEntityTypeConfiguration<Suppor
             );
 
         builder.OwnsOne(t => t.Csat, b =>
-        {
-            b.ToJson();
-            b.Property(c => c.Score).HasConversion<string>();
-        });
+            {
+                b.ToJson();
+                b.Property(c => c.Score).HasConversion<string>();
+            }
+        );
 
         builder.Property(t => t.Messages)
             .HasColumnType("jsonb")

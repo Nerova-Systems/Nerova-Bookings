@@ -1,3 +1,4 @@
+using System.Net;
 using System.Net.Http.Json;
 using System.Text.Json;
 using FluentAssertions;
@@ -126,7 +127,7 @@ public sealed class AutonomyJobTests : EndpointBaseTest<MainDbContext>
         var response = await AnonymousHttpClient.GetAsync($"{RoutesPrefix}/job-runs");
 
         // Assert
-        response.StatusCode.Should().Be(System.Net.HttpStatusCode.Unauthorized);
+        response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
     }
 
     private async Task RunTickAsync()
@@ -134,7 +135,7 @@ public sealed class AutonomyJobTests : EndpointBaseTest<MainDbContext>
         // Dispatch the runner exactly as the TickerQ cron job does, scoped to the seeded tenant.
         using var scope = Provider.CreateScope();
         var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
-        var result = await mediator.Send(new RunAutonomyTickCommand(DatabaseSeeder.TenantId, BypassQuietHours: true));
+        var result = await mediator.Send(new RunAutonomyTickCommand(DatabaseSeeder.TenantId, true));
         result.IsSuccess.Should().BeTrue();
     }
 

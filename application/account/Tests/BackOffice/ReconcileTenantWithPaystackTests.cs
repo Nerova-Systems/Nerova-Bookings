@@ -239,6 +239,7 @@ public sealed class ReconcileTenantWithPaystackTests(BackOfficeWebApplicationFac
         {
             return DateTimeOffset.FromUnixTimeMilliseconds(unixMs);
         }
+
         return DateTimeOffset.Parse(value, CultureInfo.InvariantCulture);
     }
 

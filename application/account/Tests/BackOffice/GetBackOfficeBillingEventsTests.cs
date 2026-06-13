@@ -257,7 +257,7 @@ public sealed class GetBackOfficeBillingEventsTests(BackOfficeWebApplicationFact
         );
         return tenantId;
     }
- 
+
     private void SeedBillingEvent(
         TenantId tenantId,
         SubscriptionId subscriptionId,

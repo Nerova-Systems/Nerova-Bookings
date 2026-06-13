@@ -8,8 +8,6 @@ namespace Main.Features.DataImport.Shared;
 /// </summary>
 public static class CsvParser
 {
-    public sealed record CsvDocument(string[] Headers, string[][] Rows);
-
     public static CsvDocument Parse(string content)
     {
         var records = ParseRecords(content);
@@ -107,4 +105,6 @@ public static class CsvParser
 
         return records;
     }
+
+    public sealed record CsvDocument(string[] Headers, string[][] Rows);
 }

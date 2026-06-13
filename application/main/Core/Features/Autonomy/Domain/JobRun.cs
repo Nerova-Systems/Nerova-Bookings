@@ -159,10 +159,10 @@ public sealed class TenantJobPolicy : AggregateRoot<TenantJobPolicyId>, ITenantS
 
     public int DailyActionCap { get; private set; }
 
-    public TenantId TenantId { get; } = new(0);
-
     /// <summary>True when the streak has earned a promotion offer (still requires the owner's tap).</summary>
     public bool IsPromotionOffered => Level == 1 && ApprovalsStreak >= PromotionStreakThreshold;
+
+    public TenantId TenantId { get; } = new(0);
 
     public static TenantJobPolicy CreateDefault(TenantId tenantId, string jobType, int level)
     {

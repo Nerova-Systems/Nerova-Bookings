@@ -1,6 +1,7 @@
 using JetBrains.Annotations;
 using Main.Features.Payments.Domain;
 using Main.Features.Payments.Infrastructure;
+using Main.Features.Receptionist.Commands;
 using Main.Features.Scheduling.Domain;
 using SharedKernel.Cqrs;
 
@@ -49,7 +50,7 @@ public sealed class ConfirmBookingPaymentHandler(
 
         // Payment-resume turn (spec R5): WhatsApp customers get their confirmation without sending a
         // new message. No-op for tenants without the receptionist or bookings without a phone number.
-        await mediator.Send(new Receptionist.Commands.NotifyCustomerOfPaidDepositCommand(booking.Id), cancellationToken);
+        await mediator.Send(new NotifyCustomerOfPaidDepositCommand(booking.Id), cancellationToken);
 
         return Result.Success();
     }

@@ -19,12 +19,19 @@ namespace Account.Features.Tenants.Commands;
 public sealed record UpdateTenantBrandProfileCommand : ICommand, IRequest<Result>
 {
     public string? BusinessDisplayName { get; init; }
+
     public string? BrandLogoUrl { get; init; }
+
     public string? BrandAboutText { get; init; }
+
     public string? BrandDescription { get; init; }
+
     public string? BrandAddress { get; init; }
+
     public string? BrandEmail { get; init; }
+
     public IReadOnlyList<string>? BrandWebsites { get; init; }
+
     public MetaBusinessVertical BrandVertical { get; init; } = MetaBusinessVertical.Other;
 }
 
@@ -150,11 +157,11 @@ public sealed class UpdateTenantBrandProfileHandler(
         // treats `null` plans throughout the account SCS.
         return plan switch
         {
-            null => new TierLimits(false, false, false, false, MaxWebsites: 1),
-            SubscriptionPlan.Basis => new TierLimits(true, true, true, true, MaxWebsites: 1),
-            SubscriptionPlan.Standard => new TierLimits(true, true, true, true, MaxWebsites: 2),
-            SubscriptionPlan.Premium => new TierLimits(true, true, true, true, MaxWebsites: 2),
-            _ => new TierLimits(false, false, false, false, MaxWebsites: 1)
+            null => new TierLimits(false, false, false, false, 1),
+            SubscriptionPlan.Basis => new TierLimits(true, true, true, true, 1),
+            SubscriptionPlan.Standard => new TierLimits(true, true, true, true, 2),
+            SubscriptionPlan.Premium => new TierLimits(true, true, true, true, 2),
+            _ => new TierLimits(false, false, false, false, 1)
         };
     }
 

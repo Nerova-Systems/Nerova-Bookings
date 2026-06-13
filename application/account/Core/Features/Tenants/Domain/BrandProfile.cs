@@ -1,3 +1,4 @@
+using System.Net.Mail;
 using JetBrains.Annotations;
 
 namespace Account.Features.Tenants.Domain;
@@ -181,7 +182,7 @@ public sealed record BrandProfile
     {
         try
         {
-            var addr = new System.Net.Mail.MailAddress(email);
+            var addr = new MailAddress(email);
             return addr.Address == email;
         }
         catch

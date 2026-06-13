@@ -1,5 +1,6 @@
 using Main.Features.Receptionist.Commands;
 using Main.Features.Receptionist.Domain;
+using Main.Features.WhatsAppBooking.Commands;
 using Main.Features.WhatsAppBooking.Domain;
 using Main.Features.WhatsAppBooking.Shared;
 using Main.Features.WhatsAppOnboarding.Domain;
@@ -72,7 +73,7 @@ public sealed class ReceptionistInboundRouter(
             return false;
         }
 
-        await mediator.Send(new WhatsAppBooking.Commands.UpsertClientFromWhatsAppLoginCommand(account.TenantId, loginResponse.Name!, loginResponse.Email!, inbound.FromPhoneNumber), cancellationToken);
+        await mediator.Send(new UpsertClientFromWhatsAppLoginCommand(account.TenantId, loginResponse.Name!, loginResponse.Email!, inbound.FromPhoneNumber), cancellationToken);
 
         var result = await mediator.Send(
             new ProcessReceptionistTurnCommand(account.TenantId, inbound.FromPhoneNumber, "[The customer just completed sign-in successfully. Greet them by name and continue helping with their original request.]"),

@@ -1,3 +1,4 @@
+using Main.Features.Autonomy.Commands;
 using TickerQ.Utilities.Base;
 using TickerQ.Utilities.Interfaces;
 
@@ -13,6 +14,6 @@ public sealed class AutonomyTickerJob(IMediator mediator) : ITickerFunction
     public async Task ExecuteAsync(TickerFunctionContext context, CancellationToken ct)
     {
         _ = context;
-        await mediator.Send(new Commands.RunAutonomyTickCommand(), ct);
+        await mediator.Send(new RunAutonomyTickCommand(), ct);
     }
 }

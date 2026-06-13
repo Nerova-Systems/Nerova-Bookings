@@ -64,7 +64,7 @@ public sealed class ApproveJobRunHandler(
         {
             jobRun.Skip(executionResult.GetErrorSummary());
             jobRunRepository.Update(jobRun);
-            return Result<ApproveJobRunResponse>.BadRequest(executionResult.GetErrorSummary(), commitChanges: true);
+            return Result<ApproveJobRunResponse>.BadRequest(executionResult.GetErrorSummary(), true);
         }
 
         jobRun.Complete(executionResult.Value!, timeProvider.GetUtcNow());

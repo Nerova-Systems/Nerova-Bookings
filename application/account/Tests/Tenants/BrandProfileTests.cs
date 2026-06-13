@@ -19,14 +19,14 @@ public sealed class BrandProfileTests
         var oversized = new string('x', overflowLength);
 
         var act = () => BrandProfile.Create(
-            businessDisplayName: field == "businessDisplayName" ? oversized : null,
-            brandLogoUrl: null,
-            brandAboutText: field == "brandAboutText" ? oversized : null,
-            brandDescription: null,
-            brandAddress: null,
-            brandEmail: null,
-            brandWebsites: null,
-            brandVertical: MetaBusinessVertical.Other
+            field == "businessDisplayName" ? oversized : null,
+            null,
+            field == "brandAboutText" ? oversized : null,
+            null,
+            null,
+            null,
+            null,
+            MetaBusinessVertical.Other
         );
 
         act.Should().Throw<ArgumentException>().Which.ParamName.Should().Be(field);
@@ -68,14 +68,14 @@ public sealed class BrandProfileTests
     public void Create_WithValidInputs_ReturnsProfile()
     {
         var profile = BrandProfile.Create(
-            businessDisplayName: "Acme",
-            brandLogoUrl: "/logos/123/abc.png",
-            brandAboutText: "Open 9-5",
-            brandDescription: "Plumbing services",
-            brandAddress: "1 Main St",
-            brandEmail: "hi@acme.test",
-            brandWebsites: ["https://acme.test"],
-            brandVertical: MetaBusinessVertical.ProfessionalServices
+            "Acme",
+            "/logos/123/abc.png",
+            "Open 9-5",
+            "Plumbing services",
+            "1 Main St",
+            "hi@acme.test",
+            ["https://acme.test"],
+            MetaBusinessVertical.ProfessionalServices
         );
 
         profile.BusinessDisplayName.Should().Be("Acme");

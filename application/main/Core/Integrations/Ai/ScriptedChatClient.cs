@@ -60,7 +60,9 @@ public sealed class ScriptedChatClient : IChatClient
     }
 
     public async IAsyncEnumerable<ChatResponseUpdate> GetStreamingResponseAsync(
-        IEnumerable<ChatMessage> messages, ChatOptions? chatOptions = null, [EnumeratorCancellation] CancellationToken cancellationToken = default)
+        IEnumerable<ChatMessage> messages,
+        ChatOptions? chatOptions = null,
+        [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
         var response = await GetResponseAsync(messages, chatOptions, cancellationToken);
         foreach (var update in response.ToChatResponseUpdates())

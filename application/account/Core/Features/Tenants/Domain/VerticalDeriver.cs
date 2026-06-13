@@ -15,27 +15,41 @@ public static class VerticalDeriver
         var lower = businessCategory.ToLowerInvariant();
 
         if (lower.Contains("salon") || lower.Contains("barber") || lower.Contains("beauty") || lower.Contains("hair"))
+        {
             return MetaBusinessVertical.Beauty;
+        }
 
         if (lower.Contains("tutor") || lower.Contains("education") || lower.Contains("school"))
+        {
             return MetaBusinessVertical.Education;
+        }
 
         if (lower.Contains("clinic") || lower.Contains("medical") || lower.Contains("health")
             || lower.Contains("doctor") || lower.Contains("dentist"))
+        {
             return MetaBusinessVertical.Health;
+        }
 
         if (lower.Contains("trainer") || lower.Contains("gym") || lower.Contains("fitness")
             || lower.Contains("personal training"))
+        {
             return MetaBusinessVertical.ProfessionalServices;
+        }
 
         if (lower.Contains("restaurant") || lower.Contains("cafe") || lower.Contains("food"))
+        {
             return MetaBusinessVertical.Restaurant;
+        }
 
         if (lower.Contains("retail") || lower.Contains("shop") || lower.Contains("store"))
+        {
             return MetaBusinessVertical.Retail;
+        }
 
         if (lower.Contains("travel") || lower.Contains("accommodation") || lower.Contains("hotel"))
+        {
             return MetaBusinessVertical.Travel;
+        }
 
         return MetaBusinessVertical.Other;
     }

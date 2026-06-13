@@ -181,6 +181,7 @@ public sealed class ProcessSubscriptionBillingTests(AccountWebApplicationFactory
         {
             return DateTimeOffset.FromUnixTimeMilliseconds(unixMs);
         }
+
         return DateTimeOffset.Parse(value, CultureInfo.InvariantCulture);
     }
 }

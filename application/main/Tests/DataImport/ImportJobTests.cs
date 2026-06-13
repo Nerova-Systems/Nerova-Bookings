@@ -1,3 +1,4 @@
+using System.Net;
 using System.Net.Http.Json;
 using System.Text.Json;
 using FluentAssertions;
@@ -108,7 +109,7 @@ public sealed class ImportJobTests : EndpointBaseTest<MainDbContext>
 
         // Approving again is rejected and creates no duplicates.
         var secondApprove = await AuthenticatedOwnerHttpClient.PostAsJsonAsync($"{RoutesPrefix}/{jobId}/approve", new { excludeRowNumbers = Array.Empty<int>() });
-        secondApprove.StatusCode.Should().Be(System.Net.HttpStatusCode.BadRequest);
+        secondApprove.StatusCode.Should().Be(HttpStatusCode.BadRequest);
         Connection.ExecuteScalar<long>("SELECT COUNT(*) FROM clients", []).Should().Be(3);
     }
 
@@ -180,7 +181,7 @@ public sealed class ImportJobTests : EndpointBaseTest<MainDbContext>
         var response = await AnonymousHttpClient.GetAsync(RoutesPrefix);
 
         // Assert
-        response.StatusCode.Should().Be(System.Net.HttpStatusCode.Unauthorized);
+        response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
     }
 
     private void InsertClient(string phoneNumber, string firstName, string lastName, string? email)

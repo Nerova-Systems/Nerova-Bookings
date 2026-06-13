@@ -1,4 +1,5 @@
 using JetBrains.Annotations;
+using Main.Features.Receptionist.Queries;
 using Main.Features.Scheduling.Commands;
 using Main.Features.Scheduling.Domain;
 using Main.Features.Scheduling.Shared;
@@ -38,7 +39,7 @@ public sealed class CreateCustomerBookingHandler(
             return Result<CreatePublicBookingResponse>.BadRequest("Online booking is not available for this business.");
         }
 
-        var eventTypeResult = await mediator.Send(new Queries.GetPublicServicesQuery(command.TenantId), cancellationToken);
+        var eventTypeResult = await mediator.Send(new GetPublicServicesQuery(command.TenantId), cancellationToken);
         var service = eventTypeResult.IsSuccess ? eventTypeResult.Value!.Services.FirstOrDefault(s => s.Slug == command.ServiceSlug) : null;
         if (service is null)
         {
