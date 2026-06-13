@@ -143,10 +143,10 @@ public class LintCommand : Command
     {
         var solutionFile = SelfContainedSystemHelper.GetSolutionFile(gateway ? null : selfContainedSystem);
 
-        var includeArgument = string.Empty;
+        var includeArguments = new List<string>();
         if (gateway && !changedOnly)
         {
-            includeArgument = $""" --include="{AppGatewayHelper.IncludeGlob}" """.TrimEnd();
+            includeArguments.Add($""" --include="{AppGatewayHelper.IncludeGlob}" """.TrimEnd());
         }
         else if (gateway)
         {
@@ -157,7 +157,7 @@ public class LintCommand : Command
                 return false;
             }
 
-            includeArgument = $""" --include="{string.Join(";", changedCsFiles)}" """.TrimEnd();
+            includeArguments.AddRange(BuildChunkedIncludeArguments(changedCsFiles));
             if (!quiet) AnsiConsole.MarkupLine($"[blue]Linting {changedCsFiles.Length} changed AppGateway file(s)...[/]");
         }
         else if (changedOnly)
@@ -169,8 +169,8 @@ public class LintCommand : Command
                 return false;
             }
 
-            includeArgument = $""" --include="{string.Join(";", changedCsFiles)}" """.TrimEnd();
-            if (!quiet) AnsiConsole.MarkupLine($"[blue]Linting {changedCsFiles.Length} changed file(s)...[/]");
+            includeArguments.AddRange(BuildChunkedIncludeArguments(changedCsFiles));
+            if (!quiet) AnsiConsole.MarkupLine($"[blue]Linting {changedCsFiles.Length} changed file(s) in {includeArguments.Count} batch(es)...[/]");
         }
 
         if (!noBuild)
@@ -191,22 +191,39 @@ public class LintCommand : Command
         // attributes (align, border, cellPadding, cellSpacing) that JetBrains flags as obsolete HTML5,
         // but those attributes are mandatory for cross-client email rendering and cannot be removed.
         // The dist folder is gitignored build output, not source.
-        ProcessHelper.Run(
-            $"dotnet jb inspectcode {solutionFile.Name} --no-build --no-restore --output=result.json --severity=SUGGESTION --exclude=**/emails/dist/**{includeArgument}",
-            solutionFile.Directory!.FullName,
-            "Linting",
-            quiet
-        );
+        // Large branch diffs are chunked into multiple inspectcode runs (Windows command-line limit);
+        // each run's issues are merged into a single result.json for the editor hand-off.
+        if (includeArguments.Count == 0) includeArguments.Add(string.Empty);
+        var hasIssues = false;
+        var issueChunks = new List<string>();
+        for (var index = 0; index < includeArguments.Count; index++)
+        {
+            var outputName = includeArguments.Count == 1 ? "result.json" : $"result-{index + 1}.json";
+            var outputPath = Path.Combine(solutionFile.Directory!.FullName, outputName);
+            if (File.Exists(outputPath)) File.Delete(outputPath);
 
-        var resultJson = File.ReadAllText(Path.Combine(solutionFile.Directory!.FullName, "result.json"));
-        var hasIssues = !resultJson.Contains("\"results\": [],");
+            ProcessHelper.Run(
+                $"dotnet jb inspectcode {solutionFile.Name} --no-build --no-restore --output={outputName} --severity=SUGGESTION --exclude=**/emails/dist/**{includeArguments[index]}",
+                solutionFile.Directory!.FullName,
+                "Linting",
+                quiet
+            );
+
+            var chunkJson = File.ReadAllText(outputPath);
+            if (!chunkJson.Contains("\"results\": [],"))
+            {
+                hasIssues = true;
+                issueChunks.Add(outputName);
+            }
+        }
 
         if (!quiet)
         {
             if (hasIssues)
             {
-                AnsiConsole.MarkupLine("[yellow]Backend issues found. Opening result.json...[/]");
-                ProcessHelper.StartProcess("code result.json", solutionFile.Directory!.FullName);
+                var firstIssueFile = issueChunks[0];
+                AnsiConsole.MarkupLine($"[yellow]Backend issues found. Opening {string.Join(", ", issueChunks)}...[/]");
+                ProcessHelper.StartProcess($"code {firstIssueFile}", solutionFile.Directory!.FullName);
             }
             else
             {
@@ -215,6 +232,12 @@ public class LintCommand : Command
         }
 
         return hasIssues;
+    }
+
+    private static IEnumerable<string> BuildChunkedIncludeArguments(string[] files)
+    {
+        return IncludeArgumentChunker.Chunk(files)
+            .Select(chunk => $""" --include="{string.Join(";", chunk)}" """.TrimEnd());
     }
 
     private static bool RunFrontendLinting(bool quiet)
@@ -283,7 +306,7 @@ public class LintCommand : Command
     {
         var solutionFile = new FileInfo(Path.Combine(Configuration.CliFolder, "DeveloperCli.slnx"));
 
-        var includeArgument = string.Empty;
+        var includeArguments = new List<string>();
         if (changedOnly)
         {
             var changedCsFiles = GitHelper.GetChangedCsFilesInDirectory(solutionFile.Directory!.FullName);
@@ -293,7 +316,7 @@ public class LintCommand : Command
                 return false;
             }
 
-            includeArgument = $""" --include="{string.Join(";", changedCsFiles)}" """.TrimEnd();
+            includeArguments.AddRange(BuildChunkedIncludeArguments(changedCsFiles));
             if (!quiet) AnsiConsole.MarkupLine($"[blue]Linting {changedCsFiles.Length} changed file(s)...[/]");
         }
 
@@ -304,29 +327,36 @@ public class LintCommand : Command
             ProcessHelper.Run($"dotnet build {solutionFile.Name}", solutionFile.Directory!.FullName, "Build", quiet);
         }
 
-        // Delete existing result.json to prevent reading stale results
-        var resultJsonPath = Path.Combine(solutionFile.Directory!.FullName, "result.json");
-        if (File.Exists(resultJsonPath))
+        if (includeArguments.Count == 0) includeArguments.Add(string.Empty);
+        var hasIssues = false;
+        var issueChunks = new List<string>();
+        for (var index = 0; index < includeArguments.Count; index++)
         {
-            File.Delete(resultJsonPath);
+            var outputName = includeArguments.Count == 1 ? "result.json" : $"result-{index + 1}.json";
+            var outputPath = Path.Combine(solutionFile.Directory!.FullName, outputName);
+            if (File.Exists(outputPath)) File.Delete(outputPath);
+
+            ProcessHelper.Run(
+                $"dotnet jb inspectcode {solutionFile.Name} --no-build --no-restore --output={outputName} --severity=SUGGESTION{includeArguments[index]}",
+                solutionFile.Directory!.FullName,
+                "Linting",
+                quiet
+            );
+
+            var chunkJson = File.ReadAllText(outputPath);
+            if (!chunkJson.Contains("\"results\": [],"))
+            {
+                hasIssues = true;
+                issueChunks.Add(outputName);
+            }
         }
-
-        ProcessHelper.Run(
-            $"dotnet jb inspectcode {solutionFile.Name} --no-build --no-restore --output=result.json --severity=SUGGESTION{includeArgument}",
-            solutionFile.Directory!.FullName,
-            "Linting",
-            quiet
-        );
-
-        var resultJson = File.ReadAllText(Path.Combine(solutionFile.Directory!.FullName, "result.json"));
-        var hasIssues = !resultJson.Contains("\"results\": [],");
 
         if (!quiet)
         {
             if (hasIssues)
             {
-                AnsiConsole.MarkupLine("[yellow]Developer-cli issues found. Opening result.json...[/]");
-                ProcessHelper.StartProcess("code result.json", solutionFile.Directory!.FullName);
+                AnsiConsole.MarkupLine($"[yellow]Developer-cli issues found. Opening {string.Join(", ", issueChunks)}...[/]");
+                ProcessHelper.StartProcess($"code {issueChunks[0]}", solutionFile.Directory!.FullName);
             }
             else
             {

@@ -148,12 +148,12 @@ public class FormatCommand : Command
 
         if (!quiet) AnsiConsole.MarkupLine("[blue]Running backend code format...[/]");
 
-        var includeArgument = string.Empty;
+        var includeArguments = new List<string>();
         if (gateway)
         {
             if (allFiles)
             {
-                includeArgument = $""" --include="{AppGatewayHelper.IncludeGlob}" """.TrimEnd();
+                includeArguments.Add($""" --include="{AppGatewayHelper.IncludeGlob}" """.TrimEnd());
             }
             else
             {
@@ -164,7 +164,7 @@ public class FormatCommand : Command
                     return;
                 }
 
-                includeArgument = $""" --include="{string.Join(";", changedCsFiles)}" """.TrimEnd();
+                includeArguments.AddRange(BuildChunkedIncludeArguments(changedCsFiles));
                 if (!quiet) AnsiConsole.MarkupLine($"[blue]Formatting {changedCsFiles.Length} changed AppGateway file(s)...[/]");
             }
         }
@@ -177,8 +177,8 @@ public class FormatCommand : Command
                 return;
             }
 
-            includeArgument = $""" --include="{string.Join(";", changedCsFiles)}" """.TrimEnd();
-            if (!quiet) AnsiConsole.MarkupLine($"[blue]Formatting {changedCsFiles.Length} changed file(s)...[/]");
+            includeArguments.AddRange(BuildChunkedIncludeArguments(changedCsFiles));
+            if (!quiet) AnsiConsole.MarkupLine($"[blue]Formatting {changedCsFiles.Length} changed file(s) in {includeArguments.Count} batch(es)...[/]");
         }
 
         if (!noBuild)
@@ -186,12 +186,22 @@ public class FormatCommand : Command
             ProcessHelper.Run("dotnet tool restore", solutionFile.Directory!.FullName, "Tool restore", quiet);
         }
 
-        ProcessHelper.Run(
-            $"""dotnet jb cleanupcode {solutionFile.FullName} --profile=".NET only" --no-build{includeArgument}""",
-            solutionFile.Directory!.FullName,
-            "Format",
-            quiet
-        );
+        if (includeArguments.Count == 0) includeArguments.Add(string.Empty);
+        foreach (var includeArgument in includeArguments)
+        {
+            ProcessHelper.Run(
+                $"""dotnet jb cleanupcode {solutionFile.FullName} --profile=".NET only" --no-build{includeArgument}""",
+                solutionFile.Directory!.FullName,
+                "Format",
+                quiet
+            );
+        }
+    }
+
+    private static IEnumerable<string> BuildChunkedIncludeArguments(string[] files)
+    {
+        return IncludeArgumentChunker.Chunk(files)
+            .Select(chunk => $""" --include="{string.Join(";", chunk)}" """.TrimEnd());
     }
 
     private static void RunFrontendFormat(bool quiet)
@@ -206,7 +216,7 @@ public class FormatCommand : Command
 
         if (!quiet) AnsiConsole.MarkupLine("[blue]Running developer-cli code format...[/]");
 
-        var includeArgument = string.Empty;
+        var includeArguments = new List<string>();
         if (!allFiles)
         {
             var changedCsFiles = GitHelper.GetChangedCsFilesInDirectory(solutionFile.Directory!.FullName);
@@ -216,7 +226,7 @@ public class FormatCommand : Command
                 return;
             }
 
-            includeArgument = $""" --include="{string.Join(";", changedCsFiles)}" """.TrimEnd();
+            includeArguments.AddRange(BuildChunkedIncludeArguments(changedCsFiles));
             if (!quiet) AnsiConsole.MarkupLine($"[blue]Formatting {changedCsFiles.Length} changed file(s)...[/]");
         }
 
@@ -225,11 +235,15 @@ public class FormatCommand : Command
             ProcessHelper.Run("dotnet tool restore", solutionFile.Directory!.FullName, "Tool restore", quiet);
         }
 
-        ProcessHelper.Run(
-            $"""dotnet jb cleanupcode {solutionFile.FullName} --profile=".NET only" --no-build{includeArgument}""",
-            solutionFile.Directory!.FullName,
-            "Format",
-            quiet
-        );
+        if (includeArguments.Count == 0) includeArguments.Add(string.Empty);
+        foreach (var includeArgument in includeArguments)
+        {
+            ProcessHelper.Run(
+                $"""dotnet jb cleanupcode {solutionFile.FullName} --profile=".NET only" --no-build{includeArgument}""",
+                solutionFile.Directory!.FullName,
+                "Format",
+                quiet
+            );
+        }
     }
 }

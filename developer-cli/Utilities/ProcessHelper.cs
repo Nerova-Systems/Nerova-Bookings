@@ -219,8 +219,17 @@ public static class ProcessHelper
         }
 
         var output = string.Empty;
-        if (processStartInfo.RedirectStandardOutput) output += process.StandardOutput.ReadToEnd();
-        if (processStartInfo.RedirectStandardError) output += process.StandardError.ReadToEnd();
+        if (processStartInfo.RedirectStandardOutput || processStartInfo.RedirectStandardError)
+        {
+            // Drain stdout and stderr concurrently to avoid a pipe-buffer deadlock: a child process
+            // that floods one stream (e.g. git's "LF will be replaced by CRLF" warnings on stderr,
+            // dozens of lines) while we block on a sequential ReadToEnd of the other fills the OS pipe
+            // buffer, the child blocks on its write, and neither stream ever reaches EOF.
+            var stdoutTask = processStartInfo.RedirectStandardOutput ? process.StandardOutput.ReadToEndAsync() : Task.FromResult(string.Empty);
+            var stderrTask = processStartInfo.RedirectStandardError ? process.StandardError.ReadToEndAsync() : Task.FromResult(string.Empty);
+            Task.WaitAll(stdoutTask, stderrTask);
+            output = stdoutTask.Result + stderrTask.Result;
+        }
 
         if (!waitForExit) return string.Empty;
         process.WaitForExit();
